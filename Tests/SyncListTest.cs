@@ -2,6 +2,8 @@
 using System;
 using System.Linq;
 
+using Mirror;
+
 namespace Mirror.Tests
 {
     [TestFixture]
