@@ -1,24 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Net.WebSockets;
 using System.Threading;
+using System.Threading.Tasks;
+using Ninja.WebSockets;
 using UnityEngine;
 
-namespace Mirror.Transport.Tcp
+namespace Mirror.Transport.Websocket
 {
-    public class Server : Common
+    public class Server 
     {
         public event Action<int> Connected;
         public event Action<int, byte[]> ReceivedData;
         public event Action<int> Disconnected;
         public event Action<int, Exception> ReceivedError;
 
+        private const int MaxMessageSize = 256 * 1024;
+
         // listener
         TcpListener listener;
+        private readonly IWebSocketServerFactory webSocketServerFactory = new WebSocketServerFactory();
+
+        CancellationTokenSource cancellation;
 
         // clients with <connectionId, TcpClient>
-        Dictionary<int, TcpClient> clients = new Dictionary<int, TcpClient>();
+        Dictionary<int, WebSocket> clients = new Dictionary<int, WebSocket>();
 
         public bool NoDelay = true;
 
@@ -55,95 +65,118 @@ namespace Mirror.Transport.Tcp
             get { return listener != null; }
         }
 
-        public TcpClient GetClient(int connectionId)
+        public WebSocket GetClient(int connectionId)
         {
             // paul:  null is evil,  throw exception if not found
             return clients[connectionId];
         }
 
-        // the listener thread's listen function
-        async public void Listen(int port, int maxConnections = int.MaxValue)
+        public async void Listen(int port)
         {
-            // absolutely must wrap with try/catch, otherwise thread
-            // exceptions are silent
             try
             {
+                cancellation = new CancellationTokenSource();
 
-                if (listener != null)
-                {
-                    ReceivedError?.Invoke(0, new Exception("Already listening"));
-                    return;
-                }
-
-                // start listener
                 listener = TcpListener.Create(port);
-
-                // NoDelay disables nagle algorithm. lowers CPU% and latency
-                // but increases bandwidth
                 listener.Server.NoDelay = this.NoDelay;
                 listener.Start();
-                Debug.Log($"Tcp server started listening on port {port}");
-
-                // keep accepting new clients
+                Debug.Log($"Websocket server started listening on port {port}");
                 while (true)
                 {
-                    // wait for a tcp client;
                     TcpClient tcpClient = await listener.AcceptTcpClientAsync();
-
-                    // are more connections allowed?
-                    if (clients.Count < maxConnections)
-                    {
-                        // non blocking receive loop
-                        ReceiveLoop(tcpClient);
-                    }
-                    else
-                    {
-                        // connection limit reached. disconnect the client and show
-                        // a small log message so we know why it happened.
-                        // note: no extra Sleep because Accept is blocking anyway
-
-                        tcpClient.Close();
-                        Debug.Log("Server too full, disconnected a client");
-                    }
+                    ProcessTcpClient(tcpClient, cancellation.Token);
                 }
             }
-            catch(ObjectDisposedException)
+            catch (ObjectDisposedException)
             {
-                Debug.Log("Server dispossed");
+                // do nothing. This will be thrown if the Listener has been stopped
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                ReceivedError?.Invoke(0, exception);
-            }
-            finally
-            {
-                listener = null;
+                ReceivedError?.Invoke(0, ex);
             }
         }
 
-        private async void ReceiveLoop(TcpClient tcpClient)
+        private async void ProcessTcpClient(TcpClient tcpClient, CancellationToken token)
         {
-            int connectionId = NextConnectionId();
-            clients.Add(connectionId, tcpClient);
 
             try
-            { 
+            {
+                // this worker thread stays alive until either of the following happens:
+                // Client sends a close conection request OR
+                // An unhandled exception is thrown OR
+                // The server is disposed
+
+                // get a secure or insecure stream
+                Stream stream = tcpClient.GetStream();
+                WebSocketHttpContext context = await webSocketServerFactory.ReadHttpHeaderFromStreamAsync(stream, token);
+                if (context.IsWebSocketRequest)
+                {
+                    var options = new WebSocketServerOptions() { KeepAliveInterval = TimeSpan.FromSeconds(30), SubProtocol = "binary" };
+
+                    WebSocket webSocket = await webSocketServerFactory.AcceptWebSocketAsync(context, options);
+
+                    await ReceiveLoopAsync(webSocket, token);
+                }
+                else
+                {
+                    Debug.Log("Http header contains no web socket upgrade request. Ignoring");
+                }
+
+            }
+            catch (ObjectDisposedException)
+            {
+                // do nothing. This will be thrown if the Listener has been stopped
+            }
+            catch (Exception ex)
+            {
+                ReceivedError?.Invoke(0, ex);
+            }
+            finally
+            {
+                try
+                {
+                    tcpClient.Client.Close();
+                    tcpClient.Close();
+                }
+                catch (Exception ex)
+                {
+                    ReceivedError?.Invoke(0, ex);
+                }
+            }
+        }
+
+        private async Task ReceiveLoopAsync(WebSocket webSocket, CancellationToken token)
+        {
+            int connectionId = NextConnectionId();
+            clients.Add(connectionId, webSocket);
+
+            byte[] buffer = new byte[MaxMessageSize];
+
+            try
+            {
                 // someone connected,  raise event
                 Connected?.Invoke(connectionId);
 
-                using (NetworkStream networkStream = tcpClient.GetStream())
+
+                while (true)
                 {
-                    while (true)
+                    WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), token);
+
+                    if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        byte[] data = await ReadMessageAsync(networkStream);
-
-                        if (data == null)
-                            break;
-
-                        // we received some data,  raise event
-                        ReceivedData?.Invoke(connectionId, data);
+                        Debug.Log($"Client initiated close. Status: {result.CloseStatus} Description: {result.CloseStatusDescription}");
+                        break;
                     }
+
+                    byte[] data = await ReadFrames(connectionId, result, webSocket, buffer, token);
+
+                    if (data == null)
+                        break;
+                    // we received some data,  raise event
+                    ReceivedData?.Invoke(connectionId, data);
                 }
+
             }
             catch (Exception exception)
             {
@@ -156,24 +189,40 @@ namespace Mirror.Transport.Tcp
             }
         }
 
+        // a message might come splitted in multiple frames
+        // collect all frames 
+        private async Task<byte[]> ReadFrames(int connectionId, WebSocketReceiveResult result, WebSocket webSocket, byte[] buffer, CancellationToken token)
+        {
+            int count = result.Count;
+
+            while (!result.EndOfMessage)
+            {
+                if (count >= MaxMessageSize)
+                {
+                    string closeMessage = string.Format("Maximum message size: {0} bytes.", MaxMessageSize);
+                    await webSocket.CloseAsync(WebSocketCloseStatus.MessageTooBig, closeMessage, CancellationToken.None);
+                    ReceivedError?.Invoke(connectionId, new WebSocketException(WebSocketError.HeaderError));
+                    return null;
+                }
+
+                result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer, count, MaxMessageSize - count), CancellationToken.None);
+                count += result.Count;
+
+            }
+            return new ArraySegment<byte>(buffer, 0, count).ToArray();
+        }
+
         public void Stop()
         {
             // only if started
             if (!Active) return;
 
             Debug.Log("Server: stopping...");
+            cancellation.Cancel();
 
             // stop listening to connections so that no one can connect while we
             // close the client connections
             listener.Stop();
-
-            // close all client connections
-            foreach (var kvp in clients)
-            {
-                // close the stream if not closed yet. it may have been closed
-                // by a disconnect already, so use try/catch
-                try { kvp.Value.Close(); } catch {}
-            }
 
             // clear clients list
             clients.Clear();
@@ -184,13 +233,12 @@ namespace Mirror.Transport.Tcp
         public async void Send(int connectionId, byte[] data)
         {
             // find the connection
-            TcpClient client;
+            WebSocket client;
             if (clients.TryGetValue(connectionId, out client))
             {
                 try
                 {
-                    NetworkStream stream = client.GetStream();
-                    await SendMessage(stream, data);
+                    await client.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, cancellation.Token);
                 }
                 catch (ObjectDisposedException) {
                     // connection has been closed,  swallow exception
@@ -224,10 +272,10 @@ namespace Mirror.Transport.Tcp
         public bool GetConnectionInfo(int connectionId, out string address)
         {
             // find the connection
-            TcpClient client;
+            WebSocket client;
             if (clients.TryGetValue(connectionId, out client))
             {
-                address = ((IPEndPoint)client.Client.RemoteEndPoint).ToString();
+                address = "";
                 return true;
             }
             address = null;
@@ -238,12 +286,12 @@ namespace Mirror.Transport.Tcp
         public bool Disconnect(int connectionId)
         {
             // find the connection
-            TcpClient client;
+            WebSocket client;
             if (clients.TryGetValue(connectionId, out client))
             {
                 clients.Remove(connectionId);
                 // just close it. client thread will take care of the rest.
-                client.Close();
+                client.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
                 Debug.Log("Server.Disconnect connectionId:" + connectionId);
                 return true;
             }
