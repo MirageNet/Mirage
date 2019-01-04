@@ -2,9 +2,9 @@
 using System;
 using UnityEngine;
 
-namespace Mirror.Transport.Tcp
+namespace Mirror.Transport.Websocket
 {
-    public class TcpTransport : TransportLayer
+    public class WebsocketTransport : TransportLayer
     {
         // events for the client
         public event Action OnClientConnect;
@@ -21,10 +21,9 @@ namespace Mirror.Transport.Tcp
         protected Client client = new Client();
         protected Server server = new Server();
 
-        public int port = 7777;
-        public int MaxConnections = int.MaxValue;
+        public int port;
 
-        public TcpTransport()
+        public WebsocketTransport()
         {
             // dispatch the events from the server
             server.Connected += (id) => OnServerConnect?.Invoke(id);
@@ -43,12 +42,16 @@ namespace Mirror.Transport.Tcp
             // by simple eating the first one before the server starts
             Server.NextConnectionId();
 
-            Debug.Log("Tcp transport initialized!");
+            Debug.Log("Websocket transport initialized!");
         }
 
         // client
         public virtual bool ClientConnected() { return client.IsConnected; }
-        public virtual void ClientConnect(string address, int port) { client.Connect(address, port); }
+        public virtual void ClientConnect(string host, int port)
+        {
+
+            client.Connect(new Uri($"ws://{host}:{port}"));
+        }
         public virtual void ClientSend(int channelId, byte[] data) { client.Send(data); }
         public virtual void ClientDisconnect() { client.Disconnect(); }
 
@@ -56,7 +59,7 @@ namespace Mirror.Transport.Tcp
         public virtual bool ServerActive() { return server.Active; }
         public virtual void ServerStart()
         {
-            server.Listen(port, MaxConnections);
+            server.Listen(port);
         }
 
         public virtual void ServerSend(int connectionId, int channelId, byte[] data) { server.Send(connectionId, data); }
