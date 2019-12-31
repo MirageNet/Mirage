@@ -19,6 +19,7 @@ jobs:
         args: build doc/docfx.json
     - name: GitHub Pages
       uses: crazy-max/ghaction-github-pages@v1.2.5
+      if: github.ref == 'refs/heads/master'
       with:
         # Create incremental commit instead of doing push force
         keep_history: true
