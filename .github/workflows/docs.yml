@@ -17,6 +17,9 @@ jobs:
       uses: nikeee/docfx-action@master
       with:
         args: build doc/docfx.json
+    - name: No Jekyll
+      run: |
+        touch doc/_site/.nojekyll
     - name: GitHub Pages
       uses: crazy-max/ghaction-github-pages@v1.2.5
       if: github.ref == 'refs/heads/master'
