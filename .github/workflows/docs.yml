@@ -26,3 +26,5 @@ jobs:
         allow_empty_commit: False
         # Build directory to deploy
         build_dir: doc/_site
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
