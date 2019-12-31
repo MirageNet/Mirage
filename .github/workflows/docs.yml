@@ -25,4 +25,4 @@ jobs:
         # Allow an empty commit to be created
         allow_empty_commit: False
         # Build directory to deploy
-        build_dir: doc/_build
+        build_dir: doc/_site
