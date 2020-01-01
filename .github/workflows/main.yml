@@ -8,7 +8,7 @@ on: [push]
 jobs:
 
   testRunnerInAllModes:
-    name: Unity test ✨
+    name: Unity test
     runs-on: ubuntu-latest
     env:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -22,12 +22,12 @@ jobs:
 
       - run: ls -l
         
-      - name: Generate Solution
+      - name: Unity - Builder
         uses: webbertakken/unity-builder@v0.3
         with:
-          projectPath: .
-          unityVersion: 2019.2.11f1
-          buildCommand: UnityEditor.SyncVS.SyncSolution
+          projectPath: "."
+          unityVersion: "2019.2.11f1"
+          buildCommand: "UnityEditor.SyncVS.SyncSolution"
           targetPlatform: StandaloneWindows64
 
       - run: ls -l
