@@ -1,0 +1,30 @@
+name: Build project
+on: [push]
+jobs:
+  buildForSomePlatforms:
+    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        projectPath:
+          - .
+        unityVersion:
+          - 2019.2.11f1
+        targetPlatform:
+          - WebGL
+          - Windows
+    steps:
+      - uses: actions/checkout@v1
+      - uses: webbertakken/unity-activate@v1
+      - uses: webbertakken/unity-builder@v0.3
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+      - uses: webbertakken/unity-return-license@v1
+        if: always()
+      - uses: actions/upload-artifact@v1
+        with:
+          name: Build
+          path: build
