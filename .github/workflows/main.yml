@@ -36,7 +36,7 @@ jobs:
         env:
           BUILD_METHOD: "UnityEditor.SyncVS.SyncSolution"
           BUILD_TARGET: StandaloneWindows64
-      - run: ls -l
+      - run: ls -l build
 
       # Configure test runner
       - name: Run tests
