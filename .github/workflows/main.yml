@@ -26,7 +26,7 @@ jobs:
           projectPath: .
           unityVersion: 2019.2.11f1
           buildCommand: UnityEditor.SyncVS.SyncSolution
-          targetPlatform: Win
+          targetPlatform: StandaloneWindows64
 
       - run: ls -l
 
