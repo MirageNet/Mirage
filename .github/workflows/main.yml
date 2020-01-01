@@ -33,7 +33,9 @@ jobs:
           unityVersion: "2019.2.11f1"
           buildCommand: "UnityEditor.SyncVS.SyncSolution"
           targetPlatform: StandaloneWindows64
-
+        env:
+            BUILD_METHOD: "UnityEditor.SyncVS.SyncSolution"
+            BUILD_TARGET: StandaloneWindows64
       - run: ls -l
 
       # Configure test runner
