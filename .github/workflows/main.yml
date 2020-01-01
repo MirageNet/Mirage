@@ -20,6 +20,16 @@ jobs:
       - name: Unity - Activate
         uses: webbertakken/unity-activate@v1
         
+      - name: Synchronize C# solution
+        uses: webbertakken/unity-builder@v0.3
+        with:
+          projectPath: .
+          unityVersion: 2019.2.11f1
+          buildCommand: UnityEditor.SyncVS.SyncSolution
+          targetPlatform: Linux64
+
+      - run: ls -l
+
       # Configure test runner
       - name: Run tests
         id: testRunner
@@ -28,14 +38,6 @@ jobs:
           UNITY_PROJECT_PATH: .
           TEST_MODE: all
 
-      - name: Synchronize C# solution
-        uses: webbertakken/unity-builder@v0.3
-        with:
-          projectPath: .
-          unityVersion: 2019.2.11f1
-          buildCommand: UnityEditor.SyncVS.SyncSolution
-
-      - run: ls -l
       - name: Sonarscanner for dotnet
         uses: Secbyte/dotnet-sonarscanner@v1.2
         with:
