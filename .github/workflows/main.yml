@@ -22,13 +22,20 @@ jobs:
 
       - run: ls -l
         
-      - name: Unity - Builder
-        uses: webbertakken/unity-builder@v0.3
-        with:
-          projectPath: "."
-          unityVersion: "2019.2.11f1"
-          buildCommand: "UnityEditor.SyncVS.SyncSolution"
-          targetPlatform: StandaloneWindows64
+      - name: 'run unity build'
+        uses: ncipollo/unity-action@master
+        with: 
+            license: ${{ secrets.UNITY_LICENSE }}
+            mode: build
+            build_method: UnityEditor.SyncVS.SyncSolution
+
+    #   - name: Unity - Builder
+    #     uses: webbertakken/unity-builder@v0.3
+    #     with:
+    #       projectPath: "."
+    #       unityVersion: "2019.2.11f1"
+    #       buildCommand: "UnityEditor.SyncVS.SyncSolution"
+    #       targetPlatform: StandaloneWindows64
 
       - run: ls -l
 
