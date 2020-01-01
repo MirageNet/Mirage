@@ -32,6 +32,7 @@ jobs:
         uses: webbertakken/unity-builder@v0.3
         with:
           projectPath: .
+          unityVersion: 2019.2.11f1
           buildCommand: UnityEditor.SyncVS.SyncSolution
 
       - run: ls -l
