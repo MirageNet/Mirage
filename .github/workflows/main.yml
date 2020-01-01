@@ -22,7 +22,7 @@ jobs:
 
       - run: ls -l
         
-      - name: 'run unity build'
+      - name: 'Generate C# Solution'
         uses: ncipollo/unity-action@master
         with: 
             license: ${{ secrets.UNITY_LICENSE }}
