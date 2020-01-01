@@ -1,30 +1,109 @@
-name: Build project
-on: [push]
+name: Actions 😎
+on:
+  pull_request: {}
+  push: { branches: [master] }
+
 jobs:
-  buildForSomePlatforms:
-    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+  requestManualActivationFile:
+    name: Request manual activation file 🔑
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        projectPath:
-          - .
-        unityVersion:
-          - 2019.2.11f1
-        targetPlatform:
-          - WebGL
-          - Windows
     steps:
-      - uses: actions/checkout@v1
-      - uses: webbertakken/unity-activate@v1
-      - uses: webbertakken/unity-builder@v0.3
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      # Request manual activation file
+      - name: Request manual activation file
+        uses: webbertakken/unity-request-manual-activation-file@v1
+        id: getManualLicenseFile
+
+      # Upload artifact (Unity_v20XX.X.XXXX.alf)
+      - name: Expose as artifact
+        uses: actions/upload-artifact@v1
         with:
-          projectPath: ${{ matrix.projectPath }}
-          unityVersion: ${{ matrix.unityVersion }}
-          targetPlatform: ${{ matrix.targetPlatform }}
-      - uses: webbertakken/unity-return-license@v1
-        if: always()
-      - uses: actions/upload-artifact@v1
+          name: Manual Activation File
+          path: ${{ steps.getManualLicenseFile.outputs.filePath }}
+
+  requestActivation:
+    name: Request activation ✔
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      # Activate Unity
+      - name: Unity - Activate
+        uses: webbertakken/unity-activate@v1
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+  testRunnerInAllModes:
+    name: Test all modes ✨
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repository (required to test local actions)
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      # Configure test runner
+      - name: Run tests
+        id: testRunner
+        uses: webbertakken/unity-test-runner@v1
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_PROJECT_PATH: test-project
+          TEST_MODE: all
+
+      # Upload artifacts
+      - name: Expose as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: Test results (all modes)
+          path: ${{ steps.testRunner.outputs.artifactsPath }}
+
+  buildForWebGL:
+    name: Build for WebGL 🕸
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repository (required to test local actions)
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      # Configure builder
+      - name: Build project
+        id: buildStep
+        uses: webbertakken/unity-builder@v0.1
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_PROJECT_PATH: test-project
+          BUILD_NAME: TestBuild
+          BUILD_TARGET: WebGL
+          BUILDS_PATH: builds
+          BUILD_COMMAND: ""
+
+      # Upload distributables
+      - name: Upload Build
+        uses: actions/upload-artifact@v1
         with:
           name: Build
-          path: build
+          path: ${{ steps.buildStep.outputs.allBuildsPath }}
+
+  activateAndThenReturnLicense:
+    name: returnLicense 🎈
+    runs-on: ubuntu-latest
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+    steps:
+      # Checkout repository (required to test local actions)
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      # Activate Unity
+      - name: Activate Unity
+        uses: webbertakken/unity-activate@v1
+
+      # Return License
+      - name: Return license
+        uses: webbertakken/unity-return-license@v0.1
