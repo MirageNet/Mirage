@@ -3,8 +3,11 @@ name: CI
 #  pull_request: {}
 #  push: { branches: [master] }
 
-on: [push]
-
+on: 
+  push:
+    paths-ignore:
+      - 'doc/**'
+  
 jobs:
 
   testRunnerInAllModes:
