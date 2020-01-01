@@ -22,7 +22,7 @@ jobs:
 
       - run: ls -l
         
-      - name: Synchronize C# solution
+      - name: Generate Solution
         uses: webbertakken/unity-builder@v0.3
         with:
           projectPath: .
@@ -34,7 +34,6 @@ jobs:
 
       # Configure test runner
       - name: Run tests
-        id: testRunner
         uses: webbertakken/unity-test-runner@v1.1
         env:
           UNITY_PROJECT_PATH: .
