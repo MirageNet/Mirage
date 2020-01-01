@@ -19,6 +19,8 @@ jobs:
 
       - name: Unity - Activate
         uses: webbertakken/unity-activate@v1
+
+      - run: ls -l
         
       - name: Synchronize C# solution
         uses: webbertakken/unity-builder@v0.3
