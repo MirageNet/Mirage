@@ -51,4 +51,5 @@ jobs:
 
       # Return License
       - name: Return license
+        if: always()
         uses: webbertakken/unity-return-license@v0.1
