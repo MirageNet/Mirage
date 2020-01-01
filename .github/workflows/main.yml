@@ -1,4 +1,4 @@
-name: Actions 😎
+name: CI
 #on:
 #  pull_request: {}
 #  push: { branches: [master] }
@@ -30,6 +30,12 @@ jobs:
           UNITY_PROJECT_PATH: .
           TEST_MODE: all
 
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        
       # Upload artifacts
       - name: Expose as artifact
         uses: actions/upload-artifact@v1
