@@ -27,7 +27,7 @@ jobs:
       - run: ls -l
 
       - name: Unity Runner
-        uses: MirrorNG/unity-runner@0.1
+        uses: MirrorNG/unity-runner@master
         with:
           # Arguments to pass to unity
           args: -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
