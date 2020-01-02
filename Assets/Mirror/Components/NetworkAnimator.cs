@@ -37,7 +37,7 @@ namespace Mirror
         [Tooltip("Set to true if animations come from owner client,  set to false if animations always come from server")]
         public bool ClientAuthority;
 
-        bool sendMessagesAllowed
+        bool SendMessagesAllowed
         {
             get
             {
