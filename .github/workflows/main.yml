@@ -35,11 +35,10 @@ jobs:
       - run: ls -l
 
       # Configure test runner
-      - name: Run tests
-        uses: webbertakken/unity-test-runner@v1.1
-        env:
-          UNITY_PROJECT_PATH: .
-          TEST_MODE: all
+      - name: Run editor Tests
+        uses: MirrorNG/unity-runner@master
+        with:
+          args: -runTests -testPlatform editmode Tests/editmode-results.xml
 
       - name: Sonarscanner for dotnet
         uses: Secbyte/dotnet-sonarscanner@v1.2
