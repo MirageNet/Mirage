@@ -30,7 +30,7 @@ jobs:
         uses: MirrorNG/unity-runner@master
         with:
           # Arguments to pass to unity
-          args: -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
+          args: -executeMethod  UnityEditor.SyncVS.SyncSolution -projectPath . -quit
     
       - run: ls -l
 
