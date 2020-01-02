@@ -39,7 +39,6 @@ Mirror/packages
 Library
 Temp
 UnityPackageManager
-Packages
 Logs
 Obj
 *.mdb
@@ -61,3 +60,8 @@ docs/.sass-cache
 ehthumbs.db
 Thumbs.db
 /VisRepo.txt
+
+.sonarqube
+CodeCoverage
+ProjectSettings
+Tests
