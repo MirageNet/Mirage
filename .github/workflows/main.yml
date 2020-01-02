@@ -25,18 +25,14 @@ jobs:
         uses: webbertakken/unity-activate@v1
 
       - run: ls -l
-        
-      - name: Unity - Builder
-        uses: webbertakken/unity-builder@v0.2
+
+      - name: Unity Runner
+        uses: MirrorNG/unity-runner@0.1
         with:
-          projectPath: "."
-          unityVersion: "2019.2.11f1"
-          buildCommand: "UnityEditor.SyncVS.SyncSolution"
-          targetPlatform: StandaloneWindows64
-        env:
-          BUILD_METHOD: "UnityEditor.SyncVS.SyncSolution"
-          BUILD_TARGET: StandaloneWindows64
-      - run: ls -l build
+          # Arguments to pass to unity
+          args: -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
+    
+      - run: ls -l
 
       # Configure test runner
       - name: Run tests
