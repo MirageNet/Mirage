@@ -10,10 +10,12 @@
                 {"type": "feature", "release": "minor"},
             ]
         }],
+
         ["@semantic-release/npm", {
             "npmPublish": false,
             "pkgRoot": "Assets/Mirror"
         }],
+        
         ["@semantic-release/exec", {
             "publishCmd": "./publish_upm.sh ${nextRelease.version}"
         }]
