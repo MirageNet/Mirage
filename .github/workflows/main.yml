@@ -73,4 +73,4 @@ jobs:
       - name: Generate UPM package
         #if: github.ref == 'refs/heads/master'
         run: |
-           git subtree split --prefix=Assets/Mirror --branch upmtest
+           git subtree push --prefix=Assets/Mirror origin upmtest
