@@ -34,7 +34,7 @@ jobs:
         uses: MirrorNG/unity-runner@master
         with:
           # Arguments to pass to unity
-          args: -executeMethod  UnityEditor.SyncVS.SyncSolution -projectPath . -quit
+          args: -buildTarget StandaloneWindows64 -customBuildName MirrorNG -customBuildPath ./build/StandaloneWindows64 -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
           workdir: MirrorNG
     
       - run: ls -l MirrorNG
@@ -43,7 +43,7 @@ jobs:
       - name: Run editor Tests
         uses: MirrorNG/unity-runner@master
         with:
-          args: -runTests -testPlatform editmode Tests/editmode-results.xml
+          args: -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
           workdir: MirrorNG
 
       - name: Sonarscanner for dotnet
