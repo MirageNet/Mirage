@@ -71,7 +71,12 @@ jobs:
     #       args: -returnlicense -quit
 
       - name: Release UPM package
-        if: github.ref == 'refs/heads/master'
+        #if: github.ref == 'refs/heads/master'
         run: |
-           git subtree push --prefix=Assets/Mirror origin upm
+           git subtree split --prefix=Assets/Mirror --branch upmtest
 
+      - uses: brpaz/action-semantic-release@v1
+        with:
+          dry_run: "true"
+          install_plugins: "semantic-release-docker semantic-release-gcr"
+          branch: upmtest
