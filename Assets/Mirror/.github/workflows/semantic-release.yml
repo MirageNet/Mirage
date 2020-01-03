@@ -1,0 +1,30 @@
+name: release
+#on:
+#  pull_request: {}
+#  push: { branches: [master] }
+
+on: 
+  push:
+    branch: 'upmtest'
+
+jobs:
+
+    Release:
+        name: Semantic release
+        runs-on: ubuntu-latest
+        env:
+            UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        steps:
+    
+            # Checkout repository (required to test local actions)
+            - name: Checkout repository
+                uses: actions/checkout@v2
+                with:
+                fetch-depth: 0
+
+            - name: Release
+                uses: brpaz/action-semantic-release@v1
+                with:
+                    dry_run: "false"
+                    branch: upmtest
+        

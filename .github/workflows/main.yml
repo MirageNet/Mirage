@@ -74,9 +74,3 @@ jobs:
         #if: github.ref == 'refs/heads/master'
         run: |
            git subtree split --prefix=Assets/Mirror --branch upmtest
-
-      - name: Release
-        uses: brpaz/action-semantic-release@v1
-        with:
-          dry_run: "true"
-          branch: upmtest
