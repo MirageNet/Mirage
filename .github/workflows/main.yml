@@ -30,7 +30,7 @@ jobs:
       
       - run: ls -l
 
-      - name: Unity Runner
+      - name: Generate Solution
         uses: MirrorNG/unity-runner@master
         with:
           # Arguments to pass to unity
@@ -64,7 +64,7 @@ jobs:
           path: ${{ steps.testRunner.outputs.artifactsPath }}
 
       # Return License
-      - name: Unity Runner
+      - name: Return license
         if: always()
         uses: MirrorNG/unity-runner@master
         with:
