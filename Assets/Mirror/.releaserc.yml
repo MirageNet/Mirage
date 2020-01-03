@@ -6,6 +6,10 @@
                 {"type": "breaking", "release": "major"},
                 {"type": "feature", "release": "minor"},
             ]
-        }]
+        }],
+        ["@semantic-release/npm", {
+            "npmPublish": false,
+            "tarballDir": "dist",
+        }],
     ]
 }
