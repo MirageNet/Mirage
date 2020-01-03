@@ -1,6 +1,7 @@
 {
+
     "plugins": [
-        ["@semantic-release/commit-analyzer", {
+]        ["@semantic-release/commit-analyzer", {
             "preset": "angular",
             "releaseRules": [
                 {"type": "breaking", "release": "major"},
@@ -9,11 +10,11 @@
         }],
         ["@semantic-release/npm", {
             "npmPublish": false,
-            "tarballDir": "dist",
+            "pkgRoot": "Assets/Mirror"
         }],
         ["@mob-sakai/semantic-release-git-snapshot", {
             "snapshotPrefix": "./Assets/Mirror",
-            "snapshotBranch": "snapshot",
+            "snapshotBranch": "upmtest",
             "snapshotTagFormat": "${version}"
         }]
     ]
