@@ -18,16 +18,15 @@ jobs:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
     steps:
 
+      # Activate license
+      - name: Activate Unity
+        uses: webbertakken/unity-activate@v1
+  
       # Checkout repository (required to test local actions)
       - name: Checkout repository
         uses: actions/checkout@v1
         with:
           path: MirrorNG
-
-      # Activate license
-      - name: Activate Unity
-        uses: webbertakken/unity-activate@v1
-  
         
       - run: ls -l
 
