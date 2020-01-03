@@ -20,10 +20,15 @@ jobs:
       # Checkout repository (required to test local actions)
       - name: Checkout repository
         uses: actions/checkout@v1
+    
+      - run: echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
 
       - name: Unity - Activate
-        uses: webbertakken/unity-activate@v1
-
+        uses: MirrorNG/unity-runner@master
+        with:
+          args: -manualLicense
+            -manualLicenseFile UnityLicenseFile.ulf
+      
       - run: ls -l
 
       - name: Unity Runner
@@ -60,6 +65,9 @@ jobs:
           path: ${{ steps.testRunner.outputs.artifactsPath }}
 
       # Return License
-      - name: Return license
+      - name: Unity Runner
         if: always()
-        uses: webbertakken/unity-return-license@v0.1
+        uses: MirrorNG/unity-runner@master
+        with:
+          # Arguments to pass to unity
+          args: -returnlicense -quit
