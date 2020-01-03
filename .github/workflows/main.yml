@@ -74,3 +74,16 @@ jobs:
         #if: github.ref == 'refs/heads/master'
         run: |
            git subtree push --prefix=Assets/Mirror origin upmtest
+        
+      - name: Checkout repository
+        uses: actions/checkout@v2
+          with:
+            fetch-depth: 0
+            ref: 'upmtest'
+
+      - name: Release
+        uses: brpaz/action-semantic-release@v1
+          with:
+            dry_run: "false"
+            branch: upmtest
+        
