@@ -17,17 +17,16 @@ jobs:
     env:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
     steps:
-
-      # Activate license
-      - name: Activate Unity
-        uses: webbertakken/unity-activate@v1
   
       # Checkout repository (required to test local actions)
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          path: MirrorNG
         
+      - name: Activate license
+        uses: MirrorNG/unity-runner@master
+        with:
+          entrypoint: /activate.sh
+      
       - run: ls -l
 
       - name: Generate Solution
@@ -35,16 +34,12 @@ jobs:
         with:
           # Arguments to pass to unity
           args: -buildTarget StandaloneWindows64 -customBuildName MirrorNG -customBuildPath ./build/StandaloneWindows64 -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
-          workdir: MirrorNG
     
-      - run: ls -l MirrorNG
-
       # Configure test runner
       - name: Run editor Tests
         uses: MirrorNG/unity-runner@master
         with:
           args: -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
-          workdir: MirrorNG
 
       - name: Sonarscanner for dotnet
         uses: Secbyte/dotnet-sonarscanner@v1.2
