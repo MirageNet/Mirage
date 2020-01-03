@@ -14,10 +14,8 @@
             "npmPublish": false,
             "pkgRoot": "Assets/Mirror"
         }],
-        ["@mob-sakai/semantic-release-git-snapshot", {
-            "snapshotPrefix": "./Assets/Mirror",
-            "snapshotBranch": "upmtest",
-            "snapshotTagFormat": "${version}"
+        ["@semantic-release/exec", {
+            "publishCmd": "git subtree push --prefix=Assets/Mirror origin upmtest && git tag upmtest ${nextRelease.version} && git push origin --tags"
         }]
     ]
 }

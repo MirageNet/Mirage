@@ -85,7 +85,7 @@ jobs:
         uses: brpaz/action-semantic-release@v1
         with:
           dry_run: "false"
-          install_plugins: "@mob-sakai/semantic-release-git-snapshot"
+          install_plugins: "@semantic-release/exec"
           branch: semver
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
