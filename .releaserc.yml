@@ -15,7 +15,7 @@
             "pkgRoot": "Assets/Mirror"
         }],
         ["@semantic-release/exec", {
-            "publishCmd": "git subtree push --prefix=Assets/Mirror origin upmtest && git tag upmtest ${nextRelease.version} && git push origin --tags"
+            "publishCmd": "./publish_upm.sh ${nextRelease.version}"
         }]
     ]
 }
