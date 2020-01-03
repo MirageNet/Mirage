@@ -11,5 +11,10 @@
             "npmPublish": false,
             "tarballDir": "dist",
         }],
+        ["@mob-sakai/semantic-release-git-snapshot", {
+            "snapshotPrefix": "./Assets/Mirror",
+            "snapshotBranch": "snapshot",
+            "snapshotTagFormat": "${version}"
+        }]
     ]
 }

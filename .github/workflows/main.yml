@@ -70,20 +70,21 @@ jobs:
     #       # Arguments to pass to unity
     #       args: -returnlicense -quit
 
-      - name: Generate UPM package
-        #if: github.ref == 'refs/heads/master'
-        run: |
-           git subtree push --prefix=Assets/Mirror origin upmtest
+    #   - name: Generate UPM package
+    #     #if: github.ref == 'refs/heads/master'
+    #     run: |
+    #        git subtree push --prefix=Assets/Mirror origin upmtest
         
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          ref: 'upmtest'
+    #   - name: Checkout repository
+    #     uses: actions/checkout@v2
+    #     with:
+    #       fetch-depth: 0
+    #       ref: 'upmtest'
 
       - name: Release
         uses: brpaz/action-semantic-release@v1
         with:
           dry_run: "false"
-          branch: upmtest
+          install_plugins: "@mob-sakai/semantic-release-git-snapshot"
+          branch: semver
         
