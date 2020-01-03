@@ -77,13 +77,13 @@ jobs:
         
       - name: Checkout repository
         uses: actions/checkout@v2
-          with:
-            fetch-depth: 0
-            ref: 'upmtest'
+        with:
+          fetch-depth: 0
+          ref: 'upmtest'
 
       - name: Release
         uses: brpaz/action-semantic-release@v1
-          with:
-            dry_run: "false"
-            branch: upmtest
+        with:
+          dry_run: "false"
+          branch: upmtest
         
