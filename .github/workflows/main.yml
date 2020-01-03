@@ -4,6 +4,7 @@ name: CI
 #  push: { branches: [master] }
 
 on: 
+  pull_requests: {}
   push:
     paths-ignore:
       - 'doc/**'
