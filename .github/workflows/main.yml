@@ -25,29 +25,29 @@ jobs:
         with:
           fetch-depth: 0
         
-      - name: Activate license
-        uses: MirrorNG/unity-runner@master
-        with:
-          entrypoint: /activate.sh
+    #   - name: Activate license
+    #     uses: MirrorNG/unity-runner@master
+    #     with:
+    #       entrypoint: /activate.sh
       
-      - name: Generate Solution
-        uses: MirrorNG/unity-runner@master
-        with:
-          # Arguments to pass to unity
-          args: -buildTarget StandaloneWindows64 -customBuildName MirrorNG -customBuildPath ./build/StandaloneWindows64 -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
+    #   - name: Generate Solution
+    #     uses: MirrorNG/unity-runner@master
+    #     with:
+    #       # Arguments to pass to unity
+    #       args: -buildTarget StandaloneWindows64 -customBuildName MirrorNG -customBuildPath ./build/StandaloneWindows64 -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
     
-      # Configure test runner
-      - name: Run editor Tests
-        uses: MirrorNG/unity-runner@master
-        with:
-          args: -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+    #   # Configure test runner
+    #   - name: Run editor Tests
+    #     uses: MirrorNG/unity-runner@master
+    #     with:
+    #       args: -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
             
-      # Upload artifacts
-      - name: Publish test results
-        uses: actions/upload-artifact@v1
-        with:
-          name: Test results (editor mode)
-          path: Tests/editmode-results.xml
+    #   # Upload artifacts
+    #   - name: Publish test results
+    #     uses: actions/upload-artifact@v1
+    #     with:
+    #       name: Test results (editor mode)
+    #       path: Tests/editmode-results.xml
 
     #   - name: Sonarscanner for dotnet
     #     uses: Secbyte/dotnet-sonarscanner@v1.2
@@ -70,13 +70,13 @@ jobs:
     #       # Arguments to pass to unity
     #       args: -returnlicense -quit
 
-      - name: Release UPM package
+      - name: Generate UPM package
         #if: github.ref == 'refs/heads/master'
         run: |
            git subtree split --prefix=Assets/Mirror --branch upmtest
 
-      - uses: brpaz/action-semantic-release@v1
+      - name: Release
+        uses: brpaz/action-semantic-release@v1
         with:
           dry_run: "true"
-          install_plugins: "semantic-release-docker semantic-release-gcr"
           branch: upmtest
