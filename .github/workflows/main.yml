@@ -26,8 +26,7 @@ jobs:
       - name: Unity - Activate
         uses: MirrorNG/unity-runner@master
         with:
-          args: -manualLicense
-            -manualLicenseFile UnityLicenseFile.ulf
+          args: -manualLicenseFile UnityLicenseFile.ulf -quit
       
       - run: ls -l
 
