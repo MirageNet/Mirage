@@ -1,6 +1,7 @@
 {
     tagFormat: "${version}-master",
     "plugins": [
+        "@semantic-release/git",
         "@semantic-release/github",
         "@semantic-release/release-notes-generator", 
         ["@semantic-release/commit-analyzer", {
@@ -15,7 +16,7 @@
             "npmPublish": false,
             "pkgRoot": "Assets/Mirror"
         }],
-        
+
         ["@semantic-release/exec", {
             "publishCmd": "./publish_upm.sh ${nextRelease.version}"
         }]
