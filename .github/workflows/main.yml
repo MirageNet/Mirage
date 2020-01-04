@@ -53,7 +53,7 @@ jobs:
       - name: Sonarscanner for dotnet
         uses: Secbyte/dotnet-sonarscanner@v1.2
         with:
-          buildCommand: dotnet build Mirror2.sln
+          buildCommand: dotnet build workspace.sln
           projectKey: MirrorNG_MirrorNG
           projectName: MirrorNG
           sonarOrganisation: mirrorng
