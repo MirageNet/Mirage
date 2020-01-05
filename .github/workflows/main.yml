@@ -42,7 +42,16 @@ jobs:
         uses: MirrorNG/unity-runner@master
         with:
           args: -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
-            
+        
+      - name: Add libraries:
+        uses: MirrorNG/unity-runner@master
+        with:
+            entrypoint: /bin/cp
+            args: 
+              - /opt/Unity/Editor/Data/Managed/UnityEngine.dll
+              - /opt/Unity/Editor/Data/Managed/UnityEditor.dll
+              - Library/ScriptAssemblies
+
       # Upload artifacts
       - name: Publish test results
         uses: actions/upload-artifact@v1
