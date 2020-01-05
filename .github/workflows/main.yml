@@ -53,7 +53,7 @@ jobs:
       - name: SonarQube analysis
         uses: MirrorNG/mono-sonarscanner@0.1
         with:
-          buildCommand: dotnet build workspace.sln
+          buildCommand: xbuild workspace.sln
           projectKey: MirrorNG_MirrorNG
           projectName: MirrorNG
           sonarOrganisation: mirrorng
