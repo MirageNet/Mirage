@@ -51,7 +51,7 @@ jobs:
           path: Tests/editmode-results.xml
 
       - name: Sonarscanner for dotnet
-        uses: Secbyte/dotnet-sonarscanner@v1.2
+        uses: MirrorNG/mono-sonarscanner@0.1
         with:
           buildCommand: dotnet build workspace.sln
           projectKey: MirrorNG_MirrorNG
