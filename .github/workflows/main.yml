@@ -63,13 +63,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish csproj
-        if: always()
-        uses: actions/upload-artifact@v1
-        with:
-          name: csproj
-          path: Ninja.WebSockets.csproj
-  
     # no need to return license for personal license
     # Return License
     #   - name: Return license
