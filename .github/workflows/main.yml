@@ -53,7 +53,7 @@ jobs:
       - name: SonarQube analysis
         uses: MirrorNG/unity-sonarscanner@master
         with:
-          buildCommand: opt/Unity/Editor/Data/MonoBleedingEdge/bin/xbuild workspace.sln
+          buildCommand: /opt/Unity/Editor/Data/MonoBleedingEdge/bin/xbuild workspace.sln
           projectKey: MirrorNG_MirrorNG
           projectName: MirrorNG
           sonarOrganisation: mirrorng
