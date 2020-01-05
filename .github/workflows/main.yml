@@ -30,13 +30,7 @@ jobs:
         uses: MirrorNG/unity-runner@master
         with:
           entrypoint: /activate.sh
-      
-      - name: Generate Solution
-        uses: MirrorNG/unity-runner@master
-        with:
-          # Arguments to pass to unity
-          args: -buildTarget StandaloneWindows64 -customBuildName MirrorNG -customBuildPath ./build/StandaloneWindows64 -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
-    
+          
       # Configure test runner
       - name: Run editor Tests
         uses: MirrorNG/unity-runner@master
@@ -50,6 +44,12 @@ jobs:
           name: Test results (editor mode)
           path: Tests/editmode-results.xml
 
+      - name: Generate Solution
+        uses: MirrorNG/unity-runner@master
+        with:
+          # Arguments to pass to unity
+          args: -buildTarget StandaloneWindows64 -customBuildName MirrorNG -customBuildPath ./build/StandaloneWindows64 -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
+  
       - name: SonarQube analysis
         uses: MirrorNG/unity-sonarscanner@master
         with:
