@@ -50,7 +50,7 @@ jobs:
           name: Test results (editor mode)
           path: Tests/editmode-results.xml
 
-      - name: Sonarscanner for dotnet
+      - name: SonarQube analysis
         uses: MirrorNG/mono-sonarscanner@0.1
         with:
           buildCommand: dotnet build workspace.sln
