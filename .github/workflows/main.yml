@@ -51,7 +51,7 @@ jobs:
           path: Tests/editmode-results.xml
 
       - name: SonarQube analysis
-        uses: MirrorNG/mono-sonarscanner@0.1
+        uses: MirrorNG/unity-sonarscanner@master
         with:
           buildCommand: xbuild workspace.sln
           projectKey: MirrorNG_MirrorNG
