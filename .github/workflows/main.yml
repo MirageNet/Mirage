@@ -43,7 +43,7 @@ jobs:
         with:
           args: -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
         
-      - name: Add libraries:
+      - name: Add libraries
         uses: MirrorNG/unity-runner@master
         with:
             entrypoint: /bin/cp
