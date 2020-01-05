@@ -50,12 +50,6 @@ jobs:
           # Arguments to pass to unity
           args: -buildTarget StandaloneWindows64 -customBuildName MirrorNG -customBuildPath ./build/StandaloneWindows64 -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
   
-      - name: Publish csproj
-        uses: actions/upload-artifact@v1
-        with:
-          name: csproj
-          path: Ninja.WebSockets.csproj
-
       - name: SonarQube analysis
         uses: MirrorNG/unity-sonarscanner@master
         with:
@@ -69,6 +63,13 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Publish csproj
+        if: always()
+        uses: actions/upload-artifact@v1
+        with:
+          name: csproj
+          path: Ninja.WebSockets.csproj
+  
     # no need to return license for personal license
     # Return License
     #   - name: Return license
