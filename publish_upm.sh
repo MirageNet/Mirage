@@ -14,7 +14,7 @@ git gc
 echo "Showing remotes 3"
 git remote -v
 
-git filter-repo --force --invert-paths --path Tests --path-rename "Examples:Samples~" --refs $BRANCH
+git filter-repo --force --invert-paths --path Tests --path Tests.meta --path Examples.meta --path-rename "Examples:Samples~" --refs $BRANCH
 
 echo "Showing remotes 5"
 git remote -v
