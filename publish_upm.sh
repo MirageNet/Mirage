@@ -1,6 +1,10 @@
 #!/bin/sh
-git subtree split --prefix=Assets/Mirror -b upm
+
+BRANCH=$1
+TAG=$2
+
+git subtree split --prefix=Assets/Mirror -b $BRANCH
 #git filter-branch --prune-empty --tree-filter 'rm -rf Tests' upm
-git filter-repo --invert-paths --path Tests --refs upm
-git tag $1 upm
-git push -u origin upm --tags
+git filter-repo --invert-paths --path Tests --refs $BRANCH
+git tag $TAG $BRANCH
+git push -u origin $BRANCH --tags

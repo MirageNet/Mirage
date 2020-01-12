@@ -25,7 +25,18 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-        
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.8"
+
+      - name: Test subtree
+        run: |
+            pip3 install git-filter-repo
+            ./publish_upm.sh upm_test testtag
+            exit 1
+
       - name: Activate license
         uses: MirrorNG/unity-runner@master
         with:
@@ -62,15 +73,6 @@ jobs:
           FrameworkPathOverride: /opt/Unity/Editor/Data/MonoBleedingEdge/
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    # no need to return license for personal license
-    # Return License
-    #   - name: Return license
-    #     if: always()
-    #     uses: MirrorNG/unity-runner@master
-    #     with:
-    #       # Arguments to pass to unity
-    #       args: -returnlicense -quit
 
       - name: Release
         uses: cycjimmy/semantic-release-action@v2
