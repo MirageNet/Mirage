@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 BRANCH=$1
 TAG=$2
