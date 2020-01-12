@@ -9,4 +9,4 @@ git gc
 git filter-repo --force --invert-paths --path Tests --refs $BRANCH
 git filter-repo --force --path-rename "Examples:Samples~"
 git tag $TAG $BRANCH
-git push -u origin $BRANCH --tags
+git push origin $BRANCH --tags
