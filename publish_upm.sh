@@ -8,5 +8,6 @@ git subtree split --prefix=Assets/Mirror -b $BRANCH
 git gc
 git filter-repo --force --invert-paths --path Tests --refs $BRANCH
 git filter-repo --force --path-rename "Examples:Samples~"
+git remote -v
 git tag $TAG $BRANCH
 git push origin $BRANCH --tags
