@@ -986,21 +986,6 @@ namespace Mirror
             }
         }
 
-        /// <summary>
-        /// Spawn the given game object on all clients which are ready.
-        /// <para>This will cause a new object to be instantiated from the registered prefab, or from a custom spawn function.</para>
-        /// </summary>
-        /// <param name="obj">Game object with NetworkIdentity to spawn.</param>
-        /// <param name="client">Client associated to the object.</param>
-        /// <param name="ownerConnection">The connection that has authority over the object</param>
-        public void Spawn(GameObject obj, NetworkConnection ownerConnection = null)
-        {
-            if (VerifyCanSpawn(obj))
-            {
-                SpawnObject(obj, ownerConnection);
-            }
-        }
-
         bool CheckForPrefab(GameObject obj)
         {
 #if UNITY_EDITOR
@@ -1067,6 +1052,21 @@ namespace Mirror
                 {
                     identity.assetId = assetId;
                 }
+                SpawnObject(obj, ownerConnection);
+            }
+        }
+
+        /// <summary>
+        /// Spawn the given game object on all clients which are ready.
+        /// <para>This will cause a new object to be instantiated from the registered prefab, or from a custom spawn function.</para>
+        /// </summary>
+        /// <param name="obj">Game object with NetworkIdentity to spawn.</param>
+        /// <param name="client">Client associated to the object.</param>
+        /// <param name="ownerConnection">The connection that has authority over the object</param>
+        public void Spawn(GameObject obj, NetworkConnection ownerConnection = null)
+        {
+            if (VerifyCanSpawn(obj))
+            {
                 SpawnObject(obj, ownerConnection);
             }
         }
