@@ -1,8 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
 using System;
 using System.Threading.Tasks;
+
+// Based on https://github.com/EnlightenedOne/MirrorNetworkDiscovery
+// forked from https://github.com/in0finite/MirrorNetworkDiscovery
+// Both are MIT Licensed
 
 namespace Mirror.Discovery
 {
