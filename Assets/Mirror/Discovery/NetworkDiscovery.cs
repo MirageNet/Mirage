@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System.Net;
-using System.Net.Sockets;
 using System;
-using System.Threading.Tasks;
 using UnityEngine.Events;
 
 namespace Mirror.Discovery
@@ -10,17 +8,15 @@ namespace Mirror.Discovery
     // Based on https://github.com/EnlightenedOne/MirrorNetworkDiscovery
     // forked from https://github.com/in0finite/MirrorNetworkDiscovery
     // Both are MIT Licensed
-    [System.Serializable]
+    [Serializable]
     public class ServerFoundUnityEvent : UnityEvent<ServerResponse> { };
 
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/NetworkDiscovery")]
-    [HelpURL("https://mirror-networking.com/docs/Components/NetworkDiscovery.html")]
     public class NetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerResponse>
     {
         #region Server
         public long ServerId { get; private set; }
-
 
         public ServerFoundUnityEvent ServerFound;
 
@@ -103,6 +99,7 @@ namespace Mirror.Discovery
 
             ServerFound.Invoke(packet);
         }
+
         #endregion
     }
 }
