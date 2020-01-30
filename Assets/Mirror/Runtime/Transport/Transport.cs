@@ -149,7 +149,7 @@ namespace Mirror
         /// </summary>
         /// <param name="connectionId">the id of the client to disconnect</param>
         /// <returns>true if the client was kicked</returns>
-        public abstract bool ServerDisconnect(int connectionId);
+        public abstract void ServerDisconnect(int connectionId);
 
         /// <summary>
         /// Get the client address

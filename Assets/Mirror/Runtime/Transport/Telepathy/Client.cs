@@ -31,8 +31,7 @@ namespace Telepathy
         // => bools are atomic according to
         //    https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/variables
         //    made volatile so the compiler does not reorder access to it
-        volatile bool _Connecting;
-        public bool Connecting => _Connecting;
+        public bool Connecting { get; private set; }
 
         // send queue
         // => SafeQueue is twice as fast as ConcurrentQueue, see SafeQueue.cs!
@@ -47,7 +46,7 @@ namespace Telepathy
         public async Task ConnectAsync(string ip, int port)
         {
             // We are connecting from now until Connect succeeds or fails
-            _Connecting = true;
+            Connecting = true;
 
             // clear old messages in queue, just to be sure that the caller
             // doesn't receive data from last time and gets out of sync.
@@ -64,6 +63,7 @@ namespace Telepathy
 
             await client.ConnectAsync(ip, port);
 
+            Connecting = false;
 
             // start the send thread:
 
@@ -94,10 +94,6 @@ namespace Telepathy
                 // -> calling .Join would sometimes wait forever, e.g. when
                 //    calling Disconnect while trying to connect to a dead end
                 receiveThread?.Interrupt();
-
-                // we interrupted the receive Thread, so we can't guarantee that
-                // connecting was reset. let's do it manually.
-                _Connecting = false;
 
                 // clear send queues. no need to hold on to them.
                 // (unlike receiveQueue, which is still needed to process the

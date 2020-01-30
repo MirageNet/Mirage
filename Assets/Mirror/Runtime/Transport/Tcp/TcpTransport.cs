@@ -74,9 +74,9 @@ namespace Mirror.Tcp
             return true;
         }
 
-        public override bool ServerDisconnect(int connectionId)
+        public override void ServerDisconnect(int connectionId)
         {
-            return server.Disconnect(connectionId);
+            server.Disconnect(connectionId);
         }
 
         public override string ServerGetClientAddress(int connectionId)

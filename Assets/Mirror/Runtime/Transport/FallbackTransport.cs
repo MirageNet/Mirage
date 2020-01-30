@@ -124,9 +124,9 @@ namespace Mirror
             return available.ServerGetClientAddress(connectionId);
         }
 
-        public override bool ServerDisconnect(int connectionId)
+        public override void ServerDisconnect(int connectionId)
         {
-            return available.ServerDisconnect(connectionId);
+            available.ServerDisconnect(connectionId);
         }
 
         public override bool ServerSend(List<int> connectionIds, int channelId, ArraySegment<byte> segment)

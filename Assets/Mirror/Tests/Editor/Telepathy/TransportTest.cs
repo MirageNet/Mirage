@@ -200,24 +200,6 @@ namespace Telepathy.Tests
         }
 
         [UnityTest]
-        public IEnumerator ServerDisconnectClientTest()
-        {
-            return RunAsync(async () =>
-            {
-                var client = new Client();
-
-                await client.ConnectAsync("127.0.0.1", Port);
-
-                // we  should first receive a connected message
-                Message serverConnectMsg = NextMessage(server);
-                int id = serverConnectMsg.connectionId;
-
-                bool result = server.Disconnect(id);
-                Assert.That(result, Is.True);
-            });
-        }
-
-        [UnityTest]
         public IEnumerator ClientKickedCleanupTest()
         {
             return RunAsync(async () =>
@@ -231,8 +213,7 @@ namespace Telepathy.Tests
                 int id = serverConnectMsg.connectionId;
 
                 // server kicks the client
-                bool result = server.Disconnect(id);
-                Assert.That(result, Is.True);
+                server.Disconnect(id);
 
                 // wait for client disconnected message
                 Message clientDisconnectedMsg = NextMessage(client);

@@ -343,9 +343,9 @@ namespace Mirror
             return true;
         }
 
-        public override bool ServerDisconnect(int connectionId)
+        public override void ServerDisconnect(int connectionId)
         {
-            return NetworkTransport.Disconnect(serverHostId, connectionId, out byte error);
+            NetworkTransport.Disconnect(serverHostId, connectionId, out byte error);
         }
 
         public override string ServerGetClientAddress(int connectionId)

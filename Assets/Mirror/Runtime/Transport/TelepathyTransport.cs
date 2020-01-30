@@ -143,6 +143,9 @@ namespace Mirror
             {
                 switch (message.eventType)
                 {
+                    case Telepathy.EventType.Connected:
+                        OnServerConnected.Invoke(message.connectionId);
+                        break;
                     case Telepathy.EventType.Data:
                         OnServerDataReceived.Invoke(message.connectionId, new ArraySegment<byte>(message.data), Channels.DefaultReliable);
                         break;
@@ -158,7 +161,11 @@ namespace Mirror
             }
             return false;
         }
-        public override bool ServerDisconnect(int connectionId) => server.Disconnect(connectionId);
+        public override void ServerDisconnect(int connectionId)
+        {
+            server.Disconnect(connectionId);
+        }
+
         public override string ServerGetClientAddress(int connectionId)
         {
             try
