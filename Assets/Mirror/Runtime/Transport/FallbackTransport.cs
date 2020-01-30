@@ -3,6 +3,7 @@
 //          otherwise.
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Mirror
@@ -51,19 +52,18 @@ namespace Mirror
             // wire all the base transports to our events
             foreach (Transport transport in transports)
             {
-                transport.OnClientConnected.AddListener(OnClientConnected.Invoke);
                 transport.OnClientDataReceived.AddListener(OnClientDataReceived.Invoke);
                 transport.OnClientError.AddListener(OnClientError.Invoke);
                 transport.OnClientDisconnected.AddListener(OnClientDisconnected.Invoke);
             }
         }
 
-        public override void ClientConnect(string address)
+        public override Task ClientConnectAsync(string address)
         {
-            available.ClientConnect(address);
+            return available.ClientConnectAsync(address);
         }
 
-        public override void ClientConnect(Uri uri)
+        public override Task ClientConnectAsync(Uri uri)
         {
             foreach (Transport transport in transports)
             {
@@ -71,9 +71,8 @@ namespace Mirror
                 {
                     try
                     {
-                        transport.ClientConnect(uri);
                         available = transport;
-                        return;
+                        return transport.ClientConnectAsync(uri);
                     }
                     catch (ArgumentException)
                     {

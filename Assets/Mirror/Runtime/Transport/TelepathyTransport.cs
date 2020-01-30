@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -53,14 +54,15 @@ namespace Mirror
 
         // client
         public override bool ClientConnected() => client.Connected;
-        public override void ClientConnect(string address) => client.Connect(address, port);
-        public override void ClientConnect(Uri uri)
+        public override Task ClientConnectAsync(string address) => client.ConnectAsync(address, port);
+
+        public override Task ClientConnectAsync(Uri uri)
         {
             if (uri.Scheme != Scheme)
                 throw new ArgumentException($"Invalid url {uri}, use {Scheme}://host:port instead", nameof(uri));
 
             int serverPort = uri.IsDefaultPort ? port : uri.Port;
-            client.Connect(uri.Host, serverPort);
+            return client.ConnectAsync(uri.Host, serverPort);
         }
         public override bool ClientSend(int channelId, ArraySegment<byte> segment)
         {
@@ -77,9 +79,6 @@ namespace Mirror
             {
                 switch (message.eventType)
                 {
-                    case Telepathy.EventType.Connected:
-                        OnClientConnected.Invoke();
-                        break;
                     case Telepathy.EventType.Data:
                         OnClientDataReceived.Invoke(new ArraySegment<byte>(message.data), Channels.DefaultReliable);
                         break;
@@ -134,9 +133,6 @@ namespace Mirror
             {
                 switch (message.eventType)
                 {
-                    case Telepathy.EventType.Connected:
-                        OnServerConnected.Invoke(message.connectionId);
-                        break;
                     case Telepathy.EventType.Data:
                         OnServerDataReceived.Invoke(message.connectionId, new ArraySegment<byte>(message.data), Channels.DefaultReliable);
                         break;

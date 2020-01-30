@@ -68,7 +68,7 @@ namespace Mirror
             InitializeTransportHandlers();
 
             connectState = ConnectState.Connecting;
-            Transport.activeTransport.ClientConnect(address);
+            Transport.activeTransport.ClientConnectAsync(address);
 
             // setup all the handlers
             connection = new NetworkConnectionToServer();
@@ -88,7 +88,7 @@ namespace Mirror
             InitializeTransportHandlers();
 
             connectState = ConnectState.Connecting;
-            Transport.activeTransport.ClientConnect(uri);
+            Transport.activeTransport.ClientConnectAsync(uri);
 
             // setup all the handlers
             connection = new NetworkConnectionToServer();
@@ -126,7 +126,6 @@ namespace Mirror
 
         void InitializeTransportHandlers()
         {
-            Transport.activeTransport.OnClientConnected.AddListener(OnConnected);
             Transport.activeTransport.OnClientDataReceived.AddListener(OnDataReceived);
             Transport.activeTransport.OnClientDisconnected.AddListener(OnDisconnected);
             Transport.activeTransport.OnClientError.AddListener(OnError);
@@ -204,7 +203,6 @@ namespace Mirror
         void RemoveTransportHandlers()
         {
             // so that we don't register them more than once
-            Transport.activeTransport.OnClientConnected.RemoveListener(OnConnected);
             Transport.activeTransport.OnClientDataReceived.RemoveListener(OnDataReceived);
             Transport.activeTransport.OnClientDisconnected.RemoveListener(OnDisconnected);
             Transport.activeTransport.OnClientError.RemoveListener(OnError);
