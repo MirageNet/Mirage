@@ -91,9 +91,9 @@ namespace Telepathy
 
                 // wait until thread finished. this is the only way to guarantee
                 // that we can call Connect() again immediately after Disconnect
-                // => Calling .Close will end the thread
-                // => Calling .Join is the only safe way to wait until it's done
-                receiveThread?.Join();
+                // -> calling .Join would sometimes wait forever, e.g. when
+                //    calling Disconnect while trying to connect to a dead end
+                receiveThread?.Interrupt();
 
                 // we interrupted the receive Thread, so we can't guarantee that
                 // connecting was reset. let's do it manually.
