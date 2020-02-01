@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Mirror.Tcp
 {
@@ -70,14 +71,14 @@ namespace Mirror.Tcp
         // read message (via stream) with the <size,content> message structure
         protected static async Task<byte[]> ReadMessageAsync(Stream stream)
         {
-            byte[] messageSizeBuffer = await stream.ReadExactlyAsync(4).ConfigureAwait(false);
+            byte[] messageSizeBuffer = await stream.ReadExactlyAsync(4);
 
             if (messageSizeBuffer == null)
                 return null; // end of stream,  just disconnect
 
             int messageSize = BytesToInt(messageSizeBuffer);
 
-            return await stream.ReadExactlyAsync(messageSize).ConfigureAwait(false);
+            return await stream.ReadExactlyAsync(messageSize);
         }
 
     }

@@ -32,7 +32,7 @@ namespace Mirror.Tcp
         // (right now we only use it from one listener thread, but we might have
         //  multiple threads later in case of WebSockets etc.)
         //  HLAPI uses 0 for local connection,  so our ids start with 1
-        int counter = 1;
+        int counter = 0;
 
         // public next id function in case someone needs to reserve an id
         // (e.g. if hostMode should always have 0 connection and external
@@ -91,14 +91,14 @@ namespace Mirror.Tcp
                 Debug.Log($"Tcp server started listening on port {port}");
 
                 // keep accepting new clients
-                while (true)
+                while (listener != null)
                 {
                     // wait for a tcp client;
                     TcpClient tcpClient = await listener.AcceptTcpClientAsync();
 
                     // non blocking receive loop
                     // must be on main thread
-                    Task receive = ReceiveLoop(tcpClient);
+                    _ = ReceiveLoop(tcpClient);
                 }
             }
             catch (ObjectDisposedException)
@@ -145,6 +145,11 @@ namespace Mirror.Tcp
                         }
                     }
                 }
+            }
+            catch (ObjectDisposedException)
+            {
+                // this is thrown when the socket is closed
+                // can be ignored
             }
             catch (Exception exception)
             {

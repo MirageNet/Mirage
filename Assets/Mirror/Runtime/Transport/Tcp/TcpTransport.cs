@@ -13,7 +13,6 @@ namespace Mirror.Tcp
         // "tcp4" means tcp with 4 bytes header, network byte order
         public const string Scheme = "tcp4";
 
-
         protected Client client = new Client();
         protected Server server = new Server();
 
@@ -43,7 +42,7 @@ namespace Mirror.Tcp
         }
 
         // client
-        public override bool ClientConnected() { return client.IsConnected; }
+        public override bool ClientConnected() { return client.Connected; }
         public override Task ClientConnectAsync(string address)
         {
             return client.ConnectAsync(address, port);
@@ -113,7 +112,7 @@ namespace Mirror.Tcp
 
         public override string ToString()
         {
-            if (client.Connecting || client.IsConnected)
+            if (client.Connecting || client.Connected)
             {
                 return client.ToString();
             }
