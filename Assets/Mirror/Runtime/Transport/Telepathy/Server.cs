@@ -216,6 +216,8 @@ namespace Telepathy
             // .Active is immediately false after Stop.
             // -> calling .Join would sometimes wait forever
             listenerThread?.Interrupt();
+
+            listenerThread.Join();
             listenerThread = null;
 
             // close all client connections
