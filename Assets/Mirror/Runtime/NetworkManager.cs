@@ -162,6 +162,30 @@ namespace Mirror
         //    during FinishLoadScene.
         public NetworkManagerMode mode { get; private set; }
 
+        // events
+        public Action onStartClient;
+        public Action onStartHost;
+        public Action onStartServer;
+        public Action onStopClient;
+        public Action onStopHost;
+        public Action onStopServer;
+
+        public Action<NetworkConnection> onServerConnect;
+        public Action<NetworkConnection> onServerDisconnect;
+        public Action<NetworkConnection> onServerReady;
+        public Action<NetworkConnection> onServerAddPlayer;
+        public Action<NetworkConnection, NetworkIdentity> onServerRemovePlayer;
+        public Action<NetworkConnection, int> onServerError;
+        public Action<string> onServerChangeScene;
+        public Action<string> onServerSceneChanged;
+
+        public Action<NetworkConnection> onClientConnect;
+        public Action<NetworkConnection> onClientDisconnect;
+        public Action<NetworkConnection, int> onClientError;
+        public Action<NetworkConnection> onClientNotReady;
+        public Action<string, SceneOperation, bool> onClientChangeScene;
+        public Action<NetworkConnection> onClientSceneChanged;
+
         #region Unity Callbacks
 
         /// <summary>
@@ -1216,7 +1240,10 @@ namespace Mirror
         /// <para>Unity calls this on the Server when a Client connects to the Server. Use an override to tell the NetworkManager what to do when a client connects to the server.</para>
         /// </summary>
         /// <param name="conn">Connection from client.</param>
-        public virtual void OnServerConnect(NetworkConnection conn) { }
+        public virtual void OnServerConnect(NetworkConnection conn)
+        {
+            onServerConnect?.Invoke(conn);
+        }
 
         /// <summary>
         /// Called on the server when a client disconnects.
@@ -1227,6 +1254,8 @@ namespace Mirror
         {
             server.DestroyPlayerForConnection(conn);
             if (LogFilter.Debug) Debug.Log("OnServerDisconnect: Client disconnected.");
+
+            onServerDisconnect?.Invoke(conn);
         }
 
         /// <summary>
@@ -1242,6 +1271,8 @@ namespace Mirror
                 if (LogFilter.Debug) Debug.Log("Ready with no player object");
             }
             server.SetClientReady(conn);
+
+            onServerReady?.Invoke(conn);
         }
 
         /// <summary>
@@ -1257,6 +1288,7 @@ namespace Mirror
                 : Instantiate(playerPrefab);
 
             server.AddPlayerForConnection(conn, client, player);
+            onServerAddPlayer?.Invoke(conn);
         }
 
         /// <summary>
@@ -1295,6 +1327,7 @@ namespace Mirror
             if (player.gameObject != null)
             {
                 server.Destroy(player.gameObject);
+                onServerRemovePlayer?.Invoke(conn, player);
             }
         }
 
@@ -1303,20 +1336,29 @@ namespace Mirror
         /// </summary>
         /// <param name="conn">Connection from client.</param>
         /// <param name="errorCode">Error code.</param>
-        public virtual void OnServerError(NetworkConnection conn, int errorCode) { }
+        public virtual void OnServerError(NetworkConnection conn, int errorCode)
+        {
+            onServerError?.Invoke(conn, errorCode);
+        }
 
         /// <summary>
         /// Called from ServerChangeScene immediately before SceneManager.LoadSceneAsync is executed
         /// <para>This allows server to do work / cleanup / prep before the scene changes.</para>
         /// </summary>
         /// <param name="newSceneName">Name of the scene that's about to be loaded</param>
-        public virtual void OnServerChangeScene(string newSceneName) { }
+        public virtual void OnServerChangeScene(string newSceneName)
+        {
+            onServerChangeScene?.Invoke(newSceneName);
+        }
 
         /// <summary>
         /// Called on the server when a scene is completed loaded, when the scene load was initiated by the server with ServerChangeScene().
         /// </summary>
         /// <param name="sceneName">The name of the new scene.</param>
-        public virtual void OnServerSceneChanged(string sceneName) { }
+        public virtual void OnServerSceneChanged(string sceneName)
+        {
+            onServerSceneChanged?.Invoke(sceneName);
+        }
 
         #endregion
 
@@ -1344,6 +1386,8 @@ namespace Mirror
                     ClientScene.AddPlayer();
                 }
             }
+
+            onClientConnect?.Invoke(conn);
         }
 
         /// <summary>
@@ -1354,6 +1398,7 @@ namespace Mirror
         public virtual void OnClientDisconnect(NetworkConnection conn)
         {
             StopClient();
+            onClientDisconnect?.Invoke(conn);
         }
 
         /// <summary>
@@ -1361,14 +1406,20 @@ namespace Mirror
         /// </summary>
         /// <param name="conn">Connection to a server.</param>
         /// <param name="errorCode">Error code.</param>
-        public virtual void OnClientError(NetworkConnection conn, int errorCode) { }
+        public virtual void OnClientError(NetworkConnection conn, int errorCode)
+        {
+            onClientError?.Invoke(conn, errorCode);
+        }
 
         /// <summary>
         /// Called on clients when a servers tells the client it is no longer ready.
         /// <para>This is commonly used when switching scenes.</para>
         /// </summary>
         /// <param name="conn">Connection to the server.</param>
-        public virtual void OnClientNotReady(NetworkConnection conn) { }
+        public virtual void OnClientNotReady(NetworkConnection conn)
+        {
+            onClientNotReady?.Invoke(conn);
+        }
 
         /// <summary>
         /// Called from ClientChangeScene immediately before SceneManager.LoadSceneAsync is executed
@@ -1377,7 +1428,10 @@ namespace Mirror
         /// <param name="newSceneName">Name of the scene that's about to be loaded</param>
         /// <param name="sceneOperation">Scene operation that's about to happen</param>
         /// <param name="customHandling">true to indicate that scene loading will be handled through overrides</param>
-        public virtual void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling) { }
+        public virtual void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
+        {
+            onClientChangeScene?.Invoke(newSceneName, sceneOperation, customHandling);
+        }
 
         /// <summary>
         /// Called on clients when a scene has completed loaded, when the scene load was initiated by the server.
@@ -1395,6 +1449,8 @@ namespace Mirror
                 // add player if existing one is null
                 ClientScene.AddPlayer();
             }
+
+            onClientSceneChanged?.Invoke(conn);
         }
 
         #endregion
@@ -1409,33 +1465,51 @@ namespace Mirror
         /// This is invoked when a host is started.
         /// <para>StartHost has multiple signatures, but they all cause this hook to be called.</para>
         /// </summary>
-        public virtual void OnStartHost() { }
+        public virtual void OnStartHost()
+        {
+            onStartHost?.Invoke();
+        }
 
         /// <summary>
         /// This is invoked when a server is started - including when a host is started.
         /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
         /// </summary>
-        public virtual void OnStartServer() { }
+        public virtual void OnStartServer()
+        {
+            onStartServer?.Invoke();
+        }
 
         /// <summary>
         /// This is invoked when the client is started.
         /// </summary>
-        public virtual void OnStartClient() { }
+        public virtual void OnStartClient()
+        {
+            onStartClient?.Invoke();
+        }
 
         /// <summary>
         /// This is called when a server is stopped - including when a host is stopped.
         /// </summary>
-        public virtual void OnStopServer() { }
+        public virtual void OnStopServer()
+        {
+            onStopServer?.Invoke();
+        }
 
         /// <summary>
         /// This is called when a client is stopped.
         /// </summary>
-        public virtual void OnStopClient() { }
+        public virtual void OnStopClient()
+        {
+            onStopClient?.Invoke();
+        }
 
         /// <summary>
         /// This is called when a host is stopped.
         /// </summary>
-        public virtual void OnStopHost() { }
+        public virtual void OnStopHost()
+        {
+            onStopHost?.Invoke();
+        }
 
         #endregion
     }
