@@ -9,7 +9,7 @@ using UnityEngine.TestTools;
 namespace Telepathy.Tests
 {
     [TestFixture]
-    [Ignore("Telepathy tests are flaky")]
+    [Ignore("Flaky telepathy tests")]
     public class TransportTest
     {
         // just a random port that will hopefully not be taken
