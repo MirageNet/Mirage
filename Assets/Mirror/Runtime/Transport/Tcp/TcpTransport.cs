@@ -133,13 +133,13 @@ namespace Mirror.Tcp
             return client.ConnectAsync(address, port);
         }
 
-        public override async Task ClientConnectAsync(Uri uri)
+        public override Task ClientConnectAsync(Uri uri)
         {
             if (uri.Scheme != Scheme)
                 throw new ArgumentException($"Invalid url {uri}, use {Scheme}://host:port instead", nameof(uri));
 
             int serverPort = uri.IsDefaultPort ? port : uri.Port;
-            await client.ConnectAsync(uri.Host, serverPort);
+            return client.ConnectAsync(uri.Host, serverPort);
         }
     }
 }
