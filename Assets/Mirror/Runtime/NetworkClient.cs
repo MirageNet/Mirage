@@ -60,7 +60,7 @@ namespace Mirror
         /// Connect client to a NetworkServer instance.
         /// </summary>
         /// <param name="address"></param>
-        public async Task Connect(string address)
+        public async Task ConnectAsync(string address)
         {
             if (LogFilter.Debug) Debug.Log("Client Connect: " + address);
 
