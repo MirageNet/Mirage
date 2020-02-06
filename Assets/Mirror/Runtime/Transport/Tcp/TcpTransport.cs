@@ -43,10 +43,6 @@ namespace Mirror.Tcp
 
         // client
         public override bool ClientConnected() { return client.Connected; }
-        public override Task ClientConnectAsync(string address)
-        {
-            return client.ConnectAsync(address, port);
-        }
 
         public override bool ClientSend(int channelId, ArraySegment<byte> segment)
         {
@@ -130,6 +126,11 @@ namespace Mirror.Tcp
             builder.Host = Dns.GetHostName();
             builder.Port = port;
             return builder.Uri;
+        }
+
+        public override Task ClientConnectAsync(string address)
+        {
+            return client.ConnectAsync(address, port);
         }
 
         public override async Task ClientConnectAsync(Uri uri)
