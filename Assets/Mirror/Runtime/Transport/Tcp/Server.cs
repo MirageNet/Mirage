@@ -148,9 +148,8 @@ namespace Mirror.Tcp
             }
             catch (SocketException ex)
             {
-                if (ex.SocketErrorCode == SocketError.Interrupted)
-                    return;
-                throw ex;
+                if (ex.SocketErrorCode != SocketError.Interrupted)
+                    throw;
             }
             catch (ObjectDisposedException)
             {
