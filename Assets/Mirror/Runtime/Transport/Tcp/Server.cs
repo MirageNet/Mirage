@@ -146,6 +146,12 @@ namespace Mirror.Tcp
                     }
                 }
             }
+            catch (SocketException ex)
+            {
+                if (ex.SocketErrorCode == SocketError.Interrupted)
+                    return;
+                throw ex;
+            }
             catch (ObjectDisposedException)
             {
                 // this is thrown when the socket is closed
