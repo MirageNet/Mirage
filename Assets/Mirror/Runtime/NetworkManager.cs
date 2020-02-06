@@ -410,7 +410,7 @@ namespace Mirror
             if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + uri);
             networkAddress = uri.Host;
 
-            client.Connect(uri);
+            _ = client.ConnectAsync(uri);
 
             OnStartClient();
         }
