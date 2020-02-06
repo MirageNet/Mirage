@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -163,28 +164,29 @@ namespace Mirror
         public NetworkManagerMode mode { get; private set; }
 
         // events
-        public Action onStartClient;
-        public Action onStartHost;
-        public Action onStartServer;
-        public Action onStopClient;
-        public Action onStopHost;
-        public Action onStopServer;
+        [Header("Events")]
+        public UnityEvent onStartClient;
+        public UnityEvent onStartHost;
+        public UnityEvent onStartServer;
+        public UnityEvent onStopClient;
+        public UnityEvent onStopHost;
+        public UnityEvent onStopServer;
 
-        public Action<NetworkConnection> onServerConnect;
-        public Action<NetworkConnection> onServerDisconnect;
-        public Action<NetworkConnection> onServerReady;
-        public Action<NetworkConnection> onServerAddPlayer;
-        public Action<NetworkConnection, NetworkIdentity> onServerRemovePlayer;
-        public Action<NetworkConnection, int> onServerError;
-        public Action<string> onServerChangeScene;
-        public Action<string> onServerSceneChanged;
+        public UnityEvent<NetworkConnection> onServerConnect;
+        public UnityEvent<NetworkConnection> onServerDisconnect;
+        public UnityEvent<NetworkConnection> onServerReady;
+        public UnityEvent<NetworkConnection> onServerAddPlayer;
+        public UnityEvent<NetworkConnection, NetworkIdentity> onServerRemovePlayer;
+        public UnityEvent<NetworkConnection, int> onServerError;
+        public UnityEvent<string> onServerChangeScene;
+        public UnityEvent<string> onServerSceneChanged;
 
-        public Action<NetworkConnection> onClientConnect;
-        public Action<NetworkConnection> onClientDisconnect;
-        public Action<NetworkConnection, int> onClientError;
-        public Action<NetworkConnection> onClientNotReady;
-        public Action<string, SceneOperation, bool> onClientChangeScene;
-        public Action<NetworkConnection> onClientSceneChanged;
+        public UnityEvent<NetworkConnection> onClientConnect;
+        public UnityEvent<NetworkConnection> onClientDisconnect;
+        public UnityEvent<NetworkConnection, int> onClientError;
+        public UnityEvent<NetworkConnection> onClientNotReady;
+        public UnityEvent<string, SceneOperation, bool> onClientChangeScene;
+        public UnityEvent<NetworkConnection> onClientSceneChanged;
 
         #region Unity Callbacks
 
