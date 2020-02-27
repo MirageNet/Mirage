@@ -42,14 +42,19 @@ jobs:
         uses: MirrorNG/unity-runner@master
         with:
           args: -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
-        
+
+      - name: Run play Tests
+          uses: MirrorNG/unity-runner@master
+          with:
+            args: -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+          
       # Upload artifacts
       - name: Publish test results
         uses: actions/upload-artifact@v1
         if: always()
         with:
           name: Test results (editor mode)
-          path: Tests/editmode-results.xml
+          path: Tests
 
       - name: Generate Solution
         uses: MirrorNG/unity-runner@master
