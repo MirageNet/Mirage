@@ -44,9 +44,9 @@ jobs:
           args: -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
 
       - name: Run play Tests
-          uses: MirrorNG/unity-runner@master
-          with:
-            args: -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+        uses: MirrorNG/unity-runner@master
+        with:
+          args: -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
           
       # Upload artifacts
       - name: Publish test results
