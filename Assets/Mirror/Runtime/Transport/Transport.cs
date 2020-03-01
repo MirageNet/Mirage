@@ -16,6 +16,7 @@ namespace Mirror
     [Serializable] public class ServerDataReceivedEvent : UnityEvent<int, ArraySegment<byte>, int> { }
     [Serializable] public class UnityEventIntException : UnityEvent<int, Exception> { }
 
+    [Obsolete("Use Transport2 instead")]
     public abstract class Transport : MonoBehaviour
     {
         /// <summary>
