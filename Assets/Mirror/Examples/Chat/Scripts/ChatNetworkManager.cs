@@ -9,7 +9,7 @@ namespace Mirror.Examples.Chat
 
         public void SetHostname(string hostname)
         {
-            networkAddress = hostname;
+            client.serverIp = hostname;
         }
 
         public ChatWindow chatWindow;

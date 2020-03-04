@@ -280,7 +280,7 @@ namespace Mirror.Examples.ListServer
                     slot.joinButton.onClick.RemoveAllListeners();
                     slot.joinButton.onClick.AddListener(() =>
                     {
-                        manager.networkAddress = server.ip;
+                        manager.client.serverIp = server.ip;
                         manager.StartClient();
                     });
                 }

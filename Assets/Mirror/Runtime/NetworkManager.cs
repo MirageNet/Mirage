@@ -84,21 +84,11 @@ namespace Mirror
         public NetworkServer server;
         public NetworkClient client;
 
-        [Header("Network Info")]
-
         // transport layer
         [Header("Network Info")]
         [Tooltip("Transport component attached to this object that server and client will use to connect")]
         [SerializeField]
         protected Transport transport;
-
-        /// <summary>
-        /// The network address currently in use.
-        /// <para>For clients, this is the address of the server that is connected to. For servers, this is the local address.</para>
-        /// </summary>
-        [FormerlySerializedAs("m_NetworkAddress")]
-        [Tooltip("Network Address where the client should connect to the server. Server does not use this for anything.")]
-        public string networkAddress = "localhost";
 
         /// <summary>
         /// The maximum number of concurrent network connections to support.
@@ -387,14 +377,14 @@ namespace Mirror
 
             RegisterClientMessages();
 
-            if (string.IsNullOrEmpty(networkAddress))
+            if (string.IsNullOrEmpty(client.serverIp))
             {
                 Debug.LogError("Must set the Network Address field in the manager");
                 return;
             }
-            if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + networkAddress);
+            if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + client.serverIp);
 
-            _ = client.ConnectAsync(networkAddress);
+            _ = client.ConnectAsync();
 
             OnStartClient();
         }
@@ -426,7 +416,6 @@ namespace Mirror
             RegisterClientMessages();
 
             if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + uri);
-            networkAddress = uri.Host;
 
             _ = client.ConnectAsync(uri);
 
@@ -547,7 +536,6 @@ namespace Mirror
                 authenticator.OnClientAuthenticated += OnClientAuthenticated;
             }
 
-            networkAddress = "localhost";
             server.ActivateHostScene();
             RegisterClientMessages();
 

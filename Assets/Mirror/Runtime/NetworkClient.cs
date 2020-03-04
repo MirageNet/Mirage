@@ -36,12 +36,6 @@ namespace Mirror
         internal ConnectState connectState = ConnectState.None;
 
         /// <summary>
-        /// The IP address of the server that this client is connected to.
-        /// <para>This will be empty if the client has not connected yet.</para>
-        /// </summary>
-        public string serverIp => connection.address;
-
-        /// <summary>
         /// active is true while a client is connecting/connected
         /// (= while the network is active)
         /// </summary>
@@ -63,19 +57,25 @@ namespace Mirror
         public bool isLocalClient => hostServer != null;
 
         /// <summary>
+        /// The IP address of the server that this client is connected to.
+        /// </summary>
+        [Tooltip("Network Address where client should connect to the server.")]
+        public string serverIp = "localhost";
+
+        /// <summary>
         /// Connect client to a NetworkServer instance.
         /// </summary>
         /// <param name="address"></param>
-        public async Task ConnectAsync(string address)
+        public async Task ConnectAsync()
         {
-            if (LogFilter.Debug) Debug.Log("Client Connect: " + address);
+            if (LogFilter.Debug) Debug.Log("Client Connect: " + serverIp);
 
             RegisterSystemHandlers(false);
             Transport.activeTransport.enabled = true;
             InitializeTransportHandlers();
 
             connectState = ConnectState.Connecting;
-            await Transport.activeTransport.ClientConnectAsync(address);
+            await Transport.activeTransport.ClientConnectAsync(serverIp);
 
             // setup all the handlers
             connection = new NetworkConnectionToServer();
@@ -90,6 +90,7 @@ namespace Mirror
         public async Task ConnectAsync(Uri uri)
         {
             if (LogFilter.Debug) Debug.Log("Client Connect: " + uri);
+            serverIp = uri.Host;
 
             RegisterSystemHandlers(false);
             Transport.activeTransport.enabled = true;
@@ -107,6 +108,7 @@ namespace Mirror
         internal void ConnectHost(NetworkServer server)
         {
             if (LogFilter.Debug) Debug.Log("Client Connect Host to Server");
+            serverIp = "localhost";
 
             RegisterSystemHandlers(true);
 
