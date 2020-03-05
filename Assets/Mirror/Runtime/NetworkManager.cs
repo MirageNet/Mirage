@@ -358,7 +358,7 @@ namespace Mirror
         /// This starts a network client. It uses the networkAddress and networkPort properties as the address to connect to.
         /// <para>This makes the newly created client connect to the server immediately.</para>
         /// </summary>
-        public void StartClient()
+        public void StartClient(string serverIp)
         {
             mode = NetworkManagerMode.ClientOnly;
 
@@ -377,14 +377,14 @@ namespace Mirror
 
             RegisterClientMessages();
 
-            if (string.IsNullOrEmpty(client.serverIp))
+            if (string.IsNullOrEmpty(serverIp))
             {
-                Debug.LogError("Must set the Network Address field in the manager");
+                Debug.LogError("serverIp shouldn't be empty");
                 return;
             }
-            if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + client.serverIp);
+            if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + serverIp);
 
-            _ = client.ConnectAsync();
+            _ = client.ConnectAsync(serverIp);
 
             OnStartClient();
         }

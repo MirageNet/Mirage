@@ -57,16 +57,10 @@ namespace Mirror
         public bool isLocalClient => hostServer != null;
 
         /// <summary>
-        /// The IP address of the server that this client is connected to.
-        /// </summary>
-        [Tooltip("Network Address where client should connect to the server.")]
-        public string serverIp = "localhost";
-
-        /// <summary>
         /// Connect client to a NetworkServer instance.
         /// </summary>
         /// <param name="address"></param>
-        public async Task ConnectAsync()
+        public async Task ConnectAsync(string serverIp)
         {
             if (LogFilter.Debug) Debug.Log("Client Connect: " + serverIp);
 
@@ -90,7 +84,6 @@ namespace Mirror
         public async Task ConnectAsync(Uri uri)
         {
             if (LogFilter.Debug) Debug.Log("Client Connect: " + uri);
-            serverIp = uri.Host;
 
             RegisterSystemHandlers(false);
             Transport.activeTransport.enabled = true;
@@ -108,7 +101,6 @@ namespace Mirror
         internal void ConnectHost(NetworkServer server)
         {
             if (LogFilter.Debug) Debug.Log("Client Connect Host to Server");
-            serverIp = "localhost";
 
             RegisterSystemHandlers(true);
 

@@ -32,6 +32,11 @@ namespace Mirror
         /// </summary>
         public int offsetY;
 
+        /// <summary>
+        /// The IP address we're connecting to.
+        /// </summary>
+        public string serverIp = "localhost";
+
         void Awake()
         {
             manager = GetComponent<NetworkManager>();
@@ -60,9 +65,9 @@ namespace Mirror
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button("LAN Client"))
                     {
-                        manager.StartClient();
+                        manager.StartClient(serverIp);
                     }
-                    manager.client.serverIp = GUILayout.TextField(manager.client.serverIp);
+                    serverIp = GUILayout.TextField(serverIp);
                     GUILayout.EndHorizontal();
 
                     // LAN Server Only
@@ -79,7 +84,7 @@ namespace Mirror
                 else
                 {
                     // Connecting
-                    GUILayout.Label("Connecting to " + manager.client.serverIp + "..");
+                    GUILayout.Label("Connecting to " + serverIp + "..");
                     if (GUILayout.Button("Cancel Connection Attempt"))
                     {
                         manager.StopClient();
@@ -95,7 +100,7 @@ namespace Mirror
                 }
                 if (manager.client.isConnected)
                 {
-                    GUILayout.Label("Client: address=" + manager.client.serverIp);
+                    GUILayout.Label("Client: address=" + serverIp);
                 }
             }
 
