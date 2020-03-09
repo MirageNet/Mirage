@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 namespace Mirror
 {
@@ -12,7 +13,8 @@ namespace Mirror
     [HelpURL("https://mirror-networking.com/docs/Components/NetworkRoomPlayer.html")]
     public class NetworkRoomPlayer : NetworkBehaviour
     {
-        public NetworkRoomManager roomManager;
+        [FormerlySerializedAs("roomManager")]
+        public NetworkRoomManager RoomManager;
 
         /// <summary>
         /// This flag controls whether the default UI is shown for the room player.
@@ -40,17 +42,18 @@ namespace Mirror
         /// </summary>
         public void Start()
         {
-            roomManager = FindObjectOfType<NetworkRoomManager>();
-            if (roomManager != null)
+            RoomManager = FindObjectOfType<NetworkRoomManager>();
+
+            if (RoomManager != null)
             {
                 // NetworkRoomPlayer object must be set to DontDestroyOnLoad along with NetworkRoomManager
                 // in server and all clients, otherwise it will be respawned in the game scene which would
                 // have undesireable effects.
-                if (roomManager.dontDestroyOnLoad)
+                if (RoomManager.dontDestroyOnLoad)
                     DontDestroyOnLoad(gameObject);
 
-                roomManager.RoomSlots.Add(this);
-                roomManager.RecalculateRoomPlayerIndices();
+                RoomManager.RoomSlots.Add(this);
+                RoomManager.RecalculateRoomPlayerIndices();
 
                 OnClientEnterRoom();
             }
@@ -63,12 +66,12 @@ namespace Mirror
         #region Commands
 
         [Command]
-        public void CmdChangeReadyState(bool readyState)
+        private void CmdChangeReadyState(bool readyState)
         {
             ReadyToBegin = readyState;
-            if (roomManager != null)
+            if (RoomManager != null)
             {
-                roomManager.ReadyStatusChanged();
+                RoomManager.ReadyStatusChanged();
             }
         }
 
@@ -76,7 +79,7 @@ namespace Mirror
 
         #region SyncVar Hooks
 
-        void ReadyStateChanged(bool oldReadyState, bool newReadyState)
+        private void ReadyStateChanged(bool oldReadyState, bool newReadyState)
         {
             OnClientReady(newReadyState);
         }
@@ -101,7 +104,7 @@ namespace Mirror
         /// <para>This function is called when the a client player calls SendReadyToBeginMessage() or SendNotReadyToBeginMessage().</para>
         /// </summary>
         /// <param name="readyState">Whether the player is ready or not.</param>
-        public virtual void OnClientReady(bool readyState) { }
+        protected virtual void OnClientReady(bool readyState) { }
 
         #endregion
 
@@ -115,50 +118,47 @@ namespace Mirror
             if (!ShowRoomGUI)
                 return;
 
-            if (roomManager)
+            if (!RoomManager)
+                return;
+
+            if (!RoomManager.showRoomGUI)
+                return;
+
+            if (SceneManager.GetActiveScene().name != RoomManager.RoomScene)
+                return;
+
+            GUILayout.BeginArea(new Rect(20f + (Index * 100), 200f, 90f, 130f));
+
+            GUILayout.Label(text: $"Player [{Index + 1}]");
+
+            GUILayout.Label(ReadyToBegin ? "Ready" : "Not Ready");
+
+            if (((isServer && Index > 0) || isServerOnly) && GUILayout.Button("REMOVE"))
             {
-                if (!roomManager.showRoomGUI)
-                    return;
+                // This button only shows on the Host for all players other than the Host
+                // Host and Players can't remove themselves (stop the client instead)
+                // Host can kick a Player this way.
+                GetComponent<NetworkIdentity>().connectionToClient.Disconnect();
+            }
 
-                if (SceneManager.GetActiveScene().name != roomManager.RoomScene)
-                    return;
+            GUILayout.EndArea();
 
-                GUILayout.BeginArea(new Rect(20f + (Index * 100), 200f, 90f, 130f));
-
-                GUILayout.Label($"Player [{Index + 1}]");
+            if (client.active && isLocalPlayer)
+            {
+                GUILayout.BeginArea(new Rect(20f, 300f, 120f, 20f));
 
                 if (ReadyToBegin)
-                    GUILayout.Label("Ready");
-                else
-                    GUILayout.Label("Not Ready");
-
-                if (((isServer && Index > 0) || isServerOnly) && GUILayout.Button("REMOVE"))
                 {
-                    // This button only shows on the Host for all players other than the Host
-                    // Host and Players can't remove themselves (stop the client instead)
-                    // Host can kick a Player this way.
-                    GetComponent<NetworkIdentity>().connectionToClient.Disconnect();
+                    if (GUILayout.Button("Cancel"))
+                        CmdChangeReadyState(false);
+                }
+                else
+                {
+                    if (GUILayout.Button("Ready"))
+                        CmdChangeReadyState(true);
                 }
 
                 GUILayout.EndArea();
-
-                if (client.active && isLocalPlayer)
-                {
-                    GUILayout.BeginArea(new Rect(20f, 300f, 120f, 20f));
-
-                    if (ReadyToBegin)
-                    {
-                        if (GUILayout.Button("Cancel"))
-                            CmdChangeReadyState(false);
-                    }
-                    else
-                    {
-                        if (GUILayout.Button("Ready"))
-                            CmdChangeReadyState(true);
-                    }
-
-                    GUILayout.EndArea();
-                }
             }
         }
 
