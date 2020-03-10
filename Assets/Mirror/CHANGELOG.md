@@ -1,3 +1,19 @@
+## [15.0.7](https://github.com/MirrorNG/MirrorNG/compare/15.0.6-master...15.0.7-master) (2020-03-10)
+
+
+### Bug Fixes
+
+* Use big endian for packet size ([1ddcbec](https://github.com/MirrorNG/MirrorNG/commit/1ddcbec93509e14169bddbb2a38a7cf0d53776e4))
+
+## [15.0.6](https://github.com/MirrorNG/MirrorNG/compare/15.0.5-master...15.0.6-master) (2020-03-09)
+
+
+### Bug Fixes
+
+* compilation issues ([22bf925](https://github.com/MirrorNG/MirrorNG/commit/22bf925f1ebf018b9ea33df22294fb9205574fa5))
+* NetworkBehaviour.SyncVarGameObjectEqual made protected again so that Weaver finds it again ([165a1dd](https://github.com/MirrorNG/MirrorNG/commit/165a1dd94cd1a7bebc3365c4f40f968f500043a5))
+* NetworkBehaviour.SyncVarNetworkIdentityEqual made protected again so that Weaver finds it again ([20a2d09](https://github.com/MirrorNG/MirrorNG/commit/20a2d09d07ab2c47a204e5d583b538a92f72231e))
+
 ## [15.0.5](https://github.com/MirrorNG/MirrorNG/compare/15.0.4-master...15.0.5-master) (2020-03-08)
 
 
