@@ -7,51 +7,53 @@ namespace Mirror.Weaver
 {
     public static class SyncVarProcessor
     {
-        const int SyncVarLimit = 64; // ulong = 64 bytes
+        private const int SYNC_VAR_LIMIT = 64; // ulong = 64 bytes
 
         // returns false for error, not for no-hook-exists
         public static bool CheckForHookFunction(TypeDefinition td, FieldDefinition syncVar, out MethodDefinition foundMethod)
         {
             foundMethod = null;
+
             foreach (CustomAttribute ca in syncVar.CustomAttributes)
             {
-                if (ca.AttributeType.FullName == Weaver.SyncVarType.FullName)
-                {
-                    foreach (CustomAttributeNamedArgument customField in ca.Fields)
-                    {
-                        if (customField.Name == "hook")
-                        {
-                            string hookFunctionName = customField.Argument.Value as string;
+                if (ca.AttributeType.FullName != Weaver.SyncVarType.FullName)
+                    continue;
 
-                            foreach (MethodDefinition m in td.Methods)
+                foreach (CustomAttributeNamedArgument customField in ca.Fields)
+                {
+                    if (customField.Name != "hook")
+                        continue;
+
+                    string hookFunctionName = customField.Argument.Value as string;
+
+                    foreach (MethodDefinition m in td.Methods)
+                    {
+                        if (m.Name != hookFunctionName)
+                            continue;
+
+                        if (m.Parameters.Count == 2)
+                        {
+                            if (m.Parameters[0].ParameterType != syncVar.FieldType ||
+                                m.Parameters[1].ParameterType != syncVar.FieldType)
                             {
-                                if (m.Name == hookFunctionName)
-                                {
-                                    if (m.Parameters.Count == 2)
-                                    {
-                                        if (m.Parameters[0].ParameterType != syncVar.FieldType ||
-                                            m.Parameters[1].ParameterType != syncVar.FieldType)
-                                        {
-                                            Weaver.Error($"{m} should have signature:\npublic void {hookFunctionName}({syncVar.FieldType} oldValue, {syncVar.FieldType} newValue) {{ }}");
-                                            return false;
-                                        }
-                                        foundMethod = m;
-                                        return true;
-                                    }
-                                    Weaver.Error($"{m} should have signature:\npublic void {hookFunctionName}({syncVar.FieldType} oldValue, {syncVar.FieldType} newValue) {{ }}");
-                                    return false;
-                                }
+                                Weaver.Error($"{m} should have signature:\npublic void {hookFunctionName}({syncVar.FieldType} oldValue, {syncVar.FieldType} newValue) {{ }}");
+                                return false;
                             }
-                            Weaver.Error($"No hook implementation found for {syncVar}. Add this method to your class:\npublic void {hookFunctionName}({syncVar.FieldType} oldValue, {syncVar.FieldType} newValue) {{ }}");
-                            return false;
+                            foundMethod = m;
+                            return true;
                         }
+                        Weaver.Error($"{m} should have signature:\npublic void {hookFunctionName}({syncVar.FieldType} oldValue, {syncVar.FieldType} newValue) {{ }}");
+                        return false;
                     }
+                    Weaver.Error($"No hook implementation found for {syncVar}. Add this method to your class:\npublic void {hookFunctionName}({syncVar.FieldType} oldValue, {syncVar.FieldType} newValue) {{ }}");
+                    return false;
                 }
             }
+
             return true;
         }
 
-        public static MethodDefinition ProcessSyncVarGet(FieldDefinition fd, string originalName, FieldDefinition netFieldId)
+        private static MethodDefinition ProcessSyncVarGet(FieldDefinition fd, string originalName, FieldDefinition netFieldId)
         {
             //Create the get method
             MethodDefinition get = new MethodDefinition(
@@ -101,7 +103,7 @@ namespace Mirror.Weaver
             return get;
         }
 
-        public static MethodDefinition ProcessSyncVarSet(TypeDefinition td, FieldDefinition fd, string originalName, long dirtyBit, FieldDefinition netFieldId)
+        private static MethodDefinition ProcessSyncVarSet(TypeDefinition td, FieldDefinition fd, string originalName, long dirtyBit, FieldDefinition netFieldId)
         {
             //Create the set method
             MethodDefinition set = new MethodDefinition("set_Network" + originalName, MethodAttributes.Public |
@@ -242,7 +244,7 @@ namespace Mirror.Weaver
             return set;
         }
 
-        public static void ProcessSyncVar(TypeDefinition td, FieldDefinition fd, Dictionary<FieldDefinition, FieldDefinition> syncVarNetIds, long dirtyBit)
+        private static void ProcessSyncVar(TypeDefinition td, FieldDefinition fd, Dictionary<FieldDefinition, FieldDefinition> syncVarNetIds, long dirtyBit)
         {
             string originalName = fd.Name;
             Weaver.DLog(td, "Sync Var " + fd.Name + " " + fd.FieldType + " " + Weaver.gameObjectType);
@@ -302,60 +304,58 @@ namespace Mirror.Weaver
             {
                 foreach (CustomAttribute ca in fd.CustomAttributes)
                 {
-                    if (ca.AttributeType.FullName == Weaver.SyncVarType.FullName)
-                    {
-                        TypeDefinition resolvedField = fd.FieldType.Resolve();
+                    if (ca.AttributeType.FullName != Weaver.SyncVarType.FullName)
+                        continue;
 
-                        if ((fd.Attributes & FieldAttributes.Static) != 0)
-                        {
-                            Weaver.Error($"{fd} cannot be static");
-                            return;
-                        }
+                    TypeDefinition resolvedField = fd.FieldType.Resolve();
 
-                        if (fd.FieldType.IsArray)
-                        {
-                            Weaver.Error($"{fd} has invalid type. Use SyncLists instead of arrays");
-                            return;
-                        }
-
-                        if (SyncObjectInitializer.ImplementsSyncObject(fd.FieldType))
-                        {
-                            Log.Warning($"{fd} has [SyncVar] attribute. SyncLists should not be marked with SyncVar");
-                            break;
-                        }
-
-                        syncVars.Add(fd);
-
-                        ProcessSyncVar(td, fd, syncVarNetIds, 1L << dirtyBitCounter);
-                        dirtyBitCounter += 1;
-                        numSyncVars += 1;
-
-                        if (dirtyBitCounter == SyncVarLimit)
-                        {
-                            Weaver.Error($"{td} has too many SyncVars. Consider refactoring your class into multiple components");
-                            return;
-                        }
-                        break;
-                    }
-                }
-
-                if (fd.FieldType.Resolve().ImplementsInterface(Weaver.SyncObjectType))
-                {
-                    if (fd.IsStatic)
+                    if ((fd.Attributes & FieldAttributes.Static) != 0)
                     {
                         Weaver.Error($"{fd} cannot be static");
                         return;
                     }
 
-                    syncObjects.Add(fd);
+                    if (fd.FieldType.IsArray)
+                    {
+                        Weaver.Error($"{fd} has invalid type. Use SyncLists instead of arrays");
+                        return;
+                    }
+
+                    if (SyncObjectInitializer.ImplementsSyncObject(fd.FieldType))
+                    {
+                        Log.Warning($"{fd} has [SyncVar] attribute. SyncLists should not be marked with SyncVar");
+                        break;
+                    }
+
+                    syncVars.Add(fd);
+
+                    ProcessSyncVar(td, fd, syncVarNetIds, 1L << dirtyBitCounter);
+                    dirtyBitCounter += 1;
+                    numSyncVars += 1;
+
+                    if (dirtyBitCounter == SYNC_VAR_LIMIT)
+                    {
+                        Weaver.Error($"{td} has too many SyncVars. Consider refactoring your class into multiple components");
+                        return;
+                    }
+                    break;
                 }
+
+                if (!fd.FieldType.Resolve().ImplementsInterface(Weaver.SyncObjectType))
+                    continue;
+
+                if (fd.IsStatic)
+                {
+                    Weaver.Error($"{fd} cannot be static");
+                    return;
+                }
+
+                syncObjects.Add(fd);
             }
 
             // add all the new SyncVar __netId fields
             foreach (FieldDefinition fd in syncVarNetIds.Values)
-            {
                 td.Fields.Add(fd);
-            }
 
             Weaver.SetNumSyncVars(td.FullName, numSyncVars);
         }
