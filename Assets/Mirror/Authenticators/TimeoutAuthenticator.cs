@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Mirror.Authenticators
 {
@@ -12,8 +13,9 @@ namespace Mirror.Authenticators
     {
         public NetworkAuthenticator Authenticator;
 
+        [FormerlySerializedAs("Timeout")]
         [Range(0, 600), Tooltip("Timeout to auto-disconnect in seconds. Set to 0 for no timeout.")]
-        public float Timeout = 60;
+        [SerializeField] private float timeout = 60;
 
         public void Awake()
         {
@@ -25,7 +27,7 @@ namespace Mirror.Authenticators
         {
             Authenticator.OnClientAuthenticate(conn);
 
-            if (Timeout > 0)
+            if (timeout > 0)
                 StartCoroutine(BeginAuthentication(conn));
         }
 
@@ -33,16 +35,16 @@ namespace Mirror.Authenticators
         {
             Authenticator.OnServerAuthenticate(conn);
 
-            if (Timeout > 0)
+            if (timeout > 0)
                 StartCoroutine(BeginAuthentication(conn));
         }
 
         private IEnumerator BeginAuthentication(NetworkConnection conn)
         {
             if (LogFilter.Debug)
-                Debug.Log($"Authentication countdown started {conn} {Timeout}");
+                Debug.Log($"Authentication countdown started {conn} {timeout}");
 
-            yield return new WaitForSecondsRealtime(Timeout);
+            yield return new WaitForSecondsRealtime(timeout);
 
             if (conn.isAuthenticated)
                 yield break;
