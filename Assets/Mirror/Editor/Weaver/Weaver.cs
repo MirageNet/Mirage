@@ -170,36 +170,36 @@ namespace Mirror.Weaver
 
         internal static void ConfirmGeneratedCodeClass()
         {
-            if (WeaveLists.generateContainerClass == null)
-            {
-                WeaveLists.generateContainerClass = new TypeDefinition("Mirror", "GeneratedNetworkCode",
-                        TypeAttributes.BeforeFieldInit | TypeAttributes.Class | TypeAttributes.AnsiClass | TypeAttributes.Public | TypeAttributes.AutoClass,
-                        objectType);
+            if (WeaveLists.generateContainerClass != null)
+                return;
 
-                const MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
-                MethodDefinition method = new MethodDefinition(".ctor", methodAttributes, voidType);
-                method.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-                method.Body.Instructions.Add(Instruction.Create(OpCodes.Call, Resolvers.ResolveMethod(objectType, CurrentAssembly, ".ctor")));
-                method.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            WeaveLists.generateContainerClass = new TypeDefinition("Mirror", "GeneratedNetworkCode",
+                TypeAttributes.BeforeFieldInit | TypeAttributes.Class | TypeAttributes.AnsiClass | TypeAttributes.Public | TypeAttributes.AutoClass,
+                objectType);
 
-                WeaveLists.generateContainerClass.Methods.Add(method);
-            }
+            const MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
+            MethodDefinition method = new MethodDefinition(".ctor", methodAttributes, voidType);
+            method.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            method.Body.Instructions.Add(Instruction.Create(OpCodes.Call, Resolvers.ResolveMethod(objectType, CurrentAssembly, ".ctor")));
+            method.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+
+            WeaveLists.generateContainerClass.Methods.Add(method);
         }
 
         static bool ProcessNetworkBehaviourType(TypeDefinition td)
         {
-            if (!NetworkBehaviourProcessor.WasProcessed(td))
-            {
-                DLog(td, "Found NetworkBehaviour " + td.FullName);
+            if (NetworkBehaviourProcessor.WasProcessed(td))
+                return false;
 
-                NetworkBehaviourProcessor proc = new NetworkBehaviourProcessor(td);
-                proc.Process();
-                return true;
-            }
-            return false;
+            DLog(td, "Found NetworkBehaviour " + td.FullName);
+
+            NetworkBehaviourProcessor proc = new NetworkBehaviourProcessor(td);
+            proc.Process();
+
+            return true;
         }
 
-        static void SetupUnityTypes()
+        private static void SetupUnityTypes()
         {
             gameObjectType = UnityAssembly.MainModule.GetType("UnityEngine.GameObject");
             transformType = UnityAssembly.MainModule.GetType("UnityEngine.Transform");
@@ -215,7 +215,7 @@ namespace Mirror.Weaver
             SyncObjectType = NetAssembly.MainModule.GetType("Mirror.ISyncObject");
         }
 
-        static void SetupCorLib()
+        private static void SetupCorLib()
         {
             AssemblyNameReference name = AssemblyNameReference.Parse("mscorlib");
             ReaderParameters parameters = new ReaderParameters
@@ -225,7 +225,7 @@ namespace Mirror.Weaver
             CorLibModule = CurrentAssembly.MainModule.AssemblyResolver.Resolve(name, parameters).MainModule;
         }
 
-        static TypeReference ImportCorLibType(string fullName)
+        private static TypeReference ImportCorLibType(string fullName)
         {
             TypeDefinition type = CorLibModule.GetType(fullName) ?? CorLibModule.ExportedTypes.First(t => t.FullName == fullName).Resolve();
             if (type != null)
@@ -236,7 +236,7 @@ namespace Mirror.Weaver
             return null;
         }
 
-        static void SetupTargetTypes()
+        private static void SetupTargetTypes()
         {
             // system types
             SetupCorLib();
@@ -352,15 +352,13 @@ namespace Mirror.Weaver
             return variable.Module.Name == assembly;
         }
 
-        static void CheckMonoBehaviour(TypeDefinition td)
+        private static void CheckMonoBehaviour(TypeDefinition td)
         {
             if (td.IsDerivedFrom(MonoBehaviourType))
-            {
                 MonoBehaviourProcessor.Process(td);
-            }
         }
 
-        static bool CheckNetworkBehaviour(TypeDefinition td)
+        private static bool CheckNetworkBehaviour(TypeDefinition td)
         {
             if (!td.IsClass)
                 return false;
@@ -374,14 +372,15 @@ namespace Mirror.Weaver
             // process this and base classes from parent to child order
 
             List<TypeDefinition> behaviourClasses = new List<TypeDefinition>();
-
             TypeDefinition parent = td;
+
             while (parent != null)
             {
                 if (parent.FullName == NetworkBehaviourType.FullName)
                 {
                     break;
                 }
+
                 try
                 {
                     behaviourClasses.Insert(0, parent);
@@ -395,14 +394,16 @@ namespace Mirror.Weaver
             }
 
             bool didWork = false;
+
             foreach (TypeDefinition behaviour in behaviourClasses)
             {
                 didWork |= ProcessNetworkBehaviourType(behaviour);
             }
+
             return didWork;
         }
 
-        static bool CheckMessageBase(TypeDefinition td)
+        private static bool CheckMessageBase(TypeDefinition td)
         {
             if (!td.IsClass)
                 return false;
@@ -424,7 +425,7 @@ namespace Mirror.Weaver
             return didWork;
         }
 
-        static bool CheckSyncList(TypeDefinition td)
+        private static bool CheckSyncList(TypeDefinition td)
         {
             if (!td.IsClass)
                 return false;
@@ -433,6 +434,7 @@ namespace Mirror.Weaver
 
             // are ANY parent classes SyncListStruct
             TypeReference parent = td.BaseType;
+
             while (parent != null)
             {
                 if (parent.FullName.StartsWith(SyncListType.FullName, StringComparison.Ordinal))
@@ -441,18 +443,21 @@ namespace Mirror.Weaver
                     didWork = true;
                     break;
                 }
+
                 if (parent.FullName.StartsWith(SyncSetType.FullName, StringComparison.Ordinal))
                 {
                     SyncListProcessor.Process(td);
                     didWork = true;
                     break;
                 }
+
                 if (parent.FullName.StartsWith(SyncDictionaryType.FullName, StringComparison.Ordinal))
                 {
                     SyncDictionaryProcessor.Process(td);
                     didWork = true;
                     break;
                 }
+
                 try
                 {
                     parent = parent.Resolve().BaseType;
@@ -473,7 +478,7 @@ namespace Mirror.Weaver
             return didWork;
         }
 
-        static bool Weave(string assName, IEnumerable<string> dependencies, string unityEngineDLLPath, string mirrorNetDLLPath, string outputDir)
+        private static bool Weave(string assName, IEnumerable<string> dependencies, string unityEngineDLLPath, string mirrorNetDLLPath, string outputDir)
         {
             using (DefaultAssemblyResolver asmResolver = new DefaultAssemblyResolver())
             using (CurrentAssembly = AssemblyDefinition.ReadAssembly(assName, new ReaderParameters { ReadWrite = true, ReadSymbols = true, AssemblyResolver = asmResolver }))
@@ -538,35 +543,36 @@ namespace Mirror.Weaver
                     Console.WriteLine("Pass: " + pass + " took " + watch.ElapsedMilliseconds + " milliseconds");
                 }
 
-                if (didWork)
+                if (!didWork)
+                    return true;
+
+                // this must be done for ALL code, not just NetworkBehaviours
+                try
                 {
-                    // this must be done for ALL code, not just NetworkBehaviours
-                    try
-                    {
-                        PropertySiteProcessor.ProcessSitesModule(CurrentAssembly.MainModule);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error("ProcessPropertySites exception: " + e);
-                        return false;
-                    }
+                    PropertySiteProcessor.ProcessSitesModule(CurrentAssembly.MainModule);
+                }
+                catch (Exception e)
+                {
+                    Log.Error("ProcessPropertySites exception: " + e);
+                    return false;
+                }
 
-                    if (WeavingFailed)
-                    {
-                        //Log.Error("Failed phase II.");
-                        return false;
-                    }
+                if (WeavingFailed)
+                {
+                    //Log.Error("Failed phase II.");
+                    return false;
+                }
 
-                    // write to outputDir if specified, otherwise perform in-place write
-                    WriterParameters writeParams = new WriterParameters { WriteSymbols = true };
-                    if (outputDir != null)
-                    {
-                        CurrentAssembly.Write(Helpers.DestinationFileFor(outputDir, assName), writeParams);
-                    }
-                    else
-                    {
-                        CurrentAssembly.Write(writeParams);
-                    }
+                // write to outputDir if specified, otherwise perform in-place write
+                WriterParameters writeParams = new WriterParameters { WriteSymbols = true };
+
+                if (outputDir != null)
+                {
+                    CurrentAssembly.Write(Helpers.DestinationFileFor(outputDir, assName), writeParams);
+                }
+                else
+                {
+                    CurrentAssembly.Write(writeParams);
                 }
             }
 
@@ -585,12 +591,10 @@ namespace Mirror.Weaver
 
                 try
                 {
-                    foreach (string ass in assemblies)
+                    foreach (string assembly in assemblies)
                     {
-                        if (!Weave(ass, dependencies, unityEngineDLLPath, mirrorNetDLLPath, outputDir))
-                        {
+                        if (!Weave(assembly, dependencies, unityEngineDLLPath, mirrorNetDLLPath, outputDir))
                             return false;
-                        }
                     }
                 }
                 catch (Exception e)
@@ -599,6 +603,7 @@ namespace Mirror.Weaver
                     return false;
                 }
             }
+            
             return true;
         }
     }
