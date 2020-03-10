@@ -603,7 +603,7 @@ namespace Mirror.Weaver
                     return false;
                 }
             }
-            
+
             return true;
         }
     }
