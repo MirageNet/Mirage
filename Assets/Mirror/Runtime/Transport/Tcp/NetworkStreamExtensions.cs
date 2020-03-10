@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace Mirror.Tcp
 {
-
     public static class NetworkStreamExtensions
     {
         // helper function to read EXACTLY 'n' bytes
@@ -22,6 +21,7 @@ namespace Mirror.Tcp
             while (offset < size)
             {
                 int received;
+
                 if (stream is NetworkStream && ((NetworkStream)stream).DataAvailable)
                 {
                     // read available data immediatelly
@@ -49,7 +49,7 @@ namespace Mirror.Tcp
             return data;
         }
 
-        public static void WriteInt(this Stream stream, int length)
+        private static void WriteInt(this Stream stream, int length)
         {
             stream.WriteByte((byte)(length >> 24));
             stream.WriteByte((byte)(length >> 16));
