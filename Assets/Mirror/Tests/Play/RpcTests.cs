@@ -86,7 +86,7 @@ namespace Mirror.Tests
         public void TargetRpc()
         {
 
-            component.TargetRpcTest(manager.server.localConnection, 1, "hello");
+            component.TargetRpcTest(manager.Server.localConnection, 1, "hello");
             // process spawn message from server
             client.Update();
 

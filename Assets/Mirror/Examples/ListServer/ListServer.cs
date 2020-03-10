@@ -80,19 +80,19 @@ namespace Mirror.Examples.ListServer
             InvokeRepeating(nameof(Tick), 0, 1);
         }
 
-        bool IsConnecting() => manager.client.active && !ClientScene.ready;
-        bool FullyConnected() => manager.client.active && ClientScene.ready;
+        bool IsConnecting() => manager.Client.active && !ClientScene.ready;
+        bool FullyConnected() => manager.Client.active && ClientScene.ready;
 
         // should we use the client to listen connection?
         bool UseClientToListen()
         {
-            return !NetworkManager.isHeadless && !manager.server.active && !FullyConnected();
+            return !NetworkManager.IsHeadless && !manager.Server.active && !FullyConnected();
         }
 
         // should we use the game server to listen connection?
         bool UseGameServerToListen()
         {
-            return manager.server.active;
+            return manager.Server.active;
         }
 
         void Tick()
@@ -107,8 +107,8 @@ namespace Mirror.Examples.ListServer
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
 
             // create message
-            writer.Write((ushort)manager.server.connections.Count);
-            writer.Write((ushort)manager.maxConnections);
+            writer.Write((ushort)manager.Server.connections.Count);
+            writer.Write((ushort)manager.MaxConnections);
             byte[] titleBytes = Encoding.UTF8.GetBytes(gameServerTitle);
             writer.Write((ushort)titleBytes.Length);
             writer.Write(titleBytes);
@@ -242,7 +242,7 @@ namespace Mirror.Examples.ListServer
         void OnUI()
         {
             // only show while client not connected and server not started
-            if (!manager.isNetworkActive || IsConnecting())
+            if (!manager.IsNetworkActive || IsConnecting())
             {
                 mainPanel.SetActive(true);
 

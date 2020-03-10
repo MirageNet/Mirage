@@ -24,12 +24,12 @@ namespace Mirror.Tests
         {
             networkManagerGo = new GameObject();
             manager = networkManagerGo.AddComponent<NetworkManager>();
-            manager.client = networkManagerGo.GetComponent<NetworkClient>();
-            manager.server = networkManagerGo.GetComponent<NetworkServer>();
-            server = manager.server;
-            client = manager.client;
+            manager.Client = networkManagerGo.GetComponent<NetworkClient>();
+            manager.Server = networkManagerGo.GetComponent<NetworkServer>();
+            server = manager.Server;
+            client = manager.Client;
 
-            manager.autoCreatePlayer = false;
+            manager.AutoCreatePlayer = false;
 
             manager.StartHost();
 

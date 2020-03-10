@@ -19,12 +19,12 @@ namespace Mirror.Tests
         {
             networkManagerGo = new GameObject();
             manager = networkManagerGo.AddComponent<NetworkManager>();
-            manager.client = networkManagerGo.GetComponent<NetworkClient>();
-            manager.server = networkManagerGo.GetComponent<NetworkServer>();
-            server = manager.server;
-            client = manager.client;
+            manager.Client = networkManagerGo.GetComponent<NetworkClient>();
+            manager.Server = networkManagerGo.GetComponent<NetworkServer>();
+            server = manager.Server;
+            client = manager.Client;
 
-            manager.autoCreatePlayer = false;
+            manager.AutoCreatePlayer = false;
             
             manager.StartServer();
         }
@@ -33,10 +33,10 @@ namespace Mirror.Tests
         {
             clientNetworkManagerGo = new GameObject();
             clientManager = clientNetworkManagerGo.AddComponent<NetworkManager>();
-            clientManager.client = clientNetworkManagerGo.GetComponent<NetworkClient>();
-            clientManager.server = clientNetworkManagerGo.GetComponent<NetworkServer>();
-            server2 = clientManager.server;
-            client2 = clientManager.client;
+            clientManager.Client = clientNetworkManagerGo.GetComponent<NetworkClient>();
+            clientManager.Server = clientNetworkManagerGo.GetComponent<NetworkServer>();
+            server2 = clientManager.Server;
+            client2 = clientManager.Client;
 
             clientManager.StartClient(hostname);
         }
@@ -45,10 +45,10 @@ namespace Mirror.Tests
         {
             clientNetworkManagerGo = new GameObject();
             clientManager = clientNetworkManagerGo.AddComponent<NetworkManager>();
-            clientManager.client = clientNetworkManagerGo.GetComponent<NetworkClient>();
-            clientManager.server = clientNetworkManagerGo.GetComponent<NetworkServer>();
-            server2 = clientManager.server;
-            client2 = clientManager.client;
+            clientManager.Client = clientNetworkManagerGo.GetComponent<NetworkClient>();
+            clientManager.Server = clientNetworkManagerGo.GetComponent<NetworkServer>();
+            server2 = clientManager.Server;
+            client2 = clientManager.Client;
 
             clientManager.StartClient(uri);
         }

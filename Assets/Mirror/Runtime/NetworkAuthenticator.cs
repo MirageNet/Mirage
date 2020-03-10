@@ -74,9 +74,9 @@ namespace Mirror
 #if UNITY_EDITOR
             // automatically assign NetworkManager field if we add this to NetworkManager
             NetworkManager manager = GetComponent<NetworkManager>();
-            if (manager != null && manager.authenticator == null)
+            if (manager != null && manager.Authenticator == null)
             {
-                manager.authenticator = this;
+                manager.Authenticator = this;
                 UnityEditor.Undo.RecordObject(gameObject, "Assigned NetworkManager authenticator");
             }
 #endif
