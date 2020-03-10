@@ -54,7 +54,7 @@ namespace Mirror.Weaver
             // process all references to replaced members with properties
 
             if (md.Name == ".cctor" ||
-                md.Name == NetworkBehaviourProcessor.ProcessedFunctionName ||
+                md.Name == NetworkBehaviourProcessor.PROCESSED_FUNCTION_NAME ||
                 md.Name.StartsWith("InvokeSyn"))
                 return;
 

@@ -11,7 +11,7 @@ namespace Mirror.Weaver
             ProcessMethods(td);
         }
 
-        static void ProcessSyncVars(TypeDefinition td)
+        private static void ProcessSyncVars(TypeDefinition td)
         {
             // find syncvars
             foreach (FieldDefinition fd in td.Fields)
@@ -31,7 +31,7 @@ namespace Mirror.Weaver
             }
         }
 
-        static void ProcessMethods(TypeDefinition td)
+        private static void ProcessMethods(TypeDefinition td)
         {
             // find command and RPC functions
             foreach (MethodDefinition md in td.Methods)
@@ -53,9 +53,7 @@ namespace Mirror.Weaver
                         Weaver.Error($"[TargetRpc] {md} must be declared inside a NetworkBehaviour");
                     }
 
-                    string attributeName = ca.Constructor.DeclaringType.ToString();
-
-                    switch (attributeName)
+                    switch (ca.Constructor.DeclaringType.ToString())
                     {
                         case "Mirror.ServerAttribute":
                             Weaver.Error($"[Server] {md} must be declared inside a NetworkBehaviour");
