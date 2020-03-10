@@ -15,7 +15,7 @@ namespace Mirror.Authenticators
         public string Username;
         public string Password;
 
-        public class AuthRequestMessage : MessageBase
+        private class AuthRequestMessage : MessageBase
         {
             // use whatever credentials make sense for your game
             // for example, you might want to pass the accessToken if using oauth
@@ -23,7 +23,7 @@ namespace Mirror.Authenticators
             public string AuthPassword;
         }
 
-        public class AuthResponseMessage : MessageBase
+        private class AuthResponseMessage : MessageBase
         {
             public byte Code;
             public string Message;
@@ -57,7 +57,7 @@ namespace Mirror.Authenticators
             conn.Send(authRequestMessage);
         }
 
-        public void OnAuthRequestMessage(NetworkConnectionToClient conn, AuthRequestMessage msg)
+        private void OnAuthRequestMessage(NetworkConnectionToClient conn, AuthRequestMessage msg)
         {
             Debug.LogFormat("Authentication Request: {0} {1}", msg.AuthUsername, msg.AuthPassword);
 
