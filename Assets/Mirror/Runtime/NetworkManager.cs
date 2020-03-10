@@ -664,9 +664,9 @@ namespace Mirror
             // * if not in Editor (it doesn't work in the Editor)
             // * if not in Host mode
 #if !UNITY_EDITOR
-            if (!client.active && isHeadless)
+            if (!Client.active && IsHeadless)
             {
-                Application.targetFrameRate = serverTickRate;
+                Application.targetFrameRate = ServerTickRate;
                 Debug.Log("Server Tick Rate set to: " + Application.targetFrameRate + " Hz.");
             }
 #endif

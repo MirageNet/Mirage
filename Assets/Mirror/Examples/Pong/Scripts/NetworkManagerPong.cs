@@ -8,9 +8,9 @@ namespace Mirror.Examples.Pong
     [AddComponentMenu("")]
     public class NetworkManagerPong : NetworkManager
     {
-        public Transform leftRacketSpawn;
-        public Transform rightRacketSpawn;
-        GameObject ball;
+        [SerializeField] private Transform leftRacketSpawn = null;
+        [SerializeField] private Transform rightRacketSpawn = null;
+        private GameObject ball;
 
         protected override void OnServerAddPlayer(NetworkConnection conn)
         {
@@ -20,11 +20,11 @@ namespace Mirror.Examples.Pong
             Server.AddPlayerForConnection(conn, player);
 
             // spawn ball if two players
-            if (NumberOfActivePlayers == 2)
-            {
-                ball = Instantiate(SpawnPrefabs.Find(prefab => prefab.name == "Ball"));
-                Server.Spawn(ball);
-            }
+            if (NumberOfActivePlayers != 2)
+                return;
+
+            ball = Instantiate(SpawnPrefabs.Find(prefab => prefab.name == "Ball"));
+            Server.Spawn(ball);
         }
 
         protected override void OnServerDisconnect(NetworkConnection conn)
