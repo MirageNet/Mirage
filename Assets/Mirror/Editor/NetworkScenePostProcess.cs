@@ -65,7 +65,7 @@ namespace Mirror
 #if UNITY_2018_2_OR_NEWER
                 GameObject prefabGameObject = PrefabUtility.GetCorrespondingObjectFromSource(identity.gameObject) as GameObject;
 #else
-                GameObject prefabGO = PrefabUtility.GetPrefabParent(identity.gameObject) as GameObject;
+                GameObject prefabGameObject = PrefabUtility.GetPrefabParent(identity.gameObject) as GameObject;
 #endif
                 if (!prefabGameObject)
                     continue;
