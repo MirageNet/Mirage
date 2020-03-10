@@ -14,21 +14,21 @@ namespace Mirror.Weaver
 
             foreach (Assembly unityAsm in CompilationPipeline.GetAssemblies())
             {
-                if (unityAsm.name != CurrentAssembly.Name.Name)
+                if (unityAsm.name == CurrentAssembly.Name.Name)
+                    continue;
+
+                try
                 {
-                    try
+                    using (DefaultAssemblyResolver asmResolver = new DefaultAssemblyResolver())
+                    using (AssemblyDefinition assembly = AssemblyDefinition.ReadAssembly(unityAsm.outputPath, new ReaderParameters { ReadWrite = false, ReadSymbols = false, AssemblyResolver = asmResolver }))
                     {
-                        using (DefaultAssemblyResolver asmResolver = new DefaultAssemblyResolver())
-                        using (AssemblyDefinition assembly = AssemblyDefinition.ReadAssembly(unityAsm.outputPath, new ReaderParameters { ReadWrite = false, ReadSymbols = false, AssemblyResolver = asmResolver }))
-                        {
-                            ProcessAssemblyClasses(CurrentAssembly, assembly);
-                        }
+                        ProcessAssemblyClasses(CurrentAssembly, assembly);
                     }
-                    catch (FileNotFoundException)
-                    {
-                        // During first import,  this gets called before some assemblies
-                        // are built,  just skip them
-                    }
+                }
+                catch (FileNotFoundException)
+                {
+                    // During first import,  this gets called before some assemblies
+                    // are built,  just skip them
                 }
             }
 
