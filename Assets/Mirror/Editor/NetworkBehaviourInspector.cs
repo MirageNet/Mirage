@@ -148,11 +148,11 @@ namespace Mirror
                 {
                     EditorGUI.indentLevel += 1;
 
-                    if (field.GetValue(serializedObject.targetObject) is IEnumerable synclist)
+                    if (field.GetValue(serializedObject.targetObject) is IEnumerable syncList)
                     {
                         int index = 0;
 
-                        IEnumerator enu = synclist.GetEnumerator();
+                        IEnumerator enu = syncList.GetEnumerator();
 
                         while (enu.MoveNext())
                         {
@@ -165,6 +165,7 @@ namespace Mirror
 
                     EditorGUI.indentLevel -= 1;
                 }
+
                 syncListIndex += 1;
             }
 
@@ -173,7 +174,7 @@ namespace Mirror
             if (!syncsAnything)
                 return;
 
-            var networkBehaviour = target as NetworkBehaviour;
+            NetworkBehaviour networkBehaviour = target as NetworkBehaviour;
 
             if (networkBehaviour == null)
                 return;
@@ -181,8 +182,7 @@ namespace Mirror
             EditorGUILayout.LabelField("Sync Settings", EditorStyles.boldLabel);
 
             // syncMode
-            serializedObject.FindProperty("syncMode").enumValueIndex = (int)(SyncMode)
-                EditorGUILayout.EnumPopup("Network Sync Mode", networkBehaviour.syncMode);
+            serializedObject.FindProperty("syncMode").enumValueIndex = (int)(SyncMode)EditorGUILayout.EnumPopup("Network Sync Mode", networkBehaviour.syncMode);
 
             // syncInterval
             // [0,2] should be enough. anything >2s is too laggy anyway.
