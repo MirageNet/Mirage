@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Mirror.Discovery
 {
@@ -9,66 +10,67 @@ namespace Mirror.Discovery
     [RequireComponent(typeof(NetworkDiscovery))]
     public class NetworkDiscoveryHUD : MonoBehaviour
     {
-        readonly Dictionary<long, ServerResponse> discoveredServers = new Dictionary<long, ServerResponse>();
-        Vector2 scrollViewPos = Vector2.zero;
+        private readonly Dictionary<long, ServerResponse> discoveredServers = new Dictionary<long, ServerResponse>();
+        private Vector2 scrollViewPos = Vector2.zero;
 
-        public NetworkDiscovery networkDiscovery;
+        [FormerlySerializedAs("networkDiscovery")]
+        public NetworkDiscovery NetworkDiscovery;
 
-        public NetworkManager networkManager;
+        [FormerlySerializedAs("networkManager")]
+        public NetworkManager NetworkManager;
 
 #if UNITY_EDITOR
-        void OnValidate()
+        private void OnValidate()
         {
-            if (networkDiscovery == null)
+            if (NetworkDiscovery == null)
             {
-                networkDiscovery = GetComponent<NetworkDiscovery>();
-                UnityEditor.Events.UnityEventTools.AddPersistentListener(networkDiscovery.OnServerFound, OnDiscoveredServer);
-                UnityEditor.Undo.RecordObjects(new Object[] { this, networkDiscovery }, "Set NetworkDiscovery");
+                NetworkDiscovery = GetComponent<NetworkDiscovery>();
+                UnityEditor.Events.UnityEventTools.AddPersistentListener(NetworkDiscovery.OnServerFound, OnDiscoveredServer);
+                UnityEditor.Undo.RecordObjects(new Object[] { this, NetworkDiscovery }, "Set NetworkDiscovery");
             }
 
-            if (networkManager == null)
-            {
-                networkManager = GetComponent<NetworkManager>();
-                UnityEditor.Undo.RecordObjects(new Object[] { this }, "Set NetworkManager");
+            if (NetworkManager != null)
+                return;
 
-            }
+            NetworkManager = GetComponent<NetworkManager>();
+            UnityEditor.Undo.RecordObjects(new Object[] { this }, "Set NetworkManager");
         }
 #endif
 
-        void OnGUI()
+        private void OnGUI()
         {
-            if (networkManager.server.active || networkManager.client.active)
+            if (NetworkManager.server.active || NetworkManager.client.active)
                 return;
 
-            if (!networkManager.client.isConnected && !networkManager.server.active && !networkManager.client.active)
+            if (!NetworkManager.client.isConnected && !NetworkManager.server.active && !NetworkManager.client.active)
                 DrawGUI();
         }
 
-        void DrawGUI()
+        private void DrawGUI()
         {
             GUILayout.BeginHorizontal();
 
             if (GUILayout.Button("Find Servers"))
             {
                 discoveredServers.Clear();
-                networkDiscovery.StartDiscovery();
+                NetworkDiscovery.StartDiscovery();
             }
 
             // LAN Host
             if (GUILayout.Button("Start Host"))
             {
                 discoveredServers.Clear();
-                networkManager.StartHost();
-                networkDiscovery.AdvertiseServer();
+                NetworkManager.StartHost();
+                NetworkDiscovery.AdvertiseServer();
             }
 
             // Dedicated server
             if (GUILayout.Button("Start Server"))
             {
                 discoveredServers.Clear();
-                networkManager.StartServer();
+                NetworkManager.StartServer();
 
-                networkDiscovery.AdvertiseServer();
+                NetworkDiscovery.AdvertiseServer();
             }
 
             GUILayout.EndHorizontal();
@@ -87,14 +89,15 @@ namespace Mirror.Discovery
             GUILayout.EndScrollView();
         }
 
-        void Connect(ServerResponse info)
+        private void Connect(ServerResponse info)
         {
-            networkManager.StartClient(info.uri);
+            NetworkManager.StartClient(info.uri);
         }
 
         public void OnDiscoveredServer(ServerResponse info)
         {
-            // Note that you can check the versioning to decide if you can connect to the server or not using this method
+            // Note that you can check the versioning to decide if you can connect to the server or not using this
+            // method
             discoveredServers[info.serverId] = info;
         }
     }

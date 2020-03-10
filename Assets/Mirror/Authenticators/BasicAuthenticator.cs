@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Serialization;
 
 namespace Mirror.Authenticators
 {
@@ -7,7 +8,8 @@ namespace Mirror.Authenticators
     public class BasicAuthenticator : NetworkAuthenticator
     {
         [Header("Custom Properties")]
-        public NetworkManager manager;
+        [FormerlySerializedAs("manager")]
+        public NetworkManager Manager;
 
         // set these in the inspector
         public string Username;
@@ -30,13 +32,13 @@ namespace Mirror.Authenticators
         public override void OnStartServer()
         {
             // register a handler for the authentication request we expect from client
-            manager.server.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage, false);
+            Manager.server.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage, false);
         }
 
         public override void OnStartClient()
         {
             // register a handler for the authentication response we expect from server
-            manager.client.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage, false);
+            Manager.client.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage, false);
         }
 
         public override void OnServerAuthenticate(NetworkConnectionToClient conn)
@@ -93,13 +95,13 @@ namespace Mirror.Authenticators
             }
         }
 
-        public IEnumerator DelayedDisconnect(NetworkConnection conn, float waitTime)
+        private IEnumerator DelayedDisconnect(NetworkConnection conn, float waitTime)
         {
             yield return new WaitForSeconds(waitTime);
             conn.Disconnect();
         }
 
-        public void OnAuthResponseMessage(NetworkConnectionToServer conn, AuthResponseMessage msg)
+        private void OnAuthResponseMessage(NetworkConnectionToServer conn, AuthResponseMessage msg)
         {
             if (msg.Code == 100)
             {

@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Net;
 using System;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace Mirror.Discovery
 {
@@ -14,10 +15,11 @@ namespace Mirror.Discovery
     {
         #region Server
 
-        public long ServerId { get; private set; }
+        private long ServerId { get; set; }
 
         [Tooltip("Transport to be advertised during discovery")]
-        public Transport transport;
+        [FormerlySerializedAs("transport")]
+        public Transport Transport;
 
         [Tooltip("Invoked when a server is found")]
         public ServerFoundUnityEvent OnServerFound;
@@ -29,8 +31,8 @@ namespace Mirror.Discovery
             // active transport gets initialized in awake
             // so make sure we set it here in Start()  (after awakes)
             // Or just let the user assign it in the inspector
-            if (transport == null)
-                transport = Transport.activeTransport;
+            if (Transport == null)
+                Transport = Transport.activeTransport;
 
             base.Start();
         }
@@ -59,12 +61,12 @@ namespace Mirror.Discovery
                 return new ServerResponse
                 {
                     serverId = ServerId,
-                    uri = transport.ServerUri()
+                    uri = Transport.ServerUri()
                 };
             }
             catch (NotImplementedException)
             {
-                Debug.LogError($"Transport {transport} does not support network discovery");
+                Debug.LogError($"Transport {Transport} does not support network discovery");
                 throw;
             }
         }
