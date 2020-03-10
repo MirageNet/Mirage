@@ -11,7 +11,7 @@ namespace Mirror.Tcp
         public event Action Disconnected;
         public event Action<Exception> ReceivedError;
 
-        public TcpClient client;
+        private TcpClient client;
 
         public bool NoDelay = true;
 
@@ -65,6 +65,7 @@ namespace Mirror.Tcp
                     while (true)
                     {
                         byte[] data = await ReadMessageAsync(networkStream);
+
                         if (data == null)
                             break;
 
@@ -78,7 +79,7 @@ namespace Mirror.Tcp
                             ReceivedError?.Invoke(exception);
                         }
                     }
-                    
+
                 }
             }
             catch (ObjectDisposedException)
@@ -95,14 +96,14 @@ namespace Mirror.Tcp
         public void Disconnect()
         {
             // only if started
-            if (client != null)
-            {
-                // close client
-                client.Close();
-                client = null;
-                Connecting = false;
-                Connected = false;
-            }
+            if (client == null)
+                return;
+
+            // close client
+            client.Close();
+            client = null;
+            Connecting = false;
+            Connected = false;
         }
 
         // send the data or throw exception
@@ -132,11 +133,8 @@ namespace Mirror.Tcp
             {
                 return $"TCP connected to {client.Client.RemoteEndPoint}";
             }
-            if (Connecting)
-            {
-                return $"TCP connecting to {client.Client.RemoteEndPoint}";
-            }
-            return "";
+
+            return Connecting ? $"TCP connecting to {client.Client.RemoteEndPoint}" : "";
         }
     }
 

@@ -19,8 +19,7 @@ namespace Mirror.Tcp
 
         public T GetObject()
         {
-            if (_objects.TryTake(out T item)) return item;
-            return _objectGenerator();
+            return _objects.TryTake(out T item) ? item : _objectGenerator();
         }
 
         public void PutObject(T item)

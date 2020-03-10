@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Net;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Mirror.Tcp
 {
@@ -11,12 +12,13 @@ namespace Mirror.Tcp
     {
         // scheme used by this transport
         // "tcp4" means tcp with 4 bytes header, network byte order
-        public const string Scheme = "tcp4";
+        private const string SCHEME = "tcp4";
 
-        protected Client client = new Client();
-        protected Server server = new Server();
+        private readonly Client client = new Client();
+        private readonly Server server = new Server();
 
-        public int port = 7777;
+        [FormerlySerializedAs("port")]
+        public int Port = 7777;
 
         [Tooltip("Nagle Algorithm can be disabled by enabling NoDelay")]
         public bool NoDelay = true;
@@ -49,23 +51,23 @@ namespace Mirror.Tcp
             _ = client.SendAsync(segment);
             return true;
         }
-        public override void ClientDisconnect() 
+        public override void ClientDisconnect()
         {
-            client.Disconnect(); 
+            client.Disconnect();
         }
 
         // server
-        public override bool ServerActive() { return server.Active; }
+        public override bool ServerActive() { return server.IsActive; }
         public override void ServerStart()
         {
-            _ = server.ListenAsync(port);
+            _ = server.ListenAsync(Port);
         }
 
         public override bool ServerSend(List<int> connectionIds, int channelId, ArraySegment<byte> segment)
         {
-            foreach (int connectionId in connectionIds)            
-                server.Send(connectionId, segment);
-            
+            foreach (int connectionId in connectionIds)
+                Server.Send(connectionId, segment);
+
             return true;
         }
 
@@ -109,36 +111,33 @@ namespace Mirror.Tcp
         public override string ToString()
         {
             if (client.Connecting || client.Connected)
-            {
                 return client.ToString();
-            }
-            if (server.Active)
-            {
-                return server.ToString();
-            }
-            return "";
+
+            return server.IsActive ? server.ToString() : "";
         }
 
         public override Uri ServerUri()
         {
             UriBuilder builder = new UriBuilder();
-            builder.Scheme = Scheme;
+            builder.Scheme = SCHEME;
             builder.Host = Dns.GetHostName();
-            builder.Port = port;
+            builder.Port = Port;
+
             return builder.Uri;
         }
 
         public override Task ClientConnectAsync(string address)
         {
-            return client.ConnectAsync(address, port);
+            return client.ConnectAsync(address, Port);
         }
 
         public override Task ClientConnectAsync(Uri uri)
         {
-            if (uri.Scheme != Scheme)
-                throw new ArgumentException($"Invalid url {uri}, use {Scheme}://host:port instead", nameof(uri));
+            if (uri.Scheme != SCHEME)
+                throw new ArgumentException($"Invalid url {uri}, use {SCHEME}://host:port instead", nameof(uri));
 
-            int serverPort = uri.IsDefaultPort ? port : uri.Port;
+            int serverPort = uri.IsDefaultPort ? Port : uri.Port;
+
             return client.ConnectAsync(uri.Host, serverPort);
         }
     }

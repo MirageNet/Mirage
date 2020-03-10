@@ -19,7 +19,7 @@ namespace Mirror.Tcp
         // -> 4 bytes because some people may want to send messages larger than
         //    64K bytes
 
-        protected static int BytesToInt(byte[] bytes)
+        private static int BytesToInt(byte[] bytes)
         {
             return
                 bytes[3] |
@@ -29,7 +29,7 @@ namespace Mirror.Tcp
 
         }
 
-        protected static void WriteSize(int length, byte[] bytes)
+        private static void WriteSize(int length, byte[] bytes)
         {
             bytes[3] = (byte)length;
             bytes[2] = (byte)(length >> 8);

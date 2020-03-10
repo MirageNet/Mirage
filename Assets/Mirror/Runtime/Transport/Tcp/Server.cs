@@ -17,20 +17,20 @@ namespace Mirror.Tcp
         public event Action<int, Exception> ReceivedError;
 
         // listener
-        TcpListener listener;
+        private TcpListener listener;
 
         // clients with <connectionId, TcpClient>
-        readonly Dictionary<int, TcpClient> clients = new Dictionary<int, TcpClient>();
+        private readonly Dictionary<int, TcpClient> clients = new Dictionary<int, TcpClient>();
 
-        static readonly ObjectPool<MemoryStream> bufferPool = new ObjectPool<MemoryStream>(() => new MemoryStream());
+        private static readonly ObjectPool<MemoryStream> bufferPool = new ObjectPool<MemoryStream>(() => new MemoryStream());
 
-        static readonly Dictionary<int, MemoryStream> dirtyBuffers = new Dictionary<int, MemoryStream>();
+        private static readonly Dictionary<int, MemoryStream> dirtyBuffers = new Dictionary<int, MemoryStream>();
 
         public bool NoDelay = true;
 
         // connectionId counter
         // 0 so first time we increment it will return 1
-        int counter;
+        private int counter;
 
         // public next id function in case someone needs to reserve an id
         // (e.g. if hostMode should always have 0 connection and external
@@ -46,15 +46,13 @@ namespace Mirror.Tcp
             // -> it's hardly worth using 'bool Next(out id)' for that case
             //    because it's just so unlikely.
             if (id == int.MaxValue)
-            {
-                throw new Exception("connection id limit reached: " + id);
-            }
+                throw new Exception("Connection id limit reached: " + id);
 
             return id;
         }
 
         // check if the server is running
-        public bool Active
+        public bool IsActive
         {
             get { return listener != null; }
         }
@@ -180,7 +178,8 @@ namespace Mirror.Tcp
         public void Stop()
         {
             // only if started
-            if (!Active) return;
+            if (!IsActive)
+                return;
 
             Debug.Log("Server: stopping...");
 
@@ -202,7 +201,7 @@ namespace Mirror.Tcp
         }
 
         // queue up all the messages
-        public void Send(int connectionId, ArraySegment<byte> data)
+        public static void Send(int connectionId, ArraySegment<byte> data)
         {
             if (!dirtyBuffers.TryGetValue(connectionId, out MemoryStream buffer))
             {
@@ -252,7 +251,7 @@ namespace Mirror.Tcp
                         // because all the WriteAsync wake up at once and throw exceptions
 
                         // by hiding inside this if, I ensure that we only report the first error
-                        // all other errors are swallowed.  
+                        // all other errors are swallowed.
                         // this prevents a log storm that freezes the server for several seconds
                         ReceivedError?.Invoke(connectionId, exception);
                     }
@@ -297,11 +296,7 @@ namespace Mirror.Tcp
 
         public override string ToString()
         {
-            if (Active)
-            {
-                return $"TCP server {listener.LocalEndpoint}";
-            }
-            return "";
+            return IsActive ? $"TCP server {listener.LocalEndpoint}" : "";
         }
     }
 }

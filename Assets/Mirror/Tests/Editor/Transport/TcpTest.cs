@@ -314,7 +314,7 @@ namespace Mirror.Tests
                 Debug.Log($"Got server conncted {id}");
 
                 // Send some data to the client
-                server.Send(id, new ArraySegment<byte>(utf8.GetBytes("Hello world")));
+                Server.Send(id, new ArraySegment<byte>(utf8.GetBytes("Hello world")));
                 server.Flush();
 
                 byte[] data = await GetClientData(client);
@@ -463,9 +463,9 @@ namespace Mirror.Tests
                 for (int i = 0; i < 10; ++i)
                 {
                     Task task = sv.ListenAsync(Port + 1);
-                    Assert.That(sv.Active, Is.True);
+                    Assert.That(sv.IsActive, Is.True);
                     sv.Stop();
-                    Assert.That(sv.Active, Is.False);
+                    Assert.That(sv.IsActive, Is.False);
                     await task;
                 }
             });
