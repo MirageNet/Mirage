@@ -6,20 +6,23 @@ namespace Mirror.Examples.Tanks
     public class Tank : NetworkBehaviour
     {
         [Header("Components")]
-        public NavMeshAgent agent;
-        public Animator animator;
+        [SerializeField] private NavMeshAgent agent = null;
+        [SerializeField] private Animator animator = null;
 
         [Header("Movement")]
-        public float rotationSpeed = 100;
+        [SerializeField] private float rotationSpeed = 100f;
 
         [Header("Firing")]
-        public KeyCode shootKey = KeyCode.Space;
-        public GameObject projectilePrefab;
-        public Transform projectileMount;
+        [SerializeField] private KeyCode shootKey = KeyCode.Space;
+        [SerializeField] private GameObject projectilePrefab = null;
+        [SerializeField] private Transform projectileMount = null;
+
+        private static readonly int moving = Animator.StringToHash("Moving");
+        private static readonly int shoot = Animator.StringToHash("Shoot");
 
         void Update()
         {
-            // movement for local player
+            // movement only for local player
             if (!isLocalPlayer)
                 return;
 
@@ -30,8 +33,8 @@ namespace Mirror.Examples.Tanks
             // move
             float vertical = Input.GetAxis("Vertical");
             Vector3 forward = transform.TransformDirection(Vector3.forward);
-            agent.velocity = forward * Mathf.Max(vertical, 0) * agent.speed;
-            animator.SetBool("Moving", agent.velocity != Vector3.zero);
+            agent.velocity = forward * (Mathf.Max(vertical, 0) * agent.speed);
+            animator.SetBool(moving, agent.velocity != Vector3.zero);
 
             // shoot
             if (Input.GetKeyDown(shootKey))
@@ -53,7 +56,7 @@ namespace Mirror.Examples.Tanks
         [ClientRpc]
         void RpcOnFire()
         {
-            animator.SetTrigger("Shoot");
+            animator.SetTrigger(shoot);
         }
     }
 }
