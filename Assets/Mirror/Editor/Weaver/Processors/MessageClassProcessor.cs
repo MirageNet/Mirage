@@ -9,7 +9,7 @@ namespace Mirror.Weaver
     static class MessageClassProcessor
     {
 
-        static bool IsEmptyDefault(this MethodBody body)
+        private static bool IsEmptyDefault(this MethodBody body)
         {
             return body.Instructions.All(instruction => instruction.OpCode == OpCodes.Nop || instruction.OpCode == OpCodes.Ret);
         }
@@ -19,28 +19,25 @@ namespace Mirror.Weaver
             Weaver.DLog(td, "MessageClassProcessor Start");
 
             GenerateSerialization(td);
+
             if (Weaver.WeavingFailed)
-            {
                 return;
-            }
 
             GenerateDeSerialization(td);
             Weaver.DLog(td, "MessageClassProcessor Done");
         }
 
-        static void GenerateSerialization(TypeDefinition td)
+        private static void GenerateSerialization(TypeDefinition td)
         {
             Weaver.DLog(td, "  GenerateSerialization");
+
             MethodDefinition existingMethod = td.Methods.FirstOrDefault(md => md.Name == "Serialize");
+
             if (existingMethod != null && !existingMethod.Body.IsEmptyDefault())
-            {
                 return;
-            }
 
             if (td.Fields.Count == 0)
-            {
                 return;
-            }
 
             // check for self-referencing types
             foreach (FieldDefinition field in td.Fields)
@@ -60,7 +57,9 @@ namespace Mirror.Weaver
             {
                 serializeFunc.Parameters.Add(new ParameterDefinition("writer", ParameterAttributes.None, Weaver.CurrentAssembly.MainModule.ImportReference(Weaver.NetworkWriterType)));
             }
+
             ILProcessor serWorker = serializeFunc.Body.GetILProcessor();
+
             if (existingMethod != null)
             {
                 serWorker.Body.Instructions.Clear(); //remove default nop&ret from existing empty interface method
@@ -70,6 +69,7 @@ namespace Mirror.Weaver
             {
                 // call base
                 MethodReference baseSerialize = Resolvers.ResolveMethodInParents(td.BaseType, Weaver.CurrentAssembly, "Serialize");
+
                 if (baseSerialize != null)
                 {
                     serWorker.Append(serWorker.Create(OpCodes.Ldarg_0)); // base
@@ -84,6 +84,7 @@ namespace Mirror.Weaver
                     continue;
 
                 MethodReference writeFunc = Writers.GetWriteFunc(field.FieldType);
+
                 if (writeFunc != null)
                 {
                     serWorker.Append(serWorker.Create(OpCodes.Ldarg_1));
@@ -105,7 +106,7 @@ namespace Mirror.Weaver
             }
         }
 
-        static void GenerateDeSerialization(TypeDefinition td)
+        private static void GenerateDeSerialization(TypeDefinition td)
         {
             Weaver.DLog(td, "  GenerateDeserialization");
             MethodDefinition existingMethod = td.Methods.FirstOrDefault(md => md.Name == "Deserialize");
