@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System;
 using System.Threading.Tasks;
+using UnityEngine.Serialization;
 
 // Based on https://github.com/EnlightenedOne/MirrorNetworkDiscovery
 // forked from https://github.com/in0finite/MirrorNetworkDiscovery
@@ -21,39 +22,42 @@ namespace Mirror.Discovery
         where Request : IMessageBase, new()
         where Response : IMessageBase, new()
     {
-        public static bool SupportedOnThisPlatform { get { return Application.platform != RuntimePlatform.WebGLPlayer; } }
+        private static bool SupportedOnThisPlatform
+        {
+            get { return Application.platform != RuntimePlatform.WebGLPlayer; }
+        }
 
         // each game should have a random unique handshake,  this way you can tell if this is the same game or not
         [HideInInspector]
         public long secretHandshake;
 
-        [SerializeField]
         [Tooltip("The UDP port the server will listen for multi-cast messages")]
-        int serverBroadcastListenPort = 47777;
+        [SerializeField] private int serverBroadcastListenPort = 47777;
 
-        [SerializeField]
+        [FormerlySerializedAs("ActiveDiscoveryInterval")]
         [Tooltip("Time in seconds between multi-cast messages")]
         [Range(1, 60)]
-        float ActiveDiscoveryInterval = 3;
+        [SerializeField] float activeDiscoveryInterval = 3f;
 
-        protected UdpClient serverUdpClient = null;
-        protected UdpClient clientUdpClient = null;
+        private UdpClient serverUdpClient = null;
+        private UdpClient clientUdpClient = null;
 
 #if UNITY_EDITOR
-        void OnValidate()
+        private void OnValidate()
         {
-            if (secretHandshake == 0)
-            {
-                secretHandshake = RandomLong();
-                UnityEditor.Undo.RecordObject(this, "Set secret handshake");
-            }
+            if (secretHandshake != 0)
+                return;
+
+            secretHandshake = RandomLong();
+            UnityEditor.Undo.RecordObject(this, "Set secret handshake");
         }
 #endif
 
-        public static long RandomLong()
+        protected static long RandomLong()
         {
             int value1 = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
             int value2 = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+
             return value1 + ((long)value2 << 32);
         }
 
@@ -64,18 +68,16 @@ namespace Mirror.Discovery
         {
             // headless mode? then start advertising
             if (NetworkManager.IsHeadless)
-            {
                 AdvertiseServer();
-            }
         }
 
         // Ensure the ports are cleared no matter when Game/Unity UI exits
-        void OnApplicationQuit()
+        private void OnApplicationQuit()
         {
             Shutdown();
         }
 
-        void Shutdown()
+        private void Shutdown()
         {
             if (serverUdpClient != null)
             {
@@ -131,7 +133,7 @@ namespace Mirror.Discovery
             _ = ServerListenAsync();
         }
 
-        public async Task ServerListenAsync()
+        private async Task ServerListenAsync()
         {
             while (true)
             {
@@ -151,7 +153,7 @@ namespace Mirror.Discovery
             }
         }
 
-        async Task ReceiveRequestAsync(UdpClient udpClient)
+        private async Task ReceiveRequestAsync(UdpClient udpClient)
         {
             // only proceed if there is available data in network buffer, or otherwise Receive() will block
             // average time for UdpClient.Available : 10 us
@@ -254,13 +256,13 @@ namespace Mirror.Discovery
 
             _ = ClientListenAsync();
 
-            InvokeRepeating(nameof(BroadcastDiscoveryRequest), 0, ActiveDiscoveryInterval);
+            InvokeRepeating(nameof(BroadcastDiscoveryRequest), 0, activeDiscoveryInterval);
         }
 
         /// <summary>
         /// Stop Active Discovery
         /// </summary>
-        public void StopDiscovery()
+        private void StopDiscovery()
         {
             Shutdown();
         }
@@ -269,7 +271,7 @@ namespace Mirror.Discovery
         /// Awaits for server response
         /// </summary>
         /// <returns>ClientListenAsync Task</returns>
-        public async Task ClientListenAsync()
+        private async Task ClientListenAsync()
         {
             while (true)
             {
@@ -292,7 +294,7 @@ namespace Mirror.Discovery
         /// <summary>
         /// Sends discovery request from client
         /// </summary>
-        public void BroadcastDiscoveryRequest()
+        private void BroadcastDiscoveryRequest()
         {
             if (clientUdpClient == null)
                 return;
@@ -329,7 +331,7 @@ namespace Mirror.Discovery
         /// <returns>An instance of ServerRequest with data to be broadcasted</returns>
         protected virtual Request GetRequest() => new Request();
 
-        async Task ReceiveGameBroadcastAsync(UdpClient udpClient)
+        private async Task ReceiveGameBroadcastAsync(UdpClient udpClient)
         {
             // only proceed if there is available data in network buffer, or otherwise Receive() will block
             // average time for UdpClient.Available : 10 us
