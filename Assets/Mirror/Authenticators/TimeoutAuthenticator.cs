@@ -32,6 +32,7 @@ namespace Mirror.Authenticators
         public override void OnServerAuthenticate(NetworkConnectionToClient conn)
         {
             Authenticator.OnServerAuthenticate(conn);
+
             if (Timeout > 0)
                 StartCoroutine(BeginAuthentication(conn));
         }
@@ -43,12 +44,13 @@ namespace Mirror.Authenticators
 
             yield return new WaitForSecondsRealtime(Timeout);
 
-            if (!conn.isAuthenticated)
-            {
-                if (LogFilter.Debug) Debug.Log($"Authentication Timeout {conn}");
+            if (conn.isAuthenticated)
+                yield break;
 
-                conn.Disconnect();
-            }
+            if (LogFilter.Debug)
+                Debug.Log($"Authentication Timeout {conn}");
+
+            conn.Disconnect();
         }
     }
 }
