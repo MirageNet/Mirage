@@ -26,10 +26,9 @@ namespace Mirror.Weaver
             Weaver.DLog(td, "SyncObjectProcessor Start item:" + itemType.FullName);
 
             MethodReference writeItemFunc = GenerateSerialization(serializeMethod, td, itemType);
+
             if (Weaver.WeavingFailed)
-            {
                 return;
-            }
 
             MethodReference readItemFunc = GenerateDeserialization(deserializeMethod, td, itemType);
 
@@ -43,6 +42,7 @@ namespace Mirror.Weaver
         static MethodReference GenerateSerialization(string methodName, TypeDefinition td, TypeReference itemType)
         {
             Weaver.DLog(td, "  GenerateSerialization");
+
             foreach (MethodDefinition m in td.Methods)
             {
                 if (m.Name == methodName)
@@ -66,6 +66,7 @@ namespace Mirror.Weaver
             }
 
             MethodReference writeFunc = Writers.GetWriteFunc(itemType);
+
             if (writeFunc != null)
             {
                 serWorker.Append(serWorker.Create(OpCodes.Ldarg_1));
@@ -77,15 +78,18 @@ namespace Mirror.Weaver
                 Weaver.Error($"{td} cannot have item of type {itemType}.  Use a type supported by mirror instead");
                 return null;
             }
+
             serWorker.Append(serWorker.Create(OpCodes.Ret));
 
             td.Methods.Add(serializeFunc);
+
             return serializeFunc;
         }
 
         static MethodReference GenerateDeserialization(string methodName, TypeDefinition td, TypeReference itemType)
         {
             Weaver.DLog(td, "  GenerateDeserialization");
+
             foreach (MethodDefinition m in td.Methods)
             {
                 if (m.Name == methodName)
@@ -103,6 +107,7 @@ namespace Mirror.Weaver
             ILProcessor serWorker = deserializeFunction.Body.GetILProcessor();
 
             MethodReference readerFunc = Readers.GetReadFunc(itemType);
+
             if (readerFunc != null)
             {
                 serWorker.Append(serWorker.Create(OpCodes.Ldarg_1));
@@ -116,6 +121,7 @@ namespace Mirror.Weaver
             }
 
             td.Methods.Add(deserializeFunction);
+
             return deserializeFunction;
         }
     }
