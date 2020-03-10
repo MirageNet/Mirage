@@ -199,19 +199,19 @@ namespace Mirror
 
         private Vector2 GetMaxBehaviourLabelSize()
         {
-            var maxLabelSize = Vector2.zero;
+            Vector2 maxLabelSize = Vector2.zero;
+
             foreach (NetworkBehaviourInfo behaviour in behavioursInfo)
             {
                 Vector2 labelSize = styles.LabelStyle.CalcSize(behaviour.Name);
+
                 if (maxLabelSize.x < labelSize.x)
-                {
                     maxLabelSize.x = labelSize.x;
-                }
+
                 if (maxLabelSize.y < labelSize.y)
-                {
                     maxLabelSize.y = labelSize.y;
-                }
             }
+
             return maxLabelSize;
         }
 
