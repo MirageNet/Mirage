@@ -88,36 +88,21 @@ namespace Mirror.Weaver
 
         private static void InjectServerGuard(TypeDefinition td, MethodDefinition md, bool logWarning)
         {
-            if (!Weaver.IsNetworkBehaviour(td))
-            {
-                Weaver.Error($"[Server] {md} must be declared in a NetworkBehaviour");
-                return;
-            }
-
-            ILProcessor worker = md.Body.GetILProcessor();
-            Instruction top = md.Body.Instructions[0];
-
-            worker.InsertBefore(top, worker.Create(OpCodes.Ldarg_0));
-            worker.InsertBefore(top, worker.Create(OpCodes.Call, Weaver.NetworkBehaviourIsServer));
-            worker.InsertBefore(top, worker.Create(OpCodes.Brtrue, top));
-
-            if (logWarning)
-            {
-                worker.InsertBefore(top, worker.Create(OpCodes.Ldstr, "[Server] function '" + md.FullName + "' called on client"));
-                worker.InsertBefore(top, worker.Create(OpCodes.Call, Weaver.logWarningReference));
-            }
-
-            InjectGuardParameters(md, worker, top);
-            InjectGuardReturnValue(md, worker, top);
-
-            worker.InsertBefore(top, worker.Create(OpCodes.Ret));
+            InjectGuard(td, md, logWarning, Weaver.NetworkBehaviourIsServer);
         }
 
         private static void InjectClientGuard(TypeDefinition td, MethodDefinition md, bool logWarning)
         {
+            InjectGuard(td, md, logWarning, Weaver.NetworkBehaviourIsClient);
+        }
+
+        private static void InjectGuard(TypeDefinition td, MethodDefinition md, bool logWarning, MethodReference mr)
+        {
+            string logPrefix = (mr == Weaver.NetworkBehaviourIsServer) ? "Server" : "Client";
+
             if (!Weaver.IsNetworkBehaviour(td))
             {
-                Weaver.Error($"[Client] {md} must be declared in a NetworkBehaviour");
+                Weaver.Error($"[{logPrefix}] {md} must be declared in a NetworkBehaviour");
                 return;
             }
 
@@ -125,12 +110,12 @@ namespace Mirror.Weaver
             Instruction top = md.Body.Instructions[0];
 
             worker.InsertBefore(top, worker.Create(OpCodes.Ldarg_0));
-            worker.InsertBefore(top, worker.Create(OpCodes.Call, Weaver.NetworkBehaviourIsClient));
+            worker.InsertBefore(top, worker.Create(OpCodes.Call, mr));
             worker.InsertBefore(top, worker.Create(OpCodes.Brtrue, top));
 
             if (logWarning)
             {
-                worker.InsertBefore(top, worker.Create(OpCodes.Ldstr, "[Client] function '" + md.FullName + "' called on server"));
+                worker.InsertBefore(top, worker.Create(OpCodes.Ldstr, $"[{logPrefix}] function '{md.Name}' called on server"));
                 worker.InsertBefore(top, worker.Create(OpCodes.Call, Weaver.logWarningReference));
             }
 
@@ -140,7 +125,7 @@ namespace Mirror.Weaver
             worker.InsertBefore(top, worker.Create(OpCodes.Ret));
         }
 
-        // replaces syncvar write access with the NetworkXYZ.get property calls
+        // replaces syncVar write access with the NetworkXYZ.get property calls
         private static void ProcessInstructionSetterField(MethodDefinition md, Instruction i, FieldDefinition opField)
         {
             // dont replace property call sites in constructors
