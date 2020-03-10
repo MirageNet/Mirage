@@ -1,8 +1,6 @@
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using Mono.CecilX;
 
 namespace Mirror.Weaver
 {
@@ -10,9 +8,10 @@ namespace Mirror.Weaver
     {
         // This code is taken from SerializationWeaver
 
-        public static string UnityEngineDLLDirectoryName()
+        public static string UnityEngineDllDirectoryName()
         {
             string directoryName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
+
             return directoryName?.Replace(@"file:\", "");
         }
 

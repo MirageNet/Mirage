@@ -13,21 +13,22 @@ namespace Mirror.Weaver
 
             // are ANY parent classes of baseClass?
             TypeReference parent = td.BaseType;
+
             while (parent != null)
             {
                 string parentName = parent.FullName;
 
                 // strip generic parameters
                 int index = parentName.IndexOf('<');
+
                 if (index != -1)
-                {
                     parentName = parentName.Substring(0, index);
-                }
 
                 if (parentName == baseClass.FullName)
                 {
                     return true;
                 }
+
                 try
                 {
                     parent = parent.Resolve().BaseType;
@@ -38,6 +39,7 @@ namespace Mirror.Weaver
                     break;
                 }
             }
+
             return false;
         }
 
@@ -48,12 +50,14 @@ namespace Mirror.Weaver
                 if (!field.IsStatic)
                     return field.FieldType;
             }
+
             throw new ArgumentException($"Invalid enum {td.FullName}");
         }
 
         public static bool ImplementsInterface(this TypeDefinition td, TypeReference baseInterface)
         {
             TypeDefinition typedef = td;
+
             while (typedef != null)
             {
                 foreach (InterfaceImplementation iface in typedef.Interfaces)
@@ -82,6 +86,7 @@ namespace Mirror.Weaver
             if ((tr.IsArray && ((ArrayType)tr).ElementType.IsArray) || // jagged array
                 (tr.IsArray && ((ArrayType)tr).Rank > 1)) // multidimensional array
                 return false;
+
             return true;
         }
 
@@ -144,6 +149,5 @@ namespace Mirror.Weaver
             }
             return null;
         }
-
     }
 }
