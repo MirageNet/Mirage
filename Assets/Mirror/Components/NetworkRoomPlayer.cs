@@ -143,23 +143,23 @@ namespace Mirror
 
             GUILayout.EndArea();
 
-            if (client.active && isLocalPlayer)
+            if (!client.active || !isLocalPlayer)
+                return;
+
+            GUILayout.BeginArea(new Rect(20f, 300f, 120f, 20f));
+
+            if (ReadyToBegin)
             {
-                GUILayout.BeginArea(new Rect(20f, 300f, 120f, 20f));
-
-                if (ReadyToBegin)
-                {
-                    if (GUILayout.Button("Cancel"))
-                        CmdChangeReadyState(false);
-                }
-                else
-                {
-                    if (GUILayout.Button("Ready"))
-                        CmdChangeReadyState(true);
-                }
-
-                GUILayout.EndArea();
+                if (GUILayout.Button("Cancel"))
+                    CmdChangeReadyState(false);
             }
+            else
+            {
+                if (GUILayout.Button("Ready"))
+                    CmdChangeReadyState(true);
+            }
+
+            GUILayout.EndArea();
         }
 
         #endregion
