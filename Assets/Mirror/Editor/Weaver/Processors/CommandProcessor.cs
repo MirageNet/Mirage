@@ -1,4 +1,6 @@
 // all the [Command] code from NetworkBehaviourProcessor in one place
+
+using System;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
 
@@ -6,7 +8,7 @@ namespace Mirror.Weaver
 {
     public static class CommandProcessor
     {
-        const string CmdPrefix = "InvokeCmd";
+        private const string CMD_PREFIX = "InvokeCmd";
 
         /*
             // generates code like:
@@ -66,11 +68,9 @@ namespace Mirror.Weaver
                 return null;
 
             string cmdName = md.Name;
-            int index = cmdName.IndexOf(CmdPrefix);
-            if (index > -1)
-            {
-                cmdName = cmdName.Substring(CmdPrefix.Length);
-            }
+
+            if (cmdName.IndexOf(CMD_PREFIX, StringComparison.Ordinal) > -1)
+                cmdName = cmdName.Substring(CMD_PREFIX.Length);
 
             // invoke internal send and return
             cmdWorker.Append(cmdWorker.Create(OpCodes.Ldarg_0)); // load 'base.' to call the SendCommand function with
@@ -101,7 +101,7 @@ namespace Mirror.Weaver
         */
         public static MethodDefinition ProcessCommandInvoke(TypeDefinition td, MethodDefinition md, MethodDefinition cmdCallFunc)
         {
-            MethodDefinition cmd = new MethodDefinition(CmdPrefix + md.Name,
+            MethodDefinition cmd = new MethodDefinition(CMD_PREFIX + md.Name,
                 MethodAttributes.Family | MethodAttributes.Static | MethodAttributes.HideBySig,
                 Weaver.voidType);
 
@@ -130,7 +130,7 @@ namespace Mirror.Weaver
         {
             if (!md.Name.StartsWith("Cmd"))
             {
-                Weaver.Error($"{md} must start with Cmd.  Consider renaming it to Cmd{md.Name}");
+                Weaver.Error($"{md} must start with Cmd. Consider renaming it to Cmd{md.Name}");
                 return false;
             }
 
