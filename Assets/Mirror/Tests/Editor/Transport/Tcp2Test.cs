@@ -70,6 +70,33 @@ namespace Mirror.Tests
         }
 
         [UnityTest]
+        public IEnumerator EndpointAddress()
+        {
+            return RunAsync(async () =>
+            {
+                await transport.ListenAsync();
+                IConnection clientConnection = await transport.ConnectAsync(new Uri("tcp4://localhost:8798"));
+                IConnection serverConnection = await transport.AcceptAsync();
+
+                // should give either IPv4 or IPv6 local address
+                var endPoint = (IPEndPoint)clientConnection.GetEndPointAddress();
+
+                IPAddress ipAddress = endPoint.Address;
+
+                if (ipAddress.IsIPv4MappedToIPv6)
+                {
+                    // mono IsLoopback seems buggy,
+                    // it does not detect loopback with mapped ipv4->ipv6 addresses
+                    // so map it back down to IPv4
+                    ipAddress = ipAddress.MapToIPv4();
+                }
+
+                Assert.That(IPAddress.IsLoopback(ipAddress), "Expected loopback address but got {0}", ipAddress);
+                Assert.That(endPoint.Port, Is.EqualTo(8798));
+            });
+        }
+
+        [UnityTest]
         public IEnumerator ClientToServerMultipleTest()
         {
             return RunAsync(async () =>
