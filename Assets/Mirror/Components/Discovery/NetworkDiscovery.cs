@@ -17,7 +17,7 @@ namespace Mirror.Discovery
         public long ServerId { get; private set; }
 
         [Tooltip("Transport to be advertised during discovery")]
-        public Transport transport;
+        public Transport2 transport;
 
         [Tooltip("Invoked when a server is found")]
         public ServerFoundUnityEvent OnServerFound;
@@ -30,7 +30,9 @@ namespace Mirror.Discovery
             // so make sure we set it here in Start()  (after awakes)
             // Or just let the user assign it in the inspector
             if (transport == null)
-                transport = Transport.activeTransport;
+            {
+                transport = GetComponent<Transport2>();
+            }
 
             base.Start();
         }
