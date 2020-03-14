@@ -1,9 +1,11 @@
 // add this component to the NetworkManager
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,17 +36,21 @@ namespace Mirror.Examples.ListServer
         }
     }
 
-    [RequireComponent(typeof(NetworkManager))]
-    public class ListServer : MonoBehaviour
+    public class ListServers : MonoBehaviour
     {
         [Header("List Server Connection")]
         public NetworkManager manager;
+        public string listServerUrl = "tpc4://127.0.0.1:8888";
+
         public string listServerIp = "127.0.0.1";
         public ushort gameServerToListenPort = 8887;
         public ushort clientToListenPort = 8888;
-        public string gameServerTitle = "Deathmatch";
-        readonly Tcp.Client gameServerToListenConnection = new Tcp.Client();
-        readonly Tcp.Client clientToListenConnection = new Tcp.Client();
+        IConnection clientToListenConnection;
+
+        public Transport2 transport;
+
+        private bool Connecting;
+        private bool Connected;
 
         [Header("UI")]
         public GameObject mainPanel;
@@ -63,90 +69,54 @@ namespace Mirror.Examples.ListServer
         // (use "ip:port" if port is needed)
         readonly Dictionary<string, ServerStatus> list = new Dictionary<string, ServerStatus>();
 
-        void Start()
+        public async Task Start()
         {
+            if (NetworkManager.isHeadless)
+                return;
+
             // examples
             //list["127.0.0.1"] = new ServerStatus("127.0.0.1", "Deathmatch", 3, 10);
             //list["192.168.0.1"] = new ServerStatus("192.168.0.1", "Free for all", 7, 10);
             //list["172.217.22.3"] = new ServerStatus("172.217.22.3", "5vs5", 10, 10);
             //list["172.217.16.142"] = new ServerStatus("172.217.16.142", "Hide & Seek Mod", 0, 10);
 
+            Connecting = true;
 
-            clientToListenConnection.ReceivedData += ParseMessage;
-            // Update once a second. no need to try to reconnect or read data
-            // in each Update call
-            // -> calling it more than 1/second would also cause significantly
-            //    more broadcasts in the list server.
-            InvokeRepeating(nameof(Tick), 0, 1);
+            try
+            {
+
+                clientToListenConnection = await transport.ConnectAsync(new Uri(listServerUrl));
+
+                Connecting = false;
+                Connected = true;
+
+                InvokeRepeating(nameof(Tick), 1f, 1f);
+
+                var buffer = new MemoryStream();
+
+                while (await clientToListenConnection.ReceiveAsync(buffer))
+                {
+                    ParseMessage(buffer.ToArray());
+                    buffer.SetLength(0);
+                }
+            }
+            finally
+            {
+                Connecting = false;
+                Connected = false;
+
+                clientToListenConnection.Disconnect();
+                clientToListenConnection = null;
+            }
         }
 
         bool IsConnecting() => manager.client.active && !ClientScene.ready;
         bool FullyConnected() => manager.client.active && ClientScene.ready;
 
-        // should we use the client to listen connection?
-        bool UseClientToListen()
-        {
-            return !NetworkManager.isHeadless && !manager.server.active && !FullyConnected();
-        }
-
         // should we use the game server to listen connection?
         bool UseGameServerToListen()
         {
             return manager.server.active;
-        }
-
-        void Tick()
-        {
-            TickGameServer();
-            TickClient();
-        }
-
-        // send server status to list server
-        void SendStatus()
-        {
-            BinaryWriter writer = new BinaryWriter(new MemoryStream());
-
-            // create message
-            writer.Write((ushort)manager.server.connections.Count);
-            writer.Write((ushort)manager.server.MaxConnections);
-            byte[] titleBytes = Encoding.UTF8.GetBytes(gameServerTitle);
-            writer.Write((ushort)titleBytes.Length);
-            writer.Write(titleBytes);
-            writer.Flush();
-
-            // list server only allows up to 128 bytes per message
-            if (writer.BaseStream.Position <= 128)
-            {
-                byte[] data = ((MemoryStream)writer.BaseStream).ToArray();
-                // send it
-                _ = gameServerToListenConnection.SendAsync(new System.ArraySegment<byte>(data));
-            }
-            else Debug.LogError("[List Server] List Server will reject messages longer than 128 bytes. Please use a shorter title.");
-        }
-
-        void TickGameServer()
-        {
-            // send server data to listen
-            if (UseGameServerToListen())
-            {
-                // connected yet?
-                if (gameServerToListenConnection.Connected)
-                {
-                    SendStatus();
-                }
-                // otherwise try to connect
-                // (we may have just started the game)
-                else if (!gameServerToListenConnection.Connecting)
-                {
-                    Debug.Log("[List Server] GameServer connecting......");
-                    _ = gameServerToListenConnection.ConnectAsync(listServerIp, gameServerToListenPort);
-                }
-            }
-            // shouldn't use game server, but still using it?
-            else if (gameServerToListenConnection.Connected)
-            {
-                gameServerToListenConnection.Disconnect();
-            }
         }
 
         void ParseMessage(byte[] bytes)
@@ -185,39 +155,23 @@ namespace Mirror.Examples.ListServer
             list[key] = server;
         }
 
-        void TickClient()
+        void Tick()
         {
             // receive client data from listen
-            if (UseClientToListen())
+            // connected yet?
+            if (clientToListenConnection != null)
             {
-                // connected yet?
-                if (clientToListenConnection.Connected)
-                {
 #if !UNITY_WEBGL // Ping isn't known in WebGL builds
-                    // ping again if previous ping finished
-                    foreach (ServerStatus server in list.Values)
-                    {
-                        if (server.ping.isDone)
-                        {
-                            server.lastLatency = server.ping.time;
-                            server.ping = new Ping(server.ip);
-                        }
-                    }
-#endif
-                }
-                // otherwise try to connect
-                // (we may have just joined the menu/disconnect from game server)
-                else if (!clientToListenConnection.Connecting)
+            // ping again if previous ping finished
+                foreach (ServerStatus server in list.Values)
                 {
-                    Debug.Log("[List Server] Client connecting...");
-                    _ = clientToListenConnection.ConnectAsync(listServerIp, clientToListenPort);
+                    if (server.ping.isDone)
+                    {
+                        server.lastLatency = server.ping.time;
+                        server.ping = new Ping(server.ip);
+                    }
                 }
-            }
-            // shouldn't use client, but still using it? (e.g. after joining)
-            else if (clientToListenConnection.Connected)
-            {
-                clientToListenConnection.Disconnect();
-                list.Clear();
+#endif
             }
 
             // refresh UI afterwards
@@ -247,12 +201,12 @@ namespace Mirror.Examples.ListServer
                 mainPanel.SetActive(true);
 
                 // status text
-                if (clientToListenConnection.Connecting)
+                if (Connecting)
                 {
                     //statusText.color = Color.yellow;
                     statusText.text = "Connecting...";
                 }
-                else if (clientToListenConnection.Connected)
+                else if (Connected)
                 {
                     //statusText.color = Color.green;
                     statusText.text = "Connected!";
@@ -320,9 +274,7 @@ namespace Mirror.Examples.ListServer
         // disconnect everything when pressing Stop in the Editor
         void OnApplicationQuit()
         {
-            if (gameServerToListenConnection.Connected)
-                gameServerToListenConnection.Disconnect();
-            if (clientToListenConnection.Connected)
+            if (clientToListenConnection != null)
                 clientToListenConnection.Disconnect();
         }
     }
