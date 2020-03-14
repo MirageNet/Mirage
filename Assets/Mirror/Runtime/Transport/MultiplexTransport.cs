@@ -7,6 +7,7 @@ using UnityEngine;
 namespace Mirror
 {
     // a transport that can listen to multiple underlying transport at the same time
+    [Obsolete("use new Transport2")]
     public class MultiplexTransport : Transport
     {
         public Transport[] transports;

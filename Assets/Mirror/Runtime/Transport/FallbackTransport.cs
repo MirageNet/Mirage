@@ -9,6 +9,7 @@ using UnityEngine;
 namespace Mirror
 {
     [HelpURL("https://mirror-networking.com/docs/Transports/Fallback.html")]
+    [Obsolete("Use new Transport2")]
     public class FallbackTransport : Transport
     {
         public Transport[] transports;

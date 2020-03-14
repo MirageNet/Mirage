@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Mirror.Tcp
 {
+    [Obsolete("use new Transport2")]
     public class TcpTransport : Transport
     {
         // scheme used by this transport
