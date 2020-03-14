@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Mirror.Tests
 {
+    [Obsolete("use new Transport2")]
     public class FallbackTransportTest
     {
 
