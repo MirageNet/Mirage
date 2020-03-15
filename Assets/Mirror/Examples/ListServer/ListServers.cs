@@ -14,7 +14,6 @@ namespace Mirror.Examples.ListServer
     public class ServerStatus
     {
         public string ip;
-        //public ushort port; // <- not all transports use a port. assume default port. feel free to also send a port if needed.
         public string title;
         public ushort players;
         public ushort capacity;
@@ -23,10 +22,9 @@ namespace Mirror.Examples.ListServer
 #if !UNITY_WEBGL // Ping isn't known in WebGL builds
         public Ping ping;
 #endif
-        public ServerStatus(string ip, /*ushort port,*/ string title, ushort players, ushort capacity)
+        public ServerStatus(string ip, string title, ushort players, ushort capacity)
         {
             this.ip = ip;
-            //this.port = port;
             this.title = title;
             this.players = players;
             this.capacity = capacity;
