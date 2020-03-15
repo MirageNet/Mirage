@@ -19,6 +19,13 @@ namespace Mirror.Examples.Basic
         [SyncVar]
         Color playerColor;
 
+        private static int playerCounter = 1;
+
+        private static int GetNextPlayerId()
+        {
+            return playerCounter++;
+        }
+
         // This is updated by UpdateData which is called from OnStartServer via InvokeRepeating
         [SyncVar(hook = nameof(OnPlayerDataChanged))]
         public int playerData;
@@ -36,7 +43,7 @@ namespace Mirror.Examples.Basic
             base.OnStartServer();
 
             // Set SyncVar values
-            playerNo = connectionToClient.connectionId;
+            playerNo = GetNextPlayerId();
             playerColor = Random.ColorHSV(0f, 1f, 0.9f, 0.9f, 1f, 1f);
 
             // Start generating updates
