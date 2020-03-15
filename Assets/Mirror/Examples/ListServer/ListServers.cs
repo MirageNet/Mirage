@@ -127,15 +127,13 @@ namespace Mirror.Examples.ListServer
             byte ipBytesLength = reader.ReadByte();
             byte[] ipBytes = reader.ReadBytes(ipBytesLength);
             string ip = new IPAddress(ipBytes).ToString();
-            //ushort port = reader.ReadUInt16(); <- not all Transports use a port. assume default.
             ushort players = reader.ReadUInt16();
             ushort capacity = reader.ReadUInt16();
             ushort titleLength = reader.ReadUInt16();
             string title = Encoding.UTF8.GetString(reader.ReadBytes(titleLength));
-            //Debug.Log("PARSED: ip=" + ip + /*" port=" + port +*/ " players=" + players + " capacity= " + capacity + " title=" + title);
 
             // build key
-            string key = ip/* + ":" + port*/;
+            string key = ip;
 
             // find existing or create new one
             if (list.TryGetValue(key, out ServerStatus server))
@@ -148,7 +146,7 @@ namespace Mirror.Examples.ListServer
             else
             {
                 // create
-                server = new ServerStatus(ip, /*port,*/ title, players, capacity);
+                server = new ServerStatus(ip, title, players, capacity);
             }
 
             // save
@@ -203,17 +201,14 @@ namespace Mirror.Examples.ListServer
                 // status text
                 if (Connecting)
                 {
-                    //statusText.color = Color.yellow;
                     statusText.text = "Connecting...";
                 }
                 else if (Connected)
                 {
-                    //statusText.color = Color.green;
                     statusText.text = "Connected!";
                 }
                 else
                 {
-                    //statusText.color = Color.gray;
                     statusText.text = "Disconnected";
                 }
 
