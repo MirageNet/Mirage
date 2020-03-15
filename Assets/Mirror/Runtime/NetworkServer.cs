@@ -59,11 +59,11 @@ namespace Mirror
         /// </summary>
         public bool active { get; private set; }
 
-        // cache the Send(connectionIds) list to avoid allocating each time
-        readonly List<int> connectionIdsCache = new List<int>();
-
-
         public readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
+
+        // just a cached memory area where we can collect connections
+        // for broadcasting messages
+        private static readonly List<NetworkConnection> connectionsCache = new List<NetworkConnection>();
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.
@@ -254,8 +254,7 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("Server.SendToReady msgType:" + typeof(T));
 
-            // TODO: cache this
-            var connections = new List<NetworkConnection>();
+            connectionsCache.Clear();
            
             foreach (NetworkConnection connection in identity.observers)
             {
@@ -263,11 +262,11 @@ namespace Mirror
                 bool isOwner = connection == identity.connectionToClient;
                 if ((!isOwner || includeOwner) && connection.isReady)
                 {
-                    connections.Add(connection);
+                    connectionsCache.Add(connection);
                 }
             }
 
-            return NetworkConnection.Send(connections, msg, channelId);
+            return NetworkConnection.Send(connectionsCache, msg, channelId);
         }
 
         /// <summary>
