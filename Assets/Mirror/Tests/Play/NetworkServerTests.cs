@@ -21,6 +21,13 @@ namespace Mirror.Tests
             server.Listen();
         }
 
+        [TearDown]
+        public void ShutdownNetworkServer()
+        {
+            server.Shutdown();
+            GameObject.DestroyImmediate(serverGO);
+        }
+
         [Test]
         public void InitializeTest()
         {
@@ -45,13 +52,6 @@ namespace Mirror.Tests
         {
             server.Shutdown();
             Assert.That(server.active, Is.False);
-        }
-
-        [TearDown]
-        public void ShutdownNetworkServer()
-        {
-            server.Shutdown();
-            GameObject.DestroyImmediate(serverGO);
         }
     }
 }
