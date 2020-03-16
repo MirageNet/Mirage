@@ -156,7 +156,7 @@ namespace Mirror
         // the client. they would be detected as a message. send messages instead.
         protected abstract bool Send(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable);
 
-        public static bool Send<T>(IEnumerable<NetworkConnection> connections, T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
+        public static void Send<T>(IEnumerable<NetworkConnection> connections, T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -164,22 +164,14 @@ namespace Mirror
                 MessagePacker.Pack(msg, writer);
                 var segment = writer.ToArraySegment();
 
-                // filter and then send to all internet connections at once
-                // -> makes code more complicated, but is HIGHLY worth it to
-                //    avoid allocations, allow for multicast, etc.
-                bool result = true;
                 int count = 0;
-
                 foreach (NetworkConnection connection in connections)
                 {
                     connection.Send(segment, channelId);
-
                     count++;
                 }
 
                 NetworkDiagnostics.OnSend(msg, channelId, segment.Count, count);
-
-                return result;
             }
         }
 
