@@ -6,27 +6,27 @@ namespace Mirror.Tests
 {
     public class NetworkServerTests 
     {
-        NetworkServer testServer;
+        NetworkServer server;
         GameObject serverGO;
 
         [SetUp]
         public void SetupNetworkServer()
         {
             serverGO = new GameObject();
-            testServer = serverGO.AddComponent<NetworkServer>();
+            server = serverGO.AddComponent<NetworkServer>();
             serverGO.AddComponent<NetworkClient>();
             Transport transport = serverGO.AddComponent<TcpTransport>();
 
             Transport.activeTransport = transport;
-            testServer.Listen();
+            server.Listen();
         }
 
         [Test]
         public void InitializeTest()
         {
-            Assert.That(testServer.connections.Count == 0);
-            Assert.That(testServer.active);
-            Assert.That(testServer.LocalClientActive, Is.False);
+            Assert.That(server.connections, Is.Empty);
+            Assert.That(server.active);
+            Assert.That(server.LocalClientActive, Is.False);
         }
 
         [Test]
@@ -34,23 +34,23 @@ namespace Mirror.Tests
         {
             var gameObject = new GameObject();
             gameObject.AddComponent<NetworkIdentity>();
-            testServer.Spawn(gameObject);
+            server.Spawn(gameObject);
 
-            Assert.That(gameObject.GetComponent<NetworkIdentity>().server == testServer);
+            Assert.That(gameObject.GetComponent<NetworkIdentity>().server, Is.SameAs(server));
         }
 
        
         [Test]
         public void ShutdownTest()
         {
-            testServer.Shutdown();
-            Assert.That(testServer.active == false);
+            server.Shutdown();
+            Assert.That(server.active, Is.False);
         }
 
         [TearDown]
         public void ShutdownNetworkServer()
         {
-            testServer.Shutdown();
+            server.Shutdown();
             GameObject.DestroyImmediate(serverGO);
         }
     }
