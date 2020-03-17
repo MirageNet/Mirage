@@ -87,10 +87,10 @@ namespace Mirror
         /// </summary>
         internal void DisconnectInternal()
         {
-            // set not ready and handle clientscene disconnect in any case
+            // set not ready and handle client disconnect in any case
             // (might be client or host mode here)
             isReady = false;
-            ClientScene.HandleClientDisconnect(this);
+            identity.server.localClient.HandleClientDisconnect(this);
         }
 
         /// <summary>
