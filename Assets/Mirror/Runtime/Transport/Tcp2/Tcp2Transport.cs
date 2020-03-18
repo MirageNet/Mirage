@@ -9,7 +9,7 @@ namespace Mirror.Tcp2
     public class Tcp2Transport : Transport2
     {
         private TcpListener listener;
-        public int Port { get; set; }
+        public int Port = 7777;
 
         public override Task ListenAsync()
         {
