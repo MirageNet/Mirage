@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Mirror
 {
     /// <summary>
-    /// A High level network connection. This is used for connections from client-to-server and for connection from server-to-client.
+    /// A High level network connection. Responsible for sending and receiving messages
     /// </summary>
     /// <remarks>
     /// <para>A NetworkConnection corresponds to a specific connection for a host in the transport layer. It has a connectionId that is assigned by the transport layer and passed to the Initialize function.</para>
@@ -15,22 +17,19 @@ namespace Mirror
     /// <para>NetworkConnection objects also act as observers for networked objects. When a connection is an observer of a networked object with a NetworkIdentity, then the object will be visible to corresponding client for the connection, and incremental state changes will be sent to the client.</para>
     /// <para>There are many virtual functions on NetworkConnection that allow its behaviour to be customized. NetworkClient and NetworkServer can both be made to instantiate custom classes derived from NetworkConnection by setting their networkConnectionClass member variable.</para>
     /// </remarks>
-    public abstract class NetworkConnection : IDisposable
+    public abstract class NetworkConnection
     {
+        #region Properties
+
         // internal so it can be tested
         internal readonly HashSet<NetworkIdentity> visList = new HashSet<NetworkIdentity>();
 
-        Dictionary<int, NetworkMessageDelegate> messageHandlers;
+        private readonly Dictionary<int, NetworkMessageDelegate> messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
 
         /// <summary>
-        /// Unique identifier for this connection that is assigned by the transport layer.
+        /// Transport connection
         /// </summary>
-        /// <remarks>
-        /// <para>On a server, this Id is unique for every connection on the server. On a client this Id is local to the client, it is not the same as the Id on the server for this connection.</para>
-        /// <para>Transport layers connections begin at one. So on a client with a single connection to a server, the connectionId of that connection will be one. In NetworkServer, the connectionId of the local connection is zero.</para>
-        /// <para>Clients do not know their connectionId on the server, and do not know the connectionId of other clients on the server.</para>
-        /// </remarks>
-        public readonly int connectionId;
+        public IConnection Connection { get; }
 
         /// <summary>
         /// Flag that indicates the client has been authenticated.
@@ -54,7 +53,7 @@ namespace Mirror
         /// The IP address / URL / FQDN associated with the connection.
         /// Can be useful for a game master to do IP Bans etc.
         /// </summary>
-        public abstract string address { get; }
+        public virtual EndPoint address => Connection.GetEndPointAddress();
 
         /// <summary>
         /// The last time that a message was received on this connection.
@@ -86,52 +85,176 @@ namespace Mirror
         /// </remarks>
         public bool logNetworkMessages;
 
+        #endregion
+
         /// <summary>
         /// Creates a new NetworkConnection with the specified address
         /// </summary>
-        internal NetworkConnection()
+        internal NetworkConnection(IConnection connection)
         {
+            this.Connection = connection;
+        }
+
+
+        #region Receiving Messages
+
+
+        private readonly MemoryStream buffer = new MemoryStream();
+        /// <summary>
+        /// Receives a message from the transport and dispatches it to the handler
+        /// </summary>
+        /// <returns>false if the connection is closed </returns>
+        internal async Task<bool> DispatchMessage()
+        {
+            buffer.SetLength(0);
+
+            if (await Connection.ReceiveAsync(buffer))
+            {
+                buffer.TryGetBuffer(out ArraySegment<byte> data);
+                TransportReceive(data, Channels.DefaultReliable);
+                return true;
+            }
+            return false;
+        }
+
+
+        private void InvokeHandler(int msgType, NetworkReader reader, int channelId)
+        {
+            if (messageHandlers.TryGetValue(msgType, out NetworkMessageDelegate msgDelegate))
+                msgDelegate(this, reader, channelId);
+            else
+                throw new KeyNotFoundException($"Unknown message ID {msgType} {this}");
         }
 
         /// <summary>
-        /// Creates a new NetworkConnection with the specified address and connectionId
+        /// This function invokes the registered handler function for a message.
+        /// <para>Network connections used by the NetworkClient and NetworkServer use this function for handling network messages.</para>
         /// </summary>
-        /// <param name="networkConnectionId"></param>
-        internal NetworkConnection(int networkConnectionId)
+        /// <typeparam name="T">The message type to unregister.</typeparam>
+        /// <param name="msg">The message object to process.</param>
+        /// <returns></returns>
+        public void InvokeHandler<T>(T msg, int channelId) where T : IMessageBase
         {
-            connectionId = networkConnectionId;
+            // get writer from pool
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                // if it is a value type,  just use typeof(T) to avoid boxing
+                // this works because value types cannot be derived
+                // if it is a reference type (for example IMessageBase),
+                // ask the message for the real type
+                int msgType = MessagePacker.GetId(typeof(T).IsValueType ? typeof(T) : msg.GetType());
+
+                MessagePacker.Pack(msg, writer);
+                var segment = writer.ToArraySegment();
+                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(segment))
+                    InvokeHandler(msgType, networkReader, channelId);
+            }
         }
 
-        ~NetworkConnection()
+        // note: original HLAPI HandleBytes function handled >1 message in a while loop, but this wasn't necessary
+        //       anymore because NetworkServer/NetworkClient Update both use while loops to handle >1 data events per
+        //       frame already.
+        //       -> in other words, we always receive 1 message per Receive call, never two.
+        //       -> can be tested easily with a 1000ms send delay and then logging amount received in while loops here
+        //          and in NetworkServer/Client Update. HandleBytes already takes exactly one.
+        /// <summary>
+        /// This function allows custom network connection classes to process data from the network before it is passed to the application.
+        /// </summary>
+        /// <param name="buffer">The data received.</param>
+        internal void TransportReceive(ArraySegment<byte> buffer, int channelId)
         {
-            Dispose(false);
+            // unpack message
+            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(buffer))
+            {
+                int msgType = MessagePacker.UnpackId(networkReader);
+                // logging
+                if (logNetworkMessages) Debug.Log("ConnectionRecv " + this + " msgType:" + msgType + " content:" + BitConverter.ToString(buffer.Array, buffer.Offset, buffer.Count));
+
+                // try to invoke the handler for that message
+                InvokeHandler(msgType, networkReader, channelId);
+            }
         }
 
         /// <summary>
-        /// Disposes of this connection, releasing channel buffers that it holds.
+        /// Register a handler for a particular message type.
+        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
         /// </summary>
-        public void Dispose()
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
+        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
+        public void RegisterHandler<C, T>(Action<C, T> handler, bool requireAuthentication = true)
+             where T : IMessageBase, new()
+            where C : NetworkConnection
         {
-            Dispose(true);
-            // Take yourself off the Finalization queue
-            // to prevent finalization code for this object
-            // from executing a second time.
-            GC.SuppressFinalize(this);
+            void handlerWrapper(NetworkConnection conn, NetworkReader reader, int channelId)
+            {
+                // protect against DOS attacks if attackers try to send invalid
+                // data packets to crash the server/client. there are a thousand
+                // ways to cause an exception in data handling:
+                // - invalid headers
+                // - invalid message ids
+                // - invalid data causing exceptions
+                // - negative ReadBytesAndSize prefixes
+                // - invalid utf8 strings
+                // - etc.
+                //
+                // let's catch them all and then disconnect that connection to avoid
+                // further attacks.
+                T message = default;
+                try
+                {
+                    if (requireAuthentication && !conn.isAuthenticated)
+                    {
+                        // message requires authentication, but the connection was not authenticated
+                        throw new UnauthorizedAccessException($"Closing connection: {conn}. Received message {typeof(T)} that required authentication, but the user has not authenticated yet");
+                    }
+
+                    message = typeof(T).IsValueType ? default(T) : new T();
+                    message.Deserialize(reader);
+
+                    handler((C)conn, message);
+                }
+                finally
+                {
+                    NetworkDiagnostics.OnReceive(message, channelId, reader.Length);
+                }
+
+            }
+
+            int msgType = MessagePacker.GetId<T>();
+
+            if (messageHandlers.ContainsKey(msgType))
+            {
+                if (LogFilter.Debug) Debug.Log("NetworkServer.RegisterHandler replacing " + msgType);
+            }
+            messageHandlers[msgType] = handlerWrapper;
         }
 
-        protected virtual void Dispose(bool disposing)
+        /// <summary>
+        /// Register a handler for a particular message type.
+        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
+        /// </summary>
+        /// <typeparam name="T">The message type to unregister.</typeparam>
+        /// <param name="handler"></param>
+        /// <param name="requireAuthentication">true if the message requires an authenticated connection</param>
+        public void RegisterHandler<T>(Action<T> handler, bool requireAuthentication = true) where T : IMessageBase, new()
         {
-            clientOwnedObjects.Clear();
+            RegisterHandler((NetworkConnectionToServer _, T value) => { handler(value); }, requireAuthentication);
         }
+
+        #endregion
+
 
         /// <summary>
         /// Disconnects this connection.
         /// </summary>
-        public abstract void Disconnect();
-
-        internal void SetHandlers(Dictionary<int, NetworkMessageDelegate> handlers)
+        public virtual void Disconnect()
         {
-            messageHandlers = handlers;
+            // set not ready and handle clientscene disconnect in any case
+            // (might be client or host mode here)
+            isReady = false;
+            RemoveObservers();
+            Connection.Disconnect();
         }
 
         /// <summary>
@@ -141,43 +264,41 @@ namespace Mirror
         /// <param name="msg">The message to send.</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
         /// <returns></returns>
-        public bool Send<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
+        public void Send<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 // pack message and send allocation free
                 MessagePacker.Pack(msg, writer);
                 NetworkDiagnostics.OnSend(msg, channelId, writer.Position, 1);
-                return Send(writer.ToArraySegment(), channelId);
+                _ = SendAsync(writer.ToArraySegment(), channelId);
             }
         }
 
-        // internal because no one except Mirror should send bytes directly to
-        // the client. they would be detected as a message. send messages instead.
-        protected abstract bool Send(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable);
+        protected virtual Task SendAsync(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable)
+        {
+            if (logNetworkMessages) Debug.Log("ConnectionSend " + this + " bytes:" + BitConverter.ToString(segment.Array, segment.Offset, segment.Count));
+
+            return Connection.SendAsync(segment);
+        }
 
         public static void Send<T>(IEnumerable<NetworkConnection> connections, T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                // pack message into byte[] once
+                // pack message and send allocation free
                 MessagePacker.Pack(msg, writer);
                 var segment = writer.ToArraySegment();
 
                 int count = 0;
                 foreach (NetworkConnection connection in connections)
                 {
-                    connection.Send(segment, channelId);
+                    _ = connection.SendAsync(segment, channelId);
                     count++;
                 }
 
                 NetworkDiagnostics.OnSend(msg, channelId, segment.Count, count);
             }
-        }
-
-        public override string ToString()
-        {
-            return $"connection({connectionId})";
         }
 
         internal void AddToVisList(NetworkIdentity identity)
@@ -208,76 +329,6 @@ namespace Mirror
             visList.Clear();
         }
 
-        internal bool InvokeHandler(int msgType, NetworkReader reader, int channelId)
-        {
-            if (messageHandlers.TryGetValue(msgType, out NetworkMessageDelegate msgDelegate))
-            {
-                msgDelegate(this, reader, channelId);
-                return true;
-            }
-            Debug.LogError("Unknown message ID " + msgType + " " + this);
-            return false;
-        }
-
-        /// <summary>
-        /// This function invokes the registered handler function for a message.
-        /// <para>Network connections used by the NetworkClient and NetworkServer use this function for handling network messages.</para>
-        /// </summary>
-        /// <typeparam name="T">The message type to unregister.</typeparam>
-        /// <param name="msg">The message object to process.</param>
-        /// <returns></returns>
-        public bool InvokeHandler<T>(T msg, int channelId) where T : IMessageBase
-        {
-            // get writer from pool
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
-            {
-                // if it is a value type,  just use typeof(T) to avoid boxing
-                // this works because value types cannot be derived
-                // if it is a reference type (for example IMessageBase),
-                // ask the message for the real type
-                int msgType = MessagePacker.GetId(typeof(T).IsValueType ? typeof(T) : msg.GetType());
-
-                MessagePacker.Pack(msg, writer);
-                ArraySegment<byte> segment = writer.ToArraySegment();
-                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(segment))
-                    return InvokeHandler(msgType, networkReader, channelId);
-            }
-        }
-
-        // note: original HLAPI HandleBytes function handled >1 message in a while loop, but this wasn't necessary
-        //       anymore because NetworkServer/NetworkClient Update both use while loops to handle >1 data events per
-        //       frame already.
-        //       -> in other words, we always receive 1 message per Receive call, never two.
-        //       -> can be tested easily with a 1000ms send delay and then logging amount received in while loops here
-        //          and in NetworkServer/Client Update. HandleBytes already takes exactly one.
-        /// <summary>
-        /// This function allows custom network connection classes to process data from the network before it is passed to the application.
-        /// </summary>
-        /// <param name="buffer">The data received.</param>
-        internal void TransportReceive(ArraySegment<byte> buffer, int channelId)
-        {
-            // unpack message
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(buffer))
-            {
-                try
-                {
-                    int msgType = MessagePacker.UnpackId(networkReader);
-                    // logging
-                    if (logNetworkMessages) Debug.Log("ConnectionRecv " + this + " msgType:" + msgType + " content:" + BitConverter.ToString(buffer.Array, buffer.Offset, buffer.Count));
-
-                    // try to invoke the handler for that message
-                    if (InvokeHandler(msgType, networkReader, channelId))
-                    {
-                        lastMessageTime = Time.time;
-                    }
-                }
-                catch (IOException ex)
-                {
-                    Debug.LogError("Closed connection: " + this + ". Invalid message " + ex);
-                    Disconnect();
-                }
-            }
-        }
 
         internal void AddOwnedObject(NetworkIdentity obj)
         {

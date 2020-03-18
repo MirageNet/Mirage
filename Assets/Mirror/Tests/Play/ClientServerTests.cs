@@ -23,6 +23,8 @@ namespace Mirror.Tests
             manager.server = networkManagerGo.GetComponent<NetworkServer>();
             server = manager.server;
             client = manager.client;
+            client.Transport = networkManagerGo.GetComponent<Transport2>();
+            server.Transport2 = networkManagerGo.GetComponent<Transport2>();
 
             manager.autoCreatePlayer = false;
             

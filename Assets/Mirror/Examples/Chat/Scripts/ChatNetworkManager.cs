@@ -14,10 +14,11 @@ namespace Mirror.Examples.Chat
             public string name;
         }
 
-        public override void OnStartServer()
+
+        public override void OnServerConnect(NetworkConnection conn)
         {
-            base.OnStartServer();
-            server.RegisterHandler<CreatePlayerMessage>(OnCreatePlayer);
+            base.OnServerConnect(conn);
+            conn.RegisterHandler<NetworkConnectionToClient, CreatePlayerMessage>(OnCreatePlayer);
         }
 
         public override void OnClientConnect(NetworkConnection conn)

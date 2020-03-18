@@ -1,37 +1,49 @@
 ﻿using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 using InvalidOperationException = System.InvalidOperationException;
+using static Mirror.Tests.AsyncTests;
+using System.Collections;
+using Mirror.Tcp2;
 
 namespace Mirror.Tests
 {
-    public class NetworkIdentityTests
+    public class NetworkIdentityTests2 
     {
         #region SetUp
         NetworkServer server;
         GameObject serverGO;
         NetworkClient client;
         GameObject clientGO;
-
+        GameObject transportGO;
 
         GameObject gameObject;
         NetworkIdentity identity;
 
-        [SetUp]
-        public void SetUp()
+        [UnitySetUp]
+        public IEnumerator SetUp()
         {
-            Transport.activeTransport = Substitute.For<Transport>();
+            transportGO = new GameObject();
+            var transport = transportGO.AddComponent<Tcp2Transport>();
+
             serverGO = new GameObject();
             server = serverGO.AddComponent<NetworkServer>();
+            server.Transport2 = transport;
 
             clientGO = new GameObject();
             client = clientGO.AddComponent<NetworkClient>();
-            server.Listen();
-            client.ConnectHost(server);
-
+            client.Transport = transport;
 
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
+
+
+            return RunAsync(async () =>
+           {
+               await server.ListenAsync();
+               client.ConnectHost(server);
+           });
         }
 
         [TearDown]
@@ -42,8 +54,7 @@ namespace Mirror.Tests
             server.Shutdown();
             Object.DestroyImmediate(serverGO);
             Object.DestroyImmediate(clientGO);
-            Transport.activeTransport = null;
-            server.Shutdown();
+            Object.DestroyImmediate(transportGO);
         }
         #endregion
 
@@ -152,7 +163,7 @@ namespace Mirror.Tests
             // another connection
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                identity.AssignClientAuthority(new NetworkConnectionToClient(43));
+                identity.AssignClientAuthority(new NetworkConnectionToClient(null));
             });
             Assert.That(ex.Message, Is.EqualTo("AssignClientAuthority for " + gameObject + " already has an owner. Use RemoveClientAuthority() first"));
         }

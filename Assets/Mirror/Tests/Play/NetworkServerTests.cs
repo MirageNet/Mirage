@@ -1,6 +1,9 @@
-using Mirror.Tcp;
+using System.Collections;
+using Mirror.Tcp2;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
+using static Mirror.Tests.AsyncTests;
 
 namespace Mirror.Tests
 {
@@ -9,23 +12,26 @@ namespace Mirror.Tests
         NetworkServer server;
         GameObject serverGO;
 
-        [SetUp]
-        public void SetupNetworkServer()
+
+        [UnitySetUp]
+        public IEnumerator SetupNetworkServer()
         {
             serverGO = new GameObject();
             server = serverGO.AddComponent<NetworkServer>();
             serverGO.AddComponent<NetworkClient>();
-            Transport transport = serverGO.AddComponent<TcpTransport>();
+            server.Transport2 = serverGO.AddComponent<Tcp2Transport>();
 
-            Transport.activeTransport = transport;
-            server.Listen();
+            return RunAsync(async () =>
+            {
+                await server.ListenAsync();
+            });
         }
 
         [TearDown]
         public void ShutdownNetworkServer()
         {
             server.Shutdown();
-            GameObject.DestroyImmediate(serverGO);
+            Object.DestroyImmediate(serverGO);
         }
 
         [Test]
@@ -45,7 +51,6 @@ namespace Mirror.Tests
 
             Assert.That(gameObject.GetComponent<NetworkIdentity>().server, Is.SameAs(server));
         }
-
        
         [Test]
         public void ShutdownTest()
@@ -53,5 +58,12 @@ namespace Mirror.Tests
             server.Shutdown();
             Assert.That(server.active, Is.False);
         }
+
+        [Test]
+        public void IsActiveTest()
+        {
+            Assert.That(server.active, Is.True);
+        }
+
     }
 }

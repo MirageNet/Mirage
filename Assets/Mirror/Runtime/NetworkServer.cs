@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using Mirror.Tcp2;
 using UnityEngine;
 
 namespace Mirror
@@ -37,6 +40,9 @@ namespace Mirror
         // The host client for this server 
         public NetworkClient localClient;
 
+        // the transport for this server
+        public Transport2 Transport2;
+
         /// <summary>
         /// True if there is a local client connected to this server (host mode)
         /// </summary>
@@ -45,7 +51,7 @@ namespace Mirror
         /// <summary>
         /// A list of local connections on the server.
         /// </summary>
-        public readonly Dictionary<int, NetworkConnectionToClient> connections = new Dictionary<int, NetworkConnectionToClient>();
+        public readonly HashSet<NetworkConnectionToClient> connections = new HashSet<NetworkConnectionToClient>();
 
         /// <summary>
         /// <para>Dictionary of the message handlers registered with the server.</para>
@@ -93,13 +99,8 @@ namespace Mirror
                     // we do NOT call Transport.Shutdown, because someone only
                     // called NetworkServer.Shutdown. we can't assume that the
                     // client is supposed to be shut down too!
-                    Transport.activeTransport.ServerStop();
+                    Transport2.Disconnect();
                 }
-
-                Transport.activeTransport.OnServerDisconnected.RemoveListener(OnDisconnected);
-                Transport.activeTransport.OnServerConnected.RemoveListener(OnConnected);
-                Transport.activeTransport.OnServerDataReceived.RemoveListener(OnDataReceived);
-                Transport.activeTransport.OnServerError.RemoveListener(OnError);
 
                 initialized = false;
             }
@@ -120,19 +121,20 @@ namespace Mirror
 
             //Make sure connections are cleared in case any old connections references exist from previous sessions
             connections.Clear();
+            /*
             Transport.activeTransport.OnServerDisconnected.AddListener(OnDisconnected);
             Transport.activeTransport.OnServerConnected.AddListener(OnConnected);
             Transport.activeTransport.OnServerDataReceived.AddListener(OnDataReceived);
-            Transport.activeTransport.OnServerError.AddListener(OnError);
+            Transport.activeTransport.OnServerError.AddListener(OnError);*/
         }
 
 
-        internal void RegisterMessageHandlers()
+        internal void RegisterMessageHandlers(NetworkConnectionToClient connection)
         {
-            RegisterHandler<ReadyMessage>(OnClientReadyMessage);
-            RegisterHandler<CommandMessage>(OnCommandMessage);
-            RegisterHandler<RemovePlayerMessage>(OnRemovePlayerMessage);
-            RegisterHandler<NetworkPingMessage>(Time.OnServerPing, false);
+            connection.RegisterHandler<NetworkConnectionToClient, ReadyMessage>(OnClientReadyMessage);
+            connection.RegisterHandler<NetworkConnectionToClient, CommandMessage>(OnCommandMessage);
+            connection.RegisterHandler<NetworkConnectionToClient, RemovePlayerMessage>(OnRemovePlayerMessage);
+            connection.RegisterHandler<NetworkConnectionToClient, NetworkPingMessage>(Time.OnServerPing, false);
         }
 
         /// <summary>
@@ -140,19 +142,32 @@ namespace Mirror
         /// </summary>
         /// <param name="maxConns">Maximum number of allowed connections</param>
         /// <returns></returns>
-        public void Listen()
+        public async Task ListenAsync()
         {
             Initialize();
+            active = true;
 
             // only start server if we want to listen
             if (!dontListen)
             {
-                Transport.activeTransport.ServerStart();
+                await Transport2.ListenAsync();
                 if (LogFilter.Debug) Debug.Log("Server started listening");
             }
+        }
 
-            active = true;
-            RegisterMessageHandlers();
+        public async Task<NetworkConnectionToClient> AcceptAsync()
+        {
+            while (true)
+            {
+                IConnection connection = await Transport2.AcceptAsync();
+                // someone just connected.
+                var connectionToClient = new NetworkConnectionToClient(connection);
+
+                RegisterMessageHandlers(connectionToClient);
+                AddConnection(connectionToClient);
+
+                return connectionToClient;
+            }
         }
 
         /// <summary>
@@ -161,28 +176,9 @@ namespace Mirror
         /// </summary>
         /// <param name="conn">Network connection to add.</param>
         /// <returns>True if added.</returns>
-        public bool AddConnection(NetworkConnectionToClient conn)
+        internal void AddConnection(NetworkConnectionToClient conn)
         {
-            if (!connections.ContainsKey(conn.connectionId))
-            {
-                // connection cannot be null here or conn.connectionId
-                // would throw NRE
-                connections[conn.connectionId] = conn;
-                conn.SetHandlers(handlers);
-                return true;
-            }
-            // already a connection with this id
-            return false;
-        }
-
-        /// <summary>
-        /// This removes an external connection added with AddExternalConnection().
-        /// </summary>
-        /// <param name="connectionId">The id of the connection to remove.</param>
-        /// <returns>True if the removal succeeded</returns>
-        public bool RemoveConnection(int connectionId)
-        {
-            return connections.Remove(connectionId);
+            connections.Add(conn);
         }
 
         // called by LocalClient to add itself. dont call directly.
@@ -202,11 +198,10 @@ namespace Mirror
         {
             if (localConnection != null)
             {
+                connections.Remove(localConnection);
                 localConnection.Disconnect();
-                localConnection.Dispose();
                 localConnection = null;
             }
-            RemoveConnection(0);
             this.localClient = null;
         }
 
@@ -244,7 +239,8 @@ namespace Mirror
         public void SendToAll<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
             if (LogFilter.Debug) Debug.Log("Server.SendToAll id:" + typeof(T));
-            NetworkConnection.Send(connections.Values, msg, channelId);
+
+            NetworkConnection.Send(connections, msg, channelId);
         }
 
         /// <summary>
@@ -308,13 +304,12 @@ namespace Mirror
         /// </summary>
         public void DisconnectAllConnections()
         {
-            foreach (NetworkConnection conn in connections.Values)
+            foreach (NetworkConnection conn in connections)
             {
                 conn.Disconnect();
                 // call OnDisconnected unless local player in host mode
-                if (conn.connectionId != 0)
+                if (conn != localConnection)
                     OnDisconnected(conn);
-                conn.Dispose();
             }
             connections.Clear();
         }
@@ -341,24 +336,15 @@ namespace Mirror
             }
         }
 
-        void OnConnected(int connectionId)
+        internal void OnConnected(NetworkConnectionToClient connection)
         {
-            if (LogFilter.Debug) Debug.Log("Server accepted client:" + connectionId);
-
-            // connectionId needs to be > 0 because 0 is reserved for local player
-            if (connectionId <= 0)
-            {
-                Debug.LogError("Server.HandleConnect: invalid connectionId: " + connectionId + " . Needs to be >0, because 0 is reserved for local player.");
-                Transport.activeTransport.ServerDisconnect(connectionId);
-                return;
-            }
+            if (LogFilter.Debug) Debug.Log("Server accepted client:" + connection);
 
             // connectionId not in use yet?
-            if (connections.ContainsKey(connectionId))
+            if (connections.Contains(connection))
             {
-                Transport.activeTransport.ServerDisconnect(connectionId);
-                if (LogFilter.Debug) Debug.Log("Server connectionId " + connectionId + " already in use. kicked client:" + connectionId);
-                return;
+                connection.Disconnect();
+                throw new ConnectionException("Server connection already in use. kicked client", connection);
             }
 
             // are more connections allowed? if not, kick
@@ -368,110 +354,34 @@ namespace Mirror
             //  Transport can't do that)
             if (connections.Count < MaxConnections)
             {
-                // add connection
-                var conn = new NetworkConnectionToClient(connectionId);
-                OnConnected(conn);
+                connection.Disconnect();
+                throw new ConnectionException("server full, kicked client", connection);
             }
-            else
-            {
-                // kick
-                Transport.activeTransport.ServerDisconnect(connectionId);
-                if (LogFilter.Debug) Debug.Log("Server full, kicked client:" + connectionId);
-            }
-        }
 
-        internal void OnConnected(NetworkConnectionToClient conn)
-        {
-            if (LogFilter.Debug) Debug.Log("Server accepted client:" + conn);
+            if (LogFilter.Debug) Debug.Log("Server accepted client:" + connection);
 
             // add connection and invoke connected event
-            AddConnection(conn);
-            conn.InvokeHandler(new ConnectMessage(), -1);
+            AddConnection(connection);
+
         }
 
-        void OnDisconnected(int connectionId)
+
+        void OnDisconnected(NetworkConnectionToClient connection)
         {
-            if (LogFilter.Debug) Debug.Log("Server disconnect client:" + connectionId);
+            if (LogFilter.Debug) Debug.Log("Server disconnect client:" + connection);
 
-            if (connections.TryGetValue(connectionId, out NetworkConnectionToClient conn))
+            if (connections.Remove(connection))
             {
-                conn.Disconnect();
-                RemoveConnection(connectionId);
-                if (LogFilter.Debug) Debug.Log("Server lost client:" + connectionId);
+                connection.Disconnect();
+                if (LogFilter.Debug) Debug.Log("Server lost client:" + connection);
 
-                OnDisconnected(conn);
+                OnDisconnected(connection);
             }
         }
 
         void OnDisconnected(NetworkConnection conn)
         {
-            conn.InvokeHandler(new DisconnectMessage(), -1);
             if (LogFilter.Debug) Debug.Log("Server lost client:" + conn);
-        }
-
-        void OnDataReceived(int connectionId, ArraySegment<byte> data, int channelId)
-        {
-            if (connections.TryGetValue(connectionId, out NetworkConnectionToClient conn))
-            {
-                conn.TransportReceive(data, channelId);
-            }
-            else
-            {
-                Debug.LogError("HandleData Unknown connectionId:" + connectionId);
-            }
-        }
-
-        void OnError(int connectionId, Exception exception)
-        {
-            // TODO Let's discuss how we will handle errors
-            Debug.LogException(exception);
-        }
-
-        /// <summary>
-        /// Register a handler for a particular message type.
-        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
-        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
-        public void RegisterHandler<T>(Action<NetworkConnectionToClient, T> handler, bool requireAuthentication = true) where T : IMessageBase, new()
-        {
-            int msgType = MessagePacker.GetId<T>();
-            if (handlers.ContainsKey(msgType))
-            {
-                if (LogFilter.Debug) Debug.Log("NetworkServer.RegisterHandler replacing " + msgType);
-            }
-            handlers[msgType] = MessagePacker.MessageHandler(handler, requireAuthentication);
-        }
-
-        /// <summary>
-        /// Register a handler for a particular message type.
-        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
-        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
-        public void RegisterHandler<T>(Action<T> handler, bool requireAuthentication = true) where T : IMessageBase, new()
-        {
-            RegisterHandler<T>((_, value) => { handler(value); }, requireAuthentication);
-        }
-
-        /// <summary>
-        /// Unregisters a handler for a particular message type.
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        public void UnregisterHandler<T>() where T : IMessageBase
-        {
-            int msgType = MessagePacker.GetId<T>();
-            handlers.Remove(msgType);
-        }
-
-        /// <summary>
-        /// Clear all registered callback handlers.
-        /// </summary>
-        public void ClearHandlers()
-        {
-            handlers.Clear();
         }
 
         /// <summary>
@@ -747,7 +657,7 @@ namespace Mirror
         /// </summary>
         public void SetAllClientsNotReady()
         {
-            foreach (NetworkConnection conn in connections.Values)
+            foreach (NetworkConnection conn in connections)
             {
                 SetClientNotReady(conn);
             }

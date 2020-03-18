@@ -1,17 +1,15 @@
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Mirror
 {
     public class NetworkConnectionToServer : NetworkConnection
     {
-        public override string address => "";
 
-        protected override bool Send(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable)
+        public NetworkConnectionToServer(IConnection connection): base(connection)
         {
-            if (logNetworkMessages) Debug.Log("ConnectionSend " + this + " bytes:" + BitConverter.ToString(segment.Array, segment.Offset, segment.Count));
 
-            return Transport.activeTransport.ClientSend(channelId, segment);
         }
 
         /// <summary>
@@ -21,9 +19,8 @@ namespace Mirror
         {
             // set not ready and handle clientscene disconnect in any case
             // (might be client or host mode here)
-            isReady = false;
             ClientScene.HandleClientDisconnect(this);
-            Transport.activeTransport.ClientDisconnect();
+            base.Disconnect();
         }
     }
 }

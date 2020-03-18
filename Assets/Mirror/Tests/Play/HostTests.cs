@@ -28,6 +28,8 @@ namespace Mirror.Tests
             manager.server = networkManagerGo.GetComponent<NetworkServer>();
             server = manager.server;
             client = manager.client;
+            server.Transport2 = networkManagerGo.GetComponent<Transport2>();
+            client.Transport = networkManagerGo.GetComponent<Transport2>();
 
             manager.autoCreatePlayer = false;
 
@@ -45,9 +47,9 @@ namespace Mirror.Tests
         [TearDown]
         public void ShutdownHost()
         {
-            GameObject.DestroyImmediate(playerGO);
+            Object.DestroyImmediate(playerGO);
             manager.StopHost();
-            GameObject.DestroyImmediate(networkManagerGo);
+            Object.DestroyImmediate(networkManagerGo);
         }
 
         #endregion

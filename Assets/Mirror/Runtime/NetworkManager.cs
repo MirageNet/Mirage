@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Mirror.Tcp;
+using Mirror.Tcp2;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
@@ -88,7 +90,7 @@ namespace Mirror
         [Header("Network Info")]
         [Tooltip("Transport component attached to this object that server and client will use to connect")]
         [SerializeField]
-        protected Transport transport;
+        protected Transport2 transport;
 
         [Header("Authentication")]
         [Tooltip("Authentication component attached to this object")]
@@ -121,7 +123,7 @@ namespace Mirror
         /// Number of active player objects across all connections on the server.
         /// <para>This is only valid on the host / server.</para>
         /// </summary>
-        public int numPlayers => server.connections.Count(kv => kv.Value.identity != null);
+        public int numPlayers => server.connections.Count(kv => kv.identity != null);
 
         /// <summary>
         /// True if the server or client is started and running
@@ -163,10 +165,10 @@ namespace Mirror
             if (transport == null)
             {
                 // was a transport added yet? if not, add one
-                transport = GetComponent<Transport>();
+                transport = GetComponent<Transport2>();
                 if (transport == null)
                 {
-                    transport = gameObject.AddComponent<TcpTransport>();
+                    transport = gameObject.AddComponent<Tcp2Transport>();
                     Debug.Log("NetworkManager: added default Transport because there was none yet.");
                 }
 #if UNITY_EDITOR
@@ -278,23 +280,30 @@ namespace Mirror
 
             ConfigureServerFrameRate();
 
-            // start listening to network connections
-            server.Listen();
 
-            // call OnStartServer AFTER Listen, so that NetworkServer.active is
-            // true and we can call NetworkServer.Spawn in OnStartServer
-            // overrides.
-            // (useful for loading & spawning stuff from database etc.)
-            //
-            // note: there is no risk of someone connecting after Listen() and
-            //       before OnStartServer() because this all runs in one thread
-            //       and we don't start processing connects until Update.
-            OnStartServer();
+            async Task AcceptClients()
+            {
 
-            // this must be after Listen(), since that registers the default message handlers
-            RegisterServerMessages();
+                // start listening to network connections
+                await server.ListenAsync();
 
-            isNetworkActive = true;
+                OnStartServer();
+                isNetworkActive = true;
+
+                while (true)
+                {
+                    NetworkConnectionToClient connection = await server.AcceptAsync();
+
+                    if (connection != null)
+                        break;
+
+                    OnServerConnectInternal(connection);
+
+                }
+            }
+
+            _ = AcceptClients();
+
         }
 
         /// <summary>
@@ -336,39 +345,15 @@ namespace Mirror
             }
         }
 
-        /// <summary>
-        /// This starts a network client. It uses the networkAddress and networkPort properties as the address to connect to.
-        /// <para>This makes the newly created client connect to the server immediately.</para>
-        /// </summary>
-        public void StartClient(string serverIp)
+        public Task StartClient(string hostname)
         {
-            mode = NetworkManagerMode.ClientOnly;
-
-            Initialize();
-
-            if (authenticator != null)
+            var uriBuilder = new UriBuilder()
             {
-                authenticator.OnStartClient();
-                authenticator.OnClientAuthenticated += OnClientAuthenticated;
-            }
+                Scheme = "tcp4",
+                Host = hostname
+            };
 
-            if (runInBackground)
-                Application.runInBackground = true;
-
-            isNetworkActive = true;
-
-            RegisterClientMessages();
-
-            if (string.IsNullOrEmpty(serverIp))
-            {
-                Debug.LogError("serverIp shouldn't be empty");
-                return;
-            }
-            if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + serverIp);
-
-            _ = client.ConnectAsync(serverIp);
-
-            OnStartClient();
+            return StartClient(uriBuilder.Uri);
         }
 
         /// <summary>
@@ -376,11 +361,9 @@ namespace Mirror
         /// <para>This makes the newly created client connect to the server immediately.</para>
         /// </summary>
         /// <param name="uri">location of the server to connect to</param>
-        public void StartClient(Uri uri)
+        public async Task StartClient(Uri uri)
         {
             mode = NetworkManagerMode.ClientOnly;
-
-            Initialize();
 
             if (authenticator != null)
             {
@@ -395,11 +378,13 @@ namespace Mirror
 
             isNetworkActive = true;
 
-            RegisterClientMessages();
+            RegisterPlayerPrefab();
 
             if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + uri);
 
-            _ = client.ConnectAsync(uri);
+            await client.ConnectAsync(uri);
+
+            RegisterClientMessages(client.connection);
 
             OnStartClient();
         }
@@ -519,11 +504,11 @@ namespace Mirror
             }
 
             server.ActivateHostScene();
-            RegisterClientMessages();
-
-            // ConnectLocalServer needs to be called AFTER RegisterClientMessages
-            // (https://github.com/vis2k/Mirror/pull/1249/)
             client.ConnectLocalServer(server);
+
+            OnServerConnectInternal(server.localConnection);
+
+            RegisterClientMessages(client.connection);
 
             OnStartClient();
         }
@@ -660,28 +645,25 @@ namespace Mirror
 
                 DontDestroyOnLoad(gameObject);
             }                
-
-            Transport.activeTransport = transport;
         }
 
-        void RegisterServerMessages()
+        void RegisterServerMessages(NetworkConnectionToClient connectionToClient)
         {
-            server.RegisterHandler<ConnectMessage>(OnServerConnectInternal, false);
-            server.RegisterHandler<DisconnectMessage>(OnServerDisconnectInternal, false);
-            server.RegisterHandler<ReadyMessage>(OnServerReadyMessageInternal);
-            server.RegisterHandler<AddPlayerMessage>(OnServerAddPlayerInternal);
-            server.RegisterHandler<RemovePlayerMessage>(OnServerRemovePlayerMessageInternal);
-            server.RegisterHandler<ErrorMessage>(OnServerErrorInternal, false);
+            connectionToClient.RegisterHandler<NetworkConnectionToClient, ReadyMessage>(OnServerReadyMessageInternal);
+            connectionToClient.RegisterHandler<NetworkConnectionToClient, AddPlayerMessage>(OnServerAddPlayerInternal);
+            connectionToClient.RegisterHandler<NetworkConnectionToClient, RemovePlayerMessage>(OnServerRemovePlayerMessageInternal);
+            connectionToClient.RegisterHandler<NetworkConnectionToClient, ErrorMessage>(OnServerErrorInternal, false);
         }
 
-        void RegisterClientMessages()
+        void RegisterClientMessages(NetworkConnection connectionToServer)
         {
-            client.RegisterHandler<ConnectMessage>(OnClientConnectInternal, false);
-            client.RegisterHandler<DisconnectMessage>(OnClientDisconnectInternal, false);
-            client.RegisterHandler<NotReadyMessage>(OnClientNotReadyMessageInternal);
-            client.RegisterHandler<ErrorMessage>(OnClientErrorInternal, false);
-            client.RegisterHandler<SceneMessage>(OnClientSceneInternal, false);
+            connectionToServer.RegisterHandler<NetworkConnectionToServer, NotReadyMessage>(OnClientNotReadyMessageInternal);
+            connectionToServer.RegisterHandler<NetworkConnectionToServer, ErrorMessage>(OnClientErrorInternal, false);
+            connectionToServer.RegisterHandler<NetworkConnectionToServer, SceneMessage>(OnClientSceneInternal, false);
+        }
 
+        void RegisterPlayerPrefab()
+        {
             if (playerPrefab != null)
             {
                 ClientScene.RegisterPrefab(playerPrefab);
@@ -742,10 +724,6 @@ namespace Mirror
             // Let server prepare for scene change
             OnServerChangeScene(newSceneName);
 
-            // Suspend the server's transport while changing scenes
-            // It will be re-enabled in FinishScene.
-            Transport.activeTransport.enabled = false;
-
             ClientScene.server = server;
             ClientScene.client = client;
 
@@ -777,7 +755,6 @@ namespace Mirror
             // the state as soon as the load is finishing, causing all kinds of bugs because of missing state.
             // (client may be null after StopClient etc.)
             if (LogFilter.Debug) Debug.Log("ClientChangeScene: pausing handlers while scene is loading to avoid data loss after scene was loaded.");
-            Transport.activeTransport.enabled = false;
 
             ClientScene.server = server;
             ClientScene.client = client;
@@ -866,7 +843,6 @@ namespace Mirror
 
             // process queued messages that we received while loading the scene
             if (LogFilter.Debug) Debug.Log("FinishLoadScene: resuming handlers after scene was loading.");
-            Transport.activeTransport.enabled = true;
 
             // host mode?
             if (mode == NetworkManagerMode.Host)
@@ -915,7 +891,7 @@ namespace Mirror
 
                 if (client.isConnected)
                 {
-                    RegisterClientMessages();
+                    RegisterClientMessages(client.connection);
 
                     // DO NOT call OnClientSceneChanged here.
                     // the scene change happened because StartHost loaded the
@@ -938,7 +914,7 @@ namespace Mirror
 
                 if (client.isConnected)
                 {
-                    RegisterClientMessages();
+                    RegisterClientMessages(client.connection);
 
                     // let client know that we changed scene
                     OnClientSceneChanged(client.connection);
@@ -963,7 +939,7 @@ namespace Mirror
 
             if (client.isConnected)
             {
-                RegisterClientMessages();
+                RegisterClientMessages(client.connection);
                 OnClientSceneChanged(client.connection);
             }
         }
@@ -1023,9 +999,10 @@ namespace Mirror
 
         #region Server Internal Message Handlers
 
-        void OnServerConnectInternal(NetworkConnectionToClient conn, ConnectMessage connectMsg)
+        void OnServerConnectInternal(NetworkConnectionToClient conn)
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerConnectInternal");
+            RegisterServerMessages(conn);
 
             if (authenticator != null)
             {
@@ -1057,7 +1034,7 @@ namespace Mirror
             OnServerConnect(conn);
         }
 
-        void OnServerDisconnectInternal(NetworkConnection conn, DisconnectMessage msg)
+        void OnServerDisconnectInternal(NetworkConnection conn)
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerDisconnectInternal");
             OnServerDisconnect(conn);
@@ -1115,7 +1092,7 @@ namespace Mirror
 
         #region Client Internal Message Handlers
 
-        void OnClientConnectInternal(NetworkConnectionToServer conn, ConnectMessage message)
+        void OnClientConnectInternal(NetworkConnectionToServer conn)
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnClientConnectInternal");
 
@@ -1154,7 +1131,7 @@ namespace Mirror
             }
         }
 
-        void OnClientDisconnectInternal(NetworkConnection conn, DisconnectMessage msg)
+        void OnClientDisconnectInternal(NetworkConnection conn)
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnClientDisconnectInternal");
             OnClientDisconnect(conn);

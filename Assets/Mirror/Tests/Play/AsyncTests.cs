@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Mirror.Tests
 {
-    public class AsyncTests
+    public static class AsyncTests
     {
         // Unity's nunit does not support async tests
         // so we do this boilerplate to run our async methods

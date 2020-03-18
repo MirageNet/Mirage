@@ -1,7 +1,6 @@
-using System;
 using System.Collections.Generic;
+using System.Net;
 using NUnit.Framework;
-using UnityEngine.TestTools;
 
 namespace Mirror.Tests
 {
@@ -37,7 +36,7 @@ namespace Mirror.Tests
         /*[Test]
         public void ServerToClientTest()
         {
-            Assert.That(connectionToClient.address, Is.EqualTo("localhost"));
+            Assert.That(connectionToClient.address, Is.EqualTo(new IPEndPoint(IPAddress.Loopback, 0)));
 
             var myMessage = new MyMessage
             {
@@ -72,7 +71,7 @@ namespace Mirror.Tests
         /*[Test]
         public void ClientToServerTest()
         {
-            Assert.That(connectionToServer.address, Is.EqualTo("localhost"));
+            Assert.That(connectionToServer.address, Is.EqualTo(new IPEndPoint(IPAddress.Loopback, 0)));
 
             var myMessage = new MyMessage
             {

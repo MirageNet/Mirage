@@ -7,7 +7,6 @@ namespace Mirror.Authenticators
     public class BasicAuthenticator : NetworkAuthenticator
     {
         [Header("Custom Properties")]
-        public NetworkManager manager;
 
         // set these in the inspector
         public string Username;
@@ -27,25 +26,24 @@ namespace Mirror.Authenticators
             public string Message;
         }
 
-        public override void OnStartServer()
-        {
-            // register a handler for the authentication request we expect from client
-            manager.server.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage, false);
-        }
-
         public override void OnStartClient()
         {
-            // register a handler for the authentication response we expect from server
-            manager.client.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage, false);
         }
 
         public override void OnServerAuthenticate(NetworkConnectionToClient conn)
         {
+            // register a handler for the authentication request we expect from client
+            conn.RegisterHandler<NetworkConnectionToClient, AuthRequestMessage>(OnAuthRequestMessage, false);
+
             // do nothing...wait for AuthRequestMessage from client
         }
 
         public override void OnClientAuthenticate(NetworkConnectionToServer conn)
         {
+            // register a handler for the authentication response we expect from server
+            conn.RegisterHandler<NetworkConnectionToServer, AuthResponseMessage>(OnAuthResponseMessage, false);
+
+
             var authRequestMessage = new AuthRequestMessage
             {
                 AuthUsername = Username,

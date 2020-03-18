@@ -173,7 +173,7 @@ namespace Mirror
             if (SceneManager.GetActiveScene().name != RoomScene)
                 return;
 
-            if (minPlayers > 0 && server.connections.Count(conn => conn.Value != null && conn.Value.identity.gameObject.GetComponent<NetworkRoomPlayer>().ReadyToBegin) < minPlayers)
+            if (minPlayers > 0 && server.connections.Count(conn => conn.identity.gameObject.GetComponent<NetworkRoomPlayer>().ReadyToBegin) < minPlayers)
             {
                 AllPlayersReady = false;
                 return;

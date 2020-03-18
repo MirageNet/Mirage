@@ -938,7 +938,7 @@ namespace Mirror
         internal void AddAllReadyServerConnectionsToObservers()
         {
             // add all server connections
-            foreach (NetworkConnection conn in server.connections.Values)
+            foreach (NetworkConnection conn in server.connections)
             {
                 if (conn.isReady)
                     AddObserver(conn);

@@ -1,5 +1,8 @@
+using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
+using static Mirror.Tests.AsyncTests;
 
 namespace Mirror.Tests
 {
@@ -17,6 +20,13 @@ namespace Mirror.Tests
             manager = gameObject.AddComponent<NetworkManager>();
             manager.client = gameObject.GetComponent<NetworkClient>();
             manager.server = gameObject.GetComponent<NetworkServer>();
+            manager.server.Transport2 = gameObject.GetComponent<Transport2>();
+            manager.client.Transport = gameObject.GetComponent<Transport2>();
+            manager.runInBackground = false;
+
+            manager.Awake();
+            ClientScene.client = manager.client;
+            ClientScene.server = manager.server;
         }
 
         [TearDown]
@@ -29,7 +39,7 @@ namespace Mirror.Tests
         public void VariableTest()
         {
             Assert.That(manager.dontDestroyOnLoad, Is.True);
-            Assert.That(manager.runInBackground, Is.True);
+            Assert.That(manager.runInBackground, Is.False);
             Assert.That(manager.startOnHeadless, Is.True);
             Assert.That(manager.showDebugMessages, Is.False);
             Assert.That(manager.serverTickRate, Is.EqualTo(30));
@@ -66,37 +76,6 @@ namespace Mirror.Tests
 
             Assert.That(manager.isNetworkActive , Is.False);
             Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.Offline));
-        }
-
-        [Test]
-        public void StartClientTest()
-        {
-            manager.StartClient("localhost");
-
-            Assert.That(manager.isNetworkActive , Is.True);
-            Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.ClientOnly));
-
-            manager.StopClient();
-        }
-
-        [Test]
-        public void StopClientTest()
-        {
-            manager.StartClient("localhost");
-            manager.StopClient();
-
-            Assert.That(manager.isNetworkActive , Is.False);
-            Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.Offline));
-        }
-
-        [Test]
-        public void ShutdownTest()
-        {
-            manager.StartClient("localhost");
-            manager.StopClient();
-
-            Assert.That(manager.startPositions , Is.Empty);
-            Assert.That(manager.startPositionIndex , Is.Zero);
         }
 
         [Test]
