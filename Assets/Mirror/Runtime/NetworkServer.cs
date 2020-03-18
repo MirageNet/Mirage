@@ -24,7 +24,7 @@ namespace Mirror
         /// </summary>
         [Tooltip("Maximum number of concurrent connections.")]
         [Min(1)]
-        public int maxConnections = 4;
+        public int MaxConnections = 4;
 
         /// <summary>
         /// The connection to the host mode client (if any).
@@ -367,7 +367,7 @@ namespace Mirror
             //  less code and third party transport might not do that anyway)
             // (this way we could also send a custom 'tooFull' message later,
             //  Transport can't do that)
-            if (connections.Count < maxConnections)
+            if (connections.Count < MaxConnections)
             {
                 // add connection
                 var conn = new NetworkConnectionToClient(connectionId);

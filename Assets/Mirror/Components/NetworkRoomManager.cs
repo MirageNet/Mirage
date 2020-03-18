@@ -73,7 +73,7 @@ namespace Mirror
         {
 
             // always <= maxConnections
-            minPlayers = Mathf.Min(minPlayers, server.maxConnections);
+            minPlayers = Mathf.Min(minPlayers, server.MaxConnections);
 
             // always >= 0
             minPlayers = Mathf.Max(minPlayers, 0);
@@ -263,7 +263,7 @@ namespace Mirror
         {
             if (SceneManager.GetActiveScene().name == RoomScene)
             {
-                if (RoomSlots.Count == server.maxConnections)
+                if (RoomSlots.Count == server.MaxConnections)
                     return;
 
                 AllPlayersReady = false;
