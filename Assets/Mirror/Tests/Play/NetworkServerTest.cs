@@ -118,6 +118,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen with maxconnections=1
+            server.MaxConnections = 1;
             server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
