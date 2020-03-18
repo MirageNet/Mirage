@@ -126,13 +126,6 @@ namespace Mirror
         public PlayerSpawnMethod playerSpawnMethod;
 
         /// <summary>
-        /// List of prefabs that will be registered with the spawning system.
-        /// <para>For each of these prefabs, ClientManager.RegisterPrefab() will be automatically invoke.</para>
-        /// </summary>
-        [FormerlySerializedAs("m_SpawnPrefabs")]
-        public List<GameObject> spawnPrefabs = new List<GameObject>();
-
-        /// <summary>
         /// Number of active player objects across all connections on the server.
         /// <para>This is only valid on the host / server.</para>
         /// </summary>
@@ -703,9 +696,9 @@ namespace Mirror
             {
                 ClientScene.RegisterPrefab(playerPrefab);
             }
-            for (int i = 0; i < spawnPrefabs.Count; i++)
+            for (int i = 0; i < client.spawnPrefabs.Count; i++)
             {
-                GameObject prefab = spawnPrefabs[i];
+                GameObject prefab = client.spawnPrefabs[i];
                 if (prefab != null)
                 {
                     ClientScene.RegisterPrefab(prefab);
