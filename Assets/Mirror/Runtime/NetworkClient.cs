@@ -276,6 +276,18 @@ namespace Mirror
             }
         }
 
+        internal void RegisterSpawnPrefabs()
+        {
+            for (int i = 0; i < spawnPrefabs.Count; i++)
+            {
+                GameObject prefab = spawnPrefabs[i];
+                if (prefab != null)
+                {
+                    ClientScene.RegisterPrefab(prefab);
+                }
+            }
+        }
+
         internal void RegisterSystemHandlers(bool hostMode)
         {
             // host mode client / regular client react to some messages differently.

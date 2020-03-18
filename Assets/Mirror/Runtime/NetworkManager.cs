@@ -696,14 +696,8 @@ namespace Mirror
             {
                 ClientScene.RegisterPrefab(playerPrefab);
             }
-            for (int i = 0; i < client.spawnPrefabs.Count; i++)
-            {
-                GameObject prefab = client.spawnPrefabs[i];
-                if (prefab != null)
-                {
-                    ClientScene.RegisterPrefab(prefab);
-                }
-            }
+
+            client.RegisterSpawnPrefabs();
         }
 
         void CleanupNetworkIdentities()
