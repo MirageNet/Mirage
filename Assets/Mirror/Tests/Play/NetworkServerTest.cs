@@ -103,7 +103,7 @@ namespace Mirror.Tests
         public void IsActiveTest()
         {
             Assert.That(server.active, Is.False);
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.active, Is.True);
             server.Shutdown();
             Assert.That(server.active, Is.False);
@@ -118,7 +118,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen with maxconnections=1
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // connect first: should work
@@ -140,7 +140,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(connectCalled, Is.False);
 
             // connect
@@ -158,7 +158,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(disconnectCalled, Is.False);
 
             // connect
@@ -179,7 +179,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(2);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // connect first
@@ -215,7 +215,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(2);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // connect 0
@@ -239,7 +239,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(2);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // connect first
@@ -257,7 +257,7 @@ namespace Mirror.Tests
         public void LocalClientActiveTest()
         {
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.LocalClientActive, Is.False);
 
             client.ConnectHost(server);
@@ -276,7 +276,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add first connection
@@ -317,7 +317,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add connection
@@ -343,7 +343,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add connection
@@ -365,7 +365,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             client.ConnectHost(server);
@@ -401,7 +401,7 @@ namespace Mirror.Tests
             }, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add a connection
@@ -446,7 +446,7 @@ namespace Mirror.Tests
             }, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // serialize a test message into an arraysegment
@@ -505,7 +505,7 @@ namespace Mirror.Tests
         public void ReadyMessageSetsClientReadyTest()
         {
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add connection
@@ -568,7 +568,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add connection
@@ -614,7 +614,7 @@ namespace Mirror.Tests
             server.RegisterHandler<WovenTestMessage>(msg => { ++variant2Called; }, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add a connection
@@ -673,7 +673,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add connection
@@ -744,7 +744,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add connection
@@ -791,7 +791,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add connection
@@ -868,7 +868,7 @@ namespace Mirror.Tests
             Assert.That(server.SpawnObjects(), Is.False);
 
             // start server
-            server.Listen(1);
+            server.Listen();
 
             // calling SpawnObjects while server is active should succeed
             Assert.That(server.SpawnObjects(), Is.True);
@@ -966,7 +966,7 @@ namespace Mirror.Tests
             server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
 
             // listen
-            server.Listen(1);
+            server.Listen();
             Assert.That(server.active, Is.True);
 
 
