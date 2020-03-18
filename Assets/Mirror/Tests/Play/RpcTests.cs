@@ -13,8 +13,8 @@ namespace Mirror.Tests
         [Command]
         public void CmdTest(int arg1, string arg2)
         {
-            this.cmdArg1 = arg1;
-            this.cmdArg2 = arg2;
+            cmdArg1 = arg1;
+            cmdArg2 = arg2;
         }
 
         public int rpcArg1;
@@ -23,18 +23,18 @@ namespace Mirror.Tests
         [ClientRpc]
         public void RpcTest(int arg1, string arg2)
         {
-            this.rpcArg1 = arg1;
-            this.rpcArg2 = arg2;
+            rpcArg1 = arg1;
+            rpcArg2 = arg2;
         }
 
         public int targetRpcArg1;
         public string targetRpcArg2;
 
         [TargetRpc]
-        public void TargetRpcTest(NetworkConnection conn, int arg1, string arg2)
+        public void TargetRpcTest(int arg1, string arg2)
         {
-            this.targetRpcArg1 = arg1;
-            this.targetRpcArg2 = arg2;
+            targetRpcArg1 = arg1;
+            targetRpcArg2 = arg2;
         }
     }
 
@@ -44,8 +44,8 @@ namespace Mirror.Tests
         public void CommandWithoutAuthority()
         {
             var gameObject2 = new GameObject();
-            var identity2 = gameObject2.AddComponent<NetworkIdentity>();
-            var rpcComponent2 = gameObject2.AddComponent<RpcComponent>();
+            NetworkIdentity identity2 = gameObject2.AddComponent<NetworkIdentity>();
+            RpcComponent rpcComponent2 = gameObject2.AddComponent<RpcComponent>();
 
             // spawn it without client authority
             server.Spawn(gameObject2);
@@ -73,7 +73,6 @@ namespace Mirror.Tests
         [Test]
         public void ClientRpc()
         {
-
             component.RpcTest(1, "hello");
             // process spawn message from server
             client.Update();
@@ -86,7 +85,7 @@ namespace Mirror.Tests
         public void TargetRpc()
         {
 
-            component.TargetRpcTest(manager.server.localConnection, 1, "hello");
+            component.TargetRpcTest(1, "hello");
             // process spawn message from server
             client.Update();
 
