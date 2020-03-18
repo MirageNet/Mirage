@@ -849,6 +849,11 @@ namespace Mirror
                 return;
             }
 
+            // hack sets the current client and server so that we can deserialize
+            // gameobjects and network identities in the reader
+            NetworkClient.Current = client;
+            NetworkServer.Current = server;
+
             // find the right component to invoke the function on
             if (0 <= componentIndex && componentIndex < NetworkBehaviours.Length)
             {
