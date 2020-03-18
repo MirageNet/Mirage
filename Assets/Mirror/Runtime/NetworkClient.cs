@@ -185,20 +185,11 @@ namespace Mirror
 
         internal void OnDataReceived(ArraySegment<byte> data, int channelId)
         {
-            try
+            if (connection != null)
             {
-                if (connection != null)
-                {
-                    Current = this;
-                    connection.TransportReceive(data, channelId);
-                }
-                else throw new InvalidOperationException("Skipped Data message handling because connection is null.");
+                connection.TransportReceive(data, channelId);
             }
-            finally
-            {
-                // don't keep this hack around more than strictly required
-                Current = null;
-            }
+            else throw new InvalidOperationException("Skipped Data message handling because connection is null.");
         }
 
         void OnConnected()

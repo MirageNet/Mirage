@@ -420,21 +420,13 @@ namespace Mirror
 
         void OnDataReceived(int connectionId, ArraySegment<byte> data, int channelId)
         {
-            try
+            if (connections.TryGetValue(connectionId, out NetworkConnectionToClient conn))
             {
-                if (connections.TryGetValue(connectionId, out NetworkConnectionToClient conn))
-                {
-                    Current = this;
-                    conn.TransportReceive(data, channelId);
-                }
-                else
-                {
-                    Debug.LogError("HandleData Unknown connectionId:" + connectionId);
-                }
+                conn.TransportReceive(data, channelId);
             }
-            finally
+            else
             {
-                Current = null;
+                Debug.LogError("HandleData Unknown connectionId:" + connectionId);
             }
         }
 
