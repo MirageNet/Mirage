@@ -150,12 +150,12 @@ namespace Mirror
         }
 
 
-        internal void RegisterMessageHandlers()
+        internal void RegisterMessageHandlers(NetworkConnectionToClient connection)
         {
-            RegisterHandler<ReadyMessage>(OnClientReadyMessage);
-            RegisterHandler<CommandMessage>(OnCommandMessage);
-            RegisterHandler<RemovePlayerMessage>(OnRemovePlayerMessage);
-            RegisterHandler<NetworkPingMessage>(Time.OnServerPing, false);
+            connection.RegisterHandler<NetworkConnectionToClient, ReadyMessage>(OnClientReadyMessage);
+            connection.RegisterHandler<NetworkConnectionToClient, CommandMessage>(OnCommandMessage);
+            connection.RegisterHandler<NetworkConnectionToClient, RemovePlayerMessage>(OnRemovePlayerMessage);
+            connection.RegisterHandler<NetworkConnectionToClient, NetworkPingMessage>(Time.OnServerPing, false);
         }
 
         /// <summary>
@@ -175,7 +175,6 @@ namespace Mirror
             }
 
             active = true;
-            RegisterMessageHandlers();
         }
 
         /// <summary>
@@ -191,7 +190,7 @@ namespace Mirror
                 // connection cannot be null here or conn.connectionId
                 // would throw NRE
                 connections[conn.connectionId] = conn;
-                conn.SetHandlers(handlers);
+                RegisterMessageHandlers(conn);
                 return true;
             }
             // already a connection with this id
@@ -216,8 +215,6 @@ namespace Mirror
                 Debug.LogError("Local Connection already exists");
                 return;
             }
-
-            conn.SetHandlers(handlers);
 
             localConnection = conn;
             localClient = client;
@@ -471,53 +468,6 @@ namespace Mirror
         {
             // TODO Let's discuss how we will handle errors
             Debug.LogException(exception);
-        }
-
-        /// <summary>
-        /// Register a handler for a particular message type.
-        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
-        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
-        public void RegisterHandler<T>(Action<NetworkConnectionToClient, T> handler, bool requireAuthentication = true) where T : IMessageBase, new()
-        {
-            int msgType = MessagePacker.GetId<T>();
-            if (handlers.ContainsKey(msgType))
-            {
-                if (LogFilter.Debug) Debug.Log("NetworkServer.RegisterHandler replacing " + msgType);
-            }
-            handlers[msgType] = NetworkConnection.MessageHandler(handler, requireAuthentication);
-        }
-
-        /// <summary>
-        /// Register a handler for a particular message type.
-        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
-        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
-        public void RegisterHandler<T>(Action<T> handler, bool requireAuthentication = true) where T : IMessageBase, new()
-        {
-            RegisterHandler<T>((_, value) => { handler(value); }, requireAuthentication);
-        }
-
-        /// <summary>
-        /// Unregisters a handler for a particular message type.
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        public void UnregisterHandler<T>() where T : IMessageBase
-        {
-            int msgType = MessagePacker.GetId<T>();
-            handlers.Remove(msgType);
-        }
-
-        /// <summary>
-        /// Clear all registered callback handlers.
-        /// </summary>
-        public void ClearHandlers()
-        {
-            handlers.Clear();
         }
 
         /// <summary>

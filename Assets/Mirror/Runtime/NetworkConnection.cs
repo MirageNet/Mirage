@@ -20,7 +20,8 @@ namespace Mirror
         // internal so it can be tested
         internal readonly HashSet<NetworkIdentity> visList = new HashSet<NetworkIdentity>();
 
-        Dictionary<int, NetworkMessageDelegate> messageHandlers;
+        // message handlers for this connection
+        private readonly Dictionary<int, NetworkMessageDelegate> messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
 
         /// <summary>
         /// Unique identifier for this connection that is assigned by the transport layer.
@@ -178,10 +179,55 @@ namespace Mirror
             return AdapterFunction;
         }
 
-        internal void SetHandlers(Dictionary<int, NetworkMessageDelegate> handlers)
+        /// <summary>
+        /// Register a handler for a particular message type.
+        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
+        /// </summary>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
+        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
+        public void RegisterHandler<C, T>(Action<C, T> handler, bool requireAuthentication = true)
+            where T : IMessageBase, new()
+            where C : NetworkConnection
         {
-            messageHandlers = handlers;
+            int msgType = MessagePacker.GetId<T>();
+            if (messageHandlers.ContainsKey(msgType))
+            {
+                if (LogFilter.Debug) Debug.Log("NetworkServer.RegisterHandler replacing " + msgType);
+            }
+            messageHandlers[msgType] = MessageHandler(handler, requireAuthentication);
         }
+
+        /// <summary>
+        /// Register a handler for a particular message type.
+        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
+        /// </summary>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
+        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
+        public void RegisterHandler<T>(Action<T> handler, bool requireAuthentication = true) where T : IMessageBase, new()
+        {
+            RegisterHandler<NetworkConnection, T>((_, value) => { handler(value); }, requireAuthentication);
+        }
+
+        /// <summary>
+        /// Unregisters a handler for a particular message type.
+        /// </summary>
+        /// <typeparam name="T">Message type</typeparam>
+        public void UnregisterHandler<T>() where T : IMessageBase
+        {
+            int msgType = MessagePacker.GetId<T>();
+            messageHandlers.Remove(msgType);
+        }
+
+        /// <summary>
+        /// Clear all registered callback handlers.
+        /// </summary>
+        public void ClearHandlers()
+        {
+            messageHandlers.Clear();
+        }
+
 
         /// <summary>
         /// This sends a network message with a message ID on the connection. This message is sent on channel zero, which by default is the reliable channel.
