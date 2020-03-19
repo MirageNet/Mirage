@@ -763,14 +763,27 @@ namespace Mirror
             unspawnHandlers.Clear();
         }
 
-        bool InvokeUnSpawnHandler(Guid assetId, GameObject obj)
+        void UnSpawn(NetworkIdentity identity)
         {
+            Guid assetId = identity.assetId;
+
+            identity.OnNetworkDestroy();
             if (unspawnHandlers.TryGetValue(assetId, out UnSpawnDelegate handler) && handler != null)
             {
-                handler(obj);
-                return true;
+                handler(identity.gameObject);
+                return;
             }
-            return false;
+
+            if (identity.sceneId == 0)
+            {
+                Object.Destroy(identity.gameObject);
+            }
+            else
+            {
+                identity.MarkForReset();
+                identity.gameObject.SetActive(false);
+                spawnableObjects[identity.sceneId] = identity;
+            }
         }
 
         /// <summary>
@@ -783,18 +796,7 @@ namespace Mirror
             {
                 if (identity != null && identity.gameObject != null)
                 {
-                    if (!InvokeUnSpawnHandler(identity.assetId, identity.gameObject))
-                    {
-                        if (identity.sceneId == 0)
-                        {
-                            Object.Destroy(identity.gameObject);
-                        }
-                        else
-                        {
-                            identity.MarkForReset();
-                            identity.gameObject.SetActive(false);
-                        }
-                    }
+                    UnSpawn(identity);
                 }
             }
             Spawned.Clear();
@@ -962,24 +964,8 @@ namespace Mirror
 
             if (Spawned.TryGetValue(netId, out NetworkIdentity localObject) && localObject != null)
             {
-                localObject.OnNetworkDestroy();
-
-                if (!InvokeUnSpawnHandler(localObject.assetId, localObject.gameObject))
-                {
-                    // default handling
-                    if (localObject.sceneId == 0)
-                    {
-                        Destroy(localObject.gameObject);
-                    }
-                    else
-                    {
-                        // scene object.. disable it in scene instead of destroying
-                        localObject.gameObject.SetActive(false);
-                        spawnableObjects[localObject.sceneId] = localObject;
-                    }
-                }
+                UnSpawn(localObject);
                 Spawned.Remove(netId);
-                localObject.MarkForReset();
             }
             else
             {
