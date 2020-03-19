@@ -771,10 +771,8 @@ namespace Mirror
             if (unspawnHandlers.TryGetValue(assetId, out UnSpawnDelegate handler) && handler != null)
             {
                 handler(identity.gameObject);
-                return;
             }
-
-            if (identity.sceneId == 0)
+            else if (identity.sceneId == 0)
             {
                 Object.Destroy(identity.gameObject);
             }
