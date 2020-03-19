@@ -90,7 +90,8 @@ namespace Mirror
             // set not ready and handle client disconnect in any case
             // (might be client or host mode here)
             isReady = false;
-            identity.server.localClient.HandleClientDisconnect(this);
+            if (identity != null)
+                identity.client.HandleClientDisconnect(this);
         }
 
         /// <summary>
