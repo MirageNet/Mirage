@@ -65,6 +65,11 @@ namespace Mirror
         public bool isServer => server != null && server.active && netId != 0;
 
         /// <summary>
+        /// Returns true if we're on host mode.
+        /// </summary>
+        public bool isLocalClient => server != null && server.LocalClientActive;
+
+        /// <summary>
         /// This returns true if this object is the one that represents the player on the local machine.
         /// <para>This is set when the server has spawned an object for this particular client.</para>
         /// </summary>
@@ -180,13 +185,6 @@ namespace Mirror
 
         // keep track of all sceneIds to detect scene duplicates
         static readonly Dictionary<ulong, NetworkIdentity> sceneIds = new Dictionary<ulong, NetworkIdentity>();
-
-        /// <summary>
-        /// Obsolete: Use <see cref="GetSceneIdentity(ulong)" /> instead
-        /// </summary>
-        // Deprecated 01/23/2020
-        [EditorBrowsable(EditorBrowsableState.Never), Obsolete("Use GetSceneIdentity instead")]
-        public static NetworkIdentity GetSceneIdenity(ulong id) => GetSceneIdentity(id);
 
         /// <summary>
         /// Gets the NetworkIdentity from the sceneIds dictionary with the corresponding id
@@ -826,6 +824,9 @@ namespace Mirror
 
         internal void OnDeserializeAllSafely(NetworkReader reader, bool initialState)
         {
+            // hack needed so that we can deserialize gameobjects and NI
+
+            NetworkClient.Current = client;
             // read component dirty mask
             ulong dirtyComponentsMask = reader.ReadPackedUInt64();
 
@@ -850,6 +851,11 @@ namespace Mirror
                 Debug.LogWarning(invokeType + " [" + functionHash + "] received for deleted object [netId=" + netId + "]");
                 return;
             }
+
+            // hack sets the current client and server so that we can deserialize
+            // gameobjects and network identities in the reader
+            NetworkClient.Current = client;
+            NetworkServer.Current = server;
 
             // find the right component to invoke the function on
             if (0 <= componentIndex && componentIndex < NetworkBehaviours.Length)
@@ -1093,7 +1099,6 @@ namespace Mirror
             clientAuthorityCallback?.Invoke(conn, this, true);
         }
 
-        // Deprecated 09/25/2019
         /// <summary>
         /// Removes ownership for an object.
         /// <para>This applies to objects that had authority set by AssignClientAuthority, or <see cref="NetworkServer.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included.</para>

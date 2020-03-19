@@ -29,14 +29,12 @@ namespace Mirror.Tests
         public void VariableTest()
         {
             Assert.That(manager.dontDestroyOnLoad, Is.True);
-            Assert.That(manager.runInBackground, Is.True);
             Assert.That(manager.startOnHeadless, Is.True);
             Assert.That(manager.showDebugMessages, Is.False);
             Assert.That(manager.serverTickRate, Is.EqualTo(30));
             Assert.That(manager.offlineScene, Is.Empty);
-            Assert.That(manager.maxConnections, Is.EqualTo(4));
+            Assert.That(manager.server.MaxConnections, Is.EqualTo(4));
             Assert.That(manager.autoCreatePlayer, Is.True);
-            Assert.That(manager.spawnPrefabs, Is.Empty);
             Assert.That(manager.numPlayers, Is.Zero);
             Assert.That(manager.isNetworkActive, Is.False);
 

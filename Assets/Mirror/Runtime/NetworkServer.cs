@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using UnityEngine;
 
 namespace Mirror
@@ -18,7 +17,14 @@ namespace Mirror
     public class NetworkServer : MonoBehaviour
     {
         bool initialized;
-        int maxConnections;
+
+        /// <summary>
+        /// The maximum number of concurrent network connections to support.
+        /// <para>This effects the memory usage of the network layer.</para>
+        /// </summary>
+        [Tooltip("Maximum number of concurrent connections.")]
+        [Min(1)]
+        public int MaxConnections = 4;
 
         /// <summary>
         /// The connection to the host mode client (if any).
@@ -134,10 +140,9 @@ namespace Mirror
         /// </summary>
         /// <param name="maxConns">Maximum number of allowed connections</param>
         /// <returns></returns>
-        public void Listen(int maxConns)
+        public void Listen()
         {
             Initialize();
-            maxConnections = maxConns;
 
             // only start server if we want to listen
             if (!dontListen)
@@ -228,7 +233,6 @@ namespace Mirror
                 NetworkConnection.Send(identity.observers, msg, channelId);
         }
 
-        // Deprecated 03/03/2019
         /// <summary>
         /// Send a message structure with the given type number to all connected clients.
         /// <para>This applies to clients that are ready and not-ready.</para>
@@ -363,7 +367,7 @@ namespace Mirror
             //  less code and third party transport might not do that anyway)
             // (this way we could also send a custom 'tooFull' message later,
             //  Transport can't do that)
-            if (connections.Count < maxConnections)
+            if (connections.Count < MaxConnections)
             {
                 // add connection
                 var conn = new NetworkConnectionToClient(connectionId);
@@ -406,6 +410,14 @@ namespace Mirror
             if (LogFilter.Debug) Debug.Log("Server lost client:" + conn);
         }
 
+        /// <summary>
+        /// server that received the message
+        /// </summary>
+        /// <remarks>This is a hack, but it is needed to deserialize
+        /// gameobjects when processing the message</remarks>
+        /// 
+        internal static NetworkServer Current;
+
         void OnDataReceived(int connectionId, ArraySegment<byte> data, int channelId)
         {
             if (connections.TryGetValue(connectionId, out NetworkConnectionToClient conn))
@@ -424,7 +436,6 @@ namespace Mirror
             Debug.LogException(exception);
         }
 
-        // Deprecated 03/03/2019
         /// <summary>
         /// Register a handler for a particular message type.
         /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
@@ -454,7 +465,6 @@ namespace Mirror
             RegisterHandler<T>((_, value) => { handler(value); }, requireAuthentication);
         }
 
-        // Deprecated 03/03/2019
         /// <summary>
         /// Unregisters a handler for a particular message type.
         /// </summary>
@@ -473,7 +483,6 @@ namespace Mirror
             handlers.Clear();
         }
 
-        // Deprecated 03/03/2019
         /// <summary>
         /// send this message to the player only
         /// </summary>

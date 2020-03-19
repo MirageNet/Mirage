@@ -49,6 +49,11 @@ namespace Mirror
         public bool isClient => netIdentity.isClient;
 
         /// <summary>
+        /// Returns true if we're on host mode.
+        /// </summary>
+        public bool isLocalClient => netIdentity.isLocalClient;
+
+        /// <summary>
         /// This returns true if this object is the one that represents the player on the local machine.
         /// <para>In multiplayer games, there are multiple instances of the Player object. The client needs to know which one is for "themselves" so that only that player processes input and potentially has a camera attached. The IsLocalPlayer function will return true only for the player instance that belongs to the player on the local machine, so it can be used to filter out input for non-local players.</para>
         /// </summary>
@@ -112,7 +117,6 @@ namespace Mirror
                 syncVarHookGuard &= ~dirtyBit;
         }
 
-        // Deprecated 04/07/2019
         /// <summary>
         /// objects that can synchronize themselves, such as synclists
         /// </summary>
@@ -529,6 +533,9 @@ namespace Mirror
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected GameObject GetSyncVarGameObject(uint netId, ref GameObject gameObjectField)
         {
+            if (!isServer && !isClient)
+                return gameObjectField;
+
             // server always uses the field
             if (isServer)
             {
@@ -539,6 +546,7 @@ namespace Mirror
             // over and over again, which shouldn't null them forever
             if (client.Spawned.TryGetValue(netId, out NetworkIdentity identity) && identity != null)
                 return gameObjectField = identity.gameObject;
+
             return null;
         }
 

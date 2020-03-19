@@ -62,6 +62,12 @@ namespace Mirror
         /// </summary>
         public bool isConnected => connectState == ConnectState.Connected;
 
+        /// <summary>
+        /// List of prefabs that will be registered with the spawning system.
+        /// <para>For each of these prefabs, ClientManager.RegisterPrefab() will be automatically invoke.</para>
+        /// </summary>
+        public List<GameObject> spawnPrefabs = new List<GameObject>();
+
         readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
 
         public readonly NetworkTime Time = new NetworkTime();
@@ -106,7 +112,7 @@ namespace Mirror
         /// <summary>
         /// The host server
         /// </summary>
-        private NetworkServer hostServer;
+        NetworkServer hostServer;
 
         /// <summary>
         /// NetworkClient can connect to local server in host mode too
@@ -207,13 +213,21 @@ namespace Mirror
             connection?.InvokeHandler(new DisconnectMessage(), -1);
         }
 
+        /// <summary>
+        /// client that received the message
+        /// </summary>
+        /// <remarks>This is a hack, but it is needed to deserialize
+        /// gameobjects when processing the message</remarks>
+        /// 
+        internal static NetworkClient Current { get; set; }
+
         internal void OnDataReceived(ArraySegment<byte> data, int channelId)
         {
             if (connection != null)
             {
                 connection.TransportReceive(data, channelId);
             }
-            else Debug.LogError("Skipped Data message handling because connection is null.");
+            else throw new InvalidOperationException("Skipped Data message handling because connection is null.");
         }
 
         void OnConnected()
@@ -304,6 +318,18 @@ namespace Mirror
                 if (active && connectState == ConnectState.Connected)
                 {
                     Time.UpdateClient(this);
+                }
+            }
+        }
+
+        internal void RegisterSpawnPrefabs()
+        {
+            for (int i = 0; i < spawnPrefabs.Count; i++)
+            {
+                GameObject prefab = spawnPrefabs[i];
+                if (prefab != null)
+                {
+                    ClientScene.RegisterPrefab(prefab);
                 }
             }
         }

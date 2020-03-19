@@ -35,14 +35,6 @@ namespace Mirror
         public bool dontDestroyOnLoad = true;
 
         /// <summary>
-        /// Controls whether the program runs when it is in the background.
-        /// <para>This is required when multiple instances of a program using networking are running on the same machine, such as when testing using localhost. But this is not recommended when deploying to mobile platforms.</para>
-        /// </summary>
-        [FormerlySerializedAs("m_RunInBackground")]
-        [Tooltip("Should the server or client keep running in the background?")]
-        public bool runInBackground = true;
-
-        /// <summary>
         /// Automatically invoke StartServer()
         /// <para>If the application is a Server Build or run with the -batchMode command line arguement, StartServer is automatically invoked.</para>
         /// </summary>
@@ -90,14 +82,6 @@ namespace Mirror
         [SerializeField]
         protected Transport transport;
 
-        /// <summary>
-        /// The maximum number of concurrent network connections to support.
-        /// <para>This effects the memory usage of the network layer.</para>
-        /// </summary>
-        [FormerlySerializedAs("m_MaxConnections")]
-        [Tooltip("Maximum number of concurrent connections.")]
-        public int maxConnections = 4;
-
         [Header("Authentication")]
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
@@ -126,13 +110,6 @@ namespace Mirror
         public PlayerSpawnMethod playerSpawnMethod;
 
         /// <summary>
-        /// List of prefabs that will be registered with the spawning system.
-        /// <para>For each of these prefabs, ClientManager.RegisterPrefab() will be automatically invoke.</para>
-        /// </summary>
-        [FormerlySerializedAs("m_SpawnPrefabs")]
-        public List<GameObject> spawnPrefabs = new List<GameObject>();
-
-        /// <summary>
         /// Number of active player objects across all connections on the server.
         /// <para>This is only valid on the host / server.</para>
         /// </summary>
@@ -154,7 +131,6 @@ namespace Mirror
         [NonSerialized]
         public bool clientLoadedScene;
 
-        // Deprecated 03/27/2019
         /// <summary>
         /// headless mode detection
         /// </summary>
@@ -209,8 +185,6 @@ namespace Mirror
                 UnityEditor.Undo.RecordObject(gameObject, "Added NetworkClient");
 #endif
             }
-
-            maxConnections = Mathf.Max(maxConnections, 0); // always >= 0
 
             if (playerPrefab != null && playerPrefab.GetComponent<NetworkIdentity>() == null)
             {
@@ -285,9 +259,6 @@ namespace Mirror
             if (LogFilter.Debug) Debug.Log("NetworkManager SetupServer");
             Initialize();
 
-            if (runInBackground)
-                Application.runInBackground = true;
-
             if (authenticator != null)
             {
                 authenticator.OnStartServer();
@@ -297,7 +268,7 @@ namespace Mirror
             ConfigureServerFrameRate();
 
             // start listening to network connections
-            server.Listen(maxConnections);
+            server.Listen();
 
             // call OnStartServer AFTER Listen, so that NetworkServer.active is
             // true and we can call NetworkServer.Spawn in OnStartServer
@@ -370,9 +341,6 @@ namespace Mirror
                 authenticator.OnClientAuthenticated += OnClientAuthenticated;
             }
 
-            if (runInBackground)
-                Application.runInBackground = true;
-
             isNetworkActive = true;
 
             RegisterClientMessages();
@@ -404,11 +372,6 @@ namespace Mirror
             {
                 authenticator.OnStartClient();
                 authenticator.OnClientAuthenticated += OnClientAuthenticated;
-            }
-
-            if (runInBackground)
-            {
-                Application.runInBackground = true;
             }
 
             isNetworkActive = true;
@@ -704,14 +667,8 @@ namespace Mirror
             {
                 client.RegisterPrefab(playerPrefab);
             }
-            for (int i = 0; i < spawnPrefabs.Count; i++)
-            {
-                GameObject prefab = spawnPrefabs[i];
-                if (prefab != null)
-                {
-                    client.RegisterPrefab(prefab);
-                }
-            }
+
+            client.RegisterSpawnPrefabs();
         }
 
         void CleanupNetworkIdentities()
@@ -1091,7 +1048,7 @@ namespace Mirror
             OnServerReady(conn);
         }
 
-        void OnServerAddPlayerInternal(NetworkConnection conn, AddPlayerMessage extraMessage)
+        void OnServerAddPlayerInternal(NetworkConnection conn, AddPlayerMessage msg)
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerAddPlayer");
 
@@ -1370,7 +1327,6 @@ namespace Mirror
         /// <param name="conn">Connection to the server.</param>
         public virtual void OnClientNotReady(NetworkConnection conn) { }
 
-        // Deprecated 09/17/2019
         /// <summary>
         /// Called from ClientChangeScene immediately before SceneManager.LoadSceneAsync is executed
         /// <para>This allows client to do work / cleanup / prep before the scene changes.</para>
@@ -1418,7 +1374,6 @@ namespace Mirror
         /// </summary>
         public virtual void OnStartServer() { }
 
-        // Deprecated 03/25/2019
         /// <summary>
         /// This is invoked when the client is started.
         /// </summary>
