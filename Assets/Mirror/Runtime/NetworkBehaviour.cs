@@ -532,7 +532,10 @@ namespace Mirror
         // -> ref GameObject as second argument makes OnDeserialize processing easier
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected GameObject GetSyncVarGameObject(uint netId, ref GameObject gameObjectField)
-        {            
+        {
+            if (!isServer && !isClient)
+                return gameObjectField;
+
             // server always uses the field
             if (isServer)
             {
@@ -541,10 +544,10 @@ namespace Mirror
 
             // client always looks up based on netId because objects might get in and out of range
             // over and over again, which shouldn't null them forever
-            if (isClient && client.Spawned.TryGetValue(netId, out NetworkIdentity identity) && identity != null)
+            if (client.Spawned.TryGetValue(netId, out NetworkIdentity identity) && identity != null)
                 return gameObjectField = identity.gameObject;
 
-            return gameObjectField;
+            return null;
         }
 
         // helper function for [SyncVar] NetworkIdentities.
