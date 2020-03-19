@@ -329,7 +329,7 @@ namespace Mirror
                 GameObject prefab = spawnPrefabs[i];
                 if (prefab != null)
                 {
-                    ClientScene.RegisterPrefab(prefab);
+                    RegisterPrefab(prefab);
                 }
             }
         }
