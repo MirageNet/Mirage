@@ -726,9 +726,6 @@ namespace Mirror
             // Suspend the server's transport while changing scenes
             // It will be re-enabled in FinishScene.
             Transport.activeTransport.enabled = false;
-
-            client.server = server;
-
             loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
 
             // notify all clients about the new scene
@@ -758,9 +755,6 @@ namespace Mirror
             // (client may be null after StopClient etc.)
             if (LogFilter.Debug) Debug.Log("ClientChangeScene: pausing handlers while scene is loading to avoid data loss after scene was loaded.");
             Transport.activeTransport.enabled = false;
-
-            client.server = server;
-
             // Let client prepare for scene change
             OnClientChangeScene(newSceneName, sceneOperation, customHandling);
 
@@ -1292,8 +1286,6 @@ namespace Mirror
             // clientLoadedScene flag to prevent it.
             if (!clientLoadedScene)
             {
-                client.server = server;
-
                 // Ready/AddPlayer is usually triggered by a scene load completing. if no scene was loaded, then Ready/AddPlayer it here instead.
                 if (!client.ready) client.Ready(conn);
                 if (autoCreatePlayer)

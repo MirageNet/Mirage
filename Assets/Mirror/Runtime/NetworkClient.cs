@@ -40,11 +40,6 @@ namespace Mirror
         public NetworkConnection connection { get; internal set; }
 
         /// <summary>
-        /// The current NetworkServer this client is connected to.
-        /// </summary>
-        public NetworkServer server { get; set; }
-
-        /// <summary>
         /// NetworkIdentity of the localPlayer
         /// </summary>
         public NetworkIdentity localPlayer { get; private set; }
@@ -823,7 +818,7 @@ namespace Mirror
             identity.transform.localScale = msg.scale;
             identity.hasAuthority = msg.isOwner;
             identity.netId = msg.netId;
-            identity.server = server;
+            identity.server = hostServer;
             identity.client = this;
 
             if (msg.isLocalPlayer)
