@@ -673,10 +673,6 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("ClientScene.OnUpdateVarsMessage " + msg.netId);
 
-            // hack so that when deserializing syncvars with NetworkIdentities
-            // the serializer can look in the current client
-
-            NetworkClient.Current = client;
             if (client.Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
             {
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))

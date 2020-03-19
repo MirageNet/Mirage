@@ -181,7 +181,7 @@ namespace Mirror
         /// <remarks>This is a hack, but it is needed to deserialize
         /// gameobjects when processing the message</remarks>
         /// 
-        internal static NetworkClient Current ;
+        internal static NetworkClient Current { get; set; }
 
         internal void OnDataReceived(ArraySegment<byte> data, int channelId)
         {

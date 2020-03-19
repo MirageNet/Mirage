@@ -824,6 +824,9 @@ namespace Mirror
 
         internal void OnDeserializeAllSafely(NetworkReader reader, bool initialState)
         {
+            // hack needed so that we can deserialize gameobjects and NI
+
+            NetworkClient.Current = client;
             // read component dirty mask
             ulong dirtyComponentsMask = reader.ReadPackedUInt64();
 
