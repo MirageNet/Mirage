@@ -84,6 +84,7 @@ namespace Mirror
 
         [Header("Authentication")]
         [Tooltip("Authentication component attached to this object")]
+        [Obsolete("assign it in NetworkClient and NetworkServer")]
         public NetworkAuthenticator authenticator;
 
         /// <summary>
