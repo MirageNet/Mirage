@@ -36,6 +36,7 @@ namespace Mirror.Weaver
             if (hasNetworkConnection)
             {
                 //ClientScene.readyconnection
+                rpcWorker.Append(rpcWorker.Create(OpCodes.Ldarg_0));
                 rpcWorker.Append(rpcWorker.Create(OpCodes.Call, Weaver.ReadyConnectionReference));
             }
 
