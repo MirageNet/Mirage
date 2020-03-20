@@ -770,7 +770,7 @@ namespace Mirror
             }
             else if (identity.sceneId == 0)
             {
-                Object.Destroy(identity.gameObject);
+                Destroy(identity.gameObject);
             }
             else
             {
