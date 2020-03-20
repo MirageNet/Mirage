@@ -202,10 +202,8 @@ namespace Mirror
         void OnDisconnected()
         {
             connectState = ConnectState.Disconnected;
-
-            HandleClientDisconnect(connection);
-
             connection?.InvokeHandler(new DisconnectMessage(), -1);
+            HandleClientDisconnect(connection);
         }
 
         /// <summary>
@@ -244,7 +242,6 @@ namespace Mirror
         public void Disconnect()
         {
             connectState = ConnectState.Disconnected;
-            HandleClientDisconnect(connection);
 
             // local or remote connection?
             if (isLocalClient)
@@ -260,11 +257,10 @@ namespace Mirror
                 if (connection != null)
                 {
                     connection.Disconnect();
-                    connection.Dispose();
-                    connection = null;
                     RemoveTransportHandlers();
                 }
             }
+            HandleClientDisconnect(connection);
         }
 
         void RemoveTransportHandlers()
