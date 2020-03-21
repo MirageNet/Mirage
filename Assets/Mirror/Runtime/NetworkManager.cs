@@ -82,11 +82,6 @@ namespace Mirror
         [SerializeField]
         protected Transport transport;
 
-        [Header("Authentication")]
-        [Tooltip("Authentication component attached to this object")]
-        [Obsolete("assign it in NetworkClient and NetworkServer")]
-        public NetworkAuthenticator authenticator;
-
         /// <summary>
         /// The default prefab to be used to create player objects on the server.
         /// <para>Player objects are created in the default handler for AddPlayer() on the server. Implementing OnServerAddPlayer overrides this behaviour.</para>
@@ -253,10 +248,10 @@ namespace Mirror
             if (LogFilter.Debug) Debug.Log("NetworkManager SetupServer");
             Initialize();
 
-            if (authenticator != null)
+            if (server.authenticator != null)
             {
-                authenticator.OnStartServer();
-                authenticator.OnServerAuthenticated += OnServerAuthenticated;
+                server.authenticator.OnStartServer();
+                server.authenticator.OnServerAuthenticated += OnServerAuthenticated;
             }
 
             ConfigureServerFrameRate();
@@ -329,10 +324,10 @@ namespace Mirror
 
             Initialize();
 
-            if (authenticator != null)
+            if (client.authenticator != null)
             {
-                authenticator.OnStartClient();
-                authenticator.OnClientAuthenticated += OnClientAuthenticated;
+                client.authenticator.OnStartClient();
+                client.authenticator.OnClientAuthenticated += OnClientAuthenticated;
             }
 
             isNetworkActive = true;
@@ -362,10 +357,10 @@ namespace Mirror
 
             Initialize();
 
-            if (authenticator != null)
+            if (client.authenticator != null)
             {
-                authenticator.OnStartClient();
-                authenticator.OnClientAuthenticated += OnClientAuthenticated;
+                client.authenticator.OnStartClient();
+                client.authenticator.OnClientAuthenticated += OnClientAuthenticated;
             }
 
             isNetworkActive = true;
@@ -487,10 +482,10 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager ConnectLocalClient");
 
-            if (authenticator != null)
+            if (client.authenticator != null)
             {
-                authenticator.OnStartClient();
-                authenticator.OnClientAuthenticated += OnClientAuthenticated;
+                client.authenticator.OnStartClient();
+                client.authenticator.OnClientAuthenticated += OnClientAuthenticated;
             }
 
             server.ActivateHostScene();
@@ -521,8 +516,8 @@ namespace Mirror
             if (!server.active)
                 return;
 
-            if (authenticator != null)
-                authenticator.OnServerAuthenticated -= OnServerAuthenticated;
+            if (server.authenticator != null)
+                server.authenticator.OnServerAuthenticated -= OnServerAuthenticated;
 
             OnStopServer();
 
@@ -548,8 +543,8 @@ namespace Mirror
         /// </summary>
         public void StopClient()
         {
-            if (authenticator != null)
-                authenticator.OnClientAuthenticated -= OnClientAuthenticated;
+            if (client.authenticator != null)
+                client.authenticator.OnClientAuthenticated -= OnClientAuthenticated;
 
             OnStopClient();
 
@@ -994,10 +989,10 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerConnectInternal");
 
-            if (authenticator != null)
+            if (server.authenticator != null)
             {
                 // we have an authenticator - let it handle authentication
-                authenticator.OnServerAuthenticateInternal(conn);
+                server.authenticator.OnServerAuthenticateInternal(conn);
             }
             else
             {
@@ -1086,10 +1081,10 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnClientConnectInternal");
 
-            if (authenticator != null)
+            if (client.authenticator != null)
             {
                 // we have an authenticator - let it handle authentication
-                authenticator.OnClientAuthenticateInternal(conn);
+                client.authenticator.OnClientAuthenticateInternal(conn);
             }
             else
             {
