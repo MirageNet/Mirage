@@ -545,7 +545,7 @@ namespace Mirror
             }
         }
 
-        internal void OnStartServer()
+        internal void StartServer()
         {
             // If the instance/net ID is invalid here then this is an object instantiated from a prefab and the server should assign a valid ID
             if (netId != 0)
@@ -565,123 +565,47 @@ namespace Mirror
             // because we already set m_isServer=true above)
             server.spawned[netId] = this;
 
-            foreach (NetworkBehaviour comp in NetworkBehaviours)
-            {
-                // an exception in OnStartServer should be caught, so that one
-                // component's exception doesn't stop all other components from
-                // being initialized
-                // => this is what Unity does for Start() etc. too.
-                //    one exception doesn't stop all the other Start() calls!
-                try
-                {
-                    comp.OnStartServer();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("Exception in OnStartServer:" + e.Message + " " + e.StackTrace);
-                }
-            }
+            OnStartServer.Invoke();
         }
 
         bool clientStarted;
-        internal void OnStartClient()
+        internal void StartClient()
         {
             if (clientStarted)
                 return;
             clientStarted = true;
 
-            if (LogFilter.Debug) Debug.Log("OnStartClient " + gameObject + " netId:" + netId);
-            foreach (NetworkBehaviour comp in NetworkBehaviours)
-            {
-                // an exception in OnStartClient should be caught, so that one
-                // component's exception doesn't stop all other components from
-                // being initialized
-                // => this is what Unity does for Start() etc. too.
-                //    one exception doesn't stop all the other Start() calls!
-                try
-                {
-                    comp.OnStartClient(); // user implemented startup
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("Exception in OnStartClient:" + e.Message + " " + e.StackTrace);
-                }
-            }
+            OnStartClient.Invoke();
         }
 
         static NetworkIdentity previousLocalPlayer = null;
-        internal void OnStartLocalPlayer()
+        internal void StartLocalPlayer()
         {
             if (previousLocalPlayer == this)
                 return;
             previousLocalPlayer = this;
 
-            foreach (NetworkBehaviour comp in NetworkBehaviours)
-            {
-                // an exception in OnStartLocalPlayer should be caught, so that
-                // one component's exception doesn't stop all other components
-                // from being initialized
-                // => this is what Unity does for Start() etc. too.
-                //    one exception doesn't stop all the other Start() calls!
-                try
-                {
-                    comp.OnStartLocalPlayer();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("Exception in OnStartLocalPlayer:" + e.Message + " " + e.StackTrace);
-                }
-            }
+            OnStartLocalPlayer.Invoke();
         }
 
         bool hadAuthority;
         internal void NotifyAuthority()
         {
             if (!hadAuthority && hasAuthority)
-                OnStartAuthority();
+                StartAuthority();
             if (hadAuthority && !hasAuthority)
-                OnStopAuthority();
+                StopAuthority();
             hadAuthority = hasAuthority;
         }
 
-        internal void OnStartAuthority()
+        internal void StartAuthority()
         {
-            foreach (NetworkBehaviour comp in NetworkBehaviours)
-            {
-                // an exception in OnStartAuthority should be caught, so that one
-                // component's exception doesn't stop all other components from
-                // being initialized
-                // => this is what Unity does for Start() etc. too.
-                //    one exception doesn't stop all the other Start() calls!
-                try
-                {
-                    comp.OnStartAuthority();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("Exception in OnStartAuthority:" + e.Message + " " + e.StackTrace);
-                }
-            }
+            OnStartAuthority.Invoke();
         }
 
-        internal void OnStopAuthority()
+        internal void StopAuthority()
         {
-            foreach (NetworkBehaviour comp in NetworkBehaviours)
-            {
-                // an exception in OnStopAuthority should be caught, so that one
-                // component's exception doesn't stop all other components from
-                // being initialized
-                // => this is what Unity does for Start() etc. too.
-                //    one exception doesn't stop all the other Start() calls!
-                try
-                {
-                    comp.OnStopAuthority();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("Exception in OnStopAuthority:" + e.Message + " " + e.StackTrace);
-                }
-            }
+            OnStopAuthority.Invoke();
         }
 
         internal void OnSetHostVisibility(bool visible)
@@ -716,24 +640,9 @@ namespace Mirror
             return true;
         }
 
-        internal void OnNetworkDestroy()
+        internal void NetworkDestroy()
         {
-            foreach (NetworkBehaviour comp in NetworkBehaviours)
-            {
-                // an exception in OnNetworkDestroy should be caught, so that
-                // one component's exception doesn't stop all other components
-                // from being initialized
-                // => this is what Unity does for Start() etc. too.
-                //    one exception doesn't stop all the other Start() calls!
-                try
-                {
-                    comp.OnNetworkDestroy();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("Exception in OnNetworkDestroy:" + e.Message + " " + e.StackTrace);
-                }
-            }
+            OnNetworkDestroy.Invoke();
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

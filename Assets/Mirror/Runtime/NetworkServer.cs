@@ -218,7 +218,7 @@ namespace Mirror
                 {
                     if (LogFilter.Debug) Debug.Log("ActivateHostScene " + identity.netId + " " + identity);
 
-                    identity.OnStartClient();
+                    identity.OnStartClient.Invoke();
                 }
             }
         }
@@ -848,7 +848,7 @@ namespace Mirror
             if (ownerConnection is ULocalConnectionToClient)
                 identity.hasAuthority = true;
 
-            identity.OnStartServer();
+            identity.OnStartServer.Invoke();
 
             if (LogFilter.Debug) Debug.Log("SpawnObject instance ID " + identity.netId + " asset ID " + identity.assetId);
 
@@ -1013,7 +1013,7 @@ namespace Mirror
             identity.ClearObservers();
             if (LocalClientActive)
             {
-                identity.OnNetworkDestroy();
+                identity.OnNetworkDestroy.Invoke();
             }
 
             // when unspawning, dont destroy the server's object
