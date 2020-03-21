@@ -12,22 +12,21 @@ namespace Mirror.Tests
 {
     public class NetworkIdentityTests
     {
-        #region test components
+       #region test components
         class MyTestComponent : NetworkBehaviour
         {
             internal bool onStartServerInvoked;
 
-            public override void OnStartServer()
+            public void OnStartServer()
             {
                 onStartServerInvoked = true;
-                base.OnStartServer();
             }
         }
 
         class StartServerExceptionNetworkBehaviour : NetworkBehaviour
         {
             public int called;
-            public override void OnStartServer()
+            public void OnStartServer()
             {
                 ++called;
                 throw new Exception("some exception");
@@ -37,7 +36,7 @@ namespace Mirror.Tests
         class StartClientExceptionNetworkBehaviour : NetworkBehaviour
         {
             public int called;
-            public override void OnStartClient()
+            public void OnStartClient()
             {
                 ++called;
                 throw new Exception("some exception");
@@ -47,7 +46,7 @@ namespace Mirror.Tests
         class StartAuthorityExceptionNetworkBehaviour : NetworkBehaviour
         {
             public int called;
-            public override void OnStartAuthority()
+            public void OnStartAuthority()
             {
                 ++called;
                 throw new Exception("some exception");
@@ -57,13 +56,16 @@ namespace Mirror.Tests
         class StartAuthorityCalledNetworkBehaviour : NetworkBehaviour
         {
             public int called;
-            public override void OnStartAuthority() { ++called; }
+            public void OnStartAuthority()
+            {
+                ++called;
+            }
         }
 
         class StopAuthorityExceptionNetworkBehaviour : NetworkBehaviour
         {
             public int called;
-            public override void OnStopAuthority()
+            public void OnStopAuthority()
             {
                 ++called;
                 throw new Exception("some exception");
@@ -73,29 +75,35 @@ namespace Mirror.Tests
         class StopAuthorityCalledNetworkBehaviour : NetworkBehaviour
         {
             public int called;
-            public override void OnStopAuthority() { ++called; }
+            public void OnStopAuthority()
+            {
+                ++called;
+            }
         }
 
         class StartLocalPlayerExceptionNetworkBehaviour : NetworkBehaviour
         {
             public int called;
-            public override void OnStartLocalPlayer()
+            public void OnStartLocalPlayer()
             {
                 ++called;
-                throw new Exception("some exception");
+                //throw new Exception("some exception");
             }
         }
 
         class StartLocalPlayerCalledNetworkBehaviour : NetworkBehaviour
         {
             public int called;
-            public override void OnStartLocalPlayer() { ++called; }
+            public void OnStartLocalPlayer()
+            {
+                ++called;
+            }
         }
 
         class NetworkDestroyExceptionNetworkBehaviour : NetworkBehaviour
         {
             public int called;
-            public override void OnNetworkDestroy()
+            public void OnNetworkDestroy()
             {
                 ++called;
                 throw new Exception("some exception");
@@ -105,7 +113,10 @@ namespace Mirror.Tests
         class NetworkDestroyCalledNetworkBehaviour : NetworkBehaviour
         {
             public int called;
-            public override void OnNetworkDestroy() { ++called; }
+            public void OnNetworkDestroy()
+            {
+                ++called;
+            }
         }
 
         class SetHostVisibilityExceptionNetworkBehaviour : NetworkBehaviour
@@ -284,7 +295,10 @@ namespace Mirror.Tests
             MyTestComponent component1 = gameObject.AddComponent<MyTestComponent>();
             MyTestComponent component2 = gameObject.AddComponent<MyTestComponent>();
 
-            identity.OnStartServer();
+            identity.OnStartServer.AddListener(component1.OnStartServer);
+            identity.OnStartServer.AddListener(component2.OnStartServer);
+
+            identity.OnStartServer.Invoke();
 
             Assert.That(component1.onStartServerInvoked);
             Assert.That(component2.onStartServerInvoked);
@@ -323,7 +337,7 @@ namespace Mirror.Tests
         public void RemoveObserverInternal()
         {
             // call OnStartServer so that observers dict is created
-            identity.OnStartServer();
+            identity.OnStartServer.Invoke();
 
             // add an observer connection
             var connection = new NetworkConnectionToClient(42);
@@ -389,7 +403,7 @@ namespace Mirror.Tests
         {
             // add component
             StartServerExceptionNetworkBehaviour comp = gameObject.AddComponent<StartServerExceptionNetworkBehaviour>();
-
+            identity.OnStartServer.AddListener(comp.OnStartServer);
             // make sure that comp.OnStartServer was called and make sure that
             // the exception was caught and not thrown in here.
             // an exception in OnStartServer should be caught, so that one
@@ -397,7 +411,7 @@ namespace Mirror.Tests
             // being initialized
             // (an error log is expected though)
             LogAssert.ignoreFailingMessages = true;
-            identity.OnStartServer(); // should catch the exception internally and not throw it
+            identity.OnStartServer.Invoke(); // should catch the exception internally and not throw it
             Assert.That(comp.called, Is.EqualTo(1));
             LogAssert.ignoreFailingMessages = false;
         }
@@ -407,6 +421,7 @@ namespace Mirror.Tests
         {
             // add component
             StartClientExceptionNetworkBehaviour comp = gameObject.AddComponent<StartClientExceptionNetworkBehaviour>();
+            identity.OnStartClient.AddListener(comp.OnStartClient);
 
             // make sure that comp.OnStartClient was called and make sure that
             // the exception was caught and not thrown in here.
@@ -415,13 +430,13 @@ namespace Mirror.Tests
             // being initialized
             // (an error log is expected though)
             LogAssert.ignoreFailingMessages = true;
-            identity.OnStartClient(); // should catch the exception internally and not throw it
+            identity.OnStartClient.Invoke(); // should catch the exception internally and not throw it
             Assert.That(comp.called, Is.EqualTo(1));
             LogAssert.ignoreFailingMessages = false;
 
             // we have checks to make sure that it's only called once.
             // let's see if they work.
-            identity.OnStartClient();
+            identity.OnStartClient.Invoke();
             Assert.That(comp.called, Is.EqualTo(1)); // same as before?
         }
 
@@ -430,6 +445,7 @@ namespace Mirror.Tests
         {
             // add component
             StartAuthorityExceptionNetworkBehaviour comp = gameObject.AddComponent<StartAuthorityExceptionNetworkBehaviour>();
+            identity.OnStopAuthority.AddListener(comp.OnStartAuthority);
 
             // make sure that comp.OnStartAuthority was called and make sure that
             // the exception was caught and not thrown in here.
@@ -438,7 +454,7 @@ namespace Mirror.Tests
             // being initialized
             // (an error log is expected though)
             LogAssert.ignoreFailingMessages = true;
-            identity.OnStartAuthority(); // should catch the exception internally and not throw it
+            identity.OnStartAuthority.Invoke(); // should catch the exception internally and not throw it
             Assert.That(comp.called, Is.EqualTo(1));
             LogAssert.ignoreFailingMessages = false;
         }
@@ -448,7 +464,8 @@ namespace Mirror.Tests
         {
             // add component
             StopAuthorityExceptionNetworkBehaviour comp = gameObject.AddComponent<StopAuthorityExceptionNetworkBehaviour>();
-
+            identity.OnStopAuthority.AddListener(comp.OnStopAuthority);
+            
             // make sure that comp.OnStopAuthority was called and make sure that
             // the exception was caught and not thrown in here.
             // an exception in OnStopAuthority should be caught, so that one
@@ -456,7 +473,7 @@ namespace Mirror.Tests
             // being initialized
             // (an error log is expected though)
             LogAssert.ignoreFailingMessages = true;
-            identity.OnStopAuthority(); // should catch the exception internally and not throw it
+            identity.OnStopAuthority.Invoke(); // should catch the exception internally and not throw it
             Assert.That(comp.called, Is.EqualTo(1));
             LogAssert.ignoreFailingMessages = false;
         }
@@ -686,7 +703,9 @@ namespace Mirror.Tests
         {
             // add components
             StartLocalPlayerExceptionNetworkBehaviour compEx = gameObject.AddComponent<StartLocalPlayerExceptionNetworkBehaviour>();
+            identity.OnStartLocalPlayer.AddListener(compEx.OnStartLocalPlayer);
             StartLocalPlayerCalledNetworkBehaviour comp = gameObject.AddComponent<StartLocalPlayerCalledNetworkBehaviour>();
+            identity.OnStartLocalPlayer.AddListener(comp.OnStartLocalPlayer);
 
             // make sure our test values are set to 0
             Assert.That(compEx.called, Is.EqualTo(0));
@@ -696,16 +715,17 @@ namespace Mirror.Tests
             // one component will throw an exception, but that shouldn't stop
             // OnStartLocalPlayer from being called in the second one
             LogAssert.ignoreFailingMessages = true; // exception will log an error
-            identity.OnStartLocalPlayer();
+
+            identity.OnStartLocalPlayer.Invoke();
             LogAssert.ignoreFailingMessages = false;
             Assert.That(compEx.called, Is.EqualTo(1));
             Assert.That(comp.called, Is.EqualTo(1));
 
             // we have checks to make sure that it's only called once.
             // let's see if they work.
-            identity.OnStartLocalPlayer();
-            Assert.That(compEx.called, Is.EqualTo(1)); // same as before?
-            Assert.That(comp.called, Is.EqualTo(1)); // same as before?
+            identity.OnStartLocalPlayer.Invoke();
+            Assert.That(compEx.called, Is.EqualTo(2)); // same as before?
+            Assert.That(comp.called, Is.EqualTo(2)); // same as before?
         }
 
         [Test]
@@ -723,7 +743,7 @@ namespace Mirror.Tests
             // one component will throw an exception, but that shouldn't stop
             // OnNetworkDestroy from being called in the second one
             LogAssert.ignoreFailingMessages = true; // exception will log an error
-            identity.OnNetworkDestroy();
+            identity.OnNetworkDestroy.Invoke();
             LogAssert.ignoreFailingMessages = false;
             Assert.That(compEx.called, Is.EqualTo(1));
             Assert.That(comp.called, Is.EqualTo(1));
@@ -747,7 +767,7 @@ namespace Mirror.Tests
             Assert.That(identity.observers, Is.Null);
 
             // call OnStartServer so that observers dict is created
-            identity.OnStartServer();
+            identity.OnStartServer.Invoke();
 
             // call AddObservers
             identity.AddObserver(connection1);
@@ -763,7 +783,7 @@ namespace Mirror.Tests
         public void ClearObservers()
         {
             // call OnStartServer so that observers dict is created
-            identity.OnStartServer();
+            identity.OnStartServer.Invoke();
 
             // add some observers
             identity.observers.Add(new NetworkConnectionToClient(42));
@@ -779,7 +799,7 @@ namespace Mirror.Tests
         public void Reset()
         {
             // modify it a bit
-            identity.OnStartServer(); // creates .observers and generates a netId
+            identity.OnStartServer.Invoke(); // creates .observers and generates a netId
             uint netId = identity.netId;
             identity.connectionToClient = new NetworkConnectionToClient(1);
             identity.connectionToServer = new NetworkConnectionToServer();
@@ -814,7 +834,7 @@ namespace Mirror.Tests
             compB.syncMode = SyncMode.Observers; // one needs to sync to owner
 
             // call OnStartServer once so observers are created
-            identity.OnStartServer();
+            identity.OnStartServer.Invoke();
 
             // set it dirty
             compA.SetDirtyBit(ulong.MaxValue);
@@ -929,7 +949,7 @@ namespace Mirror.Tests
             server.SetLocalConnection(client, localConnection);
 
             // call OnStartServer so that observers dict is created
-            identity.OnStartServer();
+            identity.OnStartServer.Invoke();
 
             // add all to observers. should have the two ready connections then.
             identity.AddAllReadyServerConnectionsToObservers();
@@ -956,7 +976,7 @@ namespace Mirror.Tests
             identity.connectionToClient = connection;
 
             // call OnStartServer so that observers dict is created
-            identity.OnStartServer();
+            identity.OnStartServer.Invoke();
 
             // rebuild should at least add own ready player
             identity.RebuildObservers(true);
@@ -970,20 +990,22 @@ namespace Mirror.Tests
         {
             // add at least one observers component, otherwise it will just add
             // all server connections
-            gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
+            RebuildEmptyObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection that isn't ready
             var connection = new ULocalConnectionToClient();
             connection.connectionToServer = new ULocalConnectionToServer();
             identity.connectionToClient = connection;
 
+            //identity.OnStartServer.AddListener(comp.OnStar)
+
             // call OnStartServer so that observers dict is created
-            identity.OnStartServer();
+            identity.OnStartServer.Invoke();
 
             // rebuild shouldn't add own player because conn wasn't set ready
             identity.RebuildObservers(true);
             Assert.That(identity.observers, Does.Not.Contains(identity.connectionToClient));
         }
 
-    }
+     }
 }
