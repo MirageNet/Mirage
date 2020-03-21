@@ -230,7 +230,6 @@ namespace Mirror
 
 
 
-
         /// <summary>
         /// Gets the NetworkIdentity from the sceneIds dictionary with the corresponding id
         /// </summary>
@@ -283,6 +282,13 @@ namespace Mirror
 
         void Awake()
         {
+            //OnNetworkDestroy.AddListener(NetworkDestroy);
+            OnStartServer.AddListener(StartServer);
+            OnStartClient.AddListener(StartClient);
+            //OnStartLocalPlayer.AddListener(StartLocalPlayer);
+            //OnStartAuthority.AddListener(StartAuthority);
+            //OnStopAuthority.AddListener(StopAuthority);
+
             // detect runtime sceneId duplicates, e.g. if a user tries to
             // Instantiate a sceneId object at runtime. if we don't detect it,
             // then the client won't know which of the two objects to use for a
