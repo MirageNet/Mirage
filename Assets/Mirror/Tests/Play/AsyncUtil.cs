@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Mirror.Tests
 {
@@ -12,7 +10,7 @@ namespace Mirror.Tests
         // so we do this boilerplate to run our async methods
         public static IEnumerator RunAsync(Func<Task> block)
         {
-            var task = block();
+            Task task = block();
 
             while (!task.IsCompleted) { yield return 0; }
             if (task.IsFaulted) { throw task.Exception; }
