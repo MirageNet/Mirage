@@ -82,11 +82,6 @@ namespace Mirror
         [SerializeField]
         protected Transport transport;
 
-        [Header("Authentication")]
-        [Tooltip("Authentication component attached to this object")]
-        [Obsolete("assign it in NetworkClient and NetworkServer")]
-        public NetworkAuthenticator authenticator;
-
         /// <summary>
         /// The default prefab to be used to create player objects on the server.
         /// <para>Player objects are created in the default handler for AddPlayer() on the server. Implementing OnServerAddPlayer overrides this behaviour.</para>
