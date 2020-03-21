@@ -156,24 +156,6 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void ConnectMessageHandlerTest()
-        {
-            // message handlers
-            bool connectCalled = false;
-            server.RegisterHandler<ConnectMessage>((conn, msg) => { connectCalled = true; }, false);
-            server.RegisterHandler<DisconnectMessage>((conn, msg) => {}, false);
-            server.RegisterHandler<ErrorMessage>((conn, msg) => {}, false);
-
-            // listen
-            server.Listen();
-            Assert.That(connectCalled, Is.False);
-
-            // connect
-            Transport.activeTransport.OnServerConnected.Invoke(42);
-            Assert.That(connectCalled, Is.True);
-        }
-
-        [Test]
         public void DisconnectMessageHandlerTest()
         {
             // message handlers
