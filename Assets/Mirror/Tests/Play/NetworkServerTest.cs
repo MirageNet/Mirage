@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.TestTools;
 
 namespace Mirror.Tests
@@ -108,6 +109,29 @@ namespace Mirror.Tests
             server.Shutdown();
             Assert.That(server.active, Is.False);
         }
+
+
+        [Test]
+        public void ConnectionEventTest()
+        {
+            // message handlers
+            server.RegisterHandler<DisconnectMessage>((conn, msg) => { }, false);
+            server.RegisterHandler<ErrorMessage>((conn, msg) => { }, false);
+
+            // listen with maxconnections=1
+            server.MaxConnections = 1;
+
+            UnityAction<NetworkConnectionToClient> func = Substitute.For<UnityAction<NetworkConnectionToClient>>();
+
+            server.Connected.AddListener(func); 
+            server.Listen();
+
+            // connect first: should work
+            Transport.activeTransport.OnServerConnected.Invoke(42);
+
+            func.Received().Invoke(Arg.Is<NetworkConnectionToClient>(conn => conn.connectionId == 42));
+        }
+
 
         [Test]
         public void MaxConnectionsTest()
