@@ -207,8 +207,12 @@ namespace Mirror
                 return;
             }
 
+            conn.SetHandlers(handlers);
+
             localConnection = conn;
             localClient = client;
+
+            Connected.Invoke(conn);
         }
 
         internal void RemoveLocalConnection()

@@ -1,5 +1,10 @@
+using System.Collections;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.TestTools;
+using static Mirror.Tests.AsyncUtil;
 
 namespace Mirror.Tests
 {
@@ -76,6 +81,48 @@ namespace Mirror.Tests
             Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.ClientOnly));
 
             manager.StopClient();
+        }
+
+        [UnityTest]
+        public IEnumerator ConnectedClientTest()
+        {
+            return RunAsync(async () =>
+            {
+                manager.StartServer();
+                UnityAction<NetworkConnectionToServer> func = Substitute.For<UnityAction<NetworkConnectionToServer>>();
+                manager.client.Connected.AddListener(func);
+                await manager.client.ConnectAsync("localhost");
+                func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
+                manager.client.Disconnect();
+                manager.StopServer();
+            });
+        }
+
+        [UnityTest]
+        public IEnumerator ConnectedClientUriTest()
+        {
+            return RunAsync(async () =>
+            {
+                manager.StartServer();
+                UnityAction<NetworkConnectionToServer> func = Substitute.For<UnityAction<NetworkConnectionToServer>>();
+                manager.client.Connected.AddListener(func);
+                await manager.client.ConnectAsync(new System.Uri("tcp4://localhost"));
+                func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
+                manager.client.Disconnect();
+                manager.StopServer();
+            });
+        }
+
+        [Test]
+        public void ConnectedHostTest()
+        {
+            manager.StartServer();
+            UnityAction<NetworkConnectionToServer> func = Substitute.For<UnityAction<NetworkConnectionToServer>>();
+            manager.client.Connected.AddListener(func);
+            manager.client.ConnectHost(manager.server);
+            func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
+            manager.client.Disconnect();
+            manager.StopServer();
         }
 
         [Test]
