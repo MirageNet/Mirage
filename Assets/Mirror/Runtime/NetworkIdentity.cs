@@ -282,12 +282,12 @@ namespace Mirror
 
         void Awake()
         {
-            //OnNetworkDestroy.AddListener(NetworkDestroy);
+            OnNetworkDestroy.AddListener(NetworkDestroy);
             OnStartServer.AddListener(StartServer);
             OnStartClient.AddListener(StartClient);
-            //OnStartLocalPlayer.AddListener(StartLocalPlayer);
-            //OnStartAuthority.AddListener(StartAuthority);
-            //OnStopAuthority.AddListener(StopAuthority);
+            OnStartLocalPlayer.AddListener(StartLocalPlayer);
+            OnStartAuthority.AddListener(StartAuthority);
+            OnStopAuthority.AddListener(StopAuthority);
 
             // detect runtime sceneId duplicates, e.g. if a user tries to
             // Instantiate a sceneId object at runtime. if we don't detect it,
@@ -571,7 +571,7 @@ namespace Mirror
             // because we already set m_isServer=true above)
             server.spawned[netId] = this;
 
-            OnStartServer.Invoke();
+            //OnStartServer.Invoke();
         }
 
         bool clientStarted;
@@ -581,37 +581,39 @@ namespace Mirror
                 return;
             clientStarted = true;
 
-            OnStartClient.Invoke();
+            //OnStartClient.Invoke();
         }
 
         static NetworkIdentity previousLocalPlayer = null;
         internal void StartLocalPlayer()
         {
+            Debug.Log("StartLocalPlayer");
+
             if (previousLocalPlayer == this)
                 return;
             previousLocalPlayer = this;
 
-            OnStartLocalPlayer.Invoke();
+            //OnStartLocalPlayer.Invoke();
         }
 
         bool hadAuthority;
         internal void NotifyAuthority()
         {
             if (!hadAuthority && hasAuthority)
-                StartAuthority();
+                OnStartAuthority.Invoke();
             if (hadAuthority && !hasAuthority)
-                StopAuthority();
+                OnStopAuthority.Invoke();
             hadAuthority = hasAuthority;
         }
 
         internal void StartAuthority()
         {
-            OnStartAuthority.Invoke();
+            //OnStartAuthority.Invoke();
         }
 
         internal void StopAuthority()
         {
-            OnStopAuthority.Invoke();
+            //OnStopAuthority.Invoke();
         }
 
         internal void OnSetHostVisibility(bool visible)
@@ -648,7 +650,7 @@ namespace Mirror
 
         internal void NetworkDestroy()
         {
-            OnNetworkDestroy.Invoke();
+            //OnNetworkDestroy.Invoke();
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
