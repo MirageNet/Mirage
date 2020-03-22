@@ -286,8 +286,6 @@ namespace Mirror
             OnStartServer.AddListener(StartServer);
             OnStartClient.AddListener(StartClient);
             OnStartLocalPlayer.AddListener(StartLocalPlayer);
-            OnStartAuthority.AddListener(StartAuthority);
-            OnStopAuthority.AddListener(StopAuthority);
 
             // detect runtime sceneId duplicates, e.g. if a user tries to
             // Instantiate a sceneId object at runtime. if we don't detect it,
@@ -596,16 +594,6 @@ namespace Mirror
             if (hadAuthority && !hasAuthority)
                 OnStopAuthority.Invoke();
             hadAuthority = hasAuthority;
-        }
-
-        internal void StartAuthority()
-        {
-            
-        }
-
-        internal void StopAuthority()
-        {
-            
         }
 
         internal void OnSetHostVisibility(bool visible)
