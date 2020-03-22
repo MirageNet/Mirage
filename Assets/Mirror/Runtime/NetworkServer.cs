@@ -402,7 +402,7 @@ namespace Mirror
             if (connections.Count < MaxConnections)
             {
                 // add connection
-                var conn = new NetworkConnectionToClient(connectionId);
+                var conn = new NetworkConnectionToClient(connectionId, Transport.activeTransport);
                 OnConnected(conn);
             }
             else

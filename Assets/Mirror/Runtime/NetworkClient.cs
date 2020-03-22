@@ -141,7 +141,7 @@ namespace Mirror
             await Transport.activeTransport.ClientConnectAsync(serverIp);
 
             // setup all the handlers
-            connection = new NetworkConnectionToServer();
+            connection = new NetworkConnectionToServer(Transport.activeTransport);
             connection.SetHandlers(handlers);
             OnConnected();
         }
@@ -163,7 +163,7 @@ namespace Mirror
             await Transport.activeTransport.ClientConnectAsync(uri);
 
             // setup all the handlers
-            connection = new NetworkConnectionToServer();
+            connection = new NetworkConnectionToServer(Transport.activeTransport);
             connection.SetHandlers(handlers);
             OnConnected();
         }

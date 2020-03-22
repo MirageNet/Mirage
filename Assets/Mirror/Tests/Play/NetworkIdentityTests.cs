@@ -1,4 +1,4 @@
-﻿using NSubstitute;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using InvalidOperationException = System.InvalidOperationException;
@@ -152,7 +152,7 @@ namespace Mirror.Tests
             // another connection
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                identity.AssignClientAuthority(new NetworkConnectionToClient(43));
+                identity.AssignClientAuthority(new NetworkConnectionToClient(43, Transport.activeTransport));
             });
             Assert.That(ex.Message, Is.EqualTo("AssignClientAuthority for " + gameObject + " already has an owner. Use RemoveClientAuthority() first"));
         }

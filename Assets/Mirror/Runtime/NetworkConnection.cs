@@ -63,6 +63,11 @@ namespace Mirror
         public float lastMessageTime;
 
         /// <summary>
+        /// The transport used in this connection
+        /// </summary>
+        public Transport transport { get; internal set; }
+
+        /// <summary>
         /// The NetworkIdentity for this connection.
         /// </summary>
         public NetworkIdentity identity { get; internal set; }
@@ -89,15 +94,18 @@ namespace Mirror
         /// <summary>
         /// Creates a new NetworkConnection with the specified address
         /// </summary>
-        internal NetworkConnection()
+        /// <param name="networkTransport">Transport that will be used in this connection</param>
+        internal NetworkConnection(Transport networkTransport)
         {
+            transport = networkTransport;
         }
 
         /// <summary>
         /// Creates a new NetworkConnection with the specified address and connectionId
         /// </summary>
         /// <param name="networkConnectionId"></param>
-        internal NetworkConnection(int networkConnectionId)
+        /// <param name="networkTransport">Transport that will be used in this connection</param>
+        internal NetworkConnection(int networkConnectionId, Transport networkTransport) : this(networkTransport)
         {
             connectionId = networkConnectionId;
         }

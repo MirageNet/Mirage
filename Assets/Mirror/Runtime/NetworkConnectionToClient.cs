@@ -6,7 +6,7 @@ namespace Mirror
 {
     public class NetworkConnectionToClient : NetworkConnection
     {
-        public NetworkConnectionToClient(int networkConnectionId) : base(networkConnectionId)
+        public NetworkConnectionToClient(int networkConnectionId, Transport networkTransport) : base(networkConnectionId, networkTransport)
         {
         }
 

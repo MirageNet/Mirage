@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using NSubstitute;
 using NUnit.Framework;
@@ -328,11 +328,11 @@ namespace Mirror.Tests
             identity.OnStartServer();
 
             // add an observer connection
-            var connection = new NetworkConnectionToClient(42);
+            var connection = new NetworkConnectionToClient(42, Transport.activeTransport);
             identity.observers.Add(connection);
 
             // RemoveObserverInternal with invalid connection should do nothing
-            identity.RemoveObserverInternal(new NetworkConnectionToClient(43));
+            identity.RemoveObserverInternal(new NetworkConnectionToClient(43, Transport.activeTransport));
             Assert.That(identity.observers.Count, Is.EqualTo(1));
 
             // RemoveObserverInternal with existing connection should remove it
@@ -549,7 +549,7 @@ namespace Mirror.Tests
             // add component
             CheckObserverExceptionNetworkBehaviour compExc = gameObject.AddComponent<CheckObserverExceptionNetworkBehaviour>();
 
-            NetworkConnection connection = new NetworkConnectionToClient(42);
+            NetworkConnection connection = new NetworkConnectionToClient(42, Transport.activeTransport);
 
             // an exception in OnCheckObserver should be caught, so that one
             // component's exception doesn't stop all other components from
@@ -761,8 +761,8 @@ namespace Mirror.Tests
 
             identity.server = server;
             // create some connections
-            var connection1 = new NetworkConnectionToClient(42);
-            var connection2 = new NetworkConnectionToClient(43);
+            var connection1 = new NetworkConnectionToClient(42, Transport.activeTransport);
+            var connection2 = new NetworkConnectionToClient(43, Transport.activeTransport);
 
             // AddObserver should return early if called before .observers was
             // created
@@ -793,8 +793,8 @@ namespace Mirror.Tests
             identity.OnStartServer();
 
             // add some observers
-            identity.observers.Add(new NetworkConnectionToClient(42));
-            identity.observers.Add(new NetworkConnectionToClient(43));
+            identity.observers.Add(new NetworkConnectionToClient(42, Transport.activeTransport));
+            identity.observers.Add(new NetworkConnectionToClient(43, Transport.activeTransport));
 
             // call ClearObservers
             identity.ClearObservers();
@@ -809,9 +809,9 @@ namespace Mirror.Tests
             // creates .observers and generates a netId
             identity.OnStartServer();
             uint netId = identity.netId;
-            identity.connectionToClient = new NetworkConnectionToClient(1);
-            identity.connectionToServer = new NetworkConnectionToServer();
-            identity.observers.Add( new NetworkConnectionToClient(2));
+            identity.connectionToClient = new NetworkConnectionToClient(1, Transport.activeTransport);
+            identity.connectionToServer = new NetworkConnectionToServer(Transport.activeTransport);
+            identity.observers.Add( new NetworkConnectionToClient(2, Transport.activeTransport));
 
             // calling reset shouldn't do anything unless it was marked for reset
             identity.Reset();
@@ -907,9 +907,9 @@ namespace Mirror.Tests
         {
             // add components
             RebuildObserversNetworkBehaviour compA = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
-            compA.observer = new NetworkConnectionToClient(12);
+            compA.observer = new NetworkConnectionToClient(12, Transport.activeTransport);
             RebuildObserversNetworkBehaviour compB = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
-            compB.observer = new NetworkConnectionToClient(13);
+            compB.observer = new NetworkConnectionToClient(13, Transport.activeTransport);
 
             // get new observers
             var observers = new HashSet<NetworkConnection>();
@@ -926,7 +926,7 @@ namespace Mirror.Tests
             // get new observers. no observer components so it should just clear
             // it and not do anything else
             var observers = new HashSet<NetworkConnection>();
-            observers.Add(new NetworkConnectionToClient(42));
+            observers.Add(new NetworkConnectionToClient(42, Transport.activeTransport));
             identity.GetNewObservers(observers, true);
             Assert.That(observers.Count, Is.EqualTo(0));
         }
@@ -943,8 +943,8 @@ namespace Mirror.Tests
         [Test]
         public void AddAllReadyServerConnectionsToObservers()
         {
-            var connection1 = new NetworkConnectionToClient(12) { isReady = true };
-            var connection2 = new NetworkConnectionToClient(13) { isReady = false };
+            var connection1 = new NetworkConnectionToClient(12, Transport.activeTransport) { isReady = true };
+            var connection2 = new NetworkConnectionToClient(13, Transport.activeTransport) { isReady = false };
             // add some server connections
             server.connections[12] = connection1;
             server.connections[13] = connection2;

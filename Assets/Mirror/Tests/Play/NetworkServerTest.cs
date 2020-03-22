@@ -282,7 +282,7 @@ namespace Mirror.Tests
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add first connection
-            var conn42 = new NetworkConnectionToClient(42);
+            var conn42 = new NetworkConnectionToClient(42, Transport.activeTransport);
             bool result42 = server.AddConnection(conn42);
             Assert.That(result42, Is.True);
             Assert.That(server.connections.Count, Is.EqualTo(1));
@@ -290,7 +290,7 @@ namespace Mirror.Tests
             Assert.That(server.connections[42], Is.EqualTo(conn42));
 
             // add second connection
-            var conn43 = new NetworkConnectionToClient(43);
+            var conn43 = new NetworkConnectionToClient(43, Transport.activeTransport);
             bool result43 = server.AddConnection(conn43);
             Assert.That(result43, Is.True);
             Assert.That(server.connections.Count, Is.EqualTo(2));
@@ -300,7 +300,7 @@ namespace Mirror.Tests
             Assert.That(server.connections[43], Is.EqualTo(conn43));
 
             // add duplicate connectionId
-            var connDup = new NetworkConnectionToClient(42);
+            var connDup = new NetworkConnectionToClient(42, Transport.activeTransport);
             bool resultDup = server.AddConnection(connDup);
             Assert.That(resultDup, Is.False);
             Assert.That(server.connections.Count, Is.EqualTo(2));
@@ -322,7 +322,7 @@ namespace Mirror.Tests
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add connection
-            var conn42 = new NetworkConnectionToClient(42);
+            var conn42 = new NetworkConnectionToClient(42, Transport.activeTransport);
             bool result42 = server.AddConnection(conn42);
             Assert.That(result42, Is.True);
             Assert.That(server.connections.Count, Is.EqualTo(1));
@@ -347,7 +347,7 @@ namespace Mirror.Tests
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add connection
-            var conn42 = new NetworkConnectionToClient(42);
+            var conn42 = new NetworkConnectionToClient(42, Transport.activeTransport);
             server.AddConnection(conn42);
             Assert.That(server.connections.Count, Is.EqualTo(1));
 
@@ -371,7 +371,7 @@ namespace Mirror.Tests
             Assert.That(server.localConnection, Is.Not.Null);
 
             // add connection
-            var conn42 = new NetworkConnectionToClient(42);
+            var conn42 = new NetworkConnectionToClient(42, Transport.activeTransport);
             server.AddConnection(conn42);
             Assert.That(server.connections.Count, Is.EqualTo(1));
 
@@ -403,7 +403,7 @@ namespace Mirror.Tests
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add a connection
-            var connection = new NetworkConnectionToClient(42);
+            var connection = new NetworkConnectionToClient(42, Transport.activeTransport);
             server.AddConnection(connection);
             Assert.That(server.connections.Count, Is.EqualTo(1));
 
@@ -609,7 +609,7 @@ namespace Mirror.Tests
             Assert.That(server.connections.Count, Is.EqualTo(0));
 
             // add a connection
-            var connection = new NetworkConnectionToClient(42);
+            var connection = new NetworkConnectionToClient(42, Transport.activeTransport);
             server.AddConnection(connection);
             Assert.That(server.connections.Count, Is.EqualTo(1));
 

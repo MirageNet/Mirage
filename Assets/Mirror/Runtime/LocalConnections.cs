@@ -10,7 +10,7 @@ namespace Mirror
     {
         internal ULocalConnectionToServer connectionToServer { get; private set; }
 
-        private ULocalConnectionToClient() : base(0)
+        private ULocalConnectionToClient() : base(0, null)
         {
         }
 
@@ -63,7 +63,7 @@ namespace Mirror
     {
         internal ULocalConnectionToClient connectionToClient { get; }
 
-        internal ULocalConnectionToServer(ULocalConnectionToClient connectionToClient)
+        internal ULocalConnectionToServer(ULocalConnectionToClient connectionToClient) : base(null)
         {
             this.connectionToClient = connectionToClient;
         }
