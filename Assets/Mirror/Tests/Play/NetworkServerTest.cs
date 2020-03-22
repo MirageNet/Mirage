@@ -76,7 +76,6 @@ namespace Mirror.Tests
             Transport.activeTransport = Substitute.For<Transport>();
             serverGO = new GameObject();
             server = serverGO.AddComponent<NetworkServer>();
-            serverGO.AddComponent<NetworkAuthenticator>();
 
             clientGO = new GameObject();
             client = clientGO.AddComponent<NetworkClient>();
