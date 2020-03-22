@@ -21,6 +21,7 @@ namespace Mirror.Tests
         {
             gameObject = new GameObject();
             manager = gameObject.AddComponent<NetworkManager>();
+            manager.startOnHeadless = false;
             manager.client = gameObject.GetComponent<NetworkClient>();
             manager.server = gameObject.GetComponent<NetworkServer>();
         }
@@ -92,11 +93,12 @@ namespace Mirror.Tests
                 manager.StartServer();
                 UnityAction<NetworkConnectionToServer> func = Substitute.For<UnityAction<NetworkConnectionToServer>>();
                 manager.client.Connected.AddListener(func);
+                
                 await manager.client.ConnectAsync("localhost");
                 func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
                 manager.client.Disconnect();
+                manager.client.Shutdown();
                 manager.StopServer();
-                await Task.Delay(1);
             });
         }
 
@@ -111,6 +113,7 @@ namespace Mirror.Tests
                 await manager.client.ConnectAsync(new System.Uri("tcp4://localhost"));
                 func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
                 manager.client.Disconnect();
+                manager.client.Shutdown();
                 manager.StopServer();
                 await Task.Delay(1);
 
@@ -128,7 +131,9 @@ namespace Mirror.Tests
                 manager.client.ConnectHost(manager.server);
                 func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
                 manager.client.Disconnect();
+                manager.client.Shutdown();
                 manager.StopServer();
+
                 await Task.Delay(1);
             });
         }
