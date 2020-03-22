@@ -282,11 +282,6 @@ namespace Mirror
 
         void Awake()
         {
-            OnNetworkDestroy.AddListener(NetworkDestroy);
-            OnStartServer.AddListener(StartServer);
-            OnStartClient.AddListener(StartClient);
-            OnStartLocalPlayer.AddListener(StartLocalPlayer);
-
             // detect runtime sceneId duplicates, e.g. if a user tries to
             // Instantiate a sceneId object at runtime. if we don't detect it,
             // then the client won't know which of the two objects to use for a
@@ -568,6 +563,8 @@ namespace Mirror
             // add to spawned (note: the original EnableIsServer isn't needed
             // because we already set m_isServer=true above)
             server.spawned[netId] = this;
+
+            OnStartServer.Invoke();
         }
 
         bool clientStarted;
@@ -576,6 +573,8 @@ namespace Mirror
             if (clientStarted)
                 return;
             clientStarted = true;
+
+            OnStartClient.Invoke();
         }
 
         static NetworkIdentity previousLocalPlayer = null;
@@ -584,16 +583,28 @@ namespace Mirror
             if (previousLocalPlayer == this)
                 return;
             previousLocalPlayer = this;
+
+            OnStartLocalPlayer.Invoke();
         }
 
         bool hadAuthority;
         internal void NotifyAuthority()
         {
             if (!hadAuthority && hasAuthority)
-                OnStartAuthority.Invoke();
+                StartAuthority();
             if (hadAuthority && !hasAuthority)
-                OnStopAuthority.Invoke();
+                StopAuthority();
             hadAuthority = hasAuthority;
+        }
+
+        internal void StartAuthority()
+        {
+            OnStartAuthority.Invoke();
+        }
+
+        internal void StopAuthority()
+        {
+            OnStopAuthority.Invoke();
         }
 
         internal void OnSetHostVisibility(bool visible)
@@ -630,7 +641,7 @@ namespace Mirror
 
         internal void NetworkDestroy()
         {
-            //OnNetworkDestroy.Invoke();
+            OnNetworkDestroy.Invoke();
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

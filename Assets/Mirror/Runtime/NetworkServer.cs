@@ -218,7 +218,7 @@ namespace Mirror
                 {
                     if (LogFilter.Debug) Debug.Log("ActivateHostScene " + identity.netId + " " + identity);
 
-                    identity.OnStartClient.Invoke();
+                    identity.StartClient();
                 }
             }
         }
@@ -848,7 +848,7 @@ namespace Mirror
             if (ownerConnection is ULocalConnectionToClient)
                 identity.hasAuthority = true;
 
-            identity.OnStartServer.Invoke();
+            identity.StartServer();
 
             if (LogFilter.Debug) Debug.Log("SpawnObject instance ID " + identity.netId + " asset ID " + identity.assetId);
 
