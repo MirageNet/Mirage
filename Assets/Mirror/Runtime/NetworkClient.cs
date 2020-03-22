@@ -784,7 +784,7 @@ namespace Mirror
         {
             Guid assetId = identity.assetId;
             
-            identity.OnNetworkDestroy.Invoke();
+            identity.NetworkDestroy();
             if (unspawnHandlers.TryGetValue(assetId, out UnSpawnDelegate handler) && handler != null)
             {
                 handler(identity.gameObject);
