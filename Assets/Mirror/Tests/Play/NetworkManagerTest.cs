@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -95,6 +96,7 @@ namespace Mirror.Tests
                 func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
                 manager.client.Disconnect();
                 manager.StopServer();
+                await Task.Delay(1);
             });
         }
 
@@ -110,19 +112,25 @@ namespace Mirror.Tests
                 func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
                 manager.client.Disconnect();
                 manager.StopServer();
+                await Task.Delay(1);
+
             });
         }
 
-        [Test]
-        public void ConnectedHostTest()
+        [UnityTest]
+        public IEnumerator ConnectedHostTest()
         {
-            manager.StartServer();
-            UnityAction<NetworkConnectionToServer> func = Substitute.For<UnityAction<NetworkConnectionToServer>>();
-            manager.client.Connected.AddListener(func);
-            manager.client.ConnectHost(manager.server);
-            func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
-            manager.client.Disconnect();
-            manager.StopServer();
+            return RunAsync(async () =>
+            {
+                manager.StartServer();
+                UnityAction<NetworkConnectionToServer> func = Substitute.For<UnityAction<NetworkConnectionToServer>>();
+                manager.client.Connected.AddListener(func);
+                manager.client.ConnectHost(manager.server);
+                func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
+                manager.client.Disconnect();
+                manager.StopServer();
+                await Task.Delay(1);
+            });
         }
 
         [Test]
