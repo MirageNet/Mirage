@@ -404,18 +404,13 @@ namespace Mirror.Tests
             // add component
             StartServerExceptionNetworkBehaviour comp = gameObject.AddComponent<StartServerExceptionNetworkBehaviour>();
             identity.OnStartServer.AddListener(comp.OnStartServer);
-            // make sure that comp.OnStartServer was called and make sure that
-            // the exception was caught and not thrown in here.
-            // an exception in OnStartServer should be caught, so that one
-            // component's exception doesn't stop all other components from
-            // being initialized
-            // (an error log is expected though)
-            LogAssert.ignoreFailingMessages = true;
 
-            // should catch the exception internally and not throw it
-            identity.StartServer(); 
+            // make sure that comp.OnStartServer was called
+            // the exception was caught and not thrown in here.
+            Assert.Throws<Exception>( () => { 
+                identity.StartServer();
+            });
             Assert.That(comp.called, Is.EqualTo(1));
-            LogAssert.ignoreFailingMessages = false;
         }
 
         [Test]
@@ -425,23 +420,18 @@ namespace Mirror.Tests
             StartClientExceptionNetworkBehaviour comp = gameObject.AddComponent<StartClientExceptionNetworkBehaviour>();
             identity.OnStartClient.AddListener(comp.OnStartClient);
 
-            // make sure that comp.OnStartClient was called and make sure that
+            // make sure that comp.OnStartServer was called
             // the exception was caught and not thrown in here.
-            // an exception in OnStartClient should be caught, so that one
-            // component's exception doesn't stop all other components from
-            // being initialized
-            // (an error log is expected though)
-            LogAssert.ignoreFailingMessages = true;
-            // should catch the exception internally and not throw it
-            identity.StartClient(); 
+            Assert.Throws<Exception>( () => { 
+                identity.StartClient();
+            });
             Assert.That(comp.called, Is.EqualTo(1));
-            LogAssert.ignoreFailingMessages = false;
+            
 
             // we have checks to make sure that it's only called once.
-            // let's see if they work.
-
-            identity.StartClient();
-            // same as before?
+            Assert.DoesNotThrow(() => { 
+                identity.StartClient();
+            });
             Assert.That(comp.called, Is.EqualTo(1)); 
         }
 
@@ -452,17 +442,12 @@ namespace Mirror.Tests
             StartAuthorityExceptionNetworkBehaviour comp = gameObject.AddComponent<StartAuthorityExceptionNetworkBehaviour>();
             identity.OnStartAuthority.AddListener(comp.OnStartAuthority);
 
-            // make sure that comp.OnStartAuthority was called and make sure that
+            // make sure that comp.OnStartServer was called
             // the exception was caught and not thrown in here.
-            // an exception in OnStartAuthority should be caught, so that one
-            // component's exception doesn't stop all other components from
-            // being initialized
-            // (an error log is expected though)
-            LogAssert.ignoreFailingMessages = true;
-            // should catch the exception internally and not throw it
-            identity.StartAuthority(); 
+            Assert.Throws<Exception>( () => { 
+                identity.StartAuthority();
+            });
             Assert.That(comp.called, Is.EqualTo(1));
-            LogAssert.ignoreFailingMessages = false;
         }
 
         [Test]
@@ -472,17 +457,12 @@ namespace Mirror.Tests
             StopAuthorityExceptionNetworkBehaviour comp = gameObject.AddComponent<StopAuthorityExceptionNetworkBehaviour>();
             identity.OnStopAuthority.AddListener(comp.OnStopAuthority);
             
-            // make sure that comp.OnStopAuthority was called and make sure that
+            // make sure that comp.OnStartServer was called
             // the exception was caught and not thrown in here.
-            // an exception in OnStopAuthority should be caught, so that one
-            // component's exception doesn't stop all other components from
-            // being initialized
-            // (an error log is expected though)
-            LogAssert.ignoreFailingMessages = true;
-            // should catch the exception internally and not throw it
-            identity.StopAuthority(); 
+            Assert.Throws<Exception>( () => { 
+                identity.StopAuthority();
+            });
             Assert.That(comp.called, Is.EqualTo(1));
-            LogAssert.ignoreFailingMessages = false;
         }
 
         [Test]
@@ -735,24 +715,25 @@ namespace Mirror.Tests
             Assert.That(compEx.called, Is.EqualTo(0));
             Assert.That(comp.called, Is.EqualTo(0));
 
-            // call OnStartLocalPlayer in identity
-            // one component will throw an exception, but that shouldn't stop
-            // OnStartLocalPlayer from being called in the second one
-            // exception will log an error
-            LogAssert.ignoreFailingMessages = true; 
-
-            identity.StartLocalPlayer();
-            LogAssert.ignoreFailingMessages = false;
+            // make sure that comp.OnStartServer was called
+            // the exception was caught and not thrown in here.
+            Assert.Throws<Exception>( () => {
+                identity.StartLocalPlayer();
+            });
+            
             Assert.That(compEx.called, Is.EqualTo(1));
-            Assert.That(comp.called, Is.EqualTo(1));
+            //Due to the order the listeners are added the one without exception is never called
+            Assert.That(comp.called, Is.EqualTo(0));
 
             // we have checks to make sure that it's only called once.
             // let's see if they work.
-            identity.StartLocalPlayer();
+            Assert.DoesNotThrow( () => {
+                identity.StartLocalPlayer();
+            });
             // same as before?
-            Assert.That(compEx.called, Is.EqualTo(1)); 
-            // same as before?
-            Assert.That(comp.called, Is.EqualTo(1)); 
+            Assert.That(compEx.called, Is.EqualTo(1));
+            //Due to the order the listeners are added the one without exception is never called
+            Assert.That(comp.called, Is.EqualTo(0));
         }
 
         [Test]
@@ -768,15 +749,15 @@ namespace Mirror.Tests
             Assert.That(compEx.called, Is.EqualTo(0));
             Assert.That(comp.called, Is.EqualTo(0));
 
-            // call OnNetworkDestroy in identity
-            // one component will throw an exception, but that shouldn't stop
-            // OnNetworkDestroy from being called in the second one
-            // exception will log an error
-            LogAssert.ignoreFailingMessages = true; 
-            identity.NetworkDestroy();
-            LogAssert.ignoreFailingMessages = false;
+            // we have checks to make sure that it's only called once.
+            // let's see if they work.
+            Assert.Throws<Exception>( () => {
+                identity.NetworkDestroy();
+            });
+
             Assert.That(compEx.called, Is.EqualTo(1));
-            Assert.That(comp.called, Is.EqualTo(1));
+            //Due to the order the listeners are added the one without exception is never called
+            Assert.That(comp.called, Is.EqualTo(0));
         }
 
         [Test]
