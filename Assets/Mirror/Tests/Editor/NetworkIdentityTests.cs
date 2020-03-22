@@ -87,7 +87,7 @@ namespace Mirror.Tests
             public void OnStartLocalPlayer()
             {
                 ++called;
-                //throw new Exception("some exception");
+                throw new Exception("some exception");
             }
         }
 
@@ -445,7 +445,7 @@ namespace Mirror.Tests
         {
             // add component
             StartAuthorityExceptionNetworkBehaviour comp = gameObject.AddComponent<StartAuthorityExceptionNetworkBehaviour>();
-            identity.OnStopAuthority.AddListener(comp.OnStartAuthority);
+            identity.OnStartAuthority.AddListener(comp.OnStartAuthority);
 
             // make sure that comp.OnStartAuthority was called and make sure that
             // the exception was caught and not thrown in here.
@@ -483,7 +483,9 @@ namespace Mirror.Tests
         {
             // add components
             StartAuthorityCalledNetworkBehaviour compStart = gameObject.AddComponent<StartAuthorityCalledNetworkBehaviour>();
+            identity.OnStartAuthority.AddListener(compStart.OnStartAuthority);
             StopAuthorityCalledNetworkBehaviour compStop = gameObject.AddComponent<StopAuthorityCalledNetworkBehaviour>();
+            identity.OnStopAuthority.AddListener(compStop.OnStopAuthority);
 
             // set authority from false to true, which should call OnStartAuthority
             identity.hasAuthority = true;
@@ -724,8 +726,8 @@ namespace Mirror.Tests
             // we have checks to make sure that it's only called once.
             // let's see if they work.
             identity.OnStartLocalPlayer.Invoke();
-            Assert.That(compEx.called, Is.EqualTo(2)); // same as before?
-            Assert.That(comp.called, Is.EqualTo(2)); // same as before?
+            Assert.That(compEx.called, Is.EqualTo(1)); // same as before?
+            Assert.That(comp.called, Is.EqualTo(1)); // same as before?
         }
 
         [Test]
@@ -733,7 +735,9 @@ namespace Mirror.Tests
         {
             // add components
             NetworkDestroyExceptionNetworkBehaviour compEx = gameObject.AddComponent<NetworkDestroyExceptionNetworkBehaviour>();
+            identity.OnNetworkDestroy.AddListener(compEx.OnNetworkDestroy);
             NetworkDestroyCalledNetworkBehaviour comp = gameObject.AddComponent<NetworkDestroyCalledNetworkBehaviour>();
+            identity.OnNetworkDestroy.AddListener(comp.OnNetworkDestroy);
 
             // make sure our test values are set to 0
             Assert.That(compEx.called, Is.EqualTo(0));
