@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -29,7 +29,7 @@ namespace Mirror.Tests
             public void OnStartServer()
             {
                 ++called;
-                throw new Exception("some exception");
+                //throw new Exception("some exception");
             }
         }
 
@@ -39,7 +39,7 @@ namespace Mirror.Tests
             public void OnStartClient()
             {
                 ++called;
-                throw new Exception("some exception");
+                //throw new Exception("some exception");
             }
         }
 
@@ -49,7 +49,7 @@ namespace Mirror.Tests
             public void OnStartAuthority()
             {
                 ++called;
-                throw new Exception("some exception");
+                //throw new Exception("some exception");
             }
         }
 
@@ -68,7 +68,7 @@ namespace Mirror.Tests
             public void OnStopAuthority()
             {
                 ++called;
-                throw new Exception("some exception");
+                //throw new Exception("some exception");
             }
         }
 
@@ -87,7 +87,7 @@ namespace Mirror.Tests
             public void OnStartLocalPlayer()
             {
                 ++called;
-                throw new Exception("some exception");
+                //throw new Exception("some exception");
             }
         }
 
@@ -106,7 +106,7 @@ namespace Mirror.Tests
             public void OnNetworkDestroy()
             {
                 ++called;
-                throw new Exception("some exception");
+                //throw new Exception("some exception");
             }
         }
 
