@@ -30,7 +30,7 @@ namespace Mirror.Tests
             manager.server = networkManagerGo.GetComponent<NetworkServer>();
             server = manager.server;
             client = manager.client;
-
+            manager.startOnHeadless = false;
             manager.autoCreatePlayer = false;
 
             // wait for manager to Start()
