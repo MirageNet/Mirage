@@ -21,7 +21,7 @@ namespace Mirror
             if (logNetworkMessages) Debug.Log("ConnectionSend " + this + " bytes:" + BitConverter.ToString(segment.Array, segment.Offset, segment.Count));
 
             singleConnectionId[0] = connectionId;
-            return Transport.activeTransport.ServerSend(singleConnectionId, channelId, segment);
+            return transport.ServerSend(singleConnectionId, channelId, segment);
         }
 
         // Send to many. basically Transport.Send(connections) + checks.

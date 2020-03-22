@@ -15,7 +15,7 @@ namespace Mirror
         {
             if (logNetworkMessages) Debug.Log("ConnectionSend " + this + " bytes:" + BitConverter.ToString(segment.Array, segment.Offset, segment.Count));
 
-            return Transport.activeTransport.ClientSend(channelId, segment);
+            return transport.ClientSend(channelId, segment);
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace Mirror
             // TODO: This does not work if there is no player yet
             if (identity != null)
                 identity.client.HandleClientDisconnect(this);
-            Transport.activeTransport.ClientDisconnect();
+            transport.ClientDisconnect();
         }
     }
 }
