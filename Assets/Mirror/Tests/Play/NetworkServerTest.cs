@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -76,6 +76,7 @@ namespace Mirror.Tests
             Transport.activeTransport = Substitute.For<Transport>();
             serverGO = new GameObject();
             server = serverGO.AddComponent<NetworkServer>();
+            serverGO.AddComponent<NetworkAuthenticator>();
 
             clientGO = new GameObject();
             client = clientGO.AddComponent<NetworkClient>();
@@ -129,8 +130,10 @@ namespace Mirror.Tests
             Transport.activeTransport.OnServerConnected.Invoke(42);
 
             func.Received().Invoke(Arg.Is<NetworkConnectionToClient>(conn => conn.connectionId == 42));
-        }
 
+            if (server.connections.TryGetValue(42, out NetworkConnectionToClient conn1))
+                Assert.That(conn1.isAuthenticated, Is.True);    
+        }
 
         [Test]
         public void MaxConnectionsTest()
