@@ -745,7 +745,7 @@ namespace Mirror.Tests
             // one component will throw an exception, but that shouldn't stop
             // OnNetworkDestroy from being called in the second one
             LogAssert.ignoreFailingMessages = true; // exception will log an error
-            identity.OnNetworkDestroy.Invoke();
+            identity.NetworkDestroy();
             LogAssert.ignoreFailingMessages = false;
             Assert.That(compEx.called, Is.EqualTo(1));
             Assert.That(comp.called, Is.EqualTo(1));
