@@ -29,7 +29,6 @@ namespace Mirror.Tests
             public void OnStartServer()
             {
                 ++called;
-                //throw new Exception("some exception");
             }
         }
 
@@ -39,7 +38,6 @@ namespace Mirror.Tests
             public void OnStartClient()
             {
                 ++called;
-                //throw new Exception("some exception");
             }
         }
 
@@ -49,7 +47,6 @@ namespace Mirror.Tests
             public void OnStartAuthority()
             {
                 ++called;
-                //throw new Exception("some exception");
             }
         }
 
@@ -68,7 +65,6 @@ namespace Mirror.Tests
             public void OnStopAuthority()
             {
                 ++called;
-                //throw new Exception("some exception");
             }
         }
 
@@ -87,7 +83,6 @@ namespace Mirror.Tests
             public void OnStartLocalPlayer()
             {
                 ++called;
-                //throw new Exception("some exception");
             }
         }
 
@@ -106,7 +101,6 @@ namespace Mirror.Tests
             public void OnNetworkDestroy()
             {
                 ++called;
-                //throw new Exception("some exception");
             }
         }
 
@@ -303,8 +297,6 @@ namespace Mirror.Tests
             Assert.That(component1.onStartServerInvoked);
             Assert.That(component2.onStartServerInvoked);
         }
-
-       
 
         [Test]
         public void GetSetAssetId()
@@ -983,14 +975,12 @@ namespace Mirror.Tests
         {
             // add at least one observers component, otherwise it will just add
             // all server connections
-            RebuildEmptyObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
+            gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection that isn't ready
             var connection = new ULocalConnectionToClient();
             connection.connectionToServer = new ULocalConnectionToServer();
             identity.connectionToClient = connection;
-
-            //identity.OnStartServer.AddListener(comp.OnStar)
 
             // call OnStartServer so that observers dict is created
             identity.OnStartServer.Invoke();
