@@ -17,6 +17,10 @@ namespace Mirror
     /// </remarks>
     public abstract class NetworkConnection : IDisposable
     {
+        // Handles network messages on client and server
+        private delegate void NetworkMessageDelegate(NetworkConnection conn, NetworkReader reader, int channelId);
+
+
         // internal so it can be tested
         internal readonly HashSet<NetworkIdentity> visList = new HashSet<NetworkIdentity>();
 
@@ -130,7 +134,7 @@ namespace Mirror
         /// </summary>
         public abstract void Disconnect();
 
-        internal static NetworkMessageDelegate MessageHandler<T, C>(Action<C, T> handler, bool requireAuthenication)
+        private static NetworkMessageDelegate MessageHandler<T, C>(Action<C, T> handler, bool requireAuthenication)
             where T : IMessageBase, new()
             where C : NetworkConnection
         {
@@ -175,7 +179,7 @@ namespace Mirror
                 }
 
                 handler((C)conn, message);
-            };
+            }
             return AdapterFunction;
         }
 
