@@ -26,7 +26,6 @@ namespace Mirror.Tests
 
             manager.autoCreatePlayer = false;
             
-            manager.StartServer();
         }
 
         public void SetupClient(string hostname = "localhost")
