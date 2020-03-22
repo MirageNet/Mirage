@@ -147,6 +147,11 @@ namespace Mirror
 
                 Connected.AddListener(authenticator.OnServerAuthenticateInternal);
             }
+            else
+            {
+                // if no authenticator, consider every connection as authenticated
+                Connected.AddListener(OnAuthenticated);
+            }
         }
 
 

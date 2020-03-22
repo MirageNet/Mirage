@@ -627,7 +627,6 @@ namespace Mirror
 
         void RegisterServerMessages()
         {
-            server.Connected.AddListener(OnServerConnectInternal);
             server.Authenticated.AddListener(OnServerAuthenticated);
             server.RegisterHandler<DisconnectMessage>(OnServerDisconnectInternal, false);
             server.RegisterHandler<ReadyMessage>(OnServerReadyMessageInternal);
@@ -976,25 +975,10 @@ namespace Mirror
         #endregion
 
         #region Server Internal Message Handlers
-
-        void OnServerConnectInternal(NetworkConnectionToClient conn)
-        {
-            if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerConnectInternal");
-
-            if (server.authenticator == null)
-            {
-                // authenticate immediately
-                OnServerAuthenticated(conn);
-            }
-        }
-
         // called after successful authentication
         void OnServerAuthenticated(NetworkConnectionToClient conn)
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerAuthenticated");
-
-            // force connection as authenticated
-            conn.isAuthenticated = true;
 
             // proceed with the login handshake by calling OnServerConnect
             if (networkSceneName != "" && networkSceneName != offlineScene)
