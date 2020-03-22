@@ -194,9 +194,9 @@ namespace Mirror
             where C : NetworkConnection
         {
             int msgType = MessagePacker.GetId<T>();
-            if (messageHandlers.ContainsKey(msgType))
+            if (LogFilter.Debug && messageHandlers.ContainsKey(msgType))
             {
-                if (LogFilter.Debug) Debug.Log("NetworkServer.RegisterHandler replacing " + msgType);
+                Debug.Log("NetworkServer.RegisterHandler replacing " + msgType);
             }
             messageHandlers[msgType] = MessageHandler(handler, requireAuthentication);
         }
