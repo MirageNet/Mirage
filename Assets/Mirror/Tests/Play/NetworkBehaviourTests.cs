@@ -67,8 +67,6 @@ namespace Mirror.Tests
 
             public void OnStartServer()
             {
-                Debug.LogError("THIS WAS CALLED");
-
                 Assert.That(isClient, Is.True);
                 Assert.That(isLocalPlayer, Is.False);
                 Assert.That(isServer, Is.True);

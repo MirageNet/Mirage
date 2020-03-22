@@ -570,8 +570,6 @@ namespace Mirror
             // add to spawned (note: the original EnableIsServer isn't needed
             // because we already set m_isServer=true above)
             server.spawned[netId] = this;
-
-            //OnStartServer.Invoke();
         }
 
         bool clientStarted;
@@ -580,20 +578,14 @@ namespace Mirror
             if (clientStarted)
                 return;
             clientStarted = true;
-
-            //OnStartClient.Invoke();
         }
 
         static NetworkIdentity previousLocalPlayer = null;
         internal void StartLocalPlayer()
         {
-            Debug.Log("StartLocalPlayer");
-
             if (previousLocalPlayer == this)
                 return;
             previousLocalPlayer = this;
-
-            //OnStartLocalPlayer.Invoke();
         }
 
         bool hadAuthority;
@@ -608,12 +600,12 @@ namespace Mirror
 
         internal void StartAuthority()
         {
-            //OnStartAuthority.Invoke();
+            
         }
 
         internal void StopAuthority()
         {
-            //OnStopAuthority.Invoke();
+            
         }
 
         internal void OnSetHostVisibility(bool visible)
