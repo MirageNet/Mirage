@@ -187,15 +187,6 @@ namespace Mirror
         // keep track of all sceneIds to detect scene duplicates
         static readonly Dictionary<ulong, NetworkIdentity> sceneIds = new Dictionary<ulong, NetworkIdentity>();
 
-
-
-        /// <summary>
-        /// This is invoked on clients when the server has caused this object to be destroyed.
-        /// <para>This can be used as a hook to invoke effects or do client specific cleanup.</para>
-        /// </summary>
-        ///<summary>Called on clients when the server destroys the GameObject.</summary>
-        public UnityEvent OnNetworkDestroy = new UnityEvent();
-
         /// <summary>
         /// This is invoked for NetworkBehaviour objects when they become active on the server.
         /// <para>This could be triggered by NetworkServer.Listen() for objects in the scene, or by NetworkServer.Spawn() for objects that are dynamically created.</para>
@@ -228,7 +219,12 @@ namespace Mirror
         /// </summary>
         public UnityEvent OnStopAuthority = new UnityEvent();
 
-
+        /// <summary>
+        /// This is invoked on clients when the server has caused this object to be destroyed.
+        /// <para>This can be used as a hook to invoke effects or do client specific cleanup.</para>
+        /// </summary>
+        ///<summary>Called on clients when the server destroys the GameObject.</summary>
+        public UnityEvent OnNetworkDestroy = new UnityEvent();
 
         /// <summary>
         /// Gets the NetworkIdentity from the sceneIds dictionary with the corresponding id
