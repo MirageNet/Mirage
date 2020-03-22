@@ -174,7 +174,6 @@ namespace Mirror
                 }
                 finally
                 {
-                    // TODO: Figure out the correct channel
                     NetworkDiagnostics.OnReceive(message, channelId, reader.Length);
                 }
 
