@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 using Guid = System.Guid;
 using Object = UnityEngine.Object;
 
@@ -25,6 +26,11 @@ namespace Mirror
     [DisallowMultipleComponent]
     public class NetworkClient : MonoBehaviour
     {
+
+        [Header("Authentication")]
+        [Tooltip("Authentication component attached to this object")]
+        public NetworkAuthenticator authenticator;
+
         /// <summary>
         /// The registered network message handlers.
         /// </summary>
@@ -33,6 +39,10 @@ namespace Mirror
         // spawn handlers
         readonly Dictionary<Guid, SpawnHandlerDelegate> spawnHandlers = new Dictionary<Guid, SpawnHandlerDelegate>();
         readonly Dictionary<Guid, UnSpawnDelegate> unspawnHandlers = new Dictionary<Guid, UnSpawnDelegate>();
+
+        public class NetworkConnectionEvent : UnityEvent<NetworkConnectionToServer> { }
+
+        public NetworkConnectionEvent Connected = new NetworkConnectionEvent();
 
         /// <summary>
         /// The NetworkConnection object this client is using.
@@ -125,6 +135,7 @@ namespace Mirror
             RegisterSystemHandlers(false);
             Transport.activeTransport.enabled = true;
             InitializeTransportHandlers();
+            RegisterSpawnPrefabs();
 
             connectState = ConnectState.Connecting;
             await Transport.activeTransport.ClientConnectAsync(serverIp);
@@ -146,6 +157,7 @@ namespace Mirror
             RegisterSystemHandlers(false);
             Transport.activeTransport.enabled = true;
             InitializeTransportHandlers();
+            RegisterSpawnPrefabs();
 
             connectState = ConnectState.Connecting;
             await Transport.activeTransport.ClientConnectAsync(uri);
@@ -165,16 +177,16 @@ namespace Mirror
             connectState = ConnectState.Connected;
 
             // create local connection objects and connect them
-            var connectionToServer = new ULocalConnectionToServer();
-            var connectionToClient = new ULocalConnectionToClient();
-            connectionToServer.connectionToClient = connectionToClient;
-            connectionToClient.connectionToServer = connectionToServer;
+            (ULocalConnectionToServer connectionToServer, ULocalConnectionToClient connectionToClient)
+                = ULocalConnectionToClient.CreateLocalConnections();
 
             connection = connectionToServer;
             connection.SetHandlers(handlers);
 
             // create server connection to local client
             server.SetLocalConnection(this, connectionToClient);
+
+            Connected.Invoke(connectionToServer);
             hostServer = server;
         }
 
@@ -184,7 +196,6 @@ namespace Mirror
         internal void ConnectLocalServer(NetworkServer server)
         {
             server.OnConnected(server.localConnection);
-            server.localConnection.Send(new ConnectMessage());
         }
 
         void InitializeTransportHandlers()
@@ -232,7 +243,7 @@ namespace Mirror
             // thus we should set the connected state before calling the handler
             connectState = ConnectState.Connected;
             Time.UpdateClient(this);
-            connection.InvokeHandler(new ConnectMessage(), -1);
+            Connected.Invoke((NetworkConnectionToServer)connection);
         }
 
         /// <summary>
@@ -313,18 +324,6 @@ namespace Mirror
             }
         }
 
-        internal void RegisterSpawnPrefabs()
-        {
-            for (int i = 0; i < spawnPrefabs.Count; i++)
-            {
-                GameObject prefab = spawnPrefabs[i];
-                if (prefab != null)
-                {
-                    RegisterPrefab(prefab);
-                }
-            }
-        }
-
         internal void RegisterSystemHandlers(bool hostMode)
         {
             // host mode client / regular client react to some messages differently.
@@ -336,8 +335,10 @@ namespace Mirror
                 RegisterHandler<ObjectHideMessage>(OnHostClientObjectHide);
                 RegisterHandler<NetworkPongMessage>((conn, msg) => { }, false);
                 RegisterHandler<SpawnMessage>(OnHostClientSpawn);
-                RegisterHandler<ObjectSpawnStartedMessage>((conn, msg) => { }); // host mode doesn't need spawning
-                RegisterHandler<ObjectSpawnFinishedMessage>((conn, msg) => { }); // host mode doesn't need spawning
+                // host mode doesn't need spawning
+                RegisterHandler<ObjectSpawnStartedMessage>((conn, msg) => { });
+                // host mode doesn't need spawning
+                RegisterHandler<ObjectSpawnFinishedMessage>((conn, msg) => { });
                 RegisterHandler<UpdateVarsMessage>((conn, msg) => { });
             }
             else
@@ -368,7 +369,7 @@ namespace Mirror
             {
                 if (LogFilter.Debug) Debug.Log("NetworkClient.RegisterHandler replacing " + handler + " - " + msgType);
             }
-            handlers[msgType] = MessagePacker.MessageHandler(handler, requireAuthentication);
+            handlers[msgType] = NetworkConnection.MessageHandler(handler, requireAuthentication);
         }
 
         /// <summary>
@@ -574,6 +575,20 @@ namespace Mirror
             return null;
         }
 
+
+        #region Spawn Prefabs
+        private void RegisterSpawnPrefabs()
+        {
+            for (int i = 0; i < spawnPrefabs.Count; i++)
+            {
+                GameObject prefab = spawnPrefabs[i];
+                if (prefab != null)
+                {
+                    RegisterPrefab(prefab);
+                }
+            }
+        }
+
         /// <summary>
         /// Find the registered prefab for this asset id.
         /// Useful for debuggers
@@ -706,6 +721,10 @@ namespace Mirror
             unspawnHandlers.Remove(identity.assetId);
         }
 
+        #endregion
+
+        #region Spawn Handler
+
         /// <summary>
         /// This is an advanced spawning function that registers a custom assetId with the UNET spawning system.
         /// <para>This can be used to register custom spawning methods for an assetId - instead of the usual method of registering spawning methods for a prefab. This should be used when no prefab exists for the spawned objects - such as when they are constructed dynamically at runtime from configuration data.</para>
@@ -758,6 +777,8 @@ namespace Mirror
             spawnHandlers.Clear();
             unspawnHandlers.Clear();
         }
+
+        #endregion
 
         void UnSpawn(NetworkIdentity identity)
         {

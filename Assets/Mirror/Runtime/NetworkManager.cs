@@ -82,10 +82,6 @@ namespace Mirror
         [SerializeField]
         protected Transport transport;
 
-        [Header("Authentication")]
-        [Tooltip("Authentication component attached to this object")]
-        public NetworkAuthenticator authenticator;
-
         /// <summary>
         /// The default prefab to be used to create player objects on the server.
         /// <para>Player objects are created in the default handler for AddPlayer() on the server. Implementing OnServerAddPlayer overrides this behaviour.</para>
@@ -231,11 +227,6 @@ namespace Mirror
         /// </summary>
         public virtual void LateUpdate()
         {
-            // call it while the NetworkManager exists.
-            // -> we don't only call while Client/Server.Connected, because then we would stop if disconnected and the
-            //    NetworkClient wouldn't receive the last Disconnect event, result in all kinds of issues
-            server.Update();
-            client.Update();
             UpdateScene();
         }
 
@@ -256,12 +247,6 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager SetupServer");
             Initialize();
-
-            if (authenticator != null)
-            {
-                authenticator.OnStartServer();
-                authenticator.OnServerAuthenticated += OnServerAuthenticated;
-            }
 
             ConfigureServerFrameRate();
 
@@ -333,10 +318,10 @@ namespace Mirror
 
             Initialize();
 
-            if (authenticator != null)
+            if (client.authenticator != null)
             {
-                authenticator.OnStartClient();
-                authenticator.OnClientAuthenticated += OnClientAuthenticated;
+                client.authenticator.OnStartClient();
+                client.authenticator.OnClientAuthenticated += OnClientAuthenticated;
             }
 
             isNetworkActive = true;
@@ -366,10 +351,10 @@ namespace Mirror
 
             Initialize();
 
-            if (authenticator != null)
+            if (client.authenticator != null)
             {
-                authenticator.OnStartClient();
-                authenticator.OnClientAuthenticated += OnClientAuthenticated;
+                client.authenticator.OnStartClient();
+                client.authenticator.OnClientAuthenticated += OnClientAuthenticated;
             }
 
             isNetworkActive = true;
@@ -473,6 +458,9 @@ namespace Mirror
             //          -> localClientActive needs to be true, otherwise the hook
             //             isn't called in host mode!
             //
+
+            RegisterClientMessages();
+
             // TODO call this after spawnobjects and worry about the syncvar hook fix later?
             client.ConnectHost(server);
 
@@ -483,7 +471,7 @@ namespace Mirror
             // loaded and all objects were spawned.
             // DO NOT do this earlier. it would cause race conditions where a
             // client will do things before the server is even fully started.
-            Debug.Log("StartHostClient called");
+            if (LogFilter.Debug) Debug.Log("StartHostClient called");
             StartHostClient();
         }
 
@@ -491,14 +479,13 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager ConnectLocalClient");
 
-            if (authenticator != null)
+            if (client.authenticator != null)
             {
-                authenticator.OnStartClient();
-                authenticator.OnClientAuthenticated += OnClientAuthenticated;
+                client.authenticator.OnStartClient();
+                client.authenticator.OnClientAuthenticated += OnClientAuthenticated;
             }
 
             server.ActivateHostScene();
-            RegisterClientMessages();
 
             // ConnectLocalServer needs to be called AFTER RegisterClientMessages
             // (https://github.com/vis2k/Mirror/pull/1249/)
@@ -525,9 +512,6 @@ namespace Mirror
             if (!server.active)
                 return;
 
-            if (authenticator != null)
-                authenticator.OnServerAuthenticated -= OnServerAuthenticated;
-
             OnStopServer();
 
             if (LogFilter.Debug) Debug.Log("NetworkManager StopServer");
@@ -552,8 +536,8 @@ namespace Mirror
         /// </summary>
         public void StopClient()
         {
-            if (authenticator != null)
-                authenticator.OnClientAuthenticated -= OnClientAuthenticated;
+            if (client.authenticator != null)
+                client.authenticator.OnClientAuthenticated -= OnClientAuthenticated;
 
             OnStopClient();
 
@@ -645,7 +629,7 @@ namespace Mirror
 
         void RegisterServerMessages()
         {
-            server.RegisterHandler<ConnectMessage>(OnServerConnectInternal, false);
+            server.Authenticated.AddListener(OnServerAuthenticated);
             server.RegisterHandler<DisconnectMessage>(OnServerDisconnectInternal, false);
             server.RegisterHandler<ReadyMessage>(OnServerReadyMessageInternal);
             server.RegisterHandler<AddPlayerMessage>(OnServerAddPlayerInternal);
@@ -655,7 +639,7 @@ namespace Mirror
 
         void RegisterClientMessages()
         {
-            client.RegisterHandler<ConnectMessage>(OnClientConnectInternal, false);
+            client.Connected.AddListener(OnClientConnectInternal);
             client.RegisterHandler<DisconnectMessage>(OnClientDisconnectInternal, false);
             client.RegisterHandler<NotReadyMessage>(OnClientNotReadyMessageInternal);
             client.RegisterHandler<ErrorMessage>(OnClientErrorInternal, false);
@@ -665,8 +649,6 @@ namespace Mirror
             {
                 client.RegisterPrefab(playerPrefab);
             }
-
-            client.RegisterSpawnPrefabs();
         }
 
         void CleanupNetworkIdentities()
@@ -810,12 +792,12 @@ namespace Mirror
                 {
                     // TODO only respawn the server objects from that scene later!
                     server.SpawnObjects();
-                    Debug.Log("Respawned Server objects after additive scene load: " + scene.name);
+                    if (LogFilter.Debug) Debug.Log("Respawned Server objects after additive scene load: " + scene.name);
                 }
                 if (client.active)
                 {
                     client.PrepareToSpawnSceneObjects();
-                    Debug.Log("Rebuild Client spawnableObjects after additive scene load: " + scene.name);
+                    if (LogFilter.Debug) Debug.Log("Rebuild Client spawnableObjects after additive scene load: " + scene.name);
                 }
             }
         }
@@ -865,7 +847,7 @@ namespace Mirror
         {
             // debug message is very important. if we ever break anything then
             // it's very obvious to notice.
-            Debug.Log("Finished loading scene in host mode.");
+            if (LogFilter.Debug) Debug.Log("Finished loading scene in host mode.");
 
             if (client.connection != null)
             {
@@ -923,7 +905,7 @@ namespace Mirror
         {
             // debug message is very important. if we ever break anything then
             // it's very obvious to notice.
-            Debug.Log("Finished loading scene in client-only mode.");
+            if (LogFilter.Debug) Debug.Log("Finished loading scene in client-only mode.");
 
             if (client.connection != null)
             {
@@ -945,7 +927,7 @@ namespace Mirror
         {
             // debug message is very important. if we ever break anything then
             // it's very obvious to notice.
-            Debug.Log("Finished loading scene in server-only mode.");
+            if (LogFilter.Debug) Debug.Log("Finished loading scene in server-only mode.");
 
             server.SpawnObjects();
             OnServerSceneChanged(networkSceneName);
@@ -993,30 +975,10 @@ namespace Mirror
         #endregion
 
         #region Server Internal Message Handlers
-
-        void OnServerConnectInternal(NetworkConnectionToClient conn, ConnectMessage connectMsg)
-        {
-            if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerConnectInternal");
-
-            if (authenticator != null)
-            {
-                // we have an authenticator - let it handle authentication
-                authenticator.OnServerAuthenticateInternal(conn);
-            }
-            else
-            {
-                // authenticate immediately
-                OnServerAuthenticated(conn);
-            }
-        }
-
         // called after successful authentication
         void OnServerAuthenticated(NetworkConnectionToClient conn)
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerAuthenticated");
-
-            // set connection to authenticated
-            conn.isAuthenticated = true;
 
             // proceed with the login handshake by calling OnServerConnect
             if (networkSceneName != "" && networkSceneName != offlineScene)
@@ -1086,14 +1048,14 @@ namespace Mirror
 
         #region Client Internal Message Handlers
 
-        void OnClientConnectInternal(NetworkConnectionToServer conn, ConnectMessage message)
+        void OnClientConnectInternal(NetworkConnectionToServer conn)
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnClientConnectInternal");
 
-            if (authenticator != null)
+            if (client.authenticator != null)
             {
                 // we have an authenticator - let it handle authentication
-                authenticator.OnClientAuthenticateInternal(conn);
+                client.authenticator.OnClientAuthenticateInternal(conn);
             }
             else
             {

@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Mirror
 {
+
+
     /// <summary>
     /// The NetworkServer.
     /// </summary>
@@ -18,6 +21,8 @@ namespace Mirror
     {
         bool initialized;
 
+        public class NetworkConnectionEvent : UnityEvent<NetworkConnectionToClient> { }
+
         /// <summary>
         /// The maximum number of concurrent network connections to support.
         /// <para>This effects the memory usage of the network layer.</para>
@@ -25,6 +30,13 @@ namespace Mirror
         [Tooltip("Maximum number of concurrent connections.")]
         [Min(1)]
         public int MaxConnections = 4;
+
+        public NetworkConnectionEvent Connected = new NetworkConnectionEvent();
+        public NetworkConnectionEvent Authenticated = new NetworkConnectionEvent();
+
+        [Header("Authentication")]
+        [Tooltip("Authentication component attached to this object")]
+        public NetworkAuthenticator authenticator;
 
         /// <summary>
         /// The connection to the host mode client (if any).
@@ -101,6 +113,9 @@ namespace Mirror
                 Transport.activeTransport.OnServerDataReceived.RemoveListener(OnDataReceived);
                 Transport.activeTransport.OnServerError.RemoveListener(OnError);
 
+                if (authenticator != null)
+                    authenticator.OnServerAuthenticated -= OnAuthenticated;
+
                 initialized = false;
             }
 
@@ -124,6 +139,19 @@ namespace Mirror
             Transport.activeTransport.OnServerConnected.AddListener(OnConnected);
             Transport.activeTransport.OnServerDataReceived.AddListener(OnDataReceived);
             Transport.activeTransport.OnServerError.AddListener(OnError);
+
+            if (authenticator != null)
+            {
+                authenticator.OnStartServer();
+                authenticator.OnServerAuthenticated += OnAuthenticated;
+
+                Connected.AddListener(authenticator.OnServerAuthenticateInternal);
+            }
+            else
+            {
+                // if no authenticator, consider every connection as authenticated
+                Connected.AddListener(OnAuthenticated);
+            }
         }
 
 
@@ -194,8 +222,12 @@ namespace Mirror
                 return;
             }
 
+            conn.SetHandlers(handlers);
+
             localConnection = conn;
             localClient = client;
+
+            Connected.Invoke(conn);
         }
 
         internal void RemoveLocalConnection()
@@ -285,7 +317,7 @@ namespace Mirror
         /// <param name="msg">Message structure.</param>
         /// <param name="channelId">Transport channel to use</param>
         /// <returns></returns>
-        public bool SendToReady<T>(NetworkIdentity identity, T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
+        public bool SendToReady<T>(NetworkIdentity identity, T msg, int channelId) where T : IMessageBase
         {
             return SendToReady(identity, msg, true, channelId);
         }
@@ -387,7 +419,7 @@ namespace Mirror
 
             // add connection and invoke connected event
             AddConnection(conn);
-            conn.InvokeHandler(new ConnectMessage(), -1);
+            Connected.Invoke(conn);
         }
 
         void OnDisconnected(int connectionId)
@@ -408,6 +440,16 @@ namespace Mirror
         {
             conn.InvokeHandler(new DisconnectMessage(), -1);
             if (LogFilter.Debug) Debug.Log("Server lost client:" + conn);
+        }
+
+        internal void OnAuthenticated(NetworkConnectionToClient conn)
+        {
+            if (LogFilter.Debug) Debug.Log("Server authenticate client:" + conn);
+
+            // set connection to authenticated
+            conn.isAuthenticated = true;
+
+            Authenticated?.Invoke(conn);
         }
 
         /// <summary>
@@ -450,7 +492,7 @@ namespace Mirror
             {
                 if (LogFilter.Debug) Debug.Log("NetworkServer.RegisterHandler replacing " + msgType);
             }
-            handlers[msgType] = MessagePacker.MessageHandler(handler, requireAuthentication);
+            handlers[msgType] = NetworkConnection.MessageHandler(handler, requireAuthentication);
         }
 
         /// <summary>
@@ -570,7 +612,9 @@ namespace Mirror
             // internally sends a spawn message for each one to the connection.
             foreach (NetworkIdentity identity in spawned.Values)
             {
-                if (identity.gameObject.activeSelf) //TODO this is different // try with far away ones in ummorpg!
+                // try with far away ones in ummorpg!
+                //TODO this is different
+                if (identity.gameObject.activeSelf)
                 {
                     if (LogFilter.Debug) Debug.Log("Sending spawn message for current server objects name='" + identity.name + "' netId=" + identity.netId + " sceneId=" + identity.sceneId);
 
@@ -860,7 +904,8 @@ namespace Mirror
             if (identity.serverOnly)
                 return;
 
-            if (LogFilter.Debug) Debug.Log("Server SendSpawnMessage: name=" + identity.name + " sceneId=" + identity.sceneId.ToString("X") + " netid=" + identity.netId); // for easier debugging
+            // for easier debugging
+            if (LogFilter.Debug) Debug.Log("Server SendSpawnMessage: name=" + identity.name + " sceneId=" + identity.sceneId.ToString("X") + " netid=" + identity.netId);
 
             // one writer for owner, one for observers
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())

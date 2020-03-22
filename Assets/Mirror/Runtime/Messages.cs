@@ -75,17 +75,11 @@ namespace Mirror
         public void Serialize(NetworkWriter writer) { /* nothing to serialize */ }
     }
 
-    public struct ConnectMessage : IMessageBase
-    {
-        public void Deserialize(NetworkReader reader) { /* nothing to serialize */ }
-
-        public void Serialize(NetworkWriter writer) { /* nothing to serialize */ }
-    }
-
     public struct SceneMessage : IMessageBase
     {
         public string sceneName;
-        public SceneOperation sceneOperation; // Normal = 0, LoadAdditive = 1, UnloadAdditive = 2
+        // Normal = 0, LoadAdditive = 1, UnloadAdditive = 2
+        public SceneOperation sceneOperation;
         public bool customHandling;
 
         public void Deserialize(NetworkReader reader)
@@ -126,7 +120,8 @@ namespace Mirror
         {
             netId = reader.ReadPackedUInt32();
             componentIndex = (int)reader.ReadPackedUInt32();
-            functionHash = reader.ReadInt32(); // hash is always 4 full bytes, WritePackedInt would send 1 extra byte here
+            // hash is always 4 full bytes, WritePackedInt would send 1 extra byte here
+            functionHash = reader.ReadInt32();
             payload = reader.ReadBytesAndSizeSegment();
         }
 
@@ -152,7 +147,8 @@ namespace Mirror
         {
             netId = reader.ReadPackedUInt32();
             componentIndex = (int)reader.ReadPackedUInt32();
-            functionHash = reader.ReadInt32(); // hash is always 4 full bytes, WritePackedInt would send 1 extra byte here
+            // hash is always 4 full bytes, WritePackedInt would send 1 extra byte here
+            functionHash = reader.ReadInt32();
             payload = reader.ReadBytesAndSizeSegment();
         }
 
@@ -178,7 +174,8 @@ namespace Mirror
         {
             netId = reader.ReadPackedUInt32();
             componentIndex = (int)reader.ReadPackedUInt32();
-            functionHash = reader.ReadInt32(); // hash is always 4 full bytes, WritePackedInt would send 1 extra byte here
+            // hash is always 4 full bytes, WritePackedInt would send 1 extra byte here
+            functionHash = reader.ReadInt32();
             payload = reader.ReadBytesAndSizeSegment();
         }
 
