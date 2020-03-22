@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace Mirror
 {
@@ -53,7 +54,7 @@ namespace Mirror
             if (count > 0 && OutMessageEvent != null)
             {
                 var outMessage = new MessageInfo(message, channel, bytes, count);
-                OutMessageEvent?.Invoke(outMessage);
+                OutMessageEvent.Invoke(outMessage);
             }
         }
         #endregion
@@ -71,7 +72,7 @@ namespace Mirror
             if (InMessageEvent != null)
             {
                 var inMessage = new MessageInfo(message, channel, bytes, 1);
-                InMessageEvent?.Invoke(inMessage);
+                InMessageEvent.Invoke(inMessage);
             }
         }
 
