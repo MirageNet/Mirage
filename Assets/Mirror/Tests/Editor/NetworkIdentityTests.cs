@@ -433,11 +433,6 @@ namespace Mirror.Tests
             identity.OnStartClient.Invoke(); // should catch the exception internally and not throw it
             Assert.That(comp.called, Is.EqualTo(1));
             LogAssert.ignoreFailingMessages = false;
-
-            // we have checks to make sure that it's only called once.
-            // let's see if they work.
-            identity.OnStartClient.Invoke();
-            Assert.That(comp.called, Is.EqualTo(1)); // same as before?
         }
 
         [Test]
@@ -722,12 +717,6 @@ namespace Mirror.Tests
             LogAssert.ignoreFailingMessages = false;
             Assert.That(compEx.called, Is.EqualTo(1));
             Assert.That(comp.called, Is.EqualTo(1));
-
-            // we have checks to make sure that it's only called once.
-            // let's see if they work.
-            identity.OnStartLocalPlayer.Invoke();
-            Assert.That(compEx.called, Is.EqualTo(1)); // same as before?
-            Assert.That(comp.called, Is.EqualTo(1)); // same as before?
         }
 
         [Test]
