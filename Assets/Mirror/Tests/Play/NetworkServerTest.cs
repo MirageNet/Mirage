@@ -521,6 +521,8 @@ namespace Mirror.Tests
 
             // add connection
             (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
+            connection.isAuthenticated = true;
+            connection.connectionToServer.isAuthenticated = true;
             // set a client handler
             int called = 0;
             connection.connectionToServer.RegisterHandler<TestMessage>(msg => ++called);
@@ -612,6 +614,9 @@ namespace Mirror.Tests
 
             // add connection
             (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
+            connection.isAuthenticated = true;
+            connection.connectionToServer.isAuthenticated = true;
+
             // set a client handler
             int called = 0;
             connection.connectionToServer.RegisterHandler<TestMessage>(msg => ++called);
@@ -675,6 +680,8 @@ namespace Mirror.Tests
             // add connection
             (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
             connection.isReady = true;
+            connection.isAuthenticated = true;
+            connection.connectionToServer.isAuthenticated = true;
             // set a client handler
             int called = 0;
             connection.connectionToServer.RegisterHandler<SpawnMessage>(msg => ++called);
@@ -714,6 +721,8 @@ namespace Mirror.Tests
             // add connection
             (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
             connection.isReady = true;
+            connection.isAuthenticated = true;
+            connection.connectionToServer.isAuthenticated = true;
             // set a client handler
             int called = 0;
             connection.connectionToServer.RegisterHandler<ObjectHideMessage>(msg => ++called);
