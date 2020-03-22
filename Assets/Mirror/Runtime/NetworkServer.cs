@@ -131,7 +131,6 @@ namespace Mirror
 
             if (authenticator != null)
             {
-                authenticator.OnStartServer();
                 authenticator.OnServerAuthenticated += OnAuthenticated;
 
                 Connected.AddListener(authenticator.OnServerAuthenticateInternal);
