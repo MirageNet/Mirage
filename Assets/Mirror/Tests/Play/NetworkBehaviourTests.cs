@@ -87,7 +87,7 @@ namespace Mirror.Tests
 
             server.Spawn(gameObject);
 
-            netIdentity.OnStartServer.Invoke();
+            netIdentity.StartServer();
 
             Assert.That(comp.called, Is.True);
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -29,6 +29,7 @@ namespace Mirror.Tests
             public void OnStartServer()
             {
                 ++called;
+                throw new Exception("some exception");
             }
         }
 
@@ -38,6 +39,7 @@ namespace Mirror.Tests
             public void OnStartClient()
             {
                 ++called;
+                throw new Exception("some exception");
             }
         }
 
@@ -47,6 +49,7 @@ namespace Mirror.Tests
             public void OnStartAuthority()
             {
                 ++called;
+                throw new Exception("some exception");
             }
         }
 
@@ -65,6 +68,7 @@ namespace Mirror.Tests
             public void OnStopAuthority()
             {
                 ++called;
+                throw new Exception("some exception");
             }
         }
 
@@ -83,6 +87,7 @@ namespace Mirror.Tests
             public void OnStartLocalPlayer()
             {
                 ++called;
+                throw new Exception("some exception");
             }
         }
 
@@ -101,6 +106,7 @@ namespace Mirror.Tests
             public void OnNetworkDestroy()
             {
                 ++called;
+                throw new Exception("some exception");
             }
         }
 
@@ -292,7 +298,7 @@ namespace Mirror.Tests
             identity.OnStartServer.AddListener(component1.OnStartServer);
             identity.OnStartServer.AddListener(component2.OnStartServer);
 
-            identity.OnStartServer.Invoke();
+            identity.StartServer();
 
             Assert.That(component1.onStartServerInvoked);
             Assert.That(component2.onStartServerInvoked);
@@ -329,7 +335,7 @@ namespace Mirror.Tests
         public void RemoveObserverInternal()
         {
             // call OnStartServer so that observers dict is created
-            identity.OnStartServer.Invoke();
+            identity.StartServer();
 
             // add an observer connection
             var connection = new NetworkConnectionToClient(42);
@@ -403,7 +409,7 @@ namespace Mirror.Tests
             // being initialized
             // (an error log is expected though)
             LogAssert.ignoreFailingMessages = true;
-            identity.OnStartServer.Invoke(); // should catch the exception internally and not throw it
+            identity.StartServer(); // should catch the exception internally and not throw it
             Assert.That(comp.called, Is.EqualTo(1));
             LogAssert.ignoreFailingMessages = false;
         }
@@ -422,9 +428,14 @@ namespace Mirror.Tests
             // being initialized
             // (an error log is expected though)
             LogAssert.ignoreFailingMessages = true;
-            identity.OnStartClient.Invoke(); // should catch the exception internally and not throw it
+            identity.StartClient(); // should catch the exception internally and not throw it
             Assert.That(comp.called, Is.EqualTo(1));
             LogAssert.ignoreFailingMessages = false;
+
+            // we have checks to make sure that it's only called once.
+            // let's see if they work.
+            identity.StartClient();
+            Assert.That(comp.called, Is.EqualTo(1)); // same as before?
         }
 
         [Test]
@@ -441,7 +452,7 @@ namespace Mirror.Tests
             // being initialized
             // (an error log is expected though)
             LogAssert.ignoreFailingMessages = true;
-            identity.OnStartAuthority.Invoke(); // should catch the exception internally and not throw it
+            identity.StartAuthority(); // should catch the exception internally and not throw it
             Assert.That(comp.called, Is.EqualTo(1));
             LogAssert.ignoreFailingMessages = false;
         }
@@ -460,7 +471,7 @@ namespace Mirror.Tests
             // being initialized
             // (an error log is expected though)
             LogAssert.ignoreFailingMessages = true;
-            identity.OnStopAuthority.Invoke(); // should catch the exception internally and not throw it
+            identity.StopAuthority(); // should catch the exception internally and not throw it
             Assert.That(comp.called, Is.EqualTo(1));
             LogAssert.ignoreFailingMessages = false;
         }
@@ -705,10 +716,16 @@ namespace Mirror.Tests
             // OnStartLocalPlayer from being called in the second one
             LogAssert.ignoreFailingMessages = true; // exception will log an error
 
-            identity.OnStartLocalPlayer.Invoke();
+            identity.StartLocalPlayer();
             LogAssert.ignoreFailingMessages = false;
             Assert.That(compEx.called, Is.EqualTo(1));
             Assert.That(comp.called, Is.EqualTo(1));
+
+            // we have checks to make sure that it's only called once.
+            // let's see if they work.
+            identity.StartLocalPlayer();
+            Assert.That(compEx.called, Is.EqualTo(1)); // same as before?
+            Assert.That(comp.called, Is.EqualTo(1)); // same as before?
         }
 
         [Test]
@@ -752,7 +769,7 @@ namespace Mirror.Tests
             Assert.That(identity.observers, Is.Null);
 
             // call OnStartServer so that observers dict is created
-            identity.OnStartServer.Invoke();
+            identity.StartServer();
 
             // call AddObservers
             identity.AddObserver(connection1);
@@ -768,7 +785,7 @@ namespace Mirror.Tests
         public void ClearObservers()
         {
             // call OnStartServer so that observers dict is created
-            identity.OnStartServer.Invoke();
+            identity.StartServer();
 
             // add some observers
             identity.observers.Add(new NetworkConnectionToClient(42));
@@ -784,7 +801,7 @@ namespace Mirror.Tests
         public void Reset()
         {
             // modify it a bit
-            identity.OnStartServer.Invoke(); // creates .observers and generates a netId
+            identity.StartServer(); // creates .observers and generates a netId
             uint netId = identity.netId;
             identity.connectionToClient = new NetworkConnectionToClient(1);
             identity.connectionToServer = new NetworkConnectionToServer();
@@ -819,7 +836,7 @@ namespace Mirror.Tests
             compB.syncMode = SyncMode.Observers; // one needs to sync to owner
 
             // call OnStartServer once so observers are created
-            identity.OnStartServer.Invoke();
+            identity.StartServer();
 
             // set it dirty
             compA.SetDirtyBit(ulong.MaxValue);
@@ -934,7 +951,7 @@ namespace Mirror.Tests
             server.SetLocalConnection(client, localConnection);
 
             // call OnStartServer so that observers dict is created
-            identity.OnStartServer.Invoke();
+            identity.StartServer();
 
             // add all to observers. should have the two ready connections then.
             identity.AddAllReadyServerConnectionsToObservers();
@@ -961,7 +978,7 @@ namespace Mirror.Tests
             identity.connectionToClient = connection;
 
             // call OnStartServer so that observers dict is created
-            identity.OnStartServer.Invoke();
+            identity.StartServer();
 
             // rebuild should at least add own ready player
             identity.RebuildObservers(true);
@@ -983,7 +1000,7 @@ namespace Mirror.Tests
             identity.connectionToClient = connection;
 
             // call OnStartServer so that observers dict is created
-            identity.OnStartServer.Invoke();
+            identity.StartServer();
 
             // rebuild shouldn't add own player because conn wasn't set ready
             identity.RebuildObservers(true);
