@@ -1,7 +1,6 @@
 using System;
 using NUnit.Framework;
-
-using Mirror;
+using NSubstitute;
 
 namespace Mirror.Tests
 {
@@ -11,19 +10,19 @@ namespace Mirror.Tests
         SyncListString serverSyncList;
         SyncListString clientSyncList;
 
-        void SerializeAllTo<T>(T fromList, T toList) where T : ISyncObject
+        public static void SerializeAllTo<T>(T fromList, T toList) where T : ISyncObject
         {
-            NetworkWriter writer = new NetworkWriter();
+            var writer = new NetworkWriter();
             fromList.OnSerializeAll(writer);
-            NetworkReader reader = new NetworkReader(writer.ToArray());
+            var reader = new NetworkReader(writer.ToArray());
             toList.OnDeserializeAll(reader);
         }
 
-        void SerializeDeltaTo<T>(T fromList, T toList) where T : ISyncObject
+        public static void SerializeDeltaTo<T>(T fromList, T toList) where T : ISyncObject
         {
-            NetworkWriter writer = new NetworkWriter();
+            var writer = new NetworkWriter();
             fromList.OnSerializeDelta(writer);
-            NetworkReader reader = new NetworkReader(writer.ToArray());
+            var reader = new NetworkReader(writer.ToArray());
             toList.OnDeserializeDelta(reader);
             fromList.Flush();
         }
@@ -129,8 +128,8 @@ namespace Mirror.Tests
         [Test]
         public void SyncListIntTest()
         {
-            SyncListInt serverList = new SyncListInt();
-            SyncListInt clientList = new SyncListInt();
+            var serverList = new SyncListInt();
+            var clientList = new SyncListInt();
 
             serverList.Add(1);
             serverList.Add(2);
@@ -143,8 +142,8 @@ namespace Mirror.Tests
         [Test]
         public void SyncListBoolTest()
         {
-            SyncListBool serverList = new SyncListBool();
-            SyncListBool clientList = new SyncListBool();
+            var serverList = new SyncListBool();
+            var clientList = new SyncListBool();
 
             serverList.Add(true);
             serverList.Add(false);
@@ -157,8 +156,8 @@ namespace Mirror.Tests
         [Test]
         public void SyncListUintTest()
         {
-            SyncListUInt serverList = new SyncListUInt();
-            SyncListUInt clientList = new SyncListUInt();
+            var serverList = new SyncListUInt();
+            var clientList = new SyncListUInt();
 
             serverList.Add(1U);
             serverList.Add(2U);
@@ -171,8 +170,8 @@ namespace Mirror.Tests
         [Test]
         public void SyncListFloatTest()
         {
-            SyncListFloat serverList = new SyncListFloat();
-            SyncListFloat clientList = new SyncListFloat();
+            var serverList = new SyncListFloat();
+            var clientList = new SyncListFloat();
 
             serverList.Add(1.0F);
             serverList.Add(2.0F);
@@ -183,64 +182,122 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void CallbackTest()
+        public void AddClientCallbackTest()
         {
-            bool called = false;
-
-            clientSyncList.Callback += (op, index, oldItem, newItem) =>
-            {
-                called = true;
-
-                Assert.That(op, Is.EqualTo(SyncList<string>.Operation.OP_ADD));
-                Assert.That(index, Is.EqualTo(3));
-                Assert.That(oldItem, Is.EqualTo(default(string)));
-                Assert.That(newItem, Is.EqualTo("yay"));
-            };
-
+            Action<int, string> callback = Substitute.For<Action<int, string>>();
+            clientSyncList.OnInsert += callback;
             serverSyncList.Add("yay");
             SerializeDeltaTo(serverSyncList, clientSyncList);
-
-            Assert.That(called, Is.True);
+            callback.Received().Invoke(3, "yay");
         }
 
         [Test]
-        public void CallbackRemoveTest()
+        public void InsertClientCallbackTest()
         {
-            bool called = false;
+            Action<int, string> callback = Substitute.For<Action<int, string>>();
+            clientSyncList.OnInsert += callback;
+            serverSyncList.Insert(1, "yay");
+            SerializeDeltaTo(serverSyncList, clientSyncList);
+            callback.Received().Invoke(1, "yay");
+        }
 
-            clientSyncList.Callback += (op, index, oldItem, newItem) =>
-            {
-                called = true;
-
-                Assert.That(op, Is.EqualTo(SyncList<string>.Operation.OP_REMOVEAT));
-                Assert.That(oldItem, Is.EqualTo("World"));
-                Assert.That(newItem, Is.EqualTo(default(string)));
-            };
+        [Test]
+        public void RemoveClientCallbackTest()
+        {
+            Action<int, string> callback = Substitute.For<Action<int, string>>();
+            clientSyncList.OnRemove += callback;
             serverSyncList.Remove("World");
             SerializeDeltaTo(serverSyncList, clientSyncList);
-
-            Assert.That(called, Is.True);
+            callback.Received().Invoke(1, "World");
         }
 
         [Test]
-        public void CallbackRemoveAtTest()
+        public void ClearClientCallbackTest()
         {
-            bool called = false;
-
-            clientSyncList.Callback += (op, index, oldItem, newItem) =>
-            {
-                called = true;
-
-                Assert.That(op, Is.EqualTo(SyncList<string>.Operation.OP_REMOVEAT));
-                Assert.That(index, Is.EqualTo(1));
-                Assert.That(oldItem, Is.EqualTo("World"));
-                Assert.That(newItem, Is.EqualTo(default(string)));
-            };
-
-            serverSyncList.RemoveAt(1);
+            Action callback = Substitute.For<Action>();
+            clientSyncList.OnClear += callback;
+            serverSyncList.Clear();
             SerializeDeltaTo(serverSyncList, clientSyncList);
+            callback.Received().Invoke();
+        }
 
-            Assert.That(called, Is.True);
+        [Test]
+        public void SetClientCallbackTest()
+        {
+            Action<int, string, string> callback = Substitute.For<Action<int, string, string>>();
+            clientSyncList.OnSet += callback;
+            serverSyncList[1] = "yo mama";
+            SerializeDeltaTo(serverSyncList, clientSyncList);
+            callback.Received().Invoke(1, "World", "yo mama");
+        }
+
+        [Test]
+        public void ChangeClientCallbackTest()
+        {
+            Action callback = Substitute.For<Action>();
+            clientSyncList.OnChange += callback;
+            serverSyncList.Add("1");
+            serverSyncList.Add("2");
+            SerializeDeltaTo(serverSyncList, clientSyncList);
+            callback.Received(1).Invoke();
+        }
+
+        [Test]
+        public void AddServerCallbackTest()
+        {
+            Action<int, string> callback = Substitute.For<Action<int, string>>();
+            serverSyncList.OnInsert += callback;
+            serverSyncList.Add("yay");
+            callback.Received().Invoke(3, "yay");
+        }
+
+        [Test]
+        public void InsertServerCallbackTest()
+        {
+            Action<int, string> callback = Substitute.For<Action<int, string>>();
+            serverSyncList.OnInsert += callback;
+            serverSyncList.Insert(1, "yay");
+            callback.Received().Invoke(1, "yay");
+        }
+
+        [Test]
+        public void RemoveServerCallbackTest()
+        {
+            Action<int, string> callback = Substitute.For<Action<int, string>>();
+            serverSyncList.OnRemove += callback;
+            serverSyncList.Remove("World");
+            callback.Received().Invoke(1, "World");
+        }
+
+        [Test]
+        public void ClearServerCallbackTest()
+        {
+            Action callback = Substitute.For<Action>();
+            serverSyncList.OnClear += callback;
+            serverSyncList.Clear();
+            callback.Received().Invoke();
+        }
+
+        [Test]
+        public void SetServerCallbackTest()
+        {
+            Action<int, string, string> callback = Substitute.For<Action<int, string, string>>();
+            serverSyncList.OnSet += callback;
+            serverSyncList[1] = "yo mama";
+            callback.Received().Invoke(1, "World", "yo mama");
+        }
+
+        [Test]
+        public void ChangeServerCallbackTest()
+        {
+            Action callback = Substitute.For<Action>();
+            serverSyncList.OnChange += callback;
+            serverSyncList.Add("1");
+            serverSyncList.Add("2");
+            // note that on the server we would receive 2 calls
+            // because we are adding 2 operations separately
+            // there is no way to batch operations in the server
+            callback.Received().Invoke();
         }
 
         [Test]
@@ -258,8 +315,8 @@ namespace Mirror.Tests
         [Test]
         public void DirtyTest()
         {
-            SyncListInt serverList = new SyncListInt();
-            SyncListInt clientList = new SyncListInt();
+            var serverList = new SyncListInt();
+            var clientList = new SyncListInt();
 
             // nothing to send
             Assert.That(serverList.IsDirty, Is.False);
@@ -276,8 +333,8 @@ namespace Mirror.Tests
         [Test]
         public void ReadonlyTest()
         {
-            SyncListUInt serverList = new SyncListUInt();
-            SyncListUInt clientList = new SyncListUInt();
+            var serverList = new SyncListUInt();
+            var clientList = new SyncListUInt();
 
             // data has been flushed,  should go back to clear
             Assert.That(clientList.IsReadOnly, Is.False);

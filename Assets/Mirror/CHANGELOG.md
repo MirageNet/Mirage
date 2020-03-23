@@ -1,3 +1,29 @@
+# [22.0.0](https://github.com/MirrorNG/MirrorNG/compare/21.2.1-master...22.0.0-master) (2020-03-23)
+
+
+### Features
+
+* synclists has individual meaningful events ([#109](https://github.com/MirrorNG/MirrorNG/issues/109)) ([e326064](https://github.com/MirrorNG/MirrorNG/commit/e326064b51e8372726b30d19973df6293c74c376)), closes [#103](https://github.com/MirrorNG/MirrorNG/issues/103)
+
+
+### BREAKING CHANGES
+
+* Sync lists no longer have a Callback event with an operation enum
+
+## [21.2.1](https://github.com/MirrorNG/MirrorNG/compare/21.2.0-master...21.2.1-master) (2020-03-23)
+
+
+### Bug Fixes
+
+* overriden hooks are invoked (fixes [#1581](https://github.com/MirrorNG/MirrorNG/issues/1581)) ([#1584](https://github.com/MirrorNG/MirrorNG/issues/1584)) ([cf55333](https://github.com/MirrorNG/MirrorNG/commit/cf55333a072c0ffe36a2972ca0a5122a48d708d0))
+
+# [21.2.0](https://github.com/MirrorNG/MirrorNG/compare/21.1.0-master...21.2.0-master) (2020-03-23)
+
+
+### Features
+
+* next gen async transport ([#106](https://github.com/MirrorNG/MirrorNG/issues/106)) ([4a8dc67](https://github.com/MirrorNG/MirrorNG/commit/4a8dc676b96840493d178718049b9e20c8eb6510))
+
 # [21.1.0](https://github.com/MirrorNG/MirrorNG/compare/21.0.1-master...21.1.0-master) (2020-03-22)
 
 

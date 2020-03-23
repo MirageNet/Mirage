@@ -164,9 +164,9 @@ namespace Mirror
                 // get start position from base class
                 Transform startPos = GetStartPosition();
                 gamePlayer = startPos != null
-                    ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
-                    : Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-                gamePlayer.name = playerPrefab.name;
+                    ? Instantiate(server.playerPrefab, startPos.position, startPos.rotation)
+                    : Instantiate(server.playerPrefab, Vector3.zero, Quaternion.identity);
+                gamePlayer.name = server.playerPrefab.name;
             }
 
             if (!OnRoomServerSceneLoadedForPlayer(conn, roomPlayer, gamePlayer))
@@ -307,10 +307,10 @@ namespace Mirror
         /// This causes the server to switch scenes and sets the networkSceneName.
         /// <para>Clients that connect to this server will automatically switch to this scene. This is called autmatically if onlineScene or offlineScene are set, but it can be called from user code to switch scenes again while the game is in progress. This automatically sets clients to be not-ready. The clients must call NetworkClient.Ready() again to participate in the new scene.</para>
         /// </summary>
-        /// <param name="sceneName"></param>
-        public override void ServerChangeScene(string sceneName)
+        /// <param name="newSceneName"></param>
+        public override void ServerChangeScene(string newSceneName)
         {
-            if (sceneName == RoomScene)
+            if (newSceneName == RoomScene)
             {
                 foreach (NetworkRoomPlayer roomPlayer in RoomSlots)
                 {
@@ -330,11 +330,11 @@ namespace Mirror
                         server.ReplacePlayerForConnection(identity.connectionToClient, client, roomPlayer.gameObject);
                     }
                 }
-            
+
                 AllPlayersReady = false;
             }
 
-            base.ServerChangeScene(sceneName);
+            base.ServerChangeScene(newSceneName);
         }
 
         /// <summary>
@@ -415,11 +415,6 @@ namespace Mirror
                 Debug.LogError("NetworkRoomManager no RoomPlayer prefab is registered. Please add a RoomPlayer prefab.");
             else
                 client.RegisterPrefab(roomPlayerPrefab.gameObject);
-
-            if (playerPrefab == null)
-                Debug.LogError("NetworkRoomManager no GamePlayer prefab is registered. Please add a GamePlayer prefab.");
-            else
-                client.RegisterPrefab(playerPrefab);
 
             OnRoomStartClient();
         }
