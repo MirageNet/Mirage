@@ -1568,9 +1568,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   manager: {fileID: 1282001520}
   listServerUrl: tpc4://35.243.149.104:8888
-  listServerIp: 127.0.0.1
-  gameServerToListenPort: 8887
-  clientToListenPort: 8888
   transport: {fileID: 1282001521}
   mainPanel: {fileID: 719699535}
   content: {fileID: 583153859}
@@ -2562,9 +2559,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1282001517}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c783900215830458a8deaef1626d515c, type: 3}
+  m_Script: {fileID: 11500000, guid: 6ce81336eed77486e8ed5e3721e54c47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Port: 7779
 --- !u!114 &1282001523
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3297,7 +3295,7 @@ MonoBehaviour:
   manager: {fileID: 1282001520}
   listServerUrl: tcp4://35.243.149.104:8887
   gameServerTitle: Deathmatch
-  transport: {fileID: 1282001521}
+  transport: {fileID: 0}
 --- !u!114 &2011878190
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3313,6 +3311,24 @@ MonoBehaviour:
   sceneId: 1146589430
   serverOnly: 1
   m_AssetId: 
+  OnStartServer:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStartClient:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStartLocalPlayer:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStartAuthority:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStopAuthority:
+    m_PersistentCalls:
+      m_Calls: []
+  OnNetworkDestroy:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &2011878191
 Transform:
   m_ObjectHideFlags: 0
