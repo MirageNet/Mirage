@@ -308,7 +308,7 @@ namespace Mirror
 
             isNetworkActive = true;
 
-            client.OnClientConnect.AddListener(OnClientConnect);
+            client.Authenticated.AddListener(OnAuthenticated);
             
             if (string.IsNullOrEmpty(serverIp))
             {
@@ -800,7 +800,7 @@ namespace Mirror
 
             if (client.connection != null)
             {
-                client.ClientConnect(client.connection);
+                client.OnAuthenticated(client.connection);
                 clientLoadedScene = true;
                 client.connection = null;
             }
@@ -854,7 +854,7 @@ namespace Mirror
 
             if (client.connection != null)
             {
-                client.ClientConnect(client.connection);
+                client.OnAuthenticated(client.connection);
                 clientLoadedScene = true;
                 client.connection = null;
             }
@@ -1014,7 +1014,7 @@ namespace Mirror
         }
 
         // called after successful authentication
-        void OnClientAuthenticated(NetworkConnection conn)
+        void OnClientAuthenticated(NetworkConnectionToServer conn)
         {
             RegisterClientMessages(conn);
 
@@ -1025,7 +1025,7 @@ namespace Mirror
             if (string.IsNullOrEmpty(onlineScene) || onlineScene == offlineScene || loadedSceneName == onlineScene)
             {
                 clientLoadedScene = false;
-                client.ClientConnect(conn);
+                client.OnAuthenticated(conn);
             }
             else
             {
@@ -1187,7 +1187,7 @@ namespace Mirror
         /// <para>The default implementation of this function sets the client as ready and adds a player. Override the function to dictate what happens when the client connects.</para>
         /// </summary>
         /// <param name="conn">Connection to the server.</param>
-        public void OnClientConnect(NetworkConnection conn)
+        public void OnAuthenticated(NetworkConnectionToServer conn)
         {
             // OnClientConnect by default calls AddPlayer but it should not do
             // that when we have online/offline scenes. so we need the
@@ -1241,7 +1241,7 @@ namespace Mirror
         /// <para>Scene changes can cause player objects to be destroyed. The default implementation of OnClientSceneChanged in the NetworkManager is to add a player object for the connection if no player object exists.</para>
         /// </summary>
         /// <param name="conn">The network connection that the scene change message arrived on.</param>
-        public virtual void OnClientSceneChanged(NetworkConnection conn)
+        public virtual void OnClientSceneChanged(NetworkConnectionToServer conn)
         {
             // always become ready.
             if (!client.ready) client.Ready(conn);

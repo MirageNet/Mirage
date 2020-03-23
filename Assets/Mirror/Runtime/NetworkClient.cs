@@ -9,8 +9,6 @@ using Object = UnityEngine.Object;
 
 namespace Mirror
 {
-    public class OnClientConnectEvent : UnityEvent<NetworkConnection> {}
-
     public enum ConnectState
     {
         None,
@@ -45,7 +43,7 @@ namespace Mirror
         /// <summary>
         /// The NetworkConnection object this client is using.
         /// </summary>
-        public NetworkConnection connection { get; internal set; }
+        public NetworkConnectionToServer connection { get; internal set; }
 
         /// <summary>
         /// NetworkIdentity of the localPlayer
@@ -111,13 +109,6 @@ namespace Mirror
                     return spawned;
             }
         }
-
-        /// <summary>
-        /// Called on the client when connected to a server.
-        /// <para>The default implementation of this function sets the client as ready and adds a player. Override the function to dictate what happens when the client connects.</para>
-        /// </summary>
-        /// <param name="conn">Connection to the server.</param>
-        public OnClientConnectEvent OnClientConnect = new OnClientConnectEvent();
 
         /// <summary>
         /// The host server
@@ -266,7 +257,7 @@ namespace Mirror
             Connected.Invoke((NetworkConnectionToServer)connection);
         }
 
-        void OnAuthenticated(NetworkConnectionToServer conn)
+        public void OnAuthenticated(NetworkConnectionToServer conn)
         {
             // set connection to authenticated
             conn.isAuthenticated = true;
@@ -430,7 +421,7 @@ namespace Mirror
         /// <param name="readyConn">The connection to become ready for this client.</param>
         /// <param name="extraData">An extra message object that can be passed to the server for this player.</param>
         /// <returns>True if player was added.</returns>
-        public bool AddPlayer(NetworkConnection readyConn)
+        public bool AddPlayer(NetworkConnectionToServer readyConn)
         {
             // ensure valid ready connection
             if (readyConn != null)
@@ -486,7 +477,7 @@ namespace Mirror
         /// </summary>
         /// <param name="conn">The client connection which is ready.</param>
         /// <returns>True if succcessful</returns>
-        public bool Ready(NetworkConnection conn)
+        public bool Ready(NetworkConnectionToServer conn)
         {
             if (ready)
             {
@@ -710,11 +701,6 @@ namespace Mirror
         }
 
         #endregion
-
-        public void ClientConnect(NetworkConnection conn)
-        {
-            OnClientConnect.Invoke(conn);
-        }
 
         #region Spawn Handler
 

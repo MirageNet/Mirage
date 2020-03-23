@@ -11,7 +11,7 @@ namespace Mirror.Examples.Chat
 
         void Awake()
         {
-            client.OnClientConnect.AddListener(OnClientConnect);
+            client.Authenticated.AddListener(OnAuthenticated);
         }
 
         public class CreatePlayerMessage : MessageBase
@@ -24,7 +24,7 @@ namespace Mirror.Examples.Chat
             conn.RegisterHandler<NetworkConnectionToClient, CreatePlayerMessage>(OnCreatePlayer);
         }
 
-        public void OnClientConnect(NetworkConnection conn)
+        public void OnAuthenticated(NetworkConnection conn)
         {
             // tell the server to create a player with this name
             conn.Send(new CreatePlayerMessage { name = playerName });
