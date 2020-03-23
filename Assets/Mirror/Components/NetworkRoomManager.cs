@@ -81,6 +81,16 @@ namespace Mirror
             client.Authenticated.AddListener(OnAuthenticated);
         }
 
+        public override void Start()
+        {
+            base.Start();
+
+            if (server.playerPrefab == null)
+                Debug.LogError("NetworkRoomManager no GamePlayer prefab is registered. Please add a GamePlayer prefab.");
+            else
+                client.RegisterPrefab(server.playerPrefab);
+        }
+
         public override void OnValidate()
         {
 
