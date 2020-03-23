@@ -44,10 +44,6 @@ namespace Mirror.Examples.ListServer
         [Header("List Server Connection")]
         public NetworkManager manager;
         public string listServerUrl = "tpc4://127.0.0.1:8888";
-
-        public string listServerIp = "127.0.0.1";
-        public ushort gameServerToListenPort = 8887;
-        public ushort clientToListenPort = 8888;
         IConnection clientToListenConnection;
 
         public AsyncTransport transport;
