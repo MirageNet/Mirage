@@ -44,7 +44,7 @@ namespace Mirror
         /// </summary>
         public event Action OnChange;
 
-        public enum Operation : byte
+        private enum Operation : byte
         {
             OP_ADD,
             OP_CLEAR,
