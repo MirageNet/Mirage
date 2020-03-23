@@ -28,7 +28,6 @@ namespace Mirror.Examples.ListServer
         public ServerStatus(string ip, /*ushort port,*/ string title, ushort players, ushort capacity)
         {
             this.ip = ip;
-            //this.port = port;
             this.title = title;
             this.players = players;
             this.capacity = capacity;
@@ -61,7 +60,7 @@ namespace Mirror.Examples.ListServer
         public GameObject connectingPanel;
         public Text connectingText;
         public Button connectingCancelButton;
-        int connectingDots = 0;
+        int connectingDots;
 
         // all the servers, stored as dict with unique ip key so we can
         // update them more easily
@@ -72,12 +71,6 @@ namespace Mirror.Examples.ListServer
         {
             if (NetworkManager.isHeadless)
                 return;
-
-            // examples
-            //      127.0.0.1 => ServerStatus(     "127.0.0.1", "Deathmatch", 3, 10);
-            //    192.168.0.1 => ServerStatus(   "192.168.0.1", "Free for all", 7, 10);
-            //   172.217.22.3 => ServerStatus(  "172.217.22.3", "5vs5", 10, 10);
-            // 172.217.16.142 => ServerStatus("172.217.16.142", "Hide & Seek Mod", 0, 10);
 
             Connecting = true;
 
@@ -121,19 +114,17 @@ namespace Mirror.Examples.ListServer
         {
             // note: we don't use ReadString here because the list server
             //       doesn't know C#'s '7-bit-length + utf8' encoding for strings
-            BinaryReader reader = new BinaryReader(new MemoryStream(bytes, false), Encoding.UTF8);
+            var reader = new BinaryReader(new MemoryStream(bytes, false), Encoding.UTF8);
             byte ipBytesLength = reader.ReadByte();
             byte[] ipBytes = reader.ReadBytes(ipBytesLength);
             string ip = new IPAddress(ipBytes).ToString();
-            //ushort port = reader.ReadUInt16(); <- not all Transports use a port. assume default.
             ushort players = reader.ReadUInt16();
             ushort capacity = reader.ReadUInt16();
             ushort titleLength = reader.ReadUInt16();
             string title = Encoding.UTF8.GetString(reader.ReadBytes(titleLength));
-            //Debug.Log("PARSED: ip=" + ip + /*" port=" + port +*/ " players=" + players + " capacity= " + capacity + " title=" + title);
 
             // build key
-            string key = ip/* + ":" + port*/;
+            string key = ip;
 
             // find existing or create new one
             if (list.TryGetValue(key, out ServerStatus server))
@@ -146,7 +137,7 @@ namespace Mirror.Examples.ListServer
             else
             {
                 // create
-                server = new ServerStatus(ip, /*port,*/ title, players, capacity);
+                server = new ServerStatus(ip, title, players, capacity);
             }
 
             // save
@@ -204,17 +195,14 @@ namespace Mirror.Examples.ListServer
                 // status text
                 if (Connecting)
                 {
-                    //statusText.color = Color.yellow;
                     statusText.text = "Connecting...";
                 }
                 else if (Connected)
                 {
-                    //statusText.color = Color.green;
                     statusText.text = "Connected!";
                 }
                 else
                 {
-                    //statusText.color = Color.gray;
                     statusText.text = "Disconnected";
                 }
 
