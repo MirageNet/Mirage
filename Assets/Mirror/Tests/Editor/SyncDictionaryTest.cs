@@ -201,6 +201,16 @@ namespace Mirror.Tests
         }
 
         [Test]
+        public void SetClientCallbackTest()
+        {
+            Action<int, string, string> callback = Substitute.For<Action<int, string, string>>();
+            clientSyncDictionary.OnSet += callback;
+            serverSyncDictionary[0] = "yay";
+            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            callback.Received().Invoke(0, "Hello", "yay");
+        }
+
+        [Test]
         public void CountTest()
         {
             Assert.That(serverSyncDictionary.Count, Is.EqualTo(3));
