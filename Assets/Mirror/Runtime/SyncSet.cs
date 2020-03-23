@@ -8,8 +8,6 @@ namespace Mirror
     [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class SyncSet<T> : ISet<T>, ISyncObject
     {
-        public delegate void SyncSetChanged(Operation op, T item);
-
         protected readonly ISet<T> objects;
 
         public int Count => objects.Count;
