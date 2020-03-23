@@ -33,7 +33,7 @@ namespace Mirror
 
         /// <summary>
         /// Raised when an item is changed in a dictionary
-        /// Receives key and new value
+        /// Receives key, the old value and the new value
         /// </summary>
         public event Action<TKey, TValue, TValue> OnSet;
 
