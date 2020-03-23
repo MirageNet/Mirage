@@ -189,6 +189,8 @@ namespace Mirror
             // if client connection to server fails.
             networkSceneName = offlineScene;
 
+            client.Authenticated.AddListener(OnAuthenticated);
+
             Initialize();
 
             // setup OnSceneLoaded callback
@@ -298,8 +300,6 @@ namespace Mirror
             mode = NetworkManagerMode.ClientOnly;
 
             isNetworkActive = true;
-
-            client.Authenticated.AddListener(OnAuthenticated);
             
             if (string.IsNullOrEmpty(serverIp))
             {
