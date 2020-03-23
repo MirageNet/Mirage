@@ -538,7 +538,7 @@ namespace Mirror
         {
             // add all unspawned NetworkIdentities to spawnable objects
             spawnableObjects.Clear();
-            var sceneObjects =
+            IEnumerable<NetworkIdentity> sceneObjects =
                 Resources.FindObjectsOfTypeAll<NetworkIdentity>()
                                .Where(ConsiderForSpawning);
 
