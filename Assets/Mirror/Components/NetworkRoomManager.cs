@@ -76,6 +76,11 @@ namespace Mirror
         [Tooltip("List of Room Player objects")]
         public List<NetworkRoomPlayer> RoomSlots = new List<NetworkRoomPlayer>();
 
+        void Awake()
+        {
+            client.OnClientConnect.AddListener(OnClientConnect);
+        }
+
         public override void OnValidate()
         {
 
@@ -424,11 +429,10 @@ namespace Mirror
         /// <para>The default implementation of this function sets the client as ready and adds a player. Override the function to dictate what happens when the client connects.</para>
         /// </summary>
         /// <param name="conn">Connection to the server.</param>
-        public override void OnClientConnect(NetworkConnection conn)
+        public void OnClientConnect(NetworkConnection conn)
         {
             OnRoomClientConnect(conn);
             CallOnClientEnterRoom();
-            base.OnClientConnect(conn);
         }
 
         /// <summary>

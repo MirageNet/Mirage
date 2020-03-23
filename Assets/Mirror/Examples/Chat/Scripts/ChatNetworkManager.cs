@@ -9,6 +9,11 @@ namespace Mirror.Examples.Chat
 
         public ChatWindow chatWindow;
 
+        void Awake()
+        {
+            client.OnClientConnect.AddListener(OnClientConnect);
+        }
+
         public class CreatePlayerMessage : MessageBase
         {
             public string name;
@@ -19,10 +24,8 @@ namespace Mirror.Examples.Chat
             conn.RegisterHandler<NetworkConnectionToClient, CreatePlayerMessage>(OnCreatePlayer);
         }
 
-        public override void OnClientConnect(NetworkConnection conn)
+        public void OnClientConnect(NetworkConnection conn)
         {
-            base.OnClientConnect(conn);
-
             // tell the server to create a player with this name
             conn.Send(new CreatePlayerMessage { name = playerName });
         }
