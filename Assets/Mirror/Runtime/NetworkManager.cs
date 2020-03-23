@@ -1025,7 +1025,6 @@ namespace Mirror
             if (string.IsNullOrEmpty(onlineScene) || onlineScene == offlineScene || loadedSceneName == onlineScene)
             {
                 clientLoadedScene = false;
-                client.OnAuthenticated(conn);
             }
             else
             {
