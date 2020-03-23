@@ -9,6 +9,8 @@ using Object = UnityEngine.Object;
 
 namespace Mirror
 {
+    public class OnClientConnectEvent : UnityEvent<NetworkConnection> {}
+
     public enum ConnectState
     {
         None,
@@ -109,6 +111,13 @@ namespace Mirror
                     return spawned;
             }
         }
+
+        /// <summary>
+        /// Called on the client when connected to a server.
+        /// <para>The default implementation of this function sets the client as ready and adds a player. Override the function to dictate what happens when the client connects.</para>
+        /// </summary>
+        /// <param name="conn">Connection to the server.</param>
+        public OnClientConnectEvent OnClientConnect = new OnClientConnectEvent();
 
         /// <summary>
         /// The host server
@@ -701,6 +710,11 @@ namespace Mirror
         }
 
         #endregion
+
+        public void ClientConnect(NetworkConnection conn)
+        {
+            OnClientConnect.Invoke(conn);
+        }
 
         #region Spawn Handler
 

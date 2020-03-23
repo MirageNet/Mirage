@@ -308,6 +308,8 @@ namespace Mirror
 
             isNetworkActive = true;
 
+            client.OnClientConnect.AddListener(OnClientConnect);
+            
             if (string.IsNullOrEmpty(serverIp))
             {
                 Debug.LogError("serverIp shouldn't be empty");
@@ -798,7 +800,7 @@ namespace Mirror
 
             if (client.connection != null)
             {
-                OnClientConnect(client.connection);
+                client.ClientConnect(client.connection);
                 clientLoadedScene = true;
                 client.connection = null;
             }
@@ -852,7 +854,7 @@ namespace Mirror
 
             if (client.connection != null)
             {
-                OnClientConnect(client.connection);
+                client.ClientConnect(client.connection);
                 clientLoadedScene = true;
                 client.connection = null;
             }
@@ -1023,7 +1025,7 @@ namespace Mirror
             if (string.IsNullOrEmpty(onlineScene) || onlineScene == offlineScene || loadedSceneName == onlineScene)
             {
                 clientLoadedScene = false;
-                OnClientConnect(conn);
+                client.ClientConnect(conn);
             }
             else
             {
@@ -1185,7 +1187,7 @@ namespace Mirror
         /// <para>The default implementation of this function sets the client as ready and adds a player. Override the function to dictate what happens when the client connects.</para>
         /// </summary>
         /// <param name="conn">Connection to the server.</param>
-        public virtual void OnClientConnect(NetworkConnection conn)
+        public void OnClientConnect(NetworkConnection conn)
         {
             // OnClientConnect by default calls AddPlayer but it should not do
             // that when we have online/offline scenes. so we need the
