@@ -9,13 +9,40 @@ namespace Mirror
     [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class SyncIDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISyncObject
     {
-        public delegate void SyncDictionaryChanged(Operation op, TKey key, TValue item);
-
         protected readonly IDictionary<TKey, TValue> objects;
 
         public int Count => objects.Count;
         public bool IsReadOnly { get; private set; }
-        public event SyncDictionaryChanged Callback;
+
+        /// <summary>
+        /// Raised when an element is added to the dictionary.
+        /// Receives the key and value of the new item
+        /// </summary>
+        public event Action<TKey, TValue> OnInsert;
+
+        /// <summary>
+        /// Raised when the dictionary is cleared
+        /// </summary>
+        public event Action OnClear;
+
+        /// <summary>
+        /// Raised when an item is removed from the dictionary
+        /// receives the key and value of the old item
+        /// </summary>
+        public event Action<TKey, TValue> OnRemove;
+
+        /// <summary>
+        /// Raised when an item is changed in a dictionary
+        /// Receives key and new value
+        /// </summary>
+        public event Action<TKey, TValue> OnSet;
+
+        /// <summary>
+        /// Raised after the dictionary has been updated
+        /// Note that if there are multiple changes
+        /// this event is only raised once.
+        /// </summary>
+        public event Action OnChange;
 
         public enum Operation : byte
         {
@@ -75,7 +102,28 @@ namespace Mirror
 
             changes.Add(change);
 
-            Callback?.Invoke(op, key, item);
+            RaiseEvents(op, key, item);
+
+            OnChange?.Invoke();
+        }
+
+        private void RaiseEvents(Operation op, TKey key, TValue value)
+        {
+            switch (op)
+            {
+                case Operation.OP_ADD:
+                    OnInsert?.Invoke(key, value);
+                    break;
+                case Operation.OP_CLEAR:
+                    OnClear?.Invoke();
+                    break;
+                case Operation.OP_REMOVE:
+                    OnRemove?.Invoke(key, value);
+                    break;
+                case Operation.OP_SET:
+                    OnSet?.Invoke(key, value);
+                    break;
+            }
         }
 
         public void OnSerializeAll(NetworkWriter writer)
@@ -148,6 +196,7 @@ namespace Mirror
         {
             // This list can now only be modified by synchronization
             IsReadOnly = true;
+            bool raiseOnChange = false;
 
             int changesCount = (int)reader.ReadPackedUInt32();
 
@@ -192,13 +241,19 @@ namespace Mirror
 
                 if (apply)
                 {
-                    Callback?.Invoke(operation, key, item);
+                    RaiseEvents(operation, key, item);
+                    raiseOnChange = true;
                 }
                 // we just skipped this change
                 else
                 {
                     changesAhead--;
                 }
+            }
+
+            if (raiseOnChange)
+            {
+                OnChange?.Invoke();
             }
         }
 
