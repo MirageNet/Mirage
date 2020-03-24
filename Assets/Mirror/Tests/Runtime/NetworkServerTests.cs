@@ -17,7 +17,7 @@ namespace Mirror.Tests
             serverGO.AddComponent<NetworkClient>();
             Transport transport = serverGO.AddComponent<TcpTransport>();
 
-            Transport.activeTransport = transport;
+            testServer.transport = transport;
             testServer.Listen();
         }
 

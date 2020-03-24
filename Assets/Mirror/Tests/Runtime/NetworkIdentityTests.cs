@@ -13,6 +13,8 @@ namespace Mirror.Tests
         NetworkClient client;
         GameObject clientGO;
 
+        private Transport serverTransport;
+        private Transport clientTransport;
 
         GameObject gameObject;
         NetworkIdentity identity;
@@ -20,10 +22,11 @@ namespace Mirror.Tests
         [SetUp]
         public void SetUp()
         {
-            Transport.activeTransport = Substitute.For<Transport>();
+            serverTransport = Substitute.For<Transport>();
             serverGO = new GameObject();
             server = serverGO.AddComponent<NetworkServer>();
 
+            clientTransport = Substitute.For<Transport>();
             clientGO = new GameObject();
             client = clientGO.AddComponent<NetworkClient>();
             server.Listen();
@@ -42,7 +45,8 @@ namespace Mirror.Tests
             server.Shutdown();
             Object.DestroyImmediate(serverGO);
             Object.DestroyImmediate(clientGO);
-            Transport.activeTransport = null;
+            serverTransport = null;
+            clientTransport = null;
             server.Shutdown();
         }
         #endregion

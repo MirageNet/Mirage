@@ -167,15 +167,20 @@ namespace Mirror.Tests
         private NetworkClient client;
         private GameObject networkServerGameObject;
 
+        private Transport serverTransport;
+        private Transport clientTransport;
+
         [SetUp]
         public void SetUp()
         {
             networkServerGameObject = new GameObject();
             server = networkServerGameObject.AddComponent<NetworkServer>();
             client = networkServerGameObject.AddComponent<NetworkClient>();
-            Transport.activeTransport = Substitute.For<Transport>();
+            serverTransport = Substitute.For<Transport>();
+            clientTransport = Substitute.For<Transport>();
 
-            Transport.activeTransport.GetMaxPacketSize().ReturnsForAnyArgs(1000);
+            serverTransport.GetMaxPacketSize().ReturnsForAnyArgs(1000);
+            clientTransport.GetMaxPacketSize().ReturnsForAnyArgs(1000);
 
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
@@ -189,7 +194,8 @@ namespace Mirror.Tests
             // DestroyImmediate is called internally, giving an error in Editor
             GameObject.DestroyImmediate(gameObject);
             Object.DestroyImmediate(networkServerGameObject);
-            Transport.activeTransport = null;
+            serverTransport = null;
+            clientTransport = null;
         }
 
         // A Test behaves as an ordinary method
