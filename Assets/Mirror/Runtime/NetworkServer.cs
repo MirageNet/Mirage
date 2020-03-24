@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Mirror.Tcp;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -55,6 +56,8 @@ namespace Mirror
         // => removed it for easier code. use .localConnection now!
         public NetworkConnectionToClient localConnection { get; private set; }
 
+        public Transport transport;
+
         // The host client for this server 
         public NetworkClient localClient { get; private set; }
 
@@ -96,6 +99,24 @@ namespace Mirror
         // Time kept in this server
         public readonly NetworkTime Time = new NetworkTime();
 
+        public virtual void OnValidate()
+        {
+            // add transport if there is none yet. makes upgrading easier.
+            if (transport == null)
+            {
+                // was a transport added yet? if not, add one
+                transport = GetComponent<Transport>();
+                if (transport == null)
+                {
+                    transport = gameObject.AddComponent<TcpTransport>();
+                    Debug.Log("NetworkManager: added default Transport because there was none yet.");
+                }
+#if UNITY_EDITOR
+                UnityEditor.Undo.RecordObject(gameObject, "Added default Transport");
+#endif
+            }
+        }
+        
         /// <summary>
         /// This shuts down the server and disconnects all clients.
         /// </summary>
@@ -111,13 +132,13 @@ namespace Mirror
                     // we do NOT call Transport.Shutdown, because someone only
                     // called NetworkServer.Shutdown. we can't assume that the
                     // client is supposed to be shut down too!
-                    Transport.activeTransport.ServerStop();
+                    transport.ServerStop();
                 }
 
-                Transport.activeTransport.OnServerDisconnected.RemoveListener(OnDisconnected);
-                Transport.activeTransport.OnServerConnected.RemoveListener(OnConnected);
-                Transport.activeTransport.OnServerDataReceived.RemoveListener(OnDataReceived);
-                Transport.activeTransport.OnServerError.RemoveListener(OnError);
+                transport.OnServerDisconnected.RemoveListener(OnDisconnected);
+                transport.OnServerConnected.RemoveListener(OnConnected);
+                transport.OnServerDataReceived.RemoveListener(OnDataReceived);
+                transport.OnServerError.RemoveListener(OnError);
 
                 if (authenticator != null)
                     authenticator.OnServerAuthenticated -= OnAuthenticated;
@@ -142,10 +163,10 @@ namespace Mirror
 
             //Make sure connections are cleared in case any old connections references exist from previous sessions
             connections.Clear();
-            Transport.activeTransport.OnServerDisconnected.AddListener(OnDisconnected);
-            Transport.activeTransport.OnServerConnected.AddListener(OnConnected);
-            Transport.activeTransport.OnServerDataReceived.AddListener(OnDataReceived);
-            Transport.activeTransport.OnServerError.AddListener(OnError);
+            transport.OnServerDisconnected.AddListener(OnDisconnected);
+            transport.OnServerConnected.AddListener(OnConnected);
+            transport.OnServerDataReceived.AddListener(OnDataReceived);
+            transport.OnServerError.AddListener(OnError);
 
             if (authenticator != null)
             {
@@ -181,7 +202,7 @@ namespace Mirror
             // only start server if we want to listen
             if (Listening)
             {
-                Transport.activeTransport.ServerStart();
+                transport.ServerStart();
                 if (LogFilter.Debug) Debug.Log("Server started listening");
             }
 
@@ -395,14 +416,14 @@ namespace Mirror
             if (connectionId <= 0)
             {
                 Debug.LogError("Server.HandleConnect: invalid connectionId: " + connectionId + " . Needs to be >0, because 0 is reserved for local player.");
-                Transport.activeTransport.ServerDisconnect(connectionId);
+                transport.ServerDisconnect(connectionId);
                 return;
             }
 
             // connectionId not in use yet?
             if (connections.ContainsKey(connectionId))
             {
-                Transport.activeTransport.ServerDisconnect(connectionId);
+                transport.ServerDisconnect(connectionId);
                 if (LogFilter.Debug) Debug.Log("Server connectionId " + connectionId + " already in use. kicked client:" + connectionId);
                 return;
             }
@@ -421,7 +442,7 @@ namespace Mirror
             else
             {
                 // kick
-                Transport.activeTransport.ServerDisconnect(connectionId);
+                transport.ServerDisconnect(connectionId);
                 if (LogFilter.Debug) Debug.Log("Server full, kicked client:" + connectionId);
             }
         }
