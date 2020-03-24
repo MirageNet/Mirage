@@ -52,12 +52,6 @@ namespace Mirror
         public NetworkServer server;
         public NetworkClient client;
 
-        // transport layer
-        [Header("Network Info")]
-        [Tooltip("Transport component attached to this object that server and client will use to connect")]
-        [SerializeField]
-        protected Transport transport;
-
         /// <summary>
         /// True if the server or client is started and running
         /// <para>This is set True in StartServer / StartClient, and set False in StopServer / StopClient</para>
@@ -103,21 +97,6 @@ namespace Mirror
         /// </summary>
         public virtual void OnValidate()
         {
-            // add transport if there is none yet. makes upgrading easier.
-            if (transport == null)
-            {
-                // was a transport added yet? if not, add one
-                transport = GetComponent<Transport>();
-                if (transport == null)
-                {
-                    transport = gameObject.AddComponent<TcpTransport>();
-                    Debug.Log("NetworkManager: added default Transport because there was none yet.");
-                }
-#if UNITY_EDITOR
-                UnityEditor.Undo.RecordObject(gameObject, "Added default Transport");
-#endif
-            }
-
             // add NetworkServer if there is none yet. makes upgrading easier.
             if (GetComponent<NetworkServer>() == null)
             {
@@ -464,8 +443,6 @@ namespace Mirror
 
                 DontDestroyOnLoad(gameObject);
             }
-
-            Transport.activeTransport = transport;
 
             // subscribe to the server
             if (server != null)
