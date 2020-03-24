@@ -9,6 +9,7 @@ using System.IO;
 using static Mirror.Tests.AsyncUtil;
 using System;
 using Object = UnityEngine.Object;
+using System.Net;
 
 namespace Mirror.Tests
 {
