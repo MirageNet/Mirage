@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Mirror.Tcp;
 using UnityEngine;
 using UnityEngine.Events;
 using Guid = System.Guid;
@@ -45,6 +46,8 @@ namespace Mirror
         /// The NetworkConnection object this client is using.
         /// </summary>
         public NetworkConnectionToServer connection { get; internal set; }
+
+        public Transport transport;
 
         /// <summary>
         /// NetworkIdentity of the localPlayer
@@ -124,8 +127,28 @@ namespace Mirror
         void Start()
         {
             InitializeAuthEvents();
+
+            transport = GetComponent<Transport>();
         }
 
+        public virtual void OnValidate()
+        {
+            // add transport if there is none yet. makes upgrading easier.
+            if (transport == null)
+            {
+                // was a transport added yet? if not, add one
+                transport = GetComponent<Transport>();
+                if (transport == null)
+                {
+                    transport = gameObject.AddComponent<TcpTransport>();
+                    Debug.Log("NetworkManager: added default Transport because there was none yet.");
+                }
+#if UNITY_EDITOR
+                UnityEditor.Undo.RecordObject(gameObject, "Added default Transport");
+#endif
+            }
+        }
+        
         /// <summary>
         /// Connect client to a NetworkServer instance.
         /// </summary>
@@ -134,12 +157,12 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("Client Connect: " + serverIp);
 
-            Transport.activeTransport.enabled = true;
+            transport.enabled = true;
             InitializeTransportHandlers();
             RegisterSpawnPrefabs();
 
             connectState = ConnectState.Connecting;
-            await Transport.activeTransport.ClientConnectAsync(serverIp);
+            await transport.ClientConnectAsync(serverIp);
 
             // setup all the handlers
             connection = new NetworkConnectionToServer();
@@ -155,12 +178,12 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("Client Connect: " + uri);
 
-            Transport.activeTransport.enabled = true;
+            transport.enabled = true;
             InitializeTransportHandlers();
             RegisterSpawnPrefabs();
 
             connectState = ConnectState.Connecting;
-            await Transport.activeTransport.ClientConnectAsync(uri);
+            await transport.ClientConnectAsync(uri);
 
             // setup all the handlers
             connection = new NetworkConnectionToServer();
@@ -197,9 +220,9 @@ namespace Mirror
 
         void InitializeTransportHandlers()
         {
-            Transport.activeTransport.OnClientDataReceived.AddListener(OnDataReceived);
-            Transport.activeTransport.OnClientDisconnected.AddListener(OnDisconnected);
-            Transport.activeTransport.OnClientError.AddListener(OnError);
+            transport.OnClientDataReceived.AddListener(OnDataReceived);
+            transport.OnClientDisconnected.AddListener(OnDisconnected);
+            transport.OnClientError.AddListener(OnError);
         }
 
         void InitializeAuthEvents()
@@ -296,9 +319,9 @@ namespace Mirror
         void RemoveTransportHandlers()
         {
             // so that we don't register them more than once
-            Transport.activeTransport.OnClientDataReceived.RemoveListener(OnDataReceived);
-            Transport.activeTransport.OnClientDisconnected.RemoveListener(OnDisconnected);
-            Transport.activeTransport.OnClientError.RemoveListener(OnError);
+            transport.OnClientDataReceived.RemoveListener(OnDataReceived);
+            transport.OnClientDisconnected.RemoveListener(OnDisconnected);
+            transport.OnClientError.RemoveListener(OnError);
         }
 
         /// <summary>
@@ -394,7 +417,7 @@ namespace Mirror
             // we do NOT call Transport.Shutdown, because someone only called
             // NetworkClient.Shutdown. we can't assume that the server is
             // supposed to be shut down too!
-            Transport.activeTransport.ClientDisconnect();
+            transport.ClientDisconnect();
         }
 
         static bool ConsiderForSpawning(NetworkIdentity identity)
