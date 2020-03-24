@@ -500,7 +500,7 @@ namespace Mirror
 
             // Suspend the server's transport while changing scenes
             // It will be re-enabled in FinishScene.
-            Transport.activeTransport.enabled = false;
+            server.transport.enabled = false;
             loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
 
             // notify all clients about the new scene
@@ -521,7 +521,7 @@ namespace Mirror
             // the state as soon as the load is finishing, causing all kinds of bugs because of missing state.
             // (client may be null after StopClient etc.)
             if (LogFilter.Debug) Debug.Log("ClientChangeScene: pausing handlers while scene is loading to avoid data loss after scene was loaded.");
-            Transport.activeTransport.enabled = false;
+            client.transport.enabled = false;
             // Let client prepare for scene change
             OnClientChangeScene(newSceneName, sceneOperation, customHandling);
 
