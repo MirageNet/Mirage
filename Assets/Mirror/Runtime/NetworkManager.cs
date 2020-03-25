@@ -1275,11 +1275,6 @@ namespace Mirror
         public virtual void OnStopServer() { }
 
         /// <summary>
-        /// This is called when a client is stopped.
-        /// </summary>
-        public virtual void OnStopClient() { }
-
-        /// <summary>
         /// This is called when a host is stopped.
         /// </summary>
         public virtual void OnStopHost() { }
