@@ -588,12 +588,6 @@ namespace Mirror
         public virtual void OnRoomClientConnect(NetworkConnection conn) { }
 
         /// <summary>
-        /// This is called on the client when disconnected from a server.
-        /// </summary>
-        /// <param name="conn">The connection that disconnected.</param>
-        //public virtual void OnRoomClientDisconnect(NetworkConnection conn) { }
-
-        /// <summary>
         /// This is called on the client when the client stops.
         /// </summary>
         public virtual void OnRoomStopClient() { }
