@@ -79,6 +79,7 @@ namespace Mirror
         void Awake()
         {
             client.Authenticated.AddListener(OnAuthenticated);
+            client.OnStopClient.AddListener(OnStopClient);
         }
 
         public override void Start()
@@ -452,9 +453,9 @@ namespace Mirror
         }
 
         /// <summary>
-        /// This is called when a client is stopped.
+        /// This is invoked when a client is stopped.
         /// </summary>
-        public override void OnStopClient()
+        public void OnStopClient()
         {
             OnRoomStopClient();
             CallOnClientExitRoom();
