@@ -433,6 +433,7 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager StopClient");
             isNetworkActive = false;
+            clientLoadedScene = false;
 
             // shutdown client
             client.Disconnect();
