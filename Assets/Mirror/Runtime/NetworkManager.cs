@@ -1259,11 +1259,6 @@ namespace Mirror
         public virtual void OnStartServer() { }
 
         /// <summary>
-        /// This is invoked when the client is started.
-        /// </summary>
-        //public virtual void OnStartClient() { }
-
-        /// <summary>
         /// This is called when a server is stopped - including when a host is stopped.
         /// </summary>
         public virtual void OnStopServer() { }
