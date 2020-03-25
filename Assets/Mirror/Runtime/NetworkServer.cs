@@ -96,8 +96,6 @@ namespace Mirror
         {
             if (initialized)
             {
-                Stopped.Invoke();
-
                 DisconnectAll();
 
                 if (Listening)
@@ -118,6 +116,8 @@ namespace Mirror
                     authenticator.OnServerAuthenticated -= OnAuthenticated;
 
                 initialized = false;
+
+                Stopped.Invoke();
             }
 
             active = false;
