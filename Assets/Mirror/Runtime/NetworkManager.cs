@@ -466,8 +466,6 @@ namespace Mirror
             if (!server.active)
                 return;
 
-            OnStopServer();
-
             if (LogFilter.Debug) Debug.Log("NetworkManager StopServer");
             isNetworkActive = false;
             server.Shutdown();

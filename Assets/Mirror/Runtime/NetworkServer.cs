@@ -96,6 +96,8 @@ namespace Mirror
         {
             if (initialized)
             {
+                OnStopServer.Invoke();
+
                 DisconnectAll();
 
                 if (Listening)
