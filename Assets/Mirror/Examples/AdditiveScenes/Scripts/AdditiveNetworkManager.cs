@@ -13,7 +13,7 @@ namespace Mirror.Examples.Additive
 
         void Awake()
         {
-            client.OnStopClient.AddListener(OnStopClient);
+            client.Disconnected.AddListener(Disconnected);
         }
 
         public override void OnStartServer()
@@ -40,7 +40,7 @@ namespace Mirror.Examples.Additive
             StartCoroutine(UnloadScenes());
         }
 
-        public void OnStopClient()
+        public void Disconnected()
         {
             StartCoroutine(UnloadScenes());
         }
