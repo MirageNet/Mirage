@@ -80,6 +80,7 @@ namespace Mirror
         {
             client.Authenticated.AddListener(OnAuthenticated);
             client.Connected.AddListener(Connected);
+            client.Disconnected.AddListener(Disconnected);
         }
 
         public override void Start()
@@ -331,9 +332,6 @@ namespace Mirror
                     // find the game-player object for this connection, and destroy it
                     NetworkIdentity identity = roomPlayer.GetComponent<NetworkIdentity>();
 
-                    NetworkIdentity playerController = identity.connectionToClient.identity;
-                    server.Destroy(playerController.gameObject);
-
                     if (server.active)
                     {
                         // re-add the room object
@@ -402,7 +400,7 @@ namespace Mirror
         public override void OnStopServer()
         {
             RoomSlots.Clear();
-            base.OnStopServer();
+            OnRoomStopServer();
         }
 
         /// <summary>
@@ -453,9 +451,9 @@ namespace Mirror
         }
 
         /// <summary>
-        /// This is called when a client is stopped.
+        /// This is invoked when a client is stopped.
         /// </summary>
-        public override void OnStopClient()
+        public void Disconnected()
         {
             OnRoomStopClient();
             CallOnClientExitRoom();
@@ -499,6 +497,11 @@ namespace Mirror
         /// This is called on the server when the server is started - including when a host is started.
         /// </summary>
         public virtual void OnRoomStartServer() { }
+
+        /// <summary>
+        /// This is called on the server when the server is started - including when a host is stopped.
+        /// </summary>
+        public virtual void OnRoomStopServer() { }
 
         /// <summary>
         /// This is called on the server when a new client connects to the server.

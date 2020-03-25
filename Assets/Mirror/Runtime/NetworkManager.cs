@@ -484,8 +484,6 @@ namespace Mirror
         /// </summary>
         public void StopClient()
         {
-            OnStopClient();
-
             if (LogFilter.Debug) Debug.Log("NetworkManager StopClient");
             isNetworkActive = false;
 
@@ -1262,11 +1260,6 @@ namespace Mirror
         /// This is called when a server is stopped - including when a host is stopped.
         /// </summary>
         public virtual void OnStopServer() { }
-
-        /// <summary>
-        /// This is called when a client is stopped.
-        /// </summary>
-        public virtual void OnStopClient() { }
 
         /// <summary>
         /// This is called when a host is stopped.
