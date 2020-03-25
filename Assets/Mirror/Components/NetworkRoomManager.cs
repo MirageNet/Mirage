@@ -80,6 +80,7 @@ namespace Mirror
         {
             client.Authenticated.AddListener(OnAuthenticated);
             server.Stopped.AddListener(Stopped);
+            client.Disconnected.AddListener(Disconnected);
         }
 
         public override void Start()
@@ -331,9 +332,6 @@ namespace Mirror
                     // find the game-player object for this connection, and destroy it
                     NetworkIdentity identity = roomPlayer.GetComponent<NetworkIdentity>();
 
-                    NetworkIdentity playerController = identity.connectionToClient.identity;
-                    server.Destroy(playerController.gameObject);
-
                     if (server.active)
                     {
                         // re-add the room object
@@ -402,6 +400,7 @@ namespace Mirror
         public void Stopped()
         {
             RoomSlots.Clear();
+            OnRoomStopServer();
         }
 
         /// <summary>
@@ -415,19 +414,6 @@ namespace Mirror
         #endregion
 
         #region client handlers
-
-        /// <summary>
-        /// This is invoked when the client is started.
-        /// </summary>
-        public override void OnStartClient()
-        {
-            if (roomPlayerPrefab == null || roomPlayerPrefab.gameObject == null)
-                Debug.LogError("NetworkRoomManager no RoomPlayer prefab is registered. Please add a RoomPlayer prefab.");
-            else
-                client.RegisterPrefab(roomPlayerPrefab.gameObject);
-
-            OnRoomStartClient();
-        }
 
         /// <summary>
         /// Called on the client when connected to a server.
@@ -452,9 +438,9 @@ namespace Mirror
         }
 
         /// <summary>
-        /// This is called when a client is stopped.
+        /// This is invoked when a client is stopped.
         /// </summary>
-        public override void OnStopClient()
+        public void Disconnected()
         {
             OnRoomStopClient();
             CallOnClientExitRoom();
@@ -498,6 +484,11 @@ namespace Mirror
         /// This is called on the server when the server is started - including when a host is started.
         /// </summary>
         public virtual void OnRoomStartServer() { }
+
+        /// <summary>
+        /// This is called on the server when the server is started - including when a host is stopped.
+        /// </summary>
+        public virtual void OnRoomStopServer() { }
 
         /// <summary>
         /// This is called on the server when a new client connects to the server.
@@ -612,12 +603,6 @@ namespace Mirror
         /// </summary>
         /// <param name="conn">The connection that disconnected.</param>
         public virtual void OnRoomClientDisconnect(NetworkConnection conn) { }
-
-        /// <summary>
-        /// This is called on the client when a client is started.
-        /// </summary>
-        /// <param name="roomClient">The connection for the room.</param>
-        public virtual void OnRoomStartClient() { }
 
         /// <summary>
         /// This is called on the client when the client stops.

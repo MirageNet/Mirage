@@ -1,3 +1,25 @@
+# [25.0.0](https://github.com/MirrorNG/MirrorNG/compare/24.1.1-master...25.0.0-master) (2020-03-25)
+
+
+* Move on client stop (#118) ([678e386](https://github.com/MirrorNG/MirrorNG/commit/678e3867a9f232e52d2a6cdbfae8140b0e82bd11)), closes [#118](https://github.com/MirrorNG/MirrorNG/issues/118)
+
+
+### Features
+
+* Added Virtual OnRoomStopServer to NetworkRoomManager and Script Template ([d034ef6](https://github.com/MirrorNG/MirrorNG/commit/d034ef616f3d479729064d652f74a905ea05b495))
+
+
+### BREAKING CHANGES
+
+* OnStopClient virtual is replaced by event in Client
+
+## [24.1.1](https://github.com/MirrorNG/MirrorNG/compare/24.1.0-master...24.1.1-master) (2020-03-25)
+
+
+### Bug Fixes
+
+* [#1593](https://github.com/MirrorNG/MirrorNG/issues/1593) - NetworkRoomManager.ServerChangeScene doesn't destroy the world player before replacing the connection. otherwise ReplacePlayerForConnection removes authority form a destroyed object, causing all kidns of errors. The call wasn't actually needed. ([#1594](https://github.com/MirrorNG/MirrorNG/issues/1594)) ([347cb53](https://github.com/MirrorNG/MirrorNG/commit/347cb5374d0cba72762e893645f076d3161aa0c5))
+
 # [24.1.0](https://github.com/MirrorNG/MirrorNG/compare/24.0.1-master...24.1.0-master) (2020-03-24)
 
 
