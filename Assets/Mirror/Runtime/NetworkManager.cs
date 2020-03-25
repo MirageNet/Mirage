@@ -309,8 +309,6 @@ namespace Mirror
             if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + serverIp);
 
             _ = client.ConnectAsync(serverIp);
-
-            OnStartClient();
         }
 
         /// <summary>
@@ -327,8 +325,6 @@ namespace Mirror
             if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + uri);
 
             _ = client.ConnectAsync(uri);
-
-            OnStartClient();
         }
 
         /// <summary>
@@ -444,8 +440,6 @@ namespace Mirror
             client.ConnectLocalServer(server);
 
             RegisterClientMessages(client.connection);
-
-            OnStartClient();
         }
 
         /// <summary>
