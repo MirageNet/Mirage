@@ -328,12 +328,8 @@ namespace Mirror
             // is called after the server is actually properly started.
             OnStartHost();
 
-            finishStartHostPending = true;
             FinishStartHost();
         }
-
-        // This may be set true in StartHost and is evaluated in FinishStartHost
-        bool finishStartHostPending;
 
         // FinishStartHost is guaranteed to be called after the host server was
         // fully started and all the asynchronous StartHost magic is finished
@@ -709,8 +705,6 @@ namespace Mirror
             {
                 FinishLoadSceneClientOnly();
             }
-            // otherwise we called it after stopping when loading offline scene.
-            // do nothing then.
         }
 
         // finish load scene part for host mode. makes code easier and is
@@ -729,42 +723,18 @@ namespace Mirror
                 client.connection = null;
             }
 
-            // do we need to finish a StartHost() call?
-            // then call FinishStartHost and let it take care of spawning etc.
-            if (finishStartHostPending)
+            FinishStartHost();
+
+            // spawn server objects
+            //server.SpawnObjects();
+
+            // call OnServerSceneChanged
+            OnServerSceneChanged(networkSceneName);
+
+            if (client.isConnected)
             {
-                finishStartHostPending = false;
-                FinishStartHost();
-
-                // call OnServerSceneChanged
-                OnServerSceneChanged(networkSceneName);
-
-                if (client.isConnected)
-                {
-                    // DO NOT call OnClientSceneChanged here.
-                    // the scene change happened because StartHost loaded the
-                    // server's online scene. it has nothing to do with the client.
-                    // this was not meant as a client scene load, so don't call it.
-                    //
-                    // otherwise AddPlayer would be called twice:
-                    // -> once for client OnConnected
-                    // -> once in OnClientSceneChanged
-                }
-            }
-            // otherwise we just changed a scene in host mode
-            else
-            {
-                // spawn server objects
-                server.SpawnObjects();
-
-                // call OnServerSceneChanged
-                OnServerSceneChanged(networkSceneName);
-
-                if (client.isConnected)
-                {
-                    // let client know that we changed scene
-                    OnClientSceneChanged(client.connection);
-                }
+                // let client know that we changed scene
+                OnClientSceneChanged(client.connection);
             }
         }
 
