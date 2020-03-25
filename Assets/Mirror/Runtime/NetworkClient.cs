@@ -530,6 +530,8 @@ namespace Mirror
                 ready = false;
                 connection = null;
             }
+
+            OnStopClient.Invoke();
         }
 
         /// <summary>
