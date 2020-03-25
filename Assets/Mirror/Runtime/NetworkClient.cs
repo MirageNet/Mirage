@@ -225,7 +225,6 @@ namespace Mirror
         void OnDisconnected()
         {
             connectState = ConnectState.Disconnected;
-            connection?.InvokeHandler(new DisconnectMessage(), -1);
             HandleClientDisconnect(connection);
         }
 
@@ -279,7 +278,7 @@ namespace Mirror
             {
                 if (isConnected)
                 {
-                    hostServer.localConnection.Send(new DisconnectMessage());
+                    hostServer.Disconnected.Invoke(hostServer.localConnection);
                 }
                 hostServer.RemoveLocalConnection();
             }
