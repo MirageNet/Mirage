@@ -39,6 +39,7 @@ namespace Mirror
 
         public NetworkConnectionEvent Connected = new NetworkConnectionEvent();
         public NetworkConnectionEvent Authenticated = new NetworkConnectionEvent();
+        public UnityEvent OnStopClient = new UnityEvent();
 
         /// <summary>
         /// The NetworkConnection object this client is using.
