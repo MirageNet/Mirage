@@ -490,8 +490,6 @@ namespace Mirror
         /// </summary>
         public void StopClient()
         {
-            OnStopClient();
-
             if (LogFilter.Debug) Debug.Log("NetworkManager StopClient");
             isNetworkActive = false;
 
