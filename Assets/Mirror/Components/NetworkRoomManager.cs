@@ -79,6 +79,7 @@ namespace Mirror
         void Awake()
         {
             client.Authenticated.AddListener(OnAuthenticated);
+            client.Connected.AddListener(Connected);
         }
 
         public override void Start()
@@ -419,7 +420,7 @@ namespace Mirror
         /// <summary>
         /// This is invoked when the client is started.
         /// </summary>
-        public override void OnStartClient()
+        void Connected(NetworkConnectionToServer server)
         {
             if (roomPlayerPrefab == null || roomPlayerPrefab.gameObject == null)
                 Debug.LogError("NetworkRoomManager no RoomPlayer prefab is registered. Please add a RoomPlayer prefab.");
