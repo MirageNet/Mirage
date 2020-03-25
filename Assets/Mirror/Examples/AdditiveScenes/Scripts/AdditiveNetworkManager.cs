@@ -11,6 +11,11 @@ namespace Mirror.Examples.Additive
         [Tooltip("Add all sub-scenes to this list")]
         public string[] subScenes;
 
+        void Awake()
+        {
+            server.OnStopServer.AddListener(OnStopServer);
+        }
+
         public override void OnStartServer()
         {
             base.OnStartServer();
@@ -30,7 +35,7 @@ namespace Mirror.Examples.Additive
             }
         }
 
-        public override void OnStopServer()
+        public void OnStopServer()
         {
             StartCoroutine(UnloadScenes());
         }
