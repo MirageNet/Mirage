@@ -13,7 +13,7 @@ namespace Mirror.Examples.Additive
 
         void Awake()
         {
-            server.OnStopServer.AddListener(OnStopServer);
+            server.Stopped.AddListener(Stopped);
         }
 
         public override void OnStartServer()
@@ -35,7 +35,7 @@ namespace Mirror.Examples.Additive
             }
         }
 
-        public void OnStopServer()
+        public void Stopped()
         {
             StartCoroutine(UnloadScenes());
         }
