@@ -725,9 +725,6 @@ namespace Mirror
 
             FinishStartHost();
 
-            // spawn server objects
-            //server.SpawnObjects();
-
             // call OnServerSceneChanged
             OnServerSceneChanged(networkSceneName);
 
