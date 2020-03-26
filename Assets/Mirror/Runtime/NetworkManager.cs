@@ -407,8 +407,6 @@ namespace Mirror
             if (!server.active)
                 return;
 
-            OnStopServer();
-
             if (LogFilter.Debug) Debug.Log("NetworkManager StopServer");
             isNetworkActive = false;
             server.Shutdown();
@@ -416,8 +414,6 @@ namespace Mirror
             // set offline mode BEFORE changing scene so that FinishStartScene
             // doesn't think we need initialize anything.
             mode = NetworkManagerMode.Offline;
-
-            CleanupNetworkIdentities();
 
             startPositionIndex = 0;
         }
@@ -439,7 +435,6 @@ namespace Mirror
             // doesn't think we need initialize anything.
             mode = NetworkManagerMode.Offline;
 
-            CleanupNetworkIdentities();
         }
 
         /// <summary>
@@ -518,14 +513,6 @@ namespace Mirror
             // subscribe to the client
             if (client != null)
                 client.Authenticated.AddListener(OnClientAuthenticated);
-        }
-
-        void CleanupNetworkIdentities()
-        {
-            foreach (NetworkIdentity identity in Resources.FindObjectsOfTypeAll<NetworkIdentity>())
-            {
-                identity.MarkForReset();
-            }
         }
 
         /// <summary>
@@ -813,7 +800,6 @@ namespace Mirror
 
         void RegisterServerMessages(NetworkConnection connection)
         {
-            connection.RegisterHandler<NetworkConnectionToClient, DisconnectMessage>(OnServerDisconnectInternal, false);
             connection.RegisterHandler<NetworkConnectionToClient, ReadyMessage>(OnServerReadyMessageInternal);
             connection.RegisterHandler<NetworkConnectionToClient, AddPlayerMessage>(OnServerAddPlayerInternal);
             connection.RegisterHandler<NetworkConnectionToClient, RemovePlayerMessage>(OnServerRemovePlayerMessageInternal);
@@ -836,12 +822,6 @@ namespace Mirror
             }
 
             OnServerConnect(conn);
-        }
-
-        void OnServerDisconnectInternal(NetworkConnection conn, DisconnectMessage msg)
-        {
-            if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerDisconnectInternal");
-            OnServerDisconnect(conn);
         }
 
         void OnServerReadyMessageInternal(NetworkConnection conn, ReadyMessage msg)
@@ -898,7 +878,6 @@ namespace Mirror
 
         void RegisterClientMessages(NetworkConnection connection)
         {
-            connection.RegisterHandler<NetworkConnectionToServer, DisconnectMessage>(OnClientDisconnectInternal, false);
             connection.RegisterHandler<NetworkConnectionToServer, NotReadyMessage>(OnClientNotReadyMessageInternal);
             connection.RegisterHandler<NetworkConnectionToServer, ErrorMessage>(OnClientErrorInternal, false);
             connection.RegisterHandler<NetworkConnectionToServer, SceneMessage>(OnClientSceneInternal, false);
@@ -914,12 +893,6 @@ namespace Mirror
             // will wait for scene id to come from the server.
             clientLoadedScene = true;
             client.connection = conn;
-        }
-
-        void OnClientDisconnectInternal(NetworkConnection conn, DisconnectMessage msg)
-        {
-            if (LogFilter.Debug) Debug.Log("NetworkManager.OnClientDisconnectInternal");
-            OnClientDisconnect(conn);
         }
 
         void OnClientNotReadyMessageInternal(NetworkConnection conn, NotReadyMessage msg)
@@ -959,16 +932,6 @@ namespace Mirror
         /// <param name="conn">Connection from client.</param>
         public virtual void OnServerConnect(NetworkConnection conn) { }
 
-        /// <summary>
-        /// Called on the server when a client disconnects.
-        /// <para>This is called on the Server when a Client disconnects from the Server. Use an override to decide what should happen when a disconnection is detected.</para>
-        /// </summary>
-        /// <param name="conn">Connection from client.</param>
-        public virtual void OnServerDisconnect(NetworkConnection conn)
-        {
-            server.DestroyPlayerForConnection(conn);
-            if (LogFilter.Debug) Debug.Log("OnServerDisconnect: Client disconnected.");
-        }
 
         /// <summary>
         /// Called on the server when a client is ready.
@@ -1085,16 +1048,6 @@ namespace Mirror
         }
 
         /// <summary>
-        /// Called on clients when disconnected from a server.
-        /// <para>This is called on the client when it disconnects from the server. Override this function to decide what happens when the client disconnects.</para>
-        /// </summary>
-        /// <param name="conn">Connection to the server.</param>
-        public virtual void OnClientDisconnect(NetworkConnection conn)
-        {
-            StopClient();
-        }
-
-        /// <summary>
         /// Called on clients when a network error occurs.
         /// </summary>
         /// <param name="conn">Connection to a server.</param>
@@ -1154,11 +1107,6 @@ namespace Mirror
         /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
         /// </summary>
         public virtual void OnStartServer() { }
-
-        /// <summary>
-        /// This is called when a server is stopped - including when a host is stopped.
-        /// </summary>
-        public virtual void OnStopServer() { }
 
         /// <summary>
         /// This is called when a host is stopped.
