@@ -1,5 +1,4 @@
-﻿using Mirror;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using UnityEngine;
 
 
@@ -14,8 +13,8 @@ namespace Mirror.Tests
         private PlayerSpawner spawner;
         private GameObject playerPrefab;
 
-        private NetworkStartPosition pos1;
-        private NetworkStartPosition pos2;
+        private Transform pos1;
+        private Transform pos2;
 
         [SetUp]
         public void Setup()
@@ -30,8 +29,11 @@ namespace Mirror.Tests
 
             spawner.playerPrefab = playerId;
 
-            pos1 = new GameObject().AddComponent<NetworkStartPosition>();
-            pos2 = new GameObject().AddComponent<NetworkStartPosition>();
+            pos1 = new GameObject().transform;
+            pos2 = new GameObject().transform;
+
+            spawner.RegisterStartPosition(pos1);
+            spawner.RegisterStartPosition(pos2);
 
         }
 
@@ -60,20 +62,11 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void AutoConfigureStartPoints()
-        {
-            spawner.Start();
-            Assert.That(spawner.startPositions, Is.EquivalentTo(new[] { pos1.transform, pos2.transform }));
-        }
-
-
-
-        [Test]
         public void RegisterStartPositionTest()
         {
             spawner.Start();
 
-            NetworkStartPosition pos3 = new GameObject().AddComponent<NetworkStartPosition>();
+            Transform pos3 = new GameObject().transform;
 
             spawner.RegisterStartPosition(pos3.transform);
 

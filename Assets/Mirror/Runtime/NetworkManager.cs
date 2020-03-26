@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Mirror.Tcp;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -530,11 +528,6 @@ namespace Mirror
             server.SendToAll(new SceneMessage { sceneName = newSceneName });
         }
 
-        // This is only set in ClientChangeScene below...never on server.
-        // We need to check this in OnClientSceneChanged called from FinishLoadSceneClientOnly
-        // to prevent AddPlayer message after loading/unloading additive scenes
-        SceneOperation clientSceneOperation = SceneOperation.Normal;
-
         internal void ClientChangeScene(string newSceneName, SceneOperation sceneOperation = SceneOperation.Normal, bool customHandling = false)
         {
             if (string.IsNullOrEmpty(newSceneName))
@@ -559,9 +552,6 @@ namespace Mirror
                 FinishLoadScene();
                 return;
             }
-
-            // cache sceneOperation so we know what was done in OnClientSceneChanged called from FinishLoadSceneClientOnly
-            clientSceneOperation = sceneOperation;
 
             switch (sceneOperation)
             {
@@ -905,13 +895,6 @@ namespace Mirror
         public virtual void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling) { }
 
         /// <summary>
-        /// A flag to control whether or not player objects are automatically created on connect, and on scene change.
-        /// </summary>
-        [FormerlySerializedAs("m_AutoCreatePlayer")]
-        [Tooltip("Should Mirror automatically spawn the player after scene change?")]
-        public bool autoCreatePlayer = true;
-
-        /// <summary>
         /// Called on clients when a scene has completed loaded, when the scene load was initiated by the server.
         /// <para>Scene changes can cause player objects to be destroyed. The default implementation of OnClientSceneChanged in the NetworkManager is to add a player object for the connection if no player object exists.</para>
         /// </summary>
@@ -919,14 +902,8 @@ namespace Mirror
         public virtual void OnClientSceneChanged(NetworkConnectionToServer conn)
         {
             // always become ready.
-            if (!client.ready) client.Ready(conn);
-
-            // Only call AddPlayer for normal scene changes, not additive load/unload
-            if (clientSceneOperation == SceneOperation.Normal && autoCreatePlayer && client.localPlayer == null)
-            {
-                // add player if existing one is null
-                client.AddPlayer();
-            }
+            if (!client.ready)
+                client.Ready(conn);
         }
 
         #endregion

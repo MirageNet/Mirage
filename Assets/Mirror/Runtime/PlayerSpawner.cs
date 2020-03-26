@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mirror
@@ -35,12 +32,6 @@ namespace Mirror
             client.Authenticated.AddListener(OnClientAuthenticated);
             server.Authenticated.AddListener(OnServerAuthenticated);
             client.RegisterPrefab(playerPrefab.gameObject);
-
-            startPositions =
-                FindObjectsOfType<NetworkStartPosition>()
-                .Select(pos => pos.transform)
-                .OrderBy(transform => transform.GetSiblingIndex())
-                .ToList(); ;
         }
 
         private void OnServerAuthenticated(NetworkConnectionToClient connection)
@@ -101,7 +92,7 @@ namespace Mirror
         /// <para>This is used by the default implementation of OnServerAddPlayer.</para>
         /// </summary>
         /// <returns>Returns the transform to spawn a player at, or null.</returns>
-        public Transform GetStartPosition()
+        public virtual Transform GetStartPosition()
         {
             // first remove any dead transforms
             startPositions.RemoveAll(t => t == null);
@@ -111,7 +102,7 @@ namespace Mirror
 
             if (playerSpawnMethod == PlayerSpawnMethod.Random)
             {
-                return startPositions[UnityEngine.Random.Range(0, startPositions.Count)];
+                return startPositions[Random.Range(0, startPositions.Count)];
             }
             else
             {
