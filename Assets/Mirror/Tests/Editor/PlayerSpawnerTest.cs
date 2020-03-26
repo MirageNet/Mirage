@@ -31,10 +31,8 @@ namespace Mirror.Tests
 
             pos1 = new GameObject().transform;
             pos2 = new GameObject().transform;
-
-            spawner.RegisterStartPosition(pos1);
-            spawner.RegisterStartPosition(pos2);
-
+            spawner.startPositions.Add(pos1);
+            spawner.startPositions.Add(pos2);
         }
 
         [TearDown]
@@ -59,31 +57,6 @@ namespace Mirror.Tests
         {
             spawner.Start();
             Assert.That(spawner.server, Is.SameAs(server));
-        }
-
-        [Test]
-        public void RegisterStartPositionTest()
-        {
-            spawner.Start();
-
-            Transform pos3 = new GameObject().transform;
-
-            spawner.RegisterStartPosition(pos3.transform);
-
-            Assert.That(spawner.startPositions, Is.EquivalentTo(new[] { pos1.transform, pos2.transform, pos3.transform }));
-
-            Object.DestroyImmediate(pos3.gameObject);
-        }
-
-        [Test]
-        public void UnRegisterStartPositionTest()
-        {
-            spawner.Start();
-
-            spawner.UnRegisterStartPosition(pos2.transform);
-
-            Assert.That(spawner.startPositions, Is.EquivalentTo(new[] { pos1.transform }));
-
         }
 
         [Test]

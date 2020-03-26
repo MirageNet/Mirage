@@ -94,9 +94,6 @@ namespace Mirror
         /// <returns>Returns the transform to spawn a player at, or null.</returns>
         public virtual Transform GetStartPosition()
         {
-            // first remove any dead transforms
-            startPositions.RemoveAll(t => t == null);
-
             if (startPositions.Count == 0)
                 return null;
 
@@ -130,28 +127,6 @@ namespace Mirror
         /// </summary>
         [Tooltip("Round Robin or Random order of Start Position selection")]
         public PlayerSpawnMethod playerSpawnMethod;
-
-
-        /// <summary>
-        /// Registers the transform of a game object as a player spawn location.
-        /// </summary>
-        /// <param name="start">Transform to register.</param>
-        public void RegisterStartPosition(Transform start)
-        {
-            if (LogFilter.Debug) Debug.Log("RegisterStartPosition: (" + start.gameObject.name + ") " + start.position);
-            startPositions.Add(start);
-        }
-
-        /// <summary>
-        /// Unregisters the transform of a game object as a player spawn location.
-        /// </summary>
-        /// <param name="start">Transform to unregister.</param>
-        public void UnRegisterStartPosition(Transform start)
-        {
-            if (LogFilter.Debug) Debug.Log("UnRegisterStartPosition: (" + start.gameObject.name + ") " + start.position);
-            startPositions.Remove(start);
-        }
-
     }
 
 }
