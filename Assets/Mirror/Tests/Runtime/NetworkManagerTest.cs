@@ -152,45 +152,5 @@ namespace Mirror.Tests
             manager.StopClient();
         }
 
-        /*
-        [Test]
-        public void RegisterStartPositionTest()
-        {
-            Assert.That(manager.startPositions, Is.Empty);
-
-            manager.RegisterStartPosition(gameObject.transform);
-            Assert.That(manager.startPositions.Count, Is.EqualTo(1));
-            Assert.That(manager.startPositions, Has.Member(gameObject.transform));
-
-            manager.UnRegisterStartPosition(gameObject.transform);
-        }
-
-        [Test]
-        public void UnRegisterStartPositionTest()
-        {
-            Assert.That(manager.startPositions, Is.Empty);
-
-            manager.RegisterStartPosition(gameObject.transform);
-            Assert.That(manager.startPositions.Count, Is.EqualTo(1));
-            Assert.That(manager.startPositions, Has.Member(gameObject.transform));
-
-            manager.UnRegisterStartPosition(gameObject.transform);
-            Assert.That(manager.startPositions, Is.Empty);
-        }
-
-        [Test]
-        public void GetStartPositionTest()
-        {
-            Assert.That(manager.startPositions, Is.Empty);
-
-            manager.RegisterStartPosition(gameObject.transform);
-            Assert.That(manager.startPositions.Count, Is.EqualTo(1));
-            Assert.That(manager.startPositions, Has.Member(gameObject.transform));
-
-            //Assert.That(manager.GetStartPosition(), Is.SameAs(gameObject.transform));
-
-            manager.UnRegisterStartPosition(gameObject.transform);
-        }
-        */
     }
 }
