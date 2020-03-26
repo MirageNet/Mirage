@@ -88,7 +88,7 @@ namespace Mirror
         }
 
         /// <summary>
-        /// This finds a spawn position based on NetworkStartPosition objects in the scene.
+        /// This finds a spawn position based on start position objects in the scene.
         /// <para>This is used by the default implementation of OnServerAddPlayer.</para>
         /// </summary>
         /// <returns>Returns the transform to spawn a player at, or null.</returns>
@@ -116,7 +116,7 @@ namespace Mirror
         public int startPositionIndex;
 
         /// <summary>
-        /// List of transforms populted by NetworkStartPosition components found in the scene.
+        /// List of transforms where players can be spawned
         /// </summary>
         public List<Transform> startPositions = new List<Transform>();
 
@@ -134,7 +134,6 @@ namespace Mirror
 
         /// <summary>
         /// Registers the transform of a game object as a player spawn location.
-        /// <para>This is done automatically by NetworkStartPosition components, but can be done manually from user script code.</para>
         /// </summary>
         /// <param name="start">Transform to register.</param>
         public void RegisterStartPosition(Transform start)
@@ -145,7 +144,6 @@ namespace Mirror
 
         /// <summary>
         /// Unregisters the transform of a game object as a player spawn location.
-        /// <para>This is done automatically by the <see cref="NetworkStartPosition">NetworkStartPosition</see> component, but can be done manually from user code.</para>
         /// </summary>
         /// <param name="start">Transform to unregister.</param>
         public void UnRegisterStartPosition(Transform start)
