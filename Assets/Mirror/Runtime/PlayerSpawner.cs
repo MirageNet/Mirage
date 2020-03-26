@@ -27,6 +27,11 @@ namespace Mirror
                 return;
             }
 
+            if (client == null)
+                client = GetComponent<NetworkClient>();
+            if (server == null)
+                server = GetComponent<NetworkServer>();
+
             client.Authenticated.AddListener(OnClientAuthenticated);
             server.Authenticated.AddListener(OnServerAuthenticated);
             client.RegisterPrefab(playerPrefab.gameObject);
