@@ -142,13 +142,5 @@ namespace Mirror.Tests
             Assert.That(manager.isNetworkActive, Is.False);
             Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.Offline));
         }
-
-        [Test]
-        public void ShutdownTest()
-        {
-            manager.StartClient("localhost");
-            manager.StopClient();
-        }
-
     }
 }
