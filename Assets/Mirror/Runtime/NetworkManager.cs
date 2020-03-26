@@ -64,24 +64,11 @@ namespace Mirror
         protected Transport transport;
 
         /// <summary>
-        /// A flag to control whether or not player objects are automatically created on connect, and on scene change.
-        /// </summary>
-        [FormerlySerializedAs("m_AutoCreatePlayer")]
-        [Tooltip("Should Mirror automatically spawn the player after scene change?")]
-        public bool autoCreatePlayer = true;
-
-        /// <summary>
         /// The current method of spawning players used by the NetworkManager.
         /// </summary>
         [FormerlySerializedAs("m_PlayerSpawnMethod")]
         [Tooltip("Round Robin or Random order of Start Position selection")]
         public PlayerSpawnMethod playerSpawnMethod;
-
-        /// <summary>
-        /// Number of active player objects across all connections on the server.
-        /// <para>This is only valid on the host / server.</para>
-        /// </summary>
-        public int numPlayers => server.connections.Count(kv => kv.Value.identity != null);
 
         /// <summary>
         /// True if the server or client is started and running
@@ -151,12 +138,6 @@ namespace Mirror
                 UnityEditor.Undo.RecordObject(gameObject, "Added NetworkClient");
 #endif
             }
-
-            if (server != null && server.playerPrefab != null && server.playerPrefab.GetComponent<NetworkIdentity>() == null)
-            {
-                Debug.LogError("NetworkManager - playerPrefab must have a NetworkIdentity.");
-                server.playerPrefab = null;
-            }
         }
 
         /// <summary>
@@ -169,8 +150,6 @@ namespace Mirror
             // Set the networkSceneName to prevent a scene reload
             // if client connection to server fails.
             networkSceneName = null;
-
-            client.Authenticated.AddListener(OnAuthenticated);
 
             Initialize();
 
@@ -501,10 +480,6 @@ namespace Mirror
 
             Transport.activeTransport = transport;
 
-            if (server.playerPrefab != null)
-            {
-                client.RegisterPrefab(server.playerPrefab);
-            }
             // subscribe to the server
             if (server != null)
                 server.Authenticated.AddListener(OnServerAuthenticated);
@@ -801,7 +776,6 @@ namespace Mirror
         void RegisterServerMessages(NetworkConnection connection)
         {
             connection.RegisterHandler<NetworkConnectionToClient, ReadyMessage>(OnServerReadyMessageInternal);
-            connection.RegisterHandler<NetworkConnectionToClient, AddPlayerMessage>(OnServerAddPlayerInternal);
             connection.RegisterHandler<NetworkConnectionToClient, RemovePlayerMessage>(OnServerRemovePlayerMessageInternal);
             connection.RegisterHandler<NetworkConnectionToClient, ErrorMessage>(OnServerErrorInternal, false);
         }
@@ -828,31 +802,6 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerReadyMessageInternal");
             OnServerReady(conn);
-        }
-
-        void OnServerAddPlayerInternal(NetworkConnection conn, AddPlayerMessage msg)
-        {
-            if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerAddPlayer");
-
-            if (autoCreatePlayer && server.playerPrefab == null)
-            {
-                Debug.LogError("The PlayerPrefab is empty on the NetworkManager. Please setup a PlayerPrefab object.");
-                return;
-            }
-
-            if (autoCreatePlayer && server.playerPrefab.GetComponent<NetworkIdentity>() == null)
-            {
-                Debug.LogError("The PlayerPrefab does not have a NetworkIdentity. Please add a NetworkIdentity to the player prefab.");
-                return;
-            }
-
-            if (conn.identity != null)
-            {
-                Debug.LogError("There is already a player for this connection.");
-                return;
-            }
-
-            OnServerAddPlayer(conn);
         }
 
         void OnServerRemovePlayerMessageInternal(NetworkConnection conn, RemovePlayerMessage msg)
@@ -948,45 +897,6 @@ namespace Mirror
             server.SetClientReady(conn);
         }
 
-        /// <summary>
-        /// Called on the server when a client adds a new player with ClientScene.AddPlayer.
-        /// <para>The default implementation for this function creates a new player object from the playerPrefab.</para>
-        /// </summary>
-        /// <param name="conn">Connection from client.</param>
-        public virtual void OnServerAddPlayer(NetworkConnection conn)
-        {
-            Transform startPos = GetStartPosition();
-            GameObject player = startPos != null
-                ? Instantiate(server.playerPrefab, startPos.position, startPos.rotation)
-                : Instantiate(server.playerPrefab);
-
-            server.AddPlayerForConnection(conn, player);
-        }
-
-        /// <summary>
-        /// This finds a spawn position based on NetworkStartPosition objects in the scene.
-        /// <para>This is used by the default implementation of OnServerAddPlayer.</para>
-        /// </summary>
-        /// <returns>Returns the transform to spawn a player at, or null.</returns>
-        public Transform GetStartPosition()
-        {
-            // first remove any dead transforms
-            startPositions.RemoveAll(t => t == null);
-
-            if (startPositions.Count == 0)
-                return null;
-
-            if (playerSpawnMethod == PlayerSpawnMethod.Random)
-            {
-                return startPositions[UnityEngine.Random.Range(0, startPositions.Count)];
-            }
-            else
-            {
-                Transform startPosition = startPositions[startPositionIndex];
-                startPositionIndex = (startPositionIndex + 1) % startPositions.Count;
-                return startPosition;
-            }
-        }
 
         /// <summary>
         /// Called on the server when a client removes a player.
@@ -1027,27 +937,6 @@ namespace Mirror
         #region Client System Callbacks
 
         /// <summary>
-        /// Called on the client when connected to a server.
-        /// <para>The default implementation of this function sets the client as ready and adds a player. Override the function to dictate what happens when the client connects.</para>
-        /// </summary>
-        /// <param name="conn">Connection to the server.</param>
-        public void OnAuthenticated(NetworkConnectionToServer conn)
-        {
-            // OnClientConnect by default calls AddPlayer but it should not do
-            // that when we have online/offline scenes. so we need the
-            // clientLoadedScene flag to prevent it.
-            if (!clientLoadedScene)
-            {
-                // Ready/AddPlayer is usually triggered by a scene load completing. if no scene was loaded, then Ready/AddPlayer it here instead.
-                if (!client.ready) client.Ready(conn);
-                if (autoCreatePlayer)
-                {
-                    client.AddPlayer();
-                }
-            }
-        }
-
-        /// <summary>
         /// Called on clients when a network error occurs.
         /// </summary>
         /// <param name="conn">Connection to a server.</param>
@@ -1069,6 +958,13 @@ namespace Mirror
         /// <param name="sceneOperation">Scene operation that's about to happen</param>
         /// <param name="customHandling">true to indicate that scene loading will be handled through overrides</param>
         public virtual void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling) { }
+
+        /// <summary>
+        /// A flag to control whether or not player objects are automatically created on connect, and on scene change.
+        /// </summary>
+        [FormerlySerializedAs("m_AutoCreatePlayer")]
+        [Tooltip("Should Mirror automatically spawn the player after scene change?")]
+        public bool autoCreatePlayer = true;
 
         /// <summary>
         /// Called on clients when a scene has completed loaded, when the scene load was initiated by the server.
