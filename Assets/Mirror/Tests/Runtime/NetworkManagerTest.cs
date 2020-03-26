@@ -42,12 +42,9 @@ namespace Mirror.Tests
             Assert.That(manager.serverTickRate, Is.EqualTo(30));
             Assert.That(manager.server.MaxConnections, Is.EqualTo(4));
             Assert.That(manager.autoCreatePlayer, Is.False);
-            Assert.That(manager.numPlayers, Is.Zero);
             Assert.That(manager.isNetworkActive, Is.False);
 
             Assert.That(manager.networkSceneName, Is.Empty);
-            Assert.That(manager.startPositionIndex, Is.Zero);
-            Assert.That(manager.startPositions, Is.Empty);
         }
 
         [Test]
@@ -153,11 +150,9 @@ namespace Mirror.Tests
         {
             manager.StartClient("localhost");
             manager.StopClient();
-
-            Assert.That(manager.startPositions, Is.Empty);
-            Assert.That(manager.startPositionIndex, Is.Zero);
         }
 
+        /*
         [Test]
         public void RegisterStartPositionTest()
         {
@@ -192,9 +187,10 @@ namespace Mirror.Tests
             Assert.That(manager.startPositions.Count, Is.EqualTo(1));
             Assert.That(manager.startPositions, Has.Member(gameObject.transform));
 
-            Assert.That(manager.GetStartPosition(), Is.SameAs(gameObject.transform));
+            //Assert.That(manager.GetStartPosition(), Is.SameAs(gameObject.transform));
 
             manager.UnRegisterStartPosition(gameObject.transform);
         }
+        */
     }
 }

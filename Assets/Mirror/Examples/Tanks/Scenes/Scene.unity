@@ -409,6 +409,7 @@ GameObject:
   - component: {fileID: 1282001524}
   - component: {fileID: 1282001523}
   - component: {fileID: 1282001522}
+  - component: {fileID: 1282001521}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -462,16 +463,33 @@ MonoBehaviour:
   startOnHeadless: 1
   showDebugMessages: 0
   serverTickRate: 30
-  offlineScene: 
-  onlineScene: 
   server: {fileID: 1282001523}
   client: {fileID: 1282001522}
   transport: {fileID: 1282001524}
-  autoCreatePlayer: 1
   playerSpawnMethod: 1
   networkSceneName: 
   startPositionIndex: 0
   startPositions: []
+  autoCreatePlayer: 1
+--- !u!114 &1282001521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282001517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7aaac73a16c040fd871cb977b5c557b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  client: {fileID: 1282001522}
+  server: {fileID: 1282001523}
+  playerPrefab: {fileID: 114118589361100106, guid: 6f43bf5488a7443d19ab2a83c6b91f35,
+    type: 3}
+  startPositionIndex: 0
+  startPositions: []
+  playerSpawnMethod: 0
 --- !u!114 &1282001522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -491,8 +509,12 @@ MonoBehaviour:
   Authenticated:
     m_PersistentCalls:
       m_Calls: []
+  Disconnected:
+    m_PersistentCalls:
+      m_Calls: []
   spawnPrefabs:
   - {fileID: 5890560936853567077, guid: b7dd46dbf38c643f09e206f9fa4be008, type: 3}
+  - {fileID: 1916082411674582, guid: 6f43bf5488a7443d19ab2a83c6b91f35, type: 3}
   - {fileID: 1916082411674582, guid: 6f43bf5488a7443d19ab2a83c6b91f35, type: 3}
 --- !u!114 &1282001523
 MonoBehaviour:
@@ -513,10 +535,14 @@ MonoBehaviour:
   Authenticated:
     m_PersistentCalls:
       m_Calls: []
+  Disconnected:
+    m_PersistentCalls:
+      m_Calls: []
+  Stopped:
+    m_PersistentCalls:
+      m_Calls: []
   authenticator: {fileID: 0}
   Listening: 1
-  playerPrefab: {fileID: 1916082411674582, guid: 6f43bf5488a7443d19ab2a83c6b91f35,
-    type: 3}
 --- !u!114 &1282001524
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -9,10 +9,6 @@ using UnityEngine.Serialization;
 
 namespace Mirror
 {
-    /// <summary>
-    /// Enumeration of methods of where to spawn player objects in multiplayer games.
-    /// </summary>
-    public enum PlayerSpawnMethod { Random, RoundRobin }
 
     /// <summary>
     /// Enumeration of methods of current Network Manager state at runtime.
@@ -62,13 +58,6 @@ namespace Mirror
         [Tooltip("Transport component attached to this object that server and client will use to connect")]
         [SerializeField]
         protected Transport transport;
-
-        /// <summary>
-        /// The current method of spawning players used by the NetworkManager.
-        /// </summary>
-        [FormerlySerializedAs("m_PlayerSpawnMethod")]
-        [Tooltip("Round Robin or Random order of Start Position selection")]
-        public PlayerSpawnMethod playerSpawnMethod;
 
         /// <summary>
         /// True if the server or client is started and running
@@ -393,8 +382,6 @@ namespace Mirror
             // set offline mode BEFORE changing scene so that FinishStartScene
             // doesn't think we need initialize anything.
             mode = NetworkManagerMode.Offline;
-
-            startPositionIndex = 0;
         }
 
         /// <summary>
@@ -541,9 +528,6 @@ namespace Mirror
 
             // notify all clients about the new scene
             server.SendToAll(new SceneMessage { sceneName = newSceneName });
-
-            startPositionIndex = 0;
-            startPositions.Clear();
         }
 
         // This is only set in ClientChangeScene below...never on server.
@@ -728,45 +712,6 @@ namespace Mirror
 
             server.SpawnObjects();
             OnServerSceneChanged(networkSceneName);
-        }
-
-        #endregion
-
-        #region Start Positions
-
-        public int startPositionIndex;
-
-        /// <summary>
-        /// List of transforms populted by NetworkStartPosition components found in the scene.
-        /// </summary>
-        public List<Transform> startPositions = new List<Transform>();
-
-        /// <summary>
-        /// Registers the transform of a game object as a player spawn location.
-        /// <para>This is done automatically by NetworkStartPosition components, but can be done manually from user script code.</para>
-        /// </summary>
-        /// <param name="start">Transform to register.</param>
-        public void RegisterStartPosition(Transform start)
-        {
-            if (LogFilter.Debug) Debug.Log("RegisterStartPosition: (" + start.gameObject.name + ") " + start.position);
-            startPositions.Add(start);
-
-            // reorder the list so that round-robin spawning uses the start positions
-            // in hierarchy order.  This assumes all objects with NetworkStartPosition
-            // component are siblings, either in the scene root or together as children
-            // under a single parent in the scene.
-            startPositions = startPositions.OrderBy(transform => transform.GetSiblingIndex()).ToList();
-        }
-
-        /// <summary>
-        /// Unregisters the transform of a game object as a player spawn location.
-        /// <para>This is done automatically by the <see cref="NetworkStartPosition">NetworkStartPosition</see> component, but can be done manually from user code.</para>
-        /// </summary>
-        /// <param name="start">Transform to unregister.</param>
-        public void UnRegisterStartPosition(Transform start)
-        {
-            if (LogFilter.Debug) Debug.Log("UnRegisterStartPosition: (" + start.gameObject.name + ") " + start.position);
-            startPositions.Remove(start);
         }
 
         #endregion

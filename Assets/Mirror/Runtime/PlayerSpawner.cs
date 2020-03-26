@@ -29,8 +29,13 @@ namespace Mirror
 
             client.Authenticated.AddListener(OnClientAuthenticated);
             server.Authenticated.AddListener(OnServerAuthenticated);
-
             client.RegisterPrefab(playerPrefab.gameObject);
+
+            startPositions =
+                FindObjectsOfType<NetworkStartPosition>()
+                .Select(pos => pos.transform)
+                .OrderBy(transform => transform.GetSiblingIndex())
+                .ToList(); ;
         }
 
         private void OnServerAuthenticated(NetworkConnectionToClient connection)
@@ -152,12 +157,6 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("RegisterStartPosition: (" + start.gameObject.name + ") " + start.position);
             startPositions.Add(start);
-
-            // reorder the list so that round-robin spawning uses the start positions
-            // in hierarchy order.  This assumes all objects with NetworkStartPosition
-            // component are siblings, either in the scene root or together as children
-            // under a single parent in the scene.
-            startPositions = startPositions.OrderBy(transform => transform.GetSiblingIndex()).ToList();
         }
 
         /// <summary>

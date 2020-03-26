@@ -8,6 +8,8 @@ namespace Mirror.Examples.Pong
     {
         public Transform leftRacketSpawn;
         public Transform rightRacketSpawn;
+        public GameObject ballPrefab;
+
         GameObject ball;
 
         public override void OnServerAddPlayer(NetworkConnection conn)
@@ -20,22 +22,17 @@ namespace Mirror.Examples.Pong
             // spawn ball if two players
             if (server.NumPlayers == 2)
             {
-                ball = Instantiate(client.spawnPrefabs.Find(prefab => prefab.name == "Ball"));
+                ball = Instantiate(ballPrefab);
                 server.Spawn(ball);
             }
         }
 
 
-        public override void OnServerDisconnect(NetworkConnection conn)
+        public void OnServerDisconnect(NetworkConnection conn)
         {
             // destroy ball
             if (ball != null)
                 server.Destroy(ball);
-
-            // call base functionality (actually destroys the player)
-            base.OnServerDisconnect(conn);
         }
-
-
     }
 }
