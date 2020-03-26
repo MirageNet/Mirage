@@ -92,17 +92,6 @@ namespace Mirror
             server.AddPlayerForConnection(conn, player.gameObject);
         }
 
-        public virtual void OnValidate()
-        {
-            if (playerPrefab != null )
-            {
-                if (client != null)
-                {
-                    client.spawnPrefabs.Add(playerPrefab.gameObject);                    
-                }
-            }
-        }
-
         /// <summary>
         /// This finds a spawn position based on NetworkStartPosition objects in the scene.
         /// <para>This is used by the default implementation of OnServerAddPlayer.</para>
