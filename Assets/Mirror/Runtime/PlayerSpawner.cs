@@ -63,9 +63,8 @@ namespace Mirror
             if (!client.ready)
                 client.Ready(connection);
 
-            client.AddPlayer();
+            client.Send(new AddPlayerMessage());
         }
-
 
         void OnServerAddPlayerInternal(NetworkConnection conn, AddPlayerMessage msg)
         {
