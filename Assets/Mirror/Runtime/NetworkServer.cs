@@ -35,6 +35,13 @@ namespace Mirror
         public NetworkConnectionEvent Connected = new NetworkConnectionEvent();
         public NetworkConnectionEvent Authenticated = new NetworkConnectionEvent();
         public NetworkConnectionEvent Disconnected = new NetworkConnectionEvent();
+
+        /// <summary>
+        /// This is invoked when a server is started - including when a host is started.
+        /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
+        /// </summary>
+        public UnityEvent OnStartServer = new UnityEvent();
+
         public UnityEvent Stopped = new UnityEvent();
 
         [Header("Authentication")]
@@ -180,6 +187,16 @@ namespace Mirror
             }
 
             active = true;
+
+            // call OnStartServer AFTER Listen, so that NetworkServer.active is
+            // true and we can call NetworkServer.Spawn in OnStartServer
+            // overrides.
+            // (useful for loading & spawning stuff from database etc.)
+            //
+            // note: there is no risk of someone connecting after Listen() and
+            //       before OnStartServer() because this all runs in one thread
+            //       and we don't start processing connects until Update.
+            OnStartServer.Invoke();
         }
 
         /// <summary>
