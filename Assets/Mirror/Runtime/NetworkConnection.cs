@@ -240,42 +240,38 @@ namespace Mirror
         /// <param name="msg">The message to send.</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
         /// <returns></returns>
-        public bool Send<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
+        public void Send<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 // pack message and send allocation free
                 MessagePacker.Pack(msg, writer);
                 NetworkDiagnostics.OnSend(msg, channelId, writer.Position, 1);
-                return Send(writer.ToArraySegment(), channelId);
+                Send(writer.ToArraySegment(), channelId);
             }
         }
 
         // internal because no one except Mirror should send bytes directly to
         // the client. they would be detected as a message. send messages instead.
-        internal abstract bool Send(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable);
+        internal abstract void Send(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable);
 
-        public static bool Send<T>(IEnumerable<NetworkConnection> connections, T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
+        public static void Send<T>(IEnumerable<NetworkConnection> connections, T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 // pack message into byte[] once
                 MessagePacker.Pack(msg, writer);
                 var segment = writer.ToArraySegment();
-
-                bool result = true;
                 int count = 0;
 
                 foreach (NetworkConnection connection in connections)
                 {
                     // use local connection directly because it doesn't send via transport
-                    result &= connection.Send(segment);
+                    connection.Send(segment);
                     count++;
                 }
 
                 NetworkDiagnostics.OnSend(msg, channelId, segment.Count, count);
-
-                return result;
             }
         }
 

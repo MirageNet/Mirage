@@ -313,19 +313,17 @@ namespace Mirror
         /// <param name="message"></param>
         /// <param name="channelId"></param>
         /// <returns>True if message was sent.</returns>
-        public bool Send<T>(T message, int channelId = Channels.DefaultReliable) where T : IMessageBase
+        public void Send<T>(T message, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
             if (connection != null)
             {
                 if (connectState != ConnectState.Connected)
                 {
-                    Debug.LogError("NetworkClient Send when not connected to a server");
-                    return false;
+                    throw new InvalidOperationException("NetworkClient Send with no connection");
                 }
-                return connection.Send(message, channelId);
+                connection.Send(message, channelId);
             }
-            Debug.LogError("NetworkClient Send with no connection");
-            return false;
+            throw new InvalidOperationException("NetworkClient Send with no connection");
         }
 
         internal void Update()

@@ -516,8 +516,7 @@ namespace Mirror.Tests
             var message = new TestMessage { IntValue = 1, DoubleValue = 2, StringValue = "3" };
 
             // send it to all
-            bool result = server.SendToAll(message);
-            Assert.That(result, Is.True);
+            server.SendToAll(message);
 
             // update local connection once so that the incoming queue is processed
             connection.connectionToServer.Update();
