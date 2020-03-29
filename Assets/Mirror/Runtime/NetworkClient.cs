@@ -47,7 +47,7 @@ namespace Mirror
         /// </summary>
         public NetworkConnectionToServer connection { get; internal set; }
 
-        public Transport transport;
+        public static Transport transport;
 
         /// <summary>
         /// NetworkIdentity of the localPlayer
