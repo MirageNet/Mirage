@@ -26,7 +26,7 @@ namespace Mirror
             isReady = false;
             // TODO: This does not work if there is no player yet
             if (identity != null)
-                identity.client.HandleClientDisconnect(this);
+                identity.client.HandleClientDisconnect();
             server.transport.ClientDisconnect();
         }
     }
