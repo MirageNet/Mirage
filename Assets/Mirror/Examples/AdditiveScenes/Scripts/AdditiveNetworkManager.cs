@@ -13,12 +13,12 @@ namespace Mirror.Examples.Additive
 
         void Awake()
         {
-            server.OnStartServer.AddListener(OnStartServer);
+            server.Started.AddListener(Started);
             server.Stopped.AddListener(Stopped);
             client.Disconnected.AddListener(Disconnected);
         }
 
-        public void OnStartServer()
+        public void Started()
         {
             // load all subscenes on the server only
             StartCoroutine(LoadSubScenes());

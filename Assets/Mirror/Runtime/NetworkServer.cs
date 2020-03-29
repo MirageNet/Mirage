@@ -32,15 +32,14 @@ namespace Mirror
         [Min(1)]
         public int MaxConnections = 4;
 
+        /// <summary>
+        /// This is invoked when a server is started - including when a host is started.
+        /// </summary>
+        public UnityEvent Started = new UnityEvent();
+
         public NetworkConnectionEvent Connected = new NetworkConnectionEvent();
         public NetworkConnectionEvent Authenticated = new NetworkConnectionEvent();
         public NetworkConnectionEvent Disconnected = new NetworkConnectionEvent();
-
-        /// <summary>
-        /// This is invoked when a server is started - including when a host is started.
-        /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
-        /// </summary>
-        public UnityEvent OnStartServer = new UnityEvent();
 
         public UnityEvent Stopped = new UnityEvent();
 
@@ -196,7 +195,7 @@ namespace Mirror
             // note: there is no risk of someone connecting after Listen() and
             //       before OnStartServer() because this all runs in one thread
             //       and we don't start processing connects until Update.
-            OnStartServer.Invoke();
+            Started.Invoke();
         }
 
         /// <summary>
