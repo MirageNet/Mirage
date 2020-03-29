@@ -500,7 +500,7 @@ namespace Mirror
 
             // Suspend the server's transport while changing scenes
             // It will be re-enabled in FinishScene.
-            server.transport.enabled = false;
+            NetworkServer.transport.enabled = false;
             loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
 
             // notify all clients about the new scene

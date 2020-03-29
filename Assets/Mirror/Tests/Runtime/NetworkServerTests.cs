@@ -15,9 +15,8 @@ namespace Mirror.Tests
             serverGO = new GameObject();
             testServer = serverGO.AddComponent<NetworkServer>();
             serverGO.AddComponent<NetworkClient>();
-            Transport transport = serverGO.AddComponent<TcpTransport>();
-
-            testServer.transport = transport;
+            NetworkServer.transport = serverGO.AddComponent<TcpTransport>();
+            
             testServer.Listen();
         }
 

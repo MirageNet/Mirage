@@ -7,13 +7,11 @@ namespace Mirror
     {
         public override string address => "";
 
-        public NetworkServer server;
-
         protected override bool Send(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable)
         {
             if (logNetworkMessages) Debug.Log("ConnectionSend " + this + " bytes:" + BitConverter.ToString(segment.Array, segment.Offset, segment.Count));
 
-            return server.transport.ClientSend(channelId, segment);
+            return NetworkServer.transport.ClientSend(channelId, segment);
         }
 
         /// <summary>
@@ -27,7 +25,7 @@ namespace Mirror
             // TODO: This does not work if there is no player yet
             if (identity != null)
                 identity.client.HandleClientDisconnect();
-            server.transport.ClientDisconnect();
+            NetworkServer.transport.ClientDisconnect();
         }
     }
 }

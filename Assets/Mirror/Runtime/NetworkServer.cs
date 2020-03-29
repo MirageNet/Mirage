@@ -56,7 +56,7 @@ namespace Mirror
         // => removed it for easier code. use .localConnection now!
         public NetworkConnectionToClient localConnection { get; private set; }
 
-        public Transport transport;
+        public static Transport transport;
 
         // The host client for this server 
         public NetworkClient localClient { get; private set; }
