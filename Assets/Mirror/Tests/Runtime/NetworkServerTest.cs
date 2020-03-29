@@ -73,9 +73,6 @@ namespace Mirror.Tests
         NetworkClient client;
         GameObject clientGO;
 
-        TcpTransport serverTransport;
-        TcpTransport clientTransport;
-
         GameObject gameObject;
         NetworkIdentity identity;
 
@@ -85,11 +82,11 @@ namespace Mirror.Tests
             //NetworkServer.transport = Substitute.For<Transport>();
             serverGO = new GameObject();
             server = serverGO.AddComponent<NetworkServer>();
-            serverTransport = serverGO.AddComponent<TcpTransport>();
+            NetworkServer.transport = serverGO.AddComponent<TcpTransport>();
 
             clientGO = new GameObject();
             client = clientGO.AddComponent<NetworkClient>();
-            clientTransport = clientGO.AddComponent<TcpTransport>();
+            NetworkClient.transport = clientGO.AddComponent<TcpTransport>();
 
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
@@ -170,11 +167,11 @@ namespace Mirror.Tests
             Assert.That(disconnectCalled, Is.False);
 
             // connect
-            serverTransport.OnServerConnected.Invoke(42);
+            NetworkServer.transport.OnServerConnected.Invoke(42);
             Assert.That(disconnectCalled, Is.False);
 
             // disconnect
-            serverTransport.OnServerDisconnected.Invoke(42);
+            NetworkServer.transport.OnServerDisconnected.Invoke(42);
             Assert.That(disconnectCalled, Is.True);
         }
 
