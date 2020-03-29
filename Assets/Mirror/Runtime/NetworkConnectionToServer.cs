@@ -8,11 +8,11 @@ namespace Mirror
     {
         public override EndPoint Address => new IPEndPoint(IPAddress.Loopback, 0);
 
-        internal override bool Send(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable)
+        internal override void Send(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable)
         {
             if (logNetworkMessages) Debug.Log("ConnectionSend " + this + " bytes:" + BitConverter.ToString(segment.Array, segment.Offset, segment.Count));
 
-            return Transport.activeTransport.ClientSend(channelId, segment);
+            Transport.activeTransport.ClientSend(channelId, segment);
         }
 
         /// <summary>
