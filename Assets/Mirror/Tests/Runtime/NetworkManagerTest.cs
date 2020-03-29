@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.TestTools;
 using static Mirror.Tests.AsyncUtil;
-using Mirror.Tcp;
 
 namespace Mirror.Tests
 {
@@ -24,9 +23,9 @@ namespace Mirror.Tests
             manager = gameObject.AddComponent<NetworkManager>();
             manager.startOnHeadless = false;
             manager.client = gameObject.GetComponent<NetworkClient>();
-            manager.client.transport = gameObject.AddComponent<TcpTransport>();
+            NetworkClient.transport = gameObject.AddComponent<Transport>();
             manager.server = gameObject.GetComponent<NetworkServer>();
-            manager.server.transport = gameObject.AddComponent<TcpTransport>();
+            manager.server.transport = gameObject.AddComponent<Transport>();
         }
 
         [TearDown]
