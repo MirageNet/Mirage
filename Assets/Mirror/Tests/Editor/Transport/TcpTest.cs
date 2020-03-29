@@ -103,6 +103,9 @@ namespace Mirror.Tests
             server = new Server();
             client = new Client();
 
+            NetworkServer.transport = new TcpTransport();
+            NetworkClient.transport = new TcpTransport();
+
             clientData = new Queue<byte[]>();
             clientSemaphore = new SemaphoreSlim(0);
 
