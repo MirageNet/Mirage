@@ -79,8 +79,7 @@ namespace Mirror
         {
             if (segment.Count == 0)
             {
-                Debug.LogError("LocalConnection.SendBytes cannot send zero bytes");
-                return false;
+                throw new InvalidMessageException("LocalConnection.Send cannot send zero bytes");
             }
 
             // handle the server's message directly
