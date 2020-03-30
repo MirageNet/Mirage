@@ -31,7 +31,7 @@ namespace Mirror.Tests
             return RunAsync(async() =>
             {
                 networkManagerGo = new GameObject();
-                networkManagerGo.AddComponent<AsyncTcpTransport>();
+                networkManagerGo.AddComponent<MockTransport>();
                 manager = networkManagerGo.AddComponent<NetworkManager>();
                 manager.client = networkManagerGo.GetComponent<NetworkClient>();
                 manager.server = networkManagerGo.GetComponent<NetworkServer>();

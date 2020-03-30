@@ -143,14 +143,12 @@ namespace Mirror
             Time.Reset();
 
             RegisterMessageHandlers(connection);
-            OnConnected();
-
             Time.UpdateClient(this);
+            _ = OnConnected();
         }
 
         internal void ConnectHost(NetworkServer server)
         {
-
             if (LogFilter.Debug) Debug.Log("Client Connect Host to Server");
             connectState = ConnectState.Connected;
 
@@ -163,7 +161,7 @@ namespace Mirror
             hostServer = server;
             connection = new NetworkConnectionToServer(c1);
             RegisterHostHandlers(connection);
-            OnConnected();
+            _ = OnConnected();
         }
 
         void InitializeAuthEvents()
@@ -189,7 +187,7 @@ namespace Mirror
         /// 
         internal static NetworkClient Current { get; set; }
 
-        void OnConnected()
+        async Task OnConnected()
         {
             // reset network time stats
             
@@ -197,7 +195,14 @@ namespace Mirror
             // the handler may want to send messages to the client
             // thus we should set the connected state before calling the handler
             connectState = ConnectState.Connected;
-            Connected.Invoke((NetworkConnectionToServer)connection);
+            Connected.Invoke(connection);
+
+            // start processing messages
+            await connection.ProcessMessagesAsync();
+            Cleanup();
+
+            Disconnected.Invoke();
+
         }
 
         public void OnAuthenticated(NetworkConnectionToServer conn)
@@ -281,16 +286,13 @@ namespace Mirror
         /// Shut down a client.
         /// <para>This should be done when a client is no longer going to be used.</para>
         /// </summary>
-        public void Shutdown()
+        void Cleanup()
         {
             if (LogFilter.Debug) Debug.Log("Shutting down client.");
 
             ClearSpawners();
             DestroyAllClientObjects();
-
-            connection?.Disconnect();
-
-            connection = null;
+            
             ready = false;
             isSpawnFinished = false;
 

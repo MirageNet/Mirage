@@ -111,7 +111,8 @@ namespace Mirror
             {
                 conn.Disconnect();
             }
-            transport.Disconnect();
+            if (transport != null)
+                transport.Disconnect();
         }
 
         void Initialize()
@@ -186,14 +187,35 @@ namespace Mirror
         // accept connections from clients
         private async Task AcceptAsync()
         {
-            IConnection connection;
-
-            while ((connection = await transport.AcceptAsync()) != null)
+            try
             {
-                NetworkConnectionToClient networkConnectionToClient = new NetworkConnectionToClient(connection);
+                IConnection connection;
 
-                _ = ConnectionAcceptedAsync(networkConnectionToClient);
+                while ((connection = await transport.AcceptAsync()) != null)
+                {
+                    NetworkConnectionToClient networkConnectionToClient = new NetworkConnectionToClient(connection);
+
+                    _ = ConnectionAcceptedAsync(networkConnectionToClient);
+                }
+
+                Cleanup();
             }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+        }
+
+        // cleanup resources so that we can start again
+        private void Cleanup()
+        {
+
+            if (authenticator != null)
+                authenticator.OnServerAuthenticated -= OnAuthenticated;
+
+            initialized = false;
+            Stopped.Invoke();
+            active = false;
         }
 
         /// <summary>
@@ -238,18 +260,6 @@ namespace Mirror
 
             _ = ConnectionAcceptedAsync(conn);
 
-        }
-
-        internal void RemoveLocalConnection()
-        {
-            if (localConnection != null)
-            {
-                localConnection.Disconnect();
-                RemoveConnection(localConnection);
-                localConnection.Dispose();
-                localConnection = null;
-            }
-            this.localClient = null;
         }
 
         internal void ActivateHostScene()
@@ -393,6 +403,9 @@ namespace Mirror
             DestroyPlayerForConnection(connection);
 
             Disconnected.Invoke(connection);
+
+            if (connection == localConnection)
+                localConnection = null;
         }
 
         internal void OnAuthenticated(NetworkConnectionToClient conn)

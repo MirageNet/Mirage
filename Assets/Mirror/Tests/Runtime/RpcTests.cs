@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Mirror.Tests
 {
@@ -69,40 +71,43 @@ namespace Mirror.Tests
 
         }
 
-        [Test]
-        public void Command()
+        [UnityTest]
+        public IEnumerator Command()
         {
             component.CmdTest(1, "hello");
+            yield return null;
 
             Assert.That(component.cmdArg1, Is.EqualTo(1));
             Assert.That(component.cmdArg2, Is.EqualTo("hello"));
         }
 
-        [Test]
-        public void CommandWithNetworkIdentity()
+        [UnityTest]
+        public IEnumerator CommandWithNetworkIdentity()
         {
             component.CmdNetworkIdentity(identity);
+
+            yield return null;
 
             Assert.That(component.cmdNi, Is.SameAs(identity));
         }
 
-        [Test]
-        public void ClientRpc()
+        [UnityTest]
+        public IEnumerator ClientRpc()
         {
             component.RpcTest(1, "hello");
             // process spawn message from server
-            client.Update();
+            yield return null;
 
             Assert.That(component.rpcArg1, Is.EqualTo(1));
             Assert.That(component.rpcArg2, Is.EqualTo("hello"));
         }
 
-        [Test]
-        public void TargetRpc()
+        [UnityTest]
+        public IEnumerator TargetRpc()
         {
             component.TargetRpcTest(manager.server.localConnection, 1, "hello");
             // process spawn message from server
-            client.Update();
+            yield return null;
 
             Assert.That(component.targetRpcArg1, Is.EqualTo(1));
             Assert.That(component.targetRpcArg2, Is.EqualTo("hello"));
