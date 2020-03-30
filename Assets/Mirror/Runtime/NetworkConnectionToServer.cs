@@ -20,7 +20,7 @@ namespace Mirror
             // set not ready and handle client disconnect in any case
             // (might be client or host mode here)
             isReady = false;
-            Transport.activeTransport.ClientDisconnect();
+            connection?.Disconnect();
         }
     }
 }

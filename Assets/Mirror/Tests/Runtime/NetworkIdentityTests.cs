@@ -1,7 +1,10 @@
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 using InvalidOperationException = System.InvalidOperationException;
+
+using static Mirror.Tests.AsyncUtil;
 
 namespace Mirror.Tests
 {
@@ -17,21 +20,23 @@ namespace Mirror.Tests
         GameObject gameObject;
         NetworkIdentity identity;
 
-        [SetUp]
+        [UnitySetUp]
         public void SetUp()
         {
-            Transport.activeTransport = Substitute.For<Transport>();
-            serverGO = new GameObject();
-            server = serverGO.AddComponent<NetworkServer>();
+            RunAsync(async () =>
+            {
+                serverGO = new GameObject();
+                server = serverGO.AddComponent<NetworkServer>();
 
-            clientGO = new GameObject();
-            client = clientGO.AddComponent<NetworkClient>();
-            server.Listen();
-            client.ConnectHost(server);
+                clientGO = new GameObject();
+                client = clientGO.AddComponent<NetworkClient>();
+                await server.ListenAsync();
+                client.ConnectHost(server);
 
 
-            gameObject = new GameObject();
-            identity = gameObject.AddComponent<NetworkIdentity>();
+                gameObject = new GameObject();
+                identity = gameObject.AddComponent<NetworkIdentity>();
+            });
         }
 
         [TearDown]
@@ -42,7 +47,6 @@ namespace Mirror.Tests
             server.Shutdown();
             Object.DestroyImmediate(serverGO);
             Object.DestroyImmediate(clientGO);
-            Transport.activeTransport = null;
             server.Shutdown();
         }
         #endregion

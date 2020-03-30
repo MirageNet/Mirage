@@ -146,6 +146,9 @@ namespace Mirror
             //Make sure connections are cleared in case any old connections references exist from previous sessions
             connections.Clear();
 
+            if (transport == null)
+                transport = GetComponent<AsyncTransport>();
+
             if (authenticator != null)
             {
                 authenticator.OnServerAuthenticated += OnAuthenticated;
@@ -173,14 +176,14 @@ namespace Mirror
         /// </summary>
         /// <param name="maxConns">Maximum number of allowed connections</param>
         /// <returns></returns>
-        public void Listen()
+        public async Task ListenAsync()
         {
             Initialize();
 
             // only start server if we want to listen
             if (Listening)
             {
-                Transport.activeTransport.ServerStart();
+                await transport.ListenAsync();
                 if (LogFilter.Debug) Debug.Log("Server started listening");
             }
 
@@ -248,6 +251,7 @@ namespace Mirror
 
             localConnection = conn;
             localClient = client;
+            AddConnection(conn);
 
             Connected.Invoke(conn);
         }

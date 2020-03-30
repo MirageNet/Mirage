@@ -123,13 +123,6 @@ namespace Mirror
         /// </summary>
         public bool isLocalClient => hostServer != null;
 
-        void Start()
-        {
-            InitializeAuthEvents();
-
-            Application.quitting += Shutdown;
-        }
-
         /// <summary>
         /// Connect client to a NetworkServer instance.
         /// </summary>
@@ -139,6 +132,7 @@ namespace Mirror
             if (LogFilter.Debug) Debug.Log("Client Connect: " + uri);
 
             RegisterSpawnPrefabs();
+            InitializeAuthEvents();
 
             connectState = ConnectState.Connecting;
             IConnection transportConnection = await Transport.ConnectAsync(uri);
@@ -151,6 +145,7 @@ namespace Mirror
 
         internal void ConnectHost(NetworkServer server)
         {
+
             if (LogFilter.Debug) Debug.Log("Client Connect Host to Server");
             connectState = ConnectState.Connected;
 
@@ -160,12 +155,13 @@ namespace Mirror
 
             connection = connectionToServer;
             RegisterHostHandlers(connection);
+            InitializeAuthEvents();
+            hostServer = server;
 
             // create server connection to local client
             server.SetLocalConnection(this, connectionToClient);
 
             Connected.Invoke(connectionToServer);
-            hostServer = server;
         }
 
         void InitializeAuthEvents()
@@ -183,17 +179,6 @@ namespace Mirror
             }
         }
 
-        void OnError(Exception exception)
-        {
-            Debug.LogException(exception);
-        }
-
-        void OnDisconnected()
-        {
-            connectState = ConnectState.Disconnected;
-            HandleClientDisconnect();
-        }
-
         /// <summary>
         /// client that received the message
         /// </summary>
@@ -201,15 +186,6 @@ namespace Mirror
         /// gameobjects when processing the message</remarks>
         /// 
         internal static NetworkClient Current { get; set; }
-
-        internal void OnDataReceived(ArraySegment<byte> data, int channelId)
-        {
-            if (connection != null)
-            {
-                connection.TransportReceive(data, channelId);
-            }
-            else throw new InvalidOperationException("Skipped Data message handling because connection is null.");
-        }
 
         void OnConnected()
         {
@@ -334,6 +310,9 @@ namespace Mirror
 
             ClearSpawners();
             DestroyAllClientObjects();
+
+            connection?.Disconnect();
+
             connection = null;
             ready = false;
             isSpawnFinished = false;
@@ -343,7 +322,6 @@ namespace Mirror
             if (authenticator != null)
                 authenticator.OnClientAuthenticated -= OnAuthenticated;
 
-            connection.Disconnect();
         }
 
         static bool ConsiderForSpawning(NetworkIdentity identity)
