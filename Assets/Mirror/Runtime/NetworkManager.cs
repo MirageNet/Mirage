@@ -235,7 +235,7 @@ namespace Mirror
             mode = NetworkManagerMode.ClientOnly;
 
             isNetworkActive = true;
-            
+
             if (string.IsNullOrEmpty(serverIp))
             {
                 Debug.LogError("serverIp shouldn't be empty");
@@ -403,7 +403,6 @@ namespace Mirror
 
             // shutdown client
             client.Disconnect();
-            client.Shutdown();
 
             // set offline mode BEFORE changing scene so that FinishStartScene
             // doesn't think we need initialize anything.
@@ -616,7 +615,7 @@ namespace Mirror
 
             // process queued messages that we received while loading the scene
             if (LogFilter.Debug) Debug.Log("FinishLoadScene: resuming handlers after scene was loading.");
-            
+
             // host mode?
             if (mode == NetworkManagerMode.Host)
             {

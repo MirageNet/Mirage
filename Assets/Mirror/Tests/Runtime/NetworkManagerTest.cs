@@ -92,7 +92,6 @@ namespace Mirror.Tests
                 await manager.client.ConnectAsync(new System.Uri("tcp4://localhost"));
                 func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
                 manager.client.Disconnect();
-                manager.client.Shutdown();
                 manager.StopServer();
             });
         }
@@ -108,7 +107,6 @@ namespace Mirror.Tests
                 await manager.client.ConnectAsync(new System.Uri("tcp4://localhost"));
                 func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
                 manager.client.Disconnect();
-                manager.client.Shutdown();
                 manager.StopServer();
                 await Task.Delay(1);
 
@@ -126,7 +124,6 @@ namespace Mirror.Tests
                 manager.client.ConnectHost(manager.server);
                 func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
                 manager.client.Disconnect();
-                manager.client.Shutdown();
                 manager.StopServer();
 
                 await Task.Delay(1);

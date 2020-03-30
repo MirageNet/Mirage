@@ -744,8 +744,8 @@ namespace Mirror.Tests
             Assert.That(compB.IsDirty(), Is.False);
         }
 
-        [Test]
-        public void DisconnectHostTest()
+        [UnityTest]
+        public IEnumerator DisconnectHostTest()
         {
             client.ConnectHost(server);
             // set local connection
@@ -753,6 +753,9 @@ namespace Mirror.Tests
             Assert.That(server.connections, Has.Count.EqualTo(1));
 
             server.Disconnect();
+
+            // wait for messages to get dispatched
+            yield return null;
 
             transport.AcceptCompletionSource.SetResult(null);
 

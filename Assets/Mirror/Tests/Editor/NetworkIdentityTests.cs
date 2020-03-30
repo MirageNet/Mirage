@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 using UnityEngine.Events;
-using Mirror.AsyncTcp;
 
 using static Mirror.Tests.LocalConnections;
 
@@ -177,9 +176,9 @@ namespace Mirror.Tests
         public void SetUp()
         {
             networkServerGameObject = new GameObject();
+            networkServerGameObject.AddComponent<MockTransport>();
             server = networkServerGameObject.AddComponent<NetworkServer>();
             client = networkServerGameObject.AddComponent<NetworkClient>();
-            networkServerGameObject.AddComponent<AsyncTcpTransport>();
 
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
@@ -902,7 +901,6 @@ namespace Mirror.Tests
             Assert.That(identity.observers, Is.EquivalentTo(new[] { connection1, server.localConnection }));
 
             // clean up
-            server.RemoveLocalConnection();
             server.Disconnect();
         }
 
