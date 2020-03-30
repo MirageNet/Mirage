@@ -1,6 +1,8 @@
 using Mirror.Tcp;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
+using static Mirror.Tests.AsyncUtil;
 
 namespace Mirror.Tests
 {
@@ -9,16 +11,17 @@ namespace Mirror.Tests
         NetworkServer testServer;
         GameObject serverGO;
 
-        [SetUp]
+        [UnitySetUp]
         public void SetupNetworkServer()
         {
-            serverGO = new GameObject();
-            testServer = serverGO.AddComponent<NetworkServer>();
-            serverGO.AddComponent<NetworkClient>();
-            Transport transport = serverGO.AddComponent<TcpTransport>();
+            RunAsync(async () =>
+            {
+                serverGO = new GameObject();
+                testServer = serverGO.AddComponent<NetworkServer>();
+                serverGO.AddComponent<NetworkClient>();
+                await testServer.ListenAsync();
 
-            Transport.activeTransport = transport;
-            testServer.Listen();
+            });
         }
 
         [Test]

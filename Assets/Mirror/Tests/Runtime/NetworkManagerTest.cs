@@ -85,7 +85,7 @@ namespace Mirror.Tests
         {
             return RunAsync(async () =>
             {
-                manager.StartServer();
+                await manager.StartServer();
                 UnityAction<NetworkConnectionToServer> func = Substitute.For<UnityAction<NetworkConnectionToServer>>();
                 manager.client.Connected.AddListener(func);
 
@@ -102,7 +102,7 @@ namespace Mirror.Tests
         {
             return RunAsync(async () =>
             {
-                manager.StartServer();
+                await manager.StartServer();
                 UnityAction<NetworkConnectionToServer> func = Substitute.For<UnityAction<NetworkConnectionToServer>>();
                 manager.client.Connected.AddListener(func);
                 await manager.client.ConnectAsync(new System.Uri("tcp4://localhost"));
@@ -120,7 +120,7 @@ namespace Mirror.Tests
         {
             return RunAsync(async () =>
             {
-                manager.StartServer();
+                await manager.StartServer();
                 UnityAction<NetworkConnectionToServer> func = Substitute.For<UnityAction<NetworkConnectionToServer>>();
                 manager.client.Connected.AddListener(func);
                 manager.client.ConnectHost(manager.server);

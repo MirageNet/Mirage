@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 using UnityEngine.Events;
+using Mirror.AsyncTcp;
 
 namespace Mirror.Tests
 {
@@ -176,9 +177,7 @@ namespace Mirror.Tests
             networkServerGameObject = new GameObject();
             server = networkServerGameObject.AddComponent<NetworkServer>();
             client = networkServerGameObject.AddComponent<NetworkClient>();
-            Transport.activeTransport = Substitute.For<Transport>();
-
-            Transport.activeTransport.GetMaxPacketSize().ReturnsForAnyArgs(1000);
+            networkServerGameObject.AddComponent<AsyncTcpTransport>();
 
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
@@ -195,7 +194,6 @@ namespace Mirror.Tests
             // DestroyImmediate is called internally, giving an error in Editor
             GameObject.DestroyImmediate(gameObject);
             Object.DestroyImmediate(networkServerGameObject);
-            Transport.activeTransport = null;
         }
 
         // A Test behaves as an ordinary method

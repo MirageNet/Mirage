@@ -1,4 +1,6 @@
 using System;
+using System.Threading.Tasks;
+using Mirror.AsyncTcp;
 using Mirror.Tcp;
 using UnityEngine;
 using UnityEngine.Events;
@@ -57,7 +59,7 @@ namespace Mirror
         [Header("Network Info")]
         [Tooltip("Transport component attached to this object that server and client will use to connect")]
         [SerializeField]
-        protected Transport transport;
+        protected AsyncTransport transport;
 
         /// <summary>
         /// True if the server or client is started and running
@@ -108,10 +110,10 @@ namespace Mirror
             if (transport == null)
             {
                 // was a transport added yet? if not, add one
-                transport = GetComponent<Transport>();
+                transport = GetComponent<AsyncTransport>();
                 if (transport == null)
                 {
-                    transport = gameObject.AddComponent<TcpTransport>();
+                    transport = gameObject.AddComponent<AsyncTcpTransport>();
                     Debug.Log("NetworkManager: added default Transport because there was none yet.");
                 }
 #if UNITY_EDITOR
@@ -163,7 +165,7 @@ namespace Mirror
             // (tick rate is applied in StartServer!)
             if (isHeadless && startOnHeadless)
             {
-                StartServer();
+                _ = StartServer();
             }
         }
 
@@ -182,14 +184,14 @@ namespace Mirror
         #region Start & Stop
 
         // full server setup code, without spawning objects yet
-        void SetupServer()
+        async Task SetupServer()
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager SetupServer");
 
             ConfigureServerFrameRate();
 
             // start listening to network connections
-            server.Listen();
+            await server.ListenAsync();
 
             isNetworkActive = true;
         }
@@ -199,7 +201,7 @@ namespace Mirror
         /// <para>This uses the networkPort property as the listen port.</para>
         /// </summary>
         /// <returns></returns>
-        public void StartServer()
+        public async Task StartServer()
         {
             mode = NetworkManagerMode.ServerOnly;
 
@@ -219,7 +221,7 @@ namespace Mirror
             // and LoadScene do not finish loading immediately. as long as we
             // have the onlineScene feature, it will be asynchronous!
 
-            SetupServer();
+            await SetupServer();
 
             server.SpawnObjects();
         }
@@ -270,7 +272,7 @@ namespace Mirror
         /// This starts a network "host" - a server and client in the same application.
         /// <para>The client returned from StartHost() is a special "local" client that communicates to the in-process server using a message queue instead of the real network. But in almost all other cases, it can be treated as a normal client.</para>
         /// </summary>
-        public void StartHost()
+        public async Task StartHost()
         {
             mode = NetworkManagerMode.Host;
 
@@ -296,7 +298,9 @@ namespace Mirror
             // have the onlineScene feature, it will be asynchronous!
 
             // setup server first
-            SetupServer();
+            await SetupServer();
+
+            client.ConnectHost(server);
 
             // call OnStartHost AFTER SetupServer. this way we can use
             // NetworkServer.Spawn etc. in there too. just like OnStartServer
@@ -340,8 +344,6 @@ namespace Mirror
             //             isn't called in host mode!
             //
 
-            // TODO call this after spawnobjects and worry about the syncvar hook fix later?
-            client.ConnectHost(server);
 
             // server scene was loaded. now spawn all the objects
             server.SpawnObjects();
@@ -459,8 +461,6 @@ namespace Mirror
                 DontDestroyOnLoad(gameObject);
             }
 
-            Transport.activeTransport = transport;
-
             // subscribe to the server
             if (server != null)
                 server.Authenticated.AddListener(OnServerAuthenticated);
@@ -515,9 +515,6 @@ namespace Mirror
             // Let server prepare for scene change
             OnServerChangeScene(newSceneName);
 
-            // Suspend the server's transport while changing scenes
-            // It will be re-enabled in FinishScene.
-            Transport.activeTransport.enabled = false;
             loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
 
             // notify all clients about the new scene
@@ -538,7 +535,6 @@ namespace Mirror
             // the state as soon as the load is finishing, causing all kinds of bugs because of missing state.
             // (client may be null after StopClient etc.)
             if (LogFilter.Debug) Debug.Log("ClientChangeScene: pausing handlers while scene is loading to avoid data loss after scene was loaded.");
-            Transport.activeTransport.enabled = false;
             // Let client prepare for scene change
             OnClientChangeScene(newSceneName, sceneOperation, customHandling);
 
@@ -620,8 +616,7 @@ namespace Mirror
 
             // process queued messages that we received while loading the scene
             if (LogFilter.Debug) Debug.Log("FinishLoadScene: resuming handlers after scene was loading.");
-            Transport.activeTransport.enabled = true;
-
+            
             // host mode?
             if (mode == NetworkManagerMode.Host)
             {
