@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using static Mirror.Tests.LocalConnections;
 
 namespace Mirror.Tests
 {
@@ -120,14 +121,14 @@ namespace Mirror.Tests
         [Test]
         public void HasIdentitysConnectionToServer()
         {
-            (identity.connectionToServer, _) = ULocalConnectionToClient.CreateLocalConnections();
+            (identity.connectionToServer, _) = PipedConnections();
             Assert.That(component.connectionToServer, Is.EqualTo(identity.connectionToServer));
         }
 
         [Test]
         public void HasIdentitysConnectionToClient()
         {
-            (_, identity.connectionToClient) = ULocalConnectionToClient.CreateLocalConnections();
+            (_, identity.connectionToClient) = PipedConnections();
             Assert.That(component.connectionToClient, Is.EqualTo(identity.connectionToClient));
         }
 

@@ -9,6 +9,7 @@ using UnityEngine.Events;
 using UnityEngine.TestTools;
 
 using static Mirror.Tests.AsyncUtil;
+using static Mirror.Tests.LocalConnections;
 
 namespace Mirror.Tests
 {
@@ -322,7 +323,7 @@ namespace Mirror.Tests
         [Test]
         public void SetClientReadyAndNotReadyTest()
         {
-            (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
+            (_, NetworkConnectionToClient connection) = PipedConnections();
             Assert.That(connection.isReady, Is.False);
 
             server.SetClientReady(connection);
@@ -336,12 +337,12 @@ namespace Mirror.Tests
         public void SetAllClientsNotReadyTest()
         {
             // add first ready client
-            (_, var first) = ULocalConnectionToClient.CreateLocalConnections();
+            (_, var first) = PipedConnections();
             first.isReady = true;
             server.connections.Add(first);
 
             // add second ready client
-            (_, var second) = ULocalConnectionToClient.CreateLocalConnections();
+            (_, var second) = PipedConnections();
             second.isReady = true;
             server.connections.Add(second);
 
@@ -355,7 +356,7 @@ namespace Mirror.Tests
         public void ReadyMessageSetsClientReadyTest()
         {
             // add connection
-            (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
+            (_, NetworkConnectionToClient connection) = PipedConnections();
             server.AddConnection(connection);
 
             // set as authenticated, otherwise readymessage is rejected
@@ -410,12 +411,10 @@ namespace Mirror.Tests
         public void SendToAllTest()
         {
             // add connection
-            (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
-            connection.isAuthenticated = true;
-            connection.connectionToServer.isAuthenticated = true;
+            (var connectionToServer, NetworkConnectionToClient connection) = PipedConnections(true);
             // set a client handler
             int called = 0;
-            connection.connectionToServer.RegisterHandler<TestMessage>(msg => ++called);
+            connectionToServer.RegisterHandler<TestMessage>(msg => ++called);
 
             server.AddConnection(connection);
 
@@ -424,9 +423,6 @@ namespace Mirror.Tests
 
             // send it to all
             server.SendToAll(message);
-
-            // update local connection once so that the incoming queue is processed
-            connection.connectionToServer.Update();
 
             // was it send to and handled by the connection?
             Assert.That(called, Is.EqualTo(1));
@@ -494,13 +490,11 @@ namespace Mirror.Tests
         public void SendToClientOfPlayer()
         {
             // add connection
-            (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
-            connection.isAuthenticated = true;
-            connection.connectionToServer.isAuthenticated = true;
+            (NetworkConnectionToServer connectionToServer, NetworkConnectionToClient connection) = PipedConnections(true);
 
             // set a client handler
             int called = 0;
-            connection.connectionToServer.RegisterHandler<TestMessage>(msg => ++called);
+            connectionToServer.RegisterHandler<TestMessage>(msg => ++called);
             server.AddConnection(connection);
 
             // create a message
@@ -512,9 +506,6 @@ namespace Mirror.Tests
 
             // send it to that player
             server.SendToClientOfPlayer(identity, message);
-
-            // update local connection once so that the incoming queue is processed
-            connection.connectionToServer.Update();
 
             // was it send to and handled by the connection?
             Assert.That(called, Is.EqualTo(1));
@@ -556,13 +547,11 @@ namespace Mirror.Tests
         {
 
             // add connection
-            (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
+            (var connectionToServer, NetworkConnectionToClient connection) = PipedConnections(true);
             connection.isReady = true;
-            connection.isAuthenticated = true;
-            connection.connectionToServer.isAuthenticated = true;
             // set a client handler
             int called = 0;
-            connection.connectionToServer.RegisterHandler<SpawnMessage>(msg => ++called);
+            connectionToServer.RegisterHandler<SpawnMessage>(msg => ++called);
             server.AddConnection(connection);
 
             // create a gameobject and networkidentity and some unique values
@@ -572,16 +561,12 @@ namespace Mirror.Tests
             // call ShowForConnection
             server.ShowForConnection(identity, connection);
 
-            // update local connection once so that the incoming queue is processed
-            connection.connectionToServer.Update();
-
             // was it sent to and handled by the connection?
             Assert.That(called, Is.EqualTo(1));
 
             // it shouldn't send it if connection isn't ready, so try that too
             connection.isReady = false;
             server.ShowForConnection(identity, connection);
-            connection.connectionToServer.Update();
             // not 2 but 1 like before?
             Assert.That(called, Is.EqualTo(1));
             // destroy GO after shutdown, otherwise isServer is true in OnDestroy and it tries to call
@@ -593,13 +578,11 @@ namespace Mirror.Tests
         public void HideForConnection()
         {
             // add connection
-            (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
+            (NetworkConnectionToServer connectionToServer, NetworkConnectionToClient connection) = PipedConnections(true);
             connection.isReady = true;
-            connection.isAuthenticated = true;
-            connection.connectionToServer.isAuthenticated = true;
             // set a client handler
             int called = 0;
-            connection.connectionToServer.RegisterHandler<ObjectHideMessage>(msg => ++called);
+            connectionToServer.RegisterHandler<ObjectHideMessage>(msg => ++called);
             server.AddConnection(connection);
 
             // create a gameobject and networkidentity
@@ -608,9 +591,6 @@ namespace Mirror.Tests
 
             // call HideForConnection
             server.HideForConnection(identity, connection);
-
-            // update local connection once so that the incoming queue is processed
-            connection.connectionToServer.Update();
 
             // was it sent to and handled by the connection?
             Assert.That(called, Is.EqualTo(1));
