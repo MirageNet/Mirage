@@ -149,6 +149,7 @@ namespace Mirror
 
         internal void ConnectHost(NetworkServer server)
         {
+
             if (LogFilter.Debug) Debug.Log("Client Connect Host to Server");
             connectState = ConnectState.Connected;
 

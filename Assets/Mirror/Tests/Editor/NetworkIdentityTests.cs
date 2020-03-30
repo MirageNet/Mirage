@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 using UnityEngine.Events;
+using Mirror.AsyncTcp;
 
 using static Mirror.Tests.LocalConnections;
 
