@@ -1,5 +1,7 @@
 using System.Collections;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -74,7 +76,6 @@ namespace Mirror.Tests
         NetworkServer server;
         GameObject serverGO;
         NetworkClient client;
-        GameObject clientGO;
 
         GameObject gameObject;
         NetworkIdentity identity;
@@ -82,22 +83,35 @@ namespace Mirror.Tests
         IConnection tconn42;
         IConnection tconn43;
 
+        MockTransport transport;
+
+        TaskCompletionSource<bool> tconn42Receive;
+        TaskCompletionSource<bool> tconn43Receive;
+
         [UnitySetUp]
         public IEnumerator SetUp()
         {
             return RunAsync(async () =>
             {
                 serverGO = new GameObject();
+                transport = serverGO.AddComponent<MockTransport>();
                 server = serverGO.AddComponent<NetworkServer>();
-
-                clientGO = new GameObject();
-                client = clientGO.AddComponent<NetworkClient>();
+                client = serverGO.AddComponent<NetworkClient>();
 
                 gameObject = new GameObject();
                 identity = gameObject.AddComponent<NetworkIdentity>();
 
                 tconn42 = Substitute.For<IConnection>();
                 tconn43 = Substitute.For<IConnection>();
+
+                tconn42Receive = new TaskCompletionSource<bool>();
+                tconn43Receive = new TaskCompletionSource<bool>();
+
+                Task<bool> task42 = tconn42Receive.Task;
+                Task<bool> task43 = tconn42Receive.Task;
+
+                tconn42.ReceiveAsync(null).ReturnsForAnyArgs(task42);
+                tconn43.ReceiveAsync(null).ReturnsForAnyArgs(task43);
 
                 await server.ListenAsync();
             });
@@ -111,8 +125,6 @@ namespace Mirror.Tests
             // reset all state
             server.Shutdown();
             Object.DestroyImmediate(serverGO);
-            Object.DestroyImmediate(clientGO);
-
         }
 
         [Test]
@@ -124,24 +136,23 @@ namespace Mirror.Tests
         }
 
 
-        [UnityTest]
-        public void ConnectionEventTest()
+        [Test]
+        public void ConnectedEventTest()
         {
-            // listen with maxconnections=1
-            server.MaxConnections = 1;
-
             UnityAction<NetworkConnectionToClient> func = Substitute.For<UnityAction<NetworkConnectionToClient>>();
-
             server.Connected.AddListener(func);
 
-            // connect first: should work
-            //Transport.activeTransport.OnServerConnected.Invoke(42);
+            transport.AcceptCompletionSource.SetResult(tconn42);
 
             func.Received().Invoke(Arg.Any<NetworkConnectionToClient>());
+        }
 
+        [Test]
+        public void ConnectionTest()
+        {
+            transport.AcceptCompletionSource.SetResult(tconn42);
             NetworkConnectionToClient conn = server.connections.First();
             Assert.That(conn.isAuthenticated);
-
         }
 
         [Test]
@@ -152,11 +163,11 @@ namespace Mirror.Tests
             Assert.That(server.connections, Is.Empty);
 
             // connect first: should work
-            //Transport.activeTransport.OnServerConnected.Invoke(42);
+            transport.AcceptCompletionSource.SetResult(tconn42);
             Assert.That(server.connections, Has.Count.EqualTo(1));
 
             // connect second: should fail
-            //Transport.activeTransport.OnServerConnected.Invoke(43);
+            transport.AcceptCompletionSource.SetResult(tconn43);
             Assert.That(server.connections, Has.Count.EqualTo(1));
         }
 
@@ -164,73 +175,25 @@ namespace Mirror.Tests
         [Test]
         public void DisconnectMessageHandlerTest()
         {
-            // message handlers
-            bool disconnectCalled = false;
-            server.Disconnected.AddListener(conn => { disconnectCalled = true; });
+            // subscribe to disconnected
+            UnityAction<NetworkConnectionToClient> func = Substitute.For<UnityAction<NetworkConnectionToClient>>();
+            server.Disconnected.AddListener(func);
 
-            Assert.That(disconnectCalled, Is.False);
+            // accept a connection and disconnect
+            transport.AcceptCompletionSource.SetResult(tconn42);
+            tconn42Receive.SetResult(false);
 
-            // connect
-            //Transport.activeTransport.OnServerConnected.Invoke(42);
-            Assert.That(disconnectCalled, Is.False);
-
-            // disconnect
-            //Transport.activeTransport.OnServerDisconnected.Invoke(42);
-            Assert.That(disconnectCalled, Is.True);
+            // make sure the callback got invoked
+            func.Received().Invoke(Arg.Any<NetworkConnectionToClient>());
         }
 
         [Test]
-        public void ConnectionsDictTest()
+        public void MultipleConnectionsTest()
         {
-            Assert.That(server.connections, Is.Empty);
+            transport.AcceptCompletionSource.SetResult(tconn42);
+            transport.AcceptCompletionSource.SetResult(tconn43);
 
-            // connect first
-            //Transport.activeTransport.OnServerConnected.Invoke(42);
-            Assert.That(server.connections, Has.Count.EqualTo(1));
-            //Assert.That(server.connections.ContainsKey(42), Is.True);
-            Assert.Fail();
-
-            // connect second
-            //Transport.activeTransport.OnServerConnected.Invoke(43);
             Assert.That(server.connections, Has.Count.EqualTo(2));
-            //Assert.That(server.connections.ContainsKey(43), Is.True);
-
-            // disconnect second
-            //Transport.activeTransport.OnServerDisconnected.Invoke(43);
-            Assert.That(server.connections, Has.Count.EqualTo(1));
-            //Assert.That(server.connections.ContainsKey(42), Is.True);
-
-            // disconnect first
-            //Transport.activeTransport.OnServerDisconnected.Invoke(42);
-            Assert.That(server.connections, Is.Empty);
-        }
-
-        [Test]
-        public void OnConnectedOnlyAllowsGreaterZeroConnectionIdsTest()
-        {
-            // connect 0
-            // (it will show an error message, which is expected)
-            LogAssert.ignoreFailingMessages = true;
-            //Transport.activeTransport.OnServerConnected.Invoke(0);
-            Assert.That(server.connections, Is.Empty);
-
-            // connect <0
-            //Transport.activeTransport.OnServerConnected.Invoke(-1);
-            Assert.That(server.connections, Is.Empty);
-            LogAssert.ignoreFailingMessages = false;
-        }
-
-        [Test]
-        public void ConnectDuplicateConnectionIdsTest()
-        {
-            // connect first
-            //Transport.activeTransport.OnServerConnected.Invoke(42);
-            Assert.That(server.connections, Has.Count.EqualTo(1));
-            NetworkConnectionToClient original = server.connections.First();
-
-            // connect duplicate - shouldn't overwrite first one
-            //Transport.activeTransport.OnServerConnected.Invoke(42);
-            Assert.That(server.connections, Is.EquivalentTo(new[] { original }));
         }
 
         [Test]
@@ -277,18 +240,20 @@ namespace Mirror.Tests
         [Test]
         public void DisconnectAllTest()
         {
-            client.ConnectHost(server);
-            Assert.That(server.localConnection, Is.Not.Null);
-
-            // add connection
-            var conn42 = new NetworkConnectionToClient(tconn42);
-            server.AddConnection(conn42);
-            Assert.That(server.connections, Has.Count.EqualTo(1));
+            transport.AcceptCompletionSource.SetResult(tconn42);
+            transport.AcceptCompletionSource.SetResult(tconn43);
 
             // disconnect all connections and local connection
             server.DisconnectAll();
+
+            tconn42.Received().Disconnect();
+            tconn43.Received().Disconnect();
+
+            // connections must return EOF
+            tconn42Receive.SetResult(false);
+            tconn43Receive.SetResult(false);
+
             Assert.That(server.connections, Is.Empty);
-            Assert.That(server.localConnection, Is.Null);
         }
 
         [Test]
