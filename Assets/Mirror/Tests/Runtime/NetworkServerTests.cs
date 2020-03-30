@@ -1,3 +1,5 @@
+using System.Collections;
+using Mirror.AsyncTcp;
 using Mirror.Tcp;
 using NUnit.Framework;
 using UnityEngine;
@@ -12,11 +14,12 @@ namespace Mirror.Tests
         GameObject serverGO;
 
         [UnitySetUp]
-        public void SetupNetworkServer()
+        public IEnumerator SetupNetworkServer()
         {
-            RunAsync(async () =>
+            return RunAsync(async () =>
             {
                 serverGO = new GameObject();
+                serverGO.AddComponent<AsyncTcpTransport>();
                 testServer = serverGO.AddComponent<NetworkServer>();
                 serverGO.AddComponent<NetworkClient>();
                 await testServer.ListenAsync();
@@ -27,7 +30,7 @@ namespace Mirror.Tests
         [Test]
         public void InitializeTest()
         {
-            Assert.That(testServer.connections.Count == 0);
+            Assert.That(testServer.connections, Is.Empty);
             Assert.That(testServer.active);
             Assert.That(testServer.LocalClientActive, Is.False);
         }
