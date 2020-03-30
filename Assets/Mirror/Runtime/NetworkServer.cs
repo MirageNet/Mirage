@@ -105,32 +105,13 @@ namespace Mirror
         /// <summary>
         /// This shuts down the server and disconnects all clients.
         /// </summary>
-        public void Shutdown()
+        public void Disconnect()
         {
-            if (initialized)
+            foreach (NetworkConnectionToClient conn in connections)
             {
-                DisconnectAll();
-
-                if (Listening)
-                {
-                    // stop the server.
-                    // we do NOT call Transport.Shutdown, because someone only
-                    // called NetworkServer.Shutdown. we can't assume that the
-                    // client is supposed to be shut down too!
-                    transport.Disconnect();
-                }
-
-                if (authenticator != null)
-                    authenticator.OnServerAuthenticated -= OnAuthenticated;
-
-                initialized = false;
-
-                Stopped.Invoke();
+                conn.Disconnect();
             }
-
-            active = false;
-
-            NetworkIdentity.ResetNextNetworkId();
+            transport.Disconnect();
         }
 
         void Initialize()
@@ -344,23 +325,6 @@ namespace Mirror
         public void SendToReady<T>(NetworkIdentity identity, T msg, int channelId) where T : IMessageBase
         {
             SendToReady(identity, msg, true, channelId);
-        }
-
-        /// <summary>
-        /// Disconnect all currently connected clients, including the local connection.
-        /// <para>This can only be called on the server. Clients will receive the Disconnect message.</para>
-        /// </summary>
-        public void DisconnectAll()
-        {
-            foreach (NetworkConnectionToClient conn in connections)
-            {
-                conn.Disconnect();
-            }
-            connections.Clear();
-
-            localConnection = null;
-            localClient = null;
-            active = false;
         }
 
         // The user should never need to pump the update loop manually

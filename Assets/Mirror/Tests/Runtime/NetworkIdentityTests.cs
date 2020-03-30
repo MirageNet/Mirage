@@ -44,10 +44,10 @@ namespace Mirror.Tests
         {
             Object.DestroyImmediate(gameObject);
             // reset all state
-            server.Shutdown();
+            server.Disconnect();
             Object.DestroyImmediate(serverGO);
             Object.DestroyImmediate(clientGO);
-            server.Shutdown();
+            server.Disconnect();
         }
         #endregion
 

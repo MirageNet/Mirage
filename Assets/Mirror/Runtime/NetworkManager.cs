@@ -385,7 +385,7 @@ namespace Mirror
 
             if (LogFilter.Debug) Debug.Log("NetworkManager StopServer");
             isNetworkActive = false;
-            server.Shutdown();
+            server.Disconnect();
 
             // set offline mode BEFORE changing scene so that FinishStartScene
             // doesn't think we need initialize anything.

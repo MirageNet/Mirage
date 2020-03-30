@@ -49,14 +49,14 @@ namespace Mirror.Tests
         [Test]
         public void ShutdownTest()
         {
-            testServer.Shutdown();
+            testServer.Disconnect();
             Assert.That(testServer.active == false);
         }
 
         [TearDown]
         public void ShutdownNetworkServer()
         {
-            testServer.Shutdown();
+            testServer.Disconnect();
             GameObject.DestroyImmediate(serverGO);
         }
     }
