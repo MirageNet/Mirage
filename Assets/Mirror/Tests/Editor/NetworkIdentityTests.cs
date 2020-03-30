@@ -8,6 +8,8 @@ using Object = UnityEngine.Object;
 using UnityEngine.Events;
 using Mirror.AsyncTcp;
 
+using static Mirror.Tests.LocalConnections;
+
 namespace Mirror.Tests
 {
     public class NetworkIdentityTests
@@ -228,7 +230,7 @@ namespace Mirror.Tests
         public void SetClientOwner()
         {
             // SetClientOwner
-            (_, ULocalConnectionToClient original) = ULocalConnectionToClient.CreateLocalConnections();
+            (_, NetworkConnectionToClient original) = PipedConnections();
             identity.SetClientOwner(original);
             Assert.That(identity.connectionToClient, Is.EqualTo(original));
         }
@@ -237,11 +239,11 @@ namespace Mirror.Tests
         public void SetOverrideClientOwner()
         {
             // SetClientOwner
-            (_, ULocalConnectionToClient original) = ULocalConnectionToClient.CreateLocalConnections();
+            (_, NetworkConnectionToClient original) = PipedConnections();
             identity.SetClientOwner(original);
 
             // setting it when it's already set shouldn't overwrite the original
-            (_, ULocalConnectionToClient overwrite) = ULocalConnectionToClient.CreateLocalConnections();
+            (_, NetworkConnectionToClient overwrite) = PipedConnections();
             // will log a warning
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -811,23 +813,19 @@ namespace Mirror.Tests
             Assert.That(compA.IsDirty(), Is.False);
             Assert.That(compB.IsDirty(), Is.False);
 
-            (_, ULocalConnectionToClient owner)
-                = ULocalConnectionToClient.CreateLocalConnections();
+            (NetworkConnectionToServer connectionToServer, NetworkConnectionToClient owner)
+                = PipedConnections(true);
             owner.isReady = true;
-            owner.isAuthenticated = true;
-            owner.connectionToServer.isAuthenticated = true;
             int ownerCalled = 0;
-            owner.connectionToServer.RegisterHandler<UpdateVarsMessage>(msg => ++ownerCalled);
+            connectionToServer.RegisterHandler<UpdateVarsMessage>(msg => ++ownerCalled);
             identity.connectionToClient = owner;
 
             // add an observer connection that will receive the updates
-            (_, ULocalConnectionToClient observer)
-                = ULocalConnectionToClient.CreateLocalConnections();
+            (NetworkConnectionToServer connectionToServer2, NetworkConnectionToClient observer)
+                = PipedConnections(true);
             observer.isReady = true;
-            observer.isAuthenticated = true;
-            observer.connectionToServer.isAuthenticated = true;
             int observerCalled = 0;
-            observer.connectionToServer.RegisterHandler<UpdateVarsMessage>(msg => ++observerCalled);
+            connectionToServer2.RegisterHandler<UpdateVarsMessage>(msg => ++observerCalled);
             identity.observers.Add(observer);
 
             // set components dirty again
@@ -837,10 +835,6 @@ namespace Mirror.Tests
             // calling update should serialize all components and send them to
             // owner/observers
             identity.ServerUpdate();
-
-            // update connections once so that messages are processed
-            owner.connectionToServer.Update();
-            observer.connectionToServer.Update();
 
             // was it received on the clients?
             Assert.That(ownerCalled, Is.EqualTo(1));
@@ -895,17 +889,17 @@ namespace Mirror.Tests
             server.connections.Add(connection2);
 
             // add a host connection
-            (_, ULocalConnectionToClient localConnection)
-                = ULocalConnectionToClient.CreateLocalConnections();
-            localConnection.isReady = true;
+            (_, var localConnection) = PipeConnection.CreatePipe();
+
             server.SetLocalConnection(client, localConnection);
+            server.localConnection.isReady = true;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
 
             // add all to observers. should have the two ready connections then.
             identity.AddAllReadyServerConnectionsToObservers();
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { connection1, localConnection }));
+            Assert.That(identity.observers, Is.EquivalentTo(new[] { connection1, server.localConnection }));
 
             // clean up
             server.RemoveLocalConnection();
@@ -922,7 +916,7 @@ namespace Mirror.Tests
             gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection
-            (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
+            (_, NetworkConnectionToClient connection) = PipedConnections();
             connection.isReady = true;
             identity.connectionToClient = connection;
 
@@ -944,7 +938,7 @@ namespace Mirror.Tests
             gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection that isn't ready
-            (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
+            (_, NetworkConnectionToClient connection) = PipedConnections();
             identity.connectionToClient = connection;
 
             // call OnStartServer so that observers dict is created

@@ -137,10 +137,15 @@ namespace Mirror
             connectState = ConnectState.Connecting;
             IConnection transportConnection = await Transport.ConnectAsync(uri);
 
+
             // setup all the handlers
             connection = new NetworkConnectionToServer(transportConnection);
+            Time.Reset();
+
             RegisterMessageHandlers(connection);
             OnConnected();
+
+            Time.UpdateClient(this);
         }
 
         internal void ConnectHost(NetworkServer server)
@@ -149,19 +154,16 @@ namespace Mirror
             if (LogFilter.Debug) Debug.Log("Client Connect Host to Server");
             connectState = ConnectState.Connected;
 
-            // create local connection objects and connect them
-            (ULocalConnectionToServer connectionToServer, ULocalConnectionToClient connectionToClient)
-                = ULocalConnectionToClient.CreateLocalConnections();
-
-            connection = connectionToServer;
-            RegisterHostHandlers(connection);
             InitializeAuthEvents();
+
+            // create local connection objects and connect them
+            (IConnection c1, IConnection c2) = PipeConnection.CreatePipe();
+
+            server.SetLocalConnection(this, c2);
             hostServer = server;
-
-            // create server connection to local client
-            server.SetLocalConnection(this, connectionToClient);
-
-            Connected.Invoke(connectionToServer);
+            connection = new NetworkConnectionToServer(c1);
+            RegisterHostHandlers(connection);
+            OnConnected();
         }
 
         void InitializeAuthEvents()
@@ -190,12 +192,11 @@ namespace Mirror
         void OnConnected()
         {
             // reset network time stats
-            Time.Reset();
+            
 
             // the handler may want to send messages to the client
             // thus we should set the connected state before calling the handler
             connectState = ConnectState.Connected;
-            Time.UpdateClient(this);
             Connected.Invoke((NetworkConnectionToServer)connection);
         }
 
@@ -213,26 +214,7 @@ namespace Mirror
         /// </summary>
         public void Disconnect()
         {
-            // local or remote connection?
-            if (isLocalClient)
-            {
-                if (isConnected)
-                {
-                    hostServer.Disconnected.Invoke(hostServer.localConnection);
-                }
-                hostServer.RemoveLocalConnection();
-            }
-            else
-            {
-                if (connection != null)
-                {
-                    connection.Disconnect();
-                }
-            }
-            // set connectState as Disconnected after, otherwise Disconnected event is never raised
-            connectState = ConnectState.Disconnected;
-
-            HandleClientDisconnect();
+            connection.Disconnect();
         }
 
         /// <summary>
@@ -257,12 +239,7 @@ namespace Mirror
         internal void Update()
         {
             // local connection?
-            if (connection is ULocalConnectionToServer localConnection)
-            {
-                localConnection.Update();
-            }
-            // remote connection?
-            else
+            if (!isLocalClient)
             {
                 // only update things while connected
                 if (active && connectState == ConnectState.Connected)

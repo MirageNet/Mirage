@@ -188,7 +188,9 @@ namespace Mirror
 
             while ((connection = await transport.AcceptAsync()) != null)
             {
-                _ = ConnectionAcceptedAsync(connection);
+                NetworkConnectionToClient networkConnectionToClient = new NetworkConnectionToClient(connection);
+
+                _ = ConnectionAcceptedAsync(networkConnectionToClient);
             }
         }
 
@@ -220,7 +222,7 @@ namespace Mirror
         }
 
         // called by LocalClient to add itself. dont call directly.
-        internal void SetLocalConnection(NetworkClient client, ULocalConnectionToClient conn)
+        internal void SetLocalConnection(NetworkClient client, IConnection tconn)
         {
             if (localConnection != null)
             {
@@ -228,11 +230,12 @@ namespace Mirror
                 return;
             }
 
+            NetworkConnectionToClient conn = new NetworkConnectionToClient(tconn);
             localConnection = conn;
             localClient = client;
-            AddConnection(conn);
 
-            Connected.Invoke(conn);
+            _ = ConnectionAcceptedAsync(conn);
+
         }
 
         internal void RemoveLocalConnection()
@@ -349,9 +352,9 @@ namespace Mirror
             }
         }
 
-        async Task ConnectionAcceptedAsync(IConnection connection)
+        async Task ConnectionAcceptedAsync(NetworkConnectionToClient conn)
         {
-            if (LogFilter.Debug) Debug.Log("Server accepted client:" + connection);
+            if (LogFilter.Debug) Debug.Log("Server accepted client:" + conn);
 
             // are more connections allowed? if not, kick
             // (it's easier to handle this in Mirror, so Transports can have
@@ -360,13 +363,12 @@ namespace Mirror
             //  Transport can't do that)
             if (connections.Count >= MaxConnections)
             {
-                connection.Disconnect();
-                if (LogFilter.Debug) Debug.Log("Server full, kicked client:" + connection);
+                conn.Disconnect();
+                if (LogFilter.Debug) Debug.Log("Server full, kicked client:" + conn);
                 return;
             }
 
             // add connection
-            var conn = new NetworkConnectionToClient(connection);
             AddConnection(conn);
 
             // let everyone know we just accepted a connection
@@ -554,7 +556,7 @@ namespace Mirror
             identity.SetClientOwner(conn);
             
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
-            if (conn is ULocalConnectionToClient)
+            if (conn == localConnection)
             {
                 identity.hasAuthority = true;
                 this.localClient.InternalAddPlayer(identity);
@@ -612,7 +614,7 @@ namespace Mirror
             //NOTE: DONT set connection ready.
 
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
-            if (conn is ULocalConnectionToClient)
+            if (conn == localConnection)
             {
                 identity.hasAuthority = true;
                 client.InternalAddPlayer(identity);
@@ -773,7 +775,7 @@ namespace Mirror
 
             // special case to make sure hasAuthority is set
             // on start server in host mode
-            if (ownerConnection is ULocalConnectionToClient)
+            if (ownerConnection == localConnection)
                 identity.hasAuthority = true;
 
             identity.StartServer();
