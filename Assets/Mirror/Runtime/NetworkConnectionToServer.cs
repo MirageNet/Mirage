@@ -6,13 +6,10 @@ namespace Mirror
 {
     public class NetworkConnectionToServer : NetworkConnection
     {
-        public override EndPoint Address => new IPEndPoint(IPAddress.Loopback, 0);
 
-        internal override void Send(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable)
+        public NetworkConnectionToServer(IConnection connection) : base(connection)
         {
-            if (logNetworkMessages) Debug.Log("ConnectionSend " + this + " bytes:" + BitConverter.ToString(segment.Array, segment.Offset, segment.Count));
 
-            Transport.activeTransport.ClientSend(channelId, segment);
         }
 
         /// <summary>

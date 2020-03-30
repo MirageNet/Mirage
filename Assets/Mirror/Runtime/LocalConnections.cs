@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Mirror
@@ -11,19 +12,20 @@ namespace Mirror
     {
         internal ULocalConnectionToServer connectionToServer { get; private set; }
 
-        private ULocalConnectionToClient() : base(0)
+        private ULocalConnectionToClient() : base(null)
         {
         }
 
         public override EndPoint Address => new IPEndPoint(IPAddress.Loopback, 0);
 
-        internal override void Send(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable)
+        internal override Task SendAsync(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable)
         {
             // LocalConnection doesn't support allocation-free sends yet.
             // previously we allocated in Mirror. now we do it here.
             byte[] data = new byte[segment.Count];
             Array.Copy(segment.Array, segment.Offset, data, 0, segment.Count);
             connectionToServer.packetQueue.Enqueue(data);
+            return Task.CompletedTask;
         }
 
         internal void DisconnectInternal()
@@ -63,7 +65,7 @@ namespace Mirror
     {
         internal ULocalConnectionToClient connectionToClient { get; }
 
-        internal ULocalConnectionToServer(ULocalConnectionToClient connectionToClient)
+        internal ULocalConnectionToServer(ULocalConnectionToClient connectionToClient) : base(null)
         {
             this.connectionToClient = connectionToClient;
         }
@@ -75,7 +77,7 @@ namespace Mirror
 
         public override EndPoint Address => new IPEndPoint(IPAddress.Loopback, 0);
 
-        internal override void Send(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable)
+        internal override Task SendAsync(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable)
         {
             if (segment.Count == 0)
             {
@@ -84,6 +86,7 @@ namespace Mirror
 
             // handle the server's message directly
             connectionToClient.TransportReceive(segment, channelId);
+            return Task.CompletedTask;
         }
 
         internal void Update()

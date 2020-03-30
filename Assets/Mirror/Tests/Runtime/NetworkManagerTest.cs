@@ -89,7 +89,7 @@ namespace Mirror.Tests
                 UnityAction<NetworkConnectionToServer> func = Substitute.For<UnityAction<NetworkConnectionToServer>>();
                 manager.client.Connected.AddListener(func);
 
-                await manager.client.ConnectAsync("localhost");
+                await manager.client.ConnectAsync(new System.Uri("tcp4://localhost"));
                 func.Received().Invoke(Arg.Any<NetworkConnectionToServer>());
                 manager.client.Disconnect();
                 manager.client.Shutdown();

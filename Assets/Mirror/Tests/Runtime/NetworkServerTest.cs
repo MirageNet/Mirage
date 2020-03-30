@@ -1,3 +1,4 @@
+using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -75,6 +76,9 @@ namespace Mirror.Tests
         GameObject gameObject;
         NetworkIdentity identity;
 
+        IConnection tconn42;
+        IConnection tconn43;
+
         [SetUp]
         public void SetUp()
         {
@@ -88,6 +92,8 @@ namespace Mirror.Tests
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
 
+            tconn42 = Substitute.For<IConnection>();
+            tconn43 = Substitute.For<IConnection>();
         }
 
         [TearDown]
@@ -129,10 +135,10 @@ namespace Mirror.Tests
             // connect first: should work
             Transport.activeTransport.OnServerConnected.Invoke(42);
 
-            func.Received().Invoke(Arg.Is<NetworkConnectionToClient>(conn => conn.connectionId == 42));
+            func.Received().Invoke(Arg.Any<NetworkConnectionToClient>());
 
-            if (server.connections.TryGetValue(42, out NetworkConnectionToClient conn1))
-                Assert.That(conn1.isAuthenticated, Is.True);
+            NetworkConnectionToClient conn = server.connections.First();
+            Assert.That(conn.isAuthenticated);
         }
 
         [Test]
@@ -141,15 +147,15 @@ namespace Mirror.Tests
             // listen with maxconnections=1
             server.MaxConnections = 1;
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // connect first: should work
             Transport.activeTransport.OnServerConnected.Invoke(42);
-            Assert.That(server.connections.Count, Is.EqualTo(1));
+            Assert.That(server.connections, Has.Count.EqualTo(1));
 
             // connect second: should fail
             Transport.activeTransport.OnServerConnected.Invoke(43);
-            Assert.That(server.connections.Count, Is.EqualTo(1));
+            Assert.That(server.connections, Has.Count.EqualTo(1));
         }
 
         
@@ -178,26 +184,27 @@ namespace Mirror.Tests
         {
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // connect first
             Transport.activeTransport.OnServerConnected.Invoke(42);
-            Assert.That(server.connections.Count, Is.EqualTo(1));
-            Assert.That(server.connections.ContainsKey(42), Is.True);
+            Assert.That(server.connections, Has.Count.EqualTo(1));
+            //Assert.That(server.connections.ContainsKey(42), Is.True);
+            Assert.Fail();
 
             // connect second
             Transport.activeTransport.OnServerConnected.Invoke(43);
-            Assert.That(server.connections.Count, Is.EqualTo(2));
-            Assert.That(server.connections.ContainsKey(43), Is.True);
+            Assert.That(server.connections, Has.Count.EqualTo(2));
+            //Assert.That(server.connections.ContainsKey(43), Is.True);
 
             // disconnect second
             Transport.activeTransport.OnServerDisconnected.Invoke(43);
-            Assert.That(server.connections.Count, Is.EqualTo(1));
-            Assert.That(server.connections.ContainsKey(42), Is.True);
+            Assert.That(server.connections, Has.Count.EqualTo(1));
+            //Assert.That(server.connections.ContainsKey(42), Is.True);
 
             // disconnect first
             Transport.activeTransport.OnServerDisconnected.Invoke(42);
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
         }
 
         [Test]
@@ -209,17 +216,17 @@ namespace Mirror.Tests
 
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // connect 0
             // (it will show an error message, which is expected)
             LogAssert.ignoreFailingMessages = true;
             Transport.activeTransport.OnServerConnected.Invoke(0);
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // connect <0
             Transport.activeTransport.OnServerConnected.Invoke(-1);
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
             LogAssert.ignoreFailingMessages = false;
         }
 
@@ -228,17 +235,16 @@ namespace Mirror.Tests
         {
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // connect first
             Transport.activeTransport.OnServerConnected.Invoke(42);
-            Assert.That(server.connections.Count, Is.EqualTo(1));
-            NetworkConnectionToClient original = server.connections[42];
+            Assert.That(server.connections, Has.Count.EqualTo(1));
+            NetworkConnectionToClient original = server.connections.First();
 
             // connect duplicate - shouldn't overwrite first one
             Transport.activeTransport.OnServerConnected.Invoke(42);
-            Assert.That(server.connections.Count, Is.EqualTo(1));
-            Assert.That(server.connections[42], Is.EqualTo(original));
+            Assert.That(server.connections, Is.EquivalentTo(new[] { original }));
         }
 
         [Test]
@@ -260,35 +266,21 @@ namespace Mirror.Tests
         {
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // add first connection
-            var conn42 = new NetworkConnectionToClient(42);
-            bool result42 = server.AddConnection(conn42);
-            Assert.That(result42, Is.True);
-            Assert.That(server.connections.Count, Is.EqualTo(1));
-            Assert.That(server.connections.ContainsKey(42), Is.True);
-            Assert.That(server.connections[42], Is.EqualTo(conn42));
+            var conn42 = new NetworkConnectionToClient(tconn42);
+            server.AddConnection(conn42);
+            Assert.That(server.connections, Is.EquivalentTo(new[] { conn42 }));
 
             // add second connection
-            var conn43 = new NetworkConnectionToClient(43);
-            bool result43 = server.AddConnection(conn43);
-            Assert.That(result43, Is.True);
-            Assert.That(server.connections.Count, Is.EqualTo(2));
-            Assert.That(server.connections.ContainsKey(42), Is.True);
-            Assert.That(server.connections[42], Is.EqualTo(conn42));
-            Assert.That(server.connections.ContainsKey(43), Is.True);
-            Assert.That(server.connections[43], Is.EqualTo(conn43));
+            var conn43 = new NetworkConnectionToClient(tconn43);
+            server.AddConnection(conn43);
+            Assert.That(server.connections, Is.EquivalentTo(new[] { conn42, conn43 }));
 
             // add duplicate connectionId
-            var connDup = new NetworkConnectionToClient(42);
-            bool resultDup = server.AddConnection(connDup);
-            Assert.That(resultDup, Is.False);
-            Assert.That(server.connections.Count, Is.EqualTo(2));
-            Assert.That(server.connections.ContainsKey(42), Is.True);
-            Assert.That(server.connections[42], Is.EqualTo(conn42));
-            Assert.That(server.connections.ContainsKey(43), Is.True);
-            Assert.That(server.connections[43], Is.EqualTo(conn43));
+            server.AddConnection(conn42);
+            Assert.That(server.connections, Is.EquivalentTo(new[] { conn42, conn43 }));
         }
 
         [Test]
@@ -296,20 +288,13 @@ namespace Mirror.Tests
         {
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
-
-            // add connection
-            var conn42 = new NetworkConnectionToClient(42);
-            bool result42 = server.AddConnection(conn42);
-            Assert.That(result42, Is.True);
-            Assert.That(server.connections.Count, Is.EqualTo(1));
-            Assert.That(server.connections.ContainsKey(42), Is.True);
-            Assert.That(server.connections[42], Is.EqualTo(conn42));
+            Assert.That(server.connections, Is.Empty);
+            var conn42 = new NetworkConnectionToClient(tconn42);
+            server.AddConnection(conn42);
 
             // remove connection
-            bool resultRemove = server.RemoveConnection(42);
-            Assert.That(resultRemove, Is.True);
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            server.RemoveConnection(conn42);
+            Assert.That(server.connections, Is.Empty);
         }
 
         [Test]
@@ -317,19 +302,19 @@ namespace Mirror.Tests
         {
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             client.ConnectHost(server);
             Assert.That(server.localConnection, Is.Not.Null);
 
             // add connection
-            var conn42 = new NetworkConnectionToClient(42);
+            var conn42 = new NetworkConnectionToClient(tconn42);
             server.AddConnection(conn42);
-            Assert.That(server.connections.Count, Is.EqualTo(1));
+            Assert.That(server.connections, Has.Count.EqualTo(1));
 
             // disconnect all connections and local connection
             server.DisconnectAll();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
             Assert.That(server.localConnection, Is.Null);
         }
 
@@ -343,10 +328,10 @@ namespace Mirror.Tests
 
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // add a connection
-            var connection = new NetworkConnectionToClient(42);
+            var connection = new NetworkConnectionToClient(tconn42);
 
             connection.RegisterHandler<NetworkConnectionToClient, TestMessage>((conn, msg) =>
             {
@@ -356,7 +341,7 @@ namespace Mirror.Tests
             }, false);
 
             server.AddConnection(connection);
-            Assert.That(server.connections.Count, Is.EqualTo(1));
+            Assert.That(server.connections, Has.Count.EqualTo(1));
 
             // serialize a test message into an arraysegment
             var testMessage = new TestMessage { IntValue = 13, DoubleValue = 14, StringValue = "15" };
@@ -385,7 +370,7 @@ namespace Mirror.Tests
 
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // serialize a test message into an arraysegment
             var testMessage = new TestMessage { IntValue = 13, DoubleValue = 14, StringValue = "15" };
@@ -423,12 +408,12 @@ namespace Mirror.Tests
             // add first ready client
             (_, var first) = ULocalConnectionToClient.CreateLocalConnections();
             first.isReady = true;
-            server.connections[42] = first;
+            server.connections.Add(first);
 
             // add second ready client
             (_, var second) = ULocalConnectionToClient.CreateLocalConnections();
             second.isReady = true;
-            server.connections[43] = second;
+            server.connections.Add(second);
 
             // set all not ready
             server.SetAllClientsNotReady();
@@ -441,7 +426,7 @@ namespace Mirror.Tests
         {
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // add connection
             (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
@@ -500,7 +485,7 @@ namespace Mirror.Tests
         {
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // add connection
             (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
@@ -532,7 +517,7 @@ namespace Mirror.Tests
             // listen
             server.Listen();
             // add a connection
-            var connection = new NetworkConnectionToClient(42);
+            var connection = new NetworkConnectionToClient(tconn42);
             server.AddConnection(connection);
 
             // RegisterHandler(conn, msg) variant
@@ -591,7 +576,7 @@ namespace Mirror.Tests
         {
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // add connection
             (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
@@ -656,7 +641,7 @@ namespace Mirror.Tests
         {
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // add connection
             (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
@@ -697,7 +682,7 @@ namespace Mirror.Tests
         {
             // listen
             server.Listen();
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
 
             // add connection
             (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
@@ -888,13 +873,13 @@ namespace Mirror.Tests
 
             // connect
             Transport.activeTransport.OnServerConnected.Invoke(42);
-            Assert.That(server.connections.Count, Is.EqualTo(1));
+            Assert.That(server.connections, Has.Count.EqualTo(1));
 
             server.DisconnectAll();
             server.Shutdown();
 
             // state cleared?
-            Assert.That(server.connections.Count, Is.EqualTo(0));
+            Assert.That(server.connections, Is.Empty);
             Assert.That(server.active, Is.False);
             Assert.That(server.localConnection, Is.Null);
             Assert.That(server.LocalClientActive, Is.False);
