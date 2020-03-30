@@ -255,6 +255,7 @@ namespace Mirror
             NetworkConnectionToClient conn = new NetworkConnectionToClient(tconn);
             localConnection = conn;
             localClient = client;
+            AddConnection(conn);
 
             _ = ConnectionAcceptedAsync(conn);
 

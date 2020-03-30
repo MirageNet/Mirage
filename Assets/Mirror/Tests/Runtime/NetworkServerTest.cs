@@ -154,6 +154,7 @@ namespace Mirror.Tests
             transport.AcceptCompletionSource.SetResult(tconn42);
             NetworkConnectionToClient conn = server.connections.First();
             Assert.That(conn.isAuthenticated);
+
         }
 
         [Test]
