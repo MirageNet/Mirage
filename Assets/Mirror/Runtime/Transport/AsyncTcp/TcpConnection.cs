@@ -20,6 +20,7 @@ namespace Mirror.AsyncTcp
         #region Receiving
         public async Task<bool> ReceiveAsync(MemoryStream buffer)
         {
+            buffer.SetLength(0);
             long position = buffer.Position;
 
             // read message size

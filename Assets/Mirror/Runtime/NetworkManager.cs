@@ -241,7 +241,13 @@ namespace Mirror
             }
             if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + serverIp);
 
-            _ = client.ConnectAsync(serverIp);
+            UriBuilder builder = new UriBuilder()
+            {
+                Host = serverIp,
+                Scheme = "tcp4",
+            };
+
+            _ = client.ConnectAsync(builder.Uri);
         }
 
         /// <summary>
@@ -353,7 +359,6 @@ namespace Mirror
             if (LogFilter.Debug) Debug.Log("NetworkManager ConnectLocalClient");
 
             server.ActivateHostScene();
-            client.ConnectLocalServer(server);
 
             RegisterClientMessages(client.connection);
         }

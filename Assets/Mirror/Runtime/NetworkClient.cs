@@ -76,6 +76,8 @@ namespace Mirror
 
         bool isSpawnFinished;
 
+        public AsyncTransport Transport;
+
         /// <summary>
         /// Returns true when a client's connection has been set to ready.
         /// <para>A client that is ready recieves state updates from the server, while a client that is not ready does not. This useful when the state of the game is not normal, such as a scene change or end-of-game.</para>
@@ -131,41 +133,18 @@ namespace Mirror
         /// <summary>
         /// Connect client to a NetworkServer instance.
         /// </summary>
-        /// <param name="address"></param>
-        public async Task ConnectAsync(string serverIp)
-        {
-            if (LogFilter.Debug) Debug.Log("Client Connect: " + serverIp);
-
-            Transport.activeTransport.enabled = true;
-            InitializeTransportHandlers();
-            RegisterSpawnPrefabs();
-
-            connectState = ConnectState.Connecting;
-            await Transport.activeTransport.ClientConnectAsync(serverIp);
-
-            // setup all the handlers
-            connection = new NetworkConnectionToServer();
-            RegisterMessageHandlers(connection);
-            OnConnected();
-        }
-
-        /// <summary>
-        /// Connect client to a NetworkServer instance.
-        /// </summary>
         /// <param name="uri">Address of the server to connect to</param>
         public async Task ConnectAsync(Uri uri)
         {
             if (LogFilter.Debug) Debug.Log("Client Connect: " + uri);
 
-            Transport.activeTransport.enabled = true;
-            InitializeTransportHandlers();
             RegisterSpawnPrefabs();
 
             connectState = ConnectState.Connecting;
-            await Transport.activeTransport.ClientConnectAsync(uri);
+            IConnection transportConnection = await Transport.ConnectAsync(uri);
 
             // setup all the handlers
-            connection = new NetworkConnectionToServer();
+            connection = new NetworkConnectionToServer(transportConnection);
             RegisterMessageHandlers(connection);
             OnConnected();
         }
@@ -187,21 +166,6 @@ namespace Mirror
 
             Connected.Invoke(connectionToServer);
             hostServer = server;
-        }
-
-        /// <summary>
-        /// connect host mode
-        /// </summary>
-        internal void ConnectLocalServer(NetworkServer server)
-        {
-            server.OnConnected(server.localConnection);
-        }
-
-        void InitializeTransportHandlers()
-        {
-            Transport.activeTransport.OnClientDataReceived.AddListener(OnDataReceived);
-            Transport.activeTransport.OnClientDisconnected.AddListener(OnDisconnected);
-            Transport.activeTransport.OnClientError.AddListener(OnError);
         }
 
         void InitializeAuthEvents()
@@ -287,21 +251,12 @@ namespace Mirror
                 if (connection != null)
                 {
                     connection.Disconnect();
-                    RemoveTransportHandlers();
                 }
             }
             // set connectState as Disconnected after, otherwise Disconnected event is never raised
             connectState = ConnectState.Disconnected;
 
             HandleClientDisconnect();
-        }
-
-        void RemoveTransportHandlers()
-        {
-            // so that we don't register them more than once
-            Transport.activeTransport.OnClientDataReceived.RemoveListener(OnDataReceived);
-            Transport.activeTransport.OnClientDisconnected.RemoveListener(OnDisconnected);
-            Transport.activeTransport.OnClientError.RemoveListener(OnError);
         }
 
         /// <summary>
@@ -313,17 +268,14 @@ namespace Mirror
         /// <param name="message"></param>
         /// <param name="channelId"></param>
         /// <returns>True if message was sent.</returns>
+        public Task SendAsync<T>(T message, int channelId = Channels.DefaultReliable) where T : IMessageBase
+        {
+            return connection.SendAsync(message, channelId);
+        }
+
         public void Send<T>(T message, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
-            if (connection != null)
-            {
-                if (connectState != ConnectState.Connected)
-                {
-                    throw new InvalidOperationException("NetworkClient Send with no connection");
-                }
-                connection.Send(message, channelId);
-            }
-            throw new InvalidOperationException("NetworkClient Send with no connection");
+            _ = connection.SendAsync(message, channelId);
         }
 
         internal void Update()
@@ -391,11 +343,7 @@ namespace Mirror
             if (authenticator != null)
                 authenticator.OnClientAuthenticated -= OnAuthenticated;
 
-            // disconnect the client connection.
-            // we do NOT call Transport.Shutdown, because someone only called
-            // NetworkClient.Shutdown. we can't assume that the server is
-            // supposed to be shut down too!
-            Transport.activeTransport.ClientDisconnect();
+            connection.Disconnect();
         }
 
         static bool ConsiderForSpawning(NetworkIdentity identity)
