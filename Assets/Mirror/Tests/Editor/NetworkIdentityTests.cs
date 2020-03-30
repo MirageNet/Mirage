@@ -909,7 +909,7 @@ namespace Mirror.Tests
 
             // clean up
             server.RemoveLocalConnection();
-            server.Shutdown();
+            server.Disconnect();
         }
 
         // RebuildObservers should always add the own ready connection

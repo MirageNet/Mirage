@@ -123,7 +123,7 @@ namespace Mirror.Tests
             Object.DestroyImmediate(gameObject);
 
             // reset all state
-            server.Shutdown();
+            server.Disconnect();
             Object.DestroyImmediate(serverGO);
         }
 
@@ -131,7 +131,7 @@ namespace Mirror.Tests
         public void IsActiveTest()
         {
             Assert.That(server.active, Is.True);
-            server.Shutdown();
+            server.Disconnect();
             Assert.That(server.active, Is.False);
         }
 
@@ -238,13 +238,13 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void DisconnectAllTest()
+        public void DisconnectAllConnectionsTest()
         {
             transport.AcceptCompletionSource.SetResult(tconn42);
             transport.AcceptCompletionSource.SetResult(tconn43);
 
             // disconnect all connections and local connection
-            server.DisconnectAll();
+            server.Disconnect();
 
             tconn42.Received().Disconnect();
             tconn43.Received().Disconnect();
@@ -765,18 +765,16 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void ShutdownCleanupTest()
+        public void DisconnectHostTest()
         {
             client.ConnectHost(server);
             // set local connection
             Assert.That(server.LocalClientActive, Is.True);
-
-            // connect
-            //Transport.activeTransport.OnServerConnected.Invoke(42);
             Assert.That(server.connections, Has.Count.EqualTo(1));
 
-            server.DisconnectAll();
-            server.Shutdown();
+            server.Disconnect();
+
+            transport.AcceptCompletionSource.SetResult(null);
 
             // state cleared?
             Assert.That(server.connections, Is.Empty);
