@@ -354,7 +354,6 @@ namespace Mirror
             localConnection = null;
             localClient = null;
             active = false;
-
         }
 
         // The user should never need to pump the update loop manually
