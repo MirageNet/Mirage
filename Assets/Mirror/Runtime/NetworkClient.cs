@@ -124,6 +124,8 @@ namespace Mirror
         void Start()
         {
             InitializeAuthEvents();
+
+            Application.quitting += Shutdown;
         }
 
         /// <summary>
@@ -370,19 +372,6 @@ namespace Mirror
             connection.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
             connection.RegisterHandler<RpcMessage>(OnRPCMessage);
             connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
-        }
-
-        /// <summary>
-        /// called when quitting the application by closing the window / pressing stop in the editor
-        /// <para>virtual so that inheriting classes' OnApplicationQuit() can call base.OnApplicationQuit() too</para>
-        /// </summary>
-        public virtual void OnApplicationQuit()
-        {
-            if (isConnected)
-            {
-                Shutdown();
-                print("OnApplicationQuit: stopped client");
-            }
         }
 
         /// <summary>
