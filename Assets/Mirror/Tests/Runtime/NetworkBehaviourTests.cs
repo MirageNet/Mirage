@@ -37,7 +37,7 @@ namespace Mirror.Tests
         [Test]
         public void IsServer()
         {
-            Assert.That(component.isServer, Is.True);
+            Assert.That(component.IsServer, Is.True);
         }
 
         [Test]
@@ -69,7 +69,7 @@ namespace Mirror.Tests
             {
                 Assert.That(isClient, Is.True);
                 Assert.That(isLocalPlayer, Is.False);
-                Assert.That(isServer, Is.True);
+                Assert.That(IsServer, Is.True);
                 called = true;
             }
         };

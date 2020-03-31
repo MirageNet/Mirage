@@ -23,7 +23,7 @@ namespace Mirror.Examples.Additive
 
         void Update()
         {
-            if (isServer && netIdentity.observers.Count > 0)
+            if (IsServer && netIdentity.observers.Count > 0)
                 ShootNearestPlayer();
 
             if (isClient)

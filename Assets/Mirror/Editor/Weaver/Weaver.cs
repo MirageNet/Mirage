@@ -283,7 +283,7 @@ namespace Mirror.Weaver
             NetworkIdentityGetServer = Resolvers.ResolveMethod(NetworkIdentityType, CurrentAssembly, "get_server");
             NetworkIdentityGetClient = Resolvers.ResolveMethod(NetworkIdentityType, CurrentAssembly, "get_client");
 
-            NetworkBehaviourIsServer = Resolvers.ResolveProperty(NetworkBehaviourType, CurrentAssembly, "isServer");
+            NetworkBehaviourIsServer = Resolvers.ResolveProperty(NetworkBehaviourType, CurrentAssembly, "IsServer");
             NetworkBehaviourIsClient = Resolvers.ResolveProperty(NetworkBehaviourType, CurrentAssembly, "isClient");
             NetworkBehaviourIsLocalClient = Resolvers.ResolveProperty(NetworkBehaviourType, CurrentAssembly, "isLocalClient");
 

@@ -93,7 +93,7 @@ namespace Mirror.Tests
         public void CanCallServerFunctionAsServer()
         {
             manager.server.Spawn(playerGO);
-            Assert.That(behavior.isServer, Is.True);
+            Assert.That(behavior.IsServer, Is.True);
             Assert.That(behavior.isClient, Is.False);
 
             flags.CallServerFunction();
@@ -107,7 +107,7 @@ namespace Mirror.Tests
         public void CannotCallClientFunctionAsServer()
         {
             manager.server.Spawn(playerGO);
-            Assert.That(behavior.isServer, Is.True);
+            Assert.That(behavior.IsServer, Is.True);
             Assert.That(behavior.isClient, Is.False);
 
             flags.CallClientFunction();

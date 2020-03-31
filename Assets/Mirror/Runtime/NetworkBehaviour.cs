@@ -44,7 +44,7 @@ namespace Mirror
         /// Returns true if this object is active on an active server.
         /// <para>This is only true if the object has been spawned. This is different from NetworkServer.active, which is true if the server itself is active rather than this object being active.</para>
         /// </summary>
-        public bool isServer => netIdentity.isServer;
+        public bool IsServer => netIdentity.isServer;
 
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
@@ -65,12 +65,12 @@ namespace Mirror
         /// <summary>
         /// True if this object only exists on the server
         /// </summary>
-        public bool isServerOnly => isServer && !isClient;
+        public bool isServerOnly => IsServer && !isClient;
 
         /// <summary>
         /// True if this object exists on a client that is not also acting as a server
         /// </summary>
-        public bool isClientOnly => isClient && !isServer;
+        public bool isClientOnly => isClient && !IsServer;
 
         /// <summary>
         /// This returns true if this object is the authoritative version of the object in the distributed network application.
@@ -258,7 +258,7 @@ namespace Mirror
                 return;
             }
             // This cannot use NetworkServer.active, as that is not specific to this object.
-            if (!isServer)
+            if (!IsServer)
             {
                 Debug.LogWarning("ClientRpc " + rpcName + " called on un-spawned object: " + name);
                 return;
@@ -299,7 +299,7 @@ namespace Mirror
                 return;
             }
             // This cannot use NetworkServer.active, as that is not specific to this object.
-            if (!isServer)
+            if (!IsServer)
             {
                 Debug.LogWarning("TargetRpc " + rpcName + " called on un-spawned object: " + name);
                 return;
@@ -548,11 +548,11 @@ namespace Mirror
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected GameObject GetSyncVarGameObject(uint netId, ref GameObject gameObjectField)
         {
-            if (!isServer && !isClient)
+            if (!IsServer && !isClient)
                 return gameObjectField;
 
             // server always uses the field
-            if (isServer)
+            if (IsServer)
             {
                 return gameObjectField;
             }
@@ -615,7 +615,7 @@ namespace Mirror
         protected NetworkIdentity GetSyncVarNetworkIdentity(uint netId, ref NetworkIdentity identityField)
         {
             // server always uses the field
-            if (isServer)
+            if (IsServer)
             {
                 return identityField;
             }

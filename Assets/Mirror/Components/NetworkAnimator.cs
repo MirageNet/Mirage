@@ -46,7 +46,7 @@ namespace Mirror
         {
             get
             {
-                if (isServer)
+                if (IsServer)
                 {
                     if (!ClientAuthority)
                         return true;
@@ -152,7 +152,7 @@ namespace Mirror
 
         void SendAnimationMessage(int stateHash, float normalizedTime, int layerId, byte[] parameters)
         {
-            if (isServer)
+            if (IsServer)
             {
                 RpcOnAnimationClientMessage(stateHash, normalizedTime, layerId, parameters);
             }
@@ -164,7 +164,7 @@ namespace Mirror
 
         void SendAnimationParametersMessage(byte[] parameters)
         {
-            if (isServer)
+            if (IsServer)
             {
                 RpcOnAnimationParametersClientMessage(parameters);
             }
@@ -383,7 +383,7 @@ namespace Mirror
             }
             else
             {
-                if (!isServer)
+                if (!IsServer)
                 {
                     Debug.LogWarning("Tried to set animation in the client for a server-controlled animator");
                     return;
@@ -428,7 +428,7 @@ namespace Mirror
             }
             else
             {
-                if (!isServer)
+                if (!IsServer)
                 {
                     Debug.LogWarning("Tried to reset animation in the client for a server-controlled animator");
                     return;

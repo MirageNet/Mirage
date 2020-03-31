@@ -208,7 +208,7 @@ namespace Mirror
 
             // server-only mode does no interpolation to save computations,
             // but let's set the position directly
-            if (isServer && !isClient)
+            if (IsServer && !isClient)
                 ApplyPositionRotationScale(goal.LocalPosition, goal.LocalRotation, goal.LocalScale);
 
             // set dirty so that OnSerialize broadcasts it
@@ -321,7 +321,7 @@ namespace Mirror
         void Update()
         {
             // if server then always sync to others.
-            if (isServer)
+            if (IsServer)
             {
                 // just use OnSerialize via SetDirtyBit only sync when position
                 // changed. set dirty bits 0 or 1
@@ -333,7 +333,7 @@ namespace Mirror
             {
                 // send to server if we have local authority (and aren't the server)
                 // -> only if connectionToServer has been initialized yet too
-                if (!isServer && IsClientWithAuthority)
+                if (!IsServer && IsClientWithAuthority)
                 {
                     // check only each 'syncInterval'
                     if (Time.time - lastClientSendTime >= syncInterval)
