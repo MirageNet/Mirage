@@ -124,8 +124,8 @@ namespace Mirror.Tests
         {
             SetupNetworkClient();
 
-            Assert.That(behavior2.isServer, Is.False);
-            Assert.That(behavior2.isClient, Is.True);
+            Assert.That(behavior2.IsServer, Is.False);
+            Assert.That(behavior2.IsClient, Is.True);
 
             flags.CallClientFunction();
             flags.CallClientCallbackFunction();
@@ -141,8 +141,8 @@ namespace Mirror.Tests
         {
             SetupNetworkClient();
 
-            Assert.That(behavior2.isServer, Is.False);
-            Assert.That(behavior2.isClient, Is.True);
+            Assert.That(behavior2.IsServer, Is.False);
+            Assert.That(behavior2.IsClient, Is.True);
 
             flags.CallServerFunction();
             flags.CallServerCallbackFunction();
