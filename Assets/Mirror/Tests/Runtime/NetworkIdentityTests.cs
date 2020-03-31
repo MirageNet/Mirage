@@ -5,6 +5,7 @@ using UnityEngine.TestTools;
 using InvalidOperationException = System.InvalidOperationException;
 
 using static Mirror.Tests.AsyncUtil;
+using System.Collections;
 
 namespace Mirror.Tests
 {
@@ -14,22 +15,20 @@ namespace Mirror.Tests
         NetworkServer server;
         GameObject serverGO;
         NetworkClient client;
-        GameObject clientGO;
 
 
         GameObject gameObject;
         NetworkIdentity identity;
 
         [UnitySetUp]
-        public void SetUp()
+        public IEnumerator SetUp()
         {
-            RunAsync(async () =>
+            return RunAsync(async () =>
             {
                 serverGO = new GameObject();
+                serverGO.AddComponent<MockTransport>();
                 server = serverGO.AddComponent<NetworkServer>();
-
-                clientGO = new GameObject();
-                client = clientGO.AddComponent<NetworkClient>();
+                client = serverGO.AddComponent<NetworkClient>();
                 await server.ListenAsync();
                 client.ConnectHost(server);
 
@@ -46,8 +45,6 @@ namespace Mirror.Tests
             // reset all state
             server.Disconnect();
             Object.DestroyImmediate(serverGO);
-            Object.DestroyImmediate(clientGO);
-            server.Disconnect();
         }
         #endregion
 
