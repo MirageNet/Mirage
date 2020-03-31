@@ -357,7 +357,7 @@ namespace Mirror
             connection.RegisterHandler<ObjectSpawnStartedMessage>(msg => { });
             connection.RegisterHandler<ObjectSpawnFinishedMessage>(msg => { });
             connection.RegisterHandler<UpdateVarsMessage>(msg => { });
-            connection.RegisterHandler<RpcMessage>(OnRPCMessage);
+            connection.RegisterHandler<RpcMessage>(OnRpcMessage);
             connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
         }
 
@@ -370,7 +370,7 @@ namespace Mirror
             connection.RegisterHandler<ObjectSpawnStartedMessage>(OnObjectSpawnStarted);
             connection.RegisterHandler<ObjectSpawnFinishedMessage>(OnObjectSpawnFinished);
             connection.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
-            connection.RegisterHandler<RpcMessage>(OnRPCMessage);
+            connection.RegisterHandler<RpcMessage>(OnRpcMessage);
             connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
         }
 
@@ -980,7 +980,7 @@ namespace Mirror
             }
         }
 
-        internal void OnRPCMessage(RpcMessage msg)
+        internal void OnRpcMessage(RpcMessage msg)
         {
             if (LogFilter.Debug) Debug.Log("ClientScene.OnRPCMessage hash:" + msg.functionHash + " netId:" + msg.netId);
 
