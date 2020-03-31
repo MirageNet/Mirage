@@ -693,7 +693,7 @@ namespace Mirror
             // proceed with the login handshake by calling OnServerConnect
             if (!string.IsNullOrEmpty(networkSceneName))
             {
-                var msg = new SceneMessage() { sceneName = networkSceneName };
+                var msg = new SceneMessage { sceneName = networkSceneName };
                 conn.Send(msg);
             }
 
