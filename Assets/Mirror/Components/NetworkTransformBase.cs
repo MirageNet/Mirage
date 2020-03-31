@@ -208,7 +208,7 @@ namespace Mirror
 
             // server-only mode does no interpolation to save computations,
             // but let's set the position directly
-            if (IsServer && !isClient)
+            if (IsServer && !IsClient)
                 ApplyPositionRotationScale(goal.LocalPosition, goal.LocalRotation, goal.LocalScale);
 
             // set dirty so that OnSerialize broadcasts it
@@ -329,7 +329,7 @@ namespace Mirror
             }
 
             // no 'else if' since host mode would be both
-            if (isClient)
+            if (IsClient)
             {
                 // send to server if we have local authority (and aren't the server)
                 // -> only if connectionToServer has been initialized yet too

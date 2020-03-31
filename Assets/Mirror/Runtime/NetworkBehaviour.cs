@@ -49,7 +49,7 @@ namespace Mirror
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
         /// </summary>
-        public bool isClient => netIdentity.isClient;
+        public bool IsClient => netIdentity.isClient;
 
         /// <summary>
         /// Returns true if we're on host mode.
@@ -65,12 +65,12 @@ namespace Mirror
         /// <summary>
         /// True if this object only exists on the server
         /// </summary>
-        public bool isServerOnly => IsServer && !isClient;
+        public bool isServerOnly => IsServer && !IsClient;
 
         /// <summary>
         /// True if this object exists on a client that is not also acting as a server
         /// </summary>
-        public bool isClientOnly => isClient && !IsServer;
+        public bool isClientOnly => IsClient && !IsServer;
 
         /// <summary>
         /// This returns true if this object is the authoritative version of the object in the distributed network application.
@@ -104,7 +104,7 @@ namespace Mirror
         /// </summary>
         public NetworkConnection connectionToClient => netIdentity.connectionToClient;
 
-        public NetworkTime NetworkTime => isClient ? client.Time : server.Time;
+        public NetworkTime NetworkTime => IsClient ? client.Time : server.Time;
 
         protected ulong syncVarDirtyBits { get; private set; }
         ulong syncVarHookGuard;
@@ -548,7 +548,7 @@ namespace Mirror
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected GameObject GetSyncVarGameObject(uint netId, ref GameObject gameObjectField)
         {
-            if (!IsServer && !isClient)
+            if (!IsServer && !IsClient)
                 return gameObjectField;
 
             // server always uses the field

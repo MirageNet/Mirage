@@ -43,7 +43,7 @@ namespace Mirror.Tests
         [Test]
         public void IsClient()
         {
-            Assert.That(component.isClient, Is.True);
+            Assert.That(component.IsClient, Is.True);
         }
 
         [Test]
@@ -67,7 +67,7 @@ namespace Mirror.Tests
 
             public void OnStartServer()
             {
-                Assert.That(isClient, Is.True);
+                Assert.That(IsClient, Is.True);
                 Assert.That(isLocalPlayer, Is.False);
                 Assert.That(IsServer, Is.True);
                 called = true;

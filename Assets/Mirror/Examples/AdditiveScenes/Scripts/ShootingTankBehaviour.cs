@@ -26,7 +26,7 @@ namespace Mirror.Examples.Additive
             if (IsServer && netIdentity.observers.Count > 0)
                 ShootNearestPlayer();
 
-            if (isClient)
+            if (IsClient)
                 transform.rotation = Quaternion.Slerp(transform.rotation, rotation, turnSpeed);
         }
 

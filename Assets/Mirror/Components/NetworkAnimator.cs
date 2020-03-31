@@ -366,7 +366,7 @@ namespace Mirror
         {
             if (ClientAuthority)
             {
-                if (!isClient)
+                if (!IsClient)
                 {
                     Debug.LogWarning("Tried to set animation in the server for a client-controlled animator");
                     return;
@@ -411,7 +411,7 @@ namespace Mirror
         {
             if (ClientAuthority)
             {
-                if (!isClient)
+                if (!IsClient)
                 {
                     Debug.LogWarning("Tried to reset animation in the server for a client-controlled animator");
                     return;

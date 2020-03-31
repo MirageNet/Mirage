@@ -94,7 +94,7 @@ namespace Mirror.Tests
         {
             manager.server.Spawn(playerGO);
             Assert.That(behavior.IsServer, Is.True);
-            Assert.That(behavior.isClient, Is.False);
+            Assert.That(behavior.IsClient, Is.False);
 
             flags.CallServerFunction();
             flags.CallServerCallbackFunction();
@@ -108,7 +108,7 @@ namespace Mirror.Tests
         {
             manager.server.Spawn(playerGO);
             Assert.That(behavior.IsServer, Is.True);
-            Assert.That(behavior.isClient, Is.False);
+            Assert.That(behavior.IsClient, Is.False);
 
             flags.CallClientFunction();
             flags.CallClientCallbackFunction();
