@@ -82,7 +82,7 @@ namespace Mirror
         /// The unique network Id of this object.
         /// <para>This is assigned at runtime by the network server and will be unique for all objects for that network session.</para>
         /// </summary>
-        public uint netId => netIdentity.netId;
+        public uint netId => netIdentity.NetId;
 
         /// <summary>
         /// The <see cref="NetworkServer">NetworkClient</see> associated to this object.
@@ -504,7 +504,7 @@ namespace Mirror
                 NetworkIdentity identity = newGameObject.GetComponent<NetworkIdentity>();
                 if (identity != null)
                 {
-                    newNetId = identity.netId;
+                    newNetId = identity.NetId;
                     if (newNetId == 0)
                     {
                         Debug.LogWarning("SetSyncVarGameObject GameObject " + newGameObject + " has a zero netId. Maybe it is not spawned yet?");
@@ -528,7 +528,7 @@ namespace Mirror
                 NetworkIdentity identity = newGameObject.GetComponent<NetworkIdentity>();
                 if (identity != null)
                 {
-                    newNetId = identity.netId;
+                    newNetId = identity.NetId;
                     if (newNetId == 0)
                     {
                         Debug.LogWarning("SetSyncVarGameObject GameObject " + newGameObject + " has a zero netId. Maybe it is not spawned yet?");
@@ -574,7 +574,7 @@ namespace Mirror
             uint newNetId = 0;
             if (newIdentity != null)
             {
-                newNetId = newIdentity.netId;
+                newNetId = newIdentity.NetId;
                 if (newNetId == 0)
                 {
                     Debug.LogWarning("SetSyncVarNetworkIdentity NetworkIdentity " + newIdentity + " has a zero netId. Maybe it is not spawned yet?");
@@ -595,7 +595,7 @@ namespace Mirror
             uint newNetId = 0;
             if (newIdentity != null)
             {
-                newNetId = newIdentity.netId;
+                newNetId = newIdentity.NetId;
                 if (newNetId == 0)
                 {
                     Debug.LogWarning("SetSyncVarNetworkIdentity NetworkIdentity " + newIdentity + " has a zero netId. Maybe it is not spawned yet?");

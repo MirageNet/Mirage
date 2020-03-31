@@ -58,12 +58,12 @@ namespace Mirror
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
         /// </summary>
-        public bool IsClient => client != null && client.Active && netId != 0 && !serverOnly;
+        public bool IsClient => client != null && client.Active && NetId != 0 && !serverOnly;
 
         /// <summary>
         /// Returns true if NetworkServer.active and server is not stopped.
         /// </summary>
-        public bool IsServer => server != null && server.active && netId != 0;
+        public bool IsServer => server != null && server.active && NetId != 0;
 
         /// <summary>
         /// Returns true if we're on host mode.
@@ -93,7 +93,7 @@ namespace Mirror
         /// Unique identifier for this particular object instance, used for tracking objects between networked clients and the server.
         /// <para>This is a unique identifier for this particular GameObject instance. Use it to track GameObjects between networked clients and the server.</para>
         /// </summary>
-        public uint netId { get; internal set; }
+        public uint NetId { get; internal set; }
 
         /// <summary>
         /// A unique identifier for NetworkIdentity objects within a scene.
@@ -239,7 +239,7 @@ namespace Mirror
             // do nothing if it already has an owner
             if (connectionToClient != null && conn != connectionToClient)
             {
-                throw new InvalidOperationException($"Object {this} netId={netId} already has an owner. Use RemoveClientAuthority() first");
+                throw new InvalidOperationException($"Object {this} netId={NetId} already has an owner. Use RemoveClientAuthority() first");
             }
 
             // otherwise set the owner connection
@@ -553,7 +553,7 @@ namespace Mirror
             //       check already checks netId. BUT this case here checks only
             //       netId, so it would still check cases where isServer=false
             //       but netId!=0.
-            if (netId != 0)
+            if (NetId != 0)
             {
                 // This object has already been spawned, this method might be called again
                 // if we try to respawn all objects.  This can happen when we add a scene
@@ -561,14 +561,14 @@ namespace Mirror
                 return;
             }
 
-            netId = GetNextNetworkId();
+            NetId = GetNextNetworkId();
             observers = new HashSet<NetworkConnection>();
 
-            if (LogFilter.Debug) Debug.Log("OnStartServer " + this + " NetId:" + netId + " SceneId:" + sceneId);
+            if (LogFilter.Debug) Debug.Log("OnStartServer " + this + " NetId:" + NetId + " SceneId:" + sceneId);
 
             // add to spawned (note: the original EnableIsServer isn't needed
             // because we already set m_isServer=true above)
-            server.spawned[netId] = this;
+            server.spawned[NetId] = this;
 
             OnStartServer.Invoke();
         }
@@ -819,7 +819,7 @@ namespace Mirror
         {
             if (gameObject == null)
             {
-                Debug.LogWarning(invokeType + " [" + functionHash + "] received for deleted object [netId=" + netId + "]");
+                Debug.LogWarning(invokeType + " [" + functionHash + "] received for deleted object [netId=" + NetId + "]");
                 return;
             }
 
@@ -834,12 +834,12 @@ namespace Mirror
                 NetworkBehaviour invokeComponent = NetworkBehaviours[componentIndex];
                 if (!invokeComponent.InvokeHandlerDelegate(functionHash, invokeType, reader))
                 {
-                    Debug.LogError("Found no receiver for incoming " + invokeType + " [" + functionHash + "] on " + gameObject + ",  the server and client should have the same NetworkBehaviour instances [netId=" + netId + "].");
+                    Debug.LogError("Found no receiver for incoming " + invokeType + " [" + functionHash + "] on " + gameObject + ",  the server and client should have the same NetworkBehaviour instances [netId=" + NetId + "].");
                 }
             }
             else
             {
-                Debug.LogWarning("Component [" + componentIndex + "] not found for [netId=" + netId + "]");
+                Debug.LogWarning("Component [" + componentIndex + "] not found for [netId=" + NetId + "]");
             }
         }
 
@@ -1122,7 +1122,7 @@ namespace Mirror
             clientStarted = false;
             reset = false;
 
-            netId = 0;
+            NetId = 0;
             server = null;
             client = null;
             connectionToServer = null;
@@ -1149,7 +1149,7 @@ namespace Mirror
                     if (ownerWritten > 0 || observersWritten > 0)
                     {
                         // populate cached UpdateVarsMessage and send
-                        varsMessage.netId = netId;
+                        varsMessage.netId = NetId;
 
                         // send ownerWriter to owner
                         // (only if we serialized anything for owner)

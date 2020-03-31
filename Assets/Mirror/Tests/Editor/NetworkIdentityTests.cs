@@ -753,21 +753,21 @@ namespace Mirror.Tests
             // modify it a bit
             // creates .observers and generates a netId
             identity.StartServer();
-            uint netId = identity.netId;
+            uint netId = identity.NetId;
             identity.connectionToClient = new NetworkConnectionToClient(1);
             identity.connectionToServer = new NetworkConnectionToServer();
             identity.observers.Add(new NetworkConnectionToClient(2));
 
             // calling reset shouldn't do anything unless it was marked for reset
             identity.Reset();
-            Assert.That(identity.netId, Is.EqualTo(netId));
+            Assert.That(identity.NetId, Is.EqualTo(netId));
             Assert.That(identity.connectionToClient, !Is.Null);
             Assert.That(identity.connectionToServer, !Is.Null);
 
             // mark for reset and reset
             identity.MarkForReset();
             identity.Reset();
-            Assert.That(identity.netId, Is.EqualTo(0));
+            Assert.That(identity.NetId, Is.EqualTo(0));
             Assert.That(identity.connectionToClient, Is.Null);
             Assert.That(identity.connectionToServer, Is.Null);
         }

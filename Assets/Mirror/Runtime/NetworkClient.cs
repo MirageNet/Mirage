@@ -779,7 +779,7 @@ namespace Mirror
             identity.transform.localRotation = msg.rotation;
             identity.transform.localScale = msg.scale;
             identity.HasAuthority = msg.isOwner;
-            identity.netId = msg.netId;
+            identity.NetId = msg.netId;
             identity.server = hostServer;
             identity.client = this;
 
@@ -899,7 +899,7 @@ namespace Mirror
             // paul: Initialize the objects in the same order as they were initialized
             // in the server.   This is important if spawned objects
             // use data from scene objects
-            foreach (NetworkIdentity identity in Spawned.Values.OrderBy(uv => uv.netId))
+            foreach (NetworkIdentity identity in Spawned.Values.OrderBy(uv => uv.NetId))
             {
                 identity.NotifyAuthority();
                 identity.StartClient();

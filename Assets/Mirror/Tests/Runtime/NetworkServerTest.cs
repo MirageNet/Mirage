@@ -471,13 +471,13 @@ namespace Mirror.Tests
             // add an identity with a networkbehaviour to .spawned
             var go = new GameObject();
             NetworkIdentity identity = go.AddComponent<NetworkIdentity>();
-            identity.netId = 42;
+            identity.NetId = 42;
             // for authority check
             //identity.connectionToClient = connection;
             OnStartClientTestNetworkBehaviour comp = go.AddComponent<OnStartClientTestNetworkBehaviour>();
             Assert.That(comp.called, Is.EqualTo(0));
             //connection.identity = identity;
-            server.spawned[identity.netId] = identity;
+            server.spawned[identity.NetId] = identity;
             identity.OnStartClient.AddListener(comp.OnStartClient);
 
             // ActivateHostScene

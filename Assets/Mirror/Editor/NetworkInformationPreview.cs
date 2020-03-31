@@ -251,7 +251,7 @@ namespace Mirror
 
             if (Application.isPlaying)
             {
-                infos.Add(GetString("Network ID", identity.netId.ToString()));
+                infos.Add(GetString("Network ID", identity.NetId.ToString()));
                 infos.Add(GetBoolean("Is Client", identity.IsClient));
                 infos.Add(GetBoolean("Is Server", identity.IsServer));
                 infos.Add(GetBoolean("Has Authority", identity.HasAuthority));

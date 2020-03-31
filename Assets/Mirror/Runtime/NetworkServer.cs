@@ -263,7 +263,7 @@ namespace Mirror
             {
                 if (!identity.IsClient)
                 {
-                    if (LogFilter.Debug) Debug.Log("ActivateHostScene " + identity.netId + " " + identity);
+                    if (LogFilter.Debug) Debug.Log("ActivateHostScene " + identity.NetId + " " + identity);
 
                     identity.StartClient();
                 }
@@ -571,7 +571,7 @@ namespace Mirror
                 //TODO this is different
                 if (identity.gameObject.activeSelf)
                 {
-                    if (LogFilter.Debug) Debug.Log("Sending spawn message for current server objects name='" + identity.name + "' netId=" + identity.netId + " sceneId=" + identity.sceneId);
+                    if (LogFilter.Debug) Debug.Log("Sending spawn message for current server objects name='" + identity.name + "' netId=" + identity.NetId + " sceneId=" + identity.sceneId);
 
                     bool visible = identity.OnCheckObserver(conn);
                     if (visible)
@@ -634,7 +634,7 @@ namespace Mirror
             // set ready if not set yet
             SetClientReady(conn);
 
-            if (LogFilter.Debug) Debug.Log("Adding new playerGameObject object netId: " + identity.netId + " asset ID " + identity.assetId);
+            if (LogFilter.Debug) Debug.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.assetId);
 
             Respawn(identity);
             return true;
@@ -642,7 +642,7 @@ namespace Mirror
 
         void Respawn(NetworkIdentity identity)
         {
-            if (identity.netId == 0)
+            if (identity.NetId == 0)
             {
                 // If the object has not been spawned, then do a full spawn and update observers
                 Spawn(identity.gameObject, identity.connectionToClient);
@@ -696,7 +696,7 @@ namespace Mirror
             // IMPORTANT: do this in AddPlayerForConnection & ReplacePlayerForConnection!
             SpawnObserversForConnection(conn);
 
-            if (LogFilter.Debug) Debug.Log("Replacing playerGameObject object netId: " + player.GetComponent<NetworkIdentity>().netId + " asset ID " + player.GetComponent<NetworkIdentity>().assetId);
+            if (LogFilter.Debug) Debug.Log("Replacing playerGameObject object netId: " + player.GetComponent<NetworkIdentity>().NetId + " asset ID " + player.GetComponent<NetworkIdentity>().assetId);
 
             Respawn(identity);
 
@@ -744,7 +744,7 @@ namespace Mirror
         {
             var msg = new ObjectHideMessage
             {
-                netId = identity.netId
+                netId = identity.NetId
             };
             conn.Send(msg);
         }
@@ -849,7 +849,7 @@ namespace Mirror
 
             identity.StartServer();
 
-            if (LogFilter.Debug) Debug.Log("SpawnObject instance ID " + identity.netId + " asset ID " + identity.assetId);
+            if (LogFilter.Debug) Debug.Log("SpawnObject instance ID " + identity.NetId + " asset ID " + identity.assetId);
 
             identity.RebuildObservers(true);
         }
@@ -860,7 +860,7 @@ namespace Mirror
                 return;
 
             // for easier debugging
-            if (LogFilter.Debug) Debug.Log("Server SendSpawnMessage: name=" + identity.name + " sceneId=" + identity.sceneId.ToString("X") + " netid=" + identity.netId);
+            if (LogFilter.Debug) Debug.Log("Server SendSpawnMessage: name=" + identity.name + " sceneId=" + identity.sceneId.ToString("X") + " netid=" + identity.NetId);
 
             // one writer for owner, one for observers
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
@@ -876,7 +876,7 @@ namespace Mirror
 
                 var msg = new SpawnMessage
                 {
-                    netId = identity.netId,
+                    netId = identity.NetId,
                     isLocalPlayer = conn.identity == identity,
                     isOwner = identity.connectionToClient == conn,
                     sceneId = identity.sceneId,
@@ -999,14 +999,14 @@ namespace Mirror
 
         void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
         {
-            if (LogFilter.Debug) Debug.Log("DestroyObject instance:" + identity.netId);
-            spawned.Remove(identity.netId);
+            if (LogFilter.Debug) Debug.Log("DestroyObject instance:" + identity.NetId);
+            spawned.Remove(identity.NetId);
 
             identity.connectionToClient?.RemoveOwnedObject(identity);
 
             var msg = new ObjectDestroyMessage
             {
-                netId = identity.netId
+                netId = identity.NetId
             };
             SendToObservers(identity, msg);
 
