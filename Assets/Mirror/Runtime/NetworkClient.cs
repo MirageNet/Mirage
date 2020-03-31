@@ -167,6 +167,9 @@ namespace Mirror
 
         void InitializeAuthEvents()
         {
+            if (Transport == null)
+                Transport = GetComponent<AsyncTransport>();
+
             if (authenticator != null)
             {
                 authenticator.OnClientAuthenticated += OnAuthenticated;
@@ -220,7 +223,7 @@ namespace Mirror
         /// </summary>
         public void Disconnect()
         {
-            connection.Disconnect();
+            connection?.Disconnect();
         }
 
         /// <summary>

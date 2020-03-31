@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
@@ -15,15 +16,22 @@ namespace Mirror.Tests
         GameObject gameObject;
         NetworkManager manager;
 
+        IConnection tconn1;
+        IConnection tconn2;
+
 
         [SetUp]
         public void SetupNetworkManager()
         {
+
             gameObject = new GameObject();
+            gameObject.AddComponent<LoopbackTransport>();
             manager = gameObject.AddComponent<NetworkManager>();
             manager.startOnHeadless = false;
             manager.client = gameObject.GetComponent<NetworkClient>();
             manager.server = gameObject.GetComponent<NetworkServer>();
+
+            (tconn1, tconn2) = PipeConnection.CreatePipe();
         }
 
         [TearDown]
@@ -45,28 +53,38 @@ namespace Mirror.Tests
             Assert.That(manager.networkSceneName, Is.Empty);
         }
 
-        [Test]
-        public void StartServerTest()
+        [UnityTest]
+        public IEnumerator StartServerTest()
         {
-            Assert.That(manager.server.active, Is.False);
+            return RunAsync(async () =>
+            {
+                Assert.That(manager.server.active, Is.False);
 
-            manager.StartServer();
+                await manager.StartServer();
 
-            Assert.That(manager.isNetworkActive, Is.True);
-            Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.ServerOnly));
-            Assert.That(manager.server.active, Is.True);
+                Assert.That(manager.isNetworkActive, Is.True);
+                Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.ServerOnly));
+                Assert.That(manager.server.active, Is.True);
 
-            manager.StopServer();
+                manager.StopServer();
+            });
+
         }
 
-        [Test]
-        public void StopServerTest()
+        [UnityTest]
+        public IEnumerator StopServerTest()
         {
-            manager.StartServer();
-            manager.StopServer();
+            return RunAsync(async () =>
+            {
+                await manager.StartServer();
+                manager.StopServer();
 
-            Assert.That(manager.isNetworkActive, Is.False);
-            Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.Offline));
+                // wait for manager to stop
+                await Task.Delay(10);
+
+                Assert.That(manager.isNetworkActive, Is.False);
+                Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.Offline));
+            });
         }
 
         [Test]
@@ -130,14 +148,41 @@ namespace Mirror.Tests
             });
         }
 
-        [Test]
-        public void StopClientTest()
+        [UnityTest]
+        public IEnumerator ConnectionRefusedTest()
         {
-            manager.StartClient("localhost");
-            manager.StopClient();
+            return RunAsync(async () =>
+            {
+                try
+                {
+                    await manager.StartClient("localhost");
+                    Assert.Fail("If server is not available, it should throw exception");
+                }
+                catch (SocketException)
+                {
+                    // Good
+                }
+            });
+        }
 
-            Assert.That(manager.isNetworkActive, Is.False);
-            Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.Offline));
+        [UnityTest]
+        public IEnumerator StopClientTest()
+        {
+            return RunAsync(async () =>
+            {
+                await manager.StartServer();
+
+                await manager.StartClient("localhost");
+
+                manager.StopClient();
+                manager.StopServer();
+
+                // wait until manager shuts down
+                await Task.Delay(1);
+
+                Assert.That(manager.isNetworkActive, Is.False);
+                Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.Offline));
+            });
         }
     }
 }
