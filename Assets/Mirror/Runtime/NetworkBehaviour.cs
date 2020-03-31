@@ -106,7 +106,7 @@ namespace Mirror
 
         public NetworkTime NetworkTime => IsClient ? Client.Time : Server.Time;
 
-        protected ulong syncVarDirtyBits { get; private set; }
+        protected ulong SyncVarDirtyBits { get; private set; }
         ulong syncVarHookGuard;
 
         protected bool getSyncVarHookGuard(ulong dirtyBit)
@@ -649,7 +649,7 @@ namespace Mirror
         /// <param name="dirtyBit">Bit mask to set.</param>
         public void SetDirtyBit(ulong dirtyBit)
         {
-            syncVarDirtyBits |= dirtyBit;
+            SyncVarDirtyBits |= dirtyBit;
         }
 
         /// <summary>
@@ -659,7 +659,7 @@ namespace Mirror
         public void ClearAllDirtyBits()
         {
             lastSyncTime = Time.time;
-            syncVarDirtyBits = 0L;
+            SyncVarDirtyBits = 0L;
 
             // flush all unsynchronized changes in syncobjects
             // note: don't use List.ForEach here, this is a hot path
@@ -690,7 +690,7 @@ namespace Mirror
         {
             if (Time.time - lastSyncTime >= syncInterval)
             {
-                return syncVarDirtyBits != 0L || AnySyncObjectDirty();
+                return SyncVarDirtyBits != 0L || AnySyncObjectDirty();
             }
             return false;
         }
