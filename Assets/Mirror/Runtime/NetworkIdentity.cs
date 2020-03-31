@@ -583,7 +583,7 @@ namespace Mirror
             OnStartClient.Invoke();
         }
 
-        static NetworkIdentity previousLocalPlayer = null;
+        static NetworkIdentity previousLocalPlayer;
         internal void StartLocalPlayer()
         {
             if (previousLocalPlayer == this)
