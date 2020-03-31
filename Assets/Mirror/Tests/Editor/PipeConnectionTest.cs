@@ -36,8 +36,7 @@ namespace Mirror.Tests
             memoryStream.TryGetBuffer(out ArraySegment<byte> receivedData);
             Assert.That(receivedData, Is.EqualTo(new ArraySegment<byte>(expected)));
         }
-
-            
+   
         [UnityTest]
         public IEnumerator TestSendAndReceive()
         {

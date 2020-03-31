@@ -22,20 +22,26 @@ namespace Mirror.AsyncTcp
         {
             buffer.SetLength(0);
             long position = buffer.Position;
+            try
+            { 
+                // read message size
+                if (!await ReadExactlyAsync(stream, buffer, 4))
+                    return false;
 
-            // read message size
-            if (!await ReadExactlyAsync(stream, buffer, 4))
+                // rewind so that we read it
+                buffer.Position = position;
+
+                int length = ReadInt(buffer);
+
+                // now read the message
+                buffer.Position = position;
+
+                return await ReadExactlyAsync(stream, buffer, length);
+            }
+            catch (ObjectDisposedException)
+            {
                 return false;
-
-            // rewind so that we read it
-            buffer.Position = position;
-
-            int length = ReadInt(buffer);
-
-            // now read the message
-            buffer.Position = position;
-
-            return await ReadExactlyAsync(stream, buffer, length);
+            }
         }
 
 
