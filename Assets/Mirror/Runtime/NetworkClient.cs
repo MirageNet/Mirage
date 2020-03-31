@@ -463,10 +463,10 @@ namespace Mirror
             NetworkIdentity identity = prefab.GetComponent<NetworkIdentity>();
             if (identity)
             {
-                identity.assetId = newAssetId;
+                identity.AssetId = newAssetId;
 
-                if (LogFilter.Debug) Debug.Log("Registering prefab '" + prefab.name + "' as asset:" + identity.assetId);
-                prefabs[identity.assetId] = prefab;
+                if (LogFilter.Debug) Debug.Log("Registering prefab '" + prefab.name + "' as asset:" + identity.AssetId);
+                prefabs[identity.AssetId] = prefab;
             }
             else
             {
@@ -486,8 +486,8 @@ namespace Mirror
             NetworkIdentity identity = prefab.GetComponent<NetworkIdentity>();
             if (identity)
             {
-                if (LogFilter.Debug) Debug.Log("Registering prefab '" + prefab.name + "' as asset:" + identity.assetId);
-                prefabs[identity.assetId] = prefab;
+                if (LogFilter.Debug) Debug.Log("Registering prefab '" + prefab.name + "' as asset:" + identity.AssetId);
+                prefabs[identity.AssetId] = prefab;
 
                 NetworkIdentity[] identities = prefab.GetComponentsInChildren<NetworkIdentity>();
                 if (identities.Length > 1)
@@ -536,20 +536,20 @@ namespace Mirror
 
             if (spawnHandler == null || unspawnHandler == null)
             {
-                Debug.LogError("RegisterPrefab custom spawn function null for " + identity.assetId);
+                Debug.LogError("RegisterPrefab custom spawn function null for " + identity.AssetId);
                 return;
             }
 
-            if (identity.assetId == Guid.Empty)
+            if (identity.AssetId == Guid.Empty)
             {
                 Debug.LogError("RegisterPrefab game object " + prefab.name + " has no prefab. Use RegisterSpawnHandler() instead?");
                 return;
             }
 
-            if (LogFilter.Debug) Debug.Log("Registering custom prefab '" + prefab.name + "' as asset:" + identity.assetId + " " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
+            if (LogFilter.Debug) Debug.Log("Registering custom prefab '" + prefab.name + "' as asset:" + identity.AssetId + " " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
 
-            spawnHandlers[identity.assetId] = spawnHandler;
-            unspawnHandlers[identity.assetId] = unspawnHandler;
+            spawnHandlers[identity.AssetId] = spawnHandler;
+            unspawnHandlers[identity.AssetId] = unspawnHandler;
         }
 
         /// <summary>
@@ -564,8 +564,8 @@ namespace Mirror
                 Debug.LogError("Could not unregister '" + prefab.name + "' since it contains no NetworkIdentity component");
                 return;
             }
-            spawnHandlers.Remove(identity.assetId);
-            unspawnHandlers.Remove(identity.assetId);
+            spawnHandlers.Remove(identity.AssetId);
+            unspawnHandlers.Remove(identity.AssetId);
         }
 
         #endregion
@@ -629,7 +629,7 @@ namespace Mirror
 
         void UnSpawn(NetworkIdentity identity)
         {
-            Guid assetId = identity.assetId;
+            Guid assetId = identity.AssetId;
 
             identity.NetworkDestroy();
             if (unspawnHandlers.TryGetValue(assetId, out UnSpawnDelegate handler) && handler != null)
@@ -669,7 +669,7 @@ namespace Mirror
             identity.Reset();
 
             if (msg.assetId != Guid.Empty)
-                identity.assetId = msg.assetId;
+                identity.AssetId = msg.assetId;
 
             if (!identity.gameObject.activeSelf)
             {
@@ -680,10 +680,10 @@ namespace Mirror
             identity.transform.localPosition = msg.position;
             identity.transform.localRotation = msg.rotation;
             identity.transform.localScale = msg.scale;
-            identity.hasAuthority = msg.isOwner;
-            identity.netId = msg.netId;
-            identity.server = hostServer;
-            identity.client = this;
+            identity.HasAuthority = msg.isOwner;
+            identity.NetId = msg.netId;
+            identity.Server = hostServer;
+            identity.Client = this;
 
             if (msg.isLocalPlayer)
                 InternalAddPlayer(identity);
@@ -801,7 +801,7 @@ namespace Mirror
             // paul: Initialize the objects in the same order as they were initialized
             // in the server.   This is important if spawned objects
             // use data from scene objects
-            foreach (NetworkIdentity identity in Spawned.Values.OrderBy(uv => uv.netId))
+            foreach (NetworkIdentity identity in Spawned.Values.OrderBy(uv => uv.NetId))
             {
                 identity.NotifyAuthority();
                 identity.StartClient();
@@ -859,7 +859,7 @@ namespace Mirror
                 if (msg.isLocalPlayer)
                     InternalAddPlayer(localObject);
 
-                localObject.hasAuthority = msg.isOwner;
+                localObject.HasAuthority = msg.isOwner;
                 localObject.NotifyAuthority();
                 localObject.StartClient();
                 localObject.OnSetHostVisibility(true);
@@ -889,7 +889,7 @@ namespace Mirror
             if (Spawned.TryGetValue(msg.netId, out NetworkIdentity identity))
             {
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
-                    identity.HandleRPC(msg.componentIndex, msg.functionHash, networkReader);
+                    identity.HandleRpc(msg.componentIndex, msg.functionHash, networkReader);
             }
         }
 
@@ -913,7 +913,7 @@ namespace Mirror
             if (identity == LocalPlayer)
             {
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
-                identity.connectionToServer = Connection;
+                identity.ConnectionToServer = Connection;
                 identity.StartLocalPlayer();
 
                 if (LogFilter.Debug) Debug.Log("ClientScene.OnOwnerMessage - player=" + identity.name);

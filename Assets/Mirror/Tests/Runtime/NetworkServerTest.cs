@@ -297,13 +297,13 @@ namespace Mirror.Tests
             // add an identity with a networkbehaviour to .spawned
             var go = new GameObject();
             NetworkIdentity identity = go.AddComponent<NetworkIdentity>();
-            identity.netId = 42;
+            identity.NetId = 42;
             // for authority check
             //identity.connectionToClient = connection;
             OnStartClientTestNetworkBehaviour comp = go.AddComponent<OnStartClientTestNetworkBehaviour>();
             Assert.That(comp.called, Is.EqualTo(0));
             //connection.identity = identity;
-            server.spawned[identity.netId] = identity;
+            server.spawned[identity.NetId] = identity;
             identity.OnStartClient.AddListener(comp.OnStartClient);
 
             // ActivateHostScene
@@ -343,7 +343,7 @@ namespace Mirror.Tests
             // GetNetworkIdentity for GO without identity
             // (error log is expected)
             LogAssert.ignoreFailingMessages = true;
-            var result = server.GetNetworkIdentity(goWithout, out NetworkIdentity valueNull);
+            bool result = server.GetNetworkIdentity(goWithout, out NetworkIdentity valueNull);
             Assert.That(result, Is.False);
             Assert.That(valueNull, Is.Null);
             LogAssert.ignoreFailingMessages = false;
@@ -363,7 +363,7 @@ namespace Mirror.Tests
 
             server.HideForConnection(identity, connectionToClient);
 
-            connectionToClient.Received().Send<ObjectHideMessage>(Arg.Is<ObjectHideMessage>(msg => msg.netId == identity.netId));
+            connectionToClient.Received().Send(Arg.Is<ObjectHideMessage>(msg => msg.netId == identity.NetId));
 
             // destroy GO after shutdown, otherwise isServer is true in OnDestroy and it tries to call
             // GameObject.Destroy (but we need DestroyImmediate in Editor)

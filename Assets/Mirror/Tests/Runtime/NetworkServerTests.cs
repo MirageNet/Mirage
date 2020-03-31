@@ -46,7 +46,7 @@ namespace Mirror.Tests
                 };
 
                 identity = new GameObject().AddComponent<NetworkIdentity>();
-                identity.connectionToClient = connectionToClient;
+                identity.ConnectionToClient = connectionToClient;
 
             });
         }
@@ -75,7 +75,7 @@ namespace Mirror.Tests
             gameObject.AddComponent<NetworkIdentity>();
             server.Spawn(gameObject);
 
-            Assert.That(gameObject.GetComponent<NetworkIdentity>().server == server);
+            Assert.That(gameObject.GetComponent<NetworkIdentity>().Server, Is.SameAs(server));
         }
 
         [UnityTest]
