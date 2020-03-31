@@ -391,15 +391,11 @@ namespace Mirror
 
             // subscribe to the server
             if (server != null)
-            {
                 server.Authenticated.AddListener(OnServerAuthenticated);
-            }
 
             // subscribe to the client
             if (client != null)
-            {
                 client.Authenticated.AddListener(OnClientAuthenticated);
-            }
         }
 
         /// <summary>
