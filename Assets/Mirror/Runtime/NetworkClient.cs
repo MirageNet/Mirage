@@ -57,7 +57,7 @@ namespace Mirror
         /// active is true while a client is connecting/connected
         /// (= while the network is active)
         /// </summary>
-        public bool active => connectState == ConnectState.Connecting || connectState == ConnectState.Connected;
+        public bool Active => connectState == ConnectState.Connecting || connectState == ConnectState.Connected;
 
         /// <summary>
         /// This gives the current connection status of the client.
@@ -339,7 +339,7 @@ namespace Mirror
             else
             {
                 // only update things while connected
-                if (active && connectState == ConnectState.Connected)
+                if (Active && connectState == ConnectState.Connected)
                 {
                     Time.UpdateClient(this);
                 }

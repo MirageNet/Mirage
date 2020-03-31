@@ -203,7 +203,7 @@ namespace Mirror
             // this was in Weaver before
             // NOTE: we could remove this later to allow calling Cmds on Server
             //       to avoid Wrapper functions. a lot of people requested this.
-            if (!client.active)
+            if (!client.Active)
             {
                 Debug.LogError("Command Function " + cmdName + " called on server without an active client.");
                 return;

@@ -50,7 +50,7 @@ namespace Mirror
             GUILayout.BeginArea(new Rect(10 + offsetX, 40 + offsetY, 215, 9999));
             if (!manager.client.isConnected && !manager.server.active)
             {
-                if (!manager.client.active)
+                if (!manager.client.Active)
                 {
                     // Server + Client
                     if (Application.platform != RuntimePlatform.WebGLPlayer)

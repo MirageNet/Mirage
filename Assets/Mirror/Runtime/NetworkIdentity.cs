@@ -58,7 +58,7 @@ namespace Mirror
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
         /// </summary>
-        public bool isClient => client != null && client.active && netId != 0 && !serverOnly;
+        public bool isClient => client != null && client.Active && netId != 0 && !serverOnly;
 
         /// <summary>
         /// Returns true if NetworkServer.active and server is not stopped.

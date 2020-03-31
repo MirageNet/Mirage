@@ -567,7 +567,7 @@ namespace Mirror
                     server.SpawnObjects();
                     if (LogFilter.Debug) Debug.Log("Respawned Server objects after additive scene load: " + scene.name);
                 }
-                if (client.active)
+                if (client.Active)
                 {
                     client.PrepareToSpawnSceneObjects();
                     if (LogFilter.Debug) Debug.Log("Rebuild Client spawnableObjects after additive scene load: " + scene.name);
