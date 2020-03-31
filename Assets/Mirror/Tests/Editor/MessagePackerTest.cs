@@ -56,7 +56,7 @@ namespace Mirror.Tests
 
             Assert.Throws<FormatException>(delegate
             {
-               _ = MessagePacker.Unpack<SceneMessage>(data);
+                _ = MessagePacker.Unpack<SceneMessage>(data);
 
             });
         }
@@ -80,7 +80,7 @@ namespace Mirror.Tests
 
         [Test]
         public void UnpackInvalidMessage()
-        { 
+        {
             // try an invalid message
             Assert.Throws<EndOfStreamException>(() =>
             {

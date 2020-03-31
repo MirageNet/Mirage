@@ -152,7 +152,7 @@ namespace Mirror.Tests
             Assert.That(server.connections.Count, Is.EqualTo(1));
         }
 
-        
+
         [Test]
         public void DisconnectMessageHandlerTest()
         {
