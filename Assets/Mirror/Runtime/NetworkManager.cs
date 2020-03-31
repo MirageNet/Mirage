@@ -84,7 +84,7 @@ namespace Mirror
         //    connected yet (no need to connect it before server was fully set up).
         //    in other words, we need this to know which mode we are running in
         //    during FinishLoadScene.
-        public NetworkManagerMode mode { get; private set; }
+        public NetworkManagerMode Mode { get; private set; }
 
         /// <summary>
         /// This is invoked when a host is started.
@@ -201,7 +201,7 @@ namespace Mirror
         /// <returns></returns>
         public void StartServer()
         {
-            mode = NetworkManagerMode.ServerOnly;
+            Mode = NetworkManagerMode.ServerOnly;
 
             // StartServer is inherently ASYNCHRONOUS (=doesn't finish immediately)
             //
@@ -230,7 +230,7 @@ namespace Mirror
         /// </summary>
         public void StartClient(string serverIp)
         {
-            mode = NetworkManagerMode.ClientOnly;
+            Mode = NetworkManagerMode.ClientOnly;
 
             isNetworkActive = true;
 
@@ -251,7 +251,7 @@ namespace Mirror
         /// <param name="uri">location of the server to connect to</param>
         public void StartClient(Uri uri)
         {
-            mode = NetworkManagerMode.ClientOnly;
+            Mode = NetworkManagerMode.ClientOnly;
             isNetworkActive = true;
 
 
@@ -266,7 +266,7 @@ namespace Mirror
         /// </summary>
         public void StartHost()
         {
-            mode = NetworkManagerMode.Host;
+            Mode = NetworkManagerMode.Host;
 
             // StartHost is inherently ASYNCHRONOUS (=doesn't finish immediately)
             //
@@ -382,7 +382,7 @@ namespace Mirror
 
             // set offline mode BEFORE changing scene so that FinishStartScene
             // doesn't think we need initialize anything.
-            mode = NetworkManagerMode.Offline;
+            Mode = NetworkManagerMode.Offline;
         }
 
         /// <summary>
@@ -400,7 +400,7 @@ namespace Mirror
 
             // set offline mode BEFORE changing scene so that FinishStartScene
             // doesn't think we need initialize anything.
-            mode = NetworkManagerMode.Offline;
+            Mode = NetworkManagerMode.Offline;
 
         }
 
@@ -595,17 +595,17 @@ namespace Mirror
             Transport.activeTransport.enabled = true;
 
             // host mode?
-            if (mode == NetworkManagerMode.Host)
+            if (Mode == NetworkManagerMode.Host)
             {
                 FinishLoadSceneHost();
             }
             // server-only mode?
-            else if (mode == NetworkManagerMode.ServerOnly)
+            else if (Mode == NetworkManagerMode.ServerOnly)
             {
                 FinishLoadSceneServerOnly();
             }
             // client-only mode?
-            else if (mode == NetworkManagerMode.ClientOnly)
+            else if (Mode == NetworkManagerMode.ClientOnly)
             {
                 FinishLoadSceneClientOnly();
             }
