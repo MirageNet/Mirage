@@ -114,7 +114,7 @@ namespace Mirror.Tests
         public void HasIdentitysNetId()
         {
             identity.netId = 42;
-            Assert.That(component.netId, Is.EqualTo(42));
+            Assert.That(component.NetId, Is.EqualTo(42));
         }
 
         [Test]

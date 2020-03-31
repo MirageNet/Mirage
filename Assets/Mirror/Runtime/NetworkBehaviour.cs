@@ -82,7 +82,7 @@ namespace Mirror
         /// The unique network Id of this object.
         /// <para>This is assigned at runtime by the network server and will be unique for all objects for that network session.</para>
         /// </summary>
-        public uint netId => netIdentity.netId;
+        public uint NetId => netIdentity.netId;
 
         /// <summary>
         /// The <see cref="NetworkServer">NetworkClient</see> associated to this object.
@@ -223,7 +223,7 @@ namespace Mirror
             // construct the message
             var message = new CommandMessage
             {
-                netId = netId,
+                netId = NetId,
                 componentIndex = ComponentIndex,
                 // type+func so Inventory.RpcUse != Equipment.RpcUse
                 functionHash = GetMethodHash(invokeClass, cmdName),
@@ -267,7 +267,7 @@ namespace Mirror
             // construct the message
             var message = new RpcMessage
             {
-                netId = netId,
+                netId = NetId,
                 componentIndex = ComponentIndex,
                 // type+func so Inventory.RpcUse != Equipment.RpcUse
                 functionHash = GetMethodHash(invokeClass, rpcName),
@@ -308,7 +308,7 @@ namespace Mirror
             // construct the message
             var message = new RpcMessage
             {
-                netId = netId,
+                netId = NetId,
                 componentIndex = ComponentIndex,
                 // type+func so Inventory.RpcUse != Equipment.RpcUse
                 functionHash = GetMethodHash(invokeClass, rpcName),
@@ -345,7 +345,7 @@ namespace Mirror
             // construct the message
             var message = new SyncEventMessage
             {
-                netId = netId,
+                netId = NetId,
                 componentIndex = ComponentIndex,
                 // type+func so Inventory.RpcUse != Equipment.RpcUse
                 functionHash = GetMethodHash(invokeClass, eventName),
