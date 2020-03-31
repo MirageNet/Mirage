@@ -58,7 +58,7 @@ namespace Mirror
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
         /// </summary>
-        public bool IsClient => client != null && client.Active && NetId != 0 && !serverOnly;
+        public bool IsClient => Client != null && Client.Active && NetId != 0 && !serverOnly;
 
         /// <summary>
         /// Returns true if NetworkServer.active and server is not stopped.
@@ -74,7 +74,7 @@ namespace Mirror
         /// This returns true if this object is the one that represents the player on the local machine.
         /// <para>This is set when the server has spawned an object for this particular client.</para>
         /// </summary>
-        public bool IsLocalPlayer => client != null && client.LocalPlayer == this;
+        public bool IsLocalPlayer => Client != null && Client.LocalPlayer == this;
 
         /// <summary>
         /// This returns true if this object is the authoritative player object on the client.
@@ -122,7 +122,7 @@ namespace Mirror
         /// <summary>
         /// The NetworkClient associated with this NetworkIdentity.
         /// </summary>
-        public NetworkClient client { get; internal set; }
+        public NetworkClient Client { get; internal set; }
 
         NetworkConnectionToClient _connectionToClient;
 
@@ -797,7 +797,7 @@ namespace Mirror
         {
             // hack needed so that we can deserialize gameobjects and NI
 
-            NetworkClient.Current = client;
+            NetworkClient.Current = Client;
             // read component dirty mask
             ulong dirtyComponentsMask = reader.ReadPackedUInt64();
 
@@ -825,7 +825,7 @@ namespace Mirror
 
             // hack sets the current client and server so that we can deserialize
             // gameobjects and network identities in the reader
-            NetworkClient.Current = client;
+            NetworkClient.Current = Client;
             NetworkServer.Current = Server;
 
             // find the right component to invoke the function on
@@ -1124,7 +1124,7 @@ namespace Mirror
 
             NetId = 0;
             Server = null;
-            client = null;
+            Client = null;
             ConnectionToServer = null;
             connectionToClient = null;
             networkBehavioursCache = null;

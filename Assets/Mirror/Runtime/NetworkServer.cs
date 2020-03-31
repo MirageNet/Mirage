@@ -619,7 +619,7 @@ namespace Mirror
             // set server to the NetworkIdentity
             identity.Server = this;
 
-            identity.client = this.localClient;
+            identity.Client = this.localClient;
 
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
             identity.SetClientOwner(conn);
@@ -675,7 +675,7 @@ namespace Mirror
             NetworkIdentity previousPlayer = conn.identity;
 
             conn.identity = identity;
-            identity.client = client;
+            identity.Client = client;
 
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
             identity.SetClientOwner(conn);
@@ -840,7 +840,7 @@ namespace Mirror
             identity.Reset();
             identity.connectionToClient = (NetworkConnectionToClient)ownerConnection;
             identity.Server = this;
-            identity.client = localClient;
+            identity.Client = localClient;
 
             // special case to make sure hasAuthority is set
             // on start server in host mode

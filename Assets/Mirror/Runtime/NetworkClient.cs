@@ -781,7 +781,7 @@ namespace Mirror
             identity.HasAuthority = msg.isOwner;
             identity.NetId = msg.netId;
             identity.Server = hostServer;
-            identity.client = this;
+            identity.Client = this;
 
             if (msg.isLocalPlayer)
                 InternalAddPlayer(identity);
