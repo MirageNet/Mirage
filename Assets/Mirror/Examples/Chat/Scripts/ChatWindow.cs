@@ -18,7 +18,7 @@ namespace Mirror.Examples.Chat
 
         private void OnPlayerMessage(Player player, string message)
         {
-            string prettyMessage = player.isLocalPlayer ?
+            string prettyMessage = player.IsLocalPlayer ?
                 $"<color=red>{player.playerName}: </color> {message}" :
                 $"<color=blue>{player.playerName}: </color> {message}";
             AppendMessage(prettyMessage);
@@ -32,7 +32,7 @@ namespace Mirror.Examples.Chat
                 return;
 
             // get our player
-            Player player = client.Connection.identity.GetComponent<Player>();
+            Player player = client.Connection.Identity.GetComponent<Player>();
 
             // send a message
             player.CmdSend(chatMessage.text.Trim());

@@ -95,8 +95,8 @@ namespace Mirror.Tests
         public void CanCallServerFunctionAsServer()
         {
             manager.server.Spawn(playerGO);
-            Assert.That(behavior.isServer, Is.True);
-            Assert.That(behavior.isClient, Is.False);
+            Assert.That(behavior.IsServer, Is.True);
+            Assert.That(behavior.IsClient, Is.False);
 
             flags.CallServerFunction();
             flags.CallServerCallbackFunction();
@@ -109,8 +109,8 @@ namespace Mirror.Tests
         public void CannotCallClientFunctionAsServer()
         {
             manager.server.Spawn(playerGO);
-            Assert.That(behavior.isServer, Is.True);
-            Assert.That(behavior.isClient, Is.False);
+            Assert.That(behavior.IsServer, Is.True);
+            Assert.That(behavior.IsClient, Is.False);
 
             flags.CallClientFunction();
             flags.CallClientCallbackFunction();
@@ -126,8 +126,8 @@ namespace Mirror.Tests
         {
             SetupNetworkClient();
 
-            Assert.That(behavior2.isServer, Is.False);
-            Assert.That(behavior2.isClient, Is.True);
+            Assert.That(behavior2.IsServer, Is.False);
+            Assert.That(behavior2.IsClient, Is.True);
 
             flags.CallClientFunction();
             flags.CallClientCallbackFunction();
@@ -143,8 +143,8 @@ namespace Mirror.Tests
         {
             SetupNetworkClient();
 
-            Assert.That(behavior2.isServer, Is.False);
-            Assert.That(behavior2.isClient, Is.True);
+            Assert.That(behavior2.IsServer, Is.False);
+            Assert.That(behavior2.IsClient, Is.True);
 
             flags.CallServerFunction();
             flags.CallServerCallbackFunction();

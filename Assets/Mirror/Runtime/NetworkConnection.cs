@@ -72,7 +72,7 @@ namespace Mirror
         /// <summary>
         /// The NetworkIdentity for this connection.
         /// </summary>
-        public NetworkIdentity identity { get; internal set; }
+        public NetworkIdentity Identity { get; internal set; }
 
         /// <summary>
         /// A list of the NetworkIdentity objects owned by this connection. This list is read-only.
@@ -417,7 +417,7 @@ namespace Mirror
             {
                 if (netIdentity != null)
                 {
-                    identity.server.Destroy(netIdentity.gameObject);
+                    Identity.server.Destroy(netIdentity.gameObject);
                 }
             }
 

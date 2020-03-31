@@ -76,7 +76,7 @@ namespace Mirror
         /// <summary>
         /// headless mode detection
         /// </summary>
-        public static bool isHeadless => SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null;
+        public static bool IsHeadless => SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null;
 
         /// <summary>
         /// This is invoked when a host is started.
@@ -153,7 +153,7 @@ namespace Mirror
             // some transports might not be ready until Start.
             //
             // (tick rate is applied in StartServer!)
-            if (isHeadless && startOnHeadless)
+            if (IsHeadless && startOnHeadless)
             {
                 _ = StartServer();
             }
@@ -642,7 +642,7 @@ namespace Mirror
             // proceed with the login handshake by calling OnServerConnect
             if (!string.IsNullOrEmpty(networkSceneName))
             {
-                var msg = new SceneMessage() { sceneName = networkSceneName };
+                var msg = new SceneMessage { sceneName = networkSceneName };
                 conn.Send(msg);
             }
 
@@ -659,10 +659,10 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerRemovePlayerMessageInternal");
 
-            if (conn.identity != null)
+            if (conn.Identity != null)
             {
-                OnServerRemovePlayer(conn, conn.identity);
-                conn.identity = null;
+                OnServerRemovePlayer(conn, conn.Identity);
+                conn.Identity = null;
             }
         }
 
@@ -727,7 +727,7 @@ namespace Mirror
         /// <param name="conn">Connection from client.</param>
         public virtual void OnServerReady(NetworkConnection conn)
         {
-            if (conn.identity == null)
+            if (conn.Identity == null)
             {
                 // this is now allowed (was not for a while)
                 if (LogFilter.Debug) Debug.Log("Ready with no player object");
