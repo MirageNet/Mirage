@@ -1082,7 +1082,7 @@ namespace Mirror
                 throw new InvalidOperationException("RemoveClientAuthority can only be called on the server for spawned objects");
             }
 
-            if (ConnectionToClient?.identity == this)
+            if (ConnectionToClient?.Identity == this)
             {
                 throw new InvalidOperationException("RemoveClientAuthority cannot remove authority for a player object");
             }
