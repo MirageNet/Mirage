@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Mirror.AsyncTcp;
-using Mirror.Tcp;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Rendering;
@@ -65,8 +64,7 @@ namespace Mirror
         /// True if the server or client is started and running
         /// <para>This is set True in StartServer / StartClient, and set False in StopServer / StopClient</para>
         /// </summary>
-        [NonSerialized]
-        public bool isNetworkActive;
+        public bool isNetworkActive => server.active || client.active;
 
         /// <summary>
         /// This is true if the client loaded a new scene when connecting to the server.
@@ -79,14 +77,6 @@ namespace Mirror
         /// headless mode detection
         /// </summary>
         public static bool isHeadless => SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null;
-
-        // helper enum to know if we started the networkmanager as server/client/host.
-        // -> this is necessary because when StartHost changes server scene to
-        //    online scene, FinishLoadScene is called and the host client isn't
-        //    connected yet (no need to connect it before server was fully set up).
-        //    in other words, we need this to know which mode we are running in
-        //    during FinishLoadScene.
-        public NetworkManagerMode mode { get; private set; }
 
         /// <summary>
         /// This is invoked when a host is started.
@@ -192,8 +182,6 @@ namespace Mirror
 
             // start listening to network connections
             await server.ListenAsync();
-
-            isNetworkActive = true;
         }
 
         /// <summary>
@@ -203,8 +191,6 @@ namespace Mirror
         /// <returns></returns>
         public async Task StartServer()
         {
-            mode = NetworkManagerMode.ServerOnly;
-
             // StartServer is inherently ASYNCHRONOUS (=doesn't finish immediately)
             //
             // Here is what it does:
@@ -232,13 +218,9 @@ namespace Mirror
         /// </summary>
         public Task StartClient(string serverIp)
         {
-            mode = NetworkManagerMode.ClientOnly;
-
-            isNetworkActive = true;
-
             if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + serverIp);
 
-            UriBuilder builder = new UriBuilder()
+            UriBuilder builder = new UriBuilder
             {
                 Host = serverIp,
                 Scheme = "tcp4",
@@ -254,10 +236,6 @@ namespace Mirror
         /// <param name="uri">location of the server to connect to</param>
         public void StartClient(Uri uri)
         {
-            mode = NetworkManagerMode.ClientOnly;
-            isNetworkActive = true;
-
-
             if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + uri);
 
             _ = client.ConnectAsync(uri);
@@ -269,8 +247,6 @@ namespace Mirror
         /// </summary>
         public async Task StartHost()
         {
-            mode = NetworkManagerMode.Host;
-
             // StartHost is inherently ASYNCHRONOUS (=doesn't finish immediately)
             //
             // Here is what it does:
@@ -440,28 +416,13 @@ namespace Mirror
             if (server != null)
             {
                 server.Authenticated.AddListener(OnServerAuthenticated);
-                server.Stopped.AddListener(OnServerStopped);
             }
-
 
             // subscribe to the client
             if (client != null)
             {
                 client.Authenticated.AddListener(OnClientAuthenticated);
-                client.Disconnected.AddListener(OnClientDisconnected);
             }
-        }
-
-        private void OnClientDisconnected()
-        {
-            isNetworkActive = false;
-            mode = NetworkManagerMode.Offline;
-        }
-
-        private void OnServerStopped()
-        {
-            isNetworkActive = false;
-            mode = NetworkManagerMode.Offline;
         }
 
         /// <summary>
@@ -610,17 +571,17 @@ namespace Mirror
             // process queued messages that we received while loading the scene
             if (LogFilter.Debug) Debug.Log("FinishLoadScene: resuming handlers after scene was loading.");
             // host mode?
-            if (mode == NetworkManagerMode.Host)
+            if (client.isLocalClient)
             {
                 FinishLoadSceneHost();
             }
             // server-only mode?
-            else if (mode == NetworkManagerMode.ServerOnly)
+            else if (server.active)
             {
                 FinishLoadSceneServerOnly();
             }
             // client-only mode?
-            else if (mode == NetworkManagerMode.ClientOnly)
+            else if (client.active)
             {
                 FinishLoadSceneClientOnly();
             }

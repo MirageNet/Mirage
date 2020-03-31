@@ -63,7 +63,6 @@ namespace Mirror.Tests
                 await manager.StartServer();
 
                 Assert.That(manager.isNetworkActive, Is.True);
-                Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.ServerOnly));
                 Assert.That(manager.server.active, Is.True);
 
                 manager.StopServer();
@@ -86,7 +85,6 @@ namespace Mirror.Tests
                 await Task.Delay(1);
 
                 Assert.That(manager.isNetworkActive, Is.False);
-                Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.Offline));
             });
         }
 
@@ -96,7 +94,6 @@ namespace Mirror.Tests
             manager.StartClient("localhost");
 
             Assert.That(manager.isNetworkActive, Is.True);
-            Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.ClientOnly));
 
             manager.StopClient();
         }
@@ -184,7 +181,6 @@ namespace Mirror.Tests
                 await Task.Delay(1);
 
                 Assert.That(manager.isNetworkActive, Is.False);
-                Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.Offline));
             });
         }
     }

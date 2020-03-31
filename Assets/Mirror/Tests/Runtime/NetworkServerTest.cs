@@ -316,31 +316,6 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void ReadyMessageSetsClientReadyTest()
-        {
-            // add connection
-            (_, NetworkConnectionToClient connection) = PipedConnections();
-            server.AddConnection(connection);
-
-            // set as authenticated, otherwise readymessage is rejected
-            connection.isAuthenticated = true;
-
-            // serialize a ready message into an arraysegment
-            var message = new ReadyMessage();
-            var writer = new NetworkWriter();
-            MessagePacker.Pack(message, writer);
-            var segment = writer.ToArraySegment();
-
-            // call transport.OnDataReceived with the message
-            // -> calls server.OnClientReadyMessage
-            //    -> calls SetClientReady(conn)
-            //Transport.activeTransport.OnServerDataReceived.Invoke(0, segment, 0);
-
-            // ready?
-            Assert.That(connection.isReady, Is.True);
-        }
-
-        [Test]
         public void ActivateHostSceneCallsOnStartClient()
         {
             // add an identity with a networkbehaviour to .spawned
@@ -389,64 +364,6 @@ namespace Mirror.Tests
 
             // was it send to and handled by the connection?
             Assert.That(called, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void RegisterUnregisterClearHandlerTest()
-        {
-            // add a connection
-            var connection = new NetworkConnectionToClient(tconn42);
-            server.AddConnection(connection);
-
-            // RegisterHandler(conn, msg) variant
-            int variant1Called = 0;
-            connection.RegisterHandler<NetworkConnectionToClient, TestMessage>((conn, msg) => { ++variant1Called; }, false);
-
-            // RegisterHandler(msg) variant
-            int variant2Called = 0;
-            connection.RegisterHandler<WovenTestMessage>(msg => { ++variant2Called; }, false);
-
-            // serialize first message, send it to server, check if it was handled
-            var writer = new NetworkWriter();
-            MessagePacker.Pack(new TestMessage(), writer);
-            //Transport.activeTransport.OnServerDataReceived.Invoke(42, writer.ToArraySegment(), 0);
-            Assert.That(variant1Called, Is.EqualTo(1));
-
-            // serialize second message, send it to server, check if it was handled
-            writer = new NetworkWriter();
-            var wovenMessage = new WovenTestMessage
-            {
-                IntValue = 1,
-                DoubleValue = 1.0,
-                StringValue = "hello"
-            };
-
-            MessagePacker.Pack(wovenMessage, writer);
-            //Transport.activeTransport.OnServerDataReceived.Invoke(42, writer.ToArraySegment(), 0);
-            Assert.That(variant2Called, Is.EqualTo(1));
-
-            // unregister first handler, send, should fail
-            connection.UnregisterHandler<TestMessage>();
-            writer = new NetworkWriter();
-            MessagePacker.Pack(new TestMessage(), writer);
-            // log error messages are expected
-            LogAssert.ignoreFailingMessages = true;
-            //Transport.activeTransport.OnServerDataReceived.Invoke(42, writer.ToArraySegment(), 0);
-            LogAssert.ignoreFailingMessages = false;
-            // still 1, not 2
-            Assert.That(variant1Called, Is.EqualTo(1));
-
-            // unregister second handler via ClearHandlers to test that one too. send, should fail
-            connection.ClearHandlers();
-            // (only add this one to avoid disconnect error)
-            writer = new NetworkWriter();
-            MessagePacker.Pack(new TestMessage(), writer);
-            // log error messages are expected
-            LogAssert.ignoreFailingMessages = true;
-            //Transport.activeTransport.OnServerDataReceived.Invoke(42, writer.ToArraySegment(), 0);
-            LogAssert.ignoreFailingMessages = false;
-            // still 1, not 2
-            Assert.That(variant2Called, Is.EqualTo(1));
         }
 
         [Test]
