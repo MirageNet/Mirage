@@ -64,7 +64,7 @@ namespace Mirror
         /// True if the server or client is started and running
         /// <para>This is set True in StartServer / StartClient, and set False in StopServer / StopClient</para>
         /// </summary>
-        public bool isNetworkActive => server.active || client.active;
+        public bool IsNetworkActive => server.active || client.active;
 
         /// <summary>
         /// This is true if the client loaded a new scene when connecting to the server.

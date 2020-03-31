@@ -260,30 +260,6 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void OnDataReceivedInvalidConnectionIdTest()
-        {
-            // add one custom message handler
-            bool wasReceived = false;
-            NetworkConnection connectionReceived = null;
-
-            // serialize a test message into an arraysegment
-            var testMessage = new TestMessage { IntValue = 13, DoubleValue = 14, StringValue = "15" };
-            var writer = new NetworkWriter();
-            MessagePacker.Pack(testMessage, writer);
-            var segment = writer.ToArraySegment();
-
-            // call transport.OnDataReceived with an invalid connectionId
-            // an error log is expected.
-            LogAssert.ignoreFailingMessages = true;
-            //Transport.activeTransport.OnServerDataReceived.Invoke(42, segment, 0);
-            LogAssert.ignoreFailingMessages = false;
-
-            // message handler should never be called
-            Assert.That(wasReceived, Is.False);
-            Assert.That(connectionReceived, Is.Null);
-        }
-
-        [Test]
         public void SetClientReadyAndNotReadyTest()
         {
             (_, NetworkConnectionToClient connection) = PipedConnections();

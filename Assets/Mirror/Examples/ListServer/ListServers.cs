@@ -146,9 +146,9 @@ namespace Mirror.Examples.ListServer
         void Tick()
         {
 
-#if !UNITY_WEBGL 
+#if !UNITY_WEBGL
             // Ping isn't known in WebGL builds
-            
+
             // receive client data from listen
             // connected yet?
             if (clientToListenConnection != null)
@@ -187,7 +187,7 @@ namespace Mirror.Examples.ListServer
         void OnUI()
         {
             // only show while client not connected and server not started
-            if (!manager.isNetworkActive || IsConnecting())
+            if (!manager.IsNetworkActive || IsConnecting())
             {
                 mainPanel.SetActive(true);
 
