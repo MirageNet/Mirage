@@ -120,8 +120,8 @@ namespace Mirror.Tests
         [Test]
         public void HasIdentitysConnectionToServer()
         {
-            (identity.connectionToServer, _) = ULocalConnectionToClient.CreateLocalConnections();
-            Assert.That(component.connectionToServer, Is.EqualTo(identity.connectionToServer));
+            (identity.ConnectionToServer, _) = ULocalConnectionToClient.CreateLocalConnections();
+            Assert.That(component.connectionToServer, Is.EqualTo(identity.ConnectionToServer));
         }
 
         [Test]

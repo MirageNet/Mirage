@@ -97,7 +97,7 @@ namespace Mirror
         /// <summary>
         /// The <see cref="NetworkConnection">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
         /// </summary>
-        public NetworkConnection connectionToServer => netIdentity.connectionToServer;
+        public NetworkConnection connectionToServer => netIdentity.ConnectionToServer;
 
         /// <summary>
         /// The <see cref="NetworkConnection">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.

@@ -117,7 +117,7 @@ namespace Mirror
         /// <summary>
         /// The NetworkConnection associated with this NetworkIdentity. This is only valid for player objects on a local client.
         /// </summary>
-        public NetworkConnection connectionToServer { get; internal set; }
+        public NetworkConnection ConnectionToServer { get; internal set; }
 
         /// <summary>
         /// The NetworkClient associated with this NetworkIdentity.
@@ -1125,7 +1125,7 @@ namespace Mirror
             NetId = 0;
             Server = null;
             client = null;
-            connectionToServer = null;
+            ConnectionToServer = null;
             connectionToClient = null;
             networkBehavioursCache = null;
 
