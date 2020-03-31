@@ -49,7 +49,7 @@ namespace Mirror
         /// <summary>
         /// NetworkIdentity of the localPlayer
         /// </summary>
-        public NetworkIdentity localPlayer { get; private set; }
+        public NetworkIdentity LocalPlayer { get; private set; }
 
         internal ConnectState connectState = ConnectState.None;
 
@@ -424,7 +424,7 @@ namespace Mirror
                 Destroy(Connection.identity.gameObject);
 
                 Connection.identity = null;
-                localPlayer = null;
+                LocalPlayer = null;
 
                 return true;
             }
@@ -471,7 +471,7 @@ namespace Mirror
 
             // NOTE: It can be "normal" when changing scenes for the player to be destroyed and recreated.
             // But, the player structures are not cleaned up, we'll just replace the old player
-            localPlayer = identity;
+            LocalPlayer = identity;
 
             if (Connection != null)
             {
@@ -1008,7 +1008,7 @@ namespace Mirror
 
         void CheckForLocalPlayer(NetworkIdentity identity)
         {
-            if (identity == localPlayer)
+            if (identity == LocalPlayer)
             {
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
                 identity.connectionToServer = Connection;
