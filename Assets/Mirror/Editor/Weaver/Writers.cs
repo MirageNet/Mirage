@@ -123,7 +123,7 @@ namespace Mirror.Weaver
                 functionName += "None";
             }
             // create new writer for this type
-            MethodDefinition writerFunc = new MethodDefinition(functionName,
+            var writerFunc = new MethodDefinition(functionName,
                     MethodAttributes.Public |
                     MethodAttributes.Static |
                     MethodAttributes.HideBySig,
@@ -190,7 +190,7 @@ namespace Mirror.Weaver
             }
 
             // create new writer for this type
-            MethodDefinition writerFunc = new MethodDefinition(functionName,
+            var writerFunc = new MethodDefinition(functionName,
                     MethodAttributes.Public |
                     MethodAttributes.Static |
                     MethodAttributes.HideBySig,
@@ -267,7 +267,7 @@ namespace Mirror.Weaver
 
         static MethodDefinition GenerateArraySegmentWriteFunc(TypeReference variable, int recursionCount)
         {
-            GenericInstanceType genericInstance = (GenericInstanceType)variable;
+            var genericInstance = (GenericInstanceType)variable;
             TypeReference elementType = genericInstance.GenericArguments[0];
             MethodReference elementWriteFunc = GetWriteFunc(elementType, recursionCount + 1);
 
@@ -287,7 +287,7 @@ namespace Mirror.Weaver
             }
 
             // create new writer for this type
-            MethodDefinition writerFunc = new MethodDefinition(functionName,
+            var writerFunc = new MethodDefinition(functionName,
                     MethodAttributes.Public |
                     MethodAttributes.Static |
                     MethodAttributes.HideBySig,

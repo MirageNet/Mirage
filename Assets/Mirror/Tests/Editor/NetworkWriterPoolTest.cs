@@ -41,7 +41,7 @@ namespace Mirror.Tests
             NetworkWriterPool.Capacity = 5;
 
             const int testWriterCount = 10;
-            PooledNetworkWriter[] writers = new PooledNetworkWriter[testWriterCount];
+            var writers = new PooledNetworkWriter[testWriterCount];
 
             for (int i = 0; i < testWriterCount; i++)
             {
