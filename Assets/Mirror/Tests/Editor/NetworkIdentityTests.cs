@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 using UnityEngine.Events;
-using Mirror.AsyncTcp;
 
 using static Mirror.Tests.LocalConnections;
 
@@ -776,69 +775,6 @@ namespace Mirror.Tests
             Assert.That(identity.netId, Is.EqualTo(0));
             Assert.That(identity.connectionToClient, Is.Null);
             Assert.That(identity.connectionToServer, Is.Null);
-        }
-
-
-        [Test]
-        public void ServerUpdate()
-        {
-            // add components
-            SerializeTest1NetworkBehaviour compA = gameObject.AddComponent<SerializeTest1NetworkBehaviour>();
-            // test value
-            compA.value = 1337;
-            // set syncInterval so IsDirty passes the interval check
-            compA.syncInterval = 0;
-            // one needs to sync to owner
-            compA.syncMode = SyncMode.Owner;
-            SerializeTest2NetworkBehaviour compB = gameObject.AddComponent<SerializeTest2NetworkBehaviour>();
-            // test value
-            compB.value = "test";
-            // set syncInterval so IsDirty passes the interval check
-            compB.syncInterval = 0;
-            // one needs to sync to owner
-            compB.syncMode = SyncMode.Observers;
-
-            // call OnStartServer once so observers are created
-            identity.StartServer();
-
-            // set it dirty
-            compA.SetDirtyBit(ulong.MaxValue);
-            compB.SetDirtyBit(ulong.MaxValue);
-            Assert.That(compA.IsDirty(), Is.True);
-            Assert.That(compB.IsDirty(), Is.True);
-
-            // calling update without observers should clear all dirty bits.
-            // it would be spawned on new observers anyway.
-            identity.ServerUpdate();
-            Assert.That(compA.IsDirty(), Is.False);
-            Assert.That(compB.IsDirty(), Is.False);
-
-            (NetworkConnectionToServer connectionToServer, NetworkConnectionToClient owner)
-                = PipedConnections(true);
-            owner.isReady = true;
-            int ownerCalled = 0;
-            connectionToServer.RegisterHandler<UpdateVarsMessage>(msg => ++ownerCalled);
-            identity.connectionToClient = owner;
-
-            // add an observer connection that will receive the updates
-            (NetworkConnectionToServer connectionToServer2, NetworkConnectionToClient observer)
-                = PipedConnections(true);
-            observer.isReady = true;
-            int observerCalled = 0;
-            connectionToServer2.RegisterHandler<UpdateVarsMessage>(msg => ++observerCalled);
-            identity.observers.Add(observer);
-
-            // set components dirty again
-            compA.SetDirtyBit(ulong.MaxValue);
-            compB.SetDirtyBit(ulong.MaxValue);
-
-            // calling update should serialize all components and send them to
-            // owner/observers
-            identity.ServerUpdate();
-
-            // was it received on the clients?
-            Assert.That(ownerCalled, Is.EqualTo(1));
-            Assert.That(observerCalled, Is.EqualTo(1));
         }
 
         [Test]

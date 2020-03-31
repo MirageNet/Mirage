@@ -213,8 +213,8 @@ namespace Mirror
             if (authenticator != null)
                 authenticator.OnServerAuthenticated -= OnAuthenticated;
 
-            initialized = false;
             Stopped.Invoke();
+            initialized = false;
             active = false;
         }
 

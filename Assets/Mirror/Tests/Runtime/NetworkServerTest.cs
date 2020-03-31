@@ -1,5 +1,4 @@
 using System.Collections;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
@@ -10,6 +9,7 @@ using UnityEngine.TestTools;
 
 using static Mirror.Tests.AsyncUtil;
 using static Mirror.Tests.LocalConnections;
+using Object = UnityEngine.Object;
 
 namespace Mirror.Tests
 {
@@ -128,11 +128,13 @@ namespace Mirror.Tests
             Object.DestroyImmediate(serverGO);
         }
 
-        [Test]
-        public void IsActiveTest()
+        [UnityTest]
+        public IEnumerator DisconnectIsActiveTest()
         {
             Assert.That(server.active, Is.True);
             server.Disconnect();
+
+            yield return null;
             Assert.That(server.active, Is.False);
         }
 
@@ -552,6 +554,7 @@ namespace Mirror.Tests
             // set a client handler
             int called = 0;
             connectionToServer.RegisterHandler<SpawnMessage>(msg => ++called);
+            
             server.AddConnection(connection);
 
             // create a gameobject and networkidentity and some unique values
@@ -578,22 +581,15 @@ namespace Mirror.Tests
         public void HideForConnection()
         {
             // add connection
-            (NetworkConnectionToServer connectionToServer, NetworkConnectionToClient connection) = PipedConnections(true);
-            connection.isReady = true;
-            // set a client handler
-            int called = 0;
-            connectionToServer.RegisterHandler<ObjectHideMessage>(msg => ++called);
-            server.AddConnection(connection);
 
-            // create a gameobject and networkidentity
+            NetworkConnectionToClient connectionToClient = Substitute.For<NetworkConnectionToClient>((IConnection) null);
+
             NetworkIdentity identity = new GameObject().AddComponent<NetworkIdentity>();
-            identity.connectionToClient = connection;
 
-            // call HideForConnection
-            server.HideForConnection(identity, connection);
+            server.HideForConnection(identity, connectionToClient);
 
-            // was it sent to and handled by the connection?
-            Assert.That(called, Is.EqualTo(1));
+            connectionToClient.Received().Send<ObjectHideMessage>(Arg.Is<ObjectHideMessage>(msg => msg.netId == identity.netId));
+
             // destroy GO after shutdown, otherwise isServer is true in OnDestroy and it tries to call
             // GameObject.Destroy (but we need DestroyImmediate in Editor)
             Object.DestroyImmediate(identity.gameObject);
@@ -756,8 +752,6 @@ namespace Mirror.Tests
 
             // wait for messages to get dispatched
             yield return null;
-
-            transport.AcceptCompletionSource.SetResult(null);
 
             // state cleared?
             Assert.That(server.connections, Is.Empty);

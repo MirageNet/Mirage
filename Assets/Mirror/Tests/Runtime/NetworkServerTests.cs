@@ -43,17 +43,6 @@ namespace Mirror.Tests
             Assert.That(gameObject.GetComponent<NetworkIdentity>().server == testServer);
         }
 
-        [UnityTest]
-        public IEnumerator ShutdownTest()
-        {
-            testServer.Disconnect();
-
-            // the transport return null when disconnected
-            transport.AcceptCompletionSource.SetResult(null);
-            yield return null;
-
-            Assert.That(testServer.active, Is.False);
-        }
 
         [TearDown]
         public void ShutdownNetworkServer()
