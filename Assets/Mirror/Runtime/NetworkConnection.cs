@@ -104,7 +104,7 @@ namespace Mirror
         /// Creates a new NetworkConnection with the specified address and connectionId
         /// </summary>
         /// <param name="networkConnectionId"></param>
-        internal NetworkConnection(IConnection connection)
+        protected NetworkConnection(IConnection connection)
         {
             this.connection = connection;
         }
@@ -275,10 +275,10 @@ namespace Mirror
                 var segment = writer.ToArraySegment();
                 int count = 0;
 
-                foreach (NetworkConnection connection in connections)
+                foreach (NetworkConnection conn in connections)
                 {
                     // send to all connections, but don't wait for them
-                    _ = connection.SendAsync(segment);
+                    _ = conn.SendAsync(segment);
                     count++;
                 }
 

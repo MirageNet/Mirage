@@ -48,7 +48,7 @@ namespace Mirror.Tests
             Assert.That(manager.showDebugMessages, Is.False);
             Assert.That(manager.serverTickRate, Is.EqualTo(30));
             Assert.That(manager.server.MaxConnections, Is.EqualTo(4));
-            Assert.That(manager.isNetworkActive, Is.False);
+            Assert.That(manager.IsNetworkActive, Is.False);
 
             Assert.That(manager.networkSceneName, Is.Empty);
         }
@@ -62,7 +62,7 @@ namespace Mirror.Tests
 
                 await manager.StartServer();
 
-                Assert.That(manager.isNetworkActive, Is.True);
+                Assert.That(manager.IsNetworkActive, Is.True);
                 Assert.That(manager.server.active, Is.True);
 
                 manager.StopServer();
@@ -84,7 +84,7 @@ namespace Mirror.Tests
                 // wait for manager to stop
                 await Task.Delay(1);
 
-                Assert.That(manager.isNetworkActive, Is.False);
+                Assert.That(manager.IsNetworkActive, Is.False);
             });
         }
 
@@ -93,7 +93,7 @@ namespace Mirror.Tests
         {
             manager.StartClient("localhost");
 
-            Assert.That(manager.isNetworkActive, Is.True);
+            Assert.That(manager.IsNetworkActive, Is.True);
 
             manager.StopClient();
         }
@@ -180,7 +180,7 @@ namespace Mirror.Tests
                 // wait until manager shuts down
                 await Task.Delay(1);
 
-                Assert.That(manager.isNetworkActive, Is.False);
+                Assert.That(manager.IsNetworkActive, Is.False);
             });
         }
     }

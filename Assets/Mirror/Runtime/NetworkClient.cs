@@ -248,13 +248,10 @@ namespace Mirror
         internal void Update()
         {
             // local connection?
-            if (!isLocalClient)
+            if (!isLocalClient && active && connectState == ConnectState.Connected)
             {
                 // only update things while connected
-                if (active && connectState == ConnectState.Connected)
-                {
-                    Time.UpdateClient(this);
-                }
+                Time.UpdateClient(this);
             }
         }
 
