@@ -102,7 +102,7 @@ namespace Mirror
         /// <summary>
         /// The <see cref="NetworkConnection">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
         /// </summary>
-        public NetworkConnection connectionToClient => netIdentity.connectionToClient;
+        public NetworkConnection connectionToClient => netIdentity.ConnectionToClient;
 
         public NetworkTime NetworkTime => isClient ? client.Time : server.Time;
 

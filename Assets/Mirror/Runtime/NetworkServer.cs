@@ -313,7 +313,7 @@ namespace Mirror
             foreach (NetworkConnection connection in identity.observers)
             {
 
-                bool isOwner = connection == identity.connectionToClient;
+                bool isOwner = connection == identity.ConnectionToClient;
                 if ((!isOwner || includeOwner) && connection.isReady)
                 {
                     connectionsCache.Add(connection);
@@ -490,7 +490,7 @@ namespace Mirror
         {
             if (identity != null)
             {
-                identity.connectionToClient.Send(msg, channelId);
+                identity.ConnectionToClient.Send(msg, channelId);
             }
             else
             {
@@ -645,12 +645,12 @@ namespace Mirror
             if (identity.NetId == 0)
             {
                 // If the object has not been spawned, then do a full spawn and update observers
-                Spawn(identity.gameObject, identity.connectionToClient);
+                Spawn(identity.gameObject, identity.ConnectionToClient);
             }
             else
             {
                 // otherwise just replace his data
-                SendSpawnMessage(identity, identity.connectionToClient);
+                SendSpawnMessage(identity, identity.ConnectionToClient);
             }
         }
 
@@ -663,7 +663,7 @@ namespace Mirror
                 return false;
             }
 
-            if (identity.connectionToClient != null && identity.connectionToClient != conn)
+            if (identity.ConnectionToClient != null && identity.ConnectionToClient != conn)
             {
                 Debug.LogError("Cannot replace player for connection. New player is already owned by a different connection" + player);
                 return false;
@@ -811,7 +811,7 @@ namespace Mirror
             // Commands can be for player objects, OR other objects with client-authority
             // -> so if this connection's controller has a different netId then
             //    only allow the command if clientAuthorityOwner
-            if (identity.connectionToClient != conn)
+            if (identity.ConnectionToClient != conn)
             {
                 Debug.LogWarning("Command for object without authority [netId=" + msg.netId + "]");
                 return;
@@ -838,7 +838,7 @@ namespace Mirror
                 return;
             }
             identity.Reset();
-            identity.connectionToClient = (NetworkConnectionToClient)ownerConnection;
+            identity.ConnectionToClient = (NetworkConnectionToClient)ownerConnection;
             identity.Server = this;
             identity.Client = localClient;
 
@@ -878,7 +878,7 @@ namespace Mirror
                 {
                     netId = identity.NetId,
                     isLocalPlayer = conn.identity == identity,
-                    isOwner = identity.connectionToClient == conn,
+                    isOwner = identity.ConnectionToClient == conn,
                     sceneId = identity.sceneId,
                     assetId = identity.assetId,
                     // use local values for VR support
@@ -953,13 +953,13 @@ namespace Mirror
                 return;
             }
 
-            if (identity.connectionToClient == null)
+            if (identity.ConnectionToClient == null)
             {
                 Debug.LogError("Player object is not a player.");
                 return;
             }
 
-            Spawn(obj, identity.connectionToClient);
+            Spawn(obj, identity.ConnectionToClient);
         }
 
         /// <summary>
@@ -1002,7 +1002,7 @@ namespace Mirror
             if (LogFilter.Debug) Debug.Log("DestroyObject instance:" + identity.NetId);
             spawned.Remove(identity.NetId);
 
-            identity.connectionToClient?.RemoveOwnedObject(identity);
+            identity.ConnectionToClient?.RemoveOwnedObject(identity);
 
             var msg = new ObjectDestroyMessage
             {

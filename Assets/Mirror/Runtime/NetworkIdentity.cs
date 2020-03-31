@@ -130,7 +130,7 @@ namespace Mirror
         /// The NetworkConnection associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is valid for player and other owned objects in the server.
         /// <para>Use it to return details such as the connection&apos;s identity, IP address and ready status.</para>
         /// </summary>
-        public NetworkConnectionToClient connectionToClient
+        public NetworkConnectionToClient ConnectionToClient
         {
             get => _connectionToClient;
 
@@ -237,13 +237,13 @@ namespace Mirror
         internal void SetClientOwner(NetworkConnection conn)
         {
             // do nothing if it already has an owner
-            if (connectionToClient != null && conn != connectionToClient)
+            if (ConnectionToClient != null && conn != ConnectionToClient)
             {
                 throw new InvalidOperationException($"Object {this} netId={NetId} already has an owner. Use RemoveClientAuthority() first");
             }
 
             // otherwise set the owner connection
-            connectionToClient = (NetworkConnectionToClient)conn;
+            ConnectionToClient = (NetworkConnectionToClient)conn;
         }
 
         static uint nextNetworkId = 1;
@@ -951,9 +951,9 @@ namespace Mirror
             // -> fixes https://github.com/vis2k/Mirror/issues/692 where a
             //    player might teleport out of the ProximityChecker's cast,
             //    losing the own connection as observer.
-            if (connectionToClient != null && connectionToClient.isReady)
+            if (ConnectionToClient != null && ConnectionToClient.isReady)
             {
-                newObservers.Add(connectionToClient);
+                newObservers.Add(ConnectionToClient);
             }
 
             // if no component implemented OnRebuildObservers, then add all
@@ -1056,7 +1056,7 @@ namespace Mirror
                 throw new InvalidOperationException("AssignClientAuthority for " + gameObject + " owner cannot be null. Use RemoveClientAuthority() instead");
             }
 
-            if (connectionToClient != null && conn != connectionToClient)
+            if (ConnectionToClient != null && conn != ConnectionToClient)
             {
                 throw new InvalidOperationException("AssignClientAuthority for " + gameObject + " already has an owner. Use RemoveClientAuthority() first");
             }
@@ -1082,18 +1082,18 @@ namespace Mirror
                 throw new InvalidOperationException("RemoveClientAuthority can only be called on the server for spawned objects");
             }
 
-            if (connectionToClient?.identity == this)
+            if (ConnectionToClient?.identity == this)
             {
                 throw new InvalidOperationException("RemoveClientAuthority cannot remove authority for a player object");
             }
 
-            if (connectionToClient != null)
+            if (ConnectionToClient != null)
             {
-                clientAuthorityCallback?.Invoke(connectionToClient, this, false);
+                clientAuthorityCallback?.Invoke(ConnectionToClient, this, false);
 
-                NetworkConnectionToClient previousOwner = connectionToClient;
+                NetworkConnectionToClient previousOwner = ConnectionToClient;
 
-                connectionToClient = null;
+                ConnectionToClient = null;
 
                 // we need to resynchronize the entire object
                 // so just spawn it again,
@@ -1101,7 +1101,7 @@ namespace Mirror
                 // reset all variables and remove authority
                 Server.SendSpawnMessage(this, previousOwner);
 
-                connectionToClient = null;
+                ConnectionToClient = null;
             }
         }
 
@@ -1126,7 +1126,7 @@ namespace Mirror
             Server = null;
             Client = null;
             ConnectionToServer = null;
-            connectionToClient = null;
+            ConnectionToClient = null;
             networkBehavioursCache = null;
 
             ClearObservers();
@@ -1159,7 +1159,7 @@ namespace Mirror
                         if (ownerWritten > 0)
                         {
                             varsMessage.payload = ownerWriter.ToArraySegment();
-                            if (connectionToClient != null && connectionToClient.isReady)
+                            if (ConnectionToClient != null && ConnectionToClient.isReady)
                                 Server.SendToClientOfPlayer(this, varsMessage);
                         }
 

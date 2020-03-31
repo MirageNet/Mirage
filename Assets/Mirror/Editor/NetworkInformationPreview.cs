@@ -195,10 +195,10 @@ namespace Mirror
 
         private float DrawOwner(NetworkIdentity identity, float initialX, float Y)
         {
-            if (identity.connectionToClient != null)
+            if (identity.ConnectionToClient != null)
             {
                 var ownerRect = new Rect(initialX, Y + 10, 400, 20);
-                GUI.Label(ownerRect, new GUIContent("Client Authority: " + identity.connectionToClient), styles.LabelStyle);
+                GUI.Label(ownerRect, new GUIContent("Client Authority: " + identity.ConnectionToClient), styles.LabelStyle);
                 Y += ownerRect.height;
             }
             return Y;

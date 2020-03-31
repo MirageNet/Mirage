@@ -226,7 +226,7 @@ namespace Mirror.Tests
             // SetClientOwner
             (_, ULocalConnectionToClient original) = ULocalConnectionToClient.CreateLocalConnections();
             identity.SetClientOwner(original);
-            Assert.That(identity.connectionToClient, Is.EqualTo(original));
+            Assert.That(identity.ConnectionToClient, Is.EqualTo(original));
         }
 
         [Test]
@@ -244,7 +244,7 @@ namespace Mirror.Tests
                 identity.SetClientOwner(overwrite);
             });
 
-            Assert.That(identity.connectionToClient, Is.EqualTo(original));
+            Assert.That(identity.ConnectionToClient, Is.EqualTo(original));
         }
 
         [Test]
@@ -754,21 +754,21 @@ namespace Mirror.Tests
             // creates .observers and generates a netId
             identity.StartServer();
             uint netId = identity.NetId;
-            identity.connectionToClient = new NetworkConnectionToClient(1);
+            identity.ConnectionToClient = new NetworkConnectionToClient(1);
             identity.ConnectionToServer = new NetworkConnectionToServer();
             identity.observers.Add(new NetworkConnectionToClient(2));
 
             // calling reset shouldn't do anything unless it was marked for reset
             identity.Reset();
             Assert.That(identity.NetId, Is.EqualTo(netId));
-            Assert.That(identity.connectionToClient, !Is.Null);
+            Assert.That(identity.ConnectionToClient, !Is.Null);
             Assert.That(identity.ConnectionToServer, !Is.Null);
 
             // mark for reset and reset
             identity.MarkForReset();
             identity.Reset();
             Assert.That(identity.NetId, Is.EqualTo(0));
-            Assert.That(identity.connectionToClient, Is.Null);
+            Assert.That(identity.ConnectionToClient, Is.Null);
             Assert.That(identity.ConnectionToServer, Is.Null);
         }
 
@@ -814,7 +814,7 @@ namespace Mirror.Tests
             owner.connectionToServer.isAuthenticated = true;
             int ownerCalled = 0;
             owner.connectionToServer.RegisterHandler<UpdateVarsMessage>(msg => ++ownerCalled);
-            identity.connectionToClient = owner;
+            identity.ConnectionToClient = owner;
 
             // add an observer connection that will receive the updates
             (_, ULocalConnectionToClient observer)
@@ -920,14 +920,14 @@ namespace Mirror.Tests
             // add own player connection
             (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
             connection.isReady = true;
-            identity.connectionToClient = connection;
+            identity.ConnectionToClient = connection;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
 
             // rebuild should at least add own ready player
             identity.RebuildObservers(true);
-            Assert.That(identity.observers, Does.Contain(identity.connectionToClient));
+            Assert.That(identity.observers, Does.Contain(identity.ConnectionToClient));
         }
 
         // RebuildObservers should always add the own ready connection
@@ -941,14 +941,14 @@ namespace Mirror.Tests
 
             // add own player connection that isn't ready
             (_, ULocalConnectionToClient connection) = ULocalConnectionToClient.CreateLocalConnections();
-            identity.connectionToClient = connection;
+            identity.ConnectionToClient = connection;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
 
             // rebuild shouldn't add own player because conn wasn't set ready
             identity.RebuildObservers(true);
-            Assert.That(identity.observers, Does.Not.Contains(identity.connectionToClient));
+            Assert.That(identity.observers, Does.Not.Contains(identity.ConnectionToClient));
         }
 
     }
