@@ -63,7 +63,7 @@ namespace Mirror
         /// <summary>
         /// Returns true if NetworkServer.active and server is not stopped.
         /// </summary>
-        public bool isServer => server != null && server.active && netId != 0;
+        public bool IsServer => server != null && server.active && netId != 0;
 
         /// <summary>
         /// Returns true if we're on host mode.
@@ -536,7 +536,7 @@ namespace Mirror
             // We cover their mistake by calling NetworkServer.Destroy for them.
             // If, however, they call NetworkServer.Destroy correctly, which leads to NetworkIdentity.MarkForReset,
             // then we don't need to call it again, so the check for reset is needed to prevent the doubling.
-            if (isServer && !reset)
+            if (IsServer && !reset)
             {
                 server.Destroy(gameObject);
             }
@@ -545,7 +545,7 @@ namespace Mirror
         internal void StartServer()
         {
             // do nothing if already spawned
-            if (isServer)
+            if (IsServer)
                 return;
 
             // If the instance/net ID is invalid here then this is an object instantiated from a prefab and the server should assign a valid ID
@@ -1046,7 +1046,7 @@ namespace Mirror
         /// <param name="conn">	The connection of the client to assign authority to.</param>
         public void AssignClientAuthority(NetworkConnection conn)
         {
-            if (!isServer)
+            if (!IsServer)
             {
                 throw new InvalidOperationException("AssignClientAuthority can only be called on the server for spawned objects");
             }
@@ -1077,7 +1077,7 @@ namespace Mirror
         /// </summary>
         public void RemoveClientAuthority()
         {
-            if (!isServer)
+            if (!IsServer)
             {
                 throw new InvalidOperationException("RemoveClientAuthority can only be called on the server for spawned objects");
             }

@@ -44,7 +44,7 @@ namespace Mirror
         /// Returns true if this object is active on an active server.
         /// <para>This is only true if the object has been spawned. This is different from NetworkServer.active, which is true if the server itself is active rather than this object being active.</para>
         /// </summary>
-        public bool isServer => netIdentity.isServer;
+        public bool isServer => netIdentity.IsServer;
 
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
