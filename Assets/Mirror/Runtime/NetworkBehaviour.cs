@@ -87,7 +87,7 @@ namespace Mirror
         /// <summary>
         /// The <see cref="NetworkServer">NetworkClient</see> associated to this object.
         /// </summary>
-        public NetworkServer server => netIdentity.server;
+        public NetworkServer server => netIdentity.Server;
 
         /// <summary>
         /// The <see cref="NetworkClient">NetworkClient</see> associated to this object.

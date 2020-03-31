@@ -179,7 +179,7 @@ namespace Mirror.Tests
 
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
-            identity.server = server;
+            identity.Server = server;
         }
 
         [TearDown]
@@ -704,7 +704,7 @@ namespace Mirror.Tests
         public void AddObserver()
         {
 
-            identity.server = server;
+            identity.Server = server;
             // create some connections
             var connection1 = new NetworkConnectionToClient(42);
             var connection2 = new NetworkConnectionToClient(43);

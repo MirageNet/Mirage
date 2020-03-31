@@ -617,7 +617,7 @@ namespace Mirror
             conn.identity = identity;
 
             // set server to the NetworkIdentity
-            identity.server = this;
+            identity.Server = this;
 
             identity.client = this.localClient;
 
@@ -839,7 +839,7 @@ namespace Mirror
             }
             identity.Reset();
             identity.connectionToClient = (NetworkConnectionToClient)ownerConnection;
-            identity.server = this;
+            identity.Server = this;
             identity.client = localClient;
 
             // special case to make sure hasAuthority is set

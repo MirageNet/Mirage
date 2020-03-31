@@ -780,7 +780,7 @@ namespace Mirror
             identity.transform.localScale = msg.scale;
             identity.HasAuthority = msg.isOwner;
             identity.NetId = msg.netId;
-            identity.server = hostServer;
+            identity.Server = hostServer;
             identity.client = this;
 
             if (msg.isLocalPlayer)
