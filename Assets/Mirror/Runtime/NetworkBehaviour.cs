@@ -76,7 +76,7 @@ namespace Mirror
         /// This returns true if this object is the authoritative version of the object in the distributed network application.
         /// <para>The <see cref="NetworkIdentity.hasAuthority">NetworkIdentity.hasAuthority</see> value on the NetworkIdentity determines how authority is determined. For most objects, authority is held by the server. For objects with <see cref="NetworkIdentity.hasAuthority">NetworkIdentity.hasAuthority</see> set, authority is held by the client of that player.</para>
         /// </summary>
-        public bool hasAuthority => netIdentity.hasAuthority;
+        public bool HasAuthority => netIdentity.hasAuthority;
 
         /// <summary>
         /// The unique network Id of this object.
@@ -210,7 +210,7 @@ namespace Mirror
             }
 
             // local players can always send commands, regardless of authority, other objects must have authority.
-            if (!(IsLocalPlayer || hasAuthority))
+            if (!(IsLocalPlayer || HasAuthority))
             {
                 throw new UnauthorizedAccessException($"Trying to send command for object without authority. {invokeClass.ToString()}.{cmdName}");
             }

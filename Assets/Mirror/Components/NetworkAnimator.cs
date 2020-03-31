@@ -60,7 +60,7 @@ namespace Mirror
                         return true;
                 }
 
-                return (hasAuthority && ClientAuthority);
+                return (HasAuthority && ClientAuthority);
             }
         }
 
@@ -176,7 +176,7 @@ namespace Mirror
 
         void HandleAnimMsg(int stateHash, float normalizedTime, int layerId, NetworkReader reader)
         {
-            if (hasAuthority && ClientAuthority)
+            if (HasAuthority && ClientAuthority)
                 return;
 
             // usually transitions will be triggered by parameters, if not, play anims directly.
@@ -192,7 +192,7 @@ namespace Mirror
 
         void HandleAnimParamsMsg(NetworkReader reader)
         {
-            if (hasAuthority && ClientAuthority)
+            if (HasAuthority && ClientAuthority)
                 return;
 
             ReadParameters(reader);
@@ -372,7 +372,7 @@ namespace Mirror
                     return;
                 }
 
-                if (!hasAuthority)
+                if (!HasAuthority)
                 {
                     Debug.LogWarning("Only the client with authority can set animations");
                     return;
@@ -417,7 +417,7 @@ namespace Mirror
                     return;
                 }
 
-                if (!hasAuthority)
+                if (!HasAuthority)
                 {
                     Debug.LogWarning("Only the client with authority can reset animations");
                     return;

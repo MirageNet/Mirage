@@ -56,7 +56,7 @@ namespace Mirror.Tests
         public void PlayerHasAuthorityByDefault()
         {
             // no authority by default
-            Assert.That(component.hasAuthority, Is.True);
+            Assert.That(component.HasAuthority, Is.True);
         }
 
         #endregion
@@ -107,7 +107,7 @@ namespace Mirror.Tests
             client.Update();
 
             // no authority by default
-            Assert.That(behaviour2.hasAuthority, Is.False);
+            Assert.That(behaviour2.HasAuthority, Is.False);
         }
 
         [Test]
