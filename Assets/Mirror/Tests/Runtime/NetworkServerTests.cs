@@ -17,6 +17,8 @@ namespace Mirror.Tests
         NetworkConnectionToServer connectionToServer;
 
         NetworkConnectionToClient connectionToClient;
+        WovenTestMessage message;
+        NetworkIdentity identity;
 
         [UnitySetUp]
         public IEnumerator SetupNetworkServer()
@@ -30,11 +32,33 @@ namespace Mirror.Tests
 
                 IConnection tconn = await transport.ConnectAsync(new System.Uri("tcp4://localhost"));
 
+                connectionToClient = server.connections.First();
                 connectionToServer = new NetworkConnectionToServer(tconn);
 
-                connectionToClient = server.connections.First();
+                connectionToClient.isAuthenticated = true;
+                connectionToServer.isAuthenticated = true;
+
+                message = new WovenTestMessage
+                {
+                    IntValue = 1,
+                    DoubleValue = 1.0,
+                    StringValue = "hello"
+                };
+
+                identity = new GameObject().AddComponent<NetworkIdentity>();
+                identity.connectionToClient = connectionToClient;
+
             });
         }
+
+        [TearDown]
+        public void ShutdownNetworkServer()
+        {
+            GameObject.DestroyImmediate(identity.gameObject);
+            server.Disconnect();
+            GameObject.DestroyImmediate(serverGO);
+        }
+
 
         [Test]
         public void InitializeTest()
@@ -72,22 +96,72 @@ namespace Mirror.Tests
 
             connectionToServer.RegisterHandler(func);
 
-            var wovenMessage = new WovenTestMessage
-            {
-                IntValue = 1,
-                DoubleValue = 1.0,
-                StringValue = "hello"
-            };
-
-            server.SendToAll(wovenMessage);
+            server.SendToAll(message);
 
             _ = connectionToServer.ProcessMessagesAsync();
 
             yield return null;
 
             func.Received().Invoke(
-                Arg.Is<WovenTestMessage>(msg => msg.Equals(wovenMessage)
+                Arg.Is<WovenTestMessage>(msg => msg.Equals(message)
             ));
+        }
+
+        [UnityTest]
+        public IEnumerator SendToClientOfPlayer()
+        {
+            Action<WovenTestMessage> func = Substitute.For<Action<WovenTestMessage>>();
+
+            connectionToServer.RegisterHandler(func);
+
+            server.SendToClientOfPlayer(identity, message);
+
+            _ = connectionToServer.ProcessMessagesAsync();
+
+            yield return null;
+
+            func.Received().Invoke(
+                Arg.Is<WovenTestMessage>(msg => msg.Equals(message)
+            ));
+        }
+
+        [UnityTest]
+        public IEnumerator ShowForConnection()
+        {
+            Action<SpawnMessage> func = Substitute.For<Action<SpawnMessage>>();
+            connectionToServer.RegisterHandler(func);
+
+            connectionToClient.isReady = true;
+
+            // call ShowForConnection
+            server.ShowForConnection(identity, connectionToClient);
+
+            _ = connectionToServer.ProcessMessagesAsync();
+
+            yield return null;
+
+            func.Received().Invoke(
+                Arg.Any<SpawnMessage>());
+        }
+
+        [Test]
+        public void SpawnSceneObject()
+        {
+            identity.sceneId = 42;
+            // unspawned scene objects are set to inactive before spawning
+            identity.gameObject.SetActive(false);
+            Assert.That(server.SpawnObjects(), Is.True);
+            Assert.That(identity.gameObject.activeSelf, Is.True);
+        }
+
+        [Test]
+        public void SpawnPrefabObject()
+        {
+            identity.sceneId = 0;
+            // unspawned scene objects are set to inactive before spawning
+            identity.gameObject.SetActive(false);
+            Assert.That(server.SpawnObjects(), Is.True);
+            Assert.That(identity.gameObject.activeSelf, Is.False);
         }
 
         [UnityTest]
@@ -96,20 +170,12 @@ namespace Mirror.Tests
             Action<WovenTestMessage> func = Substitute.For<Action<WovenTestMessage>>();
 
             connectionToClient.RegisterHandler(func);
-
-            var wovenMessage = new WovenTestMessage
-            {
-                IntValue = 1,
-                DoubleValue = 1.0,
-                StringValue = "hello"
-            };
-
-            connectionToServer.Send(wovenMessage);
+            connectionToServer.Send(message);
 
             yield return null;
 
             func.Received().Invoke(
-                Arg.Is<WovenTestMessage>(msg => msg.Equals(wovenMessage)
+                Arg.Is<WovenTestMessage>(msg => msg.Equals(message)
             ));
         }
 
@@ -121,20 +187,13 @@ namespace Mirror.Tests
 
             connectionToClient.RegisterHandler<NetworkConnectionToClient, WovenTestMessage> (func);
 
-            var wovenMessage = new WovenTestMessage
-            {
-                IntValue = 1,
-                DoubleValue = 1.0,
-                StringValue = "hello"
-            };
-
-            connectionToServer.Send(wovenMessage);
+            connectionToServer.Send(message);
 
             yield return null;
 
             func.Received().Invoke(
                 connectionToClient,
-                Arg.Is<WovenTestMessage>(msg => msg.Equals(wovenMessage)
+                Arg.Is<WovenTestMessage>(msg => msg.Equals(message)
             ));
         }
 
@@ -146,15 +205,7 @@ namespace Mirror.Tests
             connectionToClient.RegisterHandler(func);
             connectionToClient.UnregisterHandler<WovenTestMessage>();
 
-
-            var wovenMessage = new WovenTestMessage
-            {
-                IntValue = 1,
-                DoubleValue = 1.0,
-                StringValue = "hello"
-            };
-
-            connectionToServer.Send(wovenMessage);
+            connectionToServer.Send(message);
 
             yield return null;
 
@@ -162,11 +213,5 @@ namespace Mirror.Tests
                 Arg.Any<WovenTestMessage>());
         }
 
-        [TearDown]
-        public void ShutdownNetworkServer()
-        {
-            server.Disconnect();
-            GameObject.DestroyImmediate(serverGO);
-        }
     }
 }

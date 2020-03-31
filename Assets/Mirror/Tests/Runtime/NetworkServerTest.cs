@@ -346,55 +346,6 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void SendToAllTest()
-        {
-            // add connection
-            (var connectionToServer, NetworkConnectionToClient connection) = PipedConnections(true);
-            // set a client handler
-            int called = 0;
-            connectionToServer.RegisterHandler<TestMessage>(msg => ++called);
-
-            server.AddConnection(connection);
-
-            // create a message
-            var message = new TestMessage { IntValue = 1, DoubleValue = 2, StringValue = "3" };
-
-            // send it to all
-            server.SendToAll(message);
-
-            // was it send to and handled by the connection?
-            Assert.That(called, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void SendToClientOfPlayer()
-        {
-            // add connection
-            (NetworkConnectionToServer connectionToServer, NetworkConnectionToClient connection) = PipedConnections(true);
-
-            // set a client handler
-            int called = 0;
-            connectionToServer.RegisterHandler<TestMessage>(msg => ++called);
-            server.AddConnection(connection);
-
-            // create a message
-            var message = new TestMessage { IntValue = 1, DoubleValue = 2, StringValue = "3" };
-
-            // create a gameobject and networkidentity
-            NetworkIdentity identity = new GameObject().AddComponent<NetworkIdentity>();
-            identity.connectionToClient = connection;
-
-            // send it to that player
-            server.SendToClientOfPlayer(identity, message);
-
-            // was it send to and handled by the connection?
-            Assert.That(called, Is.EqualTo(1));
-            // destroy GO after shutdown, otherwise isServer is true in OnDestroy and it tries to call
-            // GameObject.Destroy (but we need DestroyImmediate in Editor)
-            Object.DestroyImmediate(identity.gameObject);
-        }
-
-        [Test]
         public void GetNetworkIdentity()
         {
             // create a GameObject with NetworkIdentity
@@ -405,54 +356,24 @@ namespace Mirror.Tests
             bool result = server.GetNetworkIdentity(go, out NetworkIdentity value);
             Assert.That(result, Is.True);
             Assert.That(value, Is.EqualTo(identity));
+        }
 
+        [Test]
+        public void GetNoNetworkIdentity()
+        {
             // create a GameObject without NetworkIdentity
             var goWithout = new GameObject();
 
             // GetNetworkIdentity for GO without identity
             // (error log is expected)
             LogAssert.ignoreFailingMessages = true;
-            result = server.GetNetworkIdentity(goWithout, out NetworkIdentity valueNull);
+            var result = server.GetNetworkIdentity(goWithout, out NetworkIdentity valueNull);
             Assert.That(result, Is.False);
             Assert.That(valueNull, Is.Null);
             LogAssert.ignoreFailingMessages = false;
 
             // clean up
-            Object.DestroyImmediate(go);
             Object.DestroyImmediate(goWithout);
-        }
-
-        [Test]
-        public void ShowForConnection()
-        {
-
-            // add connection
-            (var connectionToServer, NetworkConnectionToClient connection) = PipedConnections(true);
-            connection.isReady = true;
-            // set a client handler
-            int called = 0;
-            connectionToServer.RegisterHandler<SpawnMessage>(msg => ++called);
-            
-            server.AddConnection(connection);
-
-            // create a gameobject and networkidentity and some unique values
-            NetworkIdentity identity = new GameObject().AddComponent<NetworkIdentity>();
-            identity.connectionToClient = connection;
-
-            // call ShowForConnection
-            server.ShowForConnection(identity, connection);
-
-            // was it sent to and handled by the connection?
-            Assert.That(called, Is.EqualTo(1));
-
-            // it shouldn't send it if connection isn't ready, so try that too
-            connection.isReady = false;
-            server.ShowForConnection(identity, connection);
-            // not 2 but 1 like before?
-            Assert.That(called, Is.EqualTo(1));
-            // destroy GO after shutdown, otherwise isServer is true in OnDestroy and it tries to call
-            // GameObject.Destroy (but we need DestroyImmediate in Editor)
-            Object.DestroyImmediate(identity.gameObject);
         }
 
         [Test]
@@ -497,38 +418,6 @@ namespace Mirror.Tests
 
             // clean up
             Object.DestroyImmediate(go);
-        }
-
-        [Test]
-        public void SpawnObjects()
-        {
-            // create a gameobject and networkidentity that lives in the scene(=has sceneid)
-            var go = new GameObject("Test");
-            NetworkIdentity identity = go.AddComponent<NetworkIdentity>();
-            // lives in the scene from the start
-            identity.sceneId = 42;
-            // unspawned scene objects are set to inactive before spawning
-            go.SetActive(false);
-
-            // create a gameobject that looks like it was instantiated and doesn't live in the scene
-            var go2 = new GameObject("Test2");
-            NetworkIdentity identity2 = go2.AddComponent<NetworkIdentity>();
-            // not a scene object
-            identity2.sceneId = 0;
-            // unspawned scene objects are set to inactive before spawning
-            go2.SetActive(false);
-
-            // calling SpawnObjects while server isn't active should do nothing
-            Assert.That(server.SpawnObjects(), Is.False);
-
-            // calling SpawnObjects while server is active should succeed
-            Assert.That(server.SpawnObjects(), Is.True);
-
-            // was the scene object activated, and the runtime one wasn't?
-            Assert.That(go.activeSelf, Is.True);
-            Assert.That(go2.activeSelf, Is.False);
-            Object.DestroyImmediate(go);
-            Object.DestroyImmediate(go2);
         }
 
         [Test]
@@ -618,24 +507,5 @@ namespace Mirror.Tests
             Assert.That(compB.IsDirty(), Is.False);
         }
 
-        [UnityTest]
-        public IEnumerator DisconnectHostTest()
-        {
-            client.ConnectHost(server);
-            // set local connection
-            Assert.That(server.LocalClientActive, Is.True);
-            Assert.That(server.connections, Has.Count.EqualTo(1));
-
-            server.Disconnect();
-
-            // wait for messages to get dispatched
-            yield return null;
-
-            // state cleared?
-            Assert.That(server.connections, Is.Empty);
-            Assert.That(server.active, Is.False);
-            Assert.That(server.localConnection, Is.Null);
-            Assert.That(server.LocalClientActive, Is.False);
-        }
     }
 }

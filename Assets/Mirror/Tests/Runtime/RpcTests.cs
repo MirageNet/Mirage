@@ -113,5 +113,24 @@ namespace Mirror.Tests
             Assert.That(component.targetRpcArg2, Is.EqualTo("hello"));
         }
 
+        [UnityTest]
+        public IEnumerator DisconnectHostTest()
+        {
+            // set local connection
+            Assert.That(server.LocalClientActive, Is.True);
+            Assert.That(server.connections, Has.Count.EqualTo(1));
+
+            server.Disconnect();
+
+            // wait for messages to get dispatched
+            yield return null;
+
+            // state cleared?
+            Assert.That(server.connections, Is.Empty);
+            Assert.That(server.active, Is.False);
+            Assert.That(server.localConnection, Is.Null);
+            Assert.That(server.LocalClientActive, Is.False);
+        }
+
     }
 }
