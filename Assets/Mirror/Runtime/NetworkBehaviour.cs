@@ -97,7 +97,7 @@ namespace Mirror
         /// <summary>
         /// The <see cref="NetworkConnection">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
         /// </summary>
-        public NetworkConnection connectionToServer => netIdentity.connectionToServer;
+        public NetworkConnection ConnectionToServer => netIdentity.connectionToServer;
 
         /// <summary>
         /// The <see cref="NetworkConnection">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
@@ -217,7 +217,7 @@ namespace Mirror
 
             if (Client.Connection == null)
             {
-                throw new InvalidOperationException("Send command attempted with no client running [client=" + connectionToServer + "].");
+                throw new InvalidOperationException("Send command attempted with no client running [client=" + ConnectionToServer + "].");
             }
 
             // construct the message
