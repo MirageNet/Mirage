@@ -445,11 +445,11 @@ namespace Mirror.Tests
                 Assert.That(GetSyncVarHookGuard(bit), Is.False);
 
                 // set true
-                setSyncVarHookGuard(bit, true);
+                SetSyncVarHookGuard(bit, true);
                 Assert.That(GetSyncVarHookGuard(bit), Is.True);
 
                 // set false again
-                setSyncVarHookGuard(bit, false);
+                SetSyncVarHookGuard(bit, false);
                 Assert.That(GetSyncVarHookGuard(bit), Is.False);
             }
         }
