@@ -76,11 +76,14 @@ namespace Mirror.Tests
         {
             return RunAsync(async () =>
             {
+                // wait for NetworkManager to initialize
+                await Task.Delay(1);
+
                 await manager.StartServer();
                 manager.StopServer();
 
                 // wait for manager to stop
-                await Task.Delay(10);
+                await Task.Delay(1);
 
                 Assert.That(manager.isNetworkActive, Is.False);
                 Assert.That(manager.mode, Is.EqualTo(NetworkManagerMode.Offline));

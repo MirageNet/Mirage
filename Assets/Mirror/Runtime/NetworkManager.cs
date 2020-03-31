@@ -440,7 +440,7 @@ namespace Mirror
             if (server != null)
             {
                 server.Authenticated.AddListener(OnServerAuthenticated);
-                server.Disconnected.AddListener(OnServerDisconnected);
+                server.Stopped.AddListener(OnServerStopped);
             }
 
 
@@ -458,7 +458,7 @@ namespace Mirror
             mode = NetworkManagerMode.Offline;
         }
 
-        private void OnServerDisconnected(NetworkConnectionToClient arg0)
+        private void OnServerStopped()
         {
             isNetworkActive = false;
             mode = NetworkManagerMode.Offline;
