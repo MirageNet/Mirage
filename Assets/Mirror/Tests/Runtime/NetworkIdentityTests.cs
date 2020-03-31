@@ -72,11 +72,11 @@ namespace Mirror.Tests
         [Test]
         public void IsClient()
         {
-            Assert.That(identity.isClient, Is.False);
+            Assert.That(identity.IsClient, Is.False);
             // create a networkidentity with our test component
             server.Spawn(gameObject);
 
-            Assert.That(identity.isClient, Is.True);
+            Assert.That(identity.IsClient, Is.True);
         }
 
         [Test]

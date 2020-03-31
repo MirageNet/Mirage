@@ -261,7 +261,7 @@ namespace Mirror
         {
             foreach (NetworkIdentity identity in spawned.Values)
             {
-                if (!identity.isClient)
+                if (!identity.IsClient)
                 {
                     if (LogFilter.Debug) Debug.Log("ActivateHostScene " + identity.netId + " " + identity);
 

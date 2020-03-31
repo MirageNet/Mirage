@@ -49,7 +49,7 @@ namespace Mirror
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
         /// </summary>
-        public bool isClient => netIdentity.isClient;
+        public bool isClient => netIdentity.IsClient;
 
         /// <summary>
         /// Returns true if we're on host mode.
