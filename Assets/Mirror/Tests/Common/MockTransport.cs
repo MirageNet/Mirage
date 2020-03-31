@@ -27,6 +27,7 @@ namespace Mirror.Tests
 
         public override void Disconnect()
         {
+            AcceptCompletionSource.TrySetResult(null);
         }
 
         public override Task ListenAsync()

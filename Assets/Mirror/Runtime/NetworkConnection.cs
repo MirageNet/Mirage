@@ -243,7 +243,7 @@ namespace Mirror
         /// <param name="msg">The message to send</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
         /// <returns></returns>
-        public void Send<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
+        public virtual void Send<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
             _ = SendAsync(msg, channelId);
         }
@@ -255,7 +255,7 @@ namespace Mirror
         /// <param name="msg">The message to send.</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
         /// <returns></returns>
-        public Task SendAsync<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
+        public virtual Task SendAsync<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
