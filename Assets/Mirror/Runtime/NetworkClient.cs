@@ -119,7 +119,7 @@ namespace Mirror
         /// <summary>
         /// NetworkClient can connect to local server in host mode too
         /// </summary>
-        public bool isLocalClient => hostServer != null;
+        public bool IsLocalClient => hostServer != null;
 
         void Start()
         {
@@ -274,7 +274,7 @@ namespace Mirror
         public void Disconnect()
         {
             // local or remote connection?
-            if (isLocalClient)
+            if (IsLocalClient)
             {
                 if (IsConnected)
                 {
