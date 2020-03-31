@@ -70,7 +70,7 @@ namespace Mirror
         /// <summary>
         /// True if this object exists on a client that is not also acting as a server
         /// </summary>
-        public bool isClientOnly => IsClient && !IsServer;
+        public bool IsClientOnly => IsClient && !IsServer;
 
         /// <summary>
         /// This returns true if this object is the authoritative version of the object in the distributed network application.

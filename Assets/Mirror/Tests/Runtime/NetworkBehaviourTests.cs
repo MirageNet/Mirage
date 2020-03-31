@@ -49,7 +49,7 @@ namespace Mirror.Tests
         [Test]
         public void IsClientOnly()
         {
-            Assert.That(component.isClientOnly, Is.False);
+            Assert.That(component.IsClientOnly, Is.False);
         }
 
         [Test]
