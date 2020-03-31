@@ -40,7 +40,7 @@ namespace Mirror.Discovery
             if (networkManager.server.active || networkManager.client.Active)
                 return;
 
-            if (!networkManager.client.isConnected && !networkManager.server.active && !networkManager.client.Active)
+            if (!networkManager.client.IsConnected && !networkManager.server.active && !networkManager.client.Active)
                 DrawGUI();
         }
 

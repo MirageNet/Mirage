@@ -62,7 +62,7 @@ namespace Mirror
         /// <summary>
         /// This gives the current connection status of the client.
         /// </summary>
-        public bool isConnected => connectState == ConnectState.Connected;
+        public bool IsConnected => connectState == ConnectState.Connected;
 
         /// <summary>
         /// List of prefabs that will be registered with the spawning system.
@@ -276,7 +276,7 @@ namespace Mirror
             // local or remote connection?
             if (isLocalClient)
             {
-                if (isConnected)
+                if (IsConnected)
                 {
                     hostServer.Disconnected.Invoke(hostServer.localConnection);
                 }

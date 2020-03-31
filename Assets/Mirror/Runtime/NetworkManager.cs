@@ -632,7 +632,7 @@ namespace Mirror
             // call OnServerSceneChanged
             OnServerSceneChanged(networkSceneName);
 
-            if (client.isConnected)
+            if (client.IsConnected)
             {
                 // let client know that we changed scene
                 OnClientSceneChanged(client.Connection);
@@ -654,7 +654,7 @@ namespace Mirror
                 client.Connection = null;
             }
 
-            if (client.isConnected)
+            if (client.IsConnected)
             {
                 OnClientSceneChanged(client.Connection);
             }
@@ -753,7 +753,7 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnClientSceneInternal");
 
-            if (client.isConnected && !server.active)
+            if (client.IsConnected && !server.active)
             {
                 ClientChangeScene(msg.sceneName, msg.sceneOperation, msg.customHandling);
             }
