@@ -215,7 +215,7 @@ namespace Mirror
                 throw new UnauthorizedAccessException($"Trying to send command for object without authority. {invokeClass.ToString()}.{cmdName}");
             }
 
-            if (client.connection == null)
+            if (client.Connection == null)
             {
                 throw new InvalidOperationException("Send command attempted with no client running [client=" + connectionToServer + "].");
             }
@@ -231,7 +231,7 @@ namespace Mirror
                 payload = writer.ToArraySegment()
             };
 
-            client.connection.Send(message, channelId);
+            client.Connection.Send(message, channelId);
         }
 
         /// <summary>

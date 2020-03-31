@@ -309,7 +309,7 @@ namespace Mirror.Weaver
             RecycleWriterReference = Resolvers.ResolveMethod(NetworkWriterPoolType, CurrentAssembly, "Recycle");
 
             ComponentType = UnityAssembly.MainModule.GetType("UnityEngine.Component");
-            ReadyConnectionReference = Resolvers.ResolveMethod(NetworkClientType, CurrentAssembly, "get_connection");
+            ReadyConnectionReference = Resolvers.ResolveMethod(NetworkClientType, CurrentAssembly, "get_Connection");
 
             syncVarEqualReference = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "SyncVarEqual");
             syncVarNetworkIdentityEqualReference = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "SyncVarNetworkIdentityEqual");

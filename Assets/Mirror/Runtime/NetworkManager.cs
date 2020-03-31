@@ -355,7 +355,7 @@ namespace Mirror
             server.ActivateHostScene();
             client.ConnectLocalServer(server);
 
-            RegisterClientMessages(client.connection);
+            RegisterClientMessages(client.Connection);
         }
 
         /// <summary>
@@ -579,7 +579,7 @@ namespace Mirror
         {
             if (loadingSceneAsync != null && loadingSceneAsync.isDone)
             {
-                if (LogFilter.Debug) Debug.Log("ClientChangeScene done readyCon:" + client.connection);
+                if (LogFilter.Debug) Debug.Log("ClientChangeScene done readyCon:" + client.Connection);
                 FinishLoadScene();
                 loadingSceneAsync.allowSceneActivation = true;
                 loadingSceneAsync = null;
@@ -620,11 +620,11 @@ namespace Mirror
             // it's very obvious to notice.
             if (LogFilter.Debug) Debug.Log("Finished loading scene in host mode.");
 
-            if (client.connection != null)
+            if (client.Connection != null)
             {
-                client.OnAuthenticated(client.connection);
+                client.OnAuthenticated(client.Connection);
                 clientLoadedScene = true;
-                client.connection = null;
+                client.Connection = null;
             }
 
             FinishStartHost();
@@ -635,7 +635,7 @@ namespace Mirror
             if (client.isConnected)
             {
                 // let client know that we changed scene
-                OnClientSceneChanged(client.connection);
+                OnClientSceneChanged(client.Connection);
             }
         }
 
@@ -647,16 +647,16 @@ namespace Mirror
             // it's very obvious to notice.
             if (LogFilter.Debug) Debug.Log("Finished loading scene in client-only mode.");
 
-            if (client.connection != null)
+            if (client.Connection != null)
             {
-                client.OnAuthenticated(client.connection);
+                client.OnAuthenticated(client.Connection);
                 clientLoadedScene = true;
-                client.connection = null;
+                client.Connection = null;
             }
 
             if (client.isConnected)
             {
-                OnClientSceneChanged(client.connection);
+                OnClientSceneChanged(client.Connection);
             }
         }
 
@@ -736,7 +736,7 @@ namespace Mirror
 
             // will wait for scene id to come from the server.
             clientLoadedScene = true;
-            client.connection = conn;
+            client.Connection = conn;
         }
 
         void OnClientNotReadyMessageInternal(NetworkConnection conn, NotReadyMessage msg)

@@ -44,7 +44,7 @@ namespace Mirror
         /// <summary>
         /// The NetworkConnection object this client is using.
         /// </summary>
-        public NetworkConnectionToServer connection { get; internal set; }
+        public NetworkConnectionToServer Connection { get; internal set; }
 
         /// <summary>
         /// NetworkIdentity of the localPlayer
@@ -144,8 +144,8 @@ namespace Mirror
             await Transport.activeTransport.ClientConnectAsync(serverIp);
 
             // setup all the handlers
-            connection = new NetworkConnectionToServer();
-            RegisterMessageHandlers(connection);
+            Connection = new NetworkConnectionToServer();
+            RegisterMessageHandlers(Connection);
             OnConnected();
         }
 
@@ -165,8 +165,8 @@ namespace Mirror
             await Transport.activeTransport.ClientConnectAsync(uri);
 
             // setup all the handlers
-            connection = new NetworkConnectionToServer();
-            RegisterMessageHandlers(connection);
+            Connection = new NetworkConnectionToServer();
+            RegisterMessageHandlers(Connection);
             OnConnected();
         }
 
@@ -179,8 +179,8 @@ namespace Mirror
             (ULocalConnectionToServer connectionToServer, ULocalConnectionToClient connectionToClient)
                 = ULocalConnectionToClient.CreateLocalConnections();
 
-            connection = connectionToServer;
-            RegisterHostHandlers(connection);
+            Connection = connectionToServer;
+            RegisterHostHandlers(Connection);
 
             // create server connection to local client
             server.SetLocalConnection(this, connectionToClient);
@@ -240,9 +240,9 @@ namespace Mirror
 
         internal void OnDataReceived(ArraySegment<byte> data, int channelId)
         {
-            if (connection != null)
+            if (Connection != null)
             {
-                connection.TransportReceive(data, channelId);
+                Connection.TransportReceive(data, channelId);
             }
             else throw new InvalidOperationException("Skipped Data message handling because connection is null.");
         }
@@ -256,7 +256,7 @@ namespace Mirror
             // thus we should set the connected state before calling the handler
             connectState = ConnectState.Connected;
             Time.UpdateClient(this);
-            Connected.Invoke((NetworkConnectionToServer)connection);
+            Connected.Invoke((NetworkConnectionToServer)Connection);
         }
 
         public void OnAuthenticated(NetworkConnectionToServer conn)
@@ -284,9 +284,9 @@ namespace Mirror
             }
             else
             {
-                if (connection != null)
+                if (Connection != null)
                 {
-                    connection.Disconnect();
+                    Connection.Disconnect();
                     RemoveTransportHandlers();
                 }
             }
@@ -315,14 +315,14 @@ namespace Mirror
         /// <returns>True if message was sent.</returns>
         public bool Send<T>(T message, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
-            if (connection != null)
+            if (Connection != null)
             {
                 if (connectState != ConnectState.Connected)
                 {
                     Debug.LogError("NetworkClient Send when not connected to a server");
                     return false;
                 }
-                return connection.Send(message, channelId);
+                return Connection.Send(message, channelId);
             }
             Debug.LogError("NetworkClient Send with no connection");
             return false;
@@ -331,7 +331,7 @@ namespace Mirror
         internal void Update()
         {
             // local connection?
-            if (connection is ULocalConnectionToServer localConnection)
+            if (Connection is ULocalConnectionToServer localConnection)
             {
                 localConnection.Update();
             }
@@ -384,7 +384,7 @@ namespace Mirror
 
             ClearSpawners();
             DestroyAllClientObjects();
-            connection = null;
+            Connection = null;
             ready = false;
             isSpawnFinished = false;
 
@@ -415,15 +415,15 @@ namespace Mirror
         /// <returns>True if succcessful</returns>
         public bool RemovePlayer()
         {
-            if (LogFilter.Debug) Debug.Log("ClientScene.RemovePlayer() called with connection [" + connection + "]");
+            if (LogFilter.Debug) Debug.Log("ClientScene.RemovePlayer() called with connection [" + Connection + "]");
 
-            if (connection.identity != null)
+            if (Connection.identity != null)
             {
-                connection.Send(new RemovePlayerMessage());
+                Connection.Send(new RemovePlayerMessage());
 
-                Destroy(connection.identity.gameObject);
+                Destroy(Connection.identity.gameObject);
 
-                connection.identity = null;
+                Connection.identity = null;
                 localPlayer = null;
 
                 return true;
@@ -452,8 +452,8 @@ namespace Mirror
                 // Set these before sending the ReadyMessage, otherwise host client
                 // will fail in InternalAddPlayer with null readyConnection.
                 ready = true;
-                connection = conn;
-                connection.isReady = true;
+                Connection = conn;
+                Connection.isReady = true;
 
                 // Tell server we're ready to have a player object spawned
                 conn.Send(new ReadyMessage());
@@ -473,9 +473,9 @@ namespace Mirror
             // But, the player structures are not cleaned up, we'll just replace the old player
             localPlayer = identity;
 
-            if (connection != null)
+            if (Connection != null)
             {
-                connection.identity = identity;
+                Connection.identity = identity;
             }
             else
             {
@@ -487,7 +487,7 @@ namespace Mirror
         {
             DestroyAllClientObjects();
             ready = false;
-            connection = null;
+            Connection = null;
 
             Disconnected.Invoke();
         }
@@ -1011,7 +1011,7 @@ namespace Mirror
             if (identity == localPlayer)
             {
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
-                identity.connectionToServer = connection;
+                identity.connectionToServer = Connection;
                 identity.StartLocalPlayer();
 
                 if (LogFilter.Debug) Debug.Log("ClientScene.OnOwnerMessage - player=" + identity.name);
