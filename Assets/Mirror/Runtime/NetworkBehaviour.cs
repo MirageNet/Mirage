@@ -109,7 +109,7 @@ namespace Mirror
         protected ulong SyncVarDirtyBits { get; private set; }
         ulong syncVarHookGuard;
 
-        protected bool getSyncVarHookGuard(ulong dirtyBit)
+        protected bool GetSyncVarHookGuard(ulong dirtyBit)
         {
             return (syncVarHookGuard & dirtyBit) != 0UL;
         }
@@ -519,7 +519,7 @@ namespace Mirror
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected void SetSyncVarGameObject(GameObject newGameObject, ref GameObject gameObjectField, ulong dirtyBit, ref uint netIdField)
         {
-            if (getSyncVarHookGuard(dirtyBit))
+            if (GetSyncVarHookGuard(dirtyBit))
                 return;
 
             uint newNetId = 0;
@@ -589,7 +589,7 @@ namespace Mirror
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected void SetSyncVarNetworkIdentity(NetworkIdentity newIdentity, ref NetworkIdentity identityField, ulong dirtyBit, ref uint netIdField)
         {
-            if (getSyncVarHookGuard(dirtyBit))
+            if (GetSyncVarHookGuard(dirtyBit))
                 return;
 
             uint newNetId = 0;

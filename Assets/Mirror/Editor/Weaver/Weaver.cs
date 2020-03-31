@@ -316,7 +316,7 @@ namespace Mirror.Weaver
             syncVarGameObjectEqualReference = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "SyncVarGameObjectEqual");
             setSyncVarReference = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "SetSyncVar");
             setSyncVarHookGuard = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "setSyncVarHookGuard");
-            getSyncVarHookGuard = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "getSyncVarHookGuard");
+            getSyncVarHookGuard = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "GetSyncVarHookGuard");
 
             setSyncVarGameObjectReference = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "SetSyncVarGameObject");
             getSyncVarGameObjectReference = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "GetSyncVarGameObject");
