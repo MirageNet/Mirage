@@ -54,7 +54,7 @@ namespace Mirror
         /// <summary>
         /// Returns true if we're on host mode.
         /// </summary>
-        public bool isLocalClient => netIdentity.isLocalClient;
+        public bool isLocalClient => netIdentity.IsLocalClient;
 
         /// <summary>
         /// This returns true if this object is the one that represents the player on the local machine.

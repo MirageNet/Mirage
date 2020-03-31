@@ -68,7 +68,7 @@ namespace Mirror
         /// <summary>
         /// Returns true if we're on host mode.
         /// </summary>
-        public bool isLocalClient => server != null && server.LocalClientActive;
+        public bool IsLocalClient => server != null && server.LocalClientActive;
 
         /// <summary>
         /// This returns true if this object is the one that represents the player on the local machine.
