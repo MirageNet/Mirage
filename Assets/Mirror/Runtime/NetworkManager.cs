@@ -230,17 +230,12 @@ namespace Mirror
         /// This starts a network client. It uses the networkAddress and networkPort properties as the address to connect to.
         /// <para>This makes the newly created client connect to the server immediately.</para>
         /// </summary>
-        public void StartClient(string serverIp)
+        public Task StartClient(string serverIp)
         {
             mode = NetworkManagerMode.ClientOnly;
 
             isNetworkActive = true;
 
-            if (string.IsNullOrEmpty(serverIp))
-            {
-                Debug.LogError("serverIp shouldn't be empty");
-                return;
-            }
             if (LogFilter.Debug) Debug.Log("NetworkManager StartClient address:" + serverIp);
 
             UriBuilder builder = new UriBuilder()
@@ -249,7 +244,7 @@ namespace Mirror
                 Scheme = "tcp4",
             };
 
-            _ = client.ConnectAsync(builder.Uri);
+            return client.ConnectAsync(builder.Uri);
         }
 
         /// <summary>
@@ -380,16 +375,7 @@ namespace Mirror
         /// </summary>
         public void StopServer()
         {
-            if (!server.active)
-                return;
-
-            if (LogFilter.Debug) Debug.Log("NetworkManager StopServer");
-            isNetworkActive = false;
             server.Disconnect();
-
-            // set offline mode BEFORE changing scene so that FinishStartScene
-            // doesn't think we need initialize anything.
-            mode = NetworkManagerMode.Offline;
         }
 
         /// <summary>
@@ -397,17 +383,7 @@ namespace Mirror
         /// </summary>
         public void StopClient()
         {
-            if (LogFilter.Debug) Debug.Log("NetworkManager StopClient");
-            isNetworkActive = false;
-            clientLoadedScene = false;
-
-            // shutdown client
             client.Disconnect();
-
-            // set offline mode BEFORE changing scene so that FinishStartScene
-            // doesn't think we need initialize anything.
-            mode = NetworkManagerMode.Offline;
-
         }
 
         /// <summary>
@@ -462,12 +438,30 @@ namespace Mirror
 
             // subscribe to the server
             if (server != null)
+            {
                 server.Authenticated.AddListener(OnServerAuthenticated);
+                server.Disconnected.AddListener(OnServerDisconnected);
+            }
 
 
             // subscribe to the client
             if (client != null)
+            {
                 client.Authenticated.AddListener(OnClientAuthenticated);
+                client.Disconnected.AddListener(OnClientDisconnected);
+            }
+        }
+
+        private void OnClientDisconnected()
+        {
+            isNetworkActive = false;
+            mode = NetworkManagerMode.Offline;
+        }
+
+        private void OnServerDisconnected(NetworkConnectionToClient arg0)
+        {
+            isNetworkActive = false;
+            mode = NetworkManagerMode.Offline;
         }
 
         /// <summary>
