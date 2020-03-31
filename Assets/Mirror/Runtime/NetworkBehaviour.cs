@@ -92,7 +92,7 @@ namespace Mirror
         /// <summary>
         /// The <see cref="NetworkClient">NetworkClient</see> associated to this object.
         /// </summary>
-        public NetworkClient client => netIdentity.client;
+        public NetworkClient Client => netIdentity.client;
 
         /// <summary>
         /// The <see cref="NetworkConnection">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
@@ -104,7 +104,7 @@ namespace Mirror
         /// </summary>
         public NetworkConnection connectionToClient => netIdentity.connectionToClient;
 
-        public NetworkTime NetworkTime => IsClient ? client.Time : Server.Time;
+        public NetworkTime NetworkTime => IsClient ? Client.Time : Server.Time;
 
         protected ulong syncVarDirtyBits { get; private set; }
         ulong syncVarHookGuard;
@@ -203,7 +203,7 @@ namespace Mirror
             // this was in Weaver before
             // NOTE: we could remove this later to allow calling Cmds on Server
             //       to avoid Wrapper functions. a lot of people requested this.
-            if (!client.Active)
+            if (!Client.Active)
             {
                 Debug.LogError("Command Function " + cmdName + " called on server without an active client.");
                 return;
@@ -215,7 +215,7 @@ namespace Mirror
                 throw new UnauthorizedAccessException($"Trying to send command for object without authority. {invokeClass.ToString()}.{cmdName}");
             }
 
-            if (client.Connection == null)
+            if (Client.Connection == null)
             {
                 throw new InvalidOperationException("Send command attempted with no client running [client=" + connectionToServer + "].");
             }
@@ -231,7 +231,7 @@ namespace Mirror
                 payload = writer.ToArraySegment()
             };
 
-            client.Connection.Send(message, channelId);
+            Client.Connection.Send(message, channelId);
         }
 
         /// <summary>
@@ -559,7 +559,7 @@ namespace Mirror
 
             // client always looks up based on netId because objects might get in and out of range
             // over and over again, which shouldn't null them forever
-            if (client.Spawned.TryGetValue(netId, out NetworkIdentity identity) && identity != null)
+            if (Client.Spawned.TryGetValue(netId, out NetworkIdentity identity) && identity != null)
                 return gameObjectField = identity.gameObject;
 
             return null;
@@ -622,7 +622,7 @@ namespace Mirror
 
             // client always looks up based on netId because objects might get in and out of range
             // over and over again, which shouldn't null them forever
-            client.Spawned.TryGetValue(netId, out identityField);
+            Client.Spawned.TryGetValue(netId, out identityField);
             return identityField;
         }
 
