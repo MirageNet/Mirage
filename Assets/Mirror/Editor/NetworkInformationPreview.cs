@@ -278,7 +278,7 @@ namespace Mirror
 
         NetworkIdentityInfo GetAssetId(NetworkIdentity identity)
         {
-            string assetId = identity.assetId.ToString();
+            string assetId = identity.AssetId.ToString();
             if (string.IsNullOrEmpty(assetId))
             {
                 assetId = "<object has no prefab>";

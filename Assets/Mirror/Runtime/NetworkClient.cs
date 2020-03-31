@@ -561,10 +561,10 @@ namespace Mirror
             NetworkIdentity identity = prefab.GetComponent<NetworkIdentity>();
             if (identity)
             {
-                identity.assetId = newAssetId;
+                identity.AssetId = newAssetId;
 
-                if (LogFilter.Debug) Debug.Log("Registering prefab '" + prefab.name + "' as asset:" + identity.assetId);
-                prefabs[identity.assetId] = prefab;
+                if (LogFilter.Debug) Debug.Log("Registering prefab '" + prefab.name + "' as asset:" + identity.AssetId);
+                prefabs[identity.AssetId] = prefab;
             }
             else
             {
@@ -584,8 +584,8 @@ namespace Mirror
             NetworkIdentity identity = prefab.GetComponent<NetworkIdentity>();
             if (identity)
             {
-                if (LogFilter.Debug) Debug.Log("Registering prefab '" + prefab.name + "' as asset:" + identity.assetId);
-                prefabs[identity.assetId] = prefab;
+                if (LogFilter.Debug) Debug.Log("Registering prefab '" + prefab.name + "' as asset:" + identity.AssetId);
+                prefabs[identity.AssetId] = prefab;
 
                 NetworkIdentity[] identities = prefab.GetComponentsInChildren<NetworkIdentity>();
                 if (identities.Length > 1)
@@ -634,20 +634,20 @@ namespace Mirror
 
             if (spawnHandler == null || unspawnHandler == null)
             {
-                Debug.LogError("RegisterPrefab custom spawn function null for " + identity.assetId);
+                Debug.LogError("RegisterPrefab custom spawn function null for " + identity.AssetId);
                 return;
             }
 
-            if (identity.assetId == Guid.Empty)
+            if (identity.AssetId == Guid.Empty)
             {
                 Debug.LogError("RegisterPrefab game object " + prefab.name + " has no prefab. Use RegisterSpawnHandler() instead?");
                 return;
             }
 
-            if (LogFilter.Debug) Debug.Log("Registering custom prefab '" + prefab.name + "' as asset:" + identity.assetId + " " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
+            if (LogFilter.Debug) Debug.Log("Registering custom prefab '" + prefab.name + "' as asset:" + identity.AssetId + " " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
 
-            spawnHandlers[identity.assetId] = spawnHandler;
-            unspawnHandlers[identity.assetId] = unspawnHandler;
+            spawnHandlers[identity.AssetId] = spawnHandler;
+            unspawnHandlers[identity.AssetId] = unspawnHandler;
         }
 
         /// <summary>
@@ -662,8 +662,8 @@ namespace Mirror
                 Debug.LogError("Could not unregister '" + prefab.name + "' since it contains no NetworkIdentity component");
                 return;
             }
-            spawnHandlers.Remove(identity.assetId);
-            unspawnHandlers.Remove(identity.assetId);
+            spawnHandlers.Remove(identity.AssetId);
+            unspawnHandlers.Remove(identity.AssetId);
         }
 
         #endregion
@@ -727,7 +727,7 @@ namespace Mirror
 
         void UnSpawn(NetworkIdentity identity)
         {
-            Guid assetId = identity.assetId;
+            Guid assetId = identity.AssetId;
 
             identity.NetworkDestroy();
             if (unspawnHandlers.TryGetValue(assetId, out UnSpawnDelegate handler) && handler != null)
@@ -767,7 +767,7 @@ namespace Mirror
             identity.Reset();
 
             if (msg.assetId != Guid.Empty)
-                identity.assetId = msg.assetId;
+                identity.AssetId = msg.assetId;
 
             if (!identity.gameObject.activeSelf)
             {

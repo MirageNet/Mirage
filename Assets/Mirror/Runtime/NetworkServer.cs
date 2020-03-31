@@ -512,7 +512,7 @@ namespace Mirror
         {
             if (GetNetworkIdentity(player, out NetworkIdentity identity))
             {
-                identity.assetId = assetId;
+                identity.AssetId = assetId;
             }
             return InternalReplacePlayerForConnection(conn, client, player, keepAuthority);
         }
@@ -544,7 +544,7 @@ namespace Mirror
         {
             if (GetNetworkIdentity(player, out NetworkIdentity identity))
             {
-                identity.assetId = assetId;
+                identity.AssetId = assetId;
             }
             return AddPlayerForConnection(conn, player);
         }
@@ -634,7 +634,7 @@ namespace Mirror
             // set ready if not set yet
             SetClientReady(conn);
 
-            if (LogFilter.Debug) Debug.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.assetId);
+            if (LogFilter.Debug) Debug.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.AssetId);
 
             Respawn(identity);
             return true;
@@ -696,7 +696,7 @@ namespace Mirror
             // IMPORTANT: do this in AddPlayerForConnection & ReplacePlayerForConnection!
             SpawnObserversForConnection(conn);
 
-            if (LogFilter.Debug) Debug.Log("Replacing playerGameObject object netId: " + player.GetComponent<NetworkIdentity>().NetId + " asset ID " + player.GetComponent<NetworkIdentity>().assetId);
+            if (LogFilter.Debug) Debug.Log("Replacing playerGameObject object netId: " + player.GetComponent<NetworkIdentity>().NetId + " asset ID " + player.GetComponent<NetworkIdentity>().AssetId);
 
             Respawn(identity);
 
@@ -849,7 +849,7 @@ namespace Mirror
 
             identity.StartServer();
 
-            if (LogFilter.Debug) Debug.Log("SpawnObject instance ID " + identity.NetId + " asset ID " + identity.assetId);
+            if (LogFilter.Debug) Debug.Log("SpawnObject instance ID " + identity.NetId + " asset ID " + identity.AssetId);
 
             identity.RebuildObservers(true);
         }
@@ -880,7 +880,7 @@ namespace Mirror
                     isLocalPlayer = conn.identity == identity,
                     isOwner = identity.ConnectionToClient == conn,
                     sceneId = identity.sceneId,
-                    assetId = identity.assetId,
+                    assetId = identity.AssetId,
                     // use local values for VR support
                     position = identity.transform.localPosition,
                     rotation = identity.transform.localRotation,
@@ -976,7 +976,7 @@ namespace Mirror
             {
                 if (GetNetworkIdentity(obj, out NetworkIdentity identity))
                 {
-                    identity.assetId = assetId;
+                    identity.AssetId = assetId;
                 }
                 SpawnObject(obj, ownerConnection);
             }

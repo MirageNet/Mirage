@@ -214,10 +214,10 @@ namespace Mirror.Tests
         {
             // assign a guid
             var guid = new Guid(0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B);
-            identity.assetId = guid;
+            identity.AssetId = guid;
 
             // did it work?
-            Assert.That(identity.assetId, Is.EqualTo(guid));
+            Assert.That(identity.AssetId, Is.EqualTo(guid));
         }
 
         [Test]
@@ -309,7 +309,7 @@ namespace Mirror.Tests
         {
             // OnValidate will have been called. make sure that assetId was set
             // to 0 empty and not anything else, because this is a scene object
-            Assert.That(identity.assetId, Is.EqualTo(Guid.Empty));
+            Assert.That(identity.AssetId, Is.EqualTo(Guid.Empty));
         }
 
         [Test]

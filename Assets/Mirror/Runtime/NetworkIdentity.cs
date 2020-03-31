@@ -160,7 +160,7 @@ namespace Mirror
         /// <summary>
         /// Unique identifier used to find the source assets when server spawns the on clients.
         /// </summary>
-        public Guid assetId
+        public Guid AssetId
         {
             get
             {
