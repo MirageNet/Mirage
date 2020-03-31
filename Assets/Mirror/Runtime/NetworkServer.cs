@@ -627,7 +627,7 @@ namespace Mirror
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
             if (conn is ULocalConnectionToClient)
             {
-                identity.hasAuthority = true;
+                identity.HasAuthority = true;
                 this.localClient.InternalAddPlayer(identity);
             }
 
@@ -685,7 +685,7 @@ namespace Mirror
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
             if (conn is ULocalConnectionToClient)
             {
-                identity.hasAuthority = true;
+                identity.HasAuthority = true;
                 client.InternalAddPlayer(identity);
             }
 
@@ -845,7 +845,7 @@ namespace Mirror
             // special case to make sure hasAuthority is set
             // on start server in host mode
             if (ownerConnection is ULocalConnectionToClient)
-                identity.hasAuthority = true;
+                identity.HasAuthority = true;
 
             identity.StartServer();
 

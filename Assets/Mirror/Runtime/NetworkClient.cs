@@ -778,7 +778,7 @@ namespace Mirror
             identity.transform.localPosition = msg.position;
             identity.transform.localRotation = msg.rotation;
             identity.transform.localScale = msg.scale;
-            identity.hasAuthority = msg.isOwner;
+            identity.HasAuthority = msg.isOwner;
             identity.netId = msg.netId;
             identity.server = hostServer;
             identity.client = this;
@@ -957,7 +957,7 @@ namespace Mirror
                 if (msg.isLocalPlayer)
                     InternalAddPlayer(localObject);
 
-                localObject.hasAuthority = msg.isOwner;
+                localObject.HasAuthority = msg.isOwner;
                 localObject.NotifyAuthority();
                 localObject.StartClient();
                 localObject.OnSetHostVisibility(true);

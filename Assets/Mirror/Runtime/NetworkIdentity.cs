@@ -81,7 +81,7 @@ namespace Mirror
         /// <para>This value is determined at runtime. For most objects, authority is held by the server.</para>
         /// <para>For objects that had their authority set by AssignClientAuthority on the server, this will be true on the client that owns the object. NOT on other clients.</para>
         /// </summary>
-        public bool hasAuthority { get; internal set; }
+        public bool HasAuthority { get; internal set; }
 
         /// <summary>
         /// The set of network connections (players) that can see this object.
@@ -207,7 +207,7 @@ namespace Mirror
         public UnityEvent OnStartLocalPlayer = new UnityEvent();
 
         /// <summary>
-        /// This is invoked on behaviours that have authority, based on context and <see cref="NetworkIdentity.hasAuthority">NetworkIdentity.hasAuthority</see>.
+        /// This is invoked on behaviours that have authority, based on context and <see cref="NetworkIdentity.HasAuthority">NetworkIdentity.hasAuthority</see>.
         /// <para>This is called after <see cref="OnStartServer">OnStartServer</see> and before <see cref="OnStartClient">OnStartClient.</see></para>
         /// <para>When <see cref="NetworkIdentity.AssignClientAuthority"/> is called on the server, this will be called on the client that owns the object. When an object is spawned with <see cref="NetworkServer.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included, this will be called on the client that owns the object.</para>
         /// </summary>
@@ -596,11 +596,11 @@ namespace Mirror
         bool hadAuthority;
         internal void NotifyAuthority()
         {
-            if (!hadAuthority && hasAuthority)
+            if (!hadAuthority && HasAuthority)
                 StartAuthority();
-            if (hadAuthority && !hasAuthority)
+            if (hadAuthority && !HasAuthority)
                 StopAuthority();
-            hadAuthority = hasAuthority;
+            hadAuthority = HasAuthority;
         }
 
         internal void StartAuthority()

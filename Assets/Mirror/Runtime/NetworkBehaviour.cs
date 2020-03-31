@@ -74,9 +74,9 @@ namespace Mirror
 
         /// <summary>
         /// This returns true if this object is the authoritative version of the object in the distributed network application.
-        /// <para>The <see cref="NetworkIdentity.hasAuthority">NetworkIdentity.hasAuthority</see> value on the NetworkIdentity determines how authority is determined. For most objects, authority is held by the server. For objects with <see cref="NetworkIdentity.hasAuthority">NetworkIdentity.hasAuthority</see> set, authority is held by the client of that player.</para>
+        /// <para>The <see cref="NetworkIdentity.HasAuthority">NetworkIdentity.hasAuthority</see> value on the NetworkIdentity determines how authority is determined. For most objects, authority is held by the server. For objects with <see cref="NetworkIdentity.HasAuthority">NetworkIdentity.hasAuthority</see> set, authority is held by the client of that player.</para>
         /// </summary>
-        public bool hasAuthority => netIdentity.hasAuthority;
+        public bool hasAuthority => netIdentity.HasAuthority;
 
         /// <summary>
         /// The unique network Id of this object.

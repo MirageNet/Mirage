@@ -414,37 +414,37 @@ namespace Mirror.Tests
             identity.OnStopAuthority.AddListener(stopAuthFunc);
 
             // set authority from false to true, which should call OnStartAuthority
-            identity.hasAuthority = true;
+            identity.HasAuthority = true;
             identity.NotifyAuthority();
             // shouldn't be touched
-            Assert.That(identity.hasAuthority, Is.True);
+            Assert.That(identity.HasAuthority, Is.True);
             // start should be called
             startAuthFunc.Received(1).Invoke();
             stopAuthFunc.Received(0).Invoke();
 
             // set it to true again, should do nothing because already true
-            identity.hasAuthority = true;
+            identity.HasAuthority = true;
             identity.NotifyAuthority();
             // shouldn't be touched
-            Assert.That(identity.hasAuthority, Is.True);
+            Assert.That(identity.HasAuthority, Is.True);
             // same as before
             startAuthFunc.Received(1).Invoke();
             stopAuthFunc.Received(0).Invoke();
 
             // set it to false, should call OnStopAuthority
-            identity.hasAuthority = false;
+            identity.HasAuthority = false;
             identity.NotifyAuthority();
             // shouldn't be touched
-            Assert.That(identity.hasAuthority, Is.False);
+            Assert.That(identity.HasAuthority, Is.False);
             // same as before
             startAuthFunc.Received(1).Invoke();
             stopAuthFunc.Received(1).Invoke();
 
             // set it to false again, should do nothing because already false
-            identity.hasAuthority = false;
+            identity.HasAuthority = false;
             identity.NotifyAuthority();
             // shouldn't be touched
-            Assert.That(identity.hasAuthority, Is.False);
+            Assert.That(identity.HasAuthority, Is.False);
             // same as before
             startAuthFunc.Received(1).Invoke();
             stopAuthFunc.Received(1).Invoke();
