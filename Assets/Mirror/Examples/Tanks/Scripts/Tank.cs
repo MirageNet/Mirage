@@ -20,7 +20,7 @@ namespace Mirror.Examples.Tanks
         void Update()
         {
             // movement for local player
-            if (!isLocalPlayer)
+            if (!IsLocalPlayer)
                 return;
 
             // rotate

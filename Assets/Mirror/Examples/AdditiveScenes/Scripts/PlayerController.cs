@@ -29,7 +29,7 @@ namespace Mirror.Examples.Additive
 
         void OnDisable()
         {
-            if (isLocalPlayer)
+            if (IsLocalPlayer)
             {
                 Camera.main.orthographic = true;
                 Camera.main.transform.SetParent(null);
@@ -54,7 +54,7 @@ namespace Mirror.Examples.Additive
 
         void Update()
         {
-            if (!isLocalPlayer)
+            if (!IsLocalPlayer)
                 return;
 
             horizontal = Input.GetAxis("Horizontal");
@@ -84,7 +84,7 @@ namespace Mirror.Examples.Additive
 
         void FixedUpdate()
         {
-            if (!isLocalPlayer || characterController == null)
+            if (!IsLocalPlayer || characterController == null)
                 return;
 
             transform.Rotate(0f, turn * Time.fixedDeltaTime, 0f);

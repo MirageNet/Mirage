@@ -68,7 +68,7 @@ namespace Mirror.Tests
             public void OnStartServer()
             {
                 Assert.That(IsClient, Is.True);
-                Assert.That(isLocalPlayer, Is.False);
+                Assert.That(IsLocalPlayer, Is.False);
                 Assert.That(IsServer, Is.True);
                 called = true;
             }
