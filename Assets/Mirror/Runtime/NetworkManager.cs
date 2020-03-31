@@ -710,10 +710,10 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerRemovePlayerMessageInternal");
 
-            if (conn.identity != null)
+            if (conn.Identity != null)
             {
-                OnServerRemovePlayer(conn, conn.identity);
-                conn.identity = null;
+                OnServerRemovePlayer(conn, conn.Identity);
+                conn.Identity = null;
             }
         }
 
@@ -778,7 +778,7 @@ namespace Mirror
         /// <param name="conn">Connection from client.</param>
         public virtual void OnServerReady(NetworkConnection conn)
         {
-            if (conn.identity == null)
+            if (conn.Identity == null)
             {
                 // this is now allowed (was not for a while)
                 if (LogFilter.Debug) Debug.Log("Ready with no player object");
