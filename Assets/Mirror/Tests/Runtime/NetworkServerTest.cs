@@ -138,6 +138,16 @@ namespace Mirror.Tests
             Assert.That(server.active, Is.False);
         }
 
+        [UnityTest]
+        public IEnumerator DisconnectRemoveHandlers()
+        {
+            Assert.That(server.Connected.GetListenerNumber(), Is.EqualTo(1));
+            Assert.That(server.active, Is.True);
+            server.Disconnect();
+
+            yield return null;
+            Assert.That(server.Connected.GetListenerNumber(), Is.Zero);
+        }
 
         [Test]
         public void ConnectedEventTest()
