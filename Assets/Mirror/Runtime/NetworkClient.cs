@@ -987,7 +987,7 @@ namespace Mirror
             if (Spawned.TryGetValue(msg.netId, out NetworkIdentity identity))
             {
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
-                    identity.HandleRPC(msg.componentIndex, msg.functionHash, networkReader);
+                    identity.HandleRpc(msg.componentIndex, msg.functionHash, networkReader);
             }
         }
 

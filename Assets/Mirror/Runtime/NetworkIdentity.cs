@@ -856,7 +856,7 @@ namespace Mirror
         }
 
         // happens on client
-        internal void HandleRPC(int componentIndex, int rpcHash, NetworkReader reader)
+        internal void HandleRpc(int componentIndex, int rpcHash, NetworkReader reader)
         {
             HandleRemoteCall(componentIndex, rpcHash, MirrorInvokeType.ClientRpc, reader);
         }
