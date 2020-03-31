@@ -255,7 +255,7 @@ namespace Mirror
                 infos.Add(GetBoolean("Is Client", identity.IsClient));
                 infos.Add(GetBoolean("Is Server", identity.IsServer));
                 infos.Add(GetBoolean("Has Authority", identity.hasAuthority));
-                infos.Add(GetBoolean("Is Local Player", identity.isLocalPlayer));
+                infos.Add(GetBoolean("Is Local Player", identity.IsLocalPlayer));
             }
             return infos;
         }
