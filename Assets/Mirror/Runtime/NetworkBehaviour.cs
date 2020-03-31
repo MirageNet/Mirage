@@ -249,7 +249,7 @@ namespace Mirror
 
         #region Client RPCs
         [EditorBrowsable(EditorBrowsableState.Never)]
-        protected void SendRPCInternal(Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
+        protected void SendRpcInternal(Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
         {
             // this was in Weaver before
             if (!Server.active)
