@@ -102,7 +102,7 @@ namespace Mirror
         /// <summary>
         /// The <see cref="NetworkConnection">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
         /// </summary>
-        public NetworkConnection connectionToClient => netIdentity.connectionToClient;
+        public NetworkConnection ConnectionToClient => netIdentity.connectionToClient;
 
         public NetworkTime NetworkTime => IsClient ? Client.Time : Server.Time;
 
@@ -290,7 +290,7 @@ namespace Mirror
             // connection parameter is optional. assign if null.
             if (conn == null)
             {
-                conn = connectionToClient;
+                conn = ConnectionToClient;
             }
             // this was in Weaver before
             if (conn is NetworkConnectionToServer)
