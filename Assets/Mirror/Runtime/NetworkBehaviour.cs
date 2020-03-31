@@ -326,7 +326,7 @@ namespace Mirror
         /// <param name="reader">Parameters to pass to the RPC function.</param>
         /// <returns>Returns true if successful.</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public virtual bool InvokeRPC(int rpcHash, NetworkReader reader)
+        public virtual bool InvokeRpc(int rpcHash, NetworkReader reader)
         {
             return InvokeHandlerDelegate(rpcHash, MirrorInvokeType.ClientRpc, reader);
         }
