@@ -73,7 +73,7 @@ namespace Mirror
 
             if (Time.time - lastUpdateTime > VisibilityUpdateInterval)
             {
-                netIdentity.RebuildObservers(false);
+                NetIdentity.RebuildObservers(false);
                 lastUpdateTime = Time.time;
             }
         }

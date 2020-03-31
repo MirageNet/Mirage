@@ -44,23 +44,23 @@ namespace Mirror
         /// Returns true if this object is active on an active server.
         /// <para>This is only true if the object has been spawned. This is different from NetworkServer.active, which is true if the server itself is active rather than this object being active.</para>
         /// </summary>
-        public bool IsServer => netIdentity.isServer;
+        public bool IsServer => NetIdentity.isServer;
 
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
         /// </summary>
-        public bool IsClient => netIdentity.isClient;
+        public bool IsClient => NetIdentity.isClient;
 
         /// <summary>
         /// Returns true if we're on host mode.
         /// </summary>
-        public bool IsLocalClient => netIdentity.isLocalClient;
+        public bool IsLocalClient => NetIdentity.isLocalClient;
 
         /// <summary>
         /// This returns true if this object is the one that represents the player on the local machine.
         /// <para>In multiplayer games, there are multiple instances of the Player object. The client needs to know which one is for "themselves" so that only that player processes input and potentially has a camera attached. The IsLocalPlayer function will return true only for the player instance that belongs to the player on the local machine, so it can be used to filter out input for non-local players.</para>
         /// </summary>
-        public bool IsLocalPlayer => netIdentity.isLocalPlayer;
+        public bool IsLocalPlayer => NetIdentity.isLocalPlayer;
 
         /// <summary>
         /// True if this object only exists on the server
@@ -76,33 +76,33 @@ namespace Mirror
         /// This returns true if this object is the authoritative version of the object in the distributed network application.
         /// <para>The <see cref="NetworkIdentity.hasAuthority">NetworkIdentity.hasAuthority</see> value on the NetworkIdentity determines how authority is determined. For most objects, authority is held by the server. For objects with <see cref="NetworkIdentity.hasAuthority">NetworkIdentity.hasAuthority</see> set, authority is held by the client of that player.</para>
         /// </summary>
-        public bool HasAuthority => netIdentity.hasAuthority;
+        public bool HasAuthority => NetIdentity.hasAuthority;
 
         /// <summary>
         /// The unique network Id of this object.
         /// <para>This is assigned at runtime by the network server and will be unique for all objects for that network session.</para>
         /// </summary>
-        public uint NetId => netIdentity.netId;
+        public uint NetId => NetIdentity.netId;
 
         /// <summary>
         /// The <see cref="NetworkServer">NetworkClient</see> associated to this object.
         /// </summary>
-        public NetworkServer Server => netIdentity.server;
+        public NetworkServer Server => NetIdentity.server;
 
         /// <summary>
         /// The <see cref="NetworkClient">NetworkClient</see> associated to this object.
         /// </summary>
-        public NetworkClient Client => netIdentity.client;
+        public NetworkClient Client => NetIdentity.client;
 
         /// <summary>
         /// The <see cref="NetworkConnection">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
         /// </summary>
-        public NetworkConnection ConnectionToServer => netIdentity.connectionToServer;
+        public NetworkConnection ConnectionToServer => NetIdentity.connectionToServer;
 
         /// <summary>
         /// The <see cref="NetworkConnection">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
         /// </summary>
-        public NetworkConnection ConnectionToClient => netIdentity.connectionToClient;
+        public NetworkConnection ConnectionToClient => NetIdentity.connectionToClient;
 
         public NetworkTime NetworkTime => IsClient ? Client.Time : Server.Time;
 
@@ -135,7 +135,7 @@ namespace Mirror
         /// <summary>
         /// Returns the NetworkIdentity of this object
         /// </summary>
-        public NetworkIdentity netIdentity
+        public NetworkIdentity NetIdentity
         {
             get
             {
@@ -162,9 +162,9 @@ namespace Mirror
             get
             {
                 // note: FindIndex causes allocations, we search manually instead
-                for (int i = 0; i < netIdentity.NetworkBehaviours.Length; i++)
+                for (int i = 0; i < NetIdentity.NetworkBehaviours.Length; i++)
                 {
-                    NetworkBehaviour component = netIdentity.NetworkBehaviours[i];
+                    NetworkBehaviour component = NetIdentity.NetworkBehaviours[i];
                     if (component == this)
                         return i;
                 }
@@ -275,7 +275,7 @@ namespace Mirror
                 payload = writer.ToArraySegment()
             };
 
-            Server.SendToReady(netIdentity, message, channelId);
+            Server.SendToReady(NetIdentity, message, channelId);
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -353,7 +353,7 @@ namespace Mirror
                 payload = writer.ToArraySegment()
             };
 
-            Server.SendToReady(netIdentity, message, channelId);
+            Server.SendToReady(NetIdentity, message, channelId);
         }
 
         /// <summary>

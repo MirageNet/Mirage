@@ -10,7 +10,7 @@ namespace Mirror.Examples.Additive
 
         void Awake()
         {
-            netIdentity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
+            NetIdentity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
         }
 
         void OnValidate()

@@ -10,7 +10,7 @@ namespace Mirror.Examples.Tanks
 
         void Awake()
         {
-            netIdentity.OnStartServer.AddListener(OnStartServer);
+            NetIdentity.OnStartServer.AddListener(OnStartServer);
         }
 
         public void OnStartServer()
