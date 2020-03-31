@@ -256,7 +256,7 @@ namespace Mirror
             // thus we should set the connected state before calling the handler
             connectState = ConnectState.Connected;
             Time.UpdateClient(this);
-            Connected.Invoke((NetworkConnectionToServer)Connection);
+            Connected.Invoke(Connection);
         }
 
         public void OnAuthenticated(NetworkConnectionToServer conn)
