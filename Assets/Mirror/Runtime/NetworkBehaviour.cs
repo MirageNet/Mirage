@@ -87,7 +87,7 @@ namespace Mirror
         /// <summary>
         /// The <see cref="NetworkServer">NetworkClient</see> associated to this object.
         /// </summary>
-        public NetworkServer server => netIdentity.server;
+        public NetworkServer Server => netIdentity.server;
 
         /// <summary>
         /// The <see cref="NetworkClient">NetworkClient</see> associated to this object.
@@ -104,7 +104,7 @@ namespace Mirror
         /// </summary>
         public NetworkConnection connectionToClient => netIdentity.connectionToClient;
 
-        public NetworkTime NetworkTime => IsClient ? client.Time : server.Time;
+        public NetworkTime NetworkTime => IsClient ? client.Time : Server.Time;
 
         protected ulong syncVarDirtyBits { get; private set; }
         ulong syncVarHookGuard;
@@ -252,7 +252,7 @@ namespace Mirror
         protected void SendRPCInternal(Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
         {
             // this was in Weaver before
-            if (!server.active)
+            if (!Server.active)
             {
                 Debug.LogError("RPC Function " + rpcName + " called on Client.");
                 return;
@@ -275,14 +275,14 @@ namespace Mirror
                 payload = writer.ToArraySegment()
             };
 
-            server.SendToReady(netIdentity, message, channelId);
+            Server.SendToReady(netIdentity, message, channelId);
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected void SendTargetRPCInternal(NetworkConnection conn, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
         {
             // this was in Weaver before
-            if (!server.active)
+            if (!Server.active)
             {
                 Debug.LogError("TargetRPC Function " + rpcName + " called on client.");
                 return;
@@ -336,7 +336,7 @@ namespace Mirror
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected void SendEventInternal(Type invokeClass, string eventName, NetworkWriter writer, int channelId)
         {
-            if (!server.active)
+            if (!Server.active)
             {
                 Debug.LogWarning("SendEvent no server?");
                 return;
@@ -353,7 +353,7 @@ namespace Mirror
                 payload = writer.ToArraySegment()
             };
 
-            server.SendToReady(netIdentity, message, channelId);
+            Server.SendToReady(netIdentity, message, channelId);
         }
 
         /// <summary>
