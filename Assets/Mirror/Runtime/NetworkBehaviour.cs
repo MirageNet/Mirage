@@ -65,7 +65,7 @@ namespace Mirror
         /// <summary>
         /// True if this object only exists on the server
         /// </summary>
-        public bool isServerOnly => IsServer && !IsClient;
+        public bool IsServerOnly => IsServer && !IsClient;
 
         /// <summary>
         /// True if this object exists on a client that is not also acting as a server

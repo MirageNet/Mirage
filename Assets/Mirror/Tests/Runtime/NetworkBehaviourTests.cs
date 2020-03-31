@@ -31,7 +31,7 @@ namespace Mirror.Tests
         [Test]
         public void IsServerOnly()
         {
-            Assert.That(component.isServerOnly, Is.False);
+            Assert.That(component.IsServerOnly, Is.False);
         }
 
         [Test]
