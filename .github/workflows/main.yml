@@ -89,7 +89,7 @@ jobs:
           path: Tests
 
       - name: Publish github check
-        uses: MirrorNG/nunit-reporter@v0.0.1
+        uses: MirrorNG/nunit-reporter@0.0.1
         if: always()
         with:
           path: "Tests/*.xml"
