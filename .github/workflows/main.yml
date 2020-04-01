@@ -10,7 +10,6 @@ on:
       - '*.md'
   
 jobs:
-
   requestActivationFile:
     runs-on: ubuntu-latest
     if: false
@@ -30,8 +29,8 @@ jobs:
             name: Manual Activation File
             path: ${{ steps.getManualLicenseFile.outputs.filePath }}
     
-  testRunnerInAllModes:
-    name: Unity test
+  build:
+    name: Main
     runs-on: ubuntu-latest
     env:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
