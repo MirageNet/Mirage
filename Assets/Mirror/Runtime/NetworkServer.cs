@@ -210,6 +210,16 @@ namespace Mirror
             if (authenticator != null)
                 authenticator.OnServerAuthenticated -= OnAuthenticated;
 
+            if (authenticator != null)
+            {
+                Connected.RemoveListener(authenticator.OnServerAuthenticateInternal);
+            }
+            else
+            {
+                // if no authenticator, consider every connection as authenticated
+                Connected.RemoveListener(OnAuthenticated);
+            }
+
             Stopped.Invoke();
             initialized = false;
             active = false;
