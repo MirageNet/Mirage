@@ -91,7 +91,7 @@ jobs:
       - name: Convert Test results
         if: always()
         run: |
-          sudo apt-get install xsltproc
+          sudo apt install xsltproc
           curl https://raw.githubusercontent.com/jenkinsci/nunit-plugin/master/src/main/resources/hudson/plugins/nunit/nunit-to-junit.xsl -O
           xsltproc -o Tests/editmode-results-junit.xml nunit-to-junit.xsl Tests/editmode-results.xml 
           xsltproc -o Tests/playmode-results-junit.xml nunit-to-junit.xsl Tests/playmode-results.xml 
