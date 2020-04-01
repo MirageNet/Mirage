@@ -298,7 +298,16 @@ namespace Mirror
             connectState = ConnectState.None;
 
             if (authenticator != null)
+            { 
                 authenticator.OnClientAuthenticated -= OnAuthenticated;
+
+                Connected.RemoveListener(authenticator.OnClientAuthenticateInternal);
+            }
+            else
+            {
+                // if no authenticator, consider connection as authenticated
+                Connected.RemoveListener(OnAuthenticated);
+            }
 
         }
 
