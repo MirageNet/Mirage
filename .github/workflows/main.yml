@@ -89,10 +89,11 @@ jobs:
           path: Tests
 
       # Upload artifacts
-      - name: Publish tests
-        if: always()
-        run:
-          python reportci.py --include='Tests/*.xml'
+      - uses: check-run-reporter/action@master
+        env:
+          CHECK_RUN_REPORTER_LABEL: 'Unit Tests'
+          CHECK_RUN_REPORTER_REPORT: 'Tests/*.xml'
+          CHECK_RUN_REPORTER_TOKEN: ${{ secrets.CHECK_RUN_REPORTER_TOKEN }}
 
       - name: SonarQube analysis
         if: always()
