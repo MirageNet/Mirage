@@ -85,7 +85,15 @@ account_name = None
 root_dir = None
 os_name = None
 
-if "JENKINS_URL" in env:
+if "GITHUB_ACTIONS" in env:
+  service="github"
+  branch = env.get("GITHUB_REF").split("/")[-1]
+  commit=env.get("GITHUB_SHA")
+  build = env.get("GITHUB_RUN_ID")
+  slug = env.get("GITHUB_REPOSITORY")
+
+
+elif "JENKINS_URL" in env:
   print (bcolors.HEADER + "    Jenkins CI detected." + bcolors.ENDC)
   # https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project
   # https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin#GitHubpullrequestbuilderplugin-EnvironmentVariables
