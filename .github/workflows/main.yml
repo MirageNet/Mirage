@@ -88,11 +88,18 @@ jobs:
           name: Test results (editor mode)
           path: Tests
 
+      - name: Convert Test results
+        if: always()
+        run:
+          curl https://raw.githubusercontent.com/jenkinsci/nunit-plugin/master/src/main/resources/hudson/plugins/nunit/nunit-to-junit.xsl -O
+          xsltproc -o Tests/editmode-results-junit.xml nunit-to-junit.xsl Tests/editmode-results.xml 
+          xsltproc -o Tests/playmode-results-junit.xml nunit-to-junit.xsl Tests/playmode-results.xml 
+
       # Upload artifacts
       - uses: check-run-reporter/action@master
         env:
           CHECK_RUN_REPORTER_LABEL: 'Unit Tests'
-          CHECK_RUN_REPORTER_REPORT: 'Tests/*.xml'
+          CHECK_RUN_REPORTER_REPORT: 'Tests/*-junit.xml'
           CHECK_RUN_REPORTER_TOKEN: ${{ secrets.CHECK_RUN_REPORTER_TOKEN }}
 
       - name: SonarQube analysis
