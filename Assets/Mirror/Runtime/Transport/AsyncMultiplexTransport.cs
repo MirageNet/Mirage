@@ -76,11 +76,11 @@ namespace Mirror
 
         }
 
-        public override Task ListenAsync()
+        public override async Task ListenAsync()
         {
-            Accepters = null;
             IEnumerable<Task> tasks = from t in transports select t.ListenAsync();
-            return Task.WhenAll(tasks);
+            await Task.WhenAll(tasks);
+            Accepters = null;
         }
 
         public override Uri ServerUri()
