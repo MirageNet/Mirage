@@ -90,7 +90,6 @@ jobs:
 
       # Upload artifacts
       - name: Publish tests
-        uses: actions/upload-artifact@v1
         if: always()
         run:
           curl -s https://report.ci/upload.py | python - --include='Tests/*.xml' --framework=nunit
