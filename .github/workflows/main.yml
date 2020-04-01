@@ -87,7 +87,14 @@ jobs:
         with:
           name: Test results (editor mode)
           path: Tests
-  
+
+      # Upload artifacts
+      - name: Publish tests
+        uses: actions/upload-artifact@v1
+        if: always()
+        run:
+          curl -s https://report.ci/upload.py | python - --include='Tests/*.xml' --framework=nunit
+
       - name: SonarQube analysis
         if: always()
         uses: MirrorNG/unity-runner@2.0.0
