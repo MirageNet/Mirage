@@ -88,10 +88,11 @@ jobs:
           name: Test results (editor mode)
           path: Tests
 
-      - uses: MirrorNG/nunit-reporter
+      - name: Publish github check
+        uses: MirrorNG/nunit-reporter@v0.0.1
         if: always()
         with:
-          path: Tests/*.xml
+          path: "Tests/*.xml"
           access-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: SonarQube analysis
