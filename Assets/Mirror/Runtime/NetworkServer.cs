@@ -208,10 +208,8 @@ namespace Mirror
         {
 
             if (authenticator != null)
+            { 
                 authenticator.OnServerAuthenticated -= OnAuthenticated;
-
-            if (authenticator != null)
-            {
                 Connected.RemoveListener(authenticator.OnServerAuthenticateInternal);
             }
             else
