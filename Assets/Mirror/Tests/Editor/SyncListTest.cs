@@ -44,7 +44,6 @@ namespace Mirror.Tests
         public void TestInit()
         {
             Assert.That(clientSyncList, Is.EquivalentTo(new[] { "Hello", "World", "!" }));
-            Assert.Fail("Testing reporter");
         }
 
         [Test]
