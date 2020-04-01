@@ -73,10 +73,12 @@ namespace Mirror
         {
             foreach (AsyncTransport transport in transports)
                 transport.Disconnect();
+
         }
 
         public override Task ListenAsync()
         {
+            Accepters = null;
             IEnumerable<Task> tasks = from t in transports select t.ListenAsync();
             return Task.WhenAll(tasks);
         }
