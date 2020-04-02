@@ -315,7 +315,7 @@ namespace Mirror.Websocket
             if (clients.TryGetValue(connectionId, out WebSocket client))
             {
                 var wsClient = client as WebSocketImplementation;
-                return wsClient.Context.Client.Client.RemoteEndPoint;
+                return null;
 
             }
             return null;
