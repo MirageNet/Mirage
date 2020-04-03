@@ -1,6 +1,9 @@
 using System;
 
-public interface INetworkConnection : IDisposable
+namespace Mirror
 {
+    public interface INetworkConnection : IDisposable
+    {
 
+    }
 }
