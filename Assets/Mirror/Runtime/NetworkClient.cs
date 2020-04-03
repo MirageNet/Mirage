@@ -149,9 +149,10 @@ namespace Mirror
                 Time.UpdateClient(this);
                 _ = OnConnected();
             }
-            finally
+            catch (Exception)
             {
                 connectState = ConnectState.Disconnected;
+                throw;
             }
         }
 
