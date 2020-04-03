@@ -201,10 +201,20 @@ namespace Mirror
             Connected.Invoke(Connection);
 
             // start processing messages
-            await Connection.ProcessMessagesAsync();
-            Cleanup();
+            try
+            {
+                await Connection.ProcessMessagesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+            finally
+            {
+                Cleanup();
 
-            Disconnected.Invoke();
+                Disconnected.Invoke();
+            }
 
         }
 
