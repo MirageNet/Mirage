@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Rendering;
 
 namespace Mirror
 {
@@ -100,6 +101,11 @@ namespace Mirror
 
         // transport to use to accept connections
         public AsyncTransport transport;
+
+        /// <summary>
+        /// headless mode detection
+        /// </summary>
+        public static bool IsHeadless => SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null;
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.
