@@ -63,7 +63,7 @@ namespace Mirror.Discovery
         public virtual void Start()
         {
             // headless mode? then start advertising
-            if (NetworkManager.IsHeadless)
+            if (NetworkServer.IsHeadless)
             {
                 AdvertiseServer();
             }
