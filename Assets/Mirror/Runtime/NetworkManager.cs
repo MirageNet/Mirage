@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Mirror.AsyncTcp;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
@@ -72,11 +71,6 @@ namespace Mirror
         /// </summary>
         [NonSerialized]
         public bool clientLoadedScene;
-
-        /// <summary>
-        /// headless mode detection
-        /// </summary>
-        public static bool IsHeadless => SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null;
 
         /// <summary>
         /// This is invoked when a host is started.
@@ -154,7 +148,7 @@ namespace Mirror
             // some transports might not be ready until Start.
             //
             // (tick rate is applied in StartServer!)
-            if (IsHeadless && startOnHeadless)
+            if (NetworkServer.IsHeadless && startOnHeadless)
             {
                 _ = StartServer();
             }
