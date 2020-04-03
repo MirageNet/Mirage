@@ -131,19 +131,28 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("Client Connect: " + uri);
 
-            RegisterSpawnPrefabs();
-            InitializeAuthEvents();
-
             connectState = ConnectState.Connecting;
-            IConnection transportConnection = await Transport.ConnectAsync(uri);
 
-            // setup all the handlers
-            Connection = new NetworkConnectionToServer(transportConnection);
-            Time.Reset();
+            try
+            {
+                IConnection transportConnection = await Transport.ConnectAsync(uri);
 
-            RegisterMessageHandlers(Connection);
-            Time.UpdateClient(this);
-            _ = OnConnected();
+                
+                RegisterSpawnPrefabs();
+                InitializeAuthEvents();
+
+                // setup all the handlers
+                Connection = new NetworkConnectionToServer(transportConnection);
+                Time.Reset();
+           
+                RegisterMessageHandlers(Connection);
+                Time.UpdateClient(this);
+                _ = OnConnected();
+            }
+            finally
+            {
+                connectState = ConnectState.Disconnected;
+            }
         }
 
         internal void ConnectHost(NetworkServer server)
