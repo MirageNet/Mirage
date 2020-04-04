@@ -131,11 +131,15 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("Client Connect: " + uri);
 
+            AsyncTransport transport = Transport;
+            if (transport == null)
+                transport = GetComponent<AsyncTransport>();
+
             connectState = ConnectState.Connecting;
 
             try
             {
-                IConnection transportConnection = await Transport.ConnectAsync(uri);
+                IConnection transportConnection = await transport.ConnectAsync(uri);
 
                 
                 RegisterSpawnPrefabs();
@@ -176,9 +180,6 @@ namespace Mirror
 
         void InitializeAuthEvents()
         {
-            if (Transport == null)
-                Transport = GetComponent<AsyncTransport>();
-
             if (authenticator != null)
             {
                 authenticator.OnClientAuthenticated += OnAuthenticated;
