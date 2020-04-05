@@ -103,11 +103,6 @@ namespace Mirror
         public AsyncTransport transport;
 
         /// <summary>
-        /// headless mode detection
-        /// </summary>
-        public static bool IsHeadless => SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null;
-
-        /// <summary>
         /// This shuts down the server and disconnects all clients.
         /// </summary>
         public void Disconnect()
