@@ -96,7 +96,7 @@ namespace Mirror
         /// <summary>
         /// Creates a new NetworkConnection with the specified address
         /// </summary>
-        internal NetworkConnection()
+        protected NetworkConnection()
         {
         }
 
