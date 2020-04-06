@@ -94,41 +94,12 @@ namespace Mirror
         public bool logNetworkMessages;
 
         /// <summary>
-        /// Creates a new NetworkConnection with the specified address
-        /// </summary>
-        protected NetworkConnection()
-        {
-        }
-
-        /// <summary>
         /// Creates a new NetworkConnection with the specified address and connectionId
         /// </summary>
         /// <param name="networkConnectionId"></param>
         protected NetworkConnection(IConnection connection)
         {
             this.connection = connection;
-        }
-
-        ~NetworkConnection()
-        {
-            Dispose(false);
-        }
-
-        /// <summary>
-        /// Disposes of this connection, releasing channel buffers that it holds.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            // Take yourself off the Finalization queue
-            // to prevent finalization code for this object
-            // from executing a second time.
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            clientOwnedObjects.Clear();
         }
 
         /// <summary>
@@ -170,12 +141,6 @@ namespace Mirror
 
                     message = default(T) != null ? default(T) : new T();
                     message.Deserialize(reader);
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogError("Closed connection: " + conn + ". This can happen if the other side accidentally (or an attacker intentionally) sent invalid data. Reason: " + exception);
-                    conn.Disconnect();
-                    return;
                 }
                 finally
                 {
@@ -339,31 +304,6 @@ namespace Mirror
             return false;
         }
 
-        /// <summary>
-        /// This function invokes the registered handler function for a message.
-        /// <para>Network connections used by the NetworkClient and NetworkServer use this function for handling network messages.</para>
-        /// </summary>
-        /// <typeparam name="T">The message type to unregister.</typeparam>
-        /// <param name="msg">The message object to process.</param>
-        /// <returns></returns>
-        public bool InvokeHandler<T>(T msg, int channelId) where T : IMessageBase
-        {
-            // get writer from pool
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
-            {
-                // if it is a value type,  just use typeof(T) to avoid boxing
-                // this works because value types cannot be derived
-                // if it is a reference type (for example IMessageBase),
-                // ask the message for the real type
-                int msgType = MessagePacker.GetId(default(T) != null ? typeof(T) : msg.GetType());
-
-                MessagePacker.Pack(msg, writer);
-                var segment = writer.ToArraySegment();
-                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(segment))
-                    return InvokeHandler(msgType, networkReader, channelId);
-            }
-        }
-
         // note: original HLAPI HandleBytes function handled >1 message in a while loop, but this wasn't necessary
         //       anymore because NetworkServer/NetworkClient Update both use while loops to handle >1 data events per
         //       frame already.
@@ -391,7 +331,7 @@ namespace Mirror
                         lastMessageTime = Time.time;
                     }
                 }
-                catch (IOException ex)
+                catch (Exception ex)
                 {
                     Debug.LogError("Closed connection: " + this + ". Invalid message " + ex);
                     Disconnect();
