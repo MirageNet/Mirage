@@ -793,7 +793,7 @@ namespace Mirror
                 return;
             }
             identity.Reset();
-            identity.ConnectionToClient = (NetworkConnection)ownerConnection;
+            identity.ConnectionToClient = ownerConnection;
             identity.Server = this;
             identity.Client = localClient;
 
