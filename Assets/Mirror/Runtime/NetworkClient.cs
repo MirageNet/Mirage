@@ -417,15 +417,6 @@ namespace Mirror
             }
         }
 
-        internal void HandleClientDisconnect()
-        {
-            DestroyAllClientObjects();
-            ready = false;
-            Connection = null;
-
-            Disconnected.Invoke();
-        }
-
         /// <summary>
         /// Call this after loading/unloading a scene in the client after connection to register the spawnable objects
         /// </summary>
