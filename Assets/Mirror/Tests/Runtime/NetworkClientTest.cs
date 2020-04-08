@@ -96,5 +96,17 @@ namespace Mirror.Tests
         {
             Assert.That(NetworkClient.Current == null);
         }
+
+        [Test]
+        public void ReadyTest()
+        {
+            Assert.That(!client.ready);
+
+            client.ConnectHost(server);
+
+            Assert.That(client.Ready(client.Connection));
+            Assert.That(client.ready);
+            Assert.That(client.Connection.isReady);
+        }
     }
 }
