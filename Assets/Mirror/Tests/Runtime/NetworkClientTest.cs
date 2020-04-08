@@ -108,5 +108,31 @@ namespace Mirror.Tests
             Assert.That(client.ready);
             Assert.That(client.Connection.isReady);
         }
+
+        [UnityTest]
+        public IEnumerable RemovePlayerTest()
+        {
+            bool result = client.RemovePlayer();
+            Assert.That(!result);
+
+            PlayerSpawner spawner = serverGO.AddComponent<PlayerSpawner>();
+
+            spawner.server = server;
+            spawner.client = client;
+            spawner.playerPrefab = identity;
+            spawner.Start();
+
+            client.ConnectHost(server);
+
+            yield return null;
+
+            Assert.That(client.Connection.Identity != null);
+
+            result = client.RemovePlayer();
+            Assert.That(identity == null);
+            Assert.That(client.Connection.Identity == null);
+            Assert.That(client.LocalPlayer == null);
+            Assert.That(result);
+        }
     }
 }
