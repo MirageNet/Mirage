@@ -57,12 +57,12 @@ namespace Mirror
         public NetworkConnection LocalConnection { get; private set; }
 
         // The host client for this server 
-        public NetworkClient localClient { get; private set; }
+        public NetworkClient LocalClient { get; private set; }
 
         /// <summary>
         /// True if there is a local client connected to this server (host mode)
         /// </summary>
-        public bool LocalClientActive => localClient != null && localClient.Active;
+        public bool LocalClientActive => LocalClient != null && LocalClient.Active;
 
 
         /// <summary>
@@ -261,7 +261,7 @@ namespace Mirror
 
             NetworkConnection conn = new NetworkConnection(tconn);
             LocalConnection = conn;
-            localClient = client;
+            LocalClient = client;
 
             _ = ConnectionAcceptedAsync(conn);
 
@@ -575,7 +575,7 @@ namespace Mirror
             // set server to the NetworkIdentity
             identity.Server = this;
 
-            identity.Client = this.localClient;
+            identity.Client = this.LocalClient;
 
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
             identity.SetClientOwner(conn);
@@ -584,7 +584,7 @@ namespace Mirror
             if (conn == LocalConnection)
             {
                 identity.HasAuthority = true;
-                this.localClient.InternalAddPlayer(identity);
+                this.LocalClient.InternalAddPlayer(identity);
             }
 
             // set ready if not set yet
@@ -795,7 +795,7 @@ namespace Mirror
             identity.Reset();
             identity.ConnectionToClient = ownerConnection;
             identity.Server = this;
-            identity.Client = localClient;
+            identity.Client = LocalClient;
 
             // special case to make sure hasAuthority is set
             // on start server in host mode
