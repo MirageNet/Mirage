@@ -656,14 +656,13 @@ namespace Mirror
         // -> OnDeserialize carefully extracts each data, then deserializes the barrier and check it
         //    -> If we read too many or too few bytes,  the barrier is very unlikely to match
         //    -> we can properly track down errors
-        bool OnSerializeSafely(NetworkBehaviour comp, NetworkWriter writer, bool initialState)
+        void OnSerializeSafely(NetworkBehaviour comp, NetworkWriter writer, bool initialState)
         {
             bool result = comp.OnSerialize(writer, initialState);
             if (LogFilter.Debug) { Debug.Log("OnSerializeSafely written for object=" + comp.name + " component=" + comp.GetType() + " sceneId=" + sceneId); }
 
             // serialize a barrier to be checked by the deserializer
             writer.WriteByte(Barrier);
-            return result;
         }
 
         // serialize all components (or only dirty ones if not initial state)
