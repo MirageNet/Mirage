@@ -54,7 +54,7 @@ namespace Mirror
         // original HLAPI has .localConnections list with only m_LocalConnection in it
         // (for backwards compatibility because they removed the real localConnections list a while ago)
         // => removed it for easier code. use .localConnection now!
-        public NetworkConnection localConnection { get; private set; }
+        public NetworkConnection LocalConnection { get; private set; }
 
         // The host client for this server 
         public NetworkClient localClient { get; private set; }
@@ -253,14 +253,14 @@ namespace Mirror
         // called by LocalClient to add itself. dont call directly.
         internal void SetLocalConnection(NetworkClient client, IConnection tconn)
         {
-            if (localConnection != null)
+            if (LocalConnection != null)
             {
                 Debug.LogError("Local Connection already exists");
                 return;
             }
 
             NetworkConnection conn = new NetworkConnection(tconn);
-            localConnection = conn;
+            LocalConnection = conn;
             localClient = client;
 
             _ = ConnectionAcceptedAsync(conn);
@@ -418,8 +418,8 @@ namespace Mirror
 
             Disconnected.Invoke(connection);
 
-            if (connection == localConnection)
-                localConnection = null;
+            if (connection == LocalConnection)
+                LocalConnection = null;
         }
 
         internal void OnAuthenticated(NetworkConnection conn)
@@ -581,7 +581,7 @@ namespace Mirror
             identity.SetClientOwner(conn);
 
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
-            if (conn == localConnection)
+            if (conn == LocalConnection)
             {
                 identity.HasAuthority = true;
                 this.localClient.InternalAddPlayer(identity);
@@ -639,7 +639,7 @@ namespace Mirror
             //NOTE: DONT set connection ready.
 
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
-            if (conn == localConnection)
+            if (conn == LocalConnection)
             {
                 identity.HasAuthority = true;
                 client.InternalAddPlayer(identity);
@@ -799,7 +799,7 @@ namespace Mirror
 
             // special case to make sure hasAuthority is set
             // on start server in host mode
-            if (ownerConnection == localConnection)
+            if (ownerConnection == LocalConnection)
                 identity.HasAuthority = true;
 
             identity.StartServer();

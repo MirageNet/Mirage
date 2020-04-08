@@ -911,9 +911,9 @@ namespace Mirror
             }
 
             // add local host connection (if any)
-            if (Server.localConnection != null && Server.localConnection.isReady)
+            if (Server.LocalConnection != null && Server.LocalConnection.isReady)
             {
-                AddObserver(Server.localConnection);
+                AddObserver(Server.LocalConnection);
             }
         }
 
@@ -1014,7 +1014,7 @@ namespace Mirror
             //      iterating all identities in a special function in StartHost.
             if (initialize)
             {
-                if (!newObservers.Contains(Server.localConnection))
+                if (!newObservers.Contains(Server.LocalConnection))
                 {
                     OnSetHostVisibility(false);
                 }
