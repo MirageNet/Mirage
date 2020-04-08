@@ -27,7 +27,6 @@ namespace Mirror.Websocket
         public EndPoint GetEndPointAddress()
         {
             var wsClient = webSocket as WebSocketImplementation;
-            wsClient.Close();
             return wsClient.TcpClient.Client.RemoteEndPoint;
         }
         
