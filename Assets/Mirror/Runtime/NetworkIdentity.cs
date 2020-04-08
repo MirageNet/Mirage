@@ -63,7 +63,7 @@ namespace Mirror
         /// <summary>
         /// Returns true if NetworkServer.active and server is not stopped.
         /// </summary>
-        public bool IsServer => Server != null && Server.active && NetId != 0;
+        public bool IsServer => Server != null && Server.Active && NetId != 0;
 
         /// <summary>
         /// Returns true if we're on host mode.

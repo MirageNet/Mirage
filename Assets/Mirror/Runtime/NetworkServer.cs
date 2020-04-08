@@ -86,7 +86,7 @@ namespace Mirror
         /// <para>Checks if the server has been started.</para>
         /// <para>This will be true after NetworkServer.Listen() has been called.</para>
         /// </summary>
-        public bool active { get; private set; }
+        public bool Active { get; private set; }
 
         public readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
 
@@ -166,7 +166,7 @@ namespace Mirror
                 if (LogFilter.Debug) Debug.Log("Server started listening");
             }
 
-            active = true;
+            Active = true;
 
             // call OnStartServer AFTER Listen, so that NetworkServer.active is
             // true and we can call NetworkServer.Spawn in OnStartServer
@@ -220,7 +220,7 @@ namespace Mirror
 
             Stopped.Invoke();
             initialized = false;
-            active = false;
+            Active = false;
         }
 
         /// <summary>
@@ -350,7 +350,7 @@ namespace Mirror
         // The user should never need to pump the update loop manually
         internal void Update()
         {
-            if (!active)
+            if (!Active)
                 return;
 
             // update all server objects
@@ -780,7 +780,7 @@ namespace Mirror
 
         internal void SpawnObject(GameObject obj, NetworkConnection ownerConnection)
         {
-            if (!active)
+            if (!Active)
             {
                 Debug.LogError("SpawnObject for " + obj + ", NetworkServer is not active. Cannot spawn objects without an active server.");
                 return;
@@ -1036,7 +1036,7 @@ namespace Mirror
         public bool SpawnObjects()
         {
             // only if server active
-            if (!active)
+            if (!Active)
                 return false;
 
             NetworkIdentity[] identities = Resources.FindObjectsOfTypeAll<NetworkIdentity>();
