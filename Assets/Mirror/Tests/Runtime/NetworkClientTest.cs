@@ -134,5 +134,28 @@ namespace Mirror.Tests
             Assert.That(client.LocalPlayer == null);
             Assert.That(result);
         }
+
+        [Test]
+        public void RegisterPrefabTest()
+        {
+            System.Guid guid = new System.Guid();
+            client.RegisterPrefab(gameObject, guid);
+
+            Assert.That(gameObject.GetComponent<NetworkIdentity>().AssetId == guid);
+        }
+
+        [UnityTest]
+        public IEnumerable GetPrefabTest()
+        {
+            System.Guid guid = new System.Guid();
+            client.RegisterPrefab(gameObject, guid);
+
+            yield return null;
+
+            client.GetPrefab(guid, out GameObject result);
+
+            Assert.That(result != null);
+            Assert.That(result.GetComponent<NetworkIdentity>().AssetId == guid);
+        }
     }
 }
