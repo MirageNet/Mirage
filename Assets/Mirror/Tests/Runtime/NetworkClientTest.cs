@@ -1,7 +1,5 @@
 using System;
 using System.Collections;
-using System.Threading.Tasks;
-using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -22,34 +20,17 @@ namespace Mirror.Tests
         GameObject gameObject;
         NetworkIdentity identity;
 
-        IConnection tconn68;
-        IConnection tconn70;
-
-        MockTransport transport;
-
-        TaskCompletionSource<bool> tconn68Receive;
-
         [UnitySetUp]
         public IEnumerator SetUp() => RunAsync(async () =>
         {
             serverGO = new GameObject();
-            transport = serverGO.AddComponent<MockTransport>();
+            serverGO.AddComponent<MockTransport>();
+
             server = serverGO.AddComponent<NetworkServer>();
             client = serverGO.AddComponent<NetworkClient>();
 
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
-
-            tconn68 = Substitute.For<IConnection>();
-            tconn70 = Substitute.For<IConnection>();
-
-            tconn68Receive = new TaskCompletionSource<bool>();
-
-            Task<bool> task42 = tconn68Receive.Task;
-            Task<bool> task43 = tconn68Receive.Task; //TODO why is this the same receive like on NetworkServerTest?
-
-            tconn68.ReceiveAsync(null).ReturnsForAnyArgs(task42);
-            tconn70.ReceiveAsync(null).ReturnsForAnyArgs(task43);
 
             await server.ListenAsync();
         });
