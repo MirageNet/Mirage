@@ -350,7 +350,7 @@ namespace Mirror
             if (LogFilter.Debug) Debug.Log("ClientScene.RemovePlayer() called with connection [" + Connection + "]");
 
             if (Connection == null)
-                return false;
+                throw new InvalidOperationException("RemovePlayer() failed. NetworkClient is not connected");
 
             if (Connection.Identity == null)
                 return false;
