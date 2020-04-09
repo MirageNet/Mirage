@@ -1,10 +1,8 @@
 using System;
-using System.Runtime.Serialization;
 
 namespace Mirror
 {
 
-    [Serializable]
     public class InvalidMessageException : Exception
     {
         public InvalidMessageException()
