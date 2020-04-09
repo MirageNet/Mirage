@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Mirror.Authenticators;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -9,6 +10,15 @@ using Object = UnityEngine.Object;
 
 namespace Mirror.Tests
 {
+    public class TestClientAuthenticator : NetworkAuthenticator
+    {
+        public int called;
+
+        public override void OnClientAuthenticate(NetworkConnection conn)
+        {
+            ++called;
+        }
+    }
 
     [TestFixture]
     public class NetworkClientTest
@@ -151,6 +161,20 @@ namespace Mirror.Tests
 
             Assert.That(result != null);
             Assert.That(result.GetComponent<NetworkIdentity>().AssetId == guid);
+        }
+
+        [UnityTest]
+        public IEnumerable AuthenticatorTest()
+        {
+            Assert.That(client.authenticator == null);
+            TestClientAuthenticator comp = serverGO.AddComponent<TestClientAuthenticator>();
+
+            yield return null;
+
+            Assert.That(client.authenticator != null);
+            client.ConnectHost(server);
+
+            Assert.That(comp.called, Is.EqualTo(1));
         }
     }
 }
