@@ -111,8 +111,10 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerable RemovePlayerTest()
         {
-            bool result = client.RemovePlayer();
-            Assert.That(!result);
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                _ = client.RemovePlayer();
+            });
 
             PlayerSpawner spawner = serverGO.AddComponent<PlayerSpawner>();
 
@@ -127,11 +129,10 @@ namespace Mirror.Tests
 
             Assert.That(client.Connection.Identity != null);
 
-            result = client.RemovePlayer();
+            Assert.That(client.RemovePlayer());
             Assert.That(identity == null);
             Assert.That(client.Connection.Identity == null);
             Assert.That(client.LocalPlayer == null);
-            Assert.That(result);
         }
 
         [Test]
