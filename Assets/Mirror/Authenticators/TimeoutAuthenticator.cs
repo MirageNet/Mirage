@@ -20,12 +20,12 @@ namespace Mirror.Authenticators
         public void Awake()
         {
             Authenticator.OnClientAuthenticated += HandleClientAuthenticated;
-            Authenticator.OnServerAuthenticated += HandleServerAuthetnicated;
+            Authenticator.OnServerAuthenticated += HandleServerAuthenticated;
         }
 
         private readonly HashSet<NetworkConnection> pendingAuthentication = new HashSet<NetworkConnection>();
 
-        private void HandleServerAuthetnicated(NetworkConnection connection)
+        private void HandleServerAuthenticated(NetworkConnection connection)
         {
             pendingAuthentication.Remove(connection);
             base.OnClientAuthenticate(connection);
