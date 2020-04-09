@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Threading.Tasks;
 using NSubstitute;
@@ -27,7 +28,6 @@ namespace Mirror.Tests
         MockTransport transport;
 
         TaskCompletionSource<bool> tconn68Receive;
-        TaskCompletionSource<bool> tconn70Receive;
 
         [UnitySetUp]
         public IEnumerator SetUp() => RunAsync(async () =>
@@ -44,7 +44,6 @@ namespace Mirror.Tests
             tconn70 = Substitute.For<IConnection>();
 
             tconn68Receive = new TaskCompletionSource<bool>();
-            tconn70Receive = new TaskCompletionSource<bool>();
 
             Task<bool> task42 = tconn68Receive.Task;
             Task<bool> task43 = tconn68Receive.Task; //TODO why is this the same receive like on NetworkServerTest?
@@ -138,7 +137,7 @@ namespace Mirror.Tests
         [Test]
         public void RegisterPrefabTest()
         {
-            System.Guid guid = new System.Guid();
+            Guid guid = Guid.NewGuid();
             client.RegisterPrefab(gameObject, guid);
 
             Assert.That(gameObject.GetComponent<NetworkIdentity>().AssetId == guid);
@@ -147,7 +146,7 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerable GetPrefabTest()
         {
-            System.Guid guid = new System.Guid();
+            Guid guid = Guid.NewGuid();
             client.RegisterPrefab(gameObject, guid);
 
             yield return null;
