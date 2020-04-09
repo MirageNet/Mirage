@@ -65,10 +65,23 @@ namespace Mirror.Tests
             Assert.That(client.Connection != null);
         }
 
-        [Test]
-        public void LocalPlayerTest()
+        [UnityTest]
+        public IEnumerable LocalPlayerTest()
         {
             Assert.That(client.LocalPlayer == null);
+
+            PlayerSpawner spawner = serverGO.AddComponent<PlayerSpawner>();
+
+            spawner.server = server;
+            spawner.client = client;
+            spawner.playerPrefab = identity;
+            spawner.Start();
+
+            client.ConnectHost(server);
+
+            yield return null;
+
+            Assert.That(client.LocalPlayer != null);
         }
 
         [Test]
@@ -109,6 +122,7 @@ namespace Mirror.Tests
             yield return null;
 
             Assert.That(client.Connection.Identity != null);
+            Assert.That(client.LocalPlayer != null);
 
             Assert.That(client.RemovePlayer());
             Assert.That(identity == null);
