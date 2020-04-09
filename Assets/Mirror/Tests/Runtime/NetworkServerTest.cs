@@ -172,8 +172,7 @@ namespace Mirror.Tests
         public void ConnectionTest()
         {
             transport.AcceptCompletionSource.SetResult(tconn42);
-            NetworkConnection conn = server.connections.First();
-            Assert.That(conn.isAuthenticated);
+            Assert.That(server.connections, Has.Count.EqualTo(1));
         }
 
         [Test]
@@ -373,7 +372,7 @@ namespace Mirror.Tests
         {
             // add connection
 
-            NetworkConnection connectionToClient = Substitute.For<NetworkConnection>((IConnection) null);
+            NetworkConnection connectionToClient = Substitute.For<NetworkConnection>((IConnection)null);
 
             NetworkIdentity identity = new GameObject().AddComponent<NetworkIdentity>();
 
