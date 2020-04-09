@@ -18,9 +18,5 @@ namespace Mirror
         public InvalidMessageException(string message, Exception innerException) : base(message, innerException)
         {
         }
-
-        protected InvalidMessageException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }
