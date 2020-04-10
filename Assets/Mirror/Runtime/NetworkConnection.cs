@@ -296,14 +296,14 @@ namespace Mirror
             }
         }
 
-        public void AddOwnedObject(NetworkIdentity obj)
+        public void AddOwnedObject(NetworkIdentity networkIdentity)
         {
-            clientOwnedObjects.Add(obj);
+            clientOwnedObjects.Add(networkIdentity);
         }
 
-        public void RemoveOwnedObject(NetworkIdentity obj)
+        public void RemoveOwnedObject(NetworkIdentity networkIdentity)
         {
-            clientOwnedObjects.Remove(obj);
+            clientOwnedObjects.Remove(networkIdentity);
         }
 
         public void DestroyOwnedObjects()

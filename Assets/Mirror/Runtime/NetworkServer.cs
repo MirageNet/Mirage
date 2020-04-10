@@ -23,7 +23,7 @@ namespace Mirror
     {
         bool initialized;
 
-        [Serializable] public class INetworkConnectionEvent : UnityEvent<INetworkConnection> { }
+        [Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkConnection> { }
 
         /// <summary>
         /// The maximum number of concurrent network connections to support.
@@ -38,9 +38,9 @@ namespace Mirror
         /// </summary>
         public UnityEvent Started = new UnityEvent();
 
-        public INetworkConnectionEvent Connected = new INetworkConnectionEvent();
-        public INetworkConnectionEvent Authenticated = new INetworkConnectionEvent();
-        public INetworkConnectionEvent Disconnected = new INetworkConnectionEvent();
+        public NetworkConnectionEvent Connected = new NetworkConnectionEvent();
+        public NetworkConnectionEvent Authenticated = new NetworkConnectionEvent();
+        public NetworkConnectionEvent Disconnected = new NetworkConnectionEvent();
 
         public UnityEvent Stopped = new UnityEvent();
 
