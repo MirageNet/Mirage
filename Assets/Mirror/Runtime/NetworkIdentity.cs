@@ -672,6 +672,7 @@ namespace Mirror
         //    -> we can properly track down errors
         void OnSerializeSafely(NetworkBehaviour comp, NetworkWriter writer, bool initialState)
         {
+            bool result = comp.OnSerialize(writer, initialState);
             if (LogFilter.Debug) { Debug.Log("OnSerializeSafely written for object=" + comp.name + " component=" + comp.GetType() + " sceneId=" + sceneId); }
 
             // serialize a barrier to be checked by the deserializer
