@@ -867,7 +867,7 @@ namespace Mirror
 
         internal void ClearObservers()
         {
-            foreach (NetworkConnection conn in observers)
+            foreach (INetworkConnection conn in observers)
             {
                 conn.RemoveFromVisList(this);
             }
@@ -915,7 +915,7 @@ namespace Mirror
         internal void AddAllReadyServerConnectionsToObservers()
         {
             // add all server connections
-            foreach (NetworkConnection conn in Server.connections)
+            foreach (INetworkConnection conn in Server.connections)
             {
                 if (conn.IsReady)
                     AddObserver(conn);
@@ -964,7 +964,7 @@ namespace Mirror
             }
 
             // add all newObservers that aren't in .observers yet
-            foreach (NetworkConnection conn in newObservers)
+            foreach (INetworkConnection conn in newObservers)
             {
                 // only add ready connections.
                 // otherwise the player might not be in the world yet or anymore

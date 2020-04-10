@@ -208,10 +208,17 @@ namespace Mirror
                 var segment = writer.ToArraySegment();
                 int count = 0;
 
-                foreach (NetworkConnection conn in connections)
+                foreach (INetworkConnection conn in connections)
                 {
-                    // send to all connections, but don't wait for them
-                    _ = conn.SendAsync(segment);
+                    if (conn is NetworkConnection networkConnection)
+                    {
+                        // send to all connections, but don't wait for them
+                        _ = networkConnection.SendAsync(segment, channelId);
+                    }
+                    else
+                    {
+                        _ = conn.SendAsync(msg, channelId);
+                    }
                     count++;
                 }
 
