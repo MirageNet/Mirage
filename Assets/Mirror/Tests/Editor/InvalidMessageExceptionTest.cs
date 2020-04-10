@@ -2,47 +2,35 @@ using NUnit.Framework;
 
 namespace Mirror.Tests
 {
-    public class ExceptionTest : InvalidMessageException
-    {
-        public void ThrowsOne()
-        {
-            throw new InvalidMessageException();
-        }
-
-        public void ThrowsTwo()
-        {
-            throw new InvalidMessageException("Test Message");
-        }
-
-        public void ThrowsThree()
-        {
-            throw new InvalidMessageException("Test Message Too", new System.Exception());
-        }
-    }
-
     [TestFixture]
     public class InvalidMessageExceptionTest
     {
         [Test]
         public void InvalidMessageTest()
         {
-            ExceptionTest exceptionTest = new ExceptionTest();
+            Assert.Throws<InvalidMessageException>(() =>
+            {
+                throw new InvalidMessageException();
+            });
+        }
 
+        [Test]
+        public void InvalidMessageWithTextTest()
+        {
             InvalidMessageException ex = Assert.Throws<InvalidMessageException>(() =>
             {
-                exceptionTest.ThrowsOne();
-            });
-
-            ex = Assert.Throws<InvalidMessageException>(() =>
-            {
-                exceptionTest.ThrowsTwo();
+                throw new InvalidMessageException("Test Message");
             });
 
             Assert.That(ex.Message, Is.EqualTo("Test Message"));
+        }
 
-            ex = Assert.Throws<InvalidMessageException>(() =>
+        [Test]
+        public void InvalidMessageWithTextAndInnerTest()
+        {
+            InvalidMessageException ex = Assert.Throws<InvalidMessageException>(() =>
             {
-                exceptionTest.ThrowsThree();
+                throw new InvalidMessageException("Test Message Too", new System.Exception());
             });
 
             Assert.That(ex.Message, Is.EqualTo("Test Message Too"));
