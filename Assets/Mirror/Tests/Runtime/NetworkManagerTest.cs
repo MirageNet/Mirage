@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -10,6 +11,19 @@ using static Mirror.Tests.AsyncUtil;
 
 namespace Mirror.Tests
 {
+    public class SimpleNetworkManager : NetworkManager
+    {
+        public void ClientChangeSceneExpose(string newSceneName, SceneOperation sceneOperation = SceneOperation.Normal, bool customHandling = false)
+        {
+            ClientChangeScene(newSceneName, sceneOperation, customHandling);
+        }
+
+        public void ServerChangeSceneExpose(string newSceneName)
+        {
+            ServerChangeScene(newSceneName);
+        }
+    }
+
     [TestFixture]
     public class NetworkManagerTest
     {
@@ -37,7 +51,7 @@ namespace Mirror.Tests
         [TearDown]
         public void TearDownNetworkManager()
         {
-            Object.DestroyImmediate(gameObject);
+            UnityEngine.Object.DestroyImmediate(gameObject);
         }
 
         [Test]
@@ -51,6 +65,30 @@ namespace Mirror.Tests
             Assert.That(manager.IsNetworkActive, Is.False);
 
             Assert.That(manager.networkSceneName, Is.Empty);
+        }
+
+        [Test]
+        public void ClientChangeSceneExceptionTest()
+        {
+            GameObject gameObject = new GameObject();
+            SimpleNetworkManager comp = gameObject.AddComponent<SimpleNetworkManager>();
+
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                comp.ClientChangeScene(string.Empty);
+            });
+        }
+
+        [Test]
+        public void ServerChangeSceneExceptionTest()
+        {
+            GameObject gameObject = new GameObject();
+            SimpleNetworkManager comp = gameObject.AddComponent<SimpleNetworkManager>();
+
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                comp.ServerChangeScene(string.Empty);
+            });
         }
 
         [UnityTest]
