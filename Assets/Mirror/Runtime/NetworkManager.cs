@@ -479,7 +479,6 @@ namespace Mirror
                     else
                     {
                         Debug.LogWarning($"Scene {newSceneName} is already loaded");
-
                     }
                     break;
                 case SceneOperation.UnloadAdditive:
@@ -490,7 +489,6 @@ namespace Mirror
                     else
                     {
                         Debug.LogWarning($"Cannot unload {newSceneName} with UnloadAdditive operation");
-
                     }
                     break;
             }

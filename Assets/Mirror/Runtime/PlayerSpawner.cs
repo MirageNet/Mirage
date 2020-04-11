@@ -61,7 +61,6 @@ namespace Mirror
         {
             if (LogFilter.Debug) Debug.Log("NetworkManager.OnServerAddPlayer");
 
-
             if (conn.Identity != null)
             {
                 throw new InvalidOperationException("There is already a player for this connection.");
