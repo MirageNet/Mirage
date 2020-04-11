@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,8 +21,7 @@ namespace Mirror
         {
             if (playerPrefab == null)
             {
-                Debug.LogError("Assign a player in the PlayerSpawner");
-                return;
+                throw new InvalidOperationException("Assign a player in the PlayerSpawner");
             }
 
             if (client == null)
@@ -64,8 +64,7 @@ namespace Mirror
 
             if (conn.Identity != null)
             {
-                Debug.LogError("There is already a player for this connection.");
-                return;
+                throw new InvalidOperationException("There is already a player for this connection.");
             }
 
             OnServerAddPlayer(conn);
