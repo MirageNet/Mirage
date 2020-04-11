@@ -163,7 +163,7 @@ namespace Mirror
 
         // NetworkProximityChecker caching
         NetworkVisibility visibilityCache;
-        public NetworkVisibility visibility
+        public NetworkVisibility Visibility
         {
             get
             {
@@ -641,9 +641,9 @@ namespace Mirror
 
         internal void OnSetHostVisibility(bool visible)
         {
-            if (visibility != null)
+            if (Visibility != null)
             {
-                visibility.OnSetHostVisibility(visible);
+                Visibility.OnSetHostVisibility(visible);
             }
         }
 
@@ -653,9 +653,9 @@ namespace Mirror
         //   seen.
         internal bool OnCheckObserver(INetworkConnection conn)
         {
-            if (visibility != null)
+            if (Visibility != null)
             {
-                return visibility.OnCheckObserver(conn);
+                return Visibility.OnCheckObserver(conn);
             }
             return true;
         }
@@ -903,9 +903,9 @@ namespace Mirror
         {
             observersSet.Clear();
 
-            if (visibility != null)
+            if (Visibility != null)
             {
-                visibility.OnRebuildObservers(observersSet, initialize);
+                Visibility.OnRebuildObservers(observersSet, initialize);
                 return true;
             }
 
