@@ -33,11 +33,9 @@ namespace Mirror.Tests
         IConnection tconn1;
         IConnection tconn2;
 
-
         [SetUp]
         public void SetupNetworkManager()
         {
-
             gameObject = new GameObject();
             gameObject.AddComponent<LoopbackTransport>();
             manager = gameObject.AddComponent<NetworkManager>();
