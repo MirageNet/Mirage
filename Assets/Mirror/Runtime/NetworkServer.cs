@@ -905,7 +905,7 @@ namespace Mirror
 
             if (identity.ConnectionToClient == null)
             {
-                throw new InvalidOperationException("Player object is not a player.");
+                throw new InvalidOperationException("Player object is not a " + nameof(player) + ".");
             }
 
             Spawn(obj, identity.ConnectionToClient);

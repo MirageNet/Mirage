@@ -427,7 +427,7 @@ namespace Mirror
         {
             if (string.IsNullOrEmpty(newSceneName))
             {
-                throw new ArgumentNullException("newSceneName", "ServerChangeScene: newSceneName cannot be empty or null");
+                throw new ArgumentNullException(nameof(newSceneName), "ServerChangeScene: " + nameof(newSceneName) + " cannot be empty or null");
             }
 
             if (LogFilter.Debug) Debug.Log("ServerChangeScene " + newSceneName);
@@ -447,7 +447,7 @@ namespace Mirror
         {
             if (string.IsNullOrEmpty(newSceneName))
             {
-                throw new ArgumentNullException("newSceneName", "ClientChangeScene: newSceneName cannot be empty or null");
+                throw new ArgumentNullException(nameof(newSceneName), "ClientChangeScene: " + nameof(newSceneName) + " cannot be empty or null");
             }
 
             if (LogFilter.Debug) Debug.Log("ClientChangeScene newSceneName:" + newSceneName + " networkSceneName:" + networkSceneName);
