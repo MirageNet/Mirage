@@ -70,8 +70,7 @@ namespace Mirror.Tests
         [Test]
         public void ClientChangeSceneExceptionTest()
         {
-            GameObject gameObject = new GameObject();
-            SimpleNetworkManager comp = gameObject.AddComponent<SimpleNetworkManager>();
+            SimpleNetworkManager comp = new GameObject().AddComponent<SimpleNetworkManager>();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
@@ -82,8 +81,7 @@ namespace Mirror.Tests
         [Test]
         public void ServerChangeSceneExceptionTest()
         {
-            GameObject gameObject = new GameObject();
-            SimpleNetworkManager comp = gameObject.AddComponent<SimpleNetworkManager>();
+            SimpleNetworkManager comp = new GameObject().AddComponent<SimpleNetworkManager>();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
