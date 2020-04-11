@@ -97,7 +97,7 @@ namespace Mirror
 
             if (playerSpawnMethod == PlayerSpawnMethod.Random)
             {
-                return startPositions[Random.Range(0, startPositions.Count)];
+                return startPositions[UnityEngine.Random.Range(0, startPositions.Count)];
             }
             else
             {
