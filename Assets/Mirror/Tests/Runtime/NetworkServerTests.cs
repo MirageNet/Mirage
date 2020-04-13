@@ -40,8 +40,7 @@ namespace Mirror.Tests
         [Test]
         public void SendToClientOfPlayerExceptionTest()
         {
-            GameObject gameObject = new GameObject();
-            SimpleNetworkServer comp = gameObject.AddComponent<SimpleNetworkServer>();
+            SimpleNetworkServer comp = serverPlayerGO.AddComponent<SimpleNetworkServer>();
 
             Assert.Throws<InvalidOperationException>(() =>
             {
