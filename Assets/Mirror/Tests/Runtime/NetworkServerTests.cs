@@ -1,11 +1,9 @@
 using System;
 using System.Collections;
-using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using static Mirror.Tests.AsyncUtil;
 
 namespace Mirror.Tests
 {
@@ -17,50 +15,9 @@ namespace Mirror.Tests
         }
     }
 
-    public class NetworkServerTests
+    public class NetworkServerTests : ClientServerSetup<MockComponent>
     {
-        NetworkServer server;
-        GameObject serverGO;
-
-        INetworkConnection connectionToServer;
-
-        INetworkConnection connectionToClient;
         WovenTestMessage message;
-        NetworkIdentity identity;
-
-        [UnitySetUp]
-        public IEnumerator SetupNetworkServer() => RunAsync(async () =>
-        {
-            serverGO = new GameObject();
-            var transport = serverGO.AddComponent<LoopbackTransport>();
-            server = serverGO.AddComponent<NetworkServer>();
-            await server.ListenAsync();
-
-            IConnection tconn = await transport.ConnectAsync(new System.Uri("tcp4://localhost"));
-
-            connectionToClient = server.connections.First();
-            connectionToServer = new NetworkConnection(tconn);
-
-            message = new WovenTestMessage
-            {
-                IntValue = 1,
-                DoubleValue = 1.0,
-                StringValue = "hello"
-            };
-
-            identity = new GameObject().AddComponent<NetworkIdentity>();
-            identity.ConnectionToClient = connectionToClient;
-
-        });
-
-        [TearDown]
-        public void ShutdownNetworkServer()
-        {
-            GameObject.DestroyImmediate(identity.gameObject);
-            server.Disconnect();
-            GameObject.DestroyImmediate(serverGO);
-        }
-
 
         [Test]
         public void InitializeTest()
@@ -159,7 +116,7 @@ namespace Mirror.Tests
 
             connectionToServer.RegisterHandler(func);
 
-            server.SendToClientOfPlayer(identity, message);
+            server.SendToClientOfPlayer(serverIdentity, message);
 
             _ = connectionToServer.ProcessMessagesAsync();
 
@@ -179,7 +136,7 @@ namespace Mirror.Tests
             connectionToClient.IsReady = true;
 
             // call ShowForConnection
-            server.ShowForConnection(identity, connectionToClient);
+            server.ShowForConnection(serverIdentity, connectionToClient);
 
             _ = connectionToServer.ProcessMessagesAsync();
 
@@ -192,21 +149,21 @@ namespace Mirror.Tests
         [Test]
         public void SpawnSceneObject()
         {
-            identity.sceneId = 42;
+            serverIdentity.sceneId = 42;
             // unspawned scene objects are set to inactive before spawning
-            identity.gameObject.SetActive(false);
+            serverIdentity.gameObject.SetActive(false);
             Assert.That(server.SpawnObjects(), Is.True);
-            Assert.That(identity.gameObject.activeSelf, Is.True);
+            Assert.That(serverIdentity.gameObject.activeSelf, Is.True);
         }
 
         [Test]
         public void SpawnPrefabObject()
         {
-            identity.sceneId = 0;
+            serverIdentity.sceneId = 0;
             // unspawned scene objects are set to inactive before spawning
-            identity.gameObject.SetActive(false);
+            serverIdentity.gameObject.SetActive(false);
             Assert.That(server.SpawnObjects(), Is.True);
-            Assert.That(identity.gameObject.activeSelf, Is.False);
+            Assert.That(serverIdentity.gameObject.activeSelf, Is.False);
         }
 
         [UnityTest]
