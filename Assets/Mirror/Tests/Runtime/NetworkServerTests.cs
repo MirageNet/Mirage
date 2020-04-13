@@ -71,16 +71,6 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void SpawnTest()
-        {
-            var gameObject = new GameObject();
-            gameObject.AddComponent<NetworkIdentity>();
-            server.Spawn(gameObject);
-
-            Assert.That(gameObject.GetComponent<NetworkIdentity>().Server, Is.SameAs(server));
-        }
-
-        [Test]
         public void SendToClientOfPlayerExceptionTest()
         {
             GameObject gameObject = new GameObject();
