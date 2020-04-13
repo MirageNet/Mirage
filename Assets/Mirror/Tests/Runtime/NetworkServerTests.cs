@@ -214,6 +214,5 @@ namespace Mirror.Tests
             func.Received(0).Invoke(
                 Arg.Any<WovenTestMessage>());
         }
-
     }
 }
