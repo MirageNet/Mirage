@@ -56,12 +56,12 @@ namespace Mirror.Tests
             });
         }
 
-        [UnityTest]
-        public IEnumerator StartServerTest() => RunAsync(async () =>
+        [Test]
+        public void StartServerTest()
         {
             Assert.That(manager.IsNetworkActive, Is.True);
             Assert.That(manager.server.Active, Is.True);
-        });
+        }
 
         [UnityTest]
         public IEnumerator StopServerTest() => RunAsync(async () =>
