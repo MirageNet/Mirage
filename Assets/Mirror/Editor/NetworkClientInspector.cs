@@ -32,7 +32,7 @@ namespace Mirror
             gameObject.spawnPrefabs.AddRange(prefabs);
         }
 
-        public static ISet<GameObject> LoadPrefabsContaining<T>(string path) where T : UnityEngine.Component
+        private static ISet<GameObject> LoadPrefabsContaining<T>(string path) where T : UnityEngine.Component
         {
             var result = new HashSet<GameObject>();
 
