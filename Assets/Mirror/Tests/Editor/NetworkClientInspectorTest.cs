@@ -16,6 +16,8 @@ namespace Mirror.Tests
 
             NetworkClient client = gameObject.GetComponent<NetworkClient>();
 
+            client.spawnPrefabs.Add(gameObject);
+
             NetworkClientInspector inspector = ScriptableObject.CreateInstance<NetworkClientInspector>();
 
             inspector.RegisterPrefabs(client);
@@ -26,6 +28,8 @@ namespace Mirror.Tests
             {
                 Assert.That(prefab.GetComponent<NetworkIdentity>(), Is.Not.Null);
             }
+
+            Assert.That(client.spawnPrefabs, Contains.Item(gameObject));
         }        
     }
 }
