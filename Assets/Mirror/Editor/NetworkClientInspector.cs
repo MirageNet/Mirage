@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -24,7 +22,7 @@ namespace Mirror
 
         public void RegisterPrefabs(NetworkClient gameObject)
         {
-            ISet<GameObject> prefabs = LoadPrefabsContaining<NetworkIdentity>(".");
+            ISet<GameObject> prefabs = LoadPrefabsContaining<NetworkIdentity>("Assets");
 
             foreach (var existing in gameObject.spawnPrefabs)
             {
@@ -38,13 +36,13 @@ namespace Mirror
         {
             var result = new HashSet<GameObject>();
 
-            var guids = AssetDatabase.FindAssets("t:Object", new[] { "Assets" });
+            var guids = AssetDatabase.FindAssets("t:Object", new[] { path });
 
             foreach (var guid in guids)
             {
                 var assetPath = AssetDatabase.GUIDToAssetPath(guid);
 
-                NetworkIdentity obj = AssetDatabase.LoadAssetAtPath<NetworkIdentity>(assetPath);
+                T obj = AssetDatabase.LoadAssetAtPath<T>(assetPath);
 
                 if (obj != null)
                     result.Add(obj.gameObject);
