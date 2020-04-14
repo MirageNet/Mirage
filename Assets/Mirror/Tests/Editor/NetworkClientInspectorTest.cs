@@ -16,10 +16,7 @@ namespace Mirror.Tests
 
             NetworkClient client = gameObject.GetComponent<NetworkClient>();
 
-            client.spawnPrefabs.Add(gameObject);
-
             NetworkClientInspector inspector = ScriptableObject.CreateInstance<NetworkClientInspector>();
-
             inspector.RegisterPrefabs(client);
 
             Assert.That(client.spawnPrefabs, Has.Count.GreaterThan(13));
@@ -28,8 +25,26 @@ namespace Mirror.Tests
             {
                 Assert.That(prefab.GetComponent<NetworkIdentity>(), Is.Not.Null);
             }
+            GameObject.DestroyImmediate(gameObject);
+        }
 
-            Assert.That(client.spawnPrefabs, Contains.Item(gameObject));
-        }        
+        [Test]
+        public void PreserveExisting()
+        {
+            var preexisting = new GameObject("object", typeof(NetworkIdentity));
+
+            var gameObject = new GameObject("NetworkClient", typeof(NetworkClient));
+            NetworkClient client = gameObject.GetComponent<NetworkClient>();
+            client.spawnPrefabs.Add(preexisting);
+
+            NetworkClientInspector inspector = ScriptableObject.CreateInstance<NetworkClientInspector>();
+
+            inspector.RegisterPrefabs(client);
+
+            Assert.That(client.spawnPrefabs, Contains.Item(preexisting));
+
+            GameObject.DestroyImmediate(gameObject);
+            GameObject.DestroyImmediate(preexisting);
+        }
     }
 }
