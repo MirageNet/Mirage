@@ -100,6 +100,7 @@ namespace Mirror
             connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
         }
 
+        #region Client Handlers
         internal void OnObjectDestroy(ObjectDestroyMessage msg)
         {
             DestroyObject(msg.netId);
@@ -154,6 +155,8 @@ namespace Mirror
                 logger.LogWarning("Did not find target for SyncEvent message for " + msg.netId);
             }
         }
+
+        #endregion
 
         NetworkIdentity GetExistingObject(uint netid)
         {
