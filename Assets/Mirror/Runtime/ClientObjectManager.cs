@@ -86,11 +86,13 @@ namespace Mirror
             connection.RegisterHandler<ObjectSpawnStartedMessage>(msg => { });
             connection.RegisterHandler<ObjectSpawnFinishedMessage>(msg => { });
             connection.RegisterHandler<UpdateVarsMessage>(msg => { });
+            connection.RegisterHandler<RpcMessage>(OnRpcMessage);
         }
 
         internal void RegisterMessageHandlers(INetworkConnection connection)
         {
             connection.RegisterHandler<SpawnMessage>(OnSpawn);
+            connection.RegisterHandler<RpcMessage>(OnRpcMessage);
         }
 
         internal void OnSpawn(SpawnMessage msg)
@@ -115,6 +117,17 @@ namespace Mirror
             }
 
             ApplySpawnPayload(identity, msg);
+        }
+
+        internal void OnRpcMessage(RpcMessage msg)
+        {
+            if (logger.LogEnabled()) logger.Log("ClientScene.OnRPCMessage hash:" + msg.functionHash + " netId:" + msg.netId);
+
+            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity identity))
+            {
+                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
+                    identity.HandleRpc(msg.componentIndex, msg.functionHash, networkReader);
+            }
         }
 
         NetworkIdentity GetExistingObject(uint netid)
