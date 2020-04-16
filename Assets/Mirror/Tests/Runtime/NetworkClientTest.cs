@@ -71,7 +71,7 @@ namespace Mirror.Tests
             var gameObject = new GameObject();
             Assert.Throws<InvalidOperationException>(() =>
             {
-                client.RegisterPrefab(gameObject);
+                clientObjectManager.RegisterPrefab(new GameObject());
             });
             Object.DestroyImmediate(gameObject);
         }
@@ -84,7 +84,7 @@ namespace Mirror.Tests
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                client.RegisterPrefab(gameObject, guid);
+                clientObjectManager.RegisterPrefab(new GameObject(), guid);
             });
             Object.DestroyImmediate(gameObject);
         }
@@ -95,7 +95,7 @@ namespace Mirror.Tests
             var msg = new SpawnMessage();
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                client.OnSpawn(msg);
+                clientObjectManager.OnSpawn(msg);
             });
 
             Assert.That(ex.Message, Is.EqualTo("OnObjSpawn netId: " + msg.netId + " has invalid asset Id"));
@@ -107,7 +107,7 @@ namespace Mirror.Tests
             var gameObject = new GameObject();
             Assert.Throws<InvalidOperationException>(() =>
             {
-                client.UnregisterPrefab(gameObject);
+                clientObjectManager.UnregisterPrefab(new GameObject());
             });
             Object.DestroyImmediate(gameObject);
         }
@@ -116,13 +116,12 @@ namespace Mirror.Tests
         public IEnumerator GetPrefabTest()
         {
             var guid = Guid.NewGuid();
-            var prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
 
             client.RegisterPrefab(prefabObject, guid);
 
             yield return null;
 
-            client.GetPrefab(guid, out GameObject result);
+            clientObjectManager.GetPrefab(guid, out GameObject result);
 
             Assert.That(result, Is.SameAs(prefabObject));
 

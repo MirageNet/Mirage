@@ -19,6 +19,7 @@ namespace Mirror.Tests
         protected NetworkManager manager;
         protected NetworkServer server;
         protected NetworkClient client;
+        protected ClientObjectManager clientObjectManager;
 
         protected GameObject serverPlayerGO;
         protected NetworkIdentity serverIdentity;
@@ -45,6 +46,8 @@ namespace Mirror.Tests
             manager = networkManagerGo.GetComponent<NetworkManager>();
             manager.client = networkManagerGo.GetComponent<NetworkClient>();
             manager.server = networkManagerGo.GetComponent<NetworkServer>();
+            manager.clientObjectManager = networkManagerGo.GetComponent<ClientObjectManager>();
+            manager.clientObjectManager.client = manager.client;
 
             server = manager.server;
             client = manager.client;
@@ -55,7 +58,7 @@ namespace Mirror.Tests
             // create and register a prefab
             playerPrefab = new GameObject("serverPlayer", typeof(NetworkIdentity), typeof(T));
             playerPrefab.GetComponent<NetworkIdentity>().AssetId = Guid.NewGuid();
-            client.RegisterPrefab(playerPrefab);
+            clientObjectManager.RegisterPrefab(playerPrefab);
 
             // wait for client and server to initialize themselves
             await Task.Delay(1);

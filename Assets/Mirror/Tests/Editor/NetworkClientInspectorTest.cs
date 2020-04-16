@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -8,11 +6,10 @@ namespace Mirror.Tests
     [TestFixture(Category = "NetworkClient")]
     public class NetworkClientInspectorTest
     {
-
         [Test]
         public void RegisterPrefabs()
         {
-            var gameObject = new GameObject("NetworkClient", typeof(NetworkClient));
+            var gameObject = new GameObject("NetworkClient", typeof(ClientObjectManager));
 
             ClientObjectManager clientObjMgr = gameObject.GetComponent<ClientObjectManager>();
 
@@ -33,7 +30,7 @@ namespace Mirror.Tests
         {
             var preexisting = new GameObject("object", typeof(NetworkIdentity));
 
-            var gameObject = new GameObject("NetworkClient", typeof(NetworkClient));
+            var gameObject = new GameObject("NetworkClient", typeof(ClientObjectManager));
             ClientObjectManager clientObjMgr = gameObject.GetComponent<ClientObjectManager>();
             clientObjMgr.spawnPrefabs.Add(preexisting);
 
