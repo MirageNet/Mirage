@@ -79,6 +79,7 @@ namespace Mirror
 
         internal void RegisterHostHandlers(INetworkConnection connection)
         {
+            connection.RegisterHandler<ObjectDestroyMessage>(OnHostClientObjectDestroy);
             connection.RegisterHandler<ObjectHideMessage>(OnHostClientObjectHide);
             connection.RegisterHandler<NetworkPongMessage>(msg => { });
             connection.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
@@ -295,6 +296,13 @@ namespace Mirror
         }
 
         #region Host
+
+        internal void OnHostClientObjectDestroy(ObjectDestroyMessage msg)
+        {
+            if (logger.LogEnabled()) logger.Log("ClientScene.OnLocalObjectObjDestroy netId:" + msg.netId);
+
+            Spawned.Remove(msg.netId);
+        }
 
         internal void OnHostClientObjectHide(ObjectHideMessage msg)
         {
