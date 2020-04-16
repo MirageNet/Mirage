@@ -19,6 +19,7 @@ namespace Mirror
     [HelpURL("https://mirror-networking.com/docs/Components/NetworkManager.html")]
     [RequireComponent(typeof(NetworkServer))]
     [RequireComponent(typeof(NetworkClient))]
+    [RequireComponent(typeof(ClientObjectManager))]
     [DisallowMultipleComponent]
     public class NetworkManager : MonoBehaviour
     {
@@ -119,6 +120,16 @@ namespace Mirror
                 logger.Log("NetworkManager: added NetworkClient because there was none yet.");
 #if UNITY_EDITOR
                 UnityEditor.Undo.RecordObject(gameObject, "Added NetworkClient");
+#endif
+            }
+
+            // add ClientObjectManager if there is none yet. makes upgrading easier.
+            if (GetComponent<ClientObjectManager>() == null)
+            {
+                clientObjectManager = gameObject.AddComponent<ClientObjectManager>();
+                Debug.Log("NetworkManager: added ClientObjectManager because there was none yet.");
+#if UNITY_EDITOR
+                UnityEditor.Undo.RecordObject(gameObject, "Added ClientObjectManager");
 #endif
             }
         }
