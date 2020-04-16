@@ -28,7 +28,6 @@ namespace Mirror
         /// </summary>
         public List<GameObject> spawnPrefabs = new List<GameObject>();
 
-        readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
 
         bool isSpawnFinished;
 
@@ -44,20 +43,7 @@ namespace Mirror
         /// </summary>
         public readonly Dictionary<ulong, NetworkIdentity> spawnableObjects = new Dictionary<ulong, NetworkIdentity>();
 
-        /// <summary>
-        /// List of all objects spawned in this client
-        /// </summary>
-        public Dictionary<uint, NetworkIdentity> Spawned
-        {
-            get
-            {
-                // if we are in host mode,  the list of spawned object is the same as the server list
-                if (client.hostServer != null)
-                    return client.hostServer.spawned;
-                else
-                    return spawned;
-            }
-        }
+
 
         private void Start()
         {
@@ -74,6 +60,7 @@ namespace Mirror
             if (client.IsLocalClient)
             {
                 RegisterHostHandlers(conn);
+                client.hostServer.clientObjectManager = this;
             }
             else
             {
@@ -167,7 +154,7 @@ namespace Mirror
             // paul: Initialize the objects in the same order as they were initialized
             // in the server.   This is important if spawned objects
             // use data from scene objects
-            foreach (NetworkIdentity identity in Spawned.Values.OrderBy(uv => uv.NetId))
+            foreach (NetworkIdentity identity in client.Spawned.Values.OrderBy(uv => uv.NetId))
             {
                 identity.NotifyAuthority();
                 identity.StartClient();
@@ -180,7 +167,7 @@ namespace Mirror
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnUpdateVarsMessage " + msg.netId);
 
-            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
+            if (client.Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
             {
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
                     localObject.OnDeserializeAllSafely(networkReader, false);
@@ -195,7 +182,7 @@ namespace Mirror
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnRPCMessage hash:" + msg.functionHash + " netId:" + msg.netId);
 
-            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity identity))
+            if (client.Spawned.TryGetValue(msg.netId, out NetworkIdentity identity))
             {
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
                     identity.HandleRpc(msg.componentIndex, msg.functionHash, networkReader);
@@ -206,7 +193,7 @@ namespace Mirror
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnSyncEventMessage " + msg.netId);
 
-            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity identity))
+            if (client.Spawned.TryGetValue(msg.netId, out NetworkIdentity identity))
             {
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
                     identity.HandleSyncEvent(msg.componentIndex, msg.functionHash, networkReader);
@@ -225,14 +212,14 @@ namespace Mirror
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnLocalObjectObjDestroy netId:" + msg.netId);
 
-            Spawned.Remove(msg.netId);
+            client.Spawned.Remove(msg.netId);
         }
 
         internal void OnHostClientObjectHide(ObjectHideMessage msg)
         {
             if (logger.LogEnabled()) logger.Log("ClientScene::OnLocalObjectObjHide netId:" + msg.netId);
 
-            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
+            if (client.Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
             {
                 localObject.OnSetHostVisibility(false);
             }
@@ -240,7 +227,7 @@ namespace Mirror
 
         internal void OnHostClientSpawn(SpawnMessage msg)
         {
-            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
+            if (client.Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
             {
                 if (msg.isLocalPlayer)
                     InternalAddPlayer(localObject);
@@ -441,7 +428,7 @@ namespace Mirror
 
         NetworkIdentity GetExistingObject(uint netid)
         {
-            Spawned.TryGetValue(netid, out NetworkIdentity localObject);
+            client.Spawned.TryGetValue(netid, out NetworkIdentity localObject);
             return localObject;
         }
 
@@ -535,7 +522,7 @@ namespace Mirror
                 }
             }
 
-            Spawned[msg.netId] = identity;
+            client.Spawned[msg.netId] = identity;
 
             // objects spawned as part of initial state are started on a second pass
             if (isSpawnFinished)
@@ -615,10 +602,10 @@ namespace Mirror
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnObjDestroy netId:" + netId);
 
-            if (Spawned.TryGetValue(netId, out NetworkIdentity localObject) && localObject != null)
+            if (client.Spawned.TryGetValue(netId, out NetworkIdentity localObject) && localObject != null)
             {
                 UnSpawn(localObject);
-                Spawned.Remove(netId);
+                client.Spawned.Remove(netId);
             }
             else
             {
@@ -653,14 +640,14 @@ namespace Mirror
         /// </summary>
         public void DestroyAllClientObjects()
         {
-            foreach (NetworkIdentity identity in Spawned.Values)
+            foreach (NetworkIdentity identity in client.Spawned.Values)
             {
                 if (identity != null && identity.gameObject != null)
                 {
                     UnSpawn(identity);
                 }
             }
-            Spawned.Clear();
+            client.Spawned.Clear();
         }
 
         #endregion
