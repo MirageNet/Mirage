@@ -95,6 +95,7 @@ namespace Mirror
         internal void RegisterMessageHandlers(INetworkConnection connection)
         {
             connection.RegisterHandler<ObjectDestroyMessage>(OnObjectDestroy);
+            connection.RegisterHandler<ObjectHideMessage>(OnObjectHide);
             connection.RegisterHandler<SpawnMessage>(OnSpawn);
             connection.RegisterHandler<RpcMessage>(OnRpcMessage);
             connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
@@ -102,6 +103,11 @@ namespace Mirror
 
         #region Client Handlers
         internal void OnObjectDestroy(ObjectDestroyMessage msg)
+        {
+            DestroyObject(msg.netId);
+        }
+
+        internal void OnObjectHide(ObjectHideMessage msg)
         {
             DestroyObject(msg.netId);
         }
