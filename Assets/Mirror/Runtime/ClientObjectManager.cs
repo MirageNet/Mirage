@@ -79,7 +79,7 @@ namespace Mirror
 
         internal void RegisterHostHandlers(INetworkConnection connection)
         {
-
+            connection.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
         }
 
         internal void RegisterMessageHandlers(INetworkConnection connection)
@@ -256,5 +256,24 @@ namespace Mirror
                 if (logger.LogEnabled()) logger.Log("ClientScene.OnOwnerMessage - player=" + identity.name);
             }
         }
+
+        #region Host
+
+        internal void OnHostClientSpawn(SpawnMessage msg)
+        {
+            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
+            {
+                if (msg.isLocalPlayer)
+                    InternalAddPlayer(localObject);
+
+                localObject.HasAuthority = msg.isOwner;
+                localObject.NotifyAuthority();
+                localObject.StartClient();
+                localObject.OnSetHostVisibility(true);
+                CheckForLocalPlayer(localObject);
+            }
+        }
+
+        #endregion
     }
 }
