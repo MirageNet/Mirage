@@ -49,6 +49,7 @@ namespace Mirror
         [Header("Authentication")]
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
+        public ClientObjectManager clientObjectManager;
 
         /// <summary>
         /// The connection to the host mode client (if any).
@@ -584,7 +585,7 @@ namespace Mirror
             if (conn == LocalConnection)
             {
                 identity.HasAuthority = true;
-                this.LocalClient.InternalAddPlayer(identity);
+                clientObjectManager.InternalAddPlayer(identity);
             }
 
             // set ready if not set yet
@@ -642,7 +643,7 @@ namespace Mirror
             if (conn == LocalConnection)
             {
                 identity.HasAuthority = true;
-                client.InternalAddPlayer(identity);
+                clientObjectManager.InternalAddPlayer(identity);
             }
 
             // add connection to observers AFTER the playerController was set.
