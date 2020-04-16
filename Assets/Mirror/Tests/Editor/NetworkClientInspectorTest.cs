@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
@@ -14,14 +14,14 @@ namespace Mirror.Tests
         {
             var gameObject = new GameObject("NetworkClient", typeof(NetworkClient));
 
-            NetworkClient client = gameObject.GetComponent<NetworkClient>();
+            ClientObjectManager clientObjMgr = gameObject.GetComponent<ClientObjectManager>();
 
             NetworkClientInspector inspector = ScriptableObject.CreateInstance<NetworkClientInspector>();
-            inspector.RegisterPrefabs(client);
+            inspector.RegisterPrefabs(clientObjMgr);
 
-            Assert.That(client.spawnPrefabs, Has.Count.GreaterThan(13));
+            Assert.That(clientObjMgr.spawnPrefabs, Has.Count.GreaterThan(13));
 
-            foreach (var prefab in client.spawnPrefabs)
+            foreach (var prefab in clientObjMgr.spawnPrefabs)
             {
                 Assert.That(prefab.GetComponent<NetworkIdentity>(), Is.Not.Null);
             }
@@ -34,14 +34,14 @@ namespace Mirror.Tests
             var preexisting = new GameObject("object", typeof(NetworkIdentity));
 
             var gameObject = new GameObject("NetworkClient", typeof(NetworkClient));
-            NetworkClient client = gameObject.GetComponent<NetworkClient>();
-            client.spawnPrefabs.Add(preexisting);
+            ClientObjectManager clientObjMgr = gameObject.GetComponent<ClientObjectManager>();
+            clientObjMgr.spawnPrefabs.Add(preexisting);
 
             NetworkClientInspector inspector = ScriptableObject.CreateInstance<NetworkClientInspector>();
 
-            inspector.RegisterPrefabs(client);
+            inspector.RegisterPrefabs(clientObjMgr);
 
-            Assert.That(client.spawnPrefabs, Contains.Item(preexisting));
+            Assert.That(clientObjMgr.spawnPrefabs, Contains.Item(preexisting));
 
             GameObject.DestroyImmediate(gameObject);
             GameObject.DestroyImmediate(preexisting);

@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 
 namespace Mirror
 {
-    [CustomEditor(typeof(NetworkClient), true)]
+    [CustomEditor(typeof(ClientObjectManager), true)]
     [CanEditMultipleObjects]
     public class NetworkClientInspector : Editor
     {
@@ -15,12 +15,12 @@ namespace Mirror
 
             if (GUILayout.Button("Register All Prefabs"))
             {
-                RegisterPrefabs((NetworkClient)target);
+                RegisterPrefabs((ClientObjectManager)target);
                 Undo.RecordObject(target, "Changed Area Of Effect");
             }
         }
 
-        public void RegisterPrefabs(NetworkClient gameObject)
+        public void RegisterPrefabs(ClientObjectManager gameObject)
         {
             ISet<GameObject> prefabs = LoadPrefabsContaining<NetworkIdentity>("Assets");
 
