@@ -87,12 +87,14 @@ namespace Mirror
             connection.RegisterHandler<ObjectSpawnFinishedMessage>(msg => { });
             connection.RegisterHandler<UpdateVarsMessage>(msg => { });
             connection.RegisterHandler<RpcMessage>(OnRpcMessage);
+            connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
         }
 
         internal void RegisterMessageHandlers(INetworkConnection connection)
         {
             connection.RegisterHandler<SpawnMessage>(OnSpawn);
             connection.RegisterHandler<RpcMessage>(OnRpcMessage);
+            connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
         }
 
         internal void OnSpawn(SpawnMessage msg)
@@ -127,6 +129,21 @@ namespace Mirror
             {
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
                     identity.HandleRpc(msg.componentIndex, msg.functionHash, networkReader);
+            }
+        }
+
+        internal void OnSyncEventMessage(SyncEventMessage msg)
+        {
+            if (logger.LogEnabled()) logger.Log("ClientScene.OnSyncEventMessage " + msg.netId);
+
+            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity identity))
+            {
+                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
+                    identity.HandleSyncEvent(msg.componentIndex, msg.functionHash, networkReader);
+            }
+            else
+            {
+                logger.LogWarning("Did not find target for SyncEvent message for " + msg.netId);
             }
         }
 
