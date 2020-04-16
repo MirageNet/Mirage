@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Guid = System.Guid;
 using Object = UnityEngine.Object;
@@ -97,6 +98,7 @@ namespace Mirror
             connection.RegisterHandler<ObjectDestroyMessage>(OnObjectDestroy);
             connection.RegisterHandler<ObjectHideMessage>(OnObjectHide);
             connection.RegisterHandler<SpawnMessage>(OnSpawn);
+            connection.RegisterHandler<ObjectSpawnStartedMessage>(OnObjectSpawnStarted);
             connection.RegisterHandler<RpcMessage>(OnRpcMessage);
             connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
         }
@@ -134,6 +136,14 @@ namespace Mirror
             }
 
             ApplySpawnPayload(identity, msg);
+        }
+
+        internal void OnObjectSpawnStarted(ObjectSpawnStartedMessage _)
+        {
+            logger.Log("SpawnStarted");
+
+            PrepareToSpawnSceneObjects();
+            isSpawnFinished = false;
         }
 
         internal void OnRpcMessage(RpcMessage msg)
@@ -334,6 +344,32 @@ namespace Mirror
             {
                 logger.LogWarning("No ready connection found for setting player controller during InternalAddPlayer");
             }
+        }
+
+        /// <summary>
+        /// Call this after loading/unloading a scene in the client after connection to register the spawnable objects
+        /// </summary>
+        public void PrepareToSpawnSceneObjects()
+        {
+            // add all unspawned NetworkIdentities to spawnable objects
+            spawnableObjects.Clear();
+            IEnumerable<NetworkIdentity> sceneObjects =
+                Resources.FindObjectsOfTypeAll<NetworkIdentity>()
+                               .Where(ConsiderForSpawning);
+
+            foreach (NetworkIdentity obj in sceneObjects)
+            {
+                spawnableObjects.Add(obj.sceneId, obj);
+            }
+        }
+
+        static bool ConsiderForSpawning(NetworkIdentity identity)
+        {
+            // not spawned yet, not hidden, etc.?
+            return !identity.gameObject.activeSelf &&
+                   identity.gameObject.hideFlags != HideFlags.NotEditable &&
+                   identity.gameObject.hideFlags != HideFlags.HideAndDontSave &&
+                   identity.sceneId != 0;
         }
 
         void CheckForLocalPlayer(NetworkIdentity identity)
