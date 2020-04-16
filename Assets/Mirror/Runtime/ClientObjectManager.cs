@@ -94,9 +94,15 @@ namespace Mirror
 
         internal void RegisterMessageHandlers(INetworkConnection connection)
         {
+            connection.RegisterHandler<ObjectDestroyMessage>(OnObjectDestroy);
             connection.RegisterHandler<SpawnMessage>(OnSpawn);
             connection.RegisterHandler<RpcMessage>(OnRpcMessage);
             connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
+        }
+
+        internal void OnObjectDestroy(ObjectDestroyMessage msg)
+        {
+            DestroyObject(msg.netId);
         }
 
         internal void OnSpawn(SpawnMessage msg)
@@ -292,6 +298,42 @@ namespace Mirror
                 identity.StartLocalPlayer();
 
                 if (logger.LogEnabled()) logger.Log("ClientScene.OnOwnerMessage - player=" + identity.name);
+            }
+        }
+
+        void DestroyObject(uint netId)
+        {
+            if (logger.LogEnabled()) logger.Log("ClientScene.OnObjDestroy netId:" + netId);
+
+            if (Spawned.TryGetValue(netId, out NetworkIdentity localObject) && localObject != null)
+            {
+                UnSpawn(localObject);
+                Spawned.Remove(netId);
+            }
+            else
+            {
+                logger.LogWarning("Did not find target for destroy message for " + netId);
+            }
+        }
+
+        void UnSpawn(NetworkIdentity identity)
+        {
+            Guid assetId = identity.AssetId;
+
+            identity.NetworkDestroy();
+            if (unspawnHandlers.TryGetValue(assetId, out UnSpawnDelegate handler) && handler != null)
+            {
+                handler(identity.gameObject);
+            }
+            else if (identity.sceneId == 0)
+            {
+                Destroy(identity.gameObject);
+            }
+            else
+            {
+                identity.MarkForReset();
+                identity.gameObject.SetActive(false);
+                spawnableObjects[identity.sceneId] = identity;
             }
         }
 
