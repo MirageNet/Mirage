@@ -100,6 +100,7 @@ namespace Mirror
             connection.RegisterHandler<SpawnMessage>(OnSpawn);
             connection.RegisterHandler<ObjectSpawnStartedMessage>(OnObjectSpawnStarted);
             connection.RegisterHandler<ObjectSpawnFinishedMessage>(OnObjectSpawnFinished);
+            connection.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
             connection.RegisterHandler<RpcMessage>(OnRpcMessage);
             connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
         }
@@ -161,6 +162,21 @@ namespace Mirror
                 CheckForLocalPlayer(identity);
             }
             isSpawnFinished = true;
+        }
+
+        internal void OnUpdateVarsMessage(UpdateVarsMessage msg)
+        {
+            if (logger.LogEnabled()) logger.Log("ClientScene.OnUpdateVarsMessage " + msg.netId);
+
+            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
+            {
+                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
+                    localObject.OnDeserializeAllSafely(networkReader, false);
+            }
+            else
+            {
+                logger.LogWarning("Did not find target for sync message for " + msg.netId + " . Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
+            }
         }
 
         internal void OnRpcMessage(RpcMessage msg)
