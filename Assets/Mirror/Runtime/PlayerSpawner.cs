@@ -14,7 +14,7 @@ namespace Mirror
 
         public NetworkClient client;
         public NetworkServer server;
-
+        public ClientObjectManager clientObjectManager;
         public NetworkIdentity playerPrefab;
 
         // Start is called before the first frame update
@@ -32,7 +32,7 @@ namespace Mirror
 
             client.Authenticated.AddListener(OnClientAuthenticated);
             server.Authenticated.AddListener(OnServerAuthenticated);
-            client.RegisterPrefab(playerPrefab.gameObject);
+            clientObjectManager.RegisterPrefab(playerPrefab.gameObject);
         }
 
         private void OnServerAuthenticated(INetworkConnection connection)
