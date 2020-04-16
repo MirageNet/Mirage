@@ -2,13 +2,21 @@ using UnityEngine;
 
 namespace Mirror
 {
-
+    /// <summary>
+    /// This is a client object manager class used by the networking system. It manages spawning and unspawning of objects for the network client.
+    /// </summary>
+    [RequireComponent(typeof(NetworkClient))]
+    [DisallowMultipleComponent]
     public class ClientObjectManager : MonoBehaviour
     {
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkClient));
+
         public NetworkClient client;
 
         private void Start()
         {
+            if (logger.LogEnabled()) logger.Log("ClientObjectManager started");
+
             client.Connected.AddListener(Connected);
         }
 
