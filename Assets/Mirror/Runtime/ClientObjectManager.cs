@@ -99,6 +99,7 @@ namespace Mirror
             connection.RegisterHandler<ObjectHideMessage>(OnObjectHide);
             connection.RegisterHandler<SpawnMessage>(OnSpawn);
             connection.RegisterHandler<ObjectSpawnStartedMessage>(OnObjectSpawnStarted);
+            connection.RegisterHandler<ObjectSpawnFinishedMessage>(OnObjectSpawnFinished);
             connection.RegisterHandler<RpcMessage>(OnRpcMessage);
             connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
         }
@@ -144,6 +145,22 @@ namespace Mirror
 
             PrepareToSpawnSceneObjects();
             isSpawnFinished = false;
+        }
+
+        internal void OnObjectSpawnFinished(ObjectSpawnFinishedMessage _)
+        {
+            logger.Log("SpawnFinished");
+
+            // paul: Initialize the objects in the same order as they were initialized
+            // in the server.   This is important if spawned objects
+            // use data from scene objects
+            foreach (NetworkIdentity identity in Spawned.Values.OrderBy(uv => uv.NetId))
+            {
+                identity.NotifyAuthority();
+                identity.StartClient();
+                CheckForLocalPlayer(identity);
+            }
+            isSpawnFinished = true;
         }
 
         internal void OnRpcMessage(RpcMessage msg)
