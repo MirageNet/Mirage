@@ -79,6 +79,7 @@ namespace Mirror
 
         internal void RegisterHostHandlers(INetworkConnection connection)
         {
+            connection.RegisterHandler<ObjectHideMessage>(OnHostClientObjectHide);
             connection.RegisterHandler<NetworkPongMessage>(msg => { });
             connection.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
             // host mode reuses objects in the server
@@ -294,6 +295,16 @@ namespace Mirror
         }
 
         #region Host
+
+        internal void OnHostClientObjectHide(ObjectHideMessage msg)
+        {
+            if (logger.LogEnabled()) logger.Log("ClientScene::OnLocalObjectObjHide netId:" + msg.netId);
+
+            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
+            {
+                localObject.OnSetHostVisibility(false);
+            }
+        }
 
         internal void OnHostClientSpawn(SpawnMessage msg)
         {
