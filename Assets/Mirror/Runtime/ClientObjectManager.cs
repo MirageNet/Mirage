@@ -158,6 +158,44 @@ namespace Mirror
 
         #endregion
 
+        #region Host
+
+        internal void OnHostClientObjectDestroy(ObjectDestroyMessage msg)
+        {
+            if (logger.LogEnabled()) logger.Log("ClientScene.OnLocalObjectObjDestroy netId:" + msg.netId);
+
+            Spawned.Remove(msg.netId);
+        }
+
+        internal void OnHostClientObjectHide(ObjectHideMessage msg)
+        {
+            if (logger.LogEnabled()) logger.Log("ClientScene::OnLocalObjectObjHide netId:" + msg.netId);
+
+            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
+            {
+                localObject.OnSetHostVisibility(false);
+            }
+        }
+
+        internal void OnHostClientSpawn(SpawnMessage msg)
+        {
+            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
+            {
+                if (msg.isLocalPlayer)
+                    InternalAddPlayer(localObject);
+
+                localObject.HasAuthority = msg.isOwner;
+                localObject.NotifyAuthority();
+                localObject.StartClient();
+                localObject.OnSetHostVisibility(true);
+                CheckForLocalPlayer(localObject);
+            }
+        }
+
+        #endregion
+
+        #region Helpers
+
         NetworkIdentity GetExistingObject(uint netid)
         {
             Spawned.TryGetValue(netid, out NetworkIdentity localObject);
@@ -337,40 +375,6 @@ namespace Mirror
                 identity.MarkForReset();
                 identity.gameObject.SetActive(false);
                 spawnableObjects[identity.sceneId] = identity;
-            }
-        }
-
-        #region Host
-
-        internal void OnHostClientObjectDestroy(ObjectDestroyMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log("ClientScene.OnLocalObjectObjDestroy netId:" + msg.netId);
-
-            Spawned.Remove(msg.netId);
-        }
-
-        internal void OnHostClientObjectHide(ObjectHideMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log("ClientScene::OnLocalObjectObjHide netId:" + msg.netId);
-
-            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
-            {
-                localObject.OnSetHostVisibility(false);
-            }
-        }
-
-        internal void OnHostClientSpawn(SpawnMessage msg)
-        {
-            if (Spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
-            {
-                if (msg.isLocalPlayer)
-                    InternalAddPlayer(localObject);
-
-                localObject.HasAuthority = msg.isOwner;
-                localObject.NotifyAuthority();
-                localObject.StartClient();
-                localObject.OnSetHostVisibility(true);
-                CheckForLocalPlayer(localObject);
             }
         }
 
