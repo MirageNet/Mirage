@@ -64,6 +64,7 @@ namespace Mirror
             if (logger.LogEnabled()) logger.Log("ClientObjectManager started");
 
             client.Connected.AddListener(Connected);
+            client.Disconnected.AddListener(Disconnected);
         }
 
         void Connected(INetworkConnection conn)
@@ -76,6 +77,15 @@ namespace Mirror
             {
                 RegisterMessageHandlers(conn);
             }
+        }
+
+        void Disconnected()
+        {
+            logger.Log("Shutting down object manager.");
+
+            ClearSpawners();
+            DestroyAllClientObjects();
+            isSpawnFinished = false;
         }
 
         internal void RegisterHostHandlers(INetworkConnection connection)
