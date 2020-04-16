@@ -79,7 +79,13 @@ namespace Mirror
 
         internal void RegisterHostHandlers(INetworkConnection connection)
         {
+            connection.RegisterHandler<NetworkPongMessage>(msg => { });
             connection.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
+            // host mode reuses objects in the server
+            // so we don't need to spawn them
+            connection.RegisterHandler<ObjectSpawnStartedMessage>(msg => { });
+            connection.RegisterHandler<ObjectSpawnFinishedMessage>(msg => { });
+            connection.RegisterHandler<UpdateVarsMessage>(msg => { });
         }
 
         internal void RegisterMessageHandlers(INetworkConnection connection)
