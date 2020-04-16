@@ -48,6 +48,7 @@ namespace Mirror
 
         public NetworkServer server;
         public NetworkClient client;
+        public ClientObjectManager clientObjectManager;
 
         // transport layer
         [Header("Network Info")]
@@ -511,8 +512,8 @@ namespace Mirror
                 }
                 if (client.Active)
                 {
-                    client.PrepareToSpawnSceneObjects();
-                    if (logger.LogEnabled()) logger.Log("Rebuild Client spawnableObjects after additive scene load: " + scene.name);
+                    clientObjectManager.PrepareToSpawnSceneObjects();
+                    if (LogFilter.Debug) Debug.Log("Rebuild Client spawnableObjects after additive scene load: " + scene.name);
                 }
             }
         }
