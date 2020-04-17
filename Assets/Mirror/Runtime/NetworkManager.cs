@@ -134,6 +134,8 @@ namespace Mirror
         /// </summary>
         public virtual void Start()
         {
+            if (showDebugMessages)
+                logger.filterLogType = LogType.Log;
 
             logger.Log("Thank you for using Mirror! https://mirror-networking.com");
 
@@ -379,8 +381,6 @@ namespace Mirror
 
         void Initialize()
         {
-            logger.logEnabled = showDebugMessages;
-
             if (dontDestroyOnLoad)
             {
                 DontDestroyOnLoad(gameObject);
