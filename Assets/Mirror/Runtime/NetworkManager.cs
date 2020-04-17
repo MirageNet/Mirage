@@ -166,7 +166,7 @@ namespace Mirror
         // full server setup code, without spawning objects yet
         async Task SetupServer()
         {
-            if (logger.LogEnabled()) logger.Log("NetworkManager SetupServer");
+            logger.Log("NetworkManager SetupServer");
 
             ConfigureServerFrameRate();
 
@@ -312,13 +312,13 @@ namespace Mirror
             // loaded and all objects were spawned.
             // DO NOT do this earlier. it would cause race conditions where a
             // client will do things before the server is even fully started.
-            if (logger.LogEnabled()) logger.Log("StartHostClient called");
+            logger.Log("StartHostClient called");
             StartHostClient();
         }
 
         void StartHostClient()
         {
-            if (logger.LogEnabled()) logger.Log("NetworkManager ConnectLocalClient");
+            logger.Log("NetworkManager ConnectLocalClient");
 
             server.ActivateHostScene();
 
@@ -390,7 +390,7 @@ namespace Mirror
         /// </summary>
         public virtual void OnDestroy()
         {
-            if (logger.LogEnabled()) logger.Log("NetworkManager destroyed");
+            logger.Log("NetworkManager destroyed");
         }
 
         #endregion
@@ -446,7 +446,7 @@ namespace Mirror
             // vis2k: pause message handling while loading scene. otherwise we will process messages and then lose all
             // the state as soon as the load is finishing, causing all kinds of bugs because of missing state.
             // (client may be null after StopClient etc.)
-            if (logger.LogEnabled()) logger.Log("ClientChangeScene: pausing handlers while scene is loading to avoid data loss after scene was loaded.");
+            logger.Log("ClientChangeScene: pausing handlers while scene is loading to avoid data loss after scene was loaded.");
             // Let client prepare for scene change
             OnClientChangeScene(newSceneName, sceneOperation, customHandling);
 
@@ -532,7 +532,7 @@ namespace Mirror
             // NOTE: this cannot use NetworkClient.allClients[0] - that client may be for a completely different purpose.
 
             // process queued messages that we received while loading the scene
-            if (logger.LogEnabled()) logger.Log("FinishLoadScene: resuming handlers after scene was loading.");
+            logger.Log("FinishLoadScene: resuming handlers after scene was loading.");
             // host mode?
             if (client.IsLocalClient)
             {
@@ -557,7 +557,7 @@ namespace Mirror
         {
             // debug message is very important. if we ever break anything then
             // it's very obvious to notice.
-            if (logger.LogEnabled()) logger.Log("Finished loading scene in host mode.");
+            logger.Log("Finished loading scene in host mode.");
 
             if (client.Connection != null)
             {
@@ -584,7 +584,7 @@ namespace Mirror
         {
             // debug message is very important. if we ever break anything then
             // it's very obvious to notice.
-            if (logger.LogEnabled()) logger.Log("Finished loading scene in client-only mode.");
+            logger.Log("Finished loading scene in client-only mode.");
 
             if (client.Connection != null)
             {
@@ -605,7 +605,7 @@ namespace Mirror
         {
             // debug message is very important. if we ever break anything then
             // it's very obvious to notice.
-            if (logger.LogEnabled()) logger.Log("Finished loading scene in server-only mode.");
+            logger.Log("Finished loading scene in server-only mode.");
 
             server.SpawnObjects();
             OnServerSceneChanged(networkSceneName);
@@ -627,7 +627,7 @@ namespace Mirror
             // a connection has been established,  register for our messages
             RegisterServerMessages(conn);
 
-            if (logger.LogEnabled()) logger.Log("NetworkManager.OnServerAuthenticated");
+            logger.Log("NetworkManager.OnServerAuthenticated");
 
             // proceed with the login handshake by calling OnServerConnect
             if (!string.IsNullOrEmpty(networkSceneName))
@@ -641,13 +641,13 @@ namespace Mirror
 
         void OnServerReadyMessageInternal(INetworkConnection conn, ReadyMessage msg)
         {
-            if (logger.LogEnabled()) logger.Log("NetworkManager.OnServerReadyMessageInternal");
+            logger.Log("NetworkManager.OnServerReadyMessageInternal");
             OnServerReady(conn);
         }
 
         void OnServerRemovePlayerMessageInternal(INetworkConnection conn, RemovePlayerMessage msg)
         {
-            if (logger.LogEnabled()) logger.Log("NetworkManager.OnServerRemovePlayerMessageInternal");
+            logger.Log("NetworkManager.OnServerRemovePlayerMessageInternal");
 
             if (conn.Identity != null)
             {
@@ -671,7 +671,7 @@ namespace Mirror
         {
             RegisterClientMessages(conn);
 
-            if (logger.LogEnabled()) logger.Log("NetworkManager.OnClientAuthenticated");
+            logger.Log("NetworkManager.OnClientAuthenticated");
 
             // will wait for scene id to come from the server.
             clientLoadedScene = true;
@@ -680,7 +680,7 @@ namespace Mirror
 
         void OnClientNotReadyMessageInternal(INetworkConnection conn, NotReadyMessage msg)
         {
-            if (logger.LogEnabled()) logger.Log("NetworkManager.OnClientNotReadyMessageInternal");
+            logger.Log("NetworkManager.OnClientNotReadyMessageInternal");
 
             client.ready = false;
             OnClientNotReady(conn);
@@ -690,7 +690,7 @@ namespace Mirror
 
         void OnClientSceneInternal(INetworkConnection conn, SceneMessage msg)
         {
-            if (logger.LogEnabled()) logger.Log("NetworkManager.OnClientSceneInternal");
+            logger.Log("NetworkManager.OnClientSceneInternal");
 
             if (client.IsConnected && !server.Active)
             {
@@ -720,7 +720,7 @@ namespace Mirror
             if (conn.Identity == null)
             {
                 // this is now allowed (was not for a while)
-                if (logger.LogEnabled()) logger.Log("Ready with no player object");
+                logger.Log("Ready with no player object");
             }
             server.SetClientReady(conn);
         }

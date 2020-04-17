@@ -60,7 +60,7 @@ namespace Mirror
 
         void OnServerAddPlayerInternal(INetworkConnection conn, AddPlayerMessage msg)
         {
-            if (logger.LogEnabled()) logger.Log("NetworkManager.OnServerAddPlayer");
+            logger.Log("NetworkManager.OnServerAddPlayer");
 
             if (conn.Identity != null)
             {

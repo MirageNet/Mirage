@@ -164,7 +164,7 @@ namespace Mirror
             if (Listening)
             {
                 await transport.ListenAsync();
-                if (logger.LogEnabled()) logger.Log("Server started listening");
+                logger.Log("Server started listening");
             }
 
             Active = true;
@@ -626,7 +626,7 @@ namespace Mirror
             }
 
             //NOTE: there can be an existing player
-            if (logger.LogEnabled()) logger.Log("NetworkServer ReplacePlayer");
+            logger.Log("NetworkServer ReplacePlayer");
 
             NetworkIdentity previousPlayer = conn.Identity;
 
@@ -997,7 +997,7 @@ namespace Mirror
         {
             if (obj == null)
             {
-                if (logger.LogEnabled()) logger.Log("NetworkServer DestroyObject is null");
+                logger.Log("NetworkServer DestroyObject is null");
                 return;
             }
 
@@ -1015,7 +1015,7 @@ namespace Mirror
         {
             if (obj == null)
             {
-                if (logger.LogEnabled()) logger.Log("NetworkServer UnspawnObject is null");
+                logger.Log("NetworkServer UnspawnObject is null");
                 return;
             }
 
