@@ -41,13 +41,6 @@ namespace Mirror
         public bool startOnHeadless = true;
 
         /// <summary>
-        /// Enables verbose debug messages in the console
-        /// </summary>
-        [FormerlySerializedAs("m_ShowDebugMessages")]
-        [Tooltip("This will enable verbose debug messages in the Unity Editor console")]
-        public bool showDebugMessages;
-
-        /// <summary>
         /// Server Update frequency, per second. Use around 60Hz for fast paced games like Counter-Strike to minimize latency. Use around 30Hz for games like WoW to minimize computations. Use around 1-10Hz for slow paced games like EVE.
         /// </summary>
         [Tooltip("Server Update frequency, per second. Use around 60Hz for fast paced games like Counter-Strike to minimize latency. Use around 30Hz for games like WoW to minimize computations. Use around 1-10Hz for slow paced games like EVE.")]
@@ -134,9 +127,6 @@ namespace Mirror
         /// </summary>
         public virtual void Start()
         {
-            if (showDebugMessages)
-                logger.filterLogType = LogType.Log;
-
             logger.Log("Thank you for using Mirror! https://mirror-networking.com");
 
             // Set the networkSceneName to prevent a scene reload
