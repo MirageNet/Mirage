@@ -134,7 +134,7 @@ namespace Mirror
             where T : IMessageBase, new()
         {
             int msgType = MessagePacker.GetId<T>();
-            if (LogFilter.Debug && messageHandlers.ContainsKey(msgType))
+            if (logger.filterLogType == LogType.Log && messageHandlers.ContainsKey(msgType))
             {
                 logger.Log("NetworkServer.RegisterHandler replacing " + msgType);
             }
