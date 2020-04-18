@@ -278,7 +278,6 @@ namespace Mirror.Tests
             // gameobject with valid networkidentity and 0 netid that is unspawned
             var go = new GameObject();
             go.AddComponent<NetworkIdentity>();
-            LogAssert.Expect(LogType.Warning, "SetSyncVarGameObject GameObject " + go + " has a zero netId. Maybe it is not spawned yet?");
             bool result = component.SyncVarGameObjectEqualExposed(go, identity.NetId);
             Assert.That(result, Is.False);
 
@@ -293,7 +292,6 @@ namespace Mirror.Tests
             // unspawned go and identity.netid==0 returns true (=equal)
             var go = new GameObject();
             go.AddComponent<NetworkIdentity>();
-            LogAssert.Expect(LogType.Warning, "SetSyncVarGameObject GameObject " + go + " has a zero netId. Maybe it is not spawned yet?");
             bool result = component.SyncVarGameObjectEqualExposed(go, 0);
             Assert.That(result, Is.True);
 
@@ -373,7 +371,6 @@ namespace Mirror.Tests
             // gameobject with valid networkidentity and 0 netid that is unspawned
             var go = new GameObject();
             NetworkIdentity ni = go.AddComponent<NetworkIdentity>();
-            LogAssert.Expect(LogType.Warning, "SetSyncVarNetworkIdentity NetworkIdentity " + ni + " has a zero netId. Maybe it is not spawned yet?");
             bool result = component.SyncVarNetworkIdentityEqualExposed(ni, identity.NetId);
             Assert.That(result, Is.False);
 
@@ -388,7 +385,6 @@ namespace Mirror.Tests
             // unspawned go and identity.netid==0 returns true (=equal)
             var go = new GameObject();
             NetworkIdentity ni = go.AddComponent<NetworkIdentity>();
-            LogAssert.Expect(LogType.Warning, "SetSyncVarNetworkIdentity NetworkIdentity " + ni + " has a zero netId. Maybe it is not spawned yet?");
             bool result = component.SyncVarNetworkIdentityEqualExposed(ni, 0);
             Assert.That(result, Is.True);
 
