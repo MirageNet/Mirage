@@ -671,8 +671,6 @@ namespace Mirror
 
         void ApplySpawnPayload(NetworkIdentity identity, SpawnMessage msg)
         {
-            identity.Reset();
-
             if (msg.assetId != Guid.Empty)
                 identity.AssetId = msg.assetId;
 
