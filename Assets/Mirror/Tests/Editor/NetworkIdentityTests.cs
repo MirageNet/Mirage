@@ -727,7 +727,7 @@ namespace Mirror.Tests
             identity.observers.Add(new NetworkConnection(null));
 
             // mark for reset and reset
-            identity.MarkForReset();
+            identity.Reset();
             Assert.That(identity.NetId, Is.EqualTo(0));
             Assert.That(identity.ConnectionToClient, Is.Null);
             Assert.That(identity.ConnectionToServer, Is.Null);

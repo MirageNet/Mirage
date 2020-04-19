@@ -1121,7 +1121,7 @@ namespace Mirror
         }
 
         // The object is no longer networked,  reset all network state
-        internal void MarkForReset()
+        internal void Reset()
         { 
             clientStarted = false;
             localPlayerStarted = false;

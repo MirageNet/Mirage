@@ -853,8 +853,8 @@ namespace Mirror
 
             // use owner segment if 'conn' owns this identity, otherwise
             // use observers segment
-            ArraySegment<byte> payload = isOwner ? 
-                ownerWriter.ToArraySegment() : 
+            ArraySegment<byte> payload = isOwner ?
+                ownerWriter.ToArraySegment() :
                 observersWriter.ToArraySegment();
 
             return payload;
@@ -979,7 +979,7 @@ namespace Mirror
 
             identity.OnStopServer.Invoke();
 
-            identity.MarkForReset();
+            identity.Reset();
 
             // when unspawning, dont destroy the server's object
             if (destroyServerObject)
