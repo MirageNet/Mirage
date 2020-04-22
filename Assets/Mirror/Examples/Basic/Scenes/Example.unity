@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4465934, g: 0.49642956, b: 0.57482487, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -136,6 +136,7 @@ GameObject:
   - component: {fileID: 249891958}
   - component: {fileID: 249891955}
   - component: {fileID: 249891961}
+  - component: {fileID: 249891960}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -173,6 +174,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   client: {fileID: 249891958}
   server: {fileID: 249891959}
+  clientObjectManager: {fileID: 249891960}
   playerPrefab: {fileID: 1088833923132447018, guid: 22f1fa3a0aff72b46a371f667bb4fb30,
     type: 3}
   startPositionIndex: 0
@@ -192,7 +194,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 0
   startOnHeadless: 0
-  showDebugMessages: 0
   serverTickRate: 30
   server: {fileID: 249891959}
   client: {fileID: 249891958}
@@ -240,14 +241,8 @@ MonoBehaviour:
   Disconnected:
     m_PersistentCalls:
       m_Calls: []
-  spawnPrefabs:
-  - {fileID: 1088833923132447022, guid: 22f1fa3a0aff72b46a371f667bb4fb30, type: 3}
-  - {fileID: 8872462076811691049, guid: a5bdca0a2315d43499be7dcef473fbc7, type: 3}
-  - {fileID: 8872462076811691049, guid: a5bdca0a2315d43499be7dcef473fbc7, type: 3}
-  - {fileID: 8872462076811691049, guid: a5bdca0a2315d43499be7dcef473fbc7, type: 3}
-  - {fileID: 1088833923132447022, guid: 22f1fa3a0aff72b46a371f667bb4fb30, type: 3}
-  - {fileID: 1088833923132447022, guid: 22f1fa3a0aff72b46a371f667bb4fb30, type: 3}
   Transport: {fileID: 249891961}
+  hostServer: {fileID: 0}
 --- !u!114 &249891959
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -279,6 +274,20 @@ MonoBehaviour:
   authenticator: {fileID: 0}
   Listening: 1
   transport: {fileID: 249891961}
+--- !u!114 &249891960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 249891953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 855477d59c8018f4dbc0a4897c8c2995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  client: {fileID: 249891958}
+  spawnPrefabs: []
 --- !u!114 &249891961
 MonoBehaviour:
   m_ObjectHideFlags: 0

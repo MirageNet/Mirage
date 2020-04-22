@@ -836,6 +836,7 @@ GameObject:
   - component: {fileID: 1886246554}
   - component: {fileID: 1886246553}
   - component: {fileID: 1886246557}
+  - component: {fileID: 1886246556}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -887,7 +888,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 1
   startOnHeadless: 1
-  showDebugMessages: 0
   serverTickRate: 30
   server: {fileID: 1886246555}
   client: {fileID: 1886246554}
@@ -913,6 +913,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   client: {fileID: 1886246554}
   server: {fileID: 1886246555}
+  clientObjectManager: {fileID: 1886246556}
   playerPrefab: {fileID: 114104497298166850, guid: b1651eaf8c7564a1c86031dfbb8a7b28,
     type: 3}
   startPositionIndex: 0
@@ -943,15 +944,8 @@ MonoBehaviour:
   Disconnected:
     m_PersistentCalls:
       m_Calls: []
-  spawnPrefabs:
-  - {fileID: 1080679924113744, guid: 5f7a7f34494ed40268eff49dbf9168bf, type: 3}
-  - {fileID: 1240244544407914, guid: b1651eaf8c7564a1c86031dfbb8a7b28, type: 3}
-  - {fileID: 1240244544407914, guid: b1651eaf8c7564a1c86031dfbb8a7b28, type: 3}
-  - {fileID: 1240244544407914, guid: b1651eaf8c7564a1c86031dfbb8a7b28, type: 3}
-  - {fileID: 1240244544407914, guid: b1651eaf8c7564a1c86031dfbb8a7b28, type: 3}
-  - {fileID: 1240244544407914, guid: b1651eaf8c7564a1c86031dfbb8a7b28, type: 3}
-  - {fileID: 1240244544407914, guid: b1651eaf8c7564a1c86031dfbb8a7b28, type: 3}
   Transport: {fileID: 0}
+  hostServer: {fileID: 0}
 --- !u!114 &1886246555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -983,6 +977,21 @@ MonoBehaviour:
   authenticator: {fileID: 0}
   Listening: 1
   transport: {fileID: 0}
+--- !u!114 &1886246556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1886246549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 855477d59c8018f4dbc0a4897c8c2995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  client: {fileID: 1886246554}
+  spawnPrefabs:
+  - {fileID: 1080679924113744, guid: 5f7a7f34494ed40268eff49dbf9168bf, type: 3}
 --- !u!114 &1886246557
 MonoBehaviour:
   m_ObjectHideFlags: 0
