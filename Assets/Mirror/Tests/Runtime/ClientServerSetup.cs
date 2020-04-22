@@ -46,11 +46,11 @@ namespace Mirror.Tests
             manager = networkManagerGo.GetComponent<NetworkManager>();
             manager.client = networkManagerGo.GetComponent<NetworkClient>();
             manager.server = networkManagerGo.GetComponent<NetworkServer>();
-            manager.clientObjectManager = networkManagerGo.GetComponent<ClientObjectManager>();
-            manager.clientObjectManager.client = manager.client;
+            clientObjectManager = networkManagerGo.AddComponent<ClientObjectManager>();
 
             server = manager.server;
             client = manager.client;
+            clientObjectManager.client = client;
             manager.startOnHeadless = false;
 
             ExtraSetup();
@@ -58,10 +58,11 @@ namespace Mirror.Tests
             // create and register a prefab
             playerPrefab = new GameObject("serverPlayer", typeof(NetworkIdentity), typeof(T));
             playerPrefab.GetComponent<NetworkIdentity>().AssetId = Guid.NewGuid();
-            clientObjectManager.RegisterPrefab(playerPrefab);
-
+            
             // wait for client and server to initialize themselves
             await Task.Delay(1);
+
+            clientObjectManager.RegisterPrefab(playerPrefab);
 
             // start the server
             await manager.StartServer();
@@ -95,7 +96,7 @@ namespace Mirror.Tests
 
             yield return null;
 
-            Object.DestroyImmediate(playerPrefab);
+            //Object.DestroyImmediate(playerPrefab);
             Object.DestroyImmediate(networkManagerGo);
         }
 

@@ -31,10 +31,11 @@ namespace Mirror.Tests
             manager = networkManagerGo.AddComponent<NetworkManager>();
             manager.client = networkManagerGo.GetComponent<NetworkClient>();
             manager.server = networkManagerGo.GetComponent<NetworkServer>();
-            clientObjectManager = networkManagerGo.GetComponent<ClientObjectManager>();
+            clientObjectManager = networkManagerGo.AddComponent<ClientObjectManager>();
 
             server = manager.server;
             client = manager.client;
+            clientObjectManager.client = client;
             manager.startOnHeadless = false;
 
             // wait for client and server to initialize themselves

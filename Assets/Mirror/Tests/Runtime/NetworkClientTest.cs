@@ -117,16 +117,15 @@ namespace Mirror.Tests
         {
             var guid = Guid.NewGuid();
 
-            client.RegisterPrefab(prefabObject, guid);
+            clientObjectManager.RegisterPrefab(playerGO, guid);
 
             yield return null;
 
             clientObjectManager.GetPrefab(guid, out GameObject result);
 
-            Assert.That(result, Is.SameAs(prefabObject));
+            Assert.That(result, Is.SameAs(playerGO));
 
-            Object.Destroy(prefabObject);
+            Object.Destroy(playerGO);
         }
-
     }
 }
