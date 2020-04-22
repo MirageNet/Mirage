@@ -73,7 +73,6 @@ namespace Mirror
             if (client.IsLocalClient)
             {
                 RegisterHostHandlers(conn);
-                client.hostServer.clientObjectManager = this;
             }
             else
             {
