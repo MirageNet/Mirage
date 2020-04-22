@@ -1,24 +1,26 @@
-using Mirror;
 using UnityEngine;
 
-public class SceneSwticherHUD : MonoBehaviour
+namespace Mirror.Examples.SceneChange
 {
-    public NetworkManager networkManager;
-
-    void OnGUI()
+    public class SceneSwticherHud : MonoBehaviour
     {
-        GUILayout.BeginArea(new Rect(10, 400, 215, 9999));
+        public NetworkManager networkManager;
 
-        if (GUILayout.Button("Switch to Room1"))
+        void OnGUI()
         {
-            networkManager.ServerChangeScene("Room1");
-        }
+            GUILayout.BeginArea(new Rect(10, 400, 215, 9999));
 
-        if (GUILayout.Button("Switch to Room2"))
-        {
-            networkManager.ServerChangeScene("Room2");
-        }
+            if (GUILayout.Button("Switch to Room1"))
+            {
+                networkManager.ServerChangeScene("Room1");
+            }
 
-        GUILayout.EndArea();
+            if (GUILayout.Button("Switch to Room2"))
+            {
+                networkManager.ServerChangeScene("Room2");
+            }
+
+            GUILayout.EndArea();
+        }
     }
 }
