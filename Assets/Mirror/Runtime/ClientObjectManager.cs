@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Guid = System.Guid;
 using Object = UnityEngine.Object;
 
@@ -28,7 +29,6 @@ namespace Mirror
         /// </summary>
         public List<GameObject> spawnPrefabs = new List<GameObject>();
 
-
         bool isSpawnFinished;
 
         /// <summary>
@@ -46,6 +46,8 @@ namespace Mirror
         private void Start()
         {
             if (logger.LogEnabled()) logger.Log("ClientObjectManager started");
+
+            SceneManager.sceneLoaded += OnSceneLoaded;
 
             client.Connected.AddListener(Connected);
             client.Disconnected.AddListener(Disconnected);
@@ -254,6 +256,24 @@ namespace Mirror
         #endregion
 
         #region Helpers
+
+        // support additive scene loads:
+        //   * ClientScene.PrepareToSpawnSceneObjects enables them again on the
+        //     client after the server sends ObjectSpawnStartedMessage to client
+        //     in SpawnObserversForConnection. this is only called when the
+        //     client joins, so we need to rebuild scene objects manually again
+        // TODO merge this with FinishLoadScene()?
+        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (mode == LoadSceneMode.Additive)
+            {
+                if (client.Active)
+                {
+                    PrepareToSpawnSceneObjects();
+                    if (logger.LogEnabled()) logger.Log("Rebuild Client spawnableObjects after additive scene load: " + scene.name);
+                }
+            }
+        }
 
         private void RegisterSpawnPrefabs()
         {

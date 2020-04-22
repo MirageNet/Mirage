@@ -19,7 +19,6 @@ namespace Mirror
     [HelpURL("https://mirror-networking.com/docs/Components/NetworkManager.html")]
     [RequireComponent(typeof(NetworkServer))]
     [RequireComponent(typeof(NetworkClient))]
-    [RequireComponent(typeof(ClientObjectManager))]
     [DisallowMultipleComponent]
     public class NetworkManager : MonoBehaviour
     {
@@ -49,7 +48,6 @@ namespace Mirror
 
         public NetworkServer server;
         public NetworkClient client;
-        public ClientObjectManager clientObjectManager;
 
         // transport layer
         [Header("Network Info")]
@@ -120,16 +118,6 @@ namespace Mirror
                 logger.Log("NetworkManager: added NetworkClient because there was none yet.");
 #if UNITY_EDITOR
                 UnityEditor.Undo.RecordObject(gameObject, "Added NetworkClient");
-#endif
-            }
-
-            // add ClientObjectManager if there is none yet. makes upgrading easier.
-            if (GetComponent<ClientObjectManager>() == null)
-            {
-                clientObjectManager = gameObject.AddComponent<ClientObjectManager>();
-                Debug.Log("NetworkManager: added ClientObjectManager because there was none yet.");
-#if UNITY_EDITOR
-                UnityEditor.Undo.RecordObject(gameObject, "Added ClientObjectManager");
 #endif
             }
         }
@@ -506,10 +494,6 @@ namespace Mirror
         //   NetworkScenePostProcess disables all scene objects on load, and
         //   * NetworkServer.SpawnObjects enables them again on the server when
         //     calling OnStartServer
-        //   * ClientScene.PrepareToSpawnSceneObjects enables them again on the
-        //     client after the server sends ObjectSpawnStartedMessage to client
-        //     in SpawnObserversForConnection. this is only called when the
-        //     client joins, so we need to rebuild scene objects manually again
         // TODO merge this with FinishLoadScene()?
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
@@ -520,11 +504,6 @@ namespace Mirror
                     // TODO only respawn the server objects from that scene later!
                     server.SpawnObjects();
                     if (logger.LogEnabled()) logger.Log("Respawned Server objects after additive scene load: " + scene.name);
-                }
-                if (client.Active)
-                {
-                    clientObjectManager.PrepareToSpawnSceneObjects();
-                    if (LogFilter.Debug) Debug.Log("Rebuild Client spawnableObjects after additive scene load: " + scene.name);
                 }
             }
         }
