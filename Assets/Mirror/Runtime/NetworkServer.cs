@@ -49,7 +49,6 @@ namespace Mirror
         [Header("Authentication")]
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
-        public ClientObjectManager clientObjectManager;
 
         /// <summary>
         /// The connection to the host mode client (if any).
