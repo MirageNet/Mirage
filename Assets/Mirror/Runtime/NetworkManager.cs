@@ -497,14 +497,11 @@ namespace Mirror
         // TODO merge this with FinishLoadScene()?
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if (mode == LoadSceneMode.Additive)
+            if (mode == LoadSceneMode.Additive && server.Active)
             {
-                if (server.Active)
-                {
-                    // TODO only respawn the server objects from that scene later!
-                    server.SpawnObjects();
-                    if (logger.LogEnabled()) logger.Log("Respawned Server objects after additive scene load: " + scene.name);
-                }
+                // TODO only respawn the server objects from that scene later!
+                server.SpawnObjects();
+                if (logger.LogEnabled()) logger.Log("Respawned Server objects after additive scene load: " + scene.name);
             }
         }
 

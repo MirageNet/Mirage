@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
-using Guid = System.Guid;
-using Object = UnityEngine.Object;
 
 namespace Mirror
 {
@@ -249,7 +246,7 @@ namespace Mirror
 
         internal void RegisterHostHandlers(INetworkConnection connection)
         {
-
+            //Currently no host related messages to register
         }
 
         internal void RegisterMessageHandlers(INetworkConnection connection)

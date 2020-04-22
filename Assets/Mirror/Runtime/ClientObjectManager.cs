@@ -43,7 +43,7 @@ namespace Mirror
         /// </summary>
         public readonly Dictionary<ulong, NetworkIdentity> spawnableObjects = new Dictionary<ulong, NetworkIdentity>();
 
-        private void Start()
+        public void Start()
         {
             if (logger.LogEnabled()) logger.Log("ClientObjectManager started");
 

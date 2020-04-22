@@ -96,7 +96,7 @@ namespace Mirror.Tests
 
             yield return null;
 
-            //Object.DestroyImmediate(playerPrefab);
+            Object.DestroyImmediate(playerPrefab);
             Object.DestroyImmediate(networkManagerGo);
         }
 
