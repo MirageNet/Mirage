@@ -628,7 +628,7 @@ namespace Mirror
         {
             Guid assetId = identity.AssetId;
 
-            identity.NetworkDestroy();
+            identity.StopClient();
             if (unspawnHandlers.TryGetValue(assetId, out UnSpawnDelegate handler) && handler != null)
             {
                 handler(identity.gameObject);
@@ -639,7 +639,7 @@ namespace Mirror
             }
             else
             {
-                identity.MarkForReset();
+                identity.Reset();
                 identity.gameObject.SetActive(false);
                 spawnableObjects[identity.sceneId] = identity;
             }
