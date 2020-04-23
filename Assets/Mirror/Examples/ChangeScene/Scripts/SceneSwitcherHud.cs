@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Mirror.Examples.SceneChange
 {
-    public class SceneSwticherHud : MonoBehaviour
+    public class SceneSwitcherHud : MonoBehaviour
     {
         public NetworkManager networkManager;
 
