@@ -15,6 +15,24 @@ namespace Mirror.Tests
         }
     }
 
+    public struct RequestMessage : IMessageBase
+    {
+        public string ZoneName;
+
+        public void Deserialize(NetworkReader reader) { }
+        public void Serialize(NetworkWriter writer) { }
+    }
+
+    public struct ReplyMessage : IMessageBase
+    {
+        public bool Success;
+        public int ErrorCode;
+        public string ErrorMessage;
+
+        public void Deserialize(NetworkReader reader) { }
+        public void Serialize(NetworkWriter writer) { }
+    }
+
     public class NetworkServerTests : ClientServerSetup<MockComponent>
     {
         WovenTestMessage message;
@@ -135,6 +153,35 @@ namespace Mirror.Tests
             func.Received().Invoke(
                 Arg.Is<WovenTestMessage>(msg => msg.Equals(message)
             ));
+        }
+
+        public void SendExampleMessage()
+        {
+            client.Connection.SendAndReceive<RequestMessage, ReplyMessage>(new RequestMessage()
+            {
+                ZoneName = "Magrathea"
+            });
+        }
+
+        public void HandleExampleMessage(INetworkConnection conn, RequestMessage message)
+        {
+            conn.SendAsync(new ReplyMessage()
+            {
+                Success = false,
+                ErrorCode = 42,
+                ErrorMessage = "Zone is available on server 42."
+            });
+        }
+
+        [UnityTest]
+        public IEnumerator SendAndReceiveTest()
+        {
+            connectionToClient.RegisterHandler<RequestMessage, ReplyMessage>(HandleExampleMessage);
+            //connectionToServer.RegisterHandler //Does the client need a handler here? 
+
+            ReplyMessage result = await connectionToServer.SendAndReceive<RequestMessage, ReplyMessage>(new RequestMessage());
+
+            Assert.That(result.Success, Is.True);
         }
 
         [UnityTest]
