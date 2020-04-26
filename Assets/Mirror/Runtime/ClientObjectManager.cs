@@ -15,7 +15,7 @@ namespace Mirror
     [DisallowMultipleComponent]
     public class ClientObjectManager : MonoBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkClient));
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientObjectManager));
 
         public NetworkClient client;
 
