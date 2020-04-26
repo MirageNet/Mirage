@@ -153,6 +153,16 @@ namespace Mirror
             RegisterHandler<T>((_, value) => { handler(value); });
         }
 
+        public void RegisterHandler<T1, T2>(Action<T1> handler) where T1 : IMessageBase where T2 : IMessageBase , new()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RegisterHandler<T1, T2>(Action<T1> handler, INetworkConnection conn) where T1 : IMessageBase where T2 : IMessageBase, new()
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Unregisters a handler for a particular message type.
         /// </summary>
@@ -233,6 +243,13 @@ namespace Mirror
         internal virtual Task SendAsync(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable)
         {
             return connection.SendAsync(segment);
+        }
+
+        public Task<T2> SendAndReceive<T1, T2>(T1 message, int channelId = Channels.DefaultReliable)
+    where T1 : IMessageBase
+    where T2 : IMessageBase
+        {
+            throw new NotImplementedException();
         }
 
         public override string ToString()
