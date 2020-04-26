@@ -564,7 +564,6 @@ namespace Mirror
             {
                 client.OnAuthenticated(client.Connection);
                 clientLoadedScene = true;
-                client.Connection = null;
             }
 
             FinishStartHost();
