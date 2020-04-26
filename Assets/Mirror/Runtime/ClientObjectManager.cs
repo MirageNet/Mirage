@@ -47,23 +47,12 @@ namespace Mirror
         {
             if (logger.LogEnabled()) logger.Log("ClientObjectManager started");
 
+            client = client ?? GetComponent<NetworkClient>();
+
             SceneManager.sceneLoaded += OnSceneLoaded;
 
             client.Connected.AddListener(Connected);
             client.Disconnected.AddListener(Disconnected);
-        }
-
-        public void OnValidate()
-        {
-            // add NetworkClient if there is none yet. makes upgrading easier.
-            if (GetComponent<NetworkClient>() == null)
-            {
-                client = gameObject.AddComponent<NetworkClient>();
-                Debug.Log("ClientObjectManager: added NetworkClient because there was none yet.");
-#if UNITY_EDITOR
-                UnityEditor.Undo.RecordObject(gameObject, "Added NetworkClient");
-#endif
-            }
         }
 
         void Connected(INetworkConnection conn)
