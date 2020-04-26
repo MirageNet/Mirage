@@ -45,7 +45,7 @@ namespace Mirror
 
         public void Start()
         {
-            if (logger.LogEnabled()) logger.Log("ClientObjectManager started");
+            logger.Log("ClientObjectManager started");
 
             client = client ?? GetComponent<NetworkClient>();
 
