@@ -14,6 +14,10 @@ namespace Mirror
 
         void RegisterHandler<T>(Action<T> handler) where T : IMessageBase, new();
 
+        void RegisterHandler<T1, T2>(Action<T1> handler) where T1 : IMessageBase where T2 : IMessageBase, new();
+
+        void RegisterHandler<T1, T2>(Action<INetworkConnection, T1> handler) where T1 : IMessageBase where T2 : IMessageBase, new();
+
         void UnregisterHandler<T>() where T : IMessageBase;
 
         void ClearHandlers();
@@ -21,6 +25,8 @@ namespace Mirror
         void Send<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase;
 
         Task SendAsync<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase;
+
+        Task<T2> SendAndReceive<T1, T2>(T1 msg, int channelId = Channels.DefaultReliable) where T1 : IMessageBase where T2 : IMessageBase;
 
         Task ProcessMessagesAsync();
 
