@@ -155,12 +155,17 @@ namespace Mirror
 
         public T2 RegisterHandler<T1, T2>(Action<T1> handler) where T1 : IMessageBase where T2 : IMessageBase , new()
         {
-            throw new NotImplementedException();
+            return RegisterHandler<T1, T2>((_, value) => { handler(value); });
         }
 
         public T2 RegisterHandler<T1, T2>(Action<INetworkConnection, T1> handler) where T1 : IMessageBase where T2 : IMessageBase, new()
         {
-            throw new NotImplementedException();
+            int msgType = MessagePacker.GetId<T1>();
+            if (logger.filterLogType == LogType.Log && messageHandlers.ContainsKey(msgType))
+            {
+                logger.Log("NetworkServer.RegisterHandler replacing " + msgType);
+            }
+            messageHandlers[msgType] = MessageHandler(handler);
         }
 
         /// <summary>
