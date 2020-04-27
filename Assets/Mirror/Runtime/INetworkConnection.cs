@@ -14,9 +14,9 @@ namespace Mirror
 
         void RegisterHandler<T>(Action<T> handler) where T : IMessageBase, new();
 
-        void RegisterHandler<T1, T2>(Action<T1> handler) where T1 : IMessageBase where T2 : IMessageBase, new();
+        T2 RegisterHandler<T1, T2>(Action<T1> handler) where T1 : IMessageBase where T2 : IMessageBase, new();
 
-        void RegisterHandler<T1, T2>(Action<INetworkConnection, T1> handler) where T1 : IMessageBase where T2 : IMessageBase, new();
+        T2 RegisterHandler<T1, T2>(Action<INetworkConnection, T1> handler) where T1 : IMessageBase where T2 : IMessageBase, new();
 
         void UnregisterHandler<T>() where T : IMessageBase;
 
