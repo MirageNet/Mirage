@@ -153,12 +153,12 @@ namespace Mirror
             RegisterHandler<T>((_, value) => { handler(value); });
         }
 
-        public void RegisterHandler<T1, T2>(Action<T1> handler) where T1 : IMessageBase where T2 : IMessageBase , new()
+        public T2 RegisterHandler<T1, T2>(Action<T1> handler) where T1 : IMessageBase where T2 : IMessageBase , new()
         {
             throw new NotImplementedException();
         }
 
-        public void RegisterHandler<T1, T2>(Action<T1> handler, INetworkConnection conn) where T1 : IMessageBase where T2 : IMessageBase, new()
+        public T2 RegisterHandler<T1, T2>(Action<INetworkConnection, T1> handler) where T1 : IMessageBase where T2 : IMessageBase, new()
         {
             throw new NotImplementedException();
         }
