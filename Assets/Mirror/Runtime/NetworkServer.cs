@@ -52,31 +52,20 @@ namespace Mirror
         public NetworkConnectionEvent Authenticated = new NetworkConnectionEvent();
 
         /// <summary>
-        /// Called from ServerChangeScene immediately before SceneManager.LoadSceneAsync is executed
-        /// <para>This allows server to do work / cleanup / prep before the scene changes.</para>
+        /// Event fires when the Server starts changing scenes.
         /// </summary>
-        /// <param name="newSceneName">Name of the scene that's about to be loaded</param>
         public ServerSceneChangeEvent ServerChangeScene = new ServerSceneChangeEvent();
 
         /// <summary>
-        /// Called on the server when a scene is completed loaded, when the scene load was initiated by the server with ServerChangeScene().
+        /// Event fires once the Server has completed changing scenes.
         /// </summary>
-        /// <param name="sceneName">The name of the new scene.</param>
         public ServerSceneChangeEvent ServerSceneChanged = new ServerSceneChangeEvent();
 
-        /// <summary>
-        /// Called on the server when a client is ready.
-        /// <para>The default implementation of this function calls NetworkServer.SetClientReady() to continue the network setup process.</para>
-        /// </summary>
-        /// <param name="conn">Connection from client.</param>
         public NetworkConnectionEvent ServerReady = new NetworkConnectionEvent();
 
         /// <summary>
-        /// Called on the server when a client removes a player.
-        /// <para>The default implementation of this function destroys the corresponding player object.</para>
+        /// Event fires when a player is removed from the server.
         /// </summary>
-        /// <param name="conn">The connection to remove the player from.</param>
-        /// <param name="player">The player identity to remove.</param>
         public ServerRemovePlayerEvent ServerRemovePlayer = new ServerRemovePlayerEvent();
 
         /// <summary>
@@ -315,16 +304,30 @@ namespace Mirror
             }
         }
 
-        public void OnServerChangeScene(string sceneName)
+        /// <summary>
+        /// Called from ServerChangeScene immediately before SceneManager.LoadSceneAsync is executed
+        /// <para>This allows server to do work / cleanup / prep before the scene changes.</para>
+        /// </summary>
+        /// <param name="newSceneName">Name of the scene that's about to be loaded</param>
+        public void OnServerChangeScene(string newSceneName)
         {
-            ServerChangeScene.Invoke(sceneName);
+            ServerChangeScene.Invoke(newSceneName);
         }
 
+        /// <summary>
+        /// Called on the server when a scene is completed loaded, when the scene load was initiated by the server with ServerChangeScene().
+        /// </summary>
+        /// <param name="sceneName">The name of the new scene.</param>
         public void OnServerSceneChanged(string sceneName)
         {
             ServerSceneChanged.Invoke(sceneName);
         }
 
+        /// <summary>
+        /// Called on the server when a client is ready.
+        /// <para>The default implementation of this function calls NetworkServer.SetClientReady() to continue the network setup process.</para>
+        /// </summary>
+        /// <param name="conn">Connection from client.</param>
         public void OnServerReady(INetworkConnection conn)
         {
             ServerReady.Invoke(conn);
@@ -337,6 +340,12 @@ namespace Mirror
             SetClientReady(conn);
         }
 
+        /// <summary>
+        /// Called on the server when a client removes a player.
+        /// <para>The default implementation of this function destroys the corresponding player object.</para>
+        /// </summary>
+        /// <param name="conn">The connection to remove the player from.</param>
+        /// <param name="player">The player identity to remove.</param>
         public void OnServerRemovePlayer(INetworkConnection conn, NetworkIdentity player)
         {
             ServerRemovePlayer.Invoke(conn, player);
