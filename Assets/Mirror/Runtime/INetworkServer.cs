@@ -3,7 +3,30 @@ using UnityEngine;
 
 namespace Mirror
 {
-    public interface INetworkServer
+    public interface ServerObjectManager
+    {
+        bool AddPlayerForConnection(INetworkConnection conn, GameObject player);
+
+        bool AddPlayerForConnection(INetworkConnection conn, GameObject player, Guid assetId);
+
+        bool ReplacePlayerForConnection(INetworkConnection conn, NetworkClient client, GameObject player, bool keepAuthority = false);
+
+        bool ReplacePlayerForConnection(INetworkConnection conn, NetworkClient client, GameObject player, Guid assetId, bool keepAuthority = false);
+
+        void Spawn(GameObject obj, GameObject player);
+
+        void Spawn(GameObject obj, INetworkConnection ownerConnection = null);
+
+        void Spawn(GameObject obj, Guid assetId, INetworkConnection ownerConnection = null);
+
+        void Destroy(GameObject obj);
+
+        void UnSpawn(GameObject obj);
+
+        bool SpawnObjects();
+    }
+
+    public interface INetworkServer : ServerObjectManager
     {
         void Disconnect();
 
@@ -19,30 +42,10 @@ namespace Mirror
 
         void SendToClientOfPlayer<T>(NetworkIdentity identity, T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase;
 
-        bool AddPlayerForConnection(INetworkConnection conn, GameObject player);
-
-        bool AddPlayerForConnection(INetworkConnection conn, GameObject player, Guid assetId);
-
-        bool ReplacePlayerForConnection(INetworkConnection conn, NetworkClient client, GameObject player, bool keepAuthority = false);
-
-        bool ReplacePlayerForConnection(INetworkConnection conn, NetworkClient client, GameObject player, Guid assetId, bool keepAuthority = false);
-
         void SetClientReady(INetworkConnection conn);
 
         void SetAllClientsNotReady();
 
         void SetClientNotReady(INetworkConnection conn);
-
-        void Spawn(GameObject obj, GameObject player);
-
-        void Spawn(GameObject obj, INetworkConnection ownerConnection = null);
-
-        void Spawn(GameObject obj, Guid assetId, INetworkConnection ownerConnection = null);
-
-        void Destroy(GameObject obj);
-
-        void UnSpawn(GameObject obj);
-
-        bool SpawnObjects();
     }
 }
