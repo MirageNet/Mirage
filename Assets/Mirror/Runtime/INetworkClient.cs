@@ -4,23 +4,11 @@ using UnityEngine;
 
 namespace Mirror
 {
-    public interface INetworkClient
+    public interface ClientObjectsManager
     {
-        void OnAuthenticated(INetworkConnection conn);
-
-        void Disconnect();
-
-        Task SendAsync<T>(T message, int channelId = Channels.DefaultReliable) where T : IMessageBase;
-
-        void Send<T>(T message, int channelId = Channels.DefaultReliable) where T : IMessageBase;
+        bool GetPrefab(Guid assetId, out GameObject prefab);
 
         bool RemovePlayer();
-
-        void Ready(INetworkConnection conn);
-
-        void PrepareToSpawnSceneObjects();
-
-        bool GetPrefab(Guid assetId, out GameObject prefab);
 
         void RegisterPrefab(GameObject prefab);
 
@@ -41,5 +29,23 @@ namespace Mirror
         void ClearSpawners();
 
         void DestroyAllClientObjects();
+    }
+
+    public interface ClientSceneManager
+    {
+        void PrepareToSpawnSceneObjects();
+    }
+
+    public interface INetworkClient : ClientObjectsManager, ClientSceneManager
+    {
+        void OnAuthenticated(INetworkConnection conn);
+
+        void Disconnect();
+
+        void Send<T>(T message, int channelId = Channels.DefaultReliable) where T : IMessageBase;
+
+        Task SendAsync<T>(T message, int channelId = Channels.DefaultReliable) where T : IMessageBase;
+
+        void Ready(INetworkConnection conn);
     }
 }
