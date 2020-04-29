@@ -37,6 +37,7 @@ namespace Mirror
         readonly Dictionary<Guid, UnSpawnDelegate> unspawnHandlers = new Dictionary<Guid, UnSpawnDelegate>();
 
         [Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkConnection> { }
+        [Serializable] public class ClientSceneChangeEvent : UnityEvent<string, SceneOperation, bool> { }
 
         /// <summary>
         /// Event fires once the Client has connected its Server.
@@ -362,6 +363,25 @@ namespace Mirror
                 Connected.RemoveListener(OnAuthenticated);
             }
 
+        }
+
+        public void OnClientChangeScene(string sceneName, SceneOperation sceneOperation, bool customHandling)
+        {
+            ClientChangeScene.Invoke(sceneName, sceneOperation, customHandling);
+        }
+
+        public void OnClientSceneChanged(INetworkConnection conn)
+        {
+            // always become ready.
+            if (!ready)
+                Ready(conn);
+
+            ClientSceneChanged.Invoke(conn);
+        }
+
+        public void OnClientNotReady(INetworkConnection conn)
+        {
+            ClientNotReady.Invoke(conn);
         }
 
         static bool ConsiderForSpawning(NetworkIdentity identity)

@@ -449,7 +449,7 @@ namespace Mirror
             // (client may be null after StopClient etc.)
             logger.Log("ClientChangeScene: pausing handlers while scene is loading to avoid data loss after scene was loaded.");
             // Let client prepare for scene change
-            OnClientChangeScene(newSceneName, sceneOperation, customHandling);
+            client.OnClientChangeScene(newSceneName, sceneOperation, customHandling);
 
             // scene handling will happen in overrides of OnClientChangeScene and/or OnClientSceneChanged
             if (customHandling)
@@ -574,7 +574,7 @@ namespace Mirror
             if (client.IsConnected)
             {
                 // let client know that we changed scene
-                OnClientSceneChanged(client.Connection);
+                client.OnClientSceneChanged(client.Connection);
             }
         }
 
@@ -594,7 +594,7 @@ namespace Mirror
 
             if (client.IsConnected)
             {
-                OnClientSceneChanged(client.Connection);
+                client.OnClientSceneChanged(client.Connection);
             }
         }
 
@@ -680,7 +680,7 @@ namespace Mirror
             logger.Log("NetworkManager.OnClientNotReadyMessageInternal");
 
             client.ready = false;
-            OnClientNotReady(conn);
+            client.OnClientNotReady(conn);
 
             // NOTE: clientReadyConnection is not set here! don't want OnClientConnect to be invoked again after scene changes.
         }
