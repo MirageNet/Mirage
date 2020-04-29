@@ -49,6 +49,29 @@ namespace Mirror
         public NetworkConnectionEvent Authenticated = new NetworkConnectionEvent();
 
         /// <summary>
+        /// Called on clients when a servers tells the client it is no longer ready.
+        /// <para>This is commonly used when switching scenes.</para>
+        /// </summary>
+        /// <param name="conn">Connection to the server.</param>
+        public NetworkConnectionEvent ClientNotReady = new NetworkConnectionEvent();
+
+        /// <summary>
+        /// Called from ClientChangeScene immediately before SceneManager.LoadSceneAsync is executed
+        /// <para>This allows client to do work / cleanup / prep before the scene changes.</para>
+        /// </summary>
+        /// <param name="newSceneName">Name of the scene that's about to be loaded</param>
+        /// <param name="sceneOperation">Scene operation that's about to happen</param>
+        /// <param name="customHandling">true to indicate that scene loading will be handled through overrides</param>
+        public ClientSceneChangeEvent ClientChangeScene = new ClientSceneChangeEvent();
+
+        /// <summary>
+        /// Called on clients when a scene has completed loaded, when the scene load was initiated by the server.
+        /// <para>Scene changes can cause player objects to be destroyed. The default implementation of OnClientSceneChanged in the NetworkManager is to add a player object for the connection if no player object exists.</para>
+        /// </summary>
+        /// <param name="conn">The network connection that the scene change message arrived on.</param>
+        public NetworkConnectionEvent ClientSceneChanged = new NetworkConnectionEvent();
+
+        /// <summary>
         /// Event fires after the Client has disconnected from its Server and Cleanup has been called.
         /// </summary>
         public UnityEvent Disconnected = new UnityEvent();
