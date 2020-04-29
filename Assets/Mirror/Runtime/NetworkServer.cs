@@ -25,6 +25,8 @@ namespace Mirror
         bool initialized;
 
         [Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkConnection> { }
+        [Serializable] public class ServerSceneChangeEvent : UnityEvent<string> { }
+        [Serializable] public class ServerRemovePlayerEvent : UnityEvent<INetworkConnection , NetworkIdentity> { }
 
         /// <summary>
         /// The maximum number of concurrent network connections to support.
@@ -310,6 +312,38 @@ namespace Mirror
 
                     identity.StartClient();
                 }
+            }
+        }
+
+        public void OnServerChangeScene(string sceneName)
+        {
+            ServerChangeScene.Invoke(sceneName);
+        }
+
+        public void OnServerSceneChanged(string sceneName)
+        {
+            ServerSceneChanged.Invoke(sceneName);
+        }
+
+        public void OnServerReady(INetworkConnection conn)
+        {
+            ServerReady.Invoke(conn);
+
+            if (conn.Identity == null)
+            {
+                // this is now allowed (was not for a while)
+                logger.Log("Ready with no player object");
+            }
+            SetClientReady(conn);
+        }
+
+        public void OnServerRemovePlayer(INetworkConnection conn, NetworkIdentity player)
+        {
+            ServerRemovePlayer.Invoke(conn, player);
+
+            if (player.gameObject != null)
+            {
+                Destroy(player.gameObject);
             }
         }
 

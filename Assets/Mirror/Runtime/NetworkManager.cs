@@ -421,7 +421,7 @@ namespace Mirror
             networkSceneName = newSceneName;
 
             // Let server prepare for scene change
-            OnServerChangeScene(newSceneName);
+            server.OnServerChangeScene(newSceneName);
 
             loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
 
@@ -563,7 +563,7 @@ namespace Mirror
             FinishStartHost();
 
             // call OnServerSceneChanged
-            OnServerSceneChanged(networkSceneName);
+            server.OnServerSceneChanged(networkSceneName);
 
             if (client.IsConnected)
             {
@@ -601,7 +601,7 @@ namespace Mirror
             logger.Log("Finished loading scene in server-only mode.");
 
             server.SpawnObjects();
-            OnServerSceneChanged(networkSceneName);
+            server.OnServerSceneChanged(networkSceneName);
         }
 
         #endregion
@@ -626,47 +626,6 @@ namespace Mirror
             {
                 var msg = new SceneMessage { sceneName = networkSceneName };
                 conn.Send(msg);
-            }
-        }
-
-        #endregion
-
-        #region Client Internal Message Handlers
-
-        void RegisterClientMessages(INetworkConnection connection)
-        {
-            connection.RegisterHandler<NotReadyMessage>(OnClientNotReadyMessageInternal);
-            connection.RegisterHandler<SceneMessage>(OnClientSceneInternal);
-        }
-
-        // called after successful authentication
-        void OnClientAuthenticated(INetworkConnection conn)
-        {
-            RegisterClientMessages(conn);
-
-            logger.Log("NetworkManager.OnClientAuthenticated");
-
-            // will wait for scene id to come from the server.
-            clientLoadedScene = true;
-        }
-
-        void OnClientNotReadyMessageInternal(INetworkConnection conn, NotReadyMessage msg)
-        {
-            logger.Log("NetworkManager.OnClientNotReadyMessageInternal");
-
-            client.ready = false;
-            client.OnClientNotReady(conn);
-
-            // NOTE: clientReadyConnection is not set here! don't want OnClientConnect to be invoked again after scene changes.
-        }
-
-        void OnClientSceneInternal(INetworkConnection conn, SceneMessage msg)
-        {
-            logger.Log("NetworkManager.OnClientSceneInternal");
-
-            if (client.IsConnected && !server.Active)
-            {
-                ClientChangeScene(msg.sceneName, msg.sceneOperation, msg.customHandling);
             }
         }
 
