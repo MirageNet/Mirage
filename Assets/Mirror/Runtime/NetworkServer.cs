@@ -50,6 +50,34 @@ namespace Mirror
         public NetworkConnectionEvent Authenticated = new NetworkConnectionEvent();
 
         /// <summary>
+        /// Called from ServerChangeScene immediately before SceneManager.LoadSceneAsync is executed
+        /// <para>This allows server to do work / cleanup / prep before the scene changes.</para>
+        /// </summary>
+        /// <param name="newSceneName">Name of the scene that's about to be loaded</param>
+        public ServerSceneChangeEvent ServerChangeScene = new ServerSceneChangeEvent();
+
+        /// <summary>
+        /// Called on the server when a scene is completed loaded, when the scene load was initiated by the server with ServerChangeScene().
+        /// </summary>
+        /// <param name="sceneName">The name of the new scene.</param>
+        public ServerSceneChangeEvent ServerSceneChanged = new ServerSceneChangeEvent();
+
+        /// <summary>
+        /// Called on the server when a client is ready.
+        /// <para>The default implementation of this function calls NetworkServer.SetClientReady() to continue the network setup process.</para>
+        /// </summary>
+        /// <param name="conn">Connection from client.</param>
+        public NetworkConnectionEvent ServerReady = new NetworkConnectionEvent();
+
+        /// <summary>
+        /// Called on the server when a client removes a player.
+        /// <para>The default implementation of this function destroys the corresponding player object.</para>
+        /// </summary>
+        /// <param name="conn">The connection to remove the player from.</param>
+        /// <param name="player">The player identity to remove.</param>
+        public ServerRemovePlayerEvent ServerRemovePlayer = new ServerRemovePlayerEvent();
+
+        /// <summary>
         /// Event fires once a Client has Disconnected from the Server.
         /// </summary>
         public NetworkConnectionEvent Disconnected = new NetworkConnectionEvent();
