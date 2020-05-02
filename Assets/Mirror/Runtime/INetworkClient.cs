@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Mirror
 {
-    public interface ClientObjectsManager
+    public interface IClientObjectsManager
     {
         bool GetPrefab(Guid assetId, out GameObject prefab);
 
@@ -31,12 +31,12 @@ namespace Mirror
         void DestroyAllClientObjects();
     }
 
-    public interface ClientSceneManager
+    public interface IClientSceneManager
     {
         void PrepareToSpawnSceneObjects();
     }
 
-    public interface INetworkClient : ClientObjectsManager, ClientSceneManager
+    public interface INetworkClient : IClientObjectsManager, IClientSceneManager
     {
         void OnAuthenticated(INetworkConnection conn);
 
