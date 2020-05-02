@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Mirror
 {
-    public interface ServerObjectManager
+    public interface IServerObjectManager
     {
         bool AddPlayerForConnection(INetworkConnection conn, GameObject player);
 
@@ -26,7 +26,7 @@ namespace Mirror
         bool SpawnObjects();
     }
 
-    public interface INetworkServer : ServerObjectManager
+    public interface INetworkServer : IServerObjectManager
     {
         void Disconnect();
 
