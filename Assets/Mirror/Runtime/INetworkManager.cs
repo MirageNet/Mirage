@@ -2,7 +2,7 @@ using System;
 
 namespace Mirror
 {
-    public interface ServerSceneManager
+    public interface IServerSceneManager
     {
         void ServerChangeScene(string newSceneName);
 
@@ -11,14 +11,14 @@ namespace Mirror
         void OnServerSceneChanged(string sceneName);
     }
 
-    public interface ClientSceneManager
+    public interface IClientSceneManager
     {
         void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling);
 
         void OnClientSceneChanged(INetworkConnection conn);
     }
 
-    public interface INetworkManager : ServerSceneManager, ClientSceneManager
+    public interface INetworkManager : IServerSceneManager, IClientSceneManager
     {
         void StartClient(Uri uri);
 
