@@ -25,6 +25,7 @@ namespace Mirror
         bool initialized;
 
         [Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkConnection> { }
+        [Serializable] public class NetworkSceneEvent : UnityEvent<string> { }
 
         /// <summary>
         /// The maximum number of concurrent network connections to support.
@@ -48,6 +49,16 @@ namespace Mirror
         /// Event fires once a new Client has passed Authentication to the Server.
         /// </summary>
         public NetworkConnectionEvent Authenticated = new NetworkConnectionEvent();
+
+        /// <summary>
+        /// Event fires before Server changes scene.
+        /// </summary>
+        public NetworkSceneEvent ServerChangeScene = new NetworkSceneEvent();
+
+        /// <summary>
+        /// Event fires after Server has completed scene change.
+        /// </summary>
+        public NetworkSceneEvent ServerSceneChanged = new NetworkSceneEvent();
 
         /// <summary>
         /// Event fires once a Client has Disconnected from the Server.
