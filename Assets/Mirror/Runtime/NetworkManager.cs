@@ -421,7 +421,7 @@ namespace Mirror
             networkSceneName = newSceneName;
 
             // Let server prepare for scene change
-            OnServerChangeScene(newSceneName);
+            server.OnServerChangeScene(newSceneName);
 
             loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
 
@@ -563,7 +563,7 @@ namespace Mirror
             FinishStartHost();
 
             // call OnServerSceneChanged
-            OnServerSceneChanged(networkSceneName);
+            server.OnServerSceneChanged(networkSceneName);
 
             if (client.IsConnected)
             {
@@ -601,7 +601,7 @@ namespace Mirror
             logger.Log("Finished loading scene in server-only mode.");
 
             server.SpawnObjects();
-            OnServerSceneChanged(networkSceneName);
+            server.OnServerSceneChanged(networkSceneName);
         }
 
         #endregion
