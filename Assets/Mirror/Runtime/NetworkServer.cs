@@ -296,6 +296,25 @@ namespace Mirror
             }
         }
 
+        /// <summary>
+        /// Called from ServerChangeScene immediately before SceneManager.LoadSceneAsync is executed
+        /// <para>This allows server to do work / cleanup / prep before the scene changes.</para>
+        /// </summary>
+        /// <param name="newSceneName">Name of the scene that's about to be loaded</param>
+        public void OnServerChangeScene(string newSceneName)
+        {
+            ServerChangeScene.Invoke(newSceneName);
+        }
+
+        /// <summary>
+        /// Called on the server when a scene is completed loaded, when the scene load was initiated by the server with ServerChangeScene().
+        /// </summary>
+        /// <param name="sceneName">The name of the new scene.</param>
+        public void OnServerSceneChanged(string sceneName)
+        {
+            ServerSceneChanged.Invoke(sceneName);
+        }
+
         // this is like SendToReady - but it doesn't check the ready flag on the connection.
         // this is used for ObjectDestroy messages.
         void SendToObservers<T>(NetworkIdentity identity, T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
