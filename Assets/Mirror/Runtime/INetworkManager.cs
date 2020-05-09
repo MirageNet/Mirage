@@ -11,14 +11,7 @@ namespace Mirror
         void OnServerSceneChanged(string sceneName);
     }
 
-    public interface IClientSceneManager
-    {
-        void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling);
-
-        void OnClientSceneChanged(INetworkConnection conn);
-    }
-
-    public interface INetworkManager : IServerSceneManager, IClientSceneManager
+    public interface INetworkManager : IServerSceneManager
     {
         void StartClient(Uri uri);
 

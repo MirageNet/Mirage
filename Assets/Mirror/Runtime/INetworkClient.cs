@@ -34,6 +34,10 @@ namespace Mirror
     public interface IClientSceneManager
     {
         void PrepareToSpawnSceneObjects();
+
+        void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling);
+
+        void OnClientSceneChanged(INetworkConnection conn);
     }
 
     public interface INetworkClient : IClientObjectManager, IClientSceneManager
