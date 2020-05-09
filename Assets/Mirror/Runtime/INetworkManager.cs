@@ -26,7 +26,5 @@ namespace Mirror
         void OnServerReady(INetworkConnection conn);
 
         void OnServerRemovePlayer(INetworkConnection conn, NetworkIdentity player);
-
-        void OnClientNotReady(INetworkConnection conn);
     }
 }

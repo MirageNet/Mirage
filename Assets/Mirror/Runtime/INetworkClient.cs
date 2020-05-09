@@ -51,5 +51,7 @@ namespace Mirror
         Task SendAsync<T>(T message, int channelId = Channels.DefaultReliable) where T : IMessageBase;
 
         void Ready(INetworkConnection conn);
+
+        void OnClientNotReady(INetworkConnection conn);
     }
 }
