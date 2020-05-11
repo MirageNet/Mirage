@@ -2,16 +2,7 @@ using System;
 
 namespace Mirror
 {
-    public interface IServerSceneManager
-    {
-        void ServerChangeScene(string newSceneName);
-
-        void OnServerChangeScene(string newSceneName);
-
-        void OnServerSceneChanged(string sceneName);
-    }
-
-    public interface INetworkManager : IServerSceneManager
+    public interface INetworkManager
     {
         void StartClient(Uri uri);
 
@@ -23,8 +14,6 @@ namespace Mirror
 
         void OnDestroy();
 
-        void OnServerReady(INetworkConnection conn);
-
-        void OnServerRemovePlayer(INetworkConnection conn, NetworkIdentity player);
+        void ServerChangeScene(string newSceneName);
     }
 }
