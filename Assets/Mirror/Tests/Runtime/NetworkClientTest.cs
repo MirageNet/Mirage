@@ -95,7 +95,7 @@ namespace Mirror.Tests
             var msg = new SpawnMessage();
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                client.OnSpawn(msg);
+                client.clientObjectManager.OnSpawn(msg);
             });
 
             Assert.That(ex.Message, Is.EqualTo("OnObjSpawn netId: " + msg.netId + " has invalid asset Id"));
