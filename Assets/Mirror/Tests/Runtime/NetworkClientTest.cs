@@ -179,6 +179,14 @@ namespace Mirror.Tests
         }
 
         [Test]
+        public void ClientNotReadyTest()
+        {
+            client.ClientNotReady.AddListener(ClientNotReady);
+            client.OnClientNotReady(client.Connection);
+            Assert.That(ClientNotReadyCalled, Is.EqualTo(1));
+        }
+
+        [Test]
         public void RemovePlayerExceptionTest()
         {
             client.Connection = null;
