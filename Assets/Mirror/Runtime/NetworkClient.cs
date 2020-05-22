@@ -583,11 +583,6 @@ namespace Mirror
                 throw new InvalidOperationException("Could not register '" + prefab.name + "' since it contains no NetworkIdentity component");
             }
 
-            if (spawnHandler == null || unspawnHandler == null)
-            {
-                throw new InvalidOperationException("RegisterPrefab custom spawn function null for " + identity.AssetId);
-            }
-
             if (identity.AssetId == Guid.Empty)
             {
                 throw new InvalidOperationException("RegisterPrefab game object " + prefab.name + " has no " + nameof(prefab) + ". Use RegisterSpawnHandler() instead?");
