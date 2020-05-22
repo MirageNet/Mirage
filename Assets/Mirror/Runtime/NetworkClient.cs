@@ -639,11 +639,6 @@ namespace Mirror
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
         public void RegisterSpawnHandler(Guid assetId, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
-            if (spawnHandler == null || unspawnHandler == null)
-            {
-                throw new InvalidOperationException("RegisterSpawnHandler custom spawn function null for " + assetId);
-            }
-
             if (logger.LogEnabled()) logger.Log("RegisterSpawnHandler asset '" + assetId + "' " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
 
             spawnHandlers[assetId] = spawnHandler;
