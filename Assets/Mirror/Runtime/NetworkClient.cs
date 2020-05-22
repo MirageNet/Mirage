@@ -33,8 +33,8 @@ namespace Mirror
         public NetworkAuthenticator authenticator;
 
         // spawn handlers
-        readonly Dictionary<Guid, SpawnHandlerDelegate> spawnHandlers = new Dictionary<Guid, SpawnHandlerDelegate>();
-        readonly Dictionary<Guid, UnSpawnDelegate> unspawnHandlers = new Dictionary<Guid, UnSpawnDelegate>();
+        internal readonly Dictionary<Guid, SpawnHandlerDelegate> spawnHandlers = new Dictionary<Guid, SpawnHandlerDelegate>();
+        internal readonly Dictionary<Guid, UnSpawnDelegate> unspawnHandlers = new Dictionary<Guid, UnSpawnDelegate>();
 
         [Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkConnection> { }
         [Serializable] public class ClientSceneChangeEvent : UnityEvent<string, SceneOperation, bool> { }
@@ -95,7 +95,7 @@ namespace Mirror
         /// </summary>
         public List<GameObject> spawnPrefabs = new List<GameObject>();
 
-        readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
+        internal readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
 
         public readonly NetworkTime Time = new NetworkTime();
 
