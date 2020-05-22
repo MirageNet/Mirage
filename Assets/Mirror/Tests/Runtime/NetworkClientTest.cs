@@ -206,7 +206,7 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator ObjectHideTest()
         {
-            client.OnObjectHide(new ObjectHideMessage()
+            client.OnObjectHide(new ObjectHideMessage
             {
                 netId = identity.NetId
             });
@@ -219,7 +219,7 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator ObjectDestroyTest()
         {
-            client.OnObjectDestroy(new ObjectDestroyMessage()
+            client.OnObjectDestroy(new ObjectDestroyMessage
             {
                 netId = identity.NetId
             });
