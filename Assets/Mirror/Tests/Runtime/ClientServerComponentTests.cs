@@ -1,6 +1,11 @@
+using System;
 using System.Collections;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
+
+using Guid = System.Guid;
+using Object = UnityEngine.Object;
 
 namespace Mirror.Tests
 {
@@ -105,5 +110,33 @@ namespace Mirror.Tests
         }
         */
 
+        [UnityTest]
+        public IEnumerator OnSpawnSpawnHandlerTest()
+        {
+            Guid guid = Guid.NewGuid();
+            GameObject gameObject = new GameObject();
+            NetworkIdentity identity = gameObject.AddComponent<NetworkIdentity>();
+            identity.AssetId = guid;
+
+            client.RegisterSpawnHandler(guid, SpawnDelegateTest, UnSpawnDelegateTest);
+            client.RegisterPrefab(gameObject, guid);
+            server.SendSpawnMessage(identity, connectionToClient);
+
+            yield return null;
+
+            Assert.That(spawnDelegateTestCalled, Is.EqualTo(1));
+        }
+
+        int spawnDelegateTestCalled;
+        GameObject SpawnDelegateTest(Vector3 position, Guid assetId)
+        {
+            spawnDelegateTestCalled++;
+
+            if (client.GetPrefab(assetId, out GameObject prefab))
+            {
+                return Object.Instantiate(prefab);
+            }
+            return null;
+        }
     }
 }
