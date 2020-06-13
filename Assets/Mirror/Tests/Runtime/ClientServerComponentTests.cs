@@ -138,5 +138,12 @@ namespace Mirror.Tests
             }
             return null;
         }
+
+        int unspawnDelegateTestCalled;
+        void UnSpawnDelegateTest(GameObject obj)
+        {
+            unspawnDelegateTestCalled++;
+        }
+
     }
 }
