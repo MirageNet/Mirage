@@ -42,7 +42,7 @@ namespace Mirror.EditorScripts.Logging
 
                         if (settings == null)
                         {
-                            LogSettings newSettings = LogLevelsGUI.DrawCreateNewButton();
+                            LogSettings newSettings = LogLevelsGui.DrawCreateNewButton();
                             if (newSettings != null)
                             {
                                 settingsProp.objectReferenceValue = newSettings;
@@ -51,7 +51,7 @@ namespace Mirror.EditorScripts.Logging
                         }
                         else
                         {
-                            LogLevelsGUI.DrawLogFactoryDictionary(settings);
+                            LogLevelsGui.DrawLogFactoryDictionary(settings);
                         }
                     }
                 }
