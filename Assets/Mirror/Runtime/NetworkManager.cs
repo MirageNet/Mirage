@@ -77,9 +77,9 @@ namespace Mirror
         #region Unity Callbacks
 
         /// <summary>
-        /// virtual so that inheriting classes' OnValidate() can call base.OnValidate() too
+        /// virtual so that inheriting classes' Reset() can call base.Reset() too
         /// </summary>
-        public virtual void OnValidate()
+        public virtual void Reset()
         {
             // add transport if there is none yet. makes upgrading easier.
             if (transport == null)
@@ -97,23 +97,31 @@ namespace Mirror
             }
 
             // add NetworkServer if there is none yet. makes upgrading easier.
-            if (GetComponent<NetworkServer>() == null)
-            {
-                server = gameObject.AddComponent<NetworkServer>();
-                logger.Log("NetworkManager: added NetworkServer because there was none yet.");
+           if (server == null)
+           {
+                server = GetComponent<NetworkServer>();
+                if (server == null)
+                {
+                    server = gameObject.AddComponent<NetworkServer>();
+                    logger.Log("NetworkManager: added NetworkServer because there was none yet.");
 #if UNITY_EDITOR
-                UnityEditor.Undo.RecordObject(gameObject, "Added NetworkServer");
+                    UnityEditor.Undo.RecordObject(gameObject, "Added NetworkServer");
 #endif
+                }
             }
 
             // add NetworkClient if there is none yet. makes upgrading easier.
-            if (GetComponent<NetworkClient>() == null)
+            if (client == null)
             {
-                client = gameObject.AddComponent<NetworkClient>();
-                logger.Log("NetworkManager: added NetworkClient because there was none yet.");
+                client = GetComponent<NetworkClient>();
+                if (client == null)
+                {
+                    client = gameObject.AddComponent<NetworkClient>();
+                    logger.Log("NetworkManager: added NetworkClient because there was none yet.");
 #if UNITY_EDITOR
-                UnityEditor.Undo.RecordObject(gameObject, "Added NetworkClient");
+                    UnityEditor.Undo.RecordObject(gameObject, "Added NetworkClient");
 #endif
+                }
             }
         }
 
