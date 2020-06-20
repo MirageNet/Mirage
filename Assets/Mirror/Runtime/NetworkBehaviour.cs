@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Mirror
@@ -232,7 +233,7 @@ namespace Mirror
                 payload = writer.ToArraySegment()
             };
 
-            _ = Client.SendAsync(message, channelId);
+            _ = Client.SendAsync(message, channelId).ContinueWith(result => { logger.LogException(result.Exception); }, TaskContinuationOptions.OnlyOnFaulted); ;
         }
 
         /// <summary>

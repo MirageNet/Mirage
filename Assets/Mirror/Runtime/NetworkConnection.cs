@@ -180,7 +180,7 @@ namespace Mirror
         /// <returns></returns>
         public virtual void Send<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
-            _ = SendAsync(msg, channelId);
+            _ = SendAsync(msg, channelId).ContinueWith(result => { logger.LogException(result.Exception); }, TaskContinuationOptions.OnlyOnFaulted); ;
         }
 
         /// <summary>
@@ -215,11 +215,11 @@ namespace Mirror
                     if (conn is NetworkConnection networkConnection)
                     {
                         // send to all connections, but don't wait for them
-                        _ = networkConnection.SendAsync(segment, channelId);
+                        _ = networkConnection.SendAsync(segment, channelId).ContinueWith(result => { logger.LogException(result.Exception); }, TaskContinuationOptions.OnlyOnFaulted); ;
                     }
                     else
                     {
-                        _ = conn.SendAsync(msg, channelId);
+                        _ = conn.SendAsync(msg, channelId).ContinueWith(result => { logger.LogException(result.Exception); }, TaskContinuationOptions.OnlyOnFaulted); ;
                     }
                     count++;
                 }

@@ -197,7 +197,7 @@ namespace Mirror
 
                 RegisterMessageHandlers();
                 Time.UpdateClient(this);
-                _ = OnConnected();
+                _ = OnConnected().ContinueWith(result => { logger.LogException(result.Exception); }, TaskContinuationOptions.OnlyOnFaulted); ;
             }
             catch (Exception)
             {
@@ -221,7 +221,7 @@ namespace Mirror
             hostServer = server;
             Connection = new NetworkConnection(c1);
             RegisterHostHandlers();
-            _ = OnConnected();
+            _ = OnConnected().ContinueWith(result => { logger.LogException(result.Exception); }, TaskContinuationOptions.OnlyOnFaulted); ;
         }
 
         void InitializeAuthEvents()
@@ -302,7 +302,7 @@ namespace Mirror
 
         public void Send<T>(T message, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
-            _ = Connection.SendAsync(message, channelId);
+            _ = Connection.SendAsync(message, channelId).ContinueWith(result => { logger.LogException(result.Exception); }, TaskContinuationOptions.OnlyOnFaulted); ;
         }
 
         internal void Update()
