@@ -144,7 +144,7 @@ namespace Mirror
             // (tick rate is applied in StartServer!)
             if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null && startOnHeadless)
             {
-                _ = StartServer().ContinueWith(result => { logger.LogException(result.Exception); }, TaskContinuationOptions.OnlyOnFaulted); ;
+                _ = StartServer();
             }
         }
 
@@ -226,7 +226,7 @@ namespace Mirror
         {
             if (logger.LogEnabled()) logger.Log("NetworkManager StartClient address:" + uri);
 
-            _ = client.ConnectAsync(uri).ContinueWith(result => { logger.LogException(result.Exception); }, TaskContinuationOptions.OnlyOnFaulted); ;
+            _ = client.ConnectAsync(uri);
         }
 
         /// <summary>

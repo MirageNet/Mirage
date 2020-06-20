@@ -220,7 +220,7 @@ namespace Mirror
             //       and we don't start processing connects until Update.
             Started.Invoke();
 
-            _ = AcceptAsync().ContinueWith(result => { logger.LogException(result.Exception); }, TaskContinuationOptions.OnlyOnFaulted);
+            _ = AcceptAsync();
         }
 
         // accept connections from clients
@@ -234,7 +234,7 @@ namespace Mirror
                 {
                     var networkConnectionToClient = new NetworkConnection(connection);
 
-                    _ = ConnectionAcceptedAsync(networkConnectionToClient).ContinueWith(result => { logger.LogException(result.Exception); }, TaskContinuationOptions.OnlyOnFaulted); ;
+                    _ = ConnectionAcceptedAsync(networkConnectionToClient);
                 }
 
                 Cleanup();
@@ -302,7 +302,7 @@ namespace Mirror
             LocalConnection = conn;
             LocalClient = client;
 
-            _ = ConnectionAcceptedAsync(conn).ContinueWith(result => { logger.LogException(result.Exception); }, TaskContinuationOptions.OnlyOnFaulted); ;
+            _ = ConnectionAcceptedAsync(conn);
 
         }
 
