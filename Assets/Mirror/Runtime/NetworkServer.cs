@@ -137,7 +137,7 @@ namespace Mirror
                 if (transport == null)
                 {
                     transport = gameObject.AddComponent<AsyncTcpTransport>();
-                    logger.Log("NetworkManager: added default Transport because there was none yet.");
+                    logger.Log("NetworkServer: added default Transport because there was none yet.");
                 }
 #if UNITY_EDITOR
                 UnityEditor.Undo.RecordObject(gameObject, "Added default Transport");
