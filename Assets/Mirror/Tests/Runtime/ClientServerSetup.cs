@@ -98,10 +98,22 @@ namespace Mirror.Tests
 
             yield return null;
 
+            networkManagerGo = null;
+            serverPlayerGO = null;
+            clientPlayerGO = null;
+            playerPrefab = null;
+
+            connectionToServer = null;
+            connectionToClient = null;
+
+            yield return null;
+
             Object.Destroy(playerPrefab);
             Object.Destroy(networkManagerGo);
             Object.Destroy(serverPlayerGO);
             Object.Destroy(clientPlayerGO);
+
+            yield return null;
         }
 
         #endregion
