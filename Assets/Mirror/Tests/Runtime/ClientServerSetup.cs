@@ -92,10 +92,10 @@ namespace Mirror.Tests
 
             yield return null;
 
-            Object.DestroyImmediate(playerPrefab);
-            Object.DestroyImmediate(networkManagerGo);
-            Object.DestroyImmediate(serverPlayerGO);
-            Object.DestroyImmediate(clientPlayerGO);
+            Object.Destroy(playerPrefab);
+            Object.Destroy(networkManagerGo);
+            Object.Destroy(serverPlayerGO);
+            Object.Destroy(clientPlayerGO);
         }
 
         #endregion
