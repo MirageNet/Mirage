@@ -27,7 +27,7 @@ namespace Mirror.Tests
         [Test]
         public void CurrentTest()
         {
-            Assert.That(NetworkClient.Current == null);
+            Assert.That(NetworkClient.Current != null);
         }
 
         [Test]
