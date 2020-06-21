@@ -13,7 +13,6 @@ namespace Mirror.Tests
     // set's up a host
     public class ClientServerSetup<T> where T : NetworkBehaviour
     {
-
         #region Setup
         protected GameObject networkManagerGo;
         protected NetworkManager manager;
@@ -40,9 +39,9 @@ namespace Mirror.Tests
         [UnitySetUp]
         public IEnumerator Setup() => RunAsync(async () =>
         {
-            networkManagerGo = new GameObject("NetworkManager", typeof(LoopbackTransport), typeof(NetworkClient), typeof(NetworkServer), typeof(NetworkManager));
-
-            manager = networkManagerGo.GetComponent<NetworkManager>();
+            networkManagerGo = new GameObject();
+            networkManagerGo.AddComponent<LoopbackTransport>();
+            manager = networkManagerGo.AddComponent<NetworkManager>();
             manager.client = networkManagerGo.GetComponent<NetworkClient>();
             manager.server = networkManagerGo.GetComponent<NetworkServer>();
 
@@ -50,21 +49,28 @@ namespace Mirror.Tests
             client = manager.client;
             manager.startOnHeadless = false;
 
-            ExtraSetup();
-
-            // create and register a prefab
-            playerPrefab = new GameObject("serverPlayer", typeof(NetworkIdentity), typeof(T));
-            playerPrefab.GetComponent<NetworkIdentity>().AssetId = Guid.NewGuid();
-            client.RegisterPrefab(playerPrefab);
-
-            // wait for client and server to initialize themselves
             await Task.Delay(1);
+
+            ExtraSetup();
 
             // start the server
             await manager.StartServer();
 
             // now start the client
             await manager.StartClient("localhost");
+
+            // create and register a prefab
+            playerPrefab = new GameObject();
+            playerPrefab.AddComponent<NetworkIdentity>();
+            playerPrefab.AddComponent<T>();
+
+            await Task.Delay(1);
+
+            playerPrefab.GetComponent<NetworkIdentity>().AssetId = Guid.NewGuid();
+            client.RegisterPrefab(playerPrefab);
+
+            // wait for client and server to initialize themselves
+            await Task.Delay(1);
 
             // get the connections so that we can spawn players
             connectionToServer = client.Connection;
