@@ -158,7 +158,6 @@ namespace Mirror
         {
             if (loadingSceneAsync != null && loadingSceneAsync.isDone)
             {
-                if (logger.LogEnabled()) logger.Log("ClientChangeScene done readyCon:" + client.Connection);
                 FinishLoadScene();
                 loadingSceneAsync.allowSceneActivation = true;
                 loadingSceneAsync = null;
