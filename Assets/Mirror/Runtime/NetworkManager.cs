@@ -302,11 +302,7 @@ namespace Mirror
             // DO NOT do this earlier. it would cause race conditions where a
             // client will do things before the server is even fully started.
             logger.Log("StartHostClient called");
-            StartHostClient();
-        }
 
-        void StartHostClient()
-        {
             logger.Log("NetworkManager ConnectLocalClient");
 
             server.ActivateHostScene();
@@ -384,105 +380,11 @@ namespace Mirror
 
         #endregion
 
-        #region Scene Management
-
-        void FinishLoadScene()
-        {
-            // NOTE: this cannot use NetworkClient.allClients[0] - that client may be for a completely different purpose.
-
-            // process queued messages that we received while loading the scene
-            logger.Log("FinishLoadScene: resuming handlers after scene was loading.");
-            // host mode?
-            if (client.IsLocalClient)
-            {
-                FinishLoadSceneHost();
-            }
-            // server-only mode?
-            else if (server.Active)
-            {
-                FinishLoadSceneServerOnly();
-            }
-            // client-only mode?
-            else if (client.Active)
-            {
-                FinishLoadSceneClientOnly();
-            }
-        }
-
-        // finish load scene part for host mode. makes code easier and is
-        // necessary for FinishStartHost later.
-        // (the 3 things have to happen in that exact order)
-        void FinishLoadSceneHost()
-        {
-            // debug message is very important. if we ever break anything then
-            // it's very obvious to notice.
-            logger.Log("Finished loading scene in host mode.");
-
-            if (client.Connection != null)
-            {
-                client.OnAuthenticated(client.Connection);
-                clientLoadedScene = true;
-            }
-
-            FinishStartHost();
-
-            // call OnServerSceneChanged
-            server.OnServerSceneChanged(server.networkSceneName);
-
-            if (client.IsConnected)
-            {
-                // let client know that we changed scene
-                client.OnClientSceneChanged(client.Connection);
-            }
-        }
-
-        // finish load scene part for client-only. makes code easier and is
-        // necessary for FinishStartClient later.
-        void FinishLoadSceneClientOnly()
-        {
-            // debug message is very important. if we ever break anything then
-            // it's very obvious to notice.
-            logger.Log("Finished loading scene in client-only mode.");
-
-            if (client.Connection != null)
-            {
-                client.OnAuthenticated(client.Connection);
-                clientLoadedScene = true;
-            }
-
-            if (client.IsConnected)
-            {
-                client.OnClientSceneChanged(client.Connection);
-            }
-        }
-
-        // finish load scene part for server-only. . makes code easier and is
-        // necessary for FinishStartServer later.
-        void FinishLoadSceneServerOnly()
-        {
-            // debug message is very important. if we ever break anything then
-            // it's very obvious to notice.
-            logger.Log("Finished loading scene in server-only mode.");
-
-            server.SpawnObjects();
-            server.OnServerSceneChanged(server.networkSceneName);
-        }
-
-        #endregion
-
         #region Server Internal Message Handlers
-
-        void RegisterServerMessages(INetworkConnection connection)
-        {
-            //Currently no messages are regsitered to the Server from NetworkManager
-        }
 
         // called after successful authentication
         void OnServerAuthenticated(INetworkConnection conn)
         {
-            // a connection has been established,  register for our messages
-            RegisterServerMessages(conn);
-
             logger.Log("NetworkManager.OnServerAuthenticated");
 
             // proceed with the login handshake by calling OnServerConnect

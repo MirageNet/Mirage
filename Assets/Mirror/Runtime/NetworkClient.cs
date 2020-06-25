@@ -512,6 +512,45 @@ namespace Mirror
             ClientSceneChanged.Invoke(conn);
         }
 
+        void FinishLoadScene()
+        {
+            if(hostServer.Active)
+            {
+                logger.Log("Finished loading scene in host mode.");
+
+                if (Connection != null)
+                {
+                    OnAuthenticated(Connection);
+                }
+
+                hostServer.SpawnObjects();
+                hostServer.ActivateHostScene();
+
+                // call OnServerSceneChanged
+                hostServer.OnServerSceneChanged(hostServer.networkSceneName);
+
+                if (IsConnected)
+                {
+                    // let client know that we changed scene
+                    OnClientSceneChanged(Connection);
+                }
+            }
+            else
+            {
+                logger.Log("Finished loading scene in client-only mode.");
+
+                if (Connection != null)
+                {
+                    OnAuthenticated(Connection);
+                }
+
+                if (IsConnected)
+                {
+                    OnClientSceneChanged(Connection);
+                }
+            }
+        }
+
         /// <summary>
         /// Called on clients when a servers tells the client it is no longer ready.
         /// <para>This is commonly used when switching scenes.</para>

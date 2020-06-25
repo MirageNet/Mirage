@@ -419,6 +419,16 @@ namespace Mirror
             }
         }
 
+        void FinishLoadScene()
+        {
+            //Run if Server Only otherwise the local client will take care of these steps
+            if(!LocalClientActive)
+            {
+                SpawnObjects();
+                OnServerSceneChanged(networkSceneName);
+            }
+        }
+
         // this is like SendToReady - but it doesn't check the ready flag on the connection.
         // this is used for ObjectDestroy messages.
         void SendToObservers<T>(NetworkIdentity identity, T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
