@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Mirror.AsyncTcp;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace Mirror
 {
@@ -336,6 +337,43 @@ namespace Mirror
         internal void OnServerSceneChanged(string sceneName)
         {
             ServerSceneChanged.Invoke(sceneName);
+        }
+
+        /// <summary>
+        /// The name of the current network scene.
+        /// </summary>
+        /// <remarks>
+        /// <para>This is populated if the NetworkManager is doing scene management. This should not be changed directly. Calls to ServerChangeScene() cause this to change. New clients that connect to a server will automatically load this scene.</para>
+        /// <para>This is used to make sure that all scene changes are initialized by Mirror.</para>
+        /// <para>Loading a scene manually wont set networkSceneName, so Mirror would still load it again on start.</para>
+        /// </remarks>
+        public string networkSceneName = "";
+
+        public AsyncOperation loadingSceneAsync;
+
+        /// <summary>
+        /// This causes the server to switch scenes and sets the networkSceneName.
+        /// <para>Clients that connect to this server will automatically switch to this scene. This is called autmatically if onlineScene or offlineScene are set, but it can be called from user code to switch scenes again while the game is in progress. This automatically sets clients to be not-ready. The clients must call NetworkClient.Ready() again to participate in the new scene.</para>
+        /// </summary>
+        /// <param name="newSceneName"></param>
+        public virtual void ChangeServerScene(string newSceneName)
+        {
+            if (string.IsNullOrEmpty(newSceneName))
+            {
+                throw new ArgumentNullException(nameof(newSceneName), "ServerChangeScene: " + nameof(newSceneName) + " cannot be empty or null");
+            }
+
+            if (logger.LogEnabled()) logger.Log("ServerChangeScene " + newSceneName);
+            SetAllClientsNotReady();
+            networkSceneName = newSceneName;
+
+            // Let server prepare for scene change
+            OnServerChangeScene(newSceneName);
+
+            loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
+
+            // notify all clients about the new scene
+            SendToAll(new SceneMessage { sceneName = newSceneName });
         }
 
         // this is like SendToReady - but it doesn't check the ready flag on the connection.
