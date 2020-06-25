@@ -404,7 +404,7 @@ namespace Mirror
                 throw new ArgumentNullException(nameof(newSceneName), "ClientChangeScene: " + nameof(newSceneName) + " cannot be empty or null");
             }
 
-            if (logger.LogEnabled()) logger.Log("ClientChangeScene newSceneName:" + newSceneName + " networkSceneName:" + networkSceneName);
+            if (logger.LogEnabled()) logger.Log("ClientChangeScene newSceneName:" + newSceneName + " networkSceneName:" + client.networkSceneName);
 
             // vis2k: pause message handling while loading scene. otherwise we will process messages and then lose all
             // the state as soon as the load is finishing, causing all kinds of bugs because of missing state.
@@ -423,13 +423,13 @@ namespace Mirror
             switch (sceneOperation)
             {
                 case SceneOperation.Normal:
-                    loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
+                    client.loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
                     break;
                 case SceneOperation.LoadAdditive:
                     // Ensure additive scene is not already loaded on client by name or path
                     // since we don't know which was passed in the Scene message
                     if (!SceneManager.GetSceneByName(newSceneName).IsValid() && !SceneManager.GetSceneByPath(newSceneName).IsValid())
-                        loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName, LoadSceneMode.Additive);
+                        client.loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName, LoadSceneMode.Additive);
                     else
                     {
                         logger.LogWarning($"Scene {newSceneName} is already loaded");
@@ -439,7 +439,7 @@ namespace Mirror
                     // Ensure additive scene is actually loaded on client by name or path
                     // since we don't know which was passed in the Scene message
                     if (SceneManager.GetSceneByName(newSceneName).IsValid() || SceneManager.GetSceneByPath(newSceneName).IsValid())
-                        loadingSceneAsync = SceneManager.UnloadSceneAsync(newSceneName, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
+                        client.loadingSceneAsync = SceneManager.UnloadSceneAsync(newSceneName, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
                     else
                     {
                         logger.LogWarning($"Cannot unload {newSceneName} with UnloadAdditive operation");
@@ -449,7 +449,7 @@ namespace Mirror
 
             // don't change the client's current networkSceneName when loading additive scene content
             if (sceneOperation == SceneOperation.Normal)
-                networkSceneName = newSceneName;
+                client.networkSceneName = newSceneName;
         }
 
         // support additive scene loads:
@@ -531,7 +531,7 @@ namespace Mirror
             FinishStartHost();
 
             // call OnServerSceneChanged
-            server.OnServerSceneChanged(networkSceneName);
+            server.OnServerSceneChanged(server.networkSceneName);
 
             if (client.IsConnected)
             {
@@ -569,7 +569,7 @@ namespace Mirror
             logger.Log("Finished loading scene in server-only mode.");
 
             server.SpawnObjects();
-            server.OnServerSceneChanged(networkSceneName);
+            server.OnServerSceneChanged(server.networkSceneName);
         }
 
         #endregion
@@ -590,9 +590,9 @@ namespace Mirror
             logger.Log("NetworkManager.OnServerAuthenticated");
 
             // proceed with the login handshake by calling OnServerConnect
-            if (!string.IsNullOrEmpty(networkSceneName))
+            if (!string.IsNullOrEmpty(server.networkSceneName))
             {
-                var msg = new SceneMessage { sceneName = networkSceneName };
+                var msg = new SceneMessage { sceneName = server.networkSceneName };
                 conn.Send(msg);
             }
         }

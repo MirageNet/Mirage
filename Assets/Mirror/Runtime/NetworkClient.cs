@@ -372,6 +372,18 @@ namespace Mirror
         }
 
         /// <summary>
+        /// The name of the current network scene.
+        /// </summary>
+        /// <remarks>
+        /// <para>This is populated if the NetworkManager is doing scene management. This should not be changed directly. Calls to ServerChangeScene() cause this to change. New clients that connect to a server will automatically load this scene.</para>
+        /// <para>This is used to make sure that all scene changes are initialized by Mirror.</para>
+        /// <para>Loading a scene manually wont set networkSceneName, so Mirror would still load it again on start.</para>
+        /// </remarks>
+        public string networkSceneName = "";
+
+        public AsyncOperation loadingSceneAsync;
+
+        /// <summary>
         /// Called from ClientChangeScene immediately before SceneManager.LoadSceneAsync is executed
         /// <para>This allows client to do work / cleanup / prep before the scene changes.</para>
         /// </summary>
