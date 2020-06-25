@@ -130,7 +130,8 @@ namespace Mirror
 
             // Set the networkSceneName to prevent a scene reload
             // if client connection to server fails.
-            networkSceneName = null;
+            //TODO: Not sure where this goes just yet
+            //networkSceneName = null;
 
             Initialize();
 
