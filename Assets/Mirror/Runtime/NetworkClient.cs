@@ -171,6 +171,25 @@ namespace Mirror
         }
 
         /// <summary>
+        /// virtual so that inheriting classes' LateUpdate() can call base.LateUpdate() too
+        /// </summary>
+        public virtual void LateUpdate()
+        {
+            UpdateScene();
+        }
+
+        void UpdateScene()
+        {
+            if (loadingSceneAsync != null && loadingSceneAsync.isDone)
+            {
+                if (logger.LogEnabled()) logger.Log("ClientChangeScene done readyCon:" + client.Connection);
+                FinishLoadScene();
+                loadingSceneAsync.allowSceneActivation = true;
+                loadingSceneAsync = null;
+            }
+        }
+
+        /// <summary>
         /// Connect client to a NetworkServer instance.
         /// </summary>
         /// <param name="uri">Address of the server to connect to</param>

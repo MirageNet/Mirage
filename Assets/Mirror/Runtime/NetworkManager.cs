@@ -149,16 +149,6 @@ namespace Mirror
             }
         }
 
-        // NetworkIdentity.UNetStaticUpdate is called from UnityEngine while LLAPI network is active.
-        // If we want TCP then we need to call it manually. Probably best from NetworkManager, although this means that we can't use NetworkServer/NetworkClient without a NetworkManager invoking Update anymore.
-        /// <summary>
-        /// virtual so that inheriting classes' LateUpdate() can call base.LateUpdate() too
-        /// </summary>
-        public virtual void LateUpdate()
-        {
-            UpdateScene();
-        }
-
         #endregion
 
         #region Start & Stop
@@ -476,17 +466,6 @@ namespace Mirror
                     client.PrepareToSpawnSceneObjects();
                     if (logger.LogEnabled()) logger.Log("Rebuild Client spawnableObjects after additive scene load: " + scene.name);
                 }
-            }
-        }
-
-        void UpdateScene()
-        {
-            if (loadingSceneAsync != null && loadingSceneAsync.isDone)
-            {
-                if (logger.LogEnabled()) logger.Log("ClientChangeScene done readyCon:" + client.Connection);
-                FinishLoadScene();
-                loadingSceneAsync.allowSceneActivation = true;
-                loadingSceneAsync = null;
             }
         }
 
