@@ -17,7 +17,7 @@ namespace Mirror.Tests
 
         public void ServerChangeSceneExpose(string newSceneName)
         {
-            ServerChangeScene(newSceneName);
+            server.ChangeServerScene(newSceneName);
         }
     }
 
@@ -51,7 +51,7 @@ namespace Mirror.Tests
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                comp.ServerChangeScene(string.Empty);
+                comp.server.ChangeServerScene(string.Empty);
             });
         }
 
@@ -89,9 +89,9 @@ namespace Mirror.Tests
         public void ServerChangeSceneTest()
         {
             AssetBundle.LoadFromFile("Assets/Mirror/Tests/Runtime/TestScene/testscene");
-            manager.ServerChangeScene("testScene");
+            manager.server.ChangeServerScene("testScene");
 
-            Assert.That(manager.networkSceneName, Is.EqualTo("testScene"));
+            Assert.That(manager.server.networkSceneName, Is.EqualTo("testScene"));
         }
     }
 }
