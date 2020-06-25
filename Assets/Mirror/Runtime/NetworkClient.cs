@@ -224,6 +224,9 @@ namespace Mirror
                 connectState = ConnectState.Disconnected;
                 throw;
             }
+
+            // setup OnSceneLoaded callback
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         internal void ConnectHost(NetworkServer server)
@@ -242,6 +245,9 @@ namespace Mirror
             Connection = new NetworkConnection(c1);
             RegisterHostHandlers();
             _ = OnConnected();
+
+            // setup OnSceneLoaded callback
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         void InitializeAuthEvents()
@@ -457,6 +463,27 @@ namespace Mirror
             // don't change the client's current networkSceneName when loading additive scene content
             if (sceneOperation == SceneOperation.Normal)
                 networkSceneName = newSceneName;
+        }
+
+        // support additive scene loads:
+        //   NetworkScenePostProcess disables all scene objects on load, and
+        //   * NetworkServer.SpawnObjects enables them again on the server when
+        //     calling OnStartServer
+        //   * ClientScene.PrepareToSpawnSceneObjects enables them again on the
+        //     client after the server sends ObjectSpawnStartedMessage to client
+        //     in SpawnObserversForConnection. this is only called when the
+        //     client joins, so we need to rebuild scene objects manually again
+        // TODO merge this with FinishLoadScene()?
+        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (mode == LoadSceneMode.Additive)
+            {
+                if (Active)
+                {
+                    PrepareToSpawnSceneObjects();
+                    if (logger.LogEnabled()) logger.Log("Rebuild Client spawnableObjects after additive scene load: " + scene.name);
+                }
+            }
         }
 
         /// <summary>
