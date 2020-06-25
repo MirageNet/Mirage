@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Mirror.AsyncTcp;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using Guid = System.Guid;
 using Object = UnityEngine.Object;
 
@@ -360,6 +361,7 @@ namespace Mirror
             Connection.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
             Connection.RegisterHandler<RpcMessage>(OnRpcMessage);
             Connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
+            Connection.RegisterHandler<SceneMessage>(OnClientSceneInternal);
         }
 
         /// <summary>
@@ -401,6 +403,61 @@ namespace Mirror
         public string networkSceneName = "";
 
         public AsyncOperation loadingSceneAsync;
+
+        internal void ChangeClientScene(string newSceneName, SceneOperation sceneOperation = SceneOperation.Normal, bool customHandling = false)
+        {
+            if (string.IsNullOrEmpty(newSceneName))
+            {
+                throw new ArgumentNullException(nameof(newSceneName), "ClientChangeScene: " + nameof(newSceneName) + " cannot be empty or null");
+            }
+
+            if (logger.LogEnabled()) logger.Log("ClientChangeScene newSceneName:" + newSceneName + " networkSceneName:" + networkSceneName);
+
+            // vis2k: pause message handling while loading scene. otherwise we will process messages and then lose all
+            // the state as soon as the load is finishing, causing all kinds of bugs because of missing state.
+            // (client may be null after StopClient etc.)
+            logger.Log("ClientChangeScene: pausing handlers while scene is loading to avoid data loss after scene was loaded.");
+            // Let client prepare for scene change
+            OnClientChangeScene(newSceneName, sceneOperation, customHandling);
+
+            // scene handling will happen in overrides of OnClientChangeScene and/or OnClientSceneChanged
+            if (customHandling)
+            {
+                FinishLoadScene();
+                return;
+            }
+
+            switch (sceneOperation)
+            {
+                case SceneOperation.Normal:
+                    loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
+                    break;
+                case SceneOperation.LoadAdditive:
+                    // Ensure additive scene is not already loaded on client by name or path
+                    // since we don't know which was passed in the Scene message
+                    if (!SceneManager.GetSceneByName(newSceneName).IsValid() && !SceneManager.GetSceneByPath(newSceneName).IsValid())
+                        loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName, LoadSceneMode.Additive);
+                    else
+                    {
+                        logger.LogWarning($"Scene {newSceneName} is already loaded");
+                    }
+                    break;
+                case SceneOperation.UnloadAdditive:
+                    // Ensure additive scene is actually loaded on client by name or path
+                    // since we don't know which was passed in the Scene message
+                    if (SceneManager.GetSceneByName(newSceneName).IsValid() || SceneManager.GetSceneByPath(newSceneName).IsValid())
+                        loadingSceneAsync = SceneManager.UnloadSceneAsync(newSceneName, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
+                    else
+                    {
+                        logger.LogWarning($"Cannot unload {newSceneName} with UnloadAdditive operation");
+                    }
+                    break;
+            }
+
+            // don't change the client's current networkSceneName when loading additive scene content
+            if (sceneOperation == SceneOperation.Normal)
+                networkSceneName = newSceneName;
+        }
 
         /// <summary>
         /// Called from ClientChangeScene immediately before SceneManager.LoadSceneAsync is executed
@@ -1012,6 +1069,16 @@ namespace Mirror
                 identity.StartLocalPlayer();
 
                 if (logger.LogEnabled()) logger.Log("ClientScene.OnOwnerMessage - player=" + identity.name);
+            }
+        }
+
+        void OnClientSceneInternal(INetworkConnection conn, SceneMessage msg)
+        {
+            logger.Log("NetworkManager.OnClientSceneInternal");
+
+            if (IsConnected && !hostServer.Active)
+            {
+                ChangeClientScene(msg.sceneName, msg.sceneOperation, msg.customHandling);
             }
         }
     }

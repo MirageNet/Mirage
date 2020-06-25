@@ -387,61 +387,6 @@ namespace Mirror
 
         #region Scene Management
 
-        internal void ClientChangeScene(string newSceneName, SceneOperation sceneOperation = SceneOperation.Normal, bool customHandling = false)
-        {
-            if (string.IsNullOrEmpty(newSceneName))
-            {
-                throw new ArgumentNullException(nameof(newSceneName), "ClientChangeScene: " + nameof(newSceneName) + " cannot be empty or null");
-            }
-
-            if (logger.LogEnabled()) logger.Log("ClientChangeScene newSceneName:" + newSceneName + " networkSceneName:" + client.networkSceneName);
-
-            // vis2k: pause message handling while loading scene. otherwise we will process messages and then lose all
-            // the state as soon as the load is finishing, causing all kinds of bugs because of missing state.
-            // (client may be null after StopClient etc.)
-            logger.Log("ClientChangeScene: pausing handlers while scene is loading to avoid data loss after scene was loaded.");
-            // Let client prepare for scene change
-            client.OnClientChangeScene(newSceneName, sceneOperation, customHandling);
-
-            // scene handling will happen in overrides of OnClientChangeScene and/or OnClientSceneChanged
-            if (customHandling)
-            {
-                FinishLoadScene();
-                return;
-            }
-
-            switch (sceneOperation)
-            {
-                case SceneOperation.Normal:
-                    client.loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
-                    break;
-                case SceneOperation.LoadAdditive:
-                    // Ensure additive scene is not already loaded on client by name or path
-                    // since we don't know which was passed in the Scene message
-                    if (!SceneManager.GetSceneByName(newSceneName).IsValid() && !SceneManager.GetSceneByPath(newSceneName).IsValid())
-                        client.loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName, LoadSceneMode.Additive);
-                    else
-                    {
-                        logger.LogWarning($"Scene {newSceneName} is already loaded");
-                    }
-                    break;
-                case SceneOperation.UnloadAdditive:
-                    // Ensure additive scene is actually loaded on client by name or path
-                    // since we don't know which was passed in the Scene message
-                    if (SceneManager.GetSceneByName(newSceneName).IsValid() || SceneManager.GetSceneByPath(newSceneName).IsValid())
-                        client.loadingSceneAsync = SceneManager.UnloadSceneAsync(newSceneName, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
-                    else
-                    {
-                        logger.LogWarning($"Cannot unload {newSceneName} with UnloadAdditive operation");
-                    }
-                    break;
-            }
-
-            // don't change the client's current networkSceneName when loading additive scene content
-            if (sceneOperation == SceneOperation.Normal)
-                client.networkSceneName = newSceneName;
-        }
-
         // support additive scene loads:
         //   NetworkScenePostProcess disables all scene objects on load, and
         //   * NetworkServer.SpawnObjects enables them again on the server when
@@ -583,7 +528,7 @@ namespace Mirror
         void RegisterClientMessages(INetworkConnection connection)
         {
             connection.RegisterHandler<NotReadyMessage>(OnClientNotReadyMessageInternal);
-            connection.RegisterHandler<SceneMessage>(OnClientSceneInternal);
+
         }
 
         // called after successful authentication
@@ -607,15 +552,7 @@ namespace Mirror
             // NOTE: clientReadyConnection is not set here! don't want OnClientConnect to be invoked again after scene changes.
         }
 
-        void OnClientSceneInternal(INetworkConnection conn, SceneMessage msg)
-        {
-            logger.Log("NetworkManager.OnClientSceneInternal");
-
-            if (client.IsConnected && !server.Active)
-            {
-                ClientChangeScene(msg.sceneName, msg.sceneOperation, msg.customHandling);
-            }
-        }
+        
 
         #endregion
 
