@@ -57,13 +57,6 @@ namespace Mirror
         public bool IsNetworkActive => server.Active || client.Active;
 
         /// <summary>
-        /// This is true if the client loaded a new scene when connecting to the server.
-        /// <para>This is set before OnClientConnect is called, so it can be checked there to perform different logic if a scene load occurred.</para>
-        /// </summary>
-        [NonSerialized]
-        public bool clientLoadedScene;
-
-        /// <summary>
         /// This is invoked when a host is started.
         /// <para>StartHost has multiple signatures, but they all cause this hook to be called.</para>
         /// </summary>
