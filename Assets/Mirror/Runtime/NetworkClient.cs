@@ -434,10 +434,6 @@ namespace Mirror
 
             if (logger.LogEnabled()) logger.Log("ClientChangeScene newSceneName:" + newSceneName + " networkSceneName:" + networkSceneName);
 
-            // vis2k: pause message handling while loading scene. otherwise we will process messages and then lose all
-            // the state as soon as the load is finishing, causing all kinds of bugs because of missing state.
-            // (client may be null after StopClient etc.)
-            logger.Log("ClientChangeScene: pausing handlers while scene is loading to avoid data loss after scene was loaded.");
             // Let client prepare for scene change
             OnClientChangeScene(newSceneName, sceneOperation, customHandling);
 
