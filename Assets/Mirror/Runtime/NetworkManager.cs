@@ -4,7 +4,6 @@ using Mirror.AsyncTcp;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Rendering;
-using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 namespace Mirror

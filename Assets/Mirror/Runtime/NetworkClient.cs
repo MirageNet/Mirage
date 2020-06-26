@@ -473,16 +473,12 @@ namespace Mirror
         //     client after the server sends ObjectSpawnStartedMessage to client
         //     in SpawnObserversForConnection. this is only called when the
         //     client joins, so we need to rebuild scene objects manually again
-        // TODO merge this with FinishLoadScene()?
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if (mode == LoadSceneMode.Additive)
+            if (mode == LoadSceneMode.Additive && Active)
             {
-                if (Active)
-                {
-                    PrepareToSpawnSceneObjects();
-                    if (logger.LogEnabled()) logger.Log("Rebuild Client spawnableObjects after additive scene load: " + scene.name);
-                }
+                PrepareToSpawnSceneObjects();
+                if (logger.LogEnabled()) logger.Log("Rebuild Client spawnableObjects after additive scene load: " + scene.name);
             }
         }
 

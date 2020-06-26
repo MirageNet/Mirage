@@ -401,17 +401,13 @@ namespace Mirror
         //   NetworkScenePostProcess disables all scene objects on load, and
         //   * NetworkServer.SpawnObjects enables them again on the server when
         //     calling OnStartServer
-        // TODO merge this with FinishLoadScene()?
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if (mode == LoadSceneMode.Additive)
+            if (mode == LoadSceneMode.Additive && Active)
             {
-                if (Active)
-                {
-                    // TODO only respawn the server objects from that scene later!
-                    SpawnObjects();
-                    if (logger.LogEnabled()) logger.Log("Respawned Server objects after additive scene load: " + scene.name);
-                }
+                // TODO only respawn the server objects from that scene later!
+                SpawnObjects();
+                if (logger.LogEnabled()) logger.Log("Respawned Server objects after additive scene load: " + scene.name);
             }
         }
 
