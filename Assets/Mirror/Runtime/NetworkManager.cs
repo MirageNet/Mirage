@@ -373,8 +373,6 @@ namespace Mirror
             // NOTE: clientReadyConnection is not set here! don't want OnClientConnect to be invoked again after scene changes.
         }
 
-        
-
         #endregion
 
     }
