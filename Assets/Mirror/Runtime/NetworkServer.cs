@@ -277,7 +277,6 @@ namespace Mirror
         // cleanup resources so that we can start again
         private void Cleanup()
         {
-
             if (authenticator != null)
             {
                 authenticator.OnServerAuthenticated -= OnAuthenticated;
@@ -332,7 +331,6 @@ namespace Mirror
             LocalClient = client;
 
             _ = ConnectionAcceptedAsync(conn);
-
         }
 
         internal void ActivateHostScene()
@@ -989,7 +987,6 @@ namespace Mirror
 
                     payload = payload,
                 };
-
 
                 conn.Send(msg);
             }
