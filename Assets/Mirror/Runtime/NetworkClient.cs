@@ -469,8 +469,6 @@ namespace Mirror
 
         // support additive scene loads:
         //   NetworkScenePostProcess disables all scene objects on load, and
-        //   * NetworkServer.SpawnObjects enables them again on the server when
-        //     calling OnStartServer
         //   * ClientScene.PrepareToSpawnSceneObjects enables them again on the
         //     client after the server sends ObjectSpawnStartedMessage to client
         //     in SpawnObserversForConnection. this is only called when the
