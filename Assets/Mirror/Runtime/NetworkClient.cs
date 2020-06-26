@@ -1138,9 +1138,12 @@ namespace Mirror
         {
             logger.Log("NetworkManager.OnClientSceneInternal");
 
-            if (IsConnected && !hostServer.Active)
+            if (IsConnected && hostServer != null)
             {
-                ChangeClientScene(msg.sceneName, msg.sceneOperation, msg.customHandling);
+                if (hostServer.Active)
+                {
+                    ChangeClientScene(msg.sceneName, msg.sceneOperation, msg.customHandling);
+                }
             }
         }
 
