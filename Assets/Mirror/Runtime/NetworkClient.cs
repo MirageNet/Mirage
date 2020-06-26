@@ -519,43 +519,30 @@ namespace Mirror
 
         void FinishLoadScene()
         {
+            if (Connection != null)
+            {
+                OnAuthenticated(Connection);
+            }
+
             if (hostServer)
             {
                 if (hostServer.Active)
                 {
                     logger.Log("Finished loading scene in host mode.");
 
-                    if (Connection != null)
-                    {
-                        OnAuthenticated(Connection);
-                    }
-
                     hostServer.SpawnObjects();
                     hostServer.ActivateHostScene();
-
-                    // call OnServerSceneChanged
                     hostServer.OnServerSceneChanged(hostServer.networkSceneName);
-
-                    if (IsConnected)
-                    {
-                        // let client know that we changed scene
-                        OnClientSceneChanged(Connection);
-                    }
                 }
             }
             else
             {
                 logger.Log("Finished loading scene in client-only mode.");
+            }
 
-                if (Connection != null)
-                {
-                    OnAuthenticated(Connection);
-                }
-
-                if (IsConnected)
-                {
-                    OnClientSceneChanged(Connection);
-                }
+            if (IsConnected)
+            {
+                OnClientSceneChanged(Connection);
             }
         }
 
