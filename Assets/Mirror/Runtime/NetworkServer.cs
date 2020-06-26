@@ -578,6 +578,13 @@ namespace Mirror
             RegisterMessageHandlers(conn);
 
             Authenticated?.Invoke(conn);
+
+            // proceed with the login handshake by calling OnServerConnect
+            if (!string.IsNullOrEmpty(networkSceneName))
+            {
+                var msg = new SceneMessage { sceneName = networkSceneName };
+                conn.Send(msg);
+            }
         }
 
         /// <summary>

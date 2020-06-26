@@ -307,10 +307,6 @@ namespace Mirror
             {
                 DontDestroyOnLoad(gameObject);
             }
-
-            // subscribe to the server
-            if (server != null)
-                server.Authenticated.AddListener(OnServerAuthenticated);
         }
 
         /// <summary>
@@ -323,21 +319,5 @@ namespace Mirror
 
         #endregion
 
-        #region Server Internal Message Handlers
-
-        // called after successful authentication
-        void OnServerAuthenticated(INetworkConnection conn)
-        {
-            logger.Log("NetworkManager.OnServerAuthenticated");
-
-            // proceed with the login handshake by calling OnServerConnect
-            if (!string.IsNullOrEmpty(server.networkSceneName))
-            {
-                var msg = new SceneMessage { sceneName = server.networkSceneName };
-                conn.Send(msg);
-            }
-        }
-
-        #endregion
     }
 }
