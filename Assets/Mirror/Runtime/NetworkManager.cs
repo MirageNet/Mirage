@@ -125,7 +125,10 @@ namespace Mirror
             //TODO: Not sure where this goes just yet
             //networkSceneName = null;
 
-            Initialize();
+            if (dontDestroyOnLoad)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
 
             // headless mode? then start the server
             // can't do this in Awake because Awake is for initialization.
@@ -252,14 +255,6 @@ namespace Mirror
                 logger.Log("Server Tick Rate set to: " + Application.targetFrameRate + " Hz.");
             }
 #endif
-        }
-
-        void Initialize()
-        {
-            if (dontDestroyOnLoad)
-            {
-                DontDestroyOnLoad(gameObject);
-            }
         }
 
         /// <summary>
