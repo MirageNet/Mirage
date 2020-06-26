@@ -124,6 +124,8 @@ namespace Mirror
         // transport to use to accept connections
         public AsyncTransport transport;
 
+        public bool dontDestroyOnLoad = true;
+
         /// <summary>
         /// Called when the script gets added to an object. Useful for getting other needed scripts.
         /// </summary>
@@ -184,6 +186,11 @@ namespace Mirror
 
             initialized = true;
             if (logger.LogEnabled()) logger.Log("NetworkServer Created version " + Version.Current);
+
+            if (dontDestroyOnLoad)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
 
             //Make sure connections are cleared in case any old connections references exist from previous sessions
             connections.Clear();

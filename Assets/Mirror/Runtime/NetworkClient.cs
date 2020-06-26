@@ -149,6 +149,8 @@ namespace Mirror
         /// </summary>
         public bool IsLocalClient => hostServer != null;
 
+        public bool dontDestroyOnLoad = true;
+
         /// <summary>
         /// Called when the script gets added to an object. Useful for getting other needed scripts.
         /// </summary>
@@ -198,6 +200,11 @@ namespace Mirror
         {
             if (logger.LogEnabled()) logger.Log("Client Connect: " + uri);
 
+            if (dontDestroyOnLoad)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
+
             AsyncTransport transport = Transport;
             if (transport == null)
                 transport = GetComponent<AsyncTransport>();
@@ -233,6 +240,12 @@ namespace Mirror
         {
 
             logger.Log("Client Connect Host to Server");
+
+            if (dontDestroyOnLoad)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
+
             connectState = ConnectState.Connected;
 
             InitializeAuthEvents();
