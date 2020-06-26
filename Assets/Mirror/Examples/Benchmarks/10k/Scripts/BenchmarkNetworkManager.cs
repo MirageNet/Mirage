@@ -2,7 +2,7 @@ using System;
 
 namespace Mirror.Examples
 {
-    public class BenchmarkNetworkManager : NetworkManager
+    public class BenchmarkNetworkManager : NetworkServer
     {
         /// <summary>
         /// hook for benchmarking
@@ -14,11 +14,11 @@ namespace Mirror.Examples
         public Action AfterLateUpdate;
 
 
-        //public override void LateUpdate()
-        //{
-        //    BeforeLateUpdate?.Invoke();
-        //    base.LateUpdate();
-        //    AfterLateUpdate?.Invoke();
-        //}
+        public override void LateUpdate()
+        {
+            BeforeLateUpdate?.Invoke();
+            base.LateUpdate();
+            AfterLateUpdate?.Invoke();
+        }
     }
 }
