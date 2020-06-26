@@ -354,6 +354,7 @@ namespace Mirror
             Connection.RegisterHandler<UpdateVarsMessage>(msg => { });
             Connection.RegisterHandler<RpcMessage>(OnRpcMessage);
             Connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
+            Connection.RegisterHandler<NotReadyMessage>(OnClientNotReadyMessageInternal);
         }
 
         internal void RegisterMessageHandlers()
@@ -368,6 +369,7 @@ namespace Mirror
             Connection.RegisterHandler<RpcMessage>(OnRpcMessage);
             Connection.RegisterHandler<SyncEventMessage>(OnSyncEventMessage);
             Connection.RegisterHandler<SceneMessage>(OnClientSceneInternal);
+            Connection.RegisterHandler<NotReadyMessage>(OnClientNotReadyMessageInternal);
         }
 
         /// <summary>
@@ -1146,6 +1148,14 @@ namespace Mirror
             {
                 ChangeClientScene(msg.sceneName, msg.sceneOperation, msg.customHandling);
             }
+        }
+
+        void OnClientNotReadyMessageInternal(INetworkConnection conn, NotReadyMessage msg)
+        {
+            logger.Log("NetworkManager.OnClientNotReadyMessageInternal");
+
+            ready = false;
+            OnClientNotReady(conn);
         }
     }
 }

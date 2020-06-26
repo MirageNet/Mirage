@@ -311,10 +311,6 @@ namespace Mirror
             // subscribe to the server
             if (server != null)
                 server.Authenticated.AddListener(OnServerAuthenticated);
-
-            // subscribe to the client
-            if (client != null)
-                client.Authenticated.AddListener(OnClientAuthenticated);
         }
 
         /// <summary>
@@ -343,37 +339,5 @@ namespace Mirror
         }
 
         #endregion
-
-        #region Client Internal Message Handlers
-
-        void RegisterClientMessages(INetworkConnection connection)
-        {
-            connection.RegisterHandler<NotReadyMessage>(OnClientNotReadyMessageInternal);
-
-        }
-
-        // called after successful authentication
-        void OnClientAuthenticated(INetworkConnection conn)
-        {
-            RegisterClientMessages(conn);
-
-            logger.Log("NetworkManager.OnClientAuthenticated");
-
-            // will wait for scene id to come from the server.
-            clientLoadedScene = true;
-        }
-
-        void OnClientNotReadyMessageInternal(INetworkConnection conn, NotReadyMessage msg)
-        {
-            logger.Log("NetworkManager.OnClientNotReadyMessageInternal");
-
-            client.ready = false;
-            client.OnClientNotReady(conn);
-
-            // NOTE: clientReadyConnection is not set here! don't want OnClientConnect to be invoked again after scene changes.
-        }
-
-        #endregion
-
     }
 }
