@@ -120,11 +120,6 @@ namespace Mirror
         {
             logger.Log("Thank you for using Mirror! https://mirror-networking.com");
 
-            // Set the networkSceneName to prevent a scene reload
-            // if client connection to server fails.
-            //TODO: Not sure where this goes just yet
-            //networkSceneName = null;
-
             if (dontDestroyOnLoad)
             {
                 DontDestroyOnLoad(gameObject);
