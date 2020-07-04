@@ -73,6 +73,8 @@ namespace Mirror
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
 
+        public NetworkSceneManager sceneManager;
+
         /// <summary>
         /// The connection to the host mode client (if any).
         /// </summary>
@@ -142,6 +144,23 @@ namespace Mirror
                 }
 #if UNITY_EDITOR
                 UnityEditor.Undo.RecordObject(gameObject, "Added default Transport");
+#endif
+            }
+
+            // add serverSceneManager if there is none yet. makes upgrading easier.
+            if (sceneManager == null)
+            {
+                // First try to get the SceneManager.
+                sceneManager = GetComponent<NetworkSceneManager>();
+                // was a SceneManager added yet? if not, add one
+                if (sceneManager == null)
+                {
+                    sceneManager = gameObject.AddComponent<NetworkSceneManager>();
+                    logger.Log("NetworkServer: added default SceneManager because there was none yet.");
+                }
+                sceneManager.server = this;
+#if UNITY_EDITOR
+                UnityEditor.Undo.RecordObject(gameObject, "Added default SceneManager");
 #endif
             }
         }

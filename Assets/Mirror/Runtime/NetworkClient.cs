@@ -34,6 +34,7 @@ namespace Mirror
         [Header("Authentication")]
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
+        public NetworkSceneManager sceneManager;
 
         // spawn handlers. internal for testing purposes. do not use directly.
         internal readonly Dictionary<Guid, SpawnHandlerDelegate> spawnHandlers = new Dictionary<Guid, SpawnHandlerDelegate>();
@@ -167,6 +168,23 @@ namespace Mirror
                 }
 #if UNITY_EDITOR
                 UnityEditor.Undo.RecordObject(gameObject, "Added default Transport");
+#endif
+            }
+
+            // add clientSceneManager if there is none yet. makes upgrading easier.
+            if (sceneManager == null)
+            {
+                // First try to get the SceneManager.
+                sceneManager = GetComponent<NetworkSceneManager>();
+                // was a SceneManager added yet? if not, add one
+                if (sceneManager == null)
+                {
+                    sceneManager = gameObject.AddComponent<NetworkSceneManager>();
+                    logger.Log("NetworkClient: added default SceneManager because there was none yet.");
+                }
+                sceneManager.client = this;
+#if UNITY_EDITOR
+                UnityEditor.Undo.RecordObject(gameObject, "Added default SceneManager");
 #endif
             }
         }
