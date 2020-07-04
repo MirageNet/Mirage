@@ -144,8 +144,8 @@ namespace Mirror.Tests
         [Test]
         public void ClientChangeSceneTest()
         {
-            client.ClientChangeScene.AddListener(ClientChangeScene);
-            client.OnClientChangeScene("", SceneOperation.Normal, false);
+            client.sceneManager.ClientChangeScene.AddListener(ClientChangeScene);
+            client.sceneManager.OnClientChangeScene("", SceneOperation.Normal, false);
             Assert.That(ClientChangeCalled, Is.EqualTo(1));
         }
 
@@ -158,8 +158,8 @@ namespace Mirror.Tests
         [Test]
         public void ClientSceneChangedTest()
         {
-            client.ClientSceneChanged.AddListener(ClientSceneChanged);
-            client.OnClientSceneChanged(client.Connection);
+            client.sceneManager.ClientSceneChanged.AddListener(ClientSceneChanged);
+            client.sceneManager.OnClientSceneChanged(client.Connection);
             Assert.That(ClientSceneChangedCalled, Is.EqualTo(1));
         }
 

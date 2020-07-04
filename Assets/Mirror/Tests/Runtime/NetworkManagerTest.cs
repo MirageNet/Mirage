@@ -8,18 +8,18 @@ using static Mirror.Tests.AsyncUtil;
 
 namespace Mirror.Tests
 {
-    public class SimpleNetworkManager : NetworkManager
-    {
-        public void ClientChangeSceneExpose(string newSceneName, SceneOperation sceneOperation = SceneOperation.Normal, bool customHandling = false)
-        {
-            ClientChangeScene(newSceneName, sceneOperation, customHandling);
-        }
+    //public class SimpleNetworkManager : NetworkManager
+    //{
+    //    public void ClientChangeSceneExpose(string newSceneName, SceneOperation sceneOperation = SceneOperation.Normal, bool customHandling = false)
+    //    {
+    //        ClientChangeScene(newSceneName, sceneOperation, customHandling);
+    //    }
 
-        public void ServerChangeSceneExpose(string newSceneName)
-        {
-            ServerChangeScene(newSceneName);
-        }
-    }
+    //    public void ServerChangeSceneExpose(string newSceneName)
+    //    {
+    //        ServerChangeScene(newSceneName);
+    //    }
+    //}
 
     [TestFixture]
     public class NetworkManagerTest : HostSetup<MockComponent>
@@ -27,33 +27,32 @@ namespace Mirror.Tests
         [Test]
         public void VariableTest()
         {
-            Assert.That(manager.dontDestroyOnLoad, Is.True);
             Assert.That(manager.startOnHeadless, Is.False);
             Assert.That(manager.serverTickRate, Is.EqualTo(30));
             Assert.That(manager.server.MaxConnections, Is.EqualTo(4));
         }
 
-        [Test]
-        public void ClientChangeSceneExceptionTest()
-        {
-            SimpleNetworkManager comp = new GameObject().AddComponent<SimpleNetworkManager>();
+        //[Test]
+        //public void ClientChangeSceneExceptionTest()
+        //{
+        //    SimpleNetworkManager comp = new GameObject().AddComponent<SimpleNetworkManager>();
 
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                comp.ClientChangeScene(string.Empty);
-            });
-        }
+        //    Assert.Throws<ArgumentNullException>(() =>
+        //    {
+        //        comp.ClientChangeScene(string.Empty);
+        //    });
+        //}
 
-        [Test]
-        public void ServerChangeSceneExceptionTest()
-        {
-            SimpleNetworkManager comp = new GameObject().AddComponent<SimpleNetworkManager>();
+        //[Test]
+        //public void ServerChangeSceneExceptionTest()
+        //{
+        //    SimpleNetworkManager comp = new GameObject().AddComponent<SimpleNetworkManager>();
 
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                comp.ServerChangeScene(string.Empty);
-            });
-        }
+        //    Assert.Throws<ArgumentNullException>(() =>
+        //    {
+        //        comp.ServerChangeScene(string.Empty);
+        //    });
+        //}
 
         [Test]
         public void StartServerTest()
@@ -67,7 +66,6 @@ namespace Mirror.Tests
         {
             manager.StopServer();
 
-            // wait for manager to stop
             await Task.Delay(1);
 
             Assert.That(server.Active, Is.False);
@@ -79,21 +77,19 @@ namespace Mirror.Tests
         public IEnumerator StopClientTest() => RunAsync(async () =>
         {
             manager.StopClient();
-            manager.StopServer();
 
-            // wait until manager shuts down
             await Task.Delay(1);
 
-            Assert.That(manager.IsNetworkActive, Is.False);
+            Assert.That(client.Active, Is.False);
         });
 
         [Test]
         public void ServerChangeSceneTest()
         {
             AssetBundle.LoadFromFile("Assets/Mirror/Tests/Runtime/TestScene/testscene");
-            manager.ServerChangeScene("testScene");
+            server.sceneManager.ChangeServerScene("testScene");
 
-            Assert.That(manager.networkSceneName, Is.EqualTo("testScene"));
+            Assert.That(server.sceneManager.networkSceneName, Is.EqualTo("testScene"));
         }
     }
 }

@@ -2,7 +2,7 @@ using System;
 
 namespace Mirror.Examples
 {
-    public class BenchmarkNetworkManager : NetworkManager
+    public class BenchmarkNetworkManager : NetworkSceneManager
     {
         /// <summary>
         /// hook for benchmarking
