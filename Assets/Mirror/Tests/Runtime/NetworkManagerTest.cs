@@ -67,19 +67,26 @@ namespace Mirror.Tests
         {
             manager.StopServer();
 
-            // wait for manager to stop
             await Task.Delay(1);
 
-            Assert.That(manager.IsNetworkActive, Is.False);
+            Assert.That(server.Active, Is.False);
         });
 
         [UnityTest]
         public IEnumerator StopClientTest() => RunAsync(async () =>
         {
             manager.StopClient();
-            manager.StopServer();
 
-            // wait until manager shuts down
+            await Task.Delay(1);
+
+            Assert.That(client.Active, Is.False);
+        });
+
+        [UnityTest]
+        public IEnumerator StopHostTest() => RunAsync(async () =>
+        {
+            manager.StopHost();
+
             await Task.Delay(1);
 
             Assert.That(manager.IsNetworkActive, Is.False);
