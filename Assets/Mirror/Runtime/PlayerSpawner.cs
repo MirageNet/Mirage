@@ -26,7 +26,7 @@ namespace Mirror
             }
             if (client != null)
             {
-                client.Authenticated.AddListener(OnClientAuthenticated);
+                client.ClientSceneChanged.AddListener(OnClientSceneChanged);
                 client.RegisterPrefab(playerPrefab.gameObject);
             }
             if (server != null)
@@ -46,7 +46,7 @@ namespace Mirror
         /// <para>The default implementation of this function sets the client as ready and adds a player. Override the function to dictate what happens when the client connects.</para>
         /// </summary>
         /// <param name="conn">Connection to the server.</param>
-        private void OnClientAuthenticated(INetworkConnection connection)
+        private void OnClientSceneChanged(INetworkConnection connection)
         {
             // OnClientConnect by default calls AddPlayer but it should not do
             // that when we have online/offline scenes. so we need the
