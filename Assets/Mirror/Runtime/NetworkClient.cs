@@ -10,6 +10,8 @@ using Object = UnityEngine.Object;
 
 namespace Mirror
 {
+    [Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkConnection> { }
+
     public enum ConnectState
     {
         None,
@@ -38,7 +40,6 @@ namespace Mirror
         internal readonly Dictionary<Guid, UnSpawnDelegate> unspawnHandlers = new Dictionary<Guid, UnSpawnDelegate>();
         internal readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
 
-        [Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkConnection> { }
         [Serializable] public class ClientSceneChangeEvent : UnityEvent<string, SceneOperation, bool> { }
 
         /// <summary>
