@@ -96,14 +96,6 @@ namespace Mirror
         public AsyncTransport Transport;
 
         /// <summary>
-        /// Returns true when a client's connection has been set to ready.
-        /// <para>A client that is ready recieves state updates from the server, while a client that is not ready does not. This useful when the state of the game is not normal, such as a scene change or end-of-game.</para>
-        /// <para>This is read-only. To change the ready state of a client, use ClientScene.Ready(). The server is able to set the ready state of clients using NetworkServer.SetClientReady(), NetworkServer.SetClientNotReady() and NetworkServer.SetAllClientsNotReady().</para>
-        /// <para>This is done when changing scenes so that clients don't receive state update messages during scene loading.</para>
-        /// </summary>
-        public bool ready { get; internal set; }
-
-        /// <summary>
         /// This is a dictionary of the prefabs that are registered on the client with ClientScene.RegisterPrefab().
         /// <para>The key to the dictionary is the prefab asset Id.</para>
         /// </summary>
@@ -362,7 +354,7 @@ namespace Mirror
 
             ClearSpawners();
             DestroyAllClientObjects();
-            ready = false;
+            sceneManager.ready = false;
             isSpawnFinished = false;
 
             connectState = ConnectState.None;
@@ -399,31 +391,7 @@ namespace Mirror
                    identity.sceneId != 0;
         }
 
-        /// <summary>
-        /// Signal that the client connection is ready to enter the game.
-        /// <para>This could be for example when a client enters an ongoing game and has finished loading the current scene. The server should respond to the SYSTEM_READY event with an appropriate handler which instantiates the players object for example.</para>
-        /// </summary>
-        /// <param name="conn">The client connection which is ready.</param>
-        public void Ready(INetworkConnection conn)
-        {
-            if (ready)
-            {
-                throw new InvalidOperationException("A connection has already been set as ready. There can only be one.");
-            }
-
-            if (conn == null)
-                throw new InvalidOperationException("Ready() called with invalid connection object: conn=null");
-
-            if (logger.LogEnabled()) logger.Log("ClientScene.Ready() called with connection [" + conn + "]");
-
-            // Set these before sending the ReadyMessage, otherwise host client
-            // will fail in InternalAddPlayer with null readyConnection.
-            ready = true;
-            Connection.IsReady = true;
-
-            // Tell server we're ready to have a player object spawned
-            conn.Send(new ReadyMessage());
-        }
+        
 
         // this is called from message handler for Owner message
         internal void InternalAddPlayer(NetworkIdentity identity)
