@@ -20,12 +20,12 @@ namespace Mirror.Examples.Tanks
         public bool IsGameReady;
         public bool IsGameOver;
         public List<Tank> players = new List<Tank>();
-        public NetworkManager NetworkManager;
+        public NetworkHost networkHost;
 
 
         void Update()
         {
-            if (NetworkManager.IsNetworkActive)
+            if (networkHost.IsNetworkActive)
             {
                 GameReadyCheck();
                 GameOverCheck();
@@ -51,7 +51,7 @@ namespace Mirror.Examples.Tanks
 
         void ShowReadyMenu()
         {
-            if (NetworkManager.client.Active)
+            if (networkHost.LocalClient.Active)
             {
 
                 if (LocalPlayer.isReady)
@@ -66,7 +66,7 @@ namespace Mirror.Examples.Tanks
             if (!IsGameReady)
             {
                 //Look for connections that are not in the player list
-                foreach (KeyValuePair<uint, NetworkIdentity> kvp in NetworkManager.client.Spawned)
+                foreach (KeyValuePair<uint, NetworkIdentity> kvp in networkHost.LocalClient.Spawned)
                 {
                     Tank comp = kvp.Value.GetComponent<Tank>();
                     if (comp != null)
@@ -136,10 +136,10 @@ namespace Mirror.Examples.Tanks
         void FindLocalTank()
         {
             //Check to see if the player is loaded in yet
-            if (NetworkManager.client.LocalPlayer == null)
+            if (networkHost.LocalClient.LocalPlayer == null)
                 return;
 
-            LocalPlayer = NetworkManager.client.LocalPlayer.GetComponent<Tank>();
+            LocalPlayer = networkHost.LocalClient.LocalPlayer.GetComponent<Tank>();
         }
 
         void UpdateStats()

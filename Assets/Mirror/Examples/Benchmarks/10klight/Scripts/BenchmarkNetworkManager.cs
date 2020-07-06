@@ -2,7 +2,7 @@ using System;
 
 namespace Mirror.Examples.Light
 {
-    public class BenchmarkNetworkManager : NetworkManager
+    public class BenchmarkNetworkManager : NetworkHost
     {
     }
 }

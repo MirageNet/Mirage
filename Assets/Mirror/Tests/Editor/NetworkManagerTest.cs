@@ -10,12 +10,10 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator NetworkManagerSetupHasComponents()
         {
-            NetworkManager networkManager = new GameObject("Network Manager Test").AddComponent<NetworkManager>();
+            NetworkHost networkHost = new GameObject("NetworkHost Test").AddComponent<NetworkHost>();
             yield return null;
-            Assert.IsNotNull(networkManager.client);
-            Assert.IsNotNull(networkManager.server);
-
-            Object.DestroyImmediate(networkManager);
+            Assert.IsNotNull(networkHost.LocalClient);
+            Object.DestroyImmediate(networkHost);
         }
     }
 }

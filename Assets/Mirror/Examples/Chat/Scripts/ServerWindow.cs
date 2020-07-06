@@ -7,16 +7,16 @@ namespace Mirror.Examples.Chat
     {
         public string serverIp = "localhost";
 
-        public NetworkManager NetworkManager;
+        public NetworkHost networkHost;
 
         public void StartClient()
         {
-            NetworkManager.StartClient(serverIp);
+            //TODO: networkHost.LocalClient.ConnectAsync(serverIp);
         }
 
         public void StartHost()
         {
-            _ = NetworkManager.StartHost();
+            _ = networkHost.StartHost();
         }
 
         public void SetServerIp(string serverIp)

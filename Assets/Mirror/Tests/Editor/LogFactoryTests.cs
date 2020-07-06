@@ -1,4 +1,4 @@
-﻿using NSubstitute;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -19,7 +19,7 @@ namespace Mirror.Tests
         public void DifferentClassDifferentLogger()
         {
             ILogger logger1 = LogFactory.GetLogger<LogFactoryTests>();
-            ILogger logger2 = LogFactory.GetLogger<NetworkManager>();
+            ILogger logger2 = LogFactory.GetLogger<NetworkHost>();
             Assert.That(logger1, Is.Not.SameAs(logger2));
         }
 

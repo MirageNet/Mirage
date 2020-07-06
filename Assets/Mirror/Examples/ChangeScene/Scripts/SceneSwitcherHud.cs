@@ -4,7 +4,7 @@ namespace Mirror.Examples.SceneChange
 {
     public class SceneSwitcherHud : MonoBehaviour
     {
-        public NetworkManager networkManager;
+        public NetworkHost networkHost;
 
         void OnGUI()
         {
@@ -12,12 +12,12 @@ namespace Mirror.Examples.SceneChange
 
             if (GUILayout.Button("Switch to Room1"))
             {
-                networkManager.server.sceneManager.ChangeServerScene("Room1");
+                networkHost.sceneManager.ChangeServerScene("Room1");
             }
 
             if (GUILayout.Button("Switch to Room2"))
             {
-                networkManager.server.sceneManager.ChangeServerScene("Room2");
+                networkHost.sceneManager.ChangeServerScene("Room2");
             }
 
             GUILayout.EndArea();

@@ -62,11 +62,11 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator TargetRpc()
         {
-            component.TargetRpcTest(manager.server.LocalConnection, 1, "hello");
+            component.TargetRpcTest(manager.LocalConnection, 1, "hello");
             // process spawn message from server
             yield return null;
 
-            Assert.That(component.targetRpcConn, Is.SameAs(manager.client.Connection));
+            Assert.That(component.targetRpcConn, Is.SameAs(manager.LocalClient.Connection));
             Assert.That(component.targetRpcArg1, Is.EqualTo(1));
             Assert.That(component.targetRpcArg2, Is.EqualTo("hello"));
         }

@@ -11,12 +11,12 @@ namespace Mirror
     /// </summary>
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/NetworkManagerHUD")]
-    [RequireComponent(typeof(NetworkManager))]
+    [RequireComponent(typeof(NetworkHost))]
     [EditorBrowsable(EditorBrowsableState.Never)]
     [HelpURL("https://mirror-networking.com/docs/Components/NetworkManagerHUD.html")]
     public class NetworkManagerHUD : MonoBehaviour
     {
-        NetworkManager manager;
+        NetworkHost host;
 
         /// <summary>
         /// Whether to show the default control HUD at runtime.
@@ -40,7 +40,7 @@ namespace Mirror
 
         void Awake()
         {
-            manager = GetComponent<NetworkManager>();
+            host = GetComponent<NetworkHost>();
         }
 
         void OnGUI()
@@ -50,7 +50,7 @@ namespace Mirror
 
             GUILayout.BeginArea(new Rect(10 + offsetX, 40 + offsetY, 215, 9999));
 
-            if (!manager.client.IsConnected && !manager.server.Active)
+            if (!host.LocalClient.IsConnected && !host.Active)
             {
                 StartButtons();
             }
@@ -65,14 +65,14 @@ namespace Mirror
 
         void StartButtons()
         {
-            if (!manager.client.Active)
+            if (!host.LocalClient.Active)
             {
                 // Server + Client
                 if (Application.platform != RuntimePlatform.WebGLPlayer)
                 {
                     if (GUILayout.Button("Host (Server + Client)"))
                     {
-                        _ = manager.StartHost();
+                        _ = host.StartHost();
                     }
                 }
 
@@ -80,7 +80,8 @@ namespace Mirror
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Client"))
                 {
-                    manager.StartClient(serverIp);
+                    //TODO: How to handle client only with NetworkHost?
+                    //host.LocalClient.StartClient(serverIp);
                 }
                 serverIp = GUILayout.TextField(serverIp);
                 GUILayout.EndHorizontal();
@@ -95,7 +96,7 @@ namespace Mirror
                 {
                     if (GUILayout.Button("Server Only"))
                     {
-                        _ = manager.StartServer();
+                        _ = host.ListenAsync();
                     }
                 }
             }
@@ -105,7 +106,8 @@ namespace Mirror
                 GUILayout.Label("Connecting to " + serverIp + "..");
                 if (GUILayout.Button("Cancel Connection Attempt"))
                 {
-                    manager.StopClient();
+                    //TODO: How to handle client only with NetworkHost?
+                    //host.StopClient();
                 }
             }
         }
@@ -113,11 +115,11 @@ namespace Mirror
         void StatusLabels()
         {
             // server / client status message
-            if (manager.server.Active)
+            if (host.Active)
             {
-                GUILayout.Label("Server: active. Transport: " + manager.server.transport);
+                GUILayout.Label("Server: active. Transport: " + host.transport);
             }
-            if (manager.client.IsConnected)
+            if (host.LocalClient.IsConnected)
             {
                 GUILayout.Label("Client: address=" + serverIp);
             }
@@ -126,27 +128,27 @@ namespace Mirror
         void StopButtons()
         {
             // stop host if host mode
-            if (manager.server.Active && manager.client.IsConnected)
+            if (host.Active && host.LocalClient.IsConnected)
             {
                 if (GUILayout.Button("Stop Host"))
                 {
-                    manager.StopHost();
+                    host.StopHost();
                 }
             }
             // stop client if client-only
-            else if (manager.client.IsConnected)
+            else if (host.LocalClient.IsConnected)
             {
                 if (GUILayout.Button("Stop Client"))
                 {
-                    manager.StopClient();
+                    host.LocalClient.Disconnect();
                 }
             }
             // stop server if server-only
-            else if (manager.server.Active)
+            else if (host.Active)
             {
                 if (GUILayout.Button("Stop Server"))
                 {
-                    manager.StopServer();
+                    host.Disconnect();
                 }
             }
         }

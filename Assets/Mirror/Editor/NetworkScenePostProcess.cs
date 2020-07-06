@@ -34,7 +34,7 @@ namespace Mirror
             {
                 // if we had a [ConflictComponent] attribute that would be better than this check.
                 // also there is no context about which scene this is in.
-                if (identity.GetComponent<NetworkManager>() != null)
+                if (identity.GetComponent<NetworkHost>() != null)
                 {
                     logger.LogError("NetworkManager has a NetworkIdentity component. This will cause the NetworkManager object to be disabled, so it is not recommended.");
                 }

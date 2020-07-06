@@ -12,22 +12,22 @@ namespace Mirror.Tests
         [Test]
         public void VariableTest()
         {
-            Assert.That(manager.startOnHeadless, Is.False);
-            Assert.That(manager.serverTickRate, Is.EqualTo(30));
-            Assert.That(manager.server.MaxConnections, Is.EqualTo(4));
+            //Assert.That(manager.startOnHeadless, Is.False);
+            //Assert.That(manager.serverTickRate, Is.EqualTo(30));
+            Assert.That(manager.MaxConnections, Is.EqualTo(4));
         }
 
         [Test]
         public void StartServerTest()
         {
             Assert.That(manager.IsNetworkActive, Is.True);
-            Assert.That(manager.server.Active, Is.True);
+            Assert.That(manager.Active, Is.True);
         }
 
         [UnityTest]
         public IEnumerator StopServerTest() => RunAsync(async () =>
         {
-            manager.StopServer();
+            manager.Disconnect();
 
             await Task.Delay(1);
 
@@ -39,7 +39,7 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator StopClientTest() => RunAsync(async () =>
         {
-            manager.StopClient();
+            manager.LocalClient.Disconnect();
 
             await Task.Delay(1);
 

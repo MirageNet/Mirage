@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Mirror.Examples.Chat
 {
     [AddComponentMenu("")]
-    public class ChatNetworkManager : NetworkManager
+    public class ChatNetworkManager : NetworkHost
     {
         public string PlayerName { get; set; }
 
@@ -13,8 +13,8 @@ namespace Mirror.Examples.Chat
 
         void Awake()
         {
-            server.Authenticated.AddListener(OnServerAuthenticated);
-            client.Authenticated.AddListener(OnClientAuthenticated);
+            Authenticated.AddListener(OnServerAuthenticated);
+            LocalClient.Authenticated.AddListener(OnClientAuthenticated);
         }
 
         public class CreatePlayerMessage : MessageBase
@@ -40,7 +40,7 @@ namespace Mirror.Examples.Chat
             playergo.GetComponent<Player>().playerName = createPlayerMessage.name;
 
             // set it as the player
-            server.AddPlayerForConnection(connection, playergo);
+            AddPlayerForConnection(connection, playergo);
 
             chatWindow.gameObject.SetActive(true);
         }

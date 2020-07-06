@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 namespace Mirror.Examples.MultipleAdditiveScenes
 {
     [AddComponentMenu("")]
-    public class MultiSceneNetManager : NetworkManager
+    public class MultiSceneNetManager : NetworkHost
     {
         [Header("MultiScene Setup")]
         public int instances = 3;
@@ -76,13 +76,13 @@ namespace Mirror.Examples.MultipleAdditiveScenes
         /// </summary>
         public void OnStopServer()
         {
-            server.SendToAll(new SceneMessage { sceneName = gameScene, sceneOperation = SceneOperation.UnloadAdditive });
+            SendToAll(new SceneMessage { sceneName = gameScene, sceneOperation = SceneOperation.UnloadAdditive });
             StartCoroutine(UnloadSubScenes());
         }
 
         public void OnStopClient()
         {
-            if (!server.Active)
+            if (!Active)
                 StartCoroutine(UnloadClientSubScenes());
         }
 

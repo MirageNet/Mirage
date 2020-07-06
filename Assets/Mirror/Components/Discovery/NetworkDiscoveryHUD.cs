@@ -14,7 +14,7 @@ namespace Mirror.Discovery
 
         public NetworkDiscovery networkDiscovery;
 
-        public NetworkManager networkManager;
+        public NetworkHost networkHost;
 
 #if UNITY_EDITOR
         void OnValidate()
@@ -26,9 +26,9 @@ namespace Mirror.Discovery
                 UnityEditor.Undo.RecordObjects(new Object[] { this, networkDiscovery }, "Set NetworkDiscovery");
             }
 
-            if (networkManager == null)
+            if (networkHost == null)
             {
-                networkManager = GetComponent<NetworkManager>();
+                networkHost = GetComponent<NetworkHost>();
                 UnityEditor.Undo.RecordObjects(new Object[] { this }, "Set NetworkManager");
 
             }
@@ -37,10 +37,10 @@ namespace Mirror.Discovery
 
         void OnGUI()
         {
-            if (networkManager.server.Active || networkManager.client.Active)
+            if (networkHost.Active || networkHost.LocalClient.Active)
                 return;
 
-            if (!networkManager.client.IsConnected && !networkManager.server.Active && !networkManager.client.Active)
+            if (!networkHost.LocalClient.IsConnected && !networkHost.Active && !networkHost.LocalClient.Active)
                 DrawGUI();
         }
 
@@ -58,7 +58,7 @@ namespace Mirror.Discovery
             if (GUILayout.Button("Start Host"))
             {
                 discoveredServers.Clear();
-                networkManager.StartHost();
+                _ = networkHost.StartHost();
                 networkDiscovery.AdvertiseServer();
             }
 
@@ -66,7 +66,7 @@ namespace Mirror.Discovery
             if (GUILayout.Button("Start Server"))
             {
                 discoveredServers.Clear();
-                networkManager.StartServer();
+                _ = networkHost.ListenAsync();
 
                 networkDiscovery.AdvertiseServer();
             }
@@ -89,7 +89,7 @@ namespace Mirror.Discovery
 
         void Connect(ServerResponse info)
         {
-            networkManager.StartClient(info.uri);
+            _ = networkHost.LocalClient.ConnectAsync(info.uri);
         }
 
         public void OnDiscoveredServer(ServerResponse info)

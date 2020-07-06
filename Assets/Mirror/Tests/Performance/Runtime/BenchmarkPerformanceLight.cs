@@ -16,7 +16,7 @@ namespace Mirror.Tests.Performance.Runtime
     {
         const string ScenePath = "Assets/Mirror/Examples/Benchmarks/10klight/Scenes/Scene.unity";
 
-        private NetworkManager benchmarker;
+        private NetworkHost benchmarker;
 
         [UnitySetUp]
         public IEnumerator SetUp()
@@ -29,7 +29,7 @@ namespace Mirror.Tests.Performance.Runtime
             // wait for NetworkManager awake
             yield return null;
             // load host
-            benchmarker = Object.FindObjectOfType<NetworkManager>();
+            benchmarker = Object.FindObjectOfType<NetworkHost>();
 
 
             if (benchmarker == null)

@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 namespace Mirror.Examples.Additive
 {
     [AddComponentMenu("")]
-    public class AdditiveNetworkManager : NetworkManager
+    public class AdditiveNetworkManager : NetworkHost
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(AdditiveNetworkManager));
 
@@ -15,12 +15,12 @@ namespace Mirror.Examples.Additive
 
         void Awake()
         {
-            server.Started.AddListener(Started);
-            server.Stopped.AddListener(Stopped);
-            client.Disconnected.AddListener(Disconnected);
+            Started.AddListener(OnStarted);
+            Stopped.AddListener(OnStopped);
+            LocalClient.Disconnected.AddListener(Disconnected);
         }
 
-        public void Started()
+        public void OnStarted()
         {
             // load all subscenes on the server only
             StartCoroutine(LoadSubScenes());
@@ -37,7 +37,7 @@ namespace Mirror.Examples.Additive
             }
         }
 
-        public void Stopped()
+        public void OnStopped()
         {
             StartCoroutine(UnloadScenes());
         }

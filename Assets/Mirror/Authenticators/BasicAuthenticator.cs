@@ -9,7 +9,7 @@ namespace Mirror.Authenticators
         static readonly ILogger logger = LogFactory.GetLogger(typeof(BasicAuthenticator));
 
         [Header("Custom Properties")]
-        public NetworkManager manager;
+        public NetworkHost manager;
 
         // set these in the inspector
         public string Username;

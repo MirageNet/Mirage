@@ -16,7 +16,6 @@ namespace Mirror.Tests
 
         #region Setup
         protected GameObject networkManagerGo;
-        protected NetworkManager manager;
         protected NetworkServer server;
         protected NetworkClient client;
         protected NetworkSceneManager sceneManager;
@@ -41,18 +40,14 @@ namespace Mirror.Tests
         [UnitySetUp]
         public IEnumerator Setup() => RunAsync(async () =>
         {
-            networkManagerGo = new GameObject("NetworkManager", typeof(LoopbackTransport), typeof(NetworkClient), typeof(NetworkServer), typeof(NetworkManager), typeof(NetworkSceneManager));
+            networkManagerGo = new GameObject("Network", typeof(LoopbackTransport), typeof(NetworkClient), typeof(NetworkServer), typeof(NetworkSceneManager));
 
             sceneManager = networkManagerGo.GetComponent<NetworkSceneManager>();
-            manager = networkManagerGo.GetComponent<NetworkManager>();
-            manager.client = networkManagerGo.GetComponent<NetworkClient>();
-            manager.server = networkManagerGo.GetComponent<NetworkServer>();
+            client = networkManagerGo.GetComponent<NetworkClient>();
+            server = networkManagerGo.GetComponent<NetworkServer>();
 
-            server = manager.server;
-            client = manager.client;
             server.sceneManager = sceneManager;
             client.sceneManager = sceneManager;
-            manager.startOnHeadless = false;
 
             ExtraSetup();
 
@@ -65,10 +60,16 @@ namespace Mirror.Tests
             await Task.Delay(1);
 
             // start the server
-            await manager.StartServer();
+            await server.ListenAsync();
 
             // now start the client
-            await manager.StartClient("localhost");
+            var builder = new UriBuilder
+            {
+                Host = "localhost",
+                Scheme = client.Transport.Scheme,
+            };
+
+            await client.ConnectAsync(builder.Uri);
 
             // get the connections so that we can spawn players
             connectionToServer = client.Connection;
@@ -91,8 +92,8 @@ namespace Mirror.Tests
         [UnityTearDown]
         public IEnumerator ShutdownHost()
         {
-            manager.StopClient();
-            manager.StopServer();
+            client.Disconnect();
+            server.Disconnect();
 
             yield return null;
 
