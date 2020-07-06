@@ -14,6 +14,12 @@ namespace Mirror
         void Ready(INetworkConnection conn);
     }
 
+    /// <summary>
+    /// Provides Scene Management to a NetworkServer and or NetworkClient.
+    /// <para>The <see cref="NetworkClient">NetworkClient</see> loads scenes as instructed by the <see cref="NetworkServer">NetworkServer</see>.</para>
+    /// <para>The <see cref="NetworkServer">NetworkServer</see> controls the currently active Scene and any additive Load/Unload.</para>
+    /// </summary>
+    [DisallowMultipleComponent]
     public class NetworkSceneManager : MonoBehaviour, INetworkSceneManager
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkSceneManager));
