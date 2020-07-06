@@ -10,6 +10,7 @@ namespace Mirror
     /// <para>The <see cref="NetworkClient">NetworkClient</see> loads scenes as instructed by the <see cref="NetworkServer">NetworkServer</see>.</para>
     /// <para>The <see cref="NetworkServer">NetworkServer</see> controls the currently active Scene and any additive Load/Unload.</para>
     /// </summary>
+    [AddComponentMenu("Network/NetworkSceneManager")]
     [DisallowMultipleComponent]
     public class NetworkSceneManager : MonoBehaviour, INetworkSceneManager
     {
