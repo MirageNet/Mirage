@@ -48,7 +48,7 @@ namespace Mirror
         /// The name of the current network scene.
         /// </summary>
         /// <remarks>
-        /// <para>This is populated if the NetworkManager is doing scene management. This should not be changed directly. Calls to ServerChangeScene() cause this to change. New clients that connect to a server will automatically load this scene.</para>
+        /// <para>This should not be changed directly. Calls to ServerChangeScene() cause this to change. New clients that connect to a server will automatically load this scene.</para>
         /// <para>This is used to make sure that all scene changes are initialized by Mirror.</para>
         /// <para>Loading a scene manually wont set networkSceneName, so Mirror would still load it again on start.</para>
         /// </remarks>
@@ -102,11 +102,10 @@ namespace Mirror
         }
 
         // support additive scene loads:
-        //   NetworkScenePostProcess disables all scene objects on load, and
         //   * ClientScene.PrepareToSpawnSceneObjects enables them again on the
         //     client after the server sends ObjectSpawnStartedMessage to client
-        //     in SpawnObserversForConnection. this is only called when the
-        //     client joins, so we need to rebuild scene objects manually again
+        //     in SpawnObserversForConnection. This is only called when the
+        //     client joins, so we need to rebuild scene objects manually again.
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             if (mode == LoadSceneMode.Additive)
@@ -226,7 +225,7 @@ namespace Mirror
         {
             RegisterClientMessages(conn);
 
-            logger.Log("NetworkManager.OnClientAuthenticated");
+            logger.Log("NetworkSceneManager.OnClientAuthenticated");
         }
 
         public void ClientSceneMessage(INetworkConnection conn, SceneMessage msg)
@@ -285,7 +284,7 @@ namespace Mirror
 
         void OnClientNotReadyMessageInternal(INetworkConnection conn, NotReadyMessage msg)
         {
-            logger.Log("NetworkManager.OnClientNotReadyMessageInternal");
+            logger.Log("NetworkSceneManager.OnClientNotReadyMessageInternal");
 
             ready = false;
             client.OnClientNotReady(conn);
@@ -305,7 +304,7 @@ namespace Mirror
 
         /// <summary>
         /// Called on clients when a scene has completed loaded, when the scene load was initiated by the server.
-        /// <para>Scene changes can cause player objects to be destroyed. The default implementation of OnClientSceneChanged in the NetworkManager is to add a player object for the connection if no player object exists.</para>
+        /// <para>Non-Additive Scene changes will cause player objects to be destroyed. The default implementation of OnClientSceneChanged in the NetworkSceneManager is to add a player object for the connection if no player object exists.</para>
         /// </summary>
         /// <param name="conn">The network connection that the scene change message arrived on.</param>
         internal void OnClientSceneChanged(INetworkConnection conn)
@@ -324,7 +323,7 @@ namespace Mirror
         // called after successful authentication
         void OnServerAuthenticated(INetworkConnection conn)
         {
-            logger.Log("NetworkManager.OnServerAuthenticated");
+            logger.Log("NetworkSceneManager.OnServerAuthenticated");
 
             // proceed with the login handshake by calling OnServerConnect
             if (!string.IsNullOrEmpty(networkSceneName))
@@ -336,7 +335,7 @@ namespace Mirror
 
         /// <summary>
         /// This causes the server to switch scenes and sets the networkSceneName.
-        /// <para>Clients that connect to this server will automatically switch to this scene. This is called autmatically if onlineScene or offlineScene are set, but it can be called from user code to switch scenes again while the game is in progress. This automatically sets clients to be not-ready. The clients must call NetworkClient.Ready() again to participate in the new scene.</para>
+        /// <para>Clients that connect to this server will automatically switch to this scene. This automatically sets clients to be not-ready. The clients must call Ready() again to participate in the new scene.</para>
         /// </summary>
         /// <param name="newSceneName"></param>
         public void ChangeServerScene(string newSceneName)
@@ -360,7 +359,7 @@ namespace Mirror
         }
 
         /// <summary>
-        /// Called from ServerChangeScene immediately before SceneManager.LoadSceneAsync is executed
+        /// Called from ChangeServerScene immediately before NetworkSceneManager's LoadSceneAsync is executed
         /// <para>This allows server to do work / cleanup / prep before the scene changes.</para>
         /// </summary>
         /// <param name="newSceneName">Name of the scene that's about to be loaded</param>
@@ -370,7 +369,7 @@ namespace Mirror
         }
 
         /// <summary>
-        /// Called on the server when a scene is completed loaded, when the scene load was initiated by the server with ServerChangeScene().
+        /// Called on the server when a scene is completed loaded, when the scene load was initiated by the server with ChangeServerScene().
         /// </summary>
         /// <param name="sceneName">The name of the new scene.</param>
         internal void OnServerSceneChanged(string sceneName)
@@ -380,7 +379,7 @@ namespace Mirror
 
         /// <summary>
         /// Signal that the client connection is ready to enter the game.
-        /// <para>This could be for example when a client enters an ongoing game and has finished loading the current scene. The server should respond to the SYSTEM_READY event with an appropriate handler which instantiates the players object for example.</para>
+        /// <para>This could be for example when a client enters an ongoing game and has finished loading the current scene. The server should respond to the message with an appropriate handler which instantiates the players object for example.</para>
         /// </summary>
         /// <param name="conn">The client connection which is ready.</param>
         public void Ready(INetworkConnection conn)
