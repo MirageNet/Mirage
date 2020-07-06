@@ -5,15 +5,6 @@ using UnityEngine.SceneManagement;
 
 namespace Mirror
 {
-    public interface INetworkSceneManager
-    {
-        void ClientSceneMessage(INetworkConnection conn, SceneMessage msg);
-
-        void ChangeServerScene(string newSceneName);
-
-        void Ready(INetworkConnection conn);
-    }
-
     /// <summary>
     /// Provides Scene Management to a NetworkServer and or NetworkClient.
     /// <para>The <see cref="NetworkClient">NetworkClient</see> loads scenes as instructed by the <see cref="NetworkServer">NetworkServer</see>.</para>
