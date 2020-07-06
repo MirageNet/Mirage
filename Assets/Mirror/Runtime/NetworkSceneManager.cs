@@ -124,10 +124,6 @@ namespace Mirror
 
         void FinishLoadScene()
         {
-            // NOTE: this cannot use NetworkClient.allClients[0] - that client may be for a completely different purpose.
-
-            // process queued messages that we received while loading the scene
-            logger.Log("FinishLoadScene: resuming handlers after scene was loading.");
             // host mode?
             if (client.IsLocalClient)
             {
@@ -150,22 +146,15 @@ namespace Mirror
             // server scene was loaded. now spawn all the objects
             server.SpawnObjects();
 
-            // connect client and call OnStartClient AFTER server scene was
-            // loaded and all objects were spawned.
             // DO NOT do this earlier. it would cause race conditions where a
             // client will do things before the server is even fully started.
-            logger.Log("StartHostClient called");
+            logger.Log("FinishStartHost called");
 
             server.ActivateHostScene();
         }
 
-        // finish load scene part for host mode. makes code easier and is
-        // necessary for FinishStartHost later.
-        // (the 3 things have to happen in that exact order)
         void FinishLoadSceneHost()
         {
-            // debug message is very important. if we ever break anything then
-            // it's very obvious to notice.
             logger.Log("Finished loading scene in host mode.");
 
             if (client.Connection != null)
@@ -185,12 +174,8 @@ namespace Mirror
             }
         }
 
-        // finish load scene part for client-only. makes code easier and is
-        // necessary for FinishStartClient later.
         void FinishLoadSceneClientOnly()
         {
-            // debug message is very important. if we ever break anything then
-            // it's very obvious to notice.
             logger.Log("Finished loading scene in client-only mode.");
 
             if (client.Connection != null)
@@ -208,8 +193,6 @@ namespace Mirror
         // necessary for FinishStartServer later.
         void FinishLoadSceneServerOnly()
         {
-            // debug message is very important. if we ever break anything then
-            // it's very obvious to notice.
             logger.Log("Finished loading scene in server-only mode.");
 
             server.SpawnObjects();
