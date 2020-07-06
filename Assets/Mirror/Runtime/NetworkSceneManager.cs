@@ -241,13 +241,6 @@ namespace Mirror
             // Let client prepare for scene change
             OnClientChangeScene(msg.sceneName, msg.sceneOperation, msg.customHandling);
 
-            // scene handling will happen in overrides of OnClientChangeScene and/or OnClientSceneChanged
-            if (msg.customHandling)
-            {
-                FinishLoadScene();
-                return;
-            }
-
             switch (msg.sceneOperation)
             {
                 case SceneOperation.Normal:
