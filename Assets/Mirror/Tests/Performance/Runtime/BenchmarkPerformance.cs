@@ -87,8 +87,7 @@ namespace Mirror.Tests.Performance.Runtime
         public IEnumerator TearDown()
         {
             // shutdown
-            benchmarker.client.Disconnect();
-            benchmarker.server.Disconnect();
+            benchmarker.StopHost();
             yield return null;
 
             // unload scene
