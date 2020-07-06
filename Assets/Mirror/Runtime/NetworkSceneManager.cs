@@ -119,7 +119,6 @@ namespace Mirror
 
                 if (server.Active)
                 {
-                    // TODO only respawn the server objects from that scene later!
                     server.SpawnObjects();
                     if (logger.LogEnabled()) logger.Log("Respawned Server objects after additive scene load: " + scene.name);
                 }
@@ -239,7 +238,7 @@ namespace Mirror
 
             if (string.IsNullOrEmpty(msg.sceneName))
             {
-                throw new ArgumentNullException(nameof(msg.sceneName), "ClientChangeScene: " + nameof(msg.sceneName) + " cannot be empty or null");
+                throw new ArgumentNullException(msg.sceneName, "ClientChangeScene: " + msg.sceneName + " cannot be empty or null");
             }
 
             if (logger.LogEnabled()) logger.Log("ClientChangeScene newSceneName:" + msg.sceneName + " networkSceneName:" + networkSceneName);

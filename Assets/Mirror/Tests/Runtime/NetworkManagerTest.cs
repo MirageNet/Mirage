@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -8,19 +7,6 @@ using static Mirror.Tests.AsyncUtil;
 
 namespace Mirror.Tests
 {
-    //public class SimpleNetworkManager : NetworkManager
-    //{
-    //    public void ClientChangeSceneExpose(string newSceneName, SceneOperation sceneOperation = SceneOperation.Normal, bool customHandling = false)
-    //    {
-    //        ClientChangeScene(newSceneName, sceneOperation, customHandling);
-    //    }
-
-    //    public void ServerChangeSceneExpose(string newSceneName)
-    //    {
-    //        ServerChangeScene(newSceneName);
-    //    }
-    //}
-
     [TestFixture]
     public class NetworkManagerTest : HostSetup<MockComponent>
     {
@@ -31,28 +17,6 @@ namespace Mirror.Tests
             Assert.That(manager.serverTickRate, Is.EqualTo(30));
             Assert.That(manager.server.MaxConnections, Is.EqualTo(4));
         }
-
-        //[Test]
-        //public void ClientChangeSceneExceptionTest()
-        //{
-        //    SimpleNetworkManager comp = new GameObject().AddComponent<SimpleNetworkManager>();
-
-        //    Assert.Throws<ArgumentNullException>(() =>
-        //    {
-        //        comp.ClientChangeScene(string.Empty);
-        //    });
-        //}
-
-        //[Test]
-        //public void ServerChangeSceneExceptionTest()
-        //{
-        //    SimpleNetworkManager comp = new GameObject().AddComponent<SimpleNetworkManager>();
-
-        //    Assert.Throws<ArgumentNullException>(() =>
-        //    {
-        //        comp.ServerChangeScene(string.Empty);
-        //    });
-        //}
 
         [Test]
         public void StartServerTest()
