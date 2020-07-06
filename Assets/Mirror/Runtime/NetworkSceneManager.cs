@@ -80,7 +80,7 @@ namespace Mirror
             }
         }
 
-        public void LateUpdate()
+        public virtual void LateUpdate()
         {
             UpdateScene();
         }
