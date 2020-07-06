@@ -1069,6 +1069,14 @@ namespace Mirror
             return identity.sceneId != 0;
         }
 
+        private class NetworkIdentityComparer : IComparer<NetworkIdentity>
+        {
+            public int Compare(NetworkIdentity x, NetworkIdentity y)
+            {
+                return x.NetId.CompareTo(y.NetId);
+            }
+        }
+
         /// <summary>
         /// This causes NetworkIdentity objects in a scene to be spawned on a server.
         /// <para>NetworkIdentity objects in a scene are disabled by default. Calling SpawnObjects() causes these scene objects to be enabled and spawned. It is like calling NetworkServer.Spawn() for each of them.</para>
@@ -1082,6 +1090,8 @@ namespace Mirror
                 return false;
 
             NetworkIdentity[] identities = Resources.FindObjectsOfTypeAll<NetworkIdentity>();
+            Array.Sort(identities, new NetworkIdentityComparer());
+
             foreach (NetworkIdentity identity in identities)
             {
                 if (ValidateSceneObject(identity))

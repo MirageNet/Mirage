@@ -1,4 +1,3 @@
-#if !UNITY_2019_2_OR_NEWER || UNITY_PERFORMANCE_TESTS_1_OR_OLDER
 using System.Collections;
 using System.Diagnostics;
 using Mirror.Examples;
@@ -89,6 +88,8 @@ namespace Mirror.Tests.Performance.Runtime
         {
             // shutdown
             benchmarker.StopHost();
+            yield return null;
+
             // unload scene
             Scene scene = SceneManager.GetSceneByPath(ScenePath);
             yield return SceneManager.UnloadSceneAsync(scene);
@@ -115,11 +116,7 @@ namespace Mirror.Tests.Performance.Runtime
         }
 
         [UnityTest]
-#if UNITY_2019_2_OR_NEWER
         [Performance]
-#else
-        [PerformanceUnityTest]
-#endif
         public IEnumerator Benchmark10kIdle()
         {
             EnableHealth(false);
@@ -128,4 +125,4 @@ namespace Mirror.Tests.Performance.Runtime
         }
     }
 }
-#endif
+
