@@ -1,7 +1,7 @@
 using System;
-using NSubstitute.Core;
+using System.Collections;
 using NUnit.Framework;
-using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
 
 namespace Mirror.Tests
 {
