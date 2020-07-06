@@ -7,15 +7,6 @@ namespace Mirror.Tests
 {
     public class NetworkSceneManagerTests : HostSetup<MockComponent>
     {
-        [Test]
-        public void ChangeServerSceneExceptionTest()
-        {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
-            {
-                sceneManager.ChangeServerScene(string.Empty);
-            });
-        }
-
         int onAuthInvokeCounter;
         void TestOnAuthenticatedInvoke(INetworkConnection conn)
         {
@@ -48,16 +39,35 @@ namespace Mirror.Tests
             Assert.That(onOnClientSceneChangedCounter, Is.EqualTo(1));
         }
 
-        [Test]
-        public void FinishLoadServerOnlyTest()
+        int onOnServerSceneOnlyChangedCounter;
+        void TestOnServerOnlySceneChangedInvoke(string scene)
+        {
+            onOnServerSceneOnlyChangedCounter++;
+        }
+
+        [UnityTest]
+        public IEnumerator FinishLoadServerOnlyTest()
         {
             client.Disconnect();
+            yield return null;
 
-            sceneManager.ServerSceneChanged.AddListener(TestOnServerSceneChangedInvoke);
+            sceneManager.ServerSceneChanged.AddListener(TestOnServerOnlySceneChangedInvoke);
 
             sceneManager.FinishLoadScene();
 
-            Assert.That(onOnServerSceneChangedCounter, Is.EqualTo(1));
+            Assert.That(onOnServerSceneOnlyChangedCounter, Is.EqualTo(1));
+        }
+    }
+
+    public class NetworkSceneManagerNonHostTests : ClientServerSetup<MockComponent>
+    {
+        [Test]
+        public void ChangeServerSceneExceptionTest()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                sceneManager.ChangeServerScene(string.Empty);
+            });
         }
     }
 }
