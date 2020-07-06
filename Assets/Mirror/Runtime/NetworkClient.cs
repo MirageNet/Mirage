@@ -53,8 +53,6 @@ namespace Mirror
         /// </summary>
         public NetworkConnectionEvent Authenticated = new NetworkConnectionEvent();
 
-        public NetworkConnectionEvent ClientNotReady = new NetworkConnectionEvent();
-
         /// <summary>
         /// Event fires after the Client has disconnected from its Server and Cleanup has been called.
         /// </summary>
@@ -373,16 +371,6 @@ namespace Mirror
             }
         }
 
-        /// <summary>
-        /// Called on clients when a servers tells the client it is no longer ready.
-        /// <para>This is commonly used when switching scenes.</para>
-        /// </summary>
-        /// <param name="conn">Connection to the server.</param>
-        internal void OnClientNotReady(INetworkConnection conn)
-        {
-            ClientNotReady.Invoke(conn);
-        }
-
         static bool ConsiderForSpawning(NetworkIdentity identity)
         {
             // not spawned yet, not hidden, etc.?
@@ -391,8 +379,6 @@ namespace Mirror
                    identity.gameObject.hideFlags != HideFlags.HideAndDontSave &&
                    identity.sceneId != 0;
         }
-
-        
 
         // this is called from message handler for Owner message
         internal void InternalAddPlayer(NetworkIdentity identity)

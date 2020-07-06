@@ -104,6 +104,76 @@ namespace Mirror.Tests
                 server.sceneManager.ChangeServerScene(string.Empty);
             });
         }
+
+        [Test]
+        public void ReadyTest()
+        {
+            client.sceneManager.Ready(client.Connection);
+            Assert.That(sceneManager.ready);
+            Assert.That(client.Connection.IsReady);
+        }
+
+        [Test]
+        public void ReadyTwiceTest()
+        {
+            sceneManager.Ready(client.Connection);
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                sceneManager.Ready(client.Connection);
+            });
+        }
+
+        [Test]
+        public void ReadyNull()
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                sceneManager.Ready(null);
+            });
+        }
+
+        int ClientChangeCalled;
+        public void ClientChangeScene(string sceneName, SceneOperation sceneOperation, bool customHandling)
+        {
+            ClientChangeCalled++;
+        }
+
+        [Test]
+        public void ClientChangeSceneTest()
+        {
+            sceneManager.ClientChangeScene.AddListener(ClientChangeScene);
+            sceneManager.OnClientChangeScene("", SceneOperation.Normal, false);
+            Assert.That(ClientChangeCalled, Is.EqualTo(1));
+        }
+
+        int ClientSceneChangedCalled;
+        public void ClientSceneChanged(INetworkConnection conn)
+        {
+            ClientSceneChangedCalled++;
+        }
+
+        [Test]
+        public void ClientSceneChangedTest()
+        {
+            sceneManager.ClientSceneChanged.AddListener(ClientSceneChanged);
+            sceneManager.OnClientSceneChanged(client.Connection);
+            Assert.That(ClientSceneChangedCalled, Is.EqualTo(1));
+        }
+
+        int ClientNotReadyCalled;
+        public void ClientNotReady(INetworkConnection conn)
+        {
+            ClientNotReadyCalled++;
+        }
+
+        [Test]
+        public void ClientNotReadyTest()
+        {
+            sceneManager.ClientNotReady.AddListener(ClientNotReady);
+            sceneManager.OnClientNotReady(client.Connection);
+            Assert.That(ClientNotReadyCalled, Is.EqualTo(1));
+        }
     }
 
     public class NetworkSceneManagerNonHostTests : ClientServerSetup<MockComponent>
