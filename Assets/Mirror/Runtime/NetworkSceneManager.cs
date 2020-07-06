@@ -122,7 +122,7 @@ namespace Mirror
             }
         }
 
-        void FinishLoadScene()
+        internal void FinishLoadScene()
         {
             // host mode?
             if (client.IsLocalClient)
