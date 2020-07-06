@@ -160,8 +160,6 @@ namespace Mirror
             logger.Log("StartHostClient called");
 
             server.ActivateHostScene();
-
-            RegisterClientMessages(client.Connection);
         }
 
         // finish load scene part for host mode. makes code easier and is

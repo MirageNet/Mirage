@@ -219,8 +219,6 @@ namespace Mirror
             logger.Log("NetworkManager ConnectLocalClient");
 
             server.ActivateHostScene();
-
-            //RegisterClientMessages(client.Connection);
         }
 
         /// <summary>
