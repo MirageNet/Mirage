@@ -226,11 +226,11 @@ namespace Mirror
             logger.Log("NetworkSceneManager.OnClientAuthenticated");
         }
 
-        public void ClientSceneMessage(INetworkConnection conn, SceneMessage msg)
+        internal void ClientSceneMessage(INetworkConnection conn, SceneMessage msg)
         {
             if (!client.IsConnected || server.Active)
                 return;
-
+                
             if (string.IsNullOrEmpty(msg.sceneName))
             {
                 throw new ArgumentNullException(msg.sceneName, "ClientChangeScene: " + msg.sceneName + " cannot be empty or null");
