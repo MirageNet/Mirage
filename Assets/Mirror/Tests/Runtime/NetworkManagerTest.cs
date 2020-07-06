@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.TestTools;
 using static Mirror.Tests.AsyncUtil;
 
@@ -46,14 +45,5 @@ namespace Mirror.Tests
 
             Assert.That(client.Active, Is.False);
         });
-
-        [Test]
-        public void ServerChangeSceneTest()
-        {
-            AssetBundle.LoadFromFile("Assets/Mirror/Tests/Runtime/TestScene/testscene");
-            server.sceneManager.ChangeServerScene("testScene");
-
-            Assert.That(server.sceneManager.networkSceneName, Is.EqualTo("testScene"));
-        }
     }
 }

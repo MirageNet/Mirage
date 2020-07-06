@@ -211,7 +211,7 @@ namespace Mirror
 
         internal void ClientSceneMessage(INetworkConnection conn, SceneMessage msg)
         {
-            if (!client.IsConnected || server.Active)
+            if (!client.IsConnected || server.LocalClientActive)
                 return;
                 
             if (string.IsNullOrEmpty(msg.sceneName))

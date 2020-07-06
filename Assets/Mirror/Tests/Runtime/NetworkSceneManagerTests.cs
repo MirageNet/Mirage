@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirror.Tests
@@ -57,16 +58,62 @@ namespace Mirror.Tests
 
             Assert.That(onOnServerSceneOnlyChangedCounter, Is.EqualTo(1));
         }
-    }
 
-    public class NetworkSceneManagerNonHostTests : ClientServerSetup<MockComponent>
-    {
+        int OnServerChangeSceneCounter;
+        void TestOnServerChangeSceneInvoke(string scene)
+        {
+            OnServerChangeSceneCounter++;
+        }
+
+        int ClientSceneMessageCounter;
+        void ClientSceneMessage(INetworkConnection conn, SceneMessage msg)
+        {
+            ClientSceneMessageCounter++;
+        }
+
+        int NotReadyMessageCounter;
+        void NotReadyMessage(INetworkConnection conn, NotReadyMessage msg)
+        {
+            NotReadyMessageCounter++;
+        }
+
+        [UnityTest]
+        public IEnumerator ServerChangeSceneTest()
+        {
+            client.Connection.RegisterHandler<SceneMessage>(ClientSceneMessage);
+            client.Connection.RegisterHandler<NotReadyMessage>(NotReadyMessage);
+            sceneManager.ServerChangeScene.AddListener(TestOnServerChangeSceneInvoke);
+
+            AssetBundle.LoadFromFile("Assets/Mirror/Tests/Runtime/TestScene/testscene");
+            server.sceneManager.ChangeServerScene("testScene");
+
+            Assert.That(server.sceneManager.networkSceneName, Is.EqualTo("testScene"));
+            Assert.That(OnServerChangeSceneCounter, Is.EqualTo(1));
+
+            yield return null;
+
+            Assert.That(ClientSceneMessageCounter, Is.EqualTo(1));
+            Assert.That(NotReadyMessageCounter, Is.EqualTo(1));
+        }
+
         [Test]
         public void ChangeServerSceneExceptionTest()
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                sceneManager.ChangeServerScene(string.Empty);
+                server.sceneManager.ChangeServerScene(string.Empty);
+            });
+        }
+    }
+
+    public class NetworkSceneManagerNonHostTests : ClientServerSetup<MockComponent>
+    {
+        [Test]
+        public void ClientSceneMessageExceptionTest()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                sceneManager.ClientSceneMessage(null, new SceneMessage());
             });
         }
     }

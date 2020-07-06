@@ -356,6 +356,7 @@ namespace Mirror
             DestroyAllClientObjects();
             sceneManager.ready = false;
             isSpawnFinished = false;
+            hostServer = null;
 
             connectState = ConnectState.None;
 
