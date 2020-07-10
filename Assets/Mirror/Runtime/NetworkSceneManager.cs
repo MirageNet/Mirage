@@ -54,6 +54,7 @@ namespace Mirror
         /// </remarks>
         public string networkSceneName = "";
 
+        [NonSerialized]
         public AsyncOperation loadingSceneAsync;
 
         /// <summary>
