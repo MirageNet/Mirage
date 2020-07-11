@@ -10,7 +10,7 @@ public static class NetworkMenu
     [MenuItem("GameObject/Network/NetworkManager", priority = 6)]
     public static GameObject CreateNetworkManager()
     {
-        var go = new GameObject("NetworkManager", typeof(AsyncTcpTransport), typeof(NetworkSceneManager), typeof(NetworkClient), typeof(NetworkServer), typeof(NetworkManager), typeof(PlayerSpawner));
+        var go = new GameObject("NetworkManager", typeof(AsyncTcpTransport), typeof(NetworkSceneManager), typeof(NetworkClient), typeof(NetworkServer), typeof(NetworkManager), typeof(PlayerSpawner), typeof(NetworkManagerHUD));
 
         AsyncTcpTransport transport = go.GetComponent<AsyncTcpTransport>();
         NetworkSceneManager nsm = go.GetComponent<NetworkSceneManager>();
