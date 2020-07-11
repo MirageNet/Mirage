@@ -8,6 +8,7 @@ using System.Collections;
 using UnityEngine.Events;
 using NSubstitute;
 using System;
+using System.Threading.Tasks;
 
 namespace Mirror.Tests.Runtime
 {
@@ -216,7 +217,7 @@ namespace Mirror.Tests.Runtime
 
 
         [UnityTest]
-        public IEnumerator OnStopServer()
+        public IEnumerator OnStopServer() => RunAsync(async () =>
         {
             server.Spawn(gameObject);
 
@@ -225,8 +226,8 @@ namespace Mirror.Tests.Runtime
 
             server.UnSpawn(gameObject);
 
-            yield return null;
+            await Task.Delay(1);
             mockHandler.Received().Invoke();
-        }
+        });
     }
 }
