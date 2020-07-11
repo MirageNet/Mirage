@@ -29,9 +29,9 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void ClientRPCAttributeTest()
+        public void ObserverRPCAttributeTest()
         {
-            var attrib = new ClientRpcAttribute();
+            var attrib = new ObserverRpcAttribute();
 
             Assert.That(attrib.channel == Channels.DefaultReliable);
 

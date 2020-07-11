@@ -520,21 +520,21 @@ namespace Mirror
 
         #region client message handlers
 
-        [ClientRpc]
+        [ObserverRpc]
         void RpcOnAnimationClientMessage(int stateHash, float normalizedTime, int layerId, byte[] parameters)
         {
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters))
                 HandleAnimMsg(stateHash, normalizedTime, layerId, networkReader);
         }
 
-        [ClientRpc]
+        [ObserverRpc]
         void RpcOnAnimationParametersClientMessage(byte[] parameters)
         {
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters))
                 HandleAnimParamsMsg(networkReader);
         }
 
-        [ClientRpc]
+        [ObserverRpc]
         void RpcOnAnimationTriggerClientMessage(int hash)
         {
             // host handles this before it is sent
@@ -543,7 +543,7 @@ namespace Mirror
             HandleAnimTriggerMsg(hash);
         }
 
-        [ClientRpc]
+        [ObserverRpc]
         void RpcOnAnimationResetTriggerClientMessage(int hash)
         {
             // host handles this before it is sent

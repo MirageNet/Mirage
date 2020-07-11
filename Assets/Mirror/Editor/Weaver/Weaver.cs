@@ -91,7 +91,7 @@ namespace Mirror.Weaver
         // custom attribute types
         public static TypeReference SyncVarType;
         public static TypeReference CommandType;
-        public static TypeReference ClientRpcType;
+        public static TypeReference ObserverRpcType;
         public static TypeReference TargetRpcType;
         public static TypeReference SyncEventType;
         public static TypeReference SyncObjectType;
@@ -215,7 +215,7 @@ namespace Mirror.Weaver
 
             SyncVarType = NetAssembly.MainModule.GetType("Mirror.SyncVarAttribute");
             CommandType = NetAssembly.MainModule.GetType("Mirror.CommandAttribute");
-            ClientRpcType = NetAssembly.MainModule.GetType("Mirror.ClientRpcAttribute");
+            ObserverRpcType = NetAssembly.MainModule.GetType("Mirror.ObserverRpcAttribute");
             TargetRpcType = NetAssembly.MainModule.GetType("Mirror.TargetRpcAttribute");
             SyncEventType = NetAssembly.MainModule.GetType("Mirror.SyncEventAttribute");
             SyncObjectType = NetAssembly.MainModule.GetType("Mirror.ISyncObject");

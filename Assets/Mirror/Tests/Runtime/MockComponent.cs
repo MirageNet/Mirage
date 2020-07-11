@@ -1,4 +1,4 @@
-﻿namespace Mirror.Tests
+namespace Mirror.Tests
 {
     public class MockComponent : NetworkBehaviour
     {
@@ -23,7 +23,7 @@
         public int rpcArg1;
         public string rpcArg2;
 
-        [ClientRpc]
+        [ObserverRpc]
         public void RpcTest(int arg1, string arg2)
         {
             this.rpcArg1 = arg1;

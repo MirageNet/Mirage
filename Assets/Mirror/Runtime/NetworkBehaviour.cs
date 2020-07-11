@@ -249,7 +249,7 @@ namespace Mirror
             // This cannot use NetworkServer.active, as that is not specific to this object.
             if (!IsServer)
             {
-                logger.LogWarning("ClientRpc " + rpcName + " called on un-spawned object: " + name);
+                logger.LogWarning("ObserverRpc " + rpcName + " called on un-spawned object: " + name);
                 return;
             }
 
@@ -264,7 +264,7 @@ namespace Mirror
                 payload = writer.ToArraySegment()
             };
 
-            // The public facing parameter is excludeOwner in [ClientRpc]
+            // The public facing parameter is excludeOwner in [ObserverRpc]
             // so we negate it here to logically align with SendToReady.
             bool includeOwner = !excludeOwner;
             Server.SendToReady(NetIdentity, message, includeOwner, channelId);
@@ -315,7 +315,7 @@ namespace Mirror
         [EditorBrowsable(EditorBrowsableState.Never)]
         public virtual bool InvokeRpc(int rpcHash, NetworkReader reader)
         {
-            return RemoteCallHelper.InvokeHandlerDelegate(rpcHash, MirrorInvokeType.ClientRpc, reader, this);
+            return RemoteCallHelper.InvokeHandlerDelegate(rpcHash, MirrorInvokeType.ObserverRpc, reader, this);
         }
         #endregion
 

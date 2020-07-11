@@ -79,7 +79,7 @@ namespace Mirror.Examples.Tanks
         }
 
         // this is called on the tank that fired for all observers
-        [ClientRpc]
+        [ObserverRpc]
         void RpcOnFire()
         {
             animator.SetTrigger("Shoot");

@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 
 namespace Mirror.Weaver.Tests
 {
@@ -29,9 +29,9 @@ namespace Mirror.Weaver.Tests
         }
 
         [Test]
-        public void MonoBehaviourClientRpc()
+        public void MonoBehaviourObserverRpc()
         {
-            Assert.That(weaverErrors, Contains.Item("ClientRpc RpcThisCantBeOutsideNetworkBehaviour must be declared inside a NetworkBehaviour (at System.Void WeaverMonoBehaviourTests.MonoBehaviourClientRpc.MonoBehaviourClientRpc::RpcThisCantBeOutsideNetworkBehaviour())"));
+            Assert.That(weaverErrors, Contains.Item("ObserverRpc RpcThisCantBeOutsideNetworkBehaviour must be declared inside a NetworkBehaviour (at System.Void WeaverMonoBehaviourTests.MonoBehaviourObserverRpc.MonoBehaviourObserverRpc::RpcThisCantBeOutsideNetworkBehaviour())"));
         }
 
         [Test]

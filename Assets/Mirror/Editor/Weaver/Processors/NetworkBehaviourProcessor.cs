@@ -7,7 +7,7 @@ namespace Mirror.Weaver
     public enum RemoteCallType
     {
         Command,
-        ClientRpc,
+        ObserverRpc,
         TargetRpc,
         SyncEvent
     }
@@ -23,11 +23,11 @@ namespace Mirror.Weaver
         // <SyncVarField,NetIdField>
         readonly Dictionary<FieldDefinition, FieldDefinition> syncVarNetIds = new Dictionary<FieldDefinition, FieldDefinition>();
         readonly List<CmdResult> commands = new List<CmdResult>();
-        readonly List<ClientRpcResult> clientRpcs = new List<ClientRpcResult>();
+        readonly List<ObserverRpcResult> observerRpcs = new List<ObserverRpcResult>();
         readonly List<MethodDefinition> targetRpcs = new List<MethodDefinition>();
         readonly List<EventDefinition> eventRpcs = new List<EventDefinition>();
         readonly List<MethodDefinition> commandInvocationFuncs = new List<MethodDefinition>();
-        readonly List<MethodDefinition> clientRpcInvocationFuncs = new List<MethodDefinition>();
+        readonly List<MethodDefinition> observerRpcInvocationFuncs = new List<MethodDefinition>();
         readonly List<MethodDefinition> targetRpcInvocationFuncs = new List<MethodDefinition>();
         readonly List<MethodDefinition> eventRpcInvocationFuncs = new List<MethodDefinition>();
 
@@ -39,7 +39,7 @@ namespace Mirror.Weaver
             public bool requireAuthority;
         }
 
-        public struct ClientRpcResult
+        public struct ObserverRpcResult
         {
             public MethodDefinition method;
             public bool excludeOwner;
@@ -214,7 +214,7 @@ namespace Mirror.Weaver
 
         void GenerateConstants()
         {
-            if (commands.Count == 0 && clientRpcs.Count == 0 && targetRpcs.Count == 0 && eventRpcs.Count == 0 && syncObjects.Count == 0)
+            if (commands.Count == 0 && observerRpcs.Count == 0 && targetRpcs.Count == 0 && eventRpcs.Count == 0 && syncObjects.Count == 0)
                 return;
 
             Weaver.DLog(netBehaviourSubclass, "  GenerateConstants ");
@@ -280,10 +280,10 @@ namespace Mirror.Weaver
                 GenerateRegisterCommandDelegate(cctorWorker, Weaver.registerCommandDelegateReference, commandInvocationFuncs[i], cmdResult);
             }
 
-            for (int i = 0; i < clientRpcs.Count; ++i)
+            for (int i = 0; i < observerRpcs.Count; ++i)
             {
-                ClientRpcResult clientRpcResult = clientRpcs[i];
-                GenerateRegisterRemoteDelegate(cctorWorker, Weaver.registerRpcDelegateReference, clientRpcInvocationFuncs[i], clientRpcResult.method.Name);
+                ObserverRpcResult observerRpcResult = observerRpcs[i];
+                GenerateRegisterRemoteDelegate(cctorWorker, Weaver.registerRpcDelegateReference, observerRpcInvocationFuncs[i], observerRpcResult.method.Name);
             }
 
             for (int i = 0; i < targetRpcs.Count; ++i)
@@ -958,20 +958,20 @@ namespace Mirror.Weaver
                         break;
                     }
 
-                    if (ca.AttributeType.FullName == Weaver.ClientRpcType.FullName)
+                    if (ca.AttributeType.FullName == Weaver.ObserverRpcType.FullName)
                     {
-                        ProcessClientRpc(names, md, ca);
+                        ProcessObserverRpc(names, md, ca);
                         break;
                     }
                 }
             }
         }
 
-        void ProcessClientRpc(HashSet<string> names, MethodDefinition md, CustomAttribute clientRpcAttr)
+        void ProcessObserverRpc(HashSet<string> names, MethodDefinition md, CustomAttribute observerRpcAttr)
         {
             if (md.IsAbstract)
             {
-                Weaver.Error("Abstract ClientRpc are currently not supported, use virtual method instead", md);
+                Weaver.Error("Abstract ObserverRpc are currently not supported, use virtual method instead", md);
                 return;
             }
 
@@ -982,25 +982,25 @@ namespace Mirror.Weaver
 
             if (names.Contains(md.Name))
             {
-                Weaver.Error($"Duplicate ClientRpc name {md.Name}", md);
+                Weaver.Error($"Duplicate ObserverRpc name {md.Name}", md);
                 return;
             }
 
-            bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
+            bool excludeOwner = observerRpcAttr.GetField("excludeOwner", false);
 
             names.Add(md.Name);
-            clientRpcs.Add(new ClientRpcResult
+            observerRpcs.Add(new ObserverRpcResult
             {
                 method = md,
                 excludeOwner = excludeOwner
             });
 
-            MethodDefinition rpcCallFunc = RpcProcessor.ProcessRpcCall(netBehaviourSubclass, md, clientRpcAttr);
+            MethodDefinition rpcCallFunc = RpcProcessor.ProcessRpcCall(netBehaviourSubclass, md, observerRpcAttr);
 
             MethodDefinition rpcFunc = RpcProcessor.ProcessRpcInvoke(netBehaviourSubclass, md, rpcCallFunc);
             if (rpcFunc != null)
             {
-                clientRpcInvocationFuncs.Add(rpcFunc);
+                observerRpcInvocationFuncs.Add(rpcFunc);
             }
         }
 

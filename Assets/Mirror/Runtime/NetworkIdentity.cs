@@ -912,7 +912,7 @@ namespace Mirror
         // happens on client
         internal void HandleRpc(int componentIndex, int rpcHash, NetworkReader reader)
         {
-            HandleRemoteCall(componentIndex, rpcHash, MirrorInvokeType.ClientRpc, reader);
+            HandleRemoteCall(componentIndex, rpcHash, MirrorInvokeType.ObserverRpc, reader);
         }
 
         internal void ClearObservers()

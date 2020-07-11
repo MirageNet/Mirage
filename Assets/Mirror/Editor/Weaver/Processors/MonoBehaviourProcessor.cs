@@ -41,9 +41,9 @@ namespace Mirror.Weaver
                         Weaver.Error($"Command {md.Name} must be declared inside a NetworkBehaviour", md);
                     }
 
-                    if (ca.AttributeType.FullName == Weaver.ClientRpcType.FullName)
+                    if (ca.AttributeType.FullName == Weaver.ObserverRpcType.FullName)
                     {
-                        Weaver.Error($"ClientRpc {md.Name} must be declared inside a NetworkBehaviour", md);
+                        Weaver.Error($"ObserverRpc {md.Name} must be declared inside a NetworkBehaviour", md);
                     }
 
                     if (ca.AttributeType.FullName == Weaver.TargetRpcType.FullName)

@@ -25,7 +25,7 @@ namespace Mirror.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Castclass, td));
 
-            if (!NetworkBehaviourProcessor.ReadArguments(md, worker, RemoteCallType.ClientRpc))
+            if (!NetworkBehaviourProcessor.ReadArguments(md, worker, RemoteCallType.ObserverRpc))
                 return null;
 
             // invoke actual command function
@@ -59,7 +59,7 @@ namespace Mirror.Weaver
             This way we do not need to modify the code anywhere else,  and this works
             correctly in dependent assemblies
         */
-        public static MethodDefinition ProcessRpcCall(TypeDefinition td, MethodDefinition md, CustomAttribute clientRpcAttr)
+        public static MethodDefinition ProcessRpcCall(TypeDefinition td, MethodDefinition md, CustomAttribute observerRpcAttr)
         {
             MethodDefinition rpc = MethodProcessor.SubstituteMethod(td, md, "Call" + md.Name);
 
@@ -69,14 +69,14 @@ namespace Mirror.Weaver
 
             if (Weaver.GenerateLogErrors)
             {
-                worker.Append(worker.Create(OpCodes.Ldstr, "Call ClientRpc function " + md.Name));
+                worker.Append(worker.Create(OpCodes.Ldstr, "Call ObserverRpc function " + md.Name));
                 worker.Append(worker.Create(OpCodes.Call, Weaver.logErrorReference));
             }
 
             NetworkBehaviourProcessor.WriteCreateWriter(worker);
 
             // write all the arguments that the user passed to the Rpc call
-            if (!NetworkBehaviourProcessor.WriteArguments(worker, md, RemoteCallType.ClientRpc))
+            if (!NetworkBehaviourProcessor.WriteArguments(worker, md, RemoteCallType.ObserverRpc))
                 return null;
 
             string rpcName = md.Name;
@@ -86,8 +86,8 @@ namespace Mirror.Weaver
                 rpcName = rpcName.Substring(RpcPrefix.Length);
             }
 
-            int channel = clientRpcAttr.GetField("channel", 0);
-            bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
+            int channel = observerRpcAttr.GetField("channel", 0);
+            bool excludeOwner = observerRpcAttr.GetField("excludeOwner", false);
 
             // invoke SendInternal and return
             // this
@@ -125,7 +125,7 @@ namespace Mirror.Weaver
 
             // validate
             return NetworkBehaviourProcessor.ProcessMethodsValidateFunction(md) &&
-                   NetworkBehaviourProcessor.ProcessMethodsValidateParameters(md, RemoteCallType.ClientRpc);
+                   NetworkBehaviourProcessor.ProcessMethodsValidateParameters(md, RemoteCallType.ObserverRpc);
         }
     }
 }

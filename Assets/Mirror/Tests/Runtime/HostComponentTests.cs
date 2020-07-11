@@ -49,7 +49,7 @@ namespace Mirror.Tests
         }
 
         [UnityTest]
-        public IEnumerator ClientRpc()
+        public IEnumerator ObserverRpc()
         {
             component.RpcTest(1, "hello");
             // process spawn message from server

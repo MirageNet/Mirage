@@ -27,10 +27,10 @@ namespace Mirror
     }
 
     /// <summary>
-    /// The server uses a Remote Procedure Call (RPC) to run this function on clients.
+    /// The server uses a Remote Procedure Call (RPC) to run this function on observers.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class ClientRpcAttribute : Attribute
+    public class ObserverRpcAttribute : Attribute
     {
         // this is zero
         public int channel = Channels.DefaultReliable;
@@ -48,7 +48,7 @@ namespace Mirror
     }
 
     /// <summary>
-    /// SyncEvents are networked events like ClientRpc's, but instead of calling a function on the game object, they trigger Events instead.
+    /// SyncEvents are networked events like ObserverRpc's, but instead of calling a function on the game object, they trigger Events instead.
     /// </summary>
     [AttributeUsage(AttributeTargets.Event)]
     public class SyncEventAttribute : Attribute

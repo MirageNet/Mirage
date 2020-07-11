@@ -218,7 +218,7 @@ namespace Mirror.Experimental
             RpcMove(position, rotation, scale);
         }
 
-        [ClientRpc]
+        [ObserverRpc]
         void RpcMove(Vector3 position, Quaternion rotation, Vector3 scale)
         {
             if (HasAuthority && excludeOwnerUpdate) return;

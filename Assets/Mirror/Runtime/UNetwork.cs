@@ -16,7 +16,7 @@ namespace Mirror
     public enum MirrorInvokeType
     {
         Command,
-        ClientRpc,
+        ObserverRpc,
         SyncEvent
     }
 
