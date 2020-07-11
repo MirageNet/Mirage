@@ -135,6 +135,8 @@ namespace Mirror.Tests
             server.Disconnect();
 
             yield return null;
+            yield return null;
+            yield return null;
             Assert.That(server.Active, Is.False);
         }
 
