@@ -85,7 +85,7 @@ namespace Mirror.Tests
             server.Disconnect();
 
             // wait for messages to get dispatched
-            await WaitFor(() => !server.Active);
+            await WaitFor(() => !server.LocalClientActive);
 
             // state cleared?
             Assert.That(server.connections, Is.Empty);
