@@ -136,7 +136,7 @@ namespace Mirror.Tests
             Assert.That(server.Active, Is.True);
             server.Disconnect();
 
-            await Task.Delay(1);
+            await WaitFor(() => !server.Active);
             Assert.That(server.Active, Is.False);
         });
 
@@ -147,7 +147,7 @@ namespace Mirror.Tests
             Assert.That(server.Active, Is.True);
             server.Disconnect();
 
-            await Task.Delay(1);
+            await WaitFor(() => !server.Active);
             Assert.That(server.Connected.GetListenerNumber(), Is.Zero);
         });
 
