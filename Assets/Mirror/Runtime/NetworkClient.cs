@@ -130,7 +130,6 @@ namespace Mirror
         /// </summary>
         public bool IsLocalClient => hostServer != null;
 
-
         /// <summary>
         /// Connect client to a NetworkServer instance.
         /// </summary>
