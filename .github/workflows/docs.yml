@@ -5,7 +5,7 @@ on: [push]
 jobs:
   build_doc:
 
-    runs-on: ubuntu-latest
+    runs-on: Windows, ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
