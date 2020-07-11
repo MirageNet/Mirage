@@ -43,8 +43,8 @@ namespace Mirror.Tests
         [UnitySetUp]
         public IEnumerator Setup() => RunAsync(async () =>
         {
-            serverGo = new GameObject("server", typeof(NetworkServer), typeof(NetworkSceneManager));
-            clientGo = new GameObject("client", typeof(NetworkClient), typeof(NetworkSceneManager));
+            serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(NetworkServer));
+            clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(NetworkClient));
             testTransport = serverGo.AddComponent<LoopbackTransport>();
 
             await Task.Delay(1);
