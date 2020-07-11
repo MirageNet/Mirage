@@ -81,10 +81,7 @@ namespace Mirror.Tests
             server.AddPlayerForConnection(connectionToClient, serverPlayerGO);
 
             // wait for client to spawn it
-            while (connectionToServer.Identity == null)
-            {
-                await Task.Delay(1);
-            }
+            await WaitFor(() => connectionToServer.Identity != null);
 
             clientIdentity = connectionToServer.Identity;
             clientPlayerGO = clientIdentity.gameObject;
@@ -97,7 +94,7 @@ namespace Mirror.Tests
             manager.StopClient();
             manager.StopServer();
 
-            await Task.Delay(1);
+            await WaitFor(() => !server.Active);
 
             Object.Destroy(playerPrefab);
             Object.Destroy(networkManagerGo);
