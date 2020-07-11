@@ -117,7 +117,7 @@ namespace Mirror.Tests
 
             _ = connectionToServer.ProcessMessagesAsync();
 
-            await Task.Delay(1); ;
+            await Task.Delay(1);
 
             func.Received().Invoke(
                 Arg.Is<WovenTestMessage>(msg => msg.Equals(message)
@@ -135,7 +135,7 @@ namespace Mirror.Tests
 
             _ = connectionToServer.ProcessMessagesAsync();
 
-            await Task.Delay(1); ;
+            await Task.Delay(1);
 
             func.Received().Invoke(
                 Arg.Is<WovenTestMessage>(msg => msg.Equals(message)
@@ -155,7 +155,7 @@ namespace Mirror.Tests
 
             _ = connectionToServer.ProcessMessagesAsync();
 
-            await Task.Delay(1); ;
+            await Task.Delay(1);
 
             func.Received().Invoke(
                 Arg.Any<SpawnMessage>());
@@ -189,7 +189,7 @@ namespace Mirror.Tests
             connectionToClient.RegisterHandler(func);
             connectionToServer.Send(message);
 
-            await Task.Delay(1); ;
+            await Task.Delay(1);
 
             func.Received().Invoke(
                 Arg.Is<WovenTestMessage>(msg => msg.Equals(message)
@@ -205,7 +205,7 @@ namespace Mirror.Tests
 
             connectionToServer.Send(message);
 
-            await Task.Delay(1); ;
+            await Task.Delay(1);
 
             func.Received().Invoke(
                 connectionToClient,
@@ -223,7 +223,7 @@ namespace Mirror.Tests
 
             connectionToServer.Send(message);
 
-            await Task.Delay(1); ;
+            await Task.Delay(1);
 
             func.Received(0).Invoke(
                 Arg.Any<WovenTestMessage>());
