@@ -51,7 +51,7 @@ namespace Mirror
         static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();
 
         [NonSerialized]
-        NetworkBehaviour[] networkBehavioursCache = null;
+        NetworkBehaviour[] networkBehavioursCache;
 
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
@@ -701,7 +701,6 @@ namespace Mirror
         // -> check ownerWritten/observersWritten to know if anything was written
         internal (int ownerWritten, int observersWritten) OnSerializeAllSafely(bool initialState, NetworkWriter ownerWriter, NetworkWriter observersWriter)
         {
-
             ulong dirtyComponentsMask = initialState ? GetIntialComponentsMask() : GetDirtyComponentsMask();
 
             // calculate syncMode mask at runtime. this allows users to change

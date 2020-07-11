@@ -28,7 +28,7 @@ namespace Mirror.Cloud.ListServerService
         /// <summary>
         /// How many failed pings in a row
         /// </summary>
-        int pingFails = 0;
+        int pingFails;
 
         public bool ServerInList => added;
 
