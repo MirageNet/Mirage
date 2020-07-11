@@ -94,7 +94,7 @@ namespace Mirror.Tests
             Assert.That(server.sceneManager.networkSceneName, Is.EqualTo("testScene"));
             Assert.That(OnServerChangeSceneCounter, Is.EqualTo(1));
 
-            await Task.Delay(1);
+            await WaitFor(() => ClientSceneMessageCounter > 0 && NotReadyMessageCounter > 0);
 
             Assert.That(ClientSceneMessageCounter, Is.EqualTo(1));
             Assert.That(NotReadyMessageCounter, Is.EqualTo(1));
