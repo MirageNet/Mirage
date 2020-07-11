@@ -51,7 +51,7 @@ namespace Mirror.Tests
         {
             clientComponent.CmdTest(1, "hello");
 
-            await Task.Delay(1);
+            await WaitFor(() => serverComponent.cmdArg1 != 0);
 
             Assert.That(serverComponent.cmdArg1, Is.EqualTo(1));
             Assert.That(serverComponent.cmdArg2, Is.EqualTo("hello"));
@@ -63,7 +63,7 @@ namespace Mirror.Tests
         {
             clientComponent.CmdNetworkIdentity(clientIdentity);
 
-            await Task.Delay(1);
+            await WaitFor(() => serverComponent.cmdNi != null);
 
             Assert.That(serverComponent.cmdNi, Is.SameAs(serverIdentity));
         });
@@ -73,7 +73,7 @@ namespace Mirror.Tests
         {
             serverComponent.RpcTest(1, "hello");
             // process spawn message from server
-            await Task.Delay(1);
+            await WaitFor(() => clientComponent.rpcArg1 != 0);
 
             Assert.That(clientComponent.rpcArg1, Is.EqualTo(1));
             Assert.That(clientComponent.rpcArg2, Is.EqualTo("hello"));
@@ -84,7 +84,7 @@ namespace Mirror.Tests
         {
             serverComponent.TargetRpcTest(connectionToClient, 1, "hello");
             // process spawn message from server
-            await Task.Delay(1);
+            await WaitFor(() => clientComponent.targetRpcArg1 != 0);
 
             Assert.That(clientComponent.targetRpcConn, Is.SameAs(connectionToServer));
             Assert.That(clientComponent.targetRpcArg1, Is.EqualTo(1));
@@ -124,7 +124,7 @@ namespace Mirror.Tests
             client.RegisterPrefab(gameObject, guid);
             server.SendSpawnMessage(identity, connectionToClient);
 
-            await Task.Delay(1);
+            await WaitFor(() => spawnDelegateTestCalled != 0);
 
             Assert.That(spawnDelegateTestCalled, Is.EqualTo(1));
         });

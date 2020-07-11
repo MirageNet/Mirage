@@ -100,7 +100,7 @@ namespace Mirror.Tests
         {
             connectionToServer.Send(new ReadyMessage());
 
-            await Task.Delay(1);;
+            await WaitFor(() => connectionToClient.IsReady);
 
             // ready?
             Assert.That(connectionToClient.IsReady, Is.True);

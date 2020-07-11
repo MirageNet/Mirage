@@ -35,7 +35,8 @@ namespace Mirror.Tests
         public IEnumerator Command() => RunAsync(async () =>
         {
             component.CmdTest(1, "hello");
-            await Task.Delay(1);
+
+            await WaitFor(() => component.cmdArg1 != 0);
 
             Assert.That(component.cmdArg1, Is.EqualTo(1));
             Assert.That(component.cmdArg2, Is.EqualTo("hello"));
@@ -46,7 +47,7 @@ namespace Mirror.Tests
         {
             component.CmdNetworkIdentity(identity);
 
-            await Task.Delay(1);
+            await WaitFor(() => component.cmdNi != null);
 
             Assert.That(component.cmdNi, Is.SameAs(identity));
         });
@@ -56,7 +57,7 @@ namespace Mirror.Tests
         {
             component.RpcTest(1, "hello");
             // process spawn message from server
-            await Task.Delay(1);
+            await WaitFor(() => component.rpcArg1 != 0);
 
             Assert.That(component.rpcArg1, Is.EqualTo(1));
             Assert.That(component.rpcArg2, Is.EqualTo("hello"));
@@ -67,7 +68,7 @@ namespace Mirror.Tests
         {
             component.TargetRpcTest(manager.server.LocalConnection, 1, "hello");
             // process spawn message from server
-            await Task.Delay(1);
+            await WaitFor(() => component.targetRpcArg1 != 0);
 
             Assert.That(component.targetRpcConn, Is.SameAs(manager.client.Connection));
             Assert.That(component.targetRpcArg1, Is.EqualTo(1));
@@ -84,7 +85,7 @@ namespace Mirror.Tests
             server.Disconnect();
 
             // wait for messages to get dispatched
-            await Task.Delay(1);
+            await WaitFor(() => !server.Active);
 
             // state cleared?
             Assert.That(server.connections, Is.Empty);
