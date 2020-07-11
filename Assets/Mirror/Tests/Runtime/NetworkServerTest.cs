@@ -129,27 +129,26 @@ namespace Mirror.Tests
         }
 
         [UnityTest]
-        public IEnumerator DisconnectIsActiveTest()
+        public IEnumerator DisconnectIsActiveTest => RunAsync(async () =>
         {
             Assert.That(server.Active, Is.True);
             server.Disconnect();
 
-            yield return null;
-            yield return null;
-            yield return null;
+            await Task.Delay(1);
             Assert.That(server.Active, Is.False);
-        }
+        })
 
         [UnityTest]
-        public IEnumerator DisconnectRemoveHandlers()
+        public IEnumerator DisconnectRemoveHandlers => RunAsync(async () =>
         {
             Assert.That(server.Connected.GetListenerNumber(), Is.EqualTo(1));
             Assert.That(server.Active, Is.True);
             server.Disconnect();
 
-            yield return null;
+            await Task.Delay(1);
             Assert.That(server.Connected.GetListenerNumber(), Is.Zero);
-        }
+        });
+
 
         [Test]
         public void ConnectedEventTest()
