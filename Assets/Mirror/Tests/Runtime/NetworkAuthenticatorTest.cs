@@ -2,9 +2,7 @@ using System;
 using System.Collections;
 using NSubstitute;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.TestTools;
-using Object = UnityEngine.Object;
 
 namespace Mirror.Tests
 {
