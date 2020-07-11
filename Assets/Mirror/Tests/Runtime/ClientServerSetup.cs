@@ -61,6 +61,9 @@ namespace Mirror.Tests
             server.sceneManager = serverSceneManager;
             client.sceneManager = clientSceneManager;
 
+            serverSceneManager.server = server;
+            clientSceneManager.client = client;
+
             ExtraSetup();
 
             // create and register a prefab
