@@ -96,7 +96,7 @@ namespace Mirror.Tests
             transport = serverGO.AddComponent<MockTransport>();
             server = serverGO.AddComponent<NetworkServer>();
             client = serverGO.AddComponent<NetworkClient>();
-
+            
             server.transport = transport;
             client.Transport = transport;
 
@@ -134,7 +134,7 @@ namespace Mirror.Tests
             Assert.That(server.Active, Is.True);
             server.Disconnect();
 
-            yield return new WaitForFixedUpdate();
+            yield return null;
             Assert.That(server.Active, Is.False);
         }
 
@@ -145,7 +145,7 @@ namespace Mirror.Tests
             Assert.That(server.Active, Is.True);
             server.Disconnect();
 
-            yield return new WaitForFixedUpdate();
+            yield return null;
             Assert.That(server.Connected.GetListenerNumber(), Is.Zero);
         }
 
