@@ -71,7 +71,6 @@ namespace Mirror.Tests
             await manager.StartClient("localhost");
 
             // get the connections so that we can spawn players
-            connectionToServer = client.Connection;
             connectionToClient = server.connections.First();
 
             // create a player object in the server
@@ -83,8 +82,10 @@ namespace Mirror.Tests
             // wait for client to spawn it
             await Task.Delay(1);
 
-            clientPlayerGO = connectionToServer.Identity.gameObject;
-            clientIdentity = clientPlayerGO.GetComponent<NetworkIdentity>();
+            connectionToServer = client.Connection;
+
+            clientIdentity = connectionToServer.Identity;
+            clientPlayerGO = clientIdentity.gameObject;
             clientComponent = clientPlayerGO.GetComponent<T>();
         });
 
@@ -96,10 +97,10 @@ namespace Mirror.Tests
 
             await Task.Delay(1);
 
-            Object.DestroyImmediate(playerPrefab);
-            Object.DestroyImmediate(networkManagerGo);
-            Object.DestroyImmediate(serverPlayerGO);
-            Object.DestroyImmediate(clientPlayerGO);
+            Object.Destroy(playerPrefab);
+            Object.Destroy(networkManagerGo);
+            Object.Destroy(serverPlayerGO);
+            Object.Destroy(clientPlayerGO);
         });
 
 
