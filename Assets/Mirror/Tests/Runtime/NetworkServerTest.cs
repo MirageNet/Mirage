@@ -126,7 +126,7 @@ namespace Mirror.Tests
             // reset all state
             server.Disconnect();
 
-            await Task.Delay(1);
+            await WaitFor(() => !server.Active);
             Object.Destroy(serverGO);
         });
 
