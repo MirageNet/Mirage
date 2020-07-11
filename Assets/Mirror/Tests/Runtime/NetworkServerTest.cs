@@ -129,7 +129,7 @@ namespace Mirror.Tests
         }
 
         [UnityTest]
-        public IEnumerator DisconnectIsActiveTest => RunAsync(async () =>
+        public IEnumerator DisconnectIsActiveTest() => RunAsync(async () =>
         {
             Assert.That(server.Active, Is.True);
             server.Disconnect();
@@ -139,7 +139,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator DisconnectRemoveHandlers => RunAsync(async () =>
+        public IEnumerator DisconnectRemoveHandlers() => RunAsync(async () =>
         {
             Assert.That(server.Connected.GetListenerNumber(), Is.EqualTo(1));
             Assert.That(server.Active, Is.True);
