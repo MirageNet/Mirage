@@ -49,11 +49,11 @@ namespace Mirror.Tests
 
             await Task.Delay(1);
 
-            server.transport = testTransport;
-            client.Transport = testTransport;
-
             server = serverGo.GetComponent<NetworkServer>();
             client = clientGo.GetComponent<NetworkClient>();
+
+            server.transport = testTransport;
+            client.Transport = testTransport;
 
             serverSceneManager = serverGo.GetComponent<NetworkSceneManager>();
             clientSceneManager = clientGo.GetComponent<NetworkSceneManager>();
