@@ -8,7 +8,6 @@ using UnityEngine.Serialization;
 using UnityEngine.Events;
 #if UNITY_EDITOR
 using UnityEditor;
-using System.IO;
 #if UNITY_2018_3_OR_NEWER
 using UnityEditor.Experimental.SceneManagement;
 #endif
