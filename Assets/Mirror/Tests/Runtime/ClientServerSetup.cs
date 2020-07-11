@@ -72,6 +72,7 @@ namespace Mirror.Tests
 
             // get the connections so that we can spawn players
             connectionToClient = server.connections.First();
+            connectionToServer = client.Connection;
 
             // create a player object in the server
             serverPlayerGO = GameObject.Instantiate(playerPrefab);
@@ -80,9 +81,10 @@ namespace Mirror.Tests
             server.AddPlayerForConnection(connectionToClient, serverPlayerGO);
 
             // wait for client to spawn it
-            await Task.Delay(1);
-
-            connectionToServer = client.Connection;
+            while (connectionToServer.Identity == null)
+            {
+                await Task.Delay(1);
+            }
 
             clientIdentity = connectionToServer.Identity;
             clientPlayerGO = clientIdentity.gameObject;
