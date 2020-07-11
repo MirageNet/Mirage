@@ -118,15 +118,17 @@ namespace Mirror.Tests
             await server.ListenAsync();
         });
 
-        [TearDown]
-        public void TearDown()
+        [UnityTearDown]
+        public IEnumerator TearDown() => RunAsync(async () =>
         {
             Object.DestroyImmediate(gameObject);
 
             // reset all state
             server.Disconnect();
+
+            await Task.Delay(1);
             Object.DestroyImmediate(serverGO);
-        }
+        });
 
         [UnityTest]
         public IEnumerator DisconnectIsActiveTest() => RunAsync(async () =>
