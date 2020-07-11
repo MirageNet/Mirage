@@ -89,18 +89,19 @@ namespace Mirror.Tests
         });
 
         [UnityTearDown]
-        public IEnumerator ShutdownHost()
+        public IEnumerator ShutdownHost() => RunAsync(async () =>
         {
             manager.StopClient();
             manager.StopServer();
 
-            yield return null;
+            await Task.Delay(1);
 
             Object.DestroyImmediate(playerPrefab);
             Object.DestroyImmediate(networkManagerGo);
             Object.DestroyImmediate(serverPlayerGO);
             Object.DestroyImmediate(clientPlayerGO);
-        }
+        });
+
 
         #endregion
     }

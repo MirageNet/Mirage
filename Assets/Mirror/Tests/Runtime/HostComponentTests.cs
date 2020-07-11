@@ -4,6 +4,8 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
+using static Mirror.Tests.AsyncUtil;
+
 namespace Mirror.Tests
 {
     public class HostComponentTests : HostSetup<MockComponent>
@@ -29,27 +31,27 @@ namespace Mirror.Tests
         }
 
         [UnityTest]
-        public IEnumerator Command()
+        public IEnumerator Command() => RunAsync(async () =>
         {
             component.CmdTest(1, "hello");
             yield return null;
 
             Assert.That(component.cmdArg1, Is.EqualTo(1));
             Assert.That(component.cmdArg2, Is.EqualTo("hello"));
-        }
+        });
 
         [UnityTest]
-        public IEnumerator CommandWithNetworkIdentity()
+        public IEnumerator CommandWithNetworkIdentity() => RunAsync(async () =>
         {
             component.CmdNetworkIdentity(identity);
 
             yield return null;
 
             Assert.That(component.cmdNi, Is.SameAs(identity));
-        }
+        });
 
         [UnityTest]
-        public IEnumerator ClientRpc()
+        public IEnumerator ClientRpc() => RunAsync(async () =>
         {
             component.RpcTest(1, "hello");
             // process spawn message from server
@@ -57,10 +59,10 @@ namespace Mirror.Tests
 
             Assert.That(component.rpcArg1, Is.EqualTo(1));
             Assert.That(component.rpcArg2, Is.EqualTo("hello"));
-        }
+        });
 
         [UnityTest]
-        public IEnumerator TargetRpc()
+        public IEnumerator TargetRpc() => RunAsync(async () =>
         {
             component.TargetRpcTest(manager.server.LocalConnection, 1, "hello");
             // process spawn message from server
@@ -69,10 +71,10 @@ namespace Mirror.Tests
             Assert.That(component.targetRpcConn, Is.SameAs(manager.client.Connection));
             Assert.That(component.targetRpcArg1, Is.EqualTo(1));
             Assert.That(component.targetRpcArg2, Is.EqualTo("hello"));
-        }
+        });
 
         [UnityTest]
-        public IEnumerator DisconnectHostTest()
+        public IEnumerator DisconnectHostTest() => RunAsync(async () =>
         {
             // set local connection
             Assert.That(server.LocalClientActive, Is.True);
@@ -88,7 +90,7 @@ namespace Mirror.Tests
             Assert.That(server.Active, Is.False);
             Assert.That(server.LocalConnection, Is.Null);
             Assert.That(server.LocalClientActive, Is.False);
-        }
+        });
 
     }
 }
