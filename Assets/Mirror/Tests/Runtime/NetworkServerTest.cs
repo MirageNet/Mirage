@@ -121,13 +121,13 @@ namespace Mirror.Tests
         [UnityTearDown]
         public IEnumerator TearDown() => RunAsync(async () =>
         {
-            Object.DestroyImmediate(gameObject);
+            Object.Destroy(gameObject);
 
             // reset all state
             server.Disconnect();
 
             await Task.Delay(1);
-            Object.DestroyImmediate(serverGO);
+            Object.Destroy(serverGO);
         });
 
         [UnityTest]
@@ -342,7 +342,7 @@ namespace Mirror.Tests
             // otherwise isServer is true in OnDestroy, which means it would try
             // to call Destroy(go). but we need to use DestroyImmediate in
             // Editor
-            Object.DestroyImmediate(go);
+            Object.Destroy(go);
         }
 
         [Test]
@@ -371,7 +371,7 @@ namespace Mirror.Tests
             });
 
             // clean up
-            Object.DestroyImmediate(goWithout);
+            Object.Destroy(goWithout);
         }
 
         [Test]
@@ -389,7 +389,7 @@ namespace Mirror.Tests
 
             // destroy GO after shutdown, otherwise isServer is true in OnDestroy and it tries to call
             // GameObject.Destroy (but we need DestroyImmediate in Editor)
-            Object.DestroyImmediate(identity.gameObject);
+            Object.Destroy(identity.gameObject);
         }
 
         [Test]
@@ -415,7 +415,7 @@ namespace Mirror.Tests
             Assert.That(server.ValidateSceneObject(identity), Is.False);
 
             // clean up
-            Object.DestroyImmediate(go);
+            Object.Destroy(go);
         }
 
         [Test]
@@ -438,7 +438,7 @@ namespace Mirror.Tests
             Assert.That(identity.NetId, Is.Zero);
 
             // clean up
-            Object.DestroyImmediate(go);
+            Object.Destroy(go);
         }
 
         [Test]

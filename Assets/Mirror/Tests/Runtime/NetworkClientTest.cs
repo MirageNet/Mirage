@@ -41,7 +41,7 @@ namespace Mirror.Tests
             {
                 client.RegisterPrefab(gameObject);
             });
-            Object.DestroyImmediate(gameObject);
+            Object.Destroy(gameObject);
         }
 
         [Test]
@@ -54,7 +54,7 @@ namespace Mirror.Tests
             {
                 client.RegisterPrefab(gameObject, guid);
             });
-            Object.DestroyImmediate(gameObject);
+            Object.Destroy(gameObject);
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace Mirror.Tests
             {
                 client.UnregisterPrefab(gameObject);
             });
-            Object.DestroyImmediate(gameObject);
+            Object.Destroy(gameObject);
         }
 
         [UnityTest]

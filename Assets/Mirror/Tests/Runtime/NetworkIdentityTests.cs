@@ -38,14 +38,17 @@ namespace Mirror.Tests.Runtime
             identity = gameObject.AddComponent<NetworkIdentity>();
         });
 
-        [TearDown]
-        public void TearDown()
+        [UnityTearDown]
+        public IEnumerator TearDown() => RunAsync(async () =>
         {
-            Object.DestroyImmediate(gameObject);
+            Object.Destroy(gameObject);
             // reset all state
             server.Disconnect();
-            Object.DestroyImmediate(serverGO);
-        }
+
+            await Task.Delay(1);
+            Object.Destroy(serverGO);
+        });
+
         #endregion
 
         [Test]
