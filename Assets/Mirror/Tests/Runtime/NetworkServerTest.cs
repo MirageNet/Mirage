@@ -136,7 +136,7 @@ namespace Mirror.Tests
 
             await Task.Delay(1);
             Assert.That(server.Active, Is.False);
-        })
+        });
 
         [UnityTest]
         public IEnumerator DisconnectRemoveHandlers => RunAsync(async () =>
