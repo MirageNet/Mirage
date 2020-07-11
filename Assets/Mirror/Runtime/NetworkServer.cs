@@ -113,30 +113,24 @@ namespace Mirror
         // Time kept in this server
         public readonly NetworkTime Time = new NetworkTime();
 
-        // transport to use to accept connections
-        public AsyncTransport transport;
+        [SerializeField]
+        private AsyncTransport transport;
+
+        internal AsyncTransport Transport
+        {
+            get
+            {
+                if (transport == null)
+                    transport = GetComponent<AsyncTransport>();
+                return transport;
+            }
+        }
 
         /// <summary>
         /// Called when the script gets added to an object. Useful for getting other needed scripts.
         /// </summary>
         private void OnValidate()
         {
-            // add transport if there is none yet. makes upgrading easier.
-            if (transport == null)
-            {
-                // First try to get the transport.
-                transport = GetComponent<AsyncTransport>();
-                // was a transport added yet? if not, add one
-                if (transport == null)
-                {
-                    transport = gameObject.AddComponent<AsyncTcpTransport>();
-                    logger.Log("NetworkServer: added default Transport because there was none yet.");
-                }
-#if UNITY_EDITOR
-                UnityEditor.Undo.RecordObject(gameObject, "Added default Transport");
-#endif
-            }
-
             // add serverSceneManager if there is none yet. makes upgrading easier.
             if (sceneManager == null)
             {
@@ -164,8 +158,8 @@ namespace Mirror
             {
                 conn.Disconnect();
             }
-            if (transport != null)
-                transport.Disconnect();
+            if (Transport != null)
+                Transport.Disconnect();
         }
         
         void Initialize()
@@ -178,9 +172,6 @@ namespace Mirror
 
             //Make sure connections are cleared in case any old connections references exist from previous sessions
             connections.Clear();
-
-            if (transport == null)
-                transport = GetComponent<AsyncTransport>();
 
             if (authenticator != null)
             {
@@ -213,7 +204,7 @@ namespace Mirror
             // only start server if we want to listen
             if (Listening)
             {
-                await transport.ListenAsync();
+                await Transport.ListenAsync();
                 logger.Log("Server started listening");
             }
 
@@ -239,7 +230,7 @@ namespace Mirror
             {
                 IConnection connection;
 
-                while ((connection = await transport.AcceptAsync()) != null)
+                while ((connection = await Transport.AcceptAsync()) != null)
                 {
                     var networkConnectionToClient = new NetworkConnection(connection);
 

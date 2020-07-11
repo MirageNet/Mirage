@@ -91,7 +91,18 @@ namespace Mirror
 
         bool isSpawnFinished;
 
-        public AsyncTransport Transport;
+        [SerializeField]
+        private AsyncTransport transport;
+
+        private AsyncTransport Transport
+        {
+            get
+            {
+                if (transport == null)
+                    transport = GetComponent<AsyncTransport>();
+                return transport;
+            }
+        }
 
         /// <summary>
         /// This is a dictionary of the prefabs that are registered on the client with ClientScene.RegisterPrefab().
@@ -135,22 +146,6 @@ namespace Mirror
         /// </summary>
         private void OnValidate()
         {
-            // add transport if there is none yet. makes upgrading easier.
-            if (Transport == null)
-            {
-                // First try to get the transport.
-                Transport = GetComponent<AsyncTransport>();
-                // was a transport added yet? if not, add one
-                if (Transport == null)
-                {
-                    Transport = gameObject.AddComponent<AsyncTcpTransport>();
-                    logger.Log("NetworkClient: added default Transport because there was none yet.");
-                }
-#if UNITY_EDITOR
-                UnityEditor.Undo.RecordObject(gameObject, "Added default Transport");
-#endif
-            }
-
             // add clientSceneManager if there is none yet. makes upgrading easier.
             if (sceneManager == null)
             {
@@ -177,15 +172,11 @@ namespace Mirror
         {
             if (logger.LogEnabled()) logger.Log("Client Connect: " + uri);
 
-            AsyncTransport transport = Transport;
-            if (transport == null)
-                transport = GetComponent<AsyncTransport>();
-
             connectState = ConnectState.Connecting;
 
             try
             {
-                IConnection transportConnection = await transport.ConnectAsync(uri);
+                IConnection transportConnection = await Transport.ConnectAsync(uri);
 
                 RegisterSpawnPrefabs();
                 InitializeAuthEvents();
