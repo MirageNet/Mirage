@@ -134,7 +134,7 @@ namespace Mirror.Tests
             Assert.That(server.Active, Is.True);
             server.Disconnect();
 
-            yield return null;
+            yield return new WaitForFixedUpdate();
             Assert.That(server.Active, Is.False);
         }
 
@@ -145,7 +145,7 @@ namespace Mirror.Tests
             Assert.That(server.Active, Is.True);
             server.Disconnect();
 
-            yield return null;
+            yield return new WaitForFixedUpdate();
             Assert.That(server.Connected.GetListenerNumber(), Is.Zero);
         }
 
