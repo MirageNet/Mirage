@@ -1,9 +1,8 @@
-﻿using Mirror;
-using Mirror.AsyncTcp;
+﻿using Mirror.AsyncTcp;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Tests
+namespace Mirror.Tests
 {
     public class NetworkMenuTest
     {
