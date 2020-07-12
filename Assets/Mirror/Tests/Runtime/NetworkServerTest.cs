@@ -96,6 +96,9 @@ namespace Mirror.Tests
             transport = serverGO.AddComponent<MockTransport>();
             server = serverGO.AddComponent<NetworkServer>();
             client = serverGO.AddComponent<NetworkClient>();
+            
+            server.transport = transport;
+            client.Transport = transport;
 
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
@@ -115,36 +118,38 @@ namespace Mirror.Tests
             await server.ListenAsync();
         });
 
-        [TearDown]
-        public void TearDown()
+        [UnityTearDown]
+        public IEnumerator TearDown() => RunAsync(async () =>
         {
-            Object.DestroyImmediate(gameObject);
+            Object.Destroy(gameObject);
 
             // reset all state
             server.Disconnect();
-            Object.DestroyImmediate(serverGO);
-        }
+
+            await WaitFor(() => !server.Active);
+            Object.Destroy(serverGO);
+        });
 
         [UnityTest]
-        public IEnumerator DisconnectIsActiveTest()
+        public IEnumerator DisconnectIsActiveTest() => RunAsync(async () =>
         {
             Assert.That(server.Active, Is.True);
             server.Disconnect();
 
-            yield return null;
+            await WaitFor(() => !server.Active);
             Assert.That(server.Active, Is.False);
-        }
+        });
 
         [UnityTest]
-        public IEnumerator DisconnectRemoveHandlers()
+        public IEnumerator DisconnectRemoveHandlers() => RunAsync(async () =>
         {
             Assert.That(server.Connected.GetListenerNumber(), Is.EqualTo(1));
             Assert.That(server.Active, Is.True);
             server.Disconnect();
 
-            yield return null;
+            await WaitFor(() => !server.Active);
             Assert.That(server.Connected.GetListenerNumber(), Is.Zero);
-        }
+        });
 
         [Test]
         public void ConnectedEventTest()
@@ -337,7 +342,7 @@ namespace Mirror.Tests
             // otherwise isServer is true in OnDestroy, which means it would try
             // to call Destroy(go). but we need to use DestroyImmediate in
             // Editor
-            Object.DestroyImmediate(go);
+            Object.Destroy(go);
         }
 
         [Test]
@@ -366,7 +371,7 @@ namespace Mirror.Tests
             });
 
             // clean up
-            Object.DestroyImmediate(goWithout);
+            Object.Destroy(goWithout);
         }
 
         [Test]
@@ -384,7 +389,7 @@ namespace Mirror.Tests
 
             // destroy GO after shutdown, otherwise isServer is true in OnDestroy and it tries to call
             // GameObject.Destroy (but we need DestroyImmediate in Editor)
-            Object.DestroyImmediate(identity.gameObject);
+            Object.Destroy(identity.gameObject);
         }
 
         [Test]
@@ -410,7 +415,7 @@ namespace Mirror.Tests
             Assert.That(server.ValidateSceneObject(identity), Is.False);
 
             // clean up
-            Object.DestroyImmediate(go);
+            Object.Destroy(go);
         }
 
         [Test]
@@ -433,7 +438,7 @@ namespace Mirror.Tests
             Assert.That(identity.NetId, Is.Zero);
 
             // clean up
-            Object.DestroyImmediate(go);
+            Object.Destroy(go);
         }
 
         [Test]

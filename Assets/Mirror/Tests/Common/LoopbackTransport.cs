@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace Mirror.Tests
 {
 
-    public class LoopbackTransport : AsyncTransport
+    public class LoopbackTransport : Transport
     {
         public TaskCompletionSource<IConnection> AcceptCompletionSource ;
 
@@ -43,7 +43,7 @@ namespace Mirror.Tests
 
         public override Uri ServerUri()
         {
-            return new UriBuilder()
+            return new UriBuilder
             {
                 Scheme = Scheme,
                 Host = "localhost"

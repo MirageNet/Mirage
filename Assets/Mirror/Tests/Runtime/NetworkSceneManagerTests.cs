@@ -1,8 +1,11 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+
+using static Mirror.Tests.AsyncUtil;
 
 namespace Mirror.Tests
 {
@@ -47,17 +50,18 @@ namespace Mirror.Tests
         }
 
         [UnityTest]
-        public IEnumerator FinishLoadServerOnlyTest()
+        public IEnumerator FinishLoadServerOnlyTest() => RunAsync(async () =>
         {
             client.Disconnect();
-            yield return null;
+
+            await Task.Delay(1);
 
             sceneManager.ServerSceneChanged.AddListener(TestOnServerOnlySceneChangedInvoke);
 
             sceneManager.FinishLoadScene();
 
             Assert.That(onOnServerSceneOnlyChangedCounter, Is.EqualTo(1));
-        }
+        });
 
         int OnServerChangeSceneCounter;
         void TestOnServerChangeSceneInvoke(string scene)
@@ -78,7 +82,7 @@ namespace Mirror.Tests
         }
 
         [UnityTest]
-        public IEnumerator ServerChangeSceneTest()
+        public IEnumerator ServerChangeSceneTest() => RunAsync(async () =>
         {
             client.Connection.RegisterHandler<SceneMessage>(ClientSceneMessage);
             client.Connection.RegisterHandler<NotReadyMessage>(NotReadyMessage);
@@ -90,11 +94,11 @@ namespace Mirror.Tests
             Assert.That(server.sceneManager.networkSceneName, Is.EqualTo("testScene"));
             Assert.That(OnServerChangeSceneCounter, Is.EqualTo(1));
 
-            yield return null;
+            await WaitFor(() => ClientSceneMessageCounter > 0 && NotReadyMessageCounter > 0);
 
             Assert.That(ClientSceneMessageCounter, Is.EqualTo(1));
             Assert.That(NotReadyMessageCounter, Is.EqualTo(1));
-        }
+        });
 
         [Test]
         public void ChangeServerSceneExceptionTest()
@@ -108,19 +112,19 @@ namespace Mirror.Tests
         [Test]
         public void ReadyTest()
         {
-            client.sceneManager.Ready(client.Connection);
-            Assert.That(sceneManager.ready);
+            client.sceneManager.SetClientReady(client.Connection);
+            Assert.That(sceneManager.Ready);
             Assert.That(client.Connection.IsReady);
         }
 
         [Test]
         public void ReadyTwiceTest()
         {
-            sceneManager.Ready(client.Connection);
+            sceneManager.SetClientReady(client.Connection);
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                sceneManager.Ready(client.Connection);
+                sceneManager.SetClientReady(client.Connection);
             });
         }
 
@@ -129,7 +133,7 @@ namespace Mirror.Tests
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                sceneManager.Ready(null);
+                sceneManager.SetClientReady(null);
             });
         }
 
@@ -183,7 +187,7 @@ namespace Mirror.Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                sceneManager.ClientSceneMessage(null, new SceneMessage());
+                client.sceneManager.ClientSceneMessage(null, new SceneMessage());
             });
         }
     }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Mirror.RemoteCalls;
-using Mirror.AsyncTcp;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -114,46 +113,7 @@ namespace Mirror
         public readonly NetworkTime Time = new NetworkTime();
 
         // transport to use to accept connections
-        public AsyncTransport transport;
-
-        /// <summary>
-        /// Called when the script gets added to an object. Useful for getting other needed scripts.
-        /// </summary>
-        private void OnValidate()
-        {
-            // add transport if there is none yet. makes upgrading easier.
-            if (transport == null)
-            {
-                // First try to get the transport.
-                transport = GetComponent<AsyncTransport>();
-                // was a transport added yet? if not, add one
-                if (transport == null)
-                {
-                    transport = gameObject.AddComponent<AsyncTcpTransport>();
-                    logger.Log("NetworkServer: added default Transport because there was none yet.");
-                }
-#if UNITY_EDITOR
-                UnityEditor.Undo.RecordObject(gameObject, "Added default Transport");
-#endif
-            }
-
-            // add serverSceneManager if there is none yet. makes upgrading easier.
-            if (sceneManager == null)
-            {
-                // First try to get the SceneManager.
-                sceneManager = GetComponent<NetworkSceneManager>();
-                // was a SceneManager added yet? if not, add one
-                if (sceneManager == null)
-                {
-                    sceneManager = gameObject.AddComponent<NetworkSceneManager>();
-                    logger.Log("NetworkServer: added default SceneManager because there was none yet.");
-                }
-                sceneManager.server = this;
-#if UNITY_EDITOR
-                UnityEditor.Undo.RecordObject(gameObject, "Added default SceneManager");
-#endif
-            }
-        }
+        public Transport transport;
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.
@@ -180,7 +140,7 @@ namespace Mirror
             connections.Clear();
 
             if (transport == null)
-                transport = GetComponent<AsyncTransport>();
+                transport = GetComponent<Transport>();
 
             if (authenticator != null)
             {
@@ -245,12 +205,14 @@ namespace Mirror
 
                     _ = ConnectionAcceptedAsync(networkConnectionToClient);
                 }
-
-                Cleanup();
             }
             catch (Exception ex)
             {
                 logger.LogException(ex);
+            }
+            finally
+            {
+                Cleanup();
             }
         }
 
