@@ -31,7 +31,7 @@ namespace Mirror.Tests
 
         private GameObject playerPrefab;
 
-        protected AsyncTransport testTransport;
+        protected Transport testTransport;
         protected INetworkConnection connectionToServer;
         protected INetworkConnection connectionToClient;
 
