@@ -217,9 +217,8 @@ namespace Mirror
             if (!client.IsConnected)
                 return;
 
-            if (server)
-                if (server.LocalClient)
-                    return;
+            if (server && server.LocalClient)
+                return;
                 
             if (string.IsNullOrEmpty(msg.sceneName))
             {
