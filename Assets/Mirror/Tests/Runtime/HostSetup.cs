@@ -57,10 +57,11 @@ namespace Mirror.Tests
         [UnityTearDown]
         public IEnumerator ShutdownHost() => RunAsync(async () =>
         {
-            Object.Destroy(playerGO);
             manager.StopHost();
 
-            await Task.Delay(1);
+            await WaitFor(() => !manager.IsNetworkActive);
+
+            Object.Destroy(playerGO);
             Object.Destroy(networkManagerGo);
         });
 
