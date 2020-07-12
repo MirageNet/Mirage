@@ -242,6 +242,8 @@ namespace Mirror
         /// </summary>
         public void Disconnect()
         {
+            connectState = ConnectState.Disconnected;
+
             Connection?.Disconnect();
         }
 
