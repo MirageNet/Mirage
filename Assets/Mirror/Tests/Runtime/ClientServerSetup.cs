@@ -112,6 +112,7 @@ namespace Mirror.Tests
             client.Disconnect();
             server.Disconnect();
 
+            await WaitFor(() => !client.Active);
             await WaitFor(() => !server.Active);
 
             Object.DestroyImmediate(playerPrefab);
