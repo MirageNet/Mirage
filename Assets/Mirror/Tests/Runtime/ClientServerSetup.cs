@@ -119,8 +119,7 @@ namespace Mirror.Tests
             Object.DestroyImmediate(clientGo);
             Object.DestroyImmediate(serverPlayerGO);
             Object.DestroyImmediate(clientPlayerGO);
-        }
-
+        });
 
         #endregion
     }
