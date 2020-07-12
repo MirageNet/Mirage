@@ -10,26 +10,28 @@ using Object = UnityEngine.Object;
 
 namespace Mirror.Tests
 {
-    // set's up a host
+    // set's up a client and a server
     public class ClientServerSetup<T> where T : NetworkBehaviour
     {
 
         #region Setup
-        protected GameObject networkManagerGo;
-        protected NetworkManager manager;
+        protected GameObject serverGo;
         protected NetworkServer server;
-        protected NetworkClient client;
-        protected NetworkSceneManager sceneManager;
-
+        protected NetworkSceneManager serverSceneManager;
         protected GameObject serverPlayerGO;
         protected NetworkIdentity serverIdentity;
         protected T serverComponent;
 
+        protected GameObject clientGo;
+        protected NetworkClient client;
+        protected NetworkSceneManager clientSceneManager;
         protected GameObject clientPlayerGO;
         protected NetworkIdentity clientIdentity;
         protected T clientComponent;
 
         private GameObject playerPrefab;
+
+        protected Transport testTransport;
         protected INetworkConnection connectionToServer;
         protected INetworkConnection connectionToClient;
 
@@ -41,18 +43,26 @@ namespace Mirror.Tests
         [UnitySetUp]
         public IEnumerator Setup() => RunAsync(async () =>
         {
-            networkManagerGo = new GameObject("NetworkManager", typeof(LoopbackTransport), typeof(NetworkClient), typeof(NetworkServer), typeof(NetworkManager), typeof(NetworkSceneManager));
+            serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(NetworkServer));
+            clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(NetworkClient));
+            testTransport = serverGo.AddComponent<LoopbackTransport>();
 
-            sceneManager = networkManagerGo.GetComponent<NetworkSceneManager>();
-            manager = networkManagerGo.GetComponent<NetworkManager>();
-            manager.client = networkManagerGo.GetComponent<NetworkClient>();
-            manager.server = networkManagerGo.GetComponent<NetworkServer>();
+            await Task.Delay(1);
 
-            server = manager.server;
-            client = manager.client;
-            server.sceneManager = sceneManager;
-            client.sceneManager = sceneManager;
-            manager.startOnHeadless = false;
+            server = serverGo.GetComponent<NetworkServer>();
+            client = clientGo.GetComponent<NetworkClient>();
+
+            server.transport = testTransport;
+            client.Transport = testTransport;
+
+            serverSceneManager = serverGo.GetComponent<NetworkSceneManager>();
+            clientSceneManager = clientGo.GetComponent<NetworkSceneManager>();
+
+            server.sceneManager = serverSceneManager;
+            client.sceneManager = clientSceneManager;
+
+            serverSceneManager.server = server;
+            clientSceneManager.client = client;
 
             ExtraSetup();
 
@@ -65,14 +75,22 @@ namespace Mirror.Tests
             await Task.Delay(1);
 
             // start the server
-            await manager.StartServer();
+            await server.ListenAsync();
+
+            await Task.Delay(1);
+
+            var builder = new UriBuilder
+            {
+                Host = "localhost",
+                Scheme = client.Transport.Scheme,
+            };
 
             // now start the client
-            await manager.StartClient("localhost");
+            await client.ConnectAsync(builder.Uri);
 
             // get the connections so that we can spawn players
-            connectionToServer = client.Connection;
             connectionToClient = server.connections.First();
+            connectionToServer = client.Connection;
 
             // create a player object in the server
             serverPlayerGO = GameObject.Instantiate(playerPrefab);
@@ -81,26 +99,28 @@ namespace Mirror.Tests
             server.AddPlayerForConnection(connectionToClient, serverPlayerGO);
 
             // wait for client to spawn it
-            await Task.Delay(1);
+            await WaitFor(() => connectionToServer.Identity != null);
 
-            clientPlayerGO = connectionToServer.Identity.gameObject;
-            clientIdentity = clientPlayerGO.GetComponent<NetworkIdentity>();
+            clientIdentity = connectionToServer.Identity;
+            clientPlayerGO = clientIdentity.gameObject;
             clientComponent = clientPlayerGO.GetComponent<T>();
         });
 
         [UnityTearDown]
-        public IEnumerator ShutdownHost()
+        public IEnumerator ShutdownHost() => RunAsync(async () =>
         {
-            manager.StopClient();
-            manager.StopServer();
+            client.Disconnect();
+            server.Disconnect();
 
-            yield return null;
+            await WaitFor(() => !client.Active);
+            await WaitFor(() => !server.Active);
 
             Object.DestroyImmediate(playerPrefab);
-            Object.DestroyImmediate(networkManagerGo);
+            Object.DestroyImmediate(serverGo);
+            Object.DestroyImmediate(clientGo);
             Object.DestroyImmediate(serverPlayerGO);
             Object.DestroyImmediate(clientPlayerGO);
-        }
+        });
 
         #endregion
     }

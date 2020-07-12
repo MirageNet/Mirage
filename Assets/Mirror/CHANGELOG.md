@@ -1,3 +1,32 @@
+# [35.1.0](https://github.com/MirrorNG/MirrorNG/compare/35.0.3-master...35.1.0-master) (2020-07-12)
+
+
+### Features
+
+* Add Network Menu  ([#253](https://github.com/MirrorNG/MirrorNG/issues/253)) ([d81f444](https://github.com/MirrorNG/MirrorNG/commit/d81f444c42475439d24bf5b4abd2bbf15fd34e92))
+
+## [35.0.3](https://github.com/MirrorNG/MirrorNG/compare/35.0.2-master...35.0.3-master) (2020-07-11)
+
+
+### Bug Fixes
+
+* code smell rename Ready ([#256](https://github.com/MirrorNG/MirrorNG/issues/256)) ([6d92d14](https://github.com/MirrorNG/MirrorNG/commit/6d92d1482cdd31fa663f7475f103476c65b7d875))
+* Misc Code Smells ([#257](https://github.com/MirrorNG/MirrorNG/issues/257)) ([278a127](https://github.com/MirrorNG/MirrorNG/commit/278a1279dabefe04b0829015841de68b41e60a7b))
+
+## [35.0.2](https://github.com/MirrorNG/MirrorNG/compare/35.0.1-master...35.0.2-master) (2020-07-11)
+
+
+### Bug Fixes
+
+* cleanup the server even after error ([#255](https://github.com/MirrorNG/MirrorNG/issues/255)) ([7bd015e](https://github.com/MirrorNG/MirrorNG/commit/7bd015eac1b77f0ad5974abb5c4c87a5d3da7b6d))
+
+## [35.0.1](https://github.com/MirrorNG/MirrorNG/compare/35.0.0-master...35.0.1-master) (2020-07-11)
+
+
+### Bug Fixes
+
+* fix adding and saving Components ([2de7ecd](https://github.com/MirrorNG/MirrorNG/commit/2de7ecd93029bf5fd2fbb04ad4e47936cbb802cc))
+
 # [35.0.0](https://github.com/MirrorNG/MirrorNG/compare/34.13.0-master...35.0.0-master) (2020-07-10)
 
 
