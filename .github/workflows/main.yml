@@ -11,7 +11,7 @@ on:
   
 jobs:
   requestActivationFile:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: false
     steps:
       - name: Checkout repository
@@ -31,7 +31,7 @@ jobs:
     
   CI:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
     if: true
@@ -95,7 +95,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   Release:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: CI
     steps:
       - name: Checkout repository
