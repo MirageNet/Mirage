@@ -460,7 +460,7 @@ namespace Mirror
 
         #region server message handlers
 
-        [Command]
+        [ServerRpc]
         void CmdOnAnimationServerMessage(int stateHash, float normalizedTime, int layerId, byte[] parameters)
         {
             // Ignore messages from client if not in client authority mode
@@ -477,7 +477,7 @@ namespace Mirror
             }
         }
 
-        [Command]
+        [ServerRpc]
         void CmdOnAnimationParametersServerMessage(byte[] parameters)
         {
             // Ignore messages from client if not in client authority mode
@@ -492,7 +492,7 @@ namespace Mirror
             }
         }
 
-        [Command]
+        [ServerRpc]
         void CmdOnAnimationTriggerServerMessage(int hash)
         {
             // Ignore messages from client if not in client authority mode
@@ -504,7 +504,7 @@ namespace Mirror
             RpcOnAnimationTriggerClientMessage(hash);
         }
 
-        [Command]
+        [ServerRpc]
         void CmdOnAnimationResetTriggerServerMessage(int hash)
         {
             // Ignore messages from client if not in client authority mode
