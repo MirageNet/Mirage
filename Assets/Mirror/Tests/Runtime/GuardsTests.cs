@@ -28,7 +28,7 @@ namespace Mirror.Tests
             clientFunctionCalled = true;
         }
 
-        [ClientCallback]
+        [Client(error = false)]
         public void CallClientCallbackFunction()
         {
             clientCallbackFunctionCalled = true;

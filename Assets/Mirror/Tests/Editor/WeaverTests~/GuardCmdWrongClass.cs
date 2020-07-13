@@ -26,7 +26,7 @@ namespace MirrorTest
         [Client]
         public void CantClientGuardInThisClass() { }
 
-        [ClientCallback]
+        [Client(error = false)]
         public void CantClientCallbackGuardInThisClass() { }
     }
 }
