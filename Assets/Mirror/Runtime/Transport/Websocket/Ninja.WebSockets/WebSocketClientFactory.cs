@@ -189,7 +189,7 @@ namespace Ninja.WebSockets
             string responseCode = HttpHelper.ReadHttpResponseCode(responseHeader);
             if (!string.Equals(responseCode, "101 Switching Protocols", StringComparison.InvariantCultureIgnoreCase))
             {
-                string[] lines = responseHeader.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+                string[] lines = responseHeader.Split(new [] { "\r\n" }, StringSplitOptions.None);
 
                 for (int i = 0; i < lines.Length; i++)
                 {

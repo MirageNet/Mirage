@@ -159,7 +159,7 @@ namespace Ninja.WebSockets
 
                 // extract a csv list of sub protocols (in order of highest preference first)
                 string csv = match.Groups["protocols"].Value.Trim();
-                return csv.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                return csv.Split(new [] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(x => x.Trim())
                     .ToList();
             }
