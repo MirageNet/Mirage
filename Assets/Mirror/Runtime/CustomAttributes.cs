@@ -75,7 +75,6 @@ namespace Mirror
     /// <summary>
     /// Exception thrown if a guarded method is invoked incorrectly
     /// </summary>
-    [Serializable]
     public class MethodInvocationException : Exception
     {
         /// <summary>
