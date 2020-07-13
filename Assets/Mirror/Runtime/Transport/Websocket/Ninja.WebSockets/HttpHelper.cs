@@ -77,7 +77,7 @@ namespace Ninja.WebSockets
         public static async Task<string> ReadHttpHeaderAsync(Stream stream, CancellationToken token)
         {
             // 16KB buffer more than enough for http header
-            int length = 1024 * 16;
+            const int length = 1024 * 16;
             byte[] buffer = new byte[length];
             int offset = 0;
             int bytesRead = 0;
