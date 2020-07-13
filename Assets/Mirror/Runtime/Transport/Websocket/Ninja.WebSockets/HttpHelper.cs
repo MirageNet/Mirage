@@ -33,7 +33,7 @@ using Ninja.WebSockets.Exceptions;
 
 namespace Ninja.WebSockets
 {
-    public class HttpHelper
+    public static class HttpHelper
     {
         const string HTTP_GET_HEADER_REGEX = @"^GET(.*)HTTP\/1\.1";
 

@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace Ninja.WebSockets.Internal
 {
-    internal class BinaryReaderWriter
+    internal static class BinaryReaderWriter
     {
         public static async Task ReadExactly(int length, Stream stream, ArraySegment<byte> buffer, CancellationToken cancellationToken)
         {
