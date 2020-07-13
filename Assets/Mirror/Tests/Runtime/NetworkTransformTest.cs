@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Mirror.Tests
 {
     [TestFixture]
-    public class NetworkTransformTest : HostSetup<NetworkTransformBase>
+    public class NetworkTransformTest : HostSetup<NetworkTransform>
     {
         [Test]
         public void InitexcludeOwnerUpdateTest()
@@ -51,19 +51,19 @@ namespace Mirror.Tests
         [Test]
         public void InitlocalPositionSensitivityTest()
         {
-            Assert.That(component.localPositionSensitivity, Is.EqualTo(0.1f));
+            Assert.That(component.localPositionSensitivity, Is.InRange(0.001f, 0.199f));
         }
 
         [Test]
         public void InitlocalRotationSensitivityTest()
         {
-            Assert.That(component.localRotationSensitivity, Is.EqualTo(0.1f));
+            Assert.That(component.localRotationSensitivity, Is.InRange(0.001f, 0.199f));
         }
 
         [Test]
         public void InitlocalScaleSensitivityTest()
         {
-            Assert.That(component.localScaleSensitivity, Is.EqualTo(0.1f));
+            Assert.That(component.localScaleSensitivity, Is.InRange(0.001f, 0.199f));
         }
     }
 }

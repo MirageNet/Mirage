@@ -15,7 +15,7 @@ namespace Mirror.Tests
         [Test]
         public void InitvelocitySensitivityTest()
         {
-            Assert.That(component.velocitySensitivity, Is.EqualTo(0.1f));
+            Assert.That(component.velocitySensitivity, Is.InRange(0.001f, 0.199f));
         }
 
         [Test]
@@ -27,7 +27,7 @@ namespace Mirror.Tests
         [Test]
         public void InitangularVelocitySensitivityTest()
         {
-            Assert.That(component.angularVelocitySensitivity, Is.EqualTo(0.1f));
+            Assert.That(component.angularVelocitySensitivity, Is.InRange(0.001f, 0.199f));
         }
     }
 }
