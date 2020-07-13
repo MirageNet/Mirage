@@ -36,7 +36,7 @@ namespace Mirror.Examples.Tanks
             Server.Destroy(gameObject);
         }
 
-        // ServerCallback because we don't want a warning if OnTriggerEnter is
+        // [Server] because we don't want a warning if OnTriggerEnter is
         // called on the client
         [Server(error=false)]
         void OnTriggerEnter(Collider co)
