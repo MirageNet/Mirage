@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 using UnityEngine;
 
 namespace Mirror
@@ -75,7 +76,8 @@ namespace Mirror
     /// <summary>
     /// Exception thrown if a guarded method is invoked incorrectly
     /// </summary>
-    public class MethodInvocationException : Exception
+    [Serializable]
+    public class MethodInvocationException : Exception, ISerializable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="T:MethodInvocationException"/> class
