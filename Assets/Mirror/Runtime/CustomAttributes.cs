@@ -77,7 +77,7 @@ namespace Mirror
     /// Exception thrown if a guarded method is invoked incorrectly
     /// </summary>
     [Serializable]
-    public class MethodInvocationException : Exception, ISerializable
+    public class MethodInvocationException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="T:MethodInvocationException"/> class
