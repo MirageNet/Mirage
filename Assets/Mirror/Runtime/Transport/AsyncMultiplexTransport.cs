@@ -80,7 +80,12 @@ namespace Mirror
 
         public override  Task<IConnection> ConnectAsync(Uri uri)
         {
-            return GetTransport().ConnectAsync(uri);
+            foreach (Transport transport in transports)
+            {
+                if (transport.Supported && transport.Scheme == uri.Scheme)
+                    return transport.ConnectAsync(uri);
+            }
+            throw new ArgumentException($"No transport was able to connect to {uri}");
         }
 
         public override void Disconnect()
