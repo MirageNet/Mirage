@@ -55,9 +55,10 @@ namespace Mirror.Tests
         [Test]
         public void CannotCallClientFunctionAsServer()
         {
-            serverComponent.CallClientFunction();
-            LogAssert.Expect(UnityEngine.LogType.Warning, "[Client] function 'System.Void Mirror.Tests.ExampleGuards::CallClientFunction()' called on server");
-            Assert.That(serverComponent.clientFunctionCalled, Is.False);
+            Assert.Throws<MethodInvocationException>(() =>
+            {
+               serverComponent.CallClientFunction();
+            });
         }
 
         [Test]
