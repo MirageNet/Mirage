@@ -61,6 +61,7 @@ These are some notable differences between Mirror and MirrorNG:
 * [WIP] Allow connection to multiple servers simultaneously
 * [WIP] Error handling via Exceptions
 * [Done] Events instead of overrides for lifecycle events
+* [WIP] Global Client RPC
 
 ## Documentation
 Check out our [Documentation](https://mirrorng.github.io/MirrorNG/).
