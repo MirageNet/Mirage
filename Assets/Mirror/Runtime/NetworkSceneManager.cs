@@ -354,7 +354,7 @@ namespace Mirror
         /// </summary>
         /// <param name="newSceneName"></param>
         /// <param name="operation"></param>
-        public void ChangeServerScene(string newSceneName, SceneOperation operation = SceneOperation.Normal)
+        public void ChangeServerScene(string newSceneName, SceneOperation sceneOperation = SceneOperation.Normal)
         {
             if (string.IsNullOrEmpty(newSceneName))
             {
@@ -372,7 +372,7 @@ namespace Mirror
             loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
 
             // notify all clients about the new scene
-            server.SendToAll(new SceneMessage { sceneName = newSceneName, sceneOperation = operation });
+            server.SendToAll(new SceneMessage { sceneName = newSceneName, sceneOperation = sceneOperation });
         }
 
         /// <summary>
