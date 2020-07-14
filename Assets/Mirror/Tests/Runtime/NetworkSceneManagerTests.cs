@@ -205,5 +205,19 @@ namespace Mirror.Tests
                 client.sceneManager.ClientSceneMessage(null, new SceneMessage());
             });
         });
+
+        [UnityTest]
+        public IEnumerator ClientNotReadyStateAndInvoke() => RunAsync(async () =>
+        {
+            bool invoked = false;
+            client.sceneManager.ClientNotReady.AddListener(conn => invoked = true);
+            client.sceneManager.SetClientReady(client.Connection);
+            server.SendToAll(new NotReadyMessage());
+
+            await WaitFor(() => invoked);
+
+            Assert.That(client.sceneManager.Ready, Is.False);
+            Assert.That(invoked, Is.True);
+        });
     }
 }
