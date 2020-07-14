@@ -123,7 +123,7 @@ namespace Mirror.Tests
         public void CanCallHasAuthorityCallbackFunctionAsClient()
         {
             clientComponent.CallAuthorityNoErrorFunction();
-            Assert.That(clientComponent.clientCallbackFunctionCalled, Is.True);
+            Assert.That(clientComponent.hasAuthorityNoErrorCalled, Is.True);
         }
 
         [Test]
