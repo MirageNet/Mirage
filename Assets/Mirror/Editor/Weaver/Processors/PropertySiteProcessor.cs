@@ -61,7 +61,7 @@ namespace Mirror.Weaver
             if (md.Body != null && md.Body.Instructions != null)
             {
                 // TODO move this to NetworkBehaviourProcessor
-                ServerClientAttributeProcessor.ProcessMethodAttributes(td, md);
+                ServerClientAttributeProcessor.ProcessMethodAttributes(md);
 
                 for (int iCount = 0; iCount < md.Body.Instructions.Count;)
                 {
