@@ -1,3 +1,40 @@
+## [37.0.1](https://github.com/MirrorNG/MirrorNG/compare/37.0.0-master...37.0.1-master) (2020-07-14)
+
+
+### Bug Fixes
+
+* smell cleanup left if bug. repaired with parenthesis. ([#275](https://github.com/MirrorNG/MirrorNG/issues/275)) ([dd52be3](https://github.com/MirrorNG/MirrorNG/commit/dd52be3bb9406de7b2527c72fce90c9ed6c9d5bf))
+
+# [37.0.0](https://github.com/MirrorNG/MirrorNG/compare/36.0.0-master...37.0.0-master) (2020-07-13)
+
+
+### Features
+
+* Server attribute now throws error ([#270](https://github.com/MirrorNG/MirrorNG/issues/270)) ([f3b5dc4](https://github.com/MirrorNG/MirrorNG/commit/f3b5dc4fef5fba05e585d274d9df05c3954ff6c7))
+
+
+### BREAKING CHANGES
+
+* [ServerCallback] is now [Server(error = false)]
+
+* fixed weaver test
+
+* Remove unused code
+
+* fix comment
+
+* document replacement of ServerCallback
+
+* No need to be serializable
+
+* Exception should be serializable?
+
+* Fix code smell
+
+* No need to implement interface,  parent does
+
+Co-authored-by: Paul Pacheco <paul.pacheco@aa.com>
+
 # [36.0.0](https://github.com/MirrorNG/MirrorNG/compare/35.3.4-master...36.0.0-master) (2020-07-13)
 
 

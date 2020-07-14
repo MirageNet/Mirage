@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Mirror.Tests
 {
@@ -8,6 +9,8 @@ namespace Mirror.Tests
         public bool serverCallbackFunctionCalled;
         public bool clientFunctionCalled;
         public bool clientCallbackFunctionCalled;
+        public bool hasAuthorityCalled;
+        public bool hasAuthorityNoErrorCalled;
 
         [Server]
         public void CallServerFunction()
@@ -31,6 +34,18 @@ namespace Mirror.Tests
         public void CallClientCallbackFunction()
         {
             clientCallbackFunctionCalled = true;
+        }
+
+        [HasAuthority]
+        public void CallAuthorityFunction() 
+        {
+            hasAuthorityCalled = true;
+        }
+
+        [HasAuthority(error = false)]
+        public void CallAuthorityNoErrorFunction() 
+        {
+            hasAuthorityNoErrorCalled = true;
         }
     }
 
@@ -97,5 +112,44 @@ namespace Mirror.Tests
             Assert.That(clientComponent.clientCallbackFunctionCalled, Is.True);
         }
 
+        [Test]
+        public void CanCallHasAuthorityFunctionAsClient()
+        {
+            clientComponent.CallAuthorityFunction();
+            Assert.That(clientComponent.hasAuthorityCalled, Is.True);
+        }
+
+        [Test]
+        public void CanCallHasAuthorityCallbackFunctionAsClient()
+        {
+            clientComponent.CallAuthorityNoErrorFunction();
+            Assert.That(clientComponent.hasAuthorityNoErrorCalled, Is.True);
+        }
+
+        [Test]
+        public void GuardHasAuthorityError()
+        {
+            var obj = new GameObject("randomObject", typeof(NetworkIdentity), typeof(ExampleGuards));
+            ExampleGuards guardedComponent = obj.GetComponent<ExampleGuards>();
+
+            Assert.Throws<MethodInvocationException>( () => 
+            {
+                guardedComponent.CallAuthorityFunction();
+            });
+
+            Object.Destroy(obj);
+        }
+
+        [Test]
+        public void GuardHasAuthorityNoError()
+        {
+            var obj = new GameObject("randomObject", typeof(NetworkIdentity), typeof(ExampleGuards));
+            ExampleGuards guardedComponent = obj.GetComponent<ExampleGuards>();
+
+            guardedComponent.CallAuthorityNoErrorFunction();
+            Assert.That(guardedComponent.hasAuthorityNoErrorCalled, Is.False);
+
+            Object.Destroy(obj);
+        }
     }
 }
