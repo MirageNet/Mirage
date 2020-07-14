@@ -353,17 +353,8 @@ namespace Mirror
         /// <para>Clients that connect to this server will automatically switch to this scene. This automatically sets clients to be not-ready. The clients must call Ready() again to participate in the new scene.</para>
         /// </summary>
         /// <param name="newSceneName"></param>
-        public void ChangeServerScene(string newSceneName)
-        {
-            ChangeServerScene(newSceneName, SceneOperation.Normal);
-        }
-
-        /// <summary>
-        /// This causes the server to switch scenes and sets the networkSceneName.
-        /// <para>Clients that connect to this server will automatically switch to this scene. This automatically sets clients to be not-ready. The clients must call Ready() again to participate in the new scene.</para>
-        /// </summary>
-        /// <param name="newSceneName"></param>
-        public void ChangeServerScene(string newSceneName, SceneOperation operation)
+        /// <param name="operation"></param>
+        public void ChangeServerScene(string newSceneName, SceneOperation operation = SceneOperation.Normal)
         {
             if (string.IsNullOrEmpty(newSceneName))
             {
