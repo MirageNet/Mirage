@@ -1,7 +1,5 @@
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
-using UnityEngine;
 
 namespace Mirror.Tests
 {
@@ -34,7 +32,7 @@ namespace Mirror.Tests
             clientFunctionCalled = true;
         }
 
-        [ClientCallback]
+        [Client(error = false)]
         public void CallClientCallbackFunction()
         {
             clientCallbackFunctionCalled = true;
@@ -85,9 +83,10 @@ namespace Mirror.Tests
         [Test]
         public void CannotCallClientFunctionAsServer()
         {
-            serverComponent.CallClientFunction();
-            LogAssert.Expect(UnityEngine.LogType.Warning, "[Client] function 'System.Void Mirror.Tests.ExampleGuards::CallClientFunction()' called on server");
-            Assert.That(serverComponent.clientFunctionCalled, Is.False);
+            Assert.Throws<MethodInvocationException>(() =>
+            {
+               serverComponent.CallClientFunction();
+            });
         }
 
         [Test]
