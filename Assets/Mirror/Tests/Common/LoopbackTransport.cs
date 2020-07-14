@@ -7,33 +7,28 @@ namespace Mirror.Tests
 
     public class LoopbackTransport : Transport
     {
-        public TaskCompletionSource<IConnection> AcceptCompletionSource ;
+        public readonly AsyncQueue<IConnection> AcceptConnections = new AsyncQueue<IConnection>();
 
-        public override Task<IConnection> AcceptAsync()
+        public override async Task<IConnection> AcceptAsync()
         {
-            AcceptCompletionSource = new TaskCompletionSource<IConnection>();
-            return AcceptCompletionSource.Task;
+            return await AcceptConnections.DequeueAsync();
         }
 
-        public TaskCompletionSource<IConnection> ConnectCompletionSource;
+        public readonly AsyncQueue<IConnection> CoonnectedConnections = new AsyncQueue<IConnection>();
 
         public override string Scheme => "local";
 
         public override Task<IConnection> ConnectAsync(Uri uri)
         {
             (IConnection c1, IConnection c2) = PipeConnection.CreatePipe();
-            if (AcceptCompletionSource == null)
-                return Task.FromException<IConnection>(new SocketException((int)SocketError.ConnectionRefused));
-            else
-            {
-                AcceptCompletionSource?.SetResult(c2);
-                return Task.FromResult(c1);
-            }
+            AcceptConnections.Enqueue(c2);
+
+            return Task.FromResult(c1);
         }
 
         public override void Disconnect()
         {
-            AcceptCompletionSource.TrySetResult(null);
+            AcceptConnections.Enqueue(null);
         }
 
         public override Task ListenAsync()
