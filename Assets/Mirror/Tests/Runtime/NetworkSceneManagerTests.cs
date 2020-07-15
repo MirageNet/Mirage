@@ -206,18 +206,16 @@ namespace Mirror.Tests
             });
         });
 
-        [UnityTest]
-        public IEnumerator ClientNotReadyStateAndInvoke() => RunAsync(async () =>
+        [Test]
+        public void ClientNotReady()
         {
-            bool invoked = false;
-            client.sceneManager.ClientNotReady.AddListener(conn => invoked = true);
+            UnityAction<INetworkConnection> func1 = Substitute.For<UnityAction<INetworkConnection>>();
+            client.sceneManager.ClientNotReady.AddListener(func1);
             client.sceneManager.SetClientReady(client.Connection);
-            server.SendToAll(new NotReadyMessage());
-
-            await WaitFor(() => invoked);
+            client.sceneManager.ClientNotReadyMessage(null, new NotReadyMessage());
 
             Assert.That(client.sceneManager.Ready, Is.False);
-            Assert.That(invoked, Is.True);
-        });
+            func1.Received(1).Invoke(Arg.Any<INetworkConnection>());
+        }
     }
 }
