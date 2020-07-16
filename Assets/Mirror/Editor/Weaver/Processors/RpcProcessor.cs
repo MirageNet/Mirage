@@ -2,11 +2,20 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 namespace Mirror.Weaver
 {
+    public enum Client { Owner, Observer }
+
     /// <summary>
     /// Processes [Rpc] methods in NetworkBehaviour
     /// </summary>
     public static class RpcProcessor
     {
+        // helper functions to check if the method has a NetworkConnection parameter
+        public static bool HasNetworkConnectionParameter(MethodDefinition md)
+        {
+            return md.Parameters.Count > 0 &&
+                   md.Parameters[0].ParameterType.FullName == Weaver.INetworkConnectionType.FullName;
+        }
+
         /// <summary>
         /// Generates a skeleton for an RPC
         /// </summary>
@@ -42,6 +51,15 @@ namespace Mirror.Weaver
             // setup for reader
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Castclass, md.DeclaringType));
+
+            // NetworkConnection parameter is optional
+            // todo: maybe test if we selected owner target?
+            if (HasNetworkConnectionParameter(md))
+            {
+                //client.connection
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Call, Weaver.BehaviorConnectionToServerReference));
+            }
 
             if (!NetworkBehaviourProcessor.ReadArguments(md, worker, RemoteCallType.ClientRpc))
                 return null;
@@ -94,12 +112,22 @@ namespace Mirror.Weaver
 
             string rpcName = md.Name;
 
+            Client target = clientRpcAttr.GetField("target", Client.Observer); 
             int channel = clientRpcAttr.GetField("channel", 0);
-            bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
+            bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false); // how to handle it 
 
             // invoke SendInternal and return
             // this
             worker.Append(worker.Create(OpCodes.Ldarg_0));
+
+            if (target == Client.Owner)
+            {
+                if (HasNetworkConnectionParameter(md)) // connection
+                    worker.Append(worker.Create(OpCodes.Ldarg_1));
+                else if (target == Client.Owner) // null
+                    worker.Append(worker.Create(OpCodes.Ldnull));
+            }
+
             worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType));
             // invokerClass
             worker.Append(worker.Create(OpCodes.Call, Weaver.getTypeFromHandleReference));
@@ -107,8 +135,16 @@ namespace Mirror.Weaver
             // writer
             worker.Append(worker.Create(OpCodes.Ldloc_0));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
-            worker.Append(worker.Create(excludeOwner ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
-            worker.Append(worker.Create(OpCodes.Callvirt, Weaver.sendRpcInternal));
+
+            if (target == Client.Observer)
+            {
+                worker.Append(worker.Create(excludeOwner ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+                worker.Append(worker.Create(OpCodes.Callvirt, Weaver.sendRpcInternal));
+            }
+            else
+            {
+                worker.Append(worker.Create(OpCodes.Callvirt, Weaver.sendTargetRpcInternal));
+            }
 
             NetworkBehaviourProcessor.WriteRecycleWriter(worker);
 

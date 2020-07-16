@@ -34,7 +34,7 @@ namespace Mirror.Tests
         public string targetRpcArg2;
         public INetworkConnection targetRpcConn;
 
-        [TargetRpc]
+        [ClientRpc(target = Mirror.Client.Owner)]
         public void TargetRpcTest(INetworkConnection conn, int arg1, string arg2)
         {
             this.targetRpcConn = conn;
