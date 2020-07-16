@@ -124,7 +124,7 @@ namespace Mirror.Weaver
             {
                 if (HasNetworkConnectionParameter(md)) // connection
                     worker.Append(worker.Create(OpCodes.Ldarg_1));
-                else if (target == Client.Owner) // null
+                else // null
                     worker.Append(worker.Create(OpCodes.Ldnull));
             }
 
