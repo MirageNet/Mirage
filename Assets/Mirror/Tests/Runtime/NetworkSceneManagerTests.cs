@@ -160,6 +160,17 @@ namespace Mirror.Tests
             sceneManager.OnClientNotReady(client.Connection);
             func1.Received(1).Invoke(Arg.Any<INetworkConnection>());
         }
+
+        //Flakey Test
+        //[UnityTest]
+        //public IEnumerator ChangeSceneAdditiveLoadTest() => RunAsync(async () =>
+        //{            
+        //    server.sceneManager.ChangeServerScene("testScene", SceneOperation.LoadAdditive);
+
+        //    await WaitFor(() => SceneManager.GetSceneByName("testScene") != null);
+
+        //    Assert.That(SceneManager.GetSceneByName("testScene"), Is.Not.Null);
+        //});
     }
 
     public class NetworkSceneManagerNonHostTests : ClientServerSetup<MockComponent>
