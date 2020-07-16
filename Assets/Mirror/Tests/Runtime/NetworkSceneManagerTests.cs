@@ -12,6 +12,18 @@ namespace Mirror.Tests
 {
     public class NetworkSceneManagerTests : HostSetup<MockComponent>
     {
+        AssetBundle bundle;
+
+        public override void ExtraSetup()
+        {
+            bundle = AssetBundle.LoadFromFile("Assets/Mirror/Tests/Runtime/TestScene/testscene");
+        }
+
+        public override void ExtraTearDown()
+        {
+            bundle.Unload(true);
+        }
+
         [Test]
         public void FinishLoadSceneHostTest()
         {
@@ -75,7 +87,6 @@ namespace Mirror.Tests
             client.Connection.RegisterHandler<NotReadyMessage>(NotReadyMessage);
             sceneManager.ServerChangeScene.AddListener(TestOnServerChangeSceneInvoke);
 
-            AssetBundle.LoadFromFile("Assets/Mirror/Tests/Runtime/TestScene/testscene");
             server.sceneManager.ChangeServerScene("testScene");
 
             Assert.That(server.sceneManager.networkSceneName, Is.EqualTo("testScene"));
@@ -168,6 +179,18 @@ namespace Mirror.Tests
 
     public class NetworkSceneManagerNonHostTests : ClientServerSetup<MockComponent>
     {
+        AssetBundle bundle;
+
+        public override void ExtraSetup()
+        {
+            bundle = AssetBundle.LoadFromFile("Assets/Mirror/Tests/Runtime/TestScene/testscene");
+        }
+
+        public override void ExtraTearDown()
+        {
+            bundle.Unload(true);
+        }
+
         [Test]
         public void ClientSceneMessageExceptionTest()
         {
