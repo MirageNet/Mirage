@@ -114,7 +114,7 @@ namespace Mirror.Weaver
 
             Client target = clientRpcAttr.GetField("target", Client.Observers); 
             int channel = clientRpcAttr.GetField("channel", 0);
-            bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false); // how to handle it 
+            bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
 
             // invoke SendInternal and return
             // this
@@ -150,7 +150,7 @@ namespace Mirror.Weaver
             return rpc;
         }
 
-        public static bool Validate(MethodDefinition md)
+        public static bool Validate(MethodDefinition md, CustomAttribute clientRpcAttr)
         {
             if (md.IsAbstract)
             {
@@ -161,6 +161,20 @@ namespace Mirror.Weaver
             if (md.IsStatic)
             {
                 Weaver.Error($"{md.Name} must not be static", md);
+                return false;
+            }
+
+            Client target = clientRpcAttr.GetField("target", Client.Observers); 
+            if (target == Client.Connection && !HasNetworkConnectionParameter(md))
+            {
+                Weaver.Error("ClientRpc with Client.Connection needs a network connection parameter", md);
+                return false;
+            }
+
+            bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
+            if (target == Client.Owner && excludeOwner)
+            {
+                Weaver.Error("ClientRpc with Client.Owner cannot have excludeOwner set as true", md);
                 return false;
             }
 
