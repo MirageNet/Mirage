@@ -35,12 +35,6 @@ namespace Mirror.Weaver.Tests
         }
 
         [Test]
-        public void MonoBehaviourTargetRpc()
-        {
-            Assert.That(weaverErrors, Contains.Item("TargetRpc TargetThisCantBeOutsideNetworkBehaviour must be declared inside a NetworkBehaviour (at System.Void WeaverMonoBehaviourTests.MonoBehaviourTargetRpc.MonoBehaviourTargetRpc::TargetThisCantBeOutsideNetworkBehaviour(Mirror.NetworkConnection))"));
-        }
-
-        [Test]
         public void MonoBehaviourServer()
         {
             Assert.That(weaverErrors, Contains.Item("Server method ThisCantBeOutsideNetworkBehaviour must be declared inside a NetworkBehaviour (at System.Void WeaverMonoBehaviourTests.MonoBehaviourServer.MonoBehaviourServer::ThisCantBeOutsideNetworkBehaviour())"));
