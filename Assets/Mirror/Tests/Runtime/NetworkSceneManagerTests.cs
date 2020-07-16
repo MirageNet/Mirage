@@ -239,5 +239,17 @@ namespace Mirror.Tests
             Assert.That(client.sceneManager.Ready, Is.False);
             func1.Received(1).Invoke(Arg.Any<INetworkConnection>());
         }
+
+        [UnityTest]
+        public IEnumerator ClientSceneMessageInvokeTest() => RunAsync(async () =>
+        {
+            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
+            client.sceneManager.ClientChangeScene.AddListener(func1);
+            client.sceneManager.ClientSceneMessage(null, new SceneMessage() { sceneName = "testScene" });
+
+            await WaitFor(() => client.sceneManager.networkSceneName.Equals("testScene"));
+
+            func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+        });
     }
 }
