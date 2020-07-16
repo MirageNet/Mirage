@@ -174,7 +174,7 @@ namespace Mirror.Tests
         [Test]
         public void ClientNoHandlersInHostMode()
         {
-            server.SendToAll(new SceneMessage());
+            Assert.DoesNotThrow(() => { server.SendToAll(new SceneMessage()); }); 
         }
     }
 
