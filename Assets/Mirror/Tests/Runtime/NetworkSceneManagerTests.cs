@@ -4,6 +4,7 @@ using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 using static Mirror.Tests.AsyncUtil;
@@ -62,40 +63,24 @@ namespace Mirror.Tests
             Assert.That(onOnServerSceneOnlyChangedCounter, Is.EqualTo(1));
         });
 
-        int OnServerChangeSceneCounter;
-        void TestOnServerChangeSceneInvoke(string scene)
-        {
-            OnServerChangeSceneCounter++;
-        }
-
-        int ClientSceneMessageCounter;
-        void ClientSceneMessage(INetworkConnection conn, SceneMessage msg)
-        {
-            ClientSceneMessageCounter++;
-        }
-
-        int NotReadyMessageCounter;
-        void NotReadyMessage(INetworkConnection conn, NotReadyMessage msg)
-        {
-            NotReadyMessageCounter++;
-        }
-
         [UnityTest]
         public IEnumerator ServerChangeSceneTest() => RunAsync(async () =>
         {
-            client.Connection.RegisterHandler<SceneMessage>(ClientSceneMessage);
-            client.Connection.RegisterHandler<NotReadyMessage>(NotReadyMessage);
-            sceneManager.ServerChangeScene.AddListener(TestOnServerChangeSceneInvoke);
+            bool invokeClientSceneMessage = false;
+            bool invokeNotReadyMessage = false;
+            UnityAction<string> func1 = Substitute.For<UnityAction<string>>();
+            client.Connection.RegisterHandler<SceneMessage>(msg => invokeClientSceneMessage = true);
+            client.Connection.RegisterHandler<NotReadyMessage>(msg => invokeNotReadyMessage = true);
+            sceneManager.ServerChangeScene.AddListener(func1);
 
             server.sceneManager.ChangeServerScene("testScene");
 
+            await WaitFor(() => invokeClientSceneMessage == true && invokeNotReadyMessage == true);
+
+            func1.Received(1).Invoke(Arg.Any<string>());
             Assert.That(server.sceneManager.networkSceneName, Is.EqualTo("testScene"));
-            Assert.That(OnServerChangeSceneCounter, Is.EqualTo(1));
-
-            await WaitFor(() => ClientSceneMessageCounter > 0 && NotReadyMessageCounter > 0);
-
-            Assert.That(ClientSceneMessageCounter, Is.EqualTo(1));
-            Assert.That(NotReadyMessageCounter, Is.EqualTo(1));
+            Assert.That(invokeClientSceneMessage, Is.True);
+            Assert.That(invokeNotReadyMessage, Is.True);
         });
 
         [Test]
