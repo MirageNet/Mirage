@@ -82,7 +82,7 @@ namespace Mirror.Weaver
         /// <param name="ServerRpcAttr">The attribute that made this an RPC</param>
         /// <returns>The method containing the original code</returns>
         /// <remarks>
-        /// Generates code like this:
+        /// Generates code like this: (Observers case)
         /// <code>
         /// public void Test (int param)
         /// {
@@ -91,6 +91,36 @@ namespace Mirror.Weaver
         ///     base.SendRPCInternal(typeof(class),"RpcTest", writer, 0);
         /// }
         /// public void UserCode_Test(int param)
+        /// {
+        ///     // whatever the user did before
+        /// }
+        /// </code>
+        ///
+        /// Generates code like this: (Owner/Connection case)
+        /// <code>
+        /// public void TargetTest(NetworkConnection conn, int param)
+        /// {
+        ///     NetworkWriter writer = new NetworkWriter();
+        ///     writer.WritePackedUInt32((uint)param);
+        ///     base.SendTargetRPCInternal(conn, typeof(class), "TargetTest", val);
+        /// }
+        /// 
+        /// public void UserCode_TargetTest(NetworkConnection conn, int param)
+        /// {
+        ///     // whatever the user did before
+        /// }
+        /// </code>
+        /// or if no connection is specified
+        ///
+        /// <code>
+        /// public void TargetTest (int param)
+        /// {
+        ///     NetworkWriter writer = new NetworkWriter();
+        ///     writer.WritePackedUInt32((uint) param);
+        ///     base.SendTargetRPCInternal(null, typeof(class), "TargetTest", val);
+        /// }
+        /// 
+        /// public void UserCode_TargetTest(int param)
         /// {
         ///     // whatever the user did before
         /// }
