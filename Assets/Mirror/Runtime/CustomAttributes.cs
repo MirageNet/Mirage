@@ -30,14 +30,14 @@ namespace Mirror
     /// <summary>
     /// The server uses a Remote Procedure Call (RPC) to run this function on specific clients.
     /// </summary>
-    public enum Client { Owner, Observer }
+    public enum Client { Owner, Observers, Connection }
 
     [AttributeUsage(AttributeTargets.Method)]
     public class ClientRpcAttribute : Attribute
     {
         // this is zero
         public int channel = Channels.DefaultReliable;
-        public Client target = Client.Observer;
+        public Client target = Client.Observers;
         public bool excludeOwner;
     }
 

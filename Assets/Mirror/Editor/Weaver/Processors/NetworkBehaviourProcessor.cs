@@ -952,7 +952,7 @@ namespace Mirror.Weaver
                 return;
             }
 
-            Client clientTarget = clientRpcAttr.GetField("target", Client.Observer);
+            Client clientTarget = clientRpcAttr.GetField("target", Client.Observers);
             bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
 
             names.Add(md.Name);
@@ -965,7 +965,7 @@ namespace Mirror.Weaver
 
             MethodDefinition userCodeFunc = RpcProcessor.GenerateStub(md, clientRpcAttr);
 
-            MethodDefinition skeletonFunc = RpcProcessor.GenerateSkeleton(md, userCodeFunc);
+            MethodDefinition skeletonFunc = RpcProcessor.GenerateSkeleton(md, userCodeFunc, clientRpcAttr);
             if (skeletonFunc != null)
             {
                 clientRpcSkeletonFuncs.Add(skeletonFunc);

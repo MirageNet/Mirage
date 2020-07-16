@@ -2,7 +2,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 namespace Mirror.Weaver
 {
-    public enum Client { Owner, Observer }
+    public enum Client { Owner, Observers, Connection }
 
     /// <summary>
     /// Processes [Rpc] methods in NetworkBehaviour
@@ -36,7 +36,7 @@ namespace Mirror.Weaver
         /// }
         /// </code>
         /// </remarks>
-        public static MethodDefinition GenerateSkeleton(MethodDefinition md, MethodDefinition userCodeFunc)
+        public static MethodDefinition GenerateSkeleton(MethodDefinition md, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr)
         {
             var rpc = new MethodDefinition(
                 MethodProcessor.SkeletonPrefix + md.Name,
@@ -52,9 +52,9 @@ namespace Mirror.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Castclass, md.DeclaringType));
 
-            // NetworkConnection parameter is optional
-            // todo: maybe test if we selected owner target?
-            if (HasNetworkConnectionParameter(md))
+            // NetworkConnection parameter is only required for Client.Connection
+            Client target = clientRpcAttr.GetField("target", Client.Observers); 
+            if (target == Client.Connection && HasNetworkConnectionParameter(md))
             {
                 //client.connection
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -112,7 +112,7 @@ namespace Mirror.Weaver
 
             string rpcName = md.Name;
 
-            Client target = clientRpcAttr.GetField("target", Client.Observer); 
+            Client target = clientRpcAttr.GetField("target", Client.Observers); 
             int channel = clientRpcAttr.GetField("channel", 0);
             bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false); // how to handle it 
 
@@ -120,13 +120,10 @@ namespace Mirror.Weaver
             // this
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            if (target == Client.Owner)
-            {
-                if (HasNetworkConnectionParameter(md)) // connection
-                    worker.Append(worker.Create(OpCodes.Ldarg_1));
-                else // null
-                    worker.Append(worker.Create(OpCodes.Ldnull));
-            }
+            if (target == Client.Connection && HasNetworkConnectionParameter(md))
+                worker.Append(worker.Create(OpCodes.Ldarg_1));
+            else if (target == Client.Owner)
+                worker.Append(worker.Create(OpCodes.Ldnull));
 
             worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType));
             // invokerClass
@@ -136,7 +133,7 @@ namespace Mirror.Weaver
             worker.Append(worker.Create(OpCodes.Ldloc_0));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
 
-            if (target == Client.Observer)
+            if (target == Client.Observers)
             {
                 worker.Append(worker.Create(excludeOwner ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
                 worker.Append(worker.Create(OpCodes.Callvirt, Weaver.sendRpcInternal));
