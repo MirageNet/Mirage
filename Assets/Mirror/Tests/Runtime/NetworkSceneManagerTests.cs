@@ -171,6 +171,12 @@ namespace Mirror.Tests
 
         //    Assert.That(SceneManager.GetSceneByName("testScene"), Is.Not.Null);
         //});
+
+        [Test]
+        public void ClientNoHandlersInHostMode()
+        {
+            server.SendToAll(new SceneMessage());
+        }
     }
 
     public class NetworkSceneManagerNonHostTests : ClientServerSetup<MockComponent>
