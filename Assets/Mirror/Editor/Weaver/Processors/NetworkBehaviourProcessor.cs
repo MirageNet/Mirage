@@ -943,7 +943,7 @@ namespace Mirror.Weaver
 
         void ProcessClientRpc(HashSet<string> names, MethodDefinition md, CustomAttribute clientRpcAttr)
         {
-            if (!RpcProcessor.Validate(md))
+            if (!RpcProcessor.Validate(md, clientRpcAttr))
                 return;
 
             if (names.Contains(md.Name))
