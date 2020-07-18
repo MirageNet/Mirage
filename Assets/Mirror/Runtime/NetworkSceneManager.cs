@@ -245,7 +245,7 @@ namespace Mirror
             // Let client prepare for scene change
             OnClientChangeScene(msg.sceneName, msg.sceneOperation);
 
-            ApplySceneOperation(msg.sceneName, msg.sceneOperation);  
+            StartCoroutine(ApplySceneOperation(msg.sceneName, msg.sceneOperation));
         }
 
         internal void ClientNotReadyMessage(INetworkConnection conn, NotReadyMessage msg)
@@ -354,7 +354,7 @@ namespace Mirror
             if(sceneOperation == SceneOperation.Normal)
                 OnServerChangeScene(newSceneName);
 
-            ApplySceneOperation(newSceneName, sceneOperation);
+            StartCoroutine(ApplySceneOperation(newSceneName, sceneOperation));
 
             // notify all clients about the new scene
             server.SendToAll(new SceneMessage { sceneName = newSceneName, sceneOperation = sceneOperation });
