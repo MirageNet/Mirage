@@ -55,9 +55,6 @@ namespace Mirror
         /// </remarks>
         public string NetworkSceneName { get; protected set; } = "";
 
-        [NonSerialized]
-        public AsyncOperation loadingSceneAsync;
-
         /// <summary>
         /// Returns true when a client's connection has been set to ready.
         /// <para>A client that is ready recieves state updates from the server, while a client that is not ready does not. This useful when the state of the game is not normal, such as a scene change or end-of-game.</para>
@@ -83,20 +80,7 @@ namespace Mirror
             }
         }
 
-        public virtual void LateUpdate()
-        {
-            UpdateScene();
-        }
-
-        void UpdateScene()
-        {
-            if (loadingSceneAsync != null && loadingSceneAsync.isDone)
-            {
-                FinishLoadScene();
-                loadingSceneAsync.allowSceneActivation = true;
-                loadingSceneAsync = null;
-            }
-        }
+        public virtual void LateUpdate() { }
 
         void RegisterClientMessages(INetworkConnection connection)
         {
