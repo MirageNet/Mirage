@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -380,18 +381,18 @@ namespace Mirror
 
         #endregion
 
-        void ApplySceneOperation(string sceneName, SceneOperation sceneOperation = SceneOperation.Normal)
+        IEnumerator ApplySceneOperation(string sceneName, SceneOperation sceneOperation = SceneOperation.Normal)
         {
             switch (sceneOperation)
             {
                 case SceneOperation.Normal:
                     NetworkSceneName = sceneName;
-                    loadingSceneAsync = SceneManager.LoadSceneAsync(sceneName);
+                    yield return SceneManager.LoadSceneAsync(sceneName);
                     break;
                 case SceneOperation.LoadAdditive:
                     // Ensure additive scene is not already loaded since we don't know which was passed in the Scene message
                     if (!SceneManager.GetSceneByName(sceneName).IsValid() && !SceneManager.GetSceneByPath(sceneName).IsValid())
-                        loadingSceneAsync = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+                        yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
                     else
                     {
                         logger.LogWarning($"Scene {sceneName} is already loaded");
@@ -400,13 +401,15 @@ namespace Mirror
                 case SceneOperation.UnloadAdditive:
                     // Ensure additive scene is actually loaded since we don't know which was passed in the Scene message
                     if (SceneManager.GetSceneByName(sceneName).IsValid() || SceneManager.GetSceneByPath(sceneName).IsValid())
-                        loadingSceneAsync = SceneManager.UnloadSceneAsync(sceneName, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
+                        yield return SceneManager.UnloadSceneAsync(sceneName, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
                     else
                     {
                         logger.LogWarning($"Cannot unload {sceneName} with UnloadAdditive operation");
                     }
                     break;
             }
+
+            FinishLoadScene();
         }
     }
 }
