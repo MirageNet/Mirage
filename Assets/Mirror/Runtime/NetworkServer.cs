@@ -126,6 +126,8 @@ namespace Mirror
             }
             if (transport != null)
                 transport.Disconnect();
+
+            DestroyAllObjects();
         }
         
         void Initialize()
@@ -958,6 +960,18 @@ namespace Mirror
             {
                 SpawnObject(obj, ownerConnection);
             }
+        }
+
+        void DestroyAllObjects()
+        {
+            foreach (NetworkIdentity identity in spawned.Values.ToList())
+            {
+                if (identity != null && identity.gameObject != null)
+                {
+                    DestroyObject(identity, true);
+                }
+            }
+            spawned.Clear();
         }
 
         void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
