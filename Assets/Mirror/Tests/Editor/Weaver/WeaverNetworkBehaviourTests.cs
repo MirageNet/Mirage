@@ -41,12 +41,6 @@ namespace Mirror.Weaver.Tests
         }
 
         [Test]
-        public void NetworkBehaviourTargetRpcParamNetworkConnection()
-        {
-            Assert.That(weaverErrors, Is.Empty);
-        }
-
-        [Test]
         public void NetworkBehaviourClientRpcGenericParam()
         {
             Assert.That(weaverErrors, Contains.Item("RpcCantHaveGeneric cannot have generic parameters (at System.Void WeaverNetworkBehaviourTests.NetworkBehaviourClientRpcGenericParam.NetworkBehaviourClientRpcGenericParam::RpcCantHaveGeneric())"));
@@ -104,7 +98,13 @@ namespace Mirror.Weaver.Tests
         [Test]
         public void NetworkBehaviourClientRpcParamNetworkConnection()
         {
-            Assert.That(weaverErrors, Contains.Item("RpcCantHaveParamOptional has invalid parameter monkeyCon, Cannot pass NetworkConnections (at System.Void WeaverNetworkBehaviourTests.NetworkBehaviourClientRpcParamNetworkConnection.NetworkBehaviourClientRpcParamNetworkConnection::RpcCantHaveParamOptional(Mirror.INetworkConnection))"));
+            Assert.That(weaverErrors, Is.Empty);
+        }
+
+        [Test]
+        public void NetworkBehaviourClientRpcParamNetworkConnectionNotFirst()
+        {
+            Assert.That(weaverErrors, Contains.Item("ClientRpc with Client.Connection needs a network connection parameter (at System.Void WeaverNetworkBehaviourTests.NetworkBehaviourClientRpcParamNetworkConnectionNotFirst.NetworkBehaviourClientRpcParamNetworkConnectionNotFirst::ClientRpcCantHaveParamOptional(System.Int32,Mirror.INetworkConnection))"));
         }
 
         [Test]
