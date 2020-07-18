@@ -275,7 +275,7 @@ namespace Mirror
         {
             //set ready after scene change has completed
             if (!Ready)
-                SetClientReady(conn);
+                SetClientReady();
 
             ClientSceneChanged.Invoke(conn);
         }
