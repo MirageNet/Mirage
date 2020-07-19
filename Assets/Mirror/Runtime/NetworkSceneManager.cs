@@ -296,7 +296,7 @@ namespace Mirror
             {
                 logger.Log("Finished loading scene in host mode.");
 
-                if (client.Connection != null) //TODO: can do && sceneOperation == SceneOperation.Normal to prevent Auth spawning player for additive load/unload
+                if (client.Connection != null && sceneOperation == SceneOperation.Normal)
                 {
                     client.OnAuthenticated(client.Connection);
                 }
@@ -327,7 +327,7 @@ namespace Mirror
             {
                 logger.Log("Finished loading scene in client-only mode.");
 
-                if (client.Connection != null) //TODO: can do && sceneOperation == SceneOperation.Normal to prevent Auth spawning player for additive load/unload
+                if (client.Connection != null && sceneOperation == SceneOperation.Normal)
                 {
                     client.OnAuthenticated(client.Connection);
                 }
