@@ -192,6 +192,21 @@ namespace Mirror.Tests
             });
         }
 
+        [Test]
+        public void FinishLoadSceneHostTest()
+        {
+            UnityAction<INetworkConnection> func1 = Substitute.For<UnityAction<INetworkConnection>>();
+            UnityAction<string, SceneOperation> func2 = Substitute.For<UnityAction<string, SceneOperation>>();
+
+            client.Authenticated.AddListener(func1);
+            client.sceneManager.ClientSceneChanged.AddListener(func2);
+
+            client.sceneManager.FinishLoadScene("test", SceneOperation.Normal);
+
+            func1.Received(1).Invoke(Arg.Any<INetworkConnection>());
+            func2.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+        }
+
         [UnityTest]
         public IEnumerator ClientOfflineSceneException() => RunAsync(async () =>
         {
