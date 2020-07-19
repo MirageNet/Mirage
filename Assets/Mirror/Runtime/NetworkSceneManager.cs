@@ -130,18 +130,6 @@ namespace Mirror
             }
         }
 
-        void FinishStartHost()
-        {
-            // server scene was loaded. now spawn all the objects
-            server.SpawnObjects();
-
-            // DO NOT do this earlier. it would cause race conditions where a
-            // client will do things before the server is even fully started.
-            logger.Log("FinishStartHost called");
-
-            server.ActivateHostScene();
-        }
-
         void FinishLoadSceneHost()
         {
             logger.Log("Finished loading scene in host mode.");
@@ -151,7 +139,9 @@ namespace Mirror
                 client.OnAuthenticated(client.Connection);
             }
 
-            FinishStartHost();
+            // server scene was loaded. now spawn all the objects
+            server.SpawnObjects();
+            server.ActivateHostScene();
 
             // call OnServerSceneChanged
             OnServerSceneChanged(NetworkSceneName);
