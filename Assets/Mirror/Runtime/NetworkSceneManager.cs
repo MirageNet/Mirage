@@ -33,17 +33,17 @@ namespace Mirror
         /// <summary>
         /// Event fires after the Client has completed its scene change.
         /// </summary>
-        public NetworkConnectionEvent ClientSceneChanged = new NetworkConnectionEvent();
+        public ClientSceneChangeEvent ClientSceneChanged = new ClientSceneChangeEvent();
 
         /// <summary>
         /// Event fires before Server changes scene.
         /// </summary>
-        public NetworkSceneEvent ServerChangeScene = new NetworkSceneEvent();
+        public ClientSceneChangeEvent ServerChangeScene = new ClientSceneChangeEvent();
 
         /// <summary>
         /// Event fires after Server has completed scene change.
         /// </summary>
-        public NetworkSceneEvent ServerSceneChanged = new NetworkSceneEvent();
+        public ClientSceneChangeEvent ServerSceneChanged = new ClientSceneChangeEvent();
 
         /// <summary>
         /// The name of the current network scene.
@@ -256,13 +256,13 @@ namespace Mirror
         /// <para>Non-Additive Scene changes will cause player objects to be destroyed. The default implementation of OnClientSceneChanged in the NetworkSceneManager is to add a player object for the connection if no player object exists.</para>
         /// </summary>
         /// <param name="conn">The network connection that the scene change message arrived on.</param>
-        internal void OnClientSceneChanged(INetworkConnection conn)
+        internal void OnClientSceneChanged(string sceneName, SceneOperation sceneOperation)
         {
             //set ready after scene change has completed
             if (!Ready)
                 SetClientReady();
 
-            ClientSceneChanged.Invoke(conn);
+            ClientSceneChanged.Invoke(sceneName, sceneOperation);
         }
 
         /// <summary>
@@ -332,8 +332,7 @@ namespace Mirror
             server.SetAllClientsNotReady();
 
             // Let server prepare for scene change
-            if(sceneOperation == SceneOperation.Normal)
-                OnServerChangeScene(newSceneName);
+            OnServerChangeScene(newSceneName, sceneOperation);
 
             StartCoroutine(ApplySceneOperation(newSceneName, sceneOperation));
 
@@ -346,18 +345,18 @@ namespace Mirror
         /// <para>This allows server to do work / cleanup / prep before the scene changes.</para>
         /// </summary>
         /// <param name="newSceneName">Name of the scene that's about to be loaded</param>
-        internal void OnServerChangeScene(string newSceneName)
+        internal void OnServerChangeScene(string newSceneName, SceneOperation operation)
         {
-            ServerChangeScene.Invoke(newSceneName);
+            ServerChangeScene.Invoke(newSceneName, operation);
         }
 
         /// <summary>
         /// Called on the server when a scene is completed loaded, when the scene load was initiated by the server with ChangeServerScene().
         /// </summary>
         /// <param name="sceneName">The name of the new scene.</param>
-        internal void OnServerSceneChanged(string sceneName)
+        internal void OnServerSceneChanged(string sceneName, SceneOperation operation)
         {
-            ServerSceneChanged.Invoke(sceneName);
+            ServerSceneChanged.Invoke(sceneName, operation);
         }
 
         #endregion
