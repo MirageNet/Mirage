@@ -66,8 +66,6 @@ namespace Mirror
         {
             DontDestroyOnLoad(gameObject);
 
-            SceneManager.sceneLoaded += OnSceneLoaded;
-
             if (client != null)
             {
                 client.Authenticated.AddListener(OnClientAuthenticated);
@@ -85,29 +83,6 @@ namespace Mirror
         {
             connection.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
             connection.RegisterHandler<SceneMessage>(ClientSceneMessage);
-        }
-
-        // support additive scene loads:
-        //   * ClientScene.PrepareToSpawnSceneObjects enables them again on the
-        //     client after the server sends ObjectSpawnStartedMessage to client
-        //     in SpawnObserversForConnection. This is only called when the
-        //     client joins, so we need to rebuild scene objects manually again.
-        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            if (mode == LoadSceneMode.Additive)
-            {
-                if(client.Active)
-                {
-                    client.PrepareToSpawnSceneObjects();
-                    if (logger.LogEnabled()) logger.Log("Rebuild Client spawnableObjects after additive scene load: " + scene.name);
-                }
-
-                if (server.Active)
-                {
-                    server.SpawnObjects();
-                    if (logger.LogEnabled()) logger.Log("Respawned Server objects after additive scene load: " + scene.name);
-                }
-            }
         }
 
         internal void FinishLoadScene(string sceneName, SceneOperation sceneOperation)
