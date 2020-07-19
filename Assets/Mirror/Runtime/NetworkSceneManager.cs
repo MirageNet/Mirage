@@ -18,7 +18,6 @@ namespace Mirror
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkSceneManager));
 
         [Serializable] public class ClientSceneChangeEvent : UnityEvent<string, SceneOperation> { }
-        [Serializable] public class NetworkSceneEvent : UnityEvent<string> { }
 
         public NetworkClient client;
         public NetworkServer server;
