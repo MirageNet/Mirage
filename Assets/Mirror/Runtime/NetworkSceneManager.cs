@@ -115,66 +115,49 @@ namespace Mirror
             // host mode?
             if (client && client.IsLocalClient)
             {
-                FinishLoadSceneHost();
+                logger.Log("Finished loading scene in host mode.");
+
+                if (client.Connection != null)
+                {
+                    client.OnAuthenticated(client.Connection);
+                }
+
+                // server scene was loaded. now spawn all the objects
+                server.SpawnObjects();
+                server.ActivateHostScene();
+
+                // call OnServerSceneChanged
+                OnServerSceneChanged(sceneName, sceneOperation);
+
+                if (client.IsConnected)
+                {
+                    // let client know that we changed scene
+                    OnClientSceneChanged(sceneName, sceneOperation);
+                }
             }
             // server-only mode?
             else if (server && server.Active)
             {
-                FinishLoadSceneServerOnly();
+                logger.Log("Finished loading scene in server-only mode.");
+
+                server.SpawnObjects();
+                OnServerSceneChanged(sceneName, sceneOperation);
             }
             // client-only mode?
             else if (client && client.Active)
             {
-                FinishLoadSceneClientOnly();
+                logger.Log("Finished loading scene in client-only mode.");
+
+                if (client.Connection != null)
+                {
+                    client.OnAuthenticated(client.Connection);
+                }
+
+                if (client.IsConnected)
+                {
+                    OnClientSceneChanged(sceneName, sceneOperation);
+                }
             }
-        }
-
-        void FinishLoadSceneHost()
-        {
-            logger.Log("Finished loading scene in host mode.");
-
-            if (client.Connection != null)
-            {
-                client.OnAuthenticated(client.Connection);
-            }
-
-            // server scene was loaded. now spawn all the objects
-            server.SpawnObjects();
-            server.ActivateHostScene();
-
-            // call OnServerSceneChanged
-            OnServerSceneChanged(NetworkSceneName);
-
-            if (client.IsConnected)
-            {
-                // let client know that we changed scene
-                OnClientSceneChanged(client.Connection);
-            }
-        }
-
-        void FinishLoadSceneClientOnly()
-        {
-            logger.Log("Finished loading scene in client-only mode.");
-
-            if (client.Connection != null)
-            {
-                client.OnAuthenticated(client.Connection);
-            }
-
-            if (client.IsConnected)
-            {
-                OnClientSceneChanged(client.Connection);
-            }
-        }
-
-        // finish load scene part for server-only. . makes code easier and is
-        // necessary for FinishStartServer later.
-        void FinishLoadSceneServerOnly()
-        {
-            logger.Log("Finished loading scene in server-only mode.");
-
-            server.SpawnObjects();
-            OnServerSceneChanged(NetworkSceneName);
         }
 
         #region Client
