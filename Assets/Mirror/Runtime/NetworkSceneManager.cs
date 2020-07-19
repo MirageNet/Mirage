@@ -111,7 +111,7 @@ namespace Mirror
                 throw new InvalidOperationException("ClientSceneMessage: cannot change network scene while client is disconnected");
             }
 
-            if (server && server.LocalClient)
+            if (client.IsLocalClient)
             {
                 throw new InvalidOperationException("ClientSceneMessage: cannot change client network scene while operating in host mode");
             }
