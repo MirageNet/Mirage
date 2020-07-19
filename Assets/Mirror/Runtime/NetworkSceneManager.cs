@@ -111,7 +111,7 @@ namespace Mirror
             }
         }
 
-        internal void FinishLoadScene()
+        internal void FinishLoadScene(string sceneName, SceneOperation sceneOperation)
         {
             // host mode?
             if (client && client.IsLocalClient)
@@ -379,7 +379,7 @@ namespace Mirror
                     break;
             }
 
-            FinishLoadScene();
+            FinishLoadScene(sceneName, sceneOperation);
         }
     }
 }
