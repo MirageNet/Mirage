@@ -18,16 +18,13 @@ namespace Mirror
 
             NetworkClient networkClient = go.GetComponent<NetworkClient>();
             networkClient.Transport = transport;
-            networkClient.sceneManager = nsm;
 
             NetworkServer networkServer = go.GetComponent<NetworkServer>();
             networkServer.transport = transport;
-            networkServer.sceneManager = nsm;
 
             NetworkManager networkManager = go.GetComponent<NetworkManager>();
             networkManager.client = networkClient;
             networkManager.server = networkServer;
-            networkManager.transport = transport;
 
             PlayerSpawner playerSpawner = go.GetComponent<PlayerSpawner>();
             playerSpawner.client = networkClient;

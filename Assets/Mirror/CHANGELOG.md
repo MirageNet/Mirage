@@ -1,3 +1,35 @@
+## [43.1.1](https://github.com/MirrorNG/MirrorNG/compare/43.1.0-master...43.1.1-master) (2020-07-22)
+
+
+### Bug Fixes
+
+* remove unused code ([#308](https://github.com/MirrorNG/MirrorNG/issues/308)) ([554d2c5](https://github.com/MirrorNG/MirrorNG/commit/554d2c5030a9ff1ebcd9ca17ed7d673865709a1c))
+* update interfaces for recent changes that were missed ([#309](https://github.com/MirrorNG/MirrorNG/issues/309)) ([a17e760](https://github.com/MirrorNG/MirrorNG/commit/a17e760e36d581ba964120af11678b66a1248ecc))
+
+# [43.1.0](https://github.com/MirrorNG/MirrorNG/compare/43.0.1-master...43.1.0-master) (2020-07-22)
+
+
+### Bug Fixes
+
+* add NetworkManager.StartClientUri test ([#2095](https://github.com/MirrorNG/MirrorNG/issues/2095)) ([12827f6](https://github.com/MirrorNG/MirrorNG/commit/12827f65a906232da55ca226129423a5bd806d23))
+* dont allow set of networkSceneName directly ([#2100](https://github.com/MirrorNG/MirrorNG/issues/2100)) ([df16a7d](https://github.com/MirrorNG/MirrorNG/commit/df16a7d3ccfddcf3aa1a68fe0965757d91363e16))
+* fixing cloud scripts not pinging api ([#2097](https://github.com/MirrorNG/MirrorNG/issues/2097)) ([8e545ac](https://github.com/MirrorNG/MirrorNG/commit/8e545ac46863e4fbe874c70bf9559c9b12de83d4))
+* Misc code smells ([#2094](https://github.com/MirrorNG/MirrorNG/issues/2094)) ([e4cc85c](https://github.com/MirrorNG/MirrorNG/commit/e4cc85c413eed01950bf9dddf0bdac2afd8ab479))
+* register prefab error with same guid ([#2092](https://github.com/MirrorNG/MirrorNG/issues/2092)) ([984eb73](https://github.com/MirrorNG/MirrorNG/commit/984eb73ea495cf876446a21775fde5c33119695b))
+* renaming call/invoke prefix for SyncEvent ([#2089](https://github.com/MirrorNG/MirrorNG/issues/2089)) ([18d6957](https://github.com/MirrorNG/MirrorNG/commit/18d695744f7c253d749792e4f9f8759ef16fcbab)), closes [#2088](https://github.com/MirrorNG/MirrorNG/issues/2088)
+
+
+### Features
+
+* Rigidbody example ([#2076](https://github.com/MirrorNG/MirrorNG/issues/2076)) ([ef47ee7](https://github.com/MirrorNG/MirrorNG/commit/ef47ee7a57bddcdc669aef32fbeffcd4446f98a8))
+
+## [43.0.1](https://github.com/MirrorNG/MirrorNG/compare/43.0.0-master...43.0.1-master) (2020-07-20)
+
+
+### Bug Fixes
+
+* benchmark examples ([b221b74](https://github.com/MirrorNG/MirrorNG/commit/b221b74beae2ee56f6fe536963b17d0aff10c5d8))
+
 # [43.0.0](https://github.com/MirrorNG/MirrorNG/compare/42.2.0-master...43.0.0-master) (2020-07-20)
 
 
