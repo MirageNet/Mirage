@@ -154,7 +154,6 @@ namespace Mirror
 
         internal void RegisterMessageHandlers(INetworkConnection connection)
         {
-            connection.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
             connection.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
         }
 
@@ -743,14 +742,6 @@ namespace Mirror
                 conn.Send(new NotReadyMessage());
             }
         }
-
-        // default ready handler.
-        void OnClientReadyMessage(INetworkConnection conn, ReadyMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + conn);
-            SetClientReady(conn);
-        }
-
         /// <summary>
         /// Removes the player object from the connection
         /// </summary>

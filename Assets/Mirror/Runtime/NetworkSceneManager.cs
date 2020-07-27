@@ -199,6 +199,11 @@ namespace Mirror
 
         #region Server
 
+        internal void RegisterMessageHandlers(INetworkConnection connection)
+        {
+            connection.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
+        }
+
         // called after successful authentication
         void OnServerAuthenticated(INetworkConnection conn)
         {
@@ -210,6 +215,13 @@ namespace Mirror
                 var msg = new SceneMessage { sceneName = NetworkSceneName };
                 conn.Send(msg);
             }
+        }
+
+        // default ready handler.
+        void OnClientReadyMessage(INetworkConnection conn, ReadyMessage msg)
+        {
+            if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + conn);
+            SetClientReady(conn);
         }
 
         /// <summary>
