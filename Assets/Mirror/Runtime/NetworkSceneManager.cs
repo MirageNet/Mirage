@@ -225,6 +225,52 @@ namespace Mirror
         }
 
         /// <summary>
+        /// Sets the client to be ready.
+        /// <para>When a client has signaled that it is ready, this method tells the server that the client is ready to receive spawned objects and state synchronization updates. This is usually called in a handler for the SYSTEM_READY message. If there is not specific action a game needs to take for this message, relying on the default ready handler function is probably fine, so this call wont be needed.</para>
+        /// </summary>
+        /// <param name="conn">The connection of the client to make ready.</param>
+        public void SetClientReady(INetworkConnection conn)
+        {
+            if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + conn);
+
+            // set ready
+            conn.IsReady = true;
+
+            // client is ready to start spawning objects
+            if (conn.Identity != null)
+                server.SpawnObserversForConnection(conn);
+        }
+
+        /// <summary>
+        /// Marks all connected clients as no longer ready.
+        /// <para>All clients will no longer be sent state synchronization updates. The player's clients can call ClientManager.Ready() again to re-enter the ready state. This is useful when switching scenes.</para>
+        /// </summary>
+        public void SetAllClientsNotReady()
+        {
+            foreach (INetworkConnection conn in server.connections)
+            {
+                SetClientNotReady(conn);
+            }
+        }
+
+        /// <summary>
+        /// Sets the client of the connection to be not-ready.
+        /// <para>Clients that are not ready do not receive spawned objects or state synchronization updates. They client can be made ready again by calling SetClientReady().</para>
+        /// </summary>
+        /// <param name="conn">The connection of the client to make not ready.</param>
+        public void SetClientNotReady(INetworkConnection conn)
+        {
+            if (conn.IsReady)
+            {
+                if (logger.LogEnabled()) logger.Log("PlayerNotReady " + conn);
+                conn.IsReady = false;
+                conn.RemoveObservers();
+
+                conn.Send(new NotReadyMessage());
+            }
+        }
+
+        /// <summary>
         /// This causes the server to switch scenes and sets the networkSceneName.
         /// <para>Clients that connect to this server will automatically switch to this scene. This automatically sets clients to be not-ready. The clients must call Ready() again to participate in the new scene.</para>
         /// </summary>
@@ -238,7 +284,7 @@ namespace Mirror
             }
 
             if (logger.LogEnabled()) logger.Log("ServerChangeScene " + newSceneName);
-            server.SetAllClientsNotReady();
+            SetAllClientsNotReady();
 
             // Let server prepare for scene change
             OnServerChangeScene(newSceneName, sceneOperation);
