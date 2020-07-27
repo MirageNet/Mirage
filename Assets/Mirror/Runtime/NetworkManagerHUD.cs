@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Mirror.Examples
+namespace Mirror
 {
     public class NetworkManagerHUD : MonoBehaviour
     {
