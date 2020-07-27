@@ -502,7 +502,7 @@ namespace Mirror
             return InternalReplacePlayerForConnection(conn, client, player, keepAuthority);
         }
 
-        void SpawnObserversForConnection(INetworkConnection conn)
+        internal void SpawnObserversForConnection(INetworkConnection conn)
         {
             if (logger.LogEnabled()) logger.Log("Spawning " + Spawned.Count + " objects for conn " + conn);
 
