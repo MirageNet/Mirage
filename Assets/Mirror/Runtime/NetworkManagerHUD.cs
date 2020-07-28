@@ -6,6 +6,7 @@ namespace Mirror
     public class NetworkManagerHUD : MonoBehaviour
     {
         public NetworkManager NetworkManager;
+        public string NetworkAddress = "localhost";
 
         [Header("Prefab Canvas Elements")]
         public InputField NetworkAddressInput;
@@ -39,7 +40,7 @@ namespace Mirror
 
         public void StartClientButtonHandler()
         {
-            _ = NetworkManager.StartClient(NetworkAddressInput.text);
+            _ = NetworkManager.StartClient(NetworkAddress);
             OnlineSetActive();
         }
 
@@ -47,6 +48,11 @@ namespace Mirror
         {
             NetworkManager.StopHost();
             OfflineSetActive();
+        }
+
+        public void OnNetworkAddressInputUpdate()
+        {
+            NetworkAddress = NetworkAddressInput.text;
         }
     }
 }
