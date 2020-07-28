@@ -249,5 +249,31 @@ namespace Mirror.Tests
         {
             Assert.That(clientSceneManager.NetworkSceneName.Equals(string.Empty));
         }
+
+        [Test]
+        public void SetClientReadyAndNotReadyTest()
+        {
+            Assert.That(client.Connection.IsReady, Is.False);
+
+            serverSceneManager.SetClientReady(client.Connection);
+            Assert.That(client.Connection.IsReady, Is.True);
+
+            serverSceneManager.SetClientNotReady(client.Connection);
+            Assert.That(client.Connection.IsReady, Is.False);
+        }
+
+        [Test]
+        public void SetAllClientsNotReadyTest()
+        {
+            // add second ready client
+            NetworkConnection second = new NetworkConnection(null);
+            second.IsReady = true;
+            server.connections.Add(second);
+
+            // set all not ready
+            serverSceneManager.SetAllClientsNotReady();
+            Assert.That(client.Connection.IsReady, Is.False);
+            Assert.That(second.IsReady, Is.False);
+        }
     }
 }
