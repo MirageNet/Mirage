@@ -28,6 +28,11 @@ namespace Mirror
             {
                 client.Authenticated.AddListener(OnClientAuthenticated);
                 client.RegisterPrefab(playerPrefab.gameObject);
+
+                if(sceneManager != null)
+                {
+                    sceneManager.ClientSceneChanged.AddListener(OnClientSceneChanged);
+                }
             }
             if (server != null)
             {
@@ -48,14 +53,16 @@ namespace Mirror
         /// <param name="conn">Connection to the server.</param>
         private void OnClientAuthenticated(INetworkConnection connection)
         {
-            // OnClientConnect by default calls AddPlayer but it should not do
-            // that when we have online/offline scenes. so we need the
-            // clientLoadedScene flag to prevent it.
-            // Ready/AddPlayer is usually triggered by a scene load completing. if no scene was loaded, then Ready/AddPlayer it here instead.
-            if (!sceneManager.Ready)
-                sceneManager.SetClientReady();
+            // OnClientConnect calls AddPlayer if there is no NetworkSceneManager
+            if (!sceneManager)
+                client.Send(new AddPlayerMessage());
+        }
 
-            client.Send(new AddPlayerMessage());
+        void OnClientSceneChanged(string sceneName, SceneOperation operation)
+        {
+            //AddPlayer when not HostClient and only if non Additive Scene Operation.
+            if(!client.IsLocalClient && operation == SceneOperation.Normal)
+                client.Send(new AddPlayerMessage());
         }
 
         void OnServerAddPlayerInternal(INetworkConnection conn, AddPlayerMessage msg)
