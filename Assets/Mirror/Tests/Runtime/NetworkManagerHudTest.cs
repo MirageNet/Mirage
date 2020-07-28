@@ -100,7 +100,6 @@ namespace Mirror.Tests
             //Initial state in the prefab
             networkManagerHUD.OfflineGO.SetActive(true);
             networkManagerHUD.OnlineGO.SetActive(false);
-            networkManagerHUD.NetworkAddressInput.text = "localhost";
         }
 
         public override void ExtraTearDown()
