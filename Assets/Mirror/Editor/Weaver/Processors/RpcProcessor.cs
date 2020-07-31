@@ -53,15 +53,17 @@ namespace Mirror.Weaver
             worker.Append(worker.Create(OpCodes.Castclass, md.DeclaringType));
 
             // NetworkConnection parameter is only required for Client.Connection
-            Client target = clientRpcAttr.GetField("target", Client.Observers); 
-            if (target == Client.Connection && HasNetworkConnectionParameter(md))
+            Client target = clientRpcAttr.GetField("target", Client.Observers);
+            bool skipFirst = target == Client.Connection && HasNetworkConnectionParameter(md);
+
+            if (skipFirst)
             {
                 //client.connection
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Call, Weaver.BehaviorConnectionToServerReference));
             }
-
-            if (!NetworkBehaviourProcessor.ReadArguments(md, worker, RemoteCallType.ClientRpc))
+            
+            if (!NetworkBehaviourProcessor.ReadArguments(md, worker, skipFirst))
                 return null;
 
             // invoke actual ServerRpc function
