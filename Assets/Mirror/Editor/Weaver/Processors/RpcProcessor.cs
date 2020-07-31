@@ -54,16 +54,16 @@ namespace Mirror.Weaver
 
             // NetworkConnection parameter is only required for Client.Connection
             Client target = clientRpcAttr.GetField("target", Client.Observers);
-            bool skipFirst = target == Client.Connection && HasNetworkConnectionParameter(md);
+            bool hasNetworkConnection = target == Client.Connection && HasNetworkConnectionParameter(md);
 
-            if (skipFirst)
+            if (hasNetworkConnection)
             {
                 //client.connection
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Call, Weaver.BehaviorConnectionToServerReference));
             }
             
-            if (!NetworkBehaviourProcessor.ReadArguments(md, worker, skipFirst))
+            if (!NetworkBehaviourProcessor.ReadArguments(md, worker, hasNetworkConnection))
                 return null;
 
             // invoke actual ServerRpc function
