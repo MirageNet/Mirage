@@ -204,5 +204,17 @@ namespace Mirror.Tests
             await Task.Delay(1);
             mockHandler.Received().Invoke();
         });
+
+        [Test]
+        public void IdentityClientValueSet()
+        {
+            Assert.That(identity.Client, Is.Not.Null);
+        }
+
+        [Test]
+        public void IdentityServerValueSet()
+        {
+            Assert.That(identity.Server, Is.Not.Null);
+        }
     }
 }
