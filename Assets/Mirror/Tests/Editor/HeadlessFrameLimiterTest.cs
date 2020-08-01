@@ -7,20 +7,20 @@ namespace Mirror.Tests
     [TestFixture]
     public class HeadlessFrameLimiterTest : MonoBehaviour
     {
-        protected GameObject gameObject;
+        protected GameObject testGO;
         protected HeadlessFrameLimiter comp;
 
         [SetUp]
         public void Setup()
         {
-            gameObject = new GameObject();
-            comp = gameObject.AddComponent<HeadlessFrameLimiter>();
+            testGO = new GameObject();
+            comp = testGO.AddComponent<HeadlessFrameLimiter>();
         }
 
         [TearDown]
         public void Teardown()
         {
-            Object.DestroyImmediate(gameObject);
+            Object.DestroyImmediate(testGO);
         }
 
         [Test]

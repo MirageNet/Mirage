@@ -1,27 +1,26 @@
 using UnityEngine;
 using NUnit.Framework;
 using Object = UnityEngine.Object;
-using UnityEditor.VersionControl;
 
 namespace Mirror.Tests
 {
     [TestFixture]
     public class HeadlessAutoStartTest : MonoBehaviour
     {
-        protected GameObject gameObject;
+        protected GameObject testGO;
         protected HeadlessAutoStart comp;
 
         [SetUp]
         public void Setup()
         {
-            gameObject = new GameObject();
-            comp = gameObject.AddComponent<HeadlessAutoStart>();
+            testGO = new GameObject();
+            comp = testGO.AddComponent<HeadlessAutoStart>();
         }
 
         [TearDown]
         public void Teardown()
         {
-            Object.DestroyImmediate(gameObject);
+            Object.DestroyImmediate(testGO);
         }
 
         [Test]
