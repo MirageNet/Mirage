@@ -35,7 +35,7 @@ namespace Mirror.Tests
         [Test]
         public void AssignClientAuthorityNoServer()
         {
-            InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<InvalidOperationException>(() =>
             {
                 testIdentity.AssignClientAuthority(server.LocalConnection);
             });
@@ -140,7 +140,7 @@ namespace Mirror.Tests
 
             // shouldn't be able to assign authority while already owned by
             // another connection
-            InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<InvalidOperationException>(() =>
             {
                 testIdentity.AssignClientAuthority(new NetworkConnection(null));
             });
@@ -154,7 +154,7 @@ namespace Mirror.Tests
 
             // someone might try to remove authority by assigning null.
             // make sure this fails.
-            InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<InvalidOperationException>(() =>
             {
                 testIdentity.AssignClientAuthority(null);
             });
@@ -163,7 +163,7 @@ namespace Mirror.Tests
         [Test]
         public void RemoveclientAuthorityNotSpawned()
         {
-            InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<InvalidOperationException>(() =>
             {
                 // shoud fail because the server is not active
                 testIdentity.RemoveClientAuthority();
@@ -175,10 +175,9 @@ namespace Mirror.Tests
         {
             server.AddPlayerForConnection(server.LocalConnection, gameObject);
 
-            InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<InvalidOperationException>(() =>
             {
                 testIdentity.RemoveClientAuthority();
-
             });
         }
 
