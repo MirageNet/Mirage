@@ -14,13 +14,10 @@ namespace Mirror
 
         /// <summary>
         /// Set the frame rate for a headless server.
-        /// <para>Override if you wish to disable the behavior or set your own tick rate.</para>
         /// </summary>
         public void Start()
         {
             // set a fixed tick rate instead of updating as often as possible
-            // * if not in Editor (it doesn't work in the Editor)
-            // DO NOT ATTACHED THIS TO A NON HEADLESS BUILD
 #if !UNITY_EDITOR
             if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null)
             {
