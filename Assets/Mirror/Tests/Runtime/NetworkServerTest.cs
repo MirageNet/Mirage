@@ -61,14 +61,16 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void SetClientReadyAndNotReadyTest()
+        public void ClientInitialReadyStateTest()
         {
             (_, NetworkConnection connection) = PipedConnections();
-            Assert.That(connection.IsReady, Is.False);
-
-            server.SetClientReady(connection);
             Assert.That(connection.IsReady, Is.True);
+        }
 
+        [Test]
+        public void SetClientNotReadyTest()
+        {
+            (_, NetworkConnection connection) = PipedConnections();
             server.SetClientNotReady(connection);
             Assert.That(connection.IsReady, Is.False);
         }
