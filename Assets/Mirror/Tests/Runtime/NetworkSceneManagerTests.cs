@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -253,9 +254,6 @@ namespace Mirror.Tests
         [Test]
         public void SetClientReadyAndNotReadyTest()
         {
-            Assert.That(client.Connection.IsReady, Is.False);
-
-            serverSceneManager.SetClientReady(client.Connection);
             Assert.That(client.Connection.IsReady, Is.True);
 
             serverSceneManager.SetClientNotReady(client.Connection);
@@ -265,15 +263,23 @@ namespace Mirror.Tests
         [Test]
         public void SetAllClientsNotReadyTest()
         {
-            // add second ready client
-            NetworkConnection second = new NetworkConnection(null);
-            second.IsReady = true;
-            server.connections.Add(second);
+            GameObject secondGO = new GameObject();
+            NetworkClient secondClient = secondGO.AddComponent<NetworkClient>();
+            Transport secondTestTransport = secondGO.AddComponent<LoopbackTransport>();
+
+            secondClient.Transport = secondTestTransport;
+
+            var builder = new UriBuilder
+            {
+                Host = "localhost",
+                Scheme = secondClient.Transport.Scheme.First(),
+            };
+
+            _ = secondClient.ConnectAsync(builder.Uri);
 
             // set all not ready
             serverSceneManager.SetAllClientsNotReady();
-            Assert.That(client.Connection.IsReady, Is.False);
-            Assert.That(second.IsReady, Is.False);
+            Assert.That(server.connections.All(c => c.IsReady == false));
         }
     }
 }

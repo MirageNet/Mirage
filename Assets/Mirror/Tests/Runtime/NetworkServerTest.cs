@@ -6,6 +6,7 @@ using static Mirror.Tests.LocalConnections;
 using Object = UnityEngine.Object;
 
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 namespace Mirror.Tests
 {
@@ -71,7 +72,7 @@ namespace Mirror.Tests
         public void SetClientNotReadyTest()
         {
             (_, NetworkConnection connection) = PipedConnections();
-            server.SetClientNotReady(connection);
+            sceneManager.SetClientNotReady(connection);
             Assert.That(connection.IsReady, Is.False);
         }
 
@@ -89,7 +90,7 @@ namespace Mirror.Tests
             server.connections.Add(second);
 
             // set all not ready
-            server.SetAllClientsNotReady();
+            sceneManager.SetAllClientsNotReady();
             Assert.That(first.IsReady, Is.False);
             Assert.That(second.IsReady, Is.False);
         }
