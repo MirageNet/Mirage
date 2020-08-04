@@ -40,7 +40,7 @@ namespace Mirror
             }
         }
 
-        private void OnServerAuthenticated(INetworkConnection connection)
+        void OnServerAuthenticated(INetworkConnection connection)
         {
             // wait for client to send us an AddPlayerMessage
             connection.RegisterHandler<AddPlayerMessage>(OnServerAddPlayerInternal);
@@ -51,7 +51,7 @@ namespace Mirror
         /// <para>The default implementation of this function sets the client as ready and adds a player. Override the function to dictate what happens when the client connects.</para>
         /// </summary>
         /// <param name="conn">Connection to the server.</param>
-        private void OnClientAuthenticated(INetworkConnection connection)
+        void OnClientAuthenticated(INetworkConnection connection)
         {
             // OnClientConnect calls AddPlayer if there is no NetworkSceneManager
             if (!sceneManager)
