@@ -906,7 +906,7 @@ namespace Mirror.Tests
 
             // rebuild shouldn't add own player because conn wasn't set ready
             identity.RebuildObservers(true);
-            Assert.That(identity.observers, Does.Not.Contains(identity.ConnectionToClient));
+            Assert.That(identity.observers.Contains(identity.ConnectionToClient));
         }
 
         [Test]

@@ -599,9 +599,6 @@ namespace Mirror
                 LocalClient.Connection.Identity = identity;
             }
 
-            // set ready if not set yet
-            SetClientReady(conn);
-
             if (logger.LogEnabled()) logger.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.AssetId);
 
             Respawn(identity);
