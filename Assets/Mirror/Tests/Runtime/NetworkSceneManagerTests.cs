@@ -168,6 +168,19 @@ namespace Mirror.Tests
         {
             Assert.DoesNotThrow(() => { server.SendToAll(new SceneMessage()); }); 
         }
+
+        [UnityTest]
+        public IEnumerator SetClientReadyExceptionTest() => RunAsync(async () =>
+        {
+            client.Disconnect();
+
+            await WaitFor(() => !client.Active);
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                sceneManager.SetClientReady();
+            });
+        });
     }
 
     public class NetworkSceneManagerNonHostTests : ClientServerSetup<MockComponent>
@@ -252,12 +265,20 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void SetClientReadyAndNotReadyTest()
+        public void ClientReadyAndSetNotReadyTest()
         {
             Assert.That(client.Connection.IsReady, Is.True);
-
             serverSceneManager.SetClientNotReady(client.Connection);
             Assert.That(client.Connection.IsReady, Is.False);
+        }
+
+        [Test]
+        public void SetClientReadyTest()
+        {
+            serverSceneManager.SetClientNotReady(client.Connection);
+            Assert.That(client.Connection.IsReady, Is.False);
+            serverSceneManager.SetClientReady(client.Connection);
+            Assert.That(client.Connection.IsReady, Is.True);
         }
 
         [Test]
