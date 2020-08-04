@@ -279,7 +279,7 @@ namespace Mirror.Tests
 
             // set all not ready
             serverSceneManager.SetAllClientsNotReady();
-            Assert.That(server.connections.All(c => c.IsReady == false));
+            Assert.That(server.connections.All(c => !c.IsReady));
         }
     }
 }
