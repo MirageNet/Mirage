@@ -8,33 +8,35 @@ namespace Mirror.Udp
 {
     internal class UdpConnection : IConnection
     {
-        public UdpClient client;
+        public Socket socket;
 
-        public UdpConnection(UdpClient client)
+        public UdpConnection(Socket socket)
         {
-            this.client = client;
+            this.socket = socket;
         }
 
         public void Disconnect()
         {
-            client.Client.Close();
+            socket.Close();
         }
 
         public EndPoint GetEndPointAddress()
         {
-            return client.Client.RemoteEndPoint;
+            return socket.RemoteEndPoint;
         }
 
         public async Task<bool> ReceiveAsync(MemoryStream buffer)
         {
             try
             {
-                while (true)
+                socket.Receive(buffer.ToArray());
+                await Task.CompletedTask;
+
+                if (buffer.Length > 0)
                 {
-                    var receivedResult = await client.ReceiveAsync();
-                    buffer.Write(receivedResult.Buffer, 0, receivedResult.Buffer.Length);
                     return true;
                 }
+                return false;
             }
             catch (ObjectDisposedException)
             {
@@ -44,13 +46,13 @@ namespace Mirror.Udp
 
         public Task SendAsync(ArraySegment<byte> data)
         {
-            client.Client.SendTo(data.Array, client.Client.RemoteEndPoint);
+            socket.SendTo(data.Array, socket.RemoteEndPoint);
             return Task.CompletedTask;
         }
 
         public void Stop()
         {
-            client.Client.Close();
+            socket.Close();
         }
     }
 }

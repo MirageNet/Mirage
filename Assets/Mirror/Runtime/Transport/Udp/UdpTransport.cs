@@ -10,7 +10,7 @@ namespace Mirror.Udp
 {
     public class UdpTransport : Transport
     {
-        UdpConnection listener;
+        UdpClient client;
         public int Port = 7777;
 
         public override IEnumerable<string> Scheme => new[] { "udp4" };
@@ -20,31 +20,32 @@ namespace Mirror.Udp
         //Server starting to listen for new connections
         public override Task ListenAsync()
         {
-            UdpClient client = new UdpClient(Port);
-            listener = new UdpConnection(client);
-            return client.ReceiveAsync();
+            client = new UdpClient(new IPEndPoint(IPAddress.Any, Port));
+            return Task.CompletedTask;
         }
 
         public override void Disconnect()
         {
-            listener?.Stop();
+            client.Client?.Disconnect(false);
         }
 
         //Client connecting to remote Server
         public override async Task<IConnection> ConnectAsync(Uri uri)
         {
-            IPAddress server_address = IPAddress.Parse(uri.Host);
             int port = uri.IsDefaultPort ? Port : uri.Port;
-
+            client = new UdpClient(new IPEndPoint(IPAddress.Parse(uri.Host), port));
             await Task.CompletedTask;
-            return new UdpConnection(new UdpClient(new IPEndPoint(server_address, port)));
+            return new UdpConnection(client.Client);
         }
 
         //Server accepting a new connection
         public override async Task<IConnection> AcceptAsync()
         {
-            await listener.client.Client.AcceptAsync();
-            return listener;
+            Socket clientConnection = new Socket(SocketType.Dgram, ProtocolType.Udp);
+            UdpReceiveResult receivedResult = await client.ReceiveAsync();
+            clientConnection.Bind(receivedResult.RemoteEndPoint);
+            await Task.CompletedTask;
+            return new UdpConnection(clientConnection);
         }
 
         public override IEnumerable<Uri> ServerUri()
@@ -61,7 +62,10 @@ namespace Mirror.Udp
 
         public void OnApplicationQuit()
         {
-            listener?.Stop();
+            if (client.Client.Connected)
+            {
+                client.Client?.Disconnect(false);
+            }
         }
     }
 }
