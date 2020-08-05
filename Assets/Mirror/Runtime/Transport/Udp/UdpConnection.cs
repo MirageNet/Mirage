@@ -25,9 +25,21 @@ namespace Mirror.Udp
             return client.Client.RemoteEndPoint;
         }
 
-        public Task<bool> ReceiveAsync(MemoryStream buffer)
+        public async Task<bool> ReceiveAsync(MemoryStream buffer)
         {
-            throw new NotImplementedException();
+            try
+            {
+                while (true)
+                {
+                    var receivedResult = await client.ReceiveAsync();
+                    buffer.Write(receivedResult.Buffer, 0, receivedResult.Buffer.Length);
+                    return true;
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                return false;
+            }
         }
 
         public Task SendAsync(ArraySegment<byte> data)
