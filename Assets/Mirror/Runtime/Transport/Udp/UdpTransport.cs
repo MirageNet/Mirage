@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -11,40 +10,41 @@ namespace Mirror.Udp
 {
     public class UdpTransport : Transport
     {
-        UdpClient client;
+        UdpConnection listener;
         public int Port = 7777;
 
         public override IEnumerable<string> Scheme => new[] { "udp4" };
 
         public override bool Supported => Application.platform != RuntimePlatform.WebGLPlayer;
 
-        public override async Task<IConnection> AcceptAsync()
+        //Server starting to listen for new connections
+        public override Task ListenAsync()
         {
-            await Task.CompletedTask;
-            return new UdpConnection(client);
-        }
-
-        public override async Task<IConnection> ConnectAsync(Uri uri)
-        {
-            IPAddress server_address = IPAddress.Parse(uri.Host);
-            int port = uri.IsDefaultPort ? Port : uri.Port;
-            IPEndPoint endpoint = new IPEndPoint(server_address, port);
-            client.Connect(endpoint);
-
-            await Task.CompletedTask;
-
-            return new UdpConnection(client);
+            UdpClient client = new UdpClient(Port);
+            listener = new UdpConnection(client);
+            return client.ReceiveAsync();
         }
 
         public override void Disconnect()
         {
-            client.Close();
+            listener?.Stop();
         }
 
-        public override Task ListenAsync()
+        //Client connecting to remote Server
+        public override async Task<IConnection> ConnectAsync(Uri uri)
         {
-            client = new UdpClient(new IPEndPoint(IPAddress.Any, Port));
-            return Task.CompletedTask;
+            IPAddress server_address = IPAddress.Parse(uri.Host);
+            int port = uri.IsDefaultPort ? Port : uri.Port;
+
+            await Task.CompletedTask;
+            return new UdpConnection(new UdpClient(new IPEndPoint(server_address, port)));
+        }
+
+        //Server accepting a new connection
+        public override async Task<IConnection> AcceptAsync()
+        {
+            await listener.client.Client.AcceptAsync();
+            return listener;
         }
 
         public override IEnumerable<Uri> ServerUri()
@@ -57,6 +57,11 @@ namespace Mirror.Udp
             };
 
             return new[] { builder.Uri };
+        }
+
+        public void OnApplicationQuit()
+        {
+            listener?.Stop();
         }
     }
 }

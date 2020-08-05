@@ -8,15 +8,16 @@ namespace Mirror.Udp
 {
     internal class UdpConnection : IConnection
     {
-        private UdpClient client;
+        public UdpClient client;
 
         public UdpConnection(UdpClient client)
         {
             this.client = client;
         }
+
         public void Disconnect()
         {
-            client.Close();
+            client.Client.Close();
         }
 
         public EndPoint GetEndPointAddress()
@@ -31,8 +32,13 @@ namespace Mirror.Udp
 
         public Task SendAsync(ArraySegment<byte> data)
         {
-            client.Send(data.Array, data.Array.Length);
+            client.Client.SendTo(data.Array, client.Client.RemoteEndPoint);
             return Task.CompletedTask;
+        }
+
+        public void Stop()
+        {
+            client.Client.Close();
         }
     }
 }
