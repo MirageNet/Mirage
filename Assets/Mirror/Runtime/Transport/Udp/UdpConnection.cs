@@ -49,10 +49,5 @@ namespace Mirror.Udp
             socket.SendTo(data.Array, socket.RemoteEndPoint);
             return Task.CompletedTask;
         }
-
-        public void Stop()
-        {
-            socket.Close();
-        }
     }
 }
