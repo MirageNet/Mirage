@@ -41,11 +41,19 @@ namespace Mirror.Udp
         //Server accepting a new connection
         public override async Task<IConnection> AcceptAsync()
         {
-            Socket clientConnection = new Socket(SocketType.Dgram, ProtocolType.Udp);
-            UdpReceiveResult receivedResult = await client.ReceiveAsync();
-            clientConnection.Bind(receivedResult.RemoteEndPoint);
-            await Task.CompletedTask;
-            return new UdpConnection(clientConnection);
+            try
+            {
+                Socket clientConnection = new Socket(SocketType.Dgram, ProtocolType.Udp);
+                UdpReceiveResult receivedResult = await client.ReceiveAsync();
+                clientConnection.Bind(receivedResult.RemoteEndPoint);
+                await Task.CompletedTask;
+                return new UdpConnection(clientConnection);
+            }
+            catch (ObjectDisposedException)
+            {
+                // expected,  the connection was closed
+                return null;
+            }
         }
 
         public override IEnumerable<Uri> ServerUri()
