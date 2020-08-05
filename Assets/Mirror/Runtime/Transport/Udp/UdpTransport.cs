@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -26,7 +25,7 @@ namespace Mirror.Udp
 
         public override void Disconnect()
         {
-            client.Client?.Disconnect(false);
+            client?.Close();
         }
 
         //Client connecting to remote Server
@@ -70,10 +69,7 @@ namespace Mirror.Udp
 
         public void OnApplicationQuit()
         {
-            if (client.Client.Connected)
-            {
-                client.Client?.Disconnect(false);
-            }
+            Disconnect();
         }
     }
 }
