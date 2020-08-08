@@ -32,9 +32,10 @@ namespace Mirror.Udp
         public override async Task<IConnection> ConnectAsync(Uri uri)
         {
             int port = uri.IsDefaultPort ? Port : uri.Port;
-            client = new UdpClient(new IPEndPoint(IPAddress.Parse(uri.Host), port));
+            Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            UdpConnection connection = new UdpConnection(s);
             await Task.CompletedTask;
-            return new UdpConnection(client.Client);
+            return connection;
         }
 
         //Server accepting a new connection
