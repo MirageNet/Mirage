@@ -1,4 +1,5 @@
 using System;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ using Object = UnityEngine.Object;
 
 namespace Mirror.Tests
 {
-
+    [TestFixture]
     public class PlayerSpawnerTest
     {
         private GameObject go;
@@ -101,6 +102,15 @@ namespace Mirror.Tests
 
             spawner.startPositions.Clear();
             Assert.That(spawner.GetStartPosition(), Is.SameAs(null));
+        }
+
+        [Test]
+        public void OnServerAddPlayerExceptionTest()
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                spawner.OnServerAddPlayer(new NetworkConnection(Substitute.For<IConnection>()), new AddPlayerMessage());
+            });
         }
     }
 }
