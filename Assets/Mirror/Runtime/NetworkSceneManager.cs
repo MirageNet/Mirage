@@ -218,7 +218,7 @@ namespace Mirror
         }
 
         // default ready handler.
-        void OnClientReadyMessage(INetworkConnection conn, ReadyMessage msg)
+        internal void OnClientReadyMessage(INetworkConnection conn, ReadyMessage msg)
         {
             if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + conn);
             SetClientReady(conn);
