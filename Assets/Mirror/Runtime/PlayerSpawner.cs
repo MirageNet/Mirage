@@ -74,7 +74,7 @@ namespace Mirror
                 throw new InvalidOperationException("There is already a player for this connection.");
             }
 
-            OnServerAddPlayer(conn);
+            ServerAddPlayer(conn);
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Mirror
         /// <para>The default implementation for this function creates a new player object from the playerPrefab.</para>
         /// </summary>
         /// <param name="conn">Connection from client.</param>
-        public virtual void OnServerAddPlayer(INetworkConnection conn)
+        public virtual void ServerAddPlayer(INetworkConnection conn)
         {
             Transform startPos = GetStartPosition();
             NetworkIdentity player = startPos != null

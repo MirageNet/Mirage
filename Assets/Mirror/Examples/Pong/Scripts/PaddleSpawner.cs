@@ -10,7 +10,7 @@ namespace Mirror.Examples.Pong
 
         GameObject ball;
 
-        public override void OnServerAddPlayer(INetworkConnection conn)
+        public override void ServerAddPlayer(INetworkConnection conn)
         {
             // add player at correct spawn position
             Transform start = server.NumPlayers == 0 ? leftRacketSpawn : rightRacketSpawn;
