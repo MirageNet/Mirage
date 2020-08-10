@@ -43,7 +43,7 @@ namespace Mirror
         void OnServerAuthenticated(INetworkConnection connection)
         {
             // wait for client to send us an AddPlayerMessage
-            connection.RegisterHandler<AddPlayerMessage>(OnServerAddPlayerInternal);
+            connection.RegisterHandler<AddPlayerMessage>(OnServerAddPlayer);
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Mirror
                 client.Send(new AddPlayerMessage());
         }
 
-        void OnServerAddPlayerInternal(INetworkConnection conn, AddPlayerMessage msg)
+        internal void OnServerAddPlayer(INetworkConnection conn, AddPlayerMessage msg)
         {
             logger.Log("NetworkManager.OnServerAddPlayer");
 
