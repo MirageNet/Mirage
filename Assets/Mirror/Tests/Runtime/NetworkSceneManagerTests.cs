@@ -307,7 +307,7 @@ namespace Mirror.Tests
         public void SetClientReadyMsgTest()
         {
             serverSceneManager.SetClientNotReady(client.Connection);
-            serverSceneManager.SetClientReady(client.Connection);
+            serverSceneManager.OnClientReadyMessage(client.Connection, new ReadyMessage());
             Assert.That(client.Connection.IsReady, Is.True);
         }
     }
