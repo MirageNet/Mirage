@@ -58,6 +58,11 @@ namespace Mirror
         {
             DontDestroyOnLoad(gameObject);
 
+            if (string.IsNullOrEmpty(NetworkSceneName))
+            {
+                NetworkSceneName = SceneManager.GetActiveScene().name;
+            }
+
             if (client != null)
             {
                 client.Authenticated.AddListener(OnClientAuthenticated);
@@ -110,6 +115,12 @@ namespace Mirror
             if (string.IsNullOrEmpty(msg.sceneName))
             {
                 throw new ArgumentNullException(msg.sceneName, "ClientSceneMessage: " + msg.sceneName + " cannot be empty or null");
+            }
+
+            //No need to change scenes as we are already running the same scene as the server.
+            if (NetworkSceneName.Equals(msg.sceneName))
+            {
+                return;
             }
 
             if (logger.LogEnabled()) logger.Log("ClientSceneMessage: changing scenes from: " + NetworkSceneName + " to:" + msg.sceneName);
@@ -195,12 +206,7 @@ namespace Mirror
         {
             logger.Log("NetworkSceneManager.OnServerAuthenticated");
 
-            // proceed with the login handshake by calling OnServerConnect
-            if (!string.IsNullOrEmpty(NetworkSceneName))
-            {
-                var msg = new SceneMessage { sceneName = NetworkSceneName };
-                conn.Send(msg);
-            }
+            conn.Send(new SceneMessage { sceneName = NetworkSceneName });
         }
 
         /// <summary>
