@@ -94,7 +94,7 @@ If you want to work on MirrorNG, follow these steps:
 ### Windows
 1) Install [git](https://git-scm.com/download/win) or use your favorite git client
 2) as administrator, clone this repo with symbolic links support:
-    ```
+    ```sh
     git clone -c core.symlinks=true https://github.com/MirrorNG/MirrorNG.git
     ```
     It you don't want to use administrator, [add symlink support](https://www.joshkel.com/2018/01/18/symlinks-in-windows/) to your account.
