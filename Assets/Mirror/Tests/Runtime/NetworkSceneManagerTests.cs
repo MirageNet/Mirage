@@ -244,9 +244,10 @@ namespace Mirror.Tests
         });
 
         [Test]
-        public void NetworkSceneNameStringEmptyTest()
+        public void NetworkSceneNameTest()
         {
-            Assert.That(clientSceneManager.NetworkSceneName.Equals(string.Empty));
+            Assert.That(clientSceneManager.NetworkSceneName.Equals(SceneManager.GetActiveScene().name));
+            Assert.That(serverSceneManager.NetworkSceneName.Equals(SceneManager.GetActiveScene().name));
         }
     }
 }
