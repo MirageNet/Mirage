@@ -98,7 +98,7 @@ If you want to work on MirrorNG, follow these steps:
     git clone -c core.symlinks=true https://github.com/MirrorNG/MirrorNG.git
     ```
     It you don't want to use administrator, [add symlink support](https://www.joshkel.com/2018/01/18/symlinks-in-windows/) to your account.
-    If you don't enable symlinks, you will still be able to work on MirrorNG, Unity will not see the examples.
+    If you don't enable symlinks, you will be able to work on MirrorNG but Unity will not see the examples.
 3) Open in unity 2019.4.x or later
 
 ## Examples
