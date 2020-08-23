@@ -83,6 +83,24 @@ If you are using unity 2019.2, you can use [openupm](https://openupm.com/package
 
 Alternatively you can download it from [Download Mirror](https://github.com/MirrorNG/MirrorNG/releases).  You will need to install some dependencies yourself such as cecil.
 
+## Development environment
+If you want to work on MirrorNG, follow these steps:
+
+### Linux and Mac
+1) Install git
+2) clone this repo
+3) Open in unity 2019.4.x or later
+
+### Windows
+1) Install [git](https://git-scm.com/download/win) or use your favorite git client
+2) as administrator, clone this repo with symbolic links support:
+    ```
+    git clone -c core.symlinks=true https://github.com/MirrorNG/MirrorNG.git
+    ```
+    It you don't want to use administrator, [add symlink support](https://www.joshkel.com/2018/01/18/symlinks-in-windows/) to your account.
+    If you don't enable symlinks, you will still be able to work on MirrorNG, Unity will not see the examples.
+3) Open in unity 2019.4.x or later
+
 ## Examples
 We included several small example projects.
 
