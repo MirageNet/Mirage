@@ -54,7 +54,7 @@ namespace Mirror
         /// </remarks>
         public string NetworkSceneName { get; protected set; } = "";
 
-        AsyncOperation asyncOperation;
+        internal AsyncOperation asyncOperation;
 
         public void Start()
         {
