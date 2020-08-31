@@ -24,7 +24,6 @@ namespace Mirror.Tests
             //Initial state in the prefab
             networkManagerHUD.OfflineGO.SetActive(true);
             networkManagerHUD.OnlineGO.SetActive(false);
-            //networkManagerHUD.NetworkAddressInput.text = "localhost";
         }
 
         public override void ExtraTearDown()
@@ -93,8 +92,8 @@ namespace Mirror.Tests
         {
             gameObject = new GameObject("NetworkManagerHUD", typeof(NetworkManagerHUD));
             networkManagerHUD = gameObject.GetComponent<NetworkManagerHUD>();
-            clientGo.AddComponent<MockTransport>();
             networkManagerHUD.NetworkManager = clientGo.AddComponent<NetworkManager>();
+            networkManagerHUD.NetworkManager.client = client;
             networkManagerHUD.OfflineGO = new GameObject();
             networkManagerHUD.OnlineGO = new GameObject();
 
@@ -110,20 +109,12 @@ namespace Mirror.Tests
             Object.DestroyImmediate(gameObject);
         }
 
-        //[Test]
-        //public void StartClientButtonTest()
-        //{
-            //TODO:
-            //StartClientButtonTest (0.123s)
-            //---
-            //System.NullReferenceException : Object reference not set to an instance of an object
-            //---
-            //at Mirror.NetworkManager.StartClient(System.String serverIp)[0x00025] in F:\Dev\MirrorNG\Assets\Mirror\Runtime\NetworkManager.cs:65
-            //at Mirror.NetworkManagerHUD.StartClientButtonHandler()[0x00001] in F:\Dev\MirrorNG\Assets\Mirror\Runtime\NetworkManagerHUD.cs:43
-
-            //networkManagerHUD.StartClientButtonHandler();
-            //Assert.That(networkManagerHUD.OfflineGO.activeSelf, Is.False);
-            //Assert.That(networkManagerHUD.OnlineGO.activeSelf, Is.True);
-        //}
+        [Test]
+        public void StartClientButtonTest()
+        {
+            networkManagerHUD.StartClientButtonHandler();
+            Assert.That(networkManagerHUD.OfflineGO.activeSelf, Is.False);
+            Assert.That(networkManagerHUD.OnlineGO.activeSelf, Is.True);
+        }
     }
 }
