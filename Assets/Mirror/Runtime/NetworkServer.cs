@@ -197,7 +197,7 @@ namespace Mirror
 
                 while ((connection = await transport.AcceptAsync()) != null)
                 {
-                    var networkConnectionToClient = new NetworkConnection(connection);
+                    var networkConnectionToClient = GetNewConnection(connection);
 
                     _ = ConnectionAcceptedAsync(networkConnectionToClient);
                 }
@@ -277,7 +277,7 @@ namespace Mirror
                 throw new InvalidOperationException("Local Connection already exists");
             }
 
-            var conn = new NetworkConnection(tconn);
+            var conn = GetNewConnection(tconn);
             LocalConnection = conn;
             LocalClient = client;
 
