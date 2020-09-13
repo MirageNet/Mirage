@@ -235,6 +235,14 @@ namespace Mirror
         }
 
         /// <summary>
+        /// Creates a new INetworkConnection based on the provided IConnection.
+        /// </summary>
+        public virtual INetworkConnection GetNewConnection(IConnection connection)
+        {
+            return new NetworkConnection(connection);
+        }
+
+        /// <summary>
         /// <para>This accepts a network connection and adds it to the server.</para>
         /// <para>This connection will use the callbacks registered with the server.</para>
         /// </summary>

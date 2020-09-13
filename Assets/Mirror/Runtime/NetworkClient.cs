@@ -183,6 +183,14 @@ namespace Mirror
             _ = OnConnected();
         }
 
+        /// <summary>
+        /// Creates a new INetworkConnection based on the provided IConnection.
+        /// </summary>
+        public virtual INetworkConnection GetNewConnection(IConnection connection)
+        {
+            return new NetworkConnection(connection);
+        }
+
         void InitializeAuthEvents()
         {
             if (authenticator != null)
