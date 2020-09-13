@@ -36,7 +36,7 @@ namespace Mirror
         void SetClientNotReady(INetworkConnection conn);
     }
 
-    public interface INetworkServer : IServerObjectManager, IServerSceneManager
+    public interface INetworkServer : IServerObjectManager
     {
         void Disconnect();
 
