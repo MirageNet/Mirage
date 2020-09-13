@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 using static Mirror.Tests.AsyncUtil;
+using static Mirror.Tests.LocalConnections;
 
 namespace Mirror.Tests
 {
@@ -165,6 +166,38 @@ namespace Mirror.Tests
         public void ClientNoHandlersInHostMode()
         {
             Assert.DoesNotThrow(() => { server.SendToAll(new SceneMessage()); }); 
+        }
+
+        [Test]
+        public void SetClientReadyAndNotReadyTest()
+        {
+            (_, NetworkConnection connection) = PipedConnections();
+            Assert.That(connection.IsReady, Is.False);
+
+            server.SetClientReady(connection);
+            Assert.That(connection.IsReady, Is.True);
+
+            sceneManager.SetClientNotReady(connection);
+            Assert.That(connection.IsReady, Is.False);
+        }
+
+        [Test]
+        public void SetAllClientsNotReadyTest()
+        {
+            // add first ready client
+            (_, NetworkConnection first) = PipedConnections();
+            first.IsReady = true;
+            server.connections.Add(first);
+
+            // add second ready client
+            (_, NetworkConnection second) = PipedConnections();
+            second.IsReady = true;
+            server.connections.Add(second);
+
+            // set all not ready
+            sceneManager.SetAllClientsNotReady();
+            Assert.That(first.IsReady, Is.False);
+            Assert.That(second.IsReady, Is.False);
         }
     }
 
