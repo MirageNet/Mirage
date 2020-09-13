@@ -26,16 +26,6 @@ namespace Mirror
         bool SpawnObjects();
     }
 
-    //These need to be moved out of NS. Problem with setting ready in: AddPlayerForConnection
-    public interface IServerSceneManager
-    {
-        void SetClientReady(INetworkConnection conn);
-
-        void SetAllClientsNotReady();
-
-        void SetClientNotReady(INetworkConnection conn);
-    }
-
     public interface INetworkServer : IServerObjectManager
     {
         void Disconnect();
