@@ -29,7 +29,7 @@ namespace Mirror
         void DestroyAllClientObjects();
     }
 
-    public interface INetworkClient : IClientObjectManager
+    public interface INetworkClient
     {
         void Disconnect();
 
