@@ -241,7 +241,7 @@ namespace Mirror
 
             // set server to the NetworkIdentity
             identity.Server = server;
-
+            identity.serverObjectManager = this;
             identity.Client = server.LocalClient;
 
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
@@ -432,6 +432,7 @@ namespace Mirror
 
             identity.ConnectionToClient = ownerConnection;
             identity.Server = server;
+            identity.serverObjectManager = this;
             identity.Client = server.LocalClient;
 
             // special case to make sure hasAuthority is set

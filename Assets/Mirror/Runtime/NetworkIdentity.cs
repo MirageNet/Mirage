@@ -168,6 +168,8 @@ namespace Mirror
         /// </summary>
         public NetworkServer Server { get; internal set; }
 
+        public ServerObjectManager serverObjectManager;
+
         /// <summary>
         /// The NetworkConnection associated with this NetworkIdentity. This is only valid for player objects on a local client.
         /// </summary>
@@ -722,7 +724,7 @@ namespace Mirror
             // if it is still true, then we need to unspawn it
             if (IsServer)
             {
-                Server.Destroy(gameObject);
+                serverObjectManager.Destroy(gameObject);
             }
         }
 
@@ -1110,7 +1112,7 @@ namespace Mirror
             conn.AddToVisList(this);
 
             // spawn identity for this conn
-            Server.ShowForConnection(this, conn);
+            serverObjectManager.ShowForConnection(this, conn);
         }
 
         /// <summary>
@@ -1203,7 +1205,7 @@ namespace Mirror
                     // new observer
                     conn.AddToVisList(this);
                     // spawn identity for this conn
-                    Server.ShowForConnection(this, conn);
+                    serverObjectManager.ShowForConnection(this, conn);
                     if (logger.LogEnabled()) logger.Log("New Observer for " + gameObject + " " + conn);
                     changed = true;
                 }
@@ -1216,7 +1218,7 @@ namespace Mirror
                 {
                     // removed observer
                     conn.RemoveFromVisList(this);
-                    Server.HideForConnection(this, conn);
+                    serverObjectManager.HideForConnection(this, conn);
 
                     if (logger.LogEnabled()) logger.Log("Removed Observer for " + gameObject + " " + conn);
                     changed = true;
@@ -1287,7 +1289,7 @@ namespace Mirror
 
             // The client will match to the existing object
             // update all variables and assign authority
-            Server.SendSpawnMessage(this, conn);
+            serverObjectManager.SendSpawnMessage(this, conn);
 
             clientAuthorityCallback?.Invoke(conn, this, true);
         }
@@ -1321,7 +1323,7 @@ namespace Mirror
                 // so just spawn it again,
                 // the client will not create a new instance,  it will simply
                 // reset all variables and remove authority
-                Server.SendSpawnMessage(this, previousOwner);
+                serverObjectManager.SendSpawnMessage(this, previousOwner);
             }
         }
 
@@ -1388,7 +1390,7 @@ namespace Mirror
                     {
                         varsMessage.payload = ownerWriter.ToArraySegment();
                         if (ConnectionToClient != null && ConnectionToClient.IsReady)
-                            Server.SendToClientOfPlayer(this, varsMessage);
+                            serverObjectManager.SendToClientOfPlayer(this, varsMessage);
                     }
 
                     // send observersWriter to everyone but owner
