@@ -94,6 +94,9 @@ namespace Mirror
         {
             client.Connected.RemoveListener(OnClientConnected);
             client.Disconnected.RemoveListener(OnClientDisconnected);
+
+            ClearSpawners();
+            DestroyAllClientObjects();
         }
 
         internal void RegisterHostHandlers(INetworkConnection Connection)
