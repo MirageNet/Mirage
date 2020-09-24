@@ -109,14 +109,6 @@ namespace Mirror
         }
 
         /// <summary>
-        /// server that received the message
-        /// </summary>
-        /// <remarks>This is a hack, but it is needed to deserialize
-        /// gameobjects when processing the message</remarks>
-        /// 
-        internal static NetworkServer Current;
-
-        /// <summary>
         /// send this message to the player only
         /// </summary>
         /// <typeparam name="T">Message type</typeparam>
