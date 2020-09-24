@@ -10,11 +10,32 @@ namespace Mirror.Weaver.Tests
     public abstract class WeaverTestsBuildFromTestName : WeaverTests
     {
         [SetUp]
-        public void TestSetup()
+        public virtual void TestSetup()
         {
             string className = TestContext.CurrentContext.Test.ClassName.Split('.').Last();
 
             BuildAndWeaveTestAssembly(className, TestContext.CurrentContext.Test.Name);
+        }
+
+        protected void IsSuccess()
+        {
+            Assert.That(weaverErrors, Is.Empty);
+            Assert.That(weaverWarnings, Is.Empty);
+        }
+
+        protected void HasNoErrors()
+        {
+            Assert.That(weaverErrors, Is.Empty);
+        }
+
+        protected void HasError(string messsage, string atType)
+        {
+            Assert.That(weaverErrors, Contains.Item($"{messsage} (at {atType})"));
+        }
+
+        protected void HasWarning(string messsage, string atType)
+        {
+            Assert.That(weaverWarnings, Contains.Item($"{messsage} (at {atType})"));
         }
     }
     [TestFixture]
@@ -49,10 +70,6 @@ namespace Mirror.Weaver.Tests
                 // ensure all errors have a location
                 Assert.That(error, Does.Match(@"\(at .*\)$"));
             }
-            if (weaverErrors.Count > 0)
-                Assert.That(CompilationFinishedHook.WeaveFailed, Is.True, "Weaver should fail if there are errors");
-            else
-                Assert.That(CompilationFinishedHook.WeaveFailed, Is.False, "Weaver should succeed if there are no errors");
         }
 
         [OneTimeSetUp]

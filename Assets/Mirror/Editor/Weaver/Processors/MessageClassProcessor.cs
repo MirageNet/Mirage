@@ -32,8 +32,9 @@ namespace Mirror.Weaver
         static void GenerateSerialization(TypeDefinition td)
         {
             Weaver.DLog(td, "  GenerateSerialization");
-            MethodDefinition existingMethod = td.GetMethod("Serialize");
-            if (existingMethod != null && !existingMethod.Body.IsEmptyDefault())
+            MethodDefinition existingMethod = td.GetMethodWith1Arg("Serialize", WeaverTypes.Import<NetworkWriter>());
+            // do nothing if method exists and is abstract or not empty
+            if (existingMethod != null && (existingMethod.IsAbstract || !existingMethod.Body.IsEmptyDefault()))
             {
                 return;
             }
@@ -55,12 +56,12 @@ namespace Mirror.Weaver
 
             MethodDefinition serializeFunc = existingMethod ?? new MethodDefinition("Serialize",
                     MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
-                    Weaver.voidType);
+                    WeaverTypes.Import(typeof(void)));
 
             //only add to new method
             if (existingMethod == null)
             {
-                serializeFunc.Parameters.Add(new ParameterDefinition("writer", ParameterAttributes.None, Weaver.CurrentAssembly.MainModule.ImportReference(Weaver.NetworkWriterType)));
+                serializeFunc.Parameters.Add(new ParameterDefinition("writer", ParameterAttributes.None, WeaverTypes.Import<NetworkWriter>()));
             }
             ILProcessor worker = serializeFunc.Body.GetILProcessor();
             if (existingMethod != null)
@@ -110,22 +111,28 @@ namespace Mirror.Weaver
 
         static void CallBase(TypeDefinition td, ILProcessor worker, string name)
         {
-            MethodReference method = Resolvers.ResolveMethodInParents(td.BaseType, Weaver.CurrentAssembly, name);
-            if (method != null)
+            MethodReference method = Resolvers.TryResolveMethodInParents(td.BaseType, Weaver.CurrentAssembly, name);
+
+            // dont call method if it is null or abstract
+            if (method == null || method.Resolve().IsAbstract)
             {
-                // base
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                // writer
-                worker.Append(worker.Create(OpCodes.Ldarg_1));
-                worker.Append(worker.Create(OpCodes.Call, method));
+                return;
             }
+
+            // base
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            // writer
+            worker.Append(worker.Create(OpCodes.Ldarg_1));
+            worker.Append(worker.Create(OpCodes.Call, method));
         }
 
         static void GenerateDeSerialization(TypeDefinition td)
         {
             Weaver.DLog(td, "  GenerateDeserialization");
-            MethodDefinition existingMethod = td.GetMethod("Deserialize");
-            if (existingMethod != null && !existingMethod.Body.IsEmptyDefault())
+            MethodDefinition existingMethod = td.GetMethodWith1Arg("Deserialize", WeaverTypes.Import<NetworkReader>());
+
+            // do nothing if method exists and is abstract or not empty
+            if (existingMethod != null && (existingMethod.IsAbstract || !existingMethod.Body.IsEmptyDefault()))
             {
                 return;
             }
@@ -137,12 +144,12 @@ namespace Mirror.Weaver
 
             MethodDefinition serializeFunc = existingMethod ?? new MethodDefinition("Deserialize",
                     MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
-                    Weaver.voidType);
+                    WeaverTypes.Import(typeof(void)));
 
             //only add to new method
             if (existingMethod == null)
             {
-                serializeFunc.Parameters.Add(new ParameterDefinition("reader", ParameterAttributes.None, Weaver.CurrentAssembly.MainModule.ImportReference(Weaver.NetworkReaderType)));
+                serializeFunc.Parameters.Add(new ParameterDefinition("reader", ParameterAttributes.None, WeaverTypes.Import<NetworkReader>()));
             }
             ILProcessor worker = serializeFunc.Body.GetILProcessor();
             if (existingMethod != null)

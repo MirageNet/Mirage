@@ -19,7 +19,7 @@ namespace Mirror.Weaver
             // find syncvars
             foreach (FieldDefinition fd in td.Fields)
             {
-                if (fd.HasCustomAttribute(Weaver.SyncVarType))
+                if (fd.HasCustomAttribute<SyncVarAttribute>())
                     Weaver.Error($"SyncVar {fd.Name} must be inside a NetworkBehaviour.  {td.Name} is not a NetworkBehaviour", fd);
 
                 if (SyncObjectInitializer.ImplementsSyncObject(fd.FieldType))
@@ -34,30 +34,14 @@ namespace Mirror.Weaver
             // find ServerRpc and RPC functions
             foreach (MethodDefinition md in td.Methods)
             {
-                foreach (CustomAttribute ca in md.CustomAttributes)
-                {
-                    if (ca.AttributeType.FullName == Weaver.ServerRpcType.FullName)
-                    {
-                        Weaver.Error($"ServerRpc {md.Name} must be declared inside a NetworkBehaviour", md);
-                    }
-
-                    if (ca.AttributeType.FullName == Weaver.ClientRpcType.FullName)
-                    {
-                        Weaver.Error($"ClientRpc {md.Name} must be declared inside a NetworkBehaviour", md);
-                    }
-
-                    string attributeName = ca.Constructor.DeclaringType.ToString();
-
-                    switch (attributeName)
-                    {
-                        case "Mirror.ServerAttribute":
-                            Weaver.Error($"Server method {md.Name} must be declared inside a NetworkBehaviour", md);
-                            break;
-                        case "Mirror.ClientAttribute":
-                            Weaver.Error($"Client method {md.Name} must be declared inside a NetworkBehaviour", md);
-                            break;
-                    }
-                }
+                if (md.HasCustomAttribute<ServerRpcAttribute>())
+                    Weaver.Error($"ServerRpc {md.Name} must be declared inside a NetworkBehaviour", md);
+                if (md.HasCustomAttribute<ClientRpcAttribute>())
+                    Weaver.Error($"ClientRpc {md.Name} must be declared inside a NetworkBehaviour", md);
+                if (md.HasCustomAttribute<ClientAttribute>())
+                    Weaver.Error($"Client method {md.Name} must be declared inside a NetworkBehaviour", md);                        
+                if (md.HasCustomAttribute<ServerAttribute>())
+                    Weaver.Error($"Server method {md.Name} must be declared inside a NetworkBehaviour", md);
             }
         }
     }

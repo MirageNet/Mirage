@@ -6,6 +6,7 @@ using UnityEngine.TestTools;
 using Guid = System.Guid;
 using Object = UnityEngine.Object;
 using static Mirror.Tests.AsyncUtil;
+using NSubstitute;
 
 namespace Mirror.Tests
 {
@@ -80,18 +81,41 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator OnSpawnSpawnHandlerTest() => RunAsync(async () =>
         {
-            Guid guid = Guid.NewGuid();
-            GameObject gameObject = new GameObject();
+            var guid = Guid.NewGuid();
+            var gameObject = new GameObject();
             NetworkIdentity identity = gameObject.AddComponent<NetworkIdentity>();
             identity.AssetId = guid;
 
-            client.RegisterSpawnHandler(guid, SpawnDelegateTest, UnSpawnDelegateTest);
+            client.RegisterSpawnHandler(guid, SpawnDelegateTest, go => { });
             client.RegisterPrefab(gameObject, guid);
             server.SendSpawnMessage(identity, connectionToClient);
 
             await WaitFor(() => spawnDelegateTestCalled != 0);
 
             Assert.That(spawnDelegateTestCalled, Is.EqualTo(1));
+        });
+
+        [UnityTest]
+        public IEnumerator OnDestroySpawnHandlerTest() => RunAsync(async () =>
+        {
+            var guid = Guid.NewGuid();
+            var gameObject = new GameObject();
+            NetworkIdentity identity = gameObject.AddComponent<NetworkIdentity>();
+            identity.AssetId = guid;
+
+            var unspawnDelegate = Substitute.For<UnSpawnDelegate>();
+
+            client.RegisterSpawnHandler(guid, SpawnDelegateTest, unspawnDelegate);
+            client.RegisterPrefab(gameObject, guid);
+            server.SendSpawnMessage(identity, connectionToClient);
+
+            await WaitFor(() => spawnDelegateTestCalled != 0);
+
+            client.OnObjectDestroy(new ObjectDestroyMessage
+            {
+                netId = identity.NetId
+            });
+            unspawnDelegate.Received().Invoke(Arg.Any<GameObject>());
         });
 
         int spawnDelegateTestCalled;
@@ -105,12 +129,5 @@ namespace Mirror.Tests
             }
             return null;
         }
-
-        int unspawnDelegateTestCalled;
-        void UnSpawnDelegateTest(GameObject obj)
-        {
-            unspawnDelegateTestCalled++;
-        }
-
     }
 }

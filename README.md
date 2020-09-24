@@ -1,7 +1,6 @@
-![Mirror Logo](https://i.imgur.com/ikP9eYs.png)
+![Mirror Logo](https://i.imgur.com/we6li1x.png)
 
 [![Documentation](https://img.shields.io/badge/documentation-brightgreen.svg)](https://mirrorng.github.io/MirrorNG/)
-[![Video Tutorial](https://img.shields.io/badge/video_tutorial-brightgreen.svg)](https://www.youtube.com/playlist?list=PLkx8oFug638oBYF5EOwsSS-gOVBXj1dkP)
 [![Forum](https://img.shields.io/badge/forum-brightgreen.svg)](https://forum.unity.com/threads/mirror-networking-for-unity-aka-hlapi-community-edition.425437/)
 [![Discord](https://img.shields.io/discord/343440455738064897.svg)](https://discordapp.com/invite/N9QVxbM)
 [![release](https://img.shields.io/github/release/MirrorNG/MirrorNG.svg)](https://github.com/MirrorNG/MirrorNG/releases/latest)
@@ -19,14 +18,12 @@ MirrorNG is a **high level** Networking API for Unity.
 
 MirrorNG is built [and tested](https://www.youtube.com/watch?v=mDCNff1S9ZU) for **MMO Scale** Networking by the developers of  [Cubica](https://cubica.net).
 
-MirrorNG is optimized for **ease of use** and **probability of success**. Projects that use MirrorNG are small, concise and maintainable.
+MirrorNG is optimized for **ease of use** and **probability of success**.
 
-With MirrorNG, the **Server & Client are ONE** project _(hence the name)_. Instead of having one code base for the server and one for the client, we simply use the same code for both of them.
-* `[Server]` / `[Client]` tags can be used for the server-only and client-only parts.
-* `[ServerRpc]`'s are used for Client->Server, and `[ClientRpc]`'s (with options) for Server->Client communication.
-* `[SyncVar]`'s and `SyncList`'s are used to automatically synchronize state.
+With MirrorNG the objects in the client are mirror images of the objects in the server.  MirrorNG takes provides all the tools necessary to keep them in sync and pass messages between them.
 
-What previously required **10.000** lines of code, now takes **1.000** lines of code. Therein lies the **magic of Mirror**.
+## Architecture
+The **Server & Client** are **ONE project** in order to achieve an order of magnitude gain in productivity.
 
 ## Why fork Mirror?
 I have worked on [Mirror](https://github.com/vis2k/Mirror) for over a year, I am the one that came up with the name and the second contributor. It has served me well and there are some really smart people working on it.
@@ -56,11 +53,11 @@ Code review takes too long in Mirror. I think code reviews are top priority.
 These are some notable differences between Mirror and MirrorNG:
 * [Done] CI/CD pipeline.  Tests are executed with every pull request, quality is *enforced*
 * [Done] Unity package manager.  Makes it easier to install and upgrade MirrorNG in your project
-* [WIP] Code quality,  the goal is to turn this [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MirrorNG_MirrorNG&metric=alert_status)](https://sonarcloud.io/dashboard?id=MirrorNG_MirrorNG) green. Help welcome. This will have a great impact on reducing the amount of defects.
+* [Done] Code quality,  the goal is to turn this [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MirrorNG_MirrorNG&metric=alert_status)](https://sonarcloud.io/dashboard?id=MirrorNG_MirrorNG) green. Help welcome. This will have a great impact on reducing the amount of defects.
 * [Done] Make it work in unity 2019.3.0 with domain reload turned off 
-* [WIP] Allow connection to multiple servers simultaneously
-* [WIP] Error handling via Exceptions
+* [DONE] Error handling via Exceptions
 * [Done] Events instead of overrides for lifecycle events
+* [WIP] Allow connection to multiple servers simultaneously
 * [WIP] Global Client RPC
 
 ## Documentation
@@ -108,9 +105,10 @@ We included several small example projects.
 MirrorNG currently supports the following low level networking transports:
 
 * (built in) Tcp
-* (built in) https://github.com/MirrorNG/MirrorNG_Websocket (Websockets)
+* https://github.com/MirrorNG/MirrorNG_Websocket (Websockets)
 * https://github.com/dragonslaya84/FizzySteamyMirror (Steam)
 * https://github.com/uweenukr/LiteNetLibTransportNG (LiteNetLib)
+* https://github.com/dragonslaya84/IgnoranceNG (ENet)
 
 ## The MirrorNG Mantra
 So many quotes to chose from.  This one in particular really encapsulates why this exists:

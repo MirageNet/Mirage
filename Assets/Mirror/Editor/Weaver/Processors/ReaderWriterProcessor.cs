@@ -1,3 +1,4 @@
+// finds all readers and writers and register them
 using System.IO;
 using Mono.Cecil;
 using UnityEditor.Compilation;
@@ -6,8 +7,7 @@ namespace Mirror.Weaver
 {
     public static class ReaderWriterProcessor
     {
-        // find all readers and writers and register them
-        public static void ProcessReadersAndWriters(AssemblyDefinition CurrentAssembly)
+        public static void Process(AssemblyDefinition CurrentAssembly)
         {
             Readers.Init();
             Writers.Init();
@@ -63,7 +63,7 @@ namespace Mirror.Weaver
                 if (method.ReturnType.FullName != "System.Void")
                     continue;
 
-                if (method.GetCustomAttribute("System.Runtime.CompilerServices.ExtensionAttribute") == null)
+                if (!method.HasCustomAttribute<System.Runtime.CompilerServices.ExtensionAttribute>())
                     continue;
 
                 TypeReference dataType = method.Parameters[1].ParameterType;
@@ -85,7 +85,7 @@ namespace Mirror.Weaver
                 if (method.ReturnType.FullName == "System.Void")
                     continue;
 
-                if (method.GetCustomAttribute("System.Runtime.CompilerServices.ExtensionAttribute") == null)
+                if (!method.HasCustomAttribute<System.Runtime.CompilerServices.ExtensionAttribute>())
                     continue;
 
                 Readers.Register(method.ReturnType, currentAssembly.MainModule.ImportReference(method));
