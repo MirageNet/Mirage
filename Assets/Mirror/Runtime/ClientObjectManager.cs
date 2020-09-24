@@ -70,13 +70,13 @@ namespace Mirror
         {
             if (client != null)
             {
-                client.Authenticated.AddListener(OnClientAuthenticated);
+                client.Connected.AddListener(OnClientConnected);
                 client.Disconnected.AddListener(OnClientDisconnected);
             }
         }
 
         // called after successful authentication
-        void OnClientAuthenticated(INetworkConnection conn)
+        void OnClientConnected(INetworkConnection conn)
         {
             if (client.IsLocalClient)
             {
@@ -87,12 +87,12 @@ namespace Mirror
                 RegisterMessageHandlers(conn);
             }
 
-            logger.Log("NetworkSceneManager.OnClientAuthenticated");
+            logger.Log("NetworkSceneManager.OnClientConnected");
         }
 
         void OnClientDisconnected()
         {
-            client.Authenticated.RemoveListener(OnClientAuthenticated);
+            client.Connected.RemoveListener(OnClientConnected);
             client.Disconnected.RemoveListener(OnClientDisconnected);
         }
 
