@@ -182,7 +182,6 @@ namespace Mirror
             //       before OnStartServer() because this all runs in one thread
             //       and we don't start processing connects until Update.
             Started.Invoke();
-            SpawnObjects();
 
             _ = AcceptAsync();
         }
