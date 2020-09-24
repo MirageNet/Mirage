@@ -315,7 +315,7 @@ namespace Mirror
             {
                 if (netIdentity != null)
                 {
-                    Identity.Server.Destroy(netIdentity.gameObject);
+                    Identity.serverObjectManager.Destroy(netIdentity.gameObject);
                 }
             }
 
