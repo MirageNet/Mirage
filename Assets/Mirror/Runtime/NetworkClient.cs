@@ -193,8 +193,6 @@ namespace Mirror
             Connection = GetNewConnection(c1);
             RegisterHostHandlers();
 
-            server.ActivateHostScene();
-
             _ = OnConnected();
         }
 
