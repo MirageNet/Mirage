@@ -119,7 +119,7 @@ namespace Mirror
         /// <summary>
         /// The host server
         /// </summary>
-        NetworkServer hostServer;
+        internal NetworkServer hostServer;
 
         /// <summary>
         /// NetworkClient can connect to local server in host mode too
