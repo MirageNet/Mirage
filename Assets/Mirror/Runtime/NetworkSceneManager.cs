@@ -309,9 +309,6 @@ namespace Mirror
                     client.OnAuthenticated(client.Connection);
                 }
 
-                // server scene was loaded. now spawn all the objects
-                server.ActivateHostScene();
-
                 // call OnServerSceneChanged
                 OnServerSceneChanged(sceneName, sceneOperation);
 
@@ -326,7 +323,6 @@ namespace Mirror
             {
                 logger.Log("Finished loading scene in server-only mode.");
 
-                server.SpawnObjects();
                 OnServerSceneChanged(sceneName, sceneOperation);
             }
             // client-only mode?
