@@ -1,9 +1,7 @@
 // finds all readers and writers and register them
 using System.IO;
 using Mono.Cecil;
-using Mono.Cecil.Cil;
 using UnityEditor.Compilation;
-using Mono.Cecil.Rocks;
 
 namespace Mirror.Weaver
 {
@@ -59,16 +57,13 @@ namespace Mirror.Weaver
                 if (method.Parameters.Count != 2)
                     continue;
 
-                if (!method.Parameters[0].ParameterType.Is<NetworkWriter>())
+                if (method.Parameters[0].ParameterType.FullName != "Mirror.NetworkWriter")
                     continue;
 
-                if (!method.ReturnType.Is(typeof(void)))
+                if (method.ReturnType.FullName != "System.Void")
                     continue;
 
                 if (!method.HasCustomAttribute<System.Runtime.CompilerServices.ExtensionAttribute>())
-                    continue;
-
-                if (method.HasGenericParameters)
                     continue;
 
                 TypeReference dataType = method.Parameters[1].ParameterType;
@@ -84,41 +79,17 @@ namespace Mirror.Weaver
                 if (method.Parameters.Count != 1)
                     continue;
 
-                if (!method.Parameters[0].ParameterType.Is<NetworkReader>())
+                if (method.Parameters[0].ParameterType.FullName != "Mirror.NetworkReader")
                     continue;
 
-                if (method.ReturnType.Is(typeof(void)))
+                if (method.ReturnType.FullName == "System.Void")
                     continue;
 
                 if (!method.HasCustomAttribute<System.Runtime.CompilerServices.ExtensionAttribute>())
                     continue;
 
-                if (method.HasGenericParameters)
-                    continue;
-
                 Readers.Register(method.ReturnType, currentAssembly.MainModule.ImportReference(method));
             }
-        }
-
-        public static void GenerateRWRegister(AssemblyDefinition currentAssembly)
-        {
-            var cctor = new MethodDefinition(".cctor", MethodAttributes.Private |
-                    MethodAttributes.HideBySig |
-                    MethodAttributes.SpecialName |
-                    MethodAttributes.RTSpecialName |
-                    MethodAttributes.Static,
-                    WeaverTypes.Import(typeof(void)));
-        
-            ILProcessor worker = cctor.Body.GetILProcessor();
-
-            Writers.GenerateRegister(worker);
-            Readers.GenerateRegister(worker);
-
-            worker.Append(worker.Create(OpCodes.Ret));
-
-            TypeDefinition moduleType = currentAssembly.MainModule.GetType("<Module>");
-
-            moduleType.Methods.Add(cctor);
         }
     }
 }

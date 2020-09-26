@@ -7,14 +7,8 @@ namespace Mirror.Weaver
 {
     public static class Extensions
     {
-        public static bool Is(this TypeReference td, Type t)
-        {
-            if (t.IsGenericType)
-            {
-                return td.GetElementType().FullName == t.FullName;
-            }
-            return td.FullName == t.FullName;
-        }
+        public static bool Is(this TypeReference td, Type t) =>
+            td.FullName == t.FullName;
 
         public static bool Is<T>(this TypeReference td) => Is(td, typeof(T));
 
@@ -113,6 +107,16 @@ namespace Mirror.Weaver
             return true;
         }
 
+        public static bool IsArraySegment(this TypeReference td)
+        {
+            return td.Resolve().Is(typeof(ArraySegment<>));
+        }
+
+        public static bool IsList(this TypeReference td)
+        {
+            return td.Resolve().Is(typeof(List<>));
+        }
+
         public static bool CanBeResolved(this TypeReference parent)
         {
             while (parent != null)
@@ -164,22 +168,6 @@ namespace Mirror.Weaver
 
             foreach (GenericParameter generic_parameter in self.GenericParameters)
                 reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
-
-            return Weaver.CurrentAssembly.MainModule.ImportReference(reference);
-        }
-
-        /// <summary>
-        /// Given a field of a generic class such as Writer<T>.write,
-        /// and a generic instance such as ArraySegment`int
-        /// Creates a reference to the specialized method  ArraySegment`int`.get_Count
-        /// <para> Note that calling ArraySegment`T.get_Count directly gives an invalid IL error </para>
-        /// </summary>
-        /// <param name="self"></param>
-        /// <param name="instanceType"></param>
-        /// <returns></returns>
-        public static FieldReference SpecializeField(this FieldReference self, GenericInstanceType instanceType)
-        {
-            var reference = new FieldReference(self.Name, self.FieldType, instanceType);
 
             return Weaver.CurrentAssembly.MainModule.ImportReference(reference);
         }

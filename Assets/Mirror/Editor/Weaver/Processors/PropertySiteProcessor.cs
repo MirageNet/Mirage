@@ -55,60 +55,24 @@ namespace Mirror.Weaver
         {
             // process all references to replaced members with properties
 
+            if (md.Name == ".cctor" ||
+                md.Name == NetworkBehaviourProcessor.ProcessedFunctionName ||
+                md.Name.StartsWith(Weaver.InvokeRpcPrefix))
+                return;
+
             if (md.IsAbstract)
             {
                 return;
             }
-
-            bool weaveSyncvar = !(
-                md.Name == ".cctor" ||
-                md.Name == NetworkBehaviourProcessor.ProcessedFunctionName ||
-                md.Name.StartsWith(Weaver.InvokeRpcPrefix));
 
             if (md.Body != null && md.Body.Instructions != null)
             {
                 for (int iCount = 0; iCount < md.Body.Instructions.Count;)
                 {
                     Instruction instr = md.Body.Instructions[iCount];
-                    if (weaveSyncvar)
-                        iCount += WeaveSyncvarProperties(md, instr, iCount);
-                    else
-                    {
-                        iCount++;
-                    }
-
-                    WeaveReadersAndWriters(instr);
+                    iCount += ProcessInstruction(md, instr, iCount);
                 }
             }
-        }
-
-        private static void WeaveReadersAndWriters(Instruction instr)
-        {
-            if (instr.OpCode == OpCodes.Ldsfld)
-            {
-                var field = (FieldReference)instr.Operand;
-
-                TypeReference type = field.DeclaringType;
-
-                if (type.Is(typeof(Writer<>)) || type.Is(typeof(Reader<>)) && type.IsGenericInstance )
-                {
-                    var typeGenericInstance = (GenericInstanceType)type;
-
-                    TypeReference parameterType = typeGenericInstance.GenericArguments[0];
-                    Writers.GetWriteFunc(parameterType);
-                    Readers.GetReadFunc(parameterType);
-                }
-            }
-            // We are looking for calls to some specific types
-            if (instr.OpCode != OpCodes.Call && instr.OpCode != OpCodes.Callvirt)
-                return;
-
-            MethodReference method = (MethodReference)instr.Operand;
-
-            // the methods we are looking for are all generics
-            if (!method.ContainsGenericParameter)
-                return;
-
         }
 
         // replaces syncvar write access with the NetworkXYZ.get property calls
@@ -143,7 +107,7 @@ namespace Mirror.Weaver
             }
         }
 
-        static int WeaveSyncvarProperties(MethodDefinition md, Instruction instr, int iCount)
+        static int ProcessInstruction(MethodDefinition md, Instruction instr, int iCount)
         {
             if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldDefinition opFieldst)
             {
