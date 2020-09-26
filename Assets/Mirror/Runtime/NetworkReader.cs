@@ -13,6 +13,18 @@ using UnityEngine;
 
 namespace Mirror
 {
+    /// <summary>
+    /// a class that holds writers for the different types
+    /// Note that c# creates a different static variable for each
+    /// type
+    /// This will be populated by the weaver
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    class Reader<T>
+    {
+        public static Func<NetworkReader, T> read;
+    }
+
     // Note: This class is intended to be extremely pedantic, and
     // throw exceptions whenever stuff is going slightly wrong.
     // The exceptions will be handled in NetworkServer/NetworkClient.
