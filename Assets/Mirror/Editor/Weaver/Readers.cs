@@ -71,7 +71,7 @@ namespace Mirror.Weaver
                 Weaver.Error($"Cannot pass type {variableReference.Name} by reference", variableReference);
                 return null;
             }
-            if (variableDefinition.HasGenericParameters && !variableDefinition.IsArraySegment() && !variableDefinition.IsList())
+            if (variableDefinition.HasGenericParameters && !variableDefinition.Is(typeof(ArraySegment<>)) && !variableDefinition.Is(typeof(List<>)))
             {
                 Weaver.Error($"Cannot generate reader for generic variable {variableReference.Name}. Use a supported type or provide a custom reader", variableReference);
                 return null;
@@ -91,11 +91,11 @@ namespace Mirror.Weaver
             {
                 return GetReadFunc(variableDefinition.GetEnumUnderlyingType(), recursionCount);
             }
-            else if (variableDefinition.IsArraySegment())
+            else if (variableDefinition.Is(typeof(ArraySegment<>)))
             {
                 newReaderFunc = GenerateArraySegmentReadFunc(variableReference, recursionCount);
             }
-            else if (variableDefinition.IsList())
+            else if (variableDefinition.Is(typeof(List<>)))
             {
                 newReaderFunc = GenerateListReadFunc(variableReference, recursionCount);
             }

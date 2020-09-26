@@ -37,16 +37,9 @@ namespace Mirror.Tests
             Assert.That(Reader<MyType>.read, Is.Not.Null);
         }
 
-        public static void myfunc(NetworkWriter writer, int pepe)
-        {
-
-        }
-
         [Test]
         public void TestAccessingCustomWriterAndReader()
         {
-            Writer<int>.write = myfunc;
-
             var data = new MyType
             {
                 id = 10,

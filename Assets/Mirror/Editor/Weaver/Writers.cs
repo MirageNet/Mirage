@@ -74,11 +74,11 @@ namespace Mirror.Weaver
 
             // check for collections
 
-            if (variableReference.IsArraySegment())
+            if (variableReference.Is(typeof(ArraySegment<>)))
             {
                 return GenerateArraySegmentWriteFunc(variableReference, recursionCount);
             }
-            if (variableReference.IsList())
+            if (variableReference.Is(typeof(List<>)))
             {
                 return GenerateListWriteFunc(variableReference, recursionCount);
             }
