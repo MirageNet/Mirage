@@ -53,7 +53,6 @@ namespace Mirror
     /// </summary>
     public interface INetworkConnection : IMessageHandler, IVisibilityTracker, IObjectOwner
     {
-        bool IsReady { get; set; }
         EndPoint Address { get; }
         object AuthenticationData { get; set; }
 
