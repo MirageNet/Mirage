@@ -301,6 +301,8 @@ namespace Mirror.Weaver
 
                 if (modified)
                 {
+                    ReaderWriterProcessor.GenerateRWRegister(CurrentAssembly);
+
                     // write to outputDir if specified, otherwise perform in-place write
                     var writeParams = new WriterParameters { WriteSymbols = true };
                     CurrentAssembly.Write(writeParams);

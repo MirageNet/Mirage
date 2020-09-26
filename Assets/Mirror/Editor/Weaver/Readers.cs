@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -110,6 +111,37 @@ namespace Mirror.Weaver
             }
             RegisterReadFunc(variableReference.FullName, newReaderFunc);
             return newReaderFunc;
+        }
+
+        internal static void GenerateRegister(ILProcessor worker)
+        {
+            ModuleDefinition module = Weaver.CurrentAssembly.MainModule;
+
+            TypeReference genericReaderClassRef = module.ImportReference(typeof(Reader<>));
+
+            System.Reflection.FieldInfo fieldInfo = typeof(Reader<>).GetField(nameof(Reader<object>.read));
+            FieldReference fieldRef = module.ImportReference(fieldInfo);
+            TypeReference networkReaderRef = module.ImportReference(typeof(NetworkReader));
+            TypeReference funcRef = module.ImportReference(typeof(Func<,>));
+            MethodReference funcConstructorRef = module.ImportReference(typeof(Func<,>).GetConstructors()[0]);
+
+            foreach (MethodReference readFunc in readFuncs.Values)
+            {
+                TypeReference dataType = readFunc.ReturnType;
+
+                // create a Func<NetworkReader, T> delegate
+                worker.Append(worker.Create(OpCodes.Ldnull));
+                worker.Append(worker.Create(OpCodes.Ldftn, readFunc));
+                GenericInstanceType funcGenericInstance = funcRef.MakeGenericInstanceType(networkReaderRef, dataType);
+                MethodReference funcConstructorInstance = funcConstructorRef.MakeHostInstanceGeneric(funcGenericInstance);
+                worker.Append(worker.Create(OpCodes.Newobj, funcConstructorInstance));
+
+                // save it in Writer<T>.write
+                GenericInstanceType genericInstance = genericReaderClassRef.MakeGenericInstanceType(dataType);
+                FieldReference specializedField = fieldRef.SpecializeField(genericInstance);
+                worker.Append(worker.Create(OpCodes.Stsfld, specializedField));
+            }
+
         }
 
         static void RegisterReadFunc(string name, MethodDefinition newReaderFunc)

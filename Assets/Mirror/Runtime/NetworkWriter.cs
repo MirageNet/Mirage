@@ -13,7 +13,7 @@ namespace Mirror
     /// This will be populated by the weaver
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    class Writer<T>
+    public class Writer<T>
     {
         public static Action<NetworkWriter, T> write;
     }

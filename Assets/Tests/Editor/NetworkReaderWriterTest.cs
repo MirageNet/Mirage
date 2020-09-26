@@ -14,6 +14,18 @@ namespace Mirror.Tests
         }
 
         [Test]
+        public void TestIntWriterNotNull()
+        {
+            Assert.That(Writer<int>.write, Is.Not.Null);
+        }
+
+        [Test]
+        public void TestIntReaderNotNull()
+        {
+            Assert.That(Reader<int>.read, Is.Not.Null);
+        }
+
+        [Test]
         public void TestCustomWriterNotNull()
         {
             Assert.That(Writer<MyType>.write, Is.Not.Null);
@@ -25,9 +37,16 @@ namespace Mirror.Tests
             Assert.That(Reader<MyType>.read, Is.Not.Null);
         }
 
+        public static void myfunc(NetworkWriter writer, int pepe)
+        {
+
+        }
+
         [Test]
         public void TestAccessingCustomWriterAndReader()
         {
+            Writer<int>.write = myfunc;
+
             var data = new MyType
             {
                 id = 10,
