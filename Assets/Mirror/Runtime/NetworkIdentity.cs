@@ -1079,12 +1079,11 @@ namespace Mirror
             // add all server connections
             foreach (INetworkConnection conn in Server.connections)
             {
-                if (conn.IsReady)
-                    AddObserver(conn);
+                AddObserver(conn);
             }
 
             // add local host connection (if any)
-            if (Server.LocalConnection != null && Server.LocalConnection.IsReady)
+            if (Server.LocalConnection != null)
             {
                 AddObserver(Server.LocalConnection);
             }
@@ -1108,7 +1107,7 @@ namespace Mirror
             // -> fixes https://github.com/vis2k/Mirror/issues/692 where a
             //    player might teleport out of the ProximityChecker's cast,
             //    losing the own connection as observer.
-            if (ConnectionToClient != null && ConnectionToClient.IsReady)
+            if (ConnectionToClient != null)
             {
                 newObservers.Add(ConnectionToClient);
             }
@@ -1130,7 +1129,7 @@ namespace Mirror
             {
                 // only add ready connections.
                 // otherwise the player might not be in the world yet or anymore
-                if (conn != null && conn.IsReady && (initialize || !observers.Contains(conn)))
+                if (conn != null && (initialize || !observers.Contains(conn)))
                 {
                     // new observer
                     conn.AddToVisList(this);
@@ -1160,7 +1159,7 @@ namespace Mirror
                 observers.Clear();
                 foreach (INetworkConnection conn in newObservers)
                 {
-                    if (conn != null && conn.IsReady)
+                    if (conn != null)
                         observers.Add(conn);
                 }
             }
@@ -1319,7 +1318,7 @@ namespace Mirror
                     if (ownerWritten > 0)
                     {
                         varsMessage.payload = ownerWriter.ToArraySegment();
-                        if (ConnectionToClient != null && ConnectionToClient.IsReady)
+                        if (ConnectionToClient != null)
                             Server.SendToClientOfPlayer(this, varsMessage);
                     }
 

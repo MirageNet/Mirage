@@ -77,7 +77,6 @@ namespace Mirror
 
         void RegisterClientMessages(INetworkConnection connection)
         {
-            connection.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
             connection.RegisterHandler<SceneMessage>(ClientSceneMessage);
             connection.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
         }
@@ -130,13 +129,6 @@ namespace Mirror
             asyncOperation.allowSceneActivation = true;
         }
 
-        internal void ClientNotReadyMessage(INetworkConnection conn, NotReadyMessage msg)
-        {
-            logger.Log("NetworkSceneManager.OnClientNotReadyMessageInternal");
-
-            OnClientNotReady(conn);
-        }
-
         /// <summary>
         /// Called from ClientChangeScene immediately before SceneManager.LoadSceneAsync is executed
         /// <para>This allows client to do work / cleanup / prep before the scene changes.</para>
@@ -155,47 +147,8 @@ namespace Mirror
         /// <param name="conn">The network connection that the scene change message arrived on.</param>
         internal void OnClientSceneChanged(string sceneName, SceneOperation sceneOperation)
         {
-            //set ready after scene change has completed
-            if (!client.Connection.IsReady)
-                SetClientReady();
-
             ClientSceneChanged.Invoke(sceneName, sceneOperation);
         }
-
-        /// <summary>
-        /// Called on clients when a servers tells the client it is no longer ready.
-        /// <para>This is commonly used when switching scenes.</para>
-        /// </summary>
-        /// <param name="conn">Connection to the server.</param>
-        internal void OnClientNotReady(INetworkConnection conn)
-        {
-            client.Connection.IsReady = false;
-
-            ClientNotReady.Invoke(conn);
-        }
-
-        /// <summary>
-        /// Signal that the client connection is ready to enter the game.
-        /// <para>This could be for example when a client enters an ongoing game and has finished loading the current scene. The server should respond to the message with an appropriate handler which instantiates the players object for example.</para>
-        /// </summary>
-        public void SetClientReady()
-        {
-            if (!client || !client.Active)
-                throw new InvalidOperationException("Ready() called with an null or disconnected client");
-
-            if (client.Connection.IsReady)
-                throw new InvalidOperationException("A connection has already been set as ready. There can only be one.");
-
-            if (logger.LogEnabled()) logger.Log("ClientScene.Ready() called.");
-
-            // Set these before sending the ReadyMessage, otherwise host client
-            // will fail in InternalAddPlayer with null readyConnection.
-            client.Connection.IsReady = true;
-
-            // Tell server we're ready to have a player object spawned
-            client.Connection.Send(new ReadyMessage());
-        }
-
         #endregion
 
         #region Server
@@ -224,7 +177,6 @@ namespace Mirror
             }
 
             if (logger.LogEnabled()) logger.Log("ServerChangeScene " + newSceneName);
-            server.SetAllClientsNotReady();
 
             // Let server prepare for scene change
             OnServerChangeScene(newSceneName, sceneOperation);

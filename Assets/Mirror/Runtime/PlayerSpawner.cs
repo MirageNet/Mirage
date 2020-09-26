@@ -48,13 +48,6 @@ namespace Mirror
         /// <param name="conn">Connection to the server.</param>
         private void OnClientAuthenticated(INetworkConnection connection)
         {
-            // OnClientConnect by default calls AddPlayer but it should not do
-            // that when we have online/offline scenes. so we need the
-            // clientLoadedScene flag to prevent it.
-            // Ready/AddPlayer is usually triggered by a scene load completing. if no scene was loaded, then Ready/AddPlayer it here instead.
-            if (!client.Connection.IsReady)
-                sceneManager.SetClientReady();
-
             client.Send(new AddPlayerMessage());
         }
 

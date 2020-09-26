@@ -152,7 +152,6 @@ namespace Mirror
 
         internal void RegisterMessageHandlers(INetworkConnection connection)
         {
-            connection.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
             connection.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
         }
 
@@ -353,7 +352,7 @@ namespace Mirror
             foreach (INetworkConnection connection in identity.observers)
             {
                 bool isOwner = connection == identity.ConnectionToClient;
-                if ((!isOwner || includeOwner) && connection.IsReady)
+                if (!isOwner || includeOwner)
                 {
                     connectionsCache.Add(connection);
                 }
@@ -522,13 +521,6 @@ namespace Mirror
         {
             if (logger.LogEnabled()) logger.Log("Spawning " + Spawned.Count + " objects for conn " + conn);
 
-            if (!conn.IsReady)
-            {
-                // client needs to finish initializing before we can spawn objects
-                // otherwise it would not find them.
-                return;
-            }
-
             // let connection know that we are about to start spawning...
             conn.Send(new ObjectSpawnStartedMessage());
 
@@ -615,9 +607,6 @@ namespace Mirror
                 LocalClient.Connection.Identity = identity;
             }
 
-            // set ready if not set yet
-            SetClientReady(conn);
-
             if (logger.LogEnabled()) logger.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.AssetId);
 
             Respawn(identity);
@@ -698,72 +687,14 @@ namespace Mirror
             return identity;
         }
 
-        /// <summary>
-        /// Sets the client to be ready.
-        /// <para>When a client has signaled that it is ready, this method tells the server that the client is ready to receive spawned objects and state synchronization updates. This is usually called in a handler for the SYSTEM_READY message. If there is not specific action a game needs to take for this message, relying on the default ready handler function is probably fine, so this call wont be needed.</para>
-        /// </summary>
-        /// <param name="conn">The connection of the client to make ready.</param>
-        public void SetClientReady(INetworkConnection conn)
-        {
-            if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + conn);
-
-            // set ready
-            conn.IsReady = true;
-
-            // client is ready to start spawning objects
-            if (conn.Identity != null)
-                SpawnObserversForConnection(conn);
-        }
-
         internal void ShowForConnection(NetworkIdentity identity, INetworkConnection conn)
         {
-            if (conn.IsReady)
-                SendSpawnMessage(identity, conn);
+            SendSpawnMessage(identity, conn);
         }
 
         internal void HideForConnection(NetworkIdentity identity, INetworkConnection conn)
         {
             conn.Send(new ObjectHideMessage { netId = identity.NetId });
-        }
-
-        /// <summary>
-        /// Marks all connected clients as no longer ready.
-        /// <para>All clients will no longer be sent state synchronization updates. The player's clients can call ClientManager.Ready() again to re-enter the ready state. This is useful when switching scenes.</para>
-        /// </summary>
-        public void SetAllClientsNotReady()
-        {
-            foreach (INetworkConnection conn in connections)
-            {
-                SetClientNotReady(conn);
-            }
-        }
-
-        /// <summary>
-        /// Sets the client of the connection to be not-ready.
-        /// <para>Clients that are not ready do not receive spawned objects or state synchronization updates. They client can be made ready again by calling SetClientReady().</para>
-        /// </summary>
-        /// <param name="conn">The connection of the client to make not ready.</param>
-        public void SetClientNotReady(INetworkConnection conn)
-        {
-            if (conn.IsReady)
-            {
-                if (logger.LogEnabled()) logger.Log("PlayerNotReady " + conn);
-                conn.IsReady = false;
-                conn.RemoveObservers();
-
-                conn.Send(new NotReadyMessage());
-            }
-        }
-
-        /// <summary>
-        /// default ready handler. 
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="msg"></param>
-        void OnClientReadyMessage(INetworkConnection conn, ReadyMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + conn);
-            SetClientReady(conn);
         }
 
         /// <summary>
