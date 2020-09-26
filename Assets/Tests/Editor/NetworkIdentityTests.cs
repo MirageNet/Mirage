@@ -843,8 +843,8 @@ namespace Mirror.Tests
         [Test]
         public void AddAllReadyServerConnectionsToObservers()
         {
-            var connection1 = new NetworkConnection(tconn42) { IsReady = true };
-            var connection2 = new NetworkConnection(tconn43) { IsReady = false };
+            var connection1 = new NetworkConnection(tconn42);
+            var connection2 = new NetworkConnection(tconn43);
             // add some server connections
             server.connections.Add(connection1);
             server.connections.Add(connection2);
@@ -853,7 +853,6 @@ namespace Mirror.Tests
             (_, IConnection localConnection) = PipeConnection.CreatePipe();
 
             server.SetLocalConnection(client, localConnection);
-            server.LocalConnection.IsReady = true;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
@@ -864,28 +863,6 @@ namespace Mirror.Tests
 
             // clean up
             server.Disconnect();
-        }
-
-        // RebuildObservers should always add the own ready connection
-        // (if any). fixes https://github.com/vis2k/Mirror/issues/692
-        [Test]
-        public void RebuildObserversAddsOwnReadyPlayer()
-        {
-            // add at least one observers component, otherwise it will just add
-            // all server connections
-            gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
-
-            // add own player connection
-            (_, NetworkConnection connection) = PipedConnections();
-            connection.IsReady = true;
-            identity.ConnectionToClient = connection;
-
-            // call OnStartServer so that observers dict is created
-            identity.StartServer();
-
-            // rebuild should at least add own ready player
-            identity.RebuildObservers(true);
-            Assert.That(identity.observers, Does.Contain(identity.ConnectionToClient));
         }
 
         // RebuildObservers should always add the own ready connection
@@ -907,53 +884,6 @@ namespace Mirror.Tests
             // rebuild shouldn't add own player because conn wasn't set ready
             identity.RebuildObservers(true);
             Assert.That(identity.observers, Does.Not.Contains(identity.ConnectionToClient));
-        }
-
-        [Test]
-        public void RebuildObserversAddsReadyConnectionsIfImplemented() { 
-
-            // add a proximity checker
-            // one with a ready connection, one with no ready connection, one with null connection
-            RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
-            comp.observer = Substitute.For<INetworkConnection>();
-            comp.observer.IsReady.Returns(true);
-
-            // rebuild observers should add all component's ready observers
-            identity.RebuildObservers(true);
-            Assert.That(identity.observers, Is.EquivalentTo( new[] { comp.observer }));
-        }
-
-
-        [Test]
-        public void RebuildObserversDoesntAddNotReadyConnectionsIfImplemented()
-        {
-            // add a proximity checker
-            // one with a ready connection, one with no ready connection, one with null connection
-            RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
-            comp.observer = Substitute.For<INetworkConnection>();
-            comp.observer.IsReady.Returns(false);
-
-            // rebuild observers should add all component's ready observers
-            identity.RebuildObservers(true);
-            Assert.That(identity.observers, Is.Empty);
-        }
-
-        [Test]
-        public void RebuildObserversAddsReadyServerConnectionsIfNotImplemented()
-        {
-            INetworkConnection readyConnection = Substitute.For<INetworkConnection>();
-            readyConnection.IsReady.Returns(true);
-            INetworkConnection notReadyConnection = Substitute.For<INetworkConnection>();
-            notReadyConnection.IsReady.Returns(false);
-
-            // add some server connections
-            server.connections.Add(readyConnection);
-            server.connections.Add(notReadyConnection);
-
-            // rebuild observers should add all ready server connections
-            // because no component implements OnRebuildObservers
-            identity.RebuildObservers(true);
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { readyConnection }));
         }
 
         [Test]

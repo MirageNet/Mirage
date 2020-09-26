@@ -64,7 +64,6 @@ namespace Mirror.Tests
                 Identity = player.GetComponent<NetworkIdentity>()
             };
             connection.Identity.ConnectionToClient = connection;
-            connection.IsReady = true;
             return connection;
         }
 

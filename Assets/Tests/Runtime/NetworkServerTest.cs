@@ -58,38 +58,6 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void SetClientReadyAndNotReadyTest()
-        {
-            (_, NetworkConnection connection) = PipedConnections();
-            Assert.That(connection.IsReady, Is.False);
-
-            server.SetClientReady(connection);
-            Assert.That(connection.IsReady, Is.True);
-
-            server.SetClientNotReady(connection);
-            Assert.That(connection.IsReady, Is.False);
-        }
-
-        [Test]
-        public void SetAllClientsNotReadyTest()
-        {
-            // add first ready client
-            (_, NetworkConnection first) = PipedConnections();
-            first.IsReady = true;
-            server.connections.Add(first);
-
-            // add second ready client
-            (_, NetworkConnection second) = PipedConnections();
-            second.IsReady = true;
-            server.connections.Add(second);
-
-            // set all not ready
-            server.SetAllClientsNotReady();
-            Assert.That(first.IsReady, Is.False);
-            Assert.That(second.IsReady, Is.False);
-        }
-
-        [Test]
         public void GetNetworkIdentity()
         {
             Assert.That(server.GetNetworkIdentity(playerGO), Is.EqualTo(identity));

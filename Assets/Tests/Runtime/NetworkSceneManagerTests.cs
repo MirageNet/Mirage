@@ -67,20 +67,17 @@ namespace Mirror.Tests
         public IEnumerator ServerChangeSceneTest() => RunAsync(async () =>
         {
             bool invokeClientSceneMessage = false;
-            bool invokeNotReadyMessage = false;
             UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
             client.Connection.RegisterHandler<SceneMessage>(msg => invokeClientSceneMessage = true);
-            client.Connection.RegisterHandler<NotReadyMessage>(msg => invokeNotReadyMessage = true);
             sceneManager.ServerChangeScene.AddListener(func1);
 
             sceneManager.ChangeServerScene("testScene");
 
-            await WaitFor(() => invokeClientSceneMessage && invokeNotReadyMessage);
+            await WaitFor(() => invokeClientSceneMessage);
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
             Assert.That(sceneManager.NetworkSceneName, Is.EqualTo("testScene"));
             Assert.That(invokeClientSceneMessage, Is.True);
-            Assert.That(invokeNotReadyMessage, Is.True);
         });
 
         [Test]
@@ -89,24 +86,6 @@ namespace Mirror.Tests
             Assert.Throws<ArgumentNullException>(() =>
             {
                 sceneManager.ChangeServerScene(string.Empty);
-            });
-        }
-
-        [Test]
-        public void ReadyTest()
-        {
-            sceneManager.SetClientReady();
-            Assert.That(client.Connection.IsReady);
-        }
-
-        [Test]
-        public void ReadyTwiceTest()
-        {
-            sceneManager.SetClientReady();
-
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                sceneManager.SetClientReady();
             });
         }
 
@@ -140,15 +119,6 @@ namespace Mirror.Tests
             sceneManager.ClientSceneChanged.AddListener(func1);
             sceneManager.OnClientSceneChanged("test", SceneOperation.Normal);
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
-        }
-
-        [Test]
-        public void ClientNotReadyTest()
-        {
-            UnityAction<INetworkConnection> func1 = Substitute.For<UnityAction<INetworkConnection>>();
-            sceneManager.ClientNotReady.AddListener(func1);
-            sceneManager.OnClientNotReady(client.Connection);
-            func1.Received(1).Invoke(Arg.Any<INetworkConnection>());
         }
 
         [UnityTest]
@@ -218,18 +188,6 @@ namespace Mirror.Tests
                 clientSceneManager.ClientSceneMessage(null, new SceneMessage());
             });
         });
-
-        [Test]
-        public void ClientNotReady()
-        {
-            UnityAction<INetworkConnection> func1 = Substitute.For<UnityAction<INetworkConnection>>();
-            clientSceneManager.ClientNotReady.AddListener(func1);
-            clientSceneManager.SetClientReady();
-            clientSceneManager.ClientNotReadyMessage(null, new NotReadyMessage());
-
-            Assert.That(client.Connection.IsReady, Is.False);
-            func1.Received(1).Invoke(Arg.Any<INetworkConnection>());
-        }
 
         [UnityTest]
         public IEnumerator ClientSceneMessageInvokeTest() => RunAsync(async () =>

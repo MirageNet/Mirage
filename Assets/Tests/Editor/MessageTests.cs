@@ -58,12 +58,6 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void NotReadyMessageTest()
-        {
-            TestSerializeDeserialize(new NotReadyMessage());
-        }
-
-        [Test]
         public void ObjectDestroyMessageTest()
         {
             TestSerializeDeserialize(new ObjectDestroyMessage
@@ -92,12 +86,6 @@ namespace Mirror.Tests
         {
             // try setting value with constructor
             TestSerializeDeserialize(new ObjectSpawnStartedMessage());
-        }
-
-        [Test]
-        public void ReadyMessageTest()
-        {
-            TestSerializeDeserialize(new ReadyMessage());
         }
 
         [Test]

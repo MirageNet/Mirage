@@ -28,7 +28,7 @@ namespace Mirror.Tests
         [Test]
         public void UnpackWrongMessage()
         {
-            var message = new ReadyMessage();
+            var message = new ServerRpcMessage();
 
             byte[] data = MessagePacker.Pack(message);
 

@@ -97,17 +97,6 @@ namespace Mirror.Tests
         }
 
         [UnityTest]
-        public IEnumerator ReadyMessageSetsClientReadyTest() => RunAsync(async () =>
-        {
-            connectionToServer.Send(new ReadyMessage());
-
-            await WaitFor(() => connectionToClient.IsReady);
-
-            // ready?
-            Assert.That(connectionToClient.IsReady, Is.True);
-        });
-
-        [UnityTest]
         public IEnumerator SendToAll() => RunAsync(async () =>
         {
             bool invoked = false;
@@ -141,8 +130,6 @@ namespace Mirror.Tests
             bool invoked = false;
 
             connectionToServer.RegisterHandler<SpawnMessage>(msg => invoked = true) ;
-
-            connectionToClient.IsReady = true;
 
             // call ShowForConnection
             server.ShowForConnection(serverIdentity, connectionToClient);
