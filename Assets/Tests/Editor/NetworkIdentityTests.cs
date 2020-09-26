@@ -841,52 +841,6 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void AddAllReadyServerConnectionsToObservers()
-        {
-            var connection1 = new NetworkConnection(tconn42);
-            var connection2 = new NetworkConnection(tconn43);
-            // add some server connections
-            server.connections.Add(connection1);
-            server.connections.Add(connection2);
-
-            // add a host connection
-            (_, IConnection localConnection) = PipeConnection.CreatePipe();
-
-            server.SetLocalConnection(client, localConnection);
-
-            // call OnStartServer so that observers dict is created
-            identity.StartServer();
-
-            // add all to observers. should have the two ready connections then.
-            identity.AddAllReadyServerConnectionsToObservers();
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { connection1, server.LocalConnection }));
-
-            // clean up
-            server.Disconnect();
-        }
-
-        // RebuildObservers should always add the own ready connection
-        // (if any). fixes https://github.com/vis2k/Mirror/issues/692
-        [Test]
-        public void RebuildObserversOnlyAddsOwnPlayerIfReady()
-        {
-            // add at least one observers component, otherwise it will just add
-            // all server connections
-            gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
-
-            // add own player connection that isn't ready
-            (_, NetworkConnection connection) = PipedConnections();
-            identity.ConnectionToClient = connection;
-
-            // call OnStartServer so that observers dict is created
-            identity.StartServer();
-
-            // rebuild shouldn't add own player because conn wasn't set ready
-            identity.RebuildObservers(true);
-            Assert.That(identity.observers, Does.Not.Contains(identity.ConnectionToClient));
-        }
-
-        [Test]
         public void OnSetHostVisibilityBaseTest()
         {
             SpriteRenderer renderer;
