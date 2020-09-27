@@ -70,6 +70,11 @@ namespace Mirror.Weaver
             {
                 GenerateReadersWriters(currentAssembly, method);
             }
+
+            foreach (TypeDefinition nested in klass.NestedTypes)
+            {
+                GenerateReadersWriters(currentAssembly, nested);
+            }
         }
 
         private static void GenerateReadersWriters(AssemblyDefinition currentAssembly, MethodDefinition method)
@@ -129,6 +134,14 @@ namespace Mirror.Weaver
                 declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.SendAsync) ||
                 declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.RegisterHandler) ||
                 declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.UnregisterHandler) ||
+                declaringType.Is(typeof(NetworkConnection)) && method.Name == nameof(NetworkConnection.Send) ||
+                declaringType.Is(typeof(NetworkConnection)) && method.Name == nameof(NetworkConnection.SendAsync) ||
+                declaringType.Is(typeof(NetworkConnection)) && method.Name == nameof(NetworkConnection.RegisterHandler) ||
+                declaringType.Is(typeof(NetworkConnection)) && method.Name == nameof(NetworkConnection.UnregisterHandler) ||
+                declaringType.Is(typeof(INetworkConnection)) && method.Name == nameof(INetworkConnection.Send) ||
+                declaringType.Is(typeof(INetworkConnection)) && method.Name == nameof(INetworkConnection.SendAsync) ||
+                declaringType.Is(typeof(INetworkConnection)) && method.Name == nameof(INetworkConnection.RegisterHandler) ||
+                declaringType.Is(typeof(INetworkConnection)) && method.Name == nameof(INetworkConnection.UnregisterHandler) ||
                 declaringType.Is(typeof(NetworkClient)) && method.Name == nameof(NetworkClient.Send) ||
                 declaringType.Is(typeof(NetworkClient)) && method.Name == nameof(NetworkClient.SendAsync) ||
                 declaringType.Is(typeof(NetworkServer)) && method.Name == nameof(NetworkServer.SendToAll) ||
