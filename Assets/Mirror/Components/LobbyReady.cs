@@ -38,10 +38,5 @@ namespace Mirror
 
             NetworkConnection.Send(connectionsCache, msg, channelId);
         }
-
-        public void SendToReady<T>(NetworkIdentity identity, T msg, int channelId) where T : IMessageBase
-        {
-            SendToReady(identity, msg, true, channelId);
-        }
     }
 }
