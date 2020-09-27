@@ -2,37 +2,38 @@ using NUnit.Framework;
 
 namespace Mirror.Tests
 {
-    struct TestMessage
+    public struct TestMessage
     {
         public int IntValue;
         public string StringValue;
         public double DoubleValue;
     }
 
-    class ClassWithoutBaseMessage
+    public class ClassWithoutBaseMessage
     {
         public int[] array;
     }
 
-    abstract class AbstractMessage
+    public abstract class AbstractMessage
     {
     }
 
-    class OverrideMessage : AbstractMessage
+    public class OverrideMessage : AbstractMessage
     {
         public int someValue;
     }
 
-    class Layer1Message
+    public class Layer1Message
     {
         public int value1;
     }
 
-    class Layer2Message : Layer1Message
+    public class Layer2Message : Layer1Message
     {
         public int value2;
     }
-    class Layer3Message : Layer2Message
+
+    public class Layer3Message : Layer2Message
     {
         public int value3;
     }
@@ -57,7 +58,7 @@ namespace Mirror.Tests
         [Test]
         public void ClassWithEmptyMethods()
         {
-            ClassWithoutBaseMessage intMessage = new ClassWithoutBaseMessage
+            var intMessage = new ClassWithoutBaseMessage
             {
                 array = new[] { 3, 4, 5 }
             };

@@ -4,6 +4,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using UnityEditor.Compilation;
 using UnityEditor;
+using UnityEngine;
 
 namespace Mirror.Weaver
 {
@@ -103,12 +104,7 @@ namespace Mirror.Weaver
 
                 TypeReference parameterType = typeGenericInstance.GenericArguments[0];
 
-                if (!parameterType.IsGenericParameter)
-                {
-                    parameterType = currentAssembly.MainModule.ImportReference(parameterType);
-                    Writers.GetWriteFunc(parameterType);
-                    Readers.GetReadFunc(parameterType);
-                }
+                GenerateReadersWriters(currentAssembly, parameterType);
             }
         }
 
@@ -119,32 +115,50 @@ namespace Mirror.Weaver
 
             TypeReference declaringType = method.DeclaringType;
 
-            bool generate = false;
-            generate |= declaringType.Is(typeof(MessagePacker)) && method.Name == nameof(MessagePacker.Pack);
-            generate |= declaringType.Is(typeof(MessagePacker)) && method.Name == nameof(MessagePacker.GetId);
-            generate |= declaringType.Is(typeof(MessagePacker)) && method.Name == nameof(MessagePacker.Unpack);
-            generate |= declaringType.Is(typeof(NetworkWriter)) && method.Name == nameof(NetworkWriter.WriteMessage);
-            generate |= declaringType.Is(typeof(NetworkReader)) && method.Name == nameof(NetworkReader.ReadMessage);
-            generate |= declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.Send);
-            generate |= declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.SendAsync);
-            generate |= declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.RegisterHandler);
-            generate |= declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.UnregisterHandler);
-            generate |= declaringType.Is(typeof(NetworkClient)) && method.Name == nameof(NetworkClient.Send);
-            generate |= declaringType.Is(typeof(NetworkClient)) && method.Name == nameof(NetworkClient.SendAsync);
-            generate |= declaringType.Is(typeof(NetworkServer)) && method.Name == nameof(NetworkServer.SendToAll);
-            generate |= declaringType.Is(typeof(NetworkServer)) && method.Name == nameof(NetworkServer.SendToClientOfPlayer);
-            generate |= declaringType.Is(typeof(NetworkServer)) && method.Name == nameof(NetworkServer.SendToReady);
+            bool generate = 
+                declaringType.Is(typeof(MessagePacker)) && method.Name == nameof(MessagePacker.Pack) ||
+                declaringType.Is(typeof(MessagePacker)) && method.Name == nameof(MessagePacker.GetId) ||
+                declaringType.Is(typeof(MessagePacker)) && method.Name == nameof(MessagePacker.Unpack) ||
+                declaringType.Is(typeof(NetworkWriter)) && method.Name == nameof(NetworkWriter.WriteMessage) ||
+                declaringType.Is(typeof(NetworkReader)) && method.Name == nameof(NetworkReader.ReadMessage) ||
+                declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.Send) ||
+                declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.SendAsync) ||
+                declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.RegisterHandler) ||
+                declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.UnregisterHandler) ||
+                declaringType.Is(typeof(NetworkClient)) && method.Name == nameof(NetworkClient.Send) ||
+                declaringType.Is(typeof(NetworkClient)) && method.Name == nameof(NetworkClient.SendAsync) ||
+                declaringType.Is(typeof(NetworkServer)) && method.Name == nameof(NetworkServer.SendToAll) ||
+                declaringType.Is(typeof(NetworkServer)) && method.Name == nameof(NetworkServer.SendToClientOfPlayer) ||
+                declaringType.Is(typeof(NetworkServer)) && method.Name == nameof(NetworkServer.SendToReady);
 
             if (generate)
             {
                 var instanceMethod = (GenericInstanceMethod)method;
-                TypeReference parameter = instanceMethod.GenericArguments[0];
-                if (!parameter.IsGenericParameter)
+                TypeReference parameterType = instanceMethod.GenericArguments[0];
+                GenerateReadersWriters(currentAssembly, parameterType);
+            }
+        }
+
+        private static void GenerateReadersWriters(AssemblyDefinition currentAssembly, TypeReference parameterType)
+        {
+            if (!parameterType.IsGenericParameter && parameterType.CanBeResolved())
+            {
+                TypeDefinition typeDefinition = parameterType.Resolve();
+
+                if (typeDefinition.IsClass && !typeDefinition.IsValueType)
                 {
-                    parameter = currentAssembly.MainModule.ImportReference(parameter);
-                    Readers.GetReadFunc(parameter);
-                    Writers.GetWriteFunc(parameter);
+                    MethodDefinition constructor = typeDefinition.GetMethod(".ctor");
+
+                    bool hasAccess = constructor.IsPublic
+                        || constructor.IsAssembly && typeDefinition.Module == currentAssembly.MainModule;
+
+                    if (!hasAccess)
+                        return;
                 }
+
+                parameterType = currentAssembly.MainModule.ImportReference(parameterType);
+                Writers.GetWriteFunc(parameterType);
+                Readers.GetReadFunc(parameterType);
             }
         }
 
