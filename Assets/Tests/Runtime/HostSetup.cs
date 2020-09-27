@@ -17,6 +17,8 @@ namespace Mirror.Tests
         protected NetworkServer server;
         protected NetworkClient client;
         protected NetworkSceneManager sceneManager;
+        protected ServerObjectManager serverObjectManager;
+        protected ClientObjectManager clientObjectManager;
 
         protected GameObject playerGO;
         protected NetworkIdentity identity;
@@ -38,6 +40,12 @@ namespace Mirror.Tests
             sceneManager.client = client;
             sceneManager.server = server;
 
+            serverObjectManager = networkManagerGo.AddComponent<ServerObjectManager>();
+            clientObjectManager = networkManagerGo.AddComponent<ClientObjectManager>();
+
+            serverObjectManager.server = server;
+            clientObjectManager.client = client;
+
             ExtraSetup();
 
             // wait for client and server to initialize themselves
@@ -50,7 +58,7 @@ namespace Mirror.Tests
             identity = playerGO.AddComponent<NetworkIdentity>();
             component = playerGO.AddComponent<T>();
 
-            server.AddPlayerForConnection(server.LocalConnection, playerGO);
+            serverObjectManager.AddPlayerForConnection(server.LocalConnection, playerGO);
 
             client.Update();
         });

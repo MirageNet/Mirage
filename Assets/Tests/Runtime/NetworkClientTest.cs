@@ -40,7 +40,7 @@ namespace Mirror.Tests
             var gameObject = new GameObject();
             Assert.Throws<InvalidOperationException>(() =>
             {
-                client.RegisterPrefab(gameObject);
+                clientObjectManager.RegisterPrefab(gameObject);
             });
             Object.Destroy(gameObject);
         }
@@ -53,7 +53,7 @@ namespace Mirror.Tests
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                client.RegisterPrefab(gameObject, guid);
+                clientObjectManager.RegisterPrefab(gameObject, guid);
             });
             Object.Destroy(gameObject);
         }
@@ -64,7 +64,7 @@ namespace Mirror.Tests
             var msg = new SpawnMessage();
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                client.OnSpawn(msg);
+                clientObjectManager.OnSpawn(msg);
             });
 
             Assert.That(ex.Message, Is.EqualTo("OnObjSpawn netId: " + msg.netId + " has invalid asset Id"));
@@ -76,7 +76,7 @@ namespace Mirror.Tests
             var gameObject = new GameObject();
             Assert.Throws<InvalidOperationException>(() =>
             {
-                client.UnregisterPrefab(gameObject);
+                clientObjectManager.UnregisterPrefab(gameObject);
             });
             Object.Destroy(gameObject);
         }
@@ -87,11 +87,11 @@ namespace Mirror.Tests
             var guid = Guid.NewGuid();
             var prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
 
-            client.RegisterPrefab(prefabObject, guid);
+            clientObjectManager.RegisterPrefab(prefabObject, guid);
 
             await Task.Delay(1);
 
-            client.GetPrefab(guid, out GameObject result);
+            clientObjectManager.GetPrefab(guid, out GameObject result);
 
             Assert.That(result, Is.SameAs(prefabObject));
 
@@ -104,9 +104,9 @@ namespace Mirror.Tests
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
             replacementIdentity.AssetId = Guid.NewGuid();
-            client.RegisterPrefab(playerReplacement);
+            clientObjectManager.RegisterPrefab(playerReplacement);
 
-            server.ReplacePlayerForConnection(server.LocalConnection, client, playerReplacement, true);
+            serverObjectManager.ReplacePlayerForConnection(server.LocalConnection, client, playerReplacement, true);
 
             Assert.That(server.LocalClient.Connection.Identity, Is.EqualTo(replacementIdentity));
         }
@@ -114,7 +114,7 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator ObjectHideTest() => RunAsync(async () =>
         {
-            client.OnObjectHide(new ObjectHideMessage
+            clientObjectManager.OnObjectHide(new ObjectHideMessage
             {
                 netId = identity.NetId
             });
@@ -127,7 +127,7 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator ObjectDestroyTest() => RunAsync(async () =>
         {
-            client.OnObjectDestroy(new ObjectDestroyMessage
+            clientObjectManager.OnObjectDestroy(new ObjectDestroyMessage
             {
                 netId = identity.NetId
             });

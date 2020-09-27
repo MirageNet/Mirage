@@ -18,6 +18,7 @@ namespace Mirror.Tests
         protected GameObject serverGo;
         protected NetworkServer server;
         protected NetworkSceneManager serverSceneManager;
+        protected ServerObjectManager serverObjectManager;
         protected GameObject serverPlayerGO;
         protected NetworkIdentity serverIdentity;
         protected T serverComponent;
@@ -25,6 +26,7 @@ namespace Mirror.Tests
         protected GameObject clientGo;
         protected NetworkClient client;
         protected NetworkSceneManager clientSceneManager;
+        protected ClientObjectManager clientObjectManager;
         protected GameObject clientPlayerGO;
         protected NetworkIdentity clientIdentity;
         protected T clientComponent;
@@ -40,8 +42,8 @@ namespace Mirror.Tests
         [UnitySetUp]
         public IEnumerator Setup() => RunAsync(async () =>
         {
-            serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(NetworkServer));
-            clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(NetworkClient));
+            serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(NetworkServer));
+            clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(ClientObjectManager), typeof(NetworkClient));
             testTransport = serverGo.AddComponent<LoopbackTransport>();
 
             await Task.Delay(1);
@@ -58,12 +60,18 @@ namespace Mirror.Tests
             serverSceneManager.server = server;
             clientSceneManager.client = client;
 
+            serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
+            clientObjectManager = clientGo.GetComponent<ClientObjectManager>();
+
+            serverObjectManager.server = server;
+            clientObjectManager.client = client;
+
             ExtraSetup();
 
             // create and register a prefab
             playerPrefab = new GameObject("serverPlayer", typeof(NetworkIdentity), typeof(T));
             playerPrefab.GetComponent<NetworkIdentity>().AssetId = Guid.NewGuid();
-            client.RegisterPrefab(playerPrefab);
+            clientObjectManager.RegisterPrefab(playerPrefab);
 
             // wait for client and server to initialize themselves
             await Task.Delay(1);
@@ -92,7 +100,7 @@ namespace Mirror.Tests
             serverPlayerGO = Object.Instantiate(playerPrefab);
             serverIdentity = serverPlayerGO.GetComponent<NetworkIdentity>();
             serverComponent = serverPlayerGO.GetComponent<T>();
-            server.AddPlayerForConnection(connectionToClient, serverPlayerGO);
+            serverObjectManager.AddPlayerForConnection(connectionToClient, serverPlayerGO);
 
             // wait for client to spawn it
             await WaitFor(() => connectionToServer.Identity != null);

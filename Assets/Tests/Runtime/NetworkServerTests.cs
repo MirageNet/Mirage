@@ -12,7 +12,7 @@ using static Mirror.Tests.AsyncUtil;
 
 namespace Mirror.Tests
 {
-    public class SimpleNetworkServer : NetworkServer
+    public class SimpleNetworkServer : ServerObjectManager
     {
         public void SpawnObjectExpose(GameObject obj, INetworkConnection ownerConnection)
         {
@@ -76,7 +76,7 @@ namespace Mirror.Tests
         {
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                server.Spawn(new GameObject(), new GameObject());
+                serverObjectManager.Spawn(new GameObject(), new GameObject());
             });
 
             Assert.That(ex.Message, Is.EqualTo("Player object has no NetworkIdentity"));
@@ -90,7 +90,7 @@ namespace Mirror.Tests
 
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                server.Spawn(new GameObject(), player);
+                serverObjectManager.Spawn(new GameObject(), player);
             });
 
             Assert.That(ex.Message, Is.EqualTo("Player object is not a player in the connection"));
@@ -128,7 +128,7 @@ namespace Mirror.Tests
 
             connectionToServer.RegisterHandler<WovenTestMessage>(msg => invoked = true) ;
 
-            server.SendToClientOfPlayer(serverIdentity, message);
+            serverObjectManager.SendToClientOfPlayer(serverIdentity, message);
 
             _ = connectionToServer.ProcessMessagesAsync();
 
@@ -145,7 +145,7 @@ namespace Mirror.Tests
             connectionToClient.IsReady = true;
 
             // call ShowForConnection
-            server.ShowForConnection(serverIdentity, connectionToClient);
+            serverObjectManager.ShowForConnection(serverIdentity, connectionToClient);
 
             _ = connectionToServer.ProcessMessagesAsync();
 
@@ -158,7 +158,7 @@ namespace Mirror.Tests
             serverIdentity.sceneId = 42;
             // unspawned scene objects are set to inactive before spawning
             serverIdentity.gameObject.SetActive(false);
-            Assert.That(server.SpawnObjects(), Is.True);
+            Assert.That(serverObjectManager.SpawnObjects(), Is.True);
             Assert.That(serverIdentity.gameObject.activeSelf, Is.True);
         }
 
@@ -168,7 +168,7 @@ namespace Mirror.Tests
             serverIdentity.sceneId = 0;
             // unspawned scene objects are set to inactive before spawning
             serverIdentity.gameObject.SetActive(false);
-            Assert.That(server.SpawnObjects(), Is.True);
+            Assert.That(serverObjectManager.SpawnObjects(), Is.True);
             Assert.That(serverIdentity.gameObject.activeSelf, Is.False);
         }
 
@@ -236,9 +236,9 @@ namespace Mirror.Tests
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
             replacementIdentity.AssetId = Guid.NewGuid();
-            client.RegisterPrefab(playerReplacement);
+            clientObjectManager.RegisterPrefab(playerReplacement);
 
-            server.ReplacePlayerForConnection(connectionToClient, client, playerReplacement);
+            serverObjectManager.ReplacePlayerForConnection(connectionToClient, client, playerReplacement);
 
             Assert.That(connectionToClient.Identity, Is.EqualTo(replacementIdentity));
         }
@@ -249,9 +249,9 @@ namespace Mirror.Tests
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
             replacementIdentity.AssetId = Guid.NewGuid();
-            client.RegisterPrefab(playerReplacement);
+            clientObjectManager.RegisterPrefab(playerReplacement);
 
-            server.ReplacePlayerForConnection(connectionToClient, client, playerReplacement, true);
+            serverObjectManager.ReplacePlayerForConnection(connectionToClient, client, playerReplacement, true);
 
             Assert.That(clientIdentity.ConnectionToClient, Is.EqualTo(null));
         }
@@ -263,9 +263,9 @@ namespace Mirror.Tests
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
             replacementIdentity.AssetId = replacementGuid;
-            client.RegisterPrefab(playerReplacement);
+            clientObjectManager.RegisterPrefab(playerReplacement);
 
-            server.ReplacePlayerForConnection(connectionToClient, client, playerReplacement, replacementGuid);
+            serverObjectManager.ReplacePlayerForConnection(connectionToClient, client, playerReplacement, replacementGuid);
 
             Assert.That(connectionToClient.Identity.AssetId, Is.EqualTo(replacementGuid));
         }
@@ -283,11 +283,11 @@ namespace Mirror.Tests
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
             replacementIdentity.AssetId = replacementGuid;
-            client.RegisterPrefab(playerReplacement);
+            clientObjectManager.RegisterPrefab(playerReplacement);
 
             connectionToClient.Identity = null;
 
-            Assert.That(server.AddPlayerForConnection(connectionToClient, playerReplacement, replacementGuid), Is.True);
+            Assert.That(serverObjectManager.AddPlayerForConnection(connectionToClient, playerReplacement, replacementGuid), Is.True);
         }
 
         [Test]

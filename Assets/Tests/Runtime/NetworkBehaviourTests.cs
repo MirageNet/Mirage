@@ -86,7 +86,7 @@ namespace Mirror.Tests
 
             Assert.That(comp.called, Is.False);
 
-            server.Spawn(gameObject);
+            serverObjectManager.Spawn(gameObject);
 
             netIdentity.StartServer();
 
@@ -103,7 +103,7 @@ namespace Mirror.Tests
             gameObject2.AddComponent<NetworkIdentity>();
             SampleBehavior behaviour2 = gameObject2.AddComponent<SampleBehavior>();
 
-            server.Spawn(gameObject2);
+            serverObjectManager.Spawn(gameObject2);
 
             client.Update();
 

@@ -86,9 +86,9 @@ namespace Mirror.Tests
             NetworkIdentity identity = gameObject.AddComponent<NetworkIdentity>();
             identity.AssetId = guid;
 
-            client.RegisterSpawnHandler(guid, SpawnDelegateTest, go => { });
-            client.RegisterPrefab(gameObject, guid);
-            server.SendSpawnMessage(identity, connectionToClient);
+            clientObjectManager.RegisterSpawnHandler(guid, SpawnDelegateTest, go => { });
+            clientObjectManager.RegisterPrefab(gameObject, guid);
+            serverObjectManager.SendSpawnMessage(identity, connectionToClient);
 
             await WaitFor(() => spawnDelegateTestCalled != 0);
 
@@ -105,13 +105,13 @@ namespace Mirror.Tests
 
             var unspawnDelegate = Substitute.For<UnSpawnDelegate>();
 
-            client.RegisterSpawnHandler(guid, SpawnDelegateTest, unspawnDelegate);
-            client.RegisterPrefab(gameObject, guid);
-            server.SendSpawnMessage(identity, connectionToClient);
+            clientObjectManager.RegisterSpawnHandler(guid, SpawnDelegateTest, unspawnDelegate);
+            clientObjectManager.RegisterPrefab(gameObject, guid);
+            serverObjectManager.SendSpawnMessage(identity, connectionToClient);
 
             await WaitFor(() => spawnDelegateTestCalled != 0);
 
-            client.OnObjectDestroy(new ObjectDestroyMessage
+            clientObjectManager.OnObjectDestroy(new ObjectDestroyMessage
             {
                 netId = identity.NetId
             });
@@ -123,7 +123,7 @@ namespace Mirror.Tests
         {
             spawnDelegateTestCalled++;
 
-            if (client.GetPrefab(assetId, out GameObject prefab))
+            if (clientObjectManager.GetPrefab(assetId, out GameObject prefab))
             {
                 return Object.Instantiate(prefab);
             }
