@@ -20,7 +20,7 @@ namespace Mirror
     /// This will be populated by the weaver
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Reader<T>
+    public static class Reader<T>
     {
         public static Func<NetworkReader, T> read;
     }
