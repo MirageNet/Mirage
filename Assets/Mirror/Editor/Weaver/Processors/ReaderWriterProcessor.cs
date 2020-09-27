@@ -119,8 +119,6 @@ namespace Mirror.Weaver
             if (!method.IsGenericInstance)
                 return;
 
-            TypeReference declaringType = method.DeclaringType;
-
             bool generate =
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.Pack)) ||
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.GetId)) ||
