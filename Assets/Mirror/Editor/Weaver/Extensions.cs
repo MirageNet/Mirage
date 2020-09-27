@@ -305,6 +305,12 @@ namespace Mirror.Weaver
             return FindAllPublicFields(variable.Resolve());
         }
 
+        public static bool Is(this MethodReference method, Type t,  string name) =>
+            method.DeclaringType.Is(t) && method.Name == name;
+
+        public static bool Is<T>(this MethodReference method, string name) =>
+            method.DeclaringType.Is<T>() && method.Name == name;
+
         /// <summary>
         /// Finds public fields in type and base type
         /// </summary>

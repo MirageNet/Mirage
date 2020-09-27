@@ -128,7 +128,7 @@ namespace Mirror.Weaver
         private static UnityAssembly CreateUnityAssembly(string assemblyPath)
         {
             // copy from one of the assemblies
-            Assembly first = CompilationPipeline.GetAssemblies().First();
+            UnityAssembly first = CompilationPipeline.GetAssemblies().First();
 
             return new UnityAssembly(
                 Path.GetFileNameWithoutExtension(assemblyPath),

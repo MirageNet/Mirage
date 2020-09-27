@@ -4,7 +4,6 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using UnityEditor.Compilation;
 using UnityEditor;
-using Debug = UnityEngine.Debug;
 
 namespace Mirror.Weaver
 {
@@ -122,29 +121,30 @@ namespace Mirror.Weaver
 
             TypeReference declaringType = method.DeclaringType;
 
-            bool generate = 
-                declaringType.Is(typeof(MessagePacker)) && method.Name == nameof(MessagePacker.Pack) ||
-                declaringType.Is(typeof(MessagePacker)) && method.Name == nameof(MessagePacker.GetId) ||
-                declaringType.Is(typeof(MessagePacker)) && method.Name == nameof(MessagePacker.Unpack) ||
-                declaringType.Is(typeof(NetworkWriter)) && method.Name == nameof(NetworkWriter.WriteMessage) ||
-                declaringType.Is(typeof(NetworkReader)) && method.Name == nameof(NetworkReader.ReadMessage) ||
-                declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.Send) ||
-                declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.SendAsync) ||
-                declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.RegisterHandler) ||
-                declaringType.Is(typeof(IMessageHandler)) && method.Name == nameof(IMessageHandler.UnregisterHandler) ||
-                declaringType.Is(typeof(NetworkConnection)) && method.Name == nameof(NetworkConnection.Send) ||
-                declaringType.Is(typeof(NetworkConnection)) && method.Name == nameof(NetworkConnection.SendAsync) ||
-                declaringType.Is(typeof(NetworkConnection)) && method.Name == nameof(NetworkConnection.RegisterHandler) ||
-                declaringType.Is(typeof(NetworkConnection)) && method.Name == nameof(NetworkConnection.UnregisterHandler) ||
-                declaringType.Is(typeof(INetworkConnection)) && method.Name == nameof(INetworkConnection.Send) ||
-                declaringType.Is(typeof(INetworkConnection)) && method.Name == nameof(INetworkConnection.SendAsync) ||
-                declaringType.Is(typeof(INetworkConnection)) && method.Name == nameof(INetworkConnection.RegisterHandler) ||
-                declaringType.Is(typeof(INetworkConnection)) && method.Name == nameof(INetworkConnection.UnregisterHandler) ||
-                declaringType.Is(typeof(NetworkClient)) && method.Name == nameof(NetworkClient.Send) ||
-                declaringType.Is(typeof(NetworkClient)) && method.Name == nameof(NetworkClient.SendAsync) ||
-                declaringType.Is(typeof(NetworkServer)) && method.Name == nameof(NetworkServer.SendToAll) ||
-                declaringType.Is(typeof(NetworkServer)) && method.Name == nameof(NetworkServer.SendToClientOfPlayer) ||
-                declaringType.Is(typeof(NetworkServer)) && method.Name == nameof(NetworkServer.SendToReady);
+            bool generate =
+                method.Is(typeof(MessagePacker), nameof(MessagePacker.Pack)) ||
+                method.Is(typeof(MessagePacker), nameof(MessagePacker.GetId)) ||
+                method.Is(typeof(MessagePacker), nameof(MessagePacker.Unpack)) ||
+                method.Is<NetworkWriter>(nameof(NetworkWriter.WriteMessage)) ||
+                method.Is<NetworkReader>(nameof(NetworkReader.ReadMessage)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.Send)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.SendAsync)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.RegisterHandler)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.UnregisterHandler)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.Send)) ||
+                method.Is<NetworkConnection>(nameof(NetworkConnection.Send)) ||
+                method.Is<NetworkConnection>(nameof(NetworkConnection.SendAsync)) ||
+                method.Is<NetworkConnection>(nameof(NetworkConnection.RegisterHandler)) ||
+                method.Is<NetworkConnection>(nameof(NetworkConnection.UnregisterHandler)) ||
+                method.Is<INetworkClient>(nameof(INetworkClient.Send)) ||
+                method.Is<INetworkClient>(nameof(INetworkClient.SendAsync)) ||
+                method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
+                method.Is<NetworkClient>(nameof(NetworkClient.SendAsync)) ||
+                method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
+                method.Is<NetworkServer>(nameof(NetworkServer.SendToClientOfPlayer)) ||
+                method.Is<NetworkServer>(nameof(NetworkServer.SendToReady)) ||
+                method.Is<INetworkServer>(nameof(INetworkServer.SendToAll)) ||
+                method.Is<INetworkServer>(nameof(INetworkServer.SendToReady));
 
             if (generate)
             {
