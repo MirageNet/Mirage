@@ -4,8 +4,6 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using UnityEditor.Compilation;
 using UnityEditor;
-using UnityEngine;
-using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 
 namespace Mirror.Weaver
