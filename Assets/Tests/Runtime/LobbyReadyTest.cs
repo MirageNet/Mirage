@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -79,19 +78,17 @@ namespace Mirror.Tests
             Assert.That(readyComp.IsReady, Is.False);
         }
 
-        [UnityTest]
-        public IEnumerator ClientReadyTest() => RunAsync(async () =>
+        [Test]
+        public void ClientReadyTest()
         {
             readyPlayer = new GameObject();
             readyPlayer.AddComponent<NetworkIdentity>();
             readyComp = readyPlayer.AddComponent<ObjectReady>();
 
-            await Task.Delay(1);
-
             server.Spawn(readyPlayer, server.LocalConnection);
             readyComp.Ready();
 
             Assert.That(readyComp.IsReady, Is.False);
-        });
+        }
     }
 }
