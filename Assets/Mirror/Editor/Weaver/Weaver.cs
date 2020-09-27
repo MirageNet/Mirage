@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using UnityEditor.Compilation;
 
 namespace Mirror.Weaver
 {
@@ -222,24 +223,16 @@ namespace Mirror.Weaver
             }
         }
 
-        static bool Weave(string assName, IEnumerable<string> dependencies)
+        static bool Weave(Assembly unityAssembly)
         {
             using (var asmResolver = new DefaultAssemblyResolver())
-            using (CurrentAssembly = AssemblyDefinition.ReadAssembly(assName, new ReaderParameters { ReadWrite = true, ReadSymbols = true, AssemblyResolver = asmResolver }))
+            using (CurrentAssembly = AssemblyDefinition.ReadAssembly(unityAssembly.outputPath, new ReaderParameters { ReadWrite = true, ReadSymbols = true, AssemblyResolver = asmResolver }))
             {
-                asmResolver.AddSearchDirectory(Path.GetDirectoryName(assName));
-                asmResolver.AddSearchDirectory(Helpers.UnityEngineDllDirectoryName());
-                if (dependencies != null)
-                {
-                    foreach (string path in dependencies)
-                    {
-                        asmResolver.AddSearchDirectory(path);
-                    }
-                }
+                AddPaths(asmResolver, unityAssembly);
 
                 WeaverTypes.SetupTargetTypes(CurrentAssembly);
                 var rwstopwatch = System.Diagnostics.Stopwatch.StartNew();
-                ReaderWriterProcessor.Process(CurrentAssembly);
+                ReaderWriterProcessor.Process(CurrentAssembly, unityAssembly);
                 rwstopwatch.Stop();
                 Console.WriteLine($"Find all reader and writers took {rwstopwatch.ElapsedMilliseconds} milliseconds");
 
@@ -266,14 +259,22 @@ namespace Mirror.Weaver
             return true;
         }
 
-        public static bool WeaveAssembly(string assembly, IEnumerable<string> dependencies)
+        private static void AddPaths(DefaultAssemblyResolver asmResolver, Assembly assembly)
+        {
+            foreach (string path in assembly.allReferences)
+            {
+                asmResolver.AddSearchDirectory(Path.GetDirectoryName(path));
+            }
+    }
+
+        public static bool WeaveAssembly(Assembly assembly)
         {
             WeavingFailed = false;
             WeaveLists = new WeaverLists();
 
             try
             {
-                return Weave(assembly, dependencies);
+                return Weave(assembly);
             }
             catch (Exception e)
             {

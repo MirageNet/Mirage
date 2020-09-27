@@ -2,12 +2,12 @@ using NUnit.Framework;
 
 namespace Mirror.Tests
 {
-    class ParentMessage
+    public class ParentMessage
     {
         public int parentValue;
     }
 
-    class ChildMessage : ParentMessage
+    public class ChildMessage : ParentMessage
     {
         public int childValue;
     }

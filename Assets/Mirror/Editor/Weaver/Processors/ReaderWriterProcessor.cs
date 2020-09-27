@@ -10,28 +10,25 @@ namespace Mirror.Weaver
 {
     public static class ReaderWriterProcessor
     {
-        public static void Process(AssemblyDefinition CurrentAssembly)
+        public static void Process(AssemblyDefinition CurrentAssembly, Assembly unityAssembly)
         {
             Readers.Init();
             Writers.Init();
-
-            foreach (Assembly unityAsm in CompilationPipeline.GetAssemblies())
+            
+            foreach (Assembly unityAsm in unityAssembly.assemblyReferences)
             {
-                if (unityAsm.name != CurrentAssembly.Name.Name)
+                try
                 {
-                    try
+                    using (var asmResolver = new DefaultAssemblyResolver())
+                    using (var assembly = AssemblyDefinition.ReadAssembly(unityAsm.outputPath, new ReaderParameters { ReadWrite = false, ReadSymbols = false, AssemblyResolver = asmResolver }))
                     {
-                        using (var asmResolver = new DefaultAssemblyResolver())
-                        using (var assembly = AssemblyDefinition.ReadAssembly(unityAsm.outputPath, new ReaderParameters { ReadWrite = false, ReadSymbols = false, AssemblyResolver = asmResolver }))
-                        {
-                            ProcessAssemblyClasses(CurrentAssembly, assembly);
-                        }
+                        ProcessAssemblyClasses(CurrentAssembly, assembly);
                     }
-                    catch (FileNotFoundException)
-                    {
-                        // During first import,  this gets called before some assemblies
-                        // are built,  just skip them
-                    }
+                }
+                catch (FileNotFoundException)
+                {
+                    // During first import,  this gets called before some assemblies
+                    // are built,  just skip them
                 }
             }
 
