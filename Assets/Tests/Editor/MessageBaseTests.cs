@@ -2,76 +2,30 @@ using NUnit.Framework;
 
 namespace Mirror.Tests
 {
-    struct TestMessage : IMessageBase
+    struct TestMessage
     {
         public int IntValue;
         public string StringValue;
         public double DoubleValue;
-
-        public TestMessage(int i, string s, double d)
-        {
-            IntValue = i;
-            StringValue = s;
-            DoubleValue = d;
-        }
-
-        public void Deserialize(NetworkReader reader)
-        {
-            IntValue = reader.ReadInt32();
-            StringValue = reader.ReadString();
-            DoubleValue = reader.ReadDouble();
-        }
-
-        public void Serialize(NetworkWriter writer)
-        {
-            writer.WriteInt32(IntValue);
-            writer.WriteString(StringValue);
-            writer.WriteDouble(DoubleValue);
-        }
     }
 
-    struct StructWithEmptyMethodMessage : IMessageBase
-    {
-        public int IntValue;
-        public string StringValue;
-        public double DoubleValue;
-
-        // Mirror will fill out these empty methods
-        public void Deserialize(NetworkReader reader) { }
-        public void Serialize(NetworkWriter writer) { }
-    }
-
-    class ClassWithoutBaseMessage : IMessageBase
+    class ClassWithoutBaseMessage
     {
         public int[] array;
-
-        // Mirror will fill out these empty methods
-        public void Deserialize(NetworkReader reader) { }
-        public void Serialize(NetworkWriter writer) { }
     }
 
-    abstract class AbstractMessage : IMessageBase
+    abstract class AbstractMessage
     {
-        public abstract void Deserialize(NetworkReader reader);
-        public abstract void Serialize(NetworkWriter writer);
     }
 
     class OverrideMessage : AbstractMessage
     {
         public int someValue;
-
-        // Mirror will fill out these empty methods
-        public override void Serialize(NetworkWriter writer) { }
-        public override void Deserialize(NetworkReader reader) { }
     }
 
-    class Layer1Message : IMessageBase
+    class Layer1Message
     {
         public int value1;
-
-        // Mirror will fill out these empty methods
-        public virtual void Serialize(NetworkWriter writer) { }
-        public virtual void Deserialize(NetworkReader reader) { }
     }
 
     class Layer2Message : Layer1Message
@@ -89,21 +43,15 @@ namespace Mirror.Tests
         [Test]
         public void StructWithMethods()
         {
-            byte[] arr = MessagePacker.Pack(new TestMessage(1, "2", 3.3));
+            byte[] arr = MessagePacker.Pack(new TestMessage
+            {
+                IntValue = 1,
+                DoubleValue = 3.3,
+                StringValue = "2"
+            });
             TestMessage t = MessagePacker.Unpack<TestMessage>(arr);
 
             Assert.AreEqual(1, t.IntValue);
-        }
-
-        [Test]
-        public void StructWithEmptyMethods()
-        {
-            byte[] arr = MessagePacker.Pack(new StructWithEmptyMethodMessage { IntValue = 1, StringValue = "2", DoubleValue = 3.3 });
-            StructWithEmptyMethodMessage t = MessagePacker.Unpack<StructWithEmptyMethodMessage>(arr);
-
-            Assert.AreEqual(1, t.IntValue);
-            Assert.AreEqual("2", t.StringValue);
-            Assert.AreEqual(3.3, t.DoubleValue);
         }
 
         [Test]

@@ -21,8 +21,6 @@ namespace Mirror.Weaver
 
         // amount of SyncVars per class. dict<className, amount>
         public Dictionary<string, int> numSyncVars = new Dictionary<string, int>();
-
-        public HashSet<string> ProcessedMessages = new HashSet<string>();
     }
 
     internal static class Weaver
@@ -138,48 +136,6 @@ namespace Mirror.Weaver
             return modified;
         }
 
-        static bool WeaveMessage(TypeDefinition td)
-        {
-            if (!td.IsClass)
-                return false;
-
-            // already processed
-            if (WeaveLists.ProcessedMessages.Contains(td.FullName))
-                return false;
-
-            bool modified = false;
-
-            if (td.ImplementsInterface<IMessageBase>())
-            {
-                // process this and base classes from parent to child order
-                try
-                {
-                    TypeDefinition parent = td.BaseType.Resolve();
-                    // process parent
-                    WeaveMessage(parent);
-                }
-                catch (AssemblyResolutionException)
-                {
-                    // this can happen for plugins.
-                    //Console.WriteLine("AssemblyResolutionException: "+ ex.ToString());
-                }
-
-                // process this
-                MessageClassProcessor.Process(td);
-                WeaveLists.ProcessedMessages.Add(td.FullName);
-                modified = true;
-            }
-
-            // check for embedded types
-            // inner classes should be processed after outter class to avoid StackOverflowException
-            foreach (TypeDefinition embedded in td.NestedTypes)
-            {
-                modified |= WeaveMessage(embedded);
-            }
-
-            return modified;
-        }
-
         static bool WeaveSyncObject(TypeDefinition td)
         {
             bool modified = false;
@@ -248,13 +204,11 @@ namespace Mirror.Weaver
                     if (td.IsClass && td.BaseType.CanBeResolved())
                     {
                         modified |= WeaveNetworkBehavior(td);
-                        modified |= WeaveMessage(td);
                         modified |= ServerClientAttributeProcessor.Process(td);
                     }
                 }
                 watch.Stop();
                 Console.WriteLine("Weave behaviours and messages took" + watch.ElapsedMilliseconds + " milliseconds");
-
 
                 if (modified)
                     PropertySiteProcessor.Process(moduleDefinition);
@@ -301,6 +255,8 @@ namespace Mirror.Weaver
 
                 if (modified)
                 {
+                    ReaderWriterProcessor.GenerateRWRegister(CurrentAssembly);
+
                     // write to outputDir if specified, otherwise perform in-place write
                     var writeParams = new WriterParameters { WriteSymbols = true };
                     CurrentAssembly.Write(writeParams);

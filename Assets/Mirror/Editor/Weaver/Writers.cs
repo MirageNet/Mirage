@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 
 namespace Mirror.Weaver
 {
@@ -36,11 +38,11 @@ namespace Mirror.Weaver
             {
                 return foundFunc;
             }
-            else if (variable.Resolve().IsEnum)
+            /*else if (variable.Resolve().IsEnum)
             {
                 // serialize enum as their base type
                 return GetWriteFunc(variable.Resolve().GetEnumUnderlyingType());
-            }
+            }*/
             else
             {
                 MethodDefinition newWriterFunc = GenerateWriter(variable, recursionCount);
@@ -70,13 +72,19 @@ namespace Mirror.Weaver
                 return GenerateArrayWriteFunc(variableReference, recursionCount);
             }
 
+            if (variableReference.Resolve()?.IsEnum ?? false)
+            {
+                // serialize enum as their base type
+                return GenerateEnumWriteFunc(variableReference);
+            }
+
             // check for collections
 
-            if (variableReference.IsArraySegment())
+            if (variableReference.Is(typeof(ArraySegment<>)))
             {
                 return GenerateArraySegmentWriteFunc(variableReference, recursionCount);
             }
-            if (variableReference.IsList())
+            if (variableReference.Is(typeof(List<>)))
             {
                 return GenerateListWriteFunc(variableReference, recursionCount);
             }
@@ -123,6 +131,71 @@ namespace Mirror.Weaver
             // generate writer for class/struct
 
             return GenerateClassOrStructWriterFunction(variableReference, recursionCount);
+        }
+
+        private static MethodDefinition GenerateEnumWriteFunc(TypeReference variable)
+        {
+            string functionName = "_Write" + variable.Name + "_";
+            if (variable.DeclaringType != null)
+            {
+                functionName += variable.DeclaringType.Name;
+            }
+            else
+            {
+                functionName += "None";
+            }
+            // create new writer for this type
+            var writerFunc = new MethodDefinition(functionName,
+                    MethodAttributes.Public |
+                    MethodAttributes.Static |
+                    MethodAttributes.HideBySig,
+                    WeaverTypes.Import(typeof(void)));
+
+            writerFunc.Parameters.Add(new ParameterDefinition("writer", ParameterAttributes.None, WeaverTypes.Import<Mirror.NetworkWriter>()));
+            writerFunc.Parameters.Add(new ParameterDefinition("value", ParameterAttributes.None, Weaver.CurrentAssembly.MainModule.ImportReference(variable)));
+
+            ILProcessor worker = writerFunc.Body.GetILProcessor();
+
+            MethodReference underlyingWriter = Writers.GetWriteFunc(variable.Resolve().GetEnumUnderlyingType());
+
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Ldarg_1));
+            worker.Append(worker.Create(OpCodes.Call, underlyingWriter));
+
+            worker.Append(worker.Create(OpCodes.Ret));
+            return writerFunc;
+    
+        }
+
+        // Initialize each writer in Writer<t>.write
+        internal static void GenerateRegister(ILProcessor worker)
+        {
+            ModuleDefinition module = Weaver.CurrentAssembly.MainModule;
+
+            TypeReference genericWriterClassRef = module.ImportReference(typeof(Writer<>));
+
+            System.Reflection.FieldInfo fieldInfo = typeof(Writer<>).GetField(nameof(Writer<object>.write));
+            FieldReference fieldRef = module.ImportReference(fieldInfo);
+            TypeReference networkWriterRef = module.ImportReference(typeof(NetworkWriter));
+            TypeReference actionRef = module.ImportReference(typeof(Action<,>));
+            MethodReference actionConstructorRef = module.ImportReference(typeof(Action<,>).GetConstructors()[0]);
+
+            foreach (MethodReference writerMethod in writeFuncs.Values) {
+
+                TypeReference dataType = writerMethod.Parameters[1].ParameterType;
+
+                // create a Action<NetworkWriter, T> delegate
+                worker.Append(worker.Create(OpCodes.Ldnull));
+                worker.Append(worker.Create(OpCodes.Ldftn, writerMethod));
+                GenericInstanceType actionGenericInstance = actionRef.MakeGenericInstanceType(networkWriterRef, dataType);
+                MethodReference actionRefInstance = actionConstructorRef.MakeHostInstanceGeneric(actionGenericInstance);
+                worker.Append(worker.Create(OpCodes.Newobj, actionRefInstance));
+
+                // save it in Writer<T>.write
+                GenericInstanceType genericInstance = genericWriterClassRef.MakeGenericInstanceType(dataType);
+                FieldReference specializedField = fieldRef.SpecializeField(genericInstance);
+                worker.Append(worker.Create(OpCodes.Stsfld, specializedField));
+            }
         }
 
         static MethodDefinition GenerateClassOrStructWriterFunction(TypeReference variable, int recursionCount)
@@ -189,11 +262,6 @@ namespace Mirror.Weaver
                     Weaver.Error($"{field.Name} has unsupported type. Use a type supported by Mirror instead", field);
                     return false;
                 }
-            }
-
-            if (fields == 0)
-            {
-                Log.Warning($"{variable} has no no public or non-static fields to serialize");
             }
 
             return true;

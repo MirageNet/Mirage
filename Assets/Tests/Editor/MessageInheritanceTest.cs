@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Mirror.Tests
 {
-    class ParentMessage : MessageBase
+    class ParentMessage
     {
         public int parentValue;
     }
@@ -13,7 +13,7 @@ namespace Mirror.Tests
     }
 
 
-    public abstract class RequestMessageBase : MessageBase
+    public abstract class RequestMessageBase
     {
         public int responseId = 0;
     }
@@ -31,7 +31,7 @@ namespace Mirror.Tests
         public string message = "";
         public int errorCode = 0; // optional for error codes
     }
-    public abstract class RequestMessageBaseReverse : MessageBase
+    public abstract class RequestMessageBaseReverse
     {
         public int responseId = 0;
     }
@@ -53,8 +53,7 @@ namespace Mirror.Tests
             byte[] arr = writer.ToArray();
 
             var reader = new NetworkReader(arr);
-            var received = new ChildMessage();
-            received.Deserialize(reader);
+            ChildMessage received = reader.ReadMessage<ChildMessage>();
 
             Assert.AreEqual(3, received.parentValue);
             Assert.AreEqual(4, received.childValue);
@@ -82,8 +81,7 @@ namespace Mirror.Tests
             byte[] arr = writer.ToArray();
 
             var reader = new NetworkReader(arr);
-            var received = new ResponseMessage();
-            received.Deserialize(reader);
+            ResponseMessage received = reader.ReadMessage<ResponseMessage>();
 
             Assert.AreEqual(state, received.state);
             Assert.AreEqual(message, received.message);
@@ -112,8 +110,7 @@ namespace Mirror.Tests
             byte[] arr = writer.ToArray();
 
             var reader = new NetworkReader(arr);
-            var received = new ResponseMessageReverse();
-            received.Deserialize(reader);
+            ResponseMessageReverse received = reader.ReadMessage<ResponseMessageReverse>();
 
             Assert.AreEqual(state, received.state);
             Assert.AreEqual(message, received.message);
