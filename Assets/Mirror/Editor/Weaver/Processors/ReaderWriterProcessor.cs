@@ -5,18 +5,25 @@ using Mono.Cecil.Cil;
 using UnityEditor.Compilation;
 using UnityEditor;
 using UnityEngine;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 namespace Mirror.Weaver
 {
     public static class ReaderWriterProcessor
     {
+
         public static void Process(AssemblyDefinition CurrentAssembly, Assembly unityAssembly)
         {
             Readers.Init();
             Writers.Init();
-            
             foreach (Assembly unityAsm in unityAssembly.assemblyReferences)
             {
+                // cute optimization,  None of the unity libraries have readers and writers
+                // saves about .3 seconds in every weaver test
+                if (Path.GetFileName(unityAsm.outputPath).StartsWith("Unity"))
+                    continue;
+
                 try
                 {
                     using (var asmResolver = new DefaultAssemblyResolver())
