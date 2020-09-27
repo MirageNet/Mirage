@@ -38,11 +38,6 @@ namespace Mirror.Weaver
             {
                 return foundFunc;
             }
-            /*else if (variable.Resolve().IsEnum)
-            {
-                // serialize enum as their base type
-                return GetWriteFunc(variable.Resolve().GetEnumUnderlyingType());
-            }*/
             else
             {
                 MethodDefinition newWriterFunc = GenerateWriter(variable, recursionCount);
