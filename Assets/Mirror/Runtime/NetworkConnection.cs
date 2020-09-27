@@ -108,7 +108,7 @@ namespace Mirror
                 //
                 // let's catch them all and then disconnect that connection to avoid
                 // further attacks.
-                T message = default(T);
+                var message = default(T);
                 try
                 {
                     message = reader.ReadMessage<T>();
