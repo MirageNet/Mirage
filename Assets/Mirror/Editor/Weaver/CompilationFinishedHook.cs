@@ -111,6 +111,10 @@ namespace Mirror.Weaver
                 assembly = CreateUnityAssembly(assemblyPath);
             }
 
+            // don't weave if this does not depend on mirror
+            if (!assembly.allReferences.Any(path => Path.GetFileNameWithoutExtension(path) == MirrorRuntimeAssemblyName))
+                return;
+
             Log.WarningMethod = HandleWarning;
             Log.ErrorMethod = HandleError;
 
