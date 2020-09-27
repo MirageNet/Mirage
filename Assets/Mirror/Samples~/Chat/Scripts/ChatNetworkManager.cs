@@ -37,10 +37,11 @@ namespace Mirror.Examples.Chat
         {
             // create a gameobject using the name supplied by client
             GameObject playergo = Instantiate(playerPrefab).gameObject;
-            playergo.GetComponent<Player>().playerName = createPlayerMessage.name;
+            Player player = playergo.GetComponent<Player>();
+            player.playerName = createPlayerMessage.name;
 
             // set it as the player
-            server.AddPlayerForConnection(connection, playergo);
+            player.NetIdentity.serverObjectManager.AddPlayerForConnection(connection, playergo);
 
             chatWindow.gameObject.SetActive(true);
         }
