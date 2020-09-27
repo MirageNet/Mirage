@@ -159,7 +159,6 @@ namespace Mirror.Weaver
 
             worker.Append(worker.Create(OpCodes.Ret));
             return writerFunc;
-    
         }
 
         // Initialize each writer in Writer<t>.write
