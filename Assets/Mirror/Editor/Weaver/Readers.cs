@@ -468,7 +468,6 @@ namespace Mirror.Weaver
                 worker.Append(worker.Create(OpCodes.Stfld, fieldRef));
                 fields++;
             }
-
         }
 
         private static MethodDefinition GenerateReaderFunc(TypeReference variable)
