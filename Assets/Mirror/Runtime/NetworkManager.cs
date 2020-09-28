@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
@@ -89,8 +87,8 @@ namespace Mirror
         /// </summary>
         public async Task StartHost()
         {
-            // setup server first
-            await SetupServer();
+            // start listening to network connections
+            await server.ListenAsync();
 
             client.ConnectHost(server);
 
@@ -108,24 +106,8 @@ namespace Mirror
         public void StopHost()
         {
             OnStopHost.Invoke();
-            StopClient();
-            StopServer();
-        }
-
-        /// <summary>
-        /// Stops the server that the manager is using.
-        /// </summary>
-        public void StopServer()
-        {
-            server.Disconnect();
-        }
-
-        /// <summary>
-        /// Stops the client that the manager is using.
-        /// </summary>
-        public void StopClient()
-        {
             client.Disconnect();
+            server.Disconnect();
         }
     }
 }
