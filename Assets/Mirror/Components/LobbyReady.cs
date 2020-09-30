@@ -30,7 +30,7 @@ namespace Mirror
             foreach (INetworkConnection connection in identity.observers)
             {
                 bool isOwner = connection == identity.ConnectionToClient;
-                if ((!isOwner || includeOwner) && connection.IsReady)
+                if ((!isOwner || includeOwner))
                 {
                     connectionsCache.Add(connection);
                 }
