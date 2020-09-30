@@ -446,8 +446,8 @@ namespace Mirror
             conn.IsReady = true;
 
             // client is ready to start spawning objects
-            if (conn.Identity != null)
-                SpawnObserversForConnection(conn);
+            //if (conn.Identity != null)
+            //    SpawnObserversForConnection(conn);
         }
 
         /// <summary>

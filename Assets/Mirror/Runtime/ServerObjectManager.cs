@@ -257,6 +257,9 @@ namespace Mirror
             // set ready if not set yet
             server.SetClientReady(conn);
 
+            // client is ready to start spawning objects
+            SpawnObserversForConnection(conn);
+
             if (logger.LogEnabled()) logger.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.AssetId);
 
             Respawn(identity);
