@@ -21,7 +21,6 @@ namespace Mirror.Tests
             Assert.That(clientPlayerGO, Is.Not.Null);
         }
 
-
         [UnityTest]
         public IEnumerator ServerRpc() => RunAsync(async () =>
         {
@@ -32,7 +31,6 @@ namespace Mirror.Tests
             Assert.That(serverComponent.cmdArg1, Is.EqualTo(1));
             Assert.That(serverComponent.cmdArg2, Is.EqualTo("hello"));
         });
-
 
         [UnityTest]
         public IEnumerator ServerRpcWithNetworkIdentity() => RunAsync(async () =>
