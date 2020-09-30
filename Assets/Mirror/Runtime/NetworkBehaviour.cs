@@ -20,7 +20,6 @@ namespace Mirror
     /// <para>Some of the built-in components of the networking system are derived from NetworkBehaviour, including NetworkTransport, NetworkAnimator and NetworkProximityChecker.</para>
     /// </remarks>
     [AddComponentMenu("")]
-    [RequireComponent(typeof(NetworkIdentity))]
     [HelpURL("https://mirror-networking.com/docs/Guides/NetworkBehaviour.html")]
     public abstract class NetworkBehaviour : MonoBehaviour
     {
