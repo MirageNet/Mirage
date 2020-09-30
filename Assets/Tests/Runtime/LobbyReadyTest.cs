@@ -85,7 +85,7 @@ namespace Mirror.Tests
             readyPlayer.AddComponent<NetworkIdentity>();
             readyComp = readyPlayer.AddComponent<ObjectReady>();
 
-            server.Spawn(readyPlayer, server.LocalConnection);
+            serverObjectManager.Spawn(readyPlayer, server.LocalConnection);
             readyComp.Ready();
 
             Assert.That(readyComp.IsReady, Is.False);
