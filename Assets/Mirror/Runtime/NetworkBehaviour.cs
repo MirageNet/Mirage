@@ -147,7 +147,7 @@ namespace Mirror
                 // instead of calling unity's MonoBehaviour == operator
                 if (((object)netIdentityCache) == null)
                 {
-                    netIdentityCache = GetComponent<NetworkIdentity>();
+                    netIdentityCache = GetComponentInParent<NetworkIdentity>();
                     // do this 2nd check inside first if so that we are not checking == twice on unity Object
                     if (netIdentityCache == null)
                     {
