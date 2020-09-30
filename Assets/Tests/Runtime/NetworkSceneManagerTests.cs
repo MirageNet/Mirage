@@ -220,6 +220,8 @@ namespace Mirror.Tests
 
             Assert.That(clientSceneManager.asyncOperation, Is.Not.Null);
             Assert.That(clientSceneManager.asyncOperation.allowSceneActivation, Is.False);
+
+            clientSceneManager.asyncOperation.allowSceneActivation = true;
         }
 
         [Test]
