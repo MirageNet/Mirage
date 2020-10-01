@@ -36,6 +36,29 @@ namespace Mirror
             }
         }
 
+        // The user should never need to pump the update loop manually
+        internal void Update()
+        {
+            if (!server || !server.Active)
+                return;
+
+            // update all server objects
+            foreach (KeyValuePair<uint, NetworkIdentity> kvp in server.Spawned)
+            {
+                NetworkIdentity identity = kvp.Value;
+                if (identity != null)
+                {
+                    identity.ServerUpdate();
+                }
+                else
+                {
+                    // spawned list should have no null entries because we
+                    // always call Remove in OnObjectDestroy everywhere.
+                    logger.LogWarning("Found 'null' entry in spawned list for netId=" + kvp.Key + ". Please call NetworkServer.Destroy to destroy networked objects. Don't use GameObject.Destroy.");
+                }
+            }
+        }
+
         void OnServerStarted()
         {
             SpawnObjects();
