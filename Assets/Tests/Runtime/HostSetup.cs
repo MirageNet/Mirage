@@ -44,6 +44,7 @@ namespace Mirror.Tests
             clientObjectManager = networkManagerGo.AddComponent<ClientObjectManager>();
 
             serverObjectManager.server = server;
+            serverObjectManager.sceneManager = sceneManager;
             clientObjectManager.client = client;
 
             ExtraSetup();
