@@ -20,7 +20,7 @@ namespace Mirror
         public NetworkServer server;
         public NetworkSceneManager sceneManager;
 
-        public readonly Dictionary<uint, NetworkIdentity> Spawned = new Dictionary<uint, NetworkIdentity>();
+        //public readonly Dictionary<uint, NetworkIdentity> Spawned = new Dictionary<uint, NetworkIdentity>();
 
         public void Start()
         {
@@ -104,7 +104,7 @@ namespace Mirror
         {
             SpawnObjects();
 
-            foreach (NetworkIdentity identity in Spawned.Values)
+            foreach (NetworkIdentity identity in server.Spawned.Values)
             {
                 if (!identity.IsClient)
                 {
@@ -182,7 +182,7 @@ namespace Mirror
 
         void SpawnObserversForConnection(INetworkConnection conn)
         {
-            if (logger.LogEnabled()) logger.Log("Spawning " + Spawned.Count + " objects for conn " + conn);
+            if (logger.LogEnabled()) logger.Log("Spawning " + server.Spawned.Count + " objects for conn " + conn);
 
             if (!conn.IsReady)
             {
@@ -196,7 +196,7 @@ namespace Mirror
 
             // add connection to each nearby NetworkIdentity's observers, which
             // internally sends a spawn message for each one to the connection.
-            foreach (NetworkIdentity identity in Spawned.Values)
+            foreach (NetworkIdentity identity in server.Spawned.Values)
             {
                 // try with far away ones in ummorpg!
                 //TODO this is different
@@ -403,7 +403,7 @@ namespace Mirror
         /// <param name="msg"></param>
         void OnServerRpcMessage(INetworkConnection conn, ServerRpcMessage msg)
         {
-            if (!Spawned.TryGetValue(msg.netId, out NetworkIdentity identity) || identity == null)
+            if (!server.Spawned.TryGetValue(msg.netId, out NetworkIdentity identity) || identity == null)
             {
                 logger.LogWarning("Spawned object not found when handling ServerRpc message [netId=" + msg.netId + "]");
                 return;
@@ -587,7 +587,7 @@ namespace Mirror
         void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
         {
             if (logger.LogEnabled()) logger.Log("DestroyObject instance:" + identity.NetId);
-            Spawned.Remove(identity.NetId);
+            server.Spawned.Remove(identity.NetId);
             identity.ConnectionToClient?.RemoveOwnedObject(identity);
 
             SendToObservers(identity, new ObjectDestroyMessage { netId = identity.NetId });
