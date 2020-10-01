@@ -95,6 +95,7 @@ namespace Mirror
             client.Connected.RemoveListener(OnClientConnected);
             client.Disconnected.RemoveListener(OnClientDisconnected);
 
+            isSpawnFinished = false;
             ClearSpawners();
             DestroyAllClientObjects();
         }

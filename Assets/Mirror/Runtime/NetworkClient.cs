@@ -85,7 +85,7 @@ namespace Mirror
 
         public readonly NetworkTime Time = new NetworkTime();
 
-        bool isSpawnFinished;
+        //bool isSpawnFinished;
 
         public Transport Transport;
 
@@ -312,7 +312,7 @@ namespace Mirror
         void Cleanup()
         {
             logger.Log("Shutting down client.");
-            isSpawnFinished = false;
+            //isSpawnFinished = false;
             hostServer = null;
 
             connectState = ConnectState.None;
