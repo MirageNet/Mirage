@@ -90,6 +90,17 @@ namespace Mirror.Tests
             GameObject.Destroy(gameObject);
         }
 
+        [Test]
+        public void OnEnableTest()
+        {
+            var gameObject = new GameObject();
+            NetworkIdentity netIdentity = gameObject.AddComponent<NetworkIdentity>();
+            NetworkBehaviourEnableTester comp = gameObject.AddComponent<NetworkBehaviourEnableTester>();
+
+            server.Spawn(gameObject);
+
+            GameObject.Destroy(gameObject);
+        }
 
         [Test]
         public void SpawnedObjectNoAuthority()
@@ -281,6 +292,15 @@ namespace Mirror.Tests
             InitSyncObject(syncObject);
             Assert.That(syncObjects.Count, Is.EqualTo(1));
             Assert.That(syncObjects[0], Is.EqualTo(syncObject));
+        }
+    }
+
+    public class NetworkBehaviourEnableTester : NetworkBehaviour
+    {
+        private void OnEnable()
+        {
+            if (Server.Active)
+                Debug.Log("Server Active");
         }
     }
 }
