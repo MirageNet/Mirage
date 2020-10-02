@@ -313,11 +313,23 @@ namespace Mirror
             var tmp = new HashSet<NetworkIdentity>(clientOwnedObjects);
             foreach (NetworkIdentity netIdentity in tmp)
             {
+                // It's the same NetworkIdentity as the one being used to destroy things.
+                // Usually it's first in the list and it removes itself and thus not
+                // properly removing all the other objects. By continuing and removing it by
+                // itself later all the objects are properly removed.
+                if (netIdentity.NetId == Identity.NetId)
+                {
+                    continue;
+                }
+
                 if (netIdentity != null)
                 {
                     Identity.Server.Destroy(netIdentity.gameObject);
                 }
             }
+
+            // Destroy the identity by itself.
+            Identity.Server.Destroy(Identity.gameObject);
 
             // clear the hashset because we destroyed them all
             clientOwnedObjects.Clear();
