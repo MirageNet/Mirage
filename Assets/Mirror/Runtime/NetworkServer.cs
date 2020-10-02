@@ -609,6 +609,8 @@ namespace Mirror
 
             if (logger.LogEnabled()) logger.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.AssetId);
 
+            SpawnObserversForConnection(conn);
+
             Respawn(identity);
             return true;
         }
