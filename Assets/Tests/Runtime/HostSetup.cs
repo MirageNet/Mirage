@@ -44,7 +44,7 @@ namespace Mirror.Tests
             await Task.Delay(1);
 
             // now start the host
-            await manager.server.StartHost(manager.client);
+            await manager.server.StartHost(client);
 
             playerGO = new GameObject("playerGO", typeof(Rigidbody));
             identity = playerGO.AddComponent<NetworkIdentity>();
