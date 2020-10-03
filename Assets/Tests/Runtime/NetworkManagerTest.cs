@@ -48,13 +48,7 @@ namespace Mirror.Tests
             manager.client = null;
             Assert.Throws<InvalidOperationException>(() =>
             {
-                manager.StartHost().GetAwaiter().GetResult();
-            });
-
-            manager.server = null;
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                manager.StartHost().GetAwaiter().GetResult();
+                manager.server.StartHost(manager.client).GetAwaiter().GetResult();
             });
         }
     }
