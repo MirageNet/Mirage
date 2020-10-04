@@ -42,8 +42,8 @@ namespace Mirror.Tests
             await WaitFor(() => !client.Active);
         });
 
-        [UnityTest]
-        public IEnumerator StartHostException() => RunAsync(async () =>
+        [Test]
+        public void StartHostException()
         {
             manager.client = null;
             Assert.Throws<InvalidOperationException>(() =>
@@ -56,6 +56,6 @@ namespace Mirror.Tests
             {
                 manager.StartHost().GetAwaiter().GetResult();
             });
-        });
+        }
     }
 }
