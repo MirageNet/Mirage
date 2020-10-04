@@ -578,9 +578,6 @@ namespace Mirror
                 return;
             }
 
-            // let connection know that we are about to start spawning...
-            conn.Send(new ObjectSpawnStartedMessage());
-
             // add connection to each nearby NetworkIdentity's observers, which
             // internally sends a spawn message for each one to the connection.
             foreach (NetworkIdentity identity in Spawned.Values)
@@ -598,11 +595,6 @@ namespace Mirror
                     }
                 }
             }
-
-            // let connection know that we finished spawning, so it can call
-            // OnStartClient on each one (only after all were spawned, which
-            // is how Unity's Start() function works too)
-            conn.Send(new ObjectSpawnFinishedMessage());
         }
 
         /// <summary>
