@@ -237,6 +237,8 @@ namespace Mirror
 
             client.ConnectHost(this);
 
+            ActivateHostScene();
+
             // call OnStartHost AFTER SetupServer. this way we can use
             // NetworkServer.Spawn etc. in there too. just like OnStartServer
             // is called after the server is actually properly started.
