@@ -91,11 +91,23 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void OnEnableTest()
+        public void ServerEnabledTest()
         {
             var gameObject = new GameObject();
             NetworkIdentity netIdentity = gameObject.AddComponent<NetworkIdentity>();
-            NetworkBehaviourEnableTester comp = gameObject.AddComponent<NetworkBehaviourEnableTester>();
+            ServerNetworkBehaviourEnableTester comp = gameObject.AddComponent<ServerNetworkBehaviourEnableTester>();
+
+            server.Spawn(gameObject);
+
+            GameObject.Destroy(gameObject);
+        }
+
+        [Test]
+        public void ClientEnabledTest()
+        {
+            var gameObject = new GameObject();
+            NetworkIdentity netIdentity = gameObject.AddComponent<NetworkIdentity>();
+            ClientNetworkBehaviourEnableTester comp = gameObject.AddComponent<ClientNetworkBehaviourEnableTester>();
 
             server.Spawn(gameObject);
 
@@ -295,12 +307,45 @@ namespace Mirror.Tests
         }
     }
 
-    public class NetworkBehaviourEnableTester : NetworkBehaviour
+    public class ServerNetworkBehaviourEnableTester : NetworkBehaviour
     {
-        private void OnEnable()
+        void Awake()
         {
             if (Server.Active)
-                Debug.Log("Server Active");
+                Debug.Log("Server Awake");
+        }
+
+        void OnEnable()
+        {
+            if (Server.Active)
+                Debug.Log("Server OnEnable");
+        }
+
+        private void Start()
+        {
+            if (Server.Active)
+                Debug.Log("Server Start");
+        }
+    }
+
+    public class ClientNetworkBehaviourEnableTester : NetworkBehaviour
+    {
+        void Awake()
+        {
+            if (Client.Active)
+                Debug.Log("Client Awake");
+        }
+
+        void OnEnable()
+        {
+            if (Client.Active)
+                Debug.Log("Client OnEnable");
+        }
+
+        private void Start()
+        {
+            if (Client.Active)
+                Debug.Log("Client Start");
         }
     }
 }
