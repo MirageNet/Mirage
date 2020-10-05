@@ -192,6 +192,15 @@ namespace Mirror
         protected void InitSyncObject(ISyncObject syncObject)
         {
             syncObjects.Add(syncObject);
+            syncObject.OnChange += SyncObject_OnChange;
+        }
+
+        private void SyncObject_OnChange()
+        {
+            if (IsServer)
+            {
+                Server.DirtyObjects.Add(NetIdentity);
+            }
         }
 
         #region ServerRpcs
@@ -413,6 +422,7 @@ namespace Mirror
         public void SetDirtyBit(ulong dirtyBit)
         {
             SyncVarDirtyBits |= dirtyBit;
+            Server.DirtyObjects.Add(NetIdentity);
         }
 
         /// <summary>
@@ -456,6 +466,14 @@ namespace Mirror
                 return SyncVarDirtyBits != 0L || AnySyncObjectDirty();
             }
             return false;
+        }
+
+        // true if this component has data that has not been
+        // synchronized.  Note that it may not synchronize
+        // right away because of syncInterval
+        public bool StillDirty()
+        {
+            return SyncVarDirtyBits != 0L || AnySyncObjectDirty();
         }
 
         /// <summary>
