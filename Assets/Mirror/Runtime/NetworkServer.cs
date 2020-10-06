@@ -364,28 +364,28 @@ namespace Mirror
         /// <param name="identity"></param>
         /// <param name="msg"></param>
         /// <param name="channelId"></param>
-        void SendToObservers<T>(NetworkIdentity identity, T msg, bool includeOwner = true, int channelId = Channels.DefaultReliable)
+        internal void SendToObservers<T>(NetworkIdentity identity, T msg, bool includeOwner = true, int channelId = Channels.DefaultReliable)
         {
             if (logger.LogEnabled()) logger.Log("Server.SendToObservers id:" + typeof(T));
 
-            if (identity.observers.Count > 0)
+            if (identity.observers.Count == 0)
+                return;
+            
+            if(includeOwner)
             {
-                if(includeOwner)
+                NetworkConnection.Send(identity.observers, msg, channelId);
+            }
+            else
+            {
+                HashSet<INetworkConnection> connectionsExcludeSelf = new HashSet<INetworkConnection>();
+                foreach(INetworkConnection conn in identity.observers)
                 {
-                    NetworkConnection.Send(identity.observers, msg, channelId);
-                }
-                else
-                {
-                    HashSet<INetworkConnection> connectionsExcludeSelf = new HashSet<INetworkConnection>();
-                    foreach(INetworkConnection conn in identity.observers)
+                    if(identity.ConnectionToClient != conn)
                     {
-                        if(identity.ConnectionToClient != conn)
-                        {
-                            connectionsExcludeSelf.Add(conn);
-                        }
+                        connectionsExcludeSelf.Add(conn);
                     }
-                    NetworkConnection.Send(connectionsExcludeSelf, msg, channelId);
                 }
+                NetworkConnection.Send(connectionsExcludeSelf, msg, channelId);
             }
         }
 
