@@ -22,8 +22,6 @@ namespace Mirror
         public NetworkClient client;
         public NetworkServer server;
 
-        public NetworkConnectionEvent ClientNotReady = new NetworkConnectionEvent();
-
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
@@ -127,6 +125,7 @@ namespace Mirror
         {
             logger.Log("ClientSceneReadyMessage");
 
+            //Server has finished changing scene. Allow the client to finish.
             asyncOperation.allowSceneActivation = true;
         }
 
@@ -170,8 +169,6 @@ namespace Mirror
         internal void OnClientNotReady(INetworkConnection conn)
         {
             client.Connection.IsReady = false;
-
-            ClientNotReady.Invoke(conn);
         }
 
         /// <summary>
