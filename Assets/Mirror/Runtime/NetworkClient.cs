@@ -84,8 +84,6 @@ namespace Mirror
 
         public readonly NetworkTime Time = new NetworkTime();
 
-        bool isSpawnFinished;
-
         public Transport Transport;
 
         /// <summary>
