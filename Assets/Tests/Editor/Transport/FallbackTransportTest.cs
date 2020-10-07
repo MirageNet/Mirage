@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -54,7 +54,7 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator AcceptTransport1() => RunAsync(async () =>
         {
-            transport1.AcceptAsync().Returns(Task.FromResult(conn1));
+            transport1.AcceptAsync().Returns(UniTask.FromResult(conn1));
 
             Assert.That(await transport.AcceptAsync(), Is.SameAs(conn1));
         });
@@ -63,7 +63,7 @@ namespace Mirror.Tests
         public IEnumerator AcceptTransport2() => RunAsync(async () =>
         {
             transport1.Supported.Returns(false);
-            transport2.AcceptAsync().Returns(Task.FromResult(conn1));
+            transport2.AcceptAsync().Returns(UniTask.FromResult(conn1));
             Assert.That(await transport.AcceptAsync(), Is.SameAs(conn1));
         });
 
@@ -71,7 +71,7 @@ namespace Mirror.Tests
         public IEnumerator AcceptMultiple() => RunAsync(async () =>
         {
             transport2.Supported.Returns(false);
-            transport1.AcceptAsync().Returns(Task.FromResult(conn1), Task.FromResult(conn2));
+            transport1.AcceptAsync().Returns(UniTask.FromResult(conn1), UniTask.FromResult(conn2));
             // transport2 task never ends
             Assert.That(await transport.AcceptAsync(), Is.SameAs(conn1));
             Assert.That(await transport.AcceptAsync(), Is.SameAs(conn2));
@@ -97,9 +97,9 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator AcceptUntilAllGone() => RunAsync(async () =>
         {
-            transport1.AcceptAsync().Returns(x => Task.FromResult(conn1), x => Task.FromResult<IConnection>(null));
+            transport1.AcceptAsync().Returns(x => UniTask.FromResult(conn1), x => UniTask.FromResult<IConnection>(null));
             // transport2 task never ends
-            transport2.AcceptAsync().Returns(x => Task.FromResult(conn2), x => Task.FromResult<IConnection>(null));
+            transport2.AcceptAsync().Returns(x => UniTask.FromResult(conn2), x => UniTask.FromResult<IConnection>(null));
 
             Assert.That(await transport.AcceptAsync(), Is.SameAs(conn1));
             Assert.That(await transport.AcceptAsync(), Is.Null);
@@ -108,8 +108,8 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator Listen1() => RunAsync(async () =>
         {
-            transport1.ListenAsync().Returns(Task.CompletedTask);
-            transport2.ListenAsync().Returns(Task.CompletedTask);
+            transport1.ListenAsync().Returns(UniTask.CompletedTask);
+            transport2.ListenAsync().Returns(UniTask.CompletedTask);
             await transport.ListenAsync();
 
             _ = transport1.Received().ListenAsync();
@@ -121,7 +121,7 @@ namespace Mirror.Tests
         public IEnumerator Listen2() => RunAsync(async () =>
         {
             transport1.Supported.Returns(false);
-            transport2.ListenAsync().Returns(Task.CompletedTask);
+            transport2.ListenAsync().Returns(UniTask.CompletedTask);
             await transport.ListenAsync();
 
             _ = transport1.Received(0).ListenAsync();
@@ -223,7 +223,7 @@ namespace Mirror.Tests
 
             // transport2 gives a connection
             transport2.ConnectAsync(Arg.Any<Uri>())
-                .Returns(Task.FromResult(conn2));
+                .Returns(UniTask.FromResult(conn2));
 
             IConnection accepted1 = await transport.ConnectAsync(new Uri("tcp4://localhost"));
 

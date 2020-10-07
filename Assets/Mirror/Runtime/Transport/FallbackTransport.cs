@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
+using Cysharp.Threading.Tasks;
 
 namespace Mirror
 {
@@ -30,12 +30,12 @@ namespace Mirror
 
         public override bool Supported => GetTransport() != null;
 
-        public override Task<IConnection> AcceptAsync()
+        public override UniTask<IConnection> AcceptAsync()
         {
             return GetTransport().AcceptAsync();
         }
 
-        public override Task<IConnection> ConnectAsync(Uri uri)
+        public override UniTask<IConnection> ConnectAsync(Uri uri)
         {
             return GetTransport().ConnectAsync(uri);
         }
@@ -49,7 +49,7 @@ namespace Mirror
             }
         }
 
-        public override Task ListenAsync()
+        public override UniTask ListenAsync()
         {
             return GetTransport().ListenAsync();
         }

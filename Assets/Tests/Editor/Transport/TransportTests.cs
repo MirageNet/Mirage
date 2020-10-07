@@ -12,6 +12,7 @@ using System;
 using Object = UnityEngine.Object;
 using System.Threading.Tasks;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 
 namespace Mirror.Tests
 {
@@ -44,8 +45,8 @@ namespace Mirror.Tests
             transport = transportObj.AddComponent<T>();
 
             await transport.ListenAsync();
-            Task<IConnection> connectTask = transport.ConnectAsync(uri);
-            Task<IConnection> acceptTask = transport.AcceptAsync();
+            UniTask<IConnection> connectTask = transport.ConnectAsync(uri);
+            UniTask<IConnection> acceptTask = transport.AcceptAsync();
 
             clientConnection = await connectTask;
             serverConnection = await acceptTask;
