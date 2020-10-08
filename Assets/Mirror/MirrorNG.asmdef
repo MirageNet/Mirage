@@ -1,7 +1,8 @@
 {
     "name": "MirrorNG",
     "references": [
-        "Mirror"
+        "Mirror",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -10,5 +11,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [],
+    "noEngineReferences": false
 }
