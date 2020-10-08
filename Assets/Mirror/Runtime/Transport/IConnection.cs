@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Net;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 
 namespace Mirror
@@ -33,6 +32,6 @@ namespace Mirror
 
     public interface IChannelConnection : IConnection
     {
-        Task SendAsync(ArraySegment<byte> data, int channel);
+        UniTask SendAsync(ArraySegment<byte> data, int channel);
     }
 }
