@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Mirror.Tcp;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -22,7 +23,7 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
 
             if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null || debugMode)
             {
-                HeadlessStart();
+                StartCoroutine(HeadlessStart());
             }
         }
 
@@ -38,7 +39,7 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
             }
         }
 
-        void HeadlessStart()
+        IEnumerator HeadlessStart()
         {
             //Try to find port
             string port = GetArgValue("-port");
@@ -83,27 +84,43 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
             }
 
             //Or client mode?
-            if (!string.IsNullOrEmpty(GetArg("-client")))
+            string client = GetArg("-client");
+            if (!string.IsNullOrEmpty(client))
             {
+                string address;
+                //network address provided?
                 string networkAddress = GetArgValue("address");
                 if (!string.IsNullOrEmpty(networkAddress))
                 {
-                    networkManager.client.ConnectAsync(networkAddress);
+                    address = networkAddress;
                 }
                 else
                 {
-                    networkManager.client.ConnectAsync("localhost");
+                    address = "localhost";
                 }
-                LogDebug("Starting Client Only Mode");
+
+                //nested clients
+                int clonesCount = 1;
+                string clonesString = GetArgValue("-client");
+                if (!string.IsNullOrEmpty(clonesString))
+                {
+                    int clones = int.Parse(clonesString);
+                }
+
+                LogDebug("Starting " + clonesCount + " Clients");
+
+                // connect from a bunch of clients
+                for (int i = 0; i < clonesCount; i++)
+                    yield return StartClient(i, networkManager.client.Transport, address);
             }
 
-            if(!string.IsNullOrEmpty(GetArg("-help")))
+            if (!string.IsNullOrEmpty(GetArg("-help")))
             {
                 Console.WriteLine("--==MirrorNG HeadlessClients Benchmark==--");
                 Console.WriteLine("Please start your standalone application with the -nographics and -batchmode options");
                 Console.WriteLine("Also provide these arguments to control the autostart process:");
                 Console.WriteLine("-server (will run in server only mode)");
-                Console.WriteLine("-client (will run in client only mode)");
+                Console.WriteLine("-client 1234 (will run the specified number of clients)");
                 Console.WriteLine("-transport tcp (transport to be used in test. add more by editing HeadlessBenchmark.cs)");
                 Console.WriteLine("-port 1234 (port used by transport)");
                 Console.WriteLine("-monster 100 (number of monsters to spawn on the server)");
@@ -126,6 +143,18 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
             GameObject monster = Instantiate(MonsterPrefab);
             monster.gameObject.name = $"Monster {i}";
             networkManager.server.Spawn(monster.gameObject);
+        }
+
+        IEnumerator StartClient(int i, Transport transport, string networkAddress)
+        {
+            var clientGo = new GameObject($"Client {i}", typeof(NetworkClient));
+            NetworkClient client = clientGo.GetComponent<NetworkClient>();
+            client.Transport = transport;
+
+            client.RegisterPrefab(MonsterPrefab);
+            client.ConnectAsync(networkAddress);
+            while (!client.IsConnected)
+                yield return null;
         }
 
         void LogDebug(string text)

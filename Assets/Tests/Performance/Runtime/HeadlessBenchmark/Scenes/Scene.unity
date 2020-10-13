@@ -359,7 +359,7 @@ MonoBehaviour:
   networkManager: {fileID: 493337956}
   MonsterPrefab: {fileID: 6374416922608025457, guid: 28d1af38d0173324ea03798dd86eac8f, type: 3}
   debugMode: 1
-  debugArgs: -server -transport tcp
+  debugArgs: -transport tcp -client 1 -server
 --- !u!4 &2043118187
 Transform:
   m_ObjectHideFlags: 0
