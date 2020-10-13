@@ -10,6 +10,7 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
     {
         public NetworkManager networkManager;
         public GameObject MonsterPrefab;
+        public GameObject PlayerPrefab;
 
         //Used for testing in editor
         public bool debugMode;
@@ -130,15 +131,15 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
 
         void OnServerStarted()
         {
-            string monster = GetArgValue("monster");
+            string monster = GetArgValue("-monster");
             if (!string.IsNullOrEmpty(monster))
             {
                 for (int i = 0; i < int.Parse(monster); i++)
-                    SpawnMonster(i);
+                    SpawnMonsters(i);
             }
         }
 
-        void SpawnMonster(int i)
+        void SpawnMonsters(int i)
         {
             GameObject monster = Instantiate(MonsterPrefab);
             monster.gameObject.name = $"Monster {i}";
@@ -152,6 +153,7 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
             client.Transport = transport;
 
             client.RegisterPrefab(MonsterPrefab);
+            client.RegisterPrefab(PlayerPrefab);
             client.ConnectAsync(networkAddress);
             while (!client.IsConnected)
                 yield return null;
