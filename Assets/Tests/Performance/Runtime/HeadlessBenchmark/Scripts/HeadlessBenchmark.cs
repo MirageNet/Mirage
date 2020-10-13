@@ -116,15 +116,15 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
 
             if (!string.IsNullOrEmpty(GetArg("-help")))
             {
-                Console.WriteLine("--==MirrorNG HeadlessClients Benchmark==--");
-                Console.WriteLine("Please start your standalone application with the -nographics and -batchmode options");
-                Console.WriteLine("Also provide these arguments to control the autostart process:");
-                Console.WriteLine("-server (will run in server only mode)");
-                Console.WriteLine("-client 1234 (will run the specified number of clients)");
-                Console.WriteLine("-transport tcp (transport to be used in test. add more by editing HeadlessBenchmark.cs)");
-                Console.WriteLine("-port 1234 (port used by transport)");
-                Console.WriteLine("-monster 100 (number of monsters to spawn on the server)");
-                Console.WriteLine("-debug (enables verbose logging and GUI mode)");
+                LogDebug("--==MirrorNG HeadlessClients Benchmark==--");
+                LogDebug("Please start your standalone application with the -nographics and -batchmode options");
+                LogDebug("Also provide these arguments to control the autostart process:");
+                LogDebug("-server (will run in server only mode)");
+                LogDebug("-client 1234 (will run the specified number of clients)");
+                LogDebug("-transport tcp (transport to be used in test. add more by editing HeadlessBenchmark.cs)");
+                LogDebug("-port 1234 (port used by transport)");
+                LogDebug("-monster 100 (number of monsters to spawn on the server)");
+                LogDebug("-debug (enables verbose logging and GUI mode)");
             }
         }
 
