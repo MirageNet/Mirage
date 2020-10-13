@@ -74,14 +74,10 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
             string client = GetArg("-client");
             if (!string.IsNullOrEmpty(client))
             {
-                string address;
+                //string address;
                 //network address provided?
-                string networkAddress = GetArgValue("address");
-                if (!string.IsNullOrEmpty(networkAddress))
-                {
-                    address = networkAddress;
-                }
-                else
+                string address = GetArgValue("-address");
+                if (string.IsNullOrEmpty(address))
                 {
                     address = "localhost";
                 }
@@ -109,6 +105,7 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
                 LogDebug("-server (will run in server only mode)");
                 LogDebug("-client 1234 (will run the specified number of clients)");
                 LogDebug("-transport tcp (transport to be used in test. add more by editing HeadlessBenchmark.cs)");
+                LogDebug("-address example.com (will run the specified number of clients)");
                 LogDebug("-port 1234 (port used by transport)");
                 LogDebug("-monster 100 (number of monsters to spawn on the server)");
             }
