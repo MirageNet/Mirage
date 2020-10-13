@@ -106,7 +106,7 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
                 string clonesString = GetArgValue("-client");
                 if (!string.IsNullOrEmpty(clonesString))
                 {
-                    int clones = int.Parse(clonesString);
+                    clonesCount = int.Parse(clonesString);
                 }
 
                 LogDebug("Starting " + clonesCount + " Clients");
@@ -158,6 +158,8 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
             client.ConnectAsync(networkAddress);
             while (!client.IsConnected)
                 yield return null;
+
+            client.Send(new AddPlayerMessage());
         }
 
         void LogDebug(string text)
