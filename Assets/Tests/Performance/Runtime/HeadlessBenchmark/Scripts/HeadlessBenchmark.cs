@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using Mirror.Tcp;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
 {
@@ -11,33 +11,18 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
         public NetworkManager networkManager;
         public GameObject MonsterPrefab;
         public GameObject PlayerPrefab;
-
-        //Used for testing in editor
-        public bool debugMode;
-        public string debugArgs;
+        public string editorArgs;
 
         string[] cachedArgs;
 
         void Start()
         {
-            SetArgs();
+            cachedArgs = Environment.GetCommandLineArgs();
 
-            if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null || debugMode)
-            {
-                StartCoroutine(HeadlessStart());
-            }
-        }
+            if (EditorApplication.isPlaying)
+                cachedArgs = editorArgs.Split(' ');
 
-        void SetArgs()
-        {
-            if (debugMode)
-            {
-                cachedArgs = debugArgs.Split(' ');
-            }
-            else
-            {
-                cachedArgs = Environment.GetCommandLineArgs();
-            }
+            StartCoroutine(HeadlessStart());
         }
 
         IEnumerator HeadlessStart()
@@ -126,7 +111,6 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
                 LogDebug("-transport tcp (transport to be used in test. add more by editing HeadlessBenchmark.cs)");
                 LogDebug("-port 1234 (port used by transport)");
                 LogDebug("-monster 100 (number of monsters to spawn on the server)");
-                LogDebug("-debug (enables verbose logging and GUI mode)");
             }
         }
 
@@ -164,16 +148,13 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
 
         void LogDebug(string text)
         {
-            if(debugMode)
+            if(EditorApplication.isPlaying)
             {
-                if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null)
-                {
-                    Console.WriteLine(text);
-                }
-                else
-                {
-                    Debug.Log(text);
-                }
+                Debug.Log(text);
+            }
+            else
+            {
+                Console.WriteLine(text);
             }
         }
 
