@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using Mirror.Tcp;
-using UnityEditor;
 using UnityEngine;
 
 namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
@@ -19,8 +18,9 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
         {
             cachedArgs = Environment.GetCommandLineArgs();
 
-            if (EditorApplication.isPlaying)
-                cachedArgs = editorArgs.Split(' ');
+#if UNITY_EDITOR
+            cachedArgs = editorArgs.Split(' ');
+#endif
 
             StartCoroutine(HeadlessStart());
         }
@@ -67,7 +67,7 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
                 networkManager.server.Started.AddListener(OnServerStarted);
                 networkManager.server.Authenticated.AddListener(conn => networkManager.server.SetClientReady(conn));
                 _ = networkManager.server.ListenAsync();
-                LogDebug("Starting Server Only Mode");
+                Debug.Log("Starting Server Only Mode");
             }
 
             //Or client mode?
@@ -90,7 +90,7 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
                     clonesCount = int.Parse(clonesString);
                 }
 
-                LogDebug("Starting " + clonesCount + " Clients");
+                Debug.Log("Starting " + clonesCount + " Clients");
 
                 // connect from a bunch of clients
                 for (int i = 0; i < clonesCount; i++)
@@ -99,15 +99,15 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
 
             if (!string.IsNullOrEmpty(GetArg("-help")))
             {
-                LogDebug("--==MirrorNG HeadlessClients Benchmark==--");
-                LogDebug("Please start your standalone application with the -nographics and -batchmode options");
-                LogDebug("Also provide these arguments to control the autostart process:");
-                LogDebug("-server (will run in server only mode)");
-                LogDebug("-client 1234 (will run the specified number of clients)");
-                LogDebug("-transport tcp (transport to be used in test. add more by editing HeadlessBenchmark.cs)");
-                LogDebug("-address example.com (will run the specified number of clients)");
-                LogDebug("-port 1234 (port used by transport)");
-                LogDebug("-monster 100 (number of monsters to spawn on the server)");
+                Debug.Log("--==MirrorNG HeadlessClients Benchmark==--");
+                Debug.Log("Please start your standalone application with the -nographics and -batchmode options");
+                Debug.Log("Also provide these arguments to control the autostart process:");
+                Debug.Log("-server (will run in server only mode)");
+                Debug.Log("-client 1234 (will run the specified number of clients)");
+                Debug.Log("-transport tcp (transport to be used in test. add more by editing HeadlessBenchmark.cs)");
+                Debug.Log("-address example.com (will run the specified number of clients)");
+                Debug.Log("-port 1234 (port used by transport)");
+                Debug.Log("-monster 100 (number of monsters to spawn on the server)");
             }
         }
 
@@ -141,18 +141,6 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
                 yield return null;
 
             client.Send(new AddPlayerMessage());
-        }
-
-        void LogDebug(string text)
-        {
-            if(EditorApplication.isPlaying)
-            {
-                Debug.Log(text);
-            }
-            else
-            {
-                Console.WriteLine(text);
-            }
         }
 
         string GetArgValue(string name)
