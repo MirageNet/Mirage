@@ -80,6 +80,7 @@ namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
             if (!string.IsNullOrEmpty(GetArg("-server")))
             {
                 networkManager.server.Started.AddListener(OnServerStarted);
+                networkManager.server.Authenticated.AddListener(conn => networkManager.server.SetClientReady(conn));
                 _ = networkManager.server.ListenAsync();
                 LogDebug("Starting Server Only Mode");
             }
