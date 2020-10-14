@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Mirror.Tcp;
+using Mirror.KCP;
 using UnityEngine;
 
 namespace Mirror.HeadlessBenchmark
@@ -47,18 +48,18 @@ namespace Mirror.HeadlessBenchmark
                     networkManager.server.transport = newTransport;
                     networkManager.client.Transport = newTransport;
                 }
-                //if (transport.Equals("kcp"))
-                //{
-                //KcpTransport newTransport = networkManager.gameObject.AddComponent<KcpTransport>();
+                if (transport.Equals("kcp"))
+                {
+                    KcpTransport newTransport = networkManager.gameObject.AddComponent<KcpTransport>();
 
-                //Try to apply port if exists and needed by transport.
-                //if (!string.IsNullOrEmpty(port))
-                //{
-                //newTransport.Port = int.Parse(port);
-                //}
-                //networkManager.server.transport = newTransport;
-                //networkManager.client.Transport = newTransport;
-                //}
+                    //Try to apply port if exists and needed by transport.
+                if (!string.IsNullOrEmpty(port))
+                    {
+                        newTransport.Port = ushort.Parse(port);
+                    }
+                    networkManager.server.transport = newTransport;
+                    networkManager.client.Transport = newTransport;
+                }
             }
 
             //Server mode?
