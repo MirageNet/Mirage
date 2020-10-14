@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
+namespace Mirror.HeadlessBenchmark
 {
     public class AdjustableLoad : NetworkBehaviour
     {

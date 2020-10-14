@@ -3,7 +3,7 @@ using System.Collections;
 using Mirror.Tcp;
 using UnityEngine;
 
-namespace Mirror.Test.Performance.Runtime.HeadlessBenchmark
+namespace Mirror.HeadlessBenchmark
 {
     public class HeadlessBenchmark : MonoBehaviour
     {
