@@ -73,7 +73,6 @@ namespace Mirror.Tests
 
             Assert.That(await serverConnection.ReceiveAsync(stream), Is.True);
             byte[] received = stream.ToArray();
-            string receivedData = utf8.GetString(received);
             Assert.That(received, Is.EqualTo(data));
         });
 
@@ -113,13 +112,11 @@ namespace Mirror.Tests
 
             Assert.That(await serverConnection.ReceiveAsync(stream), Is.True);
             byte[] received = stream.ToArray();
-            string receivedData = utf8.GetString(received);
             Assert.That(received, Is.EqualTo(data));
 
             stream.SetLength(0);
             Assert.That(await serverConnection.ReceiveAsync(stream), Is.True);
             byte[] received2 = stream.ToArray();
-            string receivedData2 = utf8.GetString(received2);
             Assert.That(received2, Is.EqualTo(data2));
         });
 
@@ -135,7 +132,6 @@ namespace Mirror.Tests
 
             Assert.That(await clientConnection.ReceiveAsync(stream), Is.True);
             byte[] received = stream.ToArray();
-            string receivedData = utf8.GetString(received);
             Assert.That(received, Is.EqualTo(data));
         });
 
