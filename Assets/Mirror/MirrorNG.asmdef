@@ -2,7 +2,8 @@
     "name": "MirrorNG",
     "references": [
         "Mirror",
-        "UniTask"
+        "UniTask",
+        "UniTask.Linq"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

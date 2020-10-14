@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 
 namespace Mirror
@@ -10,8 +11,7 @@ namespace Mirror
 
         public Transport[] transports;
 
-        private Channel<IConnection> accepted;
-        private int stillAccepting = 0;
+        private Dictionary<UniTask<IConnection>, Transport> Accepters;
 
         public override IEnumerable<string> Scheme =>
             transports
@@ -30,50 +30,49 @@ namespace Mirror
 
         public override bool Supported => GetTransport() != null;
 
-        public override UniTask<IConnection> AcceptAsync()
+        public override async UniTask<IConnection> AcceptAsync()
         {
-            if (accepted == null)
+            if (Accepters == null)
             {
-                accepted = Channel.CreateSingleConsumerUnbounded<IConnection>();
-                stillAccepting = transports.Length;
+                Accepters = new Dictionary<UniTask<IConnection>, Transport>();
+
                 foreach (Transport transport in transports)
                 {
-                    _ = AcceptLoopAsync(transport);
+                    UniTask<IConnection> transportAccepter = transport.AcceptAsync();
+                    Accepters[transportAccepter] = transport;
                 }
             }
 
-            if (stillAccepting == 0)
-                return UniTask.FromResult<IConnection>(null);
+            // that's it nobody is left to accept
+            if (Accepters.Count == 0)
+                return null;
 
-            return accepted.Reader.ReadAsync();
+            var tasks = Accepters.Keys;
+
+            // wait for any one of them to accept
+            var (index, connection) = await UniTask.WhenAny(tasks);
+
+            var task = tasks.ElementAt(index);
+
+            Transport acceptedTransport = Accepters[task];
+            Accepters.Remove(task);
+
+            if (connection == null)
+            {
+                // this transport closed. Get the next one
+                return await AcceptAsync();
+            }
+            else
+            {
+                // transport may accept more connections
+                task = acceptedTransport.AcceptAsync();
+                Accepters[task] = acceptedTransport;
+
+                return connection;
+            }
         }
 
-        private async UniTask AcceptLoopAsync(Transport transport)
-        {
-            try
-            {
-                IConnection connection = await transport.AcceptAsync();
-
-                while (connection != null)
-                {
-                    accepted.Writer.TryWrite(connection);
-                    connection = await transport.AcceptAsync();
-                }
-            }
-            finally
-            {
-                stillAccepting--;
-
-                if (stillAccepting == 0)
-                {
-                    // if last one out the room,  turn off the lights
-                    // there are no more pending accepts
-                    accepted.Writer.TryWrite(null);
-                }
-            }
-        }
-
-        public override  UniTask<IConnection> ConnectAsync(Uri uri)
+        public override UniTask<IConnection> ConnectAsync(Uri uri)
         {
             foreach (Transport transport in transports)
             {
@@ -93,7 +92,7 @@ namespace Mirror
         {
             IEnumerable<UniTask> tasks = from t in transports select t.ListenAsync();
             await UniTask.WhenAll(tasks);
-            accepted = null;
+            Accepters = null;
         }
 
         public override IEnumerable<Uri> ServerUri() =>

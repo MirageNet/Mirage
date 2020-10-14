@@ -12,6 +12,7 @@ using Object = UnityEngine.Object;
 
 namespace Mirror.Tests
 {
+    [Timeout(2000)]
     public class MultiplexTransportTest
     {
         #region SetUp
