@@ -98,11 +98,18 @@ namespace Mirror.Tcp
         #region Sending
         public async UniTask SendAsync(ArraySegment<byte> data)
         {
-            var prefixed = new MemoryStream(data.Count + 4);
-            WritePrefixedData(prefixed, data);
+            try
+            {
+                var prefixed = new MemoryStream(data.Count + 4);
+                WritePrefixedData(prefixed, data);
 
-            prefixed.TryGetBuffer(out ArraySegment<byte> prefixedData);
-            await stream.WriteAsync(prefixedData.Array, prefixedData.Offset, prefixedData.Count);
+                prefixed.TryGetBuffer(out ArraySegment<byte> prefixedData);
+                await stream.WriteAsync(prefixedData.Array, prefixedData.Offset, prefixedData.Count);
+            }
+            catch (ObjectDisposedException)
+            {
+                // this is fine, connection was closed
+            }
         }
 
         private static void WriteInt(Stream stream, int length)

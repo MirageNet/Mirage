@@ -6,7 +6,6 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using static Mirror.Tests.AsyncUtil;
 using Object = UnityEngine.Object;
 
 namespace Mirror.Tests
@@ -52,7 +51,7 @@ namespace Mirror.Tests
         #endregion
 
         [UnityTest]
-        public IEnumerator AcceptTransport1() => RunAsync(async () =>
+        public IEnumerator AcceptTransport1() => UniTask.ToCoroutine(async () =>
         {
             transport1.AcceptAsync().Returns(UniTask.FromResult(conn1));
 
@@ -60,7 +59,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator AcceptTransport2() => RunAsync(async () =>
+        public IEnumerator AcceptTransport2() => UniTask.ToCoroutine(async () =>
         {
             transport1.Supported.Returns(false);
             transport2.AcceptAsync().Returns(UniTask.FromResult(conn1));
@@ -68,7 +67,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator AcceptMultiple() => RunAsync(async () =>
+        public IEnumerator AcceptMultiple() => UniTask.ToCoroutine(async () =>
         {
             transport2.Supported.Returns(false);
             transport1.AcceptAsync().Returns(UniTask.FromResult(conn1), UniTask.FromResult(conn2));
@@ -78,7 +77,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator AcceptInvalid() => RunAsync(async () =>
+        public IEnumerator AcceptInvalid() => UniTask.ToCoroutine(async () =>
         {
             transport1.Supported.Returns(false);
             transport2.Supported.Returns(false);
@@ -95,7 +94,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator AcceptUntilAllGone() => RunAsync(async () =>
+        public IEnumerator AcceptUntilAllGone() => UniTask.ToCoroutine(async () =>
         {
             transport1.AcceptAsync().Returns(x => UniTask.FromResult(conn1), x => UniTask.FromResult<IConnection>(null));
             // transport2 task never ends
@@ -106,7 +105,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator Listen1() => RunAsync(async () =>
+        public IEnumerator Listen1() => UniTask.ToCoroutine(async () =>
         {
             transport1.ListenAsync().Returns(UniTask.CompletedTask);
             transport2.ListenAsync().Returns(UniTask.CompletedTask);
@@ -118,7 +117,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator Listen2() => RunAsync(async () =>
+        public IEnumerator Listen2() => UniTask.ToCoroutine(async () =>
         {
             transport1.Supported.Returns(false);
             transport2.ListenAsync().Returns(UniTask.CompletedTask);
@@ -130,7 +129,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator ListenNone() => RunAsync(async () =>
+        public IEnumerator ListenNone() => UniTask.ToCoroutine(async () =>
         {
             transport1.Supported.Returns(false);
             transport2.Supported.Returns(false);
@@ -217,7 +216,7 @@ namespace Mirror.Tests
         }
 
         [UnityTest]
-        public IEnumerator Connect() => RunAsync(async () =>
+        public IEnumerator Connect() => UniTask.ToCoroutine(async () =>
         {
             transport1.Supported.Returns(false);
 
@@ -231,7 +230,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator CannotConnect() => RunAsync(async () =>
+        public IEnumerator CannotConnect() => UniTask.ToCoroutine(async () =>
         {
             transport1.Supported.Returns(false);
             transport2.Supported.Returns(false);

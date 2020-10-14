@@ -6,11 +6,8 @@ using Mirror.Tcp;
 using System.Text;
 using System.IO;
 using System.Net;
-
-using static Mirror.Tests.AsyncUtil;
 using System;
 using Object = UnityEngine.Object;
-using System.Threading.Tasks;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 
@@ -38,7 +35,7 @@ namespace Mirror.Tests
         IConnection serverConnection;
 
         [UnitySetUp]
-        public IEnumerator Setup() => RunAsync(async () =>
+        public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
         {
             transportObj = new GameObject();
 
@@ -65,7 +62,7 @@ namespace Mirror.Tests
         #endregion
 
         [UnityTest]
-        public IEnumerator ClientToServerTest() => RunAsync(async () =>
+        public IEnumerator ClientToServerTest() => UniTask.ToCoroutine(async () =>
         {
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the client";
@@ -101,7 +98,7 @@ namespace Mirror.Tests
         }
 
         [UnityTest]
-        public IEnumerator ClientToServerMultipleTest() => RunAsync(async () =>
+        public IEnumerator ClientToServerMultipleTest() => UniTask.ToCoroutine(async () =>
         {
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the client 1";
@@ -127,7 +124,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator ServerToClientTest() => RunAsync(async () =>
+        public IEnumerator ServerToClientTest() => UniTask.ToCoroutine(async () =>
         {
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the server";
@@ -143,7 +140,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator DisconnectServerTest() => RunAsync(async () =>
+        public IEnumerator DisconnectServerTest() => UniTask.ToCoroutine(async () =>
         {
             serverConnection.Disconnect();
 
@@ -152,7 +149,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator DisconnectClientTest() => RunAsync(async () =>
+        public IEnumerator DisconnectClientTest() => UniTask.ToCoroutine(async () =>
         {
             clientConnection.Disconnect();
 
@@ -161,7 +158,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator DisconnectClientTest2() => RunAsync(async () =>
+        public IEnumerator DisconnectClientTest2() => UniTask.ToCoroutine(async () =>
         {
             clientConnection.Disconnect();
 
