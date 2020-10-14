@@ -196,7 +196,7 @@ namespace Mirror.Weaver.Tests
             HasError("Cannot generate reader for GameObject. Use a supported type or provide a custom reader",
                 "UnityEngine.GameObject");
             HasError("CmdCantHaveGameObjectComponent has invalid parameter monkeyComp.  Unsupported type UnityEngine.GameObject,  use a supported Mirror type instead",
-                "at System.Void WeaverNetworkBehaviourTests.NetworkBehaviourCmdParamGameObject.NetworkBehaviourCmdParamGameObject::CmdCantHaveGameObjectComponent(UnityEngine.GameObject)");
+                "System.Void WeaverNetworkBehaviourTests.NetworkBehaviourCmdParamGameObject.NetworkBehaviourCmdParamGameObject::CmdCantHaveGameObjectComponent(UnityEngine.GameObject)");
         }
 
         [Test]
