@@ -1,3 +1,11 @@
+## [49.2.1](https://github.com/MirrorNG/MirrorNG/compare/v49.2.0...v49.2.1) (2020-10-15)
+
+
+### Performance Improvements
+
+* reduce allocation sending to observers ([f5f7f6c](https://github.com/MirrorNG/MirrorNG/commit/f5f7f6c9b5b33f1f432d7bf6016b8e63f4699e7d))
+* reduce allocations per client ([8d37f8c](https://github.com/MirrorNG/MirrorNG/commit/8d37f8c987addfd99a2078d29e1456ce715239c7))
+
 # [49.2.0](https://github.com/MirrorNG/MirrorNG/compare/v49.1.1...v49.2.0) (2020-10-14)
 
 
