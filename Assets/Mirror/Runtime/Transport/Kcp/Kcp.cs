@@ -906,6 +906,26 @@ namespace Mirror.KCP
             nocwnd = nc;
         }
 
+        public void SetNoDelay(KcpDelayMode kcpDelayMode)
+        {
+            switch (kcpDelayMode)
+            {
+                case KcpDelayMode.Normal:
+                    SetNoDelay(false, 40, 0, false);
+                    break;
+                case KcpDelayMode.Fast:
+                    SetNoDelay(false, 30, 2, true);
+                    break;
+                case KcpDelayMode.Fast2:
+                    SetNoDelay(true, 20, 2, true);
+                    break;
+                case KcpDelayMode.Fast3:
+                    SetNoDelay(true, 10, 2, true);
+                    break;
+
+            }
+        }
+
         /// <summary>SetWindowSize
         /// sets maximum window size</summary>
         /// <param name="sendWindow">32 by default</param>
