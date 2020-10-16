@@ -77,14 +77,14 @@ namespace Mirror.Tests
         [Test]
         public void InvalidHash()
         {
-            byte[] hash = new byte[20] {
+            byte[] hash = new byte[] {
                 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 };
             Assert.That(HashCash.Validate(hash, 16), Is.False);
         }
         [Test]
         public void ValidHash()
         {
-            byte[] hash = new byte[20] {
+            byte[] hash = new byte[] {
                 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 };
             Assert.That(HashCash.Validate(hash, 15), Is.True);
         }
