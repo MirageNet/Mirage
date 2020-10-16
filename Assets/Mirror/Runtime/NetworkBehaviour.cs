@@ -393,9 +393,12 @@ namespace Mirror
                 return identityField;
             }
 
-            // client always looks up based on netId because objects might get in and out of range
-            // over and over again, which shouldn't null them forever
-            Client.Spawned.TryGetValue(netId, out identityField);
+            if (IsClient)
+            {
+                // client always looks up based on netId because objects might get in and out of range
+                // over and over again, which shouldn't null them forever
+                Client.Spawned.TryGetValue(netId, out identityField);
+            }
             return identityField;
         }
 
