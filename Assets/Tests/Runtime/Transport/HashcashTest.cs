@@ -104,19 +104,5 @@ namespace Mirror.Tests
             Assert.That(mined.Validate("yomama", 10), Is.True);
         }
 
-        [Test]
-        public void ValidToken2()
-        {
-            var stopWatch = new Stopwatch();
-            for (int i = 0; i < 10; i++)
-            {
-                stopWatch.Restart();
-                var mined = HashCash.Mine("yomama", 18);
-                // token is for wrong resource
-                Assert.That(mined.Validate("yomama", 18), Is.True);
-
-                stopWatch.Stop();
-            }
-        }
     }
 }
