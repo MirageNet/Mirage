@@ -642,31 +642,7 @@ namespace Mirror.KCP
 
             uint current = CurrentMS;
 
-            // probe window size (if remote window size equals zero)
-            if (RmtWnd == 0)
-            {
-                if (probe_wait == 0)
-                {
-                    probe_wait = PROBE_INIT;
-                    ts_probe = current + probe_wait;
-                }
-                else
-                {
-                    if (current >= ts_probe)
-                    {
-                        probe_wait = Math.Max(probe_wait, PROBE_INIT);
-                        probe_wait += probe_wait / 2;
-                        probe_wait = Math.Min(probe_wait, PROBE_LIMIT);
-                        ts_probe = current + probe_wait;
-                        probe |= ASK_SEND;
-                    }
-                }
-            }
-            else
-            {
-                ts_probe = 0;
-                probe_wait = 0;
-            }
+            ProbeWindowSize(current);
 
             FlushWindowProbingCommands(seg);
 
@@ -743,6 +719,35 @@ namespace Mirror.KCP
 
             Segment.Put(seg);
             return (uint)minrto;
+        }
+
+        void ProbeWindowSize(uint current)
+        {
+            // probe window size (if remote window size equals zero)
+            if (RmtWnd == 0)
+            {
+                if (probe_wait == 0)
+                {
+                    probe_wait = PROBE_INIT;
+                    ts_probe = current + probe_wait;
+                }
+                else
+                {
+                    if (current >= ts_probe)
+                    {
+                        probe_wait = Math.Max(probe_wait, PROBE_INIT);
+                        probe_wait += probe_wait / 2;
+                        probe_wait = Math.Min(probe_wait, PROBE_LIMIT);
+                        ts_probe = current + probe_wait;
+                        probe |= ASK_SEND;
+                    }
+                }
+            }
+            else
+            {
+                ts_probe = 0;
+                probe_wait = 0;
+            }
         }
 
         void SetThresh(uint value)
