@@ -1,13 +1,7 @@
-﻿using System.Collections;
-using NUnit.Framework;
-using UnityEngine.TestTools;
-using Cysharp.Threading.Tasks;
+﻿using NUnit.Framework;
 using System;
-using System.IO;
 
 using UnityEngine;
-using Random = UnityEngine.Random;
-using System.Linq;
 using Mirror.KCP;
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
@@ -22,13 +16,12 @@ namespace Mirror.Tests
         [SetUp]
         public void Setup()
         {
-            hashCash = new HashCash
-            {
-                dt = DateTime.UtcNow,
-                resource = "yomama".GetStableHashCode(),
-                salt = 123123,
-                counter = 10,
-            };
+            hashCash = new HashCash(
+                DateTime.UtcNow,
+                "yomama",
+                123123,
+                10
+            );
         }
 
         [Test]
@@ -55,8 +48,7 @@ namespace Mirror.Tests
         [Test]
         public void TestShaDiff()
         {
-            HashCash hashCash2 = hashCash;
-            hashCash2.resource++;
+            var hashCash2 = new HashCash(hashCash.dt, hashCash.resource + 1, hashCash.salt, hashCash.counter);
 
             Assert.That(hashCash2.Sha1(), Is.Not.EqualTo(hashCash.Sha1()));
         }

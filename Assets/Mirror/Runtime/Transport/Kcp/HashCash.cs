@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Security.Cryptography;
-using UnityEngine;
 
 namespace Mirror.KCP
 {
@@ -19,27 +18,43 @@ namespace Mirror.KCP
     /// 3) the token has not been seen in the server yet
     /// 4) the sha1 hash of the token must start with zeroes. The more zeroes,  the more difficulty
     /// </remarks>
-    public struct HashCash : IEquatable<HashCash>
+    public readonly struct HashCash : IEquatable<HashCash>
     {
         /// <summary>
         /// Date and time when the token was generated
         /// </summary>
-        public DateTime dt;
+        public readonly DateTime dt;
         /// <summary>
         /// a number that represents the resource this hashcash is for.
         /// In the original they have a string,  so just use a string hash here
         /// </summary>
-        public int resource;
+        public readonly int resource;
 
         /// <summary>
         /// the random number.  In the original they have
         /// a byte[],  but we can limit it to 64 bits
         /// </summary>
-        public ulong salt;
+        public readonly ulong salt;
         /// <summary>
         /// counter used for making the token valid
         /// </summary>
-        public ulong counter;
+        public readonly ulong counter;
+
+        public HashCash(DateTime dt, int resource, ulong salt, ulong counter)
+        {
+            this.dt = dt;
+            this.resource = resource;
+            this.salt = salt;
+            this.counter = counter;
+        }
+
+        public HashCash(DateTime dt, string resource, ulong salt, ulong counter)
+        {
+            this.dt = dt;
+            this.resource = resource.GetStableHashCode();
+            this.salt = salt;
+            this.counter = counter;
+        }
 
         public bool Equals(HashCash other)
         {
@@ -51,7 +66,7 @@ namespace Mirror.KCP
 
         public override bool Equals(object obj)
         {
-            return this.Equals((HashCash)obj);
+            return Equals((HashCash)obj);
         }
 
         public override int GetHashCode()
@@ -71,9 +86,6 @@ namespace Mirror.KCP
 
         #region mining
 
-        public static HashCash Mine(string resource, int bits = 18)
-            => Mine(resource.GetStableHashCode(), bits);
-
         /// <summary>
         /// Mines a hashcash token for a given resource
         /// </summary>
@@ -81,17 +93,11 @@ namespace Mirror.KCP
         /// the resource can be any number, but should be unique to your game
         /// for example,  use Application.productName.GetStableHashCode()</param>
         /// <returns>A valid HashCash for the resource</returns>
-        private static HashCash Mine(int resource, int bits = 18)
+        public static HashCash Mine(string resource, int bits = 18)
         {
-            var random = new System.Random();
+            var random = new Random();
 
-            var token = new HashCash
-            {
-                dt = DateTime.UtcNow,
-                resource = resource,
-                salt = (ulong)((random.Next() << 32) | random.Next()),
-                counter = 0
-            };
+            var token = new HashCash(DateTime.UtcNow, resource, (ulong)((random.Next() << 32) | random.Next()), 0);
 
             // calculate hash after hash until
             // we find one that validaes
@@ -102,7 +108,7 @@ namespace Mirror.KCP
                 if (Validate(sha1, bits))
                     return token;
 
-                token.counter++;
+                token = new HashCash(token.dt, token.resource, token.salt, token.counter + 1);
             }
         }
 
@@ -110,9 +116,9 @@ namespace Mirror.KCP
 
 
         #region Validation
-        private static SHA1CryptoServiceProvider sha1CryptoService = new SHA1CryptoServiceProvider();
+        private static readonly SHA1CryptoServiceProvider sha1CryptoService = new SHA1CryptoServiceProvider();
 
-        private static byte[] buffer = new byte[HashCashEncoding.SIZE];
+        private static readonly byte[] buffer = new byte[HashCashEncoding.SIZE];
 
 
         internal byte[] Sha1()
@@ -157,14 +163,14 @@ namespace Mirror.KCP
                 return false;
 
             // tokens are valid for 10 minutes
-            if (this.dt < DateTime.UtcNow.AddMinutes(-10f))
+            if (dt < DateTime.UtcNow.AddMinutes(-10f))
                 return false;
 
             // tokens cannot come from the future
-            if (this.dt > DateTime.UtcNow.AddMinutes(5f))
+            if (dt > DateTime.UtcNow.AddMinutes(5f))
                 return false;
 
-            return this.ValidateHash(bits);
+            return ValidateHash(bits);
         }
 
         #endregion
@@ -211,13 +217,11 @@ namespace Mirror.KCP
             ulong counter;
             (offset, counter) = Utils.Decode64U(buffer, offset);
 
-            var token = new HashCash
-            {
-                dt = new DateTime((long)ticks),
-                resource = (int)resource,
-                salt = salt,
-                counter = counter
-            };
+            var token = new HashCash (new DateTime((long)ticks),
+                (int)resource,
+                salt,
+                counter
+            );
 
             return (offset, token);
         }
