@@ -4,7 +4,6 @@ using System;
 using UnityEngine;
 using Mirror.KCP;
 using System.Diagnostics;
-using Debug = UnityEngine.Debug;
 
 namespace Mirror.Tests
 {
