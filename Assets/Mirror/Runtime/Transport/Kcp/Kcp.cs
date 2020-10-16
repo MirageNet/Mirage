@@ -883,10 +883,10 @@ namespace Mirror.KCP
         }
 
         /// <summary>SetNoDelay
-        /// <para>Normal: false, 40, 0, 0</para>
-        /// <para>Fast:    false, 30, 2, 1</para>
-        /// <para>Fast2:   true, 20, 2, 1</para>
-        /// <para>Fast3:   true, 10, 2, 1</para>
+        /// <para>Normal: false, 40, 0, false</para>
+        /// <para>Fast:    false, 30, 2, true</para>
+        /// <para>Fast2:   true, 20, 2, true</para>
+        /// <para>Fast3:   true, 10, 2, true</para>
         /// </summary>
         /// <param name="nodelay">Whether to enable nodelay mode.</param>
         /// <param name="interval">Interval of the internal working of the protocol, in milliseconds, such as 10ms or 20ms.</param>
