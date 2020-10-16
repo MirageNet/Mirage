@@ -143,7 +143,7 @@ namespace Mirror.KCP
         }
 
         public bool Validate(string resource, int bits = 20)
-            => Validate(resource.GetStableHashCode(), bits = 20);
+            => Validate(resource.GetStableHashCode(), bits);
 
         private bool Validate(int resource, int bits = 20)
         {
@@ -155,7 +155,7 @@ namespace Mirror.KCP
             if (this.dt < DateTime.UtcNow.AddMinutes(-10f))
                 return false;
 
-            return this.ValidateHash(20);
+            return this.ValidateHash(bits);
         }
 
         #endregion

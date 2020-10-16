@@ -9,6 +9,8 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using System.Linq;
 using Mirror.KCP;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 namespace Mirror.Tests
 {
@@ -109,6 +111,18 @@ namespace Mirror.Tests
             var mined = HashCash.Mine("yomama", 10);
             // token is for wrong resource
             Assert.That(mined.Validate("yomama", 10), Is.True);
+        }
+
+        [Test]
+        public void ValidToken2()
+        {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            var mined = HashCash.Mine("yomama", 15);
+            // token is for wrong resource
+            Assert.That(mined.Validate("yomama", 15), Is.True);
+
+            Debug.Log($"It took {stopWatch.ElapsedMilliseconds} to mine");
         }
     }
 }
