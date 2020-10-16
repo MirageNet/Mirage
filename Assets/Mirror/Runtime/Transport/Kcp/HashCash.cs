@@ -160,6 +160,10 @@ namespace Mirror.KCP
             if (this.dt < DateTime.UtcNow.AddMinutes(-10f))
                 return false;
 
+            // tokens cannot come from the future
+            if (this.dt > DateTime.UtcNow.AddMinutes(5f))
+                return false;
+
             return this.ValidateHash(bits);
         }
 
