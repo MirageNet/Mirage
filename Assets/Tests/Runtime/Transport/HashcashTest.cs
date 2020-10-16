@@ -116,13 +116,17 @@ namespace Mirror.Tests
         [Test]
         public void ValidToken2()
         {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-            var mined = HashCash.Mine("yomama", 15);
-            // token is for wrong resource
-            Assert.That(mined.Validate("yomama", 15), Is.True);
+            var stopWatch = new Stopwatch();
+            for (int i = 0; i < 10; i++)
+            {
+                stopWatch.Restart();
+                var mined = HashCash.Mine("yomama", 18);
+                // token is for wrong resource
+                Assert.That(mined.Validate("yomama", 18), Is.True);
 
-            Debug.Log($"It took {stopWatch.ElapsedMilliseconds} to mine");
+                stopWatch.Stop();
+                Debug.Log($"It took {stopWatch.ElapsedMilliseconds} to mine");
+            }
         }
     }
 }

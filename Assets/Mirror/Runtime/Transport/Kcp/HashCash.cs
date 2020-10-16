@@ -66,7 +66,7 @@ namespace Mirror.KCP
 
         #region mining
 
-        public static HashCash Mine(string resource, int bits = 20)
+        public static HashCash Mine(string resource, int bits = 18)
             => Mine(resource.GetStableHashCode(), bits);
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Mirror.KCP
         /// the resource can be any number, but should be unique to your game
         /// for example,  use Application.productName.GetStableHashCode()</param>
         /// <returns>A valid HashCash for the resource</returns>
-        private static HashCash Mine(int resource, int bits = 20)
+        private static HashCash Mine(int resource, int bits = 18)
         {
             var random = new System.Random();
 
@@ -118,7 +118,7 @@ namespace Mirror.KCP
         }
 
         // validate that the first n bits in a hash are zero
-        internal static bool Validate(byte[] hash, int bits = 20)
+        internal static bool Validate(byte[] hash, int bits = 18)
         {
             int bytesToCheck = bits >> 3 ;
             int remainderBitsToCheck = bits & 0b111;
@@ -142,10 +142,10 @@ namespace Mirror.KCP
             return Validate(Sha1(), bits);
         }
 
-        public bool Validate(string resource, int bits = 20)
+        public bool Validate(string resource, int bits = 18)
             => Validate(resource.GetStableHashCode(), bits);
 
-        private bool Validate(int resource, int bits = 20)
+        private bool Validate(int resource, int bits = 18)
         {
             // this token is for some other resource
             if (this.resource != resource)
