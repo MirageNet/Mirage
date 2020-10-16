@@ -66,6 +66,7 @@ namespace Mirror.KCP
 
         #region mining
 
+        public static HashCash Mine(string resource, int bits = 20) => Mine(resource.GetStableHashCode(), bits);
 
         /// <summary>
         /// Mines a hashcash token for a given resource
@@ -74,9 +75,29 @@ namespace Mirror.KCP
         /// the resource can be any number, but should be unique to your game
         /// for example,  use Application.productName.GetStableHashCode()</param>
         /// <returns>A valid HashCash for the resource</returns>
-        public static HashCash Mine(int resource)
+        public static HashCash Mine(int resource, int bits = 20)
         {
-            return new HashCash();
+            System.Random random = new System.Random();
+
+            var token = new HashCash
+            {
+                dt = DateTime.UtcNow,
+                resource = resource,
+                salt = (ulong)((random.Next() << 32) | random.Next()),
+                counter = 0
+            };
+
+            // calculate hash after hash until
+            // we find one that validaes
+            while (true)
+            {
+                byte[] sha1 = token.Sha1();
+
+                if (Validate(sha1, bits))
+                    return token;
+
+                token.counter++;
+            }
         }
 
         #endregion
@@ -94,6 +115,32 @@ namespace Mirror.KCP
 
             return sha1CryptoService.ComputeHash(buffer, 0, length);
         }
+
+        // validate that the first n bits in a hash are zero
+        internal static bool Validate(byte[] hash, int bits = 20)
+        {
+            int bytesToCheck = bits >> 3 ;
+            int remainderBitsToCheck = bits & 0b111;
+            byte remainderMask = (byte)(0xFF << (8 - remainderBitsToCheck));
+
+            if (bytesToCheck >= hash.Length)
+                return false;
+
+            for (int i=0; i< bytesToCheck; i++)
+            {
+                if (hash[i] != 0)
+                    return false;
+            }
+
+            return (hash[bytesToCheck] & remainderMask) == 0;
+        }
+
+
+        internal bool ValidateHash(int bits = 20)
+        {
+            return Validate(Sha1(), bits);
+        }
+
 
         #endregion
     }

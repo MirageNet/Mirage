@@ -62,8 +62,30 @@ namespace Mirror.Tests
         [Test]
         public void TestMining()
         {
-            HashCash mined = HashCash.Mine("yomama".GetStableHashCode());
+            var mined = HashCash.Mine("yomama", 10);
+            Assert.That(mined.ValidateHash(10), Is.True);
+        }
 
+        [Test]
+        public void TestNotMined()
+        {
+            // we didn't mine this one,  so it should not validate
+            Assert.That(hashCash.ValidateHash(10), Is.False);
+        }
+
+        [Test]
+        public void InvalidHash()
+        {
+            byte[] hash = new byte[20] {
+                0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 };
+            Assert.That(HashCash.Validate(hash, 16), Is.False);
+        }
+        [Test]
+        public void ValidHash()
+        {
+            byte[] hash = new byte[20] {
+                0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 };
+            Assert.That(HashCash.Validate(hash, 15), Is.True);
         }
 
     }
