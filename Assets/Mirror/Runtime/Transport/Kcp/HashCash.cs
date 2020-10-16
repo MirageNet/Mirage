@@ -17,6 +17,7 @@ namespace Mirror.KCP
     /// 2) the resource must match the expected resource in the server
     /// 3) the token has not been seen in the server yet
     /// 4) the sha1 hash of the token must start with zeroes. The more zeroes,  the more difficulty
+    /// </remarks>
     public struct HashCash : IEquatable<HashCash>
     {
         /// <summary>
