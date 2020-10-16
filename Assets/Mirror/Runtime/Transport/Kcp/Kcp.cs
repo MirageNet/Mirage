@@ -582,6 +582,14 @@ namespace Mirror.KCP
             return newSegsCount;
         }
 
+        uint CalculateWindowSize()
+        {
+            uint cwnd_ = Math.Min(SendWindowMax, RmtWnd);
+            if (!nocwnd)
+                cwnd_ = Math.Min(cwnd, cwnd_);
+            return cwnd_;
+        }
+
         /// <summary><para>Flush</para>
         /// <return>Returns uint (interval or mintro)</return></summary>
         /// <param name="ackOnly">flush remain ack segments</param>
@@ -650,13 +658,8 @@ namespace Mirror.KCP
 
             probe = 0;
 
-            // calculate window size
-            uint cwnd_ = Math.Min(SendWindowMax, RmtWnd);
-            if (!nocwnd)
-                cwnd_ = Math.Min(cwnd, cwnd_);
-
             // sliding window, controlled by snd_nxt && sna_una+cwnd
-            int newSegsCount = FillSendBuffer(cwnd_);
+            int newSegsCount = FillSendBuffer(CalculateWindowSize());
 
             // calculate resent
             uint resent = (uint)fastresend;
