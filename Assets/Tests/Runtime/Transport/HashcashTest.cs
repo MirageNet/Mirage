@@ -67,6 +67,13 @@ namespace Mirror.Tests
         }
 
         [Test]
+        public void TestMiningNotGoodEnough()
+        {
+            var mined = HashCash.Mine("yomama", 10);
+            Assert.That(mined.ValidateHash(11), Is.False);
+        }
+
+        [Test]
         public void TestNotMined()
         {
             // we didn't mine this one,  so it should not validate
@@ -88,5 +95,20 @@ namespace Mirror.Tests
             Assert.That(HashCash.Validate(hash, 15), Is.True);
         }
 
+        [Test]
+        public void InvalidResource()
+        {
+            var mined = HashCash.Mine("yomama", 10);
+            // token is for wrong resource
+            Assert.That(mined.Validate("filomon", 10), Is.False);
+        }
+
+        [Test]
+        public void ValidToken()
+        {
+            var mined = HashCash.Mine("yomama", 10);
+            // token is for wrong resource
+            Assert.That(mined.Validate("yomama", 10), Is.True);
+        }
     }
 }
