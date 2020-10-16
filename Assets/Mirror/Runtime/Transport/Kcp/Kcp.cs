@@ -590,6 +590,14 @@ namespace Mirror.KCP
             return cwnd_;
         }
 
+        uint CalculateResent()
+        {
+            // calculate resent
+            uint resent = (uint)fastresend;
+            if (fastresend <= 0) resent = 0xffffffff;
+            return resent;
+        }
+
         /// <summary><para>Flush</para>
         /// <return>Returns uint (interval or mintro)</return></summary>
         /// <param name="ackOnly">flush remain ack segments</param>
@@ -661,10 +669,6 @@ namespace Mirror.KCP
             // sliding window, controlled by snd_nxt && sna_una+cwnd
             int newSegsCount = FillSendBuffer(CalculateWindowSize());
 
-            // calculate resent
-            uint resent = (uint)fastresend;
-            if (fastresend <= 0) resent = 0xffffffff;
-
             // check for retransmissions
             ulong change = 0;
             ulong lostSegs = 0;
@@ -682,7 +686,7 @@ namespace Mirror.KCP
                     segment.rto = (uint)rx_rto;
                     segment.resendts = current + segment.rto;
                 }
-                else if (segment.fastack >= resent || segment.fastack > 0 && newSegsCount == 0 ) // fast retransmit
+                else if (segment.fastack >= CalculateResent() || segment.fastack > 0 && newSegsCount == 0 ) // fast retransmit
                 {
                     needSend = true;
                     segment.fastack = 0;
@@ -730,7 +734,7 @@ namespace Mirror.KCP
             // cwnd update
             if (!nocwnd)
             {
-                CwndUpdate(resent, change, lostSegs);
+                CwndUpdate(CalculateResent(), change, lostSegs);
             }
 
             Segment.Put(seg);
