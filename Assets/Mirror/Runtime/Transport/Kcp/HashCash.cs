@@ -106,9 +106,9 @@ namespace Mirror.KCP
             // we find one that validaes
             while (true)
             {
-                byte[] sha1 = token.Sha1();
+                byte[] hash = token.Hash();
 
-                if (Validate(sha1, bits))
+                if (Validate(hash, bits))
                     return token;
 
                 token = new HashCash(token.dt, token.resource, token.salt, token.counter + 1);
@@ -119,16 +119,16 @@ namespace Mirror.KCP
 
 
         #region Validation
-        private static readonly SHA1CryptoServiceProvider sha1CryptoService = new SHA1CryptoServiceProvider();
+        private static readonly HashAlgorithm hashAlgorithm = SHA256.Create();
 
         private static readonly byte[] buffer = new byte[HashCashEncoding.SIZE];
 
 
-        internal byte[] Sha1()
+        internal byte[] Hash()
         {
             int length = HashCashEncoding.Encode(buffer, 0, this);
 
-            return sha1CryptoService.ComputeHash(buffer, 0, length);
+            return hashAlgorithm.ComputeHash(buffer, 0, length);
         }
 
         // validate that the first n bits in a hash are zero
@@ -153,7 +153,7 @@ namespace Mirror.KCP
 
         internal bool ValidateHash(int bits = 20)
         {
-            return Validate(Sha1(), bits);
+            return Validate(Hash(), bits);
         }
 
         public bool Validate(string resource, int bits = 18)

@@ -42,7 +42,7 @@ namespace Mirror.Tests
         {
             HashCash hashCash2 = hashCash;
 
-            Assert.That(hashCash2.Sha1(), Is.EqualTo(hashCash.Sha1()));
+            Assert.That(hashCash2.Hash(), Is.EqualTo(hashCash.Hash()));
         }
 
         [Test]
@@ -50,7 +50,7 @@ namespace Mirror.Tests
         {
             var hashCash2 = new HashCash(hashCash.dt, hashCash.resource + 1, hashCash.salt, hashCash.counter);
 
-            Assert.That(hashCash2.Sha1(), Is.Not.EqualTo(hashCash.Sha1()));
+            Assert.That(hashCash2.Hash(), Is.Not.EqualTo(hashCash.Hash()));
         }
 
         [Test]
@@ -64,7 +64,7 @@ namespace Mirror.Tests
         public void TestMiningNotGoodEnough()
         {
             var mined = HashCash.Mine("yomama", 10);
-            Assert.That(mined.ValidateHash(11), Is.False);
+            Assert.That(mined.ValidateHash(20), Is.False);
         }
 
         [Test]
@@ -117,7 +117,6 @@ namespace Mirror.Tests
                 Assert.That(mined.Validate("yomama", 18), Is.True);
 
                 stopWatch.Stop();
-                Debug.Log($"It took {stopWatch.ElapsedMilliseconds} to mine");
             }
         }
     }
