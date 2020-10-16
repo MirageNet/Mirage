@@ -350,7 +350,9 @@ namespace Mirror
                 newNetId = newIdentity.NetId;
                 if (newNetId == 0)
                 {
-                    logger.LogWarning("SetSyncVarNetworkIdentity NetworkIdentity " + newIdentity + " has a zero netId. Maybe it is not spawned yet?");
+                    // it has not been spawned yet,  so just consider them different
+                    // so that we call the setter
+                    return false;
                 }
             }
 
