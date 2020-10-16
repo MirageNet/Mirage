@@ -64,6 +64,11 @@ namespace Mirror.KCP
             return hashCode;
         }
 
+        internal static HashCash Mine()
+        {
+            throw new NotImplementedException();
+        }
+
         #region mining
 
         public static HashCash Mine(string resource, int bits = 18)
