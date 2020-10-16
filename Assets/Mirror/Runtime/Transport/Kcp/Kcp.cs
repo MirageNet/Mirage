@@ -646,6 +646,11 @@ namespace Mirror.KCP
 
             FlushWindowProbingCommands(seg);
 
+            return CheckForRetransmission(seg, current);
+        }
+
+        uint CheckForRetransmission(Segment seg, uint current)
+        {
             // sliding window, controlled by snd_nxt && sna_una+cwnd
             int newSegsCount = FillSendBuffer(CalculateWindowSize());
 
@@ -666,7 +671,7 @@ namespace Mirror.KCP
                     segment.rto = (uint)rx_rto;
                     segment.resendts = current + segment.rto;
                 }
-                else if (segment.fastack >= CalculateResent() || segment.fastack > 0 && newSegsCount == 0 ) // fast retransmit
+                else if (segment.fastack >= CalculateResent() || segment.fastack > 0 && newSegsCount == 0) // fast retransmit
                 {
                     needSend = true;
                     segment.fastack = 0;
