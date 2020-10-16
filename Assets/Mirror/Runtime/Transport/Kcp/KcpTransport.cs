@@ -18,6 +18,7 @@ namespace Mirror.KCP
         [Tooltip("Used for DoS prevention,  clients must mine a HashCash with these many bits in order to connect, higher means more secure, but slower for the clients")]
         public int HashCashBits = 18;
 
+        public KcpDelayMode delayMode = KcpDelayMode.Fast3;
         internal readonly Dictionary<IPEndPoint, KcpServerConnection> connectedClients = new Dictionary<IPEndPoint, KcpServerConnection>(new IPEndpointComparer());
         readonly Channel<KcpServerConnection> acceptedConnections = Channel.CreateSingleConsumerUnbounded<KcpServerConnection>();
 

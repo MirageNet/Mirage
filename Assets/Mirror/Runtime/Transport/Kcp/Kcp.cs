@@ -4,6 +4,9 @@ using System.Diagnostics;
 
 namespace Mirror.KCP
 {
+
+    public enum KcpDelayMode { Normal, Fast, Fast2, Fast3 } //See SetNoDelay for details;
+
     public class Kcp
     {
         public const int RTO_MAX = 60000; // Maximum RTO
