@@ -97,10 +97,10 @@ namespace Mirror.KCP
         {
             var random = new Random();
 
-            long salt = random.Next();
-            salt = (salt << 32) | (long)random.Next();
+            long newSalt = random.Next();
+            newSalt = (newSalt << 32) | (long)random.Next();
 
-            var token = new HashCash(DateTime.UtcNow, resource, (ulong)salt, 0);
+            var token = new HashCash(DateTime.UtcNow, resource, (ulong)newSalt, 0);
 
             // calculate hash after hash until
             // we find one that validaes
