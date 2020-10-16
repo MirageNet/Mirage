@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Security.Cryptography;
 using UnityEngine;
 
 namespace Mirror.KCP
@@ -62,10 +63,46 @@ namespace Mirror.KCP
             hashCode = hashCode * -1521134295 + counter.GetHashCode();
             return hashCode;
         }
+
+        #region mining
+
+
+        /// <summary>
+        /// Mines a hashcash token for a given resource
+        /// </summary>
+        /// <param name="resource">The resource for which we are mining the token
+        /// the resource can be any number, but should be unique to your game
+        /// for example,  use Application.productName.GetStableHashCode()</param>
+        /// <returns>A valid HashCash for the resource</returns>
+        public static HashCash Mine(int resource)
+        {
+            return new HashCash();
+        }
+
+        #endregion
+
+
+        #region Validation
+        private static SHA1CryptoServiceProvider sha1CryptoService = new SHA1CryptoServiceProvider();
+
+        private static byte[] buffer = new byte[HashCashEncoding.SIZE];
+
+
+        internal byte[] Sha1()
+        {
+            int length = HashCashEncoding.Encode(buffer, 0, this);
+
+            return sha1CryptoService.ComputeHash(buffer, 0, length);
+        }
+
+        #endregion
     }
 
     public static class HashCashEncoding
     {
+        // takes 20 bytes to serialize a hash cash token
+        public const int SIZE = 28;
+
         /// <summary>
         /// Encode a hashcash token into a buffer
         /// </summary>
@@ -94,7 +131,7 @@ namespace Mirror.KCP
         /// <returns>the length of the written data</returns>
         public static (int offset, HashCash decoded) Decode(byte[] buffer, int index)
         {
-            var (offset, ticks) = Utils.Decode64U(buffer, index);
+            (int offset, ulong ticks) = Utils.Decode64U(buffer, index);
             uint resource;
             (offset, resource) = Utils.Decode32U(buffer, offset);
             ulong salt;
@@ -112,6 +149,5 @@ namespace Mirror.KCP
 
             return (offset, token);
         }
-
     }
 }
