@@ -598,6 +598,25 @@ namespace Mirror.KCP
             return resent;
         }
 
+        void FlushWindowProbingCommands(Segment seg)
+        {
+            if ((probe & ASK_SEND) != 0)
+            {
+                seg.cmd = CommandType.WindowAsk;
+                MakeSpace(OVERHEAD);
+                writeIndex += seg.Encode(buffer, writeIndex);
+            }
+
+            if ((probe & ASK_TELL) != 0)
+            {
+                seg.cmd = CommandType.WindowTell;
+                MakeSpace(OVERHEAD);
+                writeIndex += seg.Encode(buffer, writeIndex);
+            }
+
+            probe = 0;
+        }
+
         /// <summary><para>Flush</para>
         /// <return>Returns uint (interval or mintro)</return></summary>
         /// <param name="ackOnly">flush remain ack segments</param>
@@ -649,22 +668,7 @@ namespace Mirror.KCP
                 probe_wait = 0;
             }
 
-            // flush window probing commands
-            if ((probe & ASK_SEND) != 0)
-            {
-                seg.cmd = CommandType.WindowAsk;
-                MakeSpace(OVERHEAD);
-                writeIndex += seg.Encode(buffer, writeIndex);
-            }
-
-            if ((probe & ASK_TELL) != 0)
-            {
-                seg.cmd = CommandType.WindowTell;
-                MakeSpace(OVERHEAD);
-                writeIndex += seg.Encode(buffer, writeIndex);
-            }
-
-            probe = 0;
+            FlushWindowProbingCommands(seg);
 
             // sliding window, controlled by snd_nxt && sna_una+cwnd
             int newSegsCount = FillSendBuffer(CalculateWindowSize());
