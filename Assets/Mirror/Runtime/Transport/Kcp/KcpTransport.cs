@@ -112,7 +112,7 @@ namespace Mirror.KCP
 
             while (expireQueue.Count > 0)
             {
-                var token = expireQueue.Peek();
+                HashCash token = expireQueue.Peek();
                 if (token.dt > threshold)
                     return;
 

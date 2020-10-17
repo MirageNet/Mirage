@@ -3,7 +3,6 @@ using System;
 
 using UnityEngine;
 using Mirror.KCP;
-using System.Diagnostics;
 
 namespace Mirror.Tests
 {
@@ -103,6 +102,5 @@ namespace Mirror.Tests
             // token is for wrong resource
             Assert.That(mined.Validate("yomama", 10), Is.True);
         }
-
     }
 }
