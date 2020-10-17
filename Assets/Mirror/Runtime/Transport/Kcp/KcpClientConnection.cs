@@ -76,7 +76,9 @@ namespace Mirror.KCP
             // in the very first message we must mine a hashcash token
             // and send that as a hello
             // the server won't accept connections otherwise
-            var token = HashCash.Mine(Application.productName, bits);
+            string applicationName = Application.productName;
+
+            HashCash token = await UniTask.RunOnThreadPool( () => HashCash.Mine(applicationName, bits));
             byte[] hello = new byte[1000];
             int length = HashCashEncoding.Encode(hello, 0, token);
 
