@@ -95,6 +95,7 @@ namespace Mirror.KCP
         /// <returns>A valid HashCash for the resource</returns>
         public static HashCash Mine(string resource, int bits = 18)
         {
+
             var random = new Random();
 
             long newSalt = random.Next();
@@ -102,17 +103,28 @@ namespace Mirror.KCP
 
             var token = new HashCash(DateTime.UtcNow, resource, (ulong)newSalt, 0);
 
+            HashAlgorithm hashAlgorithm = SHA256.Create();
+            byte[] buffer = new byte[HashCashEncoding.SIZE];
+
             // calculate hash after hash until
             // we find one that validaes
             while (true)
             {
-                byte[] hash = token.Hash();
+                byte[] hash = token.Hash(hashAlgorithm, buffer);
 
                 if (Validate(hash, bits))
                     return token;
 
                 token = new HashCash(token.dt, token.resource, token.salt, token.counter + 1);
             }
+        }
+
+        // same as Hash, but thread safe
+        private byte[] Hash(HashAlgorithm hashAlgorithm, byte[] buffer)
+        {
+            int length = HashCashEncoding.Encode(buffer, 0, this);
+
+            return hashAlgorithm.ComputeHash(buffer, 0, length);
         }
 
         #endregion
