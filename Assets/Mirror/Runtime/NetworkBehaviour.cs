@@ -288,7 +288,7 @@ namespace Mirror
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        protected void SendTargetRPCInternal(INetworkConnection conn, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
+        internal protected void SendTargetRpcInternal(INetworkConnection conn, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
         {
             // this was in Weaver before
             if (!Server || !Server.Active)

@@ -143,7 +143,7 @@ namespace Mirror.Weaver
             getTypeFromHandleReference = Resolvers.ResolveMethod(typeType, currentAssembly, "GetTypeFromHandle");
             sendServerRpcInternal = Resolvers.ResolveMethod(NetworkBehaviourType, currentAssembly, "SendServerRpcInternal");
             sendRpcInternal = Resolvers.ResolveMethod(NetworkBehaviourType, currentAssembly, nameof(NetworkBehaviour.SendRpcInternal));
-            sendTargetRpcInternal = Resolvers.ResolveMethod(NetworkBehaviourType, currentAssembly, "SendTargetRPCInternal");
+            sendTargetRpcInternal = Resolvers.ResolveMethod(NetworkBehaviourType, currentAssembly, nameof(NetworkBehaviour.SendTargetRpcInternal));
 
             InitSyncObjectReference = Resolvers.ResolveMethod(NetworkBehaviourType, currentAssembly, "InitSyncObject");
 
