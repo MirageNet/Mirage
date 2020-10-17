@@ -90,7 +90,7 @@ namespace Mirror.Weaver
         /// {
         ///     NetworkWriter writer = new NetworkWriter();
         ///     writer.WritePackedUInt32((uint) param);
-        ///     base.SendRPCInternal(typeof(class),"RpcTest", writer, 0);
+        ///     base.SendRpcInternal(typeof(class),"RpcTest", writer, 0);
         /// }
         /// public void UserCode_Test(int param)
         /// {
