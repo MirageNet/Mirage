@@ -145,7 +145,7 @@ namespace Mirror
                 // in this specific case,  we want to know if we have set it before
                 // so we can compare if the reference is null
                 // instead of calling unity's MonoBehaviour == operator
-                if ((netIdentityCache is null)
+                if (netIdentityCache is null)
                 {
                     // GetComponentInParent doesn't works on disabled gameobjecs
                     // and GetComponentsInParent(false)[0] isn't allocation free, so
