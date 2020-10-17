@@ -105,14 +105,14 @@ namespace Mirror.KCP
 
             // note we create these here so Mine does not depend
             // on static state.  This way Mine is thread safe
-            HashAlgorithm hashAlgorithm = SHA256.Create();
-            byte[] buffer = new byte[HashCashEncoding.SIZE];
+            HashAlgorithm hashAlg = SHA256.Create();
+            byte[] buf = new byte[HashCashEncoding.SIZE];
 
             // calculate hash after hash until
             // we find one that validaes
             while (true)
             {
-                byte[] hash = token.Hash(hashAlgorithm, buffer);
+                byte[] hash = token.Hash(hashAlg, buf);
 
                 if (Validate(hash, bits))
                     return token;
