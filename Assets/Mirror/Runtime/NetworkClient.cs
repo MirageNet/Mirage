@@ -695,7 +695,7 @@ namespace Mirror
                 return obj.GetComponent<NetworkIdentity>();
             }
             GameObject prefab = GetPrefab(msg.assetId);
-            if (prefab is GameObject)
+            if ((object)prefab != null)
             {
                 GameObject obj = Object.Instantiate(prefab, msg.position, msg.rotation);
                 if (logger.LogEnabled())
