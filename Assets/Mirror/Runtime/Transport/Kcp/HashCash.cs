@@ -103,6 +103,8 @@ namespace Mirror.KCP
 
             var token = new HashCash(DateTime.UtcNow, resource, (ulong)newSalt, 0);
 
+            // note we create these here so Mine does not depend
+            // on static state.  This way Mine is thread safe
             HashAlgorithm hashAlgorithm = SHA256.Create();
             byte[] buffer = new byte[HashCashEncoding.SIZE];
 
@@ -119,13 +121,6 @@ namespace Mirror.KCP
             }
         }
 
-        // same as Hash, but thread safe
-        private byte[] Hash(HashAlgorithm hashAlgorithm, byte[] buffer)
-        {
-            int length = HashCashEncoding.Encode(buffer, 0, this);
-
-            return hashAlgorithm.ComputeHash(buffer, 0, length);
-        }
 
         #endregion
 
@@ -135,8 +130,11 @@ namespace Mirror.KCP
 
         private static readonly byte[] buffer = new byte[HashCashEncoding.SIZE];
 
+        // not thread safe
+        internal byte[] Hash() => Hash(hashAlgorithm, buffer);
 
-        internal byte[] Hash()
+        // calculate the hash of a hashcash token
+        private byte[] Hash(HashAlgorithm hashAlgorithm, byte[] buffer)
         {
             int length = HashCashEncoding.Encode(buffer, 0, this);
 
