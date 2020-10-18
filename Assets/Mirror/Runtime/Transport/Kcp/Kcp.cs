@@ -922,7 +922,6 @@ namespace Mirror.KCP
                 case KcpDelayMode.Fast3:
                     SetNoDelay(true, 10, 2, true);
                     break;
-
             }
         }
 

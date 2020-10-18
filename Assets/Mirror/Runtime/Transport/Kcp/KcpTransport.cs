@@ -66,7 +66,7 @@ namespace Mirror.KCP
                     return;
 
                 // add it to a queue
-                connection = new KcpServerConnection(socket, endpoint);
+                connection = new KcpServerConnection(socket, endpoint, delayMode);
                 acceptedConnections.Writer.TryWrite(connection);
                 connectedClients.Add(endpoint as IPEndPoint, connection);
                 connection.Disconnected += () =>
@@ -178,7 +178,7 @@ namespace Mirror.KCP
         /// <exception>If connection cannot be established</exception>
         public override async UniTask<IConnection> ConnectAsync(Uri uri)
         {
-            var client = new KcpClientConnection
+            var client = new KcpClientConnection(delayMode)
             {
                 HashCashBits = HashCashBits
             };
