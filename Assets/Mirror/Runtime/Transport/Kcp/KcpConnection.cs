@@ -12,7 +12,7 @@ namespace Mirror.KCP
         protected Socket socket;
         protected EndPoint remoteEndpoint;
         protected Kcp kcp;
-        KcpDelayMode delayMode;
+        readonly KcpDelayMode delayMode;
         volatile bool open;
 
         internal event Action Disconnected;
