@@ -1,9 +1,7 @@
 using System.Collections;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Mirror.KCP;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirror.Tests
