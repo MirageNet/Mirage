@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace Mirror.KCP
 {
 
-    public enum KcpDelayMode { Normal, Fast, Fast2, Fast3 } //See SetNoDelay for details;
+    public enum KcpDelayMode { Normal, Fast, Fast2, Fast3 } //See SetNoDelay for details
 
     public class Kcp
     {
