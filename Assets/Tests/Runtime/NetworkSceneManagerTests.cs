@@ -74,7 +74,7 @@ namespace Mirror.Tests
 
             sceneManager.ChangeServerScene("testScene");
 
-            await AsyncUtil.WaitUntilWithTimeout(() => invokeClientSceneMessage && invokeNotReadyMessage);
+            await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.asyncOperation.isDone);
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
             Assert.That(sceneManager.NetworkSceneName, Is.EqualTo("testScene"));
@@ -216,15 +216,21 @@ namespace Mirror.Tests
             clientSceneManager.ClientChangeScene.AddListener(func1);
             clientSceneManager.ClientSceneMessage(null, new SceneMessage { sceneName = "testScene" });
 
-            await AsyncUtil.WaitUntilWithTimeout(() => clientSceneManager.NetworkSceneName.Equals("testScene"));
+            await AsyncUtil.WaitUntilWithTimeout(() => clientSceneManager.asyncOperation != null);
+
+            clientSceneManager.ClientSceneReadyMessage(connectionToServer, new SceneReadyMessage());
+
+            await AsyncUtil.WaitUntilWithTimeout(() => clientSceneManager.asyncOperation.isDone);
+
+            Assert.That(clientSceneManager.NetworkSceneName, Is.EqualTo("testScene"));
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         });
 
         [Test]
-        public void NetworkSceneNameStringEmptyTest()
+        public void NetworkSceneNameStringValueTest()
         {
-            Assert.That(clientSceneManager.NetworkSceneName.Equals(string.Empty));
+            Assert.That(clientSceneManager.NetworkSceneName.Equals(SceneManager.GetActiveScene().name));
         }
 
         [Test]
