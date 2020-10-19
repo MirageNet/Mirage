@@ -98,7 +98,7 @@ namespace Mirror.Tests
         {
             connectionToServer.Send(new ReadyMessage());
 
-            await UniTask.WaitUntil(() => connectionToClient.IsReady);
+            await UniTask.WaitUntil(() => connectionToClient.IsReady).Timeout(TimeSpan.FromSeconds(2));
 
             // ready?
             Assert.That(connectionToClient.IsReady, Is.True);
@@ -115,7 +115,7 @@ namespace Mirror.Tests
 
             connectionToServer.ProcessMessagesAsync().Forget();
 
-            await UniTask.WaitUntil(() => invoked);
+            await UniTask.WaitUntil(() => invoked).Timeout(TimeSpan.FromSeconds(2));
         });
 
         [UnityTest]
@@ -129,7 +129,7 @@ namespace Mirror.Tests
 
             connectionToServer.ProcessMessagesAsync().Forget();
 
-            await UniTask.WaitUntil(() => invoked);
+            await UniTask.WaitUntil(() => invoked).Timeout(TimeSpan.FromSeconds(2));
         });
 
         [UnityTest]
@@ -146,7 +146,7 @@ namespace Mirror.Tests
 
             connectionToServer.ProcessMessagesAsync().Forget();
 
-            await UniTask.WaitUntil(() => invoked);
+            await UniTask.WaitUntil(() => invoked).Timeout(TimeSpan.FromSeconds(2));
         });
 
         [Test]
@@ -177,7 +177,7 @@ namespace Mirror.Tests
             connectionToClient.RegisterHandler< WovenTestMessage>(msg => invoked = true);
             connectionToServer.Send(message);
 
-            await UniTask.WaitUntil(() => invoked);
+            await UniTask.WaitUntil(() => invoked).Timeout(TimeSpan.FromSeconds(2));
 
         });
 
@@ -190,7 +190,7 @@ namespace Mirror.Tests
 
             connectionToServer.Send(message);
 
-            await UniTask.WaitUntil(() => invoked);
+            await UniTask.WaitUntil(() => invoked).Timeout(TimeSpan.FromSeconds(2));
         });
 
         [UnityTest]

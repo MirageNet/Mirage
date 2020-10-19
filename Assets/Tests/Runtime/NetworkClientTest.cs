@@ -117,7 +117,7 @@ namespace Mirror.Tests
                 netId = identity.NetId
             });
 
-            await UniTask.WaitUntil(() => identity == null);
+            await UniTask.WaitUntil(() => identity == null).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(identity == null);
         });
@@ -130,7 +130,7 @@ namespace Mirror.Tests
                 netId = identity.NetId
             });
 
-            await UniTask.WaitUntil(() => identity == null);
+            await UniTask.WaitUntil(() => identity == null).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(identity == null);
         });
@@ -146,8 +146,8 @@ namespace Mirror.Tests
         {
             client.Disconnect();
 
-            await UniTask.WaitUntil(() => client.connectState == ConnectState.Disconnected);
-            await UniTask.WaitUntil(() => !client.Active);
+            await UniTask.WaitUntil(() => client.connectState == ConnectState.Disconnected).Timeout(TimeSpan.FromSeconds(2));
+            await UniTask.WaitUntil(() => !client.Active).Timeout(TimeSpan.FromSeconds(2));
         });
     }
 }

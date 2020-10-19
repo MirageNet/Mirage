@@ -23,9 +23,9 @@ namespace Mirror.Tests
 
             // only authorized clients can call ServerRpc
             Assert.Throws<UnauthorizedAccessException>(() =>
-           {
-               rpcComponent2.Test(1, "hello");
-           });
+            {
+                rpcComponent2.Test(1, "hello");
+            });
 
         }
 
@@ -34,7 +34,7 @@ namespace Mirror.Tests
         {
             component.Test(1, "hello");
 
-            await UniTask.WaitUntil(() => component.cmdArg1 != 0);
+            await UniTask.WaitUntil(() => component.cmdArg1 != 0).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(component.cmdArg1, Is.EqualTo(1));
             Assert.That(component.cmdArg2, Is.EqualTo("hello"));
@@ -45,7 +45,7 @@ namespace Mirror.Tests
         {
             component.CmdNetworkIdentity(identity);
 
-            await UniTask.WaitUntil(() => component.cmdNi != null);
+            await UniTask.WaitUntil(() => component.cmdNi != null).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(component.cmdNi, Is.SameAs(identity));
         });
@@ -55,7 +55,7 @@ namespace Mirror.Tests
         {
             component.RpcTest(1, "hello");
             // process spawn message from server
-            await UniTask.WaitUntil(() => component.rpcArg1 != 0);
+            await UniTask.WaitUntil(() => component.rpcArg1 != 0).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(component.rpcArg1, Is.EqualTo(1));
             Assert.That(component.rpcArg2, Is.EqualTo("hello"));
@@ -66,7 +66,7 @@ namespace Mirror.Tests
         {
             component.ClientConnRpcTest(manager.server.LocalConnection, 1, "hello");
             // process spawn message from server
-            await UniTask.WaitUntil(() => component.targetRpcArg1 != 0);
+            await UniTask.WaitUntil(() => component.targetRpcArg1 != 0).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(component.targetRpcConn, Is.SameAs(manager.client.Connection));
             Assert.That(component.targetRpcArg1, Is.EqualTo(1));
@@ -78,7 +78,7 @@ namespace Mirror.Tests
         {
             component.RpcOwnerTest(1, "hello");
             // process spawn message from server
-            await UniTask.WaitUntil(() => component.rpcOwnerArg1 != 0);
+            await UniTask.WaitUntil(() => component.rpcOwnerArg1 != 0).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(component.rpcOwnerArg1, Is.EqualTo(1));
             Assert.That(component.rpcOwnerArg2, Is.EqualTo("hello"));
@@ -94,7 +94,7 @@ namespace Mirror.Tests
             server.Disconnect();
 
             // wait for messages to get dispatched
-            await UniTask.WaitUntil(() => !server.LocalClientActive);
+            await UniTask.WaitUntil(() => !server.LocalClientActive).Timeout(TimeSpan.FromSeconds(2));
 
             // state cleared?
             Assert.That(server.connections, Is.Empty);
@@ -102,6 +102,5 @@ namespace Mirror.Tests
             Assert.That(server.LocalConnection, Is.Null);
             Assert.That(server.LocalClientActive, Is.False);
         });
-
     }
 }

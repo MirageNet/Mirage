@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
@@ -46,7 +47,7 @@ namespace Mirror.Tests
             client.Connection.RegisterHandler<SceneMessage>(msg => invokeWovenTestMessage = true);
             lobby.SendToReady(identity, new SceneMessage(), true, Channels.DefaultReliable);
 
-            await UniTask.WaitUntil(() => invokeWovenTestMessage);
+            await UniTask.WaitUntil(() => invokeWovenTestMessage).Timeout(TimeSpan.FromSeconds(2));
         });
 
         [Test]

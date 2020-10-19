@@ -81,7 +81,7 @@ namespace Mirror.Tests
             // now start the client
             await client.ConnectAsync(builder.Uri);
 
-            await UniTask.WaitUntil(() => server.connections.Count > 0);
+            await UniTask.WaitUntil(() => server.connections.Count > 0).Timeout(TimeSpan.FromSeconds(2));
 
             // get the connections so that we can spawn players
             connectionToClient = server.connections.First();
@@ -94,7 +94,7 @@ namespace Mirror.Tests
             server.AddPlayerForConnection(connectionToClient, serverPlayerGO);
 
             // wait for client to spawn it
-            await UniTask.WaitUntil(() => connectionToServer.Identity != null);
+            await UniTask.WaitUntil(() => connectionToServer.Identity != null).Timeout(TimeSpan.FromSeconds(2));
 
             clientIdentity = connectionToServer.Identity;
             clientPlayerGO = clientIdentity.gameObject;
@@ -109,8 +109,8 @@ namespace Mirror.Tests
             client.Disconnect();
             server.Disconnect();
 
-            await UniTask.WaitUntil(() => !client.Active);
-            await UniTask.WaitUntil(() => !server.Active);
+            await UniTask.WaitUntil(() => !client.Active).Timeout(TimeSpan.FromSeconds(2));
+            await UniTask.WaitUntil(() => !server.Active).Timeout(TimeSpan.FromSeconds(2));
 
             Object.DestroyImmediate(playerPrefab);
             Object.DestroyImmediate(serverGo);

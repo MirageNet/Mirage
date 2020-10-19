@@ -7,6 +7,7 @@ using Guid = System.Guid;
 using Object = UnityEngine.Object;
 using NSubstitute;
 using Cysharp.Threading.Tasks;
+using System;
 
 namespace Mirror.Tests
 {
@@ -27,7 +28,7 @@ namespace Mirror.Tests
         {
             clientComponent.Test(1, "hello");
 
-            await UniTask.WaitUntil(() => serverComponent.cmdArg1 != 0);
+            await UniTask.WaitUntil(() => serverComponent.cmdArg1 != 0).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(serverComponent.cmdArg1, Is.EqualTo(1));
             Assert.That(serverComponent.cmdArg2, Is.EqualTo("hello"));
@@ -39,7 +40,7 @@ namespace Mirror.Tests
         {
             clientComponent.CmdNetworkIdentity(clientIdentity);
 
-            await UniTask.WaitUntil(() => serverComponent.cmdNi != null);
+            await UniTask.WaitUntil(() => serverComponent.cmdNi != null).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(serverComponent.cmdNi, Is.SameAs(serverIdentity));
         });
@@ -49,7 +50,7 @@ namespace Mirror.Tests
         {
             serverComponent.RpcTest(1, "hello");
             // process spawn message from server
-            await UniTask.WaitUntil(() => clientComponent.rpcArg1 != 0);
+            await UniTask.WaitUntil(() => clientComponent.rpcArg1 != 0).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(clientComponent.rpcArg1, Is.EqualTo(1));
             Assert.That(clientComponent.rpcArg2, Is.EqualTo("hello"));
@@ -60,7 +61,7 @@ namespace Mirror.Tests
         {
             serverComponent.ClientConnRpcTest(connectionToClient, 1, "hello");
             // process spawn message from server
-            await UniTask.WaitUntil(() => clientComponent.targetRpcArg1 != 0);
+            await UniTask.WaitUntil(() => clientComponent.targetRpcArg1 != 0).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(clientComponent.targetRpcConn, Is.SameAs(connectionToServer));
             Assert.That(clientComponent.targetRpcArg1, Is.EqualTo(1));
@@ -72,7 +73,7 @@ namespace Mirror.Tests
         {
             serverComponent.RpcOwnerTest(1, "hello");
             // process spawn message from server
-            await UniTask.WaitUntil(() => clientComponent.rpcOwnerArg1 != 0);
+            await UniTask.WaitUntil(() => clientComponent.rpcOwnerArg1 != 0).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(clientComponent.rpcOwnerArg1, Is.EqualTo(1));
             Assert.That(clientComponent.rpcOwnerArg2, Is.EqualTo("hello"));
@@ -91,7 +92,7 @@ namespace Mirror.Tests
             client.RegisterPrefab(gameObject, guid);
             server.SendSpawnMessage(identity, connectionToClient);
 
-            await UniTask.WaitUntil(() => spawnDelegateTestCalled != 0);
+            await UniTask.WaitUntil(() => spawnDelegateTestCalled != 0).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(spawnDelegateTestCalled, Is.EqualTo(1));
         });
@@ -111,7 +112,7 @@ namespace Mirror.Tests
             client.RegisterPrefab(gameObject, guid);
             server.SendSpawnMessage(identity, connectionToClient);
 
-            await UniTask.WaitUntil(() => spawnDelegateTestCalled != 0);
+            await UniTask.WaitUntil(() => spawnDelegateTestCalled != 0).Timeout(TimeSpan.FromSeconds(2));
 
             client.OnObjectDestroy(new ObjectDestroyMessage
             {
@@ -138,7 +139,7 @@ namespace Mirror.Tests
         {
             client.Disconnect();
 
-            await UniTask.WaitUntil(() => client.connectState == ConnectState.Disconnected);
+            await UniTask.WaitUntil(() => client.connectState == ConnectState.Disconnected).Timeout(TimeSpan.FromSeconds(2));
         });
     }
 }

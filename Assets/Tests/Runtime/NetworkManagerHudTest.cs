@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
@@ -65,7 +66,7 @@ namespace Mirror.Tests
             Assert.That(networkManagerHud.OfflineGO.activeSelf, Is.True);
             Assert.That(networkManagerHud.OnlineGO.activeSelf, Is.False);
 
-            await UniTask.WaitUntil(() => !manager.IsNetworkActive);
+            await UniTask.WaitUntil(() => !manager.IsNetworkActive).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(manager.IsNetworkActive, Is.False);
         });

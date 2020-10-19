@@ -20,7 +20,7 @@ namespace Mirror.Tests
         {
             manager.server.Disconnect();
 
-            await UniTask.WaitUntil(() => !client.Active);
+            await UniTask.WaitUntil(() => !client.Active).Timeout(TimeSpan.FromSeconds(2));
 
             Assert.That(server.Active, Is.False);
             Assert.That(client.Active, Is.False);
@@ -32,7 +32,7 @@ namespace Mirror.Tests
         {
             manager.client.Disconnect();
 
-            await UniTask.WaitUntil(() => !client.Active);
+            await UniTask.WaitUntil(() => !client.Active).Timeout(TimeSpan.FromSeconds(2));
         });
 
         [Test]
