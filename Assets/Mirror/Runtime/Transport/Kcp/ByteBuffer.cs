@@ -23,6 +23,7 @@ namespace Mirror.KCP
         }
 
         // write bytes at offset
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteBytes(byte[] bytes, int offset, int count)
         {
             if (offset >= 0 && count > 0)
