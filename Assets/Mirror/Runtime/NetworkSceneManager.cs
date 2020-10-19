@@ -192,8 +192,7 @@ namespace Mirror
         {
             logger.Log("NetworkSceneManager.OnServerAuthenticated");
 
-            if (!string.IsNullOrEmpty(NetworkSceneName))
-                conn.Send(new SceneMessage { sceneName = NetworkSceneName });
+            conn.Send(new SceneMessage { sceneName = NetworkSceneName });
         }
 
         /// <summary>
