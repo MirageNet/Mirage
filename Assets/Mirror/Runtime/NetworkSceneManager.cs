@@ -249,6 +249,10 @@ namespace Mirror
             switch (sceneOperation)
             {
                 case SceneOperation.Normal:
+                    //Scene is already active.
+                    if (NetworkSceneName.Equals(sceneName))
+                        break;
+
                     asyncOperation = SceneManager.LoadSceneAsync(sceneName);
 
                     //If non host client. Wait for server to finish scene change
