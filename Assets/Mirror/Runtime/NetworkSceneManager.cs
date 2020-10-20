@@ -118,7 +118,8 @@ namespace Mirror
             logger.Log("ClientSceneReadyMessage");
 
             //Server has finished changing scene. Allow the client to finish.
-            asyncOperation.allowSceneActivation = true;
+            if(asyncOperation != null)
+                asyncOperation.allowSceneActivation = true;
         }
 
         internal void ClientNotReadyMessage(INetworkConnection conn, NotReadyMessage msg)
@@ -248,14 +249,15 @@ namespace Mirror
                     }
                     else
                     {
+                        asyncOperation = SceneManager.LoadSceneAsync(sceneName);
+                        asyncOperation.completed += OnAsyncComplete;
+
                         //If non host client. Wait for server to finish scene change
                         if (client && client.Active && !client.IsLocalClient)
                         {
                             asyncOperation.allowSceneActivation = false;
                         }
 
-                        asyncOperation = SceneManager.LoadSceneAsync(sceneName);
-                        asyncOperation.completed += OnAsyncComplete;
                         yield return asyncOperation;
                     }
                     
