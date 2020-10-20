@@ -32,7 +32,7 @@ namespace Mirror.Tests
         private static async Task ExpectData(IConnection c, byte[] expected)
         {
             var memoryStream = new MemoryStream();
-            Assert.That(await c.ReceiveAsync(memoryStream));
+            Assert.That((await c.ReceiveAsync(memoryStream)).next);
 
             memoryStream.TryGetBuffer(out ArraySegment<byte> receivedData);
             Assert.That(receivedData, Is.EqualTo(new ArraySegment<byte>(expected)));
