@@ -73,19 +73,19 @@ namespace Mirror
 
         void RegisterClientMessages(INetworkConnection connection)
         {
-            connection.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
             connection.RegisterHandler<SceneMessage>(ClientSceneMessage);
-            connection.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
+            if (!client.IsLocalClient)
+            {
+                connection.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
+                connection.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
+            }
         }
 
         // called after successful authentication
         void OnClientAuthenticated(INetworkConnection conn)
         {
-            //Dont register msg handlers in host mode
-            if (!client.IsLocalClient)
-                RegisterClientMessages(conn);
-
             logger.Log("NetworkSceneManager.OnClientAuthenticated");
+            RegisterClientMessages(conn);
         }
 
         void OnClientDisconnected()
