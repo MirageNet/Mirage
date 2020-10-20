@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Mirror.Tests
 {
