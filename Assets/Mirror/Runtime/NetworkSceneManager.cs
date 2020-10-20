@@ -100,12 +100,6 @@ namespace Mirror
             {
                 throw new InvalidOperationException("ClientSceneMessage: cannot change network scene while client is disconnected");
             }
-
-            if (client.IsLocalClient)
-            {
-                throw new InvalidOperationException("ClientSceneMessage: cannot change client network scene while operating in host mode");
-            }
-
             if (string.IsNullOrEmpty(msg.sceneName))
             {
                 throw new ArgumentNullException(msg.sceneName, "ClientSceneMessage: " + msg.sceneName + " cannot be empty or null");
@@ -153,8 +147,8 @@ namespace Mirror
         internal void OnClientSceneChanged(string sceneName, SceneOperation sceneOperation)
         {
             //set ready after scene change has completed
-            if (!client.Connection.IsReady)
-                SetClientReady();
+            //if (!client.Connection.IsReady)
+            //    SetClientReady();
 
             ClientSceneChanged.Invoke(sceneName, sceneOperation);
         }

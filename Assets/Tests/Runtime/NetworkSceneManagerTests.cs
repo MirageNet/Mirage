@@ -109,15 +109,6 @@ namespace Mirror.Tests
             });
         }
 
-        [Test]
-        public void HostModeClientSceneException()
-        {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                sceneManager.ClientSceneMessage(null, new SceneMessage());
-            });
-        }
-
         int ClientChangeCalled;
         public void ClientChangeScene(string sceneName, SceneOperation sceneOperation)
         {
