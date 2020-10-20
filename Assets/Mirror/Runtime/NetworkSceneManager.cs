@@ -69,8 +69,6 @@ namespace Mirror
             }
         }
 
-        public virtual void LateUpdate() { } //TODO: Remove/move this as its only used in BenchmarkNetworkManager
-
         #region Client
 
         void RegisterClientMessages(INetworkConnection connection)
