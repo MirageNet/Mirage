@@ -18,8 +18,6 @@ namespace Mirror
     //    (probably even shorter)
     public static class MessagePacker
     {
-        private static readonly ILogger logger = LogFactory.GetLogger(typeof(MessagePacker));
-
         /// <summary>
         /// Map of Message Id => Type
         /// When we receive a message, we can lookup here to find out what type
