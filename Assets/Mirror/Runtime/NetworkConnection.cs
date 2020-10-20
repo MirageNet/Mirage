@@ -332,7 +332,7 @@ namespace Mirror
         {
             var buffer = new MemoryStream();
 
-            while (await connection.ReceiveAsync(buffer))
+            while ((await connection.ReceiveAsync(buffer)).next)
             {
                 buffer.TryGetBuffer(out ArraySegment<byte> data);
                 TransportReceive(data, Channels.DefaultReliable);

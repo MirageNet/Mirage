@@ -7,14 +7,14 @@ namespace Mirror
 {
     public interface IConnection
     {
-        UniTask SendAsync(ArraySegment<byte> data);
+        UniTask SendAsync(ArraySegment<byte> data, int channel = 0);
 
         /// <summary>
         /// reads a message from connection
         /// </summary>
         /// <param name="buffer">buffer where the message will be written</param>
         /// <returns>true if we got a message, false if we got disconnected</returns>
-        UniTask<bool> ReceiveAsync(MemoryStream buffer);
+        UniTask<(bool next, int channel)> ReceiveAsync(MemoryStream buffer);
 
         /// <summary>
         /// Disconnect this connection
@@ -28,10 +28,5 @@ namespace Mirror
         /// </summary>
         /// <returns></returns>
         EndPoint GetEndPointAddress();
-    }
-
-    public interface IChannelConnection : IConnection
-    {
-        UniTask SendAsync(ArraySegment<byte> data, int channel);
     }
 }

@@ -85,10 +85,10 @@ namespace Mirror.KCP
 
             var data = new ArraySegment<byte>(hello, 0, length);
             // send a greeting and see if the server replies
-            await SendAsync(data);
+            await SendAsync(data, 0);
 
             var stream = new MemoryStream();
-            if (!await ReceiveAsync(stream))
+            if (!(await ReceiveAsync(stream)).next)
             {
                 throw new OperationCanceledException("Unable to establish connection, no Handshake message received.");
             }

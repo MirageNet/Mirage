@@ -18,14 +18,14 @@ namespace Mirror.KCP
         internal async UniTask HandshakeAsync()
         {
             // send a greeting and see if the server replies
-            await SendAsync(Hello);
+            await SendAsync(Hello, 0);
             var stream = new MemoryStream();
 
             // receive our first message and just throw it away
             // this first message is the one that contains the Hashcash,
             // but we don't care,  we already validated it before creating
             // the connection
-            if (!await ReceiveAsync(stream))
+            if (!(await ReceiveAsync(stream)).next)
             {
                 throw new OperationCanceledException("Unable to establish connection, no Handshake message received.");
             }
