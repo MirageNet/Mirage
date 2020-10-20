@@ -133,7 +133,9 @@ namespace Mirror.Tests
         [Test]
         public void FindUnknownMessage()
         {
-            int id = MessagePacker.GetId<SomeRandomMessageNotRegistered>();
+            // note that GetId<> will cause the weaver to register it
+            // but GetId() will not
+            int id = MessagePacker.GetId(typeof(SomeRandomMessageNotRegistered));
             Assert.Throws<KeyNotFoundException>(() =>
             {
                 Type type = MessagePacker.GetMessageType(id);
