@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Mirror.Tests
 {
@@ -88,6 +89,34 @@ namespace Mirror.Tests
             {
                 var reader2 = new NetworkReader(new byte[0]);
                 int msgType2 = MessagePacker.UnpackId(reader2);
+            });
+        }
+
+        struct SomeRandomMessage { };
+
+        [Test]
+        public void RegisterMessage()
+        {
+            MessagePacker.RegisterMessage<SomeRandomMessage>();
+
+            int id = MessagePacker.GetId<SomeRandomMessage>();
+
+            Type type = MessagePacker.GetMessageType(id);
+
+            Assert.That(type, Is.EqualTo(typeof(SomeRandomMessage)));
+        }
+
+        // these 2 messages have a colliding message id
+        struct SomeRandomMessage2121143 { };
+        struct SomeRandomMessage2133122 { };
+
+        [Test]
+        public void RegisterMessage2()
+        {
+            MessagePacker.RegisterMessage<SomeRandomMessage2121143>();
+            Assert.Throws<ArgumentException>(() =>
+            {
+                MessagePacker.RegisterMessage<SomeRandomMessage2133122>();
             });
         }
     }
