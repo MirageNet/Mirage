@@ -205,7 +205,7 @@ namespace Mirror.Weaver.Tests
         [Test]
         public void GivesErrorForInvalidArraySegmentType()
         {
-            HasError("Cannot generate writer for ArraySegment because element MonoBehaviour does not have a writer. Use a supported type or provide a custom writer",
+            HasError("Cannot generate writer for System.ArraySegment`1<UnityEngine.MonoBehaviour>. Use a supported type or provide a custom writer",
                 "System.ArraySegment`1<UnityEngine.MonoBehaviour>");
             // TODO change weaver to run checks for write/read at the same time
             //HasError("Cannot generate reader for ArraySegment because element MonoBehaviour does not have a reader. Use a supported type or provide a custom reader",

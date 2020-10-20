@@ -86,7 +86,10 @@ namespace Mirror.Weaver
             // check for collections
             if (variableReference.Is(typeof(ArraySegment<>)))
             {
-                return GenerateArraySegmentWriteFunc(variableReference);
+                var genericInstance = (GenericInstanceType)variableReference;
+                TypeReference elementType = genericInstance.GenericArguments[0];
+
+                return GenerateCollectionWriter(variableReference, elementType, nameof(NetworkWriterExtensions.WriteArraySegment));
             }
             if (variableReference.Is(typeof(List<>)))
             {
@@ -263,102 +266,12 @@ namespace Mirror.Weaver
             ILProcessor worker = writerFunc.Body.GetILProcessor();
             worker.Append(worker.Create(OpCodes.Ldarg_0)); // writer
             worker.Append(worker.Create(OpCodes.Ldarg_1)); // collection
+
             worker.Append(worker.Create(OpCodes.Call, methodRef)); // WriteArray
 
             worker.Append(worker.Create(OpCodes.Ret));
 
             return writerFunc;
-        }
-
-        static MethodDefinition GenerateArraySegmentWriteFunc(TypeReference variable)
-        {
-            MethodDefinition writerFunc = GenerateWriterFunc(variable);
-
-            var genericInstance = (GenericInstanceType)variable;
-            TypeReference elementType = genericInstance.GenericArguments[0];
-            MethodReference elementWriteFunc = GetWriteFunc(elementType);
-
-            // need this null check till later PR when GetWriteFunc throws exception instead
-            if (elementWriteFunc == null)
-            {
-                Weaver.Error($"Cannot generate writer for ArraySegment because element {elementType.Name} does not have a writer. Use a supported type or provide a custom writer", variable);
-                return writerFunc;
-            }
-
-            // int length
-            writerFunc.Body.Variables.Add(new VariableDefinition(WeaverTypes.Import<int>()));
-            // int i
-            writerFunc.Body.Variables.Add(new VariableDefinition(WeaverTypes.Import<int>()));
-
-            ILProcessor worker = writerFunc.Body.GetILProcessor();
-
-            MethodReference countref = WeaverTypes.ArraySegmentCountReference.MakeHostInstanceGeneric(genericInstance);
-
-            // int length = value.Count;
-            worker.Append(worker.Create(OpCodes.Ldarga_S, (byte)1));
-            worker.Append(worker.Create(OpCodes.Call, countref));
-            worker.Append(worker.Create(OpCodes.Stloc_0));
-
-            // writer.WritePackedInt32(count);
-            // for (int i=0; i < length; i++)
-            GenerateFor(worker, () =>
-            {
-                // writer.Write(value.Array[i + value.Offset]);
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Ldarga_S, (byte)1));
-                worker.Append(worker.Create(OpCodes.Call, WeaverTypes.ArraySegmentArrayReference.MakeHostInstanceGeneric(genericInstance)));
-                worker.Append(worker.Create(OpCodes.Ldloc_1));
-                worker.Append(worker.Create(OpCodes.Ldarga_S, (byte)1));
-                worker.Append(worker.Create(OpCodes.Call, WeaverTypes.ArraySegmentOffsetReference.MakeHostInstanceGeneric(genericInstance)));
-                worker.Append(worker.Create(OpCodes.Add));
-                worker.Append(worker.Create(OpCodes.Ldelema, elementType));
-                worker.Append(worker.Create(OpCodes.Ldobj, elementType));
-                worker.Append(worker.Create(OpCodes.Call, elementWriteFunc));
-            });
-
-            // return
-            worker.Append(worker.Create(OpCodes.Ret));
-            return writerFunc;
-        }
-
-        private static void GenerateFor(ILProcessor worker, Action body)
-        {
-            MethodReference intWriterFunc = GetWriteFunc(WeaverTypes.Import<int>());
-
-            // writer.WritePackedInt32(count);
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldloc_0));
-            worker.Append(worker.Create(OpCodes.Call, intWriterFunc));
-
-            // Loop through the List<T> and call the writer for each element.
-            // generates this:
-            // for (int i=0; i < length; i++)
-            // {
-            //    writer.WriteT(value[i]);
-            // }
-            worker.Append(worker.Create(OpCodes.Ldc_I4_0));
-            worker.Append(worker.Create(OpCodes.Stloc_1));
-            Instruction labelHead = worker.Create(OpCodes.Nop);
-            worker.Append(worker.Create(OpCodes.Br, labelHead));
-
-            // loop body
-            Instruction labelBody = worker.Create(OpCodes.Nop);
-            worker.Append(labelBody);
-
-            body();
-
-            // end for loop
-            // for loop i++ 
-            worker.Append(worker.Create(OpCodes.Ldloc_1));
-            worker.Append(worker.Create(OpCodes.Ldc_I4_1));
-            worker.Append(worker.Create(OpCodes.Add));
-            worker.Append(worker.Create(OpCodes.Stloc_1));
-
-            worker.Append(labelHead);
-            // for loop i < length
-            worker.Append(worker.Create(OpCodes.Ldloc_1));
-            worker.Append(worker.Create(OpCodes.Ldloc_0));
-            worker.Append(worker.Create(OpCodes.Blt, labelBody));
         }
 
         /// <summary>
