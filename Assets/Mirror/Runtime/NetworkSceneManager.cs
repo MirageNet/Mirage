@@ -249,18 +249,22 @@ namespace Mirror
                 case SceneOperation.Normal:
                     //Scene is already active.
                     if (NetworkSceneName.Equals(sceneName))
-                        break;
-
-                    asyncOperation = SceneManager.LoadSceneAsync(sceneName);
-                    asyncOperation.completed += OnAsyncComplete;
-
-                    //If non host client. Wait for server to finish scene change
-                    if(client && client.Active && !client.IsLocalClient)
                     {
-                        asyncOperation.allowSceneActivation = false;
+                        FinishLoadScene(sceneName, sceneOperation);
                     }
+                    else
+                    {
+                        //If non host client. Wait for server to finish scene change
+                        if (client && client.Active && !client.IsLocalClient)
+                        {
+                            asyncOperation.allowSceneActivation = false;
+                        }
 
-                    yield return asyncOperation;
+                        asyncOperation = SceneManager.LoadSceneAsync(sceneName);
+                        asyncOperation.completed += OnAsyncComplete;
+                        yield return asyncOperation;
+                    }
+                    
                     break;
                 case SceneOperation.LoadAdditive:
                     // Ensure additive scene is not already loaded since we don't know which was passed in the Scene message
