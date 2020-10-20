@@ -293,11 +293,6 @@ namespace Mirror
             {
                 logger.Log("Finished loading scene in host mode.");
 
-                if (client.Connection != null && sceneOperation == SceneOperation.Normal)
-                {
-                    client.OnAuthenticated(client.Connection);
-                }
-
                 // server scene was loaded. now spawn all the objects
                 server.ActivateHostScene();
 
