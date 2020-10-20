@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using UnityEngine;
@@ -117,6 +118,25 @@ namespace Mirror.Tests
             Assert.Throws<ArgumentException>(() =>
             {
                 MessagePacker.RegisterMessage<SomeRandomMessage2133122>();
+            });
+        }
+
+        [Test]
+        public void FindSystemMessage()
+        {
+            int id = MessagePacker.GetId<SceneMessage>();
+            Type type = MessagePacker.GetMessageType(id);
+            Assert.That(type, Is.EqualTo(typeof(SceneMessage)));
+        }
+
+        struct SomeRandomMessageNotRegistered { };
+        [Test]
+        public void FindUnknownMessage()
+        {
+            int id = MessagePacker.GetId<SomeRandomMessageNotRegistered>();
+            Assert.Throws<KeyNotFoundException>(() =>
+            {
+                Type type = MessagePacker.GetMessageType(id);
             });
         }
     }
