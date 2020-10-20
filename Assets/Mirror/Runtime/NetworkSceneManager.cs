@@ -319,11 +319,6 @@ namespace Mirror
             {
                 logger.Log("Finished loading scene in client-only mode.");
 
-                if (client.Connection != null && sceneOperation == SceneOperation.Normal)
-                {
-                    client.OnAuthenticated(client.Connection);
-                }
-
                 client.PrepareToSpawnSceneObjects();
 
                 OnClientSceneChanged(sceneName, sceneOperation);
