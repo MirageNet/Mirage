@@ -315,7 +315,7 @@ namespace Mirror
                 OnServerSceneChanged(sceneName, sceneOperation);
             }
             // client-only mode?
-            else if (client && client.Active)
+            else if (client && client.Active && !client.IsLocalClient)
             {
                 logger.Log("Finished loading scene in client-only mode.");
 
