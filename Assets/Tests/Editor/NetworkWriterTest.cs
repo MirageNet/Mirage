@@ -1162,5 +1162,16 @@ namespace Mirror.Tests
             var readList = reader.Read<List<int>>();
             Assert.That(readList, Is.EqualTo(original));
         }
+
+        [Test]
+        public void TestNullList()
+        {
+            var writer = new NetworkWriter();
+            writer.Write<List<int>>(null);
+
+            var reader = new NetworkReader(writer.ToArray());
+            var readList = reader.Read<List<int>>();
+            Assert.That(readList, Is.Null);
+        }
     }
 }
