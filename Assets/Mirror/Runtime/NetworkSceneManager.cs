@@ -50,7 +50,7 @@ namespace Mirror
         /// <para>This is used to make sure that all scene changes are initialized by Mirror.</para>
         /// <para>Loading a scene manually wont set networkSceneName, so Mirror would still load it again on start.</para>
         /// </remarks>
-        public string NetworkSceneName => SceneManager.GetActiveScene().name;
+        public string NetworkSceneName => SceneManager.GetActiveScene().path;
 
         internal AsyncOperation asyncOperation;
 
