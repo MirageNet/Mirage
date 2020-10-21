@@ -138,7 +138,7 @@ namespace Mirror.KCP
             }
         }
 
-        public UniTask SendAsync(ArraySegment<byte> data, int channel)
+        public UniTask SendAsync(ArraySegment<byte> data, int channel = 0)
         {
             kcp.Send(data.Array, data.Offset, data.Count);
             return UniTask.CompletedTask;

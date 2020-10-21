@@ -79,7 +79,7 @@ namespace Mirror
             return (true, 0);
         }
 
-        public UniTask SendAsync(ArraySegment<byte> data, int channel)
+        public UniTask SendAsync(ArraySegment<byte> data, int channel = 0)
         {
             // add some data to the writer in the connected connection
             // and increase the message count
