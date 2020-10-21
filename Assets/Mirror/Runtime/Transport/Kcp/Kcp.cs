@@ -162,7 +162,7 @@ namespace Mirror.KCP
                     break;
             }
 
-            MoveReceiveBufferDataToReceiveQueue();
+            ReceiveBufferToReceiveQueue();
 
             // fast recover
             if (rcv_queue.Count < rcv_wnd && recover)
@@ -358,7 +358,7 @@ namespace Mirror.KCP
             }
 
             InsertSegmentInReceiveBuffer(newseg);
-            MoveReceiveBufferDataToReceiveQueue();
+            ReceiveBufferToReceiveQueue();
         }
 
         // inserts the segment into rcv_buf, ordered by seg.sn.
@@ -403,7 +403,7 @@ namespace Mirror.KCP
         }
 
         // move available data from rcv_buf -> rcv_queue
-        void MoveReceiveBufferDataToReceiveQueue()
+        void ReceiveBufferToReceiveQueue()
         {
             int removed = 0;
             foreach (Segment seg in rcv_buf)
