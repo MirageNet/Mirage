@@ -501,9 +501,9 @@ namespace Mirror.KCP
 
                 if (cmd == CMD_ACK)
                 {
-                    if (Utils.TimeDiff(current, ts) >= 0)
+                    if (current >= ts)
                     {
-                        UpdateAck(Utils.TimeDiff(current, ts));
+                        UpdateAck((int)(current - ts));
                     }
                     ParseAck(sn);
                     ShrinkBuf();
@@ -515,13 +515,13 @@ namespace Mirror.KCP
                     }
                     else
                     {
-                        if (Utils.TimeDiff(sn, maxack) > 0)
+                        if (sn > maxack)
                         {
 #if !FASTACK_CONSERVE
                             maxack = sn;
                             latest_ts = ts;
 #else
-                            if (Utils.TimeDiff(ts, latest_ts) > 0)
+                            if (ts > latest_ts)
                             {
                                 maxack = sn;
                                 latest_ts = ts;
@@ -532,10 +532,10 @@ namespace Mirror.KCP
                 }
                 else if (cmd == CMD_PUSH)
                 {
-                    if (Utils.TimeDiff(sn, rcv_nxt + rcv_wnd) < 0)
+                    if (sn < rcv_nxt + rcv_wnd)
                     {
                         AckPush(sn, ts);
-                        if (Utils.TimeDiff(sn, rcv_nxt) >= 0)
+                        if (sn >= rcv_nxt)
                         {
                             Segment seg = Segment.Lease();
                             seg.conversation = conv_;
@@ -578,7 +578,7 @@ namespace Mirror.KCP
             }
 
             // cwnd update when packet arrived
-            if (Utils.TimeDiff(snd_una, prev_una) > 0)
+            if (snd_una > prev_una)
             {
                 if (cwnd < rmt_wnd)
                 {
