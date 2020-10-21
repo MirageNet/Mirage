@@ -148,8 +148,8 @@ namespace Mirror
         internal void OnClientSceneChanged(string sceneName, SceneOperation sceneOperation)
         {
             //set ready after scene change has completed
-            //if (!client.Connection.IsReady)
-            //    SetClientReady();
+            if (!client.Connection.IsReady)
+                SetClientReady();
 
             ClientSceneChanged.Invoke(sceneName, sceneOperation);
         }
