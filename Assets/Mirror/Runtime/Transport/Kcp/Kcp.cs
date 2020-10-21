@@ -103,22 +103,6 @@ namespace Mirror.KCP
             buffer = new byte[(mtu + OVERHEAD) * 3];
         }
 
-        // ikcp_segment_new
-        // we keep the original function and add our pooling to it.
-        // this way we'll never miss it anywhere.
-        static Segment SegmentNew()
-        {
-            return Segment.Lease();
-        }
-
-        // ikcp_segment_delete
-        // we keep the original function and add our pooling to it.
-        // this way we'll never miss it anywhere.
-        static void SegmentDelete(Segment seg)
-        {
-            Segment.Release(seg);
-        }
-
         // ikcp_recv
         // receive data from kcp state machine
         //   returns number of bytes read.
@@ -176,7 +160,7 @@ namespace Mirror.KCP
                 // unlike original kcp, we don't need to remove seg from queue
                 // because we already dequeued it.
                 // simply delete it
-                SegmentDelete(seg);
+                Segment.Release(seg);
 
                 if (fragment == 0)
                     break;
@@ -258,7 +242,7 @@ namespace Mirror.KCP
             for (int i = 0; i < count; i++)
             {
                 int size = len > (int)mss ? (int)mss : len;
-                Segment seg = SegmentNew();
+                Segment seg = Segment.Lease();
 
                 if (len > 0)
                 {
@@ -323,7 +307,7 @@ namespace Mirror.KCP
                 if (sn == seg.serialNumber)
                 {
                     snd_buf.RemoveAt(i);
-                    SegmentDelete(seg);
+                    Segment.Release(seg);
                     break;
                 }
                 if (sn < seg.serialNumber)
@@ -344,7 +328,7 @@ namespace Mirror.KCP
                     // can't remove while iterating. remember how many to remove
                     // and do it after the loop.
                     ++removed;
-                    SegmentDelete(seg);
+                    Segment.Release(seg);
                 }
                 else
                 {
@@ -393,7 +377,7 @@ namespace Mirror.KCP
             if (Utils.TimeDiff(sn, rcv_nxt + rcv_wnd) >= 0 ||
                 Utils.TimeDiff(sn, rcv_nxt) < 0)
             {
-                SegmentDelete(newseg);
+                Segment.Release(newseg);
                 return;
             }
 
@@ -438,7 +422,7 @@ namespace Mirror.KCP
             // duplicate. just delete it.
             else
             {
-                SegmentDelete(newseg);
+                Segment.Release(newseg);
             }
         }
 
@@ -554,7 +538,7 @@ namespace Mirror.KCP
                         AckPush(sn, ts);
                         if (Utils.TimeDiff(sn, rcv_nxt) >= 0)
                         {
-                            Segment seg = SegmentNew();
+                            Segment seg = Segment.Lease();
                             seg.conversation = conv_;
                             seg.cmd = (CommandType)cmd;
                             seg.fragment = frg;
@@ -665,7 +649,7 @@ namespace Mirror.KCP
             // used. that's fine in C, but in C# our segment is class so we need
             // to allocate and most importantly, not forget to deallocate it
             // before returning.
-            Segment seg = SegmentNew();
+            Segment seg = Segment.Lease();
             seg.conversation = conv;
             seg.cmd = CommandType.Ack;
             seg.window = WndUnused();
@@ -825,7 +809,7 @@ namespace Mirror.KCP
             // kcp stackallocs 'seg'. our C# segment is a class though, so we
             // need to properly delete and return it to the pool now that we are
             // done with it.
-            SegmentDelete(seg);
+            Segment.Release(seg);
 
             // flash remain segments
             FlushBuffer();
