@@ -137,6 +137,23 @@ namespace Mirror.KCP
 
             bool recover = rcv_queue.Count >= rcv_wnd;
 
+            int len = ReceiveQueueToMessage(buffer);
+
+            ReceiveBufferToReceiveQueue();
+
+            // fast recover
+            if (rcv_queue.Count < rcv_wnd && recover)
+            {
+                // ready to send back CMD_WINS in flush
+                // tell remote my window size
+                probe |= ASK_TELL;
+            }
+
+            return len;
+        }
+
+        private int ReceiveQueueToMessage(byte[] buffer)
+        {
             // merge fragment.
             int offset = 0;
             int len = 0;
@@ -166,16 +183,6 @@ namespace Mirror.KCP
 
                 if (fragment == 0)
                     break;
-            }
-
-            ReceiveBufferToReceiveQueue();
-
-            // fast recover
-            if (rcv_queue.Count < rcv_wnd && recover)
-            {
-                // ready to send back CMD_WINS in flush
-                // tell remote my window size
-                probe |= ASK_TELL;
             }
 
             return len;
