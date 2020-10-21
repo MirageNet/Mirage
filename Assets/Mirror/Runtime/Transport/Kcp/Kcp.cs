@@ -47,7 +47,6 @@ namespace Mirror.KCP
         public int Reserved { get; set; } = 0;
 
         // kcp members.
-        int state;
         readonly uint conv;          // conversation
         internal uint mtu;
         internal uint mss => (uint)(mtu - OVERHEAD - Reserved);           // maximum segment size
@@ -830,11 +829,6 @@ namespace Mirror.KCP
                         segment.data.Position = 0;
                         segment.data.Read(buffer, offset, (int)segment.data.Length);
                         offset += (int)segment.data.Length;
-                    }
-
-                    if (segment.transmit >= dead_link)
-                    {
-                        state = -1;
                     }
                 }
             }
