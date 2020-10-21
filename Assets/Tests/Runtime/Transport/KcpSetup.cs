@@ -81,7 +81,7 @@ namespace Mirror.Tests
             });
             // fast mode so that we finish quicker
             client.SetNoDelay();
-            client.SetMtu(1000);
+            client.Mtu = 1000;
             client.SetWindowSize(16, 16);
 
             server = new Kcp(0, (data, length) =>
@@ -90,7 +90,7 @@ namespace Mirror.Tests
             });
             // fast mode so that we finish quicker
             server.SetNoDelay();
-            client.SetMtu(1000);
+            client.Mtu = 1000;
             client.SetWindowSize(16, 16);
 
 

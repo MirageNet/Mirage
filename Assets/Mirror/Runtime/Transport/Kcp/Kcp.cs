@@ -41,15 +41,30 @@ namespace Mirror.KCP
             internal uint timestamp;
         }
 
+        private int reserved = 0;
+
         /// <summary>
         /// How many bytes to reserve at beginning of a packet
         /// the extra bytes can be used to store a CRC or other information
         /// </summary>
-        public int Reserved { get; set; } = 0;
+        public int Reserved
+        {
+            get
+            {
+                return reserved;
+            }
+            set
+            {
+                if (value >= (mtu - OVERHEAD))
+                    throw new ArgumentException(nameof(Reserved) + " must be lower than MTU.");
+                reserved = value;
+            }
+
+        }
 
         // kcp members.
         readonly uint conv;                    // conversation
-        internal uint mtu = MTU_DEF;
+        private uint mtu = MTU_DEF;
         internal uint mss => (uint)(mtu - OVERHEAD - Reserved);           // maximum segment size
         internal uint snd_una;                 // unacknowledged
         internal uint snd_nxt;
@@ -362,7 +377,7 @@ namespace Mirror.KCP
         // appends an ack.
         void AckPush(uint sn, uint ts)
         {
-            acklist.Add(new AckItem{ serialNumber = sn, timestamp = ts });
+            acklist.Add(new AckItem { serialNumber = sn, timestamp = ts });
         }
 
         // ikcp_parse_data
@@ -896,14 +911,21 @@ namespace Mirror.KCP
         }
 
         // ikcp_setmtu
-        // Change MTU (Maximum Transmission Unit) size.
-        public void SetMtu(uint mtu)
+        public uint Mtu
         {
-            if (mtu < 50 || mtu < OVERHEAD)
-                throw new ArgumentException("MTU must be higher than 50 and higher than OVERHEAD");
+            get => mtu;
+            set
+            {
+                if (value < 50 || value < OVERHEAD + Reserved)
+                    throw new ArgumentException("MTU must be higher than 50 and higher than OVERHEAD");
 
-            buffer = new byte[(mtu + OVERHEAD) * 3];
-            this.mtu = mtu;
+                if (value > ushort.MaxValue)
+                    throw new ArgumentException("MTU must be lower than " + ushort.MaxValue);
+
+
+                buffer = new byte[(value + OVERHEAD) * 3];
+                mtu = value;
+            }
         }
 
         // ikcp_interval
