@@ -117,18 +117,13 @@ namespace Mirror.KCP
         /// <param name="len">size of the buffer</param>
         /// <returns>number of read bytes</returns>
         /// <exception cref="ArgumentException">If length is negative</exception>
-        public int Receive(byte[] buffer, int len)
+        public int Receive(byte[] buffer)
         {
             // kcp's ispeek feature is not supported.
             // this makes 'merge fragment' code significantly easier because
             // we can iterate while queue.Count > 0 and dequeue each time.
             // if we had to consider ispeek then count would always be > 0 and
             // we would have to remove only after the loop.
-            //
-            //bool ispeek = len < 0;
-            if (len < 0)
-                throw new ArgumentException("Receive ispeek for negative len is not supported!");
-
             if (rcv_queue.Count == 0)
                 return -1;
 
@@ -137,14 +132,14 @@ namespace Mirror.KCP
             if (peeksize < 0)
                 return -2;
 
-            if (peeksize > len)
-                return -3;
+            if (peeksize > buffer.Length)
+                throw new IndexOutOfRangeException($"Buffer is {buffer.Length} bytes long, but the message is {peeksize} bytes long");
 
             bool recover = rcv_queue.Count >= rcv_wnd;
 
             // merge fragment.
             int offset = 0;
-            len = 0;
+            int len = 0;
             // original KCP iterates rcv_queue and deletes if !ispeek.
             // removing from a c# queue while iterating is not possible, but
             // we can change to 'while Count > 0' and remove every time.

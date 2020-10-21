@@ -227,7 +227,7 @@ namespace Mirror.KCP
                 int msgSize = kcp.PeekSize();
                 // we have some data,  return it
                 buffer.SetLength(msgSize);
-                kcp.Receive(buffer.GetBuffer(), msgSize);
+                kcp.Receive(buffer.GetBuffer());
                 buffer.Position = msgSize;
 
                 // if we receive a disconnect message,  then close everything
