@@ -5,9 +5,15 @@ using Cysharp.Threading.Tasks;
 
 namespace Mirror
 {
+    public static class Channel
+    {
+        public const int Reliable = 0;
+        public const int Unreliable = 1;
+    }
+
     public interface IConnection
     {
-        UniTask SendAsync(ArraySegment<byte> data, int channel = 0);
+        UniTask SendAsync(ArraySegment<byte> data, int channel = Channel.Reliable);
 
         /// <summary>
         /// reads a message from connection
