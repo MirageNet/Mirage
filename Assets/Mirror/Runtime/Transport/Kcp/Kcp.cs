@@ -60,7 +60,7 @@ namespace Mirror.KCP
 
         }
 
-        public bool FastAckConserve { get; set; } = false;
+        public bool FastAckConserve { get; set; }
 
         // kcp members.
         readonly uint conv;                    // conversation
