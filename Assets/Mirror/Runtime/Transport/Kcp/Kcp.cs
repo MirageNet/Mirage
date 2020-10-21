@@ -919,27 +919,16 @@ namespace Mirror.KCP
         //   Fast:   0, 30, 2, 1
         //   Fast2:  1, 20, 2, 1
         //   Fast3:  1, 10, 2, 1
-        public void SetNoDelay(uint nodelay = 0, uint interval = INTERVAL, int resend = 0, bool nocwnd = false)
+        public void SetNoDelay(uint nodelay = 0, int interval = INTERVAL, int resend = 0, bool nocwnd = false)
         {
             this.nodelay = nodelay;
-            if (nodelay != 0)
-                rx_minrto = RTO_NDL;
-            else
-                rx_minrto = RTO_MIN;
 
-            if (interval >= 0)
-            {
-                if (interval > 5000)
-                    interval = 5000;
-                else if (interval < 10)
-                    interval = 10;
-                this.interval = interval;
-            }
+            rx_minrto = (nodelay != 0) ? RTO_NDL : RTO_MIN;
+
+            this.interval = (uint)Utils.Clamp(interval, 10, 5000);
 
             if (resend >= 0)
-            {
                 fastresend = resend;
-            }
 
             this.nocwnd = nocwnd;
         }
