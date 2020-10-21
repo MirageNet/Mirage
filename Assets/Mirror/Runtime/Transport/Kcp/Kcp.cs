@@ -689,7 +689,7 @@ namespace Mirror.KCP
                 // ikcp_ack_get assigns ack[i] to seg.sn, seg.ts
                 seg.serialNumber = ack.serialNumber;
                 seg.timeStamp = ack.timestamp;
-                offset += seg.Encode(buffer, offset);
+                offset = seg.Encode(buffer, offset);
             }
 
             acklist.Clear();
@@ -727,7 +727,7 @@ namespace Mirror.KCP
             {
                 seg.cmd = CommandType.WindowAsk;
                 MakeSpace(OVERHEAD);
-                offset += seg.Encode(buffer, offset);
+                offset = seg.Encode(buffer, offset);
             }
 
             // flush window probing commands
@@ -735,7 +735,7 @@ namespace Mirror.KCP
             {
                 seg.cmd = CommandType.WindowTell;
                 MakeSpace(OVERHEAD);
-                offset += seg.Encode(buffer, offset);
+                offset = seg.Encode(buffer, offset);
             }
 
             probe = 0;
@@ -822,7 +822,7 @@ namespace Mirror.KCP
                     int need = (int)(OVERHEAD + segment.data.Length);
                     MakeSpace(need);
 
-                    offset += segment.Encode(buffer, offset);
+                    offset = segment.Encode(buffer, offset);
 
                     if (segment.data.Length > 0)
                     {
