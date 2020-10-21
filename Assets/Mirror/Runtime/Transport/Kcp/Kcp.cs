@@ -612,14 +612,6 @@ namespace Mirror.KCP
                 }
             }
 
-            void FlushBuffer()
-            {
-                if (offset > Reserved)
-                {
-                    output(buffer, offset);
-                }
-            }
-
             // 'ikcp_update' haven't been called.
             if (!updated)
                 return;
@@ -794,7 +786,10 @@ namespace Mirror.KCP
             Segment.Release(seg);
 
             // flash remain segments
-            FlushBuffer();
+            if (offset > Reserved)
+            {
+                output(buffer, offset);
+            }
 
             // update ssthresh
             // rate halving, https://tools.ietf.org/html/rfc6937
