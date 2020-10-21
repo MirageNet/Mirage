@@ -233,7 +233,7 @@ namespace Mirror.KCP
         public void Send(byte[] buffer, int offset, int length)
         {
             if (length <= 0)
-                throw new ArgumentException("You cannot send a packet with a length of 0.");
+                throw new ArgumentException($"You cannot send a packet with a {nameof(length)} of 0.");
 
             // streaming mode: removed. we never want to send 'hello' and
             // receive 'he' 'll' 'o'. we want to always receive 'hello'.
@@ -244,8 +244,8 @@ namespace Mirror.KCP
             else
                 count = (int)((length + Mss - 1) / Mss);
 
-            if (count >= WND_RCV)
-                throw new ArgumentException("Your packet is too big and doesn't fit WND_RCV, please reduce its length or increase the MTU with SetMtu().");
+            if (count >= rcv_wnd)
+                throw new ArgumentException($"Your packet is too big and doesn't fit the receive window, either reduce its {nameof(length)}, call {nameof(SetWindowSize)} to increase the window or increase the {nameof(Mtu)}.");
 
             if (count == 0)
                 count = 1;
