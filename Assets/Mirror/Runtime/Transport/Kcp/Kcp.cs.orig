@@ -119,6 +119,12 @@ namespace Mirror.KCP
             if (rcv_queue.Count == 0)
                 return -1;
 
+<<<<<<< HEAD
+            if (len < 0)
+                Math.Abs(len);
+
+=======
+>>>>>>> 41fe841c77e4bfd82893ebf2db0db915fc532530
             int peeksize = PeekSize();
 
             if (peeksize < 0)
@@ -283,7 +289,7 @@ namespace Mirror.KCP
         // removes the segment with 'sn' from send buffer
         internal void ParseAck(uint sn)
         {
-            if (sn < snd_una || sn >= snd_nxt)
+            if ((sn < snd_una) || (sn >= snd_nxt))
                 return;
 
             // for-int so we can erase while iterating
@@ -327,7 +333,7 @@ namespace Mirror.KCP
         // ikcp_parse_fastack
         void ParseFastack(uint sn, uint ts)
         {
-            if (sn < snd_una || sn >= snd_nxt)
+            if ((sn < snd_una) || (sn >= snd_nxt))
                 return;
 
             foreach (Segment seg in snd_buf)
@@ -360,7 +366,7 @@ namespace Mirror.KCP
         {
             uint sn = newseg.serialNumber;
 
-            if (sn >= rcv_nxt + rcv_wnd || sn < rcv_nxt)
+            if ((sn >= rcv_nxt + rcv_wnd) || (sn < rcv_nxt))
             {
                 Segment.Release(newseg);
                 return;
