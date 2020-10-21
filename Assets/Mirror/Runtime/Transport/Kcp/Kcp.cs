@@ -313,7 +313,7 @@ namespace Mirror.KCP
         // removes the segment with 'sn' from send buffer
         internal void ParseAck(uint sn)
         {
-            if (Utils.TimeDiff(sn, snd_una) < 0 || Utils.TimeDiff(sn, snd_nxt) >= 0)
+            if ((sn < snd_una) || (sn >= snd_nxt))
                 return;
 
             // for-int so we can erase while iterating
@@ -326,7 +326,7 @@ namespace Mirror.KCP
                     SegmentDelete(seg);
                     break;
                 }
-                if (Utils.TimeDiff(sn, seg.serialNumber) < 0)
+                if (sn < seg.serialNumber)
                 {
                     break;
                 }
@@ -339,7 +339,7 @@ namespace Mirror.KCP
             int removed = 0;
             foreach (Segment seg in snd_buf)
             {
-                if (Utils.TimeDiff(una, seg.serialNumber) > 0)
+                if (una > seg.serialNumber)
                 {
                     // can't remove while iterating. remember how many to remove
                     // and do it after the loop.
