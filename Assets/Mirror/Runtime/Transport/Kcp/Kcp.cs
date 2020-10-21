@@ -61,11 +61,11 @@ namespace Mirror.KCP
         internal int rx_minrto = RTO_MIN;
         internal uint snd_wnd = WND_SND;       // send window
         internal uint rcv_wnd = WND_RCV;       // receive window
-        internal uint rmt_wnd;                 // remote window
+        internal uint rmt_wnd = WND_RCV;       // remote window
         internal uint cwnd;                    // congestion window
         internal uint probe;
         internal uint interval = INTERVAL;
-        internal uint ts_flush;
+        internal uint ts_flush = INTERVAL;
         internal uint xmit;
         internal uint nodelay;                 // not a bool. original Kcp has '<2 else' check.
         internal bool updated;
