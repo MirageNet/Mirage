@@ -150,7 +150,7 @@ namespace Mirror.KCP
             if (rcv_queue.Count == 0)
                 return -1;
 
-            if (len < 0) len = -len;
+            if (len < 0) Math.Abs(len);
 
             int peeksize = PeekSize();
 
