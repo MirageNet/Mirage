@@ -368,12 +368,12 @@ namespace Mirror.KCP
         // ikcp_parse_fastack
         void ParseFastack(uint sn, uint ts)
         {
-            if (Utils.TimeDiff(sn, snd_una) < 0 || Utils.TimeDiff(sn, snd_nxt) >= 0)
+            if ((sn < snd_una) || (sn >= snd_nxt))
                 return;
 
             foreach (Segment seg in snd_buf)
             {
-                if (Utils.TimeDiff(sn, seg.serialNumber) < 0)
+                if (sn < seg.serialNumber)
                 {
                     break;
                 }
@@ -382,7 +382,7 @@ namespace Mirror.KCP
 #if !FASTACK_CONSERVE
                     seg.fastack++;
 #else
-                    if (Utils.TimeDiff(ts, seg.ts) >= 0)
+                    if (ts >= seg.ts)
                         seg.fastack++;
 #endif
                 }
