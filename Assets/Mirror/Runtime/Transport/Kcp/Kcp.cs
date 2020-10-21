@@ -18,10 +18,6 @@ namespace Mirror.KCP
         public const int RTO_MIN = 100;          // normal min rto
         public const int RTO_DEF = 200;          // default RTO
         public const int RTO_MAX = 60000;        // maximum RTO
-        public const int CMD_PUSH = 81;          // cmd: push data
-        public const int CMD_ACK  = 82;          // cmd: ack
-        public const int CMD_WASK = 83;          // cmd: window probe (ask)
-        public const int CMD_WINS = 84;          // cmd: window size (tell)
         public const int ASK_SEND = 1;           // need to send CMD_WASK
         public const int ASK_TELL = 2;           // need to send CMD_WINS
         public const int WND_SND = 32;           // default send window
@@ -242,7 +238,7 @@ namespace Mirror.KCP
             for (int i = 0; i < count; i++)
             {
                 int size = len > (int)mss ? (int)mss : len;
-                Segment seg = Segment.Lease();
+                var seg = Segment.Lease();
 
                 if (len > 0)
                 {
@@ -468,7 +464,6 @@ namespace Mirror.KCP
                 uint una = 0;
                 uint conv_ = 0;
                 ushort wnd = 0;
-                byte cmd = 0;
                 byte frg = 0;
 
                 if (size < OVERHEAD) break;
@@ -478,7 +473,7 @@ namespace Mirror.KCP
 
                 if (conv_ != conv) return -1;
 
-                cmd = decoder.Decode8U();
+                CommandType cmd = (CommandType)decoder.Decode8U();
                 frg = decoder.Decode8U();
                 wnd = decoder.Decode16U();
                 ts = decoder.Decode32U();
@@ -491,15 +486,22 @@ namespace Mirror.KCP
 
                 if (size < len || len < 0) return -2;
 
-                if (cmd != CMD_PUSH && cmd != CMD_ACK &&
-                    cmd != CMD_WASK && cmd != CMD_WINS)
-                    return -3;
+                switch (cmd)
+                {
+                    case CommandType.Ack:
+                    case CommandType.Push:
+                    case CommandType.WindowAsk:
+                    case CommandType.WindowTell:
+                        break;
+                    default:
+                        return -3;
+                }
 
                 rmt_wnd = wnd;
                 ParseUna(una);
                 ShrinkBuf();
 
-                if (cmd == CMD_ACK)
+                if (cmd == CommandType.Ack)
                 {
                     if (current >= ts)
                     {
@@ -530,14 +532,14 @@ namespace Mirror.KCP
                         }
                     }
                 }
-                else if (cmd == CMD_PUSH)
+                else if (cmd == CommandType.Push)
                 {
                     if (sn < rcv_nxt + rcv_wnd)
                     {
                         AckPush(sn, ts);
                         if (sn >= rcv_nxt)
                         {
-                            Segment seg = Segment.Lease();
+                            var seg = Segment.Lease();
                             seg.conversation = conv_;
                             seg.cmd = (CommandType)cmd;
                             seg.fragment = frg;
@@ -553,13 +555,13 @@ namespace Mirror.KCP
                         }
                     }
                 }
-                else if (cmd == CMD_WASK)
+                else if (cmd == CommandType.WindowAsk)
                 {
                     // ready to send back CMD_WINS in flush
                     // tell remote my window size
                     probe |= ASK_TELL;
                 }
-                else if (cmd == CMD_WINS)
+                else if (cmd == CommandType.WindowTell)
                 {
                     // do nothing
                 }
@@ -648,7 +650,7 @@ namespace Mirror.KCP
             // used. that's fine in C, but in C# our segment is class so we need
             // to allocate and most importantly, not forget to deallocate it
             // before returning.
-            Segment seg = Segment.Lease();
+            var seg = Segment.Lease();
             seg.conversation = conv;
             seg.cmd = CommandType.Ack;
             seg.window = WndUnused();
