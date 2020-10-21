@@ -917,13 +917,9 @@ namespace Mirror.KCP
         }
 
         // ikcp_interval
-        public void SetInterval(uint interval)
+        public void SetInterval(int interval)
         {
-            if (interval > 5000)
-                interval = 5000;
-            else if (interval < 10)
-                interval = 10;
-            this.interval = interval;
+            this.interval = (uint)Utils.Clamp(interval, 10, 5000);
         }
 
         // ikcp_nodelay
