@@ -162,7 +162,7 @@ namespace Mirror.KCP
                     break;
             }
 
-            MoveReceiveBufferDataToReceiveQueue();
+            ReceiveBufferToReceiveQueue();
 
             // fast recover
             if (rcv_queue.Count < rcv_wnd && recover)
@@ -358,7 +358,7 @@ namespace Mirror.KCP
             }
 
             InsertSegmentInReceiveBuffer(newseg);
-            MoveReceiveBufferDataToReceiveQueue();
+            ReceiveBufferToReceiveQueue();
         }
 
         // inserts the segment into rcv_buf, ordered by seg.sn.
@@ -370,8 +370,6 @@ namespace Mirror.KCP
         //       keep consistency with original C kcp.
         internal void InsertSegmentInReceiveBuffer(Segment newseg)
         {
-            bool repeat = false; // 'duplicate'
-
             // original C iterates backwards, so we need to do that as well.
             int i;
             for (i = rcv_buf.Count - 1; i >= 0; i--)
@@ -380,8 +378,8 @@ namespace Mirror.KCP
                 if (seg.serialNumber == newseg.serialNumber)
                 {
                     // duplicate segment found. nothing will be added.
-                    repeat = true;
-                    break;
+                    Segment.Release(newseg);
+                    return;
                 }
                 if (newseg.serialNumber > seg.serialNumber)
                 {
@@ -390,20 +388,11 @@ namespace Mirror.KCP
                 }
             }
 
-            // no duplicate? then insert.
-            if (!repeat)
-            {
-                rcv_buf.Insert(i + 1, newseg);
-            }
-            // duplicate. just delete it.
-            else
-            {
-                Segment.Release(newseg);
-            }
+            rcv_buf.Insert(i + 1, newseg);
         }
 
         // move available data from rcv_buf -> rcv_queue
-        void MoveReceiveBufferDataToReceiveQueue()
+        void ReceiveBufferToReceiveQueue()
         {
             int removed = 0;
             foreach (Segment seg in rcv_buf)
