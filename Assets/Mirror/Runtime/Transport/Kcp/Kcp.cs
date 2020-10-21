@@ -720,7 +720,7 @@ namespace Mirror.KCP
 
             // move data from snd_queue to snd_buf
             // sliding window, controlled by snd_nxt && sna_una+cwnd
-            while (Utils.TimeDiff(snd_nxt, snd_una + cwnd_) < 0)
+            while (snd_nxt < snd_una + cwnd_)
             {
                 if (snd_queue.Count == 0) break;
 
@@ -757,7 +757,7 @@ namespace Mirror.KCP
                     segment.resendTimeStamp = current + (uint)segment.rto + rtomin;
                 }
                 // RTO
-                else if (Utils.TimeDiff(current, segment.resendTimeStamp) >= 0)
+                else if (current >= segment.resendTimeStamp)
                 {
                     needsend = true;
                     segment.transmit++;
