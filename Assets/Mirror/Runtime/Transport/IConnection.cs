@@ -6,15 +6,18 @@ using Cysharp.Threading.Tasks;
 namespace Mirror
 {
 
-    public static class Channels
+    public static class Channel
     {
-        public const int DefaultReliable = 0;
-        public const int DefaultUnreliable = 1;
+        // 2 well known channels
+        // transports can implement other channels
+        // to expose their features
+        public const int Reliable = 0;
+        public const int Unreliable = 1;
     }
 
     public interface IConnection
     {
-        UniTask SendAsync(ArraySegment<byte> data, int channel = Channels.DefaultReliable);
+        UniTask SendAsync(ArraySegment<byte> data, int channel = Channel.Reliable);
 
         /// <summary>
         /// reads a message from connection
