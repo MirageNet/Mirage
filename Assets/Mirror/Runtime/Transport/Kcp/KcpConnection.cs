@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -45,7 +44,7 @@ namespace Mirror.KCP
         {
             unreliable = new Unreliable(SendWithChecksum)
             {
-                reserved = RESERVED
+                Reserved = RESERVED
             };
 
             kcp = new Kcp(0, SendWithChecksum);
@@ -276,7 +275,7 @@ namespace Mirror.KCP
 
         public static int GetChannel(byte[] data)
         {
-            var decoder = new Decoder(data, KcpConnection.RESERVED);
+            var decoder = new Decoder(data, RESERVED);
             return (int)decoder.Decode32U();
         }
     }

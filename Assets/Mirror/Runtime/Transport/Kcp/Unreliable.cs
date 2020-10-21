@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Mirror.KCP
 {
@@ -14,7 +12,7 @@ namespace Mirror.KCP
         private readonly Action<byte[], int> output;
         public const int OVERHEAD = 4; //related to MTU
 
-        public int reserved { get; set; }
+        public int Reserved { get; set; }
 
         // Start is called before the first frame update
         public Unreliable(Action<byte[], int> output_)
@@ -75,19 +73,19 @@ namespace Mirror.KCP
 
         public void Send(byte[] buffer, int offset, int length)
         {
-            Segment segment = Segment.Get(length);
+            var segment = Segment.Get(length);
 
-            var sendBuffer = segment.data;
+            ByteBuffer sendBuffer = segment.data;
 
-            sendBuffer.EnsureCapacity(length + reserved + OVERHEAD);
+            sendBuffer.EnsureCapacity(length + Reserved + OVERHEAD);
 
-            var encoder = new Encoder(sendBuffer.RawBuffer, reserved);
+            var encoder = new Encoder(sendBuffer.RawBuffer, Reserved);
             encoder.Encode32U(Channel.Unreliable);
 
             sendBuffer.Position = encoder.Position;
 
             sendBuffer.WriteBytes(buffer, offset, length);
-            output(sendBuffer.RawBuffer, length + reserved + OVERHEAD);
+            output(sendBuffer.RawBuffer, length + Reserved + OVERHEAD);
 
             Segment.Put(segment);
         }
