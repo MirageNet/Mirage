@@ -894,9 +894,8 @@ namespace Mirror.KCP
                     tm_packet = diff;
             }
 
-            uint minimal = (uint)(tm_packet < tm_flush ? tm_packet : tm_flush);
-            if (minimal >= interval)
-                minimal = interval;
+            uint minimal = (uint)Math.Min(tm_packet, tm_flush);
+            minimal = Math.Min(minimal, interval);
 
             return current_ + minimal;
         }
