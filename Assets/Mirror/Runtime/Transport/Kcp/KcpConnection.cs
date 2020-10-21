@@ -78,7 +78,9 @@ namespace Mirror.KCP
                 while (open )
                 {
                     now = stopWatch.ElapsedMilliseconds;
-                    if (now < lastReceived + Timeout)
+                    if (now > lastReceived + Timeout)
+                        break;
+
                     kcp.Update((uint)now);
 
                     uint check = kcp.Check((uint)now);
