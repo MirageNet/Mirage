@@ -131,7 +131,7 @@ namespace Mirror.KCP
         /// <param name="buffer">buffer where the data will be stored</param>
         /// <param name="len">size of the buffer</param>
         /// <returns>number of read bytes</returns>
-        /// <exception cref="ArgumentException">If length is negative</exception>
+        /// <exception cref="System.IndexOutOfRangeException">If the buffer is not big enough for the message</exception>
         public int Receive(byte[] buffer)
         {
             // kcp's ispeek feature is not supported.
@@ -921,7 +921,6 @@ namespace Mirror.KCP
 
                 if (value > ushort.MaxValue)
                     throw new ArgumentException("MTU must be lower than " + ushort.MaxValue);
-
 
                 buffer = new byte[(value + OVERHEAD) * 3];
                 mtu = value;
