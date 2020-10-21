@@ -450,7 +450,7 @@ namespace Mirror.KCP
             uint prev_una = snd_una;
             uint maxack = 0;
             uint latest_ts = 0;
-            int flag = 0;
+            bool flag = false;
 
             if (data == null || size < OVERHEAD) return -1;
 
@@ -458,28 +458,20 @@ namespace Mirror.KCP
 
             while (true)
             {
-                uint ts = 0;
-                uint sn = 0;
-                uint len = 0;
-                uint una = 0;
-                uint conv_ = 0;
-                ushort wnd = 0;
-                byte frg = 0;
-
                 if (size < OVERHEAD) break;
 
                 var decoder = new Decoder(data, offset);
-                conv_ = decoder.Decode32U();
+                uint conv_ = decoder.Decode32U();
 
                 if (conv_ != conv) return -1;
 
-                CommandType cmd = (CommandType)decoder.Decode8U();
-                frg = decoder.Decode8U();
-                wnd = decoder.Decode16U();
-                ts = decoder.Decode32U();
-                sn = decoder.Decode32U();
-                una = decoder.Decode32U();
-                len = decoder.Decode32U();
+                var cmd = (CommandType)decoder.Decode8U();
+                byte frg = decoder.Decode8U();
+                ushort wnd = decoder.Decode16U();
+                uint ts = decoder.Decode32U();
+                uint sn = decoder.Decode32U();
+                uint una = decoder.Decode32U();
+                uint len = decoder.Decode32U();
 
                 offset = decoder.Position;
                 size -= OVERHEAD;
@@ -509,9 +501,9 @@ namespace Mirror.KCP
                     }
                     ParseAck(sn);
                     ShrinkBuf();
-                    if (flag == 0)
+                    if (!flag)
                     {
-                        flag = 1;
+                        flag = true;
                         maxack = sn;
                         latest_ts = ts;
                     }
@@ -541,7 +533,7 @@ namespace Mirror.KCP
                         {
                             var seg = Segment.Lease();
                             seg.conversation = conv_;
-                            seg.cmd = (CommandType)cmd;
+                            seg.cmd = cmd;
                             seg.fragment = frg;
                             seg.window = wnd;
                             seg.timeStamp = ts;
@@ -566,7 +558,7 @@ namespace Mirror.KCP
                 size -= (int)len;
             }
 
-            if (flag != 0)
+            if (flag)
             {
                 ParseFastack(maxack, latest_ts);
             }
@@ -712,7 +704,7 @@ namespace Mirror.KCP
 
             // move data from snd_queue to snd_buf
             // sliding window, controlled by snd_nxt && sna_una+cwnd
-            while (snd_nxt < snd_una + cwnd_)
+            while (Utils.TimeDiff(snd_nxt, snd_una + cwnd_) < 0)
             {
                 if (snd_queue.Count == 0) break;
 
@@ -749,7 +741,7 @@ namespace Mirror.KCP
                     segment.resendTimeStamp = current + (uint)segment.rto + rtomin;
                 }
                 // RTO
-                else if (current >= segment.resendTimeStamp)
+                else if (Utils.TimeDiff(current, segment.resendTimeStamp) >= 0)
                 {
                     needsend = true;
                     segment.transmit++;
@@ -853,7 +845,7 @@ namespace Mirror.KCP
                 ts_flush = current;
             }
 
-            int slap = (int)(current - ts_flush);
+            int slap = Utils.TimeDiff(current, ts_flush);
 
             if (slap >= 10000 || slap < -10000)
             {
@@ -864,7 +856,7 @@ namespace Mirror.KCP
             if (slap >= 0)
             {
                 ts_flush += interval;
-                if (current >= ts_flush)
+                if (Utils.TimeDiff(current, ts_flush) >= 0)
                 {
                     ts_flush = current + interval;
                 }
