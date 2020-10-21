@@ -95,13 +95,13 @@ namespace Mirror.KCP
         public int WaitSnd => snd_buf.Count + snd_queue.Count;
 
 
+        // ikcp_create
         /// <summary>
         ///  create a new kcp control object, 'conv' must equal in two endpoint
         ///  from the same connection.
         /// </summary>
         /// <param name="conv">a number that must match between two endpoints</param>
         /// <param name="output">a delegate to use when sending data</param>
-        /// <remarks>ikcp_create</remarks>
         public Kcp(uint conv, Action<byte[], int> output)
         {
             this.conv = conv;
@@ -110,10 +110,13 @@ namespace Mirror.KCP
         }
 
         // ikcp_recv
-        // receive data from kcp state machine
-        //   returns number of bytes read.
-        //   returns negative on error.
-        // note: pass negative length to peek.
+        /// <summary>
+        /// receive data from kcp state machine
+        /// </summary>
+        /// <param name="buffer">buffer where the data will be stored</param>
+        /// <param name="len">size of the buffer</param>
+        /// <returns>number of read bytes</returns>
+        /// <exception cref="ArgumentException">If length is negative</exception>
         public int Receive(byte[] buffer, int len)
         {
             // kcp's ispeek feature is not supported.
@@ -124,7 +127,7 @@ namespace Mirror.KCP
             //
             //bool ispeek = len < 0;
             if (len < 0)
-                throw new NotSupportedException("Receive ispeek for negative len is not supported!");
+                throw new ArgumentException("Receive ispeek for negative len is not supported!");
 
             if (rcv_queue.Count == 0)
                 return -1;
@@ -910,6 +913,16 @@ namespace Mirror.KCP
 
             buffer = new byte[(mtu + OVERHEAD) * 3];
             this.mtu = mtu;
+        }
+
+        // ikcp_interval
+        public void SetInterval(uint interval)
+        {
+            if (interval > 5000)
+                interval = 5000;
+            else if (interval < 10)
+                interval = 10;
+            this.interval = interval;
         }
 
         // ikcp_nodelay
