@@ -422,7 +422,7 @@ namespace Mirror.KCP
                     repeat = true;
                     break;
                 }
-                if (Utils.TimeDiff(newseg.serialNumber, seg.serialNumber) > 0)
+                if (newseg.serialNumber > seg.serialNumber)
                 {
                     // this entry's sn is < newseg.sn, so let's stop
                     break;
