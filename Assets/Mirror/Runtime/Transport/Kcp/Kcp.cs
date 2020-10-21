@@ -587,12 +587,7 @@ namespace Mirror.KCP
         }
 
         // ikcp_wnd_unused
-        uint WndUnused()
-        {
-            if (rcv_queue.Count < rcv_wnd)
-                return rcv_wnd - (uint)rcv_queue.Count;
-            return 0;
-        }
+        uint WndUnused() => Math.Max(rcv_wnd - (uint)rcv_queue.Count, 0);
 
         // ikcp_flush
         // flush remain ack segments
