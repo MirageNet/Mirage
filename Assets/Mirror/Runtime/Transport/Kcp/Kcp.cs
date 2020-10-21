@@ -891,22 +891,21 @@ namespace Mirror.KCP
                 return current_;
             }
 
-            if (Utils.TimeDiff(current_, ts_flush_) >= 10000 ||
-                Utils.TimeDiff(current_, ts_flush_) < -10000)
+            if ((current_ - ts_flush_) >= 10000 || (current_ - ts_flush_) < -10000)
             {
                 ts_flush_ = current_;
             }
 
-            if (Utils.TimeDiff(current_, ts_flush_) >= 0)
+            if (current_ >= ts_flush_)
             {
                 return current_;
             }
 
-            int tm_flush = Utils.TimeDiff(ts_flush_, current_);
+            int tm_flush = (int)(ts_flush_ - current_);
 
             foreach (Segment seg in snd_buf)
             {
-                int diff = Utils.TimeDiff(seg.resendTimeStamp, current_);
+                int diff = (int)(seg.resendTimeStamp - current_);
                 if (diff <= 0)
                 {
                     return current_;
