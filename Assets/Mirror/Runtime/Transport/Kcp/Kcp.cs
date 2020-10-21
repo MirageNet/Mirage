@@ -533,7 +533,7 @@ namespace Mirror.KCP
                         {
                             var seg = Segment.Lease();
                             seg.conversation = conv_;
-                            seg.cmd = (CommandType)cmd;
+                            seg.cmd = cmd;
                             seg.fragment = frg;
                             seg.window = wnd;
                             seg.timeStamp = ts;
