@@ -39,7 +39,7 @@ namespace Mirror.KCP
             internal uint timestamp;
         }
 
-        private int reserved = 0;
+        private int reserved;
 
         /// <summary>
         /// How many bytes to reserve at beginning of a packet
@@ -65,7 +65,7 @@ namespace Mirror.KCP
         // kcp members.
         readonly uint conv;                    // conversation
         private uint mtu = MTU_DEF;
-        internal uint mss => (uint)(mtu - OVERHEAD - Reserved);           // maximum segment size
+        internal uint Mss => (uint)(mtu - OVERHEAD - Reserved);           // maximum segment size
         internal uint snd_una;                 // unacknowledged
         internal uint snd_nxt;
         internal uint rcv_nxt;
@@ -131,7 +131,7 @@ namespace Mirror.KCP
         /// <param name="buffer">buffer where the data will be stored</param>
         /// <param name="len">size of the buffer</param>
         /// <returns>number of read bytes</returns>
-        /// <exception cref="System.IndexOutOfRangeException">If the buffer is not big enough for the message</exception>
+        /// <exception cref="System.Exception">If the buffer is not big enough for the message</exception>
         public int Receive(byte[] buffer)
         {
             // kcp's ispeek feature is not supported.
@@ -148,7 +148,7 @@ namespace Mirror.KCP
                 return -2;
 
             if (peeksize > buffer.Length)
-                throw new IndexOutOfRangeException($"Buffer is {buffer.Length} bytes long, but the message is {peeksize} bytes long");
+                throw new Exception($"Buffer is {buffer.Length} bytes long, but the message is {peeksize} bytes long");
 
             bool recover = rcv_queue.Count >= rcv_wnd;
 
@@ -240,10 +240,10 @@ namespace Mirror.KCP
             // receive 'he' 'll' 'o'. we want to always receive 'hello'.
 
             int count;
-            if (length <= mss)
+            if (length <= Mss)
                 count = 1;
             else
-                count = (int)((length + mss - 1) / mss);
+                count = (int)((length + Mss - 1) / Mss);
 
             if (count >= WND_RCV)
                 throw new ArgumentException("Your packet is too big and doesn't fit WND_RCV, please reduce its length or increase the MTU with SetMtu().");
@@ -254,7 +254,7 @@ namespace Mirror.KCP
             // fragment
             for (int i = 0; i < count; i++)
             {
-                int size = length > (int)mss ? (int)mss : length;
+                int size = length > (int)Mss ? (int)Mss : length;
                 var seg = Segment.Lease();
 
                 seg.data.Write(buffer, offset, size);
@@ -570,21 +570,21 @@ namespace Mirror.KCP
                     if (cwnd < ssthresh)
                     {
                         cwnd++;
-                        incr += mss;
+                        incr += Mss;
                     }
                     else
                     {
-                        if (incr < mss) incr = mss;
-                        incr += mss * mss / incr + (mss / 16);
-                        if ((cwnd + 1) * mss <= incr)
+                        if (incr < Mss) incr = Mss;
+                        incr += Mss * Mss / incr + (Mss / 16);
+                        if ((cwnd + 1) * Mss <= incr)
                         {
-                            cwnd = (incr + mss - 1) / ((mss > 0) ? mss : 1);
+                            cwnd = (incr + Mss - 1) / ((Mss > 0) ? Mss : 1);
                         }
                     }
                     if (cwnd > rmt_wnd)
                     {
                         cwnd = rmt_wnd;
-                        incr = rmt_wnd * mss;
+                        incr = rmt_wnd * Mss;
                     }
                 }
             }
@@ -805,7 +805,7 @@ namespace Mirror.KCP
                 if (ssthresh < THRESH_MIN)
                     ssthresh = THRESH_MIN;
                 cwnd = ssthresh + resent;
-                incr = cwnd * mss;
+                incr = cwnd * Mss;
             }
 
             // congestion control, https://tools.ietf.org/html/rfc5681
@@ -816,13 +816,13 @@ namespace Mirror.KCP
                 if (ssthresh < THRESH_MIN)
                     ssthresh = THRESH_MIN;
                 cwnd = 1;
-                incr = mss;
+                incr = Mss;
             }
 
             if (cwnd < 1)
             {
                 cwnd = 1;
-                incr = mss;
+                incr = Mss;
             }
         }
 
