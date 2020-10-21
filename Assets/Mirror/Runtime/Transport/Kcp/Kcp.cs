@@ -618,7 +618,7 @@ namespace Mirror.KCP
                     else
                     {
                         if (incr < mss) incr = mss;
-                        incr += (mss * mss) / incr + (mss / 16);
+                        incr += mss * mss / incr + (mss / 16);
                         if ((cwnd + 1) * mss <= incr)
                         {
                             cwnd = (incr + mss - 1) / ((mss > 0) ? mss : 1);
