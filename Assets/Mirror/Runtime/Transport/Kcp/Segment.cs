@@ -15,7 +15,7 @@ namespace Mirror.KCP
         internal uint timeStamp;
         internal uint serialNumber;
         internal uint unacknowledged;
-        internal uint rto;
+        internal int rto;
         internal uint transmit;
         internal uint resendTimeStamp;
         internal uint fastack;

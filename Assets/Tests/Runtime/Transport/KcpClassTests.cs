@@ -35,7 +35,7 @@ namespace Mirror.Tests
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                server.ReserveBytes(uint.MaxValue);
+                server.Reserved = int.MaxValue;
             });
         }
     }
