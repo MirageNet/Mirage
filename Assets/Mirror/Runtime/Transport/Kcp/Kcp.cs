@@ -390,8 +390,7 @@ namespace Mirror.KCP
         {
             uint sn = newseg.serialNumber;
 
-            if (Utils.TimeDiff(sn, rcv_nxt + rcv_wnd) >= 0 ||
-                Utils.TimeDiff(sn, rcv_nxt) < 0)
+            if ((sn >= rcv_nxt + rcv_wnd) || (sn < rcv_nxt))
             {
                 SegmentDelete(newseg);
                 return;
