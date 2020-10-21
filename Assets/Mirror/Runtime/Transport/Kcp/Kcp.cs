@@ -704,7 +704,7 @@ namespace Mirror.KCP
                 }
                 else
                 {
-                    if (Utils.TimeDiff(current, ts_probe) >= 0)
+                    if (current >= ts_probe)
                     {
                         if (probe_wait < PROBE_INIT)
                             probe_wait = PROBE_INIT;
