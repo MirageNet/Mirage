@@ -47,35 +47,35 @@ namespace Mirror.KCP
         public int Reserved { get; set; } = 0;
 
         // kcp members.
-        readonly uint conv;          // conversation
-        internal uint mtu;
+        readonly uint conv;                    // conversation
+        internal uint mtu = MTU_DEF;
         internal uint mss => (uint)(mtu - OVERHEAD - Reserved);           // maximum segment size
-        internal uint snd_una;       // unacknowledged
+        internal uint snd_una;                 // unacknowledged
         internal uint snd_nxt;
         internal uint rcv_nxt;
-        internal uint ssthresh;      // slow start threshold
+        internal uint ssthresh = THRESH_INIT;  // slow start threshold
         internal int rx_rttval;
-        internal int rx_srtt;        // smoothed round trip time
-        internal int rx_rto;
-        internal int rx_minrto;
-        internal uint snd_wnd;       // send window
-        internal uint rcv_wnd;       // receive window
-        internal uint rmt_wnd;       // remote window
-        internal uint cwnd;          // congestion window
+        internal int rx_srtt;                  // smoothed round trip time
+        internal int rx_rto = RTO_DEF;
+        internal int rx_minrto = RTO_MIN;
+        internal uint snd_wnd = WND_SND;       // send window
+        internal uint rcv_wnd = WND_RCV;       // receive window
+        internal uint rmt_wnd;                 // remote window
+        internal uint cwnd;                    // congestion window
         internal uint probe;
-        internal uint interval;
+        internal uint interval = INTERVAL;
         internal uint ts_flush;
         internal uint xmit;
-        internal uint nodelay;       // not a bool. original Kcp has '<2 else' check.
+        internal uint nodelay;                 // not a bool. original Kcp has '<2 else' check.
         internal bool updated;
-        internal uint ts_probe;      // timestamp probe
+        internal uint ts_probe;                // timestamp probe
         internal uint probe_wait;
-        internal uint dead_link;
+        internal uint dead_link = DEADLINK;
         internal uint incr;
-        internal uint current;       // current time (milliseconds). set by Update.
+        internal uint current;                 // current time (milliseconds). set by Update.
 
         internal int fastresend;
-        internal int fastlimit;
+        internal int fastlimit = FASTACK_LIMIT;
         internal bool nocwnd;
         internal readonly Queue<Segment> snd_queue = new Queue<Segment>(16); // send queue
         internal readonly Queue<Segment> rcv_queue = new Queue<Segment>(16); // receive queue
@@ -100,17 +100,6 @@ namespace Mirror.KCP
         {
             this.conv = conv;
             this.output = output;
-            snd_wnd = WND_SND;
-            rcv_wnd = WND_RCV;
-            rmt_wnd = WND_RCV;
-            mtu = MTU_DEF;
-            rx_rto = RTO_DEF;
-            rx_minrto = RTO_MIN;
-            interval = INTERVAL;
-            ts_flush = INTERVAL;
-            ssthresh = THRESH_INIT;
-            fastlimit = FASTACK_LIMIT;
-            dead_link = DEADLINK;
             buffer = new byte[(mtu + OVERHEAD) * 3];
         }
 
