@@ -450,7 +450,7 @@ namespace Mirror.KCP
             uint prev_una = snd_una;
             uint maxack = 0;
             uint latest_ts = 0;
-            int flag = 0;
+            bool flag = false;
 
             if (data == null || size < OVERHEAD) return -1;
 
@@ -501,9 +501,9 @@ namespace Mirror.KCP
                     }
                     ParseAck(sn);
                     ShrinkBuf();
-                    if (flag == 0)
+                    if (!flag)
                     {
-                        flag = 1;
+                        flag = true;
                         maxack = sn;
                         latest_ts = ts;
                     }
@@ -558,7 +558,7 @@ namespace Mirror.KCP
                 size -= (int)len;
             }
 
-            if (flag != 0)
+            if (flag)
             {
                 ParseFastack(maxack, latest_ts);
             }
@@ -704,7 +704,7 @@ namespace Mirror.KCP
 
             // move data from snd_queue to snd_buf
             // sliding window, controlled by snd_nxt && sna_una+cwnd
-            while (snd_nxt < snd_una + cwnd_)
+            while (Utils.TimeDiff(snd_nxt, snd_una + cwnd_) < 0)
             {
                 if (snd_queue.Count == 0) break;
 
@@ -741,7 +741,7 @@ namespace Mirror.KCP
                     segment.resendTimeStamp = current + (uint)segment.rto + rtomin;
                 }
                 // RTO
-                else if (current >= segment.resendTimeStamp)
+                else if (Utils.TimeDiff(current, segment.resendTimeStamp) >= 0)
                 {
                     needsend = true;
                     segment.transmit++;
@@ -845,7 +845,7 @@ namespace Mirror.KCP
                 ts_flush = current;
             }
 
-            int slap = (int)(current - ts_flush);
+            int slap = Utils.TimeDiff(current, ts_flush);
 
             if (slap >= 10000 || slap < -10000)
             {
@@ -856,7 +856,7 @@ namespace Mirror.KCP
             if (slap >= 0)
             {
                 ts_flush += interval;
-                if (current >= ts_flush)
+                if (Utils.TimeDiff(current, ts_flush) >= 0)
                 {
                     ts_flush = current + interval;
                 }
