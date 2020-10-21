@@ -13,8 +13,6 @@ namespace Mirror.KCP
     /// </summary>
     public class Kcp
     {
-        // original Kcp has a define option, which is not defined by default:
-        // #define FASTACK_CONSERVE
 
         public const int RTO_NDL = 30;           // no delay min rto
         public const int RTO_MIN = 100;          // normal min rto
@@ -61,6 +59,8 @@ namespace Mirror.KCP
             }
 
         }
+
+        public bool FastAckConserve { get; set; } = false;
 
         // kcp members.
         readonly uint conv;                    // conversation
@@ -363,12 +363,10 @@ namespace Mirror.KCP
                 }
                 else if (sn != seg.serialNumber)
                 {
-#if !FASTACK_CONSERVE
-                    seg.fastack++;
-#else
-                    if (ts >= seg.ts)
+                    if (!FastAckConserve || ts >= seg.timeStamp)
+                    {
                         seg.fastack++;
-#endif
+                    }
                 }
             }
         }
@@ -515,22 +513,15 @@ namespace Mirror.KCP
                         maxack = sn;
                         latest_ts = ts;
                     }
-                    else
+                    else if (sn > maxack)
                     {
-                        if (sn > maxack)
+                        if (!FastAckConserve || ts > latest_ts)
                         {
-#if !FASTACK_CONSERVE
                             maxack = sn;
                             latest_ts = ts;
-#else
-                            if (ts > latest_ts)
-                            {
-                                maxack = sn;
-                                latest_ts = ts;
-                            }
-#endif
                         }
                     }
+
                 }
                 else if (cmd == CommandType.Push)
                 {
