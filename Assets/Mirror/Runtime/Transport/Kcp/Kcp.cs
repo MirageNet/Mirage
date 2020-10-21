@@ -357,15 +357,11 @@ namespace Mirror.KCP
             foreach (Segment seg in snd_buf)
             {
                 if (sn < seg.serialNumber)
-                {
                     break;
-                }
-                else if (sn != seg.serialNumber)
+
+                if (sn != seg.serialNumber && (!FastAckConserve || ts >= seg.timeStamp))
                 {
-                    if (!FastAckConserve || ts >= seg.timeStamp)
-                    {
-                        seg.fastack++;
-                    }
+                    seg.fastack++;
                 }
             }
         }
