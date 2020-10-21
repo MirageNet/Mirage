@@ -891,7 +891,7 @@ namespace Mirror.KCP
                 return current_;
             }
 
-            if ((current_ - ts_flush_) >= 10000 || (current_ - ts_flush_) < -10000)
+            if ((current_ - ts_flush_) >= 10000)
             {
                 ts_flush_ = current_;
             }
