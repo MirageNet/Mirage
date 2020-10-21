@@ -63,8 +63,8 @@ namespace Mirror.Tests
             c1.Disconnect();
 
             var memoryStream = new MemoryStream();
-            Assert.That(await c1.ReceiveAsync(memoryStream), Is.False);
-            Assert.That(await c2.ReceiveAsync(memoryStream), Is.False);
+            Assert.That((await c1.ReceiveAsync(memoryStream)).next, Is.False);
+            Assert.That((await c2.ReceiveAsync(memoryStream)).next, Is.False);
         });
 
         [UnityTest]
@@ -74,8 +74,8 @@ namespace Mirror.Tests
             c2.Disconnect();
 
             var memoryStream = new MemoryStream();
-            Assert.That(await c1.ReceiveAsync(memoryStream), Is.False);
-            Assert.That(await c2.ReceiveAsync(memoryStream), Is.False);
+            Assert.That((await c1.ReceiveAsync(memoryStream)).next, Is.False);
+            Assert.That((await c2.ReceiveAsync(memoryStream)).next, Is.False);
         });
 
         [Test]
