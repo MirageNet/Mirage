@@ -350,7 +350,7 @@ namespace Mirror.KCP
             int removed = 0;
             foreach (Segment seg in snd_buf)
             {
-                if (Utils.TimeDiff(una, seg.serialNumber) > 0)
+                if (una > seg.serialNumber)
                 {
                     // can't remove while iterating. remember how many to remove
                     // and do it after the loop.
