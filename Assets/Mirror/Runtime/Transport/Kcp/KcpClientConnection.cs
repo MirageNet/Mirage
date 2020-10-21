@@ -85,7 +85,7 @@ namespace Mirror.KCP
 
             var data = new ArraySegment<byte>(hello, 0, length);
             // send a greeting and see if the server replies
-            await SendAsync(data, 0);
+            await SendAsync(data);
 
             var stream = new MemoryStream();
             if (!(await ReceiveAsync(stream)).next)

@@ -18,7 +18,7 @@ namespace Mirror.KCP
         internal async UniTask HandshakeAsync()
         {
             // send a greeting and see if the server replies
-            await SendAsync(Hello, 0);
+            await SendAsync(Hello);
             var stream = new MemoryStream();
 
             // receive our first message and just throw it away
