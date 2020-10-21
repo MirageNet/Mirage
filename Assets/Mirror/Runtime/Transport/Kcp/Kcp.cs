@@ -918,7 +918,6 @@ namespace Mirror.KCP
         public uint Check(uint current_)
         {
             uint ts_flush_ = ts_flush;
-            int tm_flush = 0x7fffffff;
             int tm_packet = 0x7fffffff;
 
             if (!updated)
@@ -937,7 +936,7 @@ namespace Mirror.KCP
                 return current_;
             }
 
-            tm_flush = Utils.TimeDiff(ts_flush_, current_);
+            int tm_flush = Utils.TimeDiff(ts_flush_, current_);
 
             foreach (Segment seg in snd_buf)
             {
