@@ -80,7 +80,7 @@ namespace Mirror.Tests
                 SendAsync(server, data, length, token).Forget();
             });
             // fast mode so that we finish quicker
-            client.SetNoDelay();
+            client.SetNoDelay(KcpDelayMode.Fast3);
             client.Mtu = 1000;
             client.SetWindowSize(16, 16);
 
@@ -89,7 +89,7 @@ namespace Mirror.Tests
                 SendAsync(client, data, length, token).Forget();
             });
             // fast mode so that we finish quicker
-            server.SetNoDelay();
+            server.SetNoDelay(KcpDelayMode.Fast3);
             client.Mtu = 1000;
             client.SetWindowSize(16, 16);
 

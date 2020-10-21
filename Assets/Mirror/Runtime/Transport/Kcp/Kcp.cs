@@ -952,6 +952,29 @@ namespace Mirror.KCP
             this.nocwnd = nocwnd;
         }
 
+        /// <summary>
+        /// Convenience method to configure KCP for well known configurations
+        /// </summary>
+        /// <param name="mode"></param>
+        public void SetNoDelay(KcpDelayMode mode)
+        {
+            switch(mode)
+            {
+                case KcpDelayMode.Normal:
+                    SetNoDelay(0, 40, 0, false);
+                    break;
+                case KcpDelayMode.Fast:
+                    SetNoDelay(0, 30, 2, true);
+                    break;
+                case KcpDelayMode.Fast2:
+                    SetNoDelay(1, 20, 2, true);
+                    break;
+                case KcpDelayMode.Fast3:
+                    SetNoDelay(1, 10, 2, true);
+                    break;
+            }
+        }
+
         // ikcp_wndsize
         public void SetWindowSize(uint sendWindow, uint receiveWindow)
         {

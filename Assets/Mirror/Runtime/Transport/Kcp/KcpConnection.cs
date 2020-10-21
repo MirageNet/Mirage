@@ -61,8 +61,7 @@ namespace Mirror.KCP
                 Reserved = RESERVED
             };
 
-            // TODO redo the delay mode enum
-            kcp.SetNoDelay();
+            kcp.SetNoDelay(delayMode);
             open = true;
 
             Tick().Forget();
