@@ -685,7 +685,7 @@ namespace Mirror.KCP
 
             // move data from snd_queue to snd_buf
             // sliding window, controlled by snd_nxt && sna_una+cwnd
-            while (Utils.TimeDiff(snd_nxt, snd_una + cwnd_) < 0)
+            while (snd_nxt < snd_una + cwnd_)
             {
                 if (snd_queue.Count == 0) break;
 
@@ -722,7 +722,7 @@ namespace Mirror.KCP
                     segment.resendTimeStamp = current + (uint)segment.rto + rtomin;
                 }
                 // RTO
-                else if (Utils.TimeDiff(current, segment.resendTimeStamp) >= 0)
+                else if (current >= segment.resendTimeStamp)
                 {
                     needsend = true;
                     segment.transmit++;
@@ -826,7 +826,7 @@ namespace Mirror.KCP
                 ts_flush = current;
             }
 
-            int slap = Utils.TimeDiff(current, ts_flush);
+            int slap = (int)(current - ts_flush);
 
             if (slap >= 10000 || slap < -10000)
             {
@@ -837,7 +837,7 @@ namespace Mirror.KCP
             if (slap >= 0)
             {
                 ts_flush += interval;
-                if (Utils.TimeDiff(current, ts_flush) >= 0)
+                if (current >= ts_flush)
                 {
                     ts_flush = current + interval;
                 }
@@ -864,22 +864,21 @@ namespace Mirror.KCP
                 return current_;
             }
 
-            if (Utils.TimeDiff(current_, ts_flush_) >= 10000 ||
-                Utils.TimeDiff(current_, ts_flush_) < -10000)
+            if ((current_ - ts_flush_) >= 10000)
             {
                 ts_flush_ = current_;
             }
 
-            if (Utils.TimeDiff(current_, ts_flush_) >= 0)
+            if (current_ >= ts_flush_)
             {
                 return current_;
             }
 
-            int tm_flush = Utils.TimeDiff(ts_flush_, current_);
+            int tm_flush = (int)(ts_flush_ - current_);
 
             foreach (Segment seg in snd_buf)
             {
-                int diff = Utils.TimeDiff(seg.resendTimeStamp, current_);
+                int diff = (int)(seg.resendTimeStamp - current_);
                 if (diff <= 0)
                 {
                     return current_;
