@@ -1,5 +1,3 @@
-// Kcp based on https://github.com/skywind3000/kcp
-// Kept as close to original as possible.
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,8 +5,12 @@ using UnityEngine;
 namespace Mirror.KCP
 {
     //See SetNoDelay for details
-    public enum KcpDelayMode { Normal, Fast, Fast2, Fast3 } 
+    public enum KcpDelayMode { Normal, Fast, Fast2, Fast3 }
 
+    /// <summary>
+    /// A reliability algorithm over an unreliable transport such as UDP.
+    /// based on https://github.com/skywind3000/kcp
+    /// </summary>
     public class Kcp
     {
         // original Kcp has a define option, which is not defined by default:
@@ -39,7 +41,10 @@ namespace Mirror.KCP
             internal uint timestamp;
         }
 
-        // reserve these many bytes for headers
+        /// <summary>
+        /// How many bytes to reserve at beginning of a packet
+        /// the extra bytes can be used to store a CRC or other information
+        /// </summary>
         public int Reserved { get; set; } = 0;
 
         // kcp members.
@@ -89,9 +94,14 @@ namespace Mirror.KCP
         // get how many packet is waiting to be sent
         public int WaitSnd => snd_buf.Count + snd_queue.Count;
 
-        // ikcp_create
-        // create a new kcp control object, 'conv' must equal in two endpoint
-        // from the same connection.
+
+        /// <summary>
+        ///  create a new kcp control object, 'conv' must equal in two endpoint
+        ///  from the same connection.
+        /// </summary>
+        /// <param name="conv">a number that must match between two endpoints</param>
+        /// <param name="output">a delegate to use when sending data</param>
+        /// <remarks>ikcp_create</remarks>
         public Kcp(uint conv, Action<byte[], int> output)
         {
             this.conv = conv;
