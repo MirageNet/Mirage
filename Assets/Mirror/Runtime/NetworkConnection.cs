@@ -231,7 +231,7 @@ namespace Mirror
         // the client. they would be detected as a message. send messages instead.
         internal virtual UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channels.DefaultReliable)
         {
-            return connection.SendAsync(segment);
+            return connection.SendAsync(segment, channelId);
         }
 
         public override string ToString()
@@ -332,10 +332,13 @@ namespace Mirror
         {
             var buffer = new MemoryStream();
 
-            while ((await connection.ReceiveAsync(buffer)).next)
-            {
+            (bool next, int channel) = await connection.ReceiveAsync(buffer);
+
+            while (next) { 
                 buffer.TryGetBuffer(out ArraySegment<byte> data);
-                TransportReceive(data, Channels.DefaultReliable);
+                TransportReceive(data, channel);
+
+                (next, channel) = await connection.ReceiveAsync(buffer);
             }
         }
     }

@@ -86,7 +86,7 @@ namespace Mirror.Tests
         public IEnumerator SendDataFromClient() => UniTask.ToCoroutine(async () =>
         {
             byte[] data = { (byte)Random.Range(1, 255) };
-            await clientConnection.SendAsync(new ArraySegment<byte>(data), 0);
+            await clientConnection.SendAsync(new ArraySegment<byte>(data));
 
             var buffer = new MemoryStream();
             await serverConnection.ReceiveAsync(buffer);
@@ -97,7 +97,7 @@ namespace Mirror.Tests
         public IEnumerator SendDataFromServer() => UniTask.ToCoroutine(async () =>
         {
             byte[] data = { (byte)Random.Range(1, 255) };
-            await serverConnection.SendAsync(new ArraySegment<byte>(data), 0);
+            await serverConnection.SendAsync(new ArraySegment<byte>(data));
 
             var buffer = new MemoryStream();
             await clientConnection.ReceiveAsync(buffer);

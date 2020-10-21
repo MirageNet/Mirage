@@ -97,7 +97,7 @@ namespace Mirror.Tcp
         #endregion
 
         #region Sending
-        public async UniTask SendAsync(ArraySegment<byte> data, int channel = Channel.Reliable)
+        public async UniTask SendAsync(ArraySegment<byte> data, int channel = Channels.DefaultReliable)
         {
             try
             {
