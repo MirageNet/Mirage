@@ -219,6 +219,7 @@ namespace Mirror.KCP
                 int msgSize = unreliable.PeekSize();
                 buffer.SetLength(msgSize);
                 unreliable.Receive(buffer.GetBuffer(), (int)buffer.Length);
+                buffer.Position = msgSize;
                 return (true, Channel.Unreliable);
             }
             else
@@ -226,7 +227,7 @@ namespace Mirror.KCP
                 int msgSize = kcp.PeekSize();
                 // we have some data,  return it
                 buffer.SetLength(msgSize);
-                kcp.Receive(buffer.GetBuffer(), (int)buffer.Length);
+                kcp.Receive(buffer.GetBuffer(), msgSize);
                 buffer.Position = msgSize;
 
                 // if we receive a disconnect message,  then close everything

@@ -825,7 +825,7 @@ namespace Mirror.KCP
 
                     offset += segment.Encode(buffer, offset);
 
-                    if (segment.data.Position > 0)
+                    if (segment.data.Length > 0)
                     {
                         segment.data.Position = 0;
                         segment.data.Read(buffer, offset, (int)segment.data.Length);
