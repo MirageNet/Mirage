@@ -162,26 +162,7 @@ namespace Mirror.KCP
                     break;
             }
 
-            // move available data from rcv_buf -> rcv_queue
-            int removed = 0;
-            foreach (Segment seg in rcv_buf)
-            {
-                if (seg.serialNumber == rcv_nxt && rcv_queue.Count < rcv_wnd)
-                {
-                    // can't remove while iterating. remember how many to remove
-                    // and do it after the loop.
-                    // note: don't return segment. we only add it to rcv_queue
-                    ++removed;
-                    // add
-                    rcv_queue.Enqueue(seg);
-                    rcv_nxt++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            rcv_buf.RemoveRange(0, removed);
+            MoveReceiveBufferDataToReceiveQueue();
 
             // fast recover
             if (rcv_queue.Count < rcv_wnd && recover)
