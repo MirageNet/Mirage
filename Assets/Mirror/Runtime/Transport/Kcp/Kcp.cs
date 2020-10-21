@@ -147,7 +147,7 @@ namespace Mirror.KCP
                 return -2;
 
             if (peeksize > buffer.Length)
-                throw new Exception($"Buffer is {buffer.Length} bytes long, but the message is {peeksize} bytes long");
+                return -3;
 
             bool recover = rcv_queue.Count >= rcv_wnd;
 
