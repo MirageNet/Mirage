@@ -561,14 +561,6 @@ namespace Mirror.KCP
                     // tell remote my window size
                     probe |= ASK_TELL;
                 }
-                else if (cmd == CommandType.WindowTell)
-                {
-                    // do nothing
-                }
-                else
-                {
-                    return -3;
-                }
 
                 offset += (int)len;
                 size -= (int)len;
