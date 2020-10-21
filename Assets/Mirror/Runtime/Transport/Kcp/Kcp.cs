@@ -473,7 +473,7 @@ namespace Mirror.KCP
 
                 if (conv_ != conv) return -1;
 
-                CommandType cmd = (CommandType)decoder.Decode8U();
+                var cmd = (CommandType)decoder.Decode8U();
                 frg = decoder.Decode8U();
                 wnd = decoder.Decode16U();
                 ts = decoder.Decode32U();
