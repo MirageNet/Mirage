@@ -242,8 +242,7 @@ namespace Mirror.KCP
                 int size = length > (int)mss ? (int)mss : length;
                 var seg = Segment.Lease();
 
-                if (length > 0)
-                    seg.data.Write(buffer, offset, size);
+                seg.data.Write(buffer, offset, size);
 
                 // seg.len = size: WriteBytes sets segment.Position!
                 seg.fragment = (byte)(count - i - 1);
