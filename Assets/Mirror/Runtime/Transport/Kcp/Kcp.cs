@@ -216,23 +216,22 @@ namespace Mirror.KCP
 
         // ikcp_send
         // sends byte[] to the other end.
-        public int Send(byte[] buffer, int offset, int len)
+        public void Send(byte[] buffer, int offset, int length)
         {
-            int count;
-
-            if (len < 0)
-                return -1;
+            if (length <= 0)
+                throw new ArgumentException("You cannot send a packet with a length of 0.");
 
             // streaming mode: removed. we never want to send 'hello' and
             // receive 'he' 'll' 'o'. we want to always receive 'hello'.
 
-            if (len <= mss)
+            int count;
+            if (length <= mss)
                 count = 1;
             else
-                count = (int)((len + mss - 1) / mss);
+                count = (int)((length + mss - 1) / mss);
 
             if (count >= WND_RCV)
-                return -2;
+                throw new ArgumentException("Your packet is too big and doesn't fit WND_RCV, please reduce its length or increase the MTU with SetMtu().");
 
             if (count == 0)
                 count = 1;
@@ -240,21 +239,17 @@ namespace Mirror.KCP
             // fragment
             for (int i = 0; i < count; i++)
             {
-                int size = len > (int)mss ? (int)mss : len;
+                int size = length > (int)mss ? (int)mss : length;
                 var seg = Segment.Lease();
 
-                if (len > 0)
-                {
-                    seg.data.Write(buffer, offset, size);
-                }
+                seg.data.Write(buffer, offset, size);
+
                 // seg.len = size: WriteBytes sets segment.Position!
                 seg.fragment = (byte)(count - i - 1);
                 snd_queue.Enqueue(seg);
                 offset += size;
-                len -= size;
+                length -= size;
             }
-
-            return 0;
         }
 
         // ikcp_update_ack
@@ -899,8 +894,9 @@ namespace Mirror.KCP
                     tm_packet = diff;
             }
 
-            uint minimal = (uint)Math.Min(tm_packet, tm_flush);
-            minimal = Math.Min(minimal, interval);
+            uint minimal = (uint)(tm_packet < tm_flush ? tm_packet : tm_flush);
+            if (minimal >= interval)
+                minimal = interval;
 
             return current_ + minimal;
         }
