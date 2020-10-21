@@ -181,17 +181,21 @@ namespace Mirror.KCP
         {
             int length = 0;
 
-            if (rcv_queue.Count == 0) return -1;
+            if (rcv_queue.Count == 0)
+                return -1;
 
             Segment seq = rcv_queue.Peek();
-            if (seq.fragment == 0) return (int)seq.data.Length;
+            if (seq.fragment == 0)
+                return (int)seq.data.Length;
 
-            if (rcv_queue.Count < seq.fragment + 1) return -1;
+            if (rcv_queue.Count < seq.fragment + 1)
+                return -1;
 
             foreach (Segment seg in rcv_queue)
             {
                 length += (int)seg.data.Length;
-                if (seg.fragment == 0) break;
+                if (seg.fragment == 0)
+                    break;
             }
 
             return length;
@@ -203,17 +207,22 @@ namespace Mirror.KCP
         {
             int count;
 
-            if (len < 0) return -1;
+            if (len < 0)
+                return -1;
 
             // streaming mode: removed. we never want to send 'hello' and
             // receive 'he' 'll' 'o'. we want to always receive 'hello'.
 
-            if (len <= mss) count = 1;
-            else count = (int)((len + mss - 1) / mss);
+            if (len <= mss)
+                count = 1;
+            else
+                count = (int)((len + mss - 1) / mss);
 
-            if (count >= WND_RCV) return -2;
+            if (count >= WND_RCV)
+                return -2;
 
-            if (count == 0) count = 1;
+            if (count == 0)
+                count = 1;
 
             // fragment
             for (int i = 0; i < count; i++)
@@ -247,10 +256,12 @@ namespace Mirror.KCP
             else
             {
                 int delta = rtt - rx_srtt;
-                if (delta < 0) delta = -delta;
+                if (delta < 0)
+                    delta = -delta;
                 rx_rttval = (3 * rx_rttval + delta) / 4;
                 rx_srtt = (7 * rx_srtt + rtt) / 8;
-                if (rx_srtt < 1) rx_srtt = 1;
+                if (rx_srtt < 1)
+                    rx_srtt = 1;
             }
             int rto = rx_srtt + Math.Max((int)interval, 4 * rx_rttval);
             rx_rto = Mathf.Clamp(rto, rx_minrto, RTO_MAX);
@@ -422,18 +433,21 @@ namespace Mirror.KCP
             uint latest_ts = 0;
             bool flag = false;
 
-            if (data == null || size < OVERHEAD) return -1;
+            if (data == null || size < OVERHEAD)
+                return -1;
 
             int offset = Reserved;
 
             while (true)
             {
-                if (size < OVERHEAD) break;
+                if (size < OVERHEAD)
+                    break;
 
                 var decoder = new Decoder(data, offset);
                 uint conv_ = decoder.Decode32U();
 
-                if (conv_ != conv) return -1;
+                if (conv_ != conv)
+                    return -1;
 
                 var cmd = (CommandType)decoder.Decode8U();
                 byte frg = decoder.Decode8U();
@@ -446,7 +460,8 @@ namespace Mirror.KCP
                 offset = decoder.Position;
                 size -= OVERHEAD;
 
-                if (size < len || len < 0) return -2;
+                if (size < len || len < 0)
+                    return -2;
 
                 switch (cmd)
                 {
@@ -597,7 +612,8 @@ namespace Mirror.KCP
             }
 
             // 'ikcp_update' haven't been called.
-            if (!updated) return;
+            if (!updated)
+                return;
 
             // kcp only stack allocs a segment here for performance, leaving
             // its data buffer null because this segment's data buffer is never
@@ -670,13 +686,15 @@ namespace Mirror.KCP
 
             // calculate window size
             uint cwnd_ = Math.Min(snd_wnd, rmt_wnd);
-            if (!nocwnd) cwnd_ = Math.Min(cwnd, cwnd_);
+            if (!nocwnd)
+                cwnd_ = Math.Min(cwnd, cwnd_);
 
             // move data from snd_queue to snd_buf
             // sliding window, controlled by snd_nxt && sna_una+cwnd
             while (snd_nxt < snd_una + cwnd_)
             {
-                if (snd_queue.Count == 0) break;
+                if (snd_queue.Count == 0)
+                    break;
 
                 Segment newseg = snd_queue.Dequeue();
 
@@ -849,19 +867,13 @@ namespace Mirror.KCP
             int tm_packet = 0x7fffffff;
 
             if (!updated)
-            {
                 return current_;
-            }
 
             if ((current_ - ts_flush_) >= 10000)
-            {
                 ts_flush_ = current_;
-            }
 
             if (current_ >= ts_flush_)
-            {
                 return current_;
-            }
 
             int tm_flush = (int)(ts_flush_ - current_);
 
@@ -869,14 +881,14 @@ namespace Mirror.KCP
             {
                 int diff = (int)(seg.resendTimeStamp - current_);
                 if (diff <= 0)
-                {
                     return current_;
-                }
-                if (diff < tm_packet) tm_packet = diff;
+                if (diff < tm_packet)
+                    tm_packet = diff;
             }
 
             uint minimal = (uint)(tm_packet < tm_flush ? tm_packet : tm_flush);
-            if (minimal >= interval) minimal = interval;
+            if (minimal >= interval)
+                minimal = interval;
 
             return current_ + minimal;
         }
@@ -895,8 +907,10 @@ namespace Mirror.KCP
         // ikcp_interval
         public void SetInterval(uint interval)
         {
-            if (interval > 5000) interval = 5000;
-            else if (interval < 10) interval = 10;
+            if (interval > 5000)
+                interval = 5000;
+            else if (interval < 10)
+                interval = 10;
             this.interval = interval;
         }
 
@@ -909,18 +923,16 @@ namespace Mirror.KCP
         {
             this.nodelay = nodelay;
             if (nodelay != 0)
-            {
                 rx_minrto = RTO_NDL;
-            }
             else
-            {
                 rx_minrto = RTO_MIN;
-            }
 
             if (interval >= 0)
             {
-                if (interval > 5000) interval = 5000;
-                else if (interval < 10) interval = 10;
+                if (interval > 5000)
+                    interval = 5000;
+                else if (interval < 10)
+                    interval = 10;
                 this.interval = interval;
             }
 
