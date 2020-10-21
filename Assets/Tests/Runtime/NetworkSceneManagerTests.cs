@@ -95,17 +95,6 @@ namespace Mirror.Tests
             Assert.That(client.Connection.IsReady);
         }
 
-        [Test]
-        public void ReadyTwiceTest()
-        {
-            sceneManager.SetClientReady();
-
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                sceneManager.SetClientReady();
-            });
-        }
-
         int ClientChangeCalled;
         public void ClientChangeScene(string sceneName, SceneOperation sceneOperation)
         {

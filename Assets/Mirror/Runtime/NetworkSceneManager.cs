@@ -163,9 +163,6 @@ namespace Mirror
             if (!client || !client.Active)
                 throw new InvalidOperationException("Ready() called with an null or disconnected client");
 
-            if (client.Connection.IsReady)
-                throw new InvalidOperationException("A connection has already been set as ready. There can only be one.");
-
             if (logger.LogEnabled()) logger.Log("ClientScene.Ready() called.");
 
             // Set these before sending the ReadyMessage, otherwise host client
