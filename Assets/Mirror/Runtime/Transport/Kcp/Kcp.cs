@@ -565,10 +565,6 @@ namespace Mirror.KCP
                 {
                     // do nothing
                 }
-                else
-                {
-                    return -3;
-                }
 
                 offset += (int)len;
                 size -= (int)len;
