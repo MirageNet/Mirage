@@ -501,7 +501,7 @@ namespace Mirror.KCP
 
                 if (size < OVERHEAD) break;
 
-                Decoder decoder = new Decoder(data, offset);
+                var decoder = new Decoder(data, offset);
                 conv_ = decoder.Decode32U();
 
                 if (conv_ != conv) return -1;
