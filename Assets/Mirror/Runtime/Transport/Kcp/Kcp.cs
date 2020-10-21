@@ -242,7 +242,7 @@ namespace Mirror.KCP
             for (int i = 0; i < count; i++)
             {
                 int size = len > (int)mss ? (int)mss : len;
-                Segment seg = Segment.Lease();
+                var seg = Segment.Lease();
 
                 if (len > 0)
                 {
@@ -537,7 +537,7 @@ namespace Mirror.KCP
                         AckPush(sn, ts);
                         if (Utils.TimeDiff(sn, rcv_nxt) >= 0)
                         {
-                            Segment seg = Segment.Lease();
+                            var seg = Segment.Lease();
                             seg.conversation = conv_;
                             seg.cmd = (CommandType)cmd;
                             seg.fragment = frg;
@@ -648,7 +648,7 @@ namespace Mirror.KCP
             // used. that's fine in C, but in C# our segment is class so we need
             // to allocate and most importantly, not forget to deallocate it
             // before returning.
-            Segment seg = Segment.Lease();
+            var seg = Segment.Lease();
             seg.conversation = conv;
             seg.cmd = CommandType.Ack;
             seg.window = WndUnused();
