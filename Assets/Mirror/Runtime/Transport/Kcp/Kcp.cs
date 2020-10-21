@@ -853,7 +853,7 @@ namespace Mirror.KCP
                 ts_flush = current;
             }
 
-            int slap = Utils.TimeDiff(current, ts_flush);
+            int slap = (int)(current - ts_flush);
 
             if (slap >= 10000 || slap < -10000)
             {
@@ -864,7 +864,7 @@ namespace Mirror.KCP
             if (slap >= 0)
             {
                 ts_flush += interval;
-                if (Utils.TimeDiff(current, ts_flush) >= 0)
+                if (current >= ts_flush)
                 {
                     ts_flush = current + interval;
                 }
