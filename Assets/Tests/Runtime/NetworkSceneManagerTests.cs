@@ -71,10 +71,10 @@ namespace Mirror.Tests
 
             sceneManager.ChangeServerScene("testScene");
 
-            await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.NetworkSceneName.Equals("Assets/Mirror/Tests/Runtime/testScene.unity"));
+            await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.NetworkScenePath.Equals("Assets/Mirror/Tests/Runtime/testScene.unity"));
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
-            Assert.That(sceneManager.NetworkSceneName, Is.EqualTo("Assets/Mirror/Tests/Runtime/testScene.unity"));
+            Assert.That(sceneManager.NetworkScenePath, Is.EqualTo("Assets/Mirror/Tests/Runtime/testScene.unity"));
             Assert.That(invokeClientSceneMessage, Is.True);
             Assert.That(invokeNotReadyMessage, Is.True);
         });
@@ -180,7 +180,7 @@ namespace Mirror.Tests
         {
             UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
             clientSceneManager.ClientChangeScene.AddListener(func1);
-            clientSceneManager.ClientSceneMessage(null, new SceneMessage { sceneName = "testScene" });
+            clientSceneManager.ClientSceneMessage(null, new SceneMessage { scenePath = "testScene" });
 
             await AsyncUtil.WaitUntilWithTimeout(() => clientSceneManager.asyncOperation != null);
 
@@ -188,7 +188,7 @@ namespace Mirror.Tests
 
             await AsyncUtil.WaitUntilWithTimeout(() => clientSceneManager.asyncOperation.isDone);
 
-            Assert.That(clientSceneManager.NetworkSceneName, Is.EqualTo("Assets/Mirror/Tests/Runtime/testScene.unity"));
+            Assert.That(clientSceneManager.NetworkScenePath, Is.EqualTo("Assets/Mirror/Tests/Runtime/testScene.unity"));
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         });
@@ -196,7 +196,7 @@ namespace Mirror.Tests
         [Test]
         public void NetworkSceneNameStringValueTest()
         {
-            Assert.That(clientSceneManager.NetworkSceneName.Equals(SceneManager.GetActiveScene().path));
+            Assert.That(clientSceneManager.NetworkScenePath.Equals(SceneManager.GetActiveScene().path));
         }
 
         [Test]
