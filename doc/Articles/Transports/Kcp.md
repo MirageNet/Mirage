@@ -8,9 +8,9 @@ Simple, message based, MMO Scale UDP networking in C\#.
 - Zero allocations.
 - Portable, works in every platform except webgl
 - DoS prevention with [HashCash](http://www.hashcash.org/).
-- Data corruption detection.
+- Data corruption detection with [CRC64](https://en.wikipedia.org/wiki/Cyclic_redundancy_check).
 - [reliable and low latency](https://github.com/skywind3000/kcp/blob/master/README.en.md)
-- Lightweight, needs very little CPU and RAM
+- Uses very little CPU and RAM
 
 # Settings
 
