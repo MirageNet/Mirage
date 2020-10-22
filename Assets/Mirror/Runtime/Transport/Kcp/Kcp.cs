@@ -555,6 +555,13 @@ namespace Mirror.KCP
             }
 
             // cwnd update when packet arrived
+            UpdateCongestionWindow(prev_una);
+
+            return 0;
+        }
+
+        private void UpdateCongestionWindow(uint prev_una)
+        {
             if (snd_una > prev_una && cwnd < rmt_wnd)
             {
                 if (cwnd < ssthresh)
@@ -577,8 +584,6 @@ namespace Mirror.KCP
                     incr = rmt_wnd * Mss;
                 }
             }
-
-            return 0;
         }
 
         // ikcp_wnd_unused
