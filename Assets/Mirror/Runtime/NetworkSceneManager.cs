@@ -190,25 +190,25 @@ namespace Mirror
         /// This causes the server to switch scenes and sets the NetworkScenePath.
         /// <para>Clients that connect to this server will automatically switch to this scene. This automatically sets clients to be not-ready. The clients must call Ready() again to participate in the new scene.</para>
         /// </summary>
-        /// <param name="newScenePath"></param>
+        /// <param name="scenePath"></param>
         /// <param name="operation"></param>
-        public void ChangeServerScene(string newScenePath, SceneOperation sceneOperation = SceneOperation.Normal)
+        public void ChangeServerScene(string scenePath, SceneOperation sceneOperation = SceneOperation.Normal)
         {
-            if (string.IsNullOrEmpty(newScenePath))
+            if (string.IsNullOrEmpty(scenePath))
             {
-                throw new ArgumentNullException(nameof(newScenePath), "ServerChangeScene: " + nameof(newScenePath) + " cannot be empty or null");
+                throw new ArgumentNullException(nameof(scenePath), "ServerChangeScene: " + nameof(scenePath) + " cannot be empty or null");
             }
 
-            if (logger.LogEnabled()) logger.Log("ServerChangeScene " + newScenePath);
+            if (logger.LogEnabled()) logger.Log("ServerChangeScene " + scenePath);
             server.SetAllClientsNotReady();
 
             // Let server prepare for scene change
-            OnServerChangeScene(newScenePath, sceneOperation);
+            OnServerChangeScene(scenePath, sceneOperation);
 
-            StartCoroutine(ApplySceneOperation(newScenePath, sceneOperation));
+            StartCoroutine(ApplySceneOperation(scenePath, sceneOperation));
 
             // notify all clients about the new scene
-            server.SendToAll(new SceneMessage { scenePath = newScenePath, sceneOperation = sceneOperation });
+            server.SendToAll(new SceneMessage { scenePath = scenePath, sceneOperation = sceneOperation });
         }
 
         /// <summary>
