@@ -4,14 +4,13 @@ KCP is the default transport in MirrorNG
 
 Simple, message based, MMO Scale UDP networking in C\#.
 
-- KCP is fast and extremely reliable, designed for [MMO](https://assetstore.unity.com/packages/templates/systems/ummorpg-51212) scale Networking.  
-- KCP is 100% C#. No native code means it works in all platforms (except webgl)
-- KCP features DoS prevention with an algorithm based on [HashCash](http://www.hashcash.org/).
-- KCP features CRC64, which makes it virtually impossible for accidental data corruption.
-- KCP scales to really large amounts of clients (we tested 800 but it should do a lot more than that).
-- KCP is a well known algorithm that provides [reliability and low latency](https://github.com/skywind3000/kcp/blob/master/README.en.md)
-- KCP sends and receives data without allocations.
-- KCP is lightweight, in my old I3 6300, a server with 800 clients used less than 20% of one core and less than 200MB of RAM.
+- Scales to 1000+ clients.
+- Zero allocations.
+- Portable, works in every platform except webgl
+- DoS prevention with [HashCash](http://www.hashcash.org/).
+- Data corruption detection.
+- [reliable and low latency](https://github.com/skywind3000/kcp/blob/master/README.en.md)
+- Lightweight, needs very little CPU and RAM
 
 # Settings
 
