@@ -7,16 +7,14 @@ A common use case for the MultiplexTransport is a server listening to both webso
 To use the MultiplexTransport follow these steps:
 
 1. Add a gameobject with a NetworkManager to your scene if you have not done so
-2. By default, Unity will add TelepathyTransport to your NetworkManager game object
+2. By default, Unity will add KcpTransport to your NetworkManager game object
 3. Add a MultiplexTransport component to the gameobject
 4. Assign the MultiplexTransport component in your NetworkManager's transport
 5. Add a WebsocketTransport component to the gameobject
-6. Add the TelepathyTransport component to the MultiplexTransport as the first transport
+6. Add the KcpTransport component to the MultiplexTransport as the first transport
 7. Add the WebsocketTransport component to the MultiplexTransport as the second transport
 
-Please note that Telepathy and WebsocketTransport cannot listen to the same port.  By default Telepathy listens to 7777 and the websocket transport listens to 7778.
-
-If you build your game as a webgl game,  the TelepathyTransport will be skipped and your client will use the websocket transport.   If you build your game as a mobile or desktop app,  it will choose TelepathyTransport. The server will happily accept connections from both.
+If you build your game as a webgl game,  the KcpTransport will be skipped and your client will use the websocket transport.   If you build your game as a mobile or desktop app,  it will choose KcpTransport. The server will happily accept connections from both.
 
 Here is what the configuration should look like:
 
