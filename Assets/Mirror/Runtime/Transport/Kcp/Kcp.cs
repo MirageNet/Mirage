@@ -737,16 +737,13 @@ namespace Mirror.KCP
                     lost = true;
                 }
                 // fast retransmit
-                else if (segment.fastack >= resent)
+                else if (segment.fastack >= resent && (segment.transmit <= fastlimit || fastlimit <= 0))
                 {
-                    if (segment.transmit <= fastlimit || fastlimit <= 0)
-                    {
-                        needsend = true;
-                        segment.transmit++;
-                        segment.fastack = 0;
-                        segment.resendTimeStamp = current + (uint)segment.rto;
-                        change++;
-                    }
+                    needsend = true;
+                    segment.transmit++;
+                    segment.fastack = 0;
+                    segment.resendTimeStamp = current + (uint)segment.rto;
+                    change++;
                 }
 
                 if (needsend)
