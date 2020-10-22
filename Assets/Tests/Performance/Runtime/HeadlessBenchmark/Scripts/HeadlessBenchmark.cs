@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using Mirror.Tcp;
 using Mirror.KCP;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
@@ -178,21 +177,6 @@ namespace Mirror.HeadlessBenchmark
             string transport = GetArgValue("-transport");
             if (!string.IsNullOrEmpty(transport))
             {
-                if (transport.Equals("tcp"))
-                {
-#pragma warning disable CS0618 // Type or member is obsolete
-                    TcpTransport newTransport = networkManager.gameObject.AddComponent<TcpTransport>();
-#pragma warning restore CS0618 // Type or member is obsolete
-
-                    //Try to apply port if exists and needed by transport.
-                    if (!string.IsNullOrEmpty(port))
-                    {
-                        newTransport.Port = int.Parse(port);
-                    }
-
-                    networkManager.server.transport = newTransport;
-                    networkManager.client.Transport = newTransport;
-                }
                 if (transport.Equals("kcp"))
                 {
                     KcpTransport newTransport = networkManager.gameObject.AddComponent<KcpTransport>();
