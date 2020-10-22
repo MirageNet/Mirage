@@ -555,29 +555,26 @@ namespace Mirror.KCP
             }
 
             // cwnd update when packet arrived
-            if (snd_una > prev_una)
+            if (snd_una > prev_una && cwnd < rmt_wnd)
             {
-                if (cwnd < rmt_wnd)
+                if (cwnd < ssthresh)
                 {
-                    if (cwnd < ssthresh)
+                    cwnd++;
+                    incr += Mss;
+                }
+                else
+                {
+                    if (incr < Mss) incr = Mss;
+                    incr += Mss * Mss / incr + (Mss / 16);
+                    if ((cwnd + 1) * Mss <= incr)
                     {
-                        cwnd++;
-                        incr += Mss;
+                        cwnd = (incr + Mss - 1) / ((Mss > 0) ? Mss : 1);
                     }
-                    else
-                    {
-                        if (incr < Mss) incr = Mss;
-                        incr += Mss * Mss / incr + (Mss / 16);
-                        if ((cwnd + 1) * Mss <= incr)
-                        {
-                            cwnd = (incr + Mss - 1) / ((Mss > 0) ? Mss : 1);
-                        }
-                    }
-                    if (cwnd > rmt_wnd)
-                    {
-                        cwnd = rmt_wnd;
-                        incr = rmt_wnd * Mss;
-                    }
+                }
+                if (cwnd > rmt_wnd)
+                {
+                    cwnd = rmt_wnd;
+                    incr = rmt_wnd * Mss;
                 }
             }
 
