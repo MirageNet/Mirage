@@ -2,7 +2,7 @@
 
 The MultiplexTransport is not a transport itself,  but it allows you to combine other transports so that your clients can connect to your servers via either one of them.
 
-A common use case for the MultiplexTransport is a server listening to both websockets and TCP.  Your webgl clients can connect to the server using websockets and your mobile or desktop clients can connect to the same server via TCP.  In HLAPI,  you had to chose between websockets and UDP, but you cannot use both at the same time. You can configure any number of transports in the MultiplexTransport.
+A common use case for the MultiplexTransport is a server listening to both websockets and KCP.  Your webgl clients can connect to the server using websockets and your mobile or desktop clients can connect to the same server via KCP.  In HLAPI,  you had to chose between websockets and UDP, but you cannot use both at the same time. You can configure any number of transports in the MultiplexTransport.
 
 To use the MultiplexTransport follow these steps:
 

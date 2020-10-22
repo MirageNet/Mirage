@@ -213,7 +213,7 @@ In HLAPI, you configure the port and local address in the NetworkManager. One of
 
 ### 13. Update your firewall and router
 
-LLAPI uses UDP. MirrorNG uses TCP by default. This means you may need to change your router port forwarding and firewall rules in your machine to expose the TCP port instead of UDP. This highly depends on your router and operating system.
+MirrorNG uses UDP by default. This means you may need to change your router port forwarding and firewall rules in your machine to expose the UDP port. This highly depends on your router and operating system.
 
 ## Video version
 
