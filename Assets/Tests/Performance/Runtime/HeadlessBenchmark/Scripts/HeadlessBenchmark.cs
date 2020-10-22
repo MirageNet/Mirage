@@ -163,7 +163,7 @@ namespace Mirror.HeadlessBenchmark
                 Console.WriteLine("Also provide these arguments to control the autostart process:");
                 Console.WriteLine("-server (will run in server only mode)");
                 Console.WriteLine("-client 1234 (will run the specified number of clients)");
-                Console.WriteLine("-transport kcp (transport to be used in test. add more by editing HeadlessBenchmark.cs)");
+                Console.WriteLine("-transport tcp (transport to be used in test. add more by editing HeadlessBenchmark.cs)");
                 Console.WriteLine("-address example.com (will run the specified number of clients)");
                 Console.WriteLine("-port 1234 (port used by transport)");
                 Console.WriteLine("-monster 100 (number of monsters to spawn on the server)");
@@ -175,23 +175,21 @@ namespace Mirror.HeadlessBenchmark
         void ParseForTransport()
         {
             string transport = GetArgValue("-transport");
-            if (!string.IsNullOrEmpty(transport))
+            if (string.IsNullOrEmpty(transport) || transport.Equals("kcp"))
             {
-                if (transport.Equals("kcp"))
+                KcpTransport newTransport = networkManager.gameObject.AddComponent<KcpTransport>();
+
+                //Try to apply port if exists and needed by transport.
+                if (!string.IsNullOrEmpty(port))
                 {
-                    KcpTransport newTransport = networkManager.gameObject.AddComponent<KcpTransport>();
-
-                    //Try to apply port if exists and needed by transport.
-                    if (!string.IsNullOrEmpty(port))
-                    {
-                        newTransport.Port = ushort.Parse(port);
-                    }
-                    networkManager.server.transport = newTransport;
-                    networkManager.client.Transport = newTransport;
-
-                    kcpTransport = newTransport;
+                    newTransport.Port = ushort.Parse(port);
                 }
+                networkManager.server.transport = newTransport;
+                networkManager.client.Transport = newTransport;
+
+                kcpTransport = newTransport;
             }
+
         }
 
         string GetArgValue(string name)
