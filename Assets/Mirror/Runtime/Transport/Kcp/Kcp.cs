@@ -508,13 +508,10 @@ namespace Mirror.KCP
                         maxack = sn;
                         latest_ts = ts;
                     }
-                    else if (sn > maxack)
+                    else if (sn > maxack && (!FastAckConserve || ts > latest_ts))
                     {
-                        if (!FastAckConserve || ts > latest_ts)
-                        {
-                            maxack = sn;
-                            latest_ts = ts;
-                        }
+                        maxack = sn;
+                        latest_ts = ts;
                     }
 
                 }
