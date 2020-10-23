@@ -43,42 +43,42 @@ jobs:
         with:
           fetch-depth: 0
         
-      # - name: Activate license
-      #   uses: MirrorNG/unity-runner@3.0.0
-      #   with:
-      #     entrypoint: /activate.sh
+      - name: Activate license
+        uses: MirrorNG/unity-runner@3.0.0
+        with:
+          entrypoint: /activate.sh
           
-      # - name: Generate Solution
-      #   uses: MirrorNG/unity-runner@3.0.0
-      #   with:
-      #     # Arguments to pass to unity
-      #     args: -buildTarget StandaloneWindows64 -customBuildName MirrorNG -customBuildPath ./build/StandaloneWindows64 -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
+      - name: Generate Solution
+        uses: MirrorNG/unity-runner@3.0.0
+        with:
+          # Arguments to pass to unity
+          args: -buildTarget StandaloneWindows64 -customBuildName MirrorNG -customBuildPath ./build/StandaloneWindows64 -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
   
-      # # Configure test runner
-      # - name: Run editor Tests
-      #   uses: MirrorNG/unity-runner@3.0.0
-      #   with:
-      #     args: -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+      # Configure test runner
+      - name: Run editor Tests
+        uses: MirrorNG/unity-runner@3.0.0
+        with:
+          args: -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
 
-      # - name: Run play Tests
-      #   uses: MirrorNG/unity-runner@3.0.0
-      #   with:
-      #     args: -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+      - name: Run play Tests
+        uses: MirrorNG/unity-runner@3.0.0
+        with:
+          args: -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
           
-      # # Upload artifacts
-      # - name: Archive test results
-      #   uses: actions/upload-artifact@v1
-      #   if: always()
-      #   with:
-      #     name: Test results
-      #     path: Tests
+      # Upload artifacts
+      - name: Archive test results
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: Test results
+          path: Tests
 
-      # - name: Publish test results
-      #   uses: MirrorNG/nunit-reporter@v1.0.9
-      #   if: always()
-      #   with:
-      #     path: "Tests/*.xml"
-      #     access-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish test results
+        uses: MirrorNG/nunit-reporter@v1.0.9
+        if: always()
+        with:
+          path: "Tests/*.xml"
+          access-token: ${{ secrets.GITHUB_TOKEN }}
   
       - name: Release
         uses: cycjimmy/semantic-release-action@v2
@@ -96,18 +96,21 @@ jobs:
         env:
           OUTPUTS: ${{ toJson(steps.semantic.outputs) }}
 
-      # - name: SonarQube analysis
-      #   if: always()
-      #   uses: MirrorNG/unity-runner@3.0.0
-      #   with:
-      #     entrypoint: /sonar-scanner.sh
-      #     projectKey: MirrorNG_MirrorNG
-      #     projectName: MirrorNG
-      #     sonarOrganisation: mirrorng
-      #     beginArguments: /d:sonar.verbose="false" /d:sonar.cs.nunit.reportsPaths=Tests/editmode-results.xml,Tests/playimode-results.xml /d:sonar.cs.opencover.reportsPaths=Tests/workspace-opencov/EditMode/TestCoverageResults_0000.xml,Tests/workspace-opencov/PlayMode/TestCoverageResults_0000.xml
-      #   env:
-      #     FrameworkPathOverride: /opt/Unity/Editor/Data/MonoBleedingEdge/
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: SonarQube analysis
+        if: always()
+        uses: MirrorNG/unity-runner@3.0.0
+        with:
+          entrypoint: /sonar-scanner.sh
+          projectKey: MirrorNG_MirrorNG
+          projectName: MirrorNG
+          sonarOrganisation: mirrorng
+          beginArguments: >-
+            /d:sonar.verbose="false" 
+            /d:sonar.cs.nunit.reportsPaths=Tests/editmode-results.xml,Tests/playimode-results.xml 
+            /d:sonar.cs.opencover.reportsPaths=Tests/workspace-opencov/EditMode/TestCoverageResults_0000.xml,Tests/workspace-opencov/PlayMode/TestCoverageResults_0000.xml
+        env:
+          FrameworkPathOverride: /opt/Unity/Editor/Data/MonoBleedingEdge/
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   
