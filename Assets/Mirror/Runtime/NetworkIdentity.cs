@@ -827,8 +827,6 @@ namespace Mirror
             // check if components are in byte.MaxRange just to be 100% sure
             // that we avoid overflows
             NetworkBehaviour[] components = NetworkBehaviours;
-            if (components.Length > byte.MaxValue)
-                throw new IndexOutOfRangeException($"{name} has more than {byte.MaxValue} components. This is not supported.");
 
             // serialize all components
             for (int i = 0; i < components.Length; ++i)
