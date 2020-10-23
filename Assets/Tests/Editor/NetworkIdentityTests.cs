@@ -612,8 +612,8 @@ namespace Mirror.Tests
         [Test]
         public void NoMoreThan64Components()
         {
-            // add 65 components
-            for (int i = 0; i < 65; ++i)
+            // add byte.MaxValue+1 components
+            for (int i = 0; i < byte.MaxValue+1; ++i)
             {
                 gameObject.AddComponent<SerializeTest1NetworkBehaviour>();
             }
