@@ -393,31 +393,17 @@ namespace Mirror
             NetworkConnection.Send(connections, msg, channelId);
         }
 
-        private readonly List<NetworkIdentity> DirtyObjectsTmp = new List<NetworkIdentity>();
-
         // The user should never need to pump the update loop manually
         internal void Update()
         {
             if (!Active)
                 return;
 
-            DirtyObjectsTmp.Clear();
-
             foreach (NetworkIdentity identity in DirtyObjects)
             {
                 if (identity != null)
-                {
-                    identity.ServerUpdate();
-
-                    if (identity.StillDirty())
-                        DirtyObjectsTmp.Add(identity);
-                }                
+                    identity.ServerUpdate();           
             }
-
-            DirtyObjects.Clear();
-
-            foreach (NetworkIdentity obj in DirtyObjectsTmp)
-                DirtyObjects.Add(obj);
         }
 
         async UniTaskVoid ConnectionAcceptedAsync(INetworkConnection conn)
