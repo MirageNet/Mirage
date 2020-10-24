@@ -1,3 +1,31 @@
+## [53.0.1](https://github.com/MirrorNG/MirrorNG/compare/v53.0.0...v53.0.1) (2020-10-24)
+
+
+### Performance Improvements
+
+* faster component serialization ([#430](https://github.com/MirrorNG/MirrorNG/issues/430)) ([b675027](https://github.com/MirrorNG/MirrorNG/commit/b67502711798bebe15ae58c96d6b09145fe0e8ed)), closes [#2331](https://github.com/MirrorNG/MirrorNG/issues/2331)
+
+# [53.0.0](https://github.com/MirrorNG/MirrorNG/compare/v52.1.1...v53.0.0) (2020-10-23)
+
+
+* Remove FallbackTransport (#432) ([261bf24](https://github.com/MirrorNG/MirrorNG/commit/261bf24bfcf5a201e7e96ba1a4dc16f9429f8121)), closes [#432](https://github.com/MirrorNG/MirrorNG/issues/432)
+* Remove FallbackTransport ([2c04202](https://github.com/MirrorNG/MirrorNG/commit/2c042021b965322e7fc08d9f82177bf9cf5268ff))
+
+
+### BREAKING CHANGES
+
+* FallbackTransport removed
+
+* fix docs
+* FallbackTransport removed
+
+## [52.1.1](https://github.com/MirrorNG/MirrorNG/compare/v52.1.0...v52.1.1) (2020-10-23)
+
+
+### Performance Improvements
+
+* simplify NetworkWriter/Reader dispose ([#431](https://github.com/MirrorNG/MirrorNG/issues/431)) ([bf62345](https://github.com/MirrorNG/MirrorNG/commit/bf62345f22137dd69f476b5ae1b2da63029e68a9))
+
 # [52.1.0](https://github.com/MirrorNG/MirrorNG/compare/v52.0.1...v52.1.0) (2020-10-23)
 
 
