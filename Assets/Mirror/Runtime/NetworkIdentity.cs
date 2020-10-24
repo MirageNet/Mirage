@@ -873,6 +873,17 @@ namespace Mirror
             return (ownerWritten, observersWritten);
         }
 
+        // Determines if there are changes in any component that have not
+        // been synchronized yet. Probably due to not meeting the syncInterval
+        internal bool StillDirty()
+        {
+            foreach (NetworkBehaviour behaviour in NetworkBehaviours)
+            {
+                if (behaviour.StillDirty())
+                    return true;
+            }
+            return false;
+        }
 
         void OnDeserializeSafely(NetworkBehaviour comp, NetworkReader reader, bool initialState)
         {
