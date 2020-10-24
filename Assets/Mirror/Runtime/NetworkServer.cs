@@ -412,12 +412,12 @@ namespace Mirror
                     if (identity.StillDirty())
                         DirtyObjectsTmp.Add(identity);
                 }
-
-                DirtyObjects.Clear();
-
-                foreach (NetworkIdentity obj in DirtyObjectsTmp)
-                    DirtyObjects.Add(obj);
             }
+
+            DirtyObjects.Clear();
+
+            foreach (NetworkIdentity obj in DirtyObjectsTmp)
+                DirtyObjects.Add(obj);
         }
 
         async UniTaskVoid ConnectionAcceptedAsync(INetworkConnection conn)
