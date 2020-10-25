@@ -362,10 +362,6 @@ namespace Mirror
             {
                 // connection closed,  normal
             }
-            catch (Exception ex)
-            {
-                logger.LogException(ex);
-            }
         }
     }
 }
