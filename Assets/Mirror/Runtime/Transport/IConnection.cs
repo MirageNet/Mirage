@@ -23,8 +23,9 @@ namespace Mirror
         /// reads a message from connection
         /// </summary>
         /// <param name="buffer">buffer where the message will be written</param>
-        /// <returns>true if we got a message, false if we got disconnected</returns>
-        UniTask<(bool next, int channel)> ReceiveAsync(MemoryStream buffer);
+        /// <returns>The channel where we got the message</returns>
+        /// <exception cref="EndOfStreamException">If the connetion has been closed</exception>
+        UniTask<int> ReceiveAsync(MemoryStream buffer);
 
         /// <summary>
         /// Disconnect this connection

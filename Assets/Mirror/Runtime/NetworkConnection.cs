@@ -347,13 +347,24 @@ namespace Mirror
         {
             var buffer = new MemoryStream();
 
-            (bool next, int channel) = await connection.ReceiveAsync(buffer);
+            try
+            {
+                while (true)
+                {
 
-            while (next) { 
-                buffer.TryGetBuffer(out ArraySegment<byte> data);
-                TransportReceive(data, channel);
+                    int channel = await connection.ReceiveAsync(buffer);
 
-                (next, channel) = await connection.ReceiveAsync(buffer);
+                    buffer.TryGetBuffer(out ArraySegment<byte> data);
+                    TransportReceive(data, channel);
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                // connection closed,  normal
+            }
+            catch (Exception ex)
+            {
+                logger.LogException(ex);
             }
         }
     }
