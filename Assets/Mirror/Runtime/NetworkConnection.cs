@@ -211,15 +211,8 @@ namespace Mirror
 
                 foreach (INetworkConnection conn in connections)
                 {
-                    if (conn is NetworkConnection networkConnection)
-                    {
-                        // send to all connections, but don't wait for them
-                        networkConnection.SendAsync(segment, channelId).Forget();
-                    }
-                    else
-                    {
-                        conn.SendAsync(msg, channelId).Forget();
-                    }
+                    // send to all connections, but don't wait for them
+                    conn.SendAsync(segment, channelId).Forget();
                     count++;
                 }
 
@@ -229,7 +222,7 @@ namespace Mirror
         
         // internal because no one except Mirror should send bytes directly to
         // the client. they would be detected as a message. send messages instead.
-        internal virtual UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable)
+        public UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
             return connection.SendAsync(segment, channelId);
         }
