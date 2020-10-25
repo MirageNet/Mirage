@@ -24,7 +24,7 @@ namespace Mirror
         /// </summary>
         /// <param name="buffer">buffer where the message will be written</param>
         /// <returns>The channel where we got the message</returns>
-        /// <exception cref="EndOfStreamException">If the connetion has been closed</exception>
+        /// <remark> throws System.IO.EndOfStreamException if the connetion has been closed</remark>
         UniTask<int> ReceiveAsync(MemoryStream buffer);
 
         /// <summary>
