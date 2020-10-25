@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Threading;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Mirror
 {
+
+    using UniTaskChannel = Cysharp.Threading.Tasks.Channel;
 
     /// <summary>
     /// A connection that is directly connected to another connection
@@ -22,12 +25,9 @@ namespace Mirror
 
         }
 
-        // buffer where we can queue up data
-        readonly NetworkWriter writer = new NetworkWriter();
-        readonly NetworkReader reader = new NetworkReader(new byte[] { });
+        private static readonly Stack<MemoryStream> pool = new Stack<MemoryStream>();
 
-        // counts how many messages we have pending
-        private readonly SemaphoreSlim MessageCount = new SemaphoreSlim(0);
+        private readonly Channel<MemoryStream> incomingMsg = UniTaskChannel.CreateSingleConsumerUnbounded<MemoryStream>();
 
         public static (IConnection, IConnection) CreatePipe()
         {
@@ -43,11 +43,8 @@ namespace Mirror
         public void Disconnect()
         {
             // disconnect both ends of the pipe
-            connected.writer.WriteBytesAndSizeSegment(new ArraySegment<byte>(Array.Empty<byte>()));
-            connected.MessageCount.Release();
-
-            writer.WriteBytesAndSizeSegment(new ArraySegment<byte>(Array.Empty<byte>()));
-            MessageCount.Release();
+            connected.incomingMsg.Writer.TryComplete();
+            incomingMsg.Writer.TryComplete();
         }
 
         // technically not an IPEndpoint,  will fix later
@@ -55,37 +52,41 @@ namespace Mirror
         
         public async UniTask<int> ReceiveAsync(MemoryStream buffer)
         {
-            // wait for a message
-            await MessageCount.WaitAsync();
-
-            buffer.SetLength(0);
-            reader.buffer = writer.ToArraySegment();
-
-            ArraySegment<byte> data = reader.ReadBytesAndSizeSegment();
-
-            if (data.Count == 0)
-                throw new EndOfStreamException();
-
-            buffer.SetLength(0);
-            buffer.Write(data.Array, data.Offset, data.Count);
-
-            if (reader.Position == reader.Length)
+            try
             {
-                // if we reached the end of the buffer, reset the buffer to recycle memory
-                writer.SetLength(0);
-                reader.Position = 0;
-            }
+                MemoryStream data = await incomingMsg.Reader.ReadAsync();
+                data.Position = 0;
+                buffer.SetLength(0);
+                data.WriteTo(buffer);
 
-            return 0;
+                pool.Push(data);
+
+                return 0;
+            }
+            catch (ChannelClosedException)
+            {
+                throw new EndOfStreamException();
+            }
         }
 
         public UniTask SendAsync(ArraySegment<byte> data, int channel = Channel.Reliable)
         {
-            // add some data to the writer in the connected connection
-            // and increase the message count
-            connected.writer.WriteBytesAndSizeSegment(data);
-            connected.MessageCount.Release();
+            MemoryStream stream = LeaseBuffer(data.Count);
+            stream.Write(data.Array, data.Offset, data.Count);
+
+            connected.incomingMsg.Writer.TryWrite(stream);
             return UniTask.CompletedTask;
+        }
+
+        private MemoryStream LeaseBuffer(int capacity)
+        {
+            if (pool.Count > 0)
+            {
+                MemoryStream stream = pool.Pop();
+                stream.SetLength(0);
+                return stream;
+            }
+            return new MemoryStream(capacity);
         }
     }
 }
