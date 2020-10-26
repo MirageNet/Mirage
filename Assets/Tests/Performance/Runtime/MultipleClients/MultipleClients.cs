@@ -61,11 +61,14 @@ namespace Mirror.Tests.Performance.Runtime
 
         private IEnumerator StartClient(int i, Transport transport)
         {
-            var clientGo = new GameObject($"Client {i}", typeof(NetworkClient));
+            var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(NetworkObjectManager));
             NetworkClient client = clientGo.GetComponent<NetworkClient>();
+            NetworkObjectManager objectManager = clientGo.GetComponent<NetworkObjectManager>();
+            objectManager.client = client;
+            objectManager.Start();
             client.Transport = transport;
 
-            client.RegisterPrefab(monsterPrefab.gameObject);
+            objectManager.RegisterPrefab(monsterPrefab.gameObject);
             client.ConnectAsync("localhost");
             while (!client.IsConnected)
                 yield return null;

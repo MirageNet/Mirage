@@ -17,6 +17,7 @@ namespace Mirror.Tests
         protected GameObject serverGo;
         protected NetworkServer server;
         protected NetworkSceneManager serverSceneManager;
+        protected NetworkObjectManager serverObjectManager;
         protected GameObject serverPlayerGO;
         protected NetworkIdentity serverIdentity;
         protected T serverComponent;
@@ -24,6 +25,7 @@ namespace Mirror.Tests
         protected GameObject clientGo;
         protected NetworkClient client;
         protected NetworkSceneManager clientSceneManager;
+        protected NetworkObjectManager clientObjectManager;
         protected GameObject clientPlayerGO;
         protected NetworkIdentity clientIdentity;
         protected T clientComponent;
@@ -39,8 +41,8 @@ namespace Mirror.Tests
         [UnitySetUp]
         public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
         {
-            serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(NetworkServer));
-            clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(NetworkClient));
+            serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(NetworkObjectManager), typeof(NetworkServer));
+            clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(NetworkObjectManager), typeof(NetworkClient));
             testTransport = serverGo.AddComponent<LoopbackTransport>();
 
             await UniTask.Delay(1);
@@ -53,16 +55,26 @@ namespace Mirror.Tests
 
             serverSceneManager = serverGo.GetComponent<NetworkSceneManager>();
             clientSceneManager = clientGo.GetComponent<NetworkSceneManager>();
-
             serverSceneManager.server = server;
             clientSceneManager.client = client;
+            serverSceneManager.Start();
+            clientSceneManager.Start();
+
+            serverObjectManager = serverGo.GetComponent<NetworkObjectManager>();
+            clientObjectManager = clientGo.GetComponent<NetworkObjectManager>();
+            serverObjectManager.server = server;
+            clientObjectManager.client = client;
+            serverObjectManager.networkSceneManager = serverSceneManager;
+            clientObjectManager.networkSceneManager = clientSceneManager;
+            serverObjectManager.Start();
+            clientObjectManager.Start();
 
             ExtraSetup();
 
             // create and register a prefab
             playerPrefab = new GameObject("serverPlayer", typeof(NetworkIdentity), typeof(T));
             playerPrefab.GetComponent<NetworkIdentity>().AssetId = Guid.NewGuid();
-            client.RegisterPrefab(playerPrefab);
+            clientObjectManager.RegisterPrefab(playerPrefab);
 
             // wait for client and server to initialize themselves
             await UniTask.Delay(1);
