@@ -97,6 +97,14 @@ namespace Mirror.Tests
         });
 
         [Test]
+        public void GetPrefabEmptyNullTest()
+        {
+            GameObject result = objectManager.GetPrefab(Guid.Empty);
+
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
         public void ReplacePlayerHostTest()
         {
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
