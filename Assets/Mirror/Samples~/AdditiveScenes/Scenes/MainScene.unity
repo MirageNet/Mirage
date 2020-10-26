@@ -1836,13 +1836,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1661834279}
-  - component: {fileID: 1661834281}
   - component: {fileID: 1661834278}
   - component: {fileID: 1661834283}
   - component: {fileID: 1661834282}
   - component: {fileID: 1661834280}
   - component: {fileID: 1661834284}
   - component: {fileID: 1661834285}
+  - component: {fileID: 1661834281}
   m_Layer: 0
   m_Name: Network
   m_TagString: Untagged
@@ -1895,6 +1895,7 @@ MonoBehaviour:
   client: {fileID: 1661834282}
   server: {fileID: 1661834283}
   sceneManager: {fileID: 1661834284}
+  objectManager: {fileID: 1661834281}
   playerPrefab: {fileID: 8537344390966522168, guid: a5bdca0a2315d43499be7dcef473fbc7, type: 3}
   startPositionIndex: 0
   startPositions:
@@ -1912,15 +1913,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1661834277}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6442dc8070ceb41f094e44de0bf87274, type: 3}
+  m_Script: {fileID: 11500000, guid: a2cbc85c1c2f1c249bbe95ae110bbcde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NetworkManager: {fileID: 1661834278}
-  NetworkAddress: localhost
-  NetworkAddressInput: {fileID: 0}
-  OfflineGO: {fileID: 0}
-  OnlineGO: {fileID: 0}
-  StatusLabel: {fileID: 0}
+  client: {fileID: 1661834282}
+  server: {fileID: 1661834283}
+  networkSceneManager: {fileID: 1661834284}
 --- !u!114 &1661834282
 MonoBehaviour:
   m_ObjectHideFlags: 0
