@@ -396,11 +396,13 @@ namespace Mirror
 
             if (identity == null)
             {
+                //is the object on the prefab or scene object lists?
                 identity = msg.sceneId == 0 ? SpawnPrefab(msg) : SpawnSceneObject(msg);
             }
 
             if (identity == null)
             {
+                //object could not be found.
                 throw new InvalidOperationException($"Could not spawn assetId={msg.assetId} scene={msg.sceneId} netId={msg.netId}");
             }
 

@@ -6,7 +6,6 @@ using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 using NSubstitute;
 using Cysharp.Threading.Tasks;
-using UnityEditor.VersionControl;
 
 namespace Mirror.Tests
 {
@@ -102,7 +101,7 @@ namespace Mirror.Tests
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                objectManager.RegisterPrefab(new GameObject(), testSpawnDelegate, testUnspawnDelegate);
+                objectManager.RegisterPrefab(new GameObject(), TestSpawnDelegate, TestUnspawnDelegate);
             });
         }
 
@@ -115,20 +114,20 @@ namespace Mirror.Tests
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                objectManager.RegisterPrefab(prefabObject, testSpawnDelegate, testUnspawnDelegate);
+                objectManager.RegisterPrefab(prefabObject, TestSpawnDelegate, TestUnspawnDelegate);
             });
 
             Object.Destroy(prefabObject);
         }
 
-        GameObject testSpawnDelegate(Vector3 position, Guid assetId)
+        GameObject TestSpawnDelegate(Vector3 position, Guid assetId)
         {
             return new GameObject();
         }
 
-        void testUnspawnDelegate(GameObject gameObject)
+        void TestUnspawnDelegate(GameObject gameObject)
         {
-
+            Debug.Log("Just testing. Nothing to see here");
         }
 
         [Test]
