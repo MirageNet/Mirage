@@ -27,10 +27,6 @@ namespace Mirror
                 if (networkSceneManager != null)
                     networkSceneManager.ClientSceneChanged.AddListener(OnClientSceneChanged);
             }
-            if (server != null)
-            {
-
-            }
         }
 
         void OnClientConnected(INetworkConnection conn)
