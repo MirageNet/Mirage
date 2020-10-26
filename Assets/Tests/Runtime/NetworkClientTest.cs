@@ -6,6 +6,7 @@ using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 using NSubstitute;
 using Cysharp.Threading.Tasks;
+using UnityEditor.VersionControl;
 
 namespace Mirror.Tests
 {
@@ -95,6 +96,40 @@ namespace Mirror.Tests
 
             Object.Destroy(prefabObject);
         });
+
+        [Test]
+        public void RegisterPrefabDelegateNoIdentityExceptionTest()
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                objectManager.RegisterPrefab(new GameObject(), testSpawnDelegate, testUnspawnDelegate);
+            });
+        }
+
+        [Test]
+        public void RegisterPrefabDelegateEmptyIdentityExceptionTest()
+        {
+            GameObject prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
+            NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
+            identity.AssetId = Guid.Empty;
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                objectManager.RegisterPrefab(prefabObject, testSpawnDelegate, testUnspawnDelegate);
+            });
+
+            Object.Destroy(prefabObject);
+        }
+
+        GameObject testSpawnDelegate(Vector3 position, Guid assetId)
+        {
+            return new GameObject();
+        }
+
+        void testUnspawnDelegate(GameObject gameObject)
+        {
+
+        }
 
         [Test]
         public void GetPrefabEmptyNullTest()
