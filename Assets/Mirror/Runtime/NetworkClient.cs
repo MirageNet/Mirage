@@ -90,7 +90,7 @@ namespace Mirror
         /// This is a dictionary of the prefabs that are registered on the client with ClientScene.RegisterPrefab().
         /// <para>The key to the dictionary is the prefab asset Id.</para>
         /// </summary>
-        private readonly Dictionary<Guid, GameObject> prefabs = new Dictionary<Guid, GameObject>();
+        internal readonly Dictionary<Guid, GameObject> prefabs = new Dictionary<Guid, GameObject>();
 
         /// <summary>
         /// This is dictionary of the disabled NetworkIdentity objects in the scene that could be spawned by messages from the server.
