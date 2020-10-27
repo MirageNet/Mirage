@@ -71,12 +71,6 @@ namespace Mirror
         /// </summary>
         public bool IsConnected => connectState == ConnectState.Connected;
 
-        /// <summary>
-        /// List of prefabs that will be registered with the spawning system.
-        /// <para>For each of these prefabs, ClientManager.RegisterPrefab() will be automatically invoke.</para>
-        /// </summary>
-        public List<GameObject> spawnPrefabs = new List<GameObject>();
-
         public readonly NetworkTime Time = new NetworkTime();
 
         public Transport Transport;

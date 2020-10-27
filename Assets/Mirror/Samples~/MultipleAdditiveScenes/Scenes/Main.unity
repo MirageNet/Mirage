@@ -244,6 +244,10 @@ MonoBehaviour:
   client: {fileID: 69965671}
   server: {fileID: 69965672}
   networkSceneManager: {fileID: 69965674}
+  spawnPrefabs:
+  - {fileID: 5513112217680870098, guid: a104de86221e66a48832c222471d4f1e, type: 3}
+  - {fileID: 1480027675339556, guid: 1f4d376d8ca693049abd1744e4c79fad, type: 3}
+  - {fileID: 1139254171913846, guid: 8cec47ed46e0eff45966a5173d3aa0d3, type: 3}
 --- !u!114 &69965668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -286,6 +290,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   server: {fileID: 69965672}
   client: {fileID: 69965671}
+  sceneManager: {fileID: 0}
   instances: 3
   gameScene: 
 --- !u!4 &69965670
@@ -324,7 +329,6 @@ MonoBehaviour:
   Disconnected:
     m_PersistentCalls:
       m_Calls: []
-  spawnPrefabs: []
   Transport: {fileID: 69965673}
 --- !u!114 &69965672
 MonoBehaviour:
