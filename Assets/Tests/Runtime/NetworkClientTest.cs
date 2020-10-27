@@ -250,5 +250,14 @@ namespace Mirror.Tests
 
             Object.Destroy(prefabObject);
         }
+
+        [Test]
+        public void SpawnSceneObjectNullTest()
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                Assert.That(objectManager.SpawnSceneObject(new SpawnMessage()), Is.Null);
+            });
+        }
     }
 }
