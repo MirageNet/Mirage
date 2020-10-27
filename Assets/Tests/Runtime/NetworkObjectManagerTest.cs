@@ -178,10 +178,9 @@ namespace Mirror.Tests
         [Test]
         public void SpawnSceneObjectNullTest()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                Assert.That(objectManager.SpawnSceneObject(new SpawnMessage()), Is.Null);
-            });
+            LogAssert.ignoreFailingMessages = true;
+            Assert.That(objectManager.SpawnSceneObject(new SpawnMessage()), Is.Null);
+            LogAssert.ignoreFailingMessages = false;
         }
     }
 }
