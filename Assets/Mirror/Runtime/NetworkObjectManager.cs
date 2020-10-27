@@ -17,6 +17,22 @@ namespace Mirror
         public NetworkServer server;
         public NetworkSceneManager networkSceneManager;
 
+        // spawn handlers. internal for testing purposes. do not use directly.
+        internal readonly Dictionary<Guid, SpawnHandlerDelegate> spawnHandlers = new Dictionary<Guid, SpawnHandlerDelegate>();
+        internal readonly Dictionary<Guid, UnSpawnDelegate> unspawnHandlers = new Dictionary<Guid, UnSpawnDelegate>();
+
+        /// <summary>
+        /// This is a dictionary of the prefabs that are registered on the client with ClientScene.RegisterPrefab().
+        /// <para>The key to the dictionary is the prefab asset Id.</para>
+        /// </summary>
+        internal readonly Dictionary<Guid, GameObject> prefabs = new Dictionary<Guid, GameObject>();
+
+        /// <summary>
+        /// This is dictionary of the disabled NetworkIdentity objects in the scene that could be spawned by messages from the server.
+        /// <para>The key to the dictionary is the NetworkIdentity sceneId.</para>
+        /// </summary>
+        public readonly Dictionary<ulong, NetworkIdentity> spawnableObjects = new Dictionary<ulong, NetworkIdentity>();
+
         public void Start()
         {
             if (client != null)
@@ -102,14 +118,14 @@ namespace Mirror
         public void PrepareToSpawnSceneObjects()
         {
             // add all unspawned NetworkIdentities to spawnable objects
-            client.spawnableObjects.Clear();
+            spawnableObjects.Clear();
             IEnumerable<NetworkIdentity> sceneObjects =
                 Resources.FindObjectsOfTypeAll<NetworkIdentity>()
                                .Where(ConsiderForSpawning);
 
             foreach (NetworkIdentity obj in sceneObjects)
             {
-                client.spawnableObjects.Add(obj.sceneId, obj);
+                spawnableObjects.Add(obj.sceneId, obj);
             }
         }
 
@@ -138,7 +154,7 @@ namespace Mirror
             if (assetId == Guid.Empty)
                 return null;
 
-            if (client.prefabs.TryGetValue(assetId, out GameObject prefab))
+            if (prefabs.TryGetValue(assetId, out GameObject prefab))
             {
                 return prefab;
             }
@@ -161,7 +177,7 @@ namespace Mirror
                 identity.AssetId = newAssetId;
 
                 if (logger.LogEnabled()) logger.Log("Registering prefab '" + prefab.name + "' as asset:" + identity.AssetId);
-                client.prefabs[identity.AssetId] = prefab;
+                prefabs[identity.AssetId] = prefab;
             }
             else
             {
@@ -182,7 +198,7 @@ namespace Mirror
             if (identity)
             {
                 if (logger.LogEnabled()) logger.Log("Registering prefab '" + prefab.name + "' as asset:" + identity.AssetId);
-                client.prefabs[identity.AssetId] = prefab;
+                prefabs[identity.AssetId] = prefab;
 
                 NetworkIdentity[] identities = prefab.GetComponentsInChildren<NetworkIdentity>();
                 if (identities.Length > 1)
@@ -235,8 +251,8 @@ namespace Mirror
 
             if (logger.LogEnabled()) logger.Log("Registering custom prefab '" + prefab.name + "' as asset:" + identity.AssetId + " " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
 
-            client.spawnHandlers[identity.AssetId] = spawnHandler;
-            client.unspawnHandlers[identity.AssetId] = unspawnHandler;
+            spawnHandlers[identity.AssetId] = spawnHandler;
+            unspawnHandlers[identity.AssetId] = unspawnHandler;
         }
 
         /// <summary>
@@ -250,8 +266,8 @@ namespace Mirror
             {
                 throw new InvalidOperationException("Could not unregister '" + prefab.name + "' since it contains no NetworkIdentity component");
             }
-            client.spawnHandlers.Remove(identity.AssetId);
-            client.unspawnHandlers.Remove(identity.AssetId);
+            spawnHandlers.Remove(identity.AssetId);
+            unspawnHandlers.Remove(identity.AssetId);
         }
 
         #endregion
@@ -281,8 +297,8 @@ namespace Mirror
         {
             if (logger.LogEnabled()) logger.Log("RegisterSpawnHandler asset '" + assetId + "' " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
 
-            client.spawnHandlers[assetId] = spawnHandler;
-            client.unspawnHandlers[assetId] = unspawnHandler;
+            spawnHandlers[assetId] = spawnHandler;
+            unspawnHandlers[assetId] = unspawnHandler;
         }
 
         /// <summary>
@@ -291,8 +307,8 @@ namespace Mirror
         /// <param name="assetId">The assetId for the handler to be removed for.</param>
         public void UnregisterSpawnHandler(Guid assetId)
         {
-            client.spawnHandlers.Remove(assetId);
-            client.unspawnHandlers.Remove(assetId);
+            spawnHandlers.Remove(assetId);
+            unspawnHandlers.Remove(assetId);
         }
 
         /// <summary>
@@ -300,9 +316,9 @@ namespace Mirror
         /// </summary>
         public void ClearSpawners()
         {
-            client.prefabs.Clear();
-            client.spawnHandlers.Clear();
-            client.unspawnHandlers.Clear();
+            prefabs.Clear();
+            spawnHandlers.Clear();
+            unspawnHandlers.Clear();
         }
 
         #endregion
@@ -312,7 +328,7 @@ namespace Mirror
             Guid assetId = identity.AssetId;
 
             identity.StopClient();
-            if (client.unspawnHandlers.TryGetValue(assetId, out UnSpawnDelegate handler) && handler != null)
+            if (unspawnHandlers.TryGetValue(assetId, out UnSpawnDelegate handler) && handler != null)
             {
                 handler(identity.gameObject);
             }
@@ -324,7 +340,7 @@ namespace Mirror
             {
                 identity.Reset();
                 identity.gameObject.SetActive(false);
-                client.spawnableObjects[identity.sceneId] = identity;
+                spawnableObjects[identity.sceneId] = identity;
             }
         }
 
@@ -417,7 +433,7 @@ namespace Mirror
 
         NetworkIdentity SpawnPrefab(SpawnMessage msg)
         {
-            if (client.spawnHandlers.TryGetValue(msg.assetId, out SpawnHandlerDelegate handler))
+            if (spawnHandlers.TryGetValue(msg.assetId, out SpawnHandlerDelegate handler))
             {
                 GameObject obj = handler(msg);
                 if (obj == null)
@@ -447,12 +463,12 @@ namespace Mirror
             NetworkIdentity spawnedId = SpawnSceneObject(msg.sceneId);
             if (spawnedId == null)
             {
-                logger.LogError("Spawn scene object not found for " + msg.sceneId.ToString("X") + " SpawnableObjects.Count=" + client.spawnableObjects.Count);
+                logger.LogError("Spawn scene object not found for " + msg.sceneId.ToString("X") + " SpawnableObjects.Count=" + spawnableObjects.Count);
 
                 // dump the whole spawnable objects dict for easier debugging
                 if (logger.LogEnabled())
                 {
-                    foreach (KeyValuePair<ulong, NetworkIdentity> kvp in client.spawnableObjects)
+                    foreach (KeyValuePair<ulong, NetworkIdentity> kvp in spawnableObjects)
                         logger.Log("Spawnable: SceneId=" + kvp.Key + " name=" + kvp.Value.name);
                 }
             }
@@ -463,9 +479,9 @@ namespace Mirror
 
         NetworkIdentity SpawnSceneObject(ulong sceneId)
         {
-            if (client.spawnableObjects.TryGetValue(sceneId, out NetworkIdentity identity))
+            if (spawnableObjects.TryGetValue(sceneId, out NetworkIdentity identity))
             {
-                client.spawnableObjects.Remove(sceneId);
+                spawnableObjects.Remove(sceneId);
                 return identity;
             }
             logger.LogWarning("Could not find scene object with sceneid:" + sceneId.ToString("X"));

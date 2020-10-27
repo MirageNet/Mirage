@@ -4,8 +4,6 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
-using Guid = System.Guid;
-using Object = UnityEngine.Object;
 
 namespace Mirror
 {
@@ -33,9 +31,6 @@ namespace Mirror
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
 
-        // spawn handlers. internal for testing purposes. do not use directly.
-        internal readonly Dictionary<Guid, SpawnHandlerDelegate> spawnHandlers = new Dictionary<Guid, SpawnHandlerDelegate>();
-        internal readonly Dictionary<Guid, UnSpawnDelegate> unspawnHandlers = new Dictionary<Guid, UnSpawnDelegate>();
         internal readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
 
         /// <summary>
@@ -85,18 +80,6 @@ namespace Mirror
         public readonly NetworkTime Time = new NetworkTime();
 
         public Transport Transport;
-
-        /// <summary>
-        /// This is a dictionary of the prefabs that are registered on the client with ClientScene.RegisterPrefab().
-        /// <para>The key to the dictionary is the prefab asset Id.</para>
-        /// </summary>
-        internal readonly Dictionary<Guid, GameObject> prefabs = new Dictionary<Guid, GameObject>();
-
-        /// <summary>
-        /// This is dictionary of the disabled NetworkIdentity objects in the scene that could be spawned by messages from the server.
-        /// <para>The key to the dictionary is the NetworkIdentity sceneId.</para>
-        /// </summary>
-        public readonly Dictionary<ulong, NetworkIdentity> spawnableObjects = new Dictionary<ulong, NetworkIdentity>();
 
         /// <summary>
         /// List of all objects spawned in this client

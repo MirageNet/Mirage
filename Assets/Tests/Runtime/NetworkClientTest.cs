@@ -242,7 +242,7 @@ namespace Mirror.Tests
             var prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
             var identity = prefabObject.GetComponent<NetworkIdentity>();
             identity.AssetId = guid;
-            client.spawnableObjects.Add(0, identity);
+            objectManager.spawnableObjects.Add(0, identity);
 
             NetworkIdentity result = client.SpawnSceneObject(new SpawnMessage { sceneId = 0, assetId = guid });
 
