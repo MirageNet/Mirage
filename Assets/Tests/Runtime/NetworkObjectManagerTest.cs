@@ -174,13 +174,5 @@ namespace Mirror.Tests
 
             Object.Destroy(prefabObject);
         }
-
-        [Test]
-        public void SpawnSceneObjectNullTest()
-        {
-            LogAssert.ignoreFailingMessages = true;
-            Assert.That(objectManager.SpawnSceneObject(new SpawnMessage()), Is.Null);
-            LogAssert.ignoreFailingMessages = false;
-        }
     }
 }
