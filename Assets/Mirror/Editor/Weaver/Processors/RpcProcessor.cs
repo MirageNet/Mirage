@@ -169,7 +169,7 @@ namespace Mirror.Weaver
             if (target == Client.Observers || target == Client.Global)
             {
                 worker.Append(worker.Create(excludeOwner ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
-                worker.Append(worker.Create(isGlobal ? OpCodes.Ldc_I4_2 : OpCodes.Ldc_I4_0));
+                worker.Append(worker.Create(isGlobal ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
                 worker.Append(worker.Create(OpCodes.Callvirt, WeaverTypes.sendRpcInternal));
             }
             else
