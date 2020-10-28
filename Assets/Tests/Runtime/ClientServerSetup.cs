@@ -17,7 +17,6 @@ namespace Mirror.Tests
         protected GameObject serverGo;
         protected NetworkServer server;
         protected NetworkSceneManager serverSceneManager;
-        protected NetworkObjectManager serverObjectManager;
         protected GameObject serverPlayerGO;
         protected NetworkIdentity serverIdentity;
         protected T serverComponent;
@@ -25,7 +24,7 @@ namespace Mirror.Tests
         protected GameObject clientGo;
         protected NetworkClient client;
         protected NetworkSceneManager clientSceneManager;
-        protected NetworkObjectManager clientObjectManager;
+        protected ClientObjectManager clientObjectManager;
         protected GameObject clientPlayerGO;
         protected NetworkIdentity clientIdentity;
         protected T clientComponent;
@@ -41,8 +40,8 @@ namespace Mirror.Tests
         [UnitySetUp]
         public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
         {
-            serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(NetworkObjectManager), typeof(NetworkServer));
-            clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(NetworkObjectManager), typeof(NetworkClient));
+            serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(NetworkServer));
+            clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(ClientObjectManager), typeof(NetworkClient));
             testTransport = serverGo.AddComponent<LoopbackTransport>();
 
             await UniTask.Delay(1);
@@ -60,13 +59,13 @@ namespace Mirror.Tests
             serverSceneManager.Start();
             clientSceneManager.Start();
 
-            serverObjectManager = serverGo.GetComponent<NetworkObjectManager>();
-            clientObjectManager = clientGo.GetComponent<NetworkObjectManager>();
-            serverObjectManager.server = server;
+            //serverObjectManager = serverGo.GetComponent<NetworkObjectManager>();
+            clientObjectManager = clientGo.GetComponent<ClientObjectManager>();
+            //serverObjectManager.server = server;
             clientObjectManager.client = client;
-            serverObjectManager.networkSceneManager = serverSceneManager;
+            //serverObjectManager.networkSceneManager = serverSceneManager;
             clientObjectManager.networkSceneManager = clientSceneManager;
-            serverObjectManager.Start();
+            //serverObjectManager.Start();
             clientObjectManager.Start();
 
             ExtraSetup();

@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace Mirror
 {
-    [CustomEditor(typeof(NetworkObjectManager), true)]
+    [CustomEditor(typeof(ClientObjectManager), true)]
     [CanEditMultipleObjects]
-    public class NetworkObjectManagerInspector : Editor
+    public class ClientObjectManagerInspector : Editor
     {
         public override void OnInspectorGUI()
         {
@@ -16,11 +16,11 @@ namespace Mirror
             if (GUILayout.Button("Register All Prefabs"))
             {
                 Undo.RecordObject(target, "Changed Area Of Effect");
-                RegisterPrefabs((NetworkObjectManager)target);
+                RegisterPrefabs((ClientObjectManager)target);
             }
         }
 
-        public void RegisterPrefabs(NetworkObjectManager gameObject)
+        public void RegisterPrefabs(ClientObjectManager gameObject)
         {
             ISet<GameObject> prefabs = LoadPrefabsContaining<NetworkIdentity>("Assets");
 

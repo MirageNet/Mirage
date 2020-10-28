@@ -61,9 +61,9 @@ namespace Mirror.Tests.Performance.Runtime
 
         private IEnumerator StartClient(int i, Transport transport)
         {
-            var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(NetworkObjectManager));
+            var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager));
             NetworkClient client = clientGo.GetComponent<NetworkClient>();
-            NetworkObjectManager objectManager = clientGo.GetComponent<NetworkObjectManager>();
+            ClientObjectManager objectManager = clientGo.GetComponent<ClientObjectManager>();
             objectManager.client = client;
             objectManager.Start();
             client.Transport = transport;

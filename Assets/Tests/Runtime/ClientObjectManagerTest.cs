@@ -9,7 +9,7 @@ using Cysharp.Threading.Tasks;
 namespace Mirror.Tests
 {
     [TestFixture]
-    public class NetworkObjectManagerTest : HostSetup<MockComponent>
+    public class ClientObjectManagerTest : HostSetup<MockComponent>
     {
         GameObject playerReplacement;
 
@@ -19,7 +19,7 @@ namespace Mirror.Tests
             var gameObject = new GameObject();
             Assert.Throws<InvalidOperationException>(() =>
             {
-                objectManager.RegisterPrefab(gameObject);
+                clientObjectManager.RegisterPrefab(gameObject);
             });
             Object.Destroy(gameObject);
         }
@@ -32,7 +32,7 @@ namespace Mirror.Tests
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                objectManager.RegisterPrefab(gameObject, guid);
+                clientObjectManager.RegisterPrefab(gameObject, guid);
             });
             Object.Destroy(gameObject);
         }
@@ -43,7 +43,7 @@ namespace Mirror.Tests
             var msg = new SpawnMessage();
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                objectManager.OnSpawn(msg);
+                clientObjectManager.OnSpawn(msg);
             });
 
             Assert.That(ex.Message, Is.EqualTo("OnObjSpawn netId: " + msg.netId + " has invalid asset Id"));
@@ -55,7 +55,7 @@ namespace Mirror.Tests
             var gameObject = new GameObject();
             Assert.Throws<InvalidOperationException>(() =>
             {
-                objectManager.UnregisterPrefab(gameObject);
+                clientObjectManager.UnregisterPrefab(gameObject);
             });
             Object.Destroy(gameObject);
         }
@@ -66,11 +66,11 @@ namespace Mirror.Tests
             var guid = Guid.NewGuid();
             var prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
 
-            objectManager.RegisterPrefab(prefabObject, guid);
+            clientObjectManager.RegisterPrefab(prefabObject, guid);
 
             await UniTask.Delay(1);
 
-            GameObject result = objectManager.GetPrefab(guid);
+            GameObject result = clientObjectManager.GetPrefab(guid);
 
             Assert.That(result, Is.SameAs(prefabObject));
 
@@ -82,7 +82,7 @@ namespace Mirror.Tests
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                objectManager.RegisterPrefab(new GameObject(), TestSpawnDelegate, TestUnspawnDelegate);
+                clientObjectManager.RegisterPrefab(new GameObject(), TestSpawnDelegate, TestUnspawnDelegate);
             });
         }
 
@@ -95,7 +95,7 @@ namespace Mirror.Tests
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                objectManager.RegisterPrefab(prefabObject, TestSpawnDelegate, TestUnspawnDelegate);
+                clientObjectManager.RegisterPrefab(prefabObject, TestSpawnDelegate, TestUnspawnDelegate);
             });
 
             Object.Destroy(prefabObject);
@@ -108,10 +108,10 @@ namespace Mirror.Tests
             NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
             identity.AssetId = Guid.NewGuid();
 
-            objectManager.RegisterPrefab(prefabObject, TestSpawnDelegate, TestUnspawnDelegate);
+            clientObjectManager.RegisterPrefab(prefabObject, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(objectManager.spawnHandlers.ContainsKey(identity.AssetId));
-            Assert.That(objectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(clientObjectManager.spawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(clientObjectManager.unspawnHandlers.ContainsKey(identity.AssetId));
 
             Object.Destroy(prefabObject);
         }
@@ -123,15 +123,15 @@ namespace Mirror.Tests
             NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
             identity.AssetId = Guid.NewGuid();
 
-            objectManager.RegisterPrefab(prefabObject, TestSpawnDelegate, TestUnspawnDelegate);
+            clientObjectManager.RegisterPrefab(prefabObject, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(objectManager.spawnHandlers.ContainsKey(identity.AssetId));
-            Assert.That(objectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(clientObjectManager.spawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(clientObjectManager.unspawnHandlers.ContainsKey(identity.AssetId));
 
-            objectManager.UnregisterPrefab(prefabObject);
+            clientObjectManager.UnregisterPrefab(prefabObject);
 
-            Assert.That(!objectManager.spawnHandlers.ContainsKey(identity.AssetId));
-            Assert.That(!objectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(!clientObjectManager.spawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(!clientObjectManager.unspawnHandlers.ContainsKey(identity.AssetId));
 
             Object.Destroy(prefabObject);
         }
@@ -143,15 +143,15 @@ namespace Mirror.Tests
             NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
             identity.AssetId = Guid.NewGuid();
 
-            objectManager.RegisterPrefab(prefabObject, TestSpawnDelegate, TestUnspawnDelegate);
+            clientObjectManager.RegisterPrefab(prefabObject, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(objectManager.spawnHandlers.ContainsKey(identity.AssetId));
-            Assert.That(objectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(clientObjectManager.spawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(clientObjectManager.unspawnHandlers.ContainsKey(identity.AssetId));
 
-            objectManager.UnregisterSpawnHandler(identity.AssetId);
+            clientObjectManager.UnregisterSpawnHandler(identity.AssetId);
 
-            Assert.That(!objectManager.spawnHandlers.ContainsKey(identity.AssetId));
-            Assert.That(!objectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(!clientObjectManager.spawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(!clientObjectManager.unspawnHandlers.ContainsKey(identity.AssetId));
 
             Object.Destroy(prefabObject);
         }
@@ -169,7 +169,7 @@ namespace Mirror.Tests
         [Test]
         public void GetPrefabEmptyNullTest()
         {
-            GameObject result = objectManager.GetPrefab(Guid.Empty);
+            GameObject result = clientObjectManager.GetPrefab(Guid.Empty);
 
             Assert.That(result, Is.Null);
         }
@@ -180,7 +180,7 @@ namespace Mirror.Tests
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
             replacementIdentity.AssetId = Guid.NewGuid();
-            objectManager.RegisterPrefab(playerReplacement);
+            clientObjectManager.RegisterPrefab(playerReplacement);
 
             server.ReplacePlayerForConnection(server.LocalConnection, client, playerReplacement, true);
 
@@ -190,7 +190,7 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator ObjectHideTest() => UniTask.ToCoroutine(async () =>
         {
-            objectManager.OnObjectHide(new ObjectHideMessage
+            clientObjectManager.OnObjectHide(new ObjectHideMessage
             {
                 netId = identity.NetId
             });
@@ -203,7 +203,7 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator ObjectDestroyTest() => UniTask.ToCoroutine(async () =>
         {
-            objectManager.OnObjectDestroy(new ObjectDestroyMessage
+            clientObjectManager.OnObjectDestroy(new ObjectDestroyMessage
             {
                 netId = identity.NetId
             });
@@ -221,9 +221,9 @@ namespace Mirror.Tests
             var prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
             var identity = prefabObject.GetComponent<NetworkIdentity>();
             identity.AssetId = guid;
-            objectManager.spawnableObjects.Add(0, identity);
+            clientObjectManager.spawnableObjects.Add(0, identity);
 
-            NetworkIdentity result = objectManager.SpawnSceneObject(new SpawnMessage { sceneId = 0, assetId = guid });
+            NetworkIdentity result = clientObjectManager.SpawnSceneObject(new SpawnMessage { sceneId = 0, assetId = guid });
 
             Assert.That(result, Is.SameAs(identity));
 

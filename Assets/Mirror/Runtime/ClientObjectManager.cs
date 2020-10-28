@@ -7,11 +7,11 @@ using Object = UnityEngine.Object;
 namespace Mirror
 {
 
-    [AddComponentMenu("Network/NetworkObjectManager")]
+    [AddComponentMenu("Network/ClientObjectManager")]
     [DisallowMultipleComponent]
-    public class NetworkObjectManager : MonoBehaviour
+    public class ClientObjectManager : MonoBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkSceneManager));
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientObjectManager));
 
         public NetworkClient client;
         public NetworkServer server;

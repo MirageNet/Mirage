@@ -3,18 +3,18 @@ using UnityEngine;
 
 namespace Mirror.Tests
 {
-    [TestFixture(Category = "NetworkObjectManager")]
-    public class NetworkObjectManagerInspectorTest
+    [TestFixture(Category = "ClientObjectManager")]
+    public class ClientObjectManagerInspectorTest
     {
 
         [Test]
         public void RegisterPrefabs()
         {
-            var gameObject = new GameObject("NetworkObjectManager", typeof(NetworkObjectManager));
+            var gameObject = new GameObject("NetworkObjectManager", typeof(ClientObjectManager));
 
-            NetworkObjectManager client = gameObject.GetComponent<NetworkObjectManager>();
+            ClientObjectManager client = gameObject.GetComponent<ClientObjectManager>();
 
-            NetworkObjectManagerInspector inspector = ScriptableObject.CreateInstance<NetworkObjectManagerInspector>();
+            ClientObjectManagerInspector inspector = ScriptableObject.CreateInstance<ClientObjectManagerInspector>();
             inspector.RegisterPrefabs(client);
 
             Assert.That(client.spawnPrefabs, Has.Count.GreaterThan(2));
@@ -31,11 +31,11 @@ namespace Mirror.Tests
         {
             var preexisting = new GameObject("object", typeof(NetworkIdentity));
 
-            var gameObject = new GameObject("NetworkObjectManager", typeof(NetworkObjectManager));
-            NetworkObjectManager client = gameObject.GetComponent<NetworkObjectManager>();
+            var gameObject = new GameObject("NetworkObjectManager", typeof(ClientObjectManager));
+            ClientObjectManager client = gameObject.GetComponent<ClientObjectManager>();
             client.spawnPrefabs.Add(preexisting);
 
-            NetworkObjectManagerInspector inspector = ScriptableObject.CreateInstance<NetworkObjectManagerInspector>();
+            ClientObjectManagerInspector inspector = ScriptableObject.CreateInstance<ClientObjectManagerInspector>();
 
             inspector.RegisterPrefabs(client);
 

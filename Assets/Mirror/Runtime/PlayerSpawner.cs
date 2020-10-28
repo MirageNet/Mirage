@@ -15,7 +15,7 @@ namespace Mirror
         public NetworkClient client;
         public NetworkServer server;
         public NetworkSceneManager sceneManager;
-        public NetworkObjectManager objectManager;
+        public ClientObjectManager objectManager;
         public NetworkIdentity playerPrefab;
 
         // Start is called before the first frame update
