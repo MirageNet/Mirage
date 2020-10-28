@@ -27,7 +27,7 @@ namespace Mirror
         public bool requireAuthority = true;
     }
 
-    public enum Client { Owner, Observers, Connection }
+    public enum Client { Owner, Global, Observers, Connection }
 
     /// <summary>
     /// The server uses a Remote Procedure Call (RPC) to run this function on specific clients.
