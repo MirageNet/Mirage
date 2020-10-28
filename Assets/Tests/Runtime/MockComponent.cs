@@ -30,6 +30,16 @@ namespace Mirror.Tests
             this.rpcArg2 = arg2;
         }
 
+        public int globalRpcArg1;
+        public string globalRpcArg2;
+
+        [ClientRpc(target = Mirror.Client.Global)]
+        public void ClientGlobalRpcTest(int arg1, string arg2)
+        {
+            this.globalRpcArg1 = arg1;
+            this.globalRpcArg2 = arg2;
+        }
+
         public int targetRpcArg1;
         public string targetRpcArg2;
         public INetworkConnection targetRpcConn;

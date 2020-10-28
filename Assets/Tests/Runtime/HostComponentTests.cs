@@ -62,6 +62,17 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
+        public IEnumerator ClientGlobalRpc() => UniTask.ToCoroutine(async () =>
+        {
+            component.ClientGlobalRpcTest(1, "hello");
+            // process spawn message from server
+            await AsyncUtil.WaitUntilWithTimeout(() => component.globalRpcArg1 != 0);
+
+            Assert.That(component.globalRpcArg1, Is.EqualTo(1));
+            Assert.That(component.globalRpcArg2, Is.EqualTo("hello"));
+        });
+
+        [UnityTest]
         public IEnumerator ClientConnRpc() => UniTask.ToCoroutine(async () =>
         {
             component.ClientConnRpcTest(manager.server.LocalConnection, 1, "hello");
