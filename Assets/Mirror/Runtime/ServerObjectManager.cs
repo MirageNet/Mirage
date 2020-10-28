@@ -8,7 +8,7 @@ namespace Mirror
 
     [AddComponentMenu("Network/ServerObjectManager")]
     [DisallowMultipleComponent]
-    public class ServerObjectManager : MonoBehaviour
+    public class ServerObjectManager : MonoBehaviour, IServerObjectManager
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
 
