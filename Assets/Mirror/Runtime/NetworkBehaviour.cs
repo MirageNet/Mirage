@@ -256,7 +256,7 @@ namespace Mirror
 
         #region Client RPCs
         [EditorBrowsable(EditorBrowsableState.Never)]
-        protected internal void SendRpcInternal(Type invokeClass, string rpcName, NetworkWriter writer, int channelId, bool excludeOwner, bool global)
+        protected internal void SendRpcInternal(Type invokeClass, string rpcName, NetworkWriter writer, int channelId, bool excludeOwner, bool isGlobal)
         {
             // this was in Weaver before
             if (!Server || !Server.Active)
@@ -285,7 +285,7 @@ namespace Mirror
             // so we negate it here to logically align with SendToReady.
             bool includeOwner = !excludeOwner;
 
-            if (global)
+            if (isGlobal)
                 Server.SendToAll(NetIdentity, message, includeOwner, channelId);
             else
                 Server.SendToObservers(NetIdentity, message, includeOwner, channelId);
