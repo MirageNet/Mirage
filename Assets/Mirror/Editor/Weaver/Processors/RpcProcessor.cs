@@ -2,7 +2,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 namespace Mirror.Weaver
 {
-    public enum Client { Owner, Observers, Connection }
+    public enum Client { Owner, Global, Observers, Connection }
 
     /// <summary>
     /// Processes [Rpc] methods in NetworkBehaviour
@@ -147,6 +147,7 @@ namespace Mirror.Weaver
             Client target = clientRpcAttr.GetField("target", Client.Observers); 
             int channel = clientRpcAttr.GetField("channel", 0);
             bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
+            bool isGlobal = clientRpcAttr.GetField("global", false);
 
             // invoke SendInternal and return
             // this
@@ -165,9 +166,10 @@ namespace Mirror.Weaver
             worker.Append(worker.Create(OpCodes.Ldloc_0));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
 
-            if (target == Client.Observers)
+            if (target == Client.Observers || target == Client.Global)
             {
                 worker.Append(worker.Create(excludeOwner ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+                worker.Append(worker.Create(isGlobal ? OpCodes.Ldc_I4_2 : OpCodes.Ldc_I4_0));
                 worker.Append(worker.Create(OpCodes.Callvirt, WeaverTypes.sendRpcInternal));
             }
             else

@@ -35,6 +35,7 @@ When migrating a project from Mirror to MirrorNG, these will be the most notable
 | Errors are thrown as exceptions                                                               | Errors are logged                      |
 | `[ServerRpc]`                                                                                 | `[Command]`                            |
 | `[ClientRpc(target=Client.Owner)]`                                                            | `[TargetRpc]`                          |
+| `[ClientRpc(target=Client.Global)]`                                                           |                                        |
 | Subscribe to events in `NetworkServer`                                                        | Override methods in `NetworkManager`   |
 | Subscribe to events in `NetworkClient`                                                        | Override methods in `NetworkManager`   |
 | Subscribe to events in `NetworkIdentity`                                                      | Override methods in `NetworkBehaviour` |

@@ -393,6 +393,28 @@ namespace Mirror
             NetworkConnection.Send(connections, msg, channelId);
         }
 
+        internal void SendToAll<T>(NetworkIdentity identity, T msg, bool includeOwner = true, int channelId = Channel.Reliable)
+        {
+            if (logger.LogEnabled()) logger.Log("Server.SendToAll id:" + typeof(T));
+
+            if (includeOwner)
+            {
+                NetworkConnection.Send(connections, msg, channelId);
+            }
+            else
+            {
+                connectionsExcludeSelf.Clear();
+
+                foreach (INetworkConnection conn in connections)
+                {
+                    if (identity.ConnectionToClient != conn)
+                        connectionsExcludeSelf.Add(conn);
+                }
+
+                NetworkConnection.Send(connectionsExcludeSelf, msg, channelId);
+            }
+        }
+
         private readonly List<NetworkIdentity> DirtyObjectsTmp = new List<NetworkIdentity>();
 
         // The user should never need to pump the update loop manually
