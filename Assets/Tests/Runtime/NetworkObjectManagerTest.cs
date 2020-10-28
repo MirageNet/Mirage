@@ -101,6 +101,61 @@ namespace Mirror.Tests
             Object.Destroy(prefabObject);
         }
 
+        [Test]
+        public void RegisterPrefabDelegateTest()
+        {
+            GameObject prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
+            NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
+            identity.AssetId = Guid.NewGuid();
+
+            objectManager.RegisterPrefab(prefabObject, TestSpawnDelegate, TestUnspawnDelegate);
+
+            Assert.That(objectManager.spawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(objectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+
+            Object.Destroy(prefabObject);
+        }
+
+        [Test]
+        public void UnregisterPrefabTest()
+        {
+            GameObject prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
+            NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
+            identity.AssetId = Guid.NewGuid();
+
+            objectManager.RegisterPrefab(prefabObject, TestSpawnDelegate, TestUnspawnDelegate);
+
+            Assert.That(objectManager.spawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(objectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+
+            objectManager.UnregisterPrefab(prefabObject);
+
+            Assert.That(!objectManager.spawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(!objectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+
+            Object.Destroy(prefabObject);
+        }
+
+        [Test]
+        public void UnregisterSpawnHandlerTest()
+        {
+            GameObject prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
+            NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
+            identity.AssetId = Guid.NewGuid();
+
+            objectManager.RegisterPrefab(prefabObject, TestSpawnDelegate, TestUnspawnDelegate);
+
+            Assert.That(objectManager.spawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(objectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+
+            objectManager.UnregisterSpawnHandler(identity.AssetId);
+
+            Assert.That(!objectManager.spawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(!objectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+
+            Object.Destroy(prefabObject);
+        }
+
         GameObject TestSpawnDelegate(Vector3 position, Guid assetId)
         {
             return new GameObject();
