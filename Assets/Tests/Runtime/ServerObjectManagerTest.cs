@@ -301,5 +301,21 @@ namespace Mirror.Tests
                 serverObjectManager.SpawnObject(new GameObject(), connectionToClient);
             });
         }
+
+        [Test]
+        public void AddPlayerForConnectionFalseTest()
+        {
+            Assert.That(serverObjectManager.AddPlayerForConnection(connectionToClient, new GameObject()), Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator SpawnObjectsFalseTest() => UniTask.ToCoroutine(async () =>
+        {
+            server.Disconnect();
+
+            await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
+
+            Assert.That(serverObjectManager.SpawnObjects(), Is.False);
+        });
     }
 }
