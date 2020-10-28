@@ -314,7 +314,7 @@ namespace Mirror
         /// </summary>
         /// <param name="conn">The connection of the client to remove from</param>
         /// <param name="destroyServerObject">Indicates whether the server object should be destroyed</param>
-        public void RemovePlayerForConnection(NetworkConnection conn, bool destroyServerObject)
+        public void RemovePlayerForConnection(INetworkConnection conn, bool destroyServerObject = false)
         {
             if (conn.Identity != null)
             {

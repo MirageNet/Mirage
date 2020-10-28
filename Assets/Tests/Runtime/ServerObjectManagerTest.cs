@@ -259,5 +259,47 @@ namespace Mirror.Tests
 
             Assert.That(serverObjectManager.AddPlayerForConnection(connectionToClient, playerReplacement, replacementGuid), Is.True);
         }
+
+        [UnityTest]
+        public IEnumerator RemovePlayerForConnectionTest() => UniTask.ToCoroutine(async () =>
+        {
+            serverObjectManager.RemovePlayerForConnection(connectionToClient);
+
+            await AsyncUtil.WaitUntilWithTimeout(() => !clientIdentity);
+
+            Assert.That(serverPlayerGO);
+        });
+
+        [UnityTest]
+        public IEnumerator RemovePlayerForConnectionExceptionTest() => UniTask.ToCoroutine(async () =>
+        {
+            serverObjectManager.RemovePlayerForConnection(connectionToClient);
+
+            await AsyncUtil.WaitUntilWithTimeout(() => !clientIdentity);
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                serverObjectManager.RemovePlayerForConnection(connectionToClient);
+            });
+        });
+
+        [UnityTest]
+        public IEnumerator RemovePlayerForConnectionDestroyTest() => UniTask.ToCoroutine(async () =>
+        {
+            serverObjectManager.RemovePlayerForConnection(connectionToClient, true);
+
+            await AsyncUtil.WaitUntilWithTimeout(() => !clientIdentity);
+
+            Assert.That(!serverPlayerGO);
+        });
+
+        [Test]
+        public void SpawnObjectExceptionTest()
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                serverObjectManager.SpawnObject(new GameObject(), connectionToClient);
+            });
+        }
     }
 }
