@@ -71,33 +71,20 @@ namespace Mirror
 
         void OnServerSceneChanged(string scenePath, SceneOperation sceneOperation)
         {
+            SpawnObjects();
+
             // host mode?
             if (server.LocalClientActive)
             {
-                // server scene was loaded. now spawn all the objects
-                ActivateHostScene();
-            }
-            // server-only mode?
-            else if (server && server.Active)
-            {
-                SpawnObjects();
-            }
-        }
-
-        /// <summary>
-        /// Loops spawned collection for NetworkIdentieis that are not IsClient and calls StartClient().
-        /// </summary>
-        internal void ActivateHostScene()
-        {
-            SpawnObjects();
-
-            foreach (NetworkIdentity identity in server.Spawned.Values)
-            {
-                if (!identity.IsClient)
+                //Loops spawned collection for NetworkIdentieis that are not IsClient and calls StartClient().
+                foreach (NetworkIdentity identity in server.Spawned.Values)
                 {
-                    if (logger.LogEnabled()) logger.Log("ActivateHostScene " + identity.NetId + " " + identity);
+                    if (!identity.IsClient)
+                    {
+                        if (logger.LogEnabled()) logger.Log("ActivateHostScene " + identity.NetId + " " + identity);
 
-                    identity.StartClient();
+                        identity.StartClient();
+                    }
                 }
             }
         }
