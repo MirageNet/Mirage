@@ -323,7 +323,7 @@ namespace Mirror
         /// <summary>
         /// This is invoked on behaviours that have authority, based on context and <see cref="HasAuthority">NetworkIdentity.hasAuthority</see>.
         /// <para>This is called after <see cref="OnStartServer">OnStartServer</see> and before <see cref="OnStartClient">OnStartClient.</see></para>
-        /// <para>When <see cref="AssignClientAuthority"/> is called on the server, this will be called on the client that owns the object. When an object is spawned with <see cref="NetworkServer.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included, this will be called on the client that owns the object.</para>
+        /// <para>When <see cref="AssignClientAuthority"/> is called on the server, this will be called on the client that owns the object. When an object is spawned with <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included, this will be called on the client that owns the object.</para>
         /// </summary>
         public UnityEvent OnStartAuthority = new UnityEvent();
 
@@ -1197,7 +1197,7 @@ namespace Mirror
 
         /// <summary>
         /// Removes ownership for an object.
-        /// <para>This applies to objects that had authority set by AssignClientAuthority, or <see cref="NetworkServer.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included.</para>
+        /// <para>This applies to objects that had authority set by AssignClientAuthority, or <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included.</para>
         /// <para>Authority cannot be removed for player objects.</para>
         /// </summary>
         public void RemoveClientAuthority()
