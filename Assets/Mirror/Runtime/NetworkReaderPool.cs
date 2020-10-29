@@ -115,7 +115,7 @@ namespace Mirror
             }
             else
             {
-                logger.LogWarning("NetworkReaderPool.Recycle, Pool was full leaving extra reader for GC");
+                if (logger.WarnEnabled()) logger.LogWarning("NetworkReaderPool.Recycle, Pool was full leaving extra reader for GC");
             }
         }
 

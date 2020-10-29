@@ -117,7 +117,7 @@ namespace Mirror
             }
             else
             {
-                logger.LogWarning("No ready connection found for setting player controller during InternalAddPlayer");
+                if (logger.WarnEnabled()) logger.LogWarning("No ready connection found for setting player controller during InternalAddPlayer");
             }
         }
 
@@ -388,7 +388,7 @@ namespace Mirror
                 NetworkIdentity obj = handler(msg);
                 if (obj == null)
                 {
-                    logger.LogWarning("Client spawn handler for " + msg.assetId + " returned null");
+                    if (logger.WarnEnabled()) logger.LogWarning("Client spawn handler for " + msg.assetId + " returned null");
                     return null;
                 }
                 return obj;
@@ -434,7 +434,7 @@ namespace Mirror
                 spawnableObjects.Remove(sceneId);
                 return identity;
             }
-            logger.LogWarning("Could not find scene object with sceneid:" + sceneId.ToString("X"));
+            if (logger.WarnEnabled()) logger.LogWarning("Could not find scene object with sceneid:" + sceneId.ToString("X"));
             return null;
         }
 
@@ -459,7 +459,7 @@ namespace Mirror
             }
             else
             {
-                logger.LogWarning("Did not find target for destroy message for " + netId);
+                if (logger.WarnEnabled()) logger.LogWarning("Did not find target for destroy message for " + netId);
             }
         }
 
@@ -508,7 +508,7 @@ namespace Mirror
             }
             else
             {
-                logger.LogWarning("Did not find target for sync message for " + msg.netId + " . Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
+                if (logger.WarnEnabled()) logger.LogWarning("Did not find target for sync message for " + msg.netId + " . Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
             }
         }
 
