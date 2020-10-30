@@ -325,7 +325,7 @@ namespace Mirror
             // host mode?
             if (client && client.IsLocalClient)
             {
-                logger.Log("Finished loading scene in host mode.");
+                if (logger.LogEnabled()) logger.Log("Host: " + sceneOperation.ToString() + " operation for scene: " + scenePath);
 
                 // call OnServerSceneChanged
                 OnServerSceneChanged(scenePath, sceneOperation);
@@ -339,14 +339,14 @@ namespace Mirror
             // server-only mode?
             else if (server && server.Active)
             {
-                logger.Log("Finished loading scene in server-only mode.");
+                if (logger.LogEnabled()) logger.Log("Server: " + sceneOperation.ToString() + " operation for scene: " + scenePath);
 
                 OnServerSceneChanged(scenePath, sceneOperation);
             }
             // client-only mode?
             else if (client && client.Active && !client.IsLocalClient)
             {
-                logger.Log("Finished loading scene in client-only mode.");
+                if (logger.LogEnabled()) logger.Log("Client: " + sceneOperation.ToString() + " operation for scene: " + scenePath);
 
                 OnClientSceneChanged(scenePath, sceneOperation);
             }
