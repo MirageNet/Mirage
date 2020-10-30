@@ -136,7 +136,12 @@ namespace Mirror
             if (transport != null)
                 transport.Disconnect();
         }
-        
+
+        public void Awake()
+        {
+            Application.quitting += Disconnect;
+        }
+
         void Initialize()
         {
             if (initialized)
