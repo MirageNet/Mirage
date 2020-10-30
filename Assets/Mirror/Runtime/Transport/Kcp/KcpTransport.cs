@@ -193,5 +193,10 @@ namespace Mirror.KCP
             await client.ConnectAsync(uri.Host, port);
             return client;
         }
+
+        public void OnApplicationQuit()
+        {
+            Disconnect();
+        }
     }
 }
