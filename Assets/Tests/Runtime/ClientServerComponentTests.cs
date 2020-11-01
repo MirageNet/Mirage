@@ -35,6 +35,14 @@ namespace Mirror.Tests
 
 
         [UnityTest]
+        public IEnumerator ServerRpcReturn() => UniTask.ToCoroutine(async () =>
+        {
+            int random = Random.Range(1, 100);
+            int result = await clientComponent.GetResult(random);
+            Assert.That(result, Is.EqualTo(random));
+        });
+
+        [UnityTest]
         public IEnumerator ServerRpcWithNetworkIdentity() => UniTask.ToCoroutine(async () =>
         {
             clientComponent.CmdNetworkIdentity(clientIdentity);

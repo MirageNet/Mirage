@@ -1,3 +1,5 @@
+using Cysharp.Threading.Tasks;
+
 namespace Mirror.Tests
 {
     public class MockComponent : NetworkBehaviour
@@ -18,6 +20,12 @@ namespace Mirror.Tests
         public void CmdNetworkIdentity(NetworkIdentity ni)
         {
             this.cmdNi = ni;
+        }
+
+        [ServerRpc]
+        public UniTask<int> GetResult(int input)
+        {
+            return UniTask.FromResult(input);
         }
 
         public int rpcArg1;
