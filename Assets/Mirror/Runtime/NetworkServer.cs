@@ -135,6 +135,8 @@ namespace Mirror
             }
             if (transport != null)
                 transport.Disconnect();
+
+            Cleanup();
         }
 
         void Initialize()
