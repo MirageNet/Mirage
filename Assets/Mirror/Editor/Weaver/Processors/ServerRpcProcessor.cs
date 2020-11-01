@@ -1,4 +1,6 @@
 // all the [ServerRpc] code from NetworkBehaviourProcessor in one place
+using System;
+using Cysharp.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -134,6 +136,19 @@ namespace Mirror.Weaver
                     worker.Append(worker.Create(OpCodes.Ldarg_2));
                 }
             }
+        }
+
+        internal static bool Validate(MethodDefinition md, CustomAttribute serverRpcAttr)
+        {
+            var unitaskType = typeof(UniTask<int>).GetGenericTypeDefinition();
+            if (!md.ReturnType.Is(typeof(void)) && !md.ReturnType.Is(unitaskType))
+            {
+
+                Weaver.Error($"{md.Name} cannot return a value.  Make it void instead ", md);
+                return false;
+            }
+
+            return true;
         }
     }
 }

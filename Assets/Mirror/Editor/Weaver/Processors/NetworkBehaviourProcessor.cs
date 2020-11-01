@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -827,11 +828,6 @@ namespace Mirror.Weaver
                 return false;
             }
 
-            if (!method.ReturnType.Is(typeof(void)))
-            {
-                Weaver.Error($"{method.Name} cannot return a value.  Make it void instead", method);
-                return false;
-            }
             if (method.HasGenericParameters)
             {
                 Weaver.Error($"{method.Name} cannot have generic parameters", method);
@@ -960,6 +956,9 @@ namespace Mirror.Weaver
         void ProcessServerRpc(HashSet<string> names, MethodDefinition md, CustomAttribute serverRpcAttr)
         {
             if (!ValidateRemoteCallAndParameters(md, RemoteCallType.ServerRpc))
+                return;
+
+            if (!ServerRpcProcessor.Validate(md, serverRpcAttr))
                 return;
 
             if (names.Contains(md.Name))
