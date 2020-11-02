@@ -307,16 +307,16 @@ namespace Mirror
         /// <returns>the task that will be completed when the result is in, and the id to use in the request</returns>
         internal (UniTask<T> task, int replyId) CreateReplyTask<T>()
         {
-            int replyId = this.replyId++;
+            int newReplyId = this.replyId++;
             var completionSource = AutoResetUniTaskCompletionSource<T>.Create();
-            void callback(NetworkReader reader)
+            void Callback(NetworkReader reader)
             {
                 T result = reader.Read<T>();
                 completionSource.TrySetResult(result);
             }
 
-            callbacks.Add(replyId, callback);
-            return (completionSource.Task, replyId);
+            callbacks.Add(newReplyId, Callback);
+            return (completionSource.Task, newReplyId);
         }
 
 
