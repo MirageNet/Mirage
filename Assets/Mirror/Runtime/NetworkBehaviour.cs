@@ -242,18 +242,6 @@ namespace Mirror
 
             Client.SendAsync(message, channelId).Forget();
         }
-
-        /// <summary>
-        /// Manually invoke a ServerRpc.
-        /// </summary>
-        /// <param name="cmdHash">Hash of the ServerRpc name.</param>
-        /// <param name="reader">Parameters to pass to the ServerRpc.</param>
-        /// <returns>Returns true if successful.</returns>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public virtual bool InvokeServerRpc(int cmdHash, NetworkReader reader)
-        {
-            return RemoteCallHelper.InvokeSkeleton(cmdHash, MirrorInvokeType.ServerRpc, reader, this);
-        }
         #endregion
 
         #region Client RPCs
@@ -323,18 +311,6 @@ namespace Mirror
             };
 
             conn.Send(message, channelId);
-        }
-
-        /// <summary>
-        /// Manually invoke an RPC function.
-        /// </summary>
-        /// <param name="rpcHash">Hash of the RPC name.</param>
-        /// <param name="reader">Parameters to pass to the RPC function.</param>
-        /// <returns>Returns true if successful.</returns>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public virtual bool InvokeRpc(int rpcHash, NetworkReader reader)
-        {
-            return RemoteCallHelper.InvokeSkeleton(rpcHash, MirrorInvokeType.ClientRpc, reader, this);
         }
         #endregion
 
