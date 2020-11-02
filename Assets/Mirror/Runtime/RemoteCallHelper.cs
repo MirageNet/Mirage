@@ -148,6 +148,7 @@ namespace Mirror.RemoteCalls
             if (invoker.invokeClass.IsInstanceOfType(invokingType))
             {
                 invoker.invokeFunction(invokingType, reader, senderConnection);
+                return;
             }
             throw new MethodInvocationException($"No RPC method found for hash {cmdHash}");
         }
