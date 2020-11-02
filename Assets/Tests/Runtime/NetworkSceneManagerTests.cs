@@ -229,8 +229,8 @@ namespace Mirror.Tests
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         }
 
-        [UnityTest]
-        public IEnumerator OnClientSceneChangedAdditiveListTest() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void OnClientSceneChangedAdditiveListTest()
         {
             UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
             clientSceneManager.ClientSceneChanged.AddListener(func1);
@@ -240,6 +240,6 @@ namespace Mirror.Tests
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
             Assert.That(clientSceneManager.pendingAdditiveSceneList.Count == 0);
-        });
+        }
     }
 }
