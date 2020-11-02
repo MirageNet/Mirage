@@ -264,11 +264,14 @@ namespace Mirror
                 throw new InvalidOperationException("Send ServerRpc attempted with no client running [client=" + ConnectionToServer + "].");
             }
 
+            (UniTask<T> task, int id) = Client.CreateReplyTask<T>();
+
             // construct the message
             var message = new ServerRpcMessage
             {
                 netId = NetId,
                 componentIndex = ComponentIndex,
+                replyId = id,
                 // type+func so Inventory.RpcUse != Equipment.RpcUse
                 functionHash = RemoteCallHelper.GetMethodHash(invokeClass, cmdName),
                 // segment to avoid reader allocations
@@ -277,7 +280,7 @@ namespace Mirror
 
             Client.SendAsync(message, channelId).Forget();
 
-            return default;
+            return task;
         }
 
         #endregion
