@@ -39,24 +39,20 @@ namespace Mirror.Tests
             func3.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         }
 
-        int onOnServerSceneOnlyChangedCounter;
-        void TestOnServerOnlySceneChangedInvoke(string sceneName, SceneOperation sceneOperation)
-        {
-            onOnServerSceneOnlyChangedCounter++;
-        }
-
         [UnityTest]
         public IEnumerator FinishLoadServerOnlyTest() => UniTask.ToCoroutine(async () =>
         {
+            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
+
             client.Disconnect();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !client.Active);
 
-            sceneManager.ServerSceneChanged.AddListener(TestOnServerOnlySceneChangedInvoke);
-
+            sceneManager.ServerSceneChanged.AddListener(func1);
+            
             sceneManager.FinishLoadScene("test", SceneOperation.Normal);
 
-            Assert.That(onOnServerSceneOnlyChangedCounter, Is.EqualTo(1));
+            func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         });
 
         [UnityTest]
@@ -108,18 +104,15 @@ namespace Mirror.Tests
             });
         });
 
-        int ClientChangeCalled;
-        public void ClientChangeScene(string sceneName, SceneOperation sceneOperation)
-        {
-            ClientChangeCalled++;
-        }
-
         [Test]
         public void ClientChangeSceneTest()
         {
-            sceneManager.ClientChangeScene.AddListener(ClientChangeScene);
+            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
+            sceneManager.ClientChangeScene.AddListener(func1);
+
             sceneManager.OnClientChangeScene("", SceneOperation.Normal);
-            Assert.That(ClientChangeCalled, Is.EqualTo(1));
+
+            func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         }
 
         [Test]
