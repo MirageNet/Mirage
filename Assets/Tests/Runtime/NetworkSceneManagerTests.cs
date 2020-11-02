@@ -241,5 +241,24 @@ namespace Mirror.Tests
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
             Assert.That(clientSceneManager.pendingAdditiveSceneList.Count == 0);
         }
+
+        [Test]
+        public void ClientSceneMessagePendingAdditiveSceneListTest()
+        {
+            //Check for the additive scene in the pending list at the time of ClientSceneChanged before its removed as part of it being loaded.
+            clientSceneManager.ClientSceneChanged.AddListener(CheckForAdditiveScene);
+            clientSceneManager.ClientSceneMessage(client.Connection, new SceneMessage() {  scenePath = "Assets/Mirror/Tests/Runtime/testScene.unity", additiveScenes = new string[] { "Assets/Mirror/Tests/Runtime/testScene.unity" } });
+
+            Assert.That(additiveSceneWasFound);
+        }
+
+        bool additiveSceneWasFound = false;
+        void CheckForAdditiveScene(string scenePath, SceneOperation sceneOperation)
+        {
+            if(clientSceneManager.pendingAdditiveSceneList.Contains("Assets/Mirror/Tests/Runtime/testScene.unity"))
+            {
+                additiveSceneWasFound = true;
+            }
+        }
     }
 }
