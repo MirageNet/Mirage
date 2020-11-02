@@ -182,24 +182,6 @@ namespace Mirror
             SendAsync(msg, channelId).Forget();
         }
 
-        /// <summary>
-        /// This sends a network message to the connection. You can await it to check for errors
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="msg">The message to send.</param>
-        /// <param name="channelId">The transport layer channel to send on.</param>
-        /// <returns></returns>
-        public virtual UniTask SendAsync<T>(T msg, int channelId = Channel.Reliable)
-        {
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
-            {
-                // pack message and send allocation free
-                MessagePacker.Pack(msg, writer);
-                NetworkDiagnostics.OnSend(msg, channelId, writer.Position, 1);
-                return SendAsync(writer.ToArraySegment(), channelId);
-            }
-        }
-
         public static void Send<T>(IEnumerable<INetworkConnection> connections, T msg, int channelId = Channel.Reliable)
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -219,13 +201,32 @@ namespace Mirror
                 NetworkDiagnostics.OnSend(msg, channelId, segment.Count, count);
             }
         }
-        
+
+        /// <summary>
+        /// This sends a network message to the connection. You can await it to check for errors
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="msg">The message to send.</param>
+        /// <param name="channelId">The transport layer channel to send on.</param>
+        /// <returns></returns>
+        public virtual UniTask SendAsync<T>(T msg, int channelId = Channel.Reliable)
+        {
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                // pack message and send allocation free
+                MessagePacker.Pack(msg, writer);
+                NetworkDiagnostics.OnSend(msg, channelId, writer.Position, 1);
+                return SendAsync(writer.ToArraySegment(), channelId);
+            }
+        }
+
         // internal because no one except Mirror should send bytes directly to
         // the client. they would be detected as a message. send messages instead.
         public UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
             return connection.SendAsync(segment, channelId);
         }
+
 
         public override string ToString()
         {
