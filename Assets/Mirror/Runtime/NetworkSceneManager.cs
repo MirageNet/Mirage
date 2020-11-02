@@ -230,7 +230,7 @@ namespace Mirror
             // Let server prepare for scene change
             OnServerChangeScene(scenePath, sceneOperation);
 
-            if(!client.IsLocalClient)
+            if(!server.LocalClientActive)
                 StartCoroutine(ApplySceneOperation(scenePath, sceneOperation));
 
             // notify all clients about the new scene
