@@ -1,8 +1,11 @@
 // all the [ServerRpc] code from NetworkBehaviourProcessor in one place
 using System;
+using System.Linq;
+using System.Reflection;
 using Cysharp.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 namespace Mirror.Weaver
 {
@@ -69,7 +72,26 @@ namespace Mirror.Weaver
             worker.Append(worker.Create(OpCodes.Ldloc_0));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
             worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
-            worker.Append(worker.Create(OpCodes.Call, WeaverTypes.sendServerRpcInternal));
+            if (md.ReturnType.Is(typeof(void)))
+            {
+                worker.Append(worker.Create(OpCodes.Call, WeaverTypes.sendServerRpcInternal));
+            }
+            else
+            {
+                // call SendServerRpcWithReturn<T> and return the result
+                var netBehaviour = typeof(NetworkBehaviour);
+
+                MethodInfo sendMethod = netBehaviour.GetMethods(BindingFlags.NonPublic| BindingFlags.Instance).First(m => m.Name == nameof(NetworkBehaviour.SendServerRpcWithReturn));
+                MethodReference sendRef = md.Module.ImportReference(sendMethod);
+
+                var returnType = md.ReturnType as GenericInstanceType;
+                
+                var instanceMethod = new GenericInstanceMethod(sendRef);
+                instanceMethod.GenericArguments.Add(returnType.GenericArguments[0]);
+
+                worker.Append(worker.Create(OpCodes.Call, sendRef));
+
+            }
 
             NetworkBehaviourProcessor.WriteRecycleWriter(worker);
 

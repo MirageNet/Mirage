@@ -208,7 +208,7 @@ namespace Mirror
 
         #region ServerRpcs
         [EditorBrowsable(EditorBrowsableState.Never)]
-        protected void SendServerRpcInternal(Type invokeClass, string cmdName, NetworkWriter writer, int channelId, bool requireAuthority = true)
+        protected internal void SendServerRpcInternal(Type invokeClass, string cmdName, NetworkWriter writer, int channelId, bool requireAuthority = true)
         {
             // this was in Weaver before
             // NOTE: we could remove this later to allow calling Cmds on Server
@@ -242,6 +242,44 @@ namespace Mirror
 
             Client.SendAsync(message, channelId).Forget();
         }
+
+        protected internal UniTask<T> SendServerRpcWithReturn<T>(Type invokeClass, string cmdName, NetworkWriter writer, int channelId, bool requireAuthority = true)
+        {
+            // this was in Weaver before
+            // NOTE: we could remove this later to allow calling Cmds on Server
+            //       to avoid Wrapper functions. a lot of people requested this.
+            if (!Client.Active)
+            {
+                throw new InvalidOperationException($"ServerRpc Function {cmdName} called on server without an active client.");
+            }
+
+            // local players can always send ServerRpcs, regardless of authority, other objects must have authority.
+            if (requireAuthority && !(IsLocalPlayer || HasAuthority))
+            {
+                throw new UnauthorizedAccessException($"Trying to send ServerRpc for object without authority. {invokeClass}.{cmdName}");
+            }
+
+            if (Client.Connection == null)
+            {
+                throw new InvalidOperationException("Send ServerRpc attempted with no client running [client=" + ConnectionToServer + "].");
+            }
+
+            // construct the message
+            var message = new ServerRpcMessage
+            {
+                netId = NetId,
+                componentIndex = ComponentIndex,
+                // type+func so Inventory.RpcUse != Equipment.RpcUse
+                functionHash = RemoteCallHelper.GetMethodHash(invokeClass, cmdName),
+                // segment to avoid reader allocations
+                payload = writer.ToArraySegment()
+            };
+
+            Client.SendAsync(message, channelId).Forget();
+
+            return default;
+        }
+
         #endregion
 
         #region Client RPCs
