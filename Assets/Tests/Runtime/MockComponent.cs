@@ -22,10 +22,12 @@ namespace Mirror.Tests
             this.cmdNi = ni;
         }
 
+        public int rpcResult;
+
         [ServerRpc]
-        public UniTask<int> GetResult(int input)
+        public UniTask<int> GetResult()
         {
-            return UniTask.FromResult(input);
+            return UniTask.FromResult(rpcResult);
         }
 
         public int rpcArg1;

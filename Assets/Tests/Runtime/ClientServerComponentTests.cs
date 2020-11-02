@@ -38,7 +38,8 @@ namespace Mirror.Tests
         public IEnumerator ServerRpcReturn() => UniTask.ToCoroutine(async () =>
         {
             int random = Random.Range(1, 100);
-            int result = await clientComponent.GetResult(random);
+            serverComponent.rpcResult = random;
+            int result = await clientComponent.GetResult();
             Assert.That(result, Is.EqualTo(random));
         });
 
