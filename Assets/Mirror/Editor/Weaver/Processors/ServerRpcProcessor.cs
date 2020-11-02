@@ -140,11 +140,10 @@ namespace Mirror.Weaver
 
         internal static bool Validate(MethodDefinition md, CustomAttribute serverRpcAttr)
         {
-            var unitaskType = typeof(UniTask<int>).GetGenericTypeDefinition();
+            Type unitaskType = typeof(UniTask<int>).GetGenericTypeDefinition();
             if (!md.ReturnType.Is(typeof(void)) && !md.ReturnType.Is(unitaskType))
             {
-
-                Weaver.Error($"{md.Name} cannot return a value.  Make it void instead ", md);
+                Weaver.Error($"{md.Name} use UniTask<{ md.ReturnType}> to return values from [ServerRpc]", md);
                 return false;
             }
 
