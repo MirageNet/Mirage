@@ -345,6 +345,7 @@ namespace Mirror.Weaver
             worker.Append(worker.Create(OpCodes.Ldstr, cmdName));
             worker.Append(worker.Create(OpCodes.Ldnull));
             CreateRpcDelegate(worker, func);
+
             worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
 
             worker.Append(worker.Create(OpCodes.Call, registerMethod));
