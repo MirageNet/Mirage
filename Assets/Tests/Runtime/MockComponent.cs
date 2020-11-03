@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 
 namespace Mirror.Tests
@@ -28,6 +29,18 @@ namespace Mirror.Tests
         public UniTask<int> GetResult()
         {
             return UniTask.FromResult(rpcResult);
+        }
+
+
+        public void TestWhatShouldBe()
+        {
+
+            RemoteCalls.RemoteCallHelper.RegisterRequestDelegate(typeof(MockComponent), "GetResult", sampledelegate, true);
+        }
+
+        private static UniTask<int> sampledelegate(NetworkBehaviour obj, NetworkReader reader, INetworkConnection senderConnection, int replyId)
+        {
+            throw new NotImplementedException();
         }
 
         public int rpcArg1;

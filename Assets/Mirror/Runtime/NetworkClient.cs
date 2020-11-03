@@ -286,6 +286,7 @@ namespace Mirror
             // find the callback that was waiting for this and invoke it.
             if (callbacks.TryGetValue(replyId, out Action<NetworkReader> action))
             {
+                callbacks.Remove(replyId);
                 using(PooledNetworkReader reader = NetworkReaderPool.GetReader(reply.payload))
                 {
                     action(reader);
@@ -307,7 +308,7 @@ namespace Mirror
         /// <returns>the task that will be completed when the result is in, and the id to use in the request</returns>
         internal (UniTask<T> task, int replyId) CreateReplyTask<T>()
         {
-            int newReplyId = this.replyId++;
+            int newReplyId = replyId++;
             var completionSource = AutoResetUniTaskCompletionSource<T>.Create();
             void Callback(NetworkReader reader)
             {

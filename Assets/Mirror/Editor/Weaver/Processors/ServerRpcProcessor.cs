@@ -72,6 +72,17 @@ namespace Mirror.Weaver
             worker.Append(worker.Create(OpCodes.Ldloc_0));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
             worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+            CallSendServerRpc(md, worker);
+
+            NetworkBehaviourProcessor.WriteRecycleWriter(worker);
+
+            worker.Append(worker.Create(OpCodes.Ret));
+
+            return cmd;
+        }
+
+        private static void CallSendServerRpc(MethodDefinition md, ILProcessor worker)
+        {
             if (md.ReturnType.Is(typeof(void)))
             {
                 worker.Append(worker.Create(OpCodes.Call, WeaverTypes.sendServerRpcInternal));
@@ -79,25 +90,19 @@ namespace Mirror.Weaver
             else
             {
                 // call SendServerRpcWithReturn<T> and return the result
-                var netBehaviour = typeof(NetworkBehaviour);
+                Type netBehaviour = typeof(NetworkBehaviour);
 
-                MethodInfo sendMethod = netBehaviour.GetMethods(BindingFlags.NonPublic| BindingFlags.Instance).First(m => m.Name == nameof(NetworkBehaviour.SendServerRpcWithReturn));
+                MethodInfo sendMethod = netBehaviour.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).First(m => m.Name == nameof(NetworkBehaviour.SendServerRpcWithReturn));
                 MethodReference sendRef = md.Module.ImportReference(sendMethod);
 
                 var returnType = md.ReturnType as GenericInstanceType;
-                
+
                 var instanceMethod = new GenericInstanceMethod(sendRef);
                 instanceMethod.GenericArguments.Add(returnType.GenericArguments[0]);
 
-                worker.Append(worker.Create(OpCodes.Call, sendRef));
+                worker.Append(worker.Create(OpCodes.Call, instanceMethod));
 
             }
-
-            NetworkBehaviourProcessor.WriteRecycleWriter(worker);
-
-            worker.Append(worker.Create(OpCodes.Ret));
-
-            return cmd;
         }
 
         /// <summary>
@@ -124,7 +129,10 @@ namespace Mirror.Weaver
         {
             var cmd = new MethodDefinition(MethodProcessor.SkeletonPrefix + method.Name,
                 MethodAttributes.Family | MethodAttributes.Static | MethodAttributes.HideBySig,
-                WeaverTypes.Import(typeof(void)));
+                userCodeFunc.ReturnType);
+
+            NetworkBehaviourProcessor.AddInvokeParameters(cmd.Parameters);
+            method.DeclaringType.Methods.Add(cmd);
 
             ILProcessor worker = cmd.Body.GetILProcessor();
 
@@ -141,9 +149,6 @@ namespace Mirror.Weaver
             worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
             worker.Append(worker.Create(OpCodes.Ret));
 
-            NetworkBehaviourProcessor.AddInvokeParameters(cmd.Parameters);
-
-            method.DeclaringType.Methods.Add(cmd);
             return cmd;
         }
 
