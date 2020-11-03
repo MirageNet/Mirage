@@ -127,6 +127,8 @@ namespace Mirror
 
             if (Transport == null)
                 Transport = GetComponent<Transport>();
+            if (Transport == null)
+                throw new InvalidOperationException("Trasnport could not be found for NetworkClient");
 
             connectState = ConnectState.Connecting;
 
