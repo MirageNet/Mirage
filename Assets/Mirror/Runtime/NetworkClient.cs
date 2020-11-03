@@ -284,7 +284,7 @@ namespace Mirror
         private void OnServerRpcReply(INetworkConnection connection, ServerRpcReply reply)
         {
             // find the callback that was waiting for this and invoke it.
-            if (callbacks.TryGetValue(replyId, out Action<NetworkReader> action))
+            if (callbacks.TryGetValue(reply.replyId, out Action<NetworkReader> action))
             {
                 callbacks.Remove(replyId);
                 using(PooledNetworkReader reader = NetworkReaderPool.GetReader(reply.payload))

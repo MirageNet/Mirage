@@ -31,18 +31,6 @@ namespace Mirror.Tests
             return UniTask.FromResult(rpcResult);
         }
 
-
-        public void TestWhatShouldBe()
-        {
-
-            RemoteCalls.RemoteCallHelper.RegisterRequestDelegate(typeof(MockComponent), "GetResult", sampledelegate, true);
-        }
-
-        private static UniTask<int> sampledelegate(NetworkBehaviour obj, NetworkReader reader, INetworkConnection senderConnection, int replyId)
-        {
-            throw new NotImplementedException();
-        }
-
         public int rpcArg1;
         public string rpcArg2;
 
