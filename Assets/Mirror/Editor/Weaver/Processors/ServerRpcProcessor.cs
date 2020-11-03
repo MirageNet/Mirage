@@ -53,7 +53,7 @@ namespace Mirror.Weaver
 
             // write all the arguments that the user passed to the Cmd call
             if (!NetworkBehaviourProcessor.WriteArguments(worker, md, RemoteCallType.ServerRpc))
-                return null;
+                return cmd;
 
             string cmdName = md.Name;
 
@@ -170,7 +170,7 @@ namespace Mirror.Weaver
             Type unitaskType = typeof(UniTask<int>).GetGenericTypeDefinition();
             if (!md.ReturnType.Is(typeof(void)) && !md.ReturnType.Is(unitaskType))
             {
-                Weaver.Error($"{md.Name} use UniTask<{ md.ReturnType}> to return values from [ServerRpc]", md);
+                Weaver.Error($"Use UniTask<{ md.ReturnType}> to return values from [ServerRpc]", md);
                 return false;
             }
 

@@ -82,10 +82,10 @@ namespace Mirror.Weaver.Tests
             Assert.That(weaverErrors, Contains.Item("Abstract Rpcs are currently not supported, use virtual method instead (at System.Void WeaverServerRpcTests.OverrideAbstractServerRpc.BaseBehaviour::CmdDoSomething())"));
         }
 
-         [Test]
+        [Test]
         public void ServerRpcWithReturn()
         {
-            IsSuccess();
+            Assert.That(weaverErrors, Is.Empty);
         }
     }
 }
