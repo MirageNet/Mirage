@@ -289,7 +289,6 @@ namespace Mirror.Weaver
         void GenerateRegisterRemoteDelegate(ILProcessor worker, MethodDefinition func, string cmdName)
         {
             MethodReference registerMethod = WeaverTypes.registerRpcDelegateReference;
-
             worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
             worker.Append(worker.Create(OpCodes.Call, WeaverTypes.getTypeFromHandleReference));
             worker.Append(worker.Create(OpCodes.Ldstr, cmdName));
@@ -338,7 +337,6 @@ namespace Mirror.Weaver
         void GenerateRegisterServerRpcDelegate(ILProcessor worker, MethodDefinition func, CmdResult cmdResult)
         {
             MethodReference registerMethod = GetRegisterMethod(func);
-
             string cmdName = cmdResult.method.Name;
             bool requireAuthority = cmdResult.requireAuthority;
 
