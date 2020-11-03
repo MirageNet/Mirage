@@ -134,9 +134,6 @@ namespace Mirror.Weaver
             NetworkBehaviourProcessor.AddInvokeParameters(cmd.Parameters);
             method.DeclaringType.Methods.Add(cmd);
 
-            NetworkBehaviourProcessor.AddInvokeParameters(cmd.Parameters);
-            method.DeclaringType.Methods.Add(cmd);
-
             ILProcessor worker = cmd.Body.GetILProcessor();
 
             // setup for reader
