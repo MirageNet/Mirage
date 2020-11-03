@@ -153,7 +153,7 @@ namespace Mirror
             if (transport is null)
                 transport = GetComponent<Transport>();
             if (transport == null)
-                throw new InvalidOperationException("Trasnport could not be found for NetworkServer");
+                throw new InvalidOperationException("Transport could not be found for NetworkServer");
 
             if (authenticator != null)
             {
