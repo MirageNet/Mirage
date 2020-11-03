@@ -103,7 +103,7 @@ namespace Mirror.RemoteCalls
 
         internal static void RegisterRequestDelegate<T>(Type invokeClass, string cmdName, RequestDelegate<T> func, bool cmdRequireAuthority = true)
         {
-            async UniTaskVoid wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkConnection senderConnection, int replyId)
+            async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkConnection senderConnection, int replyId)
             {
                 /// invoke the serverRpc and send a reply message
                 T result = await func(obj, reader, senderConnection, replyId);
@@ -121,12 +121,12 @@ namespace Mirror.RemoteCalls
                 }
             }
 
-            void cmdWrapper(NetworkBehaviour obj, NetworkReader reader, INetworkConnection senderConnection, int replyId)
+            void CmdWrapper(NetworkBehaviour obj, NetworkReader reader, INetworkConnection senderConnection, int replyId)
             {
-                wrapper(obj, reader, senderConnection, replyId).Forget();
+                Wrapper(obj, reader, senderConnection, replyId).Forget();
             }
 
-            RegisterDelegate(invokeClass, cmdName, MirrorInvokeType.ServerRpc, cmdWrapper, cmdRequireAuthority);
+            RegisterDelegate(invokeClass, cmdName, MirrorInvokeType.ServerRpc, CmdWrapper, cmdRequireAuthority);
         }
 
         static bool CheckIfDelegateExists(Type invokeClass, MirrorInvokeType invokerType, CmdDelegate func, int cmdHash)
