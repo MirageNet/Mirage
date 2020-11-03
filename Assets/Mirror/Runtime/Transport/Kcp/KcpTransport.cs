@@ -76,10 +76,11 @@ namespace Mirror.KCP
                 // that way if the client does not cooperate
                 // we can continue with other clients
                 ServerHandshake(endpoint, data, msgLength).Forget();
-                return;
             }
-
-            connection.RawInput(data, msgLength);
+            else
+            {
+                connection.RawInput(data, msgLength);
+            }
         }
 
         private async UniTaskVoid ServerHandshake(EndPoint endpoint, byte[] data, int msgLength)
