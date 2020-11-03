@@ -125,15 +125,14 @@ namespace Mirror
         {
             if (logger.LogEnabled()) logger.Log("Client Connect: " + uri);
 
-            Transport transport = Transport;
-            if (transport == null)
-                transport = GetComponent<Transport>();
+            if (Transport == null)
+                Transport = GetComponent<Transport>();
 
             connectState = ConnectState.Connecting;
 
             try
             {
-                IConnection transportConnection = await transport.ConnectAsync(uri);
+                IConnection transportConnection = await Transport.ConnectAsync(uri);
 
                 InitializeAuthEvents();
 
