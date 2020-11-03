@@ -1,3 +1,24 @@
+## [56.3.4](https://github.com/MirrorNG/MirrorNG/compare/v56.3.3...v56.3.4) (2020-11-03)
+
+
+### Bug Fixes
+
+* added missing UniTask.asmdef reference to Mirror.Weaver.asmdef ([#463](https://github.com/MirrorNG/MirrorNG/issues/463)) ([bcb8ae7](https://github.com/MirrorNG/MirrorNG/commit/bcb8ae73f4ebc949d10d8abec6e57a2737bfd276))
+
+## [56.3.3](https://github.com/MirrorNG/MirrorNG/compare/v56.3.2...v56.3.3) (2020-11-02)
+
+
+### Bug Fixes
+
+* prevent NRE if client is not present on server ([#461](https://github.com/MirrorNG/MirrorNG/issues/461)) ([357da87](https://github.com/MirrorNG/MirrorNG/commit/357da87d530e8bdb01e2eb0967d75a7a354c92b1))
+
+## [56.3.2](https://github.com/MirrorNG/MirrorNG/compare/v56.3.1...v56.3.2) (2020-11-02)
+
+
+### Bug Fixes
+
+* **NetworkAnimator:** fixing trigger not applied on host ([49b5325](https://github.com/MirrorNG/MirrorNG/commit/49b532546f22074ff1478bf76ecd78f2406a1b55))
+
 ## [56.3.1](https://github.com/MirrorNG/MirrorNG/compare/v56.3.0...v56.3.1) (2020-11-02)
 
 

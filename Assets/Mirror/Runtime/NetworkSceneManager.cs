@@ -117,14 +117,11 @@ namespace Mirror
             OnClientChangeScene(msg.scenePath, msg.sceneOperation);
 
             //Additive are scenes loaded on server and this client is not a host client
-            if(msg.additiveScenes != null && msg.additiveScenes.Length > 0)
+            if(msg.additiveScenes != null && msg.additiveScenes.Length > 0 && client && !client.IsLocalClient)
             {
-                if(client && !client.IsLocalClient)
+                foreach (string scene in msg.additiveScenes)
                 {
-                    foreach (string scene in msg.additiveScenes)
-                    {
-                        pendingAdditiveSceneList.Add(scene);
-                    }
+                    pendingAdditiveSceneList.Add(scene);
                 }
             }
 
@@ -230,7 +227,7 @@ namespace Mirror
             // Let server prepare for scene change
             OnServerChangeScene(scenePath, sceneOperation);
 
-            if(!client.IsLocalClient)
+            if(!server.LocalClientActive)
                 StartCoroutine(ApplySceneOperation(scenePath, sceneOperation));
 
             // notify all clients about the new scene

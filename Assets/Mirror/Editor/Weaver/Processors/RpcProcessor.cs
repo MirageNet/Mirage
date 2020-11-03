@@ -64,7 +64,7 @@ namespace Mirror.Weaver
             }
             
             if (!NetworkBehaviourProcessor.ReadArguments(md, worker, hasNetworkConnection))
-                return null;
+                return rpc;
 
             // invoke actual ServerRpc function
             worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
