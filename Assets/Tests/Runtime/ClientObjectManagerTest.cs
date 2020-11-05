@@ -113,7 +113,7 @@ namespace Mirror.Tests
             Object.Destroy(prefabObject);
         }
 
-        NetworkIdentity TestSpawnDelegate(Vector3 position, Guid assetId)
+        NetworkIdentity TestSpawnDelegate(SpawnMessage msg)
         {
             return new GameObject("spawned", typeof(NetworkIdentity)).GetComponent<NetworkIdentity>();
         }

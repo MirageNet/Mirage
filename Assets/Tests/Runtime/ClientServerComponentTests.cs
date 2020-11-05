@@ -130,11 +130,11 @@ namespace Mirror.Tests
         });
 
         int spawnDelegateTestCalled;
-        NetworkIdentity SpawnDelegateTest(Vector3 position, Guid assetId)
+        NetworkIdentity SpawnDelegateTest(SpawnMessage msg)
         {
             spawnDelegateTestCalled++;
 
-            NetworkIdentity prefab = clientObjectManager.GetPrefab(assetId);
+            NetworkIdentity prefab = clientObjectManager.GetPrefab(msg.assetId);
             if (!(prefab is null))
             {
                 return Object.Instantiate(prefab);
