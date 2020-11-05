@@ -196,8 +196,8 @@ namespace Mirror.Weaver
             else
             {
                 // fieldValue = value;
-                worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
                 worker.Append(worker.Create(OpCodes.Stfld, fd));
 
                 // SetDirtyBit(dirtyBit);
