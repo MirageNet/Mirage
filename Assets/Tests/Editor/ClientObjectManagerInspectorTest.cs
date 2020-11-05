@@ -39,7 +39,7 @@ namespace Mirror.Tests
 
             inspector.RegisterPrefabs(client);
 
-            Assert.That(client.spawnPrefabs, Contains.Item(preexisting));
+            Assert.That(client.spawnPrefabs, Contains.Item(preexisting.GetComponent<NetworkIdentity>()));
 
             GameObject.DestroyImmediate(gameObject);
             GameObject.DestroyImmediate(preexisting);

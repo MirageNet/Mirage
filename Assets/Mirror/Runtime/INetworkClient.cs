@@ -4,19 +4,27 @@ using UnityEngine;
 
 namespace Mirror
 {
+    // Handles requests to spawn objects on the client
+    public delegate NetworkIdentity SpawnDelegate(Vector3 position, Guid assetId);
+
+    public delegate NetworkIdentity SpawnHandlerDelegate(SpawnMessage msg);
+
+    // Handles requests to unspawn objects on the client
+    public delegate void UnSpawnDelegate(NetworkIdentity spawned);
+
     public interface IClientObjectManager
     {
         GameObject GetPrefab(Guid assetId);
 
-        void RegisterPrefab(GameObject prefab);
+        void RegisterPrefab(NetworkIdentity prefab);
 
-        void RegisterPrefab(GameObject prefab, Guid newAssetId);
+        void RegisterPrefab(NetworkIdentity prefab, Guid newAssetId);
 
-        void RegisterPrefab(GameObject prefab, SpawnDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
+        void RegisterPrefab(NetworkIdentity prefab, SpawnDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
 
-        void RegisterPrefab(GameObject prefab, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
+        void RegisterPrefab(NetworkIdentity prefab, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
 
-        void UnregisterPrefab(GameObject prefab);
+        void UnregisterPrefab(NetworkIdentity prefab);
 
         void RegisterSpawnHandler(Guid assetId, SpawnDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
 

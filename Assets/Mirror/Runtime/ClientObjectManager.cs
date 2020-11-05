@@ -26,7 +26,7 @@ namespace Mirror
         /// This is a dictionary of the prefabs that are registered on the client with ClientScene.RegisterPrefab().
         /// <para>The key to the dictionary is the prefab asset Id.</para>
         /// </summary>
-        internal readonly Dictionary<Guid, GameObject> prefabs = new Dictionary<Guid, GameObject>();
+        internal readonly Dictionary<Guid, NetworkIdentity> prefabs = new Dictionary<Guid, NetworkIdentity>();
 
         /// <summary>
         /// List of prefabs that will be registered with the spawning system.
@@ -158,14 +158,14 @@ namespace Mirror
         /// <param name="assetId">asset id of the prefab</param>
         /// <param name="prefab">the prefab gameobject</param>
         /// <returns>true if prefab was registered</returns>
-        public GameObject GetPrefab(Guid assetId)
+        public NetworkIdentity GetPrefab(Guid assetId)
         {
             if (assetId == Guid.Empty)
                 return null;
 
-            if (prefabs.TryGetValue(assetId, out GameObject prefab))
+            if (prefabs.TryGetValue(assetId, out NetworkIdentity identity))
             {
-                return prefab;
+                return identity;
             }
             return null;
         }
@@ -183,7 +183,7 @@ namespace Mirror
                 identity.AssetId = newAssetId;
 
                 if (logger.LogEnabled()) logger.Log("Registering prefab '" + identity.name + "' as asset:" + identity.AssetId);
-                prefabs[identity.AssetId] = identity.gameObject;
+                prefabs[identity.AssetId] = identity;
         }
 
         /// <summary>
@@ -196,7 +196,7 @@ namespace Mirror
         public void RegisterPrefab(NetworkIdentity identity)
         {
             if (logger.LogEnabled()) logger.Log("Registering prefab '" + identity.name + "' as asset:" + identity.AssetId);
-            prefabs[identity.AssetId] = identity.gameObject;
+            prefabs[identity.AssetId] = identity;
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace Mirror
         /// <param name="prefab">A Prefab that will be spawned.</param>
         /// <param name="spawnHandler">A method to use as a custom spawnhandler on clients.</param>
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
-        public void RegisterPrefab(GameObject prefab, SpawnDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
+        public void RegisterPrefab(NetworkIdentity prefab, SpawnDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
             RegisterPrefab(prefab, msg => spawnHandler(msg.position, msg.assetId), unspawnHandler);
         }
@@ -222,20 +222,14 @@ namespace Mirror
         /// <param name="prefab">A Prefab that will be spawned.</param>
         /// <param name="spawnHandler">A method to use as a custom spawnhandler on clients.</param>
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
-        public void RegisterPrefab(GameObject prefab, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
+        public void RegisterPrefab(NetworkIdentity identity, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
-            NetworkIdentity identity = prefab.GetComponent<NetworkIdentity>();
-            if (identity == null)
-            {
-                throw new InvalidOperationException("Could not register '" + prefab.name + "' since it contains no NetworkIdentity component");
-            }
-
             if (identity.AssetId == Guid.Empty)
             {
-                throw new InvalidOperationException("RegisterPrefab game object " + prefab.name + " has no " + nameof(prefab) + ". Use RegisterSpawnHandler() instead?");
+                throw new InvalidOperationException("RegisterPrefab game object " + identity.name + " has no " + nameof(identity) + ". Use RegisterSpawnHandler() instead?");
             }
 
-            if (logger.LogEnabled()) logger.Log("Registering custom prefab '" + prefab.name + "' as asset:" + identity.AssetId + " " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
+            if (logger.LogEnabled()) logger.Log("Registering custom prefab '" + identity.name + "' as asset:" + identity.AssetId + " " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
 
             spawnHandlers[identity.AssetId] = spawnHandler;
             unspawnHandlers[identity.AssetId] = unspawnHandler;
@@ -245,13 +239,8 @@ namespace Mirror
         /// Removes a registered spawn prefab that was setup with ClientScene.RegisterPrefab.
         /// </summary>
         /// <param name="prefab">The prefab to be removed from registration.</param>
-        public void UnregisterPrefab(GameObject prefab)
+        public void UnregisterPrefab(NetworkIdentity identity)
         {
-            NetworkIdentity identity = prefab.GetComponent<NetworkIdentity>();
-            if (identity == null)
-            {
-                throw new InvalidOperationException("Could not unregister '" + prefab.name + "' since it contains no NetworkIdentity component");
-            }
             spawnHandlers.Remove(identity.AssetId);
             unspawnHandlers.Remove(identity.AssetId);
         }
@@ -316,7 +305,7 @@ namespace Mirror
             identity.StopClient();
             if (unspawnHandlers.TryGetValue(assetId, out UnSpawnDelegate handler) && handler != null)
             {
-                handler(identity.gameObject);
+                handler(identity);
             }
             else if (identity.sceneId == 0)
             {
@@ -422,24 +411,24 @@ namespace Mirror
         {
             if (spawnHandlers.TryGetValue(msg.assetId, out SpawnHandlerDelegate handler))
             {
-                GameObject obj = handler(msg);
+                NetworkIdentity obj = handler(msg);
                 if (obj == null)
                 {
                     logger.LogWarning("Client spawn handler for " + msg.assetId + " returned null");
                     return null;
                 }
-                return obj.GetComponent<NetworkIdentity>();
+                return obj;
             }
-            GameObject prefab = GetPrefab(msg.assetId);
+            NetworkIdentity prefab = GetPrefab(msg.assetId);
             if (!(prefab is null))
             {
-                GameObject obj = Object.Instantiate(prefab, msg.position, msg.rotation);
+                NetworkIdentity obj = Instantiate(prefab, msg.position, msg.rotation);
                 if (logger.LogEnabled())
                 {
                     logger.Log("Client spawn handler instantiating [netId:" + msg.netId + " asset ID:" + msg.assetId + " pos:" + msg.position + " rotation: " + msg.rotation + "]");
                 }
 
-                return obj.GetComponent<NetworkIdentity>();
+                return obj;
             }
             logger.LogError("Failed to spawn server object, did you forget to add it to the ClientObjectManager? assetId=" + msg.assetId + " netId=" + msg.netId);
             return null;
