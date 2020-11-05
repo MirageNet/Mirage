@@ -99,6 +99,13 @@ namespace Mirror
             client.Connection.RegisterHandler<RpcMessage>(OnRpcMessage);
         }
 
+        void OnDestroy()
+        {
+            client.Connected.RemoveListener(OnClientConnected);
+            client.Disconnected.RemoveListener(OnClientDisconnected);
+            networkSceneManager.ClientSceneChanged.RemoveListener(OnClientSceneChanged);
+        }
+
         static bool ConsiderForSpawning(NetworkIdentity identity)
         {
             // not spawned yet, not hidden, etc.?
