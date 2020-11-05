@@ -33,7 +33,7 @@ namespace Mirror.Tests
 
             var gameObject = new GameObject("NetworkObjectManager", typeof(ClientObjectManager));
             ClientObjectManager client = gameObject.GetComponent<ClientObjectManager>();
-            client.spawnPrefabs.Add(preexisting);
+            client.spawnPrefabs.Add(preexisting.GetComponent<NetworkIdentity>());
 
             ClientObjectManagerInspector inspector = ScriptableObject.CreateInstance<ClientObjectManagerInspector>();
 

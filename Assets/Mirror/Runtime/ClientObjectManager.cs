@@ -32,7 +32,7 @@ namespace Mirror
         /// List of prefabs that will be registered with the spawning system.
         /// <para>For each of these prefabs, ClientManager.RegisterPrefab() will be automatically invoke.</para>
         /// </summary>
-        public List<GameObject> spawnPrefabs = new List<GameObject>();
+        public List<NetworkIdentity> spawnPrefabs = new List<NetworkIdentity>();
 
         /// <summary>
         /// This is dictionary of the disabled NetworkIdentity objects in the scene that could be spawned by messages from the server.
@@ -143,7 +143,7 @@ namespace Mirror
         {
             for (int i = 0; i < spawnPrefabs.Count; i++)
             {
-                GameObject prefab = spawnPrefabs[i];
+                NetworkIdentity prefab = spawnPrefabs[i];
                 if (prefab != null)
                 {
                     RegisterPrefab(prefab);
@@ -178,20 +178,12 @@ namespace Mirror
         /// </summary>
         /// <param name="prefab">A Prefab that will be spawned.</param>
         /// <param name="newAssetId">An assetId to be assigned to this prefab. This allows a dynamically created game object to be registered for an already known asset Id.</param>
-        public void RegisterPrefab(GameObject prefab, Guid newAssetId)
+        public void RegisterPrefab(NetworkIdentity identity, Guid newAssetId)
         {
-            NetworkIdentity identity = prefab.GetComponent<NetworkIdentity>();
-            if (identity)
-            {
                 identity.AssetId = newAssetId;
 
-                if (logger.LogEnabled()) logger.Log("Registering prefab '" + prefab.name + "' as asset:" + identity.AssetId);
-                prefabs[identity.AssetId] = prefab;
-            }
-            else
-            {
-                throw new InvalidOperationException("Could not register '" + prefab.name + "' since it contains no NetworkIdentity component");
-            }
+                if (logger.LogEnabled()) logger.Log("Registering prefab '" + identity.name + "' as asset:" + identity.AssetId);
+                prefabs[identity.AssetId] = identity.gameObject;
         }
 
         /// <summary>
@@ -201,25 +193,10 @@ namespace Mirror
         /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of NetworkAssetIds and prefab references.</para>
         /// </summary>
         /// <param name="prefab">A Prefab that will be spawned.</param>
-        public void RegisterPrefab(GameObject prefab)
+        public void RegisterPrefab(NetworkIdentity identity)
         {
-            NetworkIdentity identity = prefab.GetComponent<NetworkIdentity>();
-            if (identity)
-            {
-                if (logger.LogEnabled()) logger.Log("Registering prefab '" + prefab.name + "' as asset:" + identity.AssetId);
-                prefabs[identity.AssetId] = prefab;
-
-                NetworkIdentity[] identities = prefab.GetComponentsInChildren<NetworkIdentity>();
-                if (identities.Length > 1)
-                {
-                    logger.LogWarning("The prefab '" + prefab.name +
-                                     "' has multiple NetworkIdentity components. There can only be one NetworkIdentity on a prefab, and it must be on the root object.");
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException("Could not register '" + prefab.name + "' since it contains no NetworkIdentity component");
-            }
+            if (logger.LogEnabled()) logger.Log("Registering prefab '" + identity.name + "' as asset:" + identity.AssetId);
+            prefabs[identity.AssetId] = identity.gameObject;
         }
 
         /// <summary>
