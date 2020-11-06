@@ -24,8 +24,6 @@ namespace Mirror.Tests
         IConnection conn1;
         IConnection conn2;
 
-        UniTask transportListen;
-
         [SetUp]
         public void Setup()
         {
