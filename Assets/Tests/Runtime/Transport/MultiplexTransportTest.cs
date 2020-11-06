@@ -24,6 +24,8 @@ namespace Mirror.Tests
         IConnection conn1;
         IConnection conn2;
 
+        UniTask transportListen;
+
         [SetUp]
         public void Setup()
         {
@@ -42,6 +44,7 @@ namespace Mirror.Tests
             conn1 = Substitute.For<IConnection>();
             conn2 = Substitute.For<IConnection>();
 
+            transport.Start();
         }
 
         [TearDown]

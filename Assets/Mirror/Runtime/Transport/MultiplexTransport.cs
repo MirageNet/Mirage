@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 
 namespace Mirror
 {
@@ -44,13 +43,17 @@ namespace Mirror
                 transport.Disconnect();
         }
 
-        public override UniTask ListenAsync()
+        public void Start()
         {
             foreach (Transport t in transports)
             {
                 t.Connected.AddListener(c => Connected.Invoke(c));
                 t.Started.AddListener(() => Started.Invoke());
             }
+        }
+        
+        public override UniTask ListenAsync()
+        {
 
             return UniTask.WhenAll(transports.Select(t => t.ListenAsync()));
         }

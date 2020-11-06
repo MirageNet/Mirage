@@ -16,14 +16,19 @@ namespace Mirror.Tests
             return UniTask.FromResult<IConnection>(default);
         }
 
+        UniTaskCompletionSource completionSource;
+
         public override void Disconnect()
         {
+            completionSource.TrySetResult();
         }
 
         public override UniTask ListenAsync()
         {
             Started.Invoke();
-            return UniTask.CompletedTask;
+
+            completionSource = new UniTaskCompletionSource();
+            return completionSource.Task;
         }
 
         public override IEnumerable<Uri> ServerUri()
