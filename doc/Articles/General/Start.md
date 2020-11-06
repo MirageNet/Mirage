@@ -75,7 +75,7 @@ Fix non-player prefabs such as enemies:
 ## Spawners
 -   Potentially change spawner scripts to be NetworkBehaviours
 -   Modify spawners to only run on the server (use `IsServer` property or the `OnStartServer` callback)
--   Call `NetworkObjectManager.Spawn()` for created game objects
+-   Call `ServerObjectManager.Spawn()` for created game objects
 
 ## Spawn positions for players
 -   Add a new game object and place it at player’s start location
