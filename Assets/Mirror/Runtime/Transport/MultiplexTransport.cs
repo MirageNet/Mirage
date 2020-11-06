@@ -54,7 +54,6 @@ namespace Mirror
         
         public override UniTask ListenAsync()
         {
-
             return UniTask.WhenAll(transports.Select(t => t.ListenAsync()));
         }
 
