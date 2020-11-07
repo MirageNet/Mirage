@@ -38,11 +38,9 @@ namespace Mirror
 
             var guids = AssetDatabase.FindAssets("t:GameObject", new[] { path });
 
-            int index = 0;
-
-            foreach (string guid in guids)
+            for (int i = 0; i< guids.Length; i++)
             {
-                var assetPath = AssetDatabase.GUIDToAssetPath(guid);
+                var assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
 
                 T obj = AssetDatabase.LoadAssetAtPath<T>(assetPath);
 
@@ -51,10 +49,9 @@ namespace Mirror
                     result.Add(obj);
                 }
 
-                if (index++ > 100)
+                if (i % 100 == 99)
                 {
                     EditorUtility.UnloadUnusedAssetsImmediate();
-                    index = 0;
                 }
             }
             EditorUtility.UnloadUnusedAssetsImmediate();
