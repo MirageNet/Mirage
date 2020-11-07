@@ -38,15 +38,26 @@ namespace Mirror
 
             var guids = AssetDatabase.FindAssets("t:Object", new[] { path });
 
-            foreach (var guid in guids)
+            int index = 0;
+
+            foreach (string guid in guids)
             {
                 var assetPath = AssetDatabase.GUIDToAssetPath(guid);
 
                 T obj = AssetDatabase.LoadAssetAtPath<T>(assetPath);
 
                 if (obj != null)
+                {
                     result.Add(obj);
+                }
+
+                if (index++ > 100)
+                {
+                    EditorUtility.UnloadUnusedAssetsImmediate();
+                    index = 0;
+                }
             }
+            EditorUtility.UnloadUnusedAssetsImmediate();
             return result;
         }
     }
