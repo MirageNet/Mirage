@@ -32,15 +32,15 @@ namespace Mirror
             gameObject.spawnPrefabs.AddRange(prefabs);
         }
 
-        private static ISet<T> LoadPrefabsContaining<T>(string path) where T : UnityEngine.Component
+        private static ISet<T> LoadPrefabsContaining<T>(string path) where T : Component
         {
             var result = new HashSet<T>();
 
-            var guids = AssetDatabase.FindAssets("t:GameObject", new[] { path });
+            string[] guids = AssetDatabase.FindAssets("t:GameObject", new[] { path });
 
             for (int i = 0; i< guids.Length; i++)
             {
-                var assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
+                string assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
 
                 T obj = AssetDatabase.LoadAssetAtPath<T>(assetPath);
 
