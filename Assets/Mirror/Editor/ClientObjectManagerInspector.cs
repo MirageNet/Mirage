@@ -36,7 +36,7 @@ namespace Mirror
         {
             var result = new HashSet<T>();
 
-            var guids = AssetDatabase.FindAssets("t:Object", new[] { path });
+            var guids = AssetDatabase.FindAssets("t:GameObject", new[] { path });
 
             int index = 0;
 
