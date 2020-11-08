@@ -231,6 +231,11 @@ namespace Mirror
 
             // notify all clients about the new scene
             server.SendToAll(new SceneMessage { scenePath = scenePath, sceneOperation = sceneOperation });
+
+            foreach(NetworkConnection conn in server.connections)
+            {
+                conn.ActiveScenes.Add(scenePath, false);
+            }
         }
 
         /// <summary>
