@@ -13,10 +13,6 @@ uMMORPG was possible with \<6000 lines of code. We needed a networking library t
 -   **Requires Unity 2018.4 LTS and Runtime .Net 4.x (default in Unity 2019) and .Net 2.0 Compatibility is recommended**
 -   Alpha / Beta Unity versions cannot be supported
 
-**List Server**
-
-We've developed a [List Server](https://mirror-networking.com/list-server/) where game servers can register and clients can connect to find those servers to play on them.
-
 **Key Features & Components:**
 -   [Transports](Articles/Transports/index.md) are interchangeable components
 -   [NetworkSceneManager](Articles/Components/NetworkSceneManager.md) to load normal and additive network scenes.
@@ -32,5 +28,4 @@ We've developed a [List Server](https://mirror-networking.com/list-server/) wher
 -   [Network Scene Checker](Articles/Components/NetworkSceneChecker.md) to isolate players and networked objects to Additive scene instances
 -   [Network Match Checker](Articles/Components/NetworkMatchChecker.md) to isolate players and networked objects by [Network Visibility](Articles/Guides/Visibility.md)
 -   [SyncVar](Articles/Guides/Sync/SyncVars.md), [SyncList](Articles/Guides/Sync/SyncLists.md), [SyncDictionary](Articles/Guides/Sync/SyncDictionary.md), and [SyncHashSet](Articles/Guides/Sync/SyncHashSet.md)
-
-**Integrations**
+-   [List Server](https://mirror-networking.com/list-server/) where game servers can register and clients can connect to find those servers to play on them.
