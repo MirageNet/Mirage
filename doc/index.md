@@ -6,7 +6,6 @@ MirrorNG has nearly all of the components and features from UNet, making network
 
 Built to support games of any scale, from LAN party games to dedicated high-volume authoritative servers running hundreds of players, MirrorNG is the core networking solution for [Cubica](https://www.cubica.net/), and [more](Articles/General/Showcase.md)!
 
-uMMORPG was possible with \<6000 lines of code. We needed a networking library that allows us to launch our games, period!
 -   **Full Source included** for debugging convenience
 -   Several working examples included
 -   Active [Discord](https://discord.gg/2BvnM4R) for prompt support
