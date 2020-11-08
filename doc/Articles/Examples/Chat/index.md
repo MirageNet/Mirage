@@ -1,3 +1,3 @@
 # Chat
 
-![Chat Example](Chat.PNG)
+![Chat Example](Chat.png)

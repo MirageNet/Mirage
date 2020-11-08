@@ -1,4 +1,4 @@
 # ChangeScene
 
 
-![ChangeScene Example](ChangeScene.PNG)
+![ChangeScene Example](ChangeScene.png)
