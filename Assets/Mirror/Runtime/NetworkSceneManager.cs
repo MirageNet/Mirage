@@ -162,6 +162,9 @@ namespace Mirror
         {
             ClientSceneChanged.Invoke(scenePath, sceneOperation);
 
+            //Notify server that this scene has been fully loaded
+            client.Connection.Send(new SceneReadyMessage { scenePath = scenePath });
+
             if (pendingAdditiveSceneList.Count > 0 && client && !client.IsLocalClient)
             {
                 StartCoroutine(ApplySceneOperation(pendingAdditiveSceneList[0], SceneOperation.LoadAdditive));
