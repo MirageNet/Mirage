@@ -54,6 +54,8 @@ namespace Mirror
         /// </summary>
         public bool IsReady { get; set; }
 
+        internal Dictionary<string, bool> ActiveScenes = new Dictionary<string, bool>();
+
         /// <summary>
         /// The IP address / URL / FQDN associated with the connection.
         /// Can be useful for a game master to do IP Bans etc.
