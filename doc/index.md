@@ -19,7 +19,7 @@ We've developed a [List Server](https://mirror-networking.com/list-server/) wher
 
 **Key Features & Components:**
 -   [Transports](Articles/Transports/index.md) are interchangeable components
--   Additive Scene handling
+-   [NetworkSceneManager](Articles/Components/NetworkSceneManager.md) to load normal and additive network scenes.
 -   Single and separated Unity projects supported
 -   [Network Authenticators](Articles/Components/Authenticators/index.md) to manage access to your game
 -   [Network Discovery](Articles/Components/NetworkDiscovery.md) to easily connect LAN players to a LAN Server or Host
