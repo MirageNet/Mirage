@@ -20,7 +20,10 @@ namespace Mirror
         public string[] additiveScenes;
     }
 
-    public struct SceneReadyMessage { }
+    public struct SceneReadyMessage
+    {
+        public string scenePath;
+    }
 
     public enum SceneOperation : byte
     {
