@@ -175,7 +175,7 @@ namespace Mirror.Weaver
             GetReadFunc(elementType);
 
             ModuleDefinition module = Weaver.CurrentAssembly.MainModule;
-            MethodReference listReader = module.ImportReference(readerFunc);
+            MethodReference listReader = module.ImportReference(readerFunction);
 
             var methodRef = new GenericInstanceMethod(listReader.GetElementMethod());
             methodRef.GenericArguments.Add(elementType);
