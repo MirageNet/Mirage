@@ -34,12 +34,3 @@ We've developed a [List Server](https://mirror-networking.com/list-server/) wher
 -   [SyncVar](Articles/Guides/Sync/SyncVars.md), [SyncList](Articles/Guides/Sync/SyncLists.md), [SyncDictionary](Articles/Guides/Sync/SyncDictionary.md), and [SyncHashSet](Articles/Guides/Sync/SyncHashSet.md)
 
 **Integrations**
--   [Dissonance Voice Chat](https://assetstore.unity.com/packages/tools/audio/dissonance-voice-chat-70078)
--   [Network Sync Transform](https://github.com/emotitron/NetworkSyncTransform)
--   [Noble Connect Free](https://assetstore.unity.com/packages/tools/network/noble-connect-free-141599)
--   [Rucksack](https://assetstore.unity.com/packages/templates/systems/rucksack-multiplayer-inventory-system-114921)
--   [RTS Engine](https://assetstore.unity.com/packages/templates/packs/rts-engine-79732)
--   [Smooth Sync](https://assetstore.unity.com/packages/tools/network/smooth-sync-96925)
--   [Weather Maker](https://assetstore.unity.com/packages/tools/particles-effects/weather-maker-unity-weather-system-sky-water-volumetric-clouds-a-60955)
--   [Steamworks Networking](https://assetstore.unity.com/packages/tools/integration/steamworks-networking-151300)
--   [Master Audio Multiplayer](https://assetstore.unity.com/packages/tools/audio/master-audio-multiplayer-69547)
