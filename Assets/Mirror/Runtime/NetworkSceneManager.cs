@@ -237,6 +237,9 @@ namespace Mirror
 
             foreach(NetworkConnection conn in server.connections)
             {
+                if(sceneOperation == SceneOperation.Normal)
+                    conn.ActiveScenes.Clear();
+
                 conn.ActiveScenes.Add(scenePath, false);
             }
         }
