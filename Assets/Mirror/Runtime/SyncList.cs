@@ -120,7 +120,7 @@ namespace Mirror
         public void OnSerializeAll(NetworkWriter writer)
         {
             // if init,  write the full list content
-            writer.WritePackedUInt32((uint)objects.Count);
+            writer.WriteUInt32((uint)objects.Count);
 
             for (int i = 0; i < objects.Count; i++)
             {
@@ -132,13 +132,13 @@ namespace Mirror
             // thus the client will need to skip all the pending changes
             // or they would be applied again.
             // So we write how many changes are pending
-            writer.WritePackedUInt32((uint)changes.Count);
+            writer.WriteUInt32((uint)changes.Count);
         }
 
         public void OnSerializeDelta(NetworkWriter writer)
         {
             // write all the queued up changes
-            writer.WritePackedUInt32((uint)changes.Count);
+            writer.WriteUInt32((uint)changes.Count);
 
             for (int i = 0; i < changes.Count; i++)
             {
@@ -155,12 +155,12 @@ namespace Mirror
                         break;
 
                     case Operation.OP_REMOVEAT:
-                        writer.WritePackedUInt32((uint)change.index);
+                        writer.WriteUInt32((uint)change.index);
                         break;
 
                     case Operation.OP_INSERT:
                     case Operation.OP_SET:
-                        writer.WritePackedUInt32((uint)change.index);
+                        writer.WriteUInt32((uint)change.index);
                         writer.Write(change.item);
                         break;
                 }
@@ -173,7 +173,7 @@ namespace Mirror
             IsReadOnly = true;
 
             // if init,  write the full list content
-            int count = (int)reader.ReadPackedUInt32();
+            int count = (int)reader.ReadUInt32();
 
             objects.Clear();
             OnClear?.Invoke();
@@ -189,7 +189,7 @@ namespace Mirror
             // We will need to skip all these changes
             // the next time the list is synchronized
             // because they have already been applied
-            changesAhead = (int)reader.ReadPackedUInt32();
+            changesAhead = (int)reader.ReadUInt32();
 
             OnChange?.Invoke();
         }
@@ -200,7 +200,7 @@ namespace Mirror
             IsReadOnly = true;
             bool raiseOnChange = false;
 
-            int changesCount = (int)reader.ReadPackedUInt32();
+            int changesCount = (int)reader.ReadUInt32();
 
             for (int i = 0; i < changesCount; i++)
             {
@@ -270,7 +270,7 @@ namespace Mirror
 
         private void DeserializeInsert(NetworkReader reader, bool apply)
         {
-            int index = (int)reader.ReadPackedUInt32();
+            int index = (int)reader.ReadUInt32();
             T newItem = reader.Read<T>();
             if (apply)
             {
@@ -281,7 +281,7 @@ namespace Mirror
 
         private void DeserializeRemoveAt(NetworkReader reader, bool apply)
         {
-            int index = (int)reader.ReadPackedUInt32();
+            int index = (int)reader.ReadUInt32();
             if (apply)
             {
                 T oldItem = objects[index];
@@ -292,7 +292,7 @@ namespace Mirror
 
         private void DeserializeSet(NetworkReader reader, bool apply)
         {
-            int index = (int)reader.ReadPackedUInt32();
+            int index = (int)reader.ReadUInt32();
             T newItem = reader.Read<T>();
             if (apply)
             {

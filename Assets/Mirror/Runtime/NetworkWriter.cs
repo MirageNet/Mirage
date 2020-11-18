@@ -297,10 +297,10 @@ namespace Mirror
             // (using size=-1 for null would limit max size to 32kb instead of 64kb)
             if (buffer == null)
             {
-                writer.WritePackedUInt32(0u);
+                writer.WriteUInt32(0u);
                 return;
             }
-            writer.WritePackedUInt32(checked((uint)count) + 1u);
+            writer.WriteUInt32(checked((uint)count) + 1u);
             writer.WriteBytes(buffer, offset, count);
         }
 
@@ -328,7 +328,7 @@ namespace Mirror
         public static void WriteRect(this NetworkWriter writer, Rect value) => writer.WriteBlittable(value);
         public static void WritePlane(this NetworkWriter writer, Plane value) => writer.WriteBlittable(value);
         public static void WriteRay(this NetworkWriter writer, Ray value) => writer.WriteBlittable(value);
-        public static void WriteMatrix4x4(this NetworkWriter writer, Matrix4x4 value) => writer.WriteBlittable(value);
+        public static void WriteMatrix4X4(this NetworkWriter writer, Matrix4x4 value) => writer.WriteBlittable(value);
 
         public static void WriteGuid(this NetworkWriter writer, Guid value)
         {
@@ -340,10 +340,10 @@ namespace Mirror
         {
             if (value == null)
             {
-                writer.WritePackedUInt32(0);
+                writer.WriteUInt32(0);
                 return;
             }
-            writer.WritePackedUInt32(value.NetId);
+            writer.WriteUInt32(value.NetId);
         }
 
         public static void WriteUri(this NetworkWriter writer, Uri uri)
@@ -355,10 +355,10 @@ namespace Mirror
         {
             if (list is null)
             {
-                writer.WritePackedInt32(-1);
+                writer.WriteInt32(-1);
                 return;
             }
-            writer.WritePackedInt32(list.Count);
+            writer.WriteInt32(list.Count);
             for (int i=0; i< list.Count; i++)
                 writer.Write(list[i]);
         }
@@ -367,10 +367,10 @@ namespace Mirror
         {
             if (array is null)
             {
-                writer.WritePackedInt32(-1);
+                writer.WriteInt32(-1);
                 return;
             }
-            writer.WritePackedInt32(array.Length);
+            writer.WriteInt32(array.Length);
             for (int i = 0; i < array.Length; i++)
                 writer.Write(array[i]);
         }
@@ -378,7 +378,7 @@ namespace Mirror
         public static void WriteArraySegment<T>(this NetworkWriter writer, ArraySegment<T> segment)
         {
             int length = segment.Count;
-            writer.WritePackedInt32(length);
+            writer.WriteInt32(length);
             for (int i = 0; i< length; i++)
             {
                 writer.Write(segment.Array[segment.Offset + i]);

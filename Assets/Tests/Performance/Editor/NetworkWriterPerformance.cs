@@ -23,7 +23,7 @@ namespace Mirror.Tests.Performance
             {
                 for (int i = 0; i < 1000; i++)
                 {
-                    writer.WritePackedInt32(i * 1000);
+                    writer.WriteInt32(i * 1000);
                 }
             }
         }

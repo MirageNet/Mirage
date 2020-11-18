@@ -100,31 +100,6 @@ namespace Mirror
             return value;
         }
 
-        public int ReadInt32() => (int)ReadUInt32();
-        public uint ReadUInt32()
-        {
-            uint value = 0;
-            value |= ReadByte();
-            value |= (uint)(ReadByte() << 8);
-            value |= (uint)(ReadByte() << 16);
-            value |= (uint)(ReadByte() << 24);
-            return value;
-        }
-        public long ReadInt64() => (long)ReadUInt64();
-        public ulong ReadUInt64()
-        {
-            ulong value = 0;
-            value |= ReadByte();
-            value |= ((ulong)ReadByte()) << 8;
-            value |= ((ulong)ReadByte()) << 16;
-            value |= ((ulong)ReadByte()) << 24;
-            value |= ((ulong)ReadByte()) << 32;
-            value |= ((ulong)ReadByte()) << 40;
-            value |= ((ulong)ReadByte()) << 48;
-            value |= ((ulong)ReadByte()) << 56;
-            return value;
-        }
-
         // read bytes into the passed buffer
         public byte[] ReadBytes(byte[] bytes, int count)
         {
@@ -231,7 +206,7 @@ namespace Mirror
         {
             // count = 0 means the array was null
             // otherwise count -1 is the length of the array
-            uint count = reader.ReadPackedUInt32();
+            uint count = reader.ReadUInt32();
             return count == 0 ? null : reader.ReadBytes(checked((int)(count - 1u)));
         }
 
@@ -239,7 +214,7 @@ namespace Mirror
         {
             // count = 0 means the array was null
             // otherwise count - 1 is the length of the array
-            uint count = reader.ReadPackedUInt32();
+            uint count = reader.ReadUInt32();
             return count == 0 ? default : reader.ReadBytesSegment(checked((int)(count - 1u)));
         }
 
@@ -267,7 +242,7 @@ namespace Mirror
 
         public static NetworkIdentity ReadNetworkIdentity(this NetworkReader reader)
         {
-            uint netId = reader.ReadPackedUInt32();
+            uint netId = reader.ReadUInt32();
             if (netId == 0)
                 return null;
 
@@ -288,7 +263,7 @@ namespace Mirror
 
         public static List<T> ReadList<T>(this NetworkReader reader)
         {
-            int length = reader.ReadPackedInt32();
+            int length = reader.ReadInt32();
             if (length < 0)
                 return null;
             var result = new List<T>(length);
@@ -301,7 +276,7 @@ namespace Mirror
 
         public static T[] ReadArray<T>(this NetworkReader reader)
         {
-            int length = reader.ReadPackedInt32();
+            int length = reader.ReadInt32();
             if (length < 0)
                 return null;
             var result = new T[length];

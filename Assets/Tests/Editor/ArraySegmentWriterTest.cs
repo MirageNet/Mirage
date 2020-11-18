@@ -26,12 +26,12 @@ namespace Mirror.Tests
 
         public static ArraySegment<int> SampleReader(NetworkReader reader)
         {
-            int length = reader.ReadPackedInt32();
+            int length = reader.ReadInt32();
             int[] array = new int[length];
 
             for (int i = 0; i < length; i++)
             {
-                array[i] = reader.ReadPackedInt32();
+                array[i] = reader.ReadInt32();
             }
 
             return new ArraySegment<int>(array);

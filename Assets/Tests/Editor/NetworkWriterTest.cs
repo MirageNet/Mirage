@@ -162,7 +162,7 @@ namespace Mirror.Tests
         {
             var writer = new NetworkWriter();
             // This is 1.5x int.MaxValue, in the negative range of int.
-            writer.WritePackedUInt32(3221225472);
+            writer.WriteUInt32(3221225472);
             var reader = new NetworkReader(writer.ToArray());
             Assert.Throws<OverflowException>(() => reader.ReadBytesAndSize());
         }
@@ -229,10 +229,10 @@ namespace Mirror.Tests
             EnsureThrows(r => r.ReadBytes(1000000));
             EnsureThrows(r => r.ReadBytes(10000000));
             EnsureThrows(r => r.ReadBytesAndSize());
-            EnsureThrows(r => r.ReadPackedInt32());
-            EnsureThrows(r => r.ReadPackedUInt32());
-            EnsureThrows(r => r.ReadPackedInt64());
-            EnsureThrows(r => r.ReadPackedUInt64());
+            EnsureThrows(r => r.ReadInt32());
+            EnsureThrows(r => r.ReadUInt32());
+            EnsureThrows(r => r.ReadInt64());
+            EnsureThrows(r => r.ReadUInt64());
             EnsureThrows(r => r.ReadVector2());
             EnsureThrows(r => r.ReadVector3());
             EnsureThrows(r => r.ReadVector4());
@@ -636,22 +636,22 @@ namespace Mirror.Tests
         public void TestPackedUInt32()
         {
             var writer = new NetworkWriter();
-            writer.WritePackedUInt32(0);
-            writer.WritePackedUInt32(234);
-            writer.WritePackedUInt32(2284);
-            writer.WritePackedUInt32(67821);
-            writer.WritePackedUInt32(16777210);
-            writer.WritePackedUInt32(16777219);
-            writer.WritePackedUInt32(uint.MaxValue);
+            writer.WriteUInt32(0);
+            writer.WriteUInt32(234);
+            writer.WriteUInt32(2284);
+            writer.WriteUInt32(67821);
+            writer.WriteUInt32(16777210);
+            writer.WriteUInt32(16777219);
+            writer.WriteUInt32(uint.MaxValue);
 
             var reader = new NetworkReader(writer.ToArray());
-            Assert.That(reader.ReadPackedUInt32(), Is.EqualTo(0));
-            Assert.That(reader.ReadPackedUInt32(), Is.EqualTo(234));
-            Assert.That(reader.ReadPackedUInt32(), Is.EqualTo(2284));
-            Assert.That(reader.ReadPackedUInt32(), Is.EqualTo(67821));
-            Assert.That(reader.ReadPackedUInt32(), Is.EqualTo(16777210));
-            Assert.That(reader.ReadPackedUInt32(), Is.EqualTo(16777219));
-            Assert.That(reader.ReadPackedUInt32(), Is.EqualTo(uint.MaxValue));
+            Assert.That(reader.ReadUInt32(), Is.EqualTo(0));
+            Assert.That(reader.ReadUInt32(), Is.EqualTo(234));
+            Assert.That(reader.ReadUInt32(), Is.EqualTo(2284));
+            Assert.That(reader.ReadUInt32(), Is.EqualTo(67821));
+            Assert.That(reader.ReadUInt32(), Is.EqualTo(16777210));
+            Assert.That(reader.ReadUInt32(), Is.EqualTo(16777219));
+            Assert.That(reader.ReadUInt32(), Is.EqualTo(uint.MaxValue));
         }
 
         [Test]
@@ -660,23 +660,23 @@ namespace Mirror.Tests
             Assert.Throws<OverflowException>(() =>
             {
                 var writer = new NetworkWriter();
-                writer.WritePackedUInt64(1099511627775);
+                writer.WriteUInt64(1099511627775);
                 var reader = new NetworkReader(writer.ToArray());
-                reader.ReadPackedUInt32();
+                reader.ReadUInt32();
             });
             Assert.Throws<OverflowException>(() =>
             {
                 var writer = new NetworkWriter();
-                writer.WritePackedUInt64(281474976710655);
+                writer.WriteUInt64(281474976710655);
                 var reader = new NetworkReader(writer.ToArray());
-                reader.ReadPackedUInt32();
+                reader.ReadUInt32();
             });
             Assert.Throws<OverflowException>(() =>
             {
                 var writer = new NetworkWriter();
-                writer.WritePackedUInt64(72057594037927935);
+                writer.WriteUInt64(72057594037927935);
                 var reader = new NetworkReader(writer.ToArray());
-                reader.ReadPackedUInt32();
+                reader.ReadUInt32();
             });
         }
 
@@ -684,36 +684,36 @@ namespace Mirror.Tests
         public void TestPackedInt32()
         {
             var writer = new NetworkWriter();
-            writer.WritePackedInt32(0);
-            writer.WritePackedInt32(234);
-            writer.WritePackedInt32(2284);
-            writer.WritePackedInt32(67821);
-            writer.WritePackedInt32(16777210);
-            writer.WritePackedInt32(16777219);
-            writer.WritePackedInt32(int.MaxValue);
-            writer.WritePackedInt32(-1);
-            writer.WritePackedInt32(-234);
-            writer.WritePackedInt32(-2284);
-            writer.WritePackedInt32(-67821);
-            writer.WritePackedInt32(-16777210);
-            writer.WritePackedInt32(-16777219);
-            writer.WritePackedInt32(int.MinValue);
+            writer.WriteInt32(0);
+            writer.WriteInt32(234);
+            writer.WriteInt32(2284);
+            writer.WriteInt32(67821);
+            writer.WriteInt32(16777210);
+            writer.WriteInt32(16777219);
+            writer.WriteInt32(int.MaxValue);
+            writer.WriteInt32(-1);
+            writer.WriteInt32(-234);
+            writer.WriteInt32(-2284);
+            writer.WriteInt32(-67821);
+            writer.WriteInt32(-16777210);
+            writer.WriteInt32(-16777219);
+            writer.WriteInt32(int.MinValue);
 
             var reader = new NetworkReader(writer.ToArray());
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(0));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(234));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(2284));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(67821));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(16777210));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(16777219));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(int.MaxValue));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(-1));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(-234));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(-2284));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(-67821));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(-16777210));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(-16777219));
-            Assert.That(reader.ReadPackedInt32(), Is.EqualTo(int.MinValue));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(0));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(234));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(2284));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(67821));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(16777210));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(16777219));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(int.MaxValue));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(-1));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(-234));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(-2284));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(-67821));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(-16777210));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(-16777219));
+            Assert.That(reader.ReadInt32(), Is.EqualTo(int.MinValue));
         }
 
         [Test]
@@ -722,23 +722,23 @@ namespace Mirror.Tests
             Assert.Throws<OverflowException>(() =>
             {
                 var writer = new NetworkWriter();
-                writer.WritePackedInt64(1099511627775);
+                writer.WriteInt64(1099511627775);
                 var reader = new NetworkReader(writer.ToArray());
-                reader.ReadPackedInt32();
+                reader.ReadInt32();
             });
             Assert.Throws<OverflowException>(() =>
             {
                 var writer = new NetworkWriter();
-                writer.WritePackedInt64(281474976710655);
+                writer.WriteInt64(281474976710655);
                 var reader = new NetworkReader(writer.ToArray());
-                reader.ReadPackedInt32();
+                reader.ReadInt32();
             });
             Assert.Throws<OverflowException>(() =>
             {
                 var writer = new NetworkWriter();
-                writer.WritePackedInt64(72057594037927935);
+                writer.WriteInt64(72057594037927935);
                 var reader = new NetworkReader(writer.ToArray());
-                reader.ReadPackedInt32();
+                reader.ReadInt32();
             });
         }
 
@@ -746,82 +746,82 @@ namespace Mirror.Tests
         public void TestPackedUInt64()
         {
             var writer = new NetworkWriter();
-            writer.WritePackedUInt64(0);
-            writer.WritePackedUInt64(234);
-            writer.WritePackedUInt64(2284);
-            writer.WritePackedUInt64(67821);
-            writer.WritePackedUInt64(16777210);
-            writer.WritePackedUInt64(16777219);
-            writer.WritePackedUInt64(4294967295);
-            writer.WritePackedUInt64(1099511627775);
-            writer.WritePackedUInt64(281474976710655);
-            writer.WritePackedUInt64(72057594037927935);
-            writer.WritePackedUInt64(ulong.MaxValue);
+            writer.WriteUInt64(0);
+            writer.WriteUInt64(234);
+            writer.WriteUInt64(2284);
+            writer.WriteUInt64(67821);
+            writer.WriteUInt64(16777210);
+            writer.WriteUInt64(16777219);
+            writer.WriteUInt64(4294967295);
+            writer.WriteUInt64(1099511627775);
+            writer.WriteUInt64(281474976710655);
+            writer.WriteUInt64(72057594037927935);
+            writer.WriteUInt64(ulong.MaxValue);
 
             var reader = new NetworkReader(writer.ToArray());
-            Assert.That(reader.ReadPackedUInt64(), Is.EqualTo(0));
-            Assert.That(reader.ReadPackedUInt64(), Is.EqualTo(234));
-            Assert.That(reader.ReadPackedUInt64(), Is.EqualTo(2284));
-            Assert.That(reader.ReadPackedUInt64(), Is.EqualTo(67821));
-            Assert.That(reader.ReadPackedUInt64(), Is.EqualTo(16777210));
-            Assert.That(reader.ReadPackedUInt64(), Is.EqualTo(16777219));
-            Assert.That(reader.ReadPackedUInt64(), Is.EqualTo(4294967295));
-            Assert.That(reader.ReadPackedUInt64(), Is.EqualTo(1099511627775));
-            Assert.That(reader.ReadPackedUInt64(), Is.EqualTo(281474976710655));
-            Assert.That(reader.ReadPackedUInt64(), Is.EqualTo(72057594037927935));
-            Assert.That(reader.ReadPackedUInt64(), Is.EqualTo(ulong.MaxValue));
+            Assert.That(reader.ReadUInt64(), Is.EqualTo(0));
+            Assert.That(reader.ReadUInt64(), Is.EqualTo(234));
+            Assert.That(reader.ReadUInt64(), Is.EqualTo(2284));
+            Assert.That(reader.ReadUInt64(), Is.EqualTo(67821));
+            Assert.That(reader.ReadUInt64(), Is.EqualTo(16777210));
+            Assert.That(reader.ReadUInt64(), Is.EqualTo(16777219));
+            Assert.That(reader.ReadUInt64(), Is.EqualTo(4294967295));
+            Assert.That(reader.ReadUInt64(), Is.EqualTo(1099511627775));
+            Assert.That(reader.ReadUInt64(), Is.EqualTo(281474976710655));
+            Assert.That(reader.ReadUInt64(), Is.EqualTo(72057594037927935));
+            Assert.That(reader.ReadUInt64(), Is.EqualTo(ulong.MaxValue));
         }
 
         [Test]
         public void TestPackedInt64()
         {
             var writer = new NetworkWriter();
-            writer.WritePackedInt64(0);
-            writer.WritePackedInt64(234);
-            writer.WritePackedInt64(2284);
-            writer.WritePackedInt64(67821);
-            writer.WritePackedInt64(16777210);
-            writer.WritePackedInt64(16777219);
-            writer.WritePackedInt64(4294967295);
-            writer.WritePackedInt64(1099511627775);
-            writer.WritePackedInt64(281474976710655);
-            writer.WritePackedInt64(72057594037927935);
-            writer.WritePackedInt64(long.MaxValue);
-            writer.WritePackedInt64(-1);
-            writer.WritePackedInt64(-234);
-            writer.WritePackedInt64(-2284);
-            writer.WritePackedInt64(-67821);
-            writer.WritePackedInt64(-16777210);
-            writer.WritePackedInt64(-16777219);
-            writer.WritePackedInt64(-4294967295);
-            writer.WritePackedInt64(-1099511627775);
-            writer.WritePackedInt64(-281474976710655);
-            writer.WritePackedInt64(-72057594037927935);
-            writer.WritePackedInt64(long.MinValue);
+            writer.WriteInt64(0);
+            writer.WriteInt64(234);
+            writer.WriteInt64(2284);
+            writer.WriteInt64(67821);
+            writer.WriteInt64(16777210);
+            writer.WriteInt64(16777219);
+            writer.WriteInt64(4294967295);
+            writer.WriteInt64(1099511627775);
+            writer.WriteInt64(281474976710655);
+            writer.WriteInt64(72057594037927935);
+            writer.WriteInt64(long.MaxValue);
+            writer.WriteInt64(-1);
+            writer.WriteInt64(-234);
+            writer.WriteInt64(-2284);
+            writer.WriteInt64(-67821);
+            writer.WriteInt64(-16777210);
+            writer.WriteInt64(-16777219);
+            writer.WriteInt64(-4294967295);
+            writer.WriteInt64(-1099511627775);
+            writer.WriteInt64(-281474976710655);
+            writer.WriteInt64(-72057594037927935);
+            writer.WriteInt64(long.MinValue);
 
             var reader = new NetworkReader(writer.ToArray());
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(0));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(234));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(2284));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(67821));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(16777210));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(16777219));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(4294967295));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(1099511627775));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(281474976710655));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(72057594037927935));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(long.MaxValue));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(-1));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(-234));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(-2284));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(-67821));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(-16777210));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(-16777219));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(-4294967295));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(-1099511627775));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(-281474976710655));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(-72057594037927935));
-            Assert.That(reader.ReadPackedInt64(), Is.EqualTo(long.MinValue));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(0));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(234));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(2284));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(67821));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(16777210));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(16777219));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(4294967295));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(1099511627775));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(281474976710655));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(72057594037927935));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(long.MaxValue));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(-1));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(-234));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(-2284));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(-67821));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(-16777210));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(-16777219));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(-4294967295));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(-1099511627775));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(-281474976710655));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(-72057594037927935));
+            Assert.That(reader.ReadInt64(), Is.EqualTo(long.MinValue));
         }
 
         [Test]
