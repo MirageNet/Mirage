@@ -219,7 +219,7 @@ namespace Mirror.Weaver
 
                 // call hook (oldValue, newValue)
                 // Generates: OnValueChanged(oldValue, value);
-                WriteCallHookMethodUsingArgument(worker, hookMethod, oldValue);
+                WriteCallHookMethodUsingArgument(worker, hookMethod, oldValue, valueParam);
 
                 // setSyncVarHookGuard(dirtyBit, false);
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -331,22 +331,22 @@ namespace Mirror.Weaver
             GenerateDeSerialization(td);
         }
 
-        static void WriteCallHookMethodUsingArgument(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue)
+        static void WriteCallHookMethodUsingArgument(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue, ParameterDefinition valueParam)
         {
-            WriteCallHookMethod(worker, hookMethod, oldValue, null);
+            WriteCallHookMethod(worker, hookMethod, oldValue, valueParam, null);
         }
 
-        static void WriteCallHookMethodUsingField(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue, FieldDefinition newValue)
+        static void WriteCallHookMethodUsingField(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue, ParameterDefinition valueParam, FieldDefinition newValue)
         {
             if (newValue == null)
             {
                 Weaver.Error("NewValue field was null when writing SyncVar hook");
             }
 
-            WriteCallHookMethod(worker, hookMethod, oldValue, newValue);
+            WriteCallHookMethod(worker, hookMethod, oldValue, valueParam, newValue);
         }
 
-        static void WriteCallHookMethod(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue, FieldDefinition newValue)
+        static void WriteCallHookMethod(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue, ParameterDefinition valueParam,  FieldDefinition newValue)
         {
             WriteStartFunctionCall();
 
@@ -370,7 +370,7 @@ namespace Mirror.Weaver
                 // write arg1 or this.field
                 if (newValue == null)
                 {
-                    worker.Append(worker.Create(OpCodes.Ldarg_1));
+                    worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
                 }
                 else
                 {
@@ -671,6 +671,7 @@ namespace Mirror.Weaver
                 Weaver.Error($"{syncVar.Name} has unsupported type. Use a supported MirrorNG type instead", syncVar);
                 return;
             }
+            ParameterDefinition valueParam = deserialize.Parameters[1];
 
             // T oldValue = value;
             VariableDefinition oldValue = deserialize.AddLocal(syncVar.FieldType);
@@ -690,7 +691,7 @@ namespace Mirror.Weaver
             // put 'this.' onto stack for 'this.syncvar' below
             serWorker.Append(serWorker.Create(OpCodes.Ldarg_0));
             // reader. for 'reader.Read()' below
-            serWorker.Append(serWorker.Create(OpCodes.Ldarg_1));
+            serWorker.Append(serWorker.Create(OpCodes.Ldarg, valueParam));
             // reader.Read()
             serWorker.Append(serWorker.Create(OpCodes.Call, readFunc));
             // syncvar
@@ -723,7 +724,7 @@ namespace Mirror.Weaver
 
                 // call the hook
                 // Generates: OnValueChanged(oldValue, this.syncVar);
-                WriteCallHookMethodUsingField(serWorker, hookMethod, oldValue, syncVar);
+                WriteCallHookMethodUsingField(serWorker, hookMethod, oldValue, valueParam, syncVar);
 
                 // Generates: end if (!SyncVarEqual);
                 serWorker.Append(syncVarEqualLabel);
@@ -761,6 +762,8 @@ namespace Mirror.Weaver
             //     move in and out of range repeatedly)
             FieldDefinition netIdField = syncVarNetIds[syncVar];
 
+            ParameterDefinition valueParam = deserialize.Parameters[1];
+
             // uint oldNetId = ___qNetId;
             VariableDefinition oldNetId = deserialize.AddLocal<uint>();
             worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -785,7 +788,7 @@ namespace Mirror.Weaver
             // put 'this.' onto stack for 'this.netId' below
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             // reader. for 'reader.Read()' below
-            worker.Append(worker.Create(OpCodes.Ldarg_1));
+            worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
             // Read()
             ModuleDefinition module = worker.Body.Method.Module;
             worker.Append(worker.Create(OpCodes.Call, module.GetReadFunc<uint>()));
@@ -830,7 +833,7 @@ namespace Mirror.Weaver
 
                 // call the hook
                 // Generates: OnValueChanged(oldValue, this.syncVar);
-                WriteCallHookMethodUsingField(worker, hookMethod, oldSyncVar, syncVar);
+                WriteCallHookMethodUsingField(worker, hookMethod, oldSyncVar, valueParam, syncVar);
 
                 // Generates: end if (!SyncVarEqual);
                 worker.Append(syncVarEqualLabel);
