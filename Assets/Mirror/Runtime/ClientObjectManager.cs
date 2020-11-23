@@ -103,7 +103,9 @@ namespace Mirror
         {
             client.Connected.RemoveListener(OnClientConnected);
             client.Disconnected.RemoveListener(OnClientDisconnected);
-            networkSceneManager.ClientSceneChanged.RemoveListener(OnClientSceneChanged);
+
+            if (networkSceneManager != null)
+                networkSceneManager.ClientSceneChanged.RemoveListener(OnClientSceneChanged);
         }
 
         static bool ConsiderForSpawning(NetworkIdentity identity)
