@@ -117,7 +117,7 @@ namespace Mirror
             }
             else
             {
-                if (logger.WarnEnabled()) logger.LogWarning("No ready connection found for setting player controller during InternalAddPlayer");
+                logger.LogWarning("No ready connection found for setting player controller during InternalAddPlayer");
             }
         }
 
@@ -388,7 +388,7 @@ namespace Mirror
                 NetworkIdentity obj = handler(msg);
                 if (obj == null)
                 {
-                    if (logger.WarnEnabled()) logger.LogWarning("Client spawn handler for " + msg.assetId + " returned null");
+                    logger.LogWarning("Client spawn handler for " + msg.assetId + " returned null");
                     return null;
                 }
                 return obj;
@@ -434,7 +434,7 @@ namespace Mirror
                 spawnableObjects.Remove(sceneId);
                 return identity;
             }
-            if (logger.WarnEnabled()) logger.LogWarning("Could not find scene object with sceneid:" + sceneId.ToString("X"));
+            logger.LogWarning("Could not find scene object with sceneid:" + sceneId.ToString("X"));
             return null;
         }
 
@@ -459,7 +459,7 @@ namespace Mirror
             }
             else
             {
-                if (logger.WarnEnabled()) logger.LogWarning("Did not find target for destroy message for " + netId);
+                logger.LogWarning("Did not find target for destroy message for " + netId);
             }
         }
 

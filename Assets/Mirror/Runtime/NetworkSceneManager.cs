@@ -290,7 +290,7 @@ namespace Mirror
                     }   
                     else
                     {
-                        if (logger.WarnEnabled()) logger.LogWarning($"Scene {scenePath} is already loaded");
+                        logger.LogWarning($"Scene {scenePath} is already loaded");
                     }
                     break;
                 case SceneOperation.UnloadAdditive:
@@ -303,7 +303,7 @@ namespace Mirror
                     }
                     else
                     {
-                        if (logger.WarnEnabled()) if (logger.WarnEnabled()) logger.LogWarning($"Cannot unload {scenePath} with UnloadAdditive operation");
+                        logger.LogWarning($"Cannot unload {scenePath} with UnloadAdditive operation");
                     }
                     break;
             }

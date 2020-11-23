@@ -427,13 +427,13 @@ namespace Mirror
             {
                 if (!IsClient)
                 {
-                    if (logger.WarnEnabled()) logger.LogWarning("Tried to set animation in the server for a client-controlled animator");
+                    logger.LogWarning("Tried to set animation in the server for a client-controlled animator");
                     return;
                 }
 
                 if (!HasAuthority)
                 {
-                    if (logger.WarnEnabled()) logger.LogWarning("Only the client with authority can set animations");
+                    logger.LogWarning("Only the client with authority can set animations");
                     return;
                 }
 
@@ -447,7 +447,7 @@ namespace Mirror
             {
                 if (!IsServer)
                 {
-                    if (logger.WarnEnabled()) logger.LogWarning("Tried to set animation in the client for a server-controlled animator");
+                    logger.LogWarning("Tried to set animation in the client for a server-controlled animator");
                     return;
                 }
 
@@ -476,13 +476,13 @@ namespace Mirror
             {
                 if (!IsClient)
                 {
-                    if (logger.WarnEnabled()) logger.LogWarning("Tried to reset animation in the server for a client-controlled animator");
+                    logger.LogWarning("Tried to reset animation in the server for a client-controlled animator");
                     return;
                 }
 
                 if (!HasAuthority)
                 {
-                    if (logger.WarnEnabled()) logger.LogWarning("Only the client with authority can reset animations");
+                    logger.LogWarning("Only the client with authority can reset animations");
                     return;
                 }
 
@@ -496,7 +496,7 @@ namespace Mirror
             {
                 if (!IsServer)
                 {
-                    if (logger.WarnEnabled()) logger.LogWarning("Tried to reset animation in the client for a server-controlled animator");
+                    logger.LogWarning("Tried to reset animation in the client for a server-controlled animator");
                     return;
                 }
 
