@@ -380,9 +380,9 @@ namespace Mirror
             if (newIdentity != null)
             {
                 newNetId = newIdentity.NetId;
-                if (newNetId == 0)
+                if (newNetId == 0 && logger.WarnEnabled())
                 {
-                    if (logger.WarnEnabled()) logger.LogWarning("SetSyncVarNetworkIdentity NetworkIdentity " + newIdentity + " has a zero netId. Maybe it is not spawned yet?");
+                    logger.LogWarning("SetSyncVarNetworkIdentity NetworkIdentity " + newIdentity + " has a zero netId. Maybe it is not spawned yet?");
                 }
             }
 
