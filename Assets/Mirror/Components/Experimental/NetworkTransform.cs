@@ -22,12 +22,12 @@ namespace Mirror.Experimental
 
         [Header("Configuration Properties")]
 
-        [SerializeField] private SendChannel _channelSendData;
+        [SerializeField] private SendChannel _channelSendData = SendChannel.UnReliable;
 
         /// <summary>
         ///     Do we want to do client or server authority.
         /// </summary>
-        [SerializeField] private bool _clientAuthority;
+        [SerializeField] private bool _clientAuthority = false;
 
         /// <summary>
         ///     This will allow to instant teleport to new location regardless of where they are
@@ -78,7 +78,7 @@ namespace Mirror.Experimental
         /// <summary>
         ///     Do we want to sync scale updates.
         /// </summary>
-        [SerializeField] public bool syncScale = false;
+        [SerializeField] public bool syncScale;
 
         /// <summary>
         ///     Sensitivity range for scale
@@ -122,7 +122,7 @@ namespace Mirror.Experimental
                 return data;
             }
 
-            data.PositionData = _oldStateData.PositionData - transform.localPosition;
+            data.PositionData = _oldStateData.PositionData - position;
 
             return data;
         }
@@ -162,7 +162,7 @@ namespace Mirror.Experimental
                 return data;
             }
 
-            data.ScaleData = _oldStateData.ScaleData - transform.localScale;
+            data.ScaleData = _oldStateData.ScaleData - scale;
 
             return data;
         }
