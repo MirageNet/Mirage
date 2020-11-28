@@ -97,7 +97,7 @@ namespace Mirror.Experimental
         /// <param name="position"></param>
         private NetworkTransformData SetPosition(ref NetworkTransformData data, Vector3 position)
         {
-            if (!_syncPosition)
+            if (!syncPosition)
             {
                 data.PositionData = Vector3.zero;
 
@@ -116,7 +116,7 @@ namespace Mirror.Experimental
         /// <param name="rotation"></param>
         private NetworkTransformData SetRotation(ref NetworkTransformData data, Quaternion rotation)
         {
-            if (!_syncRotation)
+            if (!syncRotation)
             {
                 data.RotationData = Quaternion.identity;
 
@@ -137,7 +137,7 @@ namespace Mirror.Experimental
         /// <param name="scale">The scale of the transform we want to check against and set from.</param>
         private NetworkTransformData SetScale(ref NetworkTransformData data, Vector3 scale)
         {
-            if (!_syncScale)
+            if (!syncScale)
             {
                 data.ScaleData = Vector3.zero;
 
