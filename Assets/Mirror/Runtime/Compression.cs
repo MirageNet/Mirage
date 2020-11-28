@@ -11,19 +11,6 @@ namespace Mirror
         W = 3
     }
 
-    struct LargestComponent
-    {
-        public ComponentType ComponentType;
-        public float Value;
-
-        public LargestComponent(ComponentType componentType, float value)
-        {
-            ComponentType = componentType;
-            Value = value;
-
-        }
-    }
-
     /// <summary>
     ///     Credit to this man for converting gaffer games c code to c#
     ///     https://gist.github.com/fversnel/0497ad7ab3b81e0dc1dd
@@ -33,93 +20,69 @@ namespace Mirror
         private const float Minimum = -1.0f / 1.414214f; // note: 1.0f / sqrt(2)
         private const float Maximum = +1.0f / 1.414214f;
 
-        internal static uint Compress(Quaternion expected)
+        internal static uint Compress(Quaternion quaternion)
         {
-            float absX = Mathf.Abs(expected.x),
-                      absY = Mathf.Abs(expected.y),
-                      absZ = Mathf.Abs(expected.z),
-                      absW = Mathf.Abs(expected.w);
+            float absX = Mathf.Abs(quaternion.x),
+                      absY = Mathf.Abs(quaternion.y),
+                      absZ = Mathf.Abs(quaternion.z),
+                      absW = Mathf.Abs(quaternion.w);
 
-            var largestComponent = new LargestComponent(ComponentType.X, absX);
-            if (absY > largestComponent.Value)
+            ComponentType largestComponent = ComponentType.X;
+            float largestAbs = absX;
+            float largest = quaternion.x;
+
+            if (absY > largestAbs)
             {
-                largestComponent.Value = absY;
-                largestComponent.ComponentType = ComponentType.Y;
+                largestAbs = absY;
+                largestComponent = ComponentType.Y;
+                largest = quaternion.y;
             }
-            if (absZ > largestComponent.Value)
+            if (absZ > largestAbs)
             {
-                largestComponent.Value = absZ;
-                largestComponent.ComponentType = ComponentType.Z;
+                largestAbs = absZ;
+                largestComponent = ComponentType.Z;
+                largest =quaternion.z;
             }
-            if (absW > largestComponent.Value)
+            if (absW > largestAbs)
             {
-                largestComponent.Value = absW;
-                largestComponent.ComponentType = ComponentType.W;
+                largestComponent = ComponentType.W;
+                largest = quaternion.w;
             }
 
             float a, b, c;
-            switch (largestComponent.ComponentType)
+            switch (largestComponent)
             {
                 case ComponentType.X:
-                    if (expected.x >= 0)
-                    {
-                        a = expected.y;
-                        b = expected.z;
-                        c = expected.w;
-                    }
-                    else
-                    {
-                        a = -expected.y;
-                        b = -expected.z;
-                        c = -expected.w;
-                    }
+                    a = quaternion.y;
+                    b = quaternion.z;
+                    c = quaternion.w;
                     break;
                 case ComponentType.Y:
-                    if (expected.y >= 0)
-                    {
-                        a = expected.x;
-                        b = expected.z;
-                        c = expected.w;
-                    }
-                    else
-                    {
-                        a = -expected.x;
-                        b = -expected.z;
-                        c = -expected.w;
-                    }
+                    a = quaternion.x;
+                    b = quaternion.z;
+                    c = quaternion.w;
                     break;
                 case ComponentType.Z:
-                    if (expected.z >= 0)
-                    {
-                        a = expected.x;
-                        b = expected.y;
-                        c = expected.w;
-                    }
-                    else
-                    {
-                        a = -expected.x;
-                        b = -expected.y;
-                        c = -expected.w;
-                    }
+                    a = quaternion.x;
+                    b = quaternion.y;
+                    c = quaternion.w;
                     break;
                 case ComponentType.W:
-                    if (expected.w >= 0)
-                    {
-                        a = expected.x;
-                        b = expected.y;
-                        c = expected.z;
-                    }
-                    else
-                    {
-                        a = -expected.x;
-                        b = -expected.y;
-                        c = -expected.z;
-                    }
+                    a = quaternion.x;
+                    b = quaternion.y;
+                    c = quaternion.z;
                     break;
                 default:
                     // Should never happen!
                     throw new ArgumentOutOfRangeException("Unknown rotation component type: " +
-                                                          largestComponent.ComponentType);
+                                                          largestComponent);
+            }
+
+            if (largest < 0)
+            {
+                a = -a;
+                b = -b;
+                c = -c;
             }
 
             float normalizedA = (a - Minimum) / (Maximum - Minimum),
@@ -130,7 +93,7 @@ namespace Mirror
                 integerB = (uint)Mathf.FloorToInt(normalizedB * 1024.0f + 0.5f),
                 integerC = (uint)Mathf.FloorToInt(normalizedC * 1024.0f + 0.5f);
 
-            return (((uint)largestComponent.ComponentType) << 30) | (integerA << 20) | (integerB << 10) | integerC;
+            return (((uint)largestComponent) << 30) | (integerA << 20) | (integerB << 10) | integerC;
         }
 
         internal static Quaternion Decompress(uint compressed)
