@@ -6,11 +6,11 @@ namespace Mirror.Experimental.Tests
     [TestFixture]
     public class NetworkTransformTest : HostSetup<NetworkTransform>
     {
-        [Test]
-        public void InitexcludeOwnerUpdateTest()
-        {
-            Assert.That(component.excludeOwnerUpdate, Is.True);
-        }
+        //[Test]
+        //public void InitexcludeOwnerUpdateTest()
+        //{
+        //    Assert.That(component.excludeOwnerUpdate, Is.True);
+        //}
 
         [Test]
         public void InitsyncPositionTest()
@@ -30,23 +30,23 @@ namespace Mirror.Experimental.Tests
             Assert.That(component.syncScale, Is.True);
         }
 
-        [Test]
-        public void InitinterpolatePositionTest()
-        {
-            Assert.That(component.interpolatePosition, Is.True);
-        }
+        //[Test]
+        //public void InitinterpolatePositionTest()
+        //{
+        //    Assert.That(component.interpolatePosition, Is.True);
+        //}
 
-        [Test]
-        public void InitinterpolateRotationTest()
-        {
-            Assert.That(component.interpolateRotation, Is.True);
-        }
+        //[Test]
+        //public void InitinterpolateRotationTest()
+        //{
+        //    Assert.That(component.interpolateRotation, Is.True);
+        //}
 
-        [Test]
-        public void InitinterpolateScaleTest()
-        {
-            Assert.That(component.interpolateScale, Is.True);
-        }
+        //[Test]
+        //public void InitinterpolateScaleTest()
+        //{
+        //    Assert.That(component.interpolateScale, Is.True);
+        //}
 
         [Test]
         public void InitlocalPositionSensitivityTest()

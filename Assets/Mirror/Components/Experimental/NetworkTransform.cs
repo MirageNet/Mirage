@@ -5,7 +5,7 @@ using UnityEngine;
 
 #endregion
 
-namespace Mirror
+namespace Mirror.Experimental
 {
     public enum SendChannel : byte
     {
@@ -41,22 +41,12 @@ namespace Mirror
         /// <summary>
         ///     Do we want to sync position updates.
         /// </summary>
-        [SerializeField] private bool _syncPosition = true;
+        [SerializeField] public bool syncPosition = true;
 
         /// <summary>
         ///     Sensitivity range for x axis
         /// </summary>
-        [SerializeField, Range(.01f, 1)] private float _positionXSensitivityRange = 0.01f;
-
-        /// <summary>
-        ///     Sensitivity range for y axis
-        /// </summary>
-        [SerializeField, Range(.01f, 1)] private float _positionYSensitivityRange = 0.01f;
-
-        /// <summary>
-        ///     Sensitivity range for z axis
-        /// </summary>
-        [SerializeField, Range(.01f, 1)] private float _positionZSensitivityRange = 0.01f;
+        [SerializeField, Range(.01f, 1)] public float localPositionSensitivity = 0.01f;
 
         #endregion
 
@@ -67,22 +57,12 @@ namespace Mirror
         /// <summary>
         ///     Do we want to sync rotation updates.
         /// </summary>
-        [SerializeField] private bool _syncRotation = true;
+        [SerializeField] public bool syncRotation = true;
 
         /// <summary>
-        ///     Sensitivity range for x axis
+        ///     Sensitivity range for rotation
         /// </summary>
-        [SerializeField, Range(.01f, 1)] private float _rotationXSensitivityRange = 0.01f;
-
-        /// <summary>
-        ///     Sensitivity range for y axis
-        /// </summary>
-        [SerializeField, Range(.01f, 1)] private float _rotationYSensitivityRange = 0.01f;
-
-        /// <summary>
-        ///     Sensitivity range for z axis
-        /// </summary>
-        [SerializeField, Range(.01f, 1)] private float _rotationZSensitivityRange = 0.01f;
+        [SerializeField, Range(.01f, 1)] public float localRotationSensitivity = 0.01f;
 
         #endregion
 
@@ -93,22 +73,12 @@ namespace Mirror
         /// <summary>
         ///     Do we want to sync scale updates.
         /// </summary>
-        [SerializeField] private bool _syncScale = false;
+        [SerializeField] public bool syncScale = false;
 
         /// <summary>
-        ///     Sensitivity range for x axis
+        ///     Sensitivity range for scale
         /// </summary>
-        [SerializeField, Range(.01f, 1)] private float _scaleXSensitivityRange = 0.01f;
-
-        /// <summary>
-        ///     Sensitivity range for y axis
-        /// </summary>
-        [SerializeField, Range(.01f, 1)] private float _scaleYSensitivityRange = 0.01f;
-
-        /// <summary>
-        ///     Sensitivity range for z axis
-        /// </summary>
-        [SerializeField, Range(.01f, 1)] private float _scaleZSensitivityRange = 0.01f;
+        [SerializeField, Range(.01f, 1)] public float localScaleSensitivity = 0.01f;
 
         #endregion
 
