@@ -72,10 +72,6 @@ namespace Mirror
                     b = quaternion.y;
                     c = quaternion.z;
                     break;
-                default:
-                    // Should never happen!
-                    throw new ArgumentOutOfRangeException("Unknown rotation component type: " +
-                                                          largestComponent);
             }
 
             if (largest < 0)
