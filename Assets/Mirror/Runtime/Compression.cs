@@ -11,19 +11,6 @@ namespace Mirror
         W = 3
     }
 
-    struct LargestComponent
-    {
-        public ComponentType ComponentType;
-        public float Value;
-
-        public LargestComponent(ComponentType componentType, float value)
-        {
-            ComponentType = componentType;
-            Value = value;
-
-        }
-    }
-
     /// <summary>
     ///     Credit to this man for converting gaffer games c code to c#
     ///     https://gist.github.com/fversnel/0497ad7ab3b81e0dc1dd
@@ -40,25 +27,25 @@ namespace Mirror
                       absZ = Mathf.Abs(expected.z),
                       absW = Mathf.Abs(expected.w);
 
-            var largestComponent = new LargestComponent(ComponentType.X, absX);
-            if (absY > largestComponent.Value)
+            ComponentType largestComponent = ComponentType.X;
+            float largestValue = absX;
+            if (absY > largestValue)
             {
-                largestComponent.Value = absY;
-                largestComponent.ComponentType = ComponentType.Y;
+                largestValue = absY;
+                largestComponent = ComponentType.Y;
             }
-            if (absZ > largestComponent.Value)
+            if (absZ > largestValue)
             {
-                largestComponent.Value = absZ;
-                largestComponent.ComponentType = ComponentType.Z;
+                largestValue = absZ;
+                largestComponent = ComponentType.Z;
             }
-            if (absW > largestComponent.Value)
+            if (absW > largestValue)
             {
-                largestComponent.Value = absW;
-                largestComponent.ComponentType = ComponentType.W;
+                largestComponent = ComponentType.W;
             }
 
             float a, b, c;
-            switch (largestComponent.ComponentType)
+            switch (largestComponent)
             {
                 case ComponentType.X when expected.x >= 0:
                     a = expected.y;
@@ -76,11 +63,9 @@ namespace Mirror
                     c = expected.w;
                     break;
                 case ComponentType.Y when expected.y < 0:
-
                     a = -expected.x;
                     b = -expected.z;
                     c = -expected.w;
-
                     break;
                 case ComponentType.Z when expected.z >= 0:
                     a = expected.x;
@@ -106,7 +91,7 @@ namespace Mirror
                 default:
                     // Should never happen!
                     throw new ArgumentOutOfRangeException("Unknown rotation component type: " +
-                                                          largestComponent.ComponentType);
+                                                          largestComponent);
             }
 
             float normalizedA = (a - Minimum) / (Maximum - Minimum),
@@ -117,7 +102,7 @@ namespace Mirror
                 integerB = (uint)Mathf.FloorToInt(normalizedB * 1024.0f + 0.5f),
                 integerC = (uint)Mathf.FloorToInt(normalizedC * 1024.0f + 0.5f);
 
-            return (((uint)largestComponent.ComponentType) << 30) | (integerA << 20) | (integerB << 10) | integerC;
+            return (((uint)largestComponent) << 30) | (integerA << 20) | (integerB << 10) | integerC;
         }
 
         internal static Quaternion Decompress(uint compressed)
