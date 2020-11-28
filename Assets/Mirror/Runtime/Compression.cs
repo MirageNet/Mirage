@@ -49,7 +49,9 @@ namespace Mirror
                 largest = quaternion.w;
             }
 
-            float a, b, c;
+            float a = 0;
+            float b = 0;
+            float c = 0;
             switch (largestComponent)
             {
                 case ComponentType.X:
