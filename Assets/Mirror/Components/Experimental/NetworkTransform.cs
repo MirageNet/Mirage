@@ -34,6 +34,11 @@ namespace Mirror.Experimental
         /// </summary>
         [SerializeField] private bool _allowTeleportation;
 
+        /// <summary>
+        ///     How many snapshots to take into account before sending the data to other side.
+        /// </summary>
+        [SerializeField, Range(15, 240)] private byte _snapShotSize = 15;
+
         #region Position Inspector
 
         [Header("Position Properties")]
@@ -82,9 +87,22 @@ namespace Mirror.Experimental
 
         #endregion
 
-        private double _previousStateId, _currentStateId, _currentSentStateId, _previousSentStateId;
-        private NetworkTransformData _oldStateSentData;
-        private readonly Dictionary<double, NetworkTransformData> _dataStates = new Dictionary<double, NetworkTransformData>();
+        private byte _previousStateId, _currentStateId, _currentSentStateId, _previousSentStateId;
+        private NetworkTransformData _oldStateData, _currentStateData;
+        private List<NetworkTransformData> _currentSnapShots;
+        private readonly Dictionary<byte, NetworkTransformData> _dataStates = new Dictionary<byte, NetworkTransformData>();
+        private byte _currentSnapShotSize = 0;
+        private Vector3 _lastPosition;
+        private Quaternion _lastRotation;
+        private Vector3 _lastScale;
+
+        // local position/rotation for VR support
+        // SqrMagnitude is faster than Distance per Unity docs
+        // https://docs.unity3d.com/ScriptReference/Vector3-sqrMagnitude.html
+
+        private bool HasMoved => syncPosition && Vector3.SqrMagnitude(_lastPosition - transform.localPosition) > localPositionSensitivity * localPositionSensitivity;
+        private bool HasRotated => syncRotation && Quaternion.Angle(_lastRotation, transform.localRotation) > localRotationSensitivity;
+        private bool HasScaled => syncScale && Vector3.SqrMagnitude(_lastScale - transform.localScale) > localScaleSensitivity * localScaleSensitivity;
 
         #endregion
 
@@ -104,7 +122,7 @@ namespace Mirror.Experimental
                 return data;
             }
 
-            data.PositionData = _oldStateSentData.PositionData - transform.localPosition;
+            data.PositionData = _oldStateData.PositionData - transform.localPosition;
 
             return data;
         }
@@ -123,9 +141,9 @@ namespace Mirror.Experimental
                 return data;
             }
 
-            data.RotationData = new Quaternion(_oldStateSentData.RotationData.x - rotation.x,
-                _oldStateSentData.RotationData.y - rotation.y, _oldStateSentData.RotationData.z - rotation.z,
-                _oldStateSentData.RotationData.w - rotation.w);
+            data.RotationData = new Quaternion(_oldStateData.RotationData.x - rotation.x,
+                _oldStateData.RotationData.y - rotation.y, _oldStateData.RotationData.z - rotation.z,
+                _oldStateData.RotationData.w - rotation.w);
 
             return data;
         }
@@ -144,7 +162,7 @@ namespace Mirror.Experimental
                 return data;
             }
 
-            data.ScaleData = _oldStateSentData.ScaleData - transform.localScale;
+            data.ScaleData = _oldStateData.ScaleData - transform.localScale;
 
             return data;
         }
@@ -160,22 +178,22 @@ namespace Mirror.Experimental
         /// <param name="position"></param>
         public void TeleportToPosition(Vector3 position)
         {
-            var newData = new NetworkTransformData {PositionData = position};
+            _currentStateData = new NetworkTransformData {PositionData = position};
 
-            SetRotation(ref newData, transform.localRotation);
-            SetScale(ref newData, transform.localScale);
+            SetRotation(ref _currentStateData, transform.localRotation);
+            SetScale(ref _currentStateData, transform.localScale);
 
             if (IsServer && !_clientAuthority)
-                ConnectionToClient.Send(newData, (byte)_channelSendData);
+                ConnectionToClient.Send(_currentStateData, (byte)_channelSendData);
 
             if (IsClient && _clientAuthority)
-                ConnectionToServer.Send(newData, (byte)_channelSendData);
+                ConnectionToServer.Send(_currentStateData, (byte)_channelSendData);
 
-            _oldStateSentData = newData;
+            _oldStateData = _currentStateData;
 
             _previousStateId = _currentStateId;
 
-            _currentStateId = NetIdentity.Client.Time.Time;
+            _currentStateId++;
         }
 
         /// <summary>
@@ -193,6 +211,23 @@ namespace Mirror.Experimental
             _dataStates.Add(data.SequenceData, data);
 
             _currentSentStateId = data.SequenceData;
+        }
+
+        // moved or rotated or scaled since last time we checked it?
+        private bool HasEitherMovedRotatedScaled()
+        {
+            // Save last for next frame to compare only if change was detected, otherwise
+            // slow moving objects might never sync because of C#'s float comparison tolerance.
+            // See also: https://github.com/vis2k/Mirror/pull/428)
+            bool changed = HasMoved || HasRotated || HasScaled;
+            if (changed)
+            {
+                // local position/rotation for VR support
+                if (syncPosition) _lastPosition = transform.localPosition;
+                if (syncRotation) _lastRotation = transform.localRotation;
+                if (syncScale) _lastScale = transform.localScale;
+            }
+            return changed;
         }
 
         #endregion
@@ -225,12 +260,50 @@ namespace Mirror.Experimental
 
         #region Unity Methods
 
+        private void Update()
+        {
+        }
+
         private void FixedUpdate()
         {
+            if (_currentSnapShotSize >= _snapShotSize)
+            {
+                if (IsServer && HasEitherMovedRotatedScaled())
+                {
+                    if (HasAuthority && _clientAuthority) return;
+
+                    Server.SendToAll(_currentSnapShots, (int)_channelSendData);
+
+                }
+
+                if (IsClient && !IsServer && _clientAuthority)
+                {
+                    ConnectionToServer.Send(_currentSnapShots);
+                }
+
+                _currentSnapShotSize = 0;
+            }
+
+            if(IsServer && _clientAuthority) return;
+
+            if(!_clientAuthority && IsClient) return;
+
+            _currentStateData = new NetworkTransformData();
+
+            SetPosition(ref _currentStateData, transform.localPosition);
+            SetRotation(ref _currentStateData, transform.localRotation);
+            SetScale(ref _currentStateData, transform.localScale);
+
+            _currentSnapShots.Add(_currentStateData);
+
+            _oldStateData = _currentStateData;
+
+            _currentSnapShotSize++;
         }
 
         private void Awake()
         {
+            _currentSnapShots = new List<NetworkTransformData>(_snapShotSize);
             NetIdentity.OnStartServer.AddListener(OnStartServer);
 
             NetIdentity.OnStartClient.AddListener(OnStartClient);
