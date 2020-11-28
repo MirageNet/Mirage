@@ -21,7 +21,7 @@ namespace Tests
             Quaternion decompressed = Compression.Decompress(compressed);
 
             // decompressed should be almost the same
-            Assert.That(Quaternion.Dot(expected, decompressed), Is.GreaterThan(1 - 0.001));
+            Assert.That(Mathf.Abs(Quaternion.Dot(expected, decompressed)), Is.GreaterThan(1 - 0.001));
         }
     }
 }
