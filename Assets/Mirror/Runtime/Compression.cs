@@ -20,57 +20,57 @@ namespace Mirror
         private const float Minimum = -1.0f / 1.414214f; // note: 1.0f / sqrt(2)
         private const float Maximum = +1.0f / 1.414214f;
 
-        internal static uint Compress(Quaternion expected)
+        internal static uint Compress(Quaternion quaternion)
         {
-            float absX = Mathf.Abs(expected.x),
-                      absY = Mathf.Abs(expected.y),
-                      absZ = Mathf.Abs(expected.z),
-                      absW = Mathf.Abs(expected.w);
+            float absX = Mathf.Abs(quaternion.x),
+                      absY = Mathf.Abs(quaternion.y),
+                      absZ = Mathf.Abs(quaternion.z),
+                      absW = Mathf.Abs(quaternion.w);
 
             ComponentType largestComponent = ComponentType.X;
-            float largestValue = absX;
-            float largestSign = Mathf.Sign(expected.x);
+            float largestAbs = absX;
+            float largest = quaternion.x;
 
-            if (absY > largestValue)
+            if (absY > largestAbs)
             {
-                largestValue = absY;
+                largestAbs = absY;
                 largestComponent = ComponentType.Y;
-                largestSign = Mathf.Sign(expected.y);
+                largest = quaternion.y;
             }
-            if (absZ > largestValue)
+            if (absZ > largestAbs)
             {
-                largestValue = absZ;
+                largestAbs = absZ;
                 largestComponent = ComponentType.Z;
-                largestSign = Mathf.Sign(expected.z);
+                largest =quaternion.z;
             }
-            if (absW > largestValue)
+            if (absW > largestAbs)
             {
                 largestComponent = ComponentType.W;
-                largestSign = Mathf.Sign(expected.w);
+                largest = quaternion.w;
             }
 
             float a, b, c;
             switch (largestComponent)
             {
                 case ComponentType.X:
-                    a = expected.y;
-                    b = expected.z;
-                    c = expected.w;
+                    a = quaternion.y;
+                    b = quaternion.z;
+                    c = quaternion.w;
                     break;
                 case ComponentType.Y:
-                    a = expected.x;
-                    b = expected.z;
-                    c = expected.w;
+                    a = quaternion.x;
+                    b = quaternion.z;
+                    c = quaternion.w;
                     break;
                 case ComponentType.Z:
-                    a = expected.x;
-                    b = expected.y;
-                    c = expected.w;
+                    a = quaternion.x;
+                    b = quaternion.y;
+                    c = quaternion.w;
                     break;
                 case ComponentType.W:
-                    a = expected.x;
-                    b = expected.y;
-                    c = expected.z;
+                    a = quaternion.x;
+                    b = quaternion.y;
+                    c = quaternion.z;
                     break;
                 default:
                     // Should never happen!
@@ -78,7 +78,7 @@ namespace Mirror
                                                           largestComponent);
             }
 
-            if (largestSign < 0)
+            if (largest < 0)
             {
                 a = -a;
                 b = -b;
