@@ -29,69 +29,60 @@ namespace Mirror
 
             ComponentType largestComponent = ComponentType.X;
             float largestValue = absX;
+            float largestSign = Mathf.Sign(expected.x);
+
             if (absY > largestValue)
             {
                 largestValue = absY;
                 largestComponent = ComponentType.Y;
+                largestSign = Mathf.Sign(expected.y);
             }
             if (absZ > largestValue)
             {
                 largestValue = absZ;
                 largestComponent = ComponentType.Z;
+                largestSign = Mathf.Sign(expected.z);
             }
             if (absW > largestValue)
             {
                 largestComponent = ComponentType.W;
+                largestSign = Mathf.Sign(expected.w);
             }
 
             float a, b, c;
             switch (largestComponent)
             {
-                case ComponentType.X when expected.x >= 0:
+                case ComponentType.X:
                     a = expected.y;
                     b = expected.z;
                     c = expected.w;
                     break;
-                case ComponentType.X when expected.x < 0:
-                    a = -expected.y;
-                    b = -expected.z;
-                    c = -expected.w;
-                    break;
-                case ComponentType.Y when expected.y >= 0:
+                case ComponentType.Y:
                     a = expected.x;
                     b = expected.z;
                     c = expected.w;
                     break;
-                case ComponentType.Y when expected.y < 0:
-                    a = -expected.x;
-                    b = -expected.z;
-                    c = -expected.w;
-                    break;
-                case ComponentType.Z when expected.z >= 0:
+                case ComponentType.Z:
                     a = expected.x;
                     b = expected.y;
                     c = expected.w;
                     break;
-                case ComponentType.Z when expected.z < 0:
-                    a = -expected.x;
-                    b = -expected.y;
-                    c = -expected.w;
-
-                    break;
-                case ComponentType.W when expected.w >= 0:
+                case ComponentType.W:
                     a = expected.x;
                     b = expected.y;
                     c = expected.z;
-                    break;
-                case ComponentType.W when expected.w < 0:
-                    a = -expected.x;
-                    b = -expected.y;
-                    c = -expected.z;
                     break;
                 default:
                     // Should never happen!
                     throw new ArgumentOutOfRangeException("Unknown rotation component type: " +
                                                           largestComponent);
+            }
+
+            if (largestSign < 0)
+            {
+                a = -a;
+                b = -b;
+                c = -c;
             }
 
             float normalizedA = (a - Minimum) / (Maximum - Minimum),
