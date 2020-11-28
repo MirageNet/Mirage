@@ -60,61 +60,48 @@ namespace Mirror
             float a, b, c;
             switch (largestComponent.ComponentType)
             {
-                case ComponentType.X:
-                    if (expected.x >= 0)
-                    {
-                        a = expected.y;
-                        b = expected.z;
-                        c = expected.w;
-                    }
-                    else
-                    {
-                        a = -expected.y;
-                        b = -expected.z;
-                        c = -expected.w;
-                    }
+                case ComponentType.X when expected.x >= 0:
+                    a = expected.y;
+                    b = expected.z;
+                    c = expected.w;
                     break;
-                case ComponentType.Y:
-                    if (expected.y >= 0)
-                    {
-                        a = expected.x;
-                        b = expected.z;
-                        c = expected.w;
-                    }
-                    else
-                    {
-                        a = -expected.x;
-                        b = -expected.z;
-                        c = -expected.w;
-                    }
+                case ComponentType.X when expected.x < 0:
+                    a = -expected.y;
+                    b = -expected.z;
+                    c = -expected.w;
                     break;
-                case ComponentType.Z:
-                    if (expected.z >= 0)
-                    {
-                        a = expected.x;
-                        b = expected.y;
-                        c = expected.w;
-                    }
-                    else
-                    {
-                        a = -expected.x;
-                        b = -expected.y;
-                        c = -expected.w;
-                    }
+                case ComponentType.Y when expected.y >= 0:
+                    a = expected.x;
+                    b = expected.z;
+                    c = expected.w;
                     break;
-                case ComponentType.W:
-                    if (expected.w >= 0)
-                    {
-                        a = expected.x;
-                        b = expected.y;
-                        c = expected.z;
-                    }
-                    else
-                    {
-                        a = -expected.x;
-                        b = -expected.y;
-                        c = -expected.z;
-                    }
+                case ComponentType.Y when expected.y < 0:
+
+                    a = -expected.x;
+                    b = -expected.z;
+                    c = -expected.w;
+
+                    break;
+                case ComponentType.Z when expected.z >= 0:
+                    a = expected.x;
+                    b = expected.y;
+                    c = expected.w;
+                    break;
+                case ComponentType.Z when expected.z < 0:
+                    a = -expected.x;
+                    b = -expected.y;
+                    c = -expected.w;
+
+                    break;
+                case ComponentType.W when expected.w >= 0:
+                    a = expected.x;
+                    b = expected.y;
+                    c = expected.z;
+                    break;
+                case ComponentType.W when expected.w < 0:
+                    a = -expected.x;
+                    b = -expected.y;
+                    c = -expected.z;
                     break;
                 default:
                     // Should never happen!
