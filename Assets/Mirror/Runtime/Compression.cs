@@ -87,9 +87,9 @@ namespace Mirror
                 normalizedB = (b - Minimum) / (Maximum - Minimum),
                 normalizedC = (c - Minimum) / (Maximum - Minimum);
 
-            uint integerA = (uint)Mathf.FloorToInt(normalizedA * 1024.0f + 0.5f),
-                integerB = (uint)Mathf.FloorToInt(normalizedB * 1024.0f + 0.5f),
-                integerC = (uint)Mathf.FloorToInt(normalizedC * 1024.0f + 0.5f);
+            uint integerA = (uint)Mathf.RoundToInt(normalizedA * 1024.0f),
+                integerB = (uint)Mathf.RoundToInt(normalizedB * 1024.0f),
+                integerC = (uint)Mathf.RoundToInt(normalizedC * 1024.0f);
 
             return (((uint)largestComponent) << 30) | (integerA << 20) | (integerB << 10) | integerC;
         }
