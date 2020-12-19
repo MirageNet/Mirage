@@ -56,8 +56,6 @@ namespace Mirror.Tests
             component = playerGO.AddComponent<T>();
 
             serverObjectManager.AddPlayerForConnection(server.LocalConnection, playerGO);
-
-            client.Update();
         });
 
 
