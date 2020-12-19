@@ -56,6 +56,9 @@ namespace Mirror.Tests
             component = playerGO.AddComponent<T>();
 
             serverObjectManager.AddPlayerForConnection(server.LocalConnection, playerGO);
+
+            // wait for client to spawn it
+            await AsyncUtil.WaitUntilWithTimeout(() => client.Connection.Identity != null);
         });
 
 
