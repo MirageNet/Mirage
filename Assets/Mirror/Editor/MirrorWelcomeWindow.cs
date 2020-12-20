@@ -88,13 +88,13 @@ public class MirrorWelcomeWindow : EditorWindow
 
     #region Urls
 
-    private static string welcomePageUrl = "https://mirror-networking.com/docs/api/Mirror.html";
-    private static string quickStartUrl = "https://mirror-networking.com/docs/Articles/CommunityGuides/MirrorQuickStartGuide/index.html";
-    private static string changelogUrl = "https://mirror-networking.com/docs/Articles/General/ChangeLog.html";
-    private static string bestPracticesUrl = "https://mirror-networking.com/docs/Articles/Guides/BestPractices.html";
+    private static string welcomePageUrl = "https://mirrorng.github.io/MirrorNG/";
+    private static string quickStartUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/CommunityGuides/MirrorQuickStartGuide/index.html";
+    private static string changelogUrl = "https://github.com/MirrorNG/MirrorNG/commits/master";
+    private static string bestPracticesUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/BestPractices.html";
     private static string templatesUrl = "https://mirror-networking.com/docs/Articles/General/ScriptTemplates.html";
-    private static string faqUrl = "https://mirror-networking.com/docs/Articles/FAQ.html";
-    private static string sponsorUrl = "https://github.com/sponsors/vis2k";
+    private static string faqUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/FAQ.html";
+    private static string sponsorUrl = "";
     private static string discordInviteUrl = "https://discord.gg/N9QVxbM";
 
     #endregion
@@ -210,13 +210,13 @@ public class MirrorWelcomeWindow : EditorWindow
     }
 
     //open the window (also openable through the path below)
-    [MenuItem("Mirror/Welcome")]
+    [MenuItem("MirrorNG/Welcome")]
     public static void OpenWindow()
     {
         mirrorIconPath = GetMirrorIconPath();
 
         //create the window
-        MirrorWelcomeWindow window = GetWindow<MirrorWelcomeWindow>("Mirror Welcome Page");
+        MirrorWelcomeWindow window = GetWindow<MirrorWelcomeWindow>("MirrorNG Welcome Page");
         //set the position and size
         window.position = new Rect(new Vector2(100, 100), windowSize);
         //set min and max sizes so we cant readjust window size
@@ -308,7 +308,7 @@ public class MirrorWelcomeWindow : EditorWindow
         GUI.Label(new Rect(new Vector2(0, 0), new Vector2(windowSize.x, 10)), firstStartUpKey != "MirrorUnknown" ? "v" + firstStartUpKey.Substring(6) : firstStartUpKey.Substring(6), versionTextStyle);
 
         //draw the welcome text
-        GUI.Label(new Rect(welcomeTextPosition, welcomeTextSize), "Welcome to Mirror!", titleStyle);
+        GUI.Label(new Rect(welcomeTextPosition, welcomeTextSize), "Welcome to MirrorNG!", titleStyle);
 
         //start content box
         GUILayout.BeginHorizontal();
