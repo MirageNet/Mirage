@@ -49,7 +49,7 @@ namespace Mirror
         #region Page variables
 
         //type of page
-        private enum EScreens { welcome, changelog, quickstart, bestpractices, templates, faq, sponsor, discord }
+        private enum EScreens { welcome, changelog, quickstart, bestpractices, faq, sponsor, discord }
 
         //the current page
         private EScreens currentScreen = EScreens.welcome;
@@ -57,15 +57,11 @@ namespace Mirror
         //data type that we want to retrieve when we are using this enum
         private enum EPageDataType { header, description, redirectButtonTitle, redirectButtonUrl }
 
-        //scroll position of the changelog
-        private Vector2 scrollPos;
-
         //headers of the different pages
         private static string welcomePageHeader = "Welcome";
         private static string changelogHeader = "Change Log";
         private static string quickStartHeader = "Quick Start Guide";
         private static string bestPracticesHeader = "Best Practices";
-        private static string templatesHeader = "Script Templates";
         private static string faqHeader = "FAQ";
         private static string sponsorHeader = "Sponsor Us";
 
@@ -74,7 +70,6 @@ namespace Mirror
         private static string changelogDescription = "The Change Log is a list of changes made to MirrorNG. Sometimes these changes can cause your game to break.";
         private static string quickStartDescription = "The Quick Start Guide is meant for people who just started using MirrorNG. The Quick Start Guide will help new users learn how to accomplish important tasks. It is highly recommended that you complete the guide.";
         private static string bestPracticesDescription = "This page describes the best practices that you should use during development. Currently a work in progress.";
-        private static string templatesDescription = "Script templates make it easier to create derived class scripts that inherit from our base classes. The templates have all the possible overrides made for you and organized with comments describing functionality.";
         private static string faqDescription = "The FAQ page holds commonly asked questions. Currently, the FAQ page contains answers to: \n\n   1. Syncing custom data types \n   2. How to connect";
         private static string sponsorDescription = "Coming Soon!";
 
@@ -83,7 +78,6 @@ namespace Mirror
         private static string changelogPageButtonTitle = "Visit Change Log";
         private static string quickStartPageButtonTitle = "Visit Quick Start Guide";
         private static string bestPracticesPageButtonTitle = "Visit Best Practices Page";
-        private static string templatesPageButtonTitle = "Download Script Templates";
         private static string faqPageButtonTitle = "Visit FAQ";
         private static string sponsorPageButtonTitle = "Sponsor Us";
 
@@ -95,7 +89,6 @@ namespace Mirror
         private static string quickStartUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/CommunityGuides/MirrorQuickStartGuide/index.html";
         private static string changelogUrl = "https://github.com/MirrorNG/MirrorNG/commits/master";
         private static string bestPracticesUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/BestPractices.html";
-        private static string templatesUrl = "https://mirror-networking.com/docs/Articles/General/ScriptTemplates.html";
         private static string faqUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/FAQ.html";
         private static string sponsorUrl = "";
         private static string discordInviteUrl = "https://discord.gg/N9QVxbM";
@@ -328,7 +321,6 @@ namespace Mirror
             CheckPageButtonClicked(GUILayout.Button("Change Log", GUILayout.MinHeight(minButtonHeight)), EScreens.changelog);
             CheckPageButtonClicked(GUILayout.Button("Quick Start Guide", GUILayout.MinHeight(minButtonHeight)), EScreens.quickstart);
             CheckPageButtonClicked(GUILayout.Button("Best Practices", GUILayout.MinHeight(minButtonHeight)), EScreens.bestpractices);
-            CheckPageButtonClicked(GUILayout.Button("Script Templates", GUILayout.MinHeight(minButtonHeight)), EScreens.templates);
             CheckPageButtonClicked(GUILayout.Button("FAQ", GUILayout.MinHeight(minButtonHeight)), EScreens.faq);
             CheckPageButtonClicked(GUILayout.Button("Sponsor Us", GUILayout.MinHeight(minButtonHeight)), EScreens.sponsor);
             CheckPageButtonClicked(GUILayout.Button("Discord", GUILayout.MinHeight(minButtonHeight)), EScreens.discord);
@@ -388,29 +380,28 @@ namespace Mirror
             //check the data type, set return types based on data type
             if (type == EPageDataType.header)
             {
-                returnTypes = new [] { welcomePageHeader, quickStartHeader, bestPracticesHeader, templatesHeader, faqHeader, sponsorHeader, changelogHeader };
+                returnTypes = new [] { welcomePageHeader, quickStartHeader, bestPracticesHeader, faqHeader, sponsorHeader, changelogHeader };
             }
             else if (type == EPageDataType.description)
             {
-                returnTypes = new [] { welcomePageDescription, quickStartDescription, bestPracticesDescription, templatesDescription, faqDescription, sponsorDescription, changelogDescription };
+                returnTypes = new [] { welcomePageDescription, quickStartDescription, bestPracticesDescription, faqDescription, sponsorDescription, changelogDescription };
             }
             else if (type == EPageDataType.redirectButtonTitle)
             {
-                returnTypes = new [] { welcomePageButtonTitle, quickStartPageButtonTitle, bestPracticesPageButtonTitle, templatesPageButtonTitle, faqPageButtonTitle, sponsorPageButtonTitle, changelogPageButtonTitle };
+                returnTypes = new [] { welcomePageButtonTitle, quickStartPageButtonTitle, bestPracticesPageButtonTitle, faqPageButtonTitle, sponsorPageButtonTitle, changelogPageButtonTitle };
             }
             else if (type == EPageDataType.redirectButtonUrl)
             {
-                returnTypes = new [] { welcomePageUrl, quickStartUrl, bestPracticesUrl, templatesUrl, faqUrl, sponsorUrl, changelogUrl };
+                returnTypes = new [] { welcomePageUrl, quickStartUrl, bestPracticesUrl, faqUrl, sponsorUrl, changelogUrl };
             }
 
             //return results based on the current page
             if (currentScreen == EScreens.welcome) { return returnTypes[0]; }
             else if (currentScreen == EScreens.quickstart) { return returnTypes[1]; }
             else if (currentScreen == EScreens.bestpractices) { return returnTypes[2]; }
-            else if (currentScreen == EScreens.templates) { return returnTypes[3]; }
-            else if (currentScreen == EScreens.faq) { return returnTypes[4]; }
-            else if (currentScreen == EScreens.sponsor) { return returnTypes[5]; }
-            else if (currentScreen == EScreens.changelog) { return returnTypes[6]; }
+            else if (currentScreen == EScreens.faq) { return returnTypes[3]; }
+            else if (currentScreen == EScreens.sponsor) { return returnTypes[4]; }
+            else if (currentScreen == EScreens.changelog) { return returnTypes[5]; }
 
             return "You forgot to update GetPageData()";
         }
