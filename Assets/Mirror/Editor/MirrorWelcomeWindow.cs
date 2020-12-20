@@ -67,13 +67,13 @@ public class MirrorWelcomeWindow : EditorWindow
     private static string sponsorHeader = "Sponsor Us";
 
     //descriptions of the different pages
-    private static string welcomePageDescription = "Hello! Thank you for installing Mirror. Please visit all the pages on this window. Clicking the button at the bottom of the pages will redirect you to a webpage. Additionally, there are example projects in the Mirror folder that you can look at. \n\nHave fun using Mirror!";
-    private static string changelogDescription = "The Change Log is a list of changes made to Mirror. Sometimes these changes can cause your game to break.";
-    private static string quickStartDescription = "The Quick Start Guide is meant for people who just started using Mirror. The Quick Start Guide will help new users learn how to accomplish important tasks. It is highly recommended that you complete the guide.";
+    private static string welcomePageDescription = "Hello! Thank you for installing MirrorNG. Please visit all the pages on this window. Clicking the button at the bottom of the pages will redirect you to a webpage. Additionally, there are example projects in the Mirror folder that you can look at. \n\nHave fun using MirrorNG!";
+    private static string changelogDescription = "The Change Log is a list of changes made to MirrorNG. Sometimes these changes can cause your game to break.";
+    private static string quickStartDescription = "The Quick Start Guide is meant for people who just started using MirrorNG. The Quick Start Guide will help new users learn how to accomplish important tasks. It is highly recommended that you complete the guide.";
     private static string bestPracticesDescription = "This page describes the best practices that you should use during development. Currently a work in progress.";
     private static string templatesDescription = "Script templates make it easier to create derived class scripts that inherit from our base classes. The templates have all the possible overrides made for you and organized with comments describing functionality.";
     private static string faqDescription = "The FAQ page holds commonly asked questions. Currently, the FAQ page contains answers to: \n\n   1. Syncing custom data types \n   2. How to connect";
-    private static string sponsorDescription = "Sponsoring will give you access to Mirror PRO which gives you special access to tools and priority support.";
+    private static string sponsorDescription = "Coming Soon!";
 
     //titles of the redirect buttons
     private static string welcomePageButtonTitle = "Visit API Reference";
