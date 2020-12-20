@@ -103,12 +103,12 @@ namespace Mirror
         #endregion
 
         //returns the path to the Mirror folder (ex. Assets/Mirror)
-        private static string mirrorPath
+        private static string MirrorPath
         {
             get
             {
                 //get an array of results based on the search
-                string[] results = AssetDatabase.FindAssets("", new string[] { "Assets" });
+                string[] results = AssetDatabase.FindAssets("", new [] { "Assets" });
 
                 //loop through every result
                 foreach (string guid in results)
@@ -138,13 +138,13 @@ namespace Mirror
         private static string GetStartUpKey()
         {
             //if the file doesnt exist, return unknown mirror version
-            if (!File.Exists(mirrorPath + "/package.json"))
+            if (!File.Exists(MirrorPath + "/package.json"))
             {
                 return "MirrorUnknown";
             }
 
             //read the Version.txt file
-            foreach (string line in File.ReadAllLines(mirrorPath + "/package.json"))
+            foreach (string line in File.ReadAllLines(MirrorPath + "/package.json"))
             {
                 if (line.Contains("version"))
                     return line.Substring(7).Replace("\"", "").Replace(",", "");
@@ -155,13 +155,13 @@ namespace Mirror
 
         private static string GetMirrorIconPath()
         {
-            return mirrorPath + "/Icon/MirrorIcon.png";
+            return MirrorPath + "/Icon/MirrorIcon.png";
         }
 
         #endregion
 
         //get the icon
-        private static Texture2D mirrorIcon
+        private static Texture2D MirrorIcon
         {
             get
             {
@@ -170,7 +170,7 @@ namespace Mirror
         }
 
         //create the black background for the banner effect
-        private static Texture2D iconBackground
+        private static Texture2D IconBackground
         {
             get
             {
@@ -202,7 +202,7 @@ namespace Mirror
             //if we haven't seen the welcome page on the current mirror version, show it
             //if there is no version, skip this
             firstStartUpKey = GetStartUpKey();
-            if (EditorPrefs.GetBool(firstStartUpKey, false) == false && firstStartUpKey != "MirrorUnknown")
+            if (!EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirrorUnknown")
             {
                 OpenWindow();
                 //now that we have seen the welcome window, set this this to true so we don't load the window every time we recompile (for the current version)
@@ -251,7 +251,7 @@ namespace Mirror
             {
                 normal = new GUIStyleState
                 {
-                    background = iconBackground,
+                    background = IconBackground,
                 },
             };
 
@@ -302,7 +302,7 @@ namespace Mirror
             //create banner
             GUILayout.BeginArea(new Rect(new Vector2(0, 0), bannerSize), bannerStyle);
             //create logo
-            GUI.Label(new Rect(iconPosition, iconSize), mirrorIcon, iconStyle);
+            GUI.Label(new Rect(iconPosition, iconSize), MirrorIcon, iconStyle);
             GUILayout.EndArea();
 
             #endregion
@@ -342,8 +342,6 @@ namespace Mirror
 
             //draw the right column
             GUILayout.BeginArea(new Rect(rightColumnPosition, rightColumnSize), EditorStyles.helpBox);
-            //if (currentScreen == EScreens.changelog) { scrollPos = GUILayout.BeginScrollView(scrollPos, false, true); }
-            //else { GUILayout.BeginVertical(); }
             GUILayout.BeginVertical();
 
             //draw the header text
@@ -351,11 +349,8 @@ namespace Mirror
             //draw the description text
             GUILayout.Label(GetPageData(EPageDataType.description).ToString(), descriptionStyle);
             //draw redirect button
-            //if (currentScreen != EScreens.changelog) { CheckRedirectButtonClicked(GUI.Button(new Rect(new Vector2(4, windowSize.y - 114 - 30 - 4), new Vector2(2 * (windowSize.x - 2) / 3 - 12, 30)), GetPageData(EPageDataType.redirectButtonTitle).ToString()), GetPageData(EPageDataType.redirectButtonUrl).ToString()); }
             CheckRedirectButtonClicked(GUI.Button(new Rect(redirectButtonPosition, redirectButtonSize), GetPageData(EPageDataType.redirectButtonTitle).ToString()), GetPageData(EPageDataType.redirectButtonUrl).ToString());
 
-            //if (currentScreen == EScreens.changelog) {GUILayout.EndScrollView(); }
-            //else { GUILayout.EndVertical(); }
             GUILayout.EndVertical();
             GUILayout.EndArea();
 
@@ -373,7 +368,7 @@ namespace Mirror
                 currentScreen = newScreen;
             }
             //otherwise, redirect directly to the discord invite link
-            else if (button && newScreen == EScreens.discord)
+            else if (button)
             {
                 CheckRedirectButtonClicked(button, discordInviteUrl);
             }
@@ -393,19 +388,19 @@ namespace Mirror
             //check the data type, set return types based on data type
             if (type == EPageDataType.header)
             {
-                returnTypes = new string[] { welcomePageHeader, quickStartHeader, bestPracticesHeader, templatesHeader, faqHeader, sponsorHeader, changelogHeader };
+                returnTypes = new [] { welcomePageHeader, quickStartHeader, bestPracticesHeader, templatesHeader, faqHeader, sponsorHeader, changelogHeader };
             }
             else if (type == EPageDataType.description)
             {
-                returnTypes = new string[] { welcomePageDescription, quickStartDescription, bestPracticesDescription, templatesDescription, faqDescription, sponsorDescription, changelogDescription };
+                returnTypes = new [] { welcomePageDescription, quickStartDescription, bestPracticesDescription, templatesDescription, faqDescription, sponsorDescription, changelogDescription };
             }
             else if (type == EPageDataType.redirectButtonTitle)
             {
-                returnTypes = new string[] { welcomePageButtonTitle, quickStartPageButtonTitle, bestPracticesPageButtonTitle, templatesPageButtonTitle, faqPageButtonTitle, sponsorPageButtonTitle, changelogPageButtonTitle };
+                returnTypes = new [] { welcomePageButtonTitle, quickStartPageButtonTitle, bestPracticesPageButtonTitle, templatesPageButtonTitle, faqPageButtonTitle, sponsorPageButtonTitle, changelogPageButtonTitle };
             }
             else if (type == EPageDataType.redirectButtonUrl)
             {
-                returnTypes = new string[] { welcomePageUrl, quickStartUrl, bestPracticesUrl, templatesUrl, faqUrl, sponsorUrl, changelogUrl };
+                returnTypes = new [] { welcomePageUrl, quickStartUrl, bestPracticesUrl, templatesUrl, faqUrl, sponsorUrl, changelogUrl };
             }
 
             //return results based on the current page
