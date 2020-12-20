@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -105,16 +105,16 @@ public class MirrorWelcomeWindow : EditorWindow
         get 
         {
             //get an array of results based on the search
-            string[] results = AssetDatabase.FindAssets("Version", new string[] { "Assets" });
+            string[] results = AssetDatabase.FindAssets("", new string[] { "Assets" });
 
             //loop through every result
             foreach (string guid in results)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 //if the path contains Mirror/Version.txt, then we have found the Mirror folder
-                if (path.Contains("Mirror/Version.txt"))
+                if (path.Contains("Mirror/package.json"))
                 {
-                    return path.Remove(path.IndexOf("/Version.txt"));
+                    return path.Remove(path.IndexOf("/package.json"));
                 }
             }
 
@@ -135,13 +135,19 @@ public class MirrorWelcomeWindow : EditorWindow
     private static string GetStartUpKey()
     {
         //if the file doesnt exist, return unknown mirror version
-        if (File.Exists(mirrorPath + "/Version.txt")) { return "MirrorUnknown"; }
+        if (!File.Exists(mirrorPath + "/package.json"))
+        {
+            return "MirrorUnknown";
+        }
 
         //read the Version.txt file
-        StreamReader sr = new StreamReader(mirrorPath + "/Version.txt");
-        string version = sr.ReadLine();
-        sr.Close();
-        return "Mirror" + version;
+        foreach (string line in File.ReadAllLines(mirrorPath + "/package.json"))
+        {
+            if (line.Contains("version"))
+                return line.Substring(7).Replace("\"", "").Replace(",", "");
+        }
+
+        return "MirrorUnknown";
     }
 
     private static string GetMirrorIconPath()
