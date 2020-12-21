@@ -155,7 +155,7 @@ namespace Mirror
         }
 
         //open the window (also openable through the path below)
-        [MenuItem("MirrorNG/Welcome")]
+        [MenuItem("Window/MirrorNG/Welcome")]
         public static void OpenWindow()
         {
             MirrorIcon = GetMirrorIcon();
