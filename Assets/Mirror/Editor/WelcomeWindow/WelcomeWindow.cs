@@ -100,7 +100,7 @@ namespace Mirror
         private static string firstStartUpKey = string.Empty;
 
         //get the icon texture
-        private static Texture2D MirrorIcon = null;
+        private static Texture2D MirrorIcon;
 
         #region Getters for icon and key
 
