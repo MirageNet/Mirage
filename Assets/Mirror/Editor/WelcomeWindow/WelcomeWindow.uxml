@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<engine:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd">
+
+	<!-- This script handles the layout and the elements that are on the window -->
+
+	<!-- Create the banner -->
+	<engine:VisualElement name="Banner">
+
+		<!-- Create the version text -->
+		<engine:Label name="VersionText" text="Placeholder"/>
+
+		<!-- Create the mirror icon -->
+		<engine:Image name="Icon"/>
+
+	</engine:VisualElement>
+
+	<!-- Title text -->
+	<engine:Label name="Title" text="Welcome to Mirror!"/>
+
+	<!-- Display the page buttons and the descriptions -->
+	<engine:Box name ="ColumnContainer">
+
+		<!-- Display the page buttons -->
+		<engine:Box name="LeftColumnBox">
+			<engine:Button name="Button0"/>
+			<engine:Button name="Button1"/>
+			<engine:Button name="Button2"/>
+			<engine:Button name="Button3"/>
+			<engine:Button name="Button4"/>
+			<engine:Button name="Button5"/>
+			<engine:Button name="Button6"/>
+			<engine:Button name="Button7"/>
+		</engine:Box>
+
+		<!-- Spacer -->
+		<engine:VisualElement name="Spacer"/>
+
+		<!-- Display the description -->
+		<engine:Box name="RightColumnBox">
+			<engine:Label name="Header"/>
+			<engine:Label name="Description"/>
+			<engine:Button name="Redirect" class="redirect"/>
+			<engine:VisualElement name="Spacer"/>
+		</engine:Box>
+	</engine:Box>
+
+</engine:UXML>
