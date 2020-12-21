@@ -19,7 +19,7 @@
 	</engine:VisualElement>
 
 	<!-- Title text -->
-	<engine:Label name="Title" text="Welcome to Mirror!"/>
+	<engine:Label name="Title" text="Welcome to MirrorNG!"/>
 
 	<!-- Display the page buttons and the descriptions -->
 	<engine:Box name ="ColumnContainer">
