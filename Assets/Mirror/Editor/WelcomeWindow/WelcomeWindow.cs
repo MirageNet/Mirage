@@ -1,7 +1,6 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEditor.UIElements;
 using System.IO;
 using System.Collections.Generic;
 
@@ -33,9 +32,6 @@ namespace Mirror
 
         //data type that we want to retrieve when we are using this enum
         private enum EPageDataType { header, description, redirectButtonTitle, redirectButtonUrl }
-
-        //scroll position of the changelog
-        private Vector2 scrollPos;
 
         //headers of the different pages
         private static string welcomePageHeader = "Welcome";
@@ -83,7 +79,7 @@ namespace Mirror
         private static Vector2 windowSize = new Vector2(500, 600);
 
         //returns the path to the Mirror folder (ex. Assets/Mirror)
-        private static string mirrorPath
+        private static string MirrorPath
         {
             get
             {
@@ -109,7 +105,7 @@ namespace Mirror
         private static string firstStartUpKey = string.Empty;
 
         //get the icon texture
-        private static Texture2D mirrorIcon = null;
+        private static Texture2D MirrorIcon = null;
 
         #region Getters for icon and key
 
@@ -117,13 +113,13 @@ namespace Mirror
         private static string GetStartUpKey()
         {
             //if the file doesnt exist, return unknown mirror version
-            if (!File.Exists(mirrorPath + "/package.json"))
+            if (!File.Exists(MirrorPath + "/package.json"))
             {
                 return "MirrorUnknown";
             }
 
             //read the Version.txt file
-            foreach (string line in File.ReadAllLines(mirrorPath + "/package.json"))
+            foreach (string line in File.ReadAllLines(MirrorPath + "/package.json"))
             {
                 if (line.Contains("version"))
                     return line.Substring(7).Replace("\"", "").Replace(",", "");
@@ -134,7 +130,7 @@ namespace Mirror
 
         private static Texture2D GetMirrorIcon()
         {
-            return (Texture2D)AssetDatabase.LoadAssetAtPath(mirrorPath + "/Icon/MirrorIcon.png", typeof(Texture2D));
+            return (Texture2D)AssetDatabase.LoadAssetAtPath(MirrorPath + "/Icon/MirrorIcon.png", typeof(Texture2D));
         }
 
         #endregion
@@ -153,7 +149,7 @@ namespace Mirror
             //if we haven't seen the welcome page on the current mirror version, show it
             //if there is no version, skip this
             firstStartUpKey = GetStartUpKey();
-            if (EditorPrefs.GetBool(firstStartUpKey, false) == false && firstStartUpKey != "MirrorUnknown")
+            if (!EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirrorUnknown")
             {
                 OpenWindow();
                 //now that we have seen the welcome window, set this this to true so we don't load the window every time we recompile (for the current version)
@@ -167,7 +163,7 @@ namespace Mirror
         [MenuItem("Mirror/Welcome")]
         public static void OpenWindow()
         {
-            mirrorIcon = GetMirrorIcon();
+            MirrorIcon = GetMirrorIcon();
             //create the window
             WelcomeWindow window = GetWindow<WelcomeWindow>("Mirror Welcome Page");
             //set the position and size
@@ -184,7 +180,7 @@ namespace Mirror
         #region Displaying UI
 
         //prevent the image from being cleared on recompile
-        private void OnValidate() { mirrorIcon = GetMirrorIcon(); }
+        private void OnValidate() { MirrorIcon = GetMirrorIcon(); }
 
         //the code to handle display and button clicking
         private void OnEnable()
@@ -192,8 +188,8 @@ namespace Mirror
             //Load the UI
             //Each editor window contains a root VisualElement object
             VisualElement root = rootVisualElement;
-            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(mirrorPath + "/Editor/WelcomeWindow/WelcomeWindow.uxml");
-            var uss = AssetDatabase.LoadAssetAtPath<StyleSheet>(mirrorPath + "/Editor/WelcomeWindow/WelcomeWindow.uss");
+            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(MirrorPath + "/Editor/WelcomeWindow/WelcomeWindow.uxml");
+            var uss = AssetDatabase.LoadAssetAtPath<StyleSheet>(MirrorPath + "/Editor/WelcomeWindow/WelcomeWindow.uss");
 
             //Load the descriptions
 
@@ -202,7 +198,7 @@ namespace Mirror
 
             //set the icon image
             var icon = root.Q<Image>("Icon");
-            icon.image = mirrorIcon;
+            icon.image = MirrorIcon;
 
             //set the version text
             var versionText = root.Q<Label>("VersionText");
@@ -219,50 +215,49 @@ namespace Mirror
             header.text = GetPageData(EPageDataType.header).ToString();
             description.text = GetPageData(EPageDataType.description).ToString();
             redirectButton.text = GetPageData(EPageDataType.redirectButtonTitle).ToString();
-            redirectButton.clicked += () => { ButtonClicked bc = new ButtonClicked(GetPageData(EPageDataType.redirectButtonUrl).ToString()); };
+            redirectButton.clicked += () => { new ButtonClicked(GetPageData(EPageDataType.redirectButtonUrl).ToString()); };
 
             #region Page buttons
 
-            List<Button> buttons = new List<Button>();
-            string[] buttonHeaders = new string[] { welcomePageHeader, changelogHeader, quickStartHeader, bestPracticesHeader, templatesHeader, faqHeader, sponsorHeader, "Discord" };
+            string[] buttonHeaders = new[] { welcomePageHeader, changelogHeader, quickStartHeader, bestPracticesHeader, templatesHeader, faqHeader, sponsorHeader, "Discord" };
 
             var button0 = root.Q<Button>("Button0");
             button0.text = buttonHeaders[0];
-            button0.clicked += () => pageButtonClicked(header, description, redirectButton, 0);
+            button0.clicked += () => PageButtonClicked(header, description, redirectButton, 0);
 
             var button1 = root.Q<Button>("Button1");
             button1.text = buttonHeaders[1];
-            button1.clicked += () => pageButtonClicked(header, description, redirectButton, 1);
+            button1.clicked += () => PageButtonClicked(header, description, redirectButton, 1);
 
             var button2 = root.Q<Button>("Button2");
             button2.text = buttonHeaders[2];
-            button2.clicked += () => pageButtonClicked(header, description, redirectButton, 2);
+            button2.clicked += () => PageButtonClicked(header, description, redirectButton, 2);
 
             var button3 = root.Q<Button>("Button3");
             button3.text = buttonHeaders[3];
-            button3.clicked += () => pageButtonClicked(header, description, redirectButton, 3);
+            button3.clicked += () => PageButtonClicked(header, description, redirectButton, 3);
 
             var button4 = root.Q<Button>("Button4");
             button4.text = buttonHeaders[4];
-            button4.clicked += () => pageButtonClicked(header, description, redirectButton, 4);
+            button4.clicked += () => PageButtonClicked(header, description, redirectButton, 4);
 
             var button5 = root.Q<Button>("Button5");
             button5.text = buttonHeaders[5];
-            button5.clicked += () => pageButtonClicked(header, description, redirectButton, 5);
+            button5.clicked += () => PageButtonClicked(header, description, redirectButton, 5);
 
             var button6 = root.Q<Button>("Button6");
             button6.text = buttonHeaders[6];
-            button6.clicked += () => pageButtonClicked(header, description, redirectButton, 6);
+            button6.clicked += () => PageButtonClicked(header, description, redirectButton, 6);
 
             var button7 = root.Q<Button>("Button7");
             button7.text = buttonHeaders[7];
-            button7.clicked += () => pageButtonClicked(header, description, redirectButton, 7);
+            button7.clicked += () => PageButtonClicked(header, description, redirectButton, 7);
 
             #endregion
 
         }
 
-        private void pageButtonClicked(Label header, Label description, Button redirectButton, int newScreen)
+        private void PageButtonClicked(Label header, Label description, Button redirectButton, int newScreen)
         {
             EScreens screen = (EScreens)newScreen;
 
@@ -272,7 +267,7 @@ namespace Mirror
                 header.text = GetPageData(EPageDataType.header).ToString();
                 description.text = GetPageData(EPageDataType.description).ToString();
                 redirectButton.text = GetPageData(EPageDataType.redirectButtonTitle).ToString();
-                redirectButton.clicked += () => { ButtonClicked bc = new ButtonClicked(GetPageData(EPageDataType.redirectButtonUrl).ToString()); };
+                redirectButton.clicked += () => { new ButtonClicked(GetPageData(EPageDataType.redirectButtonUrl).ToString()); };
             }
             else
             {
@@ -288,19 +283,19 @@ namespace Mirror
             //check the data type, set return types based on data type
             if (type == EPageDataType.header)
             {
-                returnTypes = new string[] { welcomePageHeader, quickStartHeader, bestPracticesHeader, templatesHeader, faqHeader, sponsorHeader, changelogHeader };
+                returnTypes = new[] { welcomePageHeader, quickStartHeader, bestPracticesHeader, templatesHeader, faqHeader, sponsorHeader, changelogHeader };
             }
             else if (type == EPageDataType.description)
             {
-                returnTypes = new string[] { welcomePageDescription, quickStartDescription, bestPracticesDescription, templatesDescription, faqDescription, sponsorDescription, changelogDescription };
+                returnTypes = new[] { welcomePageDescription, quickStartDescription, bestPracticesDescription, templatesDescription, faqDescription, sponsorDescription, changelogDescription };
             }
             else if (type == EPageDataType.redirectButtonTitle)
             {
-                returnTypes = new string[] { welcomePageButtonTitle, quickStartPageButtonTitle, bestPracticesPageButtonTitle, templatesPageButtonTitle, faqPageButtonTitle, sponsorPageButtonTitle, changelogPageButtonTitle };
+                returnTypes = new[] { welcomePageButtonTitle, quickStartPageButtonTitle, bestPracticesPageButtonTitle, templatesPageButtonTitle, faqPageButtonTitle, sponsorPageButtonTitle, changelogPageButtonTitle };
             }
             else if (type == EPageDataType.redirectButtonUrl)
             {
-                returnTypes = new string[] { welcomePageUrl, quickStartUrl, bestPracticesUrl, templatesUrl, faqUrl, sponsorUrl, changelogUrl };
+                returnTypes = new[] { welcomePageUrl, quickStartUrl, bestPracticesUrl, templatesUrl, faqUrl, sponsorUrl, changelogUrl };
             }
 
             //return results based on the current page
