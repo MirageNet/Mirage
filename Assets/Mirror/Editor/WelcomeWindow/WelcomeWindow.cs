@@ -216,31 +216,31 @@ namespace Mirror
 
             string[] buttonHeaders = new[] { welcomePageHeader, changelogHeader, quickStartHeader, bestPracticesHeader, faqHeader, sponsorHeader, "Discord" };
 
-            var button0 = root.Q<Button>("Button0");
+            var button0 = root.Q<Button>("WelcomeButton");
             button0.text = buttonHeaders[0];
             button0.clicked += () => PageButtonClicked(header, description, redirectButton, 0);
 
-            var button1 = root.Q<Button>("Button1");
+            var button1 = root.Q<Button>("ChangeLogButton");
             button1.text = buttonHeaders[1];
             button1.clicked += () => PageButtonClicked(header, description, redirectButton, 1);
 
-            var button2 = root.Q<Button>("Button2");
+            var button2 = root.Q<Button>("QuickStartButton");
             button2.text = buttonHeaders[2];
             button2.clicked += () => PageButtonClicked(header, description, redirectButton, 2);
 
-            var button3 = root.Q<Button>("Button3");
+            var button3 = root.Q<Button>("BestPracticesButton");
             button3.text = buttonHeaders[3];
             button3.clicked += () => PageButtonClicked(header, description, redirectButton, 3);
 
-            var button4 = root.Q<Button>("Button4");
+            var button4 = root.Q<Button>("FaqButton");
             button4.text = buttonHeaders[4];
             button4.clicked += () => PageButtonClicked(header, description, redirectButton, 4);
 
-            var button5 = root.Q<Button>("Button5");
+            var button5 = root.Q<Button>("SponsorButton");
             button5.text = buttonHeaders[5];
             button5.clicked += () => PageButtonClicked(header, description, redirectButton, 5);
 
-            var button6 = root.Q<Button>("Button6");
+            var button6 = root.Q<Button>("DiscordButton");
             button6.text = buttonHeaders[6];
             button6.clicked += () => PageButtonClicked(header, description, redirectButton, 6);
 

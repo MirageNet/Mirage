@@ -26,13 +26,13 @@
 
 		<!-- Display the page buttons -->
 		<engine:Box name="LeftColumnBox">
-			<engine:Button name="Button0"/>
-			<engine:Button name="Button1"/>
-			<engine:Button name="Button2"/>
-			<engine:Button name="Button3"/>
-			<engine:Button name="Button4"/>
-			<engine:Button name="Button5"/>
-			<engine:Button name="Button6"/>
+			<engine:Button name="WelcomeButton"/>
+			<engine:Button name="ChangeLogButton"/>
+			<engine:Button name="QuickStartButton"/>
+			<engine:Button name="BestPracticesButton"/>
+			<engine:Button name="FaqButton"/>
+			<engine:Button name="SponsorButton"/>
+			<engine:Button name="DiscordButton"/>
 		</engine:Box>
 
 		<!-- Spacer -->
