@@ -24,7 +24,7 @@ namespace Mirror
         #region Page variables
 
         //type of page
-        private enum EScreens { welcome, changelog, quickstart, bestpractices, templates, faq, sponsor, discord }
+        private enum EScreens { welcome, changelog, quickstart, bestpractices, faq, sponsor, discord }
 
         //the current page
         private EScreens currentScreen = EScreens.welcome;
@@ -37,7 +37,6 @@ namespace Mirror
         private static string changelogHeader = "Change Log";
         private static string quickStartHeader = "Quick Start Guide";
         private static string bestPracticesHeader = "Best Practices";
-        private static string templatesHeader = "Script Templates";
         private static string faqHeader = "FAQ";
         private static string sponsorHeader = "Sponsor Us";
 
@@ -46,7 +45,6 @@ namespace Mirror
         private static string changelogDescription = "The Change Log is a list of changes made to MirrorNG. Sometimes these changes can cause your game to break.";
         private static string quickStartDescription = "The Quick Start Guide is meant for people who just started using MirrorNG. The Quick Start Guide will help new users learn how to accomplish important tasks. It is highly recommended that you complete the guide.";
         private static string bestPracticesDescription = "This page describes the best practices that you should use during development. Currently a work in progress.";
-        private static string templatesDescription = "Script templates make it easier to create derived class scripts that inherit from our base classes. The templates have all the possible overrides made for you and organized with comments describing functionality.";
         private static string faqDescription = "The FAQ page holds commonly asked questions. Currently, the FAQ page contains answers to: \n\n   1. Syncing custom data types \n   2. How to connect \n   3. Host migration \n   4. Server lists and matchmaking";
         private static string sponsorDescription = "Sponsoring will give you access to Mirror PRO which gives you special access to tools and priority support.";
 
@@ -55,7 +53,6 @@ namespace Mirror
         private static string changelogPageButtonTitle = "Visit Change Log";
         private static string quickStartPageButtonTitle = "Visit Quick Start Guide";
         private static string bestPracticesPageButtonTitle = "Visit Best Practices Page";
-        private static string templatesPageButtonTitle = "Download Script Templates";
         private static string faqPageButtonTitle = "Visit FAQ";
         private static string sponsorPageButtonTitle = "Sponsor Us";
 
@@ -67,7 +64,6 @@ namespace Mirror
         private static string quickStartUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/CommunityGuides/MirrorQuickStartGuide/index.html";
         private static string changelogUrl = "https://github.com/MirrorNG/MirrorNG/commits/master";
         private static string bestPracticesUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/BestPractices.html";
-        private static string templatesUrl = "https://mirror-networking.com/docs/Articles/General/ScriptTemplates.html";
         private static string faqUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/FAQ.html";
         private static string sponsorUrl = "";
         private static string discordInviteUrl = "https://discord.gg/N9QVxbM";
@@ -218,7 +214,7 @@ namespace Mirror
 
             #region Page buttons
 
-            string[] buttonHeaders = new[] { welcomePageHeader, changelogHeader, quickStartHeader, bestPracticesHeader, templatesHeader, faqHeader, sponsorHeader, "Discord" };
+            string[] buttonHeaders = new[] { welcomePageHeader, changelogHeader, quickStartHeader, bestPracticesHeader, faqHeader, sponsorHeader, "Discord" };
 
             var button0 = root.Q<Button>("Button0");
             button0.text = buttonHeaders[0];
@@ -247,10 +243,6 @@ namespace Mirror
             var button6 = root.Q<Button>("Button6");
             button6.text = buttonHeaders[6];
             button6.clicked += () => PageButtonClicked(header, description, redirectButton, 6);
-
-            var button7 = root.Q<Button>("Button7");
-            button7.text = buttonHeaders[7];
-            button7.clicked += () => PageButtonClicked(header, description, redirectButton, 7);
 
             #endregion
 
@@ -282,29 +274,28 @@ namespace Mirror
             //check the data type, set return types based on data type
             if (type == EPageDataType.header)
             {
-                returnTypes = new[] { welcomePageHeader, quickStartHeader, bestPracticesHeader, templatesHeader, faqHeader, sponsorHeader, changelogHeader };
+                returnTypes = new[] { welcomePageHeader, quickStartHeader, bestPracticesHeader, faqHeader, sponsorHeader, changelogHeader };
             }
             else if (type == EPageDataType.description)
             {
-                returnTypes = new[] { welcomePageDescription, quickStartDescription, bestPracticesDescription, templatesDescription, faqDescription, sponsorDescription, changelogDescription };
+                returnTypes = new[] { welcomePageDescription, quickStartDescription, bestPracticesDescription, faqDescription, sponsorDescription, changelogDescription };
             }
             else if (type == EPageDataType.redirectButtonTitle)
             {
-                returnTypes = new[] { welcomePageButtonTitle, quickStartPageButtonTitle, bestPracticesPageButtonTitle, templatesPageButtonTitle, faqPageButtonTitle, sponsorPageButtonTitle, changelogPageButtonTitle };
+                returnTypes = new[] { welcomePageButtonTitle, quickStartPageButtonTitle, bestPracticesPageButtonTitle, faqPageButtonTitle, sponsorPageButtonTitle, changelogPageButtonTitle };
             }
             else if (type == EPageDataType.redirectButtonUrl)
             {
-                returnTypes = new[] { welcomePageUrl, quickStartUrl, bestPracticesUrl, templatesUrl, faqUrl, sponsorUrl, changelogUrl };
+                returnTypes = new[] { welcomePageUrl, quickStartUrl, bestPracticesUrl, faqUrl, sponsorUrl, changelogUrl };
             }
 
             //return results based on the current page
             if (currentScreen == EScreens.welcome) { return returnTypes[0]; }
             else if (currentScreen == EScreens.quickstart) { return returnTypes[1]; }
             else if (currentScreen == EScreens.bestpractices) { return returnTypes[2]; }
-            else if (currentScreen == EScreens.templates) { return returnTypes[3]; }
-            else if (currentScreen == EScreens.faq) { return returnTypes[4]; }
-            else if (currentScreen == EScreens.sponsor) { return returnTypes[5]; }
-            else if (currentScreen == EScreens.changelog) { return returnTypes[6]; }
+            else if (currentScreen == EScreens.faq) { return returnTypes[3]; }
+            else if (currentScreen == EScreens.sponsor) { return returnTypes[4]; }
+            else if (currentScreen == EScreens.changelog) { return returnTypes[5]; }
 
             return "You forgot to update GetPageData()";
         }

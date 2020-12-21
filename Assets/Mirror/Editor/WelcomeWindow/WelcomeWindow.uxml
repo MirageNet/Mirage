@@ -33,7 +33,6 @@
 			<engine:Button name="Button4"/>
 			<engine:Button name="Button5"/>
 			<engine:Button name="Button6"/>
-			<engine:Button name="Button7"/>
 		</engine:Box>
 
 		<!-- Spacer -->
