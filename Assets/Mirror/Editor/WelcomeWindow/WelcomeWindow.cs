@@ -105,7 +105,7 @@ namespace Mirror
         #region Getters for icon and key
 
         //called only once
-        private static string GetStartUpKey()
+        private static string GetVersion()
         {
             //if the file doesnt exist, return unknown mirror version
             if (!File.Exists(MirrorPath + "/package.json"))
@@ -143,7 +143,7 @@ namespace Mirror
         {
             //if we haven't seen the welcome page on the current mirror version, show it
             //if there is no version, skip this
-            firstStartUpKey = GetStartUpKey();
+            firstStartUpKey = GetVersion();
             if (!EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirrorUnknown")
             {
                 OpenWindow();
@@ -197,7 +197,7 @@ namespace Mirror
 
             //set the version text
             var versionText = root.Q<Label>("VersionText");
-            versionText.text = "v" + GetStartUpKey().Substring(6);
+            versionText.text = "v" + GetVersion().Substring(6);
 
             //get the header
             var header = root.Q<Label>("Header");
