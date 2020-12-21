@@ -63,13 +63,13 @@ namespace Mirror
 
         #region Urls
 
-        private static string welcomePageUrl = "https://mirror-networking.com/docs/api/Mirror.html";
-        private static string quickStartUrl = "https://mirror-networking.com/docs/Articles/CommunityGuides/MirrorQuickStartGuide/index.html";
-        private static string changelogUrl = "https://mirror-networking.com/docs/Articles/General/ChangeLog.html";
-        private static string bestPracticesUrl = "https://mirror-networking.com/docs/Articles/Guides/BestPractices.html";
+        private static string welcomePageUrl = "https://mirrorng.github.io/MirrorNG/";
+        private static string quickStartUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/CommunityGuides/MirrorQuickStartGuide/index.html";
+        private static string changelogUrl = "https://github.com/MirrorNG/MirrorNG/commits/master";
+        private static string bestPracticesUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/BestPractices.html";
         private static string templatesUrl = "https://mirror-networking.com/docs/Articles/General/ScriptTemplates.html";
-        private static string faqUrl = "https://mirror-networking.com/docs/Articles/FAQ.html";
-        private static string sponsorUrl = "https://github.com/sponsors/vis2k";
+        private static string faqUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/FAQ.html";
+        private static string sponsorUrl = "";
         private static string discordInviteUrl = "https://discord.gg/N9QVxbM";
 
         #endregion
