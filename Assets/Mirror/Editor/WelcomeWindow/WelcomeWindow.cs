@@ -33,40 +33,40 @@ namespace Mirror
         private enum EPageDataType { header, description, redirectButtonTitle, redirectButtonUrl }
 
         //headers of the different pages
-        private static string welcomePageHeader = "Welcome";
-        private static string changelogHeader = "Change Log";
-        private static string quickStartHeader = "Quick Start Guide";
-        private static string bestPracticesHeader = "Best Practices";
-        private static string faqHeader = "FAQ";
-        private static string sponsorHeader = "Sponsor Us";
+        private const string welcomePageHeader = "Welcome";
+        private const string changelogHeader = "Change Log";
+        private const string quickStartHeader = "Quick Start Guide";
+        private const string bestPracticesHeader = "Best Practices";
+        private const string faqHeader = "FAQ";
+        private const string sponsorHeader = "Sponsor Us";
 
         //descriptions of the different pages
-        private static string welcomePageDescription = "Hello! Thank you for installing MirrorNG. Please visit all the pages on this window. Clicking the button at the bottom of the pages will redirect you to a webpage. Additionally, there are example projects in the Mirror folder that you can look at. \n\nHave fun using Mirror!";
-        private static string changelogDescription = "The Change Log is a list of changes made to MirrorNG. Sometimes these changes can cause your game to break.";
-        private static string quickStartDescription = "The Quick Start Guide is meant for people who just started using MirrorNG. The Quick Start Guide will help new users learn how to accomplish important tasks. It is highly recommended that you complete the guide.";
-        private static string bestPracticesDescription = "This page describes the best practices that you should use during development. Currently a work in progress.";
-        private static string faqDescription = "The FAQ page holds commonly asked questions. Currently, the FAQ page contains answers to: \n\n   1. Syncing custom data types \n   2. How to connect \n   3. Host migration \n   4. Server lists and matchmaking";
-        private static string sponsorDescription = "Sponsoring will give you access to Mirror PRO which gives you special access to tools and priority support.";
+        private const string welcomePageDescription = "Hello! Thank you for installing MirrorNG. Please visit all the pages on this window. Clicking the button at the bottom of the pages will redirect you to a webpage. Additionally, there are example projects in the Mirror folder that you can look at. \n\nHave fun using Mirror!";
+        private const string changelogDescription = "The Change Log is a list of changes made to MirrorNG. Sometimes these changes can cause your game to break.";
+        private const string quickStartDescription = "The Quick Start Guide is meant for people who just started using MirrorNG. The Quick Start Guide will help new users learn how to accomplish important tasks. It is highly recommended that you complete the guide.";
+        private const string bestPracticesDescription = "This page describes the best practices that you should use during development. Currently a work in progress.";
+        private const string faqDescription = "The FAQ page holds commonly asked questions. Currently, the FAQ page contains answers to: \n\n   1. Syncing custom data types \n   2. How to connect \n   3. Host migration \n   4. Server lists and matchmaking";
+        private const string sponsorDescription = "Sponsoring will give you access to Mirror PRO which gives you special access to tools and priority support.";
 
         //titles of the redirect buttons
-        private static string welcomePageButtonTitle = "Visit API Reference";
-        private static string changelogPageButtonTitle = "Visit Change Log";
-        private static string quickStartPageButtonTitle = "Visit Quick Start Guide";
-        private static string bestPracticesPageButtonTitle = "Visit Best Practices Page";
-        private static string faqPageButtonTitle = "Visit FAQ";
-        private static string sponsorPageButtonTitle = "Sponsor Us";
+        private const string welcomePageButtonTitle = "Visit API Reference";
+        private const string changelogPageButtonTitle = "Visit Change Log";
+        private const string quickStartPageButtonTitle = "Visit Quick Start Guide";
+        private const string bestPracticesPageButtonTitle = "Visit Best Practices Page";
+        private const string faqPageButtonTitle = "Visit FAQ";
+        private const string sponsorPageButtonTitle = "Sponsor Us";
 
         #endregion
 
         #region Urls
 
-        private static string welcomePageUrl = "https://mirrorng.github.io/MirrorNG/";
-        private static string quickStartUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/CommunityGuides/MirrorQuickStartGuide/index.html";
-        private static string changelogUrl = "https://github.com/MirrorNG/MirrorNG/commits/master";
-        private static string bestPracticesUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/BestPractices.html";
-        private static string faqUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/FAQ.html";
-        private static string sponsorUrl = "";
-        private static string discordInviteUrl = "https://discord.gg/N9QVxbM";
+        private const string welcomePageUrl = "https://mirrorng.github.io/MirrorNG/";
+        private const string quickStartUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/CommunityGuides/MirrorQuickStartGuide/index.html";
+        private const string changelogUrl = "https://github.com/MirrorNG/MirrorNG/commits/master";
+        private const string bestPracticesUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/BestPractices.html";
+        private const string faqUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/FAQ.html";
+        private const string sponsorUrl = "";
+        private const string discordInviteUrl = "https://discord.gg/N9QVxbM";
 
         #endregion
 
