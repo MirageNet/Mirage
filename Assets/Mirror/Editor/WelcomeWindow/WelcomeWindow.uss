@@ -38,7 +38,6 @@
 
 #Header {
     font-size: 20px;
-    color: var(--text-color);
     -unity-font-style: bold;
     -unity-text-align: middle-left;
     padding-left: 10px;
@@ -50,7 +49,6 @@
 
 #Description {
     font-size: 14px;
-    color: var(--text-color);
     -unity-text-align: upper-left;
     padding-left: 10px;
     padding-right: 10px;
@@ -88,7 +86,6 @@ Button:active {
 
 #ColumnContainer {
     border-width: 0;
-    background-color: rgb(56, 56, 56);
     height: 80%;
     width: auto;
     padding-left: 3px;
@@ -102,7 +99,7 @@ Button:active {
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding-top: 1px;
+    padding-top: 3px;
 }
 
 #RightColumnBox {
