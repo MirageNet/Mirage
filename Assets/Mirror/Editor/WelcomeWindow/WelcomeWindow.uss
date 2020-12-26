@@ -1,157 +1,112 @@
-/* This script handles the styles used in the uxml file */
-
-:root
-{
-    /* variables */
-
+:root {
     --window-width: 500;
     --window-height: 600;
     --banner-color: rgb(12, 12, 12);
     --text-color: rgb(255, 255, 255);
 }
 
-/* version text style */
-#VersionText
-{
-    height: 0px;
+#VersionText {
+    height: 0;
     width: var(--window-width);
-
     font-size: 10px;
     color: var(--text-color);
-
     -unity-text-align: upper-right;
-    /* add padding that doesn't effect layout */
     position: relative;
     top: 5px;
     right: 5px;
 }
 
-/* banner style */
-#Banner
-{
+#Banner {
     height: 64px;
     width: var(--window-width);
-
     background-color: var(--banner-color);
 }
 
-/* mirror icon style */
-#Icon
-{
+#Icon {
     height: 64px;
     width: 64px;
     align-self: center;
-
-    background-color: rgb(255,255,255);
+    background-color: rgb(255, 255, 255);
 }
 
-/* title style */
-#Title
-{
+#Title {
     font-size: 30px;
     color: var(--text-color);
-
     align-self: center;
     padding-top: 10px;
     padding-bottom: 10px;
 }
 
-/* Header text style */
-#Header
-{
+#Header {
     font-size: 20px;
     color: var(--text-color);
     -unity-font-style: bold;
-
     -unity-text-align: middle-left;
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 10px;
     padding-bottom: 15px;
-
     white-space: normal;
 }
 
-/* Description text style */
-#Description
-{
+#Description {
     font-size: 14px;
     color: var(--text-color);
-
     -unity-text-align: upper-left;
     padding-left: 10px;
     padding-right: 10px;
     padding-bottom: 10px;
     padding-top: 5px;
     flex: 3;
-
     white-space: normal;
 }
 
-/* Spacer */
-#Spacer
-{
+#Spacer {
     display: flex;
     flex: 0.02;
 }
 
-/* Button default */
-Button
-{
+Button {
     padding: 2px;
     height: 50px;
     color: rgb(255, 255, 255);
     background-color: rgb(85, 85, 85);
 }
 
-/* Button hover */
-Button:hover
-{
+Button:hover {
     background-color: rgb(95, 95, 95);
 }
 
-/* Button pressed */
-Button:active
-{
+Button:active {
     background-color: rgb(105, 105, 105);
 }
 
-/* Redirect button style */
-.redirect
-{
+.redirect {
     padding: 2px;
     height: 32px;
     width: auto;
 }
 
-/* Container for the contents */
-#ColumnContainer
-{
-    border-width: 0px;
+#ColumnContainer {
+    border-width: 0;
     background-color: rgb(56, 56, 56);
-
     height: 80%;
     width: auto;
     padding-left: 3px;
     padding-right: 3px;
     padding-bottom: 2px;
-
     display: flex;
     flex-direction: row;
 }
 
-/* Page buttons column */
-#LeftColumnBox
-{
+#LeftColumnBox {
     display: flex;
     flex: 1;
     flex-direction: column;
     padding-top: 1px;
 }
 
-/* Descriptions column */
-#RightColumnBox
-{
+#RightColumnBox {
     display: flex;
     flex: 2;
     flex-direction: column;

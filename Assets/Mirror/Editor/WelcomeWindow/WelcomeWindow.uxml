@@ -1,50 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?>
-<engine:UXML
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:engine="UnityEngine.UIElements"
-    xmlns:editor="UnityEditor.UIElements"
-    xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd">
-
-	<!-- This script handles the layout and the elements that are on the window -->
-
-	<!-- Create the banner -->
-	<engine:VisualElement name="Banner">
-
-		<!-- Create the version text -->
-		<engine:Label name="VersionText" text="Placeholder"/>
-
-		<!-- Create the mirror icon -->
-		<engine:Image name="Icon"/>
-
-	</engine:VisualElement>
-
-	<!-- Title text -->
-	<engine:Label name="Title" text="Welcome to MirrorNG!"/>
-
-	<!-- Display the page buttons and the descriptions -->
-	<engine:Box name ="ColumnContainer">
-
-		<!-- Display the page buttons -->
-		<engine:Box name="LeftColumnBox">
-			<engine:Button name="WelcomeButton"/>
-			<engine:Button name="ChangeLogButton"/>
-			<engine:Button name="QuickStartButton"/>
-			<engine:Button name="BestPracticesButton"/>
-			<engine:Button name="FaqButton"/>
-			<engine:Button name="SponsorButton"/>
-			<engine:Button name="DiscordButton"/>
-		</engine:Box>
-
-		<!-- Spacer -->
-		<engine:VisualElement name="Spacer"/>
-
-		<!-- Display the description -->
-		<engine:Box name="RightColumnBox">
-			<engine:Label name="Header"/>
-			<engine:Label name="Description"/>
-			<engine:Button name="Redirect" class="redirect"/>
-			<engine:VisualElement name="Spacer"/>
-		</engine:Box>
-	</engine:Box>
-
-</engine:UXML>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="WelcomeWindow.uss" />
+    <ui:VisualElement name="Banner">
+        <ui:Label name="VersionText" text="Placeholder" />
+        <ui:Image name="Icon" style="background-image: url(&apos;/Assets/Mirror/Icon/MirrorIcon.png&apos;);" />
+    </ui:VisualElement>
+    <ui:Label name="Title" text="Welcome to MirrorNG!" />
+    <ui:Box name="ColumnContainer">
+        <ui:Box name="LeftColumnBox">
+            <ui:Button name="WelcomeButton" />
+            <ui:Button name="ChangeLogButton" />
+            <ui:Button name="QuickStartButton" />
+            <ui:Button name="BestPracticesButton" />
+            <ui:Button name="FaqButton" />
+            <ui:Button name="SponsorButton" />
+            <ui:Button name="DiscordButton" />
+        </ui:Box>
+        <ui:VisualElement name="Spacer" />
+        <ui:Box name="RightColumnBox">
+            <ui:Label name="Header" />
+            <ui:Label name="Description" />
+            <ui:Button name="Redirect" class="redirect" />
+            <ui:VisualElement name="Spacer" />
+        </ui:Box>
+    </ui:Box>
+</ui:UXML>

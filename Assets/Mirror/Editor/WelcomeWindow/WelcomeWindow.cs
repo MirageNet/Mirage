@@ -123,11 +123,6 @@ namespace Mirror
             return "MirrorUnknown";
         }
 
-        private static Texture2D GetMirrorIcon()
-        {
-            return (Texture2D)AssetDatabase.LoadAssetAtPath(MirrorPath + "/Icon/MirrorIcon.png", typeof(Texture2D));
-        }
-
         #endregion
 
         #region Handle visibility
@@ -158,7 +153,6 @@ namespace Mirror
         [MenuItem("Window/MirrorNG/Welcome")]
         public static void OpenWindow()
         {
-            MirrorIcon = GetMirrorIcon();
             //create the window
             WelcomeWindow window = GetWindow<WelcomeWindow>("MirrorNG Welcome Page");
             //set the position and size
@@ -173,9 +167,6 @@ namespace Mirror
         #endregion
 
         #region Displaying UI
-
-        //prevent the image from being cleared on recompile
-        private void OnValidate() { MirrorIcon = GetMirrorIcon(); }
 
         //the code to handle display and button clicking
         private void OnEnable()
