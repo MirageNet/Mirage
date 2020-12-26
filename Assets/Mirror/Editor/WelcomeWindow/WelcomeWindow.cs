@@ -151,29 +151,26 @@ namespace Mirror
 
             #region Page buttons
 
-            Button WelcomeButton = root.Q<Button>("WelcomeButton");
-            WelcomeButton.clicked += () => ShowTab("Welcome");
-
-            Button ChangeLogButton = root.Q<Button>("ChangeLogButton");
-            ChangeLogButton.clicked += () => ShowTab("ChangeLog");
-
-            Button QuickStartButton = root.Q<Button>("QuickStartButton");
-            QuickStartButton.clicked += () => ShowTab("QuickStart");
-
-            Button BestPracticesButton = root.Q<Button>("BestPracticesButton");
-            BestPracticesButton.clicked += () => ShowTab("BestPractices");
-
-            Button FaqButton = root.Q<Button>("FaqButton");
-            FaqButton.clicked += () => ShowTab("Faq");
-
-            Button SponsorButton = root.Q<Button>("SponsorButton");
-            SponsorButton.clicked += () => ShowTab("Sponsor");
+            ConfigureTab("WelcomeButton", "Welcome", welcomePageUrl);
+            ConfigureTab("ChangeLogButton", "ChangeLog", changelogUrl);
+            ConfigureTab("QuickStartButton", "QuickStart", quickStartUrl);
+            ConfigureTab("BestPracticesButton", "BestPractices", bestPracticesUrl);
+            ConfigureTab("FaqButton", "Faq", faqUrl);
+            ConfigureTab("SponsorButton", "Sponsor", sponsorUrl);
 
             Button DiscordButton = root.Q<Button>("DiscordButton");
             DiscordButton.clicked += () => Application.OpenURL(discordInviteUrl);
 
             ShowTab("Welcome");
             #endregion
+        }
+
+        private void ConfigureTab(string tabButtonName, string tab, string url)
+        {
+            Button tabButton = rootVisualElement.Q<Button>(tabButtonName);
+            tabButton.clicked += () => ShowTab(tab);
+            Button redirectButton = rootVisualElement.Q<VisualElement>(tab).Q<Button>("Redirect");
+            redirectButton.clicked += () => Application.OpenURL(url);
         }
 
         private void ShowTab(string screen)
