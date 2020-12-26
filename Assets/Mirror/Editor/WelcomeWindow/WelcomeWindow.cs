@@ -151,26 +151,26 @@ namespace Mirror
 
             #region Page buttons
 
-            var button0 = root.Q<Button>("WelcomeButton");
-            button0.clicked += () => ShowTab("Welcome");
+            Button WelcomeButton = root.Q<Button>("WelcomeButton");
+            WelcomeButton.clicked += () => ShowTab("Welcome");
 
-            var button1 = root.Q<Button>("ChangeLogButton");
-            button1.clicked += () => ShowTab("ChangeLog");
+            Button ChangeLogButton = root.Q<Button>("ChangeLogButton");
+            ChangeLogButton.clicked += () => ShowTab("ChangeLog");
 
-            var button2 = root.Q<Button>("QuickStartButton");
-            button2.clicked += () => ShowTab("QuickStart");
+            Button QuickStartButton = root.Q<Button>("QuickStartButton");
+            QuickStartButton.clicked += () => ShowTab("QuickStart");
 
-            var button3 = root.Q<Button>("BestPracticesButton");
-            button3.clicked += () => ShowTab("BestPractices");
+            Button BestPracticesButton = root.Q<Button>("BestPracticesButton");
+            BestPracticesButton.clicked += () => ShowTab("BestPractices");
 
-            var button4 = root.Q<Button>("FaqButton");
-            button4.clicked += () => ShowTab("Faq");
+            Button FaqButton = root.Q<Button>("FaqButton");
+            FaqButton.clicked += () => ShowTab("Faq");
 
-            var button5 = root.Q<Button>("SponsorButton");
-            button5.clicked += () => ShowTab("Sponsor");
+            Button SponsorButton = root.Q<Button>("SponsorButton");
+            SponsorButton.clicked += () => ShowTab("Sponsor");
 
-            var button6 = root.Q<Button>("DiscordButton");
-            button6.clicked += () => Application.OpenURL(discordInviteUrl);
+            Button DiscordButton = root.Q<Button>("DiscordButton");
+            DiscordButton.clicked += () => Application.OpenURL(discordInviteUrl);
 
             ShowTab("Welcome");
             #endregion
