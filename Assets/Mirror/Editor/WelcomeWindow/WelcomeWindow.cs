@@ -23,13 +23,13 @@ namespace Mirror
 
         #region Urls
 
-        private const string welcomePageUrl = "https://mirrorng.github.io/MirrorNG/";
-        private const string quickStartUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/CommunityGuides/MirrorQuickStartGuide/index.html";
-        private const string changelogUrl = "https://github.com/MirrorNG/MirrorNG/commits/master";
-        private const string bestPracticesUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/BestPractices.html";
-        private const string faqUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/FAQ.html";
-        private const string sponsorUrl = "";
-        private const string discordInviteUrl = "https://discord.gg/N9QVxbM";
+        private const string WelcomePageUrl = "https://mirrorng.github.io/MirrorNG/";
+        private const string QuickStartUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/CommunityGuides/MirrorQuickStartGuide/index.html";
+        private const string ChangelogUrl = "https://github.com/MirrorNG/MirrorNG/commits/master";
+        private const string BestPracticesUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/BestPractices.html";
+        private const string FaqUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/FAQ.html";
+        private const string SponsorUrl = "";
+        private const string DiscordInviteUrl = "https://discord.gg/N9QVxbM";
 
         #endregion
 
@@ -135,7 +135,7 @@ namespace Mirror
             //Each editor window contains a root VisualElement object
             VisualElement root = rootVisualElement;
             VisualTreeAsset uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(MirrorPath + "/Editor/WelcomeWindow/WelcomeWindow.uxml");
-            var uss = AssetDatabase.LoadAssetAtPath<StyleSheet>(MirrorPath + "/Editor/WelcomeWindow/WelcomeWindow.uss");
+            StyleSheet uss = AssetDatabase.LoadAssetAtPath<StyleSheet>(MirrorPath + "/Editor/WelcomeWindow/WelcomeWindow.uss");
 
             //Load the descriptions
 
@@ -148,15 +148,15 @@ namespace Mirror
 
             #region Page buttons
 
-            ConfigureTab("WelcomeButton", "Welcome", welcomePageUrl);
-            ConfigureTab("ChangeLogButton", "ChangeLog", changelogUrl);
-            ConfigureTab("QuickStartButton", "QuickStart", quickStartUrl);
-            ConfigureTab("BestPracticesButton", "BestPractices", bestPracticesUrl);
-            ConfigureTab("FaqButton", "Faq", faqUrl);
-            ConfigureTab("SponsorButton", "Sponsor", sponsorUrl);
+            ConfigureTab("WelcomeButton", "Welcome", WelcomePageUrl);
+            ConfigureTab("ChangeLogButton", "ChangeLog", ChangelogUrl);
+            ConfigureTab("QuickStartButton", "QuickStart", QuickStartUrl);
+            ConfigureTab("BestPracticesButton", "BestPractices", BestPracticesUrl);
+            ConfigureTab("FaqButton", "Faq", FaqUrl);
+            ConfigureTab("SponsorButton", "Sponsor", SponsorUrl);
 
             Button DiscordButton = root.Q<Button>("DiscordButton");
-            DiscordButton.clicked += () => Application.OpenURL(discordInviteUrl);
+            DiscordButton.clicked += () => Application.OpenURL(DiscordInviteUrl);
 
             ShowTab("Welcome");
             #endregion
