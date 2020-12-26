@@ -143,7 +143,7 @@ namespace Mirror
             root.styleSheets.Add(uss);
 
             //set the version text
-            var versionText = root.Q<Label>("VersionText");
+            Label versionText = root.Q<Label>("VersionText");
             versionText.text = "v" + GetVersion().Substring(6);
 
             #region Page buttons
