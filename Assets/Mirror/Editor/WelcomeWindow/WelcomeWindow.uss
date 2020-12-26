@@ -31,7 +31,6 @@
 
 #Title {
     font-size: 30px;
-    color: var(--text-color);
     align-self: center;
     padding-top: 10px;
     padding-bottom: 10px;
