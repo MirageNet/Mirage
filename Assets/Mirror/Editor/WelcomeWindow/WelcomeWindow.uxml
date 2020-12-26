@@ -7,13 +7,13 @@
     <ui:Label name="Title" text="Welcome to MirrorNG!" />
     <ui:Box name="ColumnContainer">
         <ui:Box name="LeftColumnBox">
-            <ui:Button name="WelcomeButton" />
-            <ui:Button name="ChangeLogButton" />
-            <ui:Button name="QuickStartButton" />
-            <ui:Button name="BestPracticesButton" />
-            <ui:Button name="FaqButton" />
-            <ui:Button name="SponsorButton" />
-            <ui:Button name="DiscordButton" />
+            <ui:Button name="WelcomeButton" text="Welcome" />
+            <ui:Button name="ChangeLogButton" text="Change Log" />
+            <ui:Button name="QuickStartButton" text="Quick Start Guide" />
+            <ui:Button name="BestPracticesButton" text="Best Practices" />
+            <ui:Button name="FaqButton" text="FAQ" />
+            <ui:Button name="SponsorButton" text="Sponsor Us" />
+            <ui:Button name="DiscordButton" text="Discord" />
         </ui:Box>
         <ui:VisualElement name="Spacer" />
         <ui:Box name="RightColumnBox">
