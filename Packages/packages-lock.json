@@ -82,13 +82,6 @@
         "com.unity.modules.imgui": "1.0.0"
       }
     },
-    "com.unity.ui.builder": {
-      "version": "1.0.0-preview.11",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://packages.unity.com"
-    },
     "nuget.mono-cecil": {
       "version": "0.1.6-preview",
       "depth": 0,
