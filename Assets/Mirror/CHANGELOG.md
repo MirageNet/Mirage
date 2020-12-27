@@ -1,3 +1,18 @@
+## [60.1.1](https://github.com/MirrorNG/MirrorNG/compare/v60.1.0...v60.1.1) (2020-12-27)
+
+
+### Bug Fixes
+
+* runtime version ([10e7d6e](https://github.com/MirrorNG/MirrorNG/commit/10e7d6e4d87b923962f9f8bed713db28a21f0354))
+* runtime version ([51b925f](https://github.com/MirrorNG/MirrorNG/commit/51b925f924d6ed0877c2a5f72ebf753f284b4ca2))
+
+# [60.1.0](https://github.com/MirrorNG/MirrorNG/compare/v60.0.1...v60.1.0) (2020-12-27)
+
+
+### Features
+
+* Provide mirrorng version at runtime ([#511](https://github.com/MirrorNG/MirrorNG/issues/511)) ([b2df972](https://github.com/MirrorNG/MirrorNG/commit/b2df97248a845a412f27004b43bc75f99a58ae1e))
+
 ## [60.0.1](https://github.com/MirrorNG/MirrorNG/compare/v60.0.0...v60.0.1) (2020-12-19)
 
 
