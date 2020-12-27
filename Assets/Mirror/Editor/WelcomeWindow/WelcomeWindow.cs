@@ -36,29 +36,6 @@ namespace Mirror
         //window size of the welcome screen
         private static Vector2 windowSize = new Vector2(500, 600);
 
-        //returns the path to the Mirror folder (ex. Assets/Mirror)
-        private static string MirrorPath
-        {
-            get
-            {
-                //get an array of results based on the search
-                string[] results = AssetDatabase.FindAssets("", new[] { "Assets" });
-
-                //loop through every result
-                foreach (string guid in results)
-                {
-                    string path = AssetDatabase.GUIDToAssetPath(guid);
-                    //if the path contains Mirror/Version.txt, then we have found the Mirror folder
-                    if (path.Contains("Mirror/package.json"))
-                    {
-                        return path.Remove(path.IndexOf("/package.json"));
-                    }
-                }
-                //return nothing if path wasn't found
-                return "";
-            }
-        }
-
         //get the start up key
         private static string firstStartUpKey = string.Empty;
 
@@ -121,8 +98,8 @@ namespace Mirror
             //Load the UI
             //Each editor window contains a root VisualElement object
             VisualElement root = rootVisualElement;
-            VisualTreeAsset uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(MirrorPath + "/Editor/WelcomeWindow/WelcomeWindow.uxml");
-            StyleSheet uss = AssetDatabase.LoadAssetAtPath<StyleSheet>(MirrorPath + "/Editor/WelcomeWindow/WelcomeWindow.uss");
+            VisualTreeAsset uxml = Resources.Load<VisualTreeAsset>("WelcomeWindow");
+            StyleSheet uss = Resources.Load<StyleSheet>("WelcomeWindow");
 
             //Load the descriptions
 
