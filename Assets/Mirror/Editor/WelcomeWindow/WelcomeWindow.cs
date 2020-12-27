@@ -67,20 +67,7 @@ namespace Mirror
         //called only once
         private static string GetVersion()
         {
-            //if the file doesnt exist, return unknown mirror version
-            if (!File.Exists(MirrorPath + "/package.json"))
-            {
-                return "MirrorUnknown";
-            }
-
-            //read the Version.txt file
-            foreach (string line in File.ReadAllLines(MirrorPath + "/package.json"))
-            {
-                if (line.Contains("version"))
-                    return line.Substring(7).Replace("\"", "").Replace(",", "");
-            }
-
-            return "MirrorUnknown";
+            return typeof(NetworkIdentity).Assembly.GetName().Version.ToString();
         }
 
         #endregion
@@ -144,7 +131,7 @@ namespace Mirror
 
             //set the version text
             Label versionText = root.Q<Label>("VersionText");
-            versionText.text = "v" + GetVersion().Substring(6);
+            versionText.text = "v" + GetVersion();
 
             #region Page buttons
 
