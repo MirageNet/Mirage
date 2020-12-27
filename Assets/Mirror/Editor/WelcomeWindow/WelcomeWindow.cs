@@ -1,7 +1,6 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-using System.IO;
 
 /**
  * Docs used:
@@ -98,8 +97,8 @@ namespace Mirror
             //Load the UI
             //Each editor window contains a root VisualElement object
             VisualElement root = rootVisualElement;
-            VisualTreeAsset uxml = Resources.Load<VisualTreeAsset>("WelcomeWindow");
-            StyleSheet uss = Resources.Load<StyleSheet>("WelcomeWindow");
+            VisualTreeAsset uxml = Resources.Load<VisualTreeAsset>("WelcomeWindow.uxml");
+            StyleSheet uss = Resources.Load<StyleSheet>("WelcomeWindow.uss");
 
             //Load the descriptions
 
