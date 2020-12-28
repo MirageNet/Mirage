@@ -31,6 +31,26 @@ namespace Mirror.Tests
             Assert.That(clientComponent.target, Is.SameAs(clientIdentity));
         });
 
+        [Test]
+        public void UpdateAfterSpawn()
+        {
+            // this situation can happen when the client does nto see an object
+            // but the object is assigned in a syncvar.
+            // this can easily happen during spawn if spawning in an unexpected order
+            // or if there is AOI in play.
+            // in this case we would have a valid net id, but we would not
+            // find the object at spawn time
+
+            var networkIdentitySyncvar = new NetworkIdentitySyncvar
+            {
+                client = client,
+                netId = serverIdentity.NetId,
+                identity = null,
+            };
+
+            Assert.That(networkIdentitySyncvar.Value, Is.SameAs(clientIdentity));
+        }
+
         [UnityTest]
         public IEnumerator SpawnWithTarget() => UniTask.ToCoroutine(async () =>
         {
