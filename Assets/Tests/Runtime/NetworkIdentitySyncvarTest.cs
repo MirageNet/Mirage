@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirror.Tests
@@ -15,8 +13,6 @@ namespace Mirror.Tests
 
     public class NetworkIdentitySyncvarTest : ClientServerSetup<SampleBehaviorWithNI>
     {
-        NetworkIdentity prefab;
-
         [Test]
         public void IsNullByDefault()
         {
@@ -39,7 +35,7 @@ namespace Mirror.Tests
         public IEnumerator SpawnWithTarget() => UniTask.ToCoroutine(async () =>
         {
             // create an object, set the target and spawn it
-            var newObject = UnityEngine.Object.Instantiate(playerPrefab);
+            UnityEngine.GameObject newObject = UnityEngine.Object.Instantiate(playerPrefab);
             SampleBehaviorWithNI newBehavior = newObject.GetComponent<SampleBehaviorWithNI>();
             newBehavior.target = serverIdentity;
             serverObjectManager.Spawn(newObject);

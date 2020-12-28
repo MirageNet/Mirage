@@ -509,18 +509,6 @@ namespace Mirror.Weaver
             worker.Append(worker.Create(OpCodes.Ret));
         }
 
-
-        /// <summary>
-        /// Is the field a NetworkIdentity or GameObject
-        /// </summary>
-        /// <param name="syncVar"></param>
-        /// <returns></returns>
-        static bool IsNetworkIdentityField(FieldDefinition syncVar)
-        {
-            return syncVar.FieldType.Is<UnityEngine.GameObject>() ||
-                   syncVar.FieldType.Is<NetworkIdentity>();
-        }
-
         void GenerateDeSerialization(TypeDefinition netBehaviourSubclass)
         {
             Weaver.DLog(netBehaviourSubclass, "  GenerateDeSerialization");
