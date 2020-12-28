@@ -23,7 +23,7 @@ namespace Mirror.Weaver
             => string.Format("void {0}({1} oldValue, {1} newValue)", hookName, ValueType);
 
         // Get hook method if any
-        static MethodDefinition GetHookMethod(FieldDefinition syncVar)
+        static MethodDefinition GetHookMethod(FieldDefinition syncVar, TypeReference originalType)
         {
             CustomAttribute syncVarAttr = syncVar.GetCustomAttribute<SyncVarAttribute>();
 
@@ -35,10 +35,10 @@ namespace Mirror.Weaver
             if (hookFunctionName == null)
                 return null;
 
-            return FindHookMethod(syncVar, hookFunctionName);
+            return FindHookMethod(syncVar, hookFunctionName, originalType);
         }
 
-        static MethodDefinition FindHookMethod(FieldDefinition syncVar, string hookFunctionName)
+        static MethodDefinition FindHookMethod(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
         {
             List<MethodDefinition> methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
 
@@ -47,7 +47,7 @@ namespace Mirror.Weaver
             if (methodsWith2Param.Count == 0)
             {
                 Weaver.Error($"Could not find hook for '{syncVar.Name}', hook name '{hookFunctionName}'. " +
-                    $"Method signature should be {HookParameterMessage(hookFunctionName, syncVar.FieldType)}",
+                    $"Method signature should be {HookParameterMessage(hookFunctionName, originalType)}",
                     syncVar);
 
                 return null;
@@ -55,24 +55,24 @@ namespace Mirror.Weaver
 
             foreach (MethodDefinition method in methodsWith2Param)
             {
-                if (MatchesParameters(syncVar, method))
+                if (MatchesParameters(method, originalType))
                 {
                     return method;
                 }
             }
 
             Weaver.Error($"Wrong type for Parameter in hook for '{syncVar.Name}', hook name '{hookFunctionName}'. " +
-                     $"Method signature should be {HookParameterMessage(hookFunctionName, syncVar.FieldType)}",
+                     $"Method signature should be {HookParameterMessage(hookFunctionName, originalType)}",
                    syncVar);
 
             return null;
         }
 
-        static bool MatchesParameters(FieldDefinition syncVar, MethodDefinition method)
+        static bool MatchesParameters(MethodDefinition method, TypeReference originalType)
         {
             // matches void onValueChange(T oldValue, T newValue)
-            return method.Parameters[0].ParameterType.FullName == syncVar.FieldType.FullName &&
-                   method.Parameters[1].ParameterType.FullName == syncVar.FieldType.FullName;
+            return method.Parameters[0].ParameterType.FullName == originalType.FullName &&
+                   method.Parameters[1].ParameterType.FullName == originalType.FullName;
         }
 
         static MethodDefinition GenerateSyncVarGetter(FieldDefinition fd, string originalName, TypeReference originalType)
@@ -137,7 +137,7 @@ namespace Mirror.Weaver
             worker.Append(worker.Create(OpCodes.Ldc_I8, dirtyBit));
             worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.SetDirtyBit(default)));
 
-            MethodDefinition hookMethod = GetHookMethod(fd);
+            MethodDefinition hookMethod = GetHookMethod(fd, originalType);
 
             if (hookMethod != null)
             {
@@ -598,7 +598,6 @@ namespace Mirror.Weaver
         /// <param name="hookResult"></param>
         void DeserializeField(FieldDefinition syncVar, ILProcessor serWorker, MethodDefinition deserialize)
         {
-            MethodDefinition hookMethod = GetHookMethod(syncVar);
 
             TypeReference originalType = syncVar.FieldType;
 
@@ -606,6 +605,8 @@ namespace Mirror.Weaver
             {
                 originalType = syncVar.Module.ImportReference<NetworkIdentity>();
             }
+
+            MethodDefinition hookMethod = GetHookMethod(syncVar, originalType);
 
             /*
              Generates code like:
