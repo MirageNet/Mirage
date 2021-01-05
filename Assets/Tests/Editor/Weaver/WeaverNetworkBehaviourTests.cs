@@ -17,6 +17,12 @@ namespace Mirror.Weaver.Tests
         }
 
         [Test]
+        public void NetworkBehaviourGeneric()
+        {
+            IsSuccess();
+        }
+
+        [Test]
         public void NetworkBehaviourCmdGenericParam()
         {
             HasError("CmdCantHaveGeneric cannot have generic parameters",
