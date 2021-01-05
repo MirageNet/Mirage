@@ -23,6 +23,19 @@ namespace Mirror.Weaver.Tests
         }
 
         [Test]
+        public void NetworkBehaviourGenericInherit()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void NetworkBehaviourCmdGenericArgument()
+        {
+            HasError("CmdCantHaveGeneric cannot have generic parameters",
+                "System.Void WeaverNetworkBehaviourTests.NetworkBehaviourCmdGenericArgument.NetworkBehaviourCmdGenericArgument`1::CmdCantHaveGeneric(T)");
+        }
+
+        [Test]
         public void NetworkBehaviourCmdGenericParam()
         {
             HasError("CmdCantHaveGeneric cannot have generic parameters",
@@ -41,6 +54,13 @@ namespace Mirror.Weaver.Tests
         {
             HasError("Use UniTask<System.Int32> to return values from [ServerRpc]",
                 "System.Int32 WeaverNetworkBehaviourTests.NetworkBehaviourCmdVoidReturn.NetworkBehaviourCmdVoidReturn::CmdCantHaveNonVoidReturn()");
+        }
+
+        [Test]
+        public void NetworkBehaviourClientRpcGenericArgument()
+        {
+            HasError("RpcCantHaveGeneric cannot have generic parameters",
+                "System.Void WeaverNetworkBehaviourTests.NetworkBehaviourClientRpcGenericArgument.NetworkBehaviourClientRpcGenericArgument`1::RpcCantHaveGeneric(T)");
         }
 
         [Test]
