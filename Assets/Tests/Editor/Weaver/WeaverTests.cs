@@ -72,6 +72,7 @@ namespace Mirror.Weaver.Tests
             }
         }
 
+        /*
         [OneTimeSetUp]
         public void FixtureSetup()
         {
@@ -87,6 +88,7 @@ namespace Mirror.Weaver.Tests
             CompilationFinishedHook.OnWeaverWarning -= HandleWeaverWarning;
             CompilationFinishedHook.UnityLogEnabled = true;
         }
+        */
 
         [TearDown]
         public void TestCleanup()

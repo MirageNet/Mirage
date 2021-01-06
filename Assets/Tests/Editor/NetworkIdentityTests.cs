@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using Mirror.RemoteCalls;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 using UnityEngine.Events;
 
@@ -29,7 +26,6 @@ namespace Mirror.Tests
                 valuePassed = visible;
                 throw new Exception("some exception");
             }
-
         }
 
         class SetHostVisibilityNetworkBehaviour : NetworkVisibility

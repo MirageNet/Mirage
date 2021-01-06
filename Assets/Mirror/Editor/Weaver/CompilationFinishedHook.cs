@@ -39,7 +39,7 @@ namespace Mirror.Weaver
             if (OnWeaverError != null) OnWeaverError.Invoke(msg);
         }
 
-        [InitializeOnLoadMethod]
+        /*
         public static void OnInitializeOnLoad()
         {
             CompilationPipeline.assemblyCompilationFinished += OnCompilationFinished;
@@ -73,7 +73,7 @@ namespace Mirror.Weaver
         {
             return messages.Any(msg => msg.type == CompilerMessageType.Error);
         }
-
+        
         static void OnCompilationFinished(string assemblyPath, CompilerMessage[] messages)
         {
             // Do nothing if there were compile errors on the target
@@ -121,6 +121,7 @@ namespace Mirror.Weaver
                 if (UnityLogEnabled) Debug.LogError("Weaving failed for: " + assemblyPath);
             }
         }
+        */
 
         private static UnityAssembly CreateUnityAssembly(string assemblyPath)
         {

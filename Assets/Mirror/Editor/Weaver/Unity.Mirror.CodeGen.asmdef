@@ -1,5 +1,5 @@
 {
-    "name": "Mirror.Weaver",
+    "name": "Unity.Mirror.CodeGen",
     "references": [
         "Mirror",
         "UniTask"
@@ -16,7 +16,7 @@
         "Mono.Cecil.Mdb.dll",
         "Mono.Cecil.Pdb.dll"
     ],
-    "autoReferenced": true,
+    "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false

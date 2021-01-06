@@ -8,9 +8,9 @@ using UnityEngine;
 
 namespace Mirror.Weaver
 {
-    public static class Readers
+    public class Readers
     {
-        static Dictionary<string, MethodReference> readFuncs;
+        Dictionary<string, MethodReference> readFuncs;
 
         public static int Count => readFuncs.Count;
 

@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Unity.CompilationPipeline.Common.Diagnostics;
+using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEditor.Compilation;
 
 namespace Mirror.Weaver
@@ -34,7 +38,8 @@ namespace Mirror.Weaver
     {
         public static WeaverLists WeaveLists { get; private set; }
         public static AssemblyDefinition CurrentAssembly { get; private set; }
-        public static bool WeavingFailed { get; private set; }
+
+        public readonly static List<DiagnosticMessage> Diagnostics = new List<DiagnosticMessage>();
 
         public static void DLog(TypeDefinition td, string fmt, params object[] args)
         {
@@ -45,14 +50,31 @@ namespace Mirror.Weaver
         // and mark process as failed
         public static void Error(string message)
         {
-            Log.Error(message);
-            WeavingFailed = true;
+            AddError(null, message);
         }
 
+        public static void Error(string message, MethodDefinition methodDefinition)
+        {
+            AddError(methodDefinition.DebugInformation.SequencePoints.FirstOrDefault(), message);
+        }
+
+        // display weaver error
+        // and mark process as failed
         public static void Error(string message, MemberReference mr)
         {
-            Log.Error($"{message} (at {mr})");
-            WeavingFailed = true;
+            AddError(null, $"{message} (at {mr})");
+        }
+
+        public static void AddError(SequencePoint sequencePoint, string message)
+        {
+            Diagnostics.Add(new DiagnosticMessage
+            {
+                DiagnosticType = DiagnosticType.Error,
+                File = sequencePoint?.Document.Url.Replace($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}", ""),
+                Line = sequencePoint?.StartLine ?? 0,
+                Column = sequencePoint?.StartColumn ?? 0,
+                MessageData = message
+            });
         }
 
         public static void Warning(string message, MemberReference mr)
@@ -120,7 +142,9 @@ namespace Mirror.Weaver
                 var watch = System.Diagnostics.Stopwatch.StartNew();
 
                 watch.Start();
-                foreach (TypeDefinition td in moduleDefinition.Types)
+                var types = new List<TypeDefinition>(moduleDefinition.Types);
+
+                foreach (TypeDefinition td in types)
                 {
                     if (td.IsClass && td.BaseType.CanBeResolved())
                     {
@@ -143,39 +167,51 @@ namespace Mirror.Weaver
             }
         }
 
-        static bool Weave(Assembly unityAssembly)
+        public static AssemblyDefinition AssemblyDefinitionFor(ICompiledAssembly compiledAssembly)
         {
-            using (var asmResolver = new DefaultAssemblyResolver())
-            using (CurrentAssembly = AssemblyDefinition.ReadAssembly(unityAssembly.outputPath, new ReaderParameters { ReadWrite = true, ReadSymbols = true, AssemblyResolver = asmResolver }))
+            var assemblyResolver = new PostProcessorAssemblyResolver(compiledAssembly);
+            var readerParameters = new ReaderParameters
             {
-                AddPaths(asmResolver, unityAssembly);
-                ModuleDefinition module = CurrentAssembly.MainModule;
+                SymbolStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PdbData),
+                SymbolReaderProvider = new PortablePdbReaderProvider(),
+                AssemblyResolver = assemblyResolver,
+                ReflectionImporterProvider = new PostProcessorReflectionImporterProvider(),
+                ReadingMode = ReadingMode.Immediate
+            };
 
-                var rwstopwatch = System.Diagnostics.Stopwatch.StartNew();
-                bool modified = ReaderWriterProcessor.Process(module, unityAssembly);
-                rwstopwatch.Stop();
-                Console.WriteLine($"Find all reader and writers took {rwstopwatch.ElapsedMilliseconds} milliseconds");
+            var assemblyDefinition = AssemblyDefinition.ReadAssembly(new MemoryStream(compiledAssembly.InMemoryAssembly.PeData), readerParameters);
 
-                Console.WriteLine($"Script Module: {module.Name}");
+            //apparently, it will happen that when we ask to resolve a type that lives inside MLAPI.Runtime, and we
+            //are also postprocessing MLAPI.Runtime, type resolving will fail, because we do not actually try to resolve
+            //inside the assembly we are processing. Let's make sure we do that, so that we can use postprocessor features inside
+            //MLAPI.Runtime itself as well.
+            assemblyResolver.AddAssemblyDefinitionBeingOperatedOn(assemblyDefinition);
 
-                modified |= WeaveModule(module);
+            return assemblyDefinition;
+        }
 
-                if (WeavingFailed)
-                {
-                    return false;
-                }
+        static AssemblyDefinition Weave(ICompiledAssembly unityAssembly)
+        {
+            CurrentAssembly = AssemblyDefinitionFor(unityAssembly);
+            
+            ModuleDefinition module = CurrentAssembly.MainModule;
 
-                if (modified)
-                {
-                    ReaderWriterProcessor.InitializeReaderAndWriters(module);
+            var rwstopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-                    // write to outputDir if specified, otherwise perform in-place write
-                    var writeParams = new WriterParameters { WriteSymbols = true };
-                    CurrentAssembly.Write(writeParams);
-                }
-            }
+            var processor = new ReaderWriterProcessor();
 
-            return true;
+            bool modified = processor.Process(module);
+            rwstopwatch.Stop();
+            Console.WriteLine($"Find all reader and writers took {rwstopwatch.ElapsedMilliseconds} milliseconds");
+
+            Console.WriteLine($"Script Module: {module.Name}");
+
+            modified |= WeaveModule(module);
+
+            if (!modified)
+                return null;
+
+            return CurrentAssembly;
         }
 
         private static void AddPaths(DefaultAssemblyResolver asmResolver, Assembly assembly)
@@ -186,10 +222,10 @@ namespace Mirror.Weaver
             }
         }
 
-        public static bool WeaveAssembly(Assembly assembly)
+        public static AssemblyDefinition WeaveAssembly(ICompiledAssembly assembly)
         {
-            WeavingFailed = false;
             WeaveLists = new WeaverLists();
+            Diagnostics.Clear();
 
             try
             {
@@ -197,8 +233,8 @@ namespace Mirror.Weaver
             }
             catch (Exception e)
             {
-                Log.Error("Exception :" + e);
-                return false;
+                Error("Exception :" + e);
+                return null;
             }
         }
     }
