@@ -8,6 +8,19 @@ namespace Mirror.Weaver
     {
         readonly List<FieldDefinition> syncObjects = new List<FieldDefinition>();
 
+        private readonly ModuleDefinition module;
+        private readonly Readers readers;
+        private readonly Writers writers;
+        private readonly IWeaverLogger logger;
+
+        public SyncObjectProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger)
+        {
+            this.module = module;
+            this.readers = readers;
+            this.writers = writers;
+            this.logger = logger;
+        }
+
         /// <summary>
         /// Finds SyncObjects fields in a type
         /// <para>Type should be a NetworkBehaviour</para>
@@ -27,11 +40,11 @@ namespace Mirror.Weaver
                 {
                     if (fd.IsStatic)
                     {
-                        Weaver.Error($"{fd.Name} cannot be static", fd);
+                        logger.Error($"{fd.Name} cannot be static", fd);
                         continue;
                     }
 
-                    GenerateReadersAndWriters(td.Module, fd.FieldType);
+                    GenerateReadersAndWriters(fd.FieldType);
 
                     syncObjects.Add(fd);
                 }
@@ -45,7 +58,7 @@ namespace Mirror.Weaver
         /// </summary>
         /// <param name="td">The synclist class</param>
         /// <param name="mirrorBaseType">the base SyncObject td inherits from</param>
-        static void GenerateReadersAndWriters(ModuleDefinition module, TypeReference tr)
+        void GenerateReadersAndWriters(TypeReference tr)
         {
             if (tr is GenericInstanceType genericInstance)
             {
@@ -53,15 +66,15 @@ namespace Mirror.Weaver
                 {
                     if (!argument.IsGenericParameter)
                     {
-                        module.GetReadFunc(argument);
-                        module.GetWriteFunc(argument);
+                        readers.GetReadFunc(argument);
+                        writers.GetWriteFunc(argument);
                     }
                 }
             }
 
             if (tr != null)
             {
-                GenerateReadersAndWriters(module, tr.Resolve().BaseType);
+                GenerateReadersAndWriters(tr.Resolve().BaseType);
             }
         }
 
@@ -74,7 +87,7 @@ namespace Mirror.Weaver
 
             if (ctor == null)
             {
-                Weaver.Error($"{netBehaviourSubclass.Name} has invalid constructor", netBehaviourSubclass);
+                logger.Error($"{netBehaviourSubclass.Name} has invalid constructor", netBehaviourSubclass);
                 return;
             }
 
@@ -85,7 +98,7 @@ namespace Mirror.Weaver
             }
             else
             {
-                Weaver.Error($"{netBehaviourSubclass.Name} has invalid constructor", ctor);
+                logger.Error($"{netBehaviourSubclass.Name} has invalid constructor", ctor);
                 return;
             }
 
