@@ -14,7 +14,7 @@ namespace Mirror.Weaver
         private Writers writers;
         private PropertySiteProcessor propertySiteProcessor;
 
-        public AssemblyDefinition CurrentAssembly { get; private set; }
+        private AssemblyDefinition CurrentAssembly { get; set; }
 
         public static void DLog(TypeDefinition td, string fmt, params object[] args)
         {
