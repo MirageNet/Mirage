@@ -4,9 +4,47 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
+using Unity.CompilationPipeline.Common.ILPostProcessing;
 
 namespace Mirror.Weaver.Tests
 {
+    public class CompiledAssembly : ICompiledAssembly
+    {
+        private readonly string assemblyPath;
+        private InMemoryAssembly inMemoryAssembly;
+
+        public CompiledAssembly(string assemblyPath)
+        {
+            this.assemblyPath = assemblyPath;
+        }
+
+        public InMemoryAssembly InMemoryAssembly
+        {
+            get
+            {
+
+                if (inMemoryAssembly == null)
+                {
+                    byte[] peData = File.ReadAllBytes(assemblyPath);
+
+                    string pdbFileName = Path.GetFileNameWithoutExtension(assemblyPath) + ".pdb";
+
+                    byte[] pdbData = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(assemblyPath), pdbFileName));
+
+                    inMemoryAssembly = new InMemoryAssembly(peData, pdbData);
+                }
+                return inMemoryAssembly;
+            }
+        }
+
+        public string Name => Path.GetFileNameWithoutExtension(assemblyPath);
+
+        public string[] References { get; set; }
+
+        public string[] Defines { get; set; }
+    }
+
+
     public class WeaverAssembler : MonoBehaviour
     {
         static string _outputDirectory;
@@ -132,7 +170,9 @@ namespace Mirror.Weaver.Tests
             DeleteOutputOnClear = false;
         }
 
-        public static void Build()
+       
+
+        public static void Build(IWeaverLogger logger)
         {
             var assemblyBuilder = new AssemblyBuilder(Path.Combine(OutputDirectory, OutputFile), SourceFiles.ToArray())
             {
@@ -143,7 +183,7 @@ namespace Mirror.Weaver.Tests
             {
                 assemblyBuilder.compilerOptions.AllowUnsafeCode = true;
             }
-
+            
             assemblyBuilder.buildFinished += delegate (string assemblyPath, CompilerMessage[] compilerMessages)
             {
                 CompilerMessages.AddRange(compilerMessages);
@@ -155,6 +195,17 @@ namespace Mirror.Weaver.Tests
                         CompilerErrors = true;
                     }
                 }
+
+                // assembly builder does not call ILPostProcessor (WTF Unity?),  so we must invoke it ourselves.
+                var compiledAssembly = new CompiledAssembly(assemblyPath)
+                {
+                    Defines = assemblyBuilder.defaultDefines,
+                    References = assemblyBuilder.defaultReferences
+                };
+
+                var weaver = new Weaver(logger);
+
+                weaver.Weave(compiledAssembly);
             };
 
             // Start build of assembly

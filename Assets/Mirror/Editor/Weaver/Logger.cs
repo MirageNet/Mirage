@@ -5,7 +5,6 @@ using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.Diagnostics;
-using UnityEngine;
 
 namespace Mirror.Weaver
 {
@@ -15,7 +14,7 @@ namespace Mirror.Weaver
 
         public void Error(string msg)
         {
-            Error(msg, (SequencePoint)null);
+            AddMessage(msg, null, DiagnosticType.Error);
         }
 
         public void Error(string message, MemberReference mr)
@@ -25,7 +24,7 @@ namespace Mirror.Weaver
 
         public void Error(string message, MethodDefinition md)
         {
-            Error(message, md.DebugInformation.SequencePoints.FirstOrDefault());
+            AddMessage($"{message} (at {md})", md.DebugInformation.SequencePoints.FirstOrDefault(), DiagnosticType.Error);
         }
 
         public void Warning(string message, MemberReference mr)
@@ -33,16 +32,16 @@ namespace Mirror.Weaver
             Warning($"{message} (at {mr})");
         }
 
-        public void Warning(string msg)
+        public void Warning(string message)
         {
-            Debug.LogWarning(msg);
+            AddMessage($"{message}", null, DiagnosticType.Warning);
         }
 
-        public void Error(string message, SequencePoint sequencePoint)
+        private void AddMessage(string message, SequencePoint sequencePoint, DiagnosticType diagnosticType)
         {
             Diagnostics.Add(new DiagnosticMessage
             {
-                DiagnosticType = DiagnosticType.Error,
+                DiagnosticType = diagnosticType,
                 File = sequencePoint?.Document.Url.Replace($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}", ""),
                 Line = sequencePoint?.StartLine ?? 0,
                 Column = sequencePoint?.StartColumn ?? 0,

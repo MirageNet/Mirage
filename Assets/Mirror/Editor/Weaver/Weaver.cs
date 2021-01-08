@@ -8,7 +8,7 @@ using Unity.CompilationPipeline.Common.ILPostProcessing;
 namespace Mirror.Weaver
 {
 
-    internal class Weaver
+    public class Weaver
     {
         private readonly IWeaverLogger logger;
         private Readers readers;

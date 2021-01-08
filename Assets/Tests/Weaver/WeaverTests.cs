@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using NUnit.Framework;
+using Unity.CompilationPipeline.Common.Diagnostics;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -26,12 +27,16 @@ namespace Mirror.Weaver.Tests
 
         protected void HasError(string messsage, string atType)
         {
-            Assert.That(weaverLog.Diagnostics, Contains.Item($"{messsage} (at {atType})"));
+            Assert.That(weaverLog.Diagnostics
+                .Where(d=> d.DiagnosticType == DiagnosticType.Error)
+                .Select(d=> d.MessageData), Contains.Item($"{messsage} (at {atType})"));
         }
 
         protected void HasWarning(string messsage, string atType)
         {
-            Assert.That(weaverLog.Diagnostics, Contains.Item($"{messsage} (at {atType})"));
+            Assert.That(weaverLog.Diagnostics
+                .Where(d => d.DiagnosticType == DiagnosticType.Warning)
+                .Select(d => d.MessageData), Contains.Item($"{messsage} (at {atType})"));
         }
     }
 
@@ -45,16 +50,18 @@ namespace Mirror.Weaver.Tests
 
         protected void BuildAndWeaveTestAssembly(string className, string testName)
         {
+            weaverLog.Diagnostics.Clear();
+
             string testSourceDirectory = className + "~";
             WeaverAssembler.OutputFile = Path.Combine(testSourceDirectory, testName + ".dll");
             WeaverAssembler.AddSourceFiles(new string[] { Path.Combine(testSourceDirectory, testName + ".cs") });
-            WeaverAssembler.Build();
+            WeaverAssembler.Build(weaverLog);
 
             Assert.That(WeaverAssembler.CompilerErrors, Is.False);
-            foreach (var error in weaverLog.Diagnostics)
+            foreach (DiagnosticMessage error in weaverLog.Diagnostics)
             {
                 // ensure all errors have a location
-                Assert.That(error, Does.Match(@"\(at .*\)$"));
+                Assert.That(error.MessageData, Does.Match(@"\(at .*\)$"));
             }
         }
 
