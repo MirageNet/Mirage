@@ -63,13 +63,11 @@ namespace Mirror.Weaver.Tests
         public void FixtureSetup()
         {
 
-            CompilationFinishedHook.logger = weaverLog;
         }
 
         [OneTimeTearDown]
         public void FixtureCleanup()
         {
-            CompilationFinishedHook.logger = null;
         }
         
 
