@@ -24,19 +24,14 @@ namespace Mirror.Weaver.Tests
             Assert.That(weaverLog.Diagnostics, Is.Empty);
         }
 
-        protected void HasNoErrors()
-        {
-            Assert.That(weaverLog.errors, Is.Empty);
-        }
-
         protected void HasError(string messsage, string atType)
         {
-            Assert.That(weaverLog.errors, Contains.Item($"{messsage} (at {atType})"));
+            Assert.That(weaverLog.Diagnostics, Contains.Item($"{messsage} (at {atType})"));
         }
 
         protected void HasWarning(string messsage, string atType)
         {
-            Assert.That(weaverLog.warnings, Contains.Item($"{messsage} (at {atType})"));
+            Assert.That(weaverLog.Diagnostics, Contains.Item($"{messsage} (at {atType})"));
         }
     }
 
@@ -63,11 +58,11 @@ namespace Mirror.Weaver.Tests
             }
         }
 
-        /*
+        
         [OneTimeSetUp]
         public void FixtureSetup()
         {
-            weaverLog = new TestLogger();
+
             CompilationFinishedHook.logger = weaverLog;
         }
 
@@ -76,15 +71,13 @@ namespace Mirror.Weaver.Tests
         {
             CompilationFinishedHook.logger = null;
         }
-        */
+        
 
         [TearDown]
         public void TestCleanup()
         {
             WeaverAssembler.DeleteOutputOnClear = true;
             WeaverAssembler.Clear();
-            weaverLog.errors.Clear();
-            weaverLog.warnings.Clear();
         }
     }
 }

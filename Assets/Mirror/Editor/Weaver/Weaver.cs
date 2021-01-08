@@ -159,7 +159,7 @@ namespace Mirror.Weaver
                 modified |= WeaveModule(module);
 
                 if (!modified)
-                    return null;
+                    return CurrentAssembly;
 
                 rwProcessor.InitializeReaderAndWriters();
 

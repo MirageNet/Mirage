@@ -13,7 +13,7 @@ namespace Mirror.Weaver.Tests
         [Test]
         public void SyncVarArraySegment()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
 
         [Test]

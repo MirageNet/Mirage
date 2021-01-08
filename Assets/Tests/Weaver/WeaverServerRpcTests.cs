@@ -13,7 +13,7 @@ namespace Mirror.Weaver.Tests
         [Test]
         public void ServerRpcCantBeStatic()
         {
-            Assert.That(weaverLog.errors, Contains.Item("CmdCantBeStatic must not be static (at System.Void WeaverServerRpcTests.ServerRpcCantBeStatic.ServerRpcCantBeStatic::CmdCantBeStatic())"));
+            HasError("CmdCantBeStatic must not be static","System.Void WeaverServerRpcTests.ServerRpcCantBeStatic.ServerRpcCantBeStatic::CmdCantBeStatic()");
         }
 
         [Test]
@@ -73,13 +73,13 @@ namespace Mirror.Weaver.Tests
         [Test]
         public void AbstractServerRpc()
         {
-            Assert.That(weaverLog.errors, Contains.Item("Abstract Rpcs are currently not supported, use virtual method instead (at System.Void WeaverServerRpcTests.AbstractServerRpc.AbstractServerRpc::CmdDoSomething())"));
+            HasError("Abstract Rpcs are currently not supported, use virtual method instead","System.Void WeaverServerRpcTests.AbstractServerRpc.AbstractServerRpc::CmdDoSomething()");
         }
 
         [Test]
         public void OverrideAbstractServerRpc()
         {
-            Assert.That(weaverLog.errors, Contains.Item("Abstract Rpcs are currently not supported, use virtual method instead (at System.Void WeaverServerRpcTests.OverrideAbstractServerRpc.BaseBehaviour::CmdDoSomething())"));
+            HasError("Abstract Rpcs are currently not supported, use virtual method instead","System.Void WeaverServerRpcTests.OverrideAbstractServerRpc.BaseBehaviour::CmdDoSomething()");
         }
 
         [Test]

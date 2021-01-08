@@ -43,7 +43,6 @@ namespace Mirror.Weaver
             // darn global state causing bugs
             messages.Clear();
 
-            Console.WriteLine($"Thread id is {Thread.CurrentThread.ManagedThreadId}");
 
             LoadBuiltInReadersAndWriters();
 
@@ -64,11 +63,12 @@ namespace Mirror.Weaver
             IEnumerable<Type> types = typeof(NetworkReaderExtensions).Module.GetTypes().Where(t => t.IsSealed && t.IsAbstract);
             foreach (Type type in types)
             {
-                var methods = type.GetMethods(System.Reflection.BindingFlags.Static | BindingFlags.Public);
+                var methods = type.GetMethods(System.Reflection.BindingFlags.Static | BindingFlags.Public)
+                    .Where(IsExtension)
+                    .Where(m => !m.IsGenericMethod);
 
                 foreach (MethodInfo method in methods)
                 {
-                    Console.WriteLine($"Found public method {method.Name} for module {module.Name}");
                     RegisterReader(method);
                     RegisterWriter(method);
                 }
@@ -77,45 +77,28 @@ namespace Mirror.Weaver
 
         private void RegisterReader(System.Reflection.MethodInfo method)
         {
-            if (!IsExtension(method))
-                return;
-
             if (method.GetParameters().Length != 1)
                 return;
 
-            if (method.GetParameters()[0].ParameterType.Name == typeof(NetworkReader).Name)
+            if (method.GetParameters()[0].ParameterType.FullName != typeof(NetworkReader).FullName)
                 return;
 
             if (method.ReturnType == typeof(void))
                 return;
-
-            if (method.IsGenericMethod)
-                return;
-
             readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
         }
 
         private void RegisterWriter(System.Reflection.MethodInfo method)
         {
-            if (!IsExtension(method))
-                return;
-
             if (method.GetParameters().Length != 2)
                 return;
 
-            Console.WriteLine($"first parameter is {method.GetParameters()[0].ParameterType}");
-            if (method.GetParameters()[0].ParameterType.Name == typeof(NetworkWriter).Name)
+            if (method.GetParameters()[0].ParameterType.FullName != typeof(NetworkWriter).FullName)
                 return;
-            Console.WriteLine($"return type is {method.ReturnType}");
 
             if (method.ReturnType != typeof(void))
                 return;
-            Console.WriteLine($"is generic {method.IsGenericMethod}");
 
-            if (method.IsGenericMethod)
-                return;
-
-            Console.WriteLine($"Found writer {method.Name} for module {module.Name}");
             Type dataType = method.GetParameters()[1].ParameterType;
             writers.Register(module.ImportReference(dataType), module.ImportReference(method));
         }

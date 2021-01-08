@@ -15,7 +15,7 @@ namespace Mirror.Weaver
 
         public void Error(string msg)
         {
-            Debug.LogError(msg);
+            Error(msg, (SequencePoint)null);
         }
 
         public void Error(string message, MemberReference mr)
@@ -46,8 +46,8 @@ namespace Mirror.Weaver
                 File = sequencePoint?.Document.Url.Replace($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}", ""),
                 Line = sequencePoint?.StartLine ?? 0,
                 Column = sequencePoint?.StartColumn ?? 0,
-                MessageData = $" - {message}"
-            });
+                MessageData = message
+            }) ;
         }
     }
 }
