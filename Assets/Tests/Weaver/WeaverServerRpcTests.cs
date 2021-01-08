@@ -7,7 +7,7 @@ namespace Mirror.Weaver.Tests
         [Test]
         public void ServerRpcValid()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
 
         [Test]
@@ -19,55 +19,55 @@ namespace Mirror.Weaver.Tests
         [Test]
         public void ServerRpcThatIgnoresAuthority()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
 
         [Test]
         public void ServerRpcWithArguments()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
 
         [Test]
         public void ServerRpcThatIgnoresAuthorityWithSenderConnection()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
 
         [Test]
         public void ServerRpcWithSenderConnectionAndOtherArgs()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
 
         [Test]
         public void VirtualServerRpc()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
 
         [Test]
         public void OverrideVirtualServerRpc()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
 
         [Test]
         public void OverrideVirtualCallBaseServerRpc()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
 
         [Test]
         public void OverrideVirtualCallsBaseServerRpcWithMultipleBaseClasses()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
 
         [Test]
         public void OverrideVirtualCallsBaseServerRpcWithOverride()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace Mirror.Weaver.Tests
         [Test]
         public void ServerRpcWithReturn()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
     }
 }

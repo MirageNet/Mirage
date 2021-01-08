@@ -41,20 +41,18 @@ namespace Mirror.Weaver
         public bool Process()
         {
             // darn global state causing bugs
-            Readers.Init();
-            Writers.Init();
             messages.Clear();
 
             Console.WriteLine($"Thread id is {Thread.CurrentThread.ManagedThreadId}");
 
             LoadBuiltInReadersAndWriters();
 
-            int writeCount = Writers.Count;
-            int readCount = Readers.Count;
+            int writeCount = writers.Count;
+            int readCount = readers.Count;
 
             ProcessAssemblyClasses();
 
-            return Writers.Count != writeCount || Readers.Count != readCount;
+            return writers.Count != writeCount || readers.Count != readCount;
         }
 
         private static bool IsExtension(MethodInfo method) => Attribute.IsDefined(method, typeof(System.Runtime.CompilerServices.ExtensionAttribute));
@@ -77,7 +75,7 @@ namespace Mirror.Weaver
             }
         }
 
-        private static void RegisterReader(System.Reflection.MethodInfo method)
+        private void RegisterReader(System.Reflection.MethodInfo method)
         {
             if (!IsExtension(method))
                 return;
@@ -97,7 +95,7 @@ namespace Mirror.Weaver
             readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
         }
 
-        private static void RegisterWriter(System.Reflection.MethodInfo method)
+        private void RegisterWriter(System.Reflection.MethodInfo method)
         {
             if (!IsExtension(method))
                 return;

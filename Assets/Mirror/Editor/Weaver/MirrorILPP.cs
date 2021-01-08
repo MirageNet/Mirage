@@ -1,6 +1,3 @@
-using UnityEngine;
-using System.Collections;
-using Unity.CompilationPipeline.Common.Diagnostics;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using System.Linq;
 using System.IO;
@@ -20,7 +17,10 @@ namespace Mirror.Weaver
             if (!WillProcess(compiledAssembly))
                 return null;
 
-            AssemblyDefinition assemblyDefinition = Weaver.WeaveAssembly(compiledAssembly);
+            var logger = new Logger();
+            var weaver = new Weaver(logger);
+
+            AssemblyDefinition assemblyDefinition = weaver.Weave(compiledAssembly);
 
             // write
             var pe = new MemoryStream();
@@ -35,7 +35,7 @@ namespace Mirror.Weaver
 
             assemblyDefinition?.Write(pe, writerParameters);
 
-            return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), Weaver.Diagnostics);
+            return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), logger.Diagnostics);
         }
 
         public override bool WillProcess(ICompiledAssembly compiledAssembly) =>

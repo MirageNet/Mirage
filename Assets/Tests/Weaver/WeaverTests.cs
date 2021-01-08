@@ -21,8 +21,7 @@ namespace Mirror.Weaver.Tests
 
         protected void IsSuccess()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
-            Assert.That(weaverLog.warnings, Is.Empty);
+            Assert.That(weaverLog.Diagnostics, Is.Empty);
         }
 
         protected void HasNoErrors()
@@ -47,33 +46,7 @@ namespace Mirror.Weaver.Tests
     {
         public static readonly ILogger logger = LogFactory.GetLogger<WeaverTests>(LogType.Exception);
 
-        protected class TestLogger : IWeaverLogger
-        {
-            public List<string> errors = new List<string>();
-            public List<string> warnings = new List<string>();
-
-            public void Error(string msg)
-            {
-                errors.Add(msg);
-            }
-
-            public void Error(string message, MemberReference mr)
-            {
-                Error($"{message} (at {mr})");
-            }
-
-            public void Warning(string msg)
-            {
-                warnings.Add(msg);
-            }
-
-            public void Warning(string message, MemberReference mr)
-            {
-                Warning($"{message} (at {mr})");
-            }
-        }
-
-        protected TestLogger weaverLog = new TestLogger();
+        protected Logger weaverLog = new Logger();
 
         protected void BuildAndWeaveTestAssembly(string className, string testName)
         {
@@ -83,7 +56,7 @@ namespace Mirror.Weaver.Tests
             WeaverAssembler.Build();
 
             Assert.That(WeaverAssembler.CompilerErrors, Is.False);
-            foreach (string error in weaverLog.errors)
+            foreach (var error in weaverLog.Diagnostics)
             {
                 // ensure all errors have a location
                 Assert.That(error, Does.Match(@"\(at .*\)$"));

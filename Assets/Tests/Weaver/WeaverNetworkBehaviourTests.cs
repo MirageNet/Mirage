@@ -139,7 +139,7 @@ namespace Mirror.Weaver.Tests
         [Test]
         public void NetworkBehaviourClientRpcParamNetworkConnection()
         {
-            Assert.That(weaverLog.errors, Is.Empty);
+            IsSuccess();
         }
 
         [Test]

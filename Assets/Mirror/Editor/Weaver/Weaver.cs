@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Unity.CompilationPipeline.Common.Diagnostics;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
-using UnityEditor.Compilation;
 
 namespace Mirror.Weaver
 {
@@ -140,46 +137,38 @@ namespace Mirror.Weaver
             return assemblyDefinition;
         }
 
-        static AssemblyDefinition Weave(ICompiledAssembly unityAssembly)
+        public AssemblyDefinition Weave(ICompiledAssembly compiledAssembly)
         {
-            CurrentAssembly = AssemblyDefinitionFor(unityAssembly);
-            
-            ModuleDefinition module = CurrentAssembly.MainModule;
-             readers = new Readers(module, logger);
-            writers = new Writers(module, logger);
-            var rwstopwatch = System.Diagnostics.Stopwatch.StartNew();
-            propertySiteProcessor = new PropertySiteProcessor();
-            var rwProcessor = new ReaderWriterProcessor(module, readers, writers);
-
-            bool modified = rwProcessor.Process();
-            rwstopwatch.Stop();
-            Console.WriteLine($"Find all reader and writers took {rwstopwatch.ElapsedMilliseconds} milliseconds");
-
-            Console.WriteLine($"Script Module: {module.Name}");
-
-            modified |= WeaveModule(module);
-
-            if (!modified)
-                return null;
-
-            rwProcessor.InitializeReaderAndWriters();
-
-            return CurrentAssembly;
-        }
-
-        public AssemblyDefinition WeaveAssembly(ICompiledAssembly assembly)
-        {
-            WeaveLists = new WeaverLists();
-            Diagnostics.Clear();
-
             try
             {
-                return Weave(assembly);
+                CurrentAssembly = AssemblyDefinitionFor(compiledAssembly);
+
+                ModuleDefinition module = CurrentAssembly.MainModule;
+                readers = new Readers(module, logger);
+                writers = new Writers(module, logger);
+                var rwstopwatch = System.Diagnostics.Stopwatch.StartNew();
+                propertySiteProcessor = new PropertySiteProcessor();
+                var rwProcessor = new ReaderWriterProcessor(module, readers, writers);
+
+                bool modified = rwProcessor.Process();
+                rwstopwatch.Stop();
+                Console.WriteLine($"Find all reader and writers took {rwstopwatch.ElapsedMilliseconds} milliseconds");
+
+                Console.WriteLine($"Script Module: {module.Name}");
+
+                modified |= WeaveModule(module);
+
+                if (!modified)
+                    return null;
+
+                rwProcessor.InitializeReaderAndWriters();
+
+                return CurrentAssembly;
             }
             catch (Exception e)
             {
                 logger.Error("Exception :" + e);
-                return false;
+                return null;
             }
         }
     }
