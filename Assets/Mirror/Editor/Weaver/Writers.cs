@@ -227,8 +227,6 @@ namespace Mirror.Weaver
         bool WriteAllFields(TypeReference variable, ILProcessor worker)
         {
             uint fields = 0;
-            ModuleDefinition module = worker.Body.Method.Module;
-
             foreach (FieldDefinition field in variable.FindAllPublicFields())
             {
                 MethodReference writeFunc = GetWriteFunc(field.FieldType);
@@ -286,8 +284,6 @@ namespace Mirror.Weaver
         /// <param name="worker"></param>
         internal void InitializeWriters(ILProcessor worker)
         {
-            ModuleDefinition module = worker.Body.Method.Module;
-
             TypeReference genericWriterClassRef = module.ImportReference(typeof(Writer<>));
 
             System.Reflection.PropertyInfo writerProperty = typeof(Writer<>).GetProperty(nameof(Writer<int>.Write));

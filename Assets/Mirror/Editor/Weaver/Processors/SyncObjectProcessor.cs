@@ -8,14 +8,12 @@ namespace Mirror.Weaver
     {
         readonly List<FieldDefinition> syncObjects = new List<FieldDefinition>();
 
-        private readonly ModuleDefinition module;
         private readonly Readers readers;
         private readonly Writers writers;
         private readonly IWeaverLogger logger;
 
-        public SyncObjectProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger)
+        public SyncObjectProcessor(Readers readers, Writers writers, IWeaverLogger logger)
         {
-            this.module = module;
             this.readers = readers;
             this.writers = writers;
             this.logger = logger;

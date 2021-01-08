@@ -32,7 +32,7 @@ namespace Mirror.Weaver
             serverRpcProcessor = new ServerRpcProcessor(netBehaviourSubclass.Module, readers, writers, logger);
             clientRpcProcessor = new ClientRpcProcessor(netBehaviourSubclass.Module, readers, writers, logger);
             syncVarProcessor = new SyncVarProcessor(netBehaviourSubclass.Module, readers, writers, propertySiteProcessor, logger);
-            syncObjectProcessor = new SyncObjectProcessor(netBehaviourSubclass.Module, readers, writers, logger);
+            syncObjectProcessor = new SyncObjectProcessor(readers, writers, logger);
         }
 
         // return true if modified

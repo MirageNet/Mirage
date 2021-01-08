@@ -225,8 +225,6 @@ namespace Mirror.Weaver
 
         private void GenerateNullCheck(ILProcessor worker)
         {
-            ModuleDefinition module = worker.Body.Method.Module;
-
             // if (!reader.ReadBoolean()) {
             //   return null;
             // }
@@ -278,8 +276,6 @@ namespace Mirror.Weaver
 
         void ReadAllFields(TypeReference variable, ILProcessor worker)
         {
-            ModuleDefinition module = worker.Body.Method.Module;
-
             uint fields = 0;
             foreach (FieldDefinition field in variable.FindAllPublicFields())
             {
@@ -310,8 +306,6 @@ namespace Mirror.Weaver
         /// <param name="worker"></param>
         internal void InitializeReaders(ILProcessor worker)
         {
-            ModuleDefinition module = worker.Body.Method.Module;
-
             TypeReference genericReaderClassRef = module.ImportReference(typeof(Reader<>));
 
             System.Reflection.PropertyInfo readProperty = typeof(Reader<>).GetProperty(nameof(Reader<object>.Read));

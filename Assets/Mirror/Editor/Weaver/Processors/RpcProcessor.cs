@@ -19,7 +19,7 @@ namespace Mirror.Weaver
 
         public static string InvokeRpcPrefix => "InvokeUserCode_";
 
-        public RpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger)
+        protected RpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger)
         {
             this.module = module;
             this.readers = readers;

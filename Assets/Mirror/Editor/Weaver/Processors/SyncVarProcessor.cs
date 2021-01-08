@@ -93,7 +93,7 @@ namespace Mirror.Weaver
                    method.Parameters[1].ParameterType.FullName == originalType.FullName;
         }
 
-        static MethodDefinition GenerateSyncVarGetter(FieldDefinition fd, string originalName, TypeReference originalType)
+        MethodDefinition GenerateSyncVarGetter(FieldDefinition fd, string originalName, TypeReference originalType)
         {
             //Create the get method
             MethodDefinition get = fd.DeclaringType.AddMethod(
@@ -135,7 +135,7 @@ namespace Mirror.Weaver
             // make generic version of SetSyncVar with field type
             LoadField(fd, worker);
 
-            MethodReference syncVarEqual = fd.Module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
+            MethodReference syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
             var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
             syncVarEqualGm.GenericArguments.Add(originalType);
             worker.Append(worker.Create(OpCodes.Call, syncVarEqualGm));
@@ -195,12 +195,12 @@ namespace Mirror.Weaver
             return set;
         }
 
-        private static void StoreField(FieldDefinition fd, ParameterDefinition valueParam, ILProcessor worker)
+        private void StoreField(FieldDefinition fd, ParameterDefinition valueParam, ILProcessor worker)
         {
             if (IsWrapped(fd.FieldType))
             {
                 // there is a wrapper struct, call the setter
-                MethodReference setter = fd.Module.ImportReference(fd.FieldType.Resolve().GetMethod("set_Value"));
+                MethodReference setter = module.ImportReference(fd.FieldType.Resolve().GetMethod("set_Value"));
 
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldflda, fd));
@@ -215,14 +215,14 @@ namespace Mirror.Weaver
             }
         }
 
-        private static void LoadField(FieldDefinition fd, ILProcessor worker)
+        private void LoadField(FieldDefinition fd, ILProcessor worker)
         {
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
             if (IsWrapped(fd.FieldType))
             {
                 worker.Append(worker.Create(OpCodes.Ldflda, fd));
-                MethodReference getter = fd.Module.ImportReference(fd.FieldType.Resolve().GetMethod("get_Value"));
+                MethodReference getter = module.ImportReference(fd.FieldType.Resolve().GetMethod("get_Value"));
                 worker.Append(worker.Create(OpCodes.Call, getter));
             }
             else
@@ -269,13 +269,13 @@ namespace Mirror.Weaver
             if (typeReference.Is<NetworkIdentity>())
             {
                 // change the type of the field to a wrapper NetworkIDentitySyncvar
-                return syncvar.Module.ImportReference<NetworkIdentitySyncvar>();
+                return module.ImportReference<NetworkIdentitySyncvar>();
             }
             if (typeReference.Is<GameObject>())
-                return syncvar.Module.ImportReference<GameObjectSyncvar>();
+                return module.ImportReference<GameObjectSyncvar>();
 
             if (typeReference.Resolve().IsDerivedFrom<NetworkBehaviour>())
-                return syncvar.Module.ImportReference<NetworkBehaviorSyncvar>();
+                return module.ImportReference<NetworkBehaviorSyncvar>();
 
             return typeReference;
         }
@@ -436,7 +436,7 @@ namespace Mirror.Weaver
 
             MethodDefinition serialize = netBehaviourSubclass.AddMethod(SerializeMethodName,
                     MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
-                    netBehaviourSubclass.Module.ImportReference<bool>());
+                    module.ImportReference<bool>());
 
             ParameterDefinition writerParameter = serialize.AddParam<NetworkWriter>("writer");
             ParameterDefinition initializeParameter = serialize.AddParam<bool>("initialize");
@@ -456,7 +456,7 @@ namespace Mirror.Weaver
                 worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
                 // forceAll
                 worker.Append(worker.Create(OpCodes.Ldarg, initializeParameter));
-                worker.Append(worker.Create(OpCodes.Call, netBehaviourSubclass.Module.ImportReference(baseSerialize)));
+                worker.Append(worker.Create(OpCodes.Call, module.ImportReference(baseSerialize)));
                 // set dirtyLocal to result of base.OnSerialize()
                 worker.Append(worker.Create(OpCodes.Stloc, dirtyLocal));
             }
@@ -577,7 +577,7 @@ namespace Mirror.Weaver
                 serWorker.Append(serWorker.Create(OpCodes.Ldarg,readerParam));
                 // initialState
                 serWorker.Append(serWorker.Create(OpCodes.Ldarg,initializeParam));
-                serWorker.Append(serWorker.Create(OpCodes.Call, netBehaviourSubclass.Module.ImportReference(baseDeserialize)));
+                serWorker.Append(serWorker.Create(OpCodes.Call, module.ImportReference(baseDeserialize)));
             }
 
             // Generates: if (initialState);
@@ -646,7 +646,6 @@ namespace Mirror.Weaver
                     OnSetA(oldValue, Networka);
                 }
              */
-            ModuleDefinition module = serWorker.Body.Method.Module;
             MethodReference readFunc = readers.GetReadFunc(syncVar.FieldType);
             if (readFunc == null)
             {
@@ -696,7 +695,7 @@ namespace Mirror.Weaver
                 // 'newValue'
                 LoadField(syncVar, serWorker);
                 // call the function
-                MethodReference syncVarEqual = syncVar.Module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
+                MethodReference syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
                 var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
                 syncVarEqualGm.GenericArguments.Add(originalType);
                 serWorker.Append(serWorker.Create(OpCodes.Call, syncVarEqualGm));
