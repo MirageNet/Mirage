@@ -46,6 +46,34 @@ namespace Mirror.Weaver
             return false;
         }
 
+        // set the value of a constant in a class
+        public static void SetConst<T>(this TypeDefinition td, string fieldName, T value) where T : struct
+        {
+            FieldDefinition field = td.Fields.FirstOrDefault(f => f.Name == fieldName);
+
+            if (field == null)
+            {
+                field = new FieldDefinition(fieldName, FieldAttributes.Literal, td.Module.ImportReference<T>());
+                td.Fields.Add(field);
+            }
+
+            field.Constant = value;
+        }
+
+        public static T GetConst<T>(this TypeDefinition td, string fieldName) where T : struct
+        {
+            FieldDefinition field = td.Fields.FirstOrDefault(f => f.Name == fieldName);
+
+            if (field == null)
+            {
+                return default(T);
+            }
+
+            var value = field.Constant as T?;
+
+            return value.GetValueOrDefault();
+        }
+
         public static TypeReference GetEnumUnderlyingType(this TypeDefinition td)
         {
             foreach (FieldDefinition field in td.Fields)
@@ -143,7 +171,7 @@ namespace Mirror.Weaver
             foreach (GenericParameter generic_parameter in self.GenericParameters)
                 reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
 
-            return Weaver.CurrentAssembly.MainModule.ImportReference(reference);
+            return self.Module.ImportReference(reference);
         }
 
         public static CustomAttribute GetCustomAttribute<TAttribute>(this ICustomAttributeProvider method)

@@ -10,87 +10,37 @@ using UnityEditor.Compilation;
 
 namespace Mirror.Weaver
 {
-    // This data is flushed each time - if we are run multiple times in the same process/domain
-    class WeaverLists
+
+    internal class Weaver
     {
-        // setter functions that replace [SyncVar] member variable references. dict<field, replacement>
-        public Dictionary<FieldDefinition, MethodDefinition> replacementSetterProperties = new Dictionary<FieldDefinition, MethodDefinition>();
-        // getter functions that replace [SyncVar] member variable references. dict<field, replacement>
-        public Dictionary<FieldDefinition, MethodDefinition> replacementGetterProperties = new Dictionary<FieldDefinition, MethodDefinition>();
+        private readonly IWeaverLogger logger;
+        private Readers readers;
+        private Writers writers;
+        private PropertySiteProcessor propertySiteProcessor;
 
-        // amount of SyncVars per class. dict<className, amount>
-        public Dictionary<string, int> numSyncVars = new Dictionary<string, int>();
-
-        public int GetSyncVarStart(string className)
-        {
-            return numSyncVars.ContainsKey(className)
-                   ? numSyncVars[className]
-                   : 0;
-        }
-
-        public void SetNumSyncVars(string className, int num)
-        {
-            numSyncVars[className] = num;
-        }
-    }
-
-    internal static class Weaver
-    {
-        public static WeaverLists WeaveLists { get; private set; }
-        public static AssemblyDefinition CurrentAssembly { get; private set; }
-
-        public readonly static List<DiagnosticMessage> Diagnostics = new List<DiagnosticMessage>();
+        private AssemblyDefinition CurrentAssembly { get; set; }
 
         public static void DLog(TypeDefinition td, string fmt, params object[] args)
         {
             Console.WriteLine("[" + td.Name + "] " + string.Format(fmt, args));
         }
 
-        // display weaver error
-        // and mark process as failed
-        public static void Error(string message)
+        public Weaver(IWeaverLogger logger)
         {
-            AddError(null, message);
+            this.logger = logger;
         }
 
-        public static void Error(string message, MethodDefinition methodDefinition)
+        void CheckMonoBehaviour(TypeDefinition td)
         {
-            AddError(methodDefinition.DebugInformation.SequencePoints.FirstOrDefault(), message);
-        }
+            var processor = new MonoBehaviourProcessor(logger);
 
-        // display weaver error
-        // and mark process as failed
-        public static void Error(string message, MemberReference mr)
-        {
-            AddError(null, $"{message} (at {mr})");
-        }
-
-        public static void AddError(SequencePoint sequencePoint, string message)
-        {
-            Diagnostics.Add(new DiagnosticMessage
-            {
-                DiagnosticType = DiagnosticType.Error,
-                File = sequencePoint?.Document.Url.Replace($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}", ""),
-                Line = sequencePoint?.StartLine ?? 0,
-                Column = sequencePoint?.StartColumn ?? 0,
-                MessageData = message
-            });
-        }
-
-        public static void Warning(string message, MemberReference mr)
-        {
-            Log.Warning($"{message} (at {mr})");
-        }
-
-        static void CheckMonoBehaviour(TypeDefinition td)
-        {
             if (td.IsDerivedFrom<UnityEngine.MonoBehaviour>())
             {
-                MonoBehaviourProcessor.Process(td);
+                processor.Process(td);
             }
         }
 
-        static bool WeaveNetworkBehavior(TypeDefinition td)
+        bool WeaveNetworkBehavior(TypeDefinition td)
         {
             if (!td.IsClass)
                 return false;
@@ -128,12 +78,12 @@ namespace Mirror.Weaver
             bool modified = false;
             foreach (TypeDefinition behaviour in behaviourClasses)
             {
-                modified |= new NetworkBehaviourProcessor(behaviour).Process();
+                modified |= new NetworkBehaviourProcessor(behaviour, readers, writers, propertySiteProcessor, logger).Process();
             }
             return modified;
         }
 
-        static bool WeaveModule(ModuleDefinition moduleDefinition)
+        bool WeaveModule(ModuleDefinition module)
         {
             try
             {
@@ -142,27 +92,27 @@ namespace Mirror.Weaver
                 var watch = System.Diagnostics.Stopwatch.StartNew();
 
                 watch.Start();
-                var types = new List<TypeDefinition>(moduleDefinition.Types);
+                var attributeProcessor = new ServerClientAttributeProcessor(logger);
 
-                foreach (TypeDefinition td in types)
+                foreach (TypeDefinition td in module.Types)
                 {
                     if (td.IsClass && td.BaseType.CanBeResolved())
                     {
                         modified |= WeaveNetworkBehavior(td);
-                        modified |= ServerClientAttributeProcessor.Process(td);
+                        modified |= attributeProcessor.Process(td);
                     }
                 }
                 watch.Stop();
                 Console.WriteLine("Weave behaviours and messages took" + watch.ElapsedMilliseconds + " milliseconds");
 
                 if (modified)
-                    PropertySiteProcessor.Process(moduleDefinition);
+                    propertySiteProcessor.Process(module);
 
                 return modified;
             }
             catch (Exception ex)
             {
-                Error(ex.ToString());
+                logger.Error(ex.ToString());
                 throw;
             }
         }
@@ -195,12 +145,13 @@ namespace Mirror.Weaver
             CurrentAssembly = AssemblyDefinitionFor(unityAssembly);
             
             ModuleDefinition module = CurrentAssembly.MainModule;
-
+             readers = new Readers(module, logger);
+            writers = new Writers(module, logger);
             var rwstopwatch = System.Diagnostics.Stopwatch.StartNew();
+            propertySiteProcessor = new PropertySiteProcessor();
+            var rwProcessor = new ReaderWriterProcessor(module, readers, writers);
 
-            var processor = new ReaderWriterProcessor();
-
-            bool modified = processor.Process(module);
+            bool modified = rwProcessor.Process();
             rwstopwatch.Stop();
             Console.WriteLine($"Find all reader and writers took {rwstopwatch.ElapsedMilliseconds} milliseconds");
 
@@ -211,18 +162,12 @@ namespace Mirror.Weaver
             if (!modified)
                 return null;
 
+            rwProcessor.InitializeReaderAndWriters();
+
             return CurrentAssembly;
         }
 
-        private static void AddPaths(DefaultAssemblyResolver asmResolver, Assembly assembly)
-        {
-            foreach (string path in assembly.allReferences)
-            {
-                asmResolver.AddSearchDirectory(Path.GetDirectoryName(path));
-            }
-        }
-
-        public static AssemblyDefinition WeaveAssembly(ICompiledAssembly assembly)
+        public AssemblyDefinition WeaveAssembly(ICompiledAssembly assembly)
         {
             WeaveLists = new WeaverLists();
             Diagnostics.Clear();
@@ -233,8 +178,8 @@ namespace Mirror.Weaver
             }
             catch (Exception e)
             {
-                Error("Exception :" + e);
-                return null;
+                logger.Error("Exception :" + e);
+                return false;
             }
         }
     }
