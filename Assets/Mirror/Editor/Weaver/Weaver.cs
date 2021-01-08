@@ -90,10 +90,6 @@ namespace Mirror.Weaver
                 watch.Start();
                 var attributeProcessor = new ServerClientAttributeProcessor(logger);
 
-                readers = new Readers(module, logger);
-                writers = new Writers(module, logger);
-                propertySiteProcessor = new PropertySiteProcessor();
-
                 foreach (TypeDefinition td in module.Types)
                 {
                     if (td.IsClass && td.BaseType.CanBeResolved())
@@ -127,7 +123,7 @@ namespace Mirror.Weaver
                 ModuleDefinition module = CurrentAssembly.MainModule;
                 readers = new Readers(module, logger);
                 writers = new Writers(module, logger);
-
+                propertySiteProcessor = new PropertySiteProcessor();
                 var rwProcessor = new ReaderWriterProcessor(module, readers, writers);
 
                 var rwstopwatch = System.Diagnostics.Stopwatch.StartNew();
