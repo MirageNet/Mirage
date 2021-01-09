@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
-using UnityEngine;
 
 namespace Mirror.Weaver
 {
-
     class PostProcessorAssemblyResolver : IAssemblyResolver
     {
         private readonly string[] _assemblyReferences;
@@ -37,22 +34,22 @@ namespace Mirror.Weaver
                 if (name.Name == _compiledAssembly.Name)
                     return _selfAssembly;
 
-                var fileName = FindFile(name);
+                string fileName = FindFile(name);
                 if (fileName == null)
                     return null;
 
-                var lastWriteTime = File.GetLastWriteTime(fileName);
+                DateTime lastWriteTime = File.GetLastWriteTime(fileName);
 
-                var cacheKey = fileName + lastWriteTime;
+                string cacheKey = fileName + lastWriteTime;
 
-                if (_assemblyCache.TryGetValue(cacheKey, out var result))
+                if (_assemblyCache.TryGetValue(cacheKey, out AssemblyDefinition result))
                     return result;
 
                 parameters.AssemblyResolver = this;
 
-                var ms = MemoryStreamFor(fileName);
+                MemoryStream ms = MemoryStreamFor(fileName);
 
-                var pdb = fileName + ".pdb";
+                string pdb = fileName + ".pdb";
                 if (File.Exists(pdb))
                     parameters.SymbolStream = MemoryStreamFor(pdb);
 
@@ -64,7 +61,7 @@ namespace Mirror.Weaver
 
         private string FindFile(AssemblyNameReference name)
         {
-            var fileName = _assemblyReferences.FirstOrDefault(r => Path.GetFileName(r) == name.Name + ".dll");
+            string fileName = _assemblyReferences.FirstOrDefault(r => Path.GetFileName(r) == name.Name + ".dll");
             if (fileName != null)
                 return fileName;
 
@@ -80,9 +77,9 @@ namespace Mirror.Weaver
             //in the ILPostProcessing API. As a workaround, we rely on the fact here that the indirect references
             //are always located next to direct references, so we search in all directories of direct references we
             //got passed, and if we find the file in there, we resolve to it.
-            foreach (var parentDir in _assemblyReferences.Select(Path.GetDirectoryName).Distinct())
+            foreach (string parentDir in _assemblyReferences.Select(Path.GetDirectoryName).Distinct())
             {
-                var candidate = Path.Combine(parentDir, name.Name + ".dll");
+                string candidate = Path.Combine(parentDir, name.Name + ".dll");
                 if (File.Exists(candidate))
                     return candidate;
             }
@@ -98,7 +95,7 @@ namespace Mirror.Weaver
                 using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     byteArray = new byte[fs.Length];
-                    var readLength = fs.Read(byteArray, 0, (int)fs.Length);
+                    int readLength = fs.Read(byteArray, 0, (int)fs.Length);
                     if (readLength != fs.Length)
                         throw new InvalidOperationException("File read length is not full length of file.");
                 }

@@ -2,7 +2,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Mono.Cecil;
-using UnityEngine;
 using TypeAttributes = Mono.Cecil.TypeAttributes;
 
 namespace Mirror.Weaver
