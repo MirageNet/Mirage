@@ -19,7 +19,6 @@
     "precompiledReferences": [
         "nunit.framework.dll",
         "NSubstitute.dll",
-        "Mono.Cecil.dll",
         "System.Threading.Tasks.Extensions.dll"
     ],
     "autoReferenced": false,

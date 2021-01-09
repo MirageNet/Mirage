@@ -3,6 +3,7 @@ using System.Linq;
 using System.IO;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System;
 
 namespace Mirror.Weaver
 {
@@ -38,9 +39,14 @@ namespace Mirror.Weaver
             return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), logger.Diagnostics);
         }
 
-        public override bool WillProcess(ICompiledAssembly compiledAssembly) =>
-            compiledAssembly.Name == RuntimeAssemblyName || 
-            compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RuntimeAssemblyName);
+        public override bool WillProcess(ICompiledAssembly compiledAssembly)
+        {
+            var result = 
+                compiledAssembly.Name == RuntimeAssemblyName ||
+                compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RuntimeAssemblyName);
 
+            Console.WriteLine($"will process {compiledAssembly.Name} {result}");
+            return result;
+        }
     }
 }
