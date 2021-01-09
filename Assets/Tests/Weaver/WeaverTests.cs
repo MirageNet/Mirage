@@ -1,11 +1,9 @@
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using NUnit.Framework;
 using Unity.CompilationPipeline.Common.Diagnostics;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace Mirror.Weaver.Tests
 {
@@ -48,6 +46,8 @@ namespace Mirror.Weaver.Tests
 
         protected Logger weaverLog = new Logger();
 
+        protected AssemblyDefinition assembly;
+
         protected void BuildAndWeaveTestAssembly(string className, string testName)
         {
             weaverLog.Diagnostics.Clear();
@@ -55,7 +55,7 @@ namespace Mirror.Weaver.Tests
             string testSourceDirectory = className + "~";
             WeaverAssembler.OutputFile = Path.Combine(testSourceDirectory, testName + ".dll");
             WeaverAssembler.AddSourceFiles(new string[] { Path.Combine(testSourceDirectory, testName + ".cs") });
-            WeaverAssembler.Build(weaverLog);
+            assembly = WeaverAssembler.Build(weaverLog);
 
             Assert.That(WeaverAssembler.CompilerErrors, Is.False);
             foreach (DiagnosticMessage error in weaverLog.Diagnostics)

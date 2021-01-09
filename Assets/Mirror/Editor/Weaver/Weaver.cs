@@ -4,6 +4,7 @@ using System.IO;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
+using UnityEngine;
 
 namespace Mirror.Weaver
 {
@@ -91,7 +92,9 @@ namespace Mirror.Weaver
                 watch.Start();
                 var attributeProcessor = new ServerClientAttributeProcessor(logger);
 
-                foreach (TypeDefinition td in module.Types)
+                var types = new List<TypeDefinition>(module.Types);
+
+                foreach (TypeDefinition td in types)
                 {
                     if (td.IsClass && td.BaseType.CanBeResolved())
                     {
@@ -99,6 +102,7 @@ namespace Mirror.Weaver
                         modified |= attributeProcessor.Process(td);
                     }
                 }
+
                 watch.Stop();
                 Console.WriteLine("Weave behaviours and messages took" + watch.ElapsedMilliseconds + " milliseconds");
 

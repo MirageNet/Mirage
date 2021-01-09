@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
+using Mono.Cecil;
 
 namespace Mirror.Weaver.Tests
 {
@@ -172,8 +173,10 @@ namespace Mirror.Weaver.Tests
 
        
 
-        public static void Build(IWeaverLogger logger)
+        public static AssemblyDefinition Build(IWeaverLogger logger)
         {
+            AssemblyDefinition assembly = null;
+
             var assemblyBuilder = new AssemblyBuilder(Path.Combine(OutputDirectory, OutputFile), SourceFiles.ToArray())
             {
                 referencesOptions = ReferencesOptions.UseEngineModules
@@ -205,20 +208,22 @@ namespace Mirror.Weaver.Tests
 
                 var weaver = new Weaver(logger);
 
-                weaver.Weave(compiledAssembly);
+                assembly = weaver.Weave(compiledAssembly);
             };
 
             // Start build of assembly
             if (!assemblyBuilder.Build())
             {
                 Debug.LogErrorFormat("Failed to start build of assembly {0}", assemblyBuilder.assemblyPath);
-                return;
+                return assembly;
             }
 
             while (assemblyBuilder.status != AssemblyBuilderStatus.Finished)
             {
                 System.Threading.Thread.Sleep(10);
             }
+
+            return assembly;
         }
     }
 }

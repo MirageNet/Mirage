@@ -52,25 +52,21 @@ namespace Mirror.Weaver.Tests
         /// </summary>
         /// <param name="addedString"></param>
         /// <param name="methodName"></param>
-        static void CheckAddedCode(Expression<Func<NetworkBehaviour, bool>> pred, string className, string methodName)
+        void CheckAddedCode(Expression<Func<NetworkBehaviour, bool>> pred, string className, string methodName)
         {
-            string assemblyName = Path.Combine(WeaverAssembler.OutputDirectory, WeaverAssembler.OutputFile);
-            using (var assembly = AssemblyDefinition.ReadAssembly(assemblyName))
-            {
-                TypeDefinition type = assembly.MainModule.GetType(className);
-                MethodDefinition method = type.Methods.First(m => m.Name == methodName);
-                MethodBody body = method.Body;
+            TypeDefinition type = assembly.MainModule.GetType(className);
+            MethodDefinition method = type.Methods.First(m => m.Name == methodName);
+            MethodBody body = method.Body;
 
-                Instruction top = body.Instructions[0];
-                Assert.That(top.OpCode, Is.EqualTo(OpCodes.Ldarg_0));
+            Instruction top = body.Instructions[0];
+            Assert.That(top.OpCode, Is.EqualTo(OpCodes.Ldarg_0));
 
-                var methodRef = assembly.MainModule.ImportReference(pred);
+            var methodRef = assembly.MainModule.ImportReference(pred);
 
-                Instruction call = body.Instructions[1];
+            Instruction call = body.Instructions[1];
 
-                Assert.That(call.OpCode, Is.EqualTo(OpCodes.Call));
-                Assert.That(call.Operand.ToString(), Is.EqualTo(methodRef.ToString()));
-            }
+            Assert.That(call.OpCode, Is.EqualTo(OpCodes.Call));
+            Assert.That(call.Operand.ToString(), Is.EqualTo(methodRef.ToString()));
         }
     }
 }

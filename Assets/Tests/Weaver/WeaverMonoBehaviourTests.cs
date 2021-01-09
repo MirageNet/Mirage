@@ -28,7 +28,7 @@ namespace Mirror.Weaver.Tests
         public void MonoBehaviourServerRpc()
         {
             HasError("ServerRpc CmdThisCantBeOutsideNetworkBehaviour must be declared inside a NetworkBehaviour",
-                "System.Void WeaverMonoBehaviourTests.MonoBehaviourServerRpc.MonoBehaviourServerRpc::CmdThisCantBeOutsideNetworkBehaviour())");
+                "System.Void WeaverMonoBehaviourTests.MonoBehaviourServerRpc.MonoBehaviourServerRpc::CmdThisCantBeOutsideNetworkBehaviour()");
         }
 
         [Test]
