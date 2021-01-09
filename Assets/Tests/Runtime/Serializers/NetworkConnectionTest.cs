@@ -1,11 +1,10 @@
 ﻿using System.IO;
 using NSubstitute;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Mirror.Tests
 {
-    public class NetworkConnectionTest : MonoBehaviour
+    public class NetworkConnectionTest 
     {
         [Test]
         public void NoHandler()

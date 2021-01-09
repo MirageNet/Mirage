@@ -10,7 +10,7 @@ using static Mirror.Tests.LocalConnections;
 
 namespace Mirror.Tests
 {
-    public class NetworkIdentityTests
+    public class NetworkIdentityCallbackTests
     {
         #region test components
 

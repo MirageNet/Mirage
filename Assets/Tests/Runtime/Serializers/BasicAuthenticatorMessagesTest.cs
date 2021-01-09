@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Mirror.Tests
 {
     [TestFixture]
-    public class BasicAuthenticatorTest
+    public class BasicAuthenticatorMessagesTest
     {
         public class AuthRequestMessage
         {

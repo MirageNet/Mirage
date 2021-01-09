@@ -25,5 +25,6 @@ namespace Mirror.Tests
 
             base.ExtraSetup();
         }
+
     }
 }
