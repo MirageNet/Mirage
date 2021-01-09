@@ -274,7 +274,7 @@ namespace Mirror.Weaver
         private static bool IsEditorAssembly(ModuleDefinition module)
         {
             return module.AssemblyReferences.Any(assemblyReference =>
-                assemblyReference.Name == nameof(UnityEditor)
+                assemblyReference.Name == "Mirror.Editor"
                 ) ;
         }
 
