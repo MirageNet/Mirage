@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using UnityEditor;
@@ -63,7 +62,7 @@ namespace Mirror.Weaver
             IEnumerable<Type> types = typeof(NetworkReaderExtensions).Module.GetTypes().Where(t => t.IsSealed && t.IsAbstract);
             foreach (Type type in types)
             {
-                var methods = type.GetMethods(System.Reflection.BindingFlags.Static | BindingFlags.Public)
+                IEnumerable<MethodInfo> methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public)
                     .Where(IsExtension)
                     .Where(m => !m.IsGenericMethod);
 
@@ -75,7 +74,7 @@ namespace Mirror.Weaver
             }
         }
 
-        private void RegisterReader(System.Reflection.MethodInfo method)
+        private void RegisterReader(MethodInfo method)
         {
             if (method.GetParameters().Length != 1)
                 return;
@@ -88,7 +87,7 @@ namespace Mirror.Weaver
             readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
         }
 
-        private void RegisterWriter(System.Reflection.MethodInfo method)
+        private void RegisterWriter(MethodInfo method)
         {
             if (method.GetParameters().Length != 2)
                 return;
@@ -292,7 +291,7 @@ namespace Mirror.Weaver
                 "InitReadWriters",
                 Mono.Cecil.MethodAttributes.Public | Mono.Cecil.MethodAttributes.Static);
 
-            System.Reflection.ConstructorInfo attributeconstructor = typeof(RuntimeInitializeOnLoadMethodAttribute).GetConstructor(new [] { typeof(RuntimeInitializeLoadType)});
+            ConstructorInfo attributeconstructor = typeof(RuntimeInitializeOnLoadMethodAttribute).GetConstructor(new [] { typeof(RuntimeInitializeLoadType)});
 
             var customAttributeRef = new CustomAttribute(module.ImportReference(attributeconstructor));
             customAttributeRef.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportReference<RuntimeInitializeLoadType>(), RuntimeInitializeLoadType.BeforeSceneLoad));
@@ -301,7 +300,7 @@ namespace Mirror.Weaver
             if (IsEditorAssembly(module))
             {
                 // editor assembly,  add InitializeOnLoadMethod too.  Useful for the editor tests
-                System.Reflection.ConstructorInfo initializeOnLoadConstructor = typeof(InitializeOnLoadMethodAttribute).GetConstructor(new Type[0]);
+                ConstructorInfo initializeOnLoadConstructor = typeof(InitializeOnLoadMethodAttribute).GetConstructor(new Type[0]);
                 var initializeCustomConstructorRef = new CustomAttribute(module.ImportReference(initializeOnLoadConstructor));
                 rwInitializer.CustomAttributes.Add(initializeCustomConstructorRef);
             }
@@ -318,7 +317,7 @@ namespace Mirror.Weaver
 
         private void RegisterMessages(ILProcessor worker)
         {
-            System.Reflection.MethodInfo method = typeof(MessagePacker).GetMethod(nameof(MessagePacker.RegisterMessage));
+            MethodInfo method = typeof(MessagePacker).GetMethod(nameof(MessagePacker.RegisterMessage));
             MethodReference registerMethod = module.ImportReference(method);
 
             foreach (TypeReference message in messages)

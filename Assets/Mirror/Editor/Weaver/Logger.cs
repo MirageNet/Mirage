@@ -12,9 +12,9 @@ namespace Mirror.Weaver
     {
         public List<DiagnosticMessage> Diagnostics = new List<DiagnosticMessage>();
 
-        public void Error(string msg)
+        public void Error(string message)
         {
-            AddMessage(msg, null, DiagnosticType.Error);
+            AddMessage(message, null, DiagnosticType.Error);
         }
 
         public void Error(string message, MemberReference mr)
