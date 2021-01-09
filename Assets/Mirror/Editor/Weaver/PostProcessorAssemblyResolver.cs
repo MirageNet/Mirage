@@ -21,8 +21,16 @@ namespace Mirror.Weaver
             _assemblyReferences = compiledAssembly.References;
         }
 
+
         public void Dispose()
+        { 
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
         {
+            // Cleanup
         }
 
         public AssemblyDefinition Resolve(AssemblyNameReference name) => Resolve(name, new ReaderParameters(ReadingMode.Deferred));
