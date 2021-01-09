@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Mono.Cecil;
-using UnityEngine;
+﻿using Mono.Cecil;
 
 namespace Mirror.Weaver
 {
