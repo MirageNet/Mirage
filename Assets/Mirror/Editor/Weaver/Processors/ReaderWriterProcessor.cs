@@ -39,7 +39,6 @@ namespace Mirror.Weaver
 
         public bool Process()
         {
-            // darn global state causing bugs
             messages.Clear();
 
 
