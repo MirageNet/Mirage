@@ -10,9 +10,7 @@ namespace Mirror.Weaver
 {
     public class Logger : IWeaverLogger
     {
-        private readonly List<DiagnosticMessage> diagnostics = new List<DiagnosticMessage>();
-
-        public IEnumerable<DiagnosticMessage> Diagnostics => diagnostics;
+        public List<DiagnosticMessage> Diagnostics = new List<DiagnosticMessage>();
 
         public void Error(string msg)
         {

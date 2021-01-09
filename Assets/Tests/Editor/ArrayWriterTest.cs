@@ -15,7 +15,7 @@ namespace Mirror.Tests
 
             Assert.IsNull(unpacked);
         }
-
+        
         [Test]
         public void TestEmptyByteArray()
         {
