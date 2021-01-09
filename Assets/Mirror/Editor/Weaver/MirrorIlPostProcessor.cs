@@ -45,7 +45,7 @@ namespace Mirror.Weaver
                 compiledAssembly.Name == RuntimeAssemblyName ||
                 compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RuntimeAssemblyName);
 
-            Console.WriteLine($"will process {compiledAssembly.Name} {result}");
+            Console.WriteLine($"will process {compiledAssembly.Name} {result} defines {string.Join(", ", compiledAssembly.Defines)}");
             return result;
         }
     }
