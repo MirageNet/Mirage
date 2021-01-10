@@ -3,6 +3,8 @@ using NUnit.Framework;
 
 namespace Mirror.Tests
 {
+    public class AssertionMethodAttribute : Attribute { }
+
     [TestFixture]
     public class MessageTests
     {
@@ -30,6 +32,7 @@ namespace Mirror.Tests
                     Is.EqualTo(message.payload.Array[message.payload.Offset + i]));
         }
 
+        [AssertionMethod]
         private void TestSerializeDeserialize<T>(T message)
         {
             // serialize
