@@ -2,8 +2,6 @@ using System;
 using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
-
-using System.Linq;
 using Cysharp.Threading.Tasks;
 
 namespace Mirror.Tests
@@ -22,7 +20,7 @@ namespace Mirror.Tests
         [Test]
         public void MaxConnectionsTest()
         {
-            GameObject secondGO = new GameObject();
+            var secondGO = new GameObject();
             NetworkClient secondClient = secondGO.AddComponent<NetworkClient>();
             Transport secondTestTransport = secondGO.AddComponent<LoopbackTransport>();
 
