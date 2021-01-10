@@ -108,7 +108,7 @@ namespace Mirror.Tests
 
             Assert.IsNotNull(unpacked.Array);
             Assert.That(unpacked.Count, Is.EqualTo(2));
-            Assert.That(unpacked, Is.EquivalentTo(new int[] { 3, 4 }));
+            Assert.That(unpacked, Is.EquivalentTo(new [] { 3, 4 }));
         }
         #endregion
 
