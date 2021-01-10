@@ -6,15 +6,15 @@ namespace Mirror.Tests
 {
     abstract class SyncVarHookTesterBase : NetworkBehaviour
     {
-        [SyncVar(hook = nameof(onValue1Changed))]
+        [SyncVar(hook = nameof(OnValue1Changed))]
         public float value1;
-        [SyncVar(hook = nameof(onValue2Changed))]
+        [SyncVar(hook = nameof(OnValue2Changed))]
         public float value2;
 
         public event Action OnValue2ChangedVirtualCalled;
 
-        public abstract void onValue1Changed(float old, float newValue);
-        public virtual void onValue2Changed(float old, float newValue)
+        public abstract void OnValue1Changed(float old, float newValue);
+        public virtual void OnValue2Changed(float old, float newValue)
         {
             OnValue2ChangedVirtualCalled?.Invoke();
         }
@@ -27,7 +27,7 @@ namespace Mirror.Tests
 
         public void CallOnValue2Changed()
         {
-            onValue2Changed(1, 1);
+            OnValue2Changed(1, 1);
         }
     }
 
@@ -35,11 +35,11 @@ namespace Mirror.Tests
     {
         public event Action OnValue1ChangedOverrideCalled;
         public event Action OnValue2ChangedOverrideCalled;
-        public override void onValue1Changed(float old, float newValue)
+        public override void OnValue1Changed(float old, float newValue)
         {
             OnValue1ChangedOverrideCalled?.Invoke();
         }
-        public override void onValue2Changed(float old, float newValue)
+        public override void OnValue2Changed(float old, float newValue)
         {
             OnValue2ChangedOverrideCalled?.Invoke();
         }
@@ -92,7 +92,7 @@ namespace Mirror.Tests
             UnityEngine.Object.DestroyImmediate(clientTester.gameObject);
         }
         [Test]
-        public void abstractMethodOnChangeWorkWithHooks()
+        public void AbstractMethodOnChangeWorkWithHooks()
         {
             serverTester.ChangeValues();
 
@@ -108,7 +108,7 @@ namespace Mirror.Tests
             Assert.IsTrue(value1OverrideCalled);
         }
         [Test]
-        public void virtualMethodOnChangeWorkWithHooks()
+        public void VirtualMethodOnChangeWorkWithHooks()
         {
             serverTester.ChangeValues();
 
@@ -132,7 +132,7 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void manuallyCallingVirtualMethodCallsOverride()
+        public void ManuallyCallingVirtualMethodCallsOverride()
         {
             // this to check that class are set up correct for tests above
             serverTester.ChangeValues();
@@ -150,14 +150,14 @@ namespace Mirror.Tests
             };
 
             var baseClass = clientTester as SyncVarHookTesterBase;
-            baseClass.onValue2Changed(1, 1);
+            baseClass.OnValue2Changed(1, 1);
 
             Assert.AreEqual(serverTester.value2, serverTester.value2);
             Assert.IsTrue(value2OverrideCalled, "Override method not called");
             Assert.IsFalse(value2VirtualCalled, "Virtual method called when Override exists");
         }
         [Test]
-        public void manuallyCallingVirtualMethodInsideBaseClassCallsOverride()
+        public void ManuallyCallingVirtualMethodInsideBaseClassCallsOverride()
         {
             // this to check that class are set up correct for tests above
             serverTester.ChangeValues();
