@@ -15,12 +15,8 @@ namespace Mirror.Tests
         {
             public override bool OnCheckObserver(INetworkConnection conn) { return true; }
             public override void OnRebuildObservers(HashSet<INetworkConnection> observers, bool initialize) { }
-            public int hostVisibilityCalled;
-            public bool hostVisibilityValue;
             public override void OnSetHostVisibility(bool visible)
             {
-                ++hostVisibilityCalled;
-                hostVisibilityValue = visible;
             }
         }
 
@@ -112,7 +108,5 @@ namespace Mirror.Tests
             identity.RebuildObservers(true);
             Assert.That(identity.observers, Does.Contain(identity.ConnectionToClient));
         }
-
-
     }
 }
