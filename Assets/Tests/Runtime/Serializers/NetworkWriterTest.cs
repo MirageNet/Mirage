@@ -130,7 +130,7 @@ namespace Mirror.Tests
         [Test]
         public void TestResetSetsPotionAndLength()
         {
-            NetworkWriter writer = new NetworkWriter();
+            var writer = new NetworkWriter();
             writer.WriteString("I saw");
             writer.WriteInt64(0xA_FADED_DEAD_EEL);
             writer.WriteString("and ate it");
@@ -1165,7 +1165,7 @@ namespace Mirror.Tests
             writer.Write<List<int>>(null);
 
             var reader = new NetworkReader(writer.ToArray());
-            var readList = reader.Read<List<int>>();
+            List<int> readList = reader.Read<List<int>>();
             Assert.That(readList, Is.Null);
         }
     }
