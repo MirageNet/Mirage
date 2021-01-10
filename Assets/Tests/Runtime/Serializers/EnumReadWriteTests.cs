@@ -4,36 +4,36 @@ namespace Mirror.Tests
 {
     public static class MyCustomEnumReadWrite
     {
-        public static void WriteMyCustomEnum(this NetworkWriter networkWriter, EnumReadWriteTests.MyCustomEnum customEnum)
+        public static void WriteMyCustomEnum(this NetworkWriter networkWriter, EnumReadWriteTests.MyCustom customEnum)
         {
             // if O write N
-            if (customEnum == EnumReadWriteTests.MyCustomEnum.O)
+            if (customEnum == EnumReadWriteTests.MyCustom.O)
             {
-                networkWriter.WriteInt32((int)EnumReadWriteTests.MyCustomEnum.N);
+                networkWriter.WriteInt32((int)EnumReadWriteTests.MyCustom.N);
             }
             else
             {
                 networkWriter.WriteInt32((int)customEnum);
             }
         }
-        public static EnumReadWriteTests.MyCustomEnum ReadMyCustomEnum(this NetworkReader networkReader)
+        public static EnumReadWriteTests.MyCustom ReadMyCustomEnum(this NetworkReader networkReader)
         {
-            return (EnumReadWriteTests.MyCustomEnum)networkReader.ReadInt32();
+            return (EnumReadWriteTests.MyCustom)networkReader.ReadInt32();
         }
     }
     public class EnumReadWriteTests
     {
-        public enum MyByteEnum : byte
+        public enum MyByte : byte
         {
             A, B, C, D
         }
 
-        public enum MyShortEnum : short
+        public enum MyShort : short
         {
             E, F, G, H
         }
 
-        public enum MyCustomEnum
+        public enum MyCustom
         {
             M, N, O, P
         }
@@ -42,7 +42,7 @@ namespace Mirror.Tests
         [Test]
         public void ByteIsSentForByteEnum()
         {
-            MyByteEnum byteEnum = MyByteEnum.B;
+            MyByte byteEnum = MyByte.B;
 
             var writer = new NetworkWriter();
             writer.Write(byteEnum);
@@ -54,7 +54,7 @@ namespace Mirror.Tests
         [Test]
         public void ShortIsSentForShortEnum()
         {
-            MyShortEnum shortEnum = MyShortEnum.G;
+            MyShort shortEnum = MyShort.G;
 
             var writer = new NetworkWriter();
             writer.Write(shortEnum);
@@ -66,11 +66,11 @@ namespace Mirror.Tests
         [Test]
         public void CustomWriterIsUsedForEnum()
         {
-            MyCustomEnum customEnum = MyCustomEnum.O;
-            MyCustomEnum clientMsg = SerializeAndDeserializeMessage(customEnum);
+            MyCustom customEnum = MyCustom.O;
+            MyCustom clientMsg = SerializeAndDeserializeMessage(customEnum);
 
             // custom writer should write N if it sees O
-            Assert.That(clientMsg, Is.EqualTo(MyCustomEnum.N));
+            Assert.That(clientMsg, Is.EqualTo(MyCustom.N));
         }
 
         T SerializeAndDeserializeMessage<T>(T msg)
