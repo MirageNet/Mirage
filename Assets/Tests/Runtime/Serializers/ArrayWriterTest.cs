@@ -71,7 +71,7 @@ namespace Mirror.Tests
         [Test]
         public void TestDataIntArray()
         {
-            var array = new[] { 3, 4, 5 };
+            int[] array = new[] { 3, 4, 5 };
 
             byte[] data = MessagePacker.Pack(array);
 
