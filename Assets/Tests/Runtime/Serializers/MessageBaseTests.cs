@@ -67,14 +67,14 @@ namespace Mirror.Tests
 
             ClassWithoutBaseMessage unpacked = MessagePacker.Unpack<ClassWithoutBaseMessage>(data);
 
-            Assert.That(unpacked.array, Is.EquivalentTo(new int[] { 3, 4, 5 }));
+            Assert.That(unpacked.array, Is.EquivalentTo(new [] { 3, 4, 5 }));
         }
 
         [Test]
         public void AbstractBaseClassWorks()
         {
             const int value = 10;
-            OverrideMessage intMessage = new OverrideMessage
+            var intMessage = new OverrideMessage
             {
                 someValue = value
             };
@@ -92,7 +92,7 @@ namespace Mirror.Tests
             const int value1 = 10;
             const int value2 = 13;
             const int value3 = 15;
-            Layer3Message intMessage = new Layer3Message
+            var intMessage = new Layer3Message
             {
                 value1 = value1,
                 value2 = value2,
