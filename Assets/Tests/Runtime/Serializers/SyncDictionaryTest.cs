@@ -293,7 +293,7 @@ namespace Mirror.Tests
 
             serverSyncDictionary.Remove(data);
 
-            Assert.That(serverSyncDictionary, Is.EquivalentTo(new KeyValuePair<int, string>[]
+            Assert.That(serverSyncDictionary, Is.EquivalentTo(new []
             {
                 new KeyValuePair<int, string>(1, "World"),
                 new KeyValuePair<int, string>(2, "!"),
