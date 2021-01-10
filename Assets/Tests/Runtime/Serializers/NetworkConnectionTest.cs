@@ -26,7 +26,7 @@ namespace Mirror.Tests
         {
             var connection = new NetworkConnection(Substitute.For<IConnection>());
 
-            int messageId = MessagePacker.GetId<SceneMessage>();
+            _ = MessagePacker.GetId<SceneMessage>();
             var reader = new NetworkReader(new byte[] { 1, 2, 3, 4 });
             InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
             {

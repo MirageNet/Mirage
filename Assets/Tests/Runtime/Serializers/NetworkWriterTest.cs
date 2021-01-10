@@ -8,20 +8,6 @@ namespace Mirror.Tests
     [TestFixture]
     public class NetworkWriterTest
     {
-        /* uncomment if needed. commented for faster test workflow. this takes >3s.
-        [Test]
-        public void Benchmark()
-        {
-            // 10 million reads, Unity 2019.3, code coverage disabled
-            //    4014ms ms
-            NetworkWriter writer = new NetworkWriter();
-            for (int i = 0; i < 10000000; ++i)
-            {
-                writer.SetLength(0);
-                writer.WriteVector3(new Vector3(1, 2, 3));
-            }
-        }
-        */
 
         [Test]
         public void TestWritingSmallMessage()
@@ -484,7 +470,7 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void TestMatrix4x4()
+        public void TestMatrix()
         {
             Matrix4x4[] inputs = {
                 Matrix4x4.identity,
@@ -975,7 +961,6 @@ namespace Mirror.Tests
             {
                 writer.WriteDecimal(weird);
             }
-            //Debug.Log(BitConverter.ToString(writer.ToArray()));
             Assert.That(writer.ToArray(), Is.EqualTo(expected));
         }
 
@@ -1164,12 +1149,12 @@ namespace Mirror.Tests
         [Test]
         public void TestList()
         {
-            var original = new List<int>() { 1, 2, 3, 4, 5 };
+            var original = new List<int> { 1, 2, 3, 4, 5 };
             var writer = new NetworkWriter();
             writer.Write(original);
 
             var reader = new NetworkReader(writer.ToArray());
-            var readList = reader.Read<List<int>>();
+            List<int> readList = reader.Read<List<int>>();
             Assert.That(readList, Is.EqualTo(original));
         }
 
