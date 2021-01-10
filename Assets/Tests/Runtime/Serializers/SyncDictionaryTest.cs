@@ -255,7 +255,7 @@ namespace Mirror.Tests
 
             clientSyncDictionary.CopyTo(data, 0);
 
-            Assert.That(data, Is.EquivalentTo(new KeyValuePair<int, string>[]
+            Assert.That(data, Is.EquivalentTo(new []
             {
                 new KeyValuePair<int, string>(0, "Hello"),
                 new KeyValuePair<int, string>(1, "World"),
@@ -340,7 +340,7 @@ namespace Mirror.Tests
 
             // make old client the host
             SyncDictionaryIntString hostList = clientSyncDictionary;
-            SyncDictionaryIntString clientList2 = new SyncDictionaryIntString();
+            var clientList2 = new SyncDictionaryIntString();
 
             Assert.That(hostList.IsReadOnly, Is.False);
 
