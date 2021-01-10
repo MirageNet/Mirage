@@ -15,13 +15,13 @@ namespace Mirror.Tests
 
     public abstract class RequestMessageBase
     {
-        public int responseId = 0;
+        public int responseId;
     }
     public class ResponseMessage : RequestMessageBase
     {
         public int state;
         public string message = "";
-        public int errorCode = 0; // optional for error codes
+        public int errorCode; // optional for error codes
     }
 
     //reverseOrder to test this https://github.com/vis2k/Mirror/issues/1925
@@ -29,11 +29,11 @@ namespace Mirror.Tests
     {
         public int state;
         public string message = "";
-        public int errorCode = 0; // optional for error codes
+        public int errorCode; // optional for error codes
     }
     public abstract class RequestMessageBaseReverse
     {
-        public int responseId = 0;
+        public int responseId;
     }
 
     [TestFixture]
