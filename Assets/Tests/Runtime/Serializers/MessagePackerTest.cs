@@ -35,7 +35,7 @@ namespace Mirror.Tests
 
             Assert.Throws<FormatException>(() =>
             {
-                AddPlayerMessage unpacked = MessagePacker.Unpack<AddPlayerMessage>(data);
+                _ = MessagePacker.Unpack<AddPlayerMessage>(data);
             });
         }
 
@@ -45,7 +45,7 @@ namespace Mirror.Tests
             // Unpack<T> has a id != msgType case that throws a FormatException.
             // let's try to trigger it.
 
-            var message = new SceneMessage()
+            var message = new SceneMessage
             {
                 scenePath = "Hello world",
                 sceneOperation = SceneOperation.LoadAdditive
@@ -68,7 +68,7 @@ namespace Mirror.Tests
         public void TestUnpackMessageNonGeneric()
         {
             // try a regular message
-            var message = new SceneMessage()
+            var message = new SceneMessage
             {
                 scenePath = "Hello world",
                 sceneOperation = SceneOperation.LoadAdditive
@@ -88,7 +88,7 @@ namespace Mirror.Tests
             Assert.Throws<EndOfStreamException>(() =>
             {
                 var reader2 = new NetworkReader(new byte[0]);
-                int msgType2 = MessagePacker.UnpackId(reader2);
+                _ = MessagePacker.UnpackId(reader2);
             });
         }
 
@@ -137,7 +137,7 @@ namespace Mirror.Tests
             int id = MessagePacker.GetId(typeof(SomeRandomMessageNotRegistered));
             Assert.Throws<KeyNotFoundException>(() =>
             {
-                Type type = MessagePacker.GetMessageType(id);
+                _ = MessagePacker.GetMessageType(id);
             });
         }
     }
