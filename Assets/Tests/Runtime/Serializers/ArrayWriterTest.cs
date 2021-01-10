@@ -77,7 +77,7 @@ namespace Mirror.Tests
 
             int[] unpacked = MessagePacker.Unpack<int[]>(data);
 
-            Assert.That(unpacked, Is.EquivalentTo(new int[] { 3, 4, 5 }));
+            Assert.That(unpacked, Is.EquivalentTo(new [] { 3, 4, 5 }));
         }
     }
 }
