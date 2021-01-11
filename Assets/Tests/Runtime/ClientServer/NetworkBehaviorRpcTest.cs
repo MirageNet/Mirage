@@ -127,6 +127,51 @@ namespace Mirror.Tests
         }
 
         [UnityTest]
+        public IEnumerator SendNullNetworkIdentity() => UniTask.ToCoroutine(async () =>
+        {
+            Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+            clientComponent.onSendNetworkIdentityCalled += callback;
+
+            serverComponent.SendNetworkIdentity(null);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            callback.Received().Invoke(null);
+        });
+
+        [UnityTest]
+        public IEnumerator SendNullNetworkBehavior() => UniTask.ToCoroutine(async () =>
+        {
+            Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+            clientComponent.onSendNetworkBehaviourCalled += callback;
+
+            serverComponent.SendNetworkBehaviour(null);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            callback.Received().Invoke(null);
+        });
+
+        [UnityTest]
+        public IEnumerator SendNullNetworkBehaviorChild() => UniTask.ToCoroutine(async () =>
+        {
+            Action<SampleBehaviorWithRpc> callback = Substitute.For<Action<SampleBehaviorWithRpc>>();
+            clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
+
+            serverComponent.SendNetworkBehaviourDerived(null);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            callback.Received().Invoke(null);
+        });
+
+        [UnityTest]
+        public IEnumerator SendNullGameObject() => UniTask.ToCoroutine(async () =>
+        {
+            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            clientComponent.onSendGameObjectCalled += callback;
+
+            serverComponent.SendGameObject(null);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            callback.Received().Invoke(null);
+        });
+
+
+        [UnityTest]
         public IEnumerator SendNetworkIdentityToServer() => UniTask.ToCoroutine(async () =>
         {
             Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
