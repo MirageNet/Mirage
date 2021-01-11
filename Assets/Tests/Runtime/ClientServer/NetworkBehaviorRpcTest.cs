@@ -50,7 +50,7 @@ namespace Mirror.Tests
             clientComponent.onSendNetworkIdentityCalled += callback;
 
             serverComponent.SendNetworkIdentity(serverIdentity);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Count() > 0);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
             callback.Received().Invoke(clientIdentity);
         });
 
@@ -61,7 +61,7 @@ namespace Mirror.Tests
             clientComponent.onSendNetworkBehaviourCalled += callback;
 
             serverComponent.SendNetworkBehaviour(serverComponent);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Count() > 0);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
             callback.Received().Invoke(clientComponent);
         });
 
@@ -72,7 +72,7 @@ namespace Mirror.Tests
             clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
             serverComponent.SendNetworkBehaviourDerived(serverComponent);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Count() > 0);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
             callback.Received().Invoke(clientComponent);
         });
 
@@ -83,7 +83,7 @@ namespace Mirror.Tests
             clientComponent.onSendGameObjectCalled += callback;
 
             serverComponent.SendGameObject(serverPlayerGO);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Count() > 0);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
             callback.Received().Invoke(clientPlayerGO);
         });
 
