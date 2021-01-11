@@ -5,6 +5,7 @@ using NSubstitute;
 using UnityEngine;
 using UnityEngine.TestTools;
 using System.Linq;
+using NUnit.Framework;
 
 namespace Mirror.Tests
 {
@@ -70,7 +71,7 @@ namespace Mirror.Tests
             Action<SampleBehaviorWithRpc> callback = Substitute.For<Action<SampleBehaviorWithRpc>>();
             clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
-            serverComponent.SendNetworkBehaviour(serverComponent);
+            serverComponent.SendNetworkBehaviourDerived(serverComponent);
             await UniTask.WaitUntil(() => callback.ReceivedCalls().Count() > 0);
             callback.Received().Invoke(clientComponent);
         });
@@ -81,9 +82,22 @@ namespace Mirror.Tests
             Action<GameObject> callback = Substitute.For<Action<GameObject>>();
             clientComponent.onSendGameObjectCalled += callback;
 
-            serverComponent.SendGameObject(serverGo);
+            serverComponent.SendGameObject(serverPlayerGO);
             await UniTask.WaitUntil(() => callback.ReceivedCalls().Count() > 0);
-            callback.Received().Invoke(clientGo);
+            callback.Received().Invoke(clientPlayerGO);
         });
+
+        [Test]
+        public void RpcSendInvalidGO()
+        {
+            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            clientComponent.onSendGameObjectCalled += callback;
+
+            // this object does not have a NI, so this should error out
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                serverComponent.SendGameObject(serverGo);
+            });
+        }
     }
 }
