@@ -34,17 +34,43 @@ namespace Mirror.Tests
             onSendNetworkBehaviourCalled?.Invoke(value);
         }
 
-        [ClientRpc]
+        [ServerRpc]
         public void SendNetworkBehaviourDerived(SampleBehaviorWithRpc value)
         {
             onSendNetworkBehaviourDerivedCalled?.Invoke(value);
         }
+
+        [ServerRpc]
+        public void SendNetworkIdentityToServer(NetworkIdentity value)
+        {
+            onSendNetworkIdentityCalled?.Invoke(value);
+        }
+
+        [ServerRpc]
+        public void SendGameObjectToServer(GameObject value)
+        {
+            onSendGameObjectCalled?.Invoke(value);
+        }
+
+        [ServerRpc]
+        public void SendNetworkBehaviourToServer(NetworkBehaviour value)
+        {
+            onSendNetworkBehaviourCalled?.Invoke(value);
+        }
+
+        [ClientRpc]
+        public void SendNetworkBehaviourDerivedToServer(SampleBehaviorWithRpc value)
+        {
+            onSendNetworkBehaviourDerivedCalled?.Invoke(value);
+        }
+
+
     }
 
     public class NetworkBehaviorRPCTest : ClientServerSetup<SampleBehaviorWithRpc>
     {
         [UnityTest]
-        public IEnumerator RpcCanSendNetworkIdentity() => UniTask.ToCoroutine(async () =>
+        public IEnumerator SendNetworkIdentity() => UniTask.ToCoroutine(async () =>
         {
             Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
             clientComponent.onSendNetworkIdentityCalled += callback;
@@ -55,7 +81,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator RpcCanSendNetworkBehavior() => UniTask.ToCoroutine(async () =>
+        public IEnumerator SendNetworkBehavior() => UniTask.ToCoroutine(async () =>
         {
             Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
             clientComponent.onSendNetworkBehaviourCalled += callback;
@@ -66,7 +92,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator RpcCanSendNetworkBehaviorChild() => UniTask.ToCoroutine(async () =>
+        public IEnumerator SendNetworkBehaviorChild() => UniTask.ToCoroutine(async () =>
         {
             Action<SampleBehaviorWithRpc> callback = Substitute.For<Action<SampleBehaviorWithRpc>>();
             clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
@@ -77,7 +103,7 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
-        public IEnumerator RpcCanSendGameObject() => UniTask.ToCoroutine(async () =>
+        public IEnumerator SendGameObject() => UniTask.ToCoroutine(async () =>
         {
             Action<GameObject> callback = Substitute.For<Action<GameObject>>();
             clientComponent.onSendGameObjectCalled += callback;
@@ -88,7 +114,7 @@ namespace Mirror.Tests
         });
 
         [Test]
-        public void RpcSendInvalidGO()
+        public void SendInvalidGO()
         {
             Action<GameObject> callback = Substitute.For<Action<GameObject>>();
             clientComponent.onSendGameObjectCalled += callback;
@@ -97,6 +123,63 @@ namespace Mirror.Tests
             Assert.Throws<InvalidOperationException>(() =>
             {
                 serverComponent.SendGameObject(serverGo);
+            });
+        }
+
+        [UnityTest]
+        public IEnumerator SendNetworkIdentityToServer() => UniTask.ToCoroutine(async () =>
+        {
+            Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+            serverComponent.onSendNetworkIdentityCalled += callback;
+
+            clientComponent.SendNetworkIdentityToServer(clientIdentity);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            callback.Received().Invoke(serverIdentity);
+        });
+
+        [UnityTest]
+        public IEnumerator SendNetworkBehaviorToServer() => UniTask.ToCoroutine(async () =>
+        {
+            Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+            serverComponent.onSendNetworkBehaviourCalled += callback;
+
+            clientComponent.SendNetworkBehaviourToServer(clientComponent);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            callback.Received().Invoke(serverComponent);
+        });
+
+        [UnityTest]
+        public IEnumerator SendNetworkBehaviorChildToServer() => UniTask.ToCoroutine(async () =>
+        {
+            Action<SampleBehaviorWithRpc> callback = Substitute.For<Action<SampleBehaviorWithRpc>>();
+            serverComponent.onSendNetworkBehaviourDerivedCalled += callback;
+
+            clientComponent.SendNetworkBehaviourDerivedToServer(clientComponent);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            callback.Received().Invoke(serverComponent);
+        });
+
+        [UnityTest]
+        public IEnumerator SendGameObjectToServer() => UniTask.ToCoroutine(async () =>
+        {
+            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            serverComponent.onSendGameObjectCalled += callback;
+
+            clientComponent.SendGameObjectToServer(clientPlayerGO);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            callback.Received().Invoke(serverPlayerGO);
+        });
+
+        [Test]
+        public void SendInvalidGOToServer()
+        {
+            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            serverComponent.onSendGameObjectCalled += callback;
+
+            // this object does not have a NI, so this should error out
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                clientComponent.SendGameObjectToServer(clientGo);
             });
         }
     }
