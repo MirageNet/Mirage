@@ -1,11 +1,9 @@
-﻿// This file is used by Code Analysis to maintain SuppressMessage
+// This file is used by Code Analysis to maintain SuppressMessage
 // attributes that are applied to this project.
 // Project-level suppressions either have no target or are given
 // a specific target and scoped to a namespace, type, member, etc.
 
 using System.Diagnostics.CodeAnalysis;
-
-[assembly: SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out", Justification = "<Pending>", Scope = "member", Target = "~M:Mirror.Tests.NetworkReaderTest.ReadBytesCountTooBigTest")]
 
 /* Unmerged change from project 'Unity.Mirror.CodeGen.Tests'
 Added:
@@ -45,8 +43,6 @@ Added:
 [assembly: SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out", Justification = "<Pending>", Scope = "member", Target = "~M:Mirror.Weaver.Writers.GenerateCollectionWriter(Mono.Cecil.TypeReference,Mono.Cecil.TypeReference,System.Linq.Expressions.Expression{System.Action})~Mono.Cecil.MethodDefinition")]
 [assembly: SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out", Justification = "<Pending>", Scope = "member", Target = "~M:Mirror.Weaver.Writers.WriteNullCheck(Mono.Cecil.Cil.ILProcessor)")]
 */
-[assembly: SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out", Justification = "<Pending>", Scope = "member", Target = "~M:Mirror.Experimental.NetworkTransformBase.InterpolatePosition(Mirror.Experimental.NetworkTransformBase.DataPoint,Mirror.Experimental.NetworkTransformBase.DataPoint,UnityEngine.Vector3)~UnityEngine.Vector3")]
-[assembly: SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out", Justification = "<Pending>", Scope = "member", Target = "~M:Mirror.NetworkTransformBase.InterpolatePosition(Mirror.NetworkTransformBase.DataPoint,Mirror.NetworkTransformBase.DataPoint,UnityEngine.Vector3)~UnityEngine.Vector3")]
 
 /* Unmerged change from project 'Unity.Mirror.CodeGen'
 Added:
