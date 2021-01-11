@@ -34,7 +34,7 @@ namespace Mirror.Tests
             onSendNetworkBehaviourCalled?.Invoke(value);
         }
 
-        [ServerRpc]
+        [ClientRpc]
         public void SendNetworkBehaviourDerived(SampleBehaviorWithRpc value)
         {
             onSendNetworkBehaviourDerivedCalled?.Invoke(value);
@@ -58,7 +58,7 @@ namespace Mirror.Tests
             onSendNetworkBehaviourCalled?.Invoke(value);
         }
 
-        [ClientRpc]
+        [ServerRpc]
         public void SendNetworkBehaviourDerivedToServer(SampleBehaviorWithRpc value)
         {
             onSendNetworkBehaviourDerivedCalled?.Invoke(value);
