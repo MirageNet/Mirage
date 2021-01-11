@@ -217,5 +217,11 @@ namespace Mirror.Weaver.Tests
             HasError("Duplicate Rpc name CmdCantHaveSameName",
                 "System.Void WeaverNetworkBehaviourTests.NetworkBehaviourCmdDuplicateName.NetworkBehaviourCmdDuplicateName::CmdCantHaveSameName(System.Int32,System.Int32)");
         }
+
+        [Test]
+        public void NetworkBehaviourChild()
+        {
+            IsSuccess();
+        }
     }
 }
