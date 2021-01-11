@@ -91,11 +91,6 @@ namespace Mirror.Weaver
                 logger.Error($"Cannot generate reader for {typeReference.Name}. Use a supported type or provide a custom reader", typeReference);
                 return null;
             }
-            if (typeReference.Is<GameObject>())
-            {
-                logger.Error($"Cannot generate reader for {typeReference.Name}. Use a supported type or provide a custom reader", typeReference);
-                return null;
-            }
             if (typeReference.IsByReference)
             {
                 // error??
