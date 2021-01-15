@@ -24,9 +24,16 @@ namespace Mirror
         public NetworkServer server;
         public NetworkSceneManager networkSceneManager;
 
-        uint nextNetworkId = 1;
-        uint GetNextNetworkId() => nextNetworkId++;
-
+        ushort nextNetworkId = 1;
+        ushort GetNextNetworkId()
+        {
+            ushort next;
+            do
+            {
+                next = nextNetworkId++;
+            } while (next == 0 || server.Spawned.ContainsKey(next));
+            return next;
+        }
 
         public readonly HashSet<NetworkIdentity> DirtyObjects = new HashSet<NetworkIdentity>();
         private readonly List<NetworkIdentity> DirtyObjectsTmp = new List<NetworkIdentity>();

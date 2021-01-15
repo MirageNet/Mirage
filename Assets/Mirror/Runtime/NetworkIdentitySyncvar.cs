@@ -12,11 +12,11 @@
         /// used to lookup the identity if it exists
         /// </summary>
         internal NetworkClient client;
-        internal uint netId;
+        internal ushort netId;
 
         internal NetworkIdentity identity;
 
-        internal uint NetId => identity != null ? identity.NetId : netId;
+        internal ushort NetId => identity != null ? identity.NetId : netId;
 
         public NetworkIdentity Value
         {
@@ -48,12 +48,12 @@
     {
         public static void WriteNetworkIdentitySyncVar(this NetworkWriter writer, NetworkIdentitySyncvar id)
         {
-            writer.WritePackedUInt32(id.NetId);
+            writer.WriteUInt16(id.NetId);
         }
 
         public static NetworkIdentitySyncvar ReadNetworkIdentitySyncVar(this NetworkReader reader)
         {
-            uint netId = reader.ReadPackedUInt32();
+            ushort netId = reader.ReadUInt16();
 
             NetworkIdentity identity = null;
             if (!(reader.Client is null))

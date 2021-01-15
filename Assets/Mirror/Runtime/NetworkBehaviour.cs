@@ -85,7 +85,7 @@ namespace Mirror
         /// The unique network Id of this object.
         /// <para>This is assigned at runtime by the network server and will be unique for all objects for that network session.</para>
         /// </summary>
-        public uint NetId => NetIdentity.NetId;
+        public ushort NetId => NetIdentity.NetId;
 
         /// <summary>
         /// The <see cref="NetworkServer">NetworkClient</see> associated to this object.

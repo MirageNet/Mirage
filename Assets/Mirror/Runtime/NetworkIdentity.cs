@@ -147,7 +147,7 @@ namespace Mirror
         /// Unique identifier for this particular object instance, used for tracking objects between networked clients and the server.
         /// <para>This is a unique identifier for this particular GameObject instance. Use it to track GameObjects between networked clients and the server.</para>
         /// </summary>
-        public uint NetId { get; internal set; }
+        public ushort NetId { get; internal set; }
 
         /// <summary>
         /// A unique identifier for NetworkIdentity objects within a scene.

@@ -472,10 +472,10 @@ namespace Mirror
         {
             if (value == null)
             {
-                writer.WritePackedUInt32(0);
+                writer.WriteUInt16(0);
                 return;
             }
-            writer.WritePackedUInt32(value.NetId);
+            writer.WriteUInt16(value.NetId);
         }
 
         public static void WriteUri(this NetworkWriter writer, Uri uri)

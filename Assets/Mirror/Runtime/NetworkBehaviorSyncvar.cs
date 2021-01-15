@@ -12,12 +12,12 @@
         /// used to lookup the identity if it exists
         /// </summary>
         internal NetworkClient client;
-        internal uint netId;
+        internal ushort netId;
         internal int componentId;
 
         internal NetworkBehaviour component;
 
-        internal uint NetId => component != null ? component.NetId : netId;
+        internal ushort NetId => component != null ? component.NetId : netId;
         internal int ComponentId => component != null ? component.ComponentIndex : componentId;
 
         public NetworkBehaviour Value
@@ -54,13 +54,13 @@
     {
         public static void WriteNetworkBehaviorSyncVar(this NetworkWriter writer, NetworkBehaviorSyncvar id)
         {
-            writer.WritePackedUInt32(id.NetId);
+            writer.WriteUInt16(id.NetId);
             writer.WritePackedInt32(id.ComponentId);
         }
 
         public static NetworkBehaviorSyncvar ReadNetworkBehaviourSyncVar(this NetworkReader reader)
         {
-            uint netId = reader.ReadPackedUInt32();
+            ushort netId = reader.ReadUInt16();
             int componentId = reader.ReadPackedInt32();
 
             NetworkIdentity identity = null;

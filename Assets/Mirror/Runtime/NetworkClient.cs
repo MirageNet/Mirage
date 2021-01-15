@@ -31,7 +31,7 @@ namespace Mirror
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
 
-        internal readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
+        internal readonly Dictionary<ushort, NetworkIdentity> spawned = new Dictionary<ushort, NetworkIdentity>();
 
         /// <summary>
         /// Event fires once the Client has connected its Server.
@@ -78,7 +78,7 @@ namespace Mirror
         /// <summary>
         /// List of all objects spawned in this client
         /// </summary>
-        public Dictionary<uint, NetworkIdentity> Spawned
+        public Dictionary<ushort, NetworkIdentity> Spawned
         {
             get
             {

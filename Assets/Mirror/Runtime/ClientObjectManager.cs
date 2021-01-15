@@ -373,7 +373,7 @@ namespace Mirror
             ApplySpawnPayload(identity, msg);
         }
 
-        NetworkIdentity GetExistingObject(uint netid)
+        NetworkIdentity GetExistingObject(ushort netid)
         {
             client.Spawned.TryGetValue(netid, out NetworkIdentity localObject);
             return localObject;
@@ -446,7 +446,7 @@ namespace Mirror
             DestroyObject(msg.netId);
         }
 
-        void DestroyObject(uint netId)
+        void DestroyObject(ushort netId)
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnObjDestroy netId:" + netId);
 

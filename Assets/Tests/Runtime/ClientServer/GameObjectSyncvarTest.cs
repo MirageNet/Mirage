@@ -62,7 +62,7 @@ namespace Mirror.Tests
             serverObjectManager.Spawn(newObject);
 
             // wait until the client spawns it
-            uint newObjectId = newBehavior.NetId;
+            ushort newObjectId = newBehavior.NetId;
             await UniTask.WaitUntil(() => client.Spawned.ContainsKey(newObjectId));
 
             // check if the target was set correctly in the client
