@@ -27,12 +27,18 @@ namespace Mirror
         ushort nextNetworkId = 1;
         ushort GetNextNetworkId()
         {
-            ushort next;
-            do
+            // After a while,  the ids will wrap around,  it is possible
+            // that there might be an object already using the next id
+            // so we need to find a valid id that is not used
+            unchecked
             {
-                next = nextNetworkId++;
-            } while (next == 0 || server.Spawned.ContainsKey(next));
-            return next;
+                ushort next;
+                do
+                {
+                    next = nextNetworkId++;
+                } while (next == 0 || server.Spawned.ContainsKey(next));
+                return next;
+            }
         }
 
         public readonly HashSet<NetworkIdentity> DirtyObjects = new HashSet<NetworkIdentity>();
