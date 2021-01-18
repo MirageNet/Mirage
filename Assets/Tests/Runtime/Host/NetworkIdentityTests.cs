@@ -1,13 +1,13 @@
+using System;
+using System.Collections;
+using Cysharp.Threading.Tasks;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.TestTools;
 using InvalidOperationException = System.InvalidOperationException;
 using Object = UnityEngine.Object;
-using System.Collections;
-using UnityEngine.Events;
-using NSubstitute;
-using System;
-using Cysharp.Threading.Tasks;
 
 namespace Mirror.Tests.Host
 {

@@ -1,8 +1,8 @@
 using System.Collections;
+using Cysharp.Threading.Tasks;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.TestTools;
-using NSubstitute;
-using Cysharp.Threading.Tasks;
 
 namespace Mirror.Tests.Host
 {

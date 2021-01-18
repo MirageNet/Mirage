@@ -1,8 +1,8 @@
 using System;
+using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
-using Cysharp.Threading.Tasks;
 
 namespace Mirror.Tests.Host
 {
