@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 using NSubstitute;
 using Cysharp.Threading.Tasks;
 
-namespace Mirror.Tests
+namespace Mirror.Tests.ClientServer
 {
     public class ClientServerComponentTests : ClientServerSetup<MockComponent>
     {
