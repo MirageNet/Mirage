@@ -7,13 +7,6 @@ using Cysharp.Threading.Tasks;
 namespace Mirror.Tests
 {
 
-    struct WovenTestMessage
-    {
-        public int IntValue;
-        public string StringValue;
-        public double DoubleValue;
-    }
-
     [TestFixture]
     public class NetworkServerTest : HostSetup<MockComponent>
     {
