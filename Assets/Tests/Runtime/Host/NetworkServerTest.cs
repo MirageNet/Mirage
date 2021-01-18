@@ -4,7 +4,7 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 using Cysharp.Threading.Tasks;
 
-namespace Mirror.Tests
+namespace Mirror.Tests.Host
 {
 
     [TestFixture]

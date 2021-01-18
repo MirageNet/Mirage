@@ -4,7 +4,7 @@ using UnityEngine.TestTools;
 using NSubstitute;
 using Cysharp.Threading.Tasks;
 
-namespace Mirror.Tests
+namespace Mirror.Tests.Host
 {
     [TestFixture]
     public class NetworkClientTest : HostSetup<MockComponent>

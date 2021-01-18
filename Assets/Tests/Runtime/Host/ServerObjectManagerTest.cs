@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 using static Mirror.Tests.LocalConnections;
 using Object = UnityEngine.Object;
 
-namespace Mirror.Tests
+namespace Mirror.Tests.Host
 {
     public class SimpleServerObjectManager : ServerObjectManager
     {

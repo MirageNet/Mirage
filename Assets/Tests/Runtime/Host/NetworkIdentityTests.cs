@@ -9,7 +9,7 @@ using NSubstitute;
 using System;
 using Cysharp.Threading.Tasks;
 
-namespace Mirror.Tests
+namespace Mirror.Tests.Host
 {
     public class NetworkIdentityTests : HostSetup<MockComponent>
     {

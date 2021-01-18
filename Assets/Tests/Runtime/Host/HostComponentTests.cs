@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 using NSubstitute;
 using UnityEngine.Events;
 
-namespace Mirror.Tests
+namespace Mirror.Tests.Host
 {
     public class HostComponentTests : HostSetup<MockComponent>
     {
