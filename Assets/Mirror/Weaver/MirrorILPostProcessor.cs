@@ -38,8 +38,15 @@ namespace Mirror.Weaver
             return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), logger.Diagnostics);
         }
 
-        public override bool WillProcess(ICompiledAssembly compiledAssembly) =>
-                compiledAssembly.Name == RuntimeAssemblyName ||
-                compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RuntimeAssemblyName);
+        public override bool WillProcess(ICompiledAssembly compiledAssembly)
+        {
+            bool result = 
+            compiledAssembly.Name == RuntimeAssemblyName ||
+            compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RuntimeAssemblyName);
+
+            Console.WriteLine($"checking Assembly {compiledAssembly.Name}, weaving: {result}");
+            return result;
+
+        }
     }
 }
