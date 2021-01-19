@@ -60,5 +60,13 @@ namespace Mirror
         /// </summary>
         /// <returns>the url at which this server can be reached</returns>
         public abstract IEnumerable<Uri> ServerUri();
+
+        public virtual void Send(IEnumerable<IConnection> connections, ArraySegment<byte> data, int channel)
+        {
+            foreach(IConnection conn in connections)
+            {
+                conn.SendAsync(data, channel);
+            }
+        }
     }
 }
