@@ -3,8 +3,6 @@ using System.Linq;
 using System.IO;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using System;
-using UnityEditor.Compilation;
 
 namespace Mirror.Weaver
 {
