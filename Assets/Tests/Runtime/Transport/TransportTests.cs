@@ -206,6 +206,28 @@ namespace Mirror.Tests
         {
             Assert.That(transport.Scheme, Is.EquivalentTo(scheme));
         }
+
+        [UnityTest]
+        public IEnumerator DirectSendTest() => UniTask.ToCoroutine(async () =>
+        {
+            IConnection[] connections = new IConnection[] { clientConnection, clientConnection };
+
+            Encoding utf8 = Encoding.UTF8;
+            string message = "Hello from the client";
+            byte[] data = utf8.GetBytes(message);
+            await transport.Send(connections, new ArraySegment<byte>(data), Channel.Reliable);
+
+            var stream = new MemoryStream();
+
+            await serverConnection.ReceiveAsync(stream);
+            byte[] received = stream.ToArray();
+            Assert.That(received, Is.EqualTo(data));
+
+            stream.SetLength(0);
+            await serverConnection.ReceiveAsync(stream);
+            byte[] received2 = stream.ToArray();
+            Assert.That(received2, Is.EqualTo(data));
+        });
     }
 }
 
