@@ -12,7 +12,7 @@ namespace Mirror.Tests.ClientServer
 
         public void OnTargetChange(NetworkIdentity oldIdentity, NetworkIdentity networkIdentity)
         {
-
+            Assert.That(networkIdentity, Is.SameAs(target));
         }
     }
 
