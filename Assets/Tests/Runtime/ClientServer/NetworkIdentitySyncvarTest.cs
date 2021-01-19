@@ -10,7 +10,7 @@ namespace Mirror.Tests.ClientServer
         [SyncVar(hook = nameof(OnTargetChange))]
         public NetworkIdentity target;
 
-        public void OnTargetChange(NetworkIdentity oldIdentity, NetworkIdentity networkIdentity)
+        public void OnTargetChange(NetworkIdentity _, NetworkIdentity networkIdentity)
         {
             Assert.That(networkIdentity, Is.SameAs(target));
         }
