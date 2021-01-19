@@ -4,12 +4,14 @@ using System.IO;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using UnityEditor.Compilation;
 
 namespace Mirror.Weaver
 {
     public class MirrorILPostProcessor : ILPostProcessor
     {
         public const string RuntimeAssemblyName = "Mirror";
+        public const string EditorAssemblyName = "Mirror.Editor";
 
         public override ILPostProcessor GetInstance() => this;
 
@@ -41,13 +43,14 @@ namespace Mirror.Weaver
 
         public override bool WillProcess(ICompiledAssembly compiledAssembly)
         {
-            bool result = 
-            compiledAssembly.Name == RuntimeAssemblyName ||
-            compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RuntimeAssemblyName);
+            bool usesMirror = 
+                compiledAssembly.Name == RuntimeAssemblyName ||
+                compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RuntimeAssemblyName);
 
-            Console.WriteLine($"checking Assembly {compiledAssembly.Name}, weaving: {result}");
-            return result;
+            bool usesMirrorEditor =
+                compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == EditorAssemblyName);
 
+            return usesMirror && !usesMirrorEditor;
         }
     }
 }
