@@ -9,11 +9,11 @@ namespace Mirror
         public NetworkServer server;
 
         [Scene]
-        [Tooltip("Assign the sub-scene to load for this zone")]
+        [Tooltip("Assign the OfflineScene to load for this zone")]
         public string OfflineScene;
 
         [Scene]
-        [Tooltip("Assign the sub-scene to load for this zone")]
+        [Tooltip("Assign the OnlineScene to load for this zone")]
         public string OnlineScene;
 
         // Start is called before the first frame update
