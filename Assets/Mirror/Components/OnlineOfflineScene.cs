@@ -5,6 +5,8 @@ namespace Mirror
 {
     public class OnlineOfflineScene : MonoBehaviour
     {
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(OnlineOfflineScene));
+
         public NetworkClient client;
         public NetworkServer server;
 
@@ -19,6 +21,12 @@ namespace Mirror
         // Start is called before the first frame update
         void Start()
         {
+            if (string.IsNullOrEmpty(OnlineScene))
+                logger.LogWarning("OnlineScene missing. Please assign to OnlineOfflineScene component.");
+
+            if (string.IsNullOrEmpty(OfflineScene))
+                logger.LogWarning("OfflineScene missing. Please assign to OnlineOfflineScene component.");
+
             if (client != null)
             {
                 client.Disconnected.AddListener(OnClientDisconnected);
@@ -32,17 +40,20 @@ namespace Mirror
 
         void OnClientDisconnected()
         {
-            SceneManager.LoadSceneAsync(OfflineScene);
+            if(!string.IsNullOrEmpty(OfflineScene))
+                SceneManager.LoadSceneAsync(OfflineScene);
         }
 
         void OnServerStarted()
         {
-            SceneManager.LoadSceneAsync(OnlineScene);
+            if (!string.IsNullOrEmpty(OnlineScene))
+                SceneManager.LoadSceneAsync(OnlineScene);
         }
 
         void OnServerStopped()
         {
-            SceneManager.LoadSceneAsync(OfflineScene);
+            if (!string.IsNullOrEmpty(OfflineScene))
+                SceneManager.LoadSceneAsync(OfflineScene);
         }
     }
 }
