@@ -8,8 +8,13 @@ namespace Mirror
         public NetworkClient client;
         public NetworkServer server;
 
-        public Scene OfflineScene;
-        public Scene OnlineScene;
+        [Scene]
+        [Tooltip("Assign the sub-scene to load for this zone")]
+        public string OfflineScene;
+
+        [Scene]
+        [Tooltip("Assign the sub-scene to load for this zone")]
+        public string OnlineScene;
 
         // Start is called before the first frame update
         void Start()
@@ -27,17 +32,17 @@ namespace Mirror
 
         void OnClientDisconnected()
         {
-            SceneManager.LoadSceneAsync(OfflineScene.path);
+            SceneManager.LoadSceneAsync(OfflineScene);
         }
 
         void OnServerStarted()
         {
-            SceneManager.LoadSceneAsync(OnlineScene.path);
+            SceneManager.LoadSceneAsync(OnlineScene);
         }
 
         void OnServerStopped()
         {
-            SceneManager.LoadSceneAsync(OfflineScene.path);
+            SceneManager.LoadSceneAsync(OfflineScene);
         }
     }
 }
