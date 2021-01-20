@@ -40,20 +40,17 @@ namespace Mirror
 
         void OnClientDisconnected()
         {
-            if(!string.IsNullOrEmpty(OfflineScene))
-                SceneManager.LoadSceneAsync(OfflineScene);
+            SceneManager.LoadSceneAsync(OfflineScene);
         }
 
         void OnServerStarted()
         {
-            if (!string.IsNullOrEmpty(OnlineScene))
-                SceneManager.LoadSceneAsync(OnlineScene);
+            SceneManager.LoadSceneAsync(OnlineScene);
         }
 
         void OnServerStopped()
         {
-            if (!string.IsNullOrEmpty(OfflineScene))
-                SceneManager.LoadSceneAsync(OfflineScene);
+            SceneManager.LoadSceneAsync(OfflineScene);
         }
     }
 }
