@@ -22,10 +22,10 @@ namespace Mirror
         void Start()
         {
             if (string.IsNullOrEmpty(OnlineScene))
-                logger.LogWarning("OnlineScene missing. Please assign to OnlineOfflineScene component.");
+                throw new MissingReferenceException("OnlineScene missing. Please assign to OnlineOfflineScene component.");
 
             if (string.IsNullOrEmpty(OfflineScene))
-                logger.LogWarning("OfflineScene missing. Please assign to OnlineOfflineScene component.");
+                throw new MissingReferenceException("OfflineScene missing. Please assign to OnlineOfflineScene component.");
 
             if (client != null)
             {
