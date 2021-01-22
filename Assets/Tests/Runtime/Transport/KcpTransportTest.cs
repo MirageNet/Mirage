@@ -116,13 +116,12 @@ namespace Mirror.Tests
             long received = transport.ReceivedBytes;
             Assert.That(received, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
 
-            byte[] data = { (byte)Random.Range(1, 255) };
             await clientConnection.SendAsync(new ArraySegment<byte>(data));
 
             var buffer = new MemoryStream();
             await serverConnection.ReceiveAsync(buffer);
 
-            Assert.That(transport.ReceivedBytes, Is.GreaterThan(received), "Client sent data,  we should have received");
+            Assert.That(transport.ReceivedBytes, Is.GreaterThan(received + data.Length), "Client sent data,  we should have received");
 
         });
 
@@ -132,13 +131,12 @@ namespace Mirror.Tests
             long sent = transport.SentBytes;
             Assert.That(sent, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
 
-            byte[] data = { (byte)Random.Range(1, 255) };
             await serverConnection.SendAsync(new ArraySegment<byte>(data));
 
             var buffer = new MemoryStream();
             await clientConnection.ReceiveAsync(buffer);
 
-            Assert.That(transport.SentBytes, Is.GreaterThan(sent), "Client sent data,  we should have received");
+            Assert.That(transport.SentBytes, Is.GreaterThan(sent + data.Length), "Client sent data,  we should have received");
 
         });
 
