@@ -32,8 +32,8 @@ namespace Mirror.KCP
 
         public long ReceivedMessageCount { get; private set; }
 
-        private long receivedBytes = 0;
-        private long sentBytes = 0;
+        private long receivedBytes;
+        private long sentBytes;
 
         private AutoResetUniTaskCompletionSource ListenCompletionSource;
 
