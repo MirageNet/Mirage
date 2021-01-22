@@ -108,6 +108,38 @@ namespace Mirror.Tests
         });
 
         [UnityTest]
+        public IEnumerator ReceivedBytes() => UniTask.ToCoroutine(async () =>
+        {
+            long received = transport.ReceivedBytes;
+            Assert.That(received, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
+
+            byte[] data = { (byte)Random.Range(1, 255) };
+            await clientConnection.SendAsync(new ArraySegment<byte>(data));
+
+            var buffer = new MemoryStream();
+            await serverConnection.ReceiveAsync(buffer);
+
+            Assert.That(transport.ReceivedBytes, Is.GreaterThan(received), "Client sent data,  we should have received");
+
+        });
+
+        [UnityTest]
+        public IEnumerator SentBytes() => UniTask.ToCoroutine(async () =>
+        {
+            long sent = transport.SentBytes;
+            Assert.That(sent, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
+
+            byte[] data = { (byte)Random.Range(1, 255) };
+            await serverConnection.SendAsync(new ArraySegment<byte>(data));
+
+            var buffer = new MemoryStream();
+            await clientConnection.ReceiveAsync(buffer);
+
+            Assert.That(transport.SentBytes, Is.GreaterThan(sent), "Client sent data,  we should have received");
+
+        });
+
+        [UnityTest]
         public IEnumerator SendUnreliableDataFromServer() => UniTask.ToCoroutine(async () =>
         {
             byte[] data = { (byte)Random.Range(1, 255) };
