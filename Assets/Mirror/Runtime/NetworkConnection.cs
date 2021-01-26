@@ -8,6 +8,7 @@ using UnityEngine.Assertions;
 
 namespace Mirror
 {
+
     /// <summary>
     /// A High level network connection. This is used for connections from client-to-server and for connection from server-to-client.
     /// </summary>
@@ -45,7 +46,7 @@ namespace Mirror
         /// General purpose object to hold authentication data, character selection, tokens, etc.
         /// associated with the connection for reference after Authentication completes.
         /// </summary>
-        public object AuthenticationData { get ; set; }
+        public object AuthenticationData { get; set; }
 
         /// <summary>
         /// Flag that tells if the connection has been marked as "ready" by a client calling ClientScene.Ready().
@@ -291,8 +292,17 @@ namespace Mirror
                 {
                     int msgType = MessagePacker.UnpackId(networkReader);
 
-                    // try to invoke the handler for that message
-                    InvokeHandler(msgType, networkReader, channelId);
+                    if (msgType == MessagePacker.GetId<NotifyPacket>())
+                    {
+                        // this is a notify message, send to the notify receive
+                        NotifyPacket notifyPacket = networkReader.ReadNotifyPacket();
+                        ReceiveNotify(notifyPacket, networkReader, channelId);
+                    }
+                    else
+                    {
+                        // try to invoke the handler for that message
+                        InvokeHandler(msgType, networkReader, channelId);
+                    }
                 }
                 catch (InvalidDataException ex)
                 {
@@ -357,5 +367,32 @@ namespace Mirror
                 // connection closed,  normal
             }
         }
+
+        #region Notify
+        /// <summary>
+        /// Sends a message, but notify when it is delivered or lost
+        /// </summary>
+        /// <typeparam name="T">type of message to send</typeparam>
+        /// <param name="msg">message to send</param>
+        /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
+        public void SendNotify<T>(T msg, object token)
+        {
+        }
+
+        internal void ReceiveNotify(NotifyPacket notifyPacket, NetworkReader networkReader, int channelId)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Raised when a message is delivered
+        /// </summary>
+        public event Action<INetworkConnection, object> NotifyDelivered;
+
+        /// <summary>
+        /// Raised when a message is lost
+        /// </summary>
+        public event Action<INetworkConnection, object> NotifyLost;
+        #endregion
     }
 }
