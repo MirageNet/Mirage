@@ -19,21 +19,27 @@ namespace Mirror.Tests
 
         private Action<INetworkConnection, object> lost;
 
+        private byte[] lastSerializedPacket;
+
+
         [SetUp]
         public void SetUp()
         {
             data = new SceneMessage();
             mockTransportConnection = Substitute.For<IConnection>();
 
-            void parsePacket(ArraySegment<byte> data)
+            void ParsePacket(ArraySegment<byte> data)
             {
                 var reader = new NetworkReader(data);
-                int id = MessagePacker.UnpackId(reader);
+                _ = MessagePacker.UnpackId(reader);
                 lastSent = reader.ReadNotifyPacket();
+
+                lastSerializedPacket = new byte[data.Count];
+                Array.Copy(data.Array, data.Offset, lastSerializedPacket, 0, data.Count);
             }
 
             mockTransportConnection.SendAsync(
-                Arg.Do<ArraySegment<byte>>(parsePacket), Channel.Unreliable);
+                Arg.Do<ArraySegment<byte>>(ParsePacket), Channel.Unreliable);
 
             connection = new NetworkConnection(mockTransportConnection);
 
@@ -91,7 +97,6 @@ namespace Mirror.Tests
             }));
         }
 
-        
         [Test]
         public void SendsNotifyPacketWithSequence()
         {
@@ -171,6 +176,24 @@ namespace Mirror.Tests
             });
         }
 
+        [Test]
+        public void DropDuplicates()
+        {
+            connection.SendNotify(data, 1);
+
+            var reply = new NotifyPacket
+            {
+                Sequence = 1,
+                ReceiveSequence = 1,
+                AckMask = 0b001
+            };
+
+            connection.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
+            connection.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
+
+            delivered.Received(1).Invoke(connection, 1);
+        }
+
 
         [Test]
         public void LoseOldPackets()
@@ -201,6 +224,18 @@ namespace Mirror.Tests
                 ReceiveSequence = 100,
                 AckMask = 1
             }));
+        }
+
+        [Test]
+        public void SendAndReceive()
+        {
+            connection.SendNotify(data, 1);
+
+            Action<SceneMessage> mockHandler = Substitute.For<Action<SceneMessage>>();
+            connection.RegisterHandler(mockHandler);
+
+            connection.TransportReceive(new ArraySegment<byte>(lastSerializedPacket), Channel.Unreliable);
+            mockHandler.Received().Invoke(new SceneMessage());
         }
 
         [Test]
