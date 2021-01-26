@@ -122,9 +122,9 @@ namespace Mirror.Tests
         [Test]
         public void RaisePacketDelivered()
         {
-            connection.Send(data, 1);
-            connection.Send(data, 3);
-            connection.Send(data, 5);
+            connection.SendNotify(data, 1);
+            connection.SendNotify(data, 3);
+            connection.SendNotify(data, 5);
 
             delivered.DidNotReceiveWithAnyArgs().Invoke(default, default);
 
@@ -148,9 +148,9 @@ namespace Mirror.Tests
         [Test]
         public void RaisePacketNotDelivered()
         {
-            connection.Send(data, 1);
-            connection.Send(data, 3);
-            connection.Send(data, 5);
+            connection.SendNotify(data, 1);
+            connection.SendNotify(data, 3);
+            connection.SendNotify(data, 5);
 
             delivered.DidNotReceiveWithAnyArgs().Invoke(default, default);
 
@@ -204,11 +204,11 @@ namespace Mirror.Tests
         }
 
         [Test]
-        public void NotAcknoledgedYet()
+        public void NotAcknowledgedYet()
         {
-            connection.Send(data, 1);
-            connection.Send(data, 3);
-            connection.Send(data, 5);
+            connection.SendNotify(data, 1);
+            connection.SendNotify(data, 3);
+            connection.SendNotify(data, 5);
 
             var reply = new NotifyPacket
             {

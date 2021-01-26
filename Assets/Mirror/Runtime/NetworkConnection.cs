@@ -369,19 +369,104 @@ namespace Mirror
         }
 
         #region Notify
+
+        internal struct PacketEnvelope
+        {
+            internal ushort Sequence;
+            internal object Token;
+        }
+
+        private Sequencer sequencer = new Sequencer(16);
+        readonly Queue<PacketEnvelope> sendWindow = new Queue<PacketEnvelope>();
+
+        private ushort receiveSequence;
+        private ulong receiveMask;
+
+        const int ACK_MASK_BITS = sizeof(ulong) * 8;
+
         /// <summary>
         /// Sends a message, but notify when it is delivered or lost
         /// </summary>
         /// <typeparam name="T">type of message to send</typeparam>
         /// <param name="msg">message to send</param>
         /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
-        public void SendNotify<T>(T msg, object token)
+        public void SendNotify<T>(T msg, object token, int channelId = Channel.Unreliable)
         {
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                var notifyPacket = new NotifyPacket
+                {
+                    Sequence = (ushort)sequencer.Next(),
+                    ReceiveSequence = receiveSequence,
+                    AckMask = receiveMask
+                };
+
+                sendWindow.Enqueue(new PacketEnvelope
+                {
+                    Sequence = notifyPacket.Sequence,
+                    Token = token
+                });
+
+                MessagePacker.Pack(notifyPacket, writer);
+                MessagePacker.Pack(msg, writer);
+                NetworkDiagnostics.OnSend(msg, channelId, writer.Length, 1);
+                SendAsync(writer.ToArraySegment(), channelId).Forget();
+            }
+
         }
 
         internal void ReceiveNotify(NotifyPacket notifyPacket, NetworkReader networkReader, int channelId)
         {
-            throw new NotImplementedException();
+            int sequenceDistance = (int)sequencer.Distance(notifyPacket.Sequence, receiveSequence);
+
+            // TODO check window size
+
+            // this message is old,  we already received
+            // a newer or duplicate packet.  Discard it
+            if (sequenceDistance <= 0)
+                return;
+
+            receiveSequence = notifyPacket.Sequence;
+
+            if (sequenceDistance >= ACK_MASK_BITS)
+                receiveMask = 1;
+            else
+                receiveMask = (receiveMask << sequenceDistance) | 1;
+
+            AckPackets(notifyPacket.ReceiveSequence, notifyPacket.AckMask);
+
+            int msgType = MessagePacker.UnpackId(networkReader);
+            InvokeHandler(msgType, networkReader, channelId);
+        }
+
+        // the other end just sent us a message
+        // and it told us the latest message it got
+        // and the ack mask
+        private void AckPackets(ushort receiveSequence, ulong ackMask)
+        {
+            while (sendWindow.Count > 0)
+            {
+                PacketEnvelope envelope = sendWindow.Peek();
+
+                int distance = (int)sequencer.Distance(envelope.Sequence, receiveSequence);
+
+                if (distance > 0)
+                    break;
+
+                sendWindow.Dequeue();
+
+                // TODO: calculate Rtt
+
+                // if any of these cases trigger, packet is most likely lost
+                if ((distance <= -ACK_MASK_BITS) || ((ackMask & (1UL << -distance)) == 0UL))
+                {
+                    NotifyLost?.Invoke(this, envelope.Token);
+                }
+                else
+                {
+                    NotifyDelivered?.Invoke(this, envelope.Token);
+                }
+            }
         }
 
         /// <summary>

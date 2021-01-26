@@ -31,7 +31,7 @@ namespace Mirror
         /// <typeparam name="T">type of message to send</typeparam>
         /// <param name="msg">message to send</param>
         /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
-        void SendNotify<T>(T msg, object token);
+        void SendNotify<T>(T msg, object token, int channelId = Channel.Unreliable);
 
         /// <summary>
         /// Raised when a message is delivered
