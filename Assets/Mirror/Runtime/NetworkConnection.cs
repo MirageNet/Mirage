@@ -375,14 +375,15 @@ namespace Mirror
             internal ushort Sequence;
             internal object Token;
         }
+        const int ACK_MASK_BITS = sizeof(ulong) * 8;
+        const int WINDOW_SIZE = 512;
 
         private Sequencer sequencer = new Sequencer(16);
-        readonly Queue<PacketEnvelope> sendWindow = new Queue<PacketEnvelope>();
+        readonly Queue<PacketEnvelope> sendWindow = new Queue<PacketEnvelope>(WINDOW_SIZE);
 
         private ushort receiveSequence;
         private ulong receiveMask;
 
-        const int ACK_MASK_BITS = sizeof(ulong) * 8;
 
         /// <summary>
         /// Sends a message, but notify when it is delivered or lost
@@ -392,6 +393,12 @@ namespace Mirror
         /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
         public void SendNotify<T>(T msg, object token, int channelId = Channel.Unreliable)
         {
+            if (sendWindow.Count == WINDOW_SIZE)
+            {
+                NotifyLost?.Invoke(this, token);
+                return;
+            }
+
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 var notifyPacket = new NotifyPacket
@@ -419,7 +426,12 @@ namespace Mirror
         {
             int sequenceDistance = (int)sequencer.Distance(notifyPacket.Sequence, receiveSequence);
 
-            // TODO check window size
+            // sequence is so far out of bounds we can't save, just kick him (or her!)
+            if (Math.Abs(sequenceDistance) > WINDOW_SIZE)
+            {
+                Disconnect();
+                return;
+            }
 
             // this message is old,  we already received
             // a newer or duplicate packet.  Discard it
@@ -454,8 +466,6 @@ namespace Mirror
                     break;
 
                 sendWindow.Dequeue();
-
-                // TODO: calculate Rtt
 
                 // if any of these cases trigger, packet is most likely lost
                 if ((distance <= -ACK_MASK_BITS) || ((ackMask & (1UL << -distance)) == 0UL))
