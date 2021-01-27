@@ -5,12 +5,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Debug = UnityEngine.Debug;
+using UnityEngine;
 
 namespace Mirror.KCP
 {
     public abstract class KcpConnection : IConnection
     {
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(KcpConnection));
+
         protected Socket socket;
         protected EndPoint remoteEndpoint;
         protected Kcp kcp;
@@ -106,7 +108,7 @@ namespace Mirror.KCP
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
+                logger.LogException(ex);
             }
             finally
             {
@@ -183,7 +185,7 @@ namespace Mirror.KCP
 
             if (kcp.WaitSnd > 1000)
             {
-                Debug.LogWarningFormat("Too many packets waiting in the send queue {0}, you are sending too much data,  the transport can't keep up", kcp.WaitSnd);
+                if (logger.WarnEnabled()) logger.LogWarning("Too many packets waiting in the send queue " + kcp.WaitSnd + ", you are sending too much data,  the transport can't keep up");
             }
         }
 
