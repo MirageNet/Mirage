@@ -183,9 +183,9 @@ namespace Mirror.KCP
             encoder.Encode64U(crc);
             RawSend(data, length);
 
-            if (kcp.WaitSnd > 1000)
+            if (kcp.WaitSnd > 1000 && logger.WarnEnabled())
             {
-                if (logger.WarnEnabled()) logger.LogWarning("Too many packets waiting in the send queue " + kcp.WaitSnd + ", you are sending too much data,  the transport can't keep up");
+                logger.LogWarning("Too many packets waiting in the send queue " + kcp.WaitSnd + ", you are sending too much data,  the transport can't keep up");
             }
         }
 
