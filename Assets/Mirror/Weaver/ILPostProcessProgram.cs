@@ -95,7 +95,7 @@ namespace Mirror.Weaver
                 return;
             }
 
-            Debug.Log($"Running Mirror ILPP on {targetAssembly}");
+            Console.WriteLine($"Running Mirror ILPP on {targetAssembly}");
 
             string outputDirectory = $"{Application.dataPath}/../{Path.GetDirectoryName(targetAssembly)}";
             string unityEngine = string.Empty;
@@ -236,9 +236,6 @@ namespace Mirror.Weaver
             string asmPath = Path.Combine(outputPath, assName);
             string pdbFileName = $"{Path.GetFileNameWithoutExtension(assName)}.pdb";
             string pdbPath = Path.Combine(outputPath, pdbFileName);
-
-            File.Move(asmPath, asmPath + ".orig");
-            File.Move(pdbPath, pdbPath + ".orig");
 
             File.WriteAllBytes(asmPath, inMemoryAssembly.PeData);
             File.WriteAllBytes(pdbPath, inMemoryAssembly.PdbData);
