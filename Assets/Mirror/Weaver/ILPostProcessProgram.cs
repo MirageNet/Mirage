@@ -24,6 +24,35 @@ namespace Mirror.Weaver
         {
             CompilationPipeline.assemblyCompilationFinished += OnCompilationFinished;
             s_ILPostProcessors = FindAllPostProcessors();
+
+            // this is for bootstrapping the weaver.
+            // the very first time this is loaded, some assemblies have already been built.
+            // so the hook will not trigger for them.
+            // we need to reload all assemblies after subscribing to teh hook so they will
+            // be weaved too
+
+            Bootstrap();
+        }
+
+        private static void Bootstrap()
+        {
+            if (SessionState.GetBool("MIRROR_BOOTSTRAP", false))
+                return;
+
+
+            SessionState.SetBool("MIRROR_BOOTSTRAP", true);
+
+            foreach (UnityEditor.Compilation.Assembly assembly in CompilationPipeline.GetAssemblies())
+            {
+                if (File.Exists(assembly.outputPath))
+                {
+                    OnCompilationFinished(assembly.outputPath, new CompilerMessage[0]);
+                }
+            }
+
+            Debug.Log("The weaver was bootstrapped.  Please reimport Mirror.Runtime once");
+
+            EditorUtility.RequestScriptReload();
         }
 
         private static ILPostProcessor[] FindAllPostProcessors()
@@ -59,19 +88,14 @@ namespace Mirror.Weaver
                 }
             }
 
-            // Should not run on the editor only assemblies
-            if (targetAssembly.Contains("-Editor") || targetAssembly.Contains(".Editor"))
-            {
-                return;
-            }
 
             // Should not run on Unity Engine modules but we can run on the MLAPI Runtime DLL 
-            if ((targetAssembly.Contains("com.unity") || Path.GetFileName(targetAssembly).StartsWith("Unity")) && !targetAssembly.Contains("Unity.Multiplayer."))
+            if ((targetAssembly.Contains("com.unity") || Path.GetFileName(targetAssembly).StartsWith("Unity")))
             {
                 return;
             }
 
-            // Debug.Log($"Running MLAPI ILPP on {targetAssembly}");
+            Debug.Log($"Running Mirror ILPP on {targetAssembly}");
 
             string outputDirectory = $"{Application.dataPath}/../{Path.GetDirectoryName(targetAssembly)}";
             string unityEngine = string.Empty;
@@ -169,21 +193,6 @@ namespace Mirror.Weaver
 
             var targetCompiledAssembly = new ILPostProcessCompiledAssembly(assemblyPathName, depenencyPaths.ToArray(), null, outputDirectory);
 
-            void WriteAssembly(InMemoryAssembly inMemoryAssembly, string outputPath, string assName)
-            {
-                if (inMemoryAssembly == null)
-                {
-                    throw new ArgumentException("InMemoryAssembly has never been accessed or modified");
-                }
-
-                string asmPath = Path.Combine(outputPath, assName);
-                string pdbFileName = $"{Path.GetFileNameWithoutExtension(assName)}.pdb";
-                string pdbPath = Path.Combine(outputPath, pdbFileName);
-
-                File.WriteAllBytes(asmPath, inMemoryAssembly.PeData);
-                File.WriteAllBytes(pdbPath, inMemoryAssembly.PdbData);
-            }
-
             foreach (ILPostProcessor i in s_ILPostProcessors)
             {
                 ILPostProcessResult result = i.Process(targetCompiledAssembly);
@@ -213,6 +222,26 @@ namespace Mirror.Weaver
                 // we now need to write out the result?
                 WriteAssembly(result.InMemoryAssembly, outputDirectory, assemblyPathName);
             }
+        }
+
+        static void WriteAssembly(InMemoryAssembly inMemoryAssembly, string outputPath, string assName)
+        {
+            Console.WriteLine($"Writing assembly {assName} to {outputPath}");
+
+            if (inMemoryAssembly == null)
+            {
+                throw new ArgumentException("InMemoryAssembly has never been accessed or modified");
+            }
+
+            string asmPath = Path.Combine(outputPath, assName);
+            string pdbFileName = $"{Path.GetFileNameWithoutExtension(assName)}.pdb";
+            string pdbPath = Path.Combine(outputPath, pdbFileName);
+
+            File.Move(asmPath, asmPath + ".orig");
+            File.Move(pdbPath, pdbPath + ".orig");
+
+            File.WriteAllBytes(asmPath, inMemoryAssembly.PeData);
+            File.WriteAllBytes(pdbPath, inMemoryAssembly.PdbData);
         }
     }
 }
