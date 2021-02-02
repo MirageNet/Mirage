@@ -531,6 +531,20 @@ namespace Mirror
         }
 
         /// <summary>
+        /// This spawns an object.
+        /// </summary>
+        /// <param name="identity">The identity to spawn.</param>
+        public void Spawn(NetworkIdentity identity)
+        {
+            if (identity is null)
+            {
+                throw new InvalidOperationException("Player object has no NetworkIdentity");
+            }
+
+            Spawn(identity.gameObject, identity.ConnectionToClient);
+        }
+
+        /// <summary>
         /// This spawns an object like NetworkServer.Spawn() but also assigns Client Authority to the specified client.
         /// <para>This is the same as calling NetworkIdentity.AssignClientAuthority on the spawned object.</para>
         /// </summary>
