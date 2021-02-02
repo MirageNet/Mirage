@@ -104,6 +104,7 @@ namespace Mirror.HeadlessBenchmark
                 var serverGo = new GameObject($"Server", typeof(NetworkServer), typeof(ServerObjectManager), typeof(NetworkSceneManager), typeof(PlayerSpawner));
 
                 server = serverGo.GetComponent<NetworkServer>();
+                server.MaxConnections = 9999;
                 server.Transport = transport;
                 serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
 
