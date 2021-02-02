@@ -90,7 +90,7 @@ namespace Mirror.Weaver
 
 
             // Should not run on Unity Engine modules but we can run on the MLAPI Runtime DLL 
-            if ((targetAssembly.Contains("com.unity") || Path.GetFileName(targetAssembly).StartsWith("Unity")))
+            if (targetAssembly.Contains("com.unity") || Path.GetFileName(targetAssembly).StartsWith("Unity"))
             {
                 return;
             }
