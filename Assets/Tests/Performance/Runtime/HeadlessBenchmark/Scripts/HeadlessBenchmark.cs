@@ -130,6 +130,9 @@ namespace Mirror.HeadlessBenchmark
 
         async UniTaskVoid StartClients()
         {
+            if (!string.IsNullOrEmpty(GetArg("-server")))
+                throw new InvalidOperationException("Cannot run server and client in this benchmark. Run them in seperate instances.");
+
             string clientArg = GetArg("-client");
             if (!string.IsNullOrEmpty(clientArg))
             {
