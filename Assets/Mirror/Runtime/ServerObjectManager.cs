@@ -444,8 +444,8 @@ namespace Mirror
                 // the object has not been spawned yet
                 identity.NetId = GetNextNetworkId();
                 Server.Spawned[identity.NetId] = identity;
-                Spawned.Invoke(identity);
                 identity.StartServer();
+                Spawned.Invoke(identity);
             }
 
             if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.NetId + " asset ID " + identity.AssetId);
