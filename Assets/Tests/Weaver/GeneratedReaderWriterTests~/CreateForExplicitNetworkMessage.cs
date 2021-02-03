@@ -1,6 +1,6 @@
 using Mirror;
 
-namespace GeneratedReaderWriter.CreateForExplicitNetworkMessage
+namespace GeneratedReaderWriterTests.CreateForExplicitNetworkMessage
 {
     [NetworkMessage]
     public class SomeOtherData
