@@ -18,8 +18,8 @@ namespace Mirror.HeadlessBenchmark
             {
                 hasArrived = true;
                 float randX = Random.Range(-15.0f, 15.0f);
-                float randZ = Random.Range(-15.0f, 15.0f);
-                StartCoroutine(MoveToPoint(new Vector3(randX, -1.504f, randZ)));
+                float randY = Random.Range(-15.0f, 15.0f);
+                StartCoroutine(MoveToPoint(new Vector3(randX, randY, 0)));
             }
         }
 
