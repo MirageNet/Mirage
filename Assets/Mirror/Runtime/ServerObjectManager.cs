@@ -536,11 +536,6 @@ namespace Mirror
         /// <param name="identity">The identity to spawn.</param>
         public void Spawn(NetworkIdentity identity)
         {
-            if (identity is null)
-            {
-                throw new InvalidOperationException("Player object has no NetworkIdentity");
-            }
-
             Spawn(identity.gameObject, identity.ConnectionToClient);
         }
 

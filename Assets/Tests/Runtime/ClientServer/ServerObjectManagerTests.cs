@@ -47,6 +47,14 @@ namespace Mirror.Tests.ClientServer
             Assert.That(ex.Message, Is.EqualTo("Player object has no NetworkIdentity"));
         }
 
+        [UnityTest]
+        public IEnumerator SpawnByIdentityTest() => UniTask.ToCoroutine(async () =>
+        {
+            serverObjectManager.Spawn(serverIdentity);
+
+            await AsyncUtil.WaitUntilWithTimeout(() => serverIdentity.Server == server);
+        });
+
         [Test]
         public void SpawnNotPlayerExceptionTest()
         {
