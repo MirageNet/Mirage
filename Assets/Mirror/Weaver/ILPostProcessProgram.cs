@@ -17,6 +17,8 @@ namespace Mirror.Weaver
 {
     internal static class ILPostProcessProgram
     {
+        internal static ILPostProcessResult PostProcessResult;
+
         private static ILPostProcessor[] s_ILPostProcessors { get; set; }
 
         [InitializeOnLoadMethod]
@@ -195,15 +197,15 @@ namespace Mirror.Weaver
 
             foreach (ILPostProcessor i in s_ILPostProcessors)
             {
-                ILPostProcessResult result = i.Process(targetCompiledAssembly);
-                if (result == null)
+                PostProcessResult = i.Process(targetCompiledAssembly);
+                if (PostProcessResult == null)
                     continue;
 
-                if (result.Diagnostics.Count > 0)
+                if (PostProcessResult.Diagnostics.Count > 0)
                 {
                     Debug.LogError($"ILPostProcessor - {i.GetType().Name} failed to run on {targetCompiledAssembly.Name}");
 
-                    foreach (DiagnosticMessage message in result.Diagnostics)
+                    foreach (DiagnosticMessage message in PostProcessResult.Diagnostics)
                     {
                         switch (message.DiagnosticType)
                         {
@@ -220,7 +222,7 @@ namespace Mirror.Weaver
                 }
 
                 // we now need to write out the result?
-                WriteAssembly(result.InMemoryAssembly, outputDirectory, assemblyPathName);
+                WriteAssembly(PostProcessResult.InMemoryAssembly, outputDirectory, assemblyPathName);
             }
         }
 
