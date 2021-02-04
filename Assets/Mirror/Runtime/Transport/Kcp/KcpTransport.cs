@@ -19,7 +19,7 @@ namespace Mirror.KCP
         public int HashCashBits = 18;
 
         [Tooltip("How many messages can be sent simultaneously")]
-        public int SendWindowSize = 32;
+        public int SendWindowSize = 1024;
         [Tooltip("How many messages can be received")]
         public int ReceiveWindowSize = 8192;
 
