@@ -45,6 +45,14 @@ namespace Mirror
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => nextNetworkId++;
 
+        public Dictionary<uint, NetworkIdentity> SpawnedObjects
+        {
+            get
+            {
+                //TODO: Finish moving all refs from Server.Spawned to ServerObjectManager
+                return Server.Spawned;
+            }
+        }
 
         public readonly HashSet<NetworkIdentity> DirtyObjects = new HashSet<NetworkIdentity>();
         private readonly List<NetworkIdentity> DirtyObjectsTmp = new List<NetworkIdentity>();

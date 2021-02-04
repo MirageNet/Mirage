@@ -58,6 +58,22 @@ namespace Mirror
         /// </summary>
         public readonly Dictionary<ulong, NetworkIdentity> spawnableObjects = new Dictionary<ulong, NetworkIdentity>();
 
+        /// <summary>
+        /// List of all objects spawned in this client
+        /// </summary>
+        public Dictionary<uint, NetworkIdentity> SpawnedObjects
+        {
+            get
+            {
+                // if we are in host mode,  the list of spawned object is the same as the server list
+                if (Client.IsLocalClient)
+                    return Client.hostServer.Spawned;
+                else
+                    //TODO: Finish moving all refs from Client.Spawned to ClientObjectManager
+                    return Client.Spawned;
+            }
+        }
+
         public void Start()
         {
             if (Client != null)
