@@ -83,7 +83,7 @@ namespace Mirror
             get
             {
                 // if we are in host mode,  the list of spawned object is the same as the server list
-                if (hostServer != null)
+                if (IsLocalClient)
                     return hostServer.Spawned;
                 else
                     return spawned;
