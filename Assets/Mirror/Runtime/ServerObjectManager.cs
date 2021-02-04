@@ -71,6 +71,7 @@ namespace Mirror
             if (Server != null)
             {
                 Server.Started.AddListener(SpawnOrActivate);
+                Server.OnStartHost.AddListener(StartedHost);
                 Server.Authenticated.AddListener(OnAuthenticated);
                 Server.Stopped.AddListener(OnServerStopped);
                 NetworkSceneManager.ServerChangeScene.AddListener(OnServerChangeScene);
@@ -147,6 +148,14 @@ namespace Mirror
             else if (Server && Server.Active)
             {
                 SpawnObjects();
+            }
+        }
+
+        void StartedHost()
+        {
+            if (TryGetComponent(out ClientObjectManager ClientObjectManager))
+            {
+                ClientObjectManager.ServerObjectManager = this;
             }
         }
 

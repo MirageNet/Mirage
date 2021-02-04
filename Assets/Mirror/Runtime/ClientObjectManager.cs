@@ -67,12 +67,14 @@ namespace Mirror
             {
                 // if we are in host mode,  the list of spawned object is the same as the server list
                 if (Client.IsLocalClient)
-                    return Client.hostServer.Spawned;
+                    return ServerObjectManager.SpawnedObjects;
                 else
                     //TODO: Finish moving all refs from Client.Spawned to ClientObjectManager
                     return Client.Spawned;
             }
         }
+
+        internal ServerObjectManager ServerObjectManager;
 
         public void Start()
         {
