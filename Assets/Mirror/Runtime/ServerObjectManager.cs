@@ -116,7 +116,7 @@ namespace Mirror
 
         void OnServerStopped()
         {
-            foreach (NetworkIdentity obj in Server.Spawned.Values.Reverse())
+            foreach (NetworkIdentity obj in SpawnedObjects.Values.Reverse())
             {
                 if (obj.AssetId != Guid.Empty)
                     DestroyObject(obj, true);
@@ -157,7 +157,7 @@ namespace Mirror
         {
             SpawnObjects();
 
-            foreach (NetworkIdentity identity in Server.Spawned.Values)
+            foreach (NetworkIdentity identity in SpawnedObjects.Values)
             {
                 if (!identity.IsClient)
                 {
@@ -201,7 +201,7 @@ namespace Mirror
 
         void SpawnObserversForConnection(INetworkConnection conn)
         {
-            if (logger.LogEnabled()) logger.Log("Spawning " + Server.Spawned.Count + " objects for conn " + conn);
+            if (logger.LogEnabled()) logger.Log("Spawning " + SpawnedObjects.Count + " objects for conn " + conn);
 
             if (!conn.IsReady)
             {
@@ -212,7 +212,7 @@ namespace Mirror
 
             // add connection to each nearby NetworkIdentity's observers, which
             // internally sends a spawn message for each one to the connection.
-            foreach (NetworkIdentity identity in Server.Spawned.Values)
+            foreach (NetworkIdentity identity in SpawnedObjects.Values)
             {
                 if (identity.gameObject.activeSelf)
                 {
@@ -409,7 +409,7 @@ namespace Mirror
         /// <param name="msg"></param>
         void OnServerRpcMessage(INetworkConnection conn, ServerRpcMessage msg)
         {
-            if (!Server.Spawned.TryGetValue(msg.netId, out NetworkIdentity identity) || identity is null)
+            if (!SpawnedObjects.TryGetValue(msg.netId, out NetworkIdentity identity) || identity is null)
             {
                 if (logger.WarnEnabled()) logger.LogWarning("Spawned object not found when handling ServerRpc message [netId=" + msg.netId + "]");
                 return;
@@ -466,7 +466,7 @@ namespace Mirror
             {
                 // the object has not been spawned yet
                 identity.NetId = GetNextNetworkId();
-                Server.Spawned[identity.NetId] = identity;
+                SpawnedObjects[identity.NetId] = identity;
                 identity.StartServer();
                 Spawned.Invoke(identity);
             }
@@ -615,7 +615,7 @@ namespace Mirror
             if (logger.LogEnabled()) logger.Log("DestroyObject instance:" + identity.NetId);
             UnSpawned.Invoke(identity);
 
-            Server.Spawned.Remove(identity.NetId);
+            SpawnedObjects.Remove(identity.NetId);
             identity.ConnectionToClient?.RemoveOwnedObject(identity);
 
             identity.SendToObservers(new ObjectDestroyMessage { netId = identity.NetId });
