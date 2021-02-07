@@ -64,6 +64,11 @@ namespace Mirror
         //constructor (called by InitializeOnLoad)
         static WelcomeWindow()
         {
+            EditorApplication.update += ShowWindowOnFirstStart;
+        }
+
+        private static void ShowWindowOnFirstStart()
+        {
             firstStartUpKey = GetVersion();
 
             //this will only happen if its the very first time someone is using mirror (independent of version)
@@ -75,6 +80,8 @@ namespace Mirror
                 EditorPrefs.SetBool(firstStartUpKey, true);
                 EditorPrefs.SetBool(firstTimeMirrorKey, true);
             }
+
+            EditorApplication.update -= ShowWindowOnFirstStart;
         }
 
         //open the window (also openable through the path below)
