@@ -1,3 +1,10 @@
+## [63.3.5](https://github.com/MirrorNG/MirrorNG/compare/v63.3.4...v63.3.5) (2021-02-07)
+
+
+### Bug Fixes
+
+* nre issues when trying to reload back in the same instance to a … ([#570](https://github.com/MirrorNG/MirrorNG/issues/570)) ([158ea2f](https://github.com/MirrorNG/MirrorNG/commit/158ea2ff61b4a6fca27a6b12588f279fe02c131d))
+
 ## [63.3.4](https://github.com/MirrorNG/MirrorNG/compare/v63.3.3...v63.3.4) (2021-02-07)
 
 
