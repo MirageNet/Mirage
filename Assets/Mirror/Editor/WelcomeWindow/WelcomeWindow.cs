@@ -44,7 +44,7 @@ namespace Mirror
 
         #region Handle visibility
 
-        private static bool showChangeLog
+        private static bool ShowChangeLog
         {
             get
             {
@@ -59,8 +59,6 @@ namespace Mirror
 
                 return false;
             }
-
-            set { }
         }
 
         //constructor (called by InitializeOnLoad)
@@ -124,7 +122,7 @@ namespace Mirror
             ConfigureTab("SponsorButton", "Sponsor", SponsorUrl);
             ConfigureTab("DiscordButton", "Discord", DiscordInviteUrl);
 
-            ShowTab(showChangeLog ? "ChangeLog" : "Welcome");
+            ShowTab(ShowChangeLog ? "ChangeLog" : "Welcome");
             #endregion
         }
 
@@ -143,10 +141,9 @@ namespace Mirror
             {
                 if (tab.name == screen)
                 {
-                    if (showChangeLog)
+                    if (tab.name == "ChangeLog" && ShowChangeLog)
                     {
                         tab.Q<Label>("Header").text = "Change Log (updated)";
-                        showChangeLog = false;
                     }
 
                     tab.style.display = DisplayStyle.Flex;
