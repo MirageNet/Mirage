@@ -380,7 +380,7 @@ namespace Mirror
             if (connections.Count >= MaxConnections)
             {
                 conn.Disconnect();
-                if (logger.LogEnabled()) logger.Log("Server full, kicked client:" + conn);
+                if (logger.WarnEnabled()) logger.LogWarning("Server full, kicked client:" + conn);
                 return;
             }
 
