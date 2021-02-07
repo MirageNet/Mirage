@@ -129,8 +129,7 @@ namespace Mirror.Tests.Host
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
 
-            //Value will not be 0 as the SceneObject is not destroyed in the stop process.
-            Assert.That(server.Spawned.Count, Is.GreaterThan(0));
+            Assert.That(server.Spawned.Count, Is.Zero);
         });
     }
 }
