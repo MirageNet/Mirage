@@ -35,7 +35,7 @@ namespace Mirror
 
         //editorprefs keys
         private static string firstStartUpKey = string.Empty;
-        private static string firstTimeMirrorKey = "MirrorWelcome";
+        private static readonly string firstTimeMirrorKey = "MirrorWelcome";
 
         private static string GetVersion()
         {
