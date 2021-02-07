@@ -1,3 +1,10 @@
+## [63.3.4](https://github.com/MirrorNG/MirrorNG/compare/v63.3.3...v63.3.4) (2021-02-07)
+
+
+### Bug Fixes
+
+* increase log level of full server ([#572](https://github.com/MirrorNG/MirrorNG/issues/572)) ([c4ce239](https://github.com/MirrorNG/MirrorNG/commit/c4ce23978d362969ed9d491d88c85f5ce7a48470))
+
 ## [63.3.3](https://github.com/MirrorNG/MirrorNG/compare/v63.3.2...v63.3.3) (2021-02-05)
 
 
