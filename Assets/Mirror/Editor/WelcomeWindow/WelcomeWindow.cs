@@ -12,9 +12,7 @@ using UnityEngine.UIElements;
 
 namespace Mirror
 {
-
     //this script handles the functionality of the UI
-
     [InitializeOnLoad]
     public class WelcomeWindow : EditorWindow
     {
@@ -22,7 +20,7 @@ namespace Mirror
 
         #region Urls
 
-        private const string WelcomePageUrl = "https://mirrorng.github.io/MirrorNG/";
+        private const string WelcomePageUrl = "https://mirrorng.github.io/MirrorNG/index.html";
         private const string QuickStartUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/CommunityGuides/MirrorQuickStartGuide/index.html";
         private const string ChangelogUrl = "https://github.com/MirrorNG/MirrorNG/commits/master";
         private const string BestPracticesUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/BestPractices.html";
@@ -33,43 +31,46 @@ namespace Mirror
         #endregion
 
         //window size of the welcome screen
-        private static Vector2 windowSize = new Vector2(500, 600);
+        private static Vector2 windowSize = new Vector2(500, 415);
 
-        //get the start up key
+        //editorprefs keys
         private static string firstStartUpKey = string.Empty;
+        private static string firstTimeMirrorKey = "MirrorWelcome";
 
-        #region version
-
-        //called only once
         private static string GetVersion()
         {
             return typeof(NetworkIdentity).Assembly.GetName().Version.ToString();
         }
 
-        #endregion
-
         #region Handle visibility
+
+        private static bool showChangeLog = false;
 
         //constructor (called by InitializeOnLoad)
         static WelcomeWindow()
         {
-            EditorApplication.update += ShowWindowOnFirstStart;
-        }
-
-        //decide if we should open the window on recompile
-        private static void ShowWindowOnFirstStart()
-        {
-            //if we haven't seen the welcome page on the current mirror version, show it
-            //if there is no version, skip this
             firstStartUpKey = GetVersion();
-            if (!EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirrorUnknown")
-            {
-                OpenWindow();
-                //now that we have seen the welcome window, set this this to true so we don't load the window every time we recompile (for the current version)
-                EditorPrefs.SetBool(firstStartUpKey, true);
-            }
 
-            EditorApplication.update -= ShowWindowOnFirstStart;
+            //this will only happen if its the very first time someone is using mirror (independent of version)
+            if (EditorPrefs.GetBool(firstTimeMirrorKey, false) == false && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirrorUnknown")
+            {
+                Debug.Log("opening for the first time");
+                showChangeLog = false;
+                OpenWindow();
+                //now that we have seen the welcome window, 
+                //set this this to true so we don't load the window every time we recompile (for the current version)
+                EditorPrefs.SetBool(firstStartUpKey, true);
+                EditorPrefs.SetBool(firstTimeMirrorKey, true);
+            }
+            else if (EditorPrefs.GetBool(firstTimeMirrorKey, false) == true && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirrorUnknown")
+            {
+                showChangeLog = true;
+                OpenWindow();
+                //now that we have seen the welcome window, 
+                //set this this to true so we don't load the window every time we recompile (for the current version)
+                EditorPrefs.SetBool(firstStartUpKey, true);
+                EditorPrefs.SetBool(firstTimeMirrorKey, true);
+            }
         }
 
         //open the window (also openable through the path below)
@@ -100,8 +101,6 @@ namespace Mirror
             VisualTreeAsset uxml = Resources.Load<VisualTreeAsset>("WelcomeWindow");
             StyleSheet uss = Resources.Load<StyleSheet>("WelcomeWindow");
 
-            //Load the descriptions
-
             uxml.CloneTree(root);
             root.styleSheets.Add(uss);
 
@@ -117,11 +116,9 @@ namespace Mirror
             ConfigureTab("BestPracticesButton", "BestPractices", BestPracticesUrl);
             ConfigureTab("FaqButton", "Faq", FaqUrl);
             ConfigureTab("SponsorButton", "Sponsor", SponsorUrl);
+            ConfigureTab("DiscordButton", "Discord", DiscordInviteUrl);
 
-            Button DiscordButton = root.Q<Button>("DiscordButton");
-            DiscordButton.clicked += () => Application.OpenURL(DiscordInviteUrl);
-
-            ShowTab("Welcome");
+            ShowTab(showChangeLog == true ? "ChangeLog" : "Welcome");
             #endregion
         }
 
@@ -138,7 +135,20 @@ namespace Mirror
             VisualElement rightColumn = rootVisualElement.Q<VisualElement>("RightColumnBox");
             foreach (VisualElement tab in rightColumn.Children())
             {
-                tab.style.display = tab.name == screen ? DisplayStyle.Flex : DisplayStyle.None;
+                if (tab.name == screen)
+                {
+                    if (showChangeLog)
+                    {
+                        tab.Q<Label>("Header").text = "Change Log (updated)";
+                        showChangeLog = false;
+                    }
+
+                    tab.style.display = DisplayStyle.Flex;
+                }
+                else
+                {
+                    tab.style.display = DisplayStyle.None;
+                }
             }
         }
 
