@@ -44,7 +44,24 @@ namespace Mirror
 
         #region Handle visibility
 
-        private static bool showChangeLog = false;
+        private static bool showChangeLog
+        {
+            get
+            {
+                if (!EditorPrefs.GetBool(firstTimeMirrorKey, false) && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirrorUnknown")
+                {
+                    return false;
+                }
+                else if (EditorPrefs.GetBool(firstTimeMirrorKey, false) && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirrorUnknown")
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            set { }
+        }
 
         //constructor (called by InitializeOnLoad)
         static WelcomeWindow()
@@ -52,19 +69,8 @@ namespace Mirror
             firstStartUpKey = GetVersion();
 
             //this will only happen if its the very first time someone is using mirror (independent of version)
-            if (EditorPrefs.GetBool(firstTimeMirrorKey, false) == false && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirrorUnknown")
+            if ((!EditorPrefs.GetBool(firstTimeMirrorKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirrorUnknown")
             {
-                Debug.Log("opening for the first time");
-                showChangeLog = false;
-                OpenWindow();
-                //now that we have seen the welcome window, 
-                //set this this to true so we don't load the window every time we recompile (for the current version)
-                EditorPrefs.SetBool(firstStartUpKey, true);
-                EditorPrefs.SetBool(firstTimeMirrorKey, true);
-            }
-            else if (EditorPrefs.GetBool(firstTimeMirrorKey, false) == true && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirrorUnknown")
-            {
-                showChangeLog = true;
                 OpenWindow();
                 //now that we have seen the welcome window, 
                 //set this this to true so we don't load the window every time we recompile (for the current version)
@@ -118,7 +124,7 @@ namespace Mirror
             ConfigureTab("SponsorButton", "Sponsor", SponsorUrl);
             ConfigureTab("DiscordButton", "Discord", DiscordInviteUrl);
 
-            ShowTab(showChangeLog == true ? "ChangeLog" : "Welcome");
+            ShowTab(showChangeLog ? "ChangeLog" : "Welcome");
             #endregion
         }
 
