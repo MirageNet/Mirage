@@ -26,6 +26,7 @@ namespace Mirror
         [FormerlySerializedAs("server")]
         public NetworkServer Server;
 
+        [Header("Events")]
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
@@ -118,7 +119,7 @@ namespace Mirror
             OnClientChangeScene(msg.scenePath, msg.sceneOperation);
 
             //Additive are scenes loaded on server and this client is not a host client
-            if(msg.additiveScenes != null && msg.additiveScenes.Length > 0 && Client && !Client.IsLocalClient)
+            if (msg.additiveScenes != null && msg.additiveScenes.Length > 0 && Client && !Client.IsLocalClient)
             {
                 foreach (string scene in msg.additiveScenes)
                 {
@@ -134,7 +135,7 @@ namespace Mirror
             logger.Log("ClientSceneReadyMessage");
 
             //Server has finished changing scene. Allow the client to finish.
-            if(asyncOperation != null)
+            if (asyncOperation != null)
                 asyncOperation.allowSceneActivation = true;
         }
 
@@ -228,7 +229,7 @@ namespace Mirror
             // Let server prepare for scene change
             OnServerChangeScene(scenePath, sceneOperation);
 
-            if(!Server.LocalClientActive)
+            if (!Server.LocalClientActive)
                 StartCoroutine(ApplySceneOperation(scenePath, sceneOperation));
 
             // notify all clients about the new scene
@@ -285,7 +286,7 @@ namespace Mirror
 
                         yield return asyncOperation;
                     }
-                    
+
                     break;
                 case SceneOperation.LoadAdditive:
                     // Ensure additive scene is not already loaded
@@ -294,7 +295,7 @@ namespace Mirror
                         yield return SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
                         additiveSceneList.Add(scenePath);
                         FinishLoadScene(scenePath, sceneOperation);
-                    }   
+                    }
                     else
                     {
                         logger.LogWarning($"Scene {scenePath} is already loaded");

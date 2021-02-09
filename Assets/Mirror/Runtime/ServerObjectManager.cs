@@ -31,6 +31,7 @@ namespace Mirror
         [System.Serializable]
         public class SpawnEvent : UnityEvent<NetworkIdentity> { }
 
+        [Header("Events")]
         /// <summary>
         /// Raised when the client spawns an object
         /// </summary>
