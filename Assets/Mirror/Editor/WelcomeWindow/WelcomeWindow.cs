@@ -35,7 +35,7 @@ namespace Mirror
 
         //editorprefs keys
         private static string firstStartUpKey = string.Empty;
-        private static readonly string firstTimeMirrorKey = "MirrorWelcome";
+        private const string firstTimeMirrorKey = "MirrorWelcome";
 
         private static string GetVersion()
         {
@@ -69,19 +69,13 @@ namespace Mirror
 
         private static void ShowWindowOnFirstStart()
         {
+            EditorApplication.update -= ShowWindowOnFirstStart;
             firstStartUpKey = GetVersion();
 
-            //this will only happen if its the very first time someone is using mirror (independent of version)
             if ((!EditorPrefs.GetBool(firstTimeMirrorKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirrorUnknown")
             {
                 OpenWindow();
-                //now that we have seen the welcome window, 
-                //set this this to true so we don't load the window every time we recompile (for the current version)
-                EditorPrefs.SetBool(firstStartUpKey, true);
-                EditorPrefs.SetBool(firstTimeMirrorKey, true);
             }
-
-            EditorApplication.update -= ShowWindowOnFirstStart;
         }
 
         //open the window (also openable through the path below)
@@ -133,6 +127,14 @@ namespace Mirror
             #endregion
         }
 
+        private void OnDisable()
+        {
+            //now that we have seen the welcome window, 
+            //set this this to true so we don't load the window every time we recompile (for the current version)
+            EditorPrefs.SetBool(firstStartUpKey, true);
+            EditorPrefs.SetBool(firstTimeMirrorKey, true);
+        }
+
         private void ConfigureTab(string tabButtonName, string tab, string url)
         {
             Button tabButton = rootVisualElement.Q<Button>(tabButtonName);
@@ -144,6 +146,7 @@ namespace Mirror
         private void ShowTab(string screen)
         {
             VisualElement rightColumn = rootVisualElement.Q<VisualElement>("RightColumnBox");
+
             foreach (VisualElement tab in rightColumn.Children())
             {
                 if (tab.name == screen)
