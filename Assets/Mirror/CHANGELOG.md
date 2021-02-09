@@ -1,3 +1,10 @@
+# [63.4.0](https://github.com/MirrorNG/MirrorNG/compare/v63.3.5...v63.4.0) (2021-02-09)
+
+
+### Features
+
+* open changelog page when user downloaded a new version ([#571](https://github.com/MirrorNG/MirrorNG/issues/571)) ([d9ed96e](https://github.com/MirrorNG/MirrorNG/commit/d9ed96e118d2da0d5ffe6aac755f6da00d7204e7))
+
 ## [63.3.5](https://github.com/MirrorNG/MirrorNG/compare/v63.3.4...v63.3.5) (2021-02-07)
 
 
