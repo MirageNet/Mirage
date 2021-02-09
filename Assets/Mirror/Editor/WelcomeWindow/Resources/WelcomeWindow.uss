@@ -19,7 +19,7 @@
 #Banner {
     height: 64px;
     width: var(--window-width);
-    background-color: var(--banner-color);
+    background-color: rgb(11, 12, 11);
 }
 
 #Icon {
@@ -65,17 +65,7 @@
 
 Button {
     padding: 2px;
-    height: 50px;
-    color: rgb(255, 255, 255);
-    background-color: rgb(85, 85, 85);
-}
-
-Button:hover {
-    background-color: rgb(95, 95, 95);
-}
-
-Button:active {
-    background-color: rgb(105, 105, 105);
+    height: 35px;
 }
 
 .redirect {
