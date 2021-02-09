@@ -22,7 +22,7 @@ namespace Mirror
 
         private const string WelcomePageUrl = "https://mirrorng.github.io/MirrorNG/index.html";
         private const string QuickStartUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/CommunityGuides/MirrorQuickStartGuide/index.html";
-        private const string ChangelogUrl = "https://github.com/MirrorNG/MirrorNG/commits/master";
+        private const string ChangelogUrl = "https://github.com/MirrorNG/MirrorNG/blob/master/Assets/Mirror/CHANGELOG.md";
         private const string BestPracticesUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/BestPractices.html";
         private const string FaqUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/FAQ.html";
         private const string SponsorUrl = "";
