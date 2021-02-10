@@ -171,7 +171,7 @@ public class Player : NetworkBehaviour
         Healed(10);
     }
 
-    [ClientRpc(target = client.Owner)]
+    [ClientRpc(target = Client.Owner)]
     public void Healed(int amount)
     {
         // No NetworkConnection parameter, so it goes to owner
