@@ -1,13 +1,13 @@
 classDiagram
 
-    ClientObjectModel --> NetworkClient
+    ClientObjectManager --> NetworkClient
     NetworkClient --> Transport
 
     IConnection *-- Transport : Opens
     NetworkConnection --> IConnection
     NetworkClient --> NetworkConnection
 
-    ClientObjectModel --o GameObject : Spawns
+    ClientObjectManager --o GameObject : Spawns
     GameObject --* NetworkIdentity
     NetworkIdentity --> NetworkConnection
     GameObject --* NetworkBehavior
