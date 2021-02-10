@@ -14,7 +14,7 @@ jobs:
         dotnet-version: '3.1.x' # SDK Version to use; x will use the latest version of the 3.1 channel
 
     - name: Install docfx
-      run: nuget install docfx.console
+      run: dotnet tool install docfx
 
     - name: Generating API doc
       run: docfx metadata --logLevel Warning --warningsAsErrors doc/docfx.json
