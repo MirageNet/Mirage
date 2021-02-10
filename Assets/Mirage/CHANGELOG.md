@@ -1,3 +1,12 @@
+## [66.2.2](https://github.com/MirageNet/Mirage/compare/v66.2.1...v66.2.2) (2021-02-19)
+
+
+### Bug Fixes
+
+* simplify checking if client is host ([#602](https://github.com/MirageNet/Mirage/issues/602)) ([dbf5784](https://github.com/MirageNet/Mirage/commit/dbf5784884012bd08a46d823452f8f9d95009721))
+* static not needed ([#604](https://github.com/MirageNet/Mirage/issues/604)) ([879ba01](https://github.com/MirageNet/Mirage/commit/879ba018feed89d12b217e273f66b0fe75a447d5))
+* stopping `: ` being at the start of all log messages ([#606](https://github.com/MirageNet/Mirage/issues/606)) ([8efe7ce](https://github.com/MirageNet/Mirage/commit/8efe7cea0eb8536335f46bf412a8ba71be74ae96))
+
 ## [66.2.1](https://github.com/MirageNet/Mirage/compare/v66.2.0...v66.2.1) (2021-02-17)
 
 

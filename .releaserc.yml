@@ -8,7 +8,6 @@ plugins:
         Assets/Mirage/Runtime/Transport/Kcp/AssemblyInfo.cs
         Assets/Mirage/Weaver/AssemblyInfo.cs
         Assets/Mirage/Components/AssemblyInfo.cs
-        Assets/Mirage/Cloud/AssemblyInfo.cs
         Assets/Mirage/Samples~/AssemblyInfo.cs
         Assets/Mirage/Samples~/RigidbodyPhysics/Scripts/AssemblyInfo.cs
         Assets/Mirage/Authenticators/AssemblyInfo.cs"
@@ -23,7 +22,6 @@ plugins:
         - 'Assets/Mirage/Runtime/Transport/Kcp/AssemblyInfo.cs'
         - 'Assets/Mirage/Weaver/AssemblyInfo.cs'
         - 'Assets/Mirage/Components/AssemblyInfo.cs'
-        - 'Assets/Mirage/Cloud/AssemblyInfo.cs'
         - 'Assets/Mirage/Samples~/AssemblyInfo.cs'
         - 'Assets/Mirage/Samples~/RigidbodyPhysics/Scripts/AssemblyInfo.cs'
         - 'Assets/Mirage/Authenticators/AssemblyInfo.cs'
