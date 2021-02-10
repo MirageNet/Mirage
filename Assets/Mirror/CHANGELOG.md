@@ -1,3 +1,15 @@
+# [63.5.0](https://github.com/MirrorNG/MirrorNG/compare/v63.4.0...v63.5.0) (2021-02-10)
+
+
+### Features
+
+* Notify acks messages in one way messages ([07ca15d](https://github.com/MirrorNG/MirrorNG/commit/07ca15df5765528b7ff478cc13fc327a86ca9968))
+
+
+### Performance Improvements
+
+* no need to send initial empty notify ([8fbe346](https://github.com/MirrorNG/MirrorNG/commit/8fbe346012d58c8ab0f3be0cbaa5dc43a8cbc7b1))
+
 # [63.4.0](https://github.com/MirrorNG/MirrorNG/compare/v63.3.5...v63.4.0) (2021-02-09)
 
 
