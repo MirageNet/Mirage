@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mirror.Examples.Tanks
+namespace Mirage.Examples.Tanks
 {
     public class Projectile : NetworkBehaviour
     {

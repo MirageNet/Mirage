@@ -1,9 +1,9 @@
 using System.Runtime.InteropServices;
 
-namespace Mirror
+namespace Mirage
 {
     // invoke type for Rpc
-    public enum MirrorInvokeType
+    public enum MirageInvokeType
     {
         ServerRpc,
         ClientRpc

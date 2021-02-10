@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Mirror
+namespace Mirage
 {
     public class HeadlessFrameLimiter : MonoBehaviour
     {

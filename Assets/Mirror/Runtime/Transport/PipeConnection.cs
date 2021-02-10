@@ -4,7 +4,7 @@ using System.Net;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
-namespace Mirror
+namespace Mirage
 {
 
     /// <summary>

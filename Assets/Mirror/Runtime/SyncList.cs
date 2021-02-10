@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace Mirror
+namespace Mirage
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class SyncList<T> : IList<T>, IReadOnlyList<T>, ISyncObject

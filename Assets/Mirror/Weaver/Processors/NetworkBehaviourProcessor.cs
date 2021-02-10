@@ -4,7 +4,7 @@ using Mono.Cecil.Cil;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using TypeAttributes = Mono.Cecil.TypeAttributes;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public enum RemoteCallType
     {
@@ -59,9 +59,9 @@ namespace Mirror.Weaver
         }
 
         #region mark / check type as processed
-        public const string ProcessedFunctionName = "MirrorProcessed";
+        public const string ProcessedFunctionName = "MirageProcessed";
 
-        // by adding an empty MirrorProcessed() function
+        // by adding an empty MirageProcessed() function
         public static bool WasProcessed(TypeDefinition td)
         {
             return td.GetMethod(ProcessedFunctionName) != null;

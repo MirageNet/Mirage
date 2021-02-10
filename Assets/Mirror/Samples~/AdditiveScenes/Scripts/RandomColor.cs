@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mirror.Examples.Additive
+namespace Mirage.Examples.Additive
 {
     public class RandomColor : NetworkBehaviour
     {

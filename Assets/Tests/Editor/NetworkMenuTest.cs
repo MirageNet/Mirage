@@ -1,8 +1,8 @@
-﻿using Mirror.KCP;
+﻿using Mirage.KCP;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     public class NetworkMenuTest
     {

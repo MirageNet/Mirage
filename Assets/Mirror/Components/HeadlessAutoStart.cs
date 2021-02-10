@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 
-namespace Mirror
+namespace Mirage
 {
     public class HeadlessAutoStart : MonoBehaviour
     {

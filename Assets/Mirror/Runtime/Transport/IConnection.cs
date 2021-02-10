@@ -3,7 +3,7 @@ using System.IO;
 using System.Net;
 using Cysharp.Threading.Tasks;
 
-namespace Mirror
+namespace Mirage
 {
 
     public static class Channel

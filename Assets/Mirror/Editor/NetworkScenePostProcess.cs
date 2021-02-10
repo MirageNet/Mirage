@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     public class NetworkScenePostProcess : MonoBehaviour
     {

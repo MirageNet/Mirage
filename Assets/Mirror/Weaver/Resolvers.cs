@@ -6,7 +6,7 @@
 //        exceptions would be a bit inconsistent here)
 using Mono.Cecil;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public static class Resolvers
     {        

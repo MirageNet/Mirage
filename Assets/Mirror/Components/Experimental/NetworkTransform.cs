@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Mirror.Experimental
+namespace Mirage.Experimental
 {
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/Experimental/NetworkTransformExperimental")]

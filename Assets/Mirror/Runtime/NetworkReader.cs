@@ -12,7 +12,7 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// a class that holds readers for the different types
@@ -152,14 +152,14 @@ namespace Mirror
             if (Reader<T>.Read == null)
                 Debug.AssertFormat(
                     Reader<T>.Read != null,
-                    @"No reader found for {0}. See https://mirrorng.github.io/MirrorNG/Articles/General/Troubleshooting.html for details",
+                    @"No reader found for {0}. See https://miragenet.github.io/Mirage/Articles/General/Troubleshooting.html for details",
                     typeof(T));
 
             return Reader<T>.Read(this);
         }
     }
 
-    // Mirror's Weaver automatically detects all NetworkReader function types,
+    // Mirage's Weaver automatically detects all NetworkReader function types,
     // but they do all need to be extensions.
     public static class NetworkReaderExtensions
     {

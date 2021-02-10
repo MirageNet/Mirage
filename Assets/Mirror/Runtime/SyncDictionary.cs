@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using JetBrains.Annotations;
 
-namespace Mirror
+namespace Mirage
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class SyncIDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISyncObject, IReadOnlyDictionary<TKey, TValue>

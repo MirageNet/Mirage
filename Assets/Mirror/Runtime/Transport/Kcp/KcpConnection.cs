@@ -7,7 +7,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Mirror.KCP
+namespace Mirage.KCP
 {
     public abstract class KcpConnection : IConnection
     {

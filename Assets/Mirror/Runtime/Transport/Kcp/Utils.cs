@@ -1,6 +1,6 @@
 using System;
 
-namespace Mirror.KCP
+namespace Mirage.KCP
 {
     public static class Utils
     {

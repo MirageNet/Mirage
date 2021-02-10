@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Cysharp.Threading.Tasks;
-using Mirror.RemoteCalls;
+using Mirage.RemoteCalls;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// Sync to everyone, or only to owner.
@@ -21,7 +21,7 @@ namespace Mirror
     /// <para>Some of the built-in components of the networking system are derived from NetworkBehaviour, including NetworkTransport, NetworkAnimator and NetworkProximityChecker.</para>
     /// </remarks>
     [AddComponentMenu("")]
-    [HelpURL("https://mirrorng.github.io/MirrorNG/Articles/Guides/GameObjects/NetworkBehaviour.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/Articles/Guides/GameObjects/NetworkBehaviour.html")]
     public abstract class NetworkBehaviour : MonoBehaviour
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviour));

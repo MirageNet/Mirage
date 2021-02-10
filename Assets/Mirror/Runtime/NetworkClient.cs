@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Mirror
+namespace Mirage
 {
     [System.Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkConnection> { }
 

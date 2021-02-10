@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mirror.Examples.Chat
+namespace Mirage.Examples.Chat
 {
     [AddComponentMenu("")]
     public class ChatNetworkManager : NetworkManager

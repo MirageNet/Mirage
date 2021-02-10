@@ -1,7 +1,7 @@
 using System;
 using Mono.Cecil;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     [System.Serializable]
     public abstract class WeaverException : Exception

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     public interface IServerObjectManager
     {

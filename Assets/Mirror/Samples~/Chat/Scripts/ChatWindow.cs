@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-namespace Mirror.Examples.Chat
+namespace Mirage.Examples.Chat
 {
     public class ChatWindow : MonoBehaviour
     {

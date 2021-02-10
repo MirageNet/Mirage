@@ -1,3 +1,3 @@
 ﻿using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Mirror.Tests.Runtime")]
+[assembly: InternalsVisibleTo("Mirage.Tests.Runtime")]

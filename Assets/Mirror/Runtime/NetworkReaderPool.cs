@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// NetworkReader to be used with <see cref="NetworkReaderPool">NetworkReaderPool</see>
@@ -49,7 +49,7 @@ namespace Mirror
         }
 
         /// <summary>
-        /// Mirror usually only uses up to 4 readers in nested usings,
+        /// Mirage usually only uses up to 4 readers in nested usings,
         /// 100 is a good margin for edge cases when users need a lot readers at
         /// the same time.
         ///

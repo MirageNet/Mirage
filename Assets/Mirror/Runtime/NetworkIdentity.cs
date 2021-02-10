@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Cryptography;
-using Mirror.RemoteCalls;
+using Mirage.RemoteCalls;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.Events;
@@ -13,7 +13,7 @@ using UnityEditor.Experimental.SceneManagement;
 #endif
 #endif
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// The NetworkIdentity identifies objects across the network, between server and clients.
@@ -102,7 +102,7 @@ namespace Mirror
     /// </remarks>
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/NetworkIdentity")]
-    [HelpURL("https://mirrorng.github.io/MirrorNG/Articles/Components/NetworkIdentity.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkIdentity.html")]
     public sealed class NetworkIdentity : MonoBehaviour
     {
         static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();

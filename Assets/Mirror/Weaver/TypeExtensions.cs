@@ -2,7 +2,7 @@
 using System.Linq;
 using Mono.Cecil;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     /// <summary>
     /// convenience methods for type definitions

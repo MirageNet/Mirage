@@ -19,7 +19,7 @@
 using System.ComponentModel;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     public abstract class NetworkTransformBase : NetworkBehaviour
     {

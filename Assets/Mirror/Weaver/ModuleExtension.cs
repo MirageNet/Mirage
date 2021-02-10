@@ -4,7 +4,7 @@ using System.Reflection;
 using Mono.Cecil;
 using TypeAttributes = Mono.Cecil.TypeAttributes;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public static class ModuleExtension
     {
@@ -41,12 +41,12 @@ namespace Mirror.Weaver
 
         public static TypeDefinition GeneratedClass(this ModuleDefinition module)
         {
-            TypeDefinition type = module.GetType("Mirror", "GeneratedNetworkCode");
+            TypeDefinition type = module.GetType("Mirage", "GeneratedNetworkCode");
 
             if (type != null)
                 return type;
 
-            type = new TypeDefinition("Mirror", "GeneratedNetworkCode",
+            type = new TypeDefinition("Mirage", "GeneratedNetworkCode",
                         TypeAttributes.BeforeFieldInit | TypeAttributes.Class | TypeAttributes.AnsiClass | TypeAttributes.Public | TypeAttributes.AutoClass | TypeAttributes.Abstract | TypeAttributes.Sealed,
                         module.ImportReference<object>());
             module.Types.Add(type);

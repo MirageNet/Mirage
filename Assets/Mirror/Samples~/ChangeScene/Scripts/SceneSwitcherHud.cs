@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Mirror.Examples.SceneChange
+namespace Mirage.Examples.SceneChange
 {
     public class SceneSwitcherHud : MonoBehaviour
     {

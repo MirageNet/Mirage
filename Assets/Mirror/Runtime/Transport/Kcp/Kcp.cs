@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Mirror.KCP
+namespace Mirage.KCP
 {
     //See SetNoDelay for details
     public enum KcpDelayMode {

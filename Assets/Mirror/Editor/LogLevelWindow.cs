@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     [CustomEditor(typeof(LogSettings), true)]
     public class LogSettingEditor : Editor
@@ -13,7 +13,7 @@ namespace Mirror
         {
             EditorGUILayout.BeginVertical();
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField(new GUIContent("Mirror Log Levels"), EditorStyles.boldLabel);
+            EditorGUILayout.LabelField(new GUIContent("Mirage Log Levels"), EditorStyles.boldLabel);
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             EditorGUILayout.EndVertical();

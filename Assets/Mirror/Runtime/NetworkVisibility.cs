@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     // the name NetworkProximityCheck implies that it's only about objects in
     // proximity to the player. But we might have room based, guild based,

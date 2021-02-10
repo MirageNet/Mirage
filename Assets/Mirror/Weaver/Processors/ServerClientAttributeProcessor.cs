@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     class ServerClientAttributeProcessor
     {

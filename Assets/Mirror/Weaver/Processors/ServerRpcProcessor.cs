@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
-using Mirror.RemoteCalls;
+using Mirage.RemoteCalls;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     /// <summary>
     /// Processes [ServerRpc] methods in NetworkBehaviour

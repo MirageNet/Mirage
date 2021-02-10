@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Mirror.Authenticators
+namespace Mirage.Authenticators
 {
     /// <summary>
     /// An authenticator that disconnects connections if they don't

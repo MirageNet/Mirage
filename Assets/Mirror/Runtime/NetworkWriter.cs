@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// a class that holds writers for the different types
@@ -177,7 +177,7 @@ namespace Mirror
             if (Writer<T>.Write == null)
                 Debug.AssertFormat(
                     Writer<T>.Write != null,
-                    @"No writer found for {0}. See https://mirrorng.github.io/MirrorNG/Articles/General/Troubleshooting.html for details",
+                    @"No writer found for {0}. See https://miragenet.github.io/Mirage/Articles/General/Troubleshooting.html for details",
                     typeof(T));
 
             Writer<T>.Write(this, value);
@@ -185,7 +185,7 @@ namespace Mirror
     }
 
 
-    // Mirror's Weaver automatically detects all NetworkWriter function types,
+    // Mirage's Weaver automatically detects all NetworkWriter function types,
     // but they do all need to be extensions.
     public static class NetworkWriterExtensions
     {

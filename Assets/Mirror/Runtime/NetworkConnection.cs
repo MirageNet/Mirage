@@ -6,7 +6,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace Mirror
+namespace Mirage
 {
     [NetworkMessage]
     public struct NotifyAck
@@ -229,7 +229,7 @@ namespace Mirror
             }
         }
 
-        // internal because no one except Mirror should send bytes directly to
+        // internal because no one except Mirage should send bytes directly to
         // the client. they would be detected as a message. send messages instead.
         public UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {

@@ -7,7 +7,7 @@ using FieldAttributes = Mono.Cecil.FieldAttributes;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using PropertyAttributes = Mono.Cecil.PropertyAttributes;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     /// <summary>
     /// Processes [SyncVar] in NetworkBehaviour
@@ -537,7 +537,7 @@ namespace Mirror.Weaver
             }
             else
             {
-                logger.Error($"{syncVar.Name} has unsupported type. Use a supported MirrorNG type instead", syncVar);
+                logger.Error($"{syncVar.Name} has unsupported type. Use a supported Mirage type instead", syncVar);
             }
         }
 
@@ -646,7 +646,7 @@ namespace Mirror.Weaver
             MethodReference readFunc = readers.GetReadFunc(syncVar.FieldType, null);
             if (readFunc == null)
             {
-                logger.Error($"{syncVar.Name} has unsupported type. Use a supported MirrorNG type instead", syncVar);
+                logger.Error($"{syncVar.Name} has unsupported type. Use a supported Mirage type instead", syncVar);
                 return;
             }
 

@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Mirror.RemoteCalls;
+using Mirage.RemoteCalls;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
-namespace Mirror
+namespace Mirage
 {
 
     /// <summary>
@@ -418,7 +418,7 @@ namespace Mirror
             }
             Skeleton skeleton = RemoteCallHelper.GetSkeleton(msg.functionHash);
 
-            if (skeleton.invokeType != MirrorInvokeType.ServerRpc)
+            if (skeleton.invokeType != MirageInvokeType.ServerRpc)
             {
                 throw new MethodInvocationException($"Invalid ServerRpc for id {msg.functionHash}");
             }

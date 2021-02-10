@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mirror.Experimental
+namespace Mirage.Experimental
 {
     [AddComponentMenu("Network/Experimental/NetworkLerpRigidbody")]
     [HelpURL("https://mirror-networking.com/docs/Components/NetworkLerpRigidbody.html")]

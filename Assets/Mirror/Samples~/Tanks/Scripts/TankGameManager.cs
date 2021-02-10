@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Mirror.Examples.Tanks
+namespace Mirage.Examples.Tanks
 {
     public class TankGameManager : MonoBehaviour
     {

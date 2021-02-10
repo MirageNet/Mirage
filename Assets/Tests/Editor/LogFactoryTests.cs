@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     public class LogFactoryTests
     {

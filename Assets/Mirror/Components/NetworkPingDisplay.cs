@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// Component that will display the clients ping in milliseconds

@@ -1,8 +1,8 @@
 using System;
-using Mirror.Cloud.ListServerService;
+using Mirage.Cloud.ListServerService;
 using UnityEngine.Events;
 
-namespace Mirror.Cloud
+namespace Mirage.Cloud
 {
     [System.Serializable]
     public class ServerListEvent : UnityEvent<ServerCollectionJson> { }

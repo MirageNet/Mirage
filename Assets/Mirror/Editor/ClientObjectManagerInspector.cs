@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 
 
-namespace Mirror
+namespace Mirage
 {
     [CustomEditor(typeof(ClientObjectManager), true)]
     [CanEditMultipleObjects]

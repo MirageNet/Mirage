@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using Cysharp.Threading.Tasks;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// An object that can send and receive messages

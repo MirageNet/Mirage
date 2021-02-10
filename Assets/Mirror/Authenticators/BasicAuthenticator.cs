@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Mirror.Authenticators
+namespace Mirage.Authenticators
 {
     [AddComponentMenu("Network/Authenticators/BasicAuthenticator")]
     public class BasicAuthenticator : NetworkAuthenticator

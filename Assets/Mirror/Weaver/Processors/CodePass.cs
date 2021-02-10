@@ -5,7 +5,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     /// <summary>
     /// Algorithm for doing a pass over the code

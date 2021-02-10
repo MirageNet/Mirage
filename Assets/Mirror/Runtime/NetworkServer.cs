@@ -5,7 +5,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// The NetworkServer.
@@ -335,7 +335,7 @@ namespace Mirror
             if (logger.LogEnabled()) logger.Log("Server accepted client:" + conn);
 
             // are more connections allowed? if not, kick
-            // (it's easier to handle this in Mirror, so Transports can have
+            // (it's easier to handle this in Mirage, so Transports can have
             //  less code and third party transport might not do that anyway)
             // (this way we could also send a custom 'tooFull' message later,
             //  Transport can't do that)

@@ -1,7 +1,7 @@
-using Mirror.Cloud.ListServerService;
+using Mirage.Cloud.ListServerService;
 using UnityEngine;
 
-namespace Mirror.Cloud
+namespace Mirage.Cloud
 {
     /// <summary>
     /// Used to requests and responses from the mirror api

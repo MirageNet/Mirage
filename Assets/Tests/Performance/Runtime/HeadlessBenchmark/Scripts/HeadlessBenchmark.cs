@@ -1,13 +1,13 @@
 using System;
 using System.Collections;
-using Mirror.KCP;
+using Mirage.KCP;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 #if IGNORANCE
-using Mirror.ENet;
+using Mirage.ENet;
 #endif
 
-namespace Mirror.HeadlessBenchmark
+namespace Mirage.HeadlessBenchmark
 {
     public class HeadlessBenchmark : MonoBehaviour
     {
@@ -196,7 +196,7 @@ namespace Mirror.HeadlessBenchmark
         {
             if (!string.IsNullOrEmpty(GetArg("-help")))
             {
-                Console.WriteLine("--==MirrorNG HeadlessClients Benchmark==--");
+                Console.WriteLine("--==Mirage HeadlessClients Benchmark==--");
                 Console.WriteLine("Please start your standalone application with the -nographics and -batchmode options");
                 Console.WriteLine("Also provide these arguments to control the autostart process:");
                 Console.WriteLine("-server (will run in server only mode)");

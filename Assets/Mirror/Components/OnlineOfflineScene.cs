@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
-namespace Mirror
+namespace Mirage
 {
     public class OnlineOfflineScene : MonoBehaviour
     {

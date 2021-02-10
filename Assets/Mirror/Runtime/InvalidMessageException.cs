@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Mirror
+namespace Mirage
 {
 
     [System.Serializable]

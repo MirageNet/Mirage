@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// Component that controls visibility of networked objects between scenes.

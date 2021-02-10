@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     [ExecuteInEditMode]
     [AddComponentMenu("Network/LogSettings")]

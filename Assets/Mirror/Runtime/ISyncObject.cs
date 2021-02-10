@@ -1,6 +1,6 @@
 using System;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// A sync object is an object that can synchronize it's state

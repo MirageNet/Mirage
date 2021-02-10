@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Mono.Cecil;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public static class Extensions
     {

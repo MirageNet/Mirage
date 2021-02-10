@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEditor;
-using Mirror.KCP;
+using Mirage.KCP;
 
-namespace Mirror
+namespace Mirage
 {
 
     public static class NetworkMenu

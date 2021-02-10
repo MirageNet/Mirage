@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Mirror.Examples.MultipleAdditiveScenes
+namespace Mirage.Examples.MultipleAdditiveScenes
 {
     public class PhysicsSimulator : NetworkBehaviour
     {

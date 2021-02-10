@@ -4,11 +4,11 @@ using System.IO;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
-    public class MirrorILPostProcessor : ILPostProcessor
+    public class MirageILPostProcessor : ILPostProcessor
     {
-        public const string RuntimeAssemblyName = "Mirror";
+        public const string RuntimeAssemblyName = "Mirage";
 
         public override ILPostProcessor GetInstance() => this;
 

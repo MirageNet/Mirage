@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace Mirror.Examples.Tanks
+namespace Mirage.Examples.Tanks
 {
     public class Tank : NetworkBehaviour
     {

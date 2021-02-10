@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 using System.Linq;
 using NUnit.Framework;
 
-namespace Mirror.Tests.ClientServer
+namespace Mirage.Tests.ClientServer
 {
     public class SampleBehaviorWithRpc : NetworkBehaviour
     {

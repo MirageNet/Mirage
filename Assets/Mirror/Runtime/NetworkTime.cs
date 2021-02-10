@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// Synchronize time between the server and the clients

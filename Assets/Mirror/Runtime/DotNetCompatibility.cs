@@ -1,6 +1,6 @@
 using System;
 
-namespace Mirror
+namespace Mirage
 {
     internal static class DotNetCompatibility
     {

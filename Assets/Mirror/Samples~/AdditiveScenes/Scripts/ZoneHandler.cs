@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mirror.Examples.Additive
+namespace Mirage.Examples.Additive
 {
     // This script is attached to a scene object called Zone that is on the Player layer and has:
     // - Sphere Collider with isTrigger = true

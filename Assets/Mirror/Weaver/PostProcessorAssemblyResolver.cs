@@ -6,7 +6,7 @@ using System.Threading;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     class PostProcessorAssemblyResolver : IAssemblyResolver
     {

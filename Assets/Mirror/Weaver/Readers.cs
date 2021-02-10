@@ -6,7 +6,7 @@ using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 using UnityEngine;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public class Readers
     {

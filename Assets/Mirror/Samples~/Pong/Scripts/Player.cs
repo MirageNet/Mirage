@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mirror.Examples.Pong
+namespace Mirage.Examples.Pong
 {
     public class Player : NetworkBehaviour
     {

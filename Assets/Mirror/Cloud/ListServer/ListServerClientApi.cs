@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Networking;
 
-namespace Mirror.Cloud.ListServerService
+namespace Mirage.Cloud.ListServerService
 {
     public sealed class ListServerClientApi : ListServerBaseApi, IListServerClientApi
     {

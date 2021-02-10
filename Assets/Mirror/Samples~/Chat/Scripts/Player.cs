@@ -1,6 +1,6 @@
 using System;
 
-namespace Mirror.Examples.Chat
+namespace Mirage.Examples.Chat
 {
     public class Player : NetworkBehaviour
     {

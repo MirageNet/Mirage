@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Mirror.Experimental
+namespace Mirage.Experimental
 {
     /// <summary>
     /// A component to synchronize the position of child transforms of networked objects.

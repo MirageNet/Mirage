@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.TestTools;
 
-namespace Mirror.Tests.Performance.Runtime
+namespace Mirage.Tests.Performance.Runtime
 {
     [Category("Performance")]
     [Category("Benchmark")]

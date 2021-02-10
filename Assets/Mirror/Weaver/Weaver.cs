@@ -6,7 +6,7 @@ using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEngine;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
 
     public class Weaver

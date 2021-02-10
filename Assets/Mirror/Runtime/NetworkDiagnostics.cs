@@ -1,6 +1,6 @@
 using System;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// Provides profiling information from mirror
@@ -43,7 +43,7 @@ namespace Mirror
 
         #region Out messages
         /// <summary>
-        /// Event that gets raised when Mirror sends a message
+        /// Event that gets raised when Mirage sends a message
         /// Subscribe to this if you want to diagnose the network
         /// </summary>
         public static event Action<MessageInfo> OutMessageEvent;
@@ -61,7 +61,7 @@ namespace Mirror
         #region In messages
 
         /// <summary>
-        /// Event that gets raised when Mirror receives a message
+        /// Event that gets raised when Mirage receives a message
         /// Subscribe to this if you want to profile the network
         /// </summary>
         public static event Action<MessageInfo> InMessageEvent;

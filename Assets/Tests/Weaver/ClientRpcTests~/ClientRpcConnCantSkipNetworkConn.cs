@@ -1,10 +1,10 @@
-using Mirror;
+using Mirage;
 
 namespace ClientRpcTests.ClientRpcConnCantSkipNetworkConn
 {
     class ClientRpcConnCantSkipNetworkConn : NetworkBehaviour
     {
-        [ClientRpc(target = Mirror.Client.Connection)]
+        [ClientRpc(target = Mirage.Client.Connection)]
         void ClientRpcMethod() { }
     }
 }

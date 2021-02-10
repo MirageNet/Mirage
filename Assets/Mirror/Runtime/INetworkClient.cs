@@ -2,7 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     public delegate NetworkIdentity SpawnHandlerDelegate(SpawnMessage msg);
 

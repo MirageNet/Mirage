@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace Mirror
+namespace Mirage
 {
     // message packing all in one place, instead of constructing headers in all
     // kinds of different places
@@ -45,7 +45,7 @@ namespace Mirror
         {
             // paul: 16 bits is enough to avoid collisions
             //  - keeps the message size small because it gets varinted
-            //  - in case of collisions,  Mirror will display an error
+            //  - in case of collisions,  Mirage will display an error
             return type.FullName.GetStableHashCode() & 0xFFFF;
         }
 

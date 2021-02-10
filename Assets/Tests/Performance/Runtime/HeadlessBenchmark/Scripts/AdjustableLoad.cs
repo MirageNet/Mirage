@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Mirror.HeadlessBenchmark
+namespace Mirage.HeadlessBenchmark
 {
     public class AdjustableLoad : NetworkBehaviour
     {

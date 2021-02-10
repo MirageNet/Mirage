@@ -2,7 +2,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Mirror
+namespace Mirage
 {
     public class NetworkManagerHud : MonoBehaviour
     {

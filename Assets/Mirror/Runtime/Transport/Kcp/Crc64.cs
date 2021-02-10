@@ -39,7 +39,7 @@
 
 // Ported to C# By Fredrik Holmström
 
-namespace Mirror.KCP
+namespace Mirage.KCP
 {
     static class Crc64
     {

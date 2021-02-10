@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mirror.Examples.Additive
+namespace Mirage.Examples.Additive
 {
     // This script demonstrates the NetworkAnimator and how to leverage
     // the built-in observers system to track players.

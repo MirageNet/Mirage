@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Mirror.Examples.Chat
+namespace Mirage.Examples.Chat
 {
 
     public class ServerWindow : MonoBehaviour

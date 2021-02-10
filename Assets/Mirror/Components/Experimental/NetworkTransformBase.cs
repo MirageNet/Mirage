@@ -19,7 +19,7 @@
 using System;
 using UnityEngine;
 
-namespace Mirror.Experimental
+namespace Mirage.Experimental
 {
     public abstract class NetworkTransformBase : NetworkBehaviour
     {

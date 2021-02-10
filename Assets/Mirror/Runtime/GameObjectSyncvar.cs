@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
 
     /// <summary>

@@ -4,7 +4,7 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 using UnityEngine.Events;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// Base transport class,  any transport should implement this class

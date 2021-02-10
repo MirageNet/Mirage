@@ -1,12 +1,12 @@
 using System;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// Base class for implementing component-based authentication during the Connect phase
     /// </summary>
-    [HelpURL("https://mirrorng.github.io/MirrorNG/Articles/Components/Authenticators/index.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/Authenticators/index.html")]
     public abstract class NetworkAuthenticator : MonoBehaviour
     {
         /// <summary>

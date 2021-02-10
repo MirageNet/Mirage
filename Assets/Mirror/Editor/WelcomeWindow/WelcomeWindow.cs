@@ -10,7 +10,7 @@ using UnityEngine.UIElements;
  * External Guide: https://www.raywenderlich.com/6452218-uielements-tutorial-for-unity-getting-started#toc-anchor-010
  */
 
-namespace Mirror
+namespace Mirage
 {
     //this script handles the functionality of the UI
     [InitializeOnLoad]
@@ -20,11 +20,11 @@ namespace Mirror
 
         #region Urls
 
-        private const string WelcomePageUrl = "https://mirrorng.github.io/MirrorNG/index.html";
-        private const string QuickStartUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/CommunityGuides/MirrorQuickStartGuide/index.html";
-        private const string ChangelogUrl = "https://github.com/MirrorNG/MirrorNG/blob/master/Assets/Mirror/CHANGELOG.md";
-        private const string BestPracticesUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/BestPractices.html";
-        private const string FaqUrl = "https://mirrorng.github.io/MirrorNG/Articles/Guides/FAQ.html";
+        private const string WelcomePageUrl = "https://miragenet.github.io/Mirage/index.html";
+        private const string QuickStartUrl = "https://miragenet.github.io/Mirage/Articles/Guides/CommunityGuides/MirageQuickStartGuide/index.html";
+        private const string ChangelogUrl = "https://github.com/Mirage/Mirage/blob/master/Assets/Mirage/CHANGELOG.md";
+        private const string BestPracticesUrl = "https://miragenet.github.io/Mirage/Articles/Guides/BestPractices.html";
+        private const string FaqUrl = "https://miragenet.github.io/Mirage/Articles/Guides/FAQ.html";
         private const string SponsorUrl = "";
         private const string DiscordInviteUrl = "https://discord.gg/N9QVxbM";
 
@@ -35,7 +35,7 @@ namespace Mirror
 
         //editorprefs keys
         private static string firstStartUpKey = string.Empty;
-        private const string firstTimeMirrorKey = "MirrorWelcome";
+        private const string firstTimeMirageKey = "MirageWelcome";
 
         private static string GetVersion()
         {
@@ -48,11 +48,11 @@ namespace Mirror
         {
             get
             {
-                if (!EditorPrefs.GetBool(firstTimeMirrorKey, false) && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirrorUnknown")
+                if (!EditorPrefs.GetBool(firstTimeMirageKey, false) && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirageUnknown")
                 {
                     return false;
                 }
-                else if (EditorPrefs.GetBool(firstTimeMirrorKey, false) && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirrorUnknown")
+                else if (EditorPrefs.GetBool(firstTimeMirageKey, false) && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirageUnknown")
                 {
                     return true;
                 }
@@ -72,18 +72,18 @@ namespace Mirror
             EditorApplication.update -= ShowWindowOnFirstStart;
             firstStartUpKey = GetVersion();
 
-            if ((!EditorPrefs.GetBool(firstTimeMirrorKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirrorUnknown")
+            if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirageUnknown")
             {
                 OpenWindow();
             }
         }
 
         //open the window (also openable through the path below)
-        [MenuItem("Window/MirrorNG/Welcome")]
+        [MenuItem("Window/Mirage/Welcome")]
         public static void OpenWindow()
         {
             //create the window
-            WelcomeWindow window = GetWindow<WelcomeWindow>("MirrorNG Welcome Page");
+            WelcomeWindow window = GetWindow<WelcomeWindow>("Mirage Welcome Page");
             //set the position and size
             window.position = new Rect(new Vector2(100, 100), windowSize);
             //set min and max sizes so we cant readjust window size
@@ -132,7 +132,7 @@ namespace Mirror
             //now that we have seen the welcome window, 
             //set this this to true so we don't load the window every time we recompile (for the current version)
             EditorPrefs.SetBool(firstStartUpKey, true);
-            EditorPrefs.SetBool(firstTimeMirrorKey, true);
+            EditorPrefs.SetBool(firstTimeMirageKey, true);
         }
 
         private void ConfigureTab(string tabButtonName, string tab, string url)

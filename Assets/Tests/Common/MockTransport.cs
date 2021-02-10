@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
 
     public class MockTransport : Transport

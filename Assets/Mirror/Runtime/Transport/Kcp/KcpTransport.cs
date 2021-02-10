@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Mirror.KCP
+namespace Mirage.KCP
 {
     public class KcpTransport : Transport
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Mirror.Examples.MultipleAdditiveScenes
+namespace Mirage.Examples.MultipleAdditiveScenes
 {
     [AddComponentMenu("")]
     public class MultiSceneNetManager : NetworkManager

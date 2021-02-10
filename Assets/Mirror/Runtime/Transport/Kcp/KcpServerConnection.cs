@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using Cysharp.Threading.Tasks;
 
-namespace Mirror.KCP
+namespace Mirage.KCP
 {
     public class KcpServerConnection : KcpConnection
     {

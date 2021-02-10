@@ -1,4 +1,4 @@
-﻿namespace Mirror
+﻿namespace Mirage
 {
 
     /// <summary>

@@ -2,7 +2,7 @@
 using System;
 using System.Security.Cryptography;
 
-namespace Mirror.KCP
+namespace Mirage.KCP
 {
 
     /// <summary>

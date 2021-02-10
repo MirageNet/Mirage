@@ -1,7 +1,7 @@
 
 using Mono.Cecil;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     /// <summary>
     /// only shows warnings in case we use SyncVars etc. for MonoBehaviour.

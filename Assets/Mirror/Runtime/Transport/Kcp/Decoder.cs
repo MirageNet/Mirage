@@ -1,4 +1,4 @@
-﻿namespace Mirror.KCP
+﻿namespace Mirage.KCP
 {
 
     // encode data into a byte[]

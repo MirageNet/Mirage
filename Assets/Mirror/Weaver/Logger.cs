@@ -6,7 +6,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.Diagnostics;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public class Logger : IWeaverLogger
     {

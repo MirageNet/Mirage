@@ -2,12 +2,12 @@ using System;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Mirror.Cloud
+namespace Mirage.Cloud
 {
     public static class Logger
     {
         public readonly static bool VerboseLogging;
-        static readonly ILogger logger = LogFactory.GetLogger("MirrorCloudServices");
+        static readonly ILogger logger = LogFactory.GetLogger("MirageCloudServices");
 
         public static void LogRequest(string page, string method, bool hasJson, string json)
         {

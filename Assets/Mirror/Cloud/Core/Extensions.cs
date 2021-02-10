@@ -1,6 +1,6 @@
 using UnityEngine.Networking;
 
-namespace Mirror.Cloud
+namespace Mirage.Cloud
 {
     public static class Extensions
     {

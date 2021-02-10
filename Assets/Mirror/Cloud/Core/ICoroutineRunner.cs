@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Mirror.Cloud
+namespace Mirage.Cloud
 {
     public interface ICoroutineRunner
     {

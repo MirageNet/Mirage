@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Net;
 
-namespace Mirror.KCP
+namespace Mirage.KCP
 {
 
     public class IPEndpointComparer : IEqualityComparer<IPEndPoint>

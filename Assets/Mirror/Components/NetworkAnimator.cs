@@ -2,7 +2,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// A component to synchronize Mecanim animation states for networked objects.

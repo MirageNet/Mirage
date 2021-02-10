@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mirror.Examples.RigidbodyPhysics
+namespace Mirage.Examples.RigidbodyPhysics
 {
     public class AddForce : NetworkBehaviour
     {

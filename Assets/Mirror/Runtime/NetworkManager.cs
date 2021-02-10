@@ -1,11 +1,11 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Mirror
+namespace Mirage
 {
 
     [AddComponentMenu("Network/NetworkManager")]
-    [HelpURL("https://mirrorng.github.io/MirrorNG/Articles/Guides/Communications/NetworkManager.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/Articles/Guides/Communications/NetworkManager.html")]
     [RequireComponent(typeof(NetworkServer))]
     [RequireComponent(typeof(NetworkClient))]
     [DisallowMultipleComponent]

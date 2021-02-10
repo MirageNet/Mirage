@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Mirror.Cloud.ListServerService
+namespace Mirage.Cloud.ListServerService
 {
     [System.Serializable]
     public struct ServerCollectionJson : ICanBeJson

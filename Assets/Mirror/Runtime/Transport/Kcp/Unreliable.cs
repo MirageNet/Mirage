@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Mirror.KCP
+namespace Mirage.KCP
 {
     /// <summary>
     /// Manages unreliable channel

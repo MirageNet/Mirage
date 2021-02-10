@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     public static class InspectorHelper
     {

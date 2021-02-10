@@ -8,7 +8,7 @@ using Mono.Cecil.Cil;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public class ReaderWriterProcessor
     {
@@ -42,7 +42,7 @@ namespace Mirror.Weaver
 
         private static bool IsExtension(MethodInfo method) => Attribute.IsDefined(method, typeof(System.Runtime.CompilerServices.ExtensionAttribute));
 
-        #region Load MirrorNG built in readers and writers
+        #region Load Mirage built in readers and writers
         private void LoadBuiltinExtensions()
         {
             // find all extension methods
@@ -279,7 +279,7 @@ namespace Mirror.Weaver
         private static bool IsEditorAssembly(ModuleDefinition module)
         {
             return module.AssemblyReferences.Any(assemblyReference =>
-                assemblyReference.Name == "Mirror.Editor"
+                assemblyReference.Name == "Mirage.Editor"
                 ) ;
         }
 

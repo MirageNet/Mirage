@@ -2,7 +2,7 @@ using System;
 using System.Runtime.Serialization;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// SyncVars are used to synchronize a variable from the server to all clients automatically.

@@ -8,7 +8,7 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Mirror.Tests.ClientServer
+namespace Mirage.Tests.ClientServer
 {
 
     [TestFixture]
@@ -40,7 +40,7 @@ namespace Mirror.Tests.ClientServer
         {
             UnityAction<string, SceneOperation> func2 = Substitute.For<UnityAction<string, SceneOperation>>();
             clientSceneManager.ClientSceneChanged.AddListener(func2);
-            clientSceneManager.FinishLoadScene("Assets/Mirror/Tests/Runtime/testScene.unity", SceneOperation.Normal);
+            clientSceneManager.FinishLoadScene("Assets/Mirage/Tests/Runtime/testScene.unity", SceneOperation.Normal);
 
             func2.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         }
@@ -63,7 +63,7 @@ namespace Mirror.Tests.ClientServer
         {
             UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
             clientSceneManager.ClientChangeScene.AddListener(func1);
-            clientSceneManager.ClientSceneMessage(null, new SceneMessage { scenePath = "Assets/Mirror/Tests/Runtime/testScene.unity" });
+            clientSceneManager.ClientSceneMessage(null, new SceneMessage { scenePath = "Assets/Mirage/Tests/Runtime/testScene.unity" });
 
             await AsyncUtil.WaitUntilWithTimeout(() => clientSceneManager.asyncOperation != null);
 
@@ -71,7 +71,7 @@ namespace Mirror.Tests.ClientServer
 
             await AsyncUtil.WaitUntilWithTimeout(() => clientSceneManager.asyncOperation.isDone);
 
-            Assert.That(clientSceneManager.NetworkScenePath, Is.EqualTo("Assets/Mirror/Tests/Runtime/testScene.unity"));
+            Assert.That(clientSceneManager.NetworkScenePath, Is.EqualTo("Assets/Mirage/Tests/Runtime/testScene.unity"));
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         });
@@ -111,7 +111,7 @@ namespace Mirror.Tests.ClientServer
         {
             UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
             clientSceneManager.ClientSceneChanged.AddListener(func1);
-            clientSceneManager.pendingAdditiveSceneList.Add("Assets/Mirror/Tests/Runtime/testScene.unity");
+            clientSceneManager.pendingAdditiveSceneList.Add("Assets/Mirage/Tests/Runtime/testScene.unity");
 
             clientSceneManager.OnClientSceneChanged(null, SceneOperation.Normal);
 
@@ -124,7 +124,7 @@ namespace Mirror.Tests.ClientServer
         {
             //Check for the additive scene in the pending list at the time of ClientSceneChanged before its removed as part of it being loaded.
             clientSceneManager.ClientSceneChanged.AddListener(CheckForAdditiveScene);
-            clientSceneManager.ClientSceneMessage(client.Connection, new SceneMessage { scenePath = "Assets/Mirror/Tests/Runtime/testScene.unity", additiveScenes = new[] { "Assets/Mirror/Tests/Runtime/testScene.unity" } });
+            clientSceneManager.ClientSceneMessage(client.Connection, new SceneMessage { scenePath = "Assets/Mirage/Tests/Runtime/testScene.unity", additiveScenes = new[] { "Assets/Mirage/Tests/Runtime/testScene.unity" } });
 
             Assert.That(additiveSceneWasFound);
         }
@@ -132,7 +132,7 @@ namespace Mirror.Tests.ClientServer
         bool additiveSceneWasFound;
         void CheckForAdditiveScene(string scenePath, SceneOperation sceneOperation)
         {
-            if (clientSceneManager.pendingAdditiveSceneList.Contains("Assets/Mirror/Tests/Runtime/testScene.unity"))
+            if (clientSceneManager.pendingAdditiveSceneList.Contains("Assets/Mirage/Tests/Runtime/testScene.unity"))
             {
                 additiveSceneWasFound = true;
             }

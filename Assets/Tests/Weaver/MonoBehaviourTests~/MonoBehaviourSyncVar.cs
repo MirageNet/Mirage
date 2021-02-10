@@ -1,4 +1,4 @@
-using Mirror;
+using Mirage;
 using UnityEngine;
 
 namespace MonoBehaviourTests.MonoBehaviourSyncVar

@@ -4,7 +4,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Mirror.Cloud
+namespace Mirage.Cloud
 {
     /// <summary>
     /// Methods to create and send UnityWebRequest

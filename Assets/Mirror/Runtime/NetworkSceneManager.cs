@@ -6,7 +6,7 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// Provides Scene Management to a NetworkServer and or NetworkClient.
@@ -52,7 +52,7 @@ namespace Mirror
         /// </summary>
         /// <remarks>
         /// <para>New clients that connect to a server will automatically load this scene.</para>
-        /// <para>This is used to make sure that all scene changes are initialized by Mirror.</para>
+        /// <para>This is used to make sure that all scene changes are initialized by Mirage.</para>
         /// </remarks>
         public string NetworkScenePath => SceneManager.GetActiveScene().path;
 

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     /// <summary>
     /// NetworkWriter to be used with <see cref="NetworkWriterPool">NetworkWriterPool</see>
@@ -44,7 +44,7 @@ namespace Mirror
         }
 
         /// <summary>
-        /// Mirror usually only uses up to 4 writes in nested usings,
+        /// Mirage usually only uses up to 4 writes in nested usings,
         /// 100 is a good margin for edge cases when users need a lot writers at
         /// the same time.
         ///

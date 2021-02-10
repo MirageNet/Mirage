@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Mirror.KCP
+namespace Mirage.KCP
 {
     public enum CommandType : byte { Push = 81, Ack = 82, WindowAsk = 83, WindowTell = 84 };
 

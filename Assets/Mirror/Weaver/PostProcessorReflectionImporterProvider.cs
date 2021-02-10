@@ -1,6 +1,6 @@
 ﻿using Mono.Cecil;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     internal class PostProcessorReflectionImporterProvider : IReflectionImporterProvider
     {

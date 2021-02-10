@@ -1,11 +1,11 @@
 ﻿using System.Linq;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
-using Mirror.RemoteCalls;
+using Mirage.RemoteCalls;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public abstract class RpcProcessor
     {
@@ -120,7 +120,7 @@ namespace Mirror.Weaver
 
                 if (readFunc == null)
                 {
-                    logger.Error($"{method.Name} has invalid parameter {param}.  Unsupported type {param.ParameterType},  use a supported MirrorNG type instead", method);
+                    logger.Error($"{method.Name} has invalid parameter {param}.  Unsupported type {param.ParameterType},  use a supported Mirage type instead", method);
                     return false;
                 }
 

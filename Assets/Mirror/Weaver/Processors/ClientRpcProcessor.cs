@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Mirror.RemoteCalls;
+using Mirage.RemoteCalls;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public enum Client { Owner, Observers, Connection }
 

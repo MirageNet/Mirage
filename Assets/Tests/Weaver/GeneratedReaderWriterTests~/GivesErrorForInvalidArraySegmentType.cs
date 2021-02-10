@@ -1,5 +1,5 @@
 ﻿using System;
-using Mirror;
+using Mirage;
 using UnityEngine;
 
 namespace GeneratedReaderWriter.GivesErrorForInvalidArraySegmentType

@@ -1,4 +1,4 @@
-namespace Mirror
+namespace Mirage
 {
     // implementation of N-day EMA
     // it calculates an exponential moving average roughy equivalent to the last n observations
