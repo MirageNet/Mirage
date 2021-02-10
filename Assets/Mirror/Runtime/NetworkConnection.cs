@@ -8,6 +8,10 @@ using UnityEngine.Assertions;
 
 namespace Mirror
 {
+    [NetworkMessage]
+    public struct NotifyAck
+    {
+    }
 
     /// <summary>
     /// A High level network connection. This is used for connections from client-to-server and for connection from server-to-client.
@@ -83,6 +87,9 @@ namespace Mirror
         {
             Assert.IsNotNull(connection);
             this.connection = connection;
+
+            // a black message to ensure a notify timeout
+            RegisterHandler<NotifyAck>(msg => { });
         }
 
         /// <summary>
@@ -377,13 +384,17 @@ namespace Mirror
         }
         const int ACK_MASK_BITS = sizeof(ulong) * 8;
         const int WINDOW_SIZE = 512;
+        // packages will be acked no longer than this time;
+        public float NOTIFY_ACK_TIMEOUT = 0.3f;
 
         private Sequencer sequencer = new Sequencer(16);
         readonly Queue<PacketEnvelope> sendWindow = new Queue<PacketEnvelope>(WINDOW_SIZE);
+        private float lastNotifySentTime;
 
         private ushort receiveSequence;
         private ulong receiveMask;
 
+        
 
         /// <summary>
         /// Sends a message, but notify when it is delivered or lost
@@ -398,7 +409,7 @@ namespace Mirror
                 NotifyLost?.Invoke(this, token);
                 return;
             }
-
+            
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 var notifyPacket = new NotifyPacket
@@ -418,6 +429,7 @@ namespace Mirror
                 MessagePacker.Pack(msg, writer);
                 NetworkDiagnostics.OnSend(msg, channelId, writer.Length, 1);
                 SendAsync(writer.ToArraySegment(), channelId).Forget();
+                lastNotifySentTime = Time.unscaledTime;
             }
 
         }
@@ -449,6 +461,11 @@ namespace Mirror
 
             int msgType = MessagePacker.UnpackId(networkReader);
             InvokeHandler(msgType, networkReader, channelId);
+
+            if (Time.unscaledTime - lastNotifySentTime > NOTIFY_ACK_TIMEOUT)
+            {
+                SendNotify(new NotifyAck(), null, channelId);
+            }
         }
 
         // the other end just sent us a message
