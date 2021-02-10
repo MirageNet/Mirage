@@ -88,6 +88,7 @@ namespace Mirror
             Assert.IsNotNull(connection);
             this.connection = connection;
 
+            lastNotifySentTime = Time.unscaledTime;
             // a black message to ensure a notify timeout
             RegisterHandler<NotifyAck>(msg => { });
         }
