@@ -27,12 +27,14 @@ namespace Mirror
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkClient));
 
-        [Header("Authentication")]
+        public Transport Transport;
+
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
 
         internal readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
 
+        [Header("Events")]
         /// <summary>
         /// Event fires once the Client has connected its Server.
         /// </summary>
@@ -72,8 +74,6 @@ namespace Mirror
         public bool IsConnected => connectState == ConnectState.Connected;
 
         public readonly NetworkTime Time = new NetworkTime();
-
-        public Transport Transport;
 
         /// <summary>
         /// List of all objects spawned in this client

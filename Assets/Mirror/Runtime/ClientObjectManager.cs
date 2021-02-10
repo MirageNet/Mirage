@@ -28,6 +28,7 @@ namespace Mirror
         [System.Serializable]
         public class SpawnEvent : UnityEvent<NetworkIdentity> { }
 
+        [Header("Events")]
         /// <summary>
         /// Raised when the client spawns an object
         /// </summary>
@@ -38,17 +39,18 @@ namespace Mirror
         /// </summary>
         public SpawnEvent UnSpawned = new SpawnEvent();
 
-        /// <summary>
-        /// This is a dictionary of the prefabs that are registered on the client with ClientScene.RegisterPrefab().
-        /// <para>The key to the dictionary is the prefab asset Id.</para>
-        /// </summary>
-        internal readonly Dictionary<Guid, NetworkIdentity> prefabs = new Dictionary<Guid, NetworkIdentity>();
-
+        [Header("Prefabs")]
         /// <summary>
         /// List of prefabs that will be registered with the spawning system.
         /// <para>For each of these prefabs, ClientManager.RegisterPrefab() will be automatically invoke.</para>
         /// </summary>
         public List<NetworkIdentity> spawnPrefabs = new List<NetworkIdentity>();
+
+        /// <summary>
+        /// This is a dictionary of the prefabs that are registered on the client with ClientScene.RegisterPrefab().
+        /// <para>The key to the dictionary is the prefab asset Id.</para>
+        /// </summary>
+        internal readonly Dictionary<Guid, NetworkIdentity> prefabs = new Dictionary<Guid, NetworkIdentity>();
 
         /// <summary>
         /// This is dictionary of the disabled NetworkIdentity objects in the scene that could be spawned by messages from the server.
@@ -72,7 +74,7 @@ namespace Mirror
         {
             RegisterSpawnPrefabs();
 
-            if(Client.IsLocalClient)
+            if (Client.IsLocalClient)
             {
                 RegisterHostHandlers();
             }
@@ -195,10 +197,10 @@ namespace Mirror
         /// <param name="newAssetId">An assetId to be assigned to this prefab. This allows a dynamically created game object to be registered for an already known asset Id.</param>
         public void RegisterPrefab(NetworkIdentity identity, Guid newAssetId)
         {
-                identity.AssetId = newAssetId;
+            identity.AssetId = newAssetId;
 
-                if (logger.LogEnabled()) logger.Log("Registering prefab '" + identity.name + "' as asset:" + identity.AssetId);
-                prefabs[identity.AssetId] = identity;
+            if (logger.LogEnabled()) logger.Log("Registering prefab '" + identity.name + "' as asset:" + identity.AssetId);
+            prefabs[identity.AssetId] = identity;
         }
 
         /// <summary>
@@ -602,8 +604,5 @@ namespace Mirror
             callbacks.Add(newReplyId, Callback);
             return (completionSource.Task, newReplyId);
         }
-
-
     }
 }
-

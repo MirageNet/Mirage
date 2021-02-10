@@ -31,6 +31,19 @@ namespace Mirror
         public int MaxConnections = 4;
 
         /// <summary>
+        /// <para>If you disable this, the server will not listen for incoming connections on the regular network port.</para>
+        /// <para>This can be used if the game is running in host mode and does not want external players to be able to connect - making it like a single-player game. Also this can be useful when using AddExternalConnection().</para>
+        /// </summary>
+        public bool Listening = true;
+
+        // transport to use to accept connections
+        public Transport Transport;
+
+        [Tooltip("Authentication component attached to this object")]
+        public NetworkAuthenticator authenticator;
+
+        [Header("Events")]
+        /// <summary>
         /// This is invoked when a server is started - including when a host is started.
         /// </summary>
         public UnityEvent Started = new UnityEvent();
@@ -63,10 +76,6 @@ namespace Mirror
         /// </summary>
         public UnityEvent OnStopHost = new UnityEvent();
 
-        [Header("Authentication")]
-        [Tooltip("Authentication component attached to this object")]
-        public NetworkAuthenticator authenticator;
-
         /// <summary>
         /// The connection to the host mode client (if any).
         /// </summary>
@@ -95,12 +104,6 @@ namespace Mirror
         public readonly HashSet<INetworkConnection> connections = new HashSet<INetworkConnection>();
 
         /// <summary>
-        /// <para>If you disable this, the server will not listen for incoming connections on the regular network port.</para>
-        /// <para>This can be used if the game is running in host mode and does not want external players to be able to connect - making it like a single-player game. Also this can be useful when using AddExternalConnection().</para>
-        /// </summary>
-        public bool Listening = true;
-
-        /// <summary>
         /// <para>Checks if the server has been started.</para>
         /// <para>This will be true after NetworkServer.Listen() has been called.</para>
         /// </summary>
@@ -110,9 +113,6 @@ namespace Mirror
 
         // Time kept in this server
         public readonly NetworkTime Time = new NetworkTime();
-
-        // transport to use to accept connections
-        public Transport Transport;
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.
