@@ -99,7 +99,7 @@ jobs:
           entrypoint: /sonar-scanner.sh
           projectKey: MirageNet_Mirage
           projectName: Mirage
-          sonarOrganisation: mirrorng
+          sonarOrganisation: miragenet
           beginArguments: >-
             /d:sonar.verbose="false" 
             ${{ steps.semantic.outputs.new_release_published == 'true' && format('/v:{0}',steps.semantic.outputs.new_release_version) || '' }}
