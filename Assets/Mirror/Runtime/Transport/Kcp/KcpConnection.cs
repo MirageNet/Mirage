@@ -91,11 +91,13 @@ namespace Mirror.KCP
 
                     uint check = kcp.Check((uint)now);
 
-                    if (check <= now)
-                        check = (uint)(now + 10);
+                    int delay = (int)(check - now);
 
+                    // todo remove magic number 10, Should it just be UniTask.Yield instead to wait 1 frame
+                    if (delay <= 0)
+                        delay = 10;
 
-                    await UniTask.Delay((int)(check - now));
+                    await UniTask.Delay(delay);
                 }
             }
             catch (SocketException)
