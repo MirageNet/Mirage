@@ -97,6 +97,8 @@ namespace Mirror.Examples.Tanks
 
         bool GetAllReadyState()
         {
+            if (!LocalPlayer || !LocalPlayer.isReady) return false;
+            
             bool AllReady = true;
             foreach (Tank tank in players)
             {
