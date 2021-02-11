@@ -206,47 +206,68 @@ namespace Mirror.KCP
         /// <returns>true if we got a message, false if we got disconnected</returns>
         public async UniTask<int> ReceiveAsync(MemoryStream buffer)
         {
-            while (kcp.PeekSize() < 0 && unreliable.PeekSize() < 0 && open) { 
+            await WaitForMessages();
+
+            ThrowIfClosed();
+
+            if (unreliable.PeekSize() >= 0)
+            {
+                return ReadUnreliable(buffer);
+            }
+            else
+            {
+                return ReadReliable(buffer);
+            }
+        }
+
+        private async Task WaitForMessages()
+        {
+            while (kcp.PeekSize() < 0 && unreliable.PeekSize() < 0 && open)
+            {
                 isWaiting = true;
                 dataAvailable = AutoResetUniTaskCompletionSource.Create();
                 await dataAvailable.Task;
                 isWaiting = false;
             }
+        }
 
+        private void ThrowIfClosed()
+        {
             if (!open)
             {
                 Disconnected?.Invoke();
                 throw new EndOfStreamException();
             }
+        }
 
-            if (unreliable.PeekSize() >= 0)
+        private int ReadUnreliable(MemoryStream buffer)
+        {
+            // we got a message in the unreliable channel
+            int msgSize = unreliable.PeekSize();
+            buffer.SetLength(msgSize);
+            unreliable.Receive(buffer.GetBuffer(), (int)buffer.Length);
+            buffer.Position = msgSize;
+            return Channel.Unreliable;
+        }
+
+        private int ReadReliable(MemoryStream buffer)
+        {
+            int msgSize = kcp.PeekSize();
+            // we have some data,  return it
+            buffer.SetLength(msgSize);
+            kcp.Receive(buffer.GetBuffer());
+            buffer.Position = msgSize;
+
+            // if we receive a disconnect message,  then close everything
+
+            var dataSegment = new ArraySegment<byte>(buffer.GetBuffer(), 0, msgSize);
+            if (Utils.Equal(dataSegment, Goodby))
             {
-                // we got a message in the unreliable channel
-                int msgSize = unreliable.PeekSize();
-                buffer.SetLength(msgSize);
-                unreliable.Receive(buffer.GetBuffer(), (int)buffer.Length);
-                buffer.Position = msgSize;
-                return Channel.Unreliable;
+                open = false;
+                Disconnected?.Invoke();
+                throw new EndOfStreamException();
             }
-            else
-            {
-                int msgSize = kcp.PeekSize();
-                // we have some data,  return it
-                buffer.SetLength(msgSize);
-                kcp.Receive(buffer.GetBuffer());
-                buffer.Position = msgSize;
-
-                // if we receive a disconnect message,  then close everything
-
-                var dataSegment = new ArraySegment<byte>(buffer.GetBuffer(), 0, msgSize);
-                if (Utils.Equal(dataSegment, Goodby))
-                {
-                    open = false;
-                    Disconnected?.Invoke();
-                    throw new EndOfStreamException();
-                }
-                return Channel.Reliable;
-            }
+            return Channel.Reliable;
         }
 
         /// <summary>
