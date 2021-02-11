@@ -220,7 +220,7 @@ namespace Mirror.KCP
             }
         }
 
-        private async Task WaitForMessages()
+        private async UniTask WaitForMessages()
         {
             while (kcp.PeekSize() < 0 && unreliable.PeekSize() < 0 && open)
             {
