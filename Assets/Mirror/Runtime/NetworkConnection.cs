@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -91,6 +90,8 @@ namespace Mirror
             lastNotifySentTime = Time.unscaledTime;
             // a black message to ensure a notify timeout
             RegisterHandler<NotifyAck>(msg => { });
+            connection.MessageReceived += TransportReceive;
+            connection.Disconnected += () => Disconnected.Invoke();
         }
 
         /// <summary>
@@ -179,18 +180,6 @@ namespace Mirror
             messageHandlers.Clear();
         }
 
-        /// <summary>
-        /// This sends a network message to the connection.
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="msg">The message to send</param>
-        /// <param name="channelId">The transport layer channel to send on.</param>
-        /// <returns></returns>
-        public virtual void Send<T>(T msg, int channelId = Channel.Reliable)
-        {
-            SendAsync(msg, channelId).Forget();
-        }
-
         public static void Send<T>(IEnumerable<INetworkConnection> connections, T msg, int channelId = Channel.Reliable)
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -203,7 +192,7 @@ namespace Mirror
                 foreach (INetworkConnection conn in connections)
                 {
                     // send to all connections, but don't wait for them
-                    conn.SendAsync(segment, channelId).Forget();
+                    conn.Send(segment, channelId);
                     count++;
                 }
 
@@ -218,22 +207,22 @@ namespace Mirror
         /// <param name="msg">The message to send.</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
         /// <returns></returns>
-        public virtual UniTask SendAsync<T>(T msg, int channelId = Channel.Reliable)
+        public virtual void Send<T>(T msg, int channelId = Channel.Reliable)
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 // pack message and send allocation free
                 MessagePacker.Pack(msg, writer);
                 NetworkDiagnostics.OnSend(msg, channelId, writer.Length, 1);
-                return SendAsync(writer.ToArraySegment(), channelId);
+                Send(writer.ToArraySegment(), channelId);
             }
         }
 
         // internal because no one except Mirror should send bytes directly to
         // the client. they would be detected as a message. send messages instead.
-        public UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable)
+        public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
-            return connection.SendAsync(segment, channelId);
+            connection.Send(segment, channelId);
         }
 
 
@@ -355,27 +344,6 @@ namespace Mirror
             clientOwnedObjects.Clear();
         }
 
-        public async UniTask ProcessMessagesAsync()
-        {
-            var buffer = new MemoryStream();
-
-            try
-            {
-                while (true)
-                {
-
-                    int channel = await connection.ReceiveAsync(buffer);
-
-                    buffer.TryGetBuffer(out ArraySegment<byte> data);
-                    TransportReceive(data, channel);
-                }
-            }
-            catch (EndOfStreamException)
-            {
-                // connection closed,  normal
-            }
-        }
-
         #region Notify
 
         internal struct PacketEnvelope
@@ -429,7 +397,7 @@ namespace Mirror
                 MessagePacker.Pack(notifyPacket, writer);
                 MessagePacker.Pack(msg, writer);
                 NetworkDiagnostics.OnSend(msg, channelId, writer.Length, 1);
-                SendAsync(writer.ToArraySegment(), channelId).Forget();
+                Send(writer.ToArraySegment(), channelId);
                 lastNotifySentTime = Time.unscaledTime;
             }
 
@@ -506,6 +474,7 @@ namespace Mirror
         /// Raised when a message is lost
         /// </summary>
         public event Action<INetworkConnection, object> NotifyLost;
+        public event Action Disconnected;
         #endregion
     }
 }

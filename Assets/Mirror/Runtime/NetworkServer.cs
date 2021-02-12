@@ -209,7 +209,7 @@ namespace Mirror
         private void TransportConnected(IConnection connection)
         {
             INetworkConnection networkConnectionToClient = GetNewConnection(connection);
-            ConnectionAcceptedAsync(networkConnectionToClient).Forget();
+            ConnectionAccepted(networkConnectionToClient);
         }
 
         /// <summary>
@@ -316,8 +316,7 @@ namespace Mirror
             LocalConnection = conn;
             LocalClient = client;
 
-            ConnectionAcceptedAsync(conn).Forget();
-
+            ConnectionAccepted(conn);
         }
 
         /// <summary>
@@ -332,7 +331,7 @@ namespace Mirror
             NetworkConnection.Send(connections, msg, channelId);
         }
 
-        async UniTaskVoid ConnectionAcceptedAsync(INetworkConnection conn)
+        void ConnectionAccepted(INetworkConnection conn)
         {
             if (logger.LogEnabled()) logger.Log("Server accepted client:" + conn);
 
@@ -351,22 +350,13 @@ namespace Mirror
             // add connection
             AddConnection(conn);
 
-            // let everyone know we just accepted a connection
-            Connected?.Invoke(conn);
-
-            // now process messages until the connection closes
-            try
-            {
-                await conn.ProcessMessagesAsync();
-            }
-            catch (Exception ex)
-            {
-                logger.LogException(ex);
-            }
-            finally
+            conn.Disconnected += () =>
             {
                 OnDisconnected(conn);
-            }
+            };
+
+            // let everyone know we just accepted a connection
+            Connected?.Invoke(conn);
         }
 
         //called once a client disconnects from the server

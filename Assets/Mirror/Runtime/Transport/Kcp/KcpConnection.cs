@@ -22,12 +22,13 @@ namespace Mirror.KCP
         private readonly int sendWindowSize;
         private readonly int receiveWindowSize;
 
+        public event MessageReceivedDelegate MessageReceived;
+
         readonly KcpDelayMode delayMode;
         volatile bool open;
 
         public int CHANNEL_SIZE = 4;
-
-        internal event Action Disconnected;
+        public event Action Disconnected;
 
         // If we don't receive anything these many milliseconds
         // then consider us disconnected
@@ -56,6 +57,7 @@ namespace Mirror.KCP
             this.sendWindowSize = sendWindowSize;
             this.receiveWindowSize = receiveWindowSize;
         }
+
 
         protected void SetupKcp()
         {
@@ -116,18 +118,39 @@ namespace Mirror.KCP
             finally
             {
                 open = false;
-                dataAvailable?.TrySetResult();
                 Close();
+            }
+        }
+
+        readonly MemoryStream receiveBuffer = new MemoryStream(1200);
+
+        private void DispatchKcpMessages()
+        {
+            int msgSize = kcp.PeekSize();
+
+            while (msgSize >=0)
+            {
+                receiveBuffer.SetLength(msgSize);
+
+                kcp.Receive(receiveBuffer.GetBuffer());
+
+                // if we receive a disconnect message,  then close everything
+
+                var dataSegment = new ArraySegment<byte>(receiveBuffer.GetBuffer(), 0, msgSize);
+                if (Utils.Equal(dataSegment, Goodby))
+                {
+                    open = false;
+                    Disconnected?.Invoke();
+                }
+
+                MessageReceived?.Invoke(dataSegment, Channel.Reliable);
+                msgSize = kcp.PeekSize();
             }
         }
 
         protected virtual void Close()
         {
         }
-
-        volatile bool isWaiting;
-
-        AutoResetUniTaskCompletionSource dataAvailable;
 
         internal void RawInput(byte[] buffer, int msgLength)
         {
@@ -144,27 +167,17 @@ namespace Mirror.KCP
 
         private void InputUnreliable(byte[] buffer, int msgLength)
         {
-            unreliable.Input(buffer, msgLength);
-            Thread.VolatileWrite(ref lastReceived, stopWatch.ElapsedMilliseconds);
+            var data = new ArraySegment<byte>(buffer, RESERVED + Unreliable.OVERHEAD, msgLength - RESERVED - Unreliable.OVERHEAD);
 
-            if (isWaiting && unreliable.PeekSize() > 0)
-            {
-                dataAvailable?.TrySetResult();
-            }
+            MessageReceived?.Invoke(data, Channel.Unreliable);
         }
 
         private void InputReliable(byte[] buffer, int msgLength)
         {
             kcp.Input(buffer, msgLength);
+            DispatchKcpMessages();
 
             Thread.VolatileWrite(ref lastReceived, stopWatch.ElapsedMilliseconds);
-
-            if (isWaiting && kcp.PeekSize() > 0)
-            {
-                // we just got a full message
-                // Let the receivers know
-                dataAvailable?.TrySetResult();
-            }
         }
 
         private bool Validate(byte[] buffer, int msgLength)
@@ -192,85 +205,12 @@ namespace Mirror.KCP
             }
         }
 
-        public UniTask SendAsync(ArraySegment<byte> data, int channel = Channel.Reliable)
+        public void Send(ArraySegment<byte> data, int channel = Channel.Reliable)
         {
             if (channel == Channel.Reliable)
                 kcp.Send(data.Array, data.Offset, data.Count);
             else if (channel == Channel.Unreliable)
                 unreliable.Send(data.Array, data.Offset, data.Count);
-
-            return UniTask.CompletedTask;
-        }
-
-        /// <summary>
-        ///     reads a message from connection
-        /// </summary>
-        /// <param name="buffer">buffer where the message will be written</param>
-        /// <returns>true if we got a message, false if we got disconnected</returns>
-        public async UniTask<int> ReceiveAsync(MemoryStream buffer)
-        {
-            await WaitForMessages();
-
-            ThrowIfClosed();
-
-            if (unreliable.PeekSize() >= 0)
-            {
-                return ReadUnreliable(buffer);
-            }
-            else
-            {
-                return ReadReliable(buffer);
-            }
-        }
-
-        private async UniTask WaitForMessages()
-        {
-            while (kcp.PeekSize() < 0 && unreliable.PeekSize() < 0 && open)
-            {
-                isWaiting = true;
-                dataAvailable = AutoResetUniTaskCompletionSource.Create();
-                await dataAvailable.Task;
-                isWaiting = false;
-            }
-        }
-
-        private void ThrowIfClosed()
-        {
-            if (!open)
-            {
-                Disconnected?.Invoke();
-                throw new EndOfStreamException();
-            }
-        }
-
-        private int ReadUnreliable(MemoryStream buffer)
-        {
-            // we got a message in the unreliable channel
-            int msgSize = unreliable.PeekSize();
-            buffer.SetLength(msgSize);
-            unreliable.Receive(buffer.GetBuffer(), (int)buffer.Length);
-            buffer.Position = msgSize;
-            return Channel.Unreliable;
-        }
-
-        private int ReadReliable(MemoryStream buffer)
-        {
-            int msgSize = kcp.PeekSize();
-            // we have some data,  return it
-            buffer.SetLength(msgSize);
-            kcp.Receive(buffer.GetBuffer());
-            buffer.Position = msgSize;
-
-            // if we receive a disconnect message,  then close everything
-
-            var dataSegment = new ArraySegment<byte>(buffer.GetBuffer(), 0, msgSize);
-            if (Utils.Equal(dataSegment, Goodby))
-            {
-                open = false;
-                Disconnected?.Invoke();
-                throw new EndOfStreamException();
-            }
-            return Channel.Reliable;
         }
 
         /// <summary>
@@ -283,7 +223,7 @@ namespace Mirror.KCP
             {
                 try
                 {
-                    SendAsync(Goodby).Forget();
+                    Send(Goodby);
                     kcp.Flush();
                 }
                 catch (SocketException)
@@ -300,10 +240,8 @@ namespace Mirror.KCP
                     // were disconnected
                 }
             }
+            Disconnected?.Invoke();
             open = false;
-
-            // EOF is now available
-            dataAvailable?.TrySetResult();
         }
 
         /// <summary>
@@ -321,6 +259,20 @@ namespace Mirror.KCP
         {
             var decoder = new Decoder(data, RESERVED);
             return (int)decoder.Decode32U();
+        }
+
+        protected UniTask WaitForHello()
+        {
+            var completionSource = AutoResetUniTaskCompletionSource.Create();
+
+            void ReceiveHello(ArraySegment<byte> helloData, int channel)
+            {
+                completionSource.TrySetResult();
+                MessageReceived -= ReceiveHello;
+            }
+            MessageReceived += ReceiveHello;
+
+            return completionSource.Task;
         }
     }
 }

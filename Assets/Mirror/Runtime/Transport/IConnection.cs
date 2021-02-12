@@ -1,7 +1,5 @@
 using System;
-using System.IO;
 using System.Net;
-using Cysharp.Threading.Tasks;
 
 namespace Mirror
 {
@@ -15,17 +13,25 @@ namespace Mirror
         public const int Unreliable = 1;
     }
 
+    public delegate void MessageReceivedDelegate(ArraySegment<byte> data, int channel);
+
     public interface IConnection
     {
-        UniTask SendAsync(ArraySegment<byte> data, int channel = Channel.Reliable);
+        void Send(ArraySegment<byte> data, int channel = Channel.Reliable);
 
         /// <summary>
-        /// reads a message from connection
+        /// raised when we get a message
         /// </summary>
-        /// <param name="buffer">buffer where the message will be written</param>
-        /// <returns>The channel where we got the message</returns>
-        /// <remark> throws System.IO.EndOfStreamException if the connetion has been closed</remark>
-        UniTask<int> ReceiveAsync(MemoryStream buffer);
+        /// <remarks>
+        /// The event gets raised with the data that got received and the channel id
+        /// do not keep the data array, it will be reused for other messages
+        /// </remarks>
+        event MessageReceivedDelegate MessageReceived;
+
+        /// <summary>
+        /// Raised when the connection disconnects
+        /// </summary>
+        event Action Disconnected;
 
         /// <summary>
         /// Disconnect this connection

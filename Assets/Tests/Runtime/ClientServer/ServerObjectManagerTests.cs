@@ -77,8 +77,6 @@ namespace Mirror.Tests.ClientServer
             // call ShowForConnection
             serverObjectManager.ShowForConnection(serverIdentity, connectionToClient);
 
-            connectionToServer.ProcessMessagesAsync().Forget();
-
             await AsyncUtil.WaitUntilWithTimeout(() => invoked);
         });
 

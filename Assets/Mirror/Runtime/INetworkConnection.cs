@@ -1,6 +1,5 @@
 using System;
 using System.Net;
-using Cysharp.Threading.Tasks;
 
 namespace Mirror
 {
@@ -19,11 +18,7 @@ namespace Mirror
 
         void Send<T>(T msg, int channelId = Channel.Reliable);
 
-        UniTask SendAsync<T>(T msg, int channelId = Channel.Reliable);
-
-        UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable);
-
-        UniTask ProcessMessagesAsync();
+        void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable);
 
         /// <summary>
         /// Sends a message, but notify when it is delivered or lost
@@ -76,6 +71,7 @@ namespace Mirror
         EndPoint Address { get; }
         object AuthenticationData { get; set; }
 
+        event Action Disconnected;
         void Disconnect();
     }
 }

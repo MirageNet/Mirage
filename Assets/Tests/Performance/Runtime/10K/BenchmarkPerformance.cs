@@ -20,10 +20,10 @@ namespace Mirror.Tests.Performance.Runtime
         private NetworkManager benchmarker;
 
         [UnitySetUp]
-        public IEnumerator SetUp() => UniTask.ToCoroutine(async () =>
+        public IEnumerator SetUp()
         {
             // load scene
-            await EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
             Scene scene = SceneManager.GetSceneByPath(ScenePath);
             SceneManager.SetActiveScene(scene);
 
@@ -31,8 +31,7 @@ namespace Mirror.Tests.Performance.Runtime
             benchmarker = Object.FindObjectOfType<NetworkManager>();
 
             benchmarker.Server.StartHost(benchmarker.Client).Forget();
-
-        });
+        }
 
         [UnityTearDown]
         public IEnumerator TearDown()

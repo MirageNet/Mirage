@@ -38,7 +38,7 @@ namespace Mirror.Tests
                 Array.Copy(data.Array, data.Offset, lastSerializedPacket, 0, data.Count);
             }
 
-            mockTransportConnection.SendAsync(
+            mockTransportConnection.Send(
                 Arg.Do<ArraySegment<byte>>(ParsePacket), Channel.Unreliable);
 
             connection = new NetworkConnection(mockTransportConnection);

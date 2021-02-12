@@ -163,7 +163,7 @@ namespace Mirror
 
                 RegisterMessageHandlers();
                 Time.UpdateClient(this);
-                OnConnected().Forget();
+                OnConnected();
             }
             catch (Exception)
             {
@@ -187,7 +187,7 @@ namespace Mirror
             Connection = GetNewConnection(c1);
             RegisterHostHandlers();
 
-            OnConnected().Forget();
+            OnConnected();
         }
 
         /// <summary>
@@ -213,30 +213,20 @@ namespace Mirror
             }
         }
 
-        async UniTaskVoid OnConnected()
+        void OnConnected()
         {
             // reset network time stats
 
             // the handler may want to send messages to the client
             // thus we should set the connected state before calling the handler
             connectState = ConnectState.Connected;
-            Connected?.Invoke(Connection);
-
-            // start processing messages
-            try
-            {
-                await Connection.ProcessMessagesAsync();
-            }
-            catch (Exception ex)
-            {
-                logger.LogException(ex);
-            }
-            finally
+            Connection.Disconnected += () =>
             {
                 Cleanup();
-
                 Disconnected?.Invoke();
-            }
+            };
+
+            Connected?.Invoke(Connection);
         }
 
         internal void OnAuthenticated(INetworkConnection conn)
@@ -262,14 +252,9 @@ namespace Mirror
         /// <param name="message"></param>
         /// <param name="channelId"></param>
         /// <returns>True if message was sent.</returns>
-        public UniTask SendAsync<T>(T message, int channelId = Channel.Reliable)
-        {
-            return Connection.SendAsync(message, channelId);
-        }
-
         public void Send<T>(T message, int channelId = Channel.Reliable)
         {
-            Connection.SendAsync(message, channelId).Forget();
+            Connection.Send(message, channelId);
         }
 
         internal void Update()

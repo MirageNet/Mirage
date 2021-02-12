@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections;
-using System.IO;
+using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
 using static Mirror.Tests.AsyncUtil;
+using TaskChannel = Cysharp.Threading.Tasks.Channel;
 
 namespace Mirror
 {
@@ -17,99 +18,80 @@ namespace Mirror
         IConnection c1;
         IConnection c2;
 
+        Channel<byte[]> c1Messages;
+        Channel<byte[]> c2Messages;
+
         [SetUp]
         public void Setup()
         {
             (c1, c2) = PipeConnection.CreatePipe();
+
+            c1Messages = TaskChannel.CreateSingleConsumerUnbounded<byte[]>();
+            c2Messages = TaskChannel.CreateSingleConsumerUnbounded<byte[]>();
+
+            c1.MessageReceived += (data, channel) =>
+            {
+                c1Messages.Writer.TryWrite(data.ToArray());
+            };
+            c2.MessageReceived += (data, channel) =>
+            {
+                c2Messages.Writer.TryWrite(data.ToArray());
+            };
         }
 
-        private static UniTask SendData(IConnection c, byte[] data)
+        private static void SendData(IConnection c, byte[] data)
         {
-            return c.SendAsync(new ArraySegment<byte>(data));
+            c.Send(new ArraySegment<byte>(data));
         }
 
 
-        private static async Task ExpectData(IConnection c, byte[] expected)
+        private static async UniTask ExpectData(Channel<byte[]> c, byte[] expected)
         {
-            var memoryStream = new MemoryStream();
-            await c.ReceiveAsync(memoryStream);
+            byte[] received = await c.Reader.ReadAsync();
 
-            memoryStream.TryGetBuffer(out ArraySegment<byte> receivedData);
-            Assert.That(receivedData, Is.EqualTo(new ArraySegment<byte>(expected)));
+            Assert.That(received, Is.EquivalentTo(expected));
         }
 
         [UnityTest]
         public IEnumerator TestSendAndReceive() => RunAsync(async () =>
         {
-            await SendData(c1, new byte[] { 1, 2, 3, 4 });
+            SendData(c1, new byte[] { 1, 2, 3, 4 });
 
-            await ExpectData(c2, new byte[] { 1, 2, 3, 4 });
+            await ExpectData(c2Messages, new byte[] { 1, 2, 3, 4 });
         });
 
         [UnityTest]
         public IEnumerator TestSendAndReceiveMultiple() => RunAsync(async () =>
         {
-            await SendData(c1, new byte[] { 1, 2, 3, 4 });
-            await SendData(c1, new byte[] { 5, 6, 7, 8 });
+            SendData(c1, new byte[] { 1, 2, 3, 4 });
+            SendData(c1, new byte[] { 5, 6, 7, 8 });
 
-            await ExpectData(c2, new byte[] { 1, 2, 3, 4 });
-            await ExpectData(c2, new byte[] { 5, 6, 7, 8 });
+            await ExpectData(c2Messages, new byte[] { 1, 2, 3, 4 });
+            await ExpectData(c2Messages, new byte[] { 5, 6, 7, 8 });
         });
 
         [UnityTest]
         public IEnumerator TestDisconnectC1() => RunAsync(async () =>
         {
-            // disconnecting c1 should disconnect both
+            Action disconnectMock = Substitute.For<Action>();
+
+            c1.Disconnected += disconnectMock;
+            // disconnecting c1 should disconnect c1
             c1.Disconnect();
 
-            var memoryStream = new MemoryStream();
-            try
-            {
-                await c1.ReceiveAsync(memoryStream);
-                Assert.Fail("Recive Async should have thrown EndOfStreamException");
-            }
-            catch (EndOfStreamException)
-            {
-                // good to go
-            }
-
-            try
-            {
-                await c2.ReceiveAsync(memoryStream);
-                Assert.Fail("Recive Async should have thrown EndOfStreamException");
-            }
-            catch (EndOfStreamException)
-            {
-                // good to go
-            }
+            disconnectMock.Received().Invoke();
         });
 
         [UnityTest]
         public IEnumerator TestDisconnectC2() => RunAsync(async () =>
         {
-            // disconnecting c1 should disconnect both
-            c2.Disconnect();
+            Action disconnectMock = Substitute.For<Action>();
 
-            var memoryStream = new MemoryStream();
-            try
-            {
-                await c1.ReceiveAsync(memoryStream);
-                Assert.Fail("Recive Async should have thrown EndOfStreamException");
-            }
-            catch (EndOfStreamException)
-            {
-                // good to go
-            }
+            c2.Disconnected += disconnectMock;
+            // disconnecting c1 should disconnect c2
+            c1.Disconnect();
 
-            try
-            {
-                await c2.ReceiveAsync(memoryStream);
-                Assert.Fail("Recive Async should have thrown EndOfStreamException");
-            }
-            catch (EndOfStreamException)
-            {
-                // good to go
-            }
+            disconnectMock.Received().Invoke();
         });
 
         [Test]

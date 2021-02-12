@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using Cysharp.Threading.Tasks;
@@ -79,23 +78,17 @@ namespace Mirror.KCP
             // the server won't accept connections otherwise
             string applicationName = Application.productName;
 
-            HashCash token = await UniTask.RunOnThreadPool( () => HashCash.Mine(applicationName, bits));
+            HashCash token = await UniTask.RunOnThreadPool(() => HashCash.Mine(applicationName, bits));
             byte[] hello = new byte[1000];
             int length = HashCashEncoding.Encode(hello, 0, token);
 
             var data = new ArraySegment<byte>(hello, 0, length);
             // send a greeting and see if the server replies
-            await SendAsync(data);
 
-            var stream = new MemoryStream();
-            try
-            {
-                await ReceiveAsync(stream);
-            }
-            catch (Exception e)
-            {
-                throw new InvalidDataException("Unable to establish connection, no Handshake message received.", e);
-            }
+            Send(data);
+
+            await WaitForHello();
+
         }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using Cysharp.Threading.Tasks;
@@ -17,24 +16,12 @@ namespace Mirror.KCP
             SetupKcp();
         }
 
-        internal async UniTask HandshakeAsync()
+        internal UniTask HandshakeAsync()
         {
             // send a greeting and see if the server replies
-            await SendAsync(Hello);
-            var stream = new MemoryStream();
+            Send(Hello);
 
-            try
-            {
-                // receive our first message and just throw it away
-                // this first message is the one that contains the Hashcash,
-                // but we don't care,  we already validated it before creating
-                // the connection
-                await ReceiveAsync(stream);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidDataException("No handshake received", ex);
-            }
+            return WaitForHello();
         }
 
         protected override void RawSend(byte[] data, int length)
