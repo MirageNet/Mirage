@@ -55,6 +55,8 @@ namespace Mirror.Tests
             listenTask = transport.ListenAsync();
             clientConnection = await transport.ConnectAsync(uri);
 
+            await UniTask.WaitUntil(() => serverConnection != null);
+
             serverMessages = TaskChannel.CreateSingleConsumerUnbounded<byte[]>();
             clientMessages = TaskChannel.CreateSingleConsumerUnbounded<byte[]>();
 
@@ -67,13 +69,8 @@ namespace Mirror.Tests
                 serverMessages.Writer.TryWrite(data.ToArray());
             };
 
-            await UniTask.WaitUntil(() => serverConnection != null);
         });
 
-        private void ClientConnection_MessageReceived(ArraySegment<byte> data, int channel)
-        {
-            throw new NotImplementedException();
-        }
 
         [UnityTearDown]
         public IEnumerator TearDown() => UniTask.ToCoroutine(async () =>
