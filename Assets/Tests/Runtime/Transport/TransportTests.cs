@@ -14,7 +14,7 @@ using Mirror.KCP;
 namespace Mirror.Tests
 {
     [TestFixture(typeof(KcpTransport), new[] { "kcp" }, "kcp://localhost", 7777)]
-    public class AsyncTransportTests<T> where T : Transport
+    public class TransportTests<T> where T : Transport
     {
         #region SetUp
 
@@ -24,7 +24,7 @@ namespace Mirror.Tests
         private readonly int port;
         private readonly string[] scheme;
 
-        public AsyncTransportTests(string[] scheme, string uri, int port)
+        public TransportTests(string[] scheme, string uri, int port)
         {
             this.scheme = scheme;
             this.uri = new Uri(uri);
