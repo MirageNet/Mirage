@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
+using Mono.Cecil.Rocks;
 
 namespace Mirror.Weaver
 {
@@ -98,5 +99,29 @@ namespace Mirror.Weaver
 
         public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes) =>
             AddMethod(typeDefinition, name, attributes, typeDefinition.Module.ImportReference(typeof(void)));
+
+        /// <summary>
+        /// Creates a generic type out of another type, if needed.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static TypeReference ConverToGenericIfNeeded(this TypeDefinition type)
+        {
+            if (type.HasGenericParameters)
+            {
+                // get all the generic parameters and make a generic instance out of it
+                TypeReference[] genericTypes = new TypeReference[type.GenericParameters.Count];
+                for (int i = 0; i < type.GenericParameters.Count; i++)
+                {
+                    genericTypes[i] = type.GenericParameters[i].GetElementType();
+                }
+
+                return type.MakeGenericInstanceType(genericTypes);
+            }
+            else
+            {
+                return type;
+            }
+        }
     }
 }

@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Mirror.RemoteCalls;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
 
 namespace Mirror.Weaver
 {
@@ -26,30 +25,6 @@ namespace Mirror.Weaver
 
         public ClientRpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger) : base(module, readers, writers, logger)
         {
-        }
-
-        /// <summary>
-        /// Creates a generic type out of another type, if needed.
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        TypeReference GetGenericIfNeeded(TypeDefinition type)
-        {
-            if (type.HasGenericParameters)
-            {
-                // get all the generic parameters and make a generic instance out of it
-                TypeReference[] genericTypes = new TypeReference[type.GenericParameters.Count];
-                for (int i = 0; i < type.GenericParameters.Count; i++)
-                {
-                    genericTypes[i] = type.GenericParameters[i].GetElementType();
-                }
-
-                return type.MakeGenericInstanceType(genericTypes);
-            }
-            else
-            {
-                return type;
-            }
         }
 
         /// <summary>
@@ -87,7 +62,7 @@ namespace Mirror.Weaver
 
             // setup for reader
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Castclass, GetGenericIfNeeded(md.DeclaringType)));
+            worker.Append(worker.Create(OpCodes.Castclass, md.DeclaringType.ConverToGenericIfNeeded()));
 
             // NetworkConnection parameter is only required for Client.Connection
             Client target = clientRpcAttr.GetField("target", Client.Observers);
@@ -193,7 +168,7 @@ namespace Mirror.Weaver
             else if (target == Client.Owner)
                 worker.Append(worker.Create(OpCodes.Ldnull));
 
-            worker.Append(worker.Create(OpCodes.Ldtoken, GetGenericIfNeeded(md.DeclaringType)));
+            worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType.ConverToGenericIfNeeded()));
             // invokerClass
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
             worker.Append(worker.Create(OpCodes.Ldstr, rpcName));
@@ -262,7 +237,7 @@ namespace Mirror.Weaver
         */
         void GenerateRegisterRemoteDelegate(ILProcessor worker, MethodDefinition func, string cmdName)
         {
-            TypeReference netBehaviourSubclass = GetGenericIfNeeded(func.DeclaringType);
+            TypeReference netBehaviourSubclass = func.DeclaringType.ConverToGenericIfNeeded();
             worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
             worker.Append(worker.Create(OpCodes.Ldstr, cmdName));
