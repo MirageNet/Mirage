@@ -36,6 +36,15 @@ namespace Mirror
         public abstract UniTask ListenAsync();
 
         /// <summary>
+        /// Process all the received messages since the last poll
+        /// </summary>
+        /// <remarks>
+        /// Transports will raise Connected, Disconnected and MessageReceived events
+        /// when this method is called.
+        /// </remarks>
+        public abstract void Poll();
+
+        /// <summary>
         /// Stop listening to the port
         /// </summary>
         public abstract void Disconnect();

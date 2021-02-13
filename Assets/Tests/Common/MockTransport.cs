@@ -35,5 +35,9 @@ namespace Mirror.Tests
         {
             return new[] { new Uri("kcp://localhost") };
         }
+
+        public override void Poll()
+        {
+        }
     }
 }

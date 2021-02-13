@@ -7,13 +7,8 @@ namespace Mirror.KCP
 {
     public class KcpServerConnection : KcpConnection
     {
-        internal event Action<int> DataSent;
-
-        public KcpServerConnection(Socket socket, EndPoint remoteEndpoint, KcpDelayMode delayMode, int sendWindowSize, int receiveWindowSize) : base(delayMode, sendWindowSize, receiveWindowSize)
+        public KcpServerConnection(Socket socket, EndPoint remoteEndpoint, KcpDelayMode delayMode, int sendWindowSize, int receiveWindowSize) : base(socket, remoteEndpoint, delayMode, sendWindowSize, receiveWindowSize)
         {
-            this.socket = socket;
-            this.remoteEndpoint = remoteEndpoint;
-            SetupKcp();
         }
 
         internal UniTask HandshakeAsync()
@@ -22,12 +17,6 @@ namespace Mirror.KCP
             Send(Hello);
 
             return WaitForHello();
-        }
-
-        protected override void RawSend(byte[] data, int length)
-        {
-            DataSent?.Invoke(length);
-            socket.SendTo(data, 0, length, SocketFlags.None, remoteEndpoint);
-        }
+        }  
     }
 }

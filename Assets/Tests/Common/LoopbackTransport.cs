@@ -45,5 +45,10 @@ namespace Mirror.Tests
 
             return new[] { builder.Uri };
         }
+
+        public override void Poll()
+        {
+            
+        }
     }
 }

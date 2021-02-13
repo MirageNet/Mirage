@@ -10,9 +10,6 @@ using Object = UnityEngine.Object;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirror.KCP;
-using NSubstitute;
-
-using TaskChannel = Cysharp.Threading.Tasks.Channel;
 
 namespace Mirror.Tests
 {
@@ -37,9 +34,6 @@ namespace Mirror.Tests
         IConnection clientConnection;
         IConnection serverConnection;
 
-        Channel<byte[]> serverMessages;
-        Channel<byte[]> clientMessages;
-
         UniTask listenTask;
 
         [UnitySetUp]
@@ -56,19 +50,6 @@ namespace Mirror.Tests
             clientConnection = await transport.ConnectAsync(uri);
 
             await UniTask.WaitUntil(() => serverConnection != null);
-
-            serverMessages = TaskChannel.CreateSingleConsumerUnbounded<byte[]>();
-            clientMessages = TaskChannel.CreateSingleConsumerUnbounded<byte[]>();
-
-            clientConnection.MessageReceived += (data, channel) =>
-            {
-                clientMessages.Writer.TryWrite(data.ToArray());
-            };
-            serverConnection.MessageReceived += (data, channel) =>
-            {
-                serverMessages.Writer.TryWrite(data.ToArray());
-            };
-
         });
 
 
@@ -93,26 +74,12 @@ namespace Mirror.Tests
             byte[] data = utf8.GetBytes(message);
             clientConnection.Send(new ArraySegment<byte>(data));
 
-            byte[] received = await Receive(serverConnection);
+            var stream = new MemoryStream();
+
+            await serverConnection.ReceiveAsync(stream);
+            byte[] received = stream.ToArray();
             Assert.That(received, Is.EqualTo(data));
         });
-
-        private UniTask<byte[]> Receive(IConnection connection)
-        {
-            var completionSource = new UniTaskCompletionSource<byte[]>();
-
-            void HandleMessage(ArraySegment<byte> data, int channel)
-            {
-                connection.MessageReceived -= HandleMessage;
-
-                byte[] received = data.ToArray();
-
-                completionSource.TrySetResult(received);
-            }
-            connection.MessageReceived += HandleMessage;
-
-            return completionSource.Task;
-        }
 
         [Test]
         public void EndpointAddress()
@@ -140,14 +107,21 @@ namespace Mirror.Tests
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the client 1";
             byte[] data = utf8.GetBytes(message);
-            clientConnection.Send(new ArraySegment<byte>(data));
+            await clientConnection.SendAsync(new ArraySegment<byte>(data));
 
             string message2 = "Hello from the client 2";
             byte[] data2 = utf8.GetBytes(message2);
-            clientConnection.Send(new ArraySegment<byte>(data2));
+            await clientConnection.SendAsync(new ArraySegment<byte>(data2));
 
-            byte[] received = await serverMessages.Reader.ReadAsync();
-            byte[] received2 = await serverMessages.Reader.ReadAsync();
+            var stream = new MemoryStream();
+
+            await serverConnection.ReceiveAsync(stream);
+            byte[] received = stream.ToArray();
+            Assert.That(received, Is.EqualTo(data));
+
+            stream.SetLength(0);
+            await serverConnection.ReceiveAsync(stream);
+            byte[] received2 = stream.ToArray();
             Assert.That(received2, Is.EqualTo(data2));
         });
 
@@ -157,38 +131,65 @@ namespace Mirror.Tests
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the server";
             byte[] data = utf8.GetBytes(message);
-            serverConnection.Send(new ArraySegment<byte>(data));
+            await serverConnection.SendAsync(new ArraySegment<byte>(data));
 
-            byte[] received = await clientMessages.Reader.ReadAsync();
+            var stream = new MemoryStream();
+
+            await clientConnection.ReceiveAsync(stream);
+            byte[] received = stream.ToArray();
             Assert.That(received, Is.EqualTo(data));
         });
 
         [UnityTest]
         public IEnumerator DisconnectServerTest() => UniTask.ToCoroutine(async () =>
         {
-            var disconnectMock = Substitute.For<Action>();
-            clientConnection.Disconnected += disconnectMock;
             serverConnection.Disconnect();
-            disconnectMock.Received().Invoke();
+
+            var stream = new MemoryStream();
+            try
+            {
+                await clientConnection.ReceiveAsync(stream);
+                Assert.Fail("ReceiveAsync should have thrown EndOfStreamException");
+            }
+            catch (EndOfStreamException)
+            {
+                // good to go
+            }
         });
 
         [UnityTest]
         public IEnumerator DisconnectClientTest() => UniTask.ToCoroutine(async () =>
         {
-            var disconnectMock = Substitute.For<Action>();
-            serverConnection.Disconnected += disconnectMock;
             clientConnection.Disconnect();
-            disconnectMock.Received().Invoke();
+
+            var stream = new MemoryStream();
+            try
+            {
+                await serverConnection.ReceiveAsync(stream);
+                Assert.Fail("ReceiveAsync should have thrown EndOfStreamException");
+            }
+            catch (EndOfStreamException)
+            {
+                // good to go
+            }
         });
 
         [UnityTest]
         public IEnumerator DisconnectClientTest2() => UniTask.ToCoroutine(async () =>
         {
-            var disconnectMock = Substitute.For<Action>();
-            clientConnection.Disconnected += disconnectMock;
             clientConnection.Disconnect();
-            disconnectMock.Received().Invoke();
-       });
+
+            var stream = new MemoryStream();
+            try
+            {
+                await clientConnection.ReceiveAsync(stream);
+                Assert.Fail("ReceiveAsync should have thrown EndOfStreamException");
+            }
+            catch (EndOfStreamException)
+            {
+                // good to go
+            }
+        });
 
         [Test]
         public void TestServerUri()

@@ -4,13 +4,11 @@ using UnityEngine.TestTools;
 using Cysharp.Threading.Tasks;
 using System;
 using System.IO;
-using NSubstitute;
 
 using UnityEngine;
 using Random = UnityEngine.Random;
 using System.Linq;
 using Mirror.KCP;
-using TaskChannel = Cysharp.Threading.Tasks.Channel;
 
 namespace Mirror.Tests
 {
@@ -27,9 +25,6 @@ namespace Mirror.Tests
         UniTask listenTask;
 
         byte[] data;
-
-        Channel<(byte[], int)> serverMessages;
-        Channel<(byte[], int)> clientMessages;
 
         [UnitySetUp]
         public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
@@ -49,7 +44,7 @@ namespace Mirror.Tests
        
             transport.Connected.AddListener(connection => serverConnection = (KcpConnection)connection);
 
-            listenTask = transport.ListenAsync();
+            listenTask = transport.Listen();
 
             var uriBuilder = new UriBuilder
             {
@@ -63,19 +58,6 @@ namespace Mirror.Tests
             clientConnection = (KcpConnection)await transport.ConnectAsync(uriBuilder.Uri);
 
             await UniTask.WaitUntil(() => serverConnection != null);
-
-            serverMessages = TaskChannel.CreateSingleConsumerUnbounded<(byte[], int)>();
-            clientMessages = TaskChannel.CreateSingleConsumerUnbounded<(byte[], int)>();
-
-            clientConnection.MessageReceived += (data, channel) =>
-            {
-                clientMessages.Writer.TryWrite((data.ToArray(), channel));
-            };
-            serverConnection.MessageReceived += (data, channel) =>
-            {
-                serverMessages.Writer.TryWrite((data.ToArray(), channel));
-            };
-
 
             // for our tests,  lower the timeout to just 0.1s
             // so that the tests run quickly.
@@ -110,17 +92,22 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator SendDataFromClient() => UniTask.ToCoroutine(async () =>
         {
-            clientConnection.Send(new ArraySegment<byte>(data));
-            (byte[] received, int channel) = await serverMessages.Reader.ReadAsync();
-            Assert.That(received, Is.EquivalentTo(data));
+            await clientConnection.SendAsync(new ArraySegment<byte>(data));
+
+            var buffer = new MemoryStream();
+            await serverConnection.ReceiveAsync(buffer);
+
+            Assert.That(buffer.ToArray(), Is.EquivalentTo(data));
         });
 
         [UnityTest]
         public IEnumerator SendDataFromServer() => UniTask.ToCoroutine(async () =>
         {
-            serverConnection.Send(new ArraySegment<byte>(data));
-            (byte[] received, int channel) = await clientMessages.Reader.ReadAsync();
-            Assert.That(received, Is.EquivalentTo(data));
+            await serverConnection.SendAsync(new ArraySegment<byte>(data));
+
+            var buffer = new MemoryStream();
+            await clientConnection.ReceiveAsync(buffer);
+            Assert.That(buffer.ToArray(), Is.EquivalentTo(data));
         });
 
         [UnityTest]
@@ -128,9 +115,14 @@ namespace Mirror.Tests
         {
             long received = transport.ReceivedBytes;
             Assert.That(received, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
-            clientConnection.Send(new ArraySegment<byte>(data));
-            _ = await serverMessages.Reader.ReadAsync();
+
+            await clientConnection.SendAsync(new ArraySegment<byte>(data));
+
+            var buffer = new MemoryStream();
+            await serverConnection.ReceiveAsync(buffer);
+
             Assert.That(transport.ReceivedBytes, Is.GreaterThan(received + data.Length), "Client sent data,  we should have received");
+
         });
 
         [UnityTest]
@@ -138,49 +130,102 @@ namespace Mirror.Tests
         {
             long sent = transport.SentBytes;
             Assert.That(sent, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
-            serverConnection.Send(new ArraySegment<byte>(data));
-            _ = await clientMessages.Reader.ReadAsync();
+
+            await serverConnection.SendAsync(new ArraySegment<byte>(data));
+
+            var buffer = new MemoryStream();
+            await clientConnection.ReceiveAsync(buffer);
+
             Assert.That(transport.SentBytes, Is.GreaterThan(sent + data.Length), "Client sent data,  we should have received");
+
         });
 
         [UnityTest]
         public IEnumerator SendUnreliableDataFromServer() => UniTask.ToCoroutine(async () =>
         {
-            serverConnection.Send(new ArraySegment<byte>(data), Channel.Unreliable);
+            await serverConnection.SendAsync(new ArraySegment<byte>(data), Channel.Unreliable);
 
-            (byte[] received, int channel) = await clientMessages.Reader.ReadAsync();
-            Assert.That(received, Is.EquivalentTo(data));
+            var buffer = new MemoryStream();
+            int channel = await clientConnection.ReceiveAsync(buffer);
+            Assert.That(buffer.ToArray(), Is.EquivalentTo(data));
             Assert.That(channel, Is.EqualTo(Channel.Unreliable));
         });
 
         [UnityTest]
         public IEnumerator SendUnreliableDataFromClient() => UniTask.ToCoroutine(async () =>
         {
-            clientConnection.Send(new ArraySegment<byte>(data), Channel.Unreliable);
+            await clientConnection.SendAsync(new ArraySegment<byte>(data), Channel.Unreliable);
 
-            (byte[] received, int channel) = await serverMessages.Reader.ReadAsync();
-            Assert.That(received, Is.EquivalentTo(data));
+            var buffer = new MemoryStream();
+            int channel = await serverConnection.ReceiveAsync(buffer);
+            Assert.That(buffer.ToArray(), Is.EquivalentTo(data));
             Assert.That(channel, Is.EqualTo(Channel.Unreliable));
+        });
+
+
+        [UnityTest]
+        public IEnumerator DisconnectFromServer() => UniTask.ToCoroutine(async () =>
+        {
+            serverConnection.Disconnect();
+
+            var buffer = new MemoryStream();
+            try
+            {
+                await clientConnection.ReceiveAsync(buffer);
+                Assert.Fail("ReceiveAsync should throw EndOfStreamException");
+            }
+            catch (EndOfStreamException)
+            {
+                // good to go
+            }
+        });
+
+        [UnityTest]
+        public IEnumerator DisconnectFromClient() => UniTask.ToCoroutine(async () =>
+        {
+            clientConnection.Disconnect();
+
+            var buffer = new MemoryStream();
+            try
+            {
+                await serverConnection.ReceiveAsync(buffer);
+                Assert.Fail("ReceiveAsync should throw EndOfStreamException");
+            }
+            catch (EndOfStreamException)
+            {
+                // good to go
+            }
         });
 
         [UnityTest]
         public IEnumerator DisconnectServerFromIdle() => UniTask.ToCoroutine(async () =>
         {
-            Action disconnected = Substitute.For<Action>();
-            serverConnection.Disconnected += disconnected;
-
-            await UniTask.WaitUntil(() => disconnected.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2));
-            disconnected.Received().Invoke();
+            var buffer = new MemoryStream();
+            try
+            {
+                await serverConnection.ReceiveAsync(buffer);
+                Assert.Fail("ReceiveAsync should throw EndOfStreamException");
+            }
+            catch (EndOfStreamException)
+            {
+                // good to go
+            }
         });
 
         [UnityTest]
         public IEnumerator DisconnectClientFromIdle() => UniTask.ToCoroutine(async () =>
         {
-            Action disconnected = Substitute.For<Action>();
-            clientConnection.Disconnected += disconnected;
-
-            await UniTask.WaitUntil(() => disconnected.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2));
-            disconnected.Received().Invoke();
+            // after certain amount of time with no messages, it should disconnect
+            var buffer = new MemoryStream();
+            try
+            {
+                await clientConnection.ReceiveAsync(buffer);
+                Assert.Fail("ReceiveAsync should throw EndOfStreamException");
+            }
+            catch (EndOfStreamException)
+            {
+                // good to go
+            }
         });
 
         [Test]
@@ -201,13 +246,23 @@ namespace Mirror.Tests
         [UnityTest]
         public IEnumerator ConnectionsDontLeak() => UniTask.ToCoroutine(async () =>
         {
-            Action disconnected = Substitute.For<Action>();
-            serverConnection.Disconnected += disconnected;
             serverConnection.Disconnect();
 
-            await UniTask.WaitUntil(() => disconnected.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2));
+            var buffer = new MemoryStream();
 
-            Assert.That(transport.connectedClients, Is.Empty);
+            try
+            {
+                while (true)
+                {
+                    await serverConnection.ReceiveAsync(buffer);
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                // connection is now successfully closed
+            }
+
+            Assert.That(transport.connections, Is.Empty);
         });
     }
 }

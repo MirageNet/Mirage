@@ -350,13 +350,13 @@ namespace Mirror
             // add connection
             AddConnection(conn);
 
+            // let everyone know we just accepted a connection
+            Connected?.Invoke(conn);
+
             conn.Disconnected += () =>
             {
                 OnDisconnected(conn);
             };
-
-            // let everyone know we just accepted a connection
-            Connected?.Invoke(conn);
         }
 
         //called once a client disconnects from the server

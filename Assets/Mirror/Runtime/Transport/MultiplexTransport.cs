@@ -61,5 +61,14 @@ namespace Mirror
             transports
                 .Where(transport => transport.Supported)
                 .SelectMany(transport => transport.ServerUri());
+
+
+        public override void Poll()
+        {
+            foreach (Transport t in transports)
+            {
+                t.Poll();
+            }
+        }
     }
 }

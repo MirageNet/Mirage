@@ -15,20 +15,20 @@ namespace Mirror.KCP
 
         const int MinimumKcpTickInterval = 10;
 
-        protected Socket socket;
-        protected EndPoint remoteEndpoint;
-        protected Kcp kcp;
-        protected Unreliable unreliable;
+        private readonly Socket socket;
+        private readonly EndPoint remoteEndpoint;
+        private readonly Kcp kcp;
+        private readonly Unreliable unreliable;
         private readonly int sendWindowSize;
         private readonly int receiveWindowSize;
 
         public event MessageReceivedDelegate MessageReceived;
 
-        readonly KcpDelayMode delayMode;
         volatile bool open;
 
         public int CHANNEL_SIZE = 4;
         public event Action Disconnected;
+        internal event Action<int> DataSent;
 
         // If we don't receive anything these many milliseconds
         // then consider us disconnected
@@ -51,22 +51,17 @@ namespace Mirror.KCP
         internal static readonly ArraySegment<byte> Hello = new ArraySegment<byte>(new byte[] { 0 });
         private static readonly ArraySegment<byte> Goodby = new ArraySegment<byte>(new byte[] { 1 });
 
-        protected KcpConnection(KcpDelayMode delayMode, int sendWindowSize, int receiveWindowSize)
+        protected KcpConnection(Socket socket, EndPoint remoteEndpoint, KcpDelayMode delayMode, int sendWindowSize, int receiveWindowSize)
         {
-            this.delayMode = delayMode;
-            this.sendWindowSize = sendWindowSize;
-            this.receiveWindowSize = receiveWindowSize;
-        }
+            this.socket = socket;
+            this.remoteEndpoint = remoteEndpoint;
 
-
-        protected void SetupKcp()
-        {
-            unreliable = new Unreliable(SendWithChecksum)
+            unreliable = new Unreliable(SendPacket)
             {
                 Reserved = RESERVED
             };
 
-            kcp = new Kcp(0, SendWithChecksum)
+            kcp = new Kcp(0, SendPacket)
             {
                 Reserved = RESERVED
             };
@@ -78,6 +73,10 @@ namespace Mirror.KCP
             Tick().Forget();
         }
 
+        /// <summary>
+        /// Ticks the KCP object.  This is needed for retransmits and congestion control flow messages
+        /// Note no events are raised here
+        /// </summary>
         async UniTaskVoid Tick()
         {
             try
@@ -118,7 +117,6 @@ namespace Mirror.KCP
             finally
             {
                 open = false;
-                Close();
             }
         }
 
@@ -148,31 +146,30 @@ namespace Mirror.KCP
             }
         }
 
-        protected virtual void Close()
-        {
-        }
-
-        internal void RawInput(byte[] buffer, int msgLength)
+        internal void HandlePacket(byte[] buffer, int msgLength)
         {
             // check packet integrity
             if (!Validate(buffer, msgLength))
                 return;
 
+            if (!open)
+                return;
+
             int channel = GetChannel(buffer);
             if (channel == Channel.Reliable)
-                InputReliable(buffer, msgLength);
+                HandleReliablePacket(buffer, msgLength);
             else if (channel == Channel.Unreliable)
-                InputUnreliable(buffer, msgLength);
+                HandleUnreliablePacket(buffer, msgLength);
         }
 
-        private void InputUnreliable(byte[] buffer, int msgLength)
+        private void HandleUnreliablePacket(byte[] buffer, int msgLength)
         {
             var data = new ArraySegment<byte>(buffer, RESERVED + Unreliable.OVERHEAD, msgLength - RESERVED - Unreliable.OVERHEAD);
 
             MessageReceived?.Invoke(data, Channel.Unreliable);
         }
 
-        private void InputReliable(byte[] buffer, int msgLength)
+        private void HandleReliablePacket(byte[] buffer, int msgLength)
         {
             kcp.Input(buffer, msgLength);
             DispatchKcpMessages();
@@ -189,15 +186,19 @@ namespace Mirror.KCP
             return receivedCrc == calculatedCrc;
         }
 
-        protected abstract void RawSend(byte[] data, int length);
+        private void SendBuffer(byte[] data, int length)
+        {
+            DataSent?.Invoke(length);
+            socket.SendTo(data, 0, length, SocketFlags.None, remoteEndpoint);
+        }
 
-        private void SendWithChecksum(byte [] data, int length)
+        private void SendPacket(byte [] data, int length)
         {
             // add a CRC64 checksum in the reserved space
             ulong crc = Crc64.Compute(data, RESERVED, length - RESERVED);
             var encoder = new Encoder(data, 0);
             encoder.Encode64U(crc);
-            RawSend(data, length);
+            SendBuffer(data, length);
 
             if (kcp.WaitSnd > 1000 && logger.WarnEnabled())
             {

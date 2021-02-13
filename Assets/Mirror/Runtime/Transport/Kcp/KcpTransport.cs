@@ -24,7 +24,8 @@ namespace Mirror.KCP
         public int ReceiveWindowSize = 8192;
 
         public KcpDelayMode delayMode = KcpDelayMode.Fast3;
-        internal readonly Dictionary<IPEndPoint, KcpServerConnection> connectedClients = new Dictionary<IPEndPoint, KcpServerConnection>(new IPEndpointComparer());
+
+        internal readonly Dictionary<IPEndPoint, KcpConnection> connections = new Dictionary<IPEndPoint, KcpConnection>(new IPEndpointComparer());
 
         public override IEnumerable<string> Scheme => new[] { "kcp" };
 
@@ -34,6 +35,8 @@ namespace Mirror.KCP
 
         private long receivedBytes;
         private long sentBytes;
+
+        #region server
 
         private UniTaskCompletionSource ListenCompletionSource;
 
@@ -65,12 +68,35 @@ namespace Mirror.KCP
             }
         }
 
+        /// <summary>
+        ///     Retrieves the address of this server.
+        ///     Useful for network discovery
+        /// </summary>
+        /// <returns>the url at which this server can be reached</returns>
+        public override IEnumerable<Uri> ServerUri()
+        {
+            var builder = new UriBuilder
+            {
+                Scheme = "kcp",
+                Host = Dns.GetHostName(),
+                Port = Port
+            };
+            return new[] { builder.Uri };
+        }
+
+        #endregion
+
         EndPoint newClientEP = new IPEndPoint(IPAddress.IPv6Any, 0);
-        public void Update()
+
+        /// <summary>
+        /// The higher level should call this method every tick to process
+        /// the messages in this transport
+        /// </summary>
+        public override void Poll()
         {
             try
             {
-                while (socket != null && socket.Poll(0, SelectMode.SelectRead))
+                while (socket.Poll(0, SelectMode.SelectRead))
                 {
                     int msgLength = socket.ReceiveFrom(buffer, 0, buffer.Length, SocketFlags.None, ref newClientEP);
 
@@ -88,7 +114,7 @@ namespace Mirror.KCP
         void RawInput(EndPoint endpoint, byte[] data, int msgLength)
         {
             // is this a new connection?                    
-            if (!connectedClients.TryGetValue(endpoint as IPEndPoint, out KcpServerConnection connection))
+            if (!connections.TryGetValue(endpoint as IPEndPoint, out KcpConnection connection))
             {
                 // very first message from this endpoint.
                 // lets validate it before we start KCP
@@ -110,18 +136,18 @@ namespace Mirror.KCP
             else
             {
                 receivedBytes += msgLength;
-                connection.RawInput(data, msgLength);
+                connection.HandlePacket(data, msgLength);
             }
         }
 
         private async UniTaskVoid ServerHandshake(EndPoint endpoint, byte[] data, int msgLength)
         {
             var connection = new KcpServerConnection(socket, endpoint, delayMode, SendWindowSize, ReceiveWindowSize);
-            connectedClients.Add(endpoint as IPEndPoint, connection);
+            connections.Add(endpoint as IPEndPoint, connection);
 
             connection.Disconnected += () =>
             {
-                connectedClients.Remove(endpoint as IPEndPoint);
+                connections.Remove(endpoint as IPEndPoint);
             };
 
             connection.DataSent += (length) =>
@@ -129,7 +155,7 @@ namespace Mirror.KCP
                 sentBytes += length;
             };
 
-            connection.RawInput(data, msgLength);
+            connection.HandlePacket(data, msgLength);
 
             await connection.HandshakeAsync();
 
@@ -193,45 +219,65 @@ namespace Mirror.KCP
         }
 
         /// <summary>
-        ///     Retrieves the address of this server.
-        ///     Useful for network discovery
-        /// </summary>
-        /// <returns>the url at which this server can be reached</returns>
-        public override IEnumerable<Uri> ServerUri()
-        {
-            var builder = new UriBuilder
-            {
-                Scheme = "kcp",
-                Host = Dns.GetHostName(),
-                Port = Port
-            };
-            return new[] { builder.Uri };
-        }
-
-        /// <summary>
         ///     Determines if this transport is supported in the current platform
         /// </summary>
         /// <returns>true if the transport works in this platform</returns>
         public override bool Supported => Application.platform != RuntimePlatform.WebGLPlayer;
 
+
+        #region client
         /// <summary>
         ///     Connect to a server located at a provided uri
         /// </summary>
         /// <param name="uri">address of the server to connect to</param>
         /// <returns>The connection to the server</returns>
         /// <exception>If connection cannot be established</exception>
-        public override async UniTask<IConnection> ConnectAsync(Uri uri)
+        public override UniTask<IConnection> ConnectAsync(Uri uri)
         {
-            var client = new KcpClientConnection(delayMode, SendWindowSize, ReceiveWindowSize)
+            ushort port = (ushort)(uri.IsDefaultPort? Port : uri.Port);
+            return ConnectAsync(uri.Host, port);
+        }
+
+        private async UniTask<IConnection> ConnectAsync(string host, ushort port)
+        {
+            IPAddress[] ipAddress = await Dns.GetHostAddressesAsync(host);
+            if (ipAddress.Length < 1)
+                throw new SocketException((int)SocketError.HostNotFound);
+
+            var remoteEndpoint = new IPEndPoint(ipAddress[0], port);
+
+            if (socket == null)
             {
-                HashCashBits = HashCashBits
+                // initialize the socket if we don't have one
+                socket = new Socket(remoteEndpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+            }
+
+            var connection = new KcpClientConnection(socket, remoteEndpoint, delayMode, SendWindowSize, ReceiveWindowSize)
+            {
             };
 
-            ushort port = (ushort)(uri.IsDefaultPort? Port : uri.Port);
+            connections.Add(remoteEndpoint, connection);
 
-            await client.ConnectAsync(uri.Host, port);
-            return client;
+            connection.Disconnected += () =>
+            {
+                connections.Remove(remoteEndpoint);
+            };
+
+            connection.DataSent += (length) =>
+            {
+                sentBytes += length;
+            };
+
+            await connection.HandshakeAsync(HashCashBits);
+
+            Connected?.Invoke(connection);
+            return connection;
         }
+
+
+        #endregion
+
+
 
         public override long ReceivedBytes => receivedBytes;
 
