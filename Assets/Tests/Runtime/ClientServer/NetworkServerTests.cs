@@ -33,22 +33,15 @@ namespace Mirror.Tests.ClientServer
         }
 
         [UnityTest]
-        public IEnumerator ReadyMessageSetsClientReadyTest() => UniTask.ToCoroutine((Func<UniTask>)(async () =>
+        public IEnumerator ReadyMessageSetsClientReadyTest() => UniTask.ToCoroutine(async () =>
         {
-
-/* Unmerged change from project 'Mirror.Tests.Runtime'
-Before:
             connectionToServer.Send(new ReadyMessage());
-After:
-            connectionToServer.Send<ReadyMessage>((ReadyMessage)new ReadyMessage());
-*/
-            connectionToServer.Send<ReadyMessage>((ReadyMessage)new ReadyMessage());
 
             await AsyncUtil.WaitUntilWithTimeout(() => connectionToClient.IsReady);
 
             // ready?
             Assert.That(connectionToClient.IsReady, Is.True);
-        }));
+        });
 
         [UnityTest]
         public IEnumerator SendToAll() => UniTask.ToCoroutine(async () =>
@@ -74,44 +67,44 @@ After:
         });
 
         [UnityTest]
-        public IEnumerator RegisterMessage1() => UniTask.ToCoroutine((Func<UniTask>)(async () =>
+        public IEnumerator RegisterMessage1() => UniTask.ToCoroutine(async () =>
         {
             bool invoked = false;
 
             connectionToClient.RegisterHandler<WovenTestMessage>(msg => invoked = true);
-            connectionToServer.Send<WovenTestMessage>((WovenTestMessage)message);
+            connectionToServer.Send(message);
 
             await AsyncUtil.WaitUntilWithTimeout(() => invoked);
 
-        }));
+        });
 
         [UnityTest]
-        public IEnumerator RegisterMessage2() => UniTask.ToCoroutine((Func<UniTask>)(async () =>
+        public IEnumerator RegisterMessage2() => UniTask.ToCoroutine(async () =>
         {
             bool invoked = false;
 
             connectionToClient.RegisterHandler<WovenTestMessage>((conn, msg) => invoked = true);
 
-            connectionToServer.Send<WovenTestMessage>((WovenTestMessage)message);
+            connectionToServer.Send(message);
 
             await AsyncUtil.WaitUntilWithTimeout(() => invoked);
-        }));
+        });
 
         [UnityTest]
-        public IEnumerator UnRegisterMessage1() => UniTask.ToCoroutine((Func<UniTask>)(async () =>
+        public IEnumerator UnRegisterMessage1() => UniTask.ToCoroutine(async () =>
         {
             Action<WovenTestMessage> func = Substitute.For<Action<WovenTestMessage>>();
 
             connectionToClient.RegisterHandler(func);
             connectionToClient.UnregisterHandler<WovenTestMessage>();
 
-            connectionToServer.Send<WovenTestMessage>((WovenTestMessage)message);
+            connectionToServer.Send(message);
 
             await UniTask.Delay(1);
 
             func.Received(0).Invoke(
                 Arg.Any<WovenTestMessage>());
-        }));
+        });
 
         [Test]
         public void NumPlayersTest()
