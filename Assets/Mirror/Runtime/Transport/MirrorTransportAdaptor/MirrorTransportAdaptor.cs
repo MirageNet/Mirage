@@ -15,8 +15,6 @@ namespace Mirror.TransportAdaptor
 
         public override void Disconnect() => transport.ServerDisconnect(id);
 
-        public override EndPoint GetEndPointAddress() => throw new NotImplementedException();
-
         public override UniTask SendAsync(ArraySegment<byte> data, int channel = 0)
         {
             transport.ServerSend(id, channel, data);
@@ -30,8 +28,6 @@ namespace Mirror.TransportAdaptor
         }
 
         public override void Disconnect() => transport.ClientDisconnect();
-
-        public override EndPoint GetEndPointAddress() => throw new NotImplementedException();
 
         public override UniTask SendAsync(ArraySegment<byte> data, int channel = 0)
         {
@@ -56,8 +52,8 @@ namespace Mirror.TransportAdaptor
         }
 
         public abstract void Disconnect();
-        public abstract EndPoint GetEndPointAddress();
         public abstract UniTask SendAsync(ArraySegment<byte> data, int channel = 0);
+        public virtual EndPoint GetEndPointAddress() => null;
 
         Queue<(ArraySegment<byte> data, int channel)> dataQueue = new Queue<(ArraySegment<byte> data, int channel)>();
         private AutoResetUniTaskCompletionSource dataAvailable;
@@ -70,9 +66,9 @@ namespace Mirror.TransportAdaptor
 
             (ArraySegment<byte> data, int channel) = dataQueue.Dequeue();
 
-            buffer.SetLength(data.Count);
             buffer.Write(data.Array, data.Offset, data.Count);
-            buffer.Position = data.Count;
+            buffer.Position = 0;
+            buffer.SetLength(data.Count);
 
             return channel;
         }
@@ -202,6 +198,7 @@ namespace Mirror.TransportAdaptor
             serverConnections = new Dictionary<int, ServerAdaptorConnection>();
             inner.ServerStart();
             Started?.Invoke();
+
             return listenCompletionSource.Task;
         }
 
