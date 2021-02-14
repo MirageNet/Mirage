@@ -101,7 +101,7 @@ namespace Mirror.TransportAdaptor
         internal void OnData(ArraySegment<byte> data, int channel)
         {
             dataQueue.Enqueue((data, channel));
-            dataAvailable.TrySetResult();
+            dataAvailable?.TrySetResult();
         }
     }
     public class MirrorTransportAdaptor : Transport
