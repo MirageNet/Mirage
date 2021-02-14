@@ -123,7 +123,6 @@ namespace Mirror.TransportAdaptor
         public override async UniTask<IConnection> ConnectAsync(Uri uri)
         {
             bool connected = false;
-            // todo what about other client events
             inner.OnClientConnected.AddListener(() =>
             {
                 connected = true;
