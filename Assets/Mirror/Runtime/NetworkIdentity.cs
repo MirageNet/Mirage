@@ -1261,9 +1261,9 @@ namespace Mirror
         /// this is used for ObjectDestroy messages.
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
-        /// <param name="identity"></param>
-        /// <param name="msg"></param>
-        /// <param name="channelId"></param>
+        /// <param name="msg"> the message to deliver to to clients</param>
+        /// <param name="includeOwner">Wether the owner should receive this message too</param>
+        /// <param name="channelId"> the transport channel that should be used to deliver the message</param>
         internal void SendToObservers<T>(T msg, bool includeOwner = true, int channelId = Channel.Reliable)
         {
             if (logger.LogEnabled()) logger.Log("Server.SendToObservers id:" + typeof(T));
