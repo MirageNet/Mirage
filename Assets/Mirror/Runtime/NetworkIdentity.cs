@@ -872,6 +872,7 @@ namespace Mirror
         {
             // needed so that we can deserialize gameobjects and NI
             reader.Client = Client;
+            reader.ClientObjectManager = ClientObjectManager;
             // deserialize all components that were received
             NetworkBehaviour[] components = NetworkBehaviours;
             while (reader.Position < reader.Length)
@@ -900,7 +901,9 @@ namespace Mirror
             // Set the client and server for this remote call.
             // this can be used by custom deserializers to lookup objects
             reader.Client = Client;
+            reader.ClientObjectManager = ClientObjectManager;
             reader.Server = Server;
+            reader.ServerObjectManager = ServerObjectManager;
 
             // find the right component to invoke the function on
             if (componentIndex >= 0 && componentIndex < NetworkBehaviours.Length)
