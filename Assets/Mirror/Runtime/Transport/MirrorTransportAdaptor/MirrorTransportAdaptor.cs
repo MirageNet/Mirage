@@ -170,7 +170,9 @@ namespace Mirror.TransportAdaptor
         {
             inner.OnServerConnected.AddListener((id) =>
             {
-                serverConnections.Add(id, new ServerAdaptorConnection(id, this));
+                var conn = new ServerAdaptorConnection(id, this);
+                serverConnections.Add(id, conn);
+                Connected?.Invoke(conn);
             });
             inner.OnServerDataReceived.AddListener((id, data, channel) =>
             {
@@ -199,6 +201,7 @@ namespace Mirror.TransportAdaptor
             listenCompletionSource = new UniTaskCompletionSource();
             serverConnections = new Dictionary<int, ServerAdaptorConnection>();
             inner.ServerStart();
+            Started?.Invoke();
             return listenCompletionSource.Task;
         }
 
