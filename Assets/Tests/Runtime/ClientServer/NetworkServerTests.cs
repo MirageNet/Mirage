@@ -32,15 +32,6 @@ namespace Mirror.Tests.ClientServer
             Assert.That(server.LocalClientActive, Is.False);
         }
 
-        [Test]
-        public void SendToClientOfPlayerExceptionTest()
-        {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                server.SendToClientOfPlayer(null, new ServerRpcMessage());
-            });
-        }
-
         [UnityTest]
         public IEnumerator ReadyMessageSetsClientReadyTest() => UniTask.ToCoroutine(async () =>
         {
@@ -73,7 +64,7 @@ namespace Mirror.Tests.ClientServer
 
             connectionToServer.RegisterHandler<WovenTestMessage>(msg => invoked = true) ;
 
-            server.SendToClientOfPlayer(serverIdentity, message);
+            serverIdentity.ConnectionToClient.Send(message);
 
             connectionToServer.ProcessMessagesAsync().Forget();
 

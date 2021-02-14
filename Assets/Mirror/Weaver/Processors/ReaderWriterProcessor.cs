@@ -185,7 +185,6 @@ namespace Mirror.Weaver
                 method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
                 method.Is<NetworkClient>(nameof(NetworkClient.SendAsync)) ||
                 method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
-                method.Is<NetworkServer>(nameof(NetworkServer.SendToClientOfPlayer)) ||
                 method.Is<INetworkServer>(nameof(INetworkServer.SendToAll));
 
             bool generate = isMessage ||

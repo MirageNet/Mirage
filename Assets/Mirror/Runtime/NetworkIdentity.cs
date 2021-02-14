@@ -1231,7 +1231,7 @@ namespace Mirror
                     {
                         varsMessage.payload = ownerWriter.ToArraySegment();
                         if (ConnectionToClient != null && ConnectionToClient.IsReady)
-                            Server.SendToClientOfPlayer(this, varsMessage);
+                            ConnectionToClient.Send(varsMessage);
                     }
 
                     // send observersWriter to everyone but owner
