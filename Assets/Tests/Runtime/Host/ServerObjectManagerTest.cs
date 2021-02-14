@@ -129,7 +129,7 @@ namespace Mirror.Tests.Host
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
 
-            Assert.That(server.Spawned.Count, Is.Zero);
+            Assert.That(serverObjectManager.SpawnedObjects.Count, Is.Zero);
         });
     }
 }

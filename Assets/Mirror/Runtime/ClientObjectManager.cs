@@ -70,9 +70,11 @@ namespace Mirror
                     return ServerObjectManager.SpawnedObjects;
                 else
                     //TODO: Finish moving all refs from Client.Spawned to ClientObjectManager
-                    return Client.Spawned;
+                    return spawned;
             }
         }
+
+        internal readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
 
         internal ServerObjectManager ServerObjectManager;
 
@@ -611,7 +613,7 @@ namespace Mirror
         {
             get
             {
-                Client.Spawned.TryGetValue(netId, out NetworkIdentity identity);
+                SpawnedObjects.TryGetValue(netId, out NetworkIdentity identity);
                 return identity;
             }
         }
