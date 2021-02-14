@@ -19,6 +19,10 @@ namespace Mirror
     /// </remarks>
     public abstract class MirrorTransport : MonoBehaviour
     {
+        public static class Channels
+        {
+            public const int DefaultReliable = 0;
+        }
         /// <summary>
         /// Is this transport available in the current platform?
         /// <para>Some transports might only be available in mobile</para>
@@ -173,7 +177,7 @@ namespace Mirror
         /// </summary>
         /// <param name="channelId">channel id</param>
         /// <returns>the size in bytes that can be sent via the provided channel</returns>
-        public abstract int GetMaxPacketSize(int channelId = 0);
+        public abstract int GetMaxPacketSize(int channelId = Channels.DefaultReliable);
 
         /// <summary>
         /// Shut down the transport, both as client and server
