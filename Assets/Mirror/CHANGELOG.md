@@ -1,3 +1,17 @@
+# [65.0.0](https://github.com/MirrorNG/MirrorNG/compare/v64.0.0...v65.0.0) (2021-02-14)
+
+
+### Code Refactoring
+
+* NetworkReader no longer depends on NetworkClient and NetworkServer ([15f27c4](https://github.com/MirrorNG/MirrorNG/commit/15f27c4bde191106c830077c136b018e1f053430))
+* readers no longer depends on NetworkClient and NetworkServer ([#583](https://github.com/MirrorNG/MirrorNG/issues/583)) ([177c307](https://github.com/MirrorNG/MirrorNG/commit/177c307dfd69816844565f0f3aeb6d1c71663652))
+
+
+### BREAKING CHANGES
+
+* NetworkReader no longer have .Client and .Server, it has a .ObjectLocator instead
+* NetworkReader no longer have .Client and .Server, it has a .ObjectLocator instead
+
 # [64.0.0](https://github.com/MirrorNG/MirrorNG/compare/v63.5.0...v64.0.0) (2021-02-14)
 
 
