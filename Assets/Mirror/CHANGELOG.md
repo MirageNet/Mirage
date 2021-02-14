@@ -1,3 +1,15 @@
+# [64.0.0](https://github.com/MirrorNG/MirrorNG/compare/v63.5.0...v64.0.0) (2021-02-14)
+
+
+### Code Refactoring
+
+* separate player ownership from NetworkServer ([#580](https://github.com/MirrorNG/MirrorNG/issues/580)) ([8d7efa6](https://github.com/MirrorNG/MirrorNG/commit/8d7efa6a3d02df8b5cef8399f0efcc286c2cbf5f))
+
+
+### BREAKING CHANGES
+
+* SendToClientOfPlayer removed. Use identity.ConnectionToClient.Send() instead
+
 # [63.5.0](https://github.com/MirrorNG/MirrorNG/compare/v63.4.0...v63.5.0) (2021-02-10)
 
 
