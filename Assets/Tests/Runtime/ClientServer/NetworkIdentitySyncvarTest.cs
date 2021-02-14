@@ -48,7 +48,7 @@ namespace Mirror.Tests.ClientServer
 
             var networkIdentitySyncvar = new NetworkIdentitySyncvar
             {
-                objectLocator = client,
+                objectLocator = clientObjectManager,
                 netId = serverIdentity.NetId,
                 identity = null,
             };

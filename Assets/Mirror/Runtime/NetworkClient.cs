@@ -16,8 +16,6 @@ namespace Mirror
         Connected,
     }
 
-    // TODO remove the IObjectLocator and move to COM
-
     /// <summary>
     /// This is a network client class used by the networking system. It contains a NetworkConnection that is used to connect to a network server.
     /// <para>The <see cref="NetworkClient">NetworkClient</see> handle connection state, messages handlers, and connection configuration. There can be many <see cref="NetworkClient">NetworkClient</see> instances in a process at a time, but only one that is connected to a game server (<see cref="NetworkServer">NetworkServer</see>) that uses spawned objects.</para>
@@ -25,7 +23,7 @@ namespace Mirror
     /// </summary>
     [AddComponentMenu("Network/NetworkClient")]
     [DisallowMultipleComponent]
-    public class NetworkClient : MonoBehaviour, INetworkClient, IObjectLocator
+    public class NetworkClient : MonoBehaviour, INetworkClient
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkClient));
 
@@ -101,17 +99,6 @@ namespace Mirror
         /// NetworkClient can connect to local server in host mode too
         /// </summary>
         public bool IsLocalClient => hostServer != null;
-
-        // TODO move this to ClientObjectManager
-        public NetworkIdentity this[uint netId]
-        {
-            get
-            {
-                Spawned.TryGetValue(netId, out NetworkIdentity identity);
-                return identity;
-            }
-        }
-
 
         /// <summary>
         /// Connect client to a NetworkServer instance.

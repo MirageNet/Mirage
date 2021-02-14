@@ -871,7 +871,7 @@ namespace Mirror
         internal void OnDeserializeAllSafely(NetworkReader reader, bool initialState)
         {
             // needed so that we can deserialize gameobjects and NI
-            reader.ObjectLocator = Client;
+            reader.ObjectLocator = ClientObjectManager;
             // deserialize all components that were received
             NetworkBehaviour[] components = NetworkBehaviours;
             while (reader.Position < reader.Length)

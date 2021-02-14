@@ -12,7 +12,7 @@ namespace Mirror
 
     [AddComponentMenu("Network/ClientObjectManager")]
     [DisallowMultipleComponent]
-    public class ClientObjectManager : MonoBehaviour
+    public class ClientObjectManager : MonoBehaviour, IObjectLocator
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientObjectManager));
 
@@ -551,8 +551,7 @@ namespace Mirror
             {
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
                 {
-                    // TODO assign here the COM instead of the client
-                    networkReader.ObjectLocator = Client;
+                    networkReader.ObjectLocator = this;
                     identity.HandleRemoteCall(skeleton, msg.componentIndex, networkReader);
                 }
             }
@@ -589,6 +588,15 @@ namespace Mirror
 
         private readonly Dictionary<int, Action<NetworkReader>> callbacks = new Dictionary<int, Action<NetworkReader>>();
         private int replyId;
+
+        public NetworkIdentity this[uint netId]
+        {
+            get
+            {
+                Client.Spawned.TryGetValue(netId, out NetworkIdentity identity);
+                return identity;
+            }
+        }
 
         /// <summary>
         /// Creates a task that waits for a reply from the server
