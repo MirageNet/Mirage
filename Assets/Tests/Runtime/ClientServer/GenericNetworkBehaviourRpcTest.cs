@@ -73,56 +73,56 @@ namespace Mirror.Tests.ClientServer
         public IEnumerator SendNetworkIdentity()
         {
             return UniTask.ToCoroutine(async () =>
-{
-    Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
-    clientComponent.onSendNetworkIdentityCalled += callback;
+            {
+                Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+                clientComponent.onSendNetworkIdentityCalled += callback;
 
-    serverComponent.SendNetworkIdentity(serverIdentity);
-    await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
-    callback.Received().Invoke(clientIdentity);
-});
+                serverComponent.SendNetworkIdentity(serverIdentity);
+                await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+                callback.Received().Invoke(clientIdentity);
+            });
         }
 
         [UnityTest]
         public IEnumerator SendNetworkBehavior()
         {
             return UniTask.ToCoroutine(async () =>
-{
-    Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
-    clientComponent.onSendNetworkBehaviourCalled += callback;
+            {
+                Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+                clientComponent.onSendNetworkBehaviourCalled += callback;
 
-    serverComponent.SendNetworkBehaviour(serverComponent);
-    await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
-    callback.Received().Invoke(clientComponent);
-});
+                serverComponent.SendNetworkBehaviour(serverComponent);
+                await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+                callback.Received().Invoke(clientComponent);
+            });
         }
 
         [UnityTest]
         public IEnumerator SendNetworkBehaviorChild()
         {
             return UniTask.ToCoroutine(async () =>
-{
-    Action<GenericBehaviourWithRpcImplement> callback = Substitute.For<Action<GenericBehaviourWithRpcImplement>>();
-    clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
+            {
+                Action<GenericBehaviourWithRpcImplement> callback = Substitute.For<Action<GenericBehaviourWithRpcImplement>>();
+                clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
-    serverComponent.SendNetworkBehaviourDerived(serverComponent);
-    await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
-    callback.Received().Invoke(clientComponent);
-});
+                serverComponent.SendNetworkBehaviourDerived(serverComponent);
+                await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+                callback.Received().Invoke(clientComponent);
+            });
         }
 
         [UnityTest]
         public IEnumerator SendGameObject()
         {
             return UniTask.ToCoroutine(async () =>
-{
-    Action<GameObject> callback = Substitute.For<Action<GameObject>>();
-    clientComponent.onSendGameObjectCalled += callback;
+            {
+                Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+                clientComponent.onSendGameObjectCalled += callback;
 
-    serverComponent.SendGameObject(serverPlayerGO);
-    await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
-    callback.Received().Invoke(clientPlayerGO);
-});
+                serverComponent.SendGameObject(serverPlayerGO);
+                await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+                callback.Received().Invoke(clientPlayerGO);
+            });
         }
 
         [Test]
@@ -142,112 +142,112 @@ namespace Mirror.Tests.ClientServer
         public IEnumerator SendNullNetworkIdentity()
         {
             return UniTask.ToCoroutine(async () =>
-{
-    Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
-    clientComponent.onSendNetworkIdentityCalled += callback;
+            {
+                Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+                clientComponent.onSendNetworkIdentityCalled += callback;
 
-    serverComponent.SendNetworkIdentity(null);
-    await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
-    callback.Received().Invoke(null);
-});
+                serverComponent.SendNetworkIdentity(null);
+                await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+                callback.Received().Invoke(null);
+            });
         }
 
         [UnityTest]
         public IEnumerator SendNullNetworkBehavior()
         {
             return UniTask.ToCoroutine(async () =>
-{
-    Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
-    clientComponent.onSendNetworkBehaviourCalled += callback;
+            {
+                Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+                clientComponent.onSendNetworkBehaviourCalled += callback;
 
-    serverComponent.SendNetworkBehaviour(null);
-    await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
-    callback.Received().Invoke(null);
-});
+                serverComponent.SendNetworkBehaviour(null);
+                await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+                callback.Received().Invoke(null);
+            });
         }
 
         [UnityTest]
         public IEnumerator SendNullNetworkBehaviorChild()
         {
             return UniTask.ToCoroutine(async () =>
-{
-    Action<GenericBehaviourWithRpcImplement> callback = Substitute.For<Action<GenericBehaviourWithRpcImplement>>();
-    clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
+            {
+                Action<GenericBehaviourWithRpcImplement> callback = Substitute.For<Action<GenericBehaviourWithRpcImplement>>();
+                clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
-    serverComponent.SendNetworkBehaviourDerived(null);
-    await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
-    callback.Received().Invoke(null);
-});
+                serverComponent.SendNetworkBehaviourDerived(null);
+                await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+                callback.Received().Invoke(null);
+            });
         }
 
         [UnityTest]
         public IEnumerator SendNullGameObject()
         {
             return UniTask.ToCoroutine(async () =>
-{
-    Action<GameObject> callback = Substitute.For<Action<GameObject>>();
-    clientComponent.onSendGameObjectCalled += callback;
+            {
+                Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+                clientComponent.onSendGameObjectCalled += callback;
 
-    serverComponent.SendGameObject(null);
-    await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
-    callback.Received().Invoke(null);
-});
+                serverComponent.SendGameObject(null);
+                await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+                callback.Received().Invoke(null);
+            });
         }
 
         [UnityTest]
         public IEnumerator SendNetworkIdentityToServer()
         {
             return UniTask.ToCoroutine(async () =>
-{
-    Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
-    serverComponent.onSendNetworkIdentityCalled += callback;
+            {
+                Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+                serverComponent.onSendNetworkIdentityCalled += callback;
 
-    clientComponent.SendNetworkIdentityToServer(clientIdentity);
-    await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
-    callback.Received().Invoke(serverIdentity);
-});
+                clientComponent.SendNetworkIdentityToServer(clientIdentity);
+                await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+                callback.Received().Invoke(serverIdentity);
+            });
         }
 
         [UnityTest]
         public IEnumerator SendNetworkBehaviorToServer()
         {
             return UniTask.ToCoroutine(async () =>
-{
-    Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
-    serverComponent.onSendNetworkBehaviourCalled += callback;
+            {
+                Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+                serverComponent.onSendNetworkBehaviourCalled += callback;
 
-    clientComponent.SendNetworkBehaviourToServer(clientComponent);
-    await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
-    callback.Received().Invoke(serverComponent);
-});
+                clientComponent.SendNetworkBehaviourToServer(clientComponent);
+                await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+                callback.Received().Invoke(serverComponent);
+            });
         }
 
         [UnityTest]
         public IEnumerator SendNetworkBehaviorChildToServer()
         {
             return UniTask.ToCoroutine(async () =>
-{
-    Action<GenericBehaviourWithRpcImplement> callback = Substitute.For<Action<GenericBehaviourWithRpcImplement>>();
-    serverComponent.onSendNetworkBehaviourDerivedCalled += callback;
+            {
+                Action<GenericBehaviourWithRpcImplement> callback = Substitute.For<Action<GenericBehaviourWithRpcImplement>>();
+                serverComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
-    clientComponent.SendNetworkBehaviourDerivedToServer(clientComponent);
-    await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
-    callback.Received().Invoke(serverComponent);
-});
+                clientComponent.SendNetworkBehaviourDerivedToServer(clientComponent);
+                await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+                callback.Received().Invoke(serverComponent);
+            });
         }
 
         [UnityTest]
         public IEnumerator SendGameObjectToServer()
         {
             return UniTask.ToCoroutine(async () =>
-{
-    Action<GameObject> callback = Substitute.For<Action<GameObject>>();
-    serverComponent.onSendGameObjectCalled += callback;
+            {
+                Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+                serverComponent.onSendGameObjectCalled += callback;
 
-    clientComponent.SendGameObjectToServer(clientPlayerGO);
-    await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
-    callback.Received().Invoke(serverPlayerGO);
-});
+                clientComponent.SendGameObjectToServer(clientPlayerGO);
+                await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+                callback.Received().Invoke(serverPlayerGO);
+            });
         }
 
         [Test]
