@@ -13,6 +13,8 @@ namespace Mirror.KCP
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(KcpConnection));
 
+        const int MinimumKcpTickInterval = 10;
+
         protected Socket socket;
         protected EndPoint remoteEndpoint;
         protected Kcp kcp;
@@ -80,7 +82,7 @@ namespace Mirror.KCP
             {
                 Thread.VolatileWrite(ref lastReceived, stopWatch.ElapsedMilliseconds);
 
-                while (open )
+                while (open)
                 {
                     long now = stopWatch.ElapsedMilliseconds;
                     long received = Thread.VolatileRead(ref lastReceived);
@@ -91,11 +93,12 @@ namespace Mirror.KCP
 
                     uint check = kcp.Check((uint)now);
 
-                    if (check <= now)
-                        check = (uint)(now + 10);
+                    int delay = (int)(check - now);
 
+                    if (delay <= 0)
+                        delay = MinimumKcpTickInterval;
 
-                    await UniTask.Delay((int)(check - now));
+                    await UniTask.Delay(delay);
                 }
             }
             catch (SocketException)
