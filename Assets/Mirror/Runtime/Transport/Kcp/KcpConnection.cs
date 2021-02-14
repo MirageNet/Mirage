@@ -12,6 +12,8 @@ namespace Mirror.KCP
     public abstract class KcpConnection : IConnection
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(KcpConnection));
+        
+        const float MinimumKcpTickInterval = 10f;
 
         protected Socket socket;
         protected EndPoint remoteEndpoint;
@@ -80,7 +82,7 @@ namespace Mirror.KCP
             {
                 Thread.VolatileWrite(ref lastReceived, stopWatch.ElapsedMilliseconds);
 
-                while (open )
+                while (open)
                 {
                     long now = stopWatch.ElapsedMilliseconds;
                     long received = Thread.VolatileRead(ref lastReceived);
@@ -93,9 +95,8 @@ namespace Mirror.KCP
 
                     int delay = (int)(check - now);
 
-                    // todo remove magic number 10, Should it just be UniTask.Yield instead to wait 1 frame
                     if (delay <= 0)
-                        delay = 10;
+                        delay = MinimumKcpTickInterval;
 
                     await UniTask.Delay(delay);
                 }
