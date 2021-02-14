@@ -12,8 +12,8 @@ namespace Mirror.KCP
     public abstract class KcpConnection : IConnection
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(KcpConnection));
-        
-        const float MinimumKcpTickInterval = 10f;
+
+        const int MinimumKcpTickInterval = 10;
 
         protected Socket socket;
         protected EndPoint remoteEndpoint;
