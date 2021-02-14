@@ -85,7 +85,7 @@ namespace Mirror.Tests.Host
 
             serverObjectManager.Spawn(gameObject2);
 
-            client.Update();
+            client.FixedUpdate();
 
             // no authority by default
             Assert.That(behaviour2.HasAuthority, Is.False);

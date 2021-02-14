@@ -245,6 +245,14 @@ namespace Mirror
             Disconnect();
         }
 
+        public void FixedUpdate()
+        {
+            if (Active)
+            {
+                Transport.Poll();
+            }
+        }
+
         /// <summary>
         /// cleanup resources so that we can start again
         /// </summary>

@@ -257,7 +257,7 @@ namespace Mirror
             Connection.Send(message, channelId);
         }
 
-        internal void Update()
+        internal void FixedUpdate()
         {
             // local connection?
             if (!IsLocalClient && Active && connectState == ConnectState.Connected)

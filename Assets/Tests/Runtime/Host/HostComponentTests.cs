@@ -21,7 +21,7 @@ namespace Mirror.Tests.Host
             serverObjectManager.Spawn(gameObject2);
 
             // process spawn message from server
-            client.Update();
+            client.FixedUpdate();
 
             // only authorized clients can call ServerRpc
             Assert.Throws<UnauthorizedAccessException>(() =>
@@ -117,7 +117,7 @@ namespace Mirror.Tests.Host
             sceneManager.ClientChangeScene.AddListener(mockListener);
             await StartHost();
 
-            client.Update();
+            client.FixedUpdate();
             mockListener.Received().Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         });
     }
