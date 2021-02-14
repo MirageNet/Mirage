@@ -598,7 +598,7 @@ namespace Mirror
             Server.Spawned.Remove(identity.NetId);
             identity.ConnectionToClient?.RemoveOwnedObject(identity);
 
-            Server.SendToObservers(identity, new ObjectDestroyMessage { netId = identity.NetId });
+            identity.SendToObservers(new ObjectDestroyMessage { netId = identity.NetId });
 
             identity.ClearObservers();
             if (Server.LocalClientActive)

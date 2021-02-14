@@ -312,7 +312,7 @@ namespace Mirror
             // The public facing parameter is excludeOwner in [ClientRpc]
             // so we negate it here to logically align with SendToReady.
             bool includeOwner = !excludeOwner;
-            Server.SendToObservers(NetIdentity, message, includeOwner, channelId);
+            NetIdentity.SendToObservers(message, includeOwner, channelId);
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
