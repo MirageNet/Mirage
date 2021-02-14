@@ -7,7 +7,6 @@ using UnityEngine.Events;
 
 namespace Mirror
 {
-
     /// <summary>
     /// The NetworkServer.
     /// </summary>

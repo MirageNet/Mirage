@@ -13,7 +13,7 @@ namespace Mirror
         /// The network client that spawned the parent object
         /// used to lookup the identity if it exists
         /// </summary>
-        internal NetworkClient client;
+        internal IObjectLocator objectLocator;
         internal uint netId;
 
         internal GameObject gameObject;
@@ -27,9 +27,9 @@ namespace Mirror
                 if (gameObject != null)
                     return gameObject;
 
-                if (client != null)
+                if (objectLocator != null)
                 {
-                    client.Spawned.TryGetValue(netId, out NetworkIdentity result);
+                    NetworkIdentity result = objectLocator[netId];
                     if (result != null)
                         return result.gameObject;
                 }
@@ -59,16 +59,12 @@ namespace Mirror
             uint netId = reader.ReadPackedUInt32();
 
             NetworkIdentity identity = null;
-            if (!(reader.Client is null))
-                reader.Client.Spawned.TryGetValue(netId, out identity);
-
-            if (!(reader.Server is null))
-                reader.Server.Spawned.TryGetValue(netId, out identity);
-
+            if (!(reader.ObjectLocator is null))
+                identity = reader.ObjectLocator[netId];
 
             return new GameObjectSyncvar
             {
-                client = reader.Client,
+                objectLocator = reader.ObjectLocator,
                 netId = netId,
                 gameObject = identity != null ? identity.gameObject : null
             };

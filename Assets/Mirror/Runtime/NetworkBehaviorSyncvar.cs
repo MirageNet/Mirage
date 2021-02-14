@@ -11,7 +11,7 @@
         /// The network client that spawned the parent object
         /// used to lookup the identity if it exists
         /// </summary>
-        internal NetworkClient client;
+        internal IObjectLocator objectLocator;
         internal uint netId;
         internal int componentId;
 
@@ -27,9 +27,9 @@
                 if (component != null)
                     return component;
 
-                if (client != null)
+                if (objectLocator != null)
                 {
-                    client.Spawned.TryGetValue(netId, out NetworkIdentity identity);
+                    NetworkIdentity identity = objectLocator[netId];
                     if (identity != null)
                         return identity.NetworkBehaviours[componentId];
                 }
@@ -64,15 +64,12 @@
             int componentId = reader.ReadPackedInt32();
 
             NetworkIdentity identity = null;
-            if (!(reader.Client is null))
-                reader.Client.Spawned.TryGetValue(netId, out identity);
-
-            if (!(reader.Server is null))
-                reader.Server.Spawned.TryGetValue(netId, out identity);
+            if (!(reader.ObjectLocator is null))
+                identity = reader.ObjectLocator[netId];
 
             return new NetworkBehaviorSyncvar
             {
-                client = reader.Client,
+                objectLocator = reader.ObjectLocator,
                 netId = netId,
                 componentId = componentId,
                 component = identity != null ? identity.NetworkBehaviours[componentId] : null

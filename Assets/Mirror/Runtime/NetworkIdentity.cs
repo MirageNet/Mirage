@@ -871,7 +871,7 @@ namespace Mirror
         internal void OnDeserializeAllSafely(NetworkReader reader, bool initialState)
         {
             // needed so that we can deserialize gameobjects and NI
-            reader.Client = Client;
+            reader.ObjectLocator = ClientObjectManager;
             // deserialize all components that were received
             NetworkBehaviour[] components = NetworkBehaviours;
             while (reader.Position < reader.Length)
@@ -897,11 +897,6 @@ namespace Mirror
         /// <param name="senderConnection"></param>
         internal void HandleRemoteCall(Skeleton skeleton, int componentIndex, NetworkReader reader, INetworkConnection senderConnection = null, int replyId = 0)
         {
-            // Set the client and server for this remote call.
-            // this can be used by custom deserializers to lookup objects
-            reader.Client = Client;
-            reader.Server = Server;
-
             // find the right component to invoke the function on
             if (componentIndex >= 0 && componentIndex < NetworkBehaviours.Length)
             {

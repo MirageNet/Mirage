@@ -26,6 +26,20 @@ namespace Mirror
         public static Func<NetworkReader, T> Read { internal get; set; }
     }
 
+    /// <summary>
+    /// An object that implements this interface can find objects by their net id
+    /// This is used by readers when trying to deserialize gameobjects
+    /// </summary>
+    public interface IObjectLocator
+    {
+        /// <summary>
+        /// Finds a network identity by id
+        /// </summary>
+        /// <param name="netId">the id of the object to find</param>
+        /// <returns>The NetworkIdentity matching the netid or null if none is found</returns>
+        NetworkIdentity this[uint netId] { get; }
+    }
+
     // Note: This class is intended to be extremely pedantic, and
     // throw exceptions whenever stuff is going slightly wrong.
     // The exceptions will be handled in NetworkServer/NetworkClient.
@@ -46,14 +60,9 @@ namespace Mirror
         public int Length => buffer.Count;
 
         /// <summary>
-        /// The network client that created this reader. May be null
+        /// some service object that can find objects by net id
         /// </summary>
-        public NetworkClient Client { get; internal set; }
-
-        /// <summary>
-        /// The Network Server that created this reader. May be null
-        /// </summary>
-        public NetworkServer Server { get; internal set; }
+        public IObjectLocator ObjectLocator { get; internal set; }
 
         public NetworkReader(byte[] bytes)
         {
@@ -393,15 +402,9 @@ namespace Mirror
             if (netId == 0)
                 return null;
 
-            if (reader.Client != null)
+            if (reader.ObjectLocator != null)
             {
-                reader.Client.Spawned.TryGetValue(netId, out NetworkIdentity identity);
-                return identity;
-            }
-            else if (reader.Server != null)
-            {
-                reader.Server.Spawned.TryGetValue(netId, out NetworkIdentity identity);
-                return identity;
+                return reader.ObjectLocator[netId];
             }
 
             if (logger.WarnEnabled()) logger.LogFormat(LogType.Warning, "ReadNetworkIdentity netId:{0} not found in spawned", netId);

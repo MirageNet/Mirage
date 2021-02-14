@@ -79,8 +79,7 @@ namespace Mirror
 
             // reset buffer
             SetBuffer(reader, bytes);
-            reader.Client = null;
-            reader.Server = null;
+            reader.ObjectLocator = null;
             return reader;
         }
 
@@ -101,8 +100,7 @@ namespace Mirror
 
             // reset buffer
             SetBuffer(reader, segment);
-            reader.Client = null;
-            reader.Server = null;
+            reader.ObjectLocator = null;
             return reader;
         }
 

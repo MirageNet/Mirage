@@ -19,7 +19,7 @@ namespace Mirror
     /// </remarks>
     [AddComponentMenu("Network/ServerObjectManager")]
     [DisallowMultipleComponent]
-    public class ServerObjectManager : MonoBehaviour, IServerObjectManager
+    public class ServerObjectManager : MonoBehaviour, IServerObjectManager, IObjectLocator
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
 
@@ -48,6 +48,15 @@ namespace Mirror
 
         public readonly HashSet<NetworkIdentity> DirtyObjects = new HashSet<NetworkIdentity>();
         private readonly List<NetworkIdentity> DirtyObjectsTmp = new List<NetworkIdentity>();
+
+        public NetworkIdentity this[uint netId]
+        {
+            get
+            {
+                Server.Spawned.TryGetValue(netId, out NetworkIdentity identity);
+                return identity;
+            }
+        }
 
         public void Start()
         {
@@ -416,7 +425,10 @@ namespace Mirror
             if (logger.LogEnabled()) logger.Log("OnServerRpcMessage for netId=" + msg.netId + " conn=" + conn);
 
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
+            {
+                networkReader.ObjectLocator = this;
                 identity.HandleRemoteCall(skeleton, msg.componentIndex, networkReader, conn, msg.replyId);
+            }
         }
 
         internal void SpawnObject(GameObject obj, INetworkConnection ownerConnection)
