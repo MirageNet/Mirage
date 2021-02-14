@@ -1239,7 +1239,7 @@ namespace Mirror
                     if (observersWritten > 0)
                     {
                         varsMessage.payload = observersWriter.ToArraySegment();
-                        Server.SendToObservers(this, varsMessage, false);
+                        SendToObservers(varsMessage, false);
                     }
 
                     // clear dirty bits only for the components that we serialized
@@ -1251,6 +1251,41 @@ namespace Mirror
                     //  them if initialState. clearing the dirty ones is enough.)
                     ClearDirtyComponentsDirtyBits();
                 }
+            }
+        }
+
+        static readonly List<INetworkConnection> connectionsExcludeSelf = new List<INetworkConnection>(100);
+
+        /// <summary>
+        /// this is like SendToReady - but it doesn't check the ready flag on the connection.
+        /// this is used for ObjectDestroy messages.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="identity"></param>
+        /// <param name="msg"></param>
+        /// <param name="channelId"></param>
+        internal void SendToObservers<T>(T msg, bool includeOwner = true, int channelId = Channel.Reliable)
+        {
+            if (logger.LogEnabled()) logger.Log("Server.SendToObservers id:" + typeof(T));
+
+            if (observers.Count == 0)
+                return;
+
+            if (includeOwner)
+            {
+                NetworkConnection.Send(observers, msg, channelId);
+            }
+            else
+            {
+                connectionsExcludeSelf.Clear();
+                foreach (INetworkConnection conn in observers)
+                {
+                    if (ConnectionToClient != conn)
+                    {
+                        connectionsExcludeSelf.Add(conn);
+                    }
+                }
+                NetworkConnection.Send(connectionsExcludeSelf, msg, channelId);
             }
         }
 
