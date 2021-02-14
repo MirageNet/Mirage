@@ -68,8 +68,6 @@ namespace Mirror.TransportAdaptor
 
             ThrowIfClosed();
 
-            throw new NotImplementedException();
-
             (ArraySegment<byte> data, int channel) = dataQueue.Dequeue();
 
             buffer.SetLength(data.Count);
