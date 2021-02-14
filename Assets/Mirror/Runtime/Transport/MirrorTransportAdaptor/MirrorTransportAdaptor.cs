@@ -128,6 +128,18 @@ namespace Mirror.TransportAdaptor
             {
                 connected = true;
             });
+            inner.OnClientDataReceived.AddListener((data, channel) =>
+            {
+                clientConnection.OnData(data, channel);
+            });
+            inner.OnClientDisconnected.AddListener(() =>
+            {
+                clientConnection.MarkAsClosed();
+            });
+            inner.OnClientError.AddListener((ex) =>
+            {
+                Debug.LogException(ex);
+            });
 
             // todo is host name enough for this?
             inner.ClientConnect(uri.Host);
@@ -167,7 +179,10 @@ namespace Mirror.TransportAdaptor
             });
             inner.OnServerDisconnected.AddListener((id) =>
             {
-                serverConnections.MarkAsClosed();
+                if (serverConnections.TryGetValue(id, out ServerAdaptorConnection conn))
+                {
+                    conn.MarkAsClosed();
+                }
                 serverConnections.Remove(id);
             });
             inner.OnServerError.AddListener((id, ex) =>
