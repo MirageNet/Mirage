@@ -427,23 +427,5 @@ namespace Mirror
 
             Authenticated?.Invoke(conn);
         }
-
-        /// <summary>
-        /// send this message to the player only
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        /// <param name="identity"></param>
-        /// <param name="msg"></param>
-        public void SendToClientOfPlayer<T>(NetworkIdentity identity, T msg, int channelId = Channel.Reliable)
-        {
-            if (identity != null)
-            {
-                identity.ConnectionToClient.Send(msg, channelId);
-            }
-            else
-            {
-                throw new InvalidOperationException("SendToClientOfPlayer: player has no NetworkIdentity: " + identity);
-            }
-        }
     }
 }
