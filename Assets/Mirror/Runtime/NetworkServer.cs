@@ -7,6 +7,7 @@ using UnityEngine.Events;
 
 namespace Mirror
 {
+    // TODO remove IObjectLocator and move to SOM
 
     /// <summary>
     /// The NetworkServer.
@@ -16,7 +17,7 @@ namespace Mirror
     /// </remarks>
     [AddComponentMenu("Network/NetworkServer")]
     [DisallowMultipleComponent]
-    public class NetworkServer : MonoBehaviour, INetworkServer
+    public class NetworkServer : MonoBehaviour, INetworkServer, IObjectLocator
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
 
@@ -108,6 +109,16 @@ namespace Mirror
         /// <para>This will be true after NetworkServer.Listen() has been called.</para>
         /// </summary>
         public bool Active { get; private set; }
+
+        // TODO move to SOM
+        public NetworkIdentity this[uint netId]
+        {
+            get
+            {
+                Spawned.TryGetValue(netId, out NetworkIdentity identity) ;
+                return identity;
+            }
+        }
 
         public readonly Dictionary<uint, NetworkIdentity> Spawned = new Dictionary<uint, NetworkIdentity>();
 

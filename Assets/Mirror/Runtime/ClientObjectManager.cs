@@ -550,7 +550,11 @@ namespace Mirror
             if (Client.Spawned.TryGetValue(msg.netId, out NetworkIdentity identity) && identity != null)
             {
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
+                {
+                    // TODO assign here the COM instead of the client
+                    networkReader.ObjectLocator = Client;
                     identity.HandleRemoteCall(skeleton, msg.componentIndex, networkReader);
+                }
             }
         }
 

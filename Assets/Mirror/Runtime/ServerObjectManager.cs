@@ -416,7 +416,11 @@ namespace Mirror
             if (logger.LogEnabled()) logger.Log("OnServerRpcMessage for netId=" + msg.netId + " conn=" + conn);
 
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
+            {
+                // TODO assign the SOM here instead of the Server
+                networkReader.ObjectLocator = Server;
                 identity.HandleRemoteCall(skeleton, msg.componentIndex, networkReader, conn, msg.replyId);
+            }
         }
 
         internal void SpawnObject(GameObject obj, INetworkConnection ownerConnection)

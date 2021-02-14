@@ -43,7 +43,7 @@ namespace Mirror.Tests.ClientServer
 
             var goSyncvar = new NetworkBehaviorSyncvar
             {
-                client = client,
+                objectLocator = client,
                 netId = serverIdentity.NetId,
                 component = null,
             };

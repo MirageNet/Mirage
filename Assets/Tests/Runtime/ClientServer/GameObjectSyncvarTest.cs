@@ -44,7 +44,7 @@ namespace Mirror.Tests.ClientServer
 
             var goSyncvar = new GameObjectSyncvar
             {
-                client = client,
+                objectLocator = client,
                 netId = serverIdentity.NetId,
                 gameObject = null,
             };
