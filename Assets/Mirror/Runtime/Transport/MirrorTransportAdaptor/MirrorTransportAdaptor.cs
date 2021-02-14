@@ -7,26 +7,103 @@ using UnityEngine;
 
 namespace Mirror.TransportAdaptor
 {
-    public class AdaptorConnection : IConnection
+    public class ServerAdaptorConnection : AdaptorConnection
     {
-        public void Disconnect()
+        public ServerAdaptorConnection(int id, MirrorTransportAdaptor adaptor) : base(id, adaptor)
         {
-            throw new NotImplementedException();
         }
 
-        public EndPoint GetEndPointAddress()
+        public override void Disconnect() => transport.ServerDisconnect(id);
+
+        public override EndPoint GetEndPointAddress() => throw new NotImplementedException();
+
+        public override UniTask SendAsync(ArraySegment<byte> data, int channel = 0)
         {
-            throw new NotImplementedException();
+            transport.ServerSend(id, channel, data);
+            return UniTask.CompletedTask;
+        }
+    }
+    public class ClientAdaptorConnection : AdaptorConnection
+    {
+        public ClientAdaptorConnection(int id, MirrorTransportAdaptor adaptor) : base(id, adaptor)
+        {
         }
 
-        public UniTask<int> ReceiveAsync(MemoryStream buffer)
+        public override void Disconnect() => transport.ClientDisconnect();
+
+        public override EndPoint GetEndPointAddress() => throw new NotImplementedException();
+
+        public override UniTask SendAsync(ArraySegment<byte> data, int channel = 0)
         {
-            throw new NotImplementedException();
+            transport.ClientSend(channel, data);
+            return UniTask.CompletedTask;
+        }
+    }
+    public abstract class AdaptorConnection : IConnection
+    {
+        protected readonly MirrorTransportAdaptor adaptor;
+        protected readonly int id;
+        protected readonly MirrorTransport transport;
+        private bool open;
+
+        public AdaptorConnection(int id, MirrorTransportAdaptor adaptor)
+        {
+            this.adaptor = adaptor;
+            transport = adaptor.Inner;
+            this.id = id;
+
+            open = true;
         }
 
-        public UniTask SendAsync(ArraySegment<byte> data, int channel = 0)
+        public abstract void Disconnect();
+        public abstract EndPoint GetEndPointAddress();
+        public abstract UniTask SendAsync(ArraySegment<byte> data, int channel = 0);
+
+        Queue<(ArraySegment<byte> data, int channel)> dataQueue = new Queue<(ArraySegment<byte> data, int channel)>();
+        private AutoResetUniTaskCompletionSource dataAvailable;
+
+        public async UniTask<int> ReceiveAsync(MemoryStream buffer)
         {
+            await WaitForMessages();
+
+            ThrowIfClosed();
+
             throw new NotImplementedException();
+
+            (ArraySegment<byte> data, int channel) = dataQueue.Dequeue();
+
+            buffer.SetLength(data.Count);
+            buffer.Write(data.Array, data.Offset, data.Count);
+            buffer.Position = data.Count;
+
+            return channel;
+        }
+
+        private async UniTask WaitForMessages()
+        {
+            while (open && dataQueue.Count == 0)
+            {
+                dataAvailable = AutoResetUniTaskCompletionSource.Create();
+                await dataAvailable.Task;
+            }
+        }
+        private void ThrowIfClosed()
+        {
+            if (!open)
+            {
+                throw new EndOfStreamException();
+            }
+        }
+
+        internal void MarkAsClosed()
+        {
+            open = false;
+        }
+
+        internal void OnData(ArraySegment<byte> data, int channel)
+        {
+            dataQueue.Enqueue((data, channel));
+            dataAvailable.TrySetResult();
         }
     }
     public class MirrorTransportAdaptor : Transport
@@ -34,7 +111,11 @@ namespace Mirror.TransportAdaptor
         [SerializeField] MirrorTransport inner;
         [SerializeField] string scheme;
 
-        private AdaptorConnection clientConnection;
+        private ClientAdaptorConnection clientConnection;
+        private UniTaskCompletionSource listenCompletionSource;
+        private Dictionary<int, ServerAdaptorConnection> serverConnections;
+
+        internal MirrorTransport Inner => inner;
 
         public override IEnumerable<string> Scheme { get { yield return scheme; } }
         public override bool Supported => inner.Available();
@@ -42,6 +123,7 @@ namespace Mirror.TransportAdaptor
         public override async UniTask<IConnection> ConnectAsync(Uri uri)
         {
             bool connected = false;
+            // todo what about other client events
             inner.OnClientConnected.AddListener(() =>
             {
                 connected = true;
@@ -55,23 +137,53 @@ namespace Mirror.TransportAdaptor
                 await UniTask.Yield();
             }
 
-            clientConnection = new AdaptorConnection();
+            clientConnection = new ClientAdaptorConnection(default, this);
             return clientConnection;
         }
 
         public override void Disconnect()
         {
             clientConnection?.Disconnect();
+            clientConnection = null;
+            listenCompletionSource?.TrySetResult();
         }
 
         public override UniTask ListenAsync()
         {
+            inner.OnServerConnected.AddListener((id) =>
+            {
+                serverConnections.Add(id, new ServerAdaptorConnection(id, this));
+            });
+            inner.OnServerDataReceived.AddListener((id, data, channel) =>
+            {
+                if (serverConnections.TryGetValue(id, out ServerAdaptorConnection conn))
+                {
+                    conn.OnData(data, channel);
+                }
+                else
+                {
+                    Debug.LogError($"Can't find connection for {id}");
+                }
+            });
+            inner.OnServerDisconnected.AddListener((id) =>
+            {
+                serverConnections.MarkAsClosed();
+                serverConnections.Remove(id);
+            });
+            inner.OnServerError.AddListener((id, ex) =>
+            {
+                Debug.LogException(ex);
+            });
+
+            listenCompletionSource = new UniTaskCompletionSource();
+            serverConnections = new Dictionary<int, ServerAdaptorConnection>();
             inner.ServerStart();
+            return listenCompletionSource.Task;
         }
 
         public override IEnumerable<Uri> ServerUri()
         {
-            throw new NotImplementedException();
+            yield return inner.ServerUri();
         }
     }
 }
