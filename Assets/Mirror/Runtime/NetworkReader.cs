@@ -50,10 +50,14 @@ namespace Mirror
         /// </summary>
         public NetworkClient Client { get; internal set; }
 
+        public ClientObjectManager ClientObjectManager { get; internal set; }
+
         /// <summary>
         /// The Network Server that created this reader. May be null
         /// </summary>
         public NetworkServer Server { get; internal set; }
+
+        public ServerObjectManager ServerObjectManager { get; internal set; }
 
         public NetworkReader(byte[] bytes)
         {
