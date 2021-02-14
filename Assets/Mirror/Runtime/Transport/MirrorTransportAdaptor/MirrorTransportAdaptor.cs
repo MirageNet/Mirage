@@ -121,8 +121,10 @@ namespace Mirror.TransportAdaptor
         public override async UniTask<IConnection> ConnectAsync(Uri uri)
         {
             bool connected = false;
+            bool disconnected = false;
             inner.OnClientConnected.AddListener(() =>
             {
+                clientConnection = new ClientAdaptorConnection(default, this);
                 connected = true;
             });
             inner.OnClientDataReceived.AddListener((data, channel) =>
@@ -131,7 +133,11 @@ namespace Mirror.TransportAdaptor
             });
             inner.OnClientDisconnected.AddListener(() =>
             {
-                clientConnection.MarkAsClosed();
+                clientConnection?.MarkAsClosed();
+                // todo does this need to be called? call it just incase?
+                clientConnection?.Disconnect();
+                clientConnection = null;
+                disconnected = true;
             });
             inner.OnClientError.AddListener((ex) =>
             {
@@ -143,10 +149,13 @@ namespace Mirror.TransportAdaptor
 
             while (!connected)
             {
+                if (disconnected)
+                {
+                    throw new Exception("failed to connect");
+                }
                 await UniTask.Yield();
             }
 
-            clientConnection = new ClientAdaptorConnection(default, this);
             return clientConnection;
         }
 
