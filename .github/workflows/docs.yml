@@ -14,13 +14,13 @@ jobs:
         dotnet-version: '3.1.x' # SDK Version to use; x will use the latest version of the 3.1 channel
 
     - name: Install docfx
-      run: nuget install docfx.console
+      run: nuget install docfx.console -Version 2.56.6
 
     - name: Generating API doc
-      run: docfx.console/tools/docfx metadata --logLevel Warning --warningsAsErrors doc/docfx.json
+      run: docfx.console.2.56.6/tools/docfx metadata --logLevel Warning --warningsAsErrors doc/docfx.json
 
     - name: Build
-      run: docfx.console/tools/docfx build --logLevel Warning --warningsAsErrors doc/docfx.json
+      run: docfx.console.2.56.6/tools/docfx build --logLevel Warning --warningsAsErrors doc/docfx.json
 
     - name: GitHub Pages
       uses: crazy-max/ghaction-github-pages@v1.2.5
