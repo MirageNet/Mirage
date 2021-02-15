@@ -96,6 +96,7 @@ namespace Mirror.TransportAdaptor
 
         internal void OnData(ArraySegment<byte> data, int channel)
         {
+            // todo copy to a new buffer, inner transport might re-use the ArraySegment for other data 
             dataQueue.Enqueue((data, channel));
             dataAvailable?.TrySetResult();
         }
