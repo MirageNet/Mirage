@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
 using Mirror.RemoteCalls;
@@ -338,7 +338,7 @@ namespace Mirror.Weaver
                     calledMethod.Name == baseRemoteCallName)
                 {
                     TypeDefinition baseType = type.BaseType.Resolve();
-                    MethodDefinition baseMethod = baseType.GetMethodInBaseType(callName);
+                    MethodReference baseMethod = baseType.GetMethodInBaseType(callName);
 
                     if (baseMethod == null)
                     {
@@ -346,7 +346,7 @@ namespace Mirror.Weaver
                         return;
                     }
 
-                    if (!baseMethod.IsVirtual)
+                    if (!baseMethod.Resolve().IsVirtual)
                     {
                         logger.Error($"Could not find base method that was virtual {callName}", method);
                         return;

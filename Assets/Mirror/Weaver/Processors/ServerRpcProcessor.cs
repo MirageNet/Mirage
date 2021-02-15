@@ -79,7 +79,7 @@ namespace Mirror.Weaver
             // invoke internal send and return
             // load 'base.' to call the SendServerRpc function with
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType.ConverToGenericIfNeeded()));
+            worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType.ConvertToGenericIfNeeded()));
             // invokerClass
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
             worker.Append(worker.Create(OpCodes.Ldstr, cmdName));
@@ -159,7 +159,7 @@ namespace Mirror.Weaver
 
             // setup for reader
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Castclass, method.DeclaringType.ConverToGenericIfNeeded()));
+            worker.Append(worker.Create(OpCodes.Castclass, method.DeclaringType.ConvertToGenericIfNeeded()));
 
             if (!ReadArguments(method, worker, false))
                 return cmd;
@@ -214,7 +214,7 @@ namespace Mirror.Weaver
             bool requireAuthority = cmdResult.requireAuthority;
 
             TypeDefinition netBehaviourSubclass = skeleton.DeclaringType;
-            worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass.ConverToGenericIfNeeded()));
+            worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass.ConvertToGenericIfNeeded()));
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
             worker.Append(worker.Create(OpCodes.Ldstr, cmdName));
             worker.Append(worker.Create(OpCodes.Ldnull));

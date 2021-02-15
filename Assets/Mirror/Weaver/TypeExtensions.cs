@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
+using UnityEngine;
 
 namespace Mirror.Weaver
 {
@@ -23,20 +24,31 @@ namespace Mirror.Weaver
             return td.Methods.Where(method => method.Name == methodName).ToList();
         }
 
-        public static MethodDefinition GetMethodInBaseType(this TypeDefinition td, string methodName)
+        public static MethodReference GetMethodInBaseType(this TypeReference td, string methodName)
         {
-            TypeDefinition typedef = td;
+            TypeDefinition typedef = td.Resolve();
+            TypeReference typeRef = td;
             while (typedef != null)
             {
                 foreach (MethodDefinition md in typedef.Methods)
                 {
                     if (md.Name == methodName)
-                        return md;
+                    {
+                        MethodReference method = md;
+                        if (typeRef.IsGenericInstance)
+                        {
+                            var baseTypeInstance = (GenericInstanceType)typeRef;
+                            method = method.MakeHostInstanceGeneric(baseTypeInstance);
+                        }
+
+                        return method;
+                    }
                 }
 
                 try
                 {
                     TypeReference parent = typedef.BaseType;
+                    typeRef = parent;
                     typedef = parent?.Resolve();
                 }
                 catch (AssemblyResolutionException)
@@ -105,7 +117,7 @@ namespace Mirror.Weaver
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static TypeReference ConverToGenericIfNeeded(this TypeDefinition type)
+        public static TypeReference ConvertToGenericIfNeeded(this TypeDefinition type)
         {
             if (type.HasGenericParameters)
             {

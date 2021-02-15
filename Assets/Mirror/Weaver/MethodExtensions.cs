@@ -52,5 +52,33 @@ namespace Mirror.Weaver
             SequencePoint sequencePoint = method.DebugInformation.GetSequencePoint(instruction);
             return sequencePoint;
         }
+
+        /// <summary>
+        /// Duplicates a method reference. 
+        /// </summary>
+        /// <param name="method"></param>
+        /// <param name="declaringType">A new declaring type. Set to null to be the same as the base method.</param>
+        /// <returns></returns>
+        public static MethodReference Duplicate(this MethodReference method, TypeReference declaringType = null)
+        {
+            MethodReference newMethod = new MethodReference(method.Name, method.ReturnType, declaringType ?? method.DeclaringType)
+            {
+                HasThis = method.HasThis,
+                ExplicitThis = method.ExplicitThis
+            };
+
+            if (method.HasParameters)
+            {
+                // Add back all the parameters.
+                for (int i = 0; i < method.Parameters.Count; i++)
+                {
+                    newMethod.Parameters.Add(new ParameterDefinition(method.Parameters[i].Name,
+                                                                     method.Parameters[i].Attributes,
+                                                                     method.Parameters[i].ParameterType));
+                }
+            }
+
+            return newMethod;
+        }
     }
 }

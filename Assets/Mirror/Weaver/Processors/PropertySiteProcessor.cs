@@ -54,6 +54,11 @@ namespace Mirror.Weaver
 
         Instruction ProcessInstruction(MethodDefinition md, Instruction instr, SequencePoint sequencePoint)
         {
+            if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldReference opFieldRef)
+            {
+                ProcessInstructionSetterField(instr, opFieldRef.Resolve());
+            }
+
             if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldDefinition opFieldst)
             {
                 // this instruction sets the value of a field. cache the field reference.

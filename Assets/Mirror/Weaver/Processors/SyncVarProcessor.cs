@@ -203,7 +203,7 @@ namespace Mirror.Weaver
                 MethodReference setter = module.ImportReference(fd.FieldType.Resolve().GetMethod("set_Value"));
 
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Ldflda, fd));
+                worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
                 worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
                 worker.Append(worker.Create(OpCodes.Call, setter));
             }
@@ -211,7 +211,7 @@ namespace Mirror.Weaver
             {
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
-                worker.Append(worker.Create(OpCodes.Stfld, fd));
+                worker.Append(worker.Create(OpCodes.Stfld, fd.MakeHostGenericIfNeeded()));
             }
         }
 
@@ -227,7 +227,7 @@ namespace Mirror.Weaver
             }
             else
             {
-                worker.Append(worker.Create(OpCodes.Ldfld, fd));
+                worker.Append(worker.Create(OpCodes.Ldfld, fd.MakeHostGenericIfNeeded()));
             }
         }
 
@@ -413,7 +413,15 @@ namespace Mirror.Weaver
             {
                 // only use Callvirt when not static
                 OpCode opcode = hookMethod.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
-                worker.Append(worker.Create(opcode, hookMethod));
+                MethodReference hookMethodReference = hookMethod;
+                // If the delcaring type is generic we need to duplicate the method reference.
+                // This will make sure it calls the correct instance of the class.
+                if (hookMethod.DeclaringType.HasGenericParameters)
+                {
+                    hookMethodReference = hookMethod.Duplicate(hookMethod.DeclaringType.ConvertToGenericIfNeeded());
+                }
+
+                worker.Append(worker.Create(opcode, module.ImportReference(hookMethodReference)));
             }
         }
 
@@ -444,7 +452,7 @@ namespace Mirror.Weaver
             // loc_0,  this local variable is to determine if any variable was dirty
             VariableDefinition dirtyLocal = serialize.AddLocal<bool>();
 
-            MethodDefinition baseSerialize = netBehaviourSubclass.BaseType.Resolve().GetMethodInBaseType(SerializeMethodName);
+            MethodReference baseSerialize = netBehaviourSubclass.BaseType.GetMethodInBaseType(SerializeMethodName);
             if (baseSerialize != null)
             {
                 // base
@@ -529,7 +537,7 @@ namespace Mirror.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
             // this
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldfld, syncVar));
+            worker.Append(worker.Create(OpCodes.Ldfld, syncVar.MakeHostGenericIfNeeded()));
             MethodReference writeFunc = writers.GetWriteFunc(syncVar.FieldType, null);
             if (writeFunc != null)
             {
@@ -565,7 +573,7 @@ namespace Mirror.Weaver
             serialize.Body.InitLocals = true;
             VariableDefinition dirtyBitsLocal = serialize.AddLocal<long>();
 
-            MethodDefinition baseDeserialize = netBehaviourSubclass.BaseType.Resolve().GetMethodInBaseType(DeserializeMethodName);
+            MethodReference baseDeserialize = netBehaviourSubclass.BaseType.GetMethodInBaseType(DeserializeMethodName);
             if (baseDeserialize != null)
             {
                 // base
@@ -672,7 +680,7 @@ namespace Mirror.Weaver
             // reader.Read()
             serWorker.Append(serWorker.Create(OpCodes.Call, readFunc));
             // syncvar
-            serWorker.Append(serWorker.Create(OpCodes.Stfld, syncVar));
+            serWorker.Append(serWorker.Create(OpCodes.Stfld, syncVar.MakeHostGenericIfNeeded()));
 
             if (hookMethod != null)
             {
