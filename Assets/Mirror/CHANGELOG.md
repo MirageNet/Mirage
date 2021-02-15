@@ -1,3 +1,10 @@
+# [65.1.0](https://github.com/MirrorNG/MirrorNG/compare/v65.0.0...v65.1.0) (2021-02-15)
+
+
+### Features
+
+* move spawned dictionary to com/som ([#568](https://github.com/MirrorNG/MirrorNG/issues/568)) ([1ad8f3d](https://github.com/MirrorNG/MirrorNG/commit/1ad8f3de951cd65a0da067bac8d078059d89ee87))
+
 # [65.0.0](https://github.com/MirrorNG/MirrorNG/compare/v64.0.0...v65.0.0) (2021-02-14)
 
 
