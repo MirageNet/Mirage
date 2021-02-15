@@ -84,7 +84,7 @@ namespace Mirror.Examples.Tanks
 
         void CheckPlayersNotInList()
         {
-            foreach (KeyValuePair<uint, NetworkIdentity> kvp in NetworkManager.Client.Spawned)
+            foreach (KeyValuePair<uint, NetworkIdentity> kvp in NetworkManager.ClientObjectManager.SpawnedObjects)
             {
                 Tank comp = kvp.Value.GetComponent<Tank>();
                 if (comp != null && !players.Contains(comp))

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -31,8 +30,6 @@ namespace Mirror
 
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
-
-        internal readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
 
         [Header("Events")]
         /// <summary>
@@ -74,21 +71,6 @@ namespace Mirror
         public bool IsConnected => connectState == ConnectState.Connected;
 
         public readonly NetworkTime Time = new NetworkTime();
-
-        /// <summary>
-        /// List of all objects spawned in this client
-        /// </summary>
-        public Dictionary<uint, NetworkIdentity> Spawned
-        {
-            get
-            {
-                // if we are in host mode,  the list of spawned object is the same as the server list
-                if (hostServer != null)
-                    return hostServer.Spawned;
-                else
-                    return spawned;
-            }
-        }
 
         /// <summary>
         /// The host server

@@ -108,8 +108,6 @@ namespace Mirror
         /// </summary>
         public bool Active { get; private set; }
 
-        public readonly Dictionary<uint, NetworkIdentity> Spawned = new Dictionary<uint, NetworkIdentity>();
-
         // Time kept in this server
         public readonly NetworkTime Time = new NetworkTime();
 

@@ -123,13 +123,13 @@ namespace Mirror.Tests.Host
             serverObjectManager.Spawn(spawnTestObj);
 
             //1 is the player. should be 2 at this point
-            Assert.That(server.Spawned.Count, Is.GreaterThan(1));
+            Assert.That(serverObjectManager.SpawnedObjects.Count, Is.GreaterThan(1));
 
             server.Disconnect();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
 
-            Assert.That(server.Spawned.Count, Is.Zero);
+            Assert.That(serverObjectManager.SpawnedObjects.Count, Is.Zero);
         });
     }
 }
