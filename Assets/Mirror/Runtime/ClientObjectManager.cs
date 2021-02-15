@@ -69,12 +69,11 @@ namespace Mirror
                 if (Client.IsLocalClient)
                     return ServerObjectManager.SpawnedObjects;
                 else
-                    //TODO: Finish moving all refs from Client.Spawned to ClientObjectManager
-                    return spawned;
+                    return spawnedObjects;
             }
         }
 
-        internal readonly Dictionary<uint, NetworkIdentity> spawned = new Dictionary<uint, NetworkIdentity>();
+        internal readonly Dictionary<uint, NetworkIdentity> spawnedObjects = new Dictionary<uint, NetworkIdentity>();
 
         internal ServerObjectManager ServerObjectManager;
 
