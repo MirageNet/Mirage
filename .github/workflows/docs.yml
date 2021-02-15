@@ -17,10 +17,10 @@ jobs:
       run: nuget install docfx.console -Version 2.56.6
 
     - name: Generating API doc
-      run: docfx.console.2.56.6/tools/docfx metadata --logLevel Warning --warningsAsErrors doc/docfx.json
+      run: dotnet docfx.console.2.56.6/tools/docfx.exe metadata --logLevel Warning --warningsAsErrors doc/docfx.json
 
     - name: Build
-      run: docfx.console.2.56.6/tools/docfx build --logLevel Warning --warningsAsErrors doc/docfx.json
+      run: dotnet docfx.console.2.56.6/tools/docfx.exe build --logLevel Warning --warningsAsErrors doc/docfx.json
 
     - name: GitHub Pages
       uses: crazy-max/ghaction-github-pages@v1.2.5
