@@ -1,3 +1,20 @@
+# [66.0.0](https://github.com/MirageNet/Mirage/compare/v65.1.0...v66.0.0) (2021-02-16)
+
+
+### Bug Fixes
+
+* update package json for new name and url ([#594](https://github.com/MirageNet/Mirage/issues/594)) ([e915aeb](https://github.com/MirageNet/Mirage/commit/e915aeb1ebcaa099c2d7a964b60194471b1f79c3))
+
+
+### Code Refactoring
+
+* change to Mirage namespace ([#590](https://github.com/MirageNet/Mirage/issues/590)) ([bafe18c](https://github.com/MirageNet/Mirage/commit/bafe18c379fd9c06ad7483e5421fa86dbef715e6))
+
+
+### BREAKING CHANGES
+
+* replaced Mirror namespace with Mirage
+
 # [65.1.0](https://github.com/MirageNet/Mirage/compare/v65.0.0...v65.1.0) (2021-02-15)
 
 
