@@ -75,10 +75,10 @@ Here is an example of how you might set up a simple game object pooling system w
 
 ``` cs
 using System.Collections.Generic;
-using MirrorNG;
+using Mirage;
 using UnityEngine;
 
-namespace MirrorNG.Examples
+namespace Mirage.Examples
 {
     public class PrefabPoolManager : MonoBehaviour
     {

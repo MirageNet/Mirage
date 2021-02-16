@@ -7,7 +7,7 @@
 <details>
   <summary>How to Send/Sync custom data types?</summary>
   
-  MirrorNG can automatically create Serialization functions for many custom data types when your scripts are compiled.
+  Mirage can automatically create Serialization functions for many custom data types when your scripts are compiled.
 
   For example, mirror will automatically create a functions for `MyCustomStruct` so that it can be sent without any extra work.
   ```cs

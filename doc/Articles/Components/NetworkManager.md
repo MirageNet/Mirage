@@ -1,11 +1,11 @@
 # Network Manager
 
-NetworkManager is a helper class with instance references to the other major parts of the MirrorNG network.
+NetworkManager is a helper class with instance references to the other major parts of the Mirage network.
 
 It provides quick access to:  
 
-[NetworkServer](https://mirrorng.github.io/MirrorNG/api/Mirror.NetworkServer.html)  
-[NetworkClient](https://mirrorng.github.io/MirrorNG/api/Mirror.NetworkClient.html)  
-[NetworkSceneManager](https://mirrorng.github.io/MirrorNG/api/Mirror.NetworkSceneManager.html)  
-[ServerObjectManager](https://mirrorng.github.io/MirrorNG/api/Mirror.ServerObjectManager.html)    
-[ClientObjectManager](https://mirrorng.github.io/MirrorNG/api/Mirror.ClientObjectManager.html)  
+[NetworkServer](https://mirrorng.github.io/Mirage/api/Mirror.NetworkServer.html)  
+[NetworkClient](https://mirrorng.github.io/Mirage/api/Mirror.NetworkClient.html)  
+[NetworkSceneManager](https://mirrorng.github.io/Mirage/api/Mirror.NetworkSceneManager.html)  
+[ServerObjectManager](https://mirrorng.github.io/Mirage/api/Mirror.ServerObjectManager.html)    
+[ClientObjectManager](https://mirrorng.github.io/Mirage/api/Mirror.ClientObjectManager.html)  

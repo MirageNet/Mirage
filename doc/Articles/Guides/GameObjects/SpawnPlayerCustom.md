@@ -1,6 +1,6 @@
 # Custom Character Spawning
 
-MirrorNG comes with a PlayerSpawner which will automatically spawn a player object when a client connects.
+Mirage comes with a PlayerSpawner which will automatically spawn a player object when a client connects.
 
 Many games need character customization. You may want to pick the color of the hair, eyes, skin, height, race, etc.
 
