@@ -2,7 +2,7 @@
     <Style src="WelcomeWindow.uss" />
     <ui:VisualElement name="Banner">
         <ui:Label name="VersionText" text="Placeholder" />
-        <ui:Image name="Icon" style="background-image: url(&apos;/Assets/Mirror/Editor/WelcomeWindow/Resources/MirrorIcon.png&apos;);" />
+        <ui:Image name="Icon" style="background-image: url(&apos;/Assets/Mirror/Editor/WelcomeWindow/Resources/MirageIcon.png&apos;);" />
     </ui:VisualElement>
     <ui:Label name="Title" text="Welcome to Mirage!" />
     <ui:Box name="ColumnContainer">
