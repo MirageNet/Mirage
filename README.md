@@ -1,7 +1,7 @@
 [![Documentation](https://img.shields.io/badge/documentation-brightgreen.svg)](https://miragenet.github.io/Mirage/)
 [![Forum](https://img.shields.io/badge/forum-brightgreen.svg)](https://forum.unity.com/threads/mirror-networking-for-unity-aka-hlapi-community-edition.425437/)
 [![Discord](https://img.shields.io/discord/343440455738064897.svg)](https://discordapp.com/invite/N9QVxbM)
-[![release](https://img.shields.io/github/release/Mirage/Mirage.svg)](https://github.com/MirageNet/Mirage/releases/latest)
+[![release](https://img.shields.io/github/release/MirageNet/Mirage.svg)](https://github.com/MirageNet/Mirage/releases/latest)
 [![openupm](https://img.shields.io/npm/v/com.mirrorng.mirrorng?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.mirrorng.mirrorng/)
 
 [![Build](https://github.com/MirageNet/Mirage/workflows/CI/badge.svg)](https://github.com/MirageNet/Mirage/actions?query=workflow%3ACI)
@@ -145,4 +145,3 @@ When contributing code, please keep these things in mind:
 * Follow [C# code conventions](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions).
 * Follow [SOLID principles](https://en.wikipedia.org/wiki/SOLID) as much as possible. 
 * Keep your pull requests small and obvious,  if a PR can be split into several small ones, do so.
-
