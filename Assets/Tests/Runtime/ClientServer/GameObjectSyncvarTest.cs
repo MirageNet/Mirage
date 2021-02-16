@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Mirror.Tests.ClientServer
+namespace Mirage.Tests.ClientServer
 {
     public class SampleBehaviorWithGO : NetworkBehaviour
     {

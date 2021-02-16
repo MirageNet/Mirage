@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public class SyncVarTests : TestsBuildFromTestName
     {
@@ -41,7 +41,7 @@ namespace Mirror.Weaver
         {
             HasError("Cannot generate writer for generic type MySyncVar`1. Use a supported type or provide a custom writer",
                 "SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam/MySyncVar`1<System.Int32>");
-            HasError("invalidVar has unsupported type. Use a supported MirrorNG type instead",
+            HasError("invalidVar has unsupported type. Use a supported Mirage type instead",
                 "SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam/MySyncVar`1<System.Int32> SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam::invalidVar");
         }
 
@@ -50,7 +50,7 @@ namespace Mirror.Weaver
         {
             HasError("Cannot generate writer for interface IMySyncVar. Use a supported type or provide a custom writer",
                 "SyncVarTests.SyncVarsInterface.SyncVarsInterface/IMySyncVar");
-            HasError("invalidVar has unsupported type. Use a supported MirrorNG type instead",
+            HasError("invalidVar has unsupported type. Use a supported Mirage type instead",
                 "SyncVarTests.SyncVarsInterface.SyncVarsInterface/IMySyncVar SyncVarTests.SyncVarsInterface.SyncVarsInterface::invalidVar");
         }
 
@@ -59,7 +59,7 @@ namespace Mirror.Weaver
         {
             HasError("Cannot generate writer for component type TextMesh. Use a supported type or provide a custom writer",
                 "UnityEngine.TextMesh");
-            HasError("invalidVar has unsupported type. Use a supported MirrorNG type instead",
+            HasError("invalidVar has unsupported type. Use a supported Mirage type instead",
                 "UnityEngine.TextMesh SyncVarTests.SyncVarsUnityComponent.SyncVarsUnityComponent::invalidVar");
         }
 
@@ -73,7 +73,7 @@ namespace Mirror.Weaver
         [Test]
         public void SyncVarsSyncList()
         {
-            HasWarning("syncints has [SyncVar] attribute. SyncLists should not be marked with SyncVar", "Mirror.SyncList`1<System.Int32> SyncVarTests.SyncVarsSyncList.SyncVarsSyncList::syncints");
+            HasWarning("syncints has [SyncVar] attribute. SyncLists should not be marked with SyncVar", "Mirage.SyncList`1<System.Int32> SyncVarTests.SyncVarsSyncList.SyncVarsSyncList::syncints");
         }
 
         [Test]

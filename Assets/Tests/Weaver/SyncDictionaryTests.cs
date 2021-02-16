@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     // Some tests for SyncObjects are in SyncListTests and apply to SyncDictionary too
     public class SyncDictionaryTests : TestsBuildFromTestName

@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-namespace Mirror.Tests.ClientServer
+namespace Mirage.Tests.ClientServer
 {
     public class SampleBehaviorWithNI : NetworkBehaviour
     {

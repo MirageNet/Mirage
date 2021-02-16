@@ -1,4 +1,4 @@
-﻿namespace Mirror.Weaver.Extra
+﻿namespace Mirage.Weaver.Extra
 {
     public class SomeDataClassWithConstructor
     {

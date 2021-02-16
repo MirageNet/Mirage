@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Mirror
+namespace Mirage
 {
 
     public class PlayerSpawnerTest

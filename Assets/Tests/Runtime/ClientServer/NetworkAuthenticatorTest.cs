@@ -2,7 +2,7 @@ using System;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace Mirror.Tests.ClientServer
+namespace Mirage.Tests.ClientServer
 {
     [TestFixture]
     public class NetworkAuthenticatorTest : ClientServerSetup<MockComponent>

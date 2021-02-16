@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Mirror.KCP;
+using Mirage.KCP;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     public class KcpSetup
     {

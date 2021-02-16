@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Mirror.Examples.Light
+namespace Mirage.Examples.Light
 {
     public class Health : NetworkBehaviour
     {

@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Mirror.Tests.Host
+namespace Mirage.Tests.Host
 {
 
     [TestFixture]

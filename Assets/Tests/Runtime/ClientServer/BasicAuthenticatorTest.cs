@@ -1,7 +1,7 @@
-﻿using Mirror.Authenticators;
+﻿using Mirage.Authenticators;
 using NUnit.Framework;
 
-namespace Mirror.Tests.ClientServer
+namespace Mirage.Tests.ClientServer
 {
     public class BasicAuthenticatorTest : ClientServerSetup<MockComponent>
     {

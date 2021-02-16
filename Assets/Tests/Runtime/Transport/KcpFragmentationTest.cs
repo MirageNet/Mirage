@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine.TestTools;
 using Random = UnityEngine.Random;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     public class KcpFragmentationTest : KcpSetup
     {
