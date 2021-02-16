@@ -4,9 +4,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Include="..\Assets\Mirror\Runtime\**\*.cs"/>
-      <Compile Include="..\Assets\Mirror\Components\**\*.cs"/>
-      <Compile Include="..\Assets\Mirror\Cloud\**\*.cs"/>
-      <Compile Remove="..\Assets\Mirror\Runtime\Transport\Websocket\Ninja.Websockets\**"/>
+      <Compile Include="..\Assets\Mirage\Runtime\**\*.cs"/>
+      <Compile Include="..\Assets\Mirage\Components\**\*.cs"/>
+      <Compile Include="..\Assets\Mirage\Cloud\**\*.cs"/>
+      <Compile Remove="..\Assets\Mirage\Runtime\Transport\Websocket\Ninja.Websockets\**"/>
     </ItemGroup>
 </Project>
