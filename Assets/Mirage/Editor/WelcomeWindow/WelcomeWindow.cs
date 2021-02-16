@@ -195,14 +195,14 @@ namespace Mirage
         //install the module
         private void InstallModules(VisualElement scrollView)
         {
-            //subscribe to InstallModuleProgress
-            EditorApplication.update += InstallModuleProgress;
-
             //find the modules that were selected and install them
             foreach (Toggle toggle in scrollView.Children())
             {
                 if(toggle.value)
                 {
+                    //subscribe to InstallModuleProgress
+                    EditorApplication.update += InstallModuleProgress;
+
                     request = UnityEditor.PackageManager.Client.Add(Modules.Find((x) => x.name == toggle.label).gitUrl);
                 }
             }
