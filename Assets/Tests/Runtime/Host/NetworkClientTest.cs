@@ -4,7 +4,7 @@ using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-namespace Mirror.Tests.Host
+namespace Mirage.Tests.Host
 {
     [TestFixture]
     public class NetworkClientTest : HostSetup<MockComponent>

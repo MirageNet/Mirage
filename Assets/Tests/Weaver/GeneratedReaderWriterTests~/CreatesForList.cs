@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Mirror;
+using Mirage;
 
 namespace GeneratedReaderWriter.CreatesForList
 {

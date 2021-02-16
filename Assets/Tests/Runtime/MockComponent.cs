@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     public class MockComponent : NetworkBehaviour
     {
@@ -44,7 +44,7 @@ namespace Mirror.Tests
         public string targetRpcArg2;
         public INetworkConnection targetRpcConn;
 
-        [ClientRpc(target = Mirror.Client.Connection)]
+        [ClientRpc(target = Mirage.Client.Connection)]
         public void ClientConnRpcTest(INetworkConnection conn, int arg1, string arg2)
         {
             targetRpcConn = conn;
@@ -55,7 +55,7 @@ namespace Mirror.Tests
         public int rpcOwnerArg1;
         public string rpcOwnerArg2;
 
-        [ClientRpc(target = Mirror.Client.Owner)]
+        [ClientRpc(target = Mirage.Client.Owner)]
         public void RpcOwnerTest(int arg1, string arg2)
         {
             rpcOwnerArg1 = arg1;

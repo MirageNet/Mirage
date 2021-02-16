@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using NSubstitute;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     [TestFixture]
     public class SyncListTest

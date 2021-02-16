@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     [TestFixture]
     public class NetworkWriterTest
@@ -981,7 +981,7 @@ namespace Mirror.Tests
             Assert.That(reader.ReadSingle(), Is.EqualTo(10));
             Assert.That(reader.ReadDouble(), Is.EqualTo(11));
             Assert.That(reader.ReadDecimal(), Is.EqualTo(12));
-            // writing null string should write null in Mirror ("" in original HLAPI)
+            // writing null string should write null in Mirage ("" in original HLAPI)
             Assert.That(reader.ReadString(), Is.Null);
             Assert.That(reader.ReadString(), Is.EqualTo(""));
             Assert.That(reader.ReadString(), Is.EqualTo("13"));

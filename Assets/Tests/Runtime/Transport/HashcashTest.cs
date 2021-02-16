@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
 using System;
-using Mirror.KCP;
+using Mirage.KCP;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
 
     public class HashcashTest

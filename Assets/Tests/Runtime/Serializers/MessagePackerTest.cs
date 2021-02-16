@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     [TestFixture]
     public class MessagePackerTest

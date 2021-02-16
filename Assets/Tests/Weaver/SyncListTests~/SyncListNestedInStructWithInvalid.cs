@@ -1,4 +1,4 @@
-using Mirror;
+using Mirage;
 using UnityEngine;
 
 namespace SyncListTests.SyncListNestedInStructWithInvalid
@@ -13,7 +13,7 @@ namespace SyncListTests.SyncListNestedInStructWithInvalid
             public int usefulNumber;
             public Object target;
 
-            public class SyncList : Mirror.SyncList<SomeData> { }
+            public class SyncList : Mirage.SyncList<SomeData> { }
         }
     }
 }

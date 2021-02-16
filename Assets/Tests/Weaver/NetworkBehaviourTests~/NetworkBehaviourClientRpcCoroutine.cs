@@ -1,5 +1,5 @@
 using System.Collections;
-using Mirror;
+using Mirage;
 
 namespace NetworkBehaviourTests.NetworkBehaviourClientRpcCoroutine
 {

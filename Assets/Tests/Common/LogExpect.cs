@@ -2,7 +2,7 @@
 using System;
 using NSubstitute;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
 
     public static class LogExpect
