@@ -1,6 +1,6 @@
 # SyncEvent (Obsolete)
 
-> **IMPORTANT** SyncEvents have been removed in version 18.0.0, see this [Issue](https://github.com/vis2k/Mirage/pull/2178) for more information
+> **IMPORTANT** SyncEvents have been removed in version 18.0.0, see this [Issue](https://github.com/MirageNet/Mirage/pull/2178) for more information
 
 This is an attribute that can be put on events in NetworkBehaviour classes to allow them to be invoked on client when the event is called on the server.
 

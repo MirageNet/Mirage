@@ -16,5 +16,5 @@ You can get the release **[Here](https://github.com/Chykary/FizzySteamworks/rele
 * [Fizz Cube](https://github.com/FizzCube) : Original author for this Transport.
 * [Chykary](https://github.com/Chykary/FizzySteamworks) : The current maintainer for this Transport.
 * [rlabrecque](https://github.com/rlabrecque) : Creator of Steamworks.Net.
-* [vis2k](https://github.com/vis2k) : Creator of Mirage.
+* [vis2k](https://github.com/MirageNet) : Creator of Mirage.
 * Valve : Steam

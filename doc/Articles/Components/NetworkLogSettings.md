@@ -26,4 +26,4 @@ To change settings at runtime please see <xref:Mirror.LogFactory>.
 
 ## Issues
 
-Mirrors Logging api is currently work in progress. If there is a bug or a feature you want added please make an issue [here](https://github.com/vis2k/Mirage/issues).
+Mirrors Logging api is currently work in progress. If there is a bug or a feature you want added please make an issue [here](https://github.com/MirageNet/Mirage/issues).
