@@ -22,7 +22,7 @@ namespace Mirage
 
         private const string WelcomePageUrl = "https://miragenet.github.io/Mirage/index.html";
         private const string QuickStartUrl = "https://miragenet.github.io/Mirage/Articles/Guides/CommunityGuides/MirageQuickStartGuide/index.html";
-        private const string ChangelogUrl = "https://github.com/Mirage/Mirage/blob/master/Assets/Mirage/CHANGELOG.md";
+        private const string ChangelogUrl = "https://github.com/MirageNet/Mirage/blob/master/Assets/Mirage/CHANGELOG.md";
         private const string BestPracticesUrl = "https://miragenet.github.io/Mirage/Articles/Guides/BestPractices.html";
         private const string FaqUrl = "https://miragenet.github.io/Mirage/Articles/Guides/FAQ.html";
         private const string SponsorUrl = "";
