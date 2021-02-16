@@ -5,11 +5,11 @@
 [![openupm](https://img.shields.io/npm/v/com.mirrorng.mirrorng?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.mirrorng.mirrorng/)
 
 [![Build](https://github.com/MirageNet/Mirage/workflows/CI/badge.svg)](https://github.com/MirageNet/Mirage/actions?query=workflow%3ACI)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Mirage_Mirage&metric=alert_status)](https://sonarcloud.io/dashboard?id=Mirage_Mirage)
-[![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=Mirage_Mirage&metric=coverage)](https://sonarcloud.io/component_measures?id=Mirage_Mirage&metric=coverage)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Mirage_Mirage&metric=ncloc)](https://sonarcloud.io/dashboard?id=Mirage_Mirage)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Mirage_Mirage&metric=sqale_index)](https://sonarcloud.io/dashboard?id=Mirage_Mirage)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Mirage_Mirage&metric=code_smells)](https://sonarcloud.io/dashboard?id=Mirage_Mirage)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=alert_status)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
+[![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=coverage)](https://sonarcloud.io/component_measures?id=MirageNet_Mirage&metric=coverage)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=ncloc)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=code_smells)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
 
 
 Mirage is a **high level** Networking API for Unity.
