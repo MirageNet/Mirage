@@ -5,4 +5,4 @@
 
 ## GitHub
 -   You can create an issue in [GitHub](https://github.com/vis2k/Mirage/issues)
--   You can also contribute with Pull Requests...see [Contributing](https://github.com/vis2k/Mirage/blob/master/CONTRIBUTING.md)
+-   You can also contribute with Pull Requests...see [Contributing](https://github.com/MirageNet/Mirage/blob/master/CONTRIBUTING.md)
