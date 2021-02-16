@@ -1,4 +1,4 @@
-[![Documentation](https://img.shields.io/badge/documentation-brightgreen.svg)](https://mirrorng.github.io/Mirage/)
+[![Documentation](https://img.shields.io/badge/documentation-brightgreen.svg)](https://miragenet.github.io/Mirage/)
 [![Forum](https://img.shields.io/badge/forum-brightgreen.svg)](https://forum.unity.com/threads/mirror-networking-for-unity-aka-hlapi-community-edition.425437/)
 [![Discord](https://img.shields.io/discord/343440455738064897.svg)](https://discordapp.com/invite/N9QVxbM)
 [![release](https://img.shields.io/github/release/Mirage/Mirage.svg)](https://github.com/MirageNet/Mirage/releases/latest)
@@ -47,7 +47,7 @@ Mirage has many new features
 * Modular,  use only the components you need.
 * Error handling
 * [Version defines](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html#define-symbols)
-* Server Rpcs can [return values](https://mirrorng.github.io/Mirage/Articles/Guides/Communications/RemoteActions.html)
+* Server Rpcs can [return values](https://miragenet.github.io/Mirage/Articles/Guides/Communications/RemoteActions.html)
 * The default transport features DoS prevention
 * The default transport has CRC64 integrity check
 * Mirage provides unreliable channel out of the box
