@@ -4,7 +4,7 @@ using Mirage.KCP;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 #if IGNORANCE
-using Mirage.ENet;
+using Mirror.ENet;
 #endif
 
 namespace Mirage.HeadlessBenchmark
