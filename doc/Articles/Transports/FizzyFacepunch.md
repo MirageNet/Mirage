@@ -15,5 +15,5 @@ You can get the release **[Here](https://github.com/Chykary/FizzyFacepunch/relea
 ## Credits
 * [Chykary](https://github.com/Chykary/FizzyFacepunch) : The author of this Transport.
 * [Facepunch](https://github.com/Facepunch) : Creator of Facepunch.Steamworks.
-* [vis2k](https://github.com/MirageNet) : Creator of Mirage.
+* [vis2k](https://github.com/vis2k) : Creator of Mirror.
 * Valve : Steam
