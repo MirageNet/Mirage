@@ -1,6 +1,9 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor.PackageManager;
+using UnityEditor.PackageManager.Requests;
+using System.Collections.Generic;
 
 /**
  * Docs used:
@@ -28,7 +31,15 @@ namespace Mirage
         private const string SponsorUrl = "";
         private const string DiscordInviteUrl = "https://discord.gg/rp6Fv3JjEz";
 
+        private List<Module> Modules = new List<Module>()
+        {
+            new Module { name = "Momentum", gitUrl = "https://github.com/MirrorNG/Momentum.git?path=/Assets/Momentum" },
+        };
+
         #endregion
+
+        //request for the module install
+        private static AddRequest request;
 
         //window size of the welcome screen
         private static Vector2 windowSize = new Vector2(500, 415);
@@ -122,6 +133,7 @@ namespace Mirage
             ConfigureTab("FaqButton", "Faq", FaqUrl);
             ConfigureTab("SponsorButton", "Sponsor", SponsorUrl);
             ConfigureTab("DiscordButton", "Discord", DiscordInviteUrl);
+            ConfigureModulesTab();
 
             ShowTab(ShowChangeLog ? "ChangeLog" : "Welcome");
             #endregion
@@ -165,7 +177,84 @@ namespace Mirage
             }
         }
 
+        #region Modules
+
+        //configure the module tab when the tab button is pressed
+        private void ConfigureModulesTab()
+        {
+            Button tabButton = rootVisualElement.Q<Button>("ModulesButton");
+            tabButton.clicked += () => ShowTab("Modules");
+
+            Button install = rootVisualElement.Q<VisualElement>("Modules").Q<Button>("InstallModules");
+            install.clicked += () => InstallModules(rootVisualElement.Q<VisualElement>("Modules").Q<ScrollView>("ModulesScrollView"));
+
+            Button uninstall = rootVisualElement.Q<VisualElement>("Modules").Q<Button>("UninstallModules");
+            uninstall.clicked += () => UninstallModules(rootVisualElement.Q<VisualElement>("Modules").Q<ScrollView>("ModulesScrollView"));
+        }
+
+        //install the module
+        private void InstallModules(VisualElement scrollView)
+        {
+            //subscribe to InstallModuleProgress
+            EditorApplication.update += InstallModuleProgress;
+
+            //find the modules that were selected and install them
+            foreach (Toggle toggle in scrollView.Children())
+            {
+                if(toggle.value)
+                {
+                    request = UnityEditor.PackageManager.Client.Add(Modules.Find((x) => x.name == toggle.label).gitUrl);
+                }
+            }
+        }
+
+        //uninstall the module
+        private void UninstallModules(VisualElement scrollView)
+        {
+            foreach (Toggle toggle in scrollView.Children())
+            {
+                if (toggle.value)
+                {
+                    //request = UnityEditor.PackageManager.Client.Remove();
+                }
+            }
+        }
+
+        //keeps track of the module install progress
+        private void InstallModuleProgress()
+        {
+            Label waitLabel = rootVisualElement.Q<Label>("PleaseWaitLabel");
+
+            if(request.IsCompleted)
+            {
+                if(request.Status == StatusCode.Success)
+                {
+                    Debug.Log("Module installation successful");
+                }
+                else if(request.Status == StatusCode.Failure)
+                {
+                    Debug.LogError("Module installation was unsuccessful. \n Error Code: " + request.Error.errorCode + "\n Error Message: " + request.Error.message);
+                }
+
+                rootVisualElement.Q<Label>("PleaseWaitLabel").style.visibility = Visibility.Hidden;
+                EditorApplication.update -= InstallModuleProgress;
+            }
+            else
+            {
+                waitLabel.style.visibility = Visibility.Visible;
+            }
+        }
+
         #endregion
+
+        #endregion
+    }
+
+    //module data type
+    public struct Module
+    {
+        public string name;
+        public string gitUrl;
     }
 
 }
