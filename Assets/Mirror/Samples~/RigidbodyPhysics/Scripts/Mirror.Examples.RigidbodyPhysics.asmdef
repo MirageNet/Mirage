@@ -1,7 +1,7 @@
 {
-    "name": "Mirror.example.RigidbodyPhysics",
+    "name": "Mirage.example.RigidbodyPhysics",
     "references": [
-        "Mirror"
+        "Mirage"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

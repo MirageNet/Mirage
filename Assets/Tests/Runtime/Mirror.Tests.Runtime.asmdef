@@ -1,14 +1,14 @@
 {
-    "name": "Mirror.Tests.Runtime",
+    "name": "Mirage.Tests.Runtime",
     "references": [
-        "Mirror",
-        "Mirror.Tests.Common",
+        "Mirage",
+        "Mirage.Tests.Common",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Mirror.Authenticators",
-        "MirrorNG",
+        "Mirage.Authenticators",
+        "MirageNG",
         "UniTask",
-        "Mirror.Components"
+        "Mirage.Components"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

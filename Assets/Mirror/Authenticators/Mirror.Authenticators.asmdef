@@ -1,7 +1,7 @@
 {
-    "name": "Mirror.Authenticators",
+    "name": "Mirage.Authenticators",
     "references": [
-        "Mirror"
+        "Mirage"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

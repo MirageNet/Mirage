@@ -1,14 +1,14 @@
 {
-    "name": "Mirror.Tests",
+    "name": "Mirage.Tests",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Mirror",
-        "Mirror.Tests.Common",
-        "Mirror.Components",
-        "Mirror.Editor",
+        "Mirage",
+        "Mirage.Tests.Common",
+        "Mirage.Components",
+        "Mirage.Editor",
         "UniTask",
-        "Unity.Mirror.CodeGen"
+        "Unity.Mirage.CodeGen"
     ],
     "includePlatforms": [
         "Editor"

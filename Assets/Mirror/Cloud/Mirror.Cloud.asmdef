@@ -1,7 +1,7 @@
 {
-    "name": "Mirror.Cloud",
+    "name": "Mirage.Cloud",
     "references": [
-        "Mirror"
+        "Mirage"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

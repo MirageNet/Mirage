@@ -1,14 +1,14 @@
 {
-    "name": "Mirror.Tests.Performance.Runtime",
+    "name": "Mirage.Tests.Performance.Runtime",
     "references": [
         "Unity.PerformanceTesting",
-        "Mirror",
-        "Mirror.Tests.Common",
-        "Mirror.Examples",
+        "Mirage",
+        "Mirage.Tests.Common",
+        "Mirage.Examples",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Mirror.10kBenchmark",
-        "Mirror.10BenchmarkLight",
+        "Mirage.10kBenchmark",
+        "Mirage.10BenchmarkLight",
         "UniTask"
     ],
     "includePlatforms": [],

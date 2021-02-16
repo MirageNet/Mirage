@@ -1,8 +1,8 @@
 {
-    "name": "Mirror.Editor",
+    "name": "Mirage.Editor",
     "references": [
-        "Mirror",
-        "Mirror.Weaver"
+        "Mirage",
+        "Mirage.Weaver"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [

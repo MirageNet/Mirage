@@ -1,7 +1,7 @@
 {
-    "name": "Mirror.Tests.Common",
+    "name": "Mirage.Tests.Common",
     "references": [
-        "Mirror",
+        "Mirage",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "UniTask"

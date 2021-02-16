@@ -1,7 +1,7 @@
 {
-    "name": "Unity.Mirror.CodeGen",
+    "name": "Unity.Mirage.CodeGen",
     "references": [
-        "Mirror",
+        "Mirage",
         "UniTask"
     ],
     "includePlatforms": [

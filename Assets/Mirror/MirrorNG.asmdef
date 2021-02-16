@@ -1,7 +1,7 @@
 {
-    "name": "MirrorNG",
+    "name": "MirageNG",
     "references": [
-        "Mirror",
+        "Mirage",
         "UniTask",
         "UniTask.Linq"
     ],
