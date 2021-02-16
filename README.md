@@ -55,8 +55,8 @@ Mirage has many new features
 If you look under the hood,  the code base has some significant differences based on the core values of each project
 * Mirage follows the [SOLID principles](https://en.wikipedia.org/wiki/SOLID).
 * Mirage avoids singletons and static state in general.
-* Mirage has high [![Test Coverage](https://sonarcloud.io/api/project_badges/measure?project=Mirage_Mirage&metric=coverage)](https://sonarcloud.io/dashboard?id=Mirage_Mirage)
-* Mirage has low [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Mirage_Mirage&metric=sqale_index)](https://sonarcloud.io/dashboard?id=Mirage_Mirage)
+* Mirage has high [![Test Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=coverage)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
+* Mirage has low [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
 * Mirage values code quality,  Mirror values API stability
 
 ## Installation
