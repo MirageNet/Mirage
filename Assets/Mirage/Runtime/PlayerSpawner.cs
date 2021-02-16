@@ -65,7 +65,7 @@ namespace Mirage
 
         void OnDestroy()
         {
-            if (Client != null)
+            if (Client != null && SceneManager != null)
             {
                 SceneManager.ClientSceneChanged.RemoveListener(OnClientSceneChanged);
             }
