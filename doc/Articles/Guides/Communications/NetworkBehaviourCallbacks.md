@@ -37,7 +37,7 @@ This is a full list of virtual methods (callbacks) that you can implement on `Ne
 
 Below is some example call order for different modes
 
-> NOTE: `Start` is called by unity before the first frame, while normally this happens after MirrorNG's callbacks. But if you dont call ` NetworkServer.Spawn` the same frame as `instantiate` then start may be called first
+> NOTE: `Start` is called by unity before the first frame, while normally this happens after Mirage's callbacks. But if you dont call ` NetworkServer.Spawn` the same frame as `instantiate` then start may be called first
 
 > Note: `OnRebuildObservers` and `OnSetHostVisibility` is now on `NetworkVisibility` instead of `NetworkBehaviour`
 

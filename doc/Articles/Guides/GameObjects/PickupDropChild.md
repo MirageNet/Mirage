@@ -2,7 +2,7 @@
 
 Frequently the question comes up about how to handle objects that are attached as children of the player prefab that all clients need to know about and synchronize, such as which weapon is equipped, picking up networked scene objects, and players dropping objects into the scene.
 
->   MirrorNG cannot support multiple Network Identity components within an object hierarchy. Since the Player object must have a Network Identity, none of its descendant objects can have one.
+>   Mirage cannot support multiple Network Identity components within an object hierarchy. Since the Player object must have a Network Identity, none of its descendant objects can have one.
 
 ## Child Objects
 
@@ -23,7 +23,7 @@ Below is the Player Equip script to handle the changing of the equipped item, an
 ``` cs
 using UnityEngine;
 using System.Collections;
-using MirrorNG;
+using Mirage;
 
 public enum EquippedItem : byte
 {
@@ -155,7 +155,7 @@ In the image above, there's a `sceneObjectPrefab` field that is assigned to a pr
 ``` cs
 using UnityEngine;
 using System.Collections;
-using MirrorNG;
+using Mirage;
 
 public class SceneObject : NetworkBehaviour
 {

@@ -2,11 +2,11 @@
 
 `SyncHashSet` are sets similar to C\# [HashSet\<T\>](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1) that synchronize their contents from the server to the clients.
 
-A SyncHashSet can contain any [supported MirrorNG type](../DataTypes.md) 
+A SyncHashSet can contain any [supported Mirage type](../DataTypes.md) 
 
 ## Usage
 
-Create a class that derives from SyncHashSet for your specific type. This is necessary because MirrorNG will add methods to that class with the weaver. Then add a SyncHashSet field to your NetworkBehaviour class. For example:
+Create a class that derives from SyncHashSet for your specific type. This is necessary because Mirage will add methods to that class with the weaver. Then add a SyncHashSet field to your NetworkBehaviour class. For example:
 
 ```cs
 [System.Serializable]

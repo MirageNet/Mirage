@@ -14,11 +14,11 @@ When you first add NetworkLogSettings you will have to Create a new LogSettings 
 
 ## Log Settings 
 
-When you first set up LogSettings the list of components may be empty or incomplete. Running the game will cause MirrorNG scripts to add their respective loggers to the list so their logging levels can be changed.
+When you first set up LogSettings the list of components may be empty or incomplete. Running the game will cause Mirage scripts to add their respective loggers to the list so their logging levels can be changed.
 
 ![Inspector](NetworkLogSettings.png)
 
-Log settings can also be changed using the "MirrorNG Log Level" window, which can be opened from the editor menu: Window > Analysis > MirrorNG Log Levels.
+Log settings can also be changed using the "Mirage Log Level" window, which can be opened from the editor menu: Window > Analysis > Mirage Log Levels.
 
 ![Window](LogLevelWindow.png)
 
@@ -26,4 +26,4 @@ To change settings at runtime please see <xref:Mirror.LogFactory>.
 
 ## Issues
 
-Mirrors Logging api is currently work in progress. If there is a bug or a feature you want added please make an issue [here](https://github.com/vis2k/MirrorNG/issues).
+Mirrors Logging api is currently work in progress. If there is a bug or a feature you want added please make an issue [here](https://github.com/MirageNet/Mirage/issues).
