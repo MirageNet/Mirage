@@ -10,7 +10,7 @@ The Network Identity component is at the heart of the Unity networking high-leve
 
 ## Instantiated Network Game Objects
 
-With the MirrorNG’s server-authoritative networking system, the server must spawn networked game objects with network identities, using `NetworkServer.Spawn`. This automatically creates them on clients that are connected to the server, and assigns them a `netId`.
+With the Mirage’s server-authoritative networking system, the server must spawn networked game objects with network identities, using `NetworkServer.Spawn`. This automatically creates them on clients that are connected to the server, and assigns them a `netId`.
 
 You must put a Network Identity component on any Prefabs that spawn at runtime for the network system to use them. See [Object Spawning](../Guides/GameObjects/SpawnObject.md) for more information.
 

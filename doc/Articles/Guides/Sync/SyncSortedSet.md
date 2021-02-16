@@ -4,11 +4,11 @@
 
 Unlike SyncHashSets, all elements in a SyncSortedSet are sorted when they are inserted. Please note this has some performance implications.
 
-A SyncSortedSet can contain any [supported MirrorNG type](../DataTypes.md) 
+A SyncSortedSet can contain any [supported Mirage type](../DataTypes.md) 
 
 ## Usage
 
-Create a class that derives from SyncSortedSet for your specific type. This is necessary because MirrorNG will add methods to that class with the weaver. Then add a SyncSortedSet field to your NetworkBehaviour class. For example:
+Create a class that derives from SyncSortedSet for your specific type. This is necessary because Mirage will add methods to that class with the weaver. Then add a SyncSortedSet field to your NetworkBehaviour class. For example:
 
 ```cs
 class Player : NetworkBehaviour {

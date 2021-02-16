@@ -19,13 +19,13 @@ You can add custom logic to the object lifecycle events by subscribing to the co
 
 
 > **Note:** In Mirror and UNet, you can add logic to lifecycle events by overriding methods in NetworkBehaviour
-> In MirrorNG you do it by subscribing to events in <xref:Mirror.NetworkIdentity>
+> In Mirage you do it by subscribing to events in <xref:Mirror.NetworkIdentity>
 
 # Server Instantiate
 
 This is done usual by you using Unity's `GameObject.Instantiate` 
 This goes through the regular GameObject Lifecycle events such as Awake, Start, Enabled, etc..
-Basically this is outside MirrorNG's control.
+Basically this is outside Mirage's control.
 
 [Scene Objects](SceneObjects.md) are normally instantiated as part of the scene.
 
@@ -61,9 +61,9 @@ will include all the data in [SyncVars](../Sync/SyncVars.md), [SyncLists](../Syn
 When an object is spawned,  the server will send a message to the clients telling it to spawn a GameObject and provide 
 an asset id.
 
-By default, MirrorNG will look up all the known prefabs looking for that asset id.  
+By default, Mirage will look up all the known prefabs looking for that asset id.  
 Make sure to add your prefabs in the NetworkClient list of prefabs.
-Then MirrorNG will instantiate the prefab,  and it will go through the regular Unity Lifecycle events.
+Then Mirage will instantiate the prefab,  and it will go through the regular Unity Lifecycle events.
 You can customize how objects are instantiated using Spawn Handlers.
 
 Do not add Network logic to these events.  Instead,  use these events to subscribe to network events in NetworkIdentity.

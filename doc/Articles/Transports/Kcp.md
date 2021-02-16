@@ -1,6 +1,6 @@
 # Kcp Transport
 
-KCP is the default transport in MirrorNG
+KCP is the default transport in Mirage
 
 Simple, message based, MMO Scale UDP networking in C\#.
 
