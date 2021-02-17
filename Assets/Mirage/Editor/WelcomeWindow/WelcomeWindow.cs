@@ -32,7 +32,7 @@ namespace Mirage
         private const string DiscordInviteUrl = "https://discord.gg/rp6Fv3JjEz";
 
         //TODO: Update links and package names after packages are renamed
-        private List<Module> Modules = new List<Module>()
+        private readonly List<Module> Modules = new List<Module>()
         {
             new Module {displayName = "LAN Discovery", packageName = "com.mirrorng.discovery", gitUrl = "https://github.com/MirrorNG/Discovery.git?path=/Assets/Discovery"},
             new Module { displayName = "Momentum", packageName = "com.mirrorng.momentum", gitUrl = "https://github.com/MirrorNG/Momentum.git?path=/Assets/Momentum" },
@@ -229,12 +229,10 @@ namespace Mirage
 
                     foreach (var package in listRequest.Result)
                     {
-                        foreach (Module module in Modules)
+                        Module? module = Modules.Find((x) => x.displayName == package.displayName);
+                        if (module != null)
                         {
-                            if (module.displayName == package.displayName)
-                            {
-                                installedPackages.Add(module.displayName);
-                            }
+                            installedPackages.Add(module.Value.displayName);
                         }
                     }
 
@@ -281,7 +279,6 @@ namespace Mirage
                 EditorApplication.update -= InstallModuleProgress;
 
                 //refresh the module tab
-                //ConfigureModulesTab();
                 currentWindow.Close();
                 EditorPrefs.SetString(screenToOpenKey, "Modules");
                 OpenWindow();
@@ -312,7 +309,6 @@ namespace Mirage
                 waitLabel.style.visibility = Visibility.Hidden;
 
                 //refresh the module tab
-                //ConfigureModulesTab();
                 currentWindow.Close();
                 EditorPrefs.SetString(screenToOpenKey, "Modules");
                 OpenWindow();
