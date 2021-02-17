@@ -31,9 +31,12 @@ namespace Mirage
         private const string SponsorUrl = "";
         private const string DiscordInviteUrl = "https://discord.gg/rp6Fv3JjEz";
 
+        //TODO: Update links and package names after packages are renamed
         private List<Module> Modules = new List<Module>()
         {
+            new Module {displayName = "LAN Discovery", packageName = "com.mirrorng.discovery", gitUrl = "https://github.com/MirrorNG/Discovery.git?path=/Assets/Discovery"},
             new Module { displayName = "Momentum", packageName = "com.mirrorng.momentum", gitUrl = "https://github.com/MirrorNG/Momentum.git?path=/Assets/Momentum" },
+            new Module { displayName = "Websockets", packageName = "com.mirrorng.websocket", gitUrl = "https://github.com/MirrorNG/MirrorNG_Websocket.git?path=/Assets/Mirror/Websocket" },
         };
 
         #endregion
@@ -210,7 +213,7 @@ namespace Mirage
         {
             uninstallRequest = UnityEditor.PackageManager.Client.Remove(Modules.Find((x) => x.displayName == moduleName).packageName);
 
-            //subscribe to InstallModuleProgress
+            //subscribe to UninstallModuleProgress
             EditorApplication.update += UninstallModuleProgress;
         }
 
@@ -267,7 +270,7 @@ namespace Mirage
             {
                 if(installRequest.Status == StatusCode.Success)
                 {
-                    Debug.Log("Module install successful");
+                    Debug.Log("Module install successful.");
                 }
                 else if(installRequest.Status == StatusCode.Failure)
                 {
@@ -299,7 +302,7 @@ namespace Mirage
 
                 if (uninstallRequest.Status == StatusCode.Success)
                 {
-                    Debug.Log("Module uninstall successful");
+                    Debug.Log("Module uninstall successful.");
                 }
                 else if (uninstallRequest.Status == StatusCode.Failure)
                 {
