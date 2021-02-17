@@ -27,13 +27,6 @@ namespace Mirage
     [NetworkMessage]
     public struct SceneReadyMessage { }
 
-    public enum SceneOperation : byte
-    {
-        Normal,
-        LoadAdditive,
-        UnloadAdditive
-    }
-
     #endregion
 
     #region System Messages requried for code gen path
