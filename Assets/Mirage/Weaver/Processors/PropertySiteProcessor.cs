@@ -32,11 +32,12 @@ namespace Mirage.Weaver
         void ProcessInstructionSetterField(Instruction i, FieldReference opField)
         {
             // does it set a field that we replaced?
-            if (Setters.TryGetValue(opField.Resolve(), out MethodDefinition replacement))
+            if (Setters.TryGetValue(opField, out MethodDefinition replacement))
             {
-                if (opField.DeclaringType.IsGenericInstance) // We're calling to a generic class
+                if (opField.DeclaringType.IsGenericInstance || opField.DeclaringType.HasGenericParameters) // We're calling to a generic class
                 {
-                    GenericInstanceType genericType = (GenericInstanceType)opField.DeclaringType;
+                    FieldReference newField = i.Operand as FieldReference;
+                    GenericInstanceType genericType = (GenericInstanceType)newField.DeclaringType;
                     i.OpCode = OpCodes.Callvirt;
                     i.Operand = replacement.MakeHostInstanceGeneric(genericType);
                 }
@@ -53,11 +54,12 @@ namespace Mirage.Weaver
         void ProcessInstructionGetterField(Instruction i, FieldReference opField)
         {
             // does it set a field that we replaced?
-            if (Getters.TryGetValue(opField.Resolve(), out MethodDefinition replacement))
+            if (Getters.TryGetValue(opField, out MethodDefinition replacement))
             {
-                if (opField.DeclaringType.IsGenericInstance) // We're calling to a generic class
+                if (opField.DeclaringType.IsGenericInstance || opField.DeclaringType.HasGenericParameters) // We're calling to a generic class
                 {
-                    GenericInstanceType genericType = (GenericInstanceType)opField.DeclaringType;
+                    FieldReference newField = i.Operand as FieldReference;
+                    GenericInstanceType genericType = (GenericInstanceType)newField.DeclaringType;
                     i.OpCode = OpCodes.Callvirt;
                     i.Operand = replacement.MakeHostInstanceGeneric(genericType);
                 }
@@ -74,30 +76,39 @@ namespace Mirage.Weaver
         {
             if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldReference opFieldst)
             {
+                FieldReference resolved = opFieldst.Resolve();
+                if (resolved == null)
+                {
+                    resolved = opFieldst.Duplicate(opFieldst.DeclaringType.Resolve());
+                }
+
                 // this instruction sets the value of a field. cache the field reference.
-                ProcessInstructionSetterField(instr, opFieldst);
-            }
-            else if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldReference opFieldRef)
-            {
-                ProcessInstructionSetterField(instr, opFieldRef);
+                ProcessInstructionSetterField(instr, resolved);
             }
 
             if (instr.OpCode == OpCodes.Ldfld && instr.Operand is FieldReference opFieldld)
             {
+                FieldReference resolved = opFieldld.Resolve();
+                if (resolved == null)
+                {
+                    resolved = opFieldld.Duplicate(opFieldld.DeclaringType.Resolve());
+                }
+
                 // this instruction gets the value of a field. cache the field reference.
-                ProcessInstructionGetterField(instr, opFieldld);
-            }
-            else if (instr.OpCode == OpCodes.Ldfld && instr.Operand is FieldDefinition opFieldldRef)
-            {
-                // this instruction gets the value of a field. cache the field reference.
-                ProcessInstructionGetterField(instr, opFieldldRef);
+                ProcessInstructionGetterField(instr, resolved);
             }
 
             if (instr.OpCode == OpCodes.Ldflda && instr.Operand is FieldReference opFieldlda)
             {
+                FieldReference resolved = opFieldlda.Resolve();
+                if (resolved == null)
+                {
+                    resolved = opFieldlda.Duplicate(opFieldlda.DeclaringType.Resolve());
+                }
+
                 // loading a field by reference,  watch out for initobj instruction
                 // see https://github.com/vis2k/Mirror/issues/696
-                return ProcessInstructionLoadAddress(md, instr, opFieldlda);
+                return ProcessInstructionLoadAddress(md, instr, resolved);
             }
 
             return instr;
