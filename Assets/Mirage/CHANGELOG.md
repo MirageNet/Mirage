@@ -1,3 +1,10 @@
+# [66.2.0](https://github.com/MirageNet/Mirage/compare/v66.1.0...v66.2.0) (2021-02-17)
+
+
+### Features
+
+* make networkscenemanager optional again ([#595](https://github.com/MirageNet/Mirage/issues/595)) ([ed180ff](https://github.com/MirageNet/Mirage/commit/ed180ff3f9230f4676a8b9a07351dd8302acb906))
+
 # [66.1.0](https://github.com/MirageNet/Mirage/compare/v66.0.0...v66.1.0) (2021-02-17)
 
 
