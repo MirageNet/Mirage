@@ -521,10 +521,10 @@ namespace Mirage
         {
             if (value == null)
             {
-                writer.WriteUInt32(0);
+                writer.WriteNetworkIdentity(null) ;
                 return;
             }
-            writer.WriteUInt32(value.NetId);
+            writer.WriteNetworkIdentity(value.NetIdentity);
             writer.WriteByte((byte)value.ComponentIndex);
         }
 
@@ -532,7 +532,7 @@ namespace Mirage
         {
             if (value == null)
             {
-                writer.WriteUInt32(0);
+                writer.WriteNetworkIdentity(null);
                 return;
             }
             NetworkIdentity identity = value.GetComponent<NetworkIdentity>();
