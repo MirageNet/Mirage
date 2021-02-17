@@ -7,9 +7,9 @@ using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-using static Mirror.Tests.AsyncUtil;
+using static Mirage.Tests.AsyncUtil;
 
-namespace Mirror
+namespace Mirage
 {
     public class AsyncPipeConnectionTest
     {

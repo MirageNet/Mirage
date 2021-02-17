@@ -6,7 +6,7 @@ State synchronization is done from the Server to remote clients. The local clien
 
 Data is not synchronized in the opposite direction - from remote clients to the server. To do this, you need to use Server RPC calls.
 -   [SyncVars](SyncVars.md)  
-    SyncVars are variables of scripts that inherit from <xref:Mirror.NetworkBehaviour>, which are synchronized from the server to clients. 
+    SyncVars are variables of scripts that inherit from <xref:Mirage.NetworkBehaviour>, which are synchronized from the server to clients. 
 -   [SyncLists](SyncLists.md)  
     SyncLists contain lists of values and synchronize data from servers to clients.
 -   [SyncDictionary](SyncDictionary.md)  
@@ -18,7 +18,7 @@ Data is not synchronized in the opposite direction - from remote clients to the 
 
 ## Sync To Owner
 
-It is often the case when you don't want some player data visible to other players. In the inspector change the "Network Sync Mode" from "Observers" (default) to "Owner" to let MirrorNG know to synchronize the data only with the owning client.
+It is often the case when you don't want some player data visible to other players. In the inspector change the "Network Sync Mode" from "Observers" (default) to "Owner" to let Mirage know to synchronize the data only with the owning client.
 
 For example, suppose you are making an inventory system. Suppose player A,B and C are in the same area. There will be a total of 12 objects in the entire network:
 
@@ -31,7 +31,7 @@ each one of them would have an Inventory component
 
 Suppose Player A picks up some loot.  The server adds the loot to Player's A inventory,  which would have a [SyncLists](SyncLists.md) of Items. 
 
-By default,  MirrorNG now has to synchronize player A's inventory everywhere,  that means sending an update message to client A,  client B and client C,  because they all have a copy of Player A. This is wasteful,  Client B and Client C do not need to know about Player's A inventory,  they never see it on screen.  It is also a security problem,  someone could hack the client and display other people's inventory and use it to their advantage.
+By default,  Mirage now has to synchronize player A's inventory everywhere,  that means sending an update message to client A,  client B and client C,  because they all have a copy of Player A. This is wasteful,  Client B and Client C do not need to know about Player's A inventory,  they never see it on screen.  It is also a security problem,  someone could hack the client and display other people's inventory and use it to their advantage.
 
 If you set the "Network Sync Mode"  in the Inventory component to "Owner",  then Player A's inventory will only be synchronized with Client A.  
 
@@ -41,11 +41,11 @@ Other typical use cases include quests,  player's hand in a card game, skills, e
 
 ## Advanced State Synchronization
 
-In most cases, the use of SyncVars is enough for your game scripts to serialize their state to clients. However in some cases you might require more complex serialization code. This page is only relevant for advanced developers who need customized synchronization solutions that go beyond MirrorNG’s normal SyncVar feature.
+In most cases, the use of SyncVars is enough for your game scripts to serialize their state to clients. However in some cases you might require more complex serialization code. This page is only relevant for advanced developers who need customized synchronization solutions that go beyond Mirage’s normal SyncVar feature.
 
 ## Custom Serialization Functions
 
-To perform your own custom serialization, you can implement virtual functions on <xref:Mirror.NetworkBehaviour> to be used for SyncVar serialization. These functions are:
+To perform your own custom serialization, you can implement virtual functions on <xref:Mirage.NetworkBehaviour> to be used for SyncVar serialization. These functions are:
 
 ```cs
 public virtual bool OnSerialize(NetworkWriter writer, bool initialState);
@@ -60,32 +60,32 @@ Use the `initialState` flag to differentiate between the first time a game objec
 
 The `OnSerialize` function should return true to indicate that an update should be sent. If it returns true, the dirty bits for that script are set to zero. If it returns false, the dirty bits are not changed. This allows multiple changes to a script to be accumulated over time and sent when the system is ready, instead of every frame.
 
-The `OnSerialize` function is only called for `initialState` or when the <xref:Mirror.NetworkBehaviour> is dirty. A <xref:Mirror.NetworkBehaviour> will only be dirty if a `SyncVar` or `SyncObject` (e.g. `SyncList`) has changed since the last OnSerialize call. After data has been sent the <xref:Mirror.NetworkBehaviour> will not be dirty again until the next `syncInterval` (set in the inspector). A <xref:Mirror.NetworkBehaviour> can also be marked as dirty by manually calling `SetDirtyBit` (this does not bypass the syncInterval limit).
+The `OnSerialize` function is only called for `initialState` or when the <xref:Mirage.NetworkBehaviour> is dirty. A <xref:Mirage.NetworkBehaviour> will only be dirty if a `SyncVar` or `SyncObject` (e.g. `SyncList`) has changed since the last OnSerialize call. After data has been sent the <xref:Mirage.NetworkBehaviour> will not be dirty again until the next `syncInterval` (set in the inspector). A <xref:Mirage.NetworkBehaviour> can also be marked as dirty by manually calling `SetDirtyBit` (this does not bypass the syncInterval limit).
  
-Although this works,  it is usually better to let MirrorNG generate these methods and provide [custom serializers](../DataTypes.md) for your specific field.
+Although this works,  it is usually better to let Mirage generate these methods and provide [custom serializers](../DataTypes.md) for your specific field.
 
 ## Serialization Flow
 
-Game objects with the Network Identity component attached can have multiple scripts derived from <xref:Mirror.NetworkBehaviour>. The flow for serializing these game objects is:
+Game objects with the Network Identity component attached can have multiple scripts derived from <xref:Mirage.NetworkBehaviour>. The flow for serializing these game objects is:
 
 On the server:
--   Each <xref:Mirror.NetworkBehaviour> has a dirty mask. This mask is available inside `OnSerialize` as `syncVarDirtyBits`
--   Each SyncVar in a <xref:Mirror.NetworkBehaviour> script is assigned a bit in the dirty mask.
+-   Each <xref:Mirage.NetworkBehaviour> has a dirty mask. This mask is available inside `OnSerialize` as `syncVarDirtyBits`
+-   Each SyncVar in a <xref:Mirage.NetworkBehaviour> script is assigned a bit in the dirty mask.
 -   Changing the value of SyncVars causes the bit for that SyncVar to be set in the dirty mask
 -   Alternatively, calling `SetDirtyBit` writes directly to the dirty mask
--   <xref:Mirror.NetworkIdentity> game objects are checked on the server as part of it’s update loop
--   If any <xref:Mirror.NetworkBehaviour>s on a <xref:Mirror.NetworkIdentity> are dirty, then an `UpdateVars` packet is created for that game object
--   The `UpdateVars` packet is populated by calling `OnSerialize` on each <xref:Mirror.NetworkBehaviour> on the game object
--   <xref:Mirror.NetworkBehaviour>s that are not dirty write a zero to the packet for their dirty bits
--   <xref:Mirror.NetworkBehaviour>s that are dirty write their dirty mask, then the values for the SyncVars that have changed
--   If `OnSerialize` returns true for a <xref:Mirror.NetworkBehaviour>, the dirty mask is reset for that <xref:Mirror.NetworkBehaviour> so it does not send again until its value changes.
+-   <xref:Mirage.NetworkIdentity> game objects are checked on the server as part of it’s update loop
+-   If any <xref:Mirage.NetworkBehaviour>s on a <xref:Mirage.NetworkIdentity> are dirty, then an `UpdateVars` packet is created for that game object
+-   The `UpdateVars` packet is populated by calling `OnSerialize` on each <xref:Mirage.NetworkBehaviour> on the game object
+-   <xref:Mirage.NetworkBehaviour>s that are not dirty write a zero to the packet for their dirty bits
+-   <xref:Mirage.NetworkBehaviour>s that are dirty write their dirty mask, then the values for the SyncVars that have changed
+-   If `OnSerialize` returns true for a <xref:Mirage.NetworkBehaviour>, the dirty mask is reset for that <xref:Mirage.NetworkBehaviour> so it does not send again until its value changes.
 -   The `UpdateVars` packet is sent to ready clients that are observing the game object
 
 On the client:
 -   an `UpdateVars packet` is received for a game object
--   The `OnDeserialize` function is called for each <xref:Mirror.NetworkBehaviour> script on the game object
--   Each <xref:Mirror.NetworkBehaviour> script on the game object reads a dirty mask.
--   If the dirty mask for a <xref:Mirror.NetworkBehaviour> is zero, the `OnDeserialize` function returns without reading any more
+-   The `OnDeserialize` function is called for each <xref:Mirage.NetworkBehaviour> script on the game object
+-   Each <xref:Mirage.NetworkBehaviour> script on the game object reads a dirty mask.
+-   If the dirty mask for a <xref:Mirage.NetworkBehaviour> is zero, the `OnDeserialize` function returns without reading any more
 -   If the dirty mask is non-zero value, then the `OnDeserialize` function reads the values for the SyncVars that correspond to the dirty bits that are set
 -   If there are SyncVar hook functions, those are invoked with the value read from the stream.
 
@@ -112,7 +112,7 @@ public class Data : NetworkBehaviour
 }
 ```
 
-The following sample shows the code that is generated by MirrorNG for the `SerializeSyncVars` function which is called inside <xref:Mirror.NetworkBehaviour>`.OnSerialize`:
+The following sample shows the code that is generated by Mirage for the `SerializeSyncVars` function which is called inside <xref:Mirage.NetworkBehaviour>`.OnSerialize`:
 
 ```cs
 public override bool SerializeSyncVars(NetworkWriter writer, bool initialState)
@@ -157,7 +157,7 @@ public override bool SerializeSyncVars(NetworkWriter writer, bool initialState)
 ```
 
 
-The following sample shows the code that is generated by MirrorNG for the `DeserializeSyncVars` function which is called inside <xref:Mirror.NetworkBehaviour>`.OnDeserialize`:
+The following sample shows the code that is generated by Mirage for the `DeserializeSyncVars` function which is called inside <xref:Mirage.NetworkBehaviour>`.OnDeserialize`:
 
 ```cs
 public override void DeserializeSyncVars(NetworkReader reader, bool initialState)
@@ -208,6 +208,6 @@ public override void DeserializeSyncVars(NetworkReader reader, bool initialState
 }
 ```
 
-If a <xref:Mirror.NetworkBehaviour> has a base class that also has serialization functions, the base class functions should also be called.
+If a <xref:Mirage.NetworkBehaviour> has a base class that also has serialization functions, the base class functions should also be called.
 
 Note that the `UpdateVar` packets created for game object state updates may be aggregated in buffers before being sent to the client, so a single transport layer packet may contain updates for multiple game objects.

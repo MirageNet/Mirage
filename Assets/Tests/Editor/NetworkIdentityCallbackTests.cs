@@ -6,9 +6,9 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 using UnityEngine.Events;
 
-using static Mirror.Tests.LocalConnections;
+using static Mirage.Tests.LocalConnections;
 
-namespace Mirror
+namespace Mirage
 {
     public class NetworkIdentityCallbackTests
     {

@@ -1,10 +1,10 @@
-using Mirror;
+using Mirage;
 
 namespace ClientRpcTests.ClientRpcOwnerCantExcludeOwner
 {
     class ClientRpcOwnerCantExcludeOwner : NetworkBehaviour
     {
-        [ClientRpc(target = Mirror.Client.Owner, excludeOwner = true)]
+        [ClientRpc(target = Mirage.Client.Owner, excludeOwner = true)]
         void ClientRpcMethod() { }
     }
 }

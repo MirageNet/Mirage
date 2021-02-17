@@ -1,8 +1,8 @@
-using Mirror.Tests.ClientServer;
+using Mirage.Tests.ClientServer;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     public class ExampleGuards : NetworkBehaviour
     {

@@ -1,4 +1,4 @@
-namespace Mirror.Examples
+namespace Mirage.Examples
 {
     public class Health : NetworkBehaviour
     {

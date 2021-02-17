@@ -1,0 +1,80 @@
+classDiagram
+
+    ClientObjectManager --> NetworkClient
+    NetworkClient --> Transport
+
+    IConnection *-- Transport : Opens
+    NetworkConnection --> IConnection
+    NetworkClient --> NetworkConnection
+
+    ClientObjectManager --o GameObject : Spawns
+    GameObject --* NetworkIdentity
+    NetworkIdentity --> NetworkConnection
+    GameObject --* NetworkBehavior
+    NetworkBehavior --> NetworkIdentity
+
+    Transport <|-- KCPTransport
+    Transport <|-- WSTransport
+    Transport <|-- MultiplexTransport
+
+
+    class Transport {
+        <<abstract>>
+        <<service>>
+        Connected : Event<IConnection>
+        ConnectAsync(Url) IConnection
+        ListenAsync()
+        Disconnect()
+    }
+
+    class IConnection {
+        <<interface>>
+        SendAsync(ArraySegment<byte>, channel)
+        ReceiveAsync(MemoryStream) int
+        Disconnect()
+    }
+
+    class NetworkConnection {
+        Send(T msg, int channel)
+        SendNotify(T msg, int channel, object token)
+        RegisterHandler(handler(T))
+    }
+
+    class NetworkClient {
+        <<service>>
+        Connection
+        Authenticated : Event<INetworkConnection>
+        Disconnected: Event<INetworkConnection>
+        ConnectAsync(Uri)
+        ConnectHost(NetworkServer)
+    }
+
+    class NetworkIdentity {
+        NetId : uint
+        AssetId : Guid
+        OnStartServer : Event
+        OnStopServer : Event
+        OnStartClient : Event
+        OnStopClient : Event
+        OnStartLocalPlayer : Event
+        OnStartAuthority : Event
+        OnStopAuthority : Event
+    }
+
+    class NetworkBehavior {
+        NetIdentity : NetworkIdentity
+        Time : NetworkTime
+        OnSerialize(NetworkWriter, bool initial)
+        OnDeserialize(NetworkReader, bool initial)
+    }
+
+    NetworkBehavior <|-- CustomComponent
+
+    class ClientObjectModel {
+        <<service>>
+        spawnPrefabs: List<NetworkIdentity>
+        Spawned : Event
+        UnSpawned: Event
+        RegisterPrefab(NetworkIdentity)
+        UnregisterPrefab(NetworkIdentity)
+    }

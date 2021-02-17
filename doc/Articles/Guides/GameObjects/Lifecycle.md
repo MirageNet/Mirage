@@ -1,7 +1,7 @@
 ## Lifecycle of a GameObject
 
 Networked GameObjects go through several lifecycle states. 
-You can add custom logic to the object lifecycle events by subscribing to the corresponding event in <xref:Mirror.NetworkIdentity>
+You can add custom logic to the object lifecycle events by subscribing to the corresponding event in <xref:Mirage.NetworkIdentity>
 
 | Server                             | Client                                    |
 | ---------------------------------- | ----------------------------------------- |
@@ -19,13 +19,13 @@ You can add custom logic to the object lifecycle events by subscribing to the co
 
 
 > **Note:** In Mirror and UNet, you can add logic to lifecycle events by overriding methods in NetworkBehaviour
-> In MirrorNG you do it by subscribing to events in <xref:Mirror.NetworkIdentity>
+> In Mirage you do it by subscribing to events in <xref:Mirage.NetworkIdentity>
 
 # Server Instantiate
 
 This is done usual by you using Unity's `GameObject.Instantiate` 
 This goes through the regular GameObject Lifecycle events such as Awake, Start, Enabled, etc..
-Basically this is outside MirrorNG's control.
+Basically this is outside Mirage's control.
 
 [Scene Objects](SceneObjects.md) are normally instantiated as part of the scene.
 
@@ -34,7 +34,7 @@ Basically this is outside MirrorNG's control.
 To start a server object,  [spawn it](SpawnObject.md). 
 If you wish to perform some logic when the object starts in the server, add a 
 component in your gameobject with your own method and subscribe to 
-<xref:Mirror.NetworkIdentity.OnStartServer>
+<xref:Mirage.NetworkIdentity.OnStartServer>
 
 For example:
 
@@ -51,7 +51,7 @@ class MyComponent : MonoBehaviour {
 }
 ```
 
-You can also simply drag your `OnStartServer` method in the <xref:Mirror.NetworkIdentity.OnStartServer> event in the inspector.
+You can also simply drag your `OnStartServer` method in the <xref:Mirage.NetworkIdentity.OnStartServer> event in the inspector.
 
 During the spawn a message will be sent to all the clients telling them to spawn the object. The message
 will include all the data in [SyncVars](../Sync/SyncVars.md), [SyncLists](../Sync/SyncLists.md), [SyncSet](../Sync/SyncHashSet.md), [SyncDictionary](../Sync/SyncDictionary.md)
@@ -61,9 +61,9 @@ will include all the data in [SyncVars](../Sync/SyncVars.md), [SyncLists](../Syn
 When an object is spawned,  the server will send a message to the clients telling it to spawn a GameObject and provide 
 an asset id.
 
-By default, MirrorNG will look up all the known prefabs looking for that asset id.  
+By default, Mirage will look up all the known prefabs looking for that asset id.  
 Make sure to add your prefabs in the NetworkClient list of prefabs.
-Then MirrorNG will instantiate the prefab,  and it will go through the regular Unity Lifecycle events.
+Then Mirage will instantiate the prefab,  and it will go through the regular Unity Lifecycle events.
 You can customize how objects are instantiated using Spawn Handlers.
 
 Do not add Network logic to these events.  Instead,  use these events to subscribe to network events in NetworkIdentity.
@@ -72,33 +72,33 @@ Immediatelly after the object is instantiated, all the data is updated to match 
 
 # Client Start Authority
 
-If the object is owned by this client, then NetworkIdentity will invoke the <xref:Mirror.NetworkIdentity.OnStartAuthority>
+If the object is owned by this client, then NetworkIdentity will invoke the <xref:Mirage.NetworkIdentity.OnStartAuthority>
 Subscribe to this event either by using `AddListener`,  or adding your method to the event in the inspector.
 Note the Authority can be revoked, and granted again.  Every time the client gains authority, this event will be invoked again.
 
 # Start Client
 
-The event <xref:Mirror.NetworkIdentity.OnStartClient> will be invoked. 
+The event <xref:Mirage.NetworkIdentity.OnStartClient> will be invoked. 
 Subscribe to this event by using `AddListener` or adding your method in the event in the inspector
 
 # Start Local Player
 
-If the object spawned is the [player object](SpawnPlayer.md),  the event <xref:Mirror.NetworkIdentity.OnStartLocalPlayer>
+If the object spawned is the [player object](SpawnPlayer.md),  the event <xref:Mirage.NetworkIdentity.OnStartLocalPlayer>
 is invoked.
 Subscribe to this event by using `AddListener` or adding your method in the event in the inspector
 
 # Stop Authority
 
-If the object loses authority over the object, then NetworkIdentity will invoke the <xref:Mirror.NetworkIdentity.OnStopAuthority>
+If the object loses authority over the object, then NetworkIdentity will invoke the <xref:Mirage.NetworkIdentity.OnStopAuthority>
 Subscribe to this event either by using `AddListener`,  or adding your method to the event in the inspector.
 Note the Authority can be revoked, and granted again.  Every time the client loses authority, this event will be invoked again.
 
 # Server Stop
 
 Either because the client disconnected, the server stopped, 
-you called <xref:Mirror.ServerObjectManager.UnSpawn(GameObject)>,  or you called <xref:Mirror.ServerObjectManager.Destroy(GameObject)> the object may stop in the server.
+you called <xref:Mirage.ServerObjectManager.UnSpawn(GameObject)>,  or you called <xref:Mirage.ServerObjectManager.Destroy(GameObject)> the object may stop in the server.
 During this state, a message is sent to all the clients to unspawn the object.
-The event <xref:Mirror.NetworkIdentity.OnStopServer> will be invoked. 
+The event <xref:Mirage.NetworkIdentity.OnStopServer> will be invoked. 
 
 Subscribe to this event either by using `AddListener`,  or adding your method to the event in the inspector.
 
@@ -114,7 +114,7 @@ Note that the server will destroy the object, and will not wait for the clients 
 # Stop Client
 
 This can be triggered either because the client received an Unspawn message or the client was disconnected
-The event <xref:Mirror.NetworkIdentity.OnStopClient> will be invoke.  
+The event <xref:Mirage.NetworkIdentity.OnStopClient> will be invoke.  
 Subscribe to this event either by using `AddListener`,  or adding your method to the event in the inspector.
 
 Use it to cleanup any network related resource used by this object.

@@ -1,10 +1,10 @@
 # NetworkBehaviour
 
-**See also <xref:Mirror.NetworkBehaviour> in the API Reference.**
+**See also <xref:Mirage.NetworkBehaviour> in the API Reference.**
 
 Network Behaviour scripts work with game objects that have a NetworkIdentity component. These scripts can perform high-level API functions such as ServerRpcs, ClientRpcs and SyncVars.
 
-With the server-authoritative system of MirrorNG, the server must use the `NetworkServer.Spawn` function to spawn game objects with Network Identity components. Spawning them this way assigns them a `netId` and creates them on clients connected to the server.
+With the server-authoritative system of Mirage, the server must use the `NetworkServer.Spawn` function to spawn game objects with Network Identity components. Spawning them this way assigns them a `netId` and creates them on clients connected to the server.
 
 **Note:** This is not a component that you can add to a game object directly. Instead, you must create a script which inherits from `NetworkBehaviour` (instead of the default `MonoBehaviour`), then you can add your script as a component to a game object.
 
@@ -17,7 +17,7 @@ NetworkBehaviour scripts have the following features:
 
 ![Data Flow Graph](UNetDirections.jpg)
 
-**Note:** NetworkBehaviors in Mirror and in UNet provide virtual functions as a way for you to add logic in response to lifecycle events.  MirrorNG does not,  instead add listeners to the events in [NetworkIdentity](../../Components/NetworkIdentity.md).
+**Note:** NetworkBehaviors in Mirror and in UNet provide virtual functions as a way for you to add logic in response to lifecycle events.  Mirage does not,  instead add listeners to the events in [NetworkIdentity](../../Components/NetworkIdentity.md).
 
 ## Synchronized variables
 
@@ -25,7 +25,7 @@ Your component can have data which is automatically synchronized from the server
 
 ## Server and Client functions
 
-You can tag member functions in NetworkBehaviour scripts with custom attributes to designate them as server-only or client-only functions. <xref:Mirror.ServerAttribute> will check that the function is called in the server. Likewise, <xref:Mirror.ClientAttribute> will check if the function is called in the client.
+You can tag member functions in NetworkBehaviour scripts with custom attributes to designate them as server-only or client-only functions. <xref:Mirage.ServerAttribute> will check that the function is called in the server. Likewise, <xref:Mirage.ClientAttribute> will check if the function is called in the client.
 
 For more information, see [Attributes](../Attributes.md).
 

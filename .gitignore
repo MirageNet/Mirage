@@ -38,7 +38,7 @@ Output/
 bin/
 .vs/
 .idea/
-Mirror/packages
+Mirage/packages
 .mfractor
 
 # Unity generated
@@ -72,8 +72,8 @@ Thumbs.db
 CodeCoverage
 ProjectSettings
 /Tests
-Assets/Mirror/Samples
-Assets/Mirror/Samples.meta
+Assets/Mirage/Samples
+Assets/Mirage/Samples.meta
 
 Builds/
 InitTestScene*.unity.*

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-namespace Mirror.Tests.Performance.Runtime
+namespace Mirage.Tests.Performance.Runtime
 {
     public class MonsterBehavior : NetworkBehaviour
     {

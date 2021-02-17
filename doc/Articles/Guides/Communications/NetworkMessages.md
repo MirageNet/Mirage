@@ -2,13 +2,13 @@
 
 For the most part we recommend the high level [RPC](RemoteActions.md) calls and [SyncVar](../Sync/index.md), but you can also send low level network messages. This can be useful if you want clients to send messages that are not tied to game objects, such as logging, analytics or profiling information.
 
-You can send any [supported MirrorNG type](../DataTypes.md) as a message, use the `Send()` method on the NetworkClient, NetworkServer, and INetworkConnection classes which work the same way. The code below demonstrates how to send and handle a message:
+You can send any [supported Mirage type](../DataTypes.md) as a message, use the `Send()` method on the NetworkClient, NetworkServer, and INetworkConnection classes which work the same way. The code below demonstrates how to send and handle a message:
 
 To declare a custom network message class and use it:
 
 ``` cs
 using UnityEngine;
-using MirrorNG;
+using Mirage;
 
 public class Scores : MonoBehaviour
 {
@@ -51,4 +51,4 @@ public class Scores : MonoBehaviour
 }
 ```
 
-Note that there is no serialization code for the `ScoreMessage` class in this source code example. MirrorNG will generate a reader and writer for ScoreMessage when it sees that it is being sent.
+Note that there is no serialization code for the `ScoreMessage` class in this source code example. Mirage will generate a reader and writer for ScoreMessage when it sees that it is being sent.

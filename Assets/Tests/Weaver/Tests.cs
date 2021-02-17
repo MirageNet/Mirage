@@ -6,7 +6,7 @@ using NUnit.Framework;
 using Unity.CompilationPipeline.Common.Diagnostics;
 using UnityEngine;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public class AssertionMethodAttribute : Attribute { }
 

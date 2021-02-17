@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
 
     public class LoopbackTransport : Transport

@@ -1,9 +1,9 @@
-﻿using System.Collections;
+using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-namespace Mirror.Tests.ClientServer
+namespace Mirage.Tests.ClientServer
 {
     public class SampleBehaviorWithNI : NetworkBehaviour
     {
@@ -48,7 +48,7 @@ namespace Mirror.Tests.ClientServer
 
             var networkIdentitySyncvar = new NetworkIdentitySyncvar
             {
-                client = client,
+                objectLocator = clientObjectManager,
                 netId = serverIdentity.NetId,
                 identity = null,
             };
@@ -67,10 +67,10 @@ namespace Mirror.Tests.ClientServer
 
             // wait until the client spawns it
             uint newObjectId = newBehavior.NetId;
-            await UniTask.WaitUntil(() => client.Spawned.ContainsKey(newObjectId));
+            await UniTask.WaitUntil(() => clientObjectManager.SpawnedObjects.ContainsKey(newObjectId));
 
             // check if the target was set correctly in the client
-            NetworkIdentity newClientObject = client.Spawned[newObjectId];
+            NetworkIdentity newClientObject = clientObjectManager.SpawnedObjects[newObjectId];
             SampleBehaviorWithNI newClientBehavior = newClientObject.GetComponent<SampleBehaviorWithNI>();
             Assert.That(newClientBehavior.target, Is.SameAs(clientIdentity));
 
