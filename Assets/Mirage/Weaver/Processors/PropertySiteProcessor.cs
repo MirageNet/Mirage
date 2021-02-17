@@ -8,9 +8,9 @@ namespace Mirage.Weaver
     public class PropertySiteProcessor
     {
         // setter functions that replace [SyncVar] member variable references. dict<field, replacement>
-        public Dictionary<FieldDefinition, MethodDefinition> Setters = new Dictionary<FieldDefinition, MethodDefinition>();
+        public Dictionary<FieldReference, MethodDefinition> Setters = new Dictionary<FieldReference, MethodDefinition>(new FieldReferenceComparator());
         // getter functions that replace [SyncVar] member variable references. dict<field, replacement>
-        public Dictionary<FieldDefinition, MethodDefinition> Getters = new Dictionary<FieldDefinition, MethodDefinition>();
+        public Dictionary<FieldReference, MethodDefinition> Getters = new Dictionary<FieldReference, MethodDefinition>(new FieldReferenceComparator());
 
         public void Process(ModuleDefinition moduleDef)
         {
@@ -29,7 +29,7 @@ namespace Mirage.Weaver
                         !md.IsConstructor;
 
         // replaces syncvar write access with the NetworkXYZ.get property calls
-        void ProcessInstructionSetterField(Instruction i, FieldDefinition opField)
+        void ProcessInstructionSetterField(Instruction i, FieldReference opField)
         {
             // does it set a field that we replaced?
             if (Setters.TryGetValue(opField, out MethodDefinition replacement))
@@ -41,7 +41,7 @@ namespace Mirage.Weaver
         }
 
         // replaces syncvar read access with the NetworkXYZ.get property calls
-        void ProcessInstructionGetterField(Instruction i, FieldDefinition opField)
+        void ProcessInstructionGetterField(Instruction i, FieldReference opField)
         {
             // does it set a field that we replaced?
             if (Getters.TryGetValue(opField, out MethodDefinition replacement))
@@ -54,19 +54,19 @@ namespace Mirage.Weaver
 
         Instruction ProcessInstruction(MethodDefinition md, Instruction instr, SequencePoint sequencePoint)
         {
-            if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldDefinition opFieldst)
+            if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldReference opFieldst)
             {
                 // this instruction sets the value of a field. cache the field reference.
                 ProcessInstructionSetterField(instr, opFieldst);
             }
 
-            if (instr.OpCode == OpCodes.Ldfld && instr.Operand is FieldDefinition opFieldld)
+            if (instr.OpCode == OpCodes.Ldfld && instr.Operand is FieldReference opFieldld)
             {
                 // this instruction gets the value of a field. cache the field reference.
                 ProcessInstructionGetterField(instr, opFieldld);
             }
 
-            if (instr.OpCode == OpCodes.Ldflda && instr.Operand is FieldDefinition opFieldlda)
+            if (instr.OpCode == OpCodes.Ldflda && instr.Operand is FieldReference opFieldlda)
             {
                 // loading a field by reference,  watch out for initobj instruction
                 // see https://github.com/vis2k/Mirror/issues/696
@@ -76,7 +76,7 @@ namespace Mirage.Weaver
             return instr;
         }
 
-        Instruction ProcessInstructionLoadAddress(MethodDefinition md, Instruction instr, FieldDefinition opField)
+        Instruction ProcessInstructionLoadAddress(MethodDefinition md, Instruction instr, FieldReference opField)
         {
             // does it set a field that we replaced?
             if (Setters.TryGetValue(opField, out MethodDefinition replacement))
