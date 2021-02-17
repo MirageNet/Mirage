@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Cysharp.Threading.Tasks;
@@ -15,28 +16,13 @@ namespace Mirage
     public class AsyncPipeConnectionTest
     {
 
-        IConnection c1;
-        IConnection c2;
-
-        Channel<byte[]> c1Messages;
-        Channel<byte[]> c2Messages;
+        PipeConnection c1;
+        PipeConnection c2;
 
         [SetUp]
         public void Setup()
         {
             (c1, c2) = PipeConnection.CreatePipe();
-
-            c1Messages = TaskChannel.CreateSingleConsumerUnbounded<byte[]>();
-            c2Messages = TaskChannel.CreateSingleConsumerUnbounded<byte[]>();
-
-            c1.MessageReceived += (data, channel) =>
-            {
-                c1Messages.Writer.TryWrite(data.ToArray());
-            };
-            c2.MessageReceived += (data, channel) =>
-            {
-                c2Messages.Writer.TryWrite(data.ToArray());
-            };
         }
 
         private static void SendData(IConnection c, byte[] data)
@@ -45,33 +31,44 @@ namespace Mirage
         }
 
 
-        private static async UniTask ExpectData(Channel<byte[]> c, byte[] expected)
+        private static List<byte[]> ReceiveAll(PipeConnection connection)
         {
-            byte[] received = await c.Reader.ReadAsync();
+            var packets = new List<byte[]>();
 
-            Assert.That(received, Is.EquivalentTo(expected));
+            void ReceiveHandler(ArraySegment<byte> data, int channel)
+            {
+                packets.Add(data.ToArray());
+            }
+
+            connection.MessageReceived += ReceiveHandler;
+            connection.Poll();
+            connection.MessageReceived -= ReceiveHandler;
+
+            return packets;
         }
 
-        [UnityTest]
-        public IEnumerator TestSendAndReceive() => RunAsync(async () =>
+        [Test]
+        public void TestSendAndReceive()
         {
             SendData(c1, new byte[] { 1, 2, 3, 4 });
 
-            await ExpectData(c2Messages, new byte[] { 1, 2, 3, 4 });
-        });
+            List<byte[]> received = ReceiveAll(c2);
+            Assert.That(received[0], Is.EqualTo(new byte[] { 1, 2, 3, 4 }));
+        }
 
-        [UnityTest]
-        public IEnumerator TestSendAndReceiveMultiple() => RunAsync(async () =>
+        [Test]
+        public void TestSendAndReceiveMultiple()
         {
             SendData(c1, new byte[] { 1, 2, 3, 4 });
             SendData(c1, new byte[] { 5, 6, 7, 8 });
 
-            await ExpectData(c2Messages, new byte[] { 1, 2, 3, 4 });
-            await ExpectData(c2Messages, new byte[] { 5, 6, 7, 8 });
-        });
+            List<byte[]> received = ReceiveAll(c2);
+            Assert.That(received[0], Is.EqualTo(new byte[] { 1, 2, 3, 4 }));
+            Assert.That(received[1], Is.EqualTo(new byte[] { 5, 6, 7, 8 }));
+        }
 
-        [UnityTest]
-        public IEnumerator TestDisconnectC1() => RunAsync(async () =>
+        [Test]
+        public void TestDisconnectC1()
         {
             Action disconnectMock = Substitute.For<Action>();
 
@@ -80,10 +77,10 @@ namespace Mirage
             c1.Disconnect();
 
             disconnectMock.Received().Invoke();
-        });
+        }
 
-        [UnityTest]
-        public IEnumerator TestDisconnectC2() => RunAsync(async () =>
+        [Test]
+        public void TestDisconnectC2()
         {
             Action disconnectMock = Substitute.For<Action>();
 
@@ -92,7 +89,7 @@ namespace Mirage
             c1.Disconnect();
 
             disconnectMock.Received().Invoke();
-        });
+        }
 
         [Test]
         public void TestAddressC1()
