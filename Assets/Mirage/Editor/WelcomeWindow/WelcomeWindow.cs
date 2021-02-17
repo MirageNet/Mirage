@@ -29,7 +29,7 @@ namespace Mirage
         private const string BestPracticesUrl = "https://miragenet.github.io/Mirage/Articles/Guides/BestPractices.html";
         private const string FaqUrl = "https://miragenet.github.io/Mirage/Articles/Guides/FAQ.html";
         private const string SponsorUrl = "";
-        private const string DiscordInviteUrl = "https://discord.gg/rp6Fv3JjEz";
+        private const string DiscordInviteUrl = "https://discord.gg/DTBPBYvexy";
 
         //TODO: Update links and package names after packages are renamed
         private readonly List<Module> Modules = new List<Module>()
