@@ -1,9 +1,9 @@
 {
-    "name": "MirageNG",
+    "name": "Mirage",
     "references": [
-        "Mirage",
         "UniTask",
-        "UniTask.Linq"
+        "UniTask.Linq",
+        "Mirage.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

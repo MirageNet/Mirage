@@ -1,7 +1,7 @@
 {
     "name": "Unity.Mirage.CodeGen",
     "references": [
-        "Mirage",
+        "Mirage.Runtime",
         "UniTask"
     ],
     "includePlatforms": [
