@@ -19,8 +19,6 @@ namespace Mirage
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkSceneManager));
 
-        [System.Serializable] public class ClientSceneChangeEvent : UnityEvent<string, SceneOperation> { }
-
         [FormerlySerializedAs("client")]
         public NetworkClient Client;
         [FormerlySerializedAs("server")]
