@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -60,6 +61,8 @@ namespace Mirage
         /// <para>This is used to make sure that all scene changes are initialized by Mirage.</para>
         /// </remarks>
         public string NetworkScenePath => SceneManager.GetActiveScene().path;
+
+        public List<NetworkScene> NetworkScenes = new List<NetworkScene>();
 
         internal AsyncOperation asyncOperation;
 
@@ -331,6 +334,8 @@ namespace Mirage
 
         internal void FinishLoadScene(string scenePath, SceneOperation sceneOperation)
         {
+            FindNewNetworkScene(sceneOperation);
+
             // host mode?
             if (Client && Client.IsLocalClient)
             {
@@ -358,6 +363,25 @@ namespace Mirage
                 if (logger.LogEnabled()) logger.Log("Client: " + sceneOperation.ToString() + " operation for scene: " + scenePath);
 
                 OnClientSceneChanged(scenePath, sceneOperation);
+            }
+        }
+
+        void FindNewNetworkScene(SceneOperation sceneOperation)
+        {
+            if (sceneOperation == SceneOperation.Normal)
+            {
+                NetworkScenes.Clear();
+            }
+
+            IEnumerable<NetworkScene> NetworkScenesFound = Resources.FindObjectsOfTypeAll<NetworkScene>();
+
+            if (NetworkScenesFound.Any())
+            {
+                NetworkScenes.Add(NetworkScenesFound.First());
+            }
+            else
+            {
+                logger.LogWarning("NetworkScene not found. SceneObjects will not be spawned.");
             }
         }
     }

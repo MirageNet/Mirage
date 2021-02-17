@@ -47,6 +47,8 @@ namespace Mirage
 
         public readonly Dictionary<uint, NetworkIdentity> SpawnedObjects = new Dictionary<uint, NetworkIdentity>();
 
+        public List<NetworkIdentity> SceneObjects = new List<NetworkIdentity>();
+
         public readonly HashSet<NetworkIdentity> DirtyObjects = new HashSet<NetworkIdentity>();
         private readonly List<NetworkIdentity> DirtyObjectsTmp = new List<NetworkIdentity>();
 
@@ -130,6 +132,9 @@ namespace Mirage
 
         void OnServerSceneChanged(string scenePath, SceneOperation sceneOperation)
         {
+            if (sceneOperation == SceneOperation.Normal && NetworkSceneManager.NetworkScenes.Count > 0 && NetworkSceneManager.NetworkScenes[0].SceneObjects.Count > 0)
+                SceneObjects = NetworkSceneManager.NetworkScenes[0].SceneObjects;
+
             SpawnOrActivate();
         }
 
@@ -712,7 +717,7 @@ namespace Mirage
             if (!Server || !Server.Active)
                 return false;
 
-            NetworkIdentity[] identities = Resources.FindObjectsOfTypeAll<NetworkIdentity>();
+            NetworkIdentity[] identities = SceneObjects.ToArray();
             Array.Sort(identities, new NetworkIdentityComparer());
 
             foreach (NetworkIdentity identity in identities)
