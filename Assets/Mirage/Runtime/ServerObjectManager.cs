@@ -67,8 +67,12 @@ namespace Mirage
                 Server.OnStartHost.AddListener(StartedHost);
                 Server.Authenticated.AddListener(OnAuthenticated);
                 Server.Stopped.AddListener(OnServerStopped);
-                NetworkSceneManager.ServerChangeScene.AddListener(OnServerChangeScene);
-                NetworkSceneManager.ServerSceneChanged.AddListener(OnServerSceneChanged);
+
+                if(NetworkSceneManager != null)
+                {
+                    NetworkSceneManager.ServerChangeScene.AddListener(OnServerChangeScene);
+                    NetworkSceneManager.ServerSceneChanged.AddListener(OnServerSceneChanged);
+                }
             }
         }
 
