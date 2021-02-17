@@ -48,5 +48,11 @@ namespace Mirage
             nsm.Server = networkServer;
             return go;
         }
+
+        [MenuItem("GameObject/Network/NetworkScene", priority = 8)]
+        public static GameObject CreateNetworkScene()
+        {
+            return new GameObject("NetworkScene", typeof(NetworkScene));
+        }
     }
 }
