@@ -26,6 +26,11 @@ namespace Mirage
         [FormerlySerializedAs("server")]
         public NetworkServer Server;
 
+        /// <summary>
+        /// Sets the NetworksSceneManagers GameObject to DontDestroyOnLoad. Default = true.
+        /// </summary>
+        public bool DontDestroy = true;
+
         [Header("Events")]
         /// <summary>
         /// Event fires when the Client starts changing scene.
@@ -65,7 +70,8 @@ namespace Mirage
 
         public void Start()
         {
-            DontDestroyOnLoad(gameObject);
+            if(DontDestroy)
+                DontDestroyOnLoad(gameObject);
 
             if (Client != null)
             {
