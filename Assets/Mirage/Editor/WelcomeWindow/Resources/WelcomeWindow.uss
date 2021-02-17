@@ -52,8 +52,8 @@
     -unity-text-align: upper-left;
     padding-left: 10px;
     padding-right: 10px;
-    padding-bottom: 10px;
-    padding-top: 5px;
+    padding-bottom: 15px;
+    padding-top: 0;
     flex: 3;
     white-space: normal;
 }
