@@ -73,6 +73,14 @@
                         <ui:Label text="Momentum" name="Name" />
                         <ui:Button text="Install" display-tooltip-when-elided="True" name="InstallButton" style="flex-shrink: 1; height: auto;" />
                     </ui:VisualElement>
+                    <ui:VisualElement name="Module" tooltip="A transport that uses Facepunch&apos;s Steam SDK.">
+                        <ui:Label text="Steam (Facepunch)" name="Name" />
+                        <ui:Button text="Install" display-tooltip-when-elided="True" name="InstallButton" style="flex-shrink: 1; height: auto;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="Module" tooltip="A transport that uses Steamworks.NET.">
+                        <ui:Label text="Steam (Steamworks.NET)" name="Name" />
+                        <ui:Button text="Install" display-tooltip-when-elided="True" name="InstallButton" style="flex-shrink: 1; height: auto;" />
+                    </ui:VisualElement>
                     <ui:VisualElement name="Module" tooltip="A transport that is suitable for building and running WebGL clients.">
                         <ui:Label text="Websockets" name="Name" />
                         <ui:Button text="Install" display-tooltip-when-elided="True" name="InstallButton" style="flex-shrink: 1; height: auto;" />

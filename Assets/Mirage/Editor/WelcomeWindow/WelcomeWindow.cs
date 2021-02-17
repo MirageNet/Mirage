@@ -36,6 +36,8 @@ namespace Mirage
         {
             new Module {displayName = "LAN Discovery", packageName = "com.mirrorng.discovery", gitUrl = "https://github.com/MirrorNG/Discovery.git?path=/Assets/Discovery"},
             new Module { displayName = "Momentum", packageName = "com.mirrorng.momentum", gitUrl = "https://github.com/MirrorNG/Momentum.git?path=/Assets/Momentum" },
+            new Module { displayName = "Steam (Facepunch)", packageName = "com.mirrorng.", gitUrl = "https://github.com/MirrorNG/SteamyFaceNG.git?path=/Assets/Mirror/Runtime/Transport/SteamyFaceMirror" },
+            new Module { displayName = "Steam (Steamworks.NET)", packageName = "com.mirrorng.", gitUrl = "https://github.com/MirrorNG/FizzySteamyMirror.git?path=/Assets/Mirror/Runtime/Transport/FizzySteamyMirror" },
             new Module { displayName = "Websockets", packageName = "com.mirrorng.websocket", gitUrl = "https://github.com/MirrorNG/MirrorNG_Websocket.git?path=/Assets/Mirror/Websocket" },
         };
 
@@ -289,7 +291,7 @@ namespace Mirage
 
                     foreach (var package in listRequest.Result)
                     {
-                        Module? module = Modules.Find((x) => x.displayName == package.displayName);
+                        Module? module = Modules.Find((x) => x.packageName == package.name);
                         if (module != null)
                         {
                             installedPackages.Add(module.Value.displayName);
@@ -311,9 +313,10 @@ namespace Mirage
             {
                 Button installButton = module.Q<Button>("InstallButton");
                 string moduleName = module.Q<Label>("Name").text;
+                bool foundInInstalledPackages = installedPackages.Contains(moduleName);
 
-                installButton.text = !installedPackages.Contains(moduleName) ? "Install" : "Uninstall";
-                if (!installedPackages.Contains(moduleName))
+                installButton.text = !foundInInstalledPackages ? "Install" : "Uninstall";
+                if (!foundInInstalledPackages)
                 {
                     installButton.clicked += () => { InstallModule(moduleName); };
                 }
