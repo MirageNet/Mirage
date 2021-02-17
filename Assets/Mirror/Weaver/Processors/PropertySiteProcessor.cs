@@ -29,46 +29,68 @@ namespace Mirror.Weaver
                         !md.IsConstructor;
 
         // replaces syncvar write access with the NetworkXYZ.get property calls
-        void ProcessInstructionSetterField(Instruction i, FieldDefinition opField)
+        void ProcessInstructionSetterField(Instruction i, FieldReference opField)
         {
             // does it set a field that we replaced?
-            if (Setters.TryGetValue(opField, out MethodDefinition replacement))
+            if (Setters.TryGetValue(opField.Resolve(), out MethodDefinition replacement))
             {
-                //replace with property
-                i.OpCode = OpCodes.Call;
-                i.Operand = replacement;
+                if (opField.DeclaringType.IsGenericInstance) // We're calling to a generic class
+                {
+                    GenericInstanceType genericType = (GenericInstanceType)opField.DeclaringType;
+                    i.OpCode = OpCodes.Callvirt;
+                    i.Operand = replacement.MakeHostInstanceGeneric(genericType);
+                }
+                else
+                {
+                    //replace with property
+                    i.OpCode = OpCodes.Call;
+                    i.Operand = replacement;
+                }
             }
         }
 
         // replaces syncvar read access with the NetworkXYZ.get property calls
-        void ProcessInstructionGetterField(Instruction i, FieldDefinition opField)
+        void ProcessInstructionGetterField(Instruction i, FieldReference opField)
         {
             // does it set a field that we replaced?
-            if (Getters.TryGetValue(opField, out MethodDefinition replacement))
+            if (Getters.TryGetValue(opField.Resolve(), out MethodDefinition replacement))
             {
-                //replace with property
-                i.OpCode = OpCodes.Call;
-                i.Operand = replacement;
+                if (opField.DeclaringType.IsGenericInstance) // We're calling to a generic class
+                {
+                    GenericInstanceType genericType = (GenericInstanceType)opField.DeclaringType;
+                    i.OpCode = OpCodes.Callvirt;
+                    i.Operand = replacement.MakeHostInstanceGeneric(genericType);
+                }
+                else
+                {
+                    //replace with property
+                    i.OpCode = OpCodes.Call;
+                    i.Operand = replacement;
+                }
             }
         }
 
         Instruction ProcessInstruction(MethodDefinition md, Instruction instr, SequencePoint sequencePoint)
         {
-            if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldReference opFieldRef)
-            {
-                ProcessInstructionSetterField(instr, opFieldRef.Resolve());
-            }
-
             if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldDefinition opFieldst)
             {
                 // this instruction sets the value of a field. cache the field reference.
                 ProcessInstructionSetterField(instr, opFieldst);
+            }
+            else if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldReference opFieldRef)
+            {
+                ProcessInstructionSetterField(instr, opFieldRef);
             }
 
             if (instr.OpCode == OpCodes.Ldfld && instr.Operand is FieldDefinition opFieldld)
             {
                 // this instruction gets the value of a field. cache the field reference.
                 ProcessInstructionGetterField(instr, opFieldld);
+            }
+            else if (instr.OpCode == OpCodes.Ldfld && instr.Operand is FieldDefinition opFieldldRef)
+            {
+                // this instruction gets the value of a field. cache the field reference.
+                ProcessInstructionGetterField(instr, opFieldldRef);
             }
 
             if (instr.OpCode == OpCodes.Ldflda && instr.Operand is FieldDefinition opFieldlda)
