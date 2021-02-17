@@ -217,48 +217,6 @@ namespace Mirage
             EditorApplication.update += UninstallModuleProgress;
         }
 
-        private void ListModuleProgress()
-        {
-            if (listRequest.IsCompleted)
-            {
-                EditorApplication.update -= ListModuleProgress;
-
-                if (listRequest.Status == StatusCode.Success)
-                {
-                    List<string> installedPackages = new List<string>();
-
-                    foreach (var package in listRequest.Result)
-                    {
-                        Module? module = Modules.Find((x) => x.displayName == package.displayName);
-                        if (module != null)
-                        {
-                            installedPackages.Add(module.Value.displayName);
-                        }
-                    }
-
-                    foreach (VisualElement module in rootVisualElement.Q<VisualElement>("ModulesScrollView").Children())
-                    {
-                        Button installButton = module.Q<Button>("InstallButton");
-                        string moduleName = module.Q<Label>("Name").text;
-
-                        installButton.text = !installedPackages.Contains(moduleName) ? "Install" : "Uninstall";
-                        if (!installedPackages.Contains(moduleName))
-                        {
-                            installButton.clicked += () => { InstallModule(moduleName); };
-                        }
-                        else
-                        {
-                            installButton.clicked += () => { UninstallModule(moduleName); };
-                        }
-                    }
-                }
-                else if(listRequest.Status == StatusCode.Failure)
-                {
-                    Debug.LogError("There was an issue finding packages. \n Error Code: " + listRequest.Error.errorCode + "\n Error Message: " + listRequest.Error.message);
-                }
-            }
-        }
-
         //keeps track of the module install progress
         private void InstallModuleProgress()
         {
@@ -319,6 +277,53 @@ namespace Mirage
             }
         }
 
+        private void ListModuleProgress()
+        {
+            if (listRequest.IsCompleted)
+            {
+                EditorApplication.update -= ListModuleProgress;
+
+                if (listRequest.Status == StatusCode.Success)
+                {
+                    List<string> installedPackages = new List<string>();
+
+                    foreach (var package in listRequest.Result)
+                    {
+                        Module? module = Modules.Find((x) => x.displayName == package.displayName);
+                        if (module != null)
+                        {
+                            installedPackages.Add(module.Value.displayName);
+                        }
+                    }
+
+                    ConfigureInstallButtons(installedPackages);
+                }
+                else if (listRequest.Status == StatusCode.Failure)
+                {
+                    Debug.LogError("There was an issue finding packages. \n Error Code: " + listRequest.Error.errorCode + "\n Error Message: " + listRequest.Error.message);
+                }
+            }
+        }
+
+        private void ConfigureInstallButtons(List<string> installedPackages)
+        {
+            foreach (VisualElement module in rootVisualElement.Q<VisualElement>("ModulesScrollView").Children())
+            {
+                Button installButton = module.Q<Button>("InstallButton");
+                string moduleName = module.Q<Label>("Name").text;
+
+                installButton.text = !installedPackages.Contains(moduleName) ? "Install" : "Uninstall";
+                if (!installedPackages.Contains(moduleName))
+                {
+                    installButton.clicked += () => { InstallModule(moduleName); };
+                }
+                else
+                {
+                    installButton.clicked += () => { UninstallModule(moduleName); };
+                }
+            }
+        }
+
         #endregion
 
         #endregion
@@ -331,5 +336,4 @@ namespace Mirage
         public string packageName;
         public string gitUrl;
     }
-
 }
