@@ -71,7 +71,7 @@ namespace Mirage.Tests
             server.connections.Add(connection2);
 
             // add a host connection
-            (_, IConnection localConnection) = PipeConnection.CreatePipe();
+            (_, PipeConnection localConnection) = PipeConnection.CreatePipe();
 
             server.SetLocalConnection(client, localConnection);
             server.LocalConnection.IsReady = true;

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.KCP;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
 using UnityEditor;
@@ -24,12 +25,8 @@ namespace Mirage.Tests.Performance.Runtime
         const int ClientCount = 10;
         const int MonsterCount = 10;
 
-        [FormerlySerializedAs("server")]
         public NetworkServer Server;
-        [FormerlySerializedAs("serverObjectManager")]
         public ServerObjectManager ServerObjectManager;
-        [FormerlySerializedAs("transport")]
-        public Transport Transport;
 
         public NetworkIdentity MonsterPrefab;
 
@@ -55,11 +52,9 @@ namespace Mirage.Tests.Performance.Runtime
 
             await started.Task;
 
-            Transport = Object.FindObjectOfType<Transport>();
-
             // connect from a bunch of clients
             for (int i = 0; i < ClientCount; i++)
-                await StartClient(i, Transport);
+                await StartClient(i);
 
             // spawn a bunch of monsters
             for (int i = 0; i < MonsterCount; i++)
@@ -69,14 +64,16 @@ namespace Mirage.Tests.Performance.Runtime
                 await UniTask.Delay(10);
         });
 
-        private IEnumerator StartClient(int i, Transport transport)
+        private IEnumerator StartClient(int i)
         {
-            var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager));
+            var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager), typeof(KcpTransport));
             NetworkClient client = clientGo.GetComponent<NetworkClient>();
+            KcpTransport transport = clientGo.GetComponent<KcpTransport>();
+            transport.HashCashBits = 15;
+            client.Transport = transport;
             ClientObjectManager objectManager = clientGo.GetComponent<ClientObjectManager>();
             objectManager.Client = client;
             objectManager.Start();
-            client.Transport = transport;
 
             objectManager.RegisterPrefab(MonsterPrefab);
             client.ConnectAsync("localhost");

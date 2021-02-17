@@ -86,6 +86,8 @@ namespace Mirage
         // The host client for this server 
         public NetworkClient LocalClient { get; private set; }
 
+        private PipeConnection localTransportConnection;
+
         /// <summary>
         /// True if there is a local client connected to this server (host mode)
         /// </summary>
@@ -247,8 +249,11 @@ namespace Mirage
         {
             if (Active)
             {
+                localTransportConnection?.Poll();
+
                 Transport.Poll();
             }
+
         }
 
         /// <summary>
@@ -311,7 +316,7 @@ namespace Mirage
         /// </summary>
         /// <param name="client">The local client</param>
         /// <param name="tconn">The connection to the client</param>
-        internal void SetLocalConnection(NetworkClient client, IConnection tconn)
+        internal void SetLocalConnection(NetworkClient client, PipeConnection tconn)
         {
             if (LocalConnection != null)
             {
@@ -321,6 +326,7 @@ namespace Mirage
             INetworkConnection conn = GetNewConnection(tconn);
             LocalConnection = conn;
             LocalClient = client;
+            localTransportConnection = tconn;
 
             ConnectionAccepted(conn);
         }
@@ -379,6 +385,8 @@ namespace Mirage
 
             if (connection == LocalConnection)
                 LocalConnection = null;
+
+            localTransportConnection = null;
         }
 
         internal void OnAuthenticated(INetworkConnection conn)

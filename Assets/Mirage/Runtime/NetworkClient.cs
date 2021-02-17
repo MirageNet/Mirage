@@ -53,6 +53,11 @@ namespace Mirage
         public INetworkConnection Connection { get; internal set; }
 
         /// <summary>
+        /// connection to the server
+        /// </summary>
+        private PipeConnection localTransportConnection;
+
+        /// <summary>
         /// NetworkIdentity of the localPlayer
         /// </summary>
         public NetworkIdentity LocalPlayer => Connection?.Identity;
@@ -162,11 +167,13 @@ namespace Mirage
             InitializeAuthEvents();
 
             // create local connection objects and connect them
-            (IConnection c1, IConnection c2) = PipeConnection.CreatePipe();
+            (PipeConnection c1, PipeConnection c2) = PipeConnection.CreatePipe();
 
             server.SetLocalConnection(this, c2);
             hostServer = server;
             Connection = GetNewConnection(c1);
+            localTransportConnection = c1;
+
             RegisterHostHandlers();
 
             OnConnected();
@@ -242,10 +249,18 @@ namespace Mirage
         internal void FixedUpdate()
         {
             // local connection?
-            if (!IsLocalClient && Active && connectState == ConnectState.Connected)
+            if (!IsLocalClient && connectState == ConnectState.Connected)
             {
                 // only update things while connected
                 Time.UpdateClient(this);
+
+                // dispatch all received messages
+                Transport.Poll();
+            }
+
+            if (IsLocalClient && connectState == ConnectState.Connected)
+            {
+                localTransportConnection.Poll();
             }
         }
 
