@@ -68,6 +68,7 @@ namespace Mirage
             if (Client != null && SceneManager != null)
             {
                 SceneManager.ClientSceneChanged.RemoveListener(OnClientSceneChanged);
+                Client.Authenticated.RemoveListener(c => Client.Send(new AddPlayerMessage()));
             }
             if (Server != null)
             {
