@@ -1,3 +1,10 @@
+# [66.1.0](https://github.com/MirageNet/Mirage/compare/v66.0.0...v66.1.0) (2021-02-17)
+
+
+### Features
+
+* optional dontdestroyonload for networkscenemanager ([#596](https://github.com/MirageNet/Mirage/issues/596)) ([67e41bd](https://github.com/MirageNet/Mirage/commit/67e41bd66c15d5951b1b7bd8a0bd302e21182655))
+
 # [66.0.0](https://github.com/MirageNet/Mirage/compare/v65.1.0...v66.0.0) (2021-02-16)
 
 
