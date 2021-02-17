@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     abstract class SyncVarHookTesterBase : NetworkBehaviour
     {

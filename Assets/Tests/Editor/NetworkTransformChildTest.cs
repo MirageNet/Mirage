@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirror
+namespace Mirage
 {
     [TestFixture]
     public class NetworkTransformChildTest

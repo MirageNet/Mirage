@@ -3,7 +3,7 @@ using System.IO;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     public class NetworkConnectionTest 
     {
@@ -64,7 +64,7 @@ namespace Mirror.Tests
                 connection.InvokeHandler(messageId, reader, 0);
             });
 
-            Assert.That(exception.Message, Does.StartWith("Unexpected message Mirror.SceneMessage received"));
+            Assert.That(exception.Message, Does.StartWith("Unexpected message Mirage.SceneMessage received"));
         }
 
         [Test]

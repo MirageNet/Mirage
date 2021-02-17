@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public class MonoBehaviourTests : TestsBuildFromTestName
     {
@@ -21,7 +21,7 @@ namespace Mirror.Weaver
         public void MonoBehaviourSyncList()
         {
             HasError("potato is a SyncObject and must be inside a NetworkBehaviour.  MonoBehaviourSyncList is not a NetworkBehaviour",
-                "Mirror.SyncList`1<System.Int32> MonoBehaviourTests.MonoBehaviourSyncList.MonoBehaviourSyncList::potato");
+                "Mirage.SyncList`1<System.Int32> MonoBehaviourTests.MonoBehaviourSyncList.MonoBehaviourSyncList::potato");
         }
 
         [Test]

@@ -1,10 +1,10 @@
-using Mirror;
+using Mirage;
 
 namespace NetworkBehaviourTests.NetworkBehaviourClientRpcParamNetworkConnectionNotFirst
 {
     class NetworkBehaviourClientRpcParamNetworkConnectionNotFirst : NetworkBehaviour
     {
-        [ClientRpc(target = Mirror.Client.Connection)]
+        [ClientRpc(target = Mirage.Client.Connection)]
         public void ClientRpcCantHaveParamOptional(int abc, INetworkConnection monkeyCon) { }
     }
 }

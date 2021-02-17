@@ -1,5 +1,5 @@
-using Mirror;
-using Mirror.Weaver.Extra;
+using Mirage;
+using Mirage.Weaver.Extra;
 
 namespace GeneratedReaderWriter.CreatesForStructFromDifferentAssemblies
 {

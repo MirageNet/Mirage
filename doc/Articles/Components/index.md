@@ -1,6 +1,6 @@
 # Components Overview
 
-These core components are included in MirrorNG:
+These core components are included in Mirage:
 
 -   [Network Animator](NetworkAnimator.md)  
     The Network Animator component allows you to synchronize animation states for networked objects. It synchronizes state and parameters from an Animator Controller.
@@ -9,7 +9,7 @@ These core components are included in MirrorNG:
 -   [Network Discovery](NetworkDiscovery.md)  
     Network Discovery uses a UDP broadcast on the LAN enabling clients to find the running server and connect to it.
 -   [Network Identity](NetworkIdentity.md)  
-    The Network Identity component is at the heart of the MirrorNG networking high-level API. It controls a game object’s unique identity on the network, and it uses that identity to make the networking system aware of the game object. It offers two different options for configuration and they are mutually exclusive, which means either one of the options or none can be checked.
+    The Network Identity component is at the heart of the Mirage networking high-level API. It controls a game object’s unique identity on the network, and it uses that identity to make the networking system aware of the game object. It offers two different options for configuration and they are mutually exclusive, which means either one of the options or none can be checked.
 -   [Network LogSettings](NetworkLogSettings.md)  
     Adds logging levels per class for Mirror components
 -   [Network Manager](NetworkManager.md)  

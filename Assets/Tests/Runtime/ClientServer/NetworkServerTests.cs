@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.TestTools;
 
-namespace Mirror.Tests.ClientServer
+namespace Mirage.Tests.ClientServer
 {
     public class NetworkServerTests : ClientServerSetup<MockComponent>
     {

@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using UnityEngine.Events;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     public static class UnityEventUtis 
     {

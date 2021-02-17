@@ -9,11 +9,11 @@ using System;
 using Object = UnityEngine.Object;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using Mirror.KCP;
+using Mirage.KCP;
 using NSubstitute;
 using System.Collections.Generic;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     [TestFixture(typeof(KcpTransport), new[] { "kcp" }, "kcp://localhost", 7777)]
     public class TransportTests<T> where T : Transport

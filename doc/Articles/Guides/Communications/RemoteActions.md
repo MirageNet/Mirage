@@ -47,7 +47,7 @@ Be careful of sending ServerRpcs from the client every frame! This can cause a l
 ### Returning values
 
 ServerRpcs can return values.  It can take a long time for the server to reply, so they must return a UniTask which the client can await.
-To return a value,  add a return value using `UniTask<MyReturnType>` where `MyReturnType` is any [supported MirrorNG type](../DataTypes.md).  In the server you can make your method async,  or you can use `UniTask.FromResult(myresult);`.  For example:
+To return a value,  add a return value using `UniTask<MyReturnType>` where `MyReturnType` is any [supported Mirage type](../DataTypes.md).  In the server you can make your method async,  or you can use `UniTask.FromResult(myresult);`.  For example:
 
 ```cs
 public class Shop: NetworkBehavior {
@@ -83,7 +83,7 @@ It is possible to invoke ServerRpcs on non-player objects if any of the followin
 - The object was spawned with client authority
 - The object has client authority set with `NetworkIdentity.AssignClientAuthority`
 - the Server RPC Call has the `requireAuthority` option set false.  
-    - You can include an optional `NetworkConnectionToClient sender = null` parameter in the Server RPC Call method signature and MirrorNG will fill in the sending client for you.
+    - You can include an optional `NetworkConnectionToClient sender = null` parameter in the Server RPC Call method signature and Mirage will fill in the sending client for you.
     - Do not try to set a value for this optional parameter...it will be ignored.
 
 Server RPC Calls sent from these object are run on the server instance of the object, not on the associated player object for the client.
@@ -182,6 +182,6 @@ public class Player : NetworkBehaviour
 
 ## Arguments to Remote Actions
 
-The arguments passed to ServerRpc and ClientRpc calls are serialized and sent over the network. You can use any [supported MirrorNG type](../DataTypes.md).
+The arguments passed to ServerRpc and ClientRpc calls are serialized and sent over the network. You can use any [supported Mirage type](../DataTypes.md).
 
 Arguments to remote actions cannot be sub-components of game objects, such as script instances or Transforms.

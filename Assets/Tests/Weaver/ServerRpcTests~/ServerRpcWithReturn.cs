@@ -1,4 +1,4 @@
-using Mirror;
+using Mirage;
 using Cysharp.Threading.Tasks;
 
 namespace ServerRpcTests.ServerRpcWithReturn

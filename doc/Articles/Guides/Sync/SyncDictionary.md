@@ -20,7 +20,7 @@ To use it, create a class that derives from SyncDictionary for your specific typ
 
 ```cs
 using UnityEngine;
-using MirrorNG;
+using Mirage;
 
 [System.Serializable]
 public struct Item

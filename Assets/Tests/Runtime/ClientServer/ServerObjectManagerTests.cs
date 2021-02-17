@@ -8,7 +8,7 @@ using NSubstitute;
 using UnityEngine.TestTools;
 using System.Linq;
 
-namespace Mirror.Tests.ClientServer
+namespace Mirage.Tests.ClientServer
 {
 
     [TestFixture]

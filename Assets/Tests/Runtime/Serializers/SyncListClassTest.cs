@@ -1,7 +1,7 @@
 using System.Linq;
 using NUnit.Framework;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     class TestObjectBehaviour : NetworkBehaviour
     {

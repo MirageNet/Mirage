@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     public static class AsyncUtil
     {

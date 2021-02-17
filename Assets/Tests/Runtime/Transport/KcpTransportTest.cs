@@ -8,11 +8,11 @@ using System.IO;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using System.Linq;
-using Mirror.KCP;
+using Mirage.KCP;
 using System.Collections.Generic;
 using NSubstitute;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     public class KcpTransportTest
     {

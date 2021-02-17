@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.TestTools;
 
-namespace Mirror.Tests.Host
+namespace Mirage.Tests.Host
 {
     public class HostComponentTests : HostSetup<MockComponent>
     {

@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
 
     class MockPlayer : NetworkBehaviour

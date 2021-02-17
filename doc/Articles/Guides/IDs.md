@@ -2,15 +2,15 @@
 
 ## Asset Id
 
-MirrorNG uses GUID for Asset Ids. Every prefab with a NetworkIdentity component has an Asset Id, which is simply Unity's AssetDatabase.AssetPathToGUID converted to 16 bytes. MirrorNG needs that to know which prefabs to spawn.
+Mirage uses GUID for Asset Ids. Every prefab with a NetworkIdentity component has an Asset Id, which is simply Unity's AssetDatabase.AssetPathToGUID converted to 16 bytes. Mirage needs that to know which prefabs to spawn.
 
 ## Scene Id
 
-MirrorNG uses uint for Scene Ids. Every game object with a NetworkIdentity in the scene (hierarchy) is assigned a scene id in OnPostProcessScene. MirrorNG needs that to distinguish scene objects from each other, because Unity has no unique id for different game objects in the scene.
+Mirage uses uint for Scene Ids. Every game object with a NetworkIdentity in the scene (hierarchy) is assigned a scene id in OnPostProcessScene. Mirage needs that to distinguish scene objects from each other, because Unity has no unique id for different game objects in the scene.
 
 ## Network Instance Id (a.k.a. NetId)
 
-MirrorNG uses uint for NetId. Every NetworkIdentity is assigned a NetId in NetworkIdentity.OnStartServer, or after spawning it. MirrorNG uses the id when passing messages between client and server to tell which object is the recipient of the message.
+Mirage uses uint for NetId. Every NetworkIdentity is assigned a NetId in NetworkIdentity.OnStartServer, or after spawning it. Mirage uses the id when passing messages between client and server to tell which object is the recipient of the message.
 
 ## Connection Id
 

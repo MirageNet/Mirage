@@ -1,9 +1,9 @@
 using NUnit.Framework;
 using UnityEngine;
 
-using static Mirror.Tests.LocalConnections;
+using static Mirage.Tests.LocalConnections;
 
-namespace Mirror.Tests.Host
+namespace Mirage.Tests.Host
 {
     public class SampleBehavior : NetworkBehaviour
     {

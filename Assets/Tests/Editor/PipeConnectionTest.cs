@@ -7,10 +7,10 @@ using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-using static Mirror.Tests.AsyncUtil;
+using static Mirage.Tests.AsyncUtil;
 using TaskChannel = Cysharp.Threading.Tasks.Channel;
 
-namespace Mirror
+namespace Mirage
 {
     public class AsyncPipeConnectionTest
     {

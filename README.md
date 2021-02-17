@@ -1,34 +1,42 @@
-![Mirror Logo](https://i.imgur.com/we6li1x.png)
-
-[![Documentation](https://img.shields.io/badge/documentation-brightgreen.svg)](https://mirrorng.github.io/MirrorNG/)
+[![Documentation](https://img.shields.io/badge/documentation-brightgreen.svg)](https://miragenet.github.io/Mirage/)
 [![Forum](https://img.shields.io/badge/forum-brightgreen.svg)](https://forum.unity.com/threads/mirror-networking-for-unity-aka-hlapi-community-edition.425437/)
 [![Discord](https://img.shields.io/discord/343440455738064897.svg)](https://discordapp.com/invite/N9QVxbM)
-[![release](https://img.shields.io/github/release/MirrorNG/MirrorNG.svg)](https://github.com/MirrorNG/MirrorNG/releases/latest)
-[![openupm](https://img.shields.io/npm/v/com.mirrorng.mirrorng?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.mirrorng.mirrorng/)
+[![release](https://img.shields.io/github/release/MirageNet/Mirage.svg)](https://github.com/MirageNet/Mirage/releases/latest)
+[![openupm](https://img.shields.io/npm/v/com.miragenet.mirage?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.miragenet.mirage/)
 
-[![Build](https://github.com/MirrorNG/MirrorNG/workflows/CI/badge.svg)](https://github.com/MirrorNG/MirrorNG/actions?query=workflow%3ACI)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MirrorNG_MirrorNG&metric=alert_status)](https://sonarcloud.io/dashboard?id=MirrorNG_MirrorNG)
-[![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirrorNG_MirrorNG&metric=coverage)](https://sonarcloud.io/component_measures?id=MirrorNG_MirrorNG&metric=coverage)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=MirrorNG_MirrorNG&metric=ncloc)](https://sonarcloud.io/dashboard?id=MirrorNG_MirrorNG)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MirrorNG_MirrorNG&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MirrorNG_MirrorNG)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MirrorNG_MirrorNG&metric=code_smells)](https://sonarcloud.io/dashboard?id=MirrorNG_MirrorNG)
+[![Build](https://github.com/MirageNet/Mirage/workflows/CI/badge.svg)](https://github.com/MirageNet/Mirage/actions?query=workflow%3ACI)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=alert_status)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
+[![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=coverage)](https://sonarcloud.io/component_measures?id=MirageNet_Mirage&metric=coverage)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=ncloc)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=code_smells)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
 
 
-MirrorNG is a **high level** Networking API for Unity.
+Mirage is a **high level** Networking API for Unity.
 
-MirrorNG is built [and tested](https://www.youtube.com/watch?v=mDCNff1S9ZU) for **MMO Scale** Networking by the developers of  [Cubica](https://cubica.net).
+Mirage is built [and tested](https://www.youtube.com/watch?v=mDCNff1S9ZU) for **MMO Scale** Networking by the developers of  [Cubica](https://cubica.net).
 
-MirrorNG is optimized for **ease of use** and **probability of success**.
+Mirage is optimized for **ease of use** and **probability of success**.
 
-With MirrorNG the objects in the client are mirror images of the objects in the server.  MirrorNG provides all the tools necessary to keep them in sync and pass messages between them.
+With Mirage the objects in the client are mirror images of the objects in the server.  Mirage provides all the tools necessary to keep them in sync and pass messages between them.
 
-## Architecture
-The **Server & Client** are **ONE project** in order to achieve an order of magnitude gain in productivity.
+## Installation
+
+To install Mirage, follow these steps:
+
+1) Install [Unity 2020.1.17 or later](https://unity.com/)
+2) Start a new project or open your existing one
+3) Add openupm registry.  Click on the menu Edit -> Project settings...,  and add a scoped registry like so:
+   ![Scoped Registry](doc/images/Scoped%20Registry.png)
+4) Close the project settings
+5) Open the package manager.  Click on menu Window -> Package Manager and select "Packages: My Registries", select the latest version of Mirage and click install, like so:
+   ![Install Mirage](doc/images/Install%20Mirage.png)
+6) You may come back to the package manager to unistall Mirage or upgrade it.
 
 ## Comparison with Mirror
-When migrating a project from Mirror to MirrorNG, these will be the most notable differences.
+When migrating a project from Mirror to Mirage, these will be the most notable differences.
 
-| MirrorNG                                      | Mirror                                 |
+| Mirage                                      | Mirror                                 |
 | --------------------------------------------- | -------------------------------------- |
 | Install via Unity Package Manager             | Install from Asset Store               |
 | Errors are thrown as exceptions               | Errors are logged                      |
@@ -42,80 +50,47 @@ When migrating a project from Mirror to MirrorNG, these will be the most notable
 | Send any data as messages                     | Messages must implement NetworkMessage |
 | Supports Unity 2019.3 or later                | Supports Unity 2018.4 or later         |
 
-MirrorNG has many new features
-* MirrorNG supports [fast domain reload](https://blogs.unity3d.com/2019/11/05/enter-play-mode-faster-in-unity-2019-3/)
+Mirage has many new features
+* Mirage supports [fast domain reload](https://blogs.unity3d.com/2019/11/05/enter-play-mode-faster-in-unity-2019-3/)
 * Components can be added in child objects
 * Your client can connect to multiple servers. For example chat server and game server
 * Modular,  use only the components you need.
 * Error handling
 * [Version defines](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html#define-symbols)
-* Server Rpcs can [return values](https://mirrorng.github.io/MirrorNG/Articles/Guides/Communications/RemoteActions.html)
+* Server Rpcs can [return values](https://miragenet.github.io/Mirage/Articles/Guides/Communications/RemoteActions.html)
 * The default transport features DoS prevention
 * The default transport has CRC64 integrity check
-* MirrorNG provides unreliable channel out of the box
+* Mirage provides unreliable channel out of the box
 
 If you look under the hood,  the code base has some significant differences based on the core values of each project
-* MirrorNG follows the [SOLID principles](https://en.wikipedia.org/wiki/SOLID).
-* MirrorNG avoids singletons and static state in general.
-* MirrorNG has high [![Test Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirrorNG_MirrorNG&metric=coverage)](https://sonarcloud.io/dashboard?id=MirrorNG_MirrorNG)
-* MirrorNG has low [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MirrorNG_MirrorNG&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MirrorNG_MirrorNG)
-* MirrorNG values code quality,  Mirror values API stability
-
-## Installation
-If you want to make a game with MirrorNG, the preferred installation method is Unity Package Manager.
-
-### Install from git url
-Use unity 2019.3 or later. 
-
-1) Install [git](https://www.git-scm.com/)
-2) Open your project in unity
-3) Install [UniTask](https://github.com/Cysharp/UniTask) using Unity Package Manager
-3) Click on Windows -> Package Manager
-4) Click on the plus sign on the left and click on "Add package from git URL..."
-5) enter https://github.com/MirrorNG/MirrorNG.git?path=/Assets/Mirror
-6) Unity will download and install MirrorNG
-7) Set a Scoped Register to see updates
-
-![Scoped Registry](https://i.imgur.com/zr6vjbk.png)
-
-### Install using [openupm](https://openupm.com/packages/com.mirrorng.mirrorng/)
-This is how I do it for Cubica because unity will display all versions of MirrorNG and allow me to switch amongst them.
-
-1) Install [git](https://www.git-scm.com/)
-2) Install [node.js 12](https://nodejs.org/en/)
-3) Install [openupm](https://openupm.com/)
-4) install MirrorNG in your project:
-    ```sh
-    cd YOUR_PROJECT
-    openupm add com.mirrorng.mirrorng 
-    ```
-5) Open your project in Unity 
-
-### Install manually
-If you prefer some pain, you can download it directly from the [release section](https://github.com/MirrorNG/MirrorNG/releases) and add it to your project. You will need to manually install UniTask and Cecil.
+* Mirage follows the [SOLID principles](https://en.wikipedia.org/wiki/SOLID).
+* Mirage avoids singletons and static state in general.
+* Mirage has high [![Test Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=coverage)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
+* Mirage has low [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
+* Mirage values code quality,  Mirror values API stability
 
 ## Development environment
-If you want to contribute to  MirrorNG, follow these steps:
+If you want to contribute to  Mirage, follow these steps:
 
 ### Linux and Mac
 1) Install git
 2) clone this repo
-3) Open in unity 2019.4.x or later
+3) Open in unity 2020.1.x or later
 
 ### Windows
 1) Install [git](https://git-scm.com/download/win) or use your favorite git client
 2) as administrator, clone this repo with symbolic links support:
     ```sh
-    git clone -c core.symlinks=true https://github.com/MirrorNG/MirrorNG.git
+    git clone -c core.symlinks=true https://github.com/MirageNet/Mirage.git
     ```
     It you don't want to use administrator, [add symlink support](https://www.joshkel.com/2018/01/18/symlinks-in-windows/) to your account.
-    If you don't enable symlinks, you will be able to work on MirrorNG but Unity will not see the examples.
+    If you don't enable symlinks, you will be able to work on Mirage but Unity will not see the examples.
 3) Open in unity 2019.4.x or later
 
 ## Transports
 Here is a list of some transports supported by NG and how they compare to each other
 
-|                |        Kcp         | [Websocket](https://github.com/MirrorNG/WebsocketNG) | [Steam](https://github.com/dragonslaya84/FizzySteamyMirror) | [LiteNetLibNG](https://github.com/uweenukr/LiteNetLibNG) | [IgnoranceNG](https://github.com/dragonslaya84/IgnoranceNG) |
+|                |        Kcp         | [Websocket](https://github.com/MirageNet/WebsocketNG) | [Steam](https://github.com/dragonslaya84/FizzySteamyMirror) | [LiteNetLibNG](https://github.com/uweenukr/LiteNetLibNG) | [IgnoranceNG](https://github.com/dragonslaya84/IgnoranceNG) |
 | -------------- | :----------------: | :--------------------------------------------------: | :---------------------------------------------------------: | :------------------------------------------------------: | :---------------------------------------------------------: |
 | **CCU**        |       1000+        |                          ?                           |                              ?                              |                            ?                             |                              ?                              |
 | **Protocol**   |        UDP         |                         TCP                          |                             UDP                             |                           UDP                            |                             UDP                             |
@@ -147,4 +122,3 @@ When contributing code, please keep these things in mind:
 * Follow [C# code conventions](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions).
 * Follow [SOLID principles](https://en.wikipedia.org/wiki/SOLID) as much as possible. 
 * Keep your pull requests small and obvious,  if a PR can be split into several small ones, do so.
-

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
-namespace Mirror.Tests.Host
+namespace Mirage.Tests.Host
 {
     [TestFixture]
     public class ClientObjectManagerTest : HostSetup<MockComponent>

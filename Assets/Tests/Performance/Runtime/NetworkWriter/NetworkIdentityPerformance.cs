@@ -3,7 +3,7 @@ using NUnit.Framework;
 using Unity.PerformanceTesting;
 using UnityEngine;
 
-namespace Mirror.Tests.Performance
+namespace Mirage.Tests.Performance
 {
     public class Health : NetworkBehaviour
     {

@@ -12,7 +12,7 @@ Below is a simple example of assigning a random color to each player when they'r
 
 ```cs
 using UnityEngine;
-using MirrorNG;
+using Mirage;
 
 public class PlayerController : NetworkBehaviour
 {
