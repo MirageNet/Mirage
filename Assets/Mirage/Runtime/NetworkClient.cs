@@ -73,14 +73,9 @@ namespace Mirage
         public readonly NetworkTime Time = new NetworkTime();
 
         /// <summary>
-        /// The host server
-        /// </summary>
-        internal NetworkServer hostServer;
-
-        /// <summary>
         /// NetworkClient can connect to local server in host mode too
         /// </summary>
-        public bool IsLocalClient => hostServer != null;
+        public bool IsLocalClient;
 
         /// <summary>
         /// Connect client to a NetworkServer instance.
@@ -165,7 +160,7 @@ namespace Mirage
             (IConnection c1, IConnection c2) = PipeConnection.CreatePipe();
 
             server.SetLocalConnection(this, c2);
-            hostServer = server;
+            IsLocalClient = true;
             Connection = GetNewConnection(c1);
             RegisterHostHandlers();
 
@@ -283,7 +278,7 @@ namespace Mirage
         {
             logger.Log("Shutting down client.");
 
-            hostServer = null;
+            IsLocalClient = false;
 
             connectState = ConnectState.Disconnected;
 
