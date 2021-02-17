@@ -18,7 +18,7 @@
         </ui:VisualElement>
         <ui:VisualElement name="Spacer" />
         <ui:VisualElement name="RightColumnBox">
-            <ui:VisualElement name="Welcome" style="flex-grow: 0; width: 100%; height: 100%; display: none;">
+            <ui:VisualElement name="Welcome" style="flex-grow: 0; width: 100%; height: 100%;">
                 <ui:Label name="Header" text="Welcome" />
                 <ui:Label name="Description" text="Hello! Thank you for installing Mirage. Please visit all the pages on this window. Clicking the button at the bottom of the pages will redirect you to a webpage. Additionally, there are example projects that you can import from the Unity Package Manager. &#10;&#10;Have fun using Mirage!" style="-unity-text-align: upper-left;" />
                 <ui:VisualElement name="Spacer" />
@@ -60,14 +60,17 @@
                 <ui:VisualElement name="Spacer" />
                 <ui:Button name="Redirect" text="Join Discord" class="redirect" />
             </ui:VisualElement>
-            <ui:VisualElement name="Modules" style="flex-grow: 0; width: 100%; height: 100%; display: flex;">
+            <ui:VisualElement name="Modules" style="flex-grow: 0; width: 100%; height: 100%; display: none;">
                 <ui:Label name="Header" text="Modules" />
                 <ui:ScrollView name="ModulesScrollView" style="flex-grow: 1; padding-left: 10px; padding-right: 10px; padding-top: 5px; padding-bottom: 10px;">
-                    <ui:Toggle label="Momentum" />
+                    <ui:VisualElement name="Module" tooltip="Momentum is a module that syncs movement.">
+                        <ui:Label text="Momentum" display-tooltip-when-elided="True" name="Name" />
+                        <ui:Button text="Install" display-tooltip-when-elided="True" name="InstallButton" style="flex-shrink: 1; height: auto;" />
+                    </ui:VisualElement>
                 </ui:ScrollView>
                 <ui:Label text="Please wait..." display-tooltip-when-elided="True" name="PleaseWaitLabel" style="-unity-text-align: middle-center; visibility: hidden;" />
                 <ui:VisualElement name="Spacer" />
-                <ui:VisualElement name="Footer" style="flex-direction: row; justify-content: center; align-items: center;">
+                <ui:VisualElement name="Footer" style="flex-direction: row; justify-content: center; align-items: center; display: none;">
                     <ui:Button name="InstallModules" text="Install Selected Modules" class="redirect" style="flex-grow: 1;" />
                     <ui:Button name="UninstallModules" text="Uninstall Selected Modules" class="redirect" style="flex-grow: 1;" />
                 </ui:VisualElement>

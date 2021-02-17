@@ -33,19 +33,24 @@ namespace Mirage
 
         private List<Module> Modules = new List<Module>()
         {
-            new Module { name = "Momentum", gitUrl = "https://github.com/MirrorNG/Momentum.git?path=/Assets/Momentum" },
+            new Module { displayName = "Momentum", packageName = "com.mirrorng.momentum", gitUrl = "https://github.com/MirrorNG/Momentum.git?path=/Assets/Momentum" },
         };
 
         #endregion
 
         //request for the module install
-        private static AddRequest request;
+        private static AddRequest installRequest;
+        private static RemoveRequest uninstallRequest;
+        private static ListRequest listRequest;
+
+        private static WelcomeWindow currentWindow;
 
         //window size of the welcome screen
         private static Vector2 windowSize = new Vector2(500, 415);
+        private static string screenToOpenKey = "MirageScreenToOpen";
 
         //editorprefs keys
-        private static string firstStartUpKey = string.Empty;
+        private static string firstTimeVersionKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
 
         private static string GetVersion()
@@ -59,11 +64,11 @@ namespace Mirage
         {
             get
             {
-                if (!EditorPrefs.GetBool(firstTimeMirageKey, false) && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirageUnknown")
+                if (!EditorPrefs.GetBool(firstTimeMirageKey, false) && !EditorPrefs.GetBool(firstTimeVersionKey, false) && firstTimeVersionKey != "MirageUnknown")
                 {
                     return false;
                 }
-                else if (EditorPrefs.GetBool(firstTimeMirageKey, false) && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirageUnknown")
+                else if (EditorPrefs.GetBool(firstTimeMirageKey, false) && !EditorPrefs.GetBool(firstTimeVersionKey, false) && firstTimeVersionKey != "MirageUnknown")
                 {
                     return true;
                 }
@@ -81,10 +86,12 @@ namespace Mirage
         private static void ShowWindowOnFirstStart()
         {
             EditorApplication.update -= ShowWindowOnFirstStart;
-            firstStartUpKey = GetVersion();
+            firstTimeVersionKey = GetVersion();
 
-            if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirageUnknown")
+            if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstTimeVersionKey, false)) && firstTimeVersionKey != "MirageUnknown")
             {
+                EditorPrefs.SetString(screenToOpenKey, ShowChangeLog ? "ChangeLog" : "Welcome");
+
                 OpenWindow();
             }
         }
@@ -94,12 +101,12 @@ namespace Mirage
         public static void OpenWindow()
         {
             //create the window
-            WelcomeWindow window = GetWindow<WelcomeWindow>("Mirage Welcome Page");
+            currentWindow = GetWindow<WelcomeWindow>("Mirage Welcome Page");
             //set the position and size
-            window.position = new Rect(new Vector2(100, 100), windowSize);
+            currentWindow.position = new Rect(new Vector2(100, 100), windowSize);
             //set min and max sizes so we cant readjust window size
-            window.maxSize = windowSize;
-            window.minSize = windowSize;
+            currentWindow.maxSize = windowSize;
+            currentWindow.minSize = windowSize;
         }
 
         #endregion
@@ -135,7 +142,7 @@ namespace Mirage
             ConfigureTab("DiscordButton", "Discord", DiscordInviteUrl);
             ConfigureModulesTab();
 
-            ShowTab(ShowChangeLog ? "ChangeLog" : "Welcome");
+            ShowTab(EditorPrefs.GetString(screenToOpenKey, "Welcome"));
             #endregion
         }
 
@@ -143,7 +150,7 @@ namespace Mirage
         {
             //now that we have seen the welcome window, 
             //set this this to true so we don't load the window every time we recompile (for the current version)
-            EditorPrefs.SetBool(firstStartUpKey, true);
+            EditorPrefs.SetBool(firstTimeVersionKey, true);
             EditorPrefs.SetBool(firstTimeMirageKey, true);
         }
 
@@ -185,37 +192,68 @@ namespace Mirage
             Button tabButton = rootVisualElement.Q<Button>("ModulesButton");
             tabButton.clicked += () => ShowTab("Modules");
 
-            Button install = rootVisualElement.Q<VisualElement>("Modules").Q<Button>("InstallModules");
-            install.clicked += () => InstallModules(rootVisualElement.Q<VisualElement>("Modules").Q<ScrollView>("ModulesScrollView"));
-
-            Button uninstall = rootVisualElement.Q<VisualElement>("Modules").Q<Button>("UninstallModules");
-            uninstall.clicked += () => UninstallModules(rootVisualElement.Q<VisualElement>("Modules").Q<ScrollView>("ModulesScrollView"));
+            listRequest = UnityEditor.PackageManager.Client.List(true, false);
+            EditorApplication.update += ListModuleProgress;
         }
 
         //install the module
-        private void InstallModules(VisualElement scrollView)
+        private void InstallModule(string moduleName)
         {
-            //find the modules that were selected and install them
-            foreach (Toggle toggle in scrollView.Children())
-            {
-                if(toggle.value)
-                {
-                    //subscribe to InstallModuleProgress
-                    EditorApplication.update += InstallModuleProgress;
+            installRequest = UnityEditor.PackageManager.Client.Add(Modules.Find((x) => x.displayName == moduleName).gitUrl);
 
-                    request = UnityEditor.PackageManager.Client.Add(Modules.Find((x) => x.name == toggle.label).gitUrl);
-                }
-            }
+            //subscribe to InstallModuleProgress
+            EditorApplication.update += InstallModuleProgress;
         }
 
         //uninstall the module
-        private void UninstallModules(VisualElement scrollView)
+        private void UninstallModule(string moduleName)
         {
-            foreach (Toggle toggle in scrollView.Children())
+            uninstallRequest = UnityEditor.PackageManager.Client.Remove(Modules.Find((x) => x.displayName == moduleName).packageName);
+
+            //subscribe to InstallModuleProgress
+            EditorApplication.update += UninstallModuleProgress;
+        }
+
+        private void ListModuleProgress()
+        {
+            if (listRequest.IsCompleted)
             {
-                if (toggle.value)
+                EditorApplication.update -= ListModuleProgress;
+
+                if (listRequest.Status == StatusCode.Success)
                 {
-                    //request = UnityEditor.PackageManager.Client.Remove();
+                    List<string> installedPackages = new List<string>();
+
+                    foreach (var package in listRequest.Result)
+                    {
+                        foreach (Module module in Modules)
+                        {
+                            if (module.displayName == package.displayName)
+                            {
+                                installedPackages.Add(module.displayName);
+                            }
+                        }
+                    }
+
+                    foreach (VisualElement module in rootVisualElement.Q<VisualElement>("ModulesScrollView").Children())
+                    {
+                        Button installButton = module.Q<Button>("InstallButton");
+                        string moduleName = module.Q<Label>("Name").text;
+
+                        installButton.text = !installedPackages.Contains(moduleName) ? "Install" : "Uninstall";
+                        if (!installedPackages.Contains(moduleName))
+                        {
+                            installButton.clicked += () => { InstallModule(moduleName); };
+                        }
+                        else
+                        {
+                            installButton.clicked += () => { UninstallModule(moduleName); };
+                        }
+                    }
+                }
+                else if(listRequest.Status == StatusCode.Failure)
+                {
+                    Debug.LogError("There was an issue finding packages. \n Error Code: " + listRequest.Error.errorCode + "\n Error Message: " + listRequest.Error.message);
                 }
             }
         }
@@ -225,19 +263,56 @@ namespace Mirage
         {
             Label waitLabel = rootVisualElement.Q<Label>("PleaseWaitLabel");
 
-            if(request.IsCompleted)
+            if(installRequest.IsCompleted)
             {
-                if(request.Status == StatusCode.Success)
+                if(installRequest.Status == StatusCode.Success)
                 {
-                    Debug.Log("Module installation successful");
+                    Debug.Log("Module install successful");
                 }
-                else if(request.Status == StatusCode.Failure)
+                else if(installRequest.Status == StatusCode.Failure)
                 {
-                    Debug.LogError("Module installation was unsuccessful. \n Error Code: " + request.Error.errorCode + "\n Error Message: " + request.Error.message);
+                    Debug.LogError("Module install was unsuccessful. \n Error Code: " + installRequest.Error.errorCode + "\n Error Message: " + installRequest.Error.message);
                 }
 
-                rootVisualElement.Q<Label>("PleaseWaitLabel").style.visibility = Visibility.Hidden;
+                waitLabel.style.visibility = Visibility.Hidden;
                 EditorApplication.update -= InstallModuleProgress;
+
+                //refresh the module tab
+                //ConfigureModulesTab();
+                currentWindow.Close();
+                EditorPrefs.SetString(screenToOpenKey, "Modules");
+                OpenWindow();
+            }
+            else
+            {
+                waitLabel.style.visibility = Visibility.Visible;
+            }
+        }
+
+        private void UninstallModuleProgress()
+        {
+            Label waitLabel = rootVisualElement.Q<Label>("PleaseWaitLabel");
+
+            if (uninstallRequest.IsCompleted)
+            {
+                EditorApplication.update -= UninstallModuleProgress;
+
+                if (uninstallRequest.Status == StatusCode.Success)
+                {
+                    Debug.Log("Module uninstall successful");
+                }
+                else if (uninstallRequest.Status == StatusCode.Failure)
+                {
+                    Debug.LogError("Module uninstall was unsuccessful. \n Error Code: " + uninstallRequest.Error.errorCode + "\n Error Message: " + uninstallRequest.Error.message);
+                }
+
+                waitLabel.style.visibility = Visibility.Hidden;
+
+                //refresh the module tab
+                //ConfigureModulesTab();
+                currentWindow.Close();
+                EditorPrefs.SetString(screenToOpenKey, "Modules");
+                OpenWindow();
             }
             else
             {
@@ -253,7 +328,8 @@ namespace Mirage
     //module data type
     public struct Module
     {
-        public string name;
+        public string displayName;
+        public string packageName;
         public string gitUrl;
     }
 
