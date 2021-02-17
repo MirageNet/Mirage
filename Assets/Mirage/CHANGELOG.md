@@ -1,3 +1,10 @@
+## [66.2.1](https://github.com/MirageNet/Mirage/compare/v66.2.0...v66.2.1) (2021-02-17)
+
+
+### Bug Fixes
+
+* fix serializing NetworkBehavior and GameObjects ([b74fcf9](https://github.com/MirageNet/Mirage/commit/b74fcf9feb949769f3ec7df851cd9e02aca24565))
+
 # [66.2.0](https://github.com/MirageNet/Mirage/compare/v66.1.0...v66.2.0) (2021-02-17)
 
 
