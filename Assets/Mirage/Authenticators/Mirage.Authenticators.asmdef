@@ -1,7 +1,7 @@
 {
     "name": "Mirage.Authenticators",
     "references": [
-        "Mirage.Runtime"
+        "Mirage"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

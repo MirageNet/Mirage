@@ -1,8 +1,8 @@
 {
     "name": "Unity.Mirage.CodeGen",
     "references": [
-        "Mirage.Runtime",
-        "UniTask"
+        "UniTask",
+        "Mirage"
     ],
     "includePlatforms": [
         "Editor"

@@ -1,7 +1,7 @@
 {
     "name": "Mirage.Cloud",
     "references": [
-        "Mirage.Runtime"
+        "Mirage"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

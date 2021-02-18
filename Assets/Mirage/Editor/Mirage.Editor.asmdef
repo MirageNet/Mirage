@@ -1,8 +1,8 @@
 {
     "name": "Mirage.Editor",
     "references": [
-        "Mirage.Runtime",
-        "Mirage.Weaver"
+        "Mirage.Weaver",
+        "Mirage"
     ],
     "includePlatforms": [
         "Editor"

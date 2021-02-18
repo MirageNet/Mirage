@@ -2,8 +2,7 @@
     "name": "Mirage",
     "references": [
         "UniTask",
-        "UniTask.Linq",
-        "Mirage.Runtime"
+        "UniTask.Linq"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

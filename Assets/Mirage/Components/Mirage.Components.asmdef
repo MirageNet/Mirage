@@ -2,7 +2,7 @@
     "name": "Mirage.Components",
     "references": [
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:30817c1a0e6d646d99c048fc403f5979"
+        "GUID:2adcab1eb5bd5499a9969522e1b8dcb2"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
