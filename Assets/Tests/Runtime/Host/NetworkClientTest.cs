@@ -59,7 +59,7 @@ namespace Mirage.Tests.Host
         {
             client.Disconnect();
 
-            await AsyncUtil.WaitUntilWithTimeout(() => client.IsLocalClient == false);
+            await AsyncUtil.WaitUntilWithTimeout(() => !client.IsLocalClient);
         });
     }
 }
