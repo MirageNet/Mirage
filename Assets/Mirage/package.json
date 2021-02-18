@@ -1,13 +1,13 @@
 {
-    "name": "com.mirrorng.mirrorng",
-    "displayName": "MirrorNG",
-    "version": "65.1.0",
+    "name": "com.miragenet.mirage",
+    "displayName": "Mirage",
+    "version": "66.2.1",
     "unity": "2019.1",
-    "description": "MirrorNG is a high level Networking API for Unity, supporting different low level Transports.",
-    "author": "MirrorNG",
+    "description": "Mirage is a high level Networking API for Unity, supporting different low level Transports.",
+    "author": "Mirage",
     "repository": {
         "type": "git",
-        "url": "https://github.com/MirrorNG/MirrorNG.git#upm"
+        "url": "https://github.com/MirageNet/Mirage.git#upm"
     },
     "dependencies": {
         "com.unity.nuget.mono-cecil": "1.10.1",

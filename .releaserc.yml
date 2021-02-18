@@ -4,30 +4,30 @@ plugins:
   - '@semantic-release/commit-analyzer'
   - - '@semantic-release/exec'
     - prepareCmd: "sed -i -e '/AssemblyVersion/s/\".*\"/\"${nextRelease.version}\"/' 
-        Assets/Mirror/Runtime/AssemblyInfo.cs
-        Assets/Mirror/AssemblyInfo.cs
-        Assets/Mirror/Runtime/Transport/Kcp/AssemblyInfo.cs
-        Assets/Mirror/Weaver/AssemblyInfo.cs
-        Assets/Mirror/Components/AssemblyInfo.cs
-        Assets/Mirror/Cloud/AssemblyInfo.cs
-        Assets/Mirror/Samples~/AssemblyInfo.cs
-        Assets/Mirror/Samples~/RigidbodyPhysics/Scripts/AssemblyInfo.cs
-        Assets/Mirror/Authenticators/AssemblyInfo.cs"
+        Assets/Mirage/Runtime/AssemblyInfo.cs
+        Assets/Mirage/AssemblyInfo.cs
+        Assets/Mirage/Runtime/Transport/Kcp/AssemblyInfo.cs
+        Assets/Mirage/Weaver/AssemblyInfo.cs
+        Assets/Mirage/Components/AssemblyInfo.cs
+        Assets/Mirage/Cloud/AssemblyInfo.cs
+        Assets/Mirage/Samples~/AssemblyInfo.cs
+        Assets/Mirage/Samples~/RigidbodyPhysics/Scripts/AssemblyInfo.cs
+        Assets/Mirage/Authenticators/AssemblyInfo.cs"
   - - '@semantic-release/changelog'
-    - changelogFile: 'Assets/Mirror/CHANGELOG.md'
+    - changelogFile: 'Assets/Mirage/CHANGELOG.md'
   - - '@semantic-release/npm'
     - npmPublish: false
-      pkgRoot: "Assets/Mirror"
+      pkgRoot: "Assets/Mirage"
   - - '@semantic-release/git'
     - assets:
-        - 'Assets/Mirror/Runtime/AssemblyInfo.cs'
-        - 'Assets/Mirror/AssemblyInfo.cs'
-        - 'Assets/Mirror/Runtime/Transport/Kcp/AssemblyInfo.cs'
-        - 'Assets/Mirror/Weaver/AssemblyInfo.cs'
-        - 'Assets/Mirror/Components/AssemblyInfo.cs'
-        - 'Assets/Mirror/Cloud/AssemblyInfo.cs'
-        - 'Assets/Mirror/Samples~/AssemblyInfo.cs'
-        - 'Assets/Mirror/Samples~/RigidbodyPhysics/Scripts/AssemblyInfo.cs'
-        - 'Assets/Mirror/Authenticators/AssemblyInfo.cs'
-        - 'Assets/Mirror/package.json'
-        - 'Assets/Mirror/CHANGELOG.md'
+        - 'Assets/Mirage/Runtime/AssemblyInfo.cs'
+        - 'Assets/Mirage/AssemblyInfo.cs'
+        - 'Assets/Mirage/Runtime/Transport/Kcp/AssemblyInfo.cs'
+        - 'Assets/Mirage/Weaver/AssemblyInfo.cs'
+        - 'Assets/Mirage/Components/AssemblyInfo.cs'
+        - 'Assets/Mirage/Cloud/AssemblyInfo.cs'
+        - 'Assets/Mirage/Samples~/AssemblyInfo.cs'
+        - 'Assets/Mirage/Samples~/RigidbodyPhysics/Scripts/AssemblyInfo.cs'
+        - 'Assets/Mirage/Authenticators/AssemblyInfo.cs'
+        - 'Assets/Mirage/package.json'
+        - 'Assets/Mirage/CHANGELOG.md'

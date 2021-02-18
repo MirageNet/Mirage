@@ -136,7 +136,7 @@ namespace Mirage
             Client.Connection.RegisterHandler<RpcMessage>(OnRpcMessage);
         }
 
-        static bool ConsiderForSpawning(NetworkIdentity identity)
+        bool ConsiderForSpawning(NetworkIdentity identity)
         {
             // not spawned yet, not hidden, etc.?
             return !identity.gameObject.activeSelf &&

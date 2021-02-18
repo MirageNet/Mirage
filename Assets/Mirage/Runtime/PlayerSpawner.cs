@@ -35,7 +35,15 @@ namespace Mirage
             }
             if (Client != null)
             {
-                SceneManager.ClientSceneChanged.AddListener(OnClientSceneChanged);
+                if(SceneManager != null)
+                {
+                    SceneManager.ClientSceneChanged.AddListener(OnClientSceneChanged);
+                }
+                else
+                {
+                    Client.Authenticated.AddListener(c => Client.Send(new AddPlayerMessage()));
+                }
+
                 if(ClientObjectManager != null)
                 {
                     ClientObjectManager.RegisterPrefab(PlayerPrefab);
@@ -57,9 +65,10 @@ namespace Mirage
 
         void OnDestroy()
         {
-            if (Client != null)
+            if (Client != null && SceneManager != null)
             {
                 SceneManager.ClientSceneChanged.RemoveListener(OnClientSceneChanged);
+                Client.Authenticated.RemoveListener(c => Client.Send(new AddPlayerMessage()));
             }
             if (Server != null)
             {
