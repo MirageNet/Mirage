@@ -1,3 +1,24 @@
+## [66.2.1](https://github.com/MirageNet/Mirage/compare/v66.2.0...v66.2.1) (2021-02-17)
+
+
+### Bug Fixes
+
+* fix serializing NetworkBehavior and GameObjects ([b74fcf9](https://github.com/MirageNet/Mirage/commit/b74fcf9feb949769f3ec7df851cd9e02aca24565))
+
+# [66.2.0](https://github.com/MirageNet/Mirage/compare/v66.1.0...v66.2.0) (2021-02-17)
+
+
+### Features
+
+* make networkscenemanager optional again ([#595](https://github.com/MirageNet/Mirage/issues/595)) ([ed180ff](https://github.com/MirageNet/Mirage/commit/ed180ff3f9230f4676a8b9a07351dd8302acb906))
+
+# [66.1.0](https://github.com/MirageNet/Mirage/compare/v66.0.0...v66.1.0) (2021-02-17)
+
+
+### Features
+
+* optional dontdestroyonload for networkscenemanager ([#596](https://github.com/MirageNet/Mirage/issues/596)) ([67e41bd](https://github.com/MirageNet/Mirage/commit/67e41bd66c15d5951b1b7bd8a0bd302e21182655))
+
 # [66.0.0](https://github.com/MirageNet/Mirage/compare/v65.1.0...v66.0.0) (2021-02-16)
 
 

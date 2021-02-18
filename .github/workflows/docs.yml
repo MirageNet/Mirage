@@ -18,13 +18,14 @@ jobs:
       with:
         args: build --logLevel Warning --warningsAsErrors doc/docfx.json
     - name: GitHub Pages
-      uses: crazy-max/ghaction-github-pages@v1.2.5
+      uses: crazy-max/ghaction-github-pages@v2.2.0
       if: github.ref == 'refs/heads/master'
       with:
         # Create incremental commit instead of doing push force
         keep_history: true
         # Allow an empty commit to be created
-        allow_empty_commit: False
+        allow_empty_commit: true
+        jekyll: false
         # Build directory to deploy
         build_dir: doc/_site
       env:

@@ -19,12 +19,15 @@ namespace Mirage
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkSceneManager));
 
-        [System.Serializable] public class ClientSceneChangeEvent : UnityEvent<string, SceneOperation> { }
-
         [FormerlySerializedAs("client")]
         public NetworkClient Client;
         [FormerlySerializedAs("server")]
         public NetworkServer Server;
+
+        /// <summary>
+        /// Sets the NetworksSceneManagers GameObject to DontDestroyOnLoad. Default = true.
+        /// </summary>
+        public bool DontDestroy = true;
 
         [Header("Events")]
         /// <summary>
@@ -65,7 +68,8 @@ namespace Mirage
 
         public void Start()
         {
-            DontDestroyOnLoad(gameObject);
+            if(DontDestroy)
+                DontDestroyOnLoad(gameObject);
 
             if (Client != null)
             {

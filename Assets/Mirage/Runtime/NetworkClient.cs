@@ -6,7 +6,7 @@ using UnityEngine.Events;
 
 namespace Mirage
 {
-    [System.Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkConnection> { }
+    [Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkConnection> { }
 
     public enum ConnectState
     {
