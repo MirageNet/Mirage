@@ -1,9 +1,10 @@
 {
     "name": "Mirage.Editor",
     "references": [
-        "Mirage.Weaver",
-        "Mirage"
+        "Mirage",
+        "Mirage.Weaver"
     ],
+    "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
     ],
@@ -12,7 +13,5 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+    "defineConstraints": []
 }
