@@ -47,5 +47,11 @@ namespace Mirage.Tests.Host
 
             Assert.That(clientConn.messageHandlers.Count == 0);
         }
+
+        [Test]
+        public void IsLocalClientHostTest()
+        {
+            Assert.That(client.IsLocalClient == true);
+        }
     }
 }
