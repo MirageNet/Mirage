@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.TestTools;
 
-namespace Mirror.Tests.ClientServer
+namespace Mirage.Tests.ClientServer
 {
     public class NetworkServerTests : ClientServerSetup<MockComponent>
     {
@@ -30,15 +30,6 @@ namespace Mirror.Tests.ClientServer
             Assert.That(server.connections, Has.Count.EqualTo(1));
             Assert.That(server.Active);
             Assert.That(server.LocalClientActive, Is.False);
-        }
-
-        [Test]
-        public void SendToClientOfPlayerExceptionTest()
-        {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                server.SendToClientOfPlayer(null, new ServerRpcMessage());
-            });
         }
 
         [UnityTest]
@@ -73,7 +64,7 @@ namespace Mirror.Tests.ClientServer
 
             connectionToServer.RegisterHandler<WovenTestMessage>(msg => invoked = true) ;
 
-            server.SendToClientOfPlayer(serverIdentity, message);
+            serverIdentity.ConnectionToClient.Send(message);
 
             connectionToServer.ProcessMessagesAsync().Forget();
 

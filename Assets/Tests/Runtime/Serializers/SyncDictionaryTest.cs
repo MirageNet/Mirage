@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     [TestFixture]
     public class SyncDictionaryTest

@@ -13,7 +13,7 @@ The Network Scene Manager component controls the Unity Scenes running over the n
 -   **Server Changed Scene**  
     Event that fires after the server changes scenes.
 
-The Network Scene Maanger allows the user to change network scenes during runtime. There are three types of scene changes broadly supported by MirrorNG: Normal, Additive Load, and Additive Unload.
+The Network Scene Maanger allows the user to change network scenes during runtime. There are three types of scene changes broadly supported by Mirage: Normal, Additive Load, and Additive Unload.
 
 Normal: In a Normal scene change all currently loaded assets are unspawned and unloaded. The new scene is loaded and set active. Then all of the scene or instance netwrok objects can be spawned. Under this operation the client waits for the server to finish before spawning starts to prevent any race conditions.
 

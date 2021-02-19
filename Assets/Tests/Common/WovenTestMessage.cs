@@ -1,4 +1,4 @@
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     public struct WovenTestMessage
     {

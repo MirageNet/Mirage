@@ -1,6 +1,6 @@
 # Samples Overview
 
-MirrorNG includes several small examples to help you learn how to use various features and how to set things up so they work together.
+Mirage includes several small examples to help you learn how to use various features and how to set things up so they work together.
 -   [Additive Scenes](AdditiveScenes/index.md)  
     The Additive Scenes example demonstrates a server additively loading a sub-scene into a main scene at startup, and having a server-only trigger that generates a message to any client whose player enters the trigger zone to also load the sub-scene, and subsequently unload it when they leave the trigger zone. Only players inside the trigger zone can see the objects in the sub-scene. Network Proximity Checker components are key to making this scenario work.
 -   [Basic](Basic/index.md)  
@@ -10,7 +10,7 @@ MirrorNG includes several small examples to help you learn how to use various fe
 -   [ChangeScene](ChangeScene/index.md)  
     Provides examples for Normal and Additive network scene changing.
 -   [Pong](Pong/index.md)  
-    A simple example for "How to build a multiplayer game with MirrorNG" is Pong. It illustrates the usage of `NetworkManager`, `NetworkManagerHUD`, NetworkBehaviour, NetworkIdentity, `NetworkTransform`, `NetworkStartPosition`and various Attributes.
+    A simple example for "How to build a multiplayer game with Mirage" is Pong. It illustrates the usage of `NetworkManager`, `NetworkManagerHUD`, NetworkBehaviour, NetworkIdentity, `NetworkTransform`, `NetworkStartPosition`and various Attributes.
 -   [Tanks](Tanks/index.md)  
     This is a simple scene with animated tanks, networked rigidbody projectiles, and NavMesh movement
 

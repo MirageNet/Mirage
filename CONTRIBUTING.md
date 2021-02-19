@@ -28,7 +28,7 @@ Before creating bug reports, please check the existing bug reports as you might 
 
 #### How Do I Submit A (Good) Bug Report?
 
-[Create an issue](https://github.com/vis2k/Mirror/issues/new?template=bug_report.md) on the project's repository and provide the following information.
+[Create an issue](https://github.com/MirageNet/Mirage/issues/new?template=bug_report.md) on the project's repository and provide the following information.
 
 Explain the problem and include additional details to help maintainers reproduce the problem:
 
@@ -60,7 +60,7 @@ Before creating enhancement suggestions, please check the list of enhancements s
 
 #### How Do I Submit A (Good) Enhancement Suggestion?
 
-[Create an issue](https://github.com/vis2k/Mirror/issues/new?template=feature_request.md) on the project's repository and provide the following information:
+[Create an issue](https://github.com/MirageNet/Mirage/issues/new?template=feature_request.md) on the project's repository and provide the following information:
 
 * **Use a clear and descriptive title** for the issue to identify the suggestion.
 * **Provide a step-by-step description of the suggested enhancement** in as many details as possible.
@@ -76,7 +76,7 @@ Before creating enhancement suggestions, please check the list of enhancements s
 
 #### How Do I Submit A (Good) Pull Request?
 
-Please send a [GitHub Pull Request](https://github.com/vis2k/Mirror/compare) with a clear list of what you've done (read more about [pull requests](http://help.github.com/pull-requests/)). 
+Please send a [GitHub Pull Request](https://github.com/MirageNet/Mirage/compare) with a clear list of what you've done (read more about [pull requests](http://help.github.com/pull-requests/)). 
 When you send a pull request, we will love you forever if you include unit tests. 
 We can always use more test coverage. 
 

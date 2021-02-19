@@ -1,4 +1,4 @@
-using Mirror;
+using Mirage;
 
 namespace SyncSetTests.SyncSetGenericInheritance
 {

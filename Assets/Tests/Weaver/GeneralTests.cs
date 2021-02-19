@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Mirror.Weaver
+namespace Mirage.Weaver
 {
     public class GeneralTests : TestsBuildFromTestName
     {

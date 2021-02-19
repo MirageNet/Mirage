@@ -8,7 +8,7 @@ using UnityEngine.Events;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     [Timeout(2000)]
     public class MultiplexTransportTest

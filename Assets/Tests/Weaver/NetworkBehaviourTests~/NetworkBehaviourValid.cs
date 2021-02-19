@@ -1,8 +1,8 @@
-using Mirror;
+using Mirage;
 
 namespace NetworkBehaviourTests.NetworkBehaviourValid
 {
-    class MirrorTestPlayer : NetworkBehaviour
+    class MirageTestPlayer : NetworkBehaviour
     {
         [SyncVar]
         public int durpatron9000 = 12;

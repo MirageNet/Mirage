@@ -8,7 +8,7 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Mirror.Tests.Host
+namespace Mirage.Tests.Host
 {
     public class NetworkSceneManagerTests : HostSetup<MockComponent>
     {

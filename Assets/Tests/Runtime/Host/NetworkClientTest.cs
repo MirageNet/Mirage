@@ -4,7 +4,7 @@ using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-namespace Mirror.Tests.Host
+namespace Mirage.Tests.Host
 {
     [TestFixture]
     public class NetworkClientTest : HostSetup<MockComponent>
@@ -47,5 +47,19 @@ namespace Mirror.Tests.Host
 
             Assert.That(clientConn.messageHandlers.Count == 0);
         }
+
+        [Test]
+        public void IsLocalClientHostTest()
+        {
+            Assert.That(client.IsLocalClient, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator IsLocalClientShutdownTest() => UniTask.ToCoroutine(async () =>
+        {
+            client.Disconnect();
+
+            await AsyncUtil.WaitUntilWithTimeout(() => !client.IsLocalClient);
+        });
     }
 }

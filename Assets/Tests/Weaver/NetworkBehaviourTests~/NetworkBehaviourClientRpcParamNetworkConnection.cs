@@ -1,10 +1,10 @@
-using Mirror;
+using Mirage;
 
 namespace NetworkBehaviourTests.NetworkBehaviourClientRpcParamNetworkConnection
 {
     class NetworkBehaviourClientRpcParamNetworkConnection : NetworkBehaviour
     {
-        [ClientRpc(target = Mirror.Client.Connection)]
+        [ClientRpc(target = Mirage.Client.Connection)]
         public void RpcCantHaveParamOptional(INetworkConnection monkeyCon) { }
     }
 }

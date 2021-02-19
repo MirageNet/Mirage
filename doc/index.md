@@ -1,10 +1,10 @@
-# MirrorNG Networking for Unity
+# Mirage Networking for Unity
 
-**MirrorNG is the most compatible direct replacement for the deprecated Unity Networking API.**
+**Mirage is the most compatible direct replacement for the deprecated Unity Networking API.**
 
-MirrorNG has nearly all of the components and features from UNet, making networking easy, concise and maintainable, whether you're starting from scratch or converting an existing project.
+Mirage has nearly all of the components and features from UNet, making networking easy, concise and maintainable, whether you're starting from scratch or converting an existing project.
 
-Built to support games of any scale, from LAN party games to dedicated high-volume authoritative servers running hundreds of players, MirrorNG is the core networking solution for [Cubica](https://www.cubica.net/), and [more](Articles/General/Showcase.md)!
+Built to support games of any scale, from LAN party games to dedicated high-volume authoritative servers running hundreds of players, Mirage is the core networking solution for [Cubica](https://www.cubica.net/), and [more](Articles/General/Showcase.md)!
 
 -   **Full Source included** for debugging convenience
 -   Several working examples included

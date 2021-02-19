@@ -1,4 +1,4 @@
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
 
     public static class LocalConnections 

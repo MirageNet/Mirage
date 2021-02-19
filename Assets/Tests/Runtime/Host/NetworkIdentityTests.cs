@@ -9,7 +9,7 @@ using UnityEngine.TestTools;
 using InvalidOperationException = System.InvalidOperationException;
 using Object = UnityEngine.Object;
 
-namespace Mirror.Tests.Host
+namespace Mirage.Tests.Host
 {
     public class NetworkIdentityTests : HostSetup<MockComponent>
     {

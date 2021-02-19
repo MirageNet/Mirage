@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirror.Tests
+namespace Mirage.Tests
 {
     [TestFixture]
     public class NetworkWriterTest
@@ -981,7 +981,7 @@ namespace Mirror.Tests
             Assert.That(reader.ReadSingle(), Is.EqualTo(10));
             Assert.That(reader.ReadDouble(), Is.EqualTo(11));
             Assert.That(reader.ReadDecimal(), Is.EqualTo(12));
-            // writing null string should write null in Mirror ("" in original HLAPI)
+            // writing null string should write null in Mirage ("" in original HLAPI)
             Assert.That(reader.ReadString(), Is.Null);
             Assert.That(reader.ReadString(), Is.EqualTo(""));
             Assert.That(reader.ReadString(), Is.EqualTo("13"));
@@ -1028,6 +1028,32 @@ namespace Mirror.Tests
             var reader = new NetworkReader(writer.ToArray());
             List<int> readList = reader.Read<List<int>>();
             Assert.That(readList, Is.Null);
+        }
+
+        [Test]
+        public void TestWriteNetworkBehavior()
+        {
+            writer.WriteNetworkBehaviour(null);
+
+            var reader = new NetworkReader(writer.ToArray());
+            NetworkBehaviour behavior = reader.ReadNetworkBehaviour();
+
+            Assert.That(behavior, Is.Null);
+
+            Assert.That(writer.Position, Is.EqualTo(reader.Position));
+        }
+
+        [Test]
+        public void TestWriteGameObject()
+        {
+            writer.WriteGameObject(null);
+
+            var reader = new NetworkReader(writer.ToArray());
+            GameObject obj = reader.ReadGameObject();
+
+            Assert.That(obj, Is.Null);
+
+            Assert.That(writer.Position, Is.EqualTo(reader.Position));
         }
     }
 }
