@@ -1,3 +1,10 @@
+## [67.0.2](https://github.com/MirageNet/Mirage/compare/v67.0.1...v67.0.2) (2021-02-19)
+
+
+### Bug Fixes
+
+* clientObjectManager was not using its interface ([#615](https://github.com/MirageNet/Mirage/issues/615)) ([d2b07ea](https://github.com/MirageNet/Mirage/commit/d2b07ea46ef1e5e0dbc4685b39c4cd24a7c2fc36))
+
 ## [67.0.1](https://github.com/MirageNet/Mirage/compare/v67.0.0...v67.0.1) (2021-02-19)
 
 
