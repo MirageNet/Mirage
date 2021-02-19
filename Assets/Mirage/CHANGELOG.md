@@ -1,3 +1,10 @@
+## [67.0.1](https://github.com/MirageNet/Mirage/compare/v67.0.0...v67.0.1) (2021-02-19)
+
+
+### Bug Fixes
+
+* move interfaces into their own files ([#613](https://github.com/MirageNet/Mirage/issues/613)) ([432005b](https://github.com/MirageNet/Mirage/commit/432005bea62a83d50416aa7760ee15881ac68d00))
+
 # [67.0.0](https://github.com/MirageNet/Mirage/compare/v66.2.2...v67.0.0) (2021-02-19)
 
 
