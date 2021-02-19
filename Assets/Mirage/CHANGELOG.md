@@ -1,3 +1,10 @@
+# [67.1.0](https://github.com/MirageNet/Mirage/compare/v67.0.2...v67.1.0) (2021-02-19)
+
+
+### Features
+
+* welcome window shows active tab ([#616](https://github.com/MirageNet/Mirage/issues/616)) ([1411d0a](https://github.com/MirageNet/Mirage/commit/1411d0ae4dd3b83c44ce27800e4117f00211f092))
+
 ## [67.0.2](https://github.com/MirageNet/Mirage/compare/v67.0.1...v67.0.2) (2021-02-19)
 
 
