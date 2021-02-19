@@ -144,5 +144,29 @@ namespace Mirage.Tests.Host
 
             Assert.That(SceneManager.GetSceneByName("testScene"), Is.Not.Null);
         });
+
+        [Test]
+        public void ClientChangeSceneNotNullTest()
+        {
+            Assert.That(sceneManager.ClientChangeScene, Is.Not.Null);
+        }
+
+        [Test]
+        public void ClientSceneChangedNotNullTest()
+        {
+            Assert.That(sceneManager.ClientSceneChanged, Is.Not.Null);
+        }
+
+        [Test]
+        public void ServerChangeSceneNotNullTest()
+        {
+            Assert.That(sceneManager.ServerChangeScene, Is.Not.Null);
+        }
+
+        [Test]
+        public void ServerSceneChangedNotNullTest()
+        {
+            Assert.That(sceneManager.ServerSceneChanged, Is.Not.Null);
+        }
     }
 }

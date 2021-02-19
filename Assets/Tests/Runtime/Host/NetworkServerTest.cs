@@ -40,5 +40,47 @@ namespace Mirage.Tests.Host
                 server.SetLocalConnection(null, null);
             });
         }
+
+        [Test]
+        public void StartedNotNullTest()
+        {
+            Assert.That(server.Started, Is.Not.Null);
+        }
+
+        [Test]
+        public void ConnectedNotNullTest()
+        {
+            Assert.That(server.Connected, Is.Not.Null);
+        }
+
+        [Test]
+        public void AuthenticatedNotNullTest()
+        {
+            Assert.That(server.Authenticated, Is.Not.Null);
+        }
+
+        [Test]
+        public void DisconnectedNotNullTest()
+        {
+            Assert.That(server.Disconnected, Is.Not.Null);
+        }
+
+        [Test]
+        public void StoppedNotNullTest()
+        {
+            Assert.That(server.Stopped, Is.Not.Null);
+        }
+
+        [Test]
+        public void OnStartHostNotNullTest()
+        {
+            Assert.That(server.OnStartHost, Is.Not.Null);
+        }
+
+        [Test]
+        public void OnStopHostNotNullTest()
+        {
+            Assert.That(server.OnStopHost, Is.Not.Null);
+        }
     }
 }
