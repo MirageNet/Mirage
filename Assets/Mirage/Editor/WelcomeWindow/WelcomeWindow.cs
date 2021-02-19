@@ -31,14 +31,14 @@ namespace Mirage
         private const string SponsorUrl = "";
         private const string DiscordInviteUrl = "https://discord.gg/DTBPBYvexy";
 
-        //TODO: Update links and package names after packages are renamed
+        //TODO: Update package names once they are renamed
         private readonly List<Module> Modules = new List<Module>()
         {
-            new Module {displayName = "LAN Discovery", packageName = "com.mirrorng.discovery", gitUrl = "https://github.com/MirrorNG/Discovery.git?path=/Assets/Discovery"},
-            new Module { displayName = "Momentum", packageName = "com.mirrorng.momentum", gitUrl = "https://github.com/MirrorNG/Momentum.git?path=/Assets/Momentum" },
-            new Module { displayName = "Steam (Facepunch)", packageName = "com.mirrorng.", gitUrl = "https://github.com/MirrorNG/SteamyFaceNG.git?path=/Assets/Mirror/Runtime/Transport/SteamyFaceMirror" },
-            new Module { displayName = "Steam (Steamworks.NET)", packageName = "com.mirrorng.", gitUrl = "https://github.com/MirrorNG/FizzySteamyMirror.git?path=/Assets/Mirror/Runtime/Transport/FizzySteamyMirror" },
-            new Module { displayName = "Websockets", packageName = "com.mirrorng.websocket", gitUrl = "https://github.com/MirrorNG/MirrorNG_Websocket.git?path=/Assets/Mirror/Websocket" },
+            new Module { displayName = "LAN Discovery", packageName = "com.mirrorng.discovery", gitUrl = "https://github.com/MirageNet/Discovery.git?path=/Assets/Discovery"},
+            new Module { displayName = "Momentum", packageName = "com.mirrorng.momentum", gitUrl = "https://github.com/MirageNet/Momentum.git?path=/Assets/Momentum" },
+            new Module { displayName = "Steam (Facepunch)", packageName = "com.miragenet.steamyface", gitUrl = "https://github.com/MirageNet/SteamyFaceNG.git?path=/Assets/Mirage/Runtime/Transport/SteamyFaceMirror" },
+            new Module { displayName = "Steam (Steamworks.NET)", packageName = "com.miragenet.steamy", gitUrl = "https://github.com/MirageNet/FizzySteamyMirror.git?path=/Assets/Mirage/Runtime/Transport/FizzySteamyMirror" },
+            new Module { displayName = "Websockets", packageName = "com.mirrorng.websocket", gitUrl = "https://github.com/MirageNet/WebsocketNG.git?path=/Assets/Mirror/Websocket" },
         };
 
         #endregion
