@@ -37,13 +37,25 @@ namespace Mirage
         /// </summary>
         UnityEvent OnStopHost { get; }
 
+        /// <summary>
+        /// The connection to the host mode client (if any).
+        /// </summary>
         INetworkConnection LocalConnection { get; }
 
-        // The host client for this server 
+        /// <summary>
+        /// The host client for this server 
+        /// </summary> 
         NetworkClient LocalClient { get; }
 
+        /// <summary>
+        /// True if there is a local client connected to this server (host mode)
+        /// </summary>
         bool LocalClientActive { get; }
 
+        /// <summary>
+        /// <para>Checks if the server has been started.</para>
+        /// <para>This will be true after NetworkServer.Listen() has been called.</para>
+        /// </summary>
         bool Active { get; }
 
         void Disconnect();
