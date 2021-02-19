@@ -37,6 +37,15 @@ namespace Mirage
         /// </summary>
         UnityEvent OnStopHost { get; }
 
+        INetworkConnection LocalConnection { get; }
+
+        // The host client for this server 
+        NetworkClient LocalClient { get; }
+
+        bool LocalClientActive { get; }
+
+        bool Active { get; }
+
         void Disconnect();
 
         void AddConnection(INetworkConnection conn);

@@ -21,6 +21,14 @@ namespace Mirage
         /// </summary>
         UnityEvent Disconnected { get; }
 
+        INetworkConnection Connection { get; }
+
+        NetworkIdentity LocalPlayer { get; }
+
+        bool Active { get; }
+
+        bool IsLocalClient { get; }
+
         void Disconnect();
 
         void Send<T>(T message, int channelId = Channel.Reliable);
