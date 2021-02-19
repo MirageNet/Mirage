@@ -1,3 +1,11 @@
+## [67.2.3](https://github.com/MirageNet/Mirage/compare/v67.2.2...v67.2.3) (2021-02-19)
+
+
+### Bug Fixes
+
+* add summaries to event classes ([#623](https://github.com/MirageNet/Mirage/issues/623)) ([e6b9354](https://github.com/MirageNet/Mirage/commit/e6b9354665294dc11140a560bfc661ef6bfbb3b9))
+* no longer true. spawnableobjects populated by FindObjectsOfTypeAll ([#622](https://github.com/MirageNet/Mirage/issues/622)) ([5692709](https://github.com/MirageNet/Mirage/commit/5692709b62095a08e25172d6a4dfba51e47355f5))
+
 ## [67.2.2](https://github.com/MirageNet/Mirage/compare/v67.2.1...v67.2.2) (2021-02-19)
 
 
