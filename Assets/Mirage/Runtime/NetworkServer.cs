@@ -120,8 +120,7 @@ namespace Mirage
         /// </summary>
         public bool Active { get; private set; }
 
-
-        NetworkTime _time = new NetworkTime();
+        readonly NetworkTime _time = new NetworkTime();
         /// <summary>
         /// Time kept in this server
         /// </summary>

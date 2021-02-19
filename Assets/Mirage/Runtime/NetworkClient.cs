@@ -77,8 +77,7 @@ namespace Mirage
         /// </summary>
         public bool IsConnected => connectState == ConnectState.Connected;
 
-
-        NetworkTime _time = new NetworkTime();
+        readonly NetworkTime _time = new NetworkTime();
         /// <summary>
         /// Time kept in this client
         /// </summary>
