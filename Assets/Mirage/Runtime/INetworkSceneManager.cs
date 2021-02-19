@@ -10,6 +10,11 @@ namespace Mirage
         UnloadAdditive
     }
 
+    /// <summary>
+    /// Event fires from <see cref="INetworkSceneManager">INetworkSceneManager</see> when a scene change happens on either Server or Client.
+    /// <para>string - New ScenePath</para>
+    /// <para>SceneOperation - Scene change type (Normal, Additive Load, Additive Unload).</para>
+    /// </summary>
     [Serializable] public class ClientSceneChangeEvent : UnityEvent<string, SceneOperation> { }
 
     public interface INetworkSceneManager
