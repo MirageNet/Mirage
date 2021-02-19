@@ -417,6 +417,7 @@ namespace Mirage.Weaver
 
                 if (hookMethodReference.DeclaringType.HasGenericParameters)
                 {
+                    // we need to get the Type<T>.HookMethod so convert it to a generic<T>.
                     GenericInstanceType genericType = (GenericInstanceType)hookMethod.DeclaringType.ConvertToGenericIfNeeded();
                     hookMethodReference = hookMethod.MakeHostInstanceGeneric(genericType);
                 }
