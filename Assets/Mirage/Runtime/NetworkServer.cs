@@ -95,7 +95,9 @@ namespace Mirage
         // => removed it for easier code. use .localConnection now!
         public INetworkConnection LocalConnection { get; private set; }
 
-        // The host client for this server 
+        /// <summary>
+        /// The host client for this server 
+        /// </summary>
         public NetworkClient LocalClient { get; private set; }
 
         /// <summary>

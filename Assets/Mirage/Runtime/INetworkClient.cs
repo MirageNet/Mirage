@@ -21,6 +21,27 @@ namespace Mirage
         /// </summary>
         UnityEvent Disconnected { get; }
 
+        /// <summary>
+        /// The NetworkConnection object this client is using.
+        /// </summary>
+        INetworkConnection Connection { get; }
+
+        /// <summary>
+        /// NetworkIdentity of the localPlayer
+        /// </summary>
+        NetworkIdentity LocalPlayer { get; }
+
+        /// <summary>
+        /// active is true while a client is connecting/connected
+        /// (= while the network is active)
+        /// </summary>
+        bool Active { get; }
+
+        /// <summary>
+        /// NetworkClient can connect to local server in host mode too
+        /// </summary>
+        bool IsLocalClient { get; }
+
         void Disconnect();
 
         void Send<T>(T message, int channelId = Channel.Reliable);
