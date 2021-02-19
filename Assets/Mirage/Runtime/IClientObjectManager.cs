@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 namespace Mirage
 {
@@ -10,15 +9,15 @@ namespace Mirage
 
     public interface IClientObjectManager
     {
-        GameObject GetPrefab(Guid assetId);
+        NetworkIdentity GetPrefab(Guid assetId);
 
-        void RegisterPrefab(NetworkIdentity prefab);
+        void RegisterPrefab(NetworkIdentity identity);
 
-        void RegisterPrefab(NetworkIdentity prefab, Guid newAssetId);
+        void RegisterPrefab(NetworkIdentity identity, Guid newAssetId);
 
-        void RegisterPrefab(NetworkIdentity prefab, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
+        void RegisterPrefab(NetworkIdentity identity, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
 
-        void UnregisterPrefab(NetworkIdentity prefab);
+        void UnregisterPrefab(NetworkIdentity identity);
 
         void RegisterSpawnHandler(Guid assetId, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
 
