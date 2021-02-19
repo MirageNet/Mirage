@@ -1,3 +1,10 @@
+## [67.2.2](https://github.com/MirageNet/Mirage/compare/v67.2.1...v67.2.2) (2021-02-19)
+
+
+### Bug Fixes
+
+* drop support for older versions ([5dc12b5](https://github.com/MirageNet/Mirage/commit/5dc12b5e8553f5689833af5b71a936615514b021))
+
 ## [67.2.1](https://github.com/MirageNet/Mirage/compare/v67.2.0...v67.2.1) (2021-02-19)
 
 
