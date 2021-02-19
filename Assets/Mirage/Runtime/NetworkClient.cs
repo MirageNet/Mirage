@@ -77,7 +77,15 @@ namespace Mirage
         /// </summary>
         public bool IsConnected => connectState == ConnectState.Connected;
 
-        public readonly NetworkTime Time = new NetworkTime();
+
+        NetworkTime _time = new NetworkTime();
+        /// <summary>
+        /// Time kept in this client
+        /// </summary>
+        public NetworkTime Time
+        {
+            get { return _time; }
+        }
 
         /// <summary>
         /// NetworkClient can connect to local server in host mode too
