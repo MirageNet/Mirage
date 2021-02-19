@@ -39,6 +39,11 @@ namespace Mirage
         [SerializeField] SpawnEvent _unSpawned = new SpawnEvent();
         public SpawnEvent UnSpawned => _unSpawned;
 
+        /// <summary>
+        /// NetworkIdentity of the localPlayer
+        /// </summary>
+        public NetworkIdentity LocalPlayer => Client.Connection?.Identity;
+
         [Header("Prefabs")]
         /// <summary>
         /// List of prefabs that will be registered with the spawning system.
@@ -578,7 +583,7 @@ namespace Mirage
 
         void CheckForLocalPlayer(NetworkIdentity identity)
         {
-            if (identity && identity == Client.LocalPlayer)
+            if (identity && identity == LocalPlayer)
             {
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
                 identity.ConnectionToServer = Client.Connection;
