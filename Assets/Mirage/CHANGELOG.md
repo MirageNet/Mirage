@@ -1,3 +1,10 @@
+## [67.2.1](https://github.com/MirageNet/Mirage/compare/v67.2.0...v67.2.1) (2021-02-19)
+
+
+### Bug Fixes
+
+* add missing properties to interface ([#617](https://github.com/MirageNet/Mirage/issues/617)) ([e45920e](https://github.com/MirageNet/Mirage/commit/e45920ebd375b382f48e11bba7e73549efb58c6c))
+
 # [67.2.0](https://github.com/MirageNet/Mirage/compare/v67.1.0...v67.2.0) (2021-02-19)
 
 
