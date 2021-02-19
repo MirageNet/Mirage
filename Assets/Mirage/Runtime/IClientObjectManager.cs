@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 namespace Mirage
 {
@@ -10,7 +9,7 @@ namespace Mirage
 
     public interface IClientObjectManager
     {
-        GameObject GetPrefab(Guid assetId);
+        NetworkIdentity GetPrefab(Guid assetId);
 
         void RegisterPrefab(NetworkIdentity prefab);
 
