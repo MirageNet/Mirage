@@ -11,7 +11,7 @@ namespace Mirage
 
     [AddComponentMenu("Network/ClientObjectManager")]
     [DisallowMultipleComponent]
-    public class ClientObjectManager : MonoBehaviour, IObjectLocator
+    public class ClientObjectManager : MonoBehaviour, IClientObjectManager, IObjectLocator
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientObjectManager));
 
