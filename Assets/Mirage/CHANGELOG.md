@@ -1,3 +1,10 @@
+# [67.2.0](https://github.com/MirageNet/Mirage/compare/v67.1.0...v67.2.0) (2021-02-19)
+
+
+### Features
+
+* add events to interfaces ([#614](https://github.com/MirageNet/Mirage/issues/614)) ([4d1a772](https://github.com/MirageNet/Mirage/commit/4d1a77263dfbca0f631ded85a5f772ce6e4e4343))
+
 # [67.1.0](https://github.com/MirageNet/Mirage/compare/v67.0.2...v67.1.0) (2021-02-19)
 
 
