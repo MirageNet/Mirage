@@ -414,10 +414,11 @@ namespace Mirage.Weaver
                 // only use Callvirt when not static
                 OpCode opcode = hookMethod.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
                 MethodReference hookMethodReference = hookMethod;
-              
-                if (hookMethod.DeclaringType.HasGenericParameters)
+
+                if (hookMethodReference.DeclaringType.HasGenericParameters)
                 {
-                    hookMethodReference = hookMethod.Duplicate(hookMethod.DeclaringType.ConvertToGenericIfNeeded());
+                    GenericInstanceType genericType = (GenericInstanceType)hookMethod.DeclaringType.ConvertToGenericIfNeeded();
+                    hookMethodReference = hookMethod.MakeHostInstanceGeneric(genericType);
                 }
 
                 worker.Append(worker.Create(opcode, module.ImportReference(hookMethodReference)));
