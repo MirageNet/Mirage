@@ -37,7 +37,7 @@ namespace Mirage.Weaver
                         MethodReference method = md;
                         if (typeRef.IsGenericInstance)
                         {
-                            var baseTypeInstance = (GenericInstanceType)typeRef;
+                            GenericInstanceType baseTypeInstance = (GenericInstanceType)td;
                             method = method.MakeHostInstanceGeneric(baseTypeInstance);
                         }
 
@@ -134,6 +134,22 @@ namespace Mirage.Weaver
             {
                 return type;
             }
+        }
+
+        public static FieldReference GetField(this TypeDefinition type, string fieldName)
+        {
+            if(type.HasFields)
+            {
+                for (int i = 0; i < type.Fields.Count; i++)
+                {
+                    if (type.Fields[i].Name == fieldName)
+                    {
+                        return type.Fields[i];
+                    }
+                }
+            }
+
+            return null;
         }
     }
 }

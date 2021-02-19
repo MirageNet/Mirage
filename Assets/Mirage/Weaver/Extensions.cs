@@ -213,12 +213,5 @@ namespace Mirage.Weaver
 
             return fd;
         }
-
-        public static FieldReference Duplicate(this FieldReference fr, TypeReference declaringType = null)
-        {
-            FieldReference newFr = new FieldReference(fr.Name, fr.FieldType, declaringType ?? fr.DeclaringType);
-
-            return newFr;
-        }
     }
 }

@@ -79,7 +79,7 @@ namespace Mirage.Weaver
                 FieldReference resolved = opFieldst.Resolve();
                 if (resolved == null)
                 {
-                    resolved = opFieldst.Duplicate(opFieldst.DeclaringType.Resolve());
+                    resolved = opFieldst.DeclaringType.Resolve().GetField(opFieldst.Name);
                 }
 
                 // this instruction sets the value of a field. cache the field reference.
@@ -91,7 +91,7 @@ namespace Mirage.Weaver
                 FieldReference resolved = opFieldld.Resolve();
                 if (resolved == null)
                 {
-                    resolved = opFieldld.Duplicate(opFieldld.DeclaringType.Resolve());
+                    resolved = opFieldld.DeclaringType.Resolve().GetField(opFieldld.Name);
                 }
 
                 // this instruction gets the value of a field. cache the field reference.
@@ -103,7 +103,7 @@ namespace Mirage.Weaver
                 FieldReference resolved = opFieldlda.Resolve();
                 if (resolved == null)
                 {
-                    resolved = opFieldlda.Duplicate(opFieldlda.DeclaringType.Resolve());
+                    resolved = opFieldlda.DeclaringType.Resolve().GetField(opFieldlda.Name);
                 }
 
                 // loading a field by reference,  watch out for initobj instruction

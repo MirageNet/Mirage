@@ -221,7 +221,7 @@ namespace Mirage.Weaver
 
             if (IsWrapped(fd.FieldType))
             {
-                worker.Append(worker.Create(OpCodes.Ldflda, fd));
+                worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
                 MethodReference getter = module.ImportReference(fd.FieldType.Resolve().GetMethod("get_Value"));
                 worker.Append(worker.Create(OpCodes.Call, getter));
             }
@@ -414,8 +414,7 @@ namespace Mirage.Weaver
                 // only use Callvirt when not static
                 OpCode opcode = hookMethod.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
                 MethodReference hookMethodReference = hookMethod;
-                // If the delcaring type is generic we need to duplicate the method reference.
-                // This will make sure it calls the correct instance of the class.
+              
                 if (hookMethod.DeclaringType.HasGenericParameters)
                 {
                     hookMethodReference = hookMethod.Duplicate(hookMethod.DeclaringType.ConvertToGenericIfNeeded());
