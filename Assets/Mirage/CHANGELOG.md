@@ -1,3 +1,15 @@
+# [67.0.0](https://github.com/MirageNet/Mirage/compare/v66.2.2...v67.0.0) (2021-02-19)
+
+
+### Code Refactoring
+
+* remove unnecessary assembly definition ([#599](https://github.com/MirageNet/Mirage/issues/599)) ([89ffc7c](https://github.com/MirageNet/Mirage/commit/89ffc7c9cc9a37650c998381bf97c148b2f1cfd9))
+
+
+### BREAKING CHANGES
+
+* removed MirageNG.asmdef,  change your assembly to use Mirage.asmdef instead
+
 ## [66.2.2](https://github.com/MirageNet/Mirage/compare/v66.2.1...v66.2.2) (2021-02-19)
 
 
