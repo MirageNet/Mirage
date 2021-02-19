@@ -4,6 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace Mirage
 {
@@ -45,24 +46,28 @@ namespace Mirage
         /// <summary>
         /// This is invoked when a server is started - including when a host is started.
         /// </summary>
+        [FormerlySerializedAs("Started")]
         [SerializeField] UnityEvent _started = new UnityEvent();
         public UnityEvent Started => _started;
 
         /// <summary>
         /// Event fires once a new Client has connect to the Server.
         /// </summary>
+        [FormerlySerializedAs("Connected")]
         [SerializeField] NetworkConnectionEvent _connected = new NetworkConnectionEvent();
         public NetworkConnectionEvent Connected => _connected;
 
         /// <summary>
         /// Event fires once a new Client has passed Authentication to the Server.
         /// </summary>
+        [FormerlySerializedAs("Authenticated")]
         [SerializeField] NetworkConnectionEvent _authenticated = new NetworkConnectionEvent();
         public NetworkConnectionEvent Authenticated => _authenticated;
 
         /// <summary>
         /// Event fires once a Client has Disconnected from the Server.
         /// </summary>
+        [FormerlySerializedAs("Disconnected")]
         [SerializeField] NetworkConnectionEvent _disconnected = new NetworkConnectionEvent();
         public NetworkConnectionEvent Disconnected => _disconnected;
 

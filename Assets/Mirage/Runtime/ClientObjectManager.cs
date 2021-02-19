@@ -28,12 +28,14 @@ namespace Mirage
         /// <summary>
         /// Raised when the client spawns an object
         /// </summary>
+        [FormerlySerializedAs("Spawned")]
         [SerializeField] SpawnEvent _spawned = new SpawnEvent();
         public SpawnEvent Spawned => _spawned;
 
         /// <summary>
         /// Raised when the client unspawns an object
         /// </summary>
+        [FormerlySerializedAs("UnSpawned")]
         [SerializeField] SpawnEvent _unSpawned = new SpawnEvent();
         public SpawnEvent UnSpawned => _unSpawned;
 

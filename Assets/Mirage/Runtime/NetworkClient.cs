@@ -3,6 +3,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace Mirage
 {
@@ -35,18 +36,21 @@ namespace Mirage
         /// <summary>
         /// Event fires once the Client has connected its Server.
         /// </summary>
+        [FormerlySerializedAs("Connected")]
         [SerializeField] NetworkConnectionEvent _connected = new NetworkConnectionEvent();
         public NetworkConnectionEvent Connected => _connected;
 
         /// <summary>
         /// Event fires after the Client connection has sucessfully been authenticated with its Server.
         /// </summary>
+        [FormerlySerializedAs("Authenticated")]
         [SerializeField] NetworkConnectionEvent _authenticated = new NetworkConnectionEvent();
         public NetworkConnectionEvent Authenticated => _authenticated;
 
         /// <summary>
         /// Event fires after the Client has disconnected from its Server and Cleanup has been called.
         /// </summary>
+        [FormerlySerializedAs("Disconnected")]
         [SerializeField] UnityEvent _disconnected = new UnityEvent();
         public UnityEvent Disconnected => _disconnected;
 
