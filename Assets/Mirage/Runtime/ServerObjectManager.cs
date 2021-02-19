@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Mirage.RemoteCalls;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 namespace Mirage
@@ -28,19 +27,18 @@ namespace Mirage
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
-        [System.Serializable]
-        public class SpawnEvent : UnityEvent<NetworkIdentity> { }
-
         [Header("Events")]
         /// <summary>
         /// Raised when the client spawns an object
         /// </summary>
-        public SpawnEvent Spawned = new SpawnEvent();
+        [SerializeField] SpawnEvent _spawned = new SpawnEvent();
+        public SpawnEvent Spawned => _spawned;
 
         /// <summary>
         /// Raised when the client unspawns an object
         /// </summary>
-        public SpawnEvent UnSpawned = new SpawnEvent();
+        [SerializeField] SpawnEvent _unSpawned = new SpawnEvent();
+        public SpawnEvent UnSpawned => _unSpawned;
 
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => nextNetworkId++;

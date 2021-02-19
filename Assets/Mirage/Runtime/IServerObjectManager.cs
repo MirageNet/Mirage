@@ -5,6 +5,16 @@ namespace Mirage
 {
     public interface IServerObjectManager
     {
+        /// <summary>
+        /// Raised when the client spawns an object
+        /// </summary>
+        SpawnEvent Spawned { get; }
+
+        /// <summary>
+        /// Raised when the client unspawns an object
+        /// </summary>
+        SpawnEvent UnSpawned { get; }
+
         bool AddPlayerForConnection(INetworkConnection conn, GameObject player);
 
         bool AddPlayerForConnection(INetworkConnection conn, GameObject player, Guid assetId);

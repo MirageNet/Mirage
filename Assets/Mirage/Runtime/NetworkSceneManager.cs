@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
@@ -33,22 +32,26 @@ namespace Mirage
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
-        public ClientSceneChangeEvent ClientChangeScene = new ClientSceneChangeEvent();
+        [SerializeField] ClientSceneChangeEvent _clientChangeScene = new ClientSceneChangeEvent();
+        public ClientSceneChangeEvent ClientChangeScene => _clientChangeScene;
 
         /// <summary>
         /// Event fires after the Client has completed its scene change.
         /// </summary>
-        public ClientSceneChangeEvent ClientSceneChanged = new ClientSceneChangeEvent();
+        [SerializeField] ClientSceneChangeEvent _clientSceneChanged = new ClientSceneChangeEvent();
+        public ClientSceneChangeEvent ClientSceneChanged => _clientSceneChanged;
 
         /// <summary>
         /// Event fires before Server changes scene.
         /// </summary>
-        public ClientSceneChangeEvent ServerChangeScene = new ClientSceneChangeEvent();
+        [SerializeField] ClientSceneChangeEvent _serverChangeScene = new ClientSceneChangeEvent();
+        public ClientSceneChangeEvent ServerChangeScene => _serverChangeScene;
 
         /// <summary>
         /// Event fires after Server has completed scene change.
         /// </summary>
-        public ClientSceneChangeEvent ServerSceneChanged = new ClientSceneChangeEvent();
+        [SerializeField] ClientSceneChangeEvent _serverSceneChanged = new ClientSceneChangeEvent();
+        public ClientSceneChangeEvent ServerSceneChanged => _serverSceneChanged;
 
         /// <summary>
         /// The path of the current network scene.
