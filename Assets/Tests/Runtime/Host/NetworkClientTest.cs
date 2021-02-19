@@ -79,5 +79,11 @@ namespace Mirage.Tests.Host
         {
             Assert.That(client.Disconnected, Is.Not.Null);
         }
+
+        [Test]
+        public void TimeNotNullTest()
+        {
+            Assert.That(client.Time, Is.Not.Null);
+        }
     }
 }
