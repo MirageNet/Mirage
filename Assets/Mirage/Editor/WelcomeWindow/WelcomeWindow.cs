@@ -35,14 +35,11 @@ namespace Mirage
         private const string SponsorUrl = "";
         private const string DiscordInviteUrl = "https://discord.gg/DTBPBYvexy";
 
-        //TODO: Update package names once they are renamed
-        private readonly List<Module> Modules = new List<Module>()
+        private readonly List<Package> Packages = new List<Package>()
         {
-            new Module { displayName = "LAN Discovery", packageName = "com.mirrorng.discovery", gitUrl = "https://github.com/MirageNet/Discovery.git?path=/Assets/Discovery"},
-            new Module { displayName = "Momentum", packageName = "com.mirrorng.momentum", gitUrl = "https://github.com/MirageNet/Momentum.git?path=/Assets/Momentum" },
-            new Module { displayName = "Steam (Facepunch)", packageName = "com.miragenet.steamyface", gitUrl = "https://github.com/MirageNet/SteamyFaceNG.git?path=/Assets/Mirage/Runtime/Transport/SteamyFaceMirror" },
-            new Module { displayName = "Steam (Steamworks.NET)", packageName = "com.miragenet.steamy", gitUrl = "https://github.com/MirageNet/FizzySteamyMirror.git?path=/Assets/Mirage/Runtime/Transport/FizzySteamyMirror" },
-            new Module { displayName = "Websockets", packageName = "com.mirrorng.websocket", gitUrl = "https://github.com/MirageNet/WebsocketNG.git?path=/Assets/Mirror/Websocket" },
+            new Package { displayName = "LAN Discovery", packageName = "com.miragenet.discovery", gitUrl = "https://github.com/MirageNet/Discovery.git?path=/Assets/Discovery"},
+            new Package { displayName = "Steam (Facepunch)", packageName = "com.miragenet.steamyface", gitUrl = "https://github.com/MirageNet/SteamyFaceNG.git?path=/Assets/Mirage/Runtime/Transport/SteamyFaceMirror" },
+            new Package { displayName = "Steam (Steamworks.NET)", packageName = "com.miragenet.steamy", gitUrl = "https://github.com/MirageNet/FizzySteamyMirror.git?path=/Assets/Mirage/Runtime/Transport/FizzySteamyMirror" },
         };
 
         #endregion
@@ -154,9 +151,18 @@ namespace Mirage
             ConfigureTab("FaqButton", "Faq", FaqUrl);
             ConfigureTab("SponsorButton", "Sponsor", SponsorUrl);
             ConfigureTab("DiscordButton", "Discord", DiscordInviteUrl);
-            ConfigureModulesTab();
+            ConfigurePackagesTab();
 
             ShowTab(EditorPrefs.GetString(screenToOpenKey, "Welcome"));
+
+            //set the screen's button to be tinted when welcome window is opened
+            float color = EditorPrefs.GetFloat("buttonClickedColor");
+            float borderColor = EditorPrefs.GetFloat("buttonClickedBorderColor");
+            Button openedButton = rootVisualElement.Q<Button>(EditorPrefs.GetString(screenToOpenKey, "Welcome") + "Button");
+            openedButton.style.backgroundColor = new StyleColor(new Color(color, color, color));
+            openedButton.style.borderBottomColor = openedButton.style.borderTopColor = openedButton.style.borderLeftColor = openedButton.style.borderRightColor = new StyleColor(new Color(borderColor, borderColor, borderColor));
+            lastClickedTab = openedButton;
+
             #endregion
         }
 
@@ -171,12 +177,14 @@ namespace Mirage
         private void ConfigureTab(string tabButtonName, string tab, string url)
         {
             Button tabButton = rootVisualElement.Q<Button>(tabButtonName);
-            tabButton.clicked += () => 
+            tabButton.clicked += () =>
             {
                 ToggleMenuButtonColor(tabButton, true);
                 ToggleMenuButtonColor(lastClickedTab, false);
                 ShowTab(tab);
+
                 lastClickedTab = tabButton;
+                EditorPrefs.SetString(screenToOpenKey, tab);
             };
 
             Button redirectButton = rootVisualElement.Q<VisualElement>(tab).Q<Button>("Redirect");
@@ -207,12 +215,15 @@ namespace Mirage
 
         private void ToggleMenuButtonColor(Button button, bool toggle)
         {
-            if(button == null) { return; }
+            if (button == null) { return; }
 
-            if(toggle)
+            if (toggle)
             {
                 button.style.backgroundColor = button.resolvedStyle.backgroundColor;
                 button.style.borderBottomColor = button.style.borderTopColor = button.style.borderLeftColor = button.style.borderRightColor = button.resolvedStyle.borderBottomColor;
+                
+                EditorPrefs.SetFloat("buttonClickedColor", button.resolvedStyle.backgroundColor.r);
+                EditorPrefs.SetFloat("buttonClickedBorderColor", button.resolvedStyle.borderBottomColor.r);
             }
             else
             {
@@ -221,101 +232,92 @@ namespace Mirage
             }
         }
 
-        #region Modules
+        #region Packages
 
-        //configure the module tab when the tab button is pressed
-        private void ConfigureModulesTab()
+        //configure the package tab when the tab button is pressed
+        private void ConfigurePackagesTab()
         {
-            Button tabButton = rootVisualElement.Q<Button>("ModulesButton");
-            tabButton.clicked += () => ShowTab("Modules");
+            Button tabButton = rootVisualElement.Q<Button>("PackagesButton");
+            tabButton.clicked += () =>
+            {
+                ToggleMenuButtonColor(tabButton, true);
+                ToggleMenuButtonColor(lastClickedTab, false);
+                ShowTab("Packages");
+
+                lastClickedTab = tabButton;
+                EditorPrefs.SetString(screenToOpenKey, "Packages");
+            };
 
             listRequest = UnityEditor.PackageManager.Client.List(true, false);
-            EditorApplication.update += ListModuleProgress;
+            EditorApplication.update += ListPackageProgress;
         }
 
-        //install the module
-        private void InstallModule(string moduleName)
+        //install the package
+        private void InstallPackage(string packageName)
         {
-            installRequest = UnityEditor.PackageManager.Client.Add(Modules.Find((x) => x.displayName == moduleName).gitUrl);
+            installRequest = UnityEditor.PackageManager.Client.Add(Packages.Find((x) => x.displayName == packageName).gitUrl);
 
-            //subscribe to InstallModuleProgress
-            EditorApplication.update += InstallModuleProgress;
+            //subscribe to InstallPackageProgress
+            EditorApplication.update += InstallPackageProgress;
         }
 
-        //uninstall the module
-        private void UninstallModule(string moduleName)
+        //uninstall the package
+        private void UninstallPackage(string packageName)
         {
-            uninstallRequest = UnityEditor.PackageManager.Client.Remove(Modules.Find((x) => x.displayName == moduleName).packageName);
+            uninstallRequest = UnityEditor.PackageManager.Client.Remove(Packages.Find((x) => x.displayName == packageName).packageName);
 
-            //subscribe to UninstallModuleProgress
-            EditorApplication.update += UninstallModuleProgress;
+            //subscribe to UninstallPackageProgress
+            EditorApplication.update += UninstallPackageProgress;
         }
 
-        //keeps track of the module install progress
-        private void InstallModuleProgress()
+        //keeps track of the package install progress
+        private void InstallPackageProgress()
         {
-            Label waitLabel = rootVisualElement.Q<Label>("PleaseWaitLabel");
-
-            if(installRequest.IsCompleted)
+            if (installRequest.IsCompleted)
             {
-                if(installRequest.Status == StatusCode.Success)
+                if (installRequest.Status == StatusCode.Success)
                 {
-                    Debug.Log("Module install successful.");
+                    Debug.Log("Package install successful.");
                 }
-                else if(installRequest.Status == StatusCode.Failure)
+                else if (installRequest.Status == StatusCode.Failure)
                 {
-                    Debug.LogError("Module install was unsuccessful. \n Error Code: " + installRequest.Error.errorCode + "\n Error Message: " + installRequest.Error.message);
+                    Debug.LogError("Package install was unsuccessful. \n Error Code: " + installRequest.Error.errorCode + "\n Error Message: " + installRequest.Error.message);
                 }
 
-                waitLabel.style.visibility = Visibility.Hidden;
-                EditorApplication.update -= InstallModuleProgress;
+                EditorApplication.update -= InstallPackageProgress;
 
-                //refresh the module tab
-                currentWindow.Close();
-                EditorPrefs.SetString(screenToOpenKey, "Modules");
+                //refresh the package tab
+                currentWindow?.Close();
                 OpenWindow();
             }
-            else
-            {
-                waitLabel.style.visibility = Visibility.Visible;
-            }
         }
 
-        private void UninstallModuleProgress()
+        private void UninstallPackageProgress()
         {
-            Label waitLabel = rootVisualElement.Q<Label>("PleaseWaitLabel");
-
             if (uninstallRequest.IsCompleted)
             {
-                EditorApplication.update -= UninstallModuleProgress;
+                EditorApplication.update -= UninstallPackageProgress;
 
                 if (uninstallRequest.Status == StatusCode.Success)
                 {
-                    Debug.Log("Module uninstall successful.");
+                    Debug.Log("Package uninstall successful.");
                 }
                 else if (uninstallRequest.Status == StatusCode.Failure)
                 {
-                    Debug.LogError("Module uninstall was unsuccessful. \n Error Code: " + uninstallRequest.Error.errorCode + "\n Error Message: " + uninstallRequest.Error.message);
+                    Debug.LogError("Package uninstall was unsuccessful. \n Error Code: " + uninstallRequest.Error.errorCode + "\n Error Message: " + uninstallRequest.Error.message);
                 }
 
-                waitLabel.style.visibility = Visibility.Hidden;
-
-                //refresh the module tab
-                currentWindow.Close();
-                EditorPrefs.SetString(screenToOpenKey, "Modules");
+                //refresh the package tab
+                currentWindow?.Close();
                 OpenWindow();
-            }
-            else
-            {
-                waitLabel.style.visibility = Visibility.Visible;
             }
         }
 
-        private void ListModuleProgress()
+        private void ListPackageProgress()
         {
             if (listRequest.IsCompleted)
             {
-                EditorApplication.update -= ListModuleProgress;
+                EditorApplication.update -= ListPackageProgress;
 
                 if (listRequest.Status == StatusCode.Success)
                 {
@@ -323,10 +325,10 @@ namespace Mirage
 
                     foreach (var package in listRequest.Result)
                     {
-                        Module? module = Modules.Find((x) => x.packageName == package.name);
-                        if (module != null)
+                        Package? miragePackage = Packages.Find((x) => x.packageName == package.name);
+                        if (miragePackage != null)
                         {
-                            installedPackages.Add(module.Value.displayName);
+                            installedPackages.Add(miragePackage.Value.displayName);
                         }
                     }
 
@@ -341,20 +343,28 @@ namespace Mirage
 
         private void ConfigureInstallButtons(List<string> installedPackages)
         {
-            foreach (VisualElement module in rootVisualElement.Q<VisualElement>("ModulesScrollView").Children())
+            foreach (VisualElement package in rootVisualElement.Q<VisualElement>("ModulesList").Children())
             {
-                Button installButton = module.Q<Button>("InstallButton");
-                string moduleName = module.Q<Label>("Name").text;
-                bool foundInInstalledPackages = installedPackages.Contains(moduleName);
+                Button installButton = package.Q<Button>("InstallButton");
+                string packageName = package.Q<Label>("Name").text;
+                bool foundInInstalledPackages = installedPackages.Contains(packageName);
 
                 installButton.text = !foundInInstalledPackages ? "Install" : "Uninstall";
                 if (!foundInInstalledPackages)
                 {
-                    installButton.clicked += () => { InstallModule(moduleName); };
+                    installButton.clicked += () => 
+                    { 
+                        InstallPackage(packageName);
+                        installButton.text = "Installing";
+                    };
                 }
                 else
                 {
-                    installButton.clicked += () => { UninstallModule(moduleName); };
+                    installButton.clicked += () => 
+                    { 
+                        UninstallPackage(packageName);
+                        installButton.text = "Uninstalling";
+                    };
                 }
             }
         }
@@ -365,7 +375,7 @@ namespace Mirage
     }
 
     //module data type
-    public struct Module
+    public struct Package
     {
         public string displayName;
         public string packageName;

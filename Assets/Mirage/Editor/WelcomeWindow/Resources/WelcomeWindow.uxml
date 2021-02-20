@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="WelcomeWindow.uss" />
-    <ui:VisualElement name="Banner">
+    <ui:VisualElement name="Banner" style="background-color: rgb(11, 12, 11);">
         <ui:Label name="VersionText" text="Placeholder" />
         <ui:Image name="Icon" style="background-image: url(&apos;/Assets/Mirage/Editor/WelcomeWindow/Resources/MirageIcon.png&apos;);" />
     </ui:VisualElement>
@@ -9,7 +9,7 @@
         <ui:VisualElement name="LeftColumnBox">
             <ui:Button name="WelcomeButton" text="Welcome" />
             <ui:Button name="QuickStartButton" text="Quick Start Guide" />
-            <ui:Button name="ModulesButton" text="Modules" />
+            <ui:Button name="PackagesButton" text="Packages" />
             <ui:Button name="FaqButton" text="FAQ" />
             <ui:Button name="BestPracticesButton" text="Best Practices" />
             <ui:Button name="ChangeLogButton" text="Change Log" />
@@ -18,7 +18,7 @@
         </ui:VisualElement>
         <ui:VisualElement name="Spacer" />
         <ui:VisualElement name="RightColumnBox">
-            <ui:VisualElement name="Welcome" style="flex-grow: 0; width: 100%; height: 100%;">
+            <ui:VisualElement name="Welcome" style="flex-grow: 0; width: 100%; height: 100%; display: none;">
                 <ui:Label name="Header" text="Welcome" />
                 <ui:Label name="Description" text="Hello! Thank you for installing Mirage. Please visit all the pages on this window. Clicking the button at the bottom of the pages will redirect you to a webpage. Additionally, there are example projects that you can import from the Unity Package Manager. &#10;&#10;Have fun using Mirage!" style="-unity-text-align: upper-left;" />
                 <ui:VisualElement name="Spacer" />
@@ -60,17 +60,13 @@
                 <ui:VisualElement name="Spacer" />
                 <ui:Button name="Redirect" text="Join Discord" class="redirect" />
             </ui:VisualElement>
-            <ui:VisualElement name="Modules" style="flex-grow: 0; width: 100%; height: 100%; display: none;">
-                <ui:Label name="Header" text="Modules" />
-                <ui:Label name="Description" text="Mirage is a modular networking library. It ships with the foundation that you can build upon by installing modules." style="flex-basis: auto; flex-grow: 0; flex-shrink: 1;" />
-                <ui:Label text="Available Modules" display-tooltip-when-elided="True" style="padding-left: 10px; -unity-font-style: bold;" />
-                <ui:ScrollView name="ModulesScrollView" show-vertical-scroller="true" style="flex-grow: 1; padding-left: 10px; padding-right: 10px; padding-top: 5px; padding-bottom: 10px;">
+            <ui:ScrollView name="Packages">
+                <ui:Label name="Header" text="Packages" />
+                <ui:Label name="Description" text="Mirage is a modular networking library. It ships with the foundation that you can build upon by installing packages." style="flex-basis: auto; flex-grow: 0; flex-shrink: 0;" />
+                <ui:Label text="Available Packages" display-tooltip-when-elided="True" style="padding-left: 10px; -unity-font-style: bold;" />
+                <ui:VisualElement name="ModulesList" style="flex-grow: 1; padding-left: 10px; padding-right: 10px;">
                     <ui:VisualElement name="Module" tooltip="Automatically find games within the same network.">
                         <ui:Label text="LAN Discovery" name="Name" />
-                        <ui:Button text="Install" display-tooltip-when-elided="True" name="InstallButton" style="flex-shrink: 1; height: auto;" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="Module" tooltip="Smoothly synchronize movement with low bandwith and latency.">
-                        <ui:Label text="Momentum" name="Name" />
                         <ui:Button text="Install" display-tooltip-when-elided="True" name="InstallButton" style="flex-shrink: 1; height: auto;" />
                     </ui:VisualElement>
                     <ui:VisualElement name="Module" tooltip="A transport that uses Facepunch&apos;s Steam SDK.">
@@ -81,18 +77,9 @@
                         <ui:Label text="Steam (Steamworks.NET)" name="Name" />
                         <ui:Button text="Install" display-tooltip-when-elided="True" name="InstallButton" style="flex-shrink: 1; height: auto;" />
                     </ui:VisualElement>
-                    <ui:VisualElement name="Module" tooltip="A transport that is suitable for building and running WebGL clients.">
-                        <ui:Label text="Websockets" name="Name" />
-                        <ui:Button text="Install" display-tooltip-when-elided="True" name="InstallButton" style="flex-shrink: 1; height: auto;" />
-                    </ui:VisualElement>
-                </ui:ScrollView>
-                <ui:Label text="Please wait..." display-tooltip-when-elided="True" name="PleaseWaitLabel" style="-unity-text-align: middle-center; visibility: hidden;" />
-                <ui:VisualElement name="Spacer" />
-                <ui:VisualElement name="Footer" style="flex-direction: row; justify-content: center; align-items: center; display: none;">
-                    <ui:Button name="InstallModules" text="Install Selected Modules" class="redirect" style="flex-grow: 1;" />
-                    <ui:Button name="UninstallModules" text="Uninstall Selected Modules" class="redirect" style="flex-grow: 1;" />
                 </ui:VisualElement>
-            </ui:VisualElement>
+                <ui:VisualElement name="Spacer" />
+            </ui:ScrollView>
         </ui:VisualElement>
     </ui:Box>
 </ui:UXML>
