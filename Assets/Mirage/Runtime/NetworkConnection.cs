@@ -91,7 +91,7 @@ namespace Mirage
             // a black message to ensure a notify timeout
             RegisterHandler<NotifyAck>(msg => { });
             connection.MessageReceived += TransportReceive;
-            connection.Disconnected += () => Disconnected.Invoke();
+            connection.Disconnected += () => Disconnected?.Invoke();
         }
 
         /// <summary>
