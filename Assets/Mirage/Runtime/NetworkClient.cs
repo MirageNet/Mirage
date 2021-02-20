@@ -244,7 +244,7 @@ namespace Mirage
         internal void FixedUpdate()
         {
             // local connection?
-            if (!IsLocalClient && connectState == ConnectState.Connected)
+            if (!IsLocalClient && Active)
             {
                 // only update things while connected
                 Time.UpdateClient(this);

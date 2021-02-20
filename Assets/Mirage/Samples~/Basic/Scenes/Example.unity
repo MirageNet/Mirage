@@ -294,6 +294,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Client: {fileID: 249891958}
   Server: {fileID: 249891959}
+  DontDestroy: 1
   ClientChangeScene:
     m_PersistentCalls:
       m_Calls: []
@@ -361,7 +362,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Levels:
-  - Name: ServerObjectManager
+  - Name: NetworkServer
+    level: 2
+  - Name: NetworkTime
+    level: 2
+  - Name: NetworkIdentity
+    level: 2
+  - Name: PlayerSpawner
     level: 3
   - Name: NetworkBehaviour
     level: 2
@@ -371,14 +378,8 @@ MonoBehaviour:
     level: 3
   - Name: NetworkClient
     level: 2
-  - Name: NetworkTime
-    level: 2
-  - Name: PlayerSpawner
+  - Name: ServerObjectManager
     level: 3
-  - Name: NetworkServer
-    level: 2
-  - Name: NetworkIdentity
-    level: 2
   - Name: RemoteCallHelper
     level: 2
   - Name: NetworkBehaviourInspector

@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -19,12 +18,10 @@ namespace Mirage.KCP
         private readonly EndPoint remoteEndpoint;
         private readonly Kcp kcp;
         private readonly Unreliable unreliable;
-        private readonly int sendWindowSize;
-        private readonly int receiveWindowSize;
 
         public event MessageReceivedDelegate MessageReceived;
 
-        volatile bool open;
+        private bool open;
 
         public int CHANNEL_SIZE = 4;
         public event Action Disconnected;
@@ -81,13 +78,12 @@ namespace Mirage.KCP
         {
             try
             {
-                Thread.VolatileWrite(ref lastReceived, stopWatch.ElapsedMilliseconds);
+                lastReceived = stopWatch.ElapsedMilliseconds;
 
                 while (open)
                 {
                     long now = stopWatch.ElapsedMilliseconds;
-                    long received = Thread.VolatileRead(ref lastReceived);
-                    if (now > received + Timeout)
+                    if (now > lastReceived + Timeout)
                         break;
 
                     kcp.Update((uint)now);
@@ -117,6 +113,7 @@ namespace Mirage.KCP
             finally
             {
                 open = false;
+                Disconnected?.Invoke();
             }
         }
 
@@ -138,7 +135,7 @@ namespace Mirage.KCP
                 if (Utils.Equal(dataSegment, Goodby))
                 {
                     open = false;
-                    Disconnected?.Invoke();
+                    break;
                 }
 
                 MessageReceived?.Invoke(dataSegment, Channel.Reliable);
@@ -174,7 +171,7 @@ namespace Mirage.KCP
             kcp.Input(buffer, msgLength);
             DispatchKcpMessages();
 
-            Thread.VolatileWrite(ref lastReceived, stopWatch.ElapsedMilliseconds);
+            lastReceived = stopWatch.ElapsedMilliseconds;
         }
 
         private bool Validate(byte[] buffer, int msgLength)

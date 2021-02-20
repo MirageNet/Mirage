@@ -54,7 +54,7 @@ namespace Mirage
 
         internal void UpdateClient(NetworkClient client)
         {
-            if (UnityEngine.Time.time - lastPingTime >= PingFrequency)
+            if (UnityEngine.Time.time - lastPingTime >= PingFrequency && client.Connection != null)
             {
                 var pingMessage = new NetworkPingMessage
                 {

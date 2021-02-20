@@ -86,7 +86,8 @@ namespace Mirage.KCP
 
         #endregion
 
-        EndPoint newClientEP = new IPEndPoint(IPAddress.IPv6Any, 0);
+        EndPoint ipv6EndPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
+        EndPoint ipv4EndPoint = new IPEndPoint(IPAddress.Any, 0);
 
         /// <summary>
         /// The higher level should call this method every tick to process
@@ -94,14 +95,19 @@ namespace Mirage.KCP
         /// </summary>
         public override void Poll()
         {
+            if (socket == null)
+                return;
+
+            EndPoint endPoint = socket.AddressFamily == AddressFamily.InterNetworkV6 ? ipv6EndPoint : ipv4EndPoint;
+
             try
             {
                 while (socket.Poll(0, SelectMode.SelectRead))
                 {
-                    int msgLength = socket.ReceiveFrom(buffer, 0, buffer.Length, SocketFlags.None, ref newClientEP);
+                    int msgLength = socket.ReceiveFrom(buffer, 0, buffer.Length, SocketFlags.None, ref endPoint);
 
                     ReceivedMessageCount++;
-                    RawInput(newClientEP, buffer, msgLength);
+                    RawInput(endPoint, buffer, msgLength);
                 }
             }
             catch (SocketException)
