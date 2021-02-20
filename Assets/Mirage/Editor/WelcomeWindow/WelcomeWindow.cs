@@ -32,6 +32,7 @@ namespace Mirage
 
         //window size of the welcome screen
         private static Vector2 windowSize = new Vector2(500, 415);
+        private static string screenToOpenKey = "MirageScreenToOpen";
 
         //editorprefs keys
         private static string firstStartUpKey = string.Empty;
@@ -74,6 +75,8 @@ namespace Mirage
 
             if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirageUnknown")
             {
+                EditorPrefs.SetString(screenToOpenKey, ShowChangeLog ? "ChangeLog" : "Welcome");
+
                 OpenWindow();
             }
         }
@@ -123,7 +126,15 @@ namespace Mirage
             ConfigureTab("SponsorButton", "Sponsor", SponsorUrl);
             ConfigureTab("DiscordButton", "Discord", DiscordInviteUrl);
 
-            ShowTab(ShowChangeLog ? "ChangeLog" : "Welcome");
+            ShowTab(EditorPrefs.GetString(screenToOpenKey, "Welcome"));
+
+            //set the screen's button to be tinted when welcome window is opened
+            float color = EditorPrefs.GetFloat("buttonClickedColor");
+            float borderColor = EditorPrefs.GetFloat("buttonClickedBorderColor");
+            Button openedButton = rootVisualElement.Q<Button>(EditorPrefs.GetString(screenToOpenKey, "Welcome") + "Button");
+            openedButton.style.backgroundColor = new StyleColor(new Color(color, color, color));
+            openedButton.style.borderBottomColor = openedButton.style.borderTopColor = openedButton.style.borderLeftColor = openedButton.style.borderRightColor = new StyleColor(new Color(borderColor, borderColor, borderColor));
+
             #endregion
         }
 
@@ -138,7 +149,12 @@ namespace Mirage
         private void ConfigureTab(string tabButtonName, string tab, string url)
         {
             Button tabButton = rootVisualElement.Q<Button>(tabButtonName);
-            tabButton.clicked += () => ShowTab(tab);
+            tabButton.clicked += () =>
+            {
+                ShowTab(tab);
+                EditorPrefs.SetString(screenToOpenKey, tab);
+            };
+
             Button redirectButton = rootVisualElement.Q<VisualElement>(tab).Q<Button>("Redirect");
             redirectButton.clicked += () => Application.OpenURL(url);
         }
