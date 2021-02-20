@@ -36,6 +36,7 @@ namespace Mirage
 
         //window size of the welcome screen
         private static Vector2 windowSize = new Vector2(500, 415);
+        private static string screenToOpenKey = "MirageScreenToOpen";
 
         //editorprefs keys
         private static string firstStartUpKey = string.Empty;
@@ -78,6 +79,8 @@ namespace Mirage
 
             if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirageUnknown")
             {
+                EditorPrefs.SetString(screenToOpenKey, ShowChangeLog ? "ChangeLog" : "Welcome");
+
                 OpenWindow();
             }
         }
@@ -132,7 +135,12 @@ namespace Mirage
             ConfigureTab("SponsorButton", "Sponsor", SponsorUrl);
             ConfigureTab("DiscordButton", "Discord", DiscordInviteUrl);
 
-            ShowTab(ShowChangeLog ? "ChangeLog" : "Welcome");
+            ShowTab(EditorPrefs.GetString(screenToOpenKey, "Welcome"));
+
+            //set the screen's button to be tinted when welcome window is opened
+            Button openedButton = rootVisualElement.Q<Button>(EditorPrefs.GetString(screenToOpenKey, "Welcome") + "Button");
+            ToggleMenuButtonColor(openedButton, true);
+            lastClickedTab = openedButton;
 
             #endregion
         }
@@ -148,12 +156,17 @@ namespace Mirage
         private void ConfigureTab(string tabButtonName, string tab, string url)
         {
             Button tabButton = rootVisualElement.Q<Button>(tabButtonName);
+
+            tabButton.EnableInClassList("dark-selected-tab", false);
+            tabButton.EnableInClassList("light-selected-tab", false);
+
             tabButton.clicked += () => 
             {
                 ToggleMenuButtonColor(tabButton, true);
                 ToggleMenuButtonColor(lastClickedTab, false);
                 ShowTab(tab);
                 lastClickedTab = tabButton;
+                EditorPrefs.SetString(screenToOpenKey, tab);
             };
 
             Button redirectButton = rootVisualElement.Q<VisualElement>(tab).Q<Button>("Redirect");
@@ -186,15 +199,15 @@ namespace Mirage
         {
             if(button == null) { return; }
 
-            if(toggle)
+            //dark mode
+            if (EditorGUIUtility.isProSkin)
             {
-                button.style.backgroundColor = button.resolvedStyle.backgroundColor;
-                button.style.borderBottomColor = button.style.borderTopColor = button.style.borderLeftColor = button.style.borderRightColor = button.resolvedStyle.borderBottomColor;
+                button.EnableInClassList("dark-selected-tab", toggle);
             }
+            //light mode
             else
             {
-                button.style.backgroundColor = defaultButtonBackgroundColor;
-                button.style.borderBottomColor = button.style.borderTopColor = button.style.borderLeftColor = button.style.borderRightColor = defaultButtonBorderColor;
+                button.EnableInClassList("light-selected-tab", toggle);
             }
         }
 

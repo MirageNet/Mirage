@@ -7,13 +7,13 @@
     <ui:Label name="Title" text="Welcome to Mirage!" />
     <ui:Box name="ColumnContainer">
         <ui:VisualElement name="LeftColumnBox">
-            <ui:Button name="WelcomeButton" text="Welcome" />
-            <ui:Button name="QuickStartButton" text="Quick Start Guide" />
-            <ui:Button name="FaqButton" text="FAQ" />
-            <ui:Button name="BestPracticesButton" text="Best Practices" />
-            <ui:Button name="ChangeLogButton" text="Change Log" />
+            <ui:Button name="WelcomeButton" text="Welcome" class="light-selected-tab dark-selected-tab" />
+            <ui:Button name="QuickStartButton" text="Quick Start Guide" class="light-selected-tab dark-selected-tab" />
+            <ui:Button name="FaqButton" text="FAQ" class="light-selected-tab dark-selected-tab" />
+            <ui:Button name="BestPracticesButton" text="Best Practices" class="light-selected-tab dark-selected-tab" />
+            <ui:Button name="ChangeLogButton" text="Change Log" class="light-selected-tab dark-selected-tab" />
             <ui:Button name="SponsorButton" text="Sponsor Us" style="display: none;" />
-            <ui:Button name="DiscordButton" text="Discord" />
+            <ui:Button name="DiscordButton" text="Discord" class="light-selected-tab dark-selected-tab" />
         </ui:VisualElement>
         <ui:VisualElement name="Spacer" />
         <ui:VisualElement name="RightColumnBox">
