@@ -7,7 +7,7 @@
     <ui:Label name="Title" text="Welcome to Mirage!" />
     <ui:Box name="ColumnContainer">
         <ui:VisualElement name="LeftColumnBox">
-            <ui:Button name="WelcomeButton" text="Welcome" focusable="false" />
+            <ui:Button name="WelcomeButton" text="Welcome" />
             <ui:Button name="QuickStartButton" text="Quick Start Guide" />
             <ui:Button name="ModulesButton" text="Modules" />
             <ui:Button name="FaqButton" text="FAQ" />

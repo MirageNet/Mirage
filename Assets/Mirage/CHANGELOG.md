@@ -1,3 +1,50 @@
+## [67.2.1](https://github.com/MirageNet/Mirage/compare/v67.2.0...v67.2.1) (2021-02-19)
+
+
+### Bug Fixes
+
+* add missing properties to interface ([#617](https://github.com/MirageNet/Mirage/issues/617)) ([e45920e](https://github.com/MirageNet/Mirage/commit/e45920ebd375b382f48e11bba7e73549efb58c6c))
+
+# [67.2.0](https://github.com/MirageNet/Mirage/compare/v67.1.0...v67.2.0) (2021-02-19)
+
+
+### Features
+
+* add events to interfaces ([#614](https://github.com/MirageNet/Mirage/issues/614)) ([4d1a772](https://github.com/MirageNet/Mirage/commit/4d1a77263dfbca0f631ded85a5f772ce6e4e4343))
+
+# [67.1.0](https://github.com/MirageNet/Mirage/compare/v67.0.2...v67.1.0) (2021-02-19)
+
+
+### Features
+
+* welcome window shows active tab ([#616](https://github.com/MirageNet/Mirage/issues/616)) ([1411d0a](https://github.com/MirageNet/Mirage/commit/1411d0ae4dd3b83c44ce27800e4117f00211f092))
+
+## [67.0.2](https://github.com/MirageNet/Mirage/compare/v67.0.1...v67.0.2) (2021-02-19)
+
+
+### Bug Fixes
+
+* clientObjectManager was not using its interface ([#615](https://github.com/MirageNet/Mirage/issues/615)) ([d2b07ea](https://github.com/MirageNet/Mirage/commit/d2b07ea46ef1e5e0dbc4685b39c4cd24a7c2fc36))
+
+## [67.0.1](https://github.com/MirageNet/Mirage/compare/v67.0.0...v67.0.1) (2021-02-19)
+
+
+### Bug Fixes
+
+* move interfaces into their own files ([#613](https://github.com/MirageNet/Mirage/issues/613)) ([432005b](https://github.com/MirageNet/Mirage/commit/432005bea62a83d50416aa7760ee15881ac68d00))
+
+# [67.0.0](https://github.com/MirageNet/Mirage/compare/v66.2.2...v67.0.0) (2021-02-19)
+
+
+### Code Refactoring
+
+* remove unnecessary assembly definition ([#599](https://github.com/MirageNet/Mirage/issues/599)) ([89ffc7c](https://github.com/MirageNet/Mirage/commit/89ffc7c9cc9a37650c998381bf97c148b2f1cfd9))
+
+
+### BREAKING CHANGES
+
+* removed MirageNG.asmdef,  change your assembly to use Mirage.asmdef instead
+
 ## [66.2.2](https://github.com/MirageNet/Mirage/compare/v66.2.1...v66.2.2) (2021-02-19)
 
 

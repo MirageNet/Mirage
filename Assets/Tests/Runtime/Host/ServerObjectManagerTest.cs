@@ -131,5 +131,17 @@ namespace Mirage.Tests.Host
 
             Assert.That(serverObjectManager.SpawnedObjects.Count, Is.Zero);
         });
+
+        [Test]
+        public void SpawnedNotNullTest()
+        {
+            Assert.That(serverObjectManager.Spawned, Is.Not.Null);
+        }
+
+        [Test]
+        public void UnSpawnedNotNullTest()
+        {
+            Assert.That(serverObjectManager.UnSpawned, Is.Not.Null);
+        }
     }
 }
