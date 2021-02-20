@@ -1,3 +1,10 @@
+## [67.2.4](https://github.com/MirageNet/Mirage/compare/v67.2.3...v67.2.4) (2021-02-20)
+
+
+### Bug Fixes
+
+* add comments and backing field for time ([#618](https://github.com/MirageNet/Mirage/issues/618)) ([da74e11](https://github.com/MirageNet/Mirage/commit/da74e11066f1a6782ec1304f855b79840c7058f3))
+
 ## [67.2.3](https://github.com/MirageNet/Mirage/compare/v67.2.2...v67.2.3) (2021-02-19)
 
 
