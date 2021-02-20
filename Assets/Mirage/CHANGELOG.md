@@ -1,3 +1,10 @@
+## [67.2.6](https://github.com/MirageNet/Mirage/compare/v67.2.5...v67.2.6) (2021-02-20)
+
+
+### Bug Fixes
+
+* bug in tanks sample ([#575](https://github.com/MirageNet/Mirage/issues/575)) ([d82efea](https://github.com/MirageNet/Mirage/commit/d82efea9015cf2db9436f12deaa9a7dd65ba862d))
+
 ## [67.2.5](https://github.com/MirageNet/Mirage/compare/v67.2.4...v67.2.5) (2021-02-20)
 
 
