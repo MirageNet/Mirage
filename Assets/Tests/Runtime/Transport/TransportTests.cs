@@ -3,7 +3,6 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using System.Text;
-using System.IO;
 using System.Net;
 using System;
 using Object = UnityEngine.Object;
@@ -85,8 +84,8 @@ namespace Mirage.Tests
 
         #endregion
 
-        [UnityTest]
-        public IEnumerator ClientToServerTest() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void ClientToServerTest()
         {
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the client";
@@ -97,7 +96,7 @@ namespace Mirage.Tests
             transport.Poll();
 
             Assert.That(serverMessages.Dequeue().data, Is.EquivalentTo(data));
-        });
+        }
 
         [Test]
         public void EndpointAddress()
@@ -119,8 +118,8 @@ namespace Mirage.Tests
             // random port
         }
 
-        [UnityTest]
-        public IEnumerator ClientToServerMultipleTest() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void ClientToServerMultipleTest()
         {
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the client 1";
@@ -135,10 +134,10 @@ namespace Mirage.Tests
 
             Assert.That(serverMessages.Dequeue().data, Is.EquivalentTo(data));
             Assert.That(serverMessages.Dequeue().data, Is.EquivalentTo(data2));
-        });
+        }
 
-        [UnityTest]
-        public IEnumerator ServerToClientTest() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void ServerToClientTest()
         {
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the server";
@@ -147,10 +146,10 @@ namespace Mirage.Tests
 
             transport.Poll();
             Assert.That(clientMessages.Dequeue().data, Is.EquivalentTo(data));
-        });
+        }
 
-        [UnityTest]
-        public IEnumerator DisconnectServerTest() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void DisconnectServerTest()
         {
             Action disconnectMock = Substitute.For<Action>();
             clientConnection.Disconnected += disconnectMock;
@@ -159,10 +158,10 @@ namespace Mirage.Tests
             transport.Poll();
 
             disconnectMock.Received().Invoke();
-        });
+        }
 
-        [UnityTest]
-        public IEnumerator DisconnectClientTest() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void DisconnectClientTest()
         {
             Action disconnectMock = Substitute.For<Action>();
             serverConnection.Disconnected += disconnectMock;
@@ -171,10 +170,10 @@ namespace Mirage.Tests
             transport.Poll();
 
             disconnectMock.Received().Invoke();
-        });
+        }
 
-        [UnityTest]
-        public IEnumerator DisconnectClientTest2() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void DisconnectClientTest2()
         {
             Action disconnectMock = Substitute.For<Action>();
             clientConnection.Disconnected += disconnectMock;
@@ -183,7 +182,7 @@ namespace Mirage.Tests
             transport.Poll();
 
             disconnectMock.Received().Invoke();
-        });
+        }
 
         [Test]
         public void TestServerUri()
