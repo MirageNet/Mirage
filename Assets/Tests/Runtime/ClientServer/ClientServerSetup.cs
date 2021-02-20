@@ -32,7 +32,8 @@ namespace Mirage.Tests.ClientServer
 
         protected GameObject playerPrefab;
 
-        protected Transport testTransport;
+        protected Transport serverTransport;
+        protected Transport clientTransport;
         protected INetworkConnection connectionToServer;
         protected INetworkConnection connectionToClient;
 
@@ -43,15 +44,15 @@ namespace Mirage.Tests.ClientServer
         {
             serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(NetworkServer));
             clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(ClientObjectManager), typeof(NetworkClient));
-            testTransport = serverGo.AddComponent<LoopbackTransport>();
+            serverTransport = serverGo.AddComponent<LoopbackTransport>();
 
             await UniTask.Delay(1);
 
             server = serverGo.GetComponent<NetworkServer>();
             client = clientGo.GetComponent<NetworkClient>();
 
-            server.Transport = testTransport;
-            client.Transport = testTransport;
+            server.Transport = serverTransport;
+            client.Transport = serverTransport;
 
             serverSceneManager = serverGo.GetComponent<NetworkSceneManager>();
             clientSceneManager = clientGo.GetComponent<NetworkSceneManager>();

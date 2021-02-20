@@ -14,11 +14,14 @@ namespace Mirage.Tests
 
         public override bool Supported => true;
 
+        PipeConnection clientConnection;
+        PipeConnection serverConnection;
+
         public override UniTask<IConnection> ConnectAsync(Uri uri)
         {
-            (IConnection c1, IConnection c2) = PipeConnection.CreatePipe();
-            Connected.Invoke(c2);
-            return UniTask.FromResult(c1);
+            (clientConnection, serverConnection) = PipeConnection.CreatePipe();
+            Connected.Invoke(serverConnection);
+            return UniTask.FromResult<IConnection>(clientConnection);
         }
 
         UniTaskCompletionSource listenCompletionSource;
@@ -48,7 +51,8 @@ namespace Mirage.Tests
 
         public override void Poll()
         {
-            
+            clientConnection.Poll();
+            serverConnection.Poll();
         }
     }
 }
