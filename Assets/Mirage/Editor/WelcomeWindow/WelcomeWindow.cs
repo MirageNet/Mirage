@@ -138,11 +138,9 @@ namespace Mirage
             ShowTab(EditorPrefs.GetString(screenToOpenKey, "Welcome"));
 
             //set the screen's button to be tinted when welcome window is opened
-            float color = EditorPrefs.GetFloat("buttonClickedColor");
-            float borderColor = EditorPrefs.GetFloat("buttonClickedBorderColor");
             Button openedButton = rootVisualElement.Q<Button>(EditorPrefs.GetString(screenToOpenKey, "Welcome") + "Button");
-            openedButton.style.backgroundColor = new StyleColor(new Color(color, color, color));
-            openedButton.style.borderBottomColor = openedButton.style.borderTopColor = openedButton.style.borderLeftColor = openedButton.style.borderRightColor = new StyleColor(new Color(borderColor, borderColor, borderColor));
+            ToggleMenuButtonColor(openedButton, true);
+            lastClickedTab = openedButton;
 
             #endregion
         }
@@ -158,6 +156,10 @@ namespace Mirage
         private void ConfigureTab(string tabButtonName, string tab, string url)
         {
             Button tabButton = rootVisualElement.Q<Button>(tabButtonName);
+
+            tabButton.EnableInClassList("dark-selected-tab", false);
+            tabButton.EnableInClassList("light-selected-tab", false);
+
             tabButton.clicked += () => 
             {
                 ToggleMenuButtonColor(tabButton, true);
@@ -197,15 +199,15 @@ namespace Mirage
         {
             if(button == null) { return; }
 
-            if(toggle)
+            //dark mode
+            if (EditorGUIUtility.isProSkin)
             {
-                button.style.backgroundColor = button.resolvedStyle.backgroundColor;
-                button.style.borderBottomColor = button.style.borderTopColor = button.style.borderLeftColor = button.style.borderRightColor = button.resolvedStyle.borderBottomColor;
+                button.EnableInClassList("dark-selected-tab", toggle);
             }
+            //light mode
             else
             {
-                button.style.backgroundColor = defaultButtonBackgroundColor;
-                button.style.borderBottomColor = button.style.borderTopColor = button.style.borderLeftColor = button.style.borderRightColor = defaultButtonBorderColor;
+                button.EnableInClassList("light-selected-tab", toggle);
             }
         }
 
