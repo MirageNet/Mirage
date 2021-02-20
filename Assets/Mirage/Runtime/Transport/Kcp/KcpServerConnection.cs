@@ -11,12 +11,10 @@ namespace Mirage.KCP
         {
         }
 
-        internal UniTask HandshakeAsync()
+        internal void Handshake()
         {
             // send a greeting and see if the server replies
             Send(Hello);
-
-            return WaitForHello();
         }  
     }
 }

@@ -19,7 +19,12 @@ namespace Mirage.KCP
         {
         }
 
-        internal async UniTask HandshakeAsync(int bits)
+        internal void Handshake(int bits)
+        {
+            HandshakeAsync(bits).Forget();
+        }
+
+        internal async UniTaskVoid HandshakeAsync(int bits)
         {
             // in the very first message we must mine a hashcash token
             // and send that as a hello
@@ -34,9 +39,6 @@ namespace Mirage.KCP
             // send a greeting and see if the server replies
 
             Send(data);
-
-            await WaitForHello();
-
         }
     }
 }

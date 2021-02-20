@@ -137,7 +137,7 @@ namespace Mirage.KCP
                 // fire a separate task for handshake
                 // that way if the client does not cooperate
                 // we can continue with other clients
-                ServerHandshake(endpoint, data, msgLength).Forget();
+                ServerHandshake(endpoint, data, msgLength);
             }
             else
             {
@@ -146,7 +146,7 @@ namespace Mirage.KCP
             }
         }
 
-        private async UniTaskVoid ServerHandshake(EndPoint endpoint, byte[] data, int msgLength)
+        private void ServerHandshake(EndPoint endpoint, byte[] data, int msgLength)
         {
             var connection = new KcpServerConnection(socket, endpoint, delayMode, SendWindowSize, ReceiveWindowSize);
             connections.Add(endpoint as IPEndPoint, connection);
@@ -161,12 +161,14 @@ namespace Mirage.KCP
                 sentBytes += length;
             };
 
+            connection.Connected += () =>
+            {
+                Connected?.Invoke(connection);
+            };
+
             connection.HandlePacket(data, msgLength);
 
-            await connection.HandshakeAsync();
-
-            // once handshake is completed,  then the connection has been accepted
-            Connected?.Invoke(connection);
+            connection.Handshake();            
         }
 
         private readonly HashSet<HashCash> used = new HashSet<HashCash>();
@@ -258,6 +260,8 @@ namespace Mirage.KCP
                 socket = new Socket(remoteEndpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
             }
 
+            var completionSource = new UniTaskCompletionSource<IConnection>();
+
             var connection = new KcpClientConnection(socket, remoteEndpoint, delayMode, SendWindowSize, ReceiveWindowSize)
             {
             };
@@ -267,6 +271,7 @@ namespace Mirage.KCP
             connection.Disconnected += () =>
             {
                 connections.Remove(remoteEndpoint);
+                completionSource.TrySetException(new SocketException());
             };
 
             connection.DataSent += (length) =>
@@ -274,10 +279,16 @@ namespace Mirage.KCP
                 sentBytes += length;
             };
 
-            await connection.HandshakeAsync(HashCashBits);
+            connection.Connected += () =>
+            {
+                Connected?.Invoke(connection);
+                completionSource.TrySetResult(connection);
+            };
 
-            Connected?.Invoke(connection);
-            return connection;
+            connection.Handshake(HashCashBits);
+
+
+            return await completionSource.Task;
         }
 
 

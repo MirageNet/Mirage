@@ -17,8 +17,10 @@ namespace Mirage.Tests
     {
         public ushort port = 7896;
 
-        KcpTransport transport;
+        KcpTransport serverTransport;
         KcpConnection clientConnection;
+
+        KcpTransport clientTransport;
         KcpConnection serverConnection;
 
         Uri testUri;
@@ -38,17 +40,21 @@ namespace Mirage.Tests
             // without interfering with each other.
             port++;
 
-            var transportGo = new GameObject("kcpTransport", typeof(KcpTransport));
-
-            transport = transportGo.GetComponent<KcpTransport>();
-
-            transport.Port = port;
+            var serverGo = new GameObject("serverTransport", typeof(KcpTransport));
+            serverTransport = serverGo.GetComponent<KcpTransport>();
+            serverTransport.Port = port;
             // speed this up
-            transport.HashCashBits = 3;
-       
-            transport.Connected.AddListener(connection => serverConnection = (KcpConnection)connection);
+            serverTransport.HashCashBits = 3;
 
-            listenTask = transport.ListenAsync();
+            var clientGo = new GameObject("clientTransport", typeof(KcpTransport));
+            clientTransport = clientGo.GetComponent<KcpTransport>();
+            clientTransport.Port = port;
+            // speed this up
+            clientTransport.HashCashBits = 3;
+
+
+            serverTransport.Connected.AddListener(connection => serverConnection = (KcpConnection)connection);
+            listenTask = serverTransport.ListenAsync();
 
             var uriBuilder = new UriBuilder
             {
@@ -59,9 +65,19 @@ namespace Mirage.Tests
 
             testUri = uriBuilder.Uri;
 
-            clientConnection = (KcpConnection)await transport.ConnectAsync(uriBuilder.Uri);
+            UniTask<IConnection> connectTask = clientTransport.ConnectAsync(uriBuilder.Uri).Timeout(TimeSpan.FromSeconds(2));
 
-            await UniTask.WaitUntil(() => serverConnection != null);
+            // If we don't poll the transports,  they won't open the connection as they don't process
+            // data on their own
+            while (!connectTask.Status.IsCompleted() || serverConnection == null)
+            {
+                serverTransport.Poll();
+                clientTransport.Poll();
+
+                await UniTask.Delay(1);
+            }
+
+            clientConnection = (KcpConnection)await connectTask;
 
             // for our tests,  lower the timeout to just 0.1s
             // so that the tests run quickly.
@@ -90,10 +106,12 @@ namespace Mirage.Tests
         {
             clientConnection?.Disconnect();
             serverConnection?.Disconnect();
-            transport.Disconnect();
+            serverTransport.Disconnect();
+            clientTransport.Disconnect();
 
             await listenTask;
-            UnityEngine.Object.Destroy(transport.gameObject);
+            UnityEngine.Object.Destroy(serverTransport.gameObject);
+            UnityEngine.Object.Destroy(clientTransport.gameObject);
             // wait a frame so object will be destroyed
         });
 
@@ -109,7 +127,7 @@ namespace Mirage.Tests
         public void SendDataFromClient()
         {
             clientConnection.Send(new ArraySegment<byte>(data));
-            transport.Poll();
+            serverTransport.Poll();
             Assert.That(serverMessages.Dequeue().data, Is.EquivalentTo(data));
         }
 
@@ -117,31 +135,32 @@ namespace Mirage.Tests
         public void SendDataFromServer()
         {
             serverConnection.Send(new ArraySegment<byte>(data));
-            transport.Poll();
+            serverTransport.Poll();
             Assert.That(clientMessages.Dequeue().data, Is.EquivalentTo(data));
         }
 
         [Test]
         public void ReceivedBytes()
         {
-            long received = transport.ReceivedBytes;
+            long received = serverTransport.ReceivedBytes;
             Assert.That(received, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
 
             clientConnection.Send(new ArraySegment<byte>(data));
-            transport.Poll();
-            Assert.That(transport.ReceivedBytes, Is.GreaterThan(received + data.Length), "Client sent data,  we should have received");
+
+            serverTransport.Poll();
+            Assert.That(serverTransport.ReceivedBytes, Is.GreaterThan(received + data.Length), "Client sent data,  we should have received");
 
         }
 
         [Test]
         public void SentBytes()
         {
-            long sent = transport.SentBytes;
+            long sent = serverTransport.SentBytes;
             Assert.That(sent, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
 
             serverConnection.Send(new ArraySegment<byte>(data));
-            transport.Poll();
-            Assert.That(transport.SentBytes, Is.GreaterThan(sent + data.Length), "Client sent data,  we should have received");
+            serverTransport.Poll();
+            Assert.That(serverTransport.SentBytes, Is.GreaterThan(sent + data.Length), "Client sent data,  we should have received");
 
         }
 
@@ -149,7 +168,7 @@ namespace Mirage.Tests
         public void SendUnreliableDataFromServer()
         {
             serverConnection.Send(new ArraySegment<byte>(data), Channel.Unreliable);
-            transport.Poll();
+            serverTransport.Poll();
             Assert.That(clientMessages.Dequeue().channel, Is.EqualTo(Channel.Unreliable));
         }
 
@@ -157,7 +176,7 @@ namespace Mirage.Tests
         public void SendUnreliableDataFromClient()
         {
             clientConnection.Send(new ArraySegment<byte>(data), Channel.Unreliable);
-            transport.Poll();
+            serverTransport.Poll();
             Assert.That(serverMessages.Dequeue().channel, Is.EqualTo(Channel.Unreliable));
         }
 
@@ -170,7 +189,7 @@ namespace Mirage.Tests
             serverConnection.Disconnected += disconnectMock;
 
             await UniTask.Delay(1000);
-            transport.Poll();
+            serverTransport.Poll();
             disconnectMock.Received().Invoke();
 
         });
@@ -183,14 +202,14 @@ namespace Mirage.Tests
             clientConnection.Disconnected += disconnectMock;
 
             await UniTask.Delay(1000);
-            transport.Poll();
+            serverTransport.Poll();
             disconnectMock.Received().Invoke();
         });
 
         [Test]
         public void TestServerUri()
         {
-            Uri serverUri = transport.ServerUri().First();
+            Uri serverUri = serverTransport.ServerUri().First();
 
             Assert.That(serverUri.Port, Is.EqualTo(port));
             Assert.That(serverUri.Scheme, Is.EqualTo(testUri.Scheme));
@@ -199,17 +218,21 @@ namespace Mirage.Tests
         [Test]
         public void IsSupportedTest()
         {
-            Assert.That(transport.Supported, Is.True);
+            Assert.That(serverTransport.Supported, Is.True);
         }
 
-        [Test]
-        public void ConnectionsDontLeak()
-        {
-            serverConnection.Disconnect();
+        [UnityTest]
+        public IEnumerator ConnectionsDontLeak() => UniTask.ToCoroutine(async () =>
+       {
+           serverConnection.Disconnect();
 
-            transport.Poll();
+           while (serverTransport.connections.Count > 0)
+           {
+               serverTransport.Poll();
+               await UniTask.Delay(1);
+           }
 
-            Assert.That(transport.connections, Is.Empty);
-        }
+           Assert.That(serverTransport.connections, Is.Empty);
+       });
     }
 }

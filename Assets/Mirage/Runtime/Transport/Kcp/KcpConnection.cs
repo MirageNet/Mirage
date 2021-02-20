@@ -11,6 +11,14 @@ namespace Mirage.KCP
 {
     public abstract class KcpConnection : IConnection
     {
+
+        enum State
+        {
+            Connecting,
+            Connected,
+            Closed
+        }
+
         static readonly ILogger logger = LogFactory.GetLogger(typeof(KcpConnection));
 
         const int MinimumKcpTickInterval = 10;
@@ -22,11 +30,14 @@ namespace Mirage.KCP
 
         public event MessageReceivedDelegate MessageReceived;
 
-        private bool open;
+        private State state = State.Connecting;
 
         public int CHANNEL_SIZE = 4;
+        public event Action Connected;
         public event Action Disconnected;
+
         internal event Action<int> DataSent;
+
 
         // If we don't receive anything these many milliseconds
         // then consider us disconnected
@@ -66,7 +77,6 @@ namespace Mirage.KCP
 
             kcp.SetNoDelay(delayMode);
             kcp.SetWindowSize((uint)sendWindowSize, (uint)receiveWindowSize);
-            open = true;
 
             Tick().Forget();
         }
@@ -81,7 +91,7 @@ namespace Mirage.KCP
             {
                 lastReceived = stopWatch.ElapsedMilliseconds;
 
-                while (open)
+                while (state != State.Closed)
                 {
                     long now = stopWatch.ElapsedMilliseconds;
                     if (now > lastReceived + Timeout)
@@ -113,7 +123,7 @@ namespace Mirage.KCP
             }
             finally
             {
-                open = false;
+                state = State.Closed;
                 Disconnected?.Invoke();
             }
         }
@@ -136,12 +146,24 @@ namespace Mirage.KCP
                 if (Utils.Equal(dataSegment, Goodby))
                 {
                     Debug.Log("Received goodby");
-                    open = false;
-                    break;
+                    state = State.Closed;
                 }
-
-                MessageReceived?.Invoke(dataSegment, Channel.Reliable);
-                msgSize = kcp.PeekSize();
+                else if (state == State.Connecting)
+                {
+                    // the first message is the handshake message.
+                    // simply eat it.
+                    // if this is the server,  the handshake message
+                    // is validated before creating the KCP,  so we can just eat it
+                    // if this is the client, we just expect any message (hello) from the server
+                    state = State.Connected;
+                    msgSize = kcp.PeekSize();
+                    Connected?.Invoke();
+                }
+                else
+                {
+                    MessageReceived?.Invoke(dataSegment, Channel.Reliable);
+                    msgSize = kcp.PeekSize();
+                }
             }
         }
 
@@ -151,7 +173,7 @@ namespace Mirage.KCP
             if (!Validate(buffer, msgLength))
                 return;
 
-            if (!open)
+            if (state == State.Closed)
                 return;
 
             int channel = GetChannel(buffer);
@@ -219,7 +241,7 @@ namespace Mirage.KCP
         public virtual void Disconnect()
         {
             // send a disconnect message and disconnect
-            if (open && socket != null)
+            if (state == State.Closed && socket != null)
             {
                 try
                 {
@@ -240,7 +262,7 @@ namespace Mirage.KCP
                     // were disconnected
                 }
             }
-            open = false;
+            state = State.Closed;
         }
 
         /// <summary>
@@ -258,20 +280,6 @@ namespace Mirage.KCP
         {
             var decoder = new Decoder(data, RESERVED);
             return (int)decoder.Decode32U();
-        }
-
-        protected UniTask WaitForHello()
-        {
-            var completionSource = AutoResetUniTaskCompletionSource.Create();
-
-            void ReceiveHello(ArraySegment<byte> helloData, int channel)
-            {
-                completionSource.TrySetResult();
-                MessageReceived -= ReceiveHello;
-            }
-            MessageReceived += ReceiveHello;
-
-            return completionSource.Task;
         }
     }
 }
