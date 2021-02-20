@@ -607,7 +607,9 @@ namespace Mirage.KCP
 
             // 'ikcp_update' haven't been called.
             if (!updated)
+            {
                 return;
+            }
 
             // kcp only stack allocs a segment here for performance, leaving
             // its data buffer null because this segment's data buffer is never

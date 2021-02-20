@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Mirage.KCP
 {
@@ -134,6 +135,7 @@ namespace Mirage.KCP
                 var dataSegment = new ArraySegment<byte>(receiveBuffer.GetBuffer(), 0, msgSize);
                 if (Utils.Equal(dataSegment, Goodby))
                 {
+                    Debug.Log("Received goodby");
                     open = false;
                     break;
                 }
@@ -217,18 +219,18 @@ namespace Mirage.KCP
         public virtual void Disconnect()
         {
             // send a disconnect message and disconnect
-            if (open && socket.Connected)
+            if (open && socket != null)
             {
                 try
                 {
                     Send(Goodby);
                     kcp.Flush();
                 }
-                catch (SocketException)
+                catch (SocketException ex)
                 {
                     // this is ok,  the connection was already closed
                 }
-                catch (ObjectDisposedException)
+                catch (ObjectDisposedException ex)
                 {
                     // this is normal when we stop the server
                     // the socket is stopped so we can't send anything anymore
@@ -238,7 +240,6 @@ namespace Mirage.KCP
                     // were disconnected
                 }
             }
-            Disconnected?.Invoke();
             open = false;
         }
 

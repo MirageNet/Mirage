@@ -63,8 +63,8 @@ namespace Mirage
         public void StopButtonHandler()
         {
             labelText = string.Empty;
-            NetworkManager.Server.StopHost();
             NetworkManager.Client.Disconnect();
+            NetworkManager.Server.StopHost();
             OfflineSetActive();
         }
 

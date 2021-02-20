@@ -118,6 +118,9 @@ namespace Mirage
         /// </summary>
         public void Disconnect()
         {
+            if (!Active)
+                return;
+
             if (LocalClient != null)
             {
                 OnStopHost?.Invoke();
