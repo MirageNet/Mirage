@@ -226,11 +226,11 @@ namespace Mirage.KCP
                     Send(Goodby);
                     kcp.Flush();
                 }
-                catch (SocketException ex)
+                catch (SocketException)
                 {
                     // this is ok,  the connection was already closed
                 }
-                catch (ObjectDisposedException ex)
+                catch (ObjectDisposedException)
                 {
                     // this is normal when we stop the server
                     // the socket is stopped so we can't send anything anymore
