@@ -174,6 +174,7 @@ namespace Mirage
             EditorPrefs.SetBool(firstTimeMirageKey, true);
         }
 
+        //menu button setup
         private void ConfigureTab(string tabButtonName, string tab, string url)
         {
             Button tabButton = rootVisualElement.Q<Button>(tabButtonName);
@@ -191,6 +192,7 @@ namespace Mirage
             redirectButton.clicked += () => Application.OpenURL(url);
         }
 
+        //switch between content
         private void ShowTab(string screen)
         {
             VisualElement rightColumn = rootVisualElement.Q<VisualElement>("RightColumnBox");
@@ -213,6 +215,9 @@ namespace Mirage
             }
         }
 
+        //changes the background and border color of the button
+        //if toggle == true, keep the button tinted
+        //otherwise, return the button to the default, not active, colors
         private void ToggleMenuButtonColor(Button button, bool toggle)
         {
             if (button == null) { return; }
@@ -249,6 +254,8 @@ namespace Mirage
             };
 
             listRequest = UnityEditor.PackageManager.Client.List(true, false);
+
+            //subscribe to ListPackageProgress for updates
             EditorApplication.update += ListPackageProgress;
         }
 
@@ -257,7 +264,7 @@ namespace Mirage
         {
             installRequest = UnityEditor.PackageManager.Client.Add(Packages.Find((x) => x.displayName == packageName).gitUrl);
 
-            //subscribe to InstallPackageProgress
+            //subscribe to InstallPackageProgress for updates
             EditorApplication.update += InstallPackageProgress;
         }
 
@@ -266,7 +273,7 @@ namespace Mirage
         {
             uninstallRequest = UnityEditor.PackageManager.Client.Remove(Packages.Find((x) => x.displayName == packageName).packageName);
 
-            //subscribe to UninstallPackageProgress
+            //subscribe to UninstallPackageProgress for updates
             EditorApplication.update += UninstallPackageProgress;
         }
 
@@ -275,6 +282,7 @@ namespace Mirage
         {
             if (installRequest.IsCompleted)
             {
+                //log results
                 if (installRequest.Status == StatusCode.Success)
                 {
                     Debug.Log("Package install successful.");
@@ -296,6 +304,7 @@ namespace Mirage
         {
             if (uninstallRequest.IsCompleted)
             {
+                //log results
                 EditorApplication.update -= UninstallPackageProgress;
 
                 if (uninstallRequest.Status == StatusCode.Success)
@@ -323,6 +332,7 @@ namespace Mirage
                 {
                     List<string> installedPackages = new List<string>();
 
+                    //populate installedPackages
                     foreach (var package in listRequest.Result)
                     {
                         Package? miragePackage = Packages.Find((x) => x.packageName == package.name);
@@ -334,6 +344,7 @@ namespace Mirage
 
                     ConfigureInstallButtons(installedPackages);
                 }
+                //log error
                 else if (listRequest.Status == StatusCode.Failure)
                 {
                     Debug.LogError("There was an issue finding packages. \n Error Code: " + listRequest.Error.errorCode + "\n Error Message: " + listRequest.Error.message);
@@ -341,15 +352,22 @@ namespace Mirage
             }
         }
 
+        //configures the install button
+        //changes text and functionality after button press
         private void ConfigureInstallButtons(List<string> installedPackages)
         {
+            //get all the packages
             foreach (VisualElement package in rootVisualElement.Q<VisualElement>("ModulesList").Children())
             {
+                //get the button and name of the package
                 Button installButton = package.Q<Button>("InstallButton");
                 string packageName = package.Q<Label>("Name").text;
                 bool foundInInstalledPackages = installedPackages.Contains(packageName);
 
+                //set text
                 installButton.text = !foundInInstalledPackages ? "Install" : "Uninstall";
+                
+                //set functionality
                 if (!foundInInstalledPackages)
                 {
                     installButton.clicked += () => 
