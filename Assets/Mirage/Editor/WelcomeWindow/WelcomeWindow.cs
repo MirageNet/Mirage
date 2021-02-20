@@ -33,7 +33,7 @@ namespace Mirage
         private const string BestPracticesUrl = "https://miragenet.github.io/Mirage/Articles/Guides/BestPractices.html";
         private const string FaqUrl = "https://miragenet.github.io/Mirage/Articles/Guides/FAQ.html";
         private const string SponsorUrl = "";
-        private const string DiscordInviteUrl = "https://discord.gg/DTBPBYvexy";
+        private const string DiscordInviteUrl = "https://discord.gg/rp6Fv3JjEz";
 
         private readonly List<Package> Packages = new List<Package>()
         {
@@ -53,10 +53,9 @@ namespace Mirage
 
         //window size of the welcome screen
         private static Vector2 windowSize = new Vector2(500, 415);
-        private static string screenToOpenKey = "MirageScreenToOpen";
 
         //editorprefs keys
-        private static string firstTimeVersionKey = string.Empty;
+        private static string firstStartUpKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
 
         private static string GetVersion()
@@ -70,11 +69,11 @@ namespace Mirage
         {
             get
             {
-                if (!EditorPrefs.GetBool(firstTimeMirageKey, false) && !EditorPrefs.GetBool(firstTimeVersionKey, false) && firstTimeVersionKey != "MirageUnknown")
+                if (!EditorPrefs.GetBool(firstTimeMirageKey, false) && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirageUnknown")
                 {
                     return false;
                 }
-                else if (EditorPrefs.GetBool(firstTimeMirageKey, false) && !EditorPrefs.GetBool(firstTimeVersionKey, false) && firstTimeVersionKey != "MirageUnknown")
+                else if (EditorPrefs.GetBool(firstTimeMirageKey, false) && !EditorPrefs.GetBool(firstStartUpKey, false) && firstStartUpKey != "MirageUnknown")
                 {
                     return true;
                 }
@@ -92,12 +91,10 @@ namespace Mirage
         private static void ShowWindowOnFirstStart()
         {
             EditorApplication.update -= ShowWindowOnFirstStart;
-            firstTimeVersionKey = GetVersion();
+            firstStartUpKey = GetVersion();
 
-            if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstTimeVersionKey, false)) && firstTimeVersionKey != "MirageUnknown")
+            if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirageUnknown")
             {
-                EditorPrefs.SetString(screenToOpenKey, ShowChangeLog ? "ChangeLog" : "Welcome");
-
                 OpenWindow();
             }
         }
@@ -153,15 +150,7 @@ namespace Mirage
             ConfigureTab("DiscordButton", "Discord", DiscordInviteUrl);
             ConfigurePackagesTab();
 
-            ShowTab(EditorPrefs.GetString(screenToOpenKey, "Welcome"));
-
-            //set the screen's button to be tinted when welcome window is opened
-            float color = EditorPrefs.GetFloat("buttonClickedColor");
-            float borderColor = EditorPrefs.GetFloat("buttonClickedBorderColor");
-            Button openedButton = rootVisualElement.Q<Button>(EditorPrefs.GetString(screenToOpenKey, "Welcome") + "Button");
-            openedButton.style.backgroundColor = new StyleColor(new Color(color, color, color));
-            openedButton.style.borderBottomColor = openedButton.style.borderTopColor = openedButton.style.borderLeftColor = openedButton.style.borderRightColor = new StyleColor(new Color(borderColor, borderColor, borderColor));
-            lastClickedTab = openedButton;
+            ShowTab(ShowChangeLog ? "ChangeLog" : "Welcome");
 
             #endregion
         }
@@ -170,7 +159,7 @@ namespace Mirage
         {
             //now that we have seen the welcome window, 
             //set this this to true so we don't load the window every time we recompile (for the current version)
-            EditorPrefs.SetBool(firstTimeVersionKey, true);
+            EditorPrefs.SetBool(firstStartUpKey, true);
             EditorPrefs.SetBool(firstTimeMirageKey, true);
         }
 
@@ -185,7 +174,6 @@ namespace Mirage
                 ShowTab(tab);
 
                 lastClickedTab = tabButton;
-                EditorPrefs.SetString(screenToOpenKey, tab);
             };
 
             Button redirectButton = rootVisualElement.Q<VisualElement>(tab).Q<Button>("Redirect");
@@ -250,7 +238,6 @@ namespace Mirage
                 ShowTab("Packages");
 
                 lastClickedTab = tabButton;
-                EditorPrefs.SetString(screenToOpenKey, "Packages");
             };
 
             listRequest = UnityEditor.PackageManager.Client.List(true, false);

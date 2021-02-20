@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="WelcomeWindow.uss" />
-    <ui:VisualElement name="Banner" style="background-color: rgb(11, 12, 11);">
+    <ui:VisualElement name="Banner">
         <ui:Label name="VersionText" text="Placeholder" />
         <ui:Image name="Icon" style="background-image: url(&apos;/Assets/Mirage/Editor/WelcomeWindow/Resources/MirageIcon.png&apos;);" />
     </ui:VisualElement>
@@ -18,7 +18,7 @@
         </ui:VisualElement>
         <ui:VisualElement name="Spacer" />
         <ui:VisualElement name="RightColumnBox">
-            <ui:VisualElement name="Welcome" style="flex-grow: 0; width: 100%; height: 100%; display: none;">
+            <ui:VisualElement name="Welcome" style="flex-grow: 0; width: 100%; height: 100%;">
                 <ui:Label name="Header" text="Welcome" />
                 <ui:Label name="Description" text="Hello! Thank you for installing Mirage. Please visit all the pages on this window. Clicking the button at the bottom of the pages will redirect you to a webpage. Additionally, there are example projects that you can import from the Unity Package Manager. &#10;&#10;Have fun using Mirage!" style="-unity-text-align: upper-left;" />
                 <ui:VisualElement name="Spacer" />
@@ -60,7 +60,7 @@
                 <ui:VisualElement name="Spacer" />
                 <ui:Button name="Redirect" text="Join Discord" class="redirect" />
             </ui:VisualElement>
-            <ui:ScrollView name="Packages">
+            <ui:ScrollView name="Packages" style="display: none;">
                 <ui:Label name="Header" text="Packages" />
                 <ui:Label name="Description" text="Mirage is a modular networking library. It ships with the foundation that you can build upon by installing packages." style="flex-basis: auto; flex-grow: 0; flex-shrink: 0;" />
                 <ui:Label text="Available Packages" display-tooltip-when-elided="True" style="padding-left: 10px; -unity-font-style: bold;" />
