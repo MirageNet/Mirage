@@ -3,7 +3,6 @@ using NUnit.Framework;
 using UnityEngine.TestTools;
 using Cysharp.Threading.Tasks;
 using System;
-using System.IO;
 
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -106,24 +105,24 @@ namespace Mirage.Tests
             Assert.That(serverConnection, Is.Not.Null);
         }
 
-        [UnityTest]
-        public IEnumerator SendDataFromClient() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void SendDataFromClient()
         {
             clientConnection.Send(new ArraySegment<byte>(data));
             transport.Poll();
             Assert.That(serverMessages.Dequeue().data, Is.EquivalentTo(data));
-        });
+        }
 
-        [UnityTest]
-        public IEnumerator SendDataFromServer() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void SendDataFromServer()
         {
             serverConnection.Send(new ArraySegment<byte>(data));
             transport.Poll();
             Assert.That(clientMessages.Dequeue().data, Is.EquivalentTo(data));
-        });
+        }
 
-        [UnityTest]
-        public IEnumerator ReceivedBytes() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void ReceivedBytes()
         {
             long received = transport.ReceivedBytes;
             Assert.That(received, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
@@ -132,10 +131,10 @@ namespace Mirage.Tests
             transport.Poll();
             Assert.That(transport.ReceivedBytes, Is.GreaterThan(received + data.Length), "Client sent data,  we should have received");
 
-        });
+        }
 
-        [UnityTest]
-        public IEnumerator SentBytes() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void SentBytes()
         {
             long sent = transport.SentBytes;
             Assert.That(sent, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
@@ -144,23 +143,23 @@ namespace Mirage.Tests
             transport.Poll();
             Assert.That(transport.SentBytes, Is.GreaterThan(sent + data.Length), "Client sent data,  we should have received");
 
-        });
+        }
 
-        [UnityTest]
-        public IEnumerator SendUnreliableDataFromServer() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void SendUnreliableDataFromServer()
         {
             serverConnection.Send(new ArraySegment<byte>(data), Channel.Unreliable);
             transport.Poll();
             Assert.That(clientMessages.Dequeue().channel, Is.EqualTo(Channel.Unreliable));
-        });
+        }
 
-        [UnityTest]
-        public IEnumerator SendUnreliableDataFromClient() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void SendUnreliableDataFromClient()
         {
             clientConnection.Send(new ArraySegment<byte>(data), Channel.Unreliable);
             transport.Poll();
             Assert.That(serverMessages.Dequeue().channel, Is.EqualTo(Channel.Unreliable));
-        });
+        }
 
 
         [UnityTest]
@@ -203,14 +202,14 @@ namespace Mirage.Tests
             Assert.That(transport.Supported, Is.True);
         }
 
-        [UnityTest]
-        public IEnumerator ConnectionsDontLeak() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void ConnectionsDontLeak()
         {
             serverConnection.Disconnect();
 
             transport.Poll();
 
             Assert.That(transport.connections, Is.Empty);
-        });
+        }
     }
 }

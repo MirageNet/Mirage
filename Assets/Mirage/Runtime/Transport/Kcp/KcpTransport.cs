@@ -86,8 +86,8 @@ namespace Mirage.KCP
 
         #endregion
 
-        EndPoint ipv6EndPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
-        EndPoint ipv4EndPoint = new IPEndPoint(IPAddress.Any, 0);
+        readonly EndPoint ipv6EndPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
+        readonly EndPoint ipv4EndPoint = new IPEndPoint(IPAddress.Any, 0);
 
         /// <summary>
         /// The higher level should call this method every tick to process
