@@ -1,3 +1,67 @@
+## [67.2.6](https://github.com/MirageNet/Mirage/compare/v67.2.5...v67.2.6) (2021-02-20)
+
+
+### Bug Fixes
+
+* bug in tanks sample ([#575](https://github.com/MirageNet/Mirage/issues/575)) ([d82efea](https://github.com/MirageNet/Mirage/commit/d82efea9015cf2db9436f12deaa9a7dd65ba862d))
+
+## [67.2.5](https://github.com/MirageNet/Mirage/compare/v67.2.4...v67.2.5) (2021-02-20)
+
+
+### Bug Fixes
+
+* revert preprocessor change ([b89c454](https://github.com/MirageNet/Mirage/commit/b89c45489755a9fa598ec804e8d71b35cfc8f438))
+
+## [67.2.4](https://github.com/MirageNet/Mirage/compare/v67.2.3...v67.2.4) (2021-02-20)
+
+
+### Bug Fixes
+
+* add comments and backing field for time ([#618](https://github.com/MirageNet/Mirage/issues/618)) ([da74e11](https://github.com/MirageNet/Mirage/commit/da74e11066f1a6782ec1304f855b79840c7058f3))
+
+## [67.2.3](https://github.com/MirageNet/Mirage/compare/v67.2.2...v67.2.3) (2021-02-19)
+
+
+### Bug Fixes
+
+* add summaries to event classes ([#623](https://github.com/MirageNet/Mirage/issues/623)) ([e6b9354](https://github.com/MirageNet/Mirage/commit/e6b9354665294dc11140a560bfc661ef6bfbb3b9))
+* no longer true. spawnableobjects populated by FindObjectsOfTypeAll ([#622](https://github.com/MirageNet/Mirage/issues/622)) ([5692709](https://github.com/MirageNet/Mirage/commit/5692709b62095a08e25172d6a4dfba51e47355f5))
+
+## [67.2.2](https://github.com/MirageNet/Mirage/compare/v67.2.1...v67.2.2) (2021-02-19)
+
+
+### Bug Fixes
+
+* drop support for older versions ([5dc12b5](https://github.com/MirageNet/Mirage/commit/5dc12b5e8553f5689833af5b71a936615514b021))
+
+## [67.2.1](https://github.com/MirageNet/Mirage/compare/v67.2.0...v67.2.1) (2021-02-19)
+
+
+### Bug Fixes
+
+* add missing properties to interface ([#617](https://github.com/MirageNet/Mirage/issues/617)) ([e45920e](https://github.com/MirageNet/Mirage/commit/e45920ebd375b382f48e11bba7e73549efb58c6c))
+
+# [67.2.0](https://github.com/MirageNet/Mirage/compare/v67.1.0...v67.2.0) (2021-02-19)
+
+
+### Features
+
+* add events to interfaces ([#614](https://github.com/MirageNet/Mirage/issues/614)) ([4d1a772](https://github.com/MirageNet/Mirage/commit/4d1a77263dfbca0f631ded85a5f772ce6e4e4343))
+
+# [67.1.0](https://github.com/MirageNet/Mirage/compare/v67.0.2...v67.1.0) (2021-02-19)
+
+
+### Features
+
+* welcome window shows active tab ([#616](https://github.com/MirageNet/Mirage/issues/616)) ([1411d0a](https://github.com/MirageNet/Mirage/commit/1411d0ae4dd3b83c44ce27800e4117f00211f092))
+
+## [67.0.2](https://github.com/MirageNet/Mirage/compare/v67.0.1...v67.0.2) (2021-02-19)
+
+
+### Bug Fixes
+
+* clientObjectManager was not using its interface ([#615](https://github.com/MirageNet/Mirage/issues/615)) ([d2b07ea](https://github.com/MirageNet/Mirage/commit/d2b07ea46ef1e5e0dbc4685b39c4cd24a7c2fc36))
+
 ## [67.0.1](https://github.com/MirageNet/Mirage/compare/v67.0.0...v67.0.1) (2021-02-19)
 
 

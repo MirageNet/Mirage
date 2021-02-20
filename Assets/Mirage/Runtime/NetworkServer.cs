@@ -4,6 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace Mirage
 {
@@ -45,35 +46,46 @@ namespace Mirage
         /// <summary>
         /// This is invoked when a server is started - including when a host is started.
         /// </summary>
-        public UnityEvent Started = new UnityEvent();
+        [FormerlySerializedAs("Started")]
+        [SerializeField] UnityEvent _started = new UnityEvent();
+        public UnityEvent Started => _started;
 
         /// <summary>
         /// Event fires once a new Client has connect to the Server.
         /// </summary>
-        public NetworkConnectionEvent Connected = new NetworkConnectionEvent();
+        [FormerlySerializedAs("Connected")]
+        [SerializeField] NetworkConnectionEvent _connected = new NetworkConnectionEvent();
+        public NetworkConnectionEvent Connected => _connected;
 
         /// <summary>
         /// Event fires once a new Client has passed Authentication to the Server.
         /// </summary>
-        public NetworkConnectionEvent Authenticated = new NetworkConnectionEvent();
+        [FormerlySerializedAs("Authenticated")]
+        [SerializeField] NetworkConnectionEvent _authenticated = new NetworkConnectionEvent();
+        public NetworkConnectionEvent Authenticated => _authenticated;
 
         /// <summary>
         /// Event fires once a Client has Disconnected from the Server.
         /// </summary>
-        public NetworkConnectionEvent Disconnected = new NetworkConnectionEvent();
+        [FormerlySerializedAs("Disconnected")]
+        [SerializeField] NetworkConnectionEvent _disconnected = new NetworkConnectionEvent();
+        public NetworkConnectionEvent Disconnected => _disconnected;
 
-        public UnityEvent Stopped = new UnityEvent();
+        [SerializeField] UnityEvent _stopped = new UnityEvent();
+        public UnityEvent Stopped => _stopped;
 
         /// <summary>
         /// This is invoked when a host is started.
         /// <para>StartHost has multiple signatures, but they all cause this hook to be called.</para>
         /// </summary>
-        public UnityEvent OnStartHost = new UnityEvent();
+        [SerializeField] UnityEvent _onStartHost = new UnityEvent();
+        public UnityEvent OnStartHost => _onStartHost;
 
         /// <summary>
         /// This is called when a host is stopped.
         /// </summary>
-        public UnityEvent OnStopHost = new UnityEvent();
+        [SerializeField] UnityEvent _onStopHost = new UnityEvent();
+        public UnityEvent OnStopHost => _onStopHost;
 
         /// <summary>
         /// The connection to the host mode client (if any).
@@ -83,7 +95,9 @@ namespace Mirage
         // => removed it for easier code. use .localConnection now!
         public INetworkConnection LocalConnection { get; private set; }
 
-        // The host client for this server 
+        /// <summary>
+        /// The host client for this server 
+        /// </summary>
         public NetworkClient LocalClient { get; private set; }
 
         /// <summary>
@@ -108,8 +122,14 @@ namespace Mirage
         /// </summary>
         public bool Active { get; private set; }
 
-        // Time kept in this server
-        public readonly NetworkTime Time = new NetworkTime();
+        readonly NetworkTime _time = new NetworkTime();
+        /// <summary>
+        /// Time kept in this server
+        /// </summary>
+        public NetworkTime Time
+        {
+            get { return _time; }
+        }
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.

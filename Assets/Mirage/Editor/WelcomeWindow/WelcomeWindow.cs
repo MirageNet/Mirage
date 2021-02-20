@@ -16,6 +16,10 @@ namespace Mirage
     [InitializeOnLoad]
     public class WelcomeWindow : EditorWindow
     {
+        private Button lastClickedTab;
+        private StyleColor defaultButtonBackgroundColor;
+        private StyleColor defaultButtonBorderColor;
+
         #region Setup
 
         #region Urls
@@ -116,6 +120,11 @@ namespace Mirage
             Label versionText = root.Q<Label>("VersionText");
             versionText.text = "v" + GetVersion();
 
+            //set button default colors (used in page nav)
+            IStyle sampleStyle = rootVisualElement.Q<Button>("WelcomeButton").style;
+            defaultButtonBackgroundColor = sampleStyle.backgroundColor;
+            defaultButtonBorderColor = sampleStyle.borderTopColor;
+
             #region Page buttons
 
             ConfigureTab("WelcomeButton", "Welcome", WelcomePageUrl);
@@ -149,9 +158,12 @@ namespace Mirage
         private void ConfigureTab(string tabButtonName, string tab, string url)
         {
             Button tabButton = rootVisualElement.Q<Button>(tabButtonName);
-            tabButton.clicked += () =>
+            tabButton.clicked += () => 
             {
+                ToggleMenuButtonColor(tabButton, true);
+                ToggleMenuButtonColor(lastClickedTab, false);
                 ShowTab(tab);
+                lastClickedTab = tabButton;
                 EditorPrefs.SetString(screenToOpenKey, tab);
             };
 
@@ -178,6 +190,22 @@ namespace Mirage
                 {
                     tab.style.display = DisplayStyle.None;
                 }
+            }
+        }
+
+        private void ToggleMenuButtonColor(Button button, bool toggle)
+        {
+            if(button == null) { return; }
+
+            if(toggle)
+            {
+                button.style.backgroundColor = button.resolvedStyle.backgroundColor;
+                button.style.borderBottomColor = button.style.borderTopColor = button.style.borderLeftColor = button.style.borderRightColor = button.resolvedStyle.borderBottomColor;
+            }
+            else
+            {
+                button.style.backgroundColor = defaultButtonBackgroundColor;
+                button.style.borderBottomColor = button.style.borderTopColor = button.style.borderLeftColor = button.style.borderRightColor = defaultButtonBorderColor;
             }
         }
 

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Mirage
 {
@@ -8,17 +9,30 @@ namespace Mirage
     // Handles requests to unspawn objects on the client
     public delegate void UnSpawnDelegate(NetworkIdentity spawned);
 
+    [Serializable]
+    public class SpawnEvent : UnityEvent<NetworkIdentity> { }
+
     public interface IClientObjectManager
     {
-        GameObject GetPrefab(Guid assetId);
+        /// <summary>
+        /// Raised when the client spawns an object
+        /// </summary>
+        SpawnEvent Spawned { get; }
 
-        void RegisterPrefab(NetworkIdentity prefab);
+        /// <summary>
+        /// Raised when the client unspawns an object
+        /// </summary>
+        SpawnEvent UnSpawned { get; }
 
-        void RegisterPrefab(NetworkIdentity prefab, Guid newAssetId);
+        NetworkIdentity GetPrefab(Guid assetId);
 
-        void RegisterPrefab(NetworkIdentity prefab, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
+        void RegisterPrefab(NetworkIdentity identity);
 
-        void UnregisterPrefab(NetworkIdentity prefab);
+        void RegisterPrefab(NetworkIdentity identity, Guid newAssetId);
+
+        void RegisterPrefab(NetworkIdentity identity, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
+
+        void UnregisterPrefab(NetworkIdentity identity);
 
         void RegisterSpawnHandler(Guid assetId, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
 

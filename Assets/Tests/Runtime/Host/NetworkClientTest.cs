@@ -61,5 +61,29 @@ namespace Mirage.Tests.Host
 
             await AsyncUtil.WaitUntilWithTimeout(() => !client.IsLocalClient);
         });
+
+        [Test]
+        public void ConnectedNotNullTest()
+        {
+            Assert.That(client.Connected, Is.Not.Null);
+        }
+
+        [Test]
+        public void AuthenticatedNotNullTest()
+        {
+            Assert.That(client.Authenticated, Is.Not.Null);
+        }
+
+        [Test]
+        public void DisconnectedNotNullTest()
+        {
+            Assert.That(client.Disconnected, Is.Not.Null);
+        }
+
+        [Test]
+        public void TimeNotNullTest()
+        {
+            Assert.That(client.Time, Is.Not.Null);
+        }
     }
 }
