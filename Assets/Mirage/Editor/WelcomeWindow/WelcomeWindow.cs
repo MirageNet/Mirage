@@ -20,8 +20,7 @@ namespace Mirage
     public class WelcomeWindow : EditorWindow
     {
         private Button lastClickedTab;
-        private StyleColor defaultButtonBackgroundColor;
-        private StyleColor defaultButtonBorderColor;
+        private List<Button> installButtons = new List<Button>();
 
         #region Setup
 
@@ -136,11 +135,6 @@ namespace Mirage
             //set the version text
             Label versionText = root.Q<Label>("VersionText");
             versionText.text = "v" + GetVersion();
-
-            //set button default colors (used in page nav)
-            IStyle sampleStyle = rootVisualElement.Q<Button>("WelcomeButton").style;
-            defaultButtonBackgroundColor = sampleStyle.backgroundColor;
-            defaultButtonBorderColor = sampleStyle.borderTopColor;
 
             #region Page buttons
 
@@ -376,6 +370,7 @@ namespace Mirage
                     { 
                         InstallPackage(packageName);
                         installButton.text = "Installing";
+                        DisableInstallButtons();
                     };
                 }
                 else
@@ -384,8 +379,22 @@ namespace Mirage
                     { 
                         UninstallPackage(packageName);
                         installButton.text = "Uninstalling";
+                        DisableInstallButtons();
                     };
                 }
+
+                installButtons.Add(installButton);
+            }
+        }
+
+        //prevents user from spamming install button
+        //spamming the button while installing/uninstalling throws errors
+        //buttons enabled again after window refreshes
+        private void DisableInstallButtons()
+        {
+            foreach (Button button in installButtons)
+            {
+                button.SetEnabled(false);
             }
         }
 
