@@ -1,3 +1,10 @@
+# [67.3.0](https://github.com/MirageNet/Mirage/compare/v67.2.7...v67.3.0) (2021-02-21)
+
+
+### Features
+
+* install/uninstall modules from welcome window ([#593](https://github.com/MirageNet/Mirage/issues/593)) ([53ac404](https://github.com/MirageNet/Mirage/commit/53ac40492ade8059338436ad15b69e3573ad1482))
+
 ## [67.2.7](https://github.com/MirageNet/Mirage/compare/v67.2.6...v67.2.7) (2021-02-21)
 
 
