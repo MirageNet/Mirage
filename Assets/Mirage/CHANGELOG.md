@@ -1,3 +1,10 @@
+## [67.3.1](https://github.com/MirageNet/Mirage/compare/v67.3.0...v67.3.1) (2021-02-21)
+
+
+### Bug Fixes
+
+* passing NetworkBehaviors in RPC works with IL2PP ([#630](https://github.com/MirageNet/Mirage/issues/630)) ([87becee](https://github.com/MirageNet/Mirage/commit/87becee8fdc028ca86abd6aa13a55396ea202567)), closes [#629](https://github.com/MirageNet/Mirage/issues/629)
+
 # [67.3.0](https://github.com/MirageNet/Mirage/compare/v67.2.7...v67.3.0) (2021-02-21)
 
 
