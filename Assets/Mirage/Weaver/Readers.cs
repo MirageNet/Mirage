@@ -118,9 +118,14 @@ namespace Mirage.Weaver
 
         private MethodReference GetNetworkBehaviourReader(TypeReference typeReference)
         {
-            MethodReference readFunc = module.ImportReference<NetworkReader>((reader) => reader.ReadNetworkBehaviour());
-            Register(typeReference, readFunc);
-            return readFunc;
+            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
+            ILProcessor worker = readerFunc.Body.GetILProcessor();
+
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create<NetworkReader>(OpCodes.Call, (reader) => reader.ReadNetworkBehaviour()));
+            worker.Append(worker.Create(OpCodes.Castclass, typeReference));
+            worker.Append(worker.Create(OpCodes.Ret));
+            return readerFunc;
         }
 
         void RegisterReadFunc(TypeReference typeReference, MethodDefinition newReaderFunc)
