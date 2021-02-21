@@ -1,3 +1,10 @@
+## [67.3.2](https://github.com/MirageNet/Mirage/compare/v67.3.1...v67.3.2) (2021-02-21)
+
+
+### Bug Fixes
+
+* passing NetworkBehaviors in syncvars work with il2pp ([#631](https://github.com/MirageNet/Mirage/issues/631)) ([cd7317f](https://github.com/MirageNet/Mirage/commit/cd7317f368bd65c6bd594c337de4bdc676fe2805)), closes [#630](https://github.com/MirageNet/Mirage/issues/630) [#629](https://github.com/MirageNet/Mirage/issues/629)
+
 ## [67.3.1](https://github.com/MirageNet/Mirage/compare/v67.3.0...v67.3.1) (2021-02-21)
 
 
