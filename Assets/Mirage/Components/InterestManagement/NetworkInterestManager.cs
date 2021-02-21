@@ -7,15 +7,17 @@ namespace Mirage.Components.InterestManagement
     {
         #region Fields
 
-        [SerializeField] private float _initialWorldSize = 1000;
-        [SerializeField] private float _minimumNodeSize = 1;
+        [Header("Network Interest Manager Settings")]
+        [SerializeField, Tooltip("World size for main bounding box.")] private float _initialWorldSize = 1000;
+        [SerializeField, Tooltip("Minimum size of each node. Will grow and shrink on its own.")] private float _minimumNodeSize = 1;
 
         /// <summary>
         ///     Loose: The octree's nodes can be larger than 1/2 their parent's length and width, so they overlap to some extent.
         ///     This can alleviate the problem of even tiny objects ending up in large nodes if they're near boundaries.
         ///     A looseness value of 1.0 will make it a "normal" octree.
         /// </summary>
-        [SerializeField] private float _looseness = 1.25f;
+        [Range(1,2)]
+        [SerializeField, Tooltip("Normal quad tree will be used if 1.0f set, Anything higher will become loose quad tree.")] private float _looseness = 1.25f;
 
         [SerializeField] private ServerObjectManager _server;
 

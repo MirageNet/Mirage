@@ -16,8 +16,9 @@ namespace Mirage.Components.InterestManagement
         /// </summary>
         [SyncVar, NonSerialized] public float CurrentPlayerVisibilityRange;
 
-        [SerializeField] private float _minimumVisibilityRange = 1;
-        [SerializeField] private float _maximumVisibilityRange = 10;
+        [Header("Interest Management Settings")]
+        [SerializeField, Tooltip("Intended for server to check against hackers.")] private float _minimumVisibilityRange = 1;
+        [SerializeField, Tooltip("Intended for server to check against hackers.")] private float _maximumVisibilityRange = 10;
 
         public NetworkInterestManager InterestManager;
 
