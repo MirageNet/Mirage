@@ -9,6 +9,7 @@
         <ui:VisualElement name="LeftColumnBox">
             <ui:Button name="WelcomeButton" text="Welcome" class="light-selected-tab dark-selected-tab" />
             <ui:Button name="QuickStartButton" text="Quick Start Guide" class="light-selected-tab dark-selected-tab" />
+            <ui:Button name="PackagesButton" text="Packages" class="light-selected-tab dark-selected-tab" />
             <ui:Button name="FaqButton" text="FAQ" class="light-selected-tab dark-selected-tab" />
             <ui:Button name="BestPracticesButton" text="Best Practices" class="light-selected-tab dark-selected-tab" />
             <ui:Button name="ChangeLogButton" text="Change Log" class="light-selected-tab dark-selected-tab" />
@@ -59,6 +60,26 @@
                 <ui:VisualElement name="Spacer" />
                 <ui:Button name="Redirect" text="Join Discord" class="redirect" />
             </ui:VisualElement>
+            <ui:ScrollView name="Packages" style="display: none;">
+                <ui:Label name="Header" text="Packages" />
+                <ui:Label name="Description" text="Mirage is a modular networking library. It ships with the foundation that you can build upon by installing packages." style="flex-basis: auto; flex-grow: 0; flex-shrink: 0;" />
+                <ui:Label text="Available Packages" display-tooltip-when-elided="True" style="padding-left: 10px; -unity-font-style: bold;" />
+                <ui:VisualElement name="ModulesList" style="flex-grow: 1; padding-left: 10px; padding-right: 10px;">
+                    <ui:VisualElement name="Module" tooltip="Automatically find games within the same network.">
+                        <ui:Label text="LAN Discovery" name="Name" />
+                        <ui:Button text="Install" display-tooltip-when-elided="True" name="InstallButton" style="flex-shrink: 1; height: auto;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="Module" tooltip="A transport that uses Facepunch&apos;s Steam SDK.">
+                        <ui:Label text="Steam (Facepunch)" name="Name" />
+                        <ui:Button text="Install" display-tooltip-when-elided="True" name="InstallButton" style="flex-shrink: 1; height: auto;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="Module" tooltip="A transport that uses Steamworks.NET.">
+                        <ui:Label text="Steam (Steamworks.NET)" name="Name" />
+                        <ui:Button text="Install" display-tooltip-when-elided="True" name="InstallButton" style="flex-shrink: 1; height: auto;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="Spacer" />
+            </ui:ScrollView>
         </ui:VisualElement>
     </ui:Box>
 </ui:UXML>
