@@ -1,3 +1,10 @@
+## [67.2.7](https://github.com/MirageNet/Mirage/compare/v67.2.6...v67.2.7) (2021-02-21)
+
+
+### Bug Fixes
+
+* show selected tab when welcome screen is opened ([#628](https://github.com/MirageNet/Mirage/issues/628)) ([f6cae98](https://github.com/MirageNet/Mirage/commit/f6cae984f1dfb2941a35cd4bfd1dd0050ce06873))
+
 ## [67.2.6](https://github.com/MirageNet/Mirage/compare/v67.2.5...v67.2.6) (2021-02-20)
 
 
