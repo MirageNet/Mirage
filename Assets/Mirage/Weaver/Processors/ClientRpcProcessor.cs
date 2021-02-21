@@ -51,18 +51,15 @@ namespace Mirage.Weaver
         {
             MethodDefinition rpc = md.DeclaringType.AddMethod(
                 SkeletonPrefix + md.Name,
-                MethodAttributes.Family | MethodAttributes.Static | MethodAttributes.HideBySig);
+                MethodAttributes.Family | MethodAttributes.HideBySig);
 
-            _ = rpc.AddParam<NetworkBehaviour>("obj");
             _ = rpc.AddParam<NetworkReader>("reader");
             _ = rpc.AddParam<INetworkConnection>("senderConnection");
             _ = rpc.AddParam<int>("replyId");
 
             ILProcessor worker = rpc.Body.GetILProcessor();
 
-            // setup for reader
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Castclass, md.DeclaringType.ConvertToGenericIfNeeded()));
 
             // NetworkConnection parameter is only required for Client.Connection
             Client target = clientRpcAttr.GetField("target", Client.Observers);
