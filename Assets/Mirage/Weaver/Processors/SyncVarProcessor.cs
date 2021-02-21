@@ -103,7 +103,7 @@ namespace Mirage.Weaver
                     originalType);
 
             ILProcessor worker = get.Body.GetILProcessor();
-            LoadField(fd, worker);
+            LoadField(fd, originalType, worker);
 
             worker.Append(worker.Create(OpCodes.Ret));
 
@@ -133,7 +133,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
             // reference to field to set
             // make generic version of SetSyncVar with field type
-            LoadField(fd, worker);
+            LoadField(fd, originalType, worker);
 
             MethodReference syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
             var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
@@ -144,7 +144,7 @@ namespace Mirage.Weaver
 
             // T oldValue = value;
             VariableDefinition oldValue = set.AddLocal(originalType);
-            LoadField(fd, worker);
+            LoadField(fd, originalType, worker);
             worker.Append(worker.Create(OpCodes.Stloc, oldValue));
 
             // fieldValue = value;
@@ -215,7 +215,7 @@ namespace Mirage.Weaver
             }
         }
 
-        private void LoadField(FieldDefinition fd, ILProcessor worker)
+        private void LoadField(FieldDefinition fd, TypeReference originalType,  ILProcessor worker)
         {
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
@@ -224,6 +224,15 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Ldflda, fd));
                 MethodReference getter = module.ImportReference(fd.FieldType.Resolve().GetMethod("get_Value"));
                 worker.Append(worker.Create(OpCodes.Call, getter));
+
+                // When we use NetworkBehaviors, we normally use a derived class,
+                // but the NetworkBehaviorSyncVar returns just NetworkBehavior
+                // thus we need to cast it to the user specicfied type
+                // otherwise IL2PP fails to build.  see #629
+                if (getter.ReturnType.FullName != originalType.FullName)
+                {
+                    worker.Append(worker.Create(OpCodes.Castclass, originalType));
+                }
             }
             else
             {
@@ -392,7 +401,7 @@ namespace Mirage.Weaver
                 }
                 else
                 {
-                    LoadField(newValue, worker);
+                    LoadField(newValue, oldValue.VariableType, worker);
                 }
             }
 
@@ -652,7 +661,7 @@ namespace Mirage.Weaver
 
             // T oldValue = value;
             VariableDefinition oldValue = deserialize.AddLocal(originalType);
-            LoadField(syncVar, serWorker);
+            LoadField(syncVar, originalType,  serWorker);
 
             serWorker.Append(serWorker.Create(OpCodes.Stloc, oldValue));
 
@@ -690,7 +699,7 @@ namespace Mirage.Weaver
                 // 'oldValue'
                 serWorker.Append(serWorker.Create(OpCodes.Ldloc, oldValue));
                 // 'newValue'
-                LoadField(syncVar, serWorker);
+                LoadField(syncVar, originalType, serWorker);
                 // call the function
                 MethodReference syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
                 var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
