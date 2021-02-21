@@ -30,7 +30,7 @@ namespace Mirage.Weaver
         {
             foreach (FieldDefinition fd in td.Fields)
             {
-                if (fd.FieldType.IsGenericParameter) // Just ignore all generic objects.
+                if (fd.FieldType.IsGenericParameter || fd.ContainsGenericParameter) // Just ignore all generic objects.
                 {
                     continue;
                 }

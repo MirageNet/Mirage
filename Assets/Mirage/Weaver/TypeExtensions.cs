@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
+using Mono.Cecil.Rocks;
 
 namespace Mirage.Weaver
 {
@@ -22,20 +23,31 @@ namespace Mirage.Weaver
             return td.Methods.Where(method => method.Name == methodName).ToList();
         }
 
-        public static MethodDefinition GetMethodInBaseType(this TypeDefinition td, string methodName)
+        public static MethodReference GetMethodInBaseType(this TypeReference td, string methodName)
         {
-            TypeDefinition typedef = td;
+            TypeDefinition typedef = td.Resolve();
+            TypeReference typeRef = td;
             while (typedef != null)
             {
                 foreach (MethodDefinition md in typedef.Methods)
                 {
                     if (md.Name == methodName)
-                        return md;
+                    {
+                        MethodReference method = md;
+                        if (typeRef.IsGenericInstance)
+                        {
+                            var baseTypeInstance = (GenericInstanceType)td;
+                            method = method.MakeHostInstanceGeneric(baseTypeInstance);
+                        }
+
+                        return method;
+                    }
                 }
 
                 try
                 {
                     TypeReference parent = typedef.BaseType;
+                    typeRef = parent;
                     typedef = parent?.Resolve();
                 }
                 catch (AssemblyResolutionException)
@@ -98,5 +110,45 @@ namespace Mirage.Weaver
 
         public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes) =>
             AddMethod(typeDefinition, name, attributes, typeDefinition.Module.ImportReference(typeof(void)));
+
+        /// <summary>
+        /// Creates a generic type out of another type, if needed.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static TypeReference ConvertToGenericIfNeeded(this TypeDefinition type)
+        {
+            if (type.HasGenericParameters)
+            {
+                // get all the generic parameters and make a generic instance out of it
+                var genericTypes = new TypeReference[type.GenericParameters.Count];
+                for (int i = 0; i < type.GenericParameters.Count; i++)
+                {
+                    genericTypes[i] = type.GenericParameters[i].GetElementType();
+                }
+
+                return type.MakeGenericInstanceType(genericTypes);
+            }
+            else
+            {
+                return type;
+            }
+        }
+
+        public static FieldReference GetField(this TypeDefinition type, string fieldName)
+        {
+            if(type.HasFields)
+            {
+                for (int i = 0; i < type.Fields.Count; i++)
+                {
+                    if (type.Fields[i].Name == fieldName)
+                    {
+                        return type.Fields[i];
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }
