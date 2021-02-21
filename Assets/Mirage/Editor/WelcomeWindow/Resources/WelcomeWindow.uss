@@ -105,7 +105,8 @@ Button {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 3px;
-    
+}
+
 .dark-selected-tab {
     background-color: rgba(53, 53, 53, 255);
     border-left-color: rgba(36, 36, 36, 255);

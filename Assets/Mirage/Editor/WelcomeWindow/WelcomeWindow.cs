@@ -241,6 +241,10 @@ namespace Mirage
         private void ConfigurePackagesTab()
         {
             Button tabButton = rootVisualElement.Q<Button>("PackagesButton");
+
+            tabButton.EnableInClassList("dark-selected-tab", false);
+            tabButton.EnableInClassList("light-selected-tab", false);
+
             tabButton.clicked += () =>
             {
                 ToggleMenuButtonColor(tabButton, true);
@@ -248,6 +252,7 @@ namespace Mirage
                 ShowTab("Packages");
 
                 lastClickedTab = tabButton;
+                EditorPrefs.SetString(screenToOpenKey, "Packages");
             };
 
             listRequest = UnityEditor.PackageManager.Client.List(true, false);
