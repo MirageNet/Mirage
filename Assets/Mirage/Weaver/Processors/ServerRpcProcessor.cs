@@ -146,10 +146,9 @@ namespace Mirage.Weaver
         MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc)
         {
             MethodDefinition cmd = method.DeclaringType.AddMethod(SkeletonPrefix + method.Name,
-                MethodAttributes.Family | MethodAttributes.Static | MethodAttributes.HideBySig,
+                MethodAttributes.Family | MethodAttributes.HideBySig,
                 userCodeFunc.ReturnType);
 
-            _ = cmd.AddParam<NetworkBehaviour>("obj");
             _ = cmd.AddParam<NetworkReader>("reader");
             _ = cmd.AddParam<INetworkConnection>("senderConnection");
             _ = cmd.AddParam<int>("replyId");
@@ -159,7 +158,6 @@ namespace Mirage.Weaver
 
             // setup for reader
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Castclass, method.DeclaringType.ConvertToGenericIfNeeded()));
 
             if (!ReadArguments(method, worker, false))
                 return cmd;
