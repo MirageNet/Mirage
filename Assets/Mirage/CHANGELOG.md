@@ -1,3 +1,10 @@
+# [67.4.0](https://github.com/MirageNet/Mirage/compare/v67.3.2...v67.4.0) (2021-02-21)
+
+
+### Features
+
+* support generic network behaviors ([#574](https://github.com/MirageNet/Mirage/issues/574)) ([715642c](https://github.com/MirageNet/Mirage/commit/715642ceb5de02dc500d8ba3f4cda883431decb7))
+
 ## [67.3.2](https://github.com/MirageNet/Mirage/compare/v67.3.1...v67.3.2) (2021-02-21)
 
 
