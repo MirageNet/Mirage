@@ -21,6 +21,9 @@ namespace Mirage.Components.InterestManagement
 
         [SerializeField] private ServerObjectManager _server;
 
+        [Header("Debug Settings.")]
+        [SerializeField] private bool _visualDebug = false;
+
         internal BoundsOctree<NetworkIdentity> QuadTree;
 
         #endregion
@@ -65,7 +68,7 @@ namespace Mirage.Components.InterestManagement
 
         private void OnDrawGizmos()
         {
-            if(!Application.isPlaying) return;
+            if(!Application.isPlaying || !_visualDebug) return;
 
             QuadTree.DrawAllBounds();
             QuadTree.DrawAllObjects();
