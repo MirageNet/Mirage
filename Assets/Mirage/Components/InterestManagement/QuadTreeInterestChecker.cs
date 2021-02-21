@@ -118,9 +118,11 @@ namespace Mirage.Components.InterestManagement
 
                 for (int i = _tempList.Count - 1; i >= 0; i--)
                 {
-                    if (conn != null && conn.Identity != null && conn.Equals(_tempList[i]))
+                    if (conn != null && conn.Identity != null && conn.Identity.Equals(_tempList[i]))
                     {
                         observers.Add(conn);
+
+                        break;
                     }
                 }
             }

@@ -63,6 +63,8 @@ namespace Mirage.Components.InterestManagement
 
         private void OnDrawGizmos()
         {
+            if(!Application.isPlaying) return;
+
             QuadTree.DrawAllBounds();
             QuadTree.DrawAllObjects();
         }
