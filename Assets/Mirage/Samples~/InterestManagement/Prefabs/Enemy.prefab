@@ -177,6 +177,7 @@ GameObject:
   - component: {fileID: 1143206540915927667}
   - component: {fileID: 3175779197224890082}
   - component: {fileID: -2379877191592498782}
+  - component: {fileID: -5208645517015270607}
   m_Layer: 8
   m_Name: Enemy
   m_TagString: Untagged
@@ -251,7 +252,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0
-  ClientAuthority: 1
+  ClientAuthority: 0
   LocalPositionSensitivity: 0.01
   LocalRotationSensitivity: 0.01
   LocalScaleSensitivity: 0.01
@@ -302,3 +303,21 @@ MonoBehaviour:
   speed: 1
   movementProbability: 0.5
   movementDistance: 20
+--- !u!114 &-5208645517015270607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8872462076811691049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c7da5b04891585458e85b60494c9ed1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  CurrentPlayerVisibilityRange: 10
+  _minimumVisibilityRange: 1
+  _maximumVisibilityRange: 10
+  InterestManager: {fileID: 0}

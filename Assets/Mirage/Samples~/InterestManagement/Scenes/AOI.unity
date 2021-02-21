@@ -386,6 +386,7 @@ GameObject:
   - component: {fileID: 114156688}
   - component: {fileID: 114156687}
   - component: {fileID: 114156686}
+  - component: {fileID: 114156690}
   m_Layer: 0
   m_Name: World Floor
   m_TagString: Untagged
@@ -465,11 +466,27 @@ Transform:
   m_GameObject: {fileID: 114156685}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 10, y: 1, z: 10}
+  m_LocalScale: {x: 100, y: 1, z: 100}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114156690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 114156685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d48e0c95e8575fd48a7ee2e75e6c5cc3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _enemyPrefab: {fileID: 8537344390966522168, guid: 8e8e2d109f733874cb5319e2b29aeae0, type: 3}
+  _numberOfEnemiesSpawn: 100
+  _serverObject: {fileID: 1092843210}
+  _plane: {fileID: 114156689}
 --- !u!1 &186169289
 GameObject:
   m_ObjectHideFlags: 0
@@ -1404,7 +1421,7 @@ MonoBehaviour:
   _initialWorldSize: 1000
   _minimumNodeSize: 1
   _looseness: 1.2
-  _server: {fileID: 1092843214}
+  _server: {fileID: 1092843210}
 --- !u!1 &1113070485
 GameObject:
   m_ObjectHideFlags: 0

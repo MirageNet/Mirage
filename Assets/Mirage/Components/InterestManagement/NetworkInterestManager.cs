@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Mirage.Components.InterestManagement
@@ -14,7 +15,7 @@ namespace Mirage.Components.InterestManagement
         ///     This can alleviate the problem of even tiny objects ending up in large nodes if they're near boundaries.
         ///     A looseness value of 1.0 will make it a "normal" octree.
         /// </summary>
-        [SerializeField] private float _looseness = 1.2f;
+        [SerializeField] private float _looseness = 1.25f;
 
         [SerializeField] private ServerObjectManager _server;
 
@@ -33,10 +34,7 @@ namespace Mirage.Components.InterestManagement
         {
             netId.TryGetComponent(out Collider colliderComponent);
 
-            var boundBox = new Bounds(netId.transform.position,
-                colliderComponent != null ? colliderComponent.bounds.size : Vector3.one * _minimumNodeSize);
-
-            QuadTree.Add(netId, boundBox);
+            QuadTree.Add(netId, colliderComponent.bounds);
         }
 
         #endregion
@@ -45,6 +43,8 @@ namespace Mirage.Components.InterestManagement
 
         private void Awake()
         {
+            _server ??= FindObjectOfType<ServerObjectManager>();
+
             QuadTree = new BoundsOctree<NetworkIdentity>(_initialWorldSize, transform.position, _minimumNodeSize,
                 _looseness);
 
@@ -59,6 +59,12 @@ namespace Mirage.Components.InterestManagement
         private void OnValidate()
         {
             _server ??= FindObjectOfType<ServerObjectManager>();
+        }
+
+        private void OnDrawGizmos()
+        {
+            QuadTree.DrawAllBounds();
+            QuadTree.DrawAllObjects();
         }
 
         #endregion

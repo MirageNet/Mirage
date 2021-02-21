@@ -363,5 +363,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  SceneVisibilityRange: 100
+  CurrentPlayerVisibilityRange: 100
+  _minimumVisibilityRange: 1
+  _maximumVisibilityRange: 10
   InterestManager: {fileID: 0}
