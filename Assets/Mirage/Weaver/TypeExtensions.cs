@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
-using UnityEngine;
 
 namespace Mirage.Weaver
 {
@@ -37,7 +36,7 @@ namespace Mirage.Weaver
                         MethodReference method = md;
                         if (typeRef.IsGenericInstance)
                         {
-                            GenericInstanceType baseTypeInstance = (GenericInstanceType)td;
+                            var baseTypeInstance = (GenericInstanceType)td;
                             method = method.MakeHostInstanceGeneric(baseTypeInstance);
                         }
 
@@ -122,7 +121,7 @@ namespace Mirage.Weaver
             if (type.HasGenericParameters)
             {
                 // get all the generic parameters and make a generic instance out of it
-                TypeReference[] genericTypes = new TypeReference[type.GenericParameters.Count];
+                var genericTypes = new TypeReference[type.GenericParameters.Count];
                 for (int i = 0; i < type.GenericParameters.Count; i++)
                 {
                     genericTypes[i] = type.GenericParameters[i].GetElementType();
