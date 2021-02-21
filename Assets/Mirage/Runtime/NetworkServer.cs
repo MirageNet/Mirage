@@ -122,8 +122,14 @@ namespace Mirage
         /// </summary>
         public bool Active { get; private set; }
 
-        // Time kept in this server
-        public readonly NetworkTime Time = new NetworkTime();
+        readonly NetworkTime _time = new NetworkTime();
+        /// <summary>
+        /// Time kept in this server
+        /// </summary>
+        public NetworkTime Time
+        {
+            get { return _time; }
+        }
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.

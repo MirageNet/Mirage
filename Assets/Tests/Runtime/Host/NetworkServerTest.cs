@@ -82,5 +82,11 @@ namespace Mirage.Tests.Host
         {
             Assert.That(server.OnStopHost, Is.Not.Null);
         }
+
+        [Test]
+        public void TimeNotNullTest()
+        {
+            Assert.That(server.Time, Is.Not.Null);
+        }
     }
 }

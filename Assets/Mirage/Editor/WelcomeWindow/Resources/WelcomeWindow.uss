@@ -105,4 +105,19 @@ Button {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 3px;
+    
+.dark-selected-tab {
+    background-color: rgba(53, 53, 53, 255);
+    border-left-color: rgba(36, 36, 36, 255);
+    border-right-color: rgba(36, 36, 36, 255);
+    border-top-color: rgba(36, 36, 36, 255);
+    border-bottom-color: rgba(36, 36, 36, 255);
+}
+
+.light-selected-tab {
+    background-color: rgba(177, 177, 177, 255);
+    border-left-color: rgba(147, 147, 147, 255);
+    border-right-color: rgba(147, 147, 147, 255);
+    border-top-color: rgba(147, 147, 147, 255);
+    border-bottom-color: rgba(147, 147, 147, 255);
 }

@@ -7,6 +7,11 @@ using UnityEngine.Serialization;
 
 namespace Mirage
 {
+
+    /// <summary>
+    /// Event fires from a <see cref="NetworkClient">NetworkClient</see> or <see cref="NetworkServer">NetworkServer</see> during a new connection, a new authentication, or a disconnection.
+    /// <para>INetworkConnection - connection creating the event</para>
+    /// </summary>
     [Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkConnection> { }
 
     public enum ConnectState
@@ -77,7 +82,14 @@ namespace Mirage
         /// </summary>
         public bool IsConnected => connectState == ConnectState.Connected;
 
-        public readonly NetworkTime Time = new NetworkTime();
+        readonly NetworkTime _time = new NetworkTime();
+        /// <summary>
+        /// Time kept in this client
+        /// </summary>
+        public NetworkTime Time
+        {
+            get { return _time; }
+        }
 
         /// <summary>
         /// NetworkClient can connect to local server in host mode too
