@@ -20,7 +20,7 @@ namespace Mirage
     public class WelcomeWindow : EditorWindow
     {
         private Button lastClickedTab;
-        private List<Button> installButtons = new List<Button>();
+        private readonly List<Button> installButtons = new List<Button>();
 
         #region Setup
 
