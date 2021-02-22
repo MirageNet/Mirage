@@ -3,9 +3,15 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace Mirage
 {
+
+    /// <summary>
+    /// Event fires from a <see cref="NetworkClient">NetworkClient</see> or <see cref="NetworkServer">NetworkServer</see> during a new connection, a new authentication, or a disconnection.
+    /// <para>INetworkConnection - connection creating the event</para>
+    /// </summary>
     [Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkConnection> { }
 
     public enum ConnectState
@@ -35,17 +41,23 @@ namespace Mirage
         /// <summary>
         /// Event fires once the Client has connected its Server.
         /// </summary>
-        public NetworkConnectionEvent Connected = new NetworkConnectionEvent();
+        [FormerlySerializedAs("Connected")]
+        [SerializeField] NetworkConnectionEvent _connected = new NetworkConnectionEvent();
+        public NetworkConnectionEvent Connected => _connected;
 
         /// <summary>
         /// Event fires after the Client connection has sucessfully been authenticated with its Server.
         /// </summary>
-        public NetworkConnectionEvent Authenticated = new NetworkConnectionEvent();
+        [FormerlySerializedAs("Authenticated")]
+        [SerializeField] NetworkConnectionEvent _authenticated = new NetworkConnectionEvent();
+        public NetworkConnectionEvent Authenticated => _authenticated;
 
         /// <summary>
         /// Event fires after the Client has disconnected from its Server and Cleanup has been called.
         /// </summary>
-        public UnityEvent Disconnected = new UnityEvent();
+        [FormerlySerializedAs("Disconnected")]
+        [SerializeField] UnityEvent _disconnected = new UnityEvent();
+        public UnityEvent Disconnected => _disconnected;
 
         /// <summary>
         /// The NetworkConnection object this client is using.
@@ -75,7 +87,14 @@ namespace Mirage
         /// </summary>
         public bool IsConnected => connectState == ConnectState.Connected;
 
-        public readonly NetworkTime Time = new NetworkTime();
+        readonly NetworkTime _time = new NetworkTime();
+        /// <summary>
+        /// Time kept in this client
+        /// </summary>
+        public NetworkTime Time
+        {
+            get { return _time; }
+        }
 
         /// <summary>
         /// NetworkClient can connect to local server in host mode too

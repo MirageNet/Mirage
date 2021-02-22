@@ -4,7 +4,6 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirage.RemoteCalls;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 namespace Mirage
@@ -12,7 +11,7 @@ namespace Mirage
 
     [AddComponentMenu("Network/ClientObjectManager")]
     [DisallowMultipleComponent]
-    public class ClientObjectManager : MonoBehaviour, IObjectLocator
+    public class ClientObjectManager : MonoBehaviour, IClientObjectManager, IObjectLocator
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientObjectManager));
 
@@ -25,19 +24,20 @@ namespace Mirage
         internal readonly Dictionary<Guid, SpawnHandlerDelegate> spawnHandlers = new Dictionary<Guid, SpawnHandlerDelegate>();
         internal readonly Dictionary<Guid, UnSpawnDelegate> unspawnHandlers = new Dictionary<Guid, UnSpawnDelegate>();
 
-        [System.Serializable]
-        public class SpawnEvent : UnityEvent<NetworkIdentity> { }
-
         [Header("Events")]
         /// <summary>
         /// Raised when the client spawns an object
         /// </summary>
-        public SpawnEvent Spawned = new SpawnEvent();
+        [FormerlySerializedAs("Spawned")]
+        [SerializeField] SpawnEvent _spawned = new SpawnEvent();
+        public SpawnEvent Spawned => _spawned;
 
         /// <summary>
         /// Raised when the client unspawns an object
         /// </summary>
-        public SpawnEvent UnSpawned = new SpawnEvent();
+        [FormerlySerializedAs("UnSpawned")]
+        [SerializeField] SpawnEvent _unSpawned = new SpawnEvent();
+        public SpawnEvent UnSpawned => _unSpawned;
 
         [Header("Prefabs")]
         /// <summary>

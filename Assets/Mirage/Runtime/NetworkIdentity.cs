@@ -162,6 +162,9 @@ namespace Mirage
         /// </summary>
         public NetworkServer Server { get; internal set; }
 
+        /// <summary>
+        /// The ServerObjectManager is present only for server/host instances.
+        /// </summary>
         public ServerObjectManager ServerObjectManager;
 
         /// <summary>
@@ -174,6 +177,9 @@ namespace Mirage
         /// </summary>
         public NetworkClient Client { get; internal set; }
 
+        /// <summary>
+        /// The ClientObjectManager is present only for client instances.
+        /// </summary>
         public ClientObjectManager ClientObjectManager;
 
         INetworkConnection _connectionToClient;
@@ -196,6 +202,9 @@ namespace Mirage
             }
         }
 
+        /// <summary>
+        /// Array of NetworkBehaviours associated with this NetworkIdentity. Can be in child GameObjects.
+        /// </summary>
         public NetworkBehaviour[] NetworkBehaviours
         {
             get

@@ -92,6 +92,9 @@ namespace Mirage
         /// </summary>
         public NetworkServer Server => NetIdentity.Server;
 
+        /// <summary>
+        /// Quick Reference to the NetworkIdentities ServerObjectManager. Present only for server/host instances.
+        /// </summary>
         public ServerObjectManager ServerObjectManager => NetIdentity.ServerObjectManager;
 
         /// <summary>
@@ -99,6 +102,9 @@ namespace Mirage
         /// </summary>
         public NetworkClient Client => NetIdentity.Client;
 
+        /// <summary>
+        /// Quick Reference to the NetworkIdentities ClientObjectManager. Present only for instances instances.
+        /// </summary>
         public ClientObjectManager ClientObjectManager => NetIdentity.ClientObjectManager;
 
         /// <summary>
@@ -111,6 +117,9 @@ namespace Mirage
         /// </summary>
         public INetworkConnection ConnectionToClient => NetIdentity.ConnectionToClient;
 
+        /// <summary>
+        /// Returns the appropriate NetworkTime instance based on if this NetworkBehaviour is running as a Server or Client.
+        /// </summary>
         public NetworkTime NetworkTime => IsClient ? Client.Time : Server.Time;
 
         protected internal ulong SyncVarDirtyBits { get; private set; }

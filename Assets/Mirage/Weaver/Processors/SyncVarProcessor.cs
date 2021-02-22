@@ -103,7 +103,7 @@ namespace Mirage.Weaver
                     originalType);
 
             ILProcessor worker = get.Body.GetILProcessor();
-            LoadField(fd, worker);
+            LoadField(fd, originalType, worker);
 
             worker.Append(worker.Create(OpCodes.Ret));
 
@@ -133,7 +133,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
             // reference to field to set
             // make generic version of SetSyncVar with field type
-            LoadField(fd, worker);
+            LoadField(fd, originalType, worker);
 
             MethodReference syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
             var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
@@ -144,7 +144,7 @@ namespace Mirage.Weaver
 
             // T oldValue = value;
             VariableDefinition oldValue = set.AddLocal(originalType);
-            LoadField(fd, worker);
+            LoadField(fd, originalType, worker);
             worker.Append(worker.Create(OpCodes.Stloc, oldValue));
 
             // fieldValue = value;
@@ -203,7 +203,7 @@ namespace Mirage.Weaver
                 MethodReference setter = module.ImportReference(fd.FieldType.Resolve().GetMethod("set_Value"));
 
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Ldflda, fd));
+                worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
                 worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
                 worker.Append(worker.Create(OpCodes.Call, setter));
             }
@@ -211,23 +211,32 @@ namespace Mirage.Weaver
             {
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
-                worker.Append(worker.Create(OpCodes.Stfld, fd));
+                worker.Append(worker.Create(OpCodes.Stfld, fd.MakeHostGenericIfNeeded()));
             }
         }
 
-        private void LoadField(FieldDefinition fd, ILProcessor worker)
+        private void LoadField(FieldDefinition fd, TypeReference originalType,  ILProcessor worker)
         {
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
             if (IsWrapped(fd.FieldType))
             {
-                worker.Append(worker.Create(OpCodes.Ldflda, fd));
+                worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
                 MethodReference getter = module.ImportReference(fd.FieldType.Resolve().GetMethod("get_Value"));
                 worker.Append(worker.Create(OpCodes.Call, getter));
+
+                // When we use NetworkBehaviors, we normally use a derived class,
+                // but the NetworkBehaviorSyncVar returns just NetworkBehavior
+                // thus we need to cast it to the user specicfied type
+                // otherwise IL2PP fails to build.  see #629
+                if (getter.ReturnType.FullName != originalType.FullName)
+                {
+                    worker.Append(worker.Create(OpCodes.Castclass, originalType));
+                }
             }
             else
             {
-                worker.Append(worker.Create(OpCodes.Ldfld, fd));
+                worker.Append(worker.Create(OpCodes.Ldfld, fd.MakeHostGenericIfNeeded()));
             }
         }
 
@@ -392,7 +401,7 @@ namespace Mirage.Weaver
                 }
                 else
                 {
-                    LoadField(newValue, worker);
+                    LoadField(newValue, oldValue.VariableType, worker);
                 }
             }
 
@@ -413,7 +422,16 @@ namespace Mirage.Weaver
             {
                 // only use Callvirt when not static
                 OpCode opcode = hookMethod.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
-                worker.Append(worker.Create(opcode, hookMethod));
+                MethodReference hookMethodReference = hookMethod;
+
+                if (hookMethodReference.DeclaringType.HasGenericParameters)
+                {
+                    // we need to get the Type<T>.HookMethod so convert it to a generic<T>.
+                    var genericType = (GenericInstanceType)hookMethod.DeclaringType.ConvertToGenericIfNeeded();
+                    hookMethodReference = hookMethod.MakeHostInstanceGeneric(genericType);
+                }
+
+                worker.Append(worker.Create(opcode, module.ImportReference(hookMethodReference)));
             }
         }
 
@@ -444,7 +462,7 @@ namespace Mirage.Weaver
             // loc_0,  this local variable is to determine if any variable was dirty
             VariableDefinition dirtyLocal = serialize.AddLocal<bool>();
 
-            MethodDefinition baseSerialize = netBehaviourSubclass.BaseType.Resolve().GetMethodInBaseType(SerializeMethodName);
+            MethodReference baseSerialize = netBehaviourSubclass.BaseType.GetMethodInBaseType(SerializeMethodName);
             if (baseSerialize != null)
             {
                 // base
@@ -529,7 +547,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
             // this
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldfld, syncVar));
+            worker.Append(worker.Create(OpCodes.Ldfld, syncVar.MakeHostGenericIfNeeded()));
             MethodReference writeFunc = writers.GetWriteFunc(syncVar.FieldType, null);
             if (writeFunc != null)
             {
@@ -565,7 +583,7 @@ namespace Mirage.Weaver
             serialize.Body.InitLocals = true;
             VariableDefinition dirtyBitsLocal = serialize.AddLocal<long>();
 
-            MethodDefinition baseDeserialize = netBehaviourSubclass.BaseType.Resolve().GetMethodInBaseType(DeserializeMethodName);
+            MethodReference baseDeserialize = netBehaviourSubclass.BaseType.GetMethodInBaseType(DeserializeMethodName);
             if (baseDeserialize != null)
             {
                 // base
@@ -652,7 +670,7 @@ namespace Mirage.Weaver
 
             // T oldValue = value;
             VariableDefinition oldValue = deserialize.AddLocal(originalType);
-            LoadField(syncVar, serWorker);
+            LoadField(syncVar, originalType,  serWorker);
 
             serWorker.Append(serWorker.Create(OpCodes.Stloc, oldValue));
 
@@ -672,7 +690,7 @@ namespace Mirage.Weaver
             // reader.Read()
             serWorker.Append(serWorker.Create(OpCodes.Call, readFunc));
             // syncvar
-            serWorker.Append(serWorker.Create(OpCodes.Stfld, syncVar));
+            serWorker.Append(serWorker.Create(OpCodes.Stfld, syncVar.MakeHostGenericIfNeeded()));
 
             if (hookMethod != null)
             {
@@ -690,7 +708,7 @@ namespace Mirage.Weaver
                 // 'oldValue'
                 serWorker.Append(serWorker.Create(OpCodes.Ldloc, oldValue));
                 // 'newValue'
-                LoadField(syncVar, serWorker);
+                LoadField(syncVar, originalType, serWorker);
                 // call the function
                 MethodReference syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
                 var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());

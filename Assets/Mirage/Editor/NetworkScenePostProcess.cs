@@ -66,9 +66,6 @@ namespace Mirage
             // set scene hash
             identity.SetSceneIdSceneHashPartInternal();
 
-            // disable it
-            // note: NetworkIdentity.OnDisable adds itself to the
-            //       spawnableObjects dictionary (only if sceneId != 0)
             identity.gameObject.SetActive(false);
 
             // safety check for prefabs with more than one NetworkIdentity
