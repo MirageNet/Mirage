@@ -60,8 +60,7 @@ namespace Mirage
         private static string firstStartUpKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
 
-        private const string changeLogPath = "Assets/Mirage/CHANGELOG.md";
-            //"Packages/Mirage/CHANGELOG.md";
+        private const string changeLogPath = "Packages/Mirage/CHANGELOG.md";
 
         private static string GetVersion()
         {
