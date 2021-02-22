@@ -238,9 +238,9 @@ namespace Mirage
             }
         }
 
+        //parse the change log file
         private void ParseChangeLog()
         {
-            Label changeLogText = rootVisualElement.Q<Label>("ChangeLogText");
             List<string> content = new List<string>();
 
             using(StreamReader reader = new StreamReader(changeLogPath))
@@ -268,12 +268,20 @@ namespace Mirage
                 }
             }
 
+            DrawChangeLog(content);
+        }
+
+        //draw the parsed information
+        private void DrawChangeLog(List<string> content)
+        {
+            Label changeLogText = rootVisualElement.Q<Label>("ChangeLogText");
+
             for (int i = 0; i < content.Count; i++)
             {
                 string item = content[i];
 
                 //if the item is a version
-                if(item.Contains("# [") || item.Contains("## ["))
+                if (item.Contains("# [") || item.Contains("## ["))
                 {
                     string version = GetVersion();
                     rootVisualElement.Q<Label>("ChangeLogVersion").text = "Version " + version.Substring(0, version.Length - 2);
@@ -282,7 +290,7 @@ namespace Mirage
                 else if (item.Contains("###"))
                 {
                     //only add a space above the title if it isn't the first title
-                    if(i > 2) { changeLogText.text += "\n"; }
+                    if (i > 2) { changeLogText.text += "\n"; }
 
                     changeLogText.text += item.Substring(4) + "\n";
                 }
