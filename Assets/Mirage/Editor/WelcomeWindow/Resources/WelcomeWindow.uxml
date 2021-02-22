@@ -61,15 +61,15 @@
                 <ui:VisualElement name="ModulesList" style="flex-grow: 1; padding-left: 10px; padding-right: 10px;">
                     <ui:VisualElement name="Module" tooltip="Automatically find games within the same network.">
                         <ui:Label text="LAN Discovery" name="Name" />
-                        <ui:Button text="Install" name="InstallButton" style="flex-shrink: 1;" />
+                        <ui:Button text="Install" name="InstallButton" class="installButton" />
                     </ui:VisualElement>
                     <ui:VisualElement name="Module" tooltip="A transport that uses Facepunch&apos;s Steam SDK.">
                         <ui:Label text="Steam (Facepunch)" name="Name" />
-                        <ui:Button text="Install" name="InstallButton" style="flex-shrink: 1;" />
+                        <ui:Button text="Install" name="InstallButton" class="installButton" />
                     </ui:VisualElement>
                     <ui:VisualElement name="Module" tooltip="A transport that uses Steamworks.NET.">
                         <ui:Label text="Steam (Steamworks.NET)" name="Name" />
-                        <ui:Button text="Install" name="InstallButton" style="flex-shrink: 1;" />
+                        <ui:Button text="Install" name="InstallButton" class="installButton" />
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="Spacer" />
