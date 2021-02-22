@@ -27,7 +27,7 @@ namespace Mirage
         public NetworkIdentity PlayerPrefab;
 
         /// <summary>
-        /// Opertionally delay the spawn.
+        /// Whether to span the player upon connection automatically
         /// </summary>
         public bool AutoSpawn = true;
 
