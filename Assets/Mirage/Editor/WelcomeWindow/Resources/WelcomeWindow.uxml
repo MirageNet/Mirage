@@ -7,18 +7,18 @@
     <ui:Label name="Title" text="Welcome to Mirage!" />
     <ui:Box name="ColumnContainer" style="flex-grow: 1;">
         <ui:VisualElement name="LeftColumnBox">
-            <ui:Button name="WelcomeButton" text="Welcome" class="light-selected-tab dark-selected-tab" />
-            <ui:Button name="QuickStartButton" text="Quick Start Guide" class="light-selected-tab dark-selected-tab" />
-            <ui:Button name="PackagesButton" text="Packages" class="light-selected-tab dark-selected-tab" />
-            <ui:Button name="FaqButton" text="FAQ" class="light-selected-tab dark-selected-tab" />
-            <ui:Button name="BestPracticesButton" text="Best Practices" class="light-selected-tab dark-selected-tab" />
-            <ui:Button name="ChangeLogButton" text="Change Log" class="light-selected-tab dark-selected-tab" />
+            <ui:Button name="WelcomeButton" text="Welcome" class="light-selected-tab dark-selected-tab navButton" />
+            <ui:Button name="QuickStartButton" text="Quick Start Guide" class="light-selected-tab dark-selected-tab navButton" />
+            <ui:Button name="PackagesButton" text="Packages" class="light-selected-tab dark-selected-tab navButton" />
+            <ui:Button name="FaqButton" text="FAQ" class="light-selected-tab dark-selected-tab navButton" />
+            <ui:Button name="BestPracticesButton" text="Best Practices" class="light-selected-tab dark-selected-tab navButton" />
+            <ui:Button name="ChangeLogButton" text="Change Log" class="light-selected-tab dark-selected-tab navButton" />
             <ui:Button name="SponsorButton" text="Sponsor Us" style="display: none;" />
-            <ui:Button name="DiscordButton" text="Discord" class="light-selected-tab dark-selected-tab" />
+            <ui:Button name="DiscordButton" text="Discord" class="light-selected-tab dark-selected-tab navButton" />
         </ui:VisualElement>
         <ui:VisualElement name="Spacer" style="display: none;" />
         <ui:VisualElement name="RightColumnBox">
-            <ui:VisualElement name="Welcome" class="screen" style="display: flex;">
+            <ui:VisualElement name="Welcome" class="screen">
                 <ui:Label name="Header" text="Welcome" />
                 <ui:Label name="Description" text="Hello! Thank you for installing Mirage. Please visit all the pages on this window. Clicking the button at the bottom of the pages will redirect you to a webpage. Additionally, there are example projects that you can import from the Unity Package Manager. &#10;&#10;Have fun using Mirage!" style="-unity-text-align: upper-left;" />
                 <ui:VisualElement name="Spacer" />

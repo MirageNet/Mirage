@@ -66,7 +66,7 @@
     flex-basis: auto;
 }
 
-Button {
+.navButton {
     padding: 2px;
     height: 35px;
 }
