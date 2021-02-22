@@ -4,6 +4,8 @@ using UnityEngine.UIElements;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using System.Collections.Generic;
+using System.IO;
+using System;
 
 /**
  * Docs used:
@@ -57,6 +59,9 @@ namespace Mirage
         //editorprefs keys
         private static string firstStartUpKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
+
+        private const string changeLogPath = "Assets/Mirage/CHANGELOG.md";
+            //"Packages/Mirage/CHANGELOG.md";
 
         private static string GetVersion()
         {
@@ -136,6 +141,8 @@ namespace Mirage
             Label versionText = root.Q<Label>("VersionText");
             versionText.text = "v" + GetVersion();
 
+            ParseChangeLog();
+
             #region Page buttons
 
             ConfigureTab("WelcomeButton", "Welcome", WelcomePageUrl);
@@ -184,7 +191,10 @@ namespace Mirage
             };
 
             Button redirectButton = rootVisualElement.Q<VisualElement>(tab).Q<Button>("Redirect");
-            redirectButton.clicked += () => Application.OpenURL(url);
+            if(redirectButton != null)
+            {
+                redirectButton.clicked += () => Application.OpenURL(url);
+            }
         }
 
         //switch between content
@@ -226,6 +236,64 @@ namespace Mirage
             else
             {
                 button.EnableInClassList("light-selected-tab", toggle);
+            }
+        }
+
+        private void ParseChangeLog()
+        {
+            Label changeLogText = rootVisualElement.Q<Label>("ChangeLogText");
+            List<string> content = new List<string>();
+
+            using(StreamReader reader = new StreamReader(changeLogPath))
+            {
+                string line;
+
+                while((line = reader.ReadLine()) != null)
+                {
+                    //we dont need to parse an empty string
+                    if(line == string.Empty) { continue; }
+
+                    //always add the first line
+                    if(content.Count == 0) { content.Add(line); continue; }
+
+                    //if we havent reached the next version yet
+                    if(!line.Contains("https://github.com/MirageNet/Mirage/compare/"))
+                    {
+                        content.Add(line);
+                    }
+                    else
+                    {
+                        //break because the next version was reached
+                        break;
+                    }
+                }
+            }
+
+            for (int i = 0; i < content.Count; i++)
+            {
+                string item = content[i];
+
+                //if the item is a version
+                if(item.Contains("# [") || item.Contains("## ["))
+                {
+                    string version = GetVersion();
+                    rootVisualElement.Q<Label>("ChangeLogVersion").text = "Version " + version.Substring(0, version.Length - 2);
+                }
+                //if the item is a change title
+                else if (item.Contains("###"))
+                {
+                    //only add a space above the title if it isn't the first title
+                    if(i > 2) { changeLogText.text += "\n"; }
+
+                    changeLogText.text += item.Substring(4) + "\n";
+                }
+                //if the item is a change
+                else
+                {
+                    string change = item.Split(new string[] { "([" }, StringSplitOptions.None)[0];
+                    change = change.Replace("*", "-");
+                    changeLogText.text += change + "\n";
+                }
             }
         }
 

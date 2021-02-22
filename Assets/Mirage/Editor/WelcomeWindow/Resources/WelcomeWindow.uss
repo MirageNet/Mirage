@@ -108,17 +108,17 @@ Button {
 }
 
 .dark-selected-tab {
-    background-color: rgba(53, 53, 53, 255);
-    border-left-color: rgba(36, 36, 36, 255);
-    border-right-color: rgba(36, 36, 36, 255);
-    border-top-color: rgba(36, 36, 36, 255);
-    border-bottom-color: rgba(36, 36, 36, 255);
+    background-color: rgb(53, 53, 53);
+    border-left-color: rgb(36, 36, 36);
+    border-right-color: rgb(36, 36, 36);
+    border-top-color: rgb(36, 36, 36);
+    border-bottom-color: rgb(36, 36, 36);
 }
 
 .light-selected-tab {
-    background-color: rgba(177, 177, 177, 255);
-    border-left-color: rgba(147, 147, 147, 255);
-    border-right-color: rgba(147, 147, 147, 255);
-    border-top-color: rgba(147, 147, 147, 255);
-    border-bottom-color: rgba(147, 147, 147, 255);
+    background-color: rgb(177, 177, 177);
+    border-left-color: rgb(147, 147, 147);
+    border-right-color: rgb(147, 147, 147);
+    border-top-color: rgb(147, 147, 147);
+    border-bottom-color: rgb(147, 147, 147);
 }
