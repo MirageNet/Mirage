@@ -7,7 +7,7 @@ namespace Mirage
 {
 
     /// <summary>
-    /// Spawns a player as soon  as the connection is authenticated
+    /// Spawns a player as soon as the connection is authenticated
     /// </summary>
     public class PlayerSpawner : MonoBehaviour
     {
@@ -25,6 +25,11 @@ namespace Mirage
         public ServerObjectManager ServerObjectManager;
         [FormerlySerializedAs("playerPrefab")]
         public NetworkIdentity PlayerPrefab;
+
+        /// <summary>
+        /// Whether to span the player upon connection automatically
+        /// </summary>
+        public bool AutoSpawn = true;
 
         // Start is called before the first frame update
         public virtual void Start()
@@ -89,8 +94,13 @@ namespace Mirage
         /// <param name="conn">Connection to the server.</param>
         private void OnClientSceneChanged(string sceneName, SceneOperation sceneOperation)
         {
-            if(sceneOperation == SceneOperation.Normal)
-                Client.Send(new AddPlayerMessage());
+            if (AutoSpawn && sceneOperation == SceneOperation.Normal)
+                RequestServerSpawnPlayer();
+        }
+
+        public virtual void RequestServerSpawnPlayer()
+        {
+            Client.Send(new AddPlayerMessage());
         }
 
         void OnServerAddPlayerInternal(INetworkConnection conn, AddPlayerMessage msg)
