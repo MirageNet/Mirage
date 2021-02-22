@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,39 +8,39 @@ namespace Mirage.Components.InterestManagement
 {
     public struct BoundsOctreeNode<T>
     {
-        // Centre of this node
+        // Center of this node
         public Vector3 Center { get; private set; }
 
         // Length of this node if it has a looseness of 1.0
         public float BaseLength { get; private set; }
 
         // Looseness value for this node
-        float looseness;
+        private float looseness;
 
         // Minimum size for a node in this octree
-        float minSize;
+        private float minSize;
 
         // Actual length of sides, taking the looseness value into account
-        float adjLength;
+        private float adjLength;
 
         // Bounding box that represents this node
-        Bounds bounds;
+        private Bounds bounds;
 
         // Objects in this node
-        readonly List<OctreeObject> objects;
+        private readonly OctreeObject[] objects;
 
         // Child nodes, if any
-        BoundsOctreeNode<T>[] children;
+        private BoundsOctreeNode<T>[] children;
 
         // Bounds of potential children to this node. These are actual size (with looseness taken into account), not base size
-        Bounds[] childBounds;
+        private Bounds[] childBounds;
 
         // If there are already numObjectsAllowed in a node, we split it into children
         // A generally good number seems to be something around 8-15
-        const int numObjectsAllowed = 8;
+        private const int numObjectsAllowed = 8;
 
         // An object in the octree
-        struct OctreeObject
+        private struct OctreeObject
         {
             public T Obj;
             public Bounds Bounds;
@@ -83,7 +84,7 @@ namespace Mirage.Components.InterestManagement
         public BoundsOctreeNode(float baseLengthVal, float minSizeVal, float loosenessVal, Vector3 centerVal) : this()
         {
             bounds = default;
-            objects = new List<OctreeObject>();
+            objects = new OctreeObject[numObjectsAllowed];
 
             SetValues(baseLengthVal, minSizeVal, loosenessVal, centerVal);
         }
@@ -115,12 +116,14 @@ namespace Mirage.Components.InterestManagement
         {
             bool removed = false;
 
-            for (int i = 0; i < objects.Count; i++)
+            for (int i = 0; i < objects.Length; i++)
             {
+                if (objects[i].Obj == null) continue;
+
                 if (objects[i].Obj.Equals(obj))
                 {
                     removed = true;
-                    objects.RemoveAt(i);
+                    objects[i] = default;
                     break;
                 }
             }
@@ -148,6 +151,46 @@ namespace Mirage.Components.InterestManagement
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="checkBounds"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public bool IsColliding(ref Bounds checkBounds, ref T obj)
+        {
+            // Are the input bounds at least partially in this node?
+            if (!bounds.Intersects(checkBounds))
+            {
+                return false;
+            }
+
+            // Check against any objects in this node
+            for (int i = 0; i < objects.Length; i++)
+            {
+                if(objects[i].Obj == null) continue;
+
+                if (objects[i].Bounds.Intersects(checkBounds) && objects[i].Obj.Equals(obj))
+                {
+                    return true;
+                }
+            }
+
+            // Check children
+            if (children != null)
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    if (children[i].IsColliding(ref checkBounds, ref obj))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Check if the specified bounds intersect with anything in the tree. See also: GetColliding.
         /// </summary>
         /// <param name="checkBounds">Bounds to check.</param>
@@ -161,7 +204,7 @@ namespace Mirage.Components.InterestManagement
             }
 
             // Check against any objects in this node
-            for (int i = 0; i < objects.Count; i++)
+            for (int i = 0; i < objects.Length; i++)
             {
                 if (objects[i].Bounds.Intersects(checkBounds))
                 {
@@ -193,15 +236,13 @@ namespace Mirage.Components.InterestManagement
         public bool IsColliding(ref Ray checkRay, float maxDistance = float.PositiveInfinity)
         {
             // Is the input ray at least partially in this node?
-            float distance;
-
-            if (!bounds.IntersectRay(checkRay, out distance) || distance > maxDistance)
+            if (!bounds.IntersectRay(checkRay, out float distance) || distance > maxDistance)
             {
                 return false;
             }
 
             // Check against any objects in this node
-            for (int i = 0; i < objects.Count; i++)
+            for (int i = 0; i < objects.Length; i++)
             {
                 if (objects[i].Bounds.IntersectRay(checkRay, out distance) && distance <= maxDistance)
                 {
@@ -239,7 +280,7 @@ namespace Mirage.Components.InterestManagement
             }
 
             // Check against any objects in this node
-            for (int i = 0; i < objects.Count; i++)
+            for (int i = 0; i < objects.Length; i++)
             {
                 if (objects[i].Bounds.Intersects(checkBounds))
                 {
@@ -266,16 +307,14 @@ namespace Mirage.Components.InterestManagement
         /// <returns>Objects that intersect with the specified ray.</returns>
         public void GetColliding(ref Ray checkRay, List<T> result, float maxDistance = float.PositiveInfinity)
         {
-            float distance;
-
             // Is the input ray at least partially in this node?
-            if (!bounds.IntersectRay(checkRay, out distance) || distance > maxDistance)
+            if (!bounds.IntersectRay(checkRay, out float distance) || distance > maxDistance)
             {
                 return;
             }
 
             // Check against any objects in this node
-            for (int i = 0; i < objects.Count; i++)
+            for (int i = 0; i < objects.Length; i++)
             {
                 if (objects[i].Bounds.IntersectRay(checkRay, out distance) && distance <= maxDistance)
                 {
@@ -324,6 +363,7 @@ namespace Mirage.Components.InterestManagement
             Gizmos.color = new Color(tintVal, 0, 1.0f - tintVal);
 
             Bounds thisBounds = new Bounds(Center, new Vector3(adjLength, adjLength, adjLength));
+
             Gizmos.DrawWireCube(thisBounds.center, thisBounds.size);
 
             if (children != null)
@@ -380,7 +420,7 @@ namespace Mirage.Components.InterestManagement
                 return this;
             }
 
-            if (objects.Count == 0 && (children == null || children.Length == 0))
+            if (objects.Length == 0 && (children == null || children.Length == 0))
             {
                 return this;
             }
@@ -388,7 +428,7 @@ namespace Mirage.Components.InterestManagement
             // Check objects in root
             int bestFit = -1;
 
-            for (int i = 0; i < objects.Count; i++)
+            for (int i = 0; i < objects.Length; i++)
             {
                 OctreeObject curObj = objects[i];
                 int newBestFit = BestFitChild(curObj.Bounds);
@@ -460,23 +500,6 @@ namespace Mirage.Components.InterestManagement
             return children[bestFit];
         }
 
-        /*
-    /// <summary>
-    /// Get the total amount of objects in this node and all its children, grandchildren etc. Useful for debugging.
-    /// </summary>
-    /// <param name="startingNum">Used by recursive calls to add to the previous total.</param>
-    /// <returns>Total objects in this node and its children, grandchildren etc.</returns>
-    public int GetTotalObjects(int startingNum = 0) {
-        int totalObjects = startingNum + objects.Count;
-        if (children != null) {
-            for (int i = 0; i < 8; i++) {
-                totalObjects += children[i].GetTotalObjects();
-            }
-        }
-        return totalObjects;
-    }
-    */
-
         /// <summary>
         /// Set values for this node.
         /// </summary>
@@ -484,7 +507,7 @@ namespace Mirage.Components.InterestManagement
         /// <param name="minSizeVal">Minimum size of nodes in this octree.</param>
         /// <param name="loosenessVal">Multiplier for baseLengthVal to get the actual size.</param>
         /// <param name="centerVal">Centre position of this node.</param>
-        void SetValues(float baseLengthVal, float minSizeVal, float loosenessVal, Vector3 centerVal)
+        private void SetValues(float baseLengthVal, float minSizeVal, float loosenessVal, Vector3 centerVal)
         {
             BaseLength = baseLengthVal;
             minSize = minSizeVal;
@@ -494,6 +517,7 @@ namespace Mirage.Components.InterestManagement
 
             // Create the bounding box.
             Vector3 size = new Vector3(adjLength, adjLength, adjLength);
+
             bounds = new Bounds(Center, size);
 
             float quarter = BaseLength / 4f;
@@ -517,17 +541,20 @@ namespace Mirage.Components.InterestManagement
         /// </summary>
         /// <param name="obj">Object to add.</param>
         /// <param name="objBounds">3D bounding box around the object.</param>
-        void SubAdd(T obj, Bounds objBounds)
+        private void SubAdd(T obj, Bounds objBounds)
         {
             // We know it fits at this level if we've got this far
             // Just add if few objects are here, or children would be below min size
-            if (objects.Count < numObjectsAllowed || (BaseLength / 2) < minSize)
+            if (objects.Length < numObjectsAllowed || (BaseLength / 2) < minSize)
             {
                 OctreeObject newObj = new OctreeObject {Obj = obj, Bounds = objBounds};
 
-                //Debug.Log("ADD " + obj.name + " to depth " + depth);
+                for (int i = 0; i < objects.Length; i++)
+                {
+                    if(objects[i].Obj == null) continue;
 
-                objects.Add(newObj);
+                    objects[i] = newObj;
+                }
             }
             else
             {
@@ -547,7 +574,7 @@ namespace Mirage.Components.InterestManagement
                     }
 
                     // Now that we have the new children, see if this node's existing objects would fit there
-                    for (int i = objects.Count - 1; i >= 0; i--)
+                    for (int i = objects.Length - 1; i >= 0; i--)
                     {
                         OctreeObject existingObj = objects[i];
 
@@ -559,7 +586,8 @@ namespace Mirage.Components.InterestManagement
                         if (Encapsulates(children[bestFitChild].bounds, existingObj.Bounds))
                         {
                             children[bestFitChild].SubAdd(existingObj.Obj, existingObj.Bounds); // Go a level deeper
-                            objects.Remove(existingObj); // Remove from here
+
+                            objects[i] = default;
                         }
                     }
                 }
@@ -575,9 +603,12 @@ namespace Mirage.Components.InterestManagement
                 {
                     OctreeObject newObj = new OctreeObject {Obj = obj, Bounds = objBounds};
 
-                    //Debug.Log("ADD " + obj.name + " to depth " + depth);
+                    for (int i = 0; i < objects.Length; i++)
+                    {
+                        if (objects[i].Obj == null) continue;
 
-                    objects.Add(newObj);
+                        objects[i] = newObj;
+                    }
                 }
             }
         }
@@ -585,7 +616,7 @@ namespace Mirage.Components.InterestManagement
         /// <summary>
         /// Splits the octree into eight children.
         /// </summary>
-        void Split()
+        private void Split()
         {
             float quarter = BaseLength / 4f;
             float newLength = BaseLength / 2;
@@ -614,18 +645,24 @@ namespace Mirage.Components.InterestManagement
         /// Note: We only have to check one level down since a merge will never happen if the children already have children,
         /// since THAT won't happen unless there are already too many objects to merge.
         /// </summary>
-        void Merge()
+        private void Merge()
         {
             // Note: We know children != null or we wouldn't be merging
             for (int i = 0; i < 8; i++)
             {
                 BoundsOctreeNode<T> curChild = children[i];
-                int numObjects = curChild.objects.Count;
+                int numObjects = curChild.objects.Length;
 
                 for (int j = numObjects - 1; j >= 0; j--)
                 {
                     OctreeObject curObj = curChild.objects[j];
-                    objects.Add(curObj);
+
+                    for (int o = 0; o < curChild.objects.Length; o++)
+                    {
+                        if (curChild.objects[o].Obj == null) continue;
+
+                        curChild.objects[o] = curObj;
+                    }
                 }
             }
 
@@ -639,7 +676,7 @@ namespace Mirage.Components.InterestManagement
         /// <param name="outerBounds">Outer bounds.</param>
         /// <param name="innerBounds">Inner bounds.</param>
         /// <returns>True if innerBounds is fully encapsulated by outerBounds.</returns>
-        static bool Encapsulates(Bounds outerBounds, Bounds innerBounds)
+        private static bool Encapsulates(Bounds outerBounds, Bounds innerBounds)
         {
             return outerBounds.Contains(innerBounds.min) && outerBounds.Contains(innerBounds.max);
         }
@@ -649,7 +686,7 @@ namespace Mirage.Components.InterestManagement
         /// </summary>
         /// <param name="objBounds">The object's bounds.</param>
         /// <returns>One of the eight child octants.</returns>
-        int BestFitChild(Bounds objBounds)
+        private int BestFitChild(Bounds objBounds)
         {
             return (objBounds.center.x <= Center.x ? 0 : 1) + (objBounds.center.y >= Center.y ? 0 : 4) +
                    (objBounds.center.z <= Center.z ? 0 : 2);
@@ -659,22 +696,22 @@ namespace Mirage.Components.InterestManagement
         /// Checks if there are few enough objects in this node and its children that the children should all be merged into this.
         /// </summary>
         /// <returns>True there are less or the same abount of objects in this and its children than numObjectsAllowed.</returns>
-        bool ShouldMerge()
+        private bool ShouldMerge()
         {
-            int totalObjects = objects.Count;
+            int totalObjects = objects.Length;
 
             if (children != null)
             {
-                foreach (BoundsOctreeNode<T> child in children)
+                for (int i = 0; i < children.Length; i++)
                 {
-                    if (child.children != null)
+                    if (children[i].children != null)
                     {
                         // If any of the *children* have children, there are definitely too many to merge,
                         // or the child woudl have been merged already
                         return false;
                     }
 
-                    totalObjects += child.objects.Count;
+                    totalObjects += children[i].objects.Length;
                 }
             }
 
@@ -687,7 +724,7 @@ namespace Mirage.Components.InterestManagement
         /// <returns>True if this node or any of its children, grandchildren etc have something in them</returns>
         internal bool HasAnyObjects()
         {
-            if (objects.Count > 0) return true;
+            if (objects.Length > 0) return true;
 
             if (children != null)
             {

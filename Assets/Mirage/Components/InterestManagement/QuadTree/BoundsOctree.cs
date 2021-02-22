@@ -26,24 +26,24 @@ namespace Mirage.Components.InterestManagement
         public int Count { get; private set; }
 
         // Root node of the octree
-        BoundsOctreeNode<T> rootNode;
+        private BoundsOctreeNode<T> rootNode;
 
         // Should be a value between 1 and 2. A multiplier for the base size of a node.
         // 1.0 is a "normal" octree, while values > 1 have overlap
-        readonly float looseness;
+        private readonly float looseness;
 
         // Size that the octree was on creation
-        readonly float initialSize;
+        private readonly float initialSize;
 
         // Minimum side length that a node can be - essentially an alternative to having a max depth
-        readonly float minSize;
+        private readonly float minSize;
 
         // For collision visualisation. Automatically removed in builds.
 #if UNITY_EDITOR
 
-        const int numCollisionsToSave = 4;
-        readonly Queue<Bounds> lastBoundsCollisionChecks;
-        readonly Queue<Ray> lastRayCollisionChecks;
+        private const int numCollisionsToSave = 4;
+        private readonly Queue<Bounds> lastBoundsCollisionChecks;
+        private readonly Queue<Ray> lastRayCollisionChecks;
 
 #endif
 
@@ -72,7 +72,6 @@ namespace Mirage.Components.InterestManagement
 #if UNITY_EDITOR
             lastRayCollisionChecks = new Queue<Ray>();
             lastBoundsCollisionChecks = new Queue<Bounds>();
-
 #endif
         }
 
@@ -86,9 +85,10 @@ namespace Mirage.Components.InterestManagement
             // Add object or expand the octree until it can be added
             int count = 0; // Safety check against infinite/excessive growth
 
-            while (!rootNode.Add(obj, objBounds))
+            if (!rootNode.Add(obj, objBounds))
             {
                 Grow(objBounds.center - rootNode.Center);
+
                 if (++count > 20)
                 {
                     Debug.LogError("Aborted Add operation as it seemed to be going on forever (" + (count - 1) +
@@ -113,6 +113,7 @@ namespace Mirage.Components.InterestManagement
             if (removed)
             {
                 Count--;
+
                 Shrink();
             }
 
@@ -126,11 +127,25 @@ namespace Mirage.Components.InterestManagement
         /// <returns>True if there was a collision.</returns>
         public bool IsColliding(Bounds checkBounds)
         {
-            //#if UNITY_EDITOR
-            // For debugging
-            //AddCollisionCheck(checkBounds);
-            //#endif
+#if UNITY_EDITOR
+            AddCollisionCheck(checkBounds);
+#endif
             return rootNode.IsColliding(ref checkBounds);
+        }
+
+        /// <summary>
+        /// Check if the specified bounds intersect with specific type.
+        /// </summary>
+        /// <param name="checkBounds">bounds to check.</param>
+        /// <param name="obj">The specific type we want to check against.</param>
+        /// <returns>True if there was a collision.</returns>
+        /// <returns></returns>
+        public bool IsColliding(Bounds checkBounds, T obj)
+        {
+#if UNITY_EDITOR
+            AddCollisionCheck(checkBounds);
+#endif
+            return rootNode.IsColliding(ref checkBounds, ref obj);
         }
 
         /// <summary>
@@ -141,10 +156,9 @@ namespace Mirage.Components.InterestManagement
         /// <returns>True if there was a collision.</returns>
         public bool IsColliding(Ray checkRay, float maxDistance)
         {
-            //#if UNITY_EDITOR
-            // For debugging
-            //AddCollisionCheck(checkRay);
-            //#endif
+#if UNITY_EDITOR
+            AddCollisionCheck(checkRay);
+#endif
             return rootNode.IsColliding(ref checkRay, maxDistance);
         }
 
@@ -156,10 +170,9 @@ namespace Mirage.Components.InterestManagement
         /// <returns>Objects that intersect with the specified bounds.</returns>
         public void GetColliding(List<T> collidingWith, Bounds checkBounds)
         {
-            //#if UNITY_EDITOR
-            // For debugging
-            //AddCollisionCheck(checkBounds);
-            //#endif
+#if UNITY_EDITOR
+            AddCollisionCheck(checkBounds);
+#endif
             rootNode.GetColliding(ref checkBounds, collidingWith);
         }
 
@@ -172,10 +185,9 @@ namespace Mirage.Components.InterestManagement
         /// <returns>Objects that intersect with the specified ray.</returns>
         public void GetColliding(List<T> collidingWith, Ray checkRay, float maxDistance = float.PositiveInfinity)
         {
-            //#if UNITY_EDITOR
-            // For debugging
-            //AddCollisionCheck(checkRay);
-            //#endif
+#if UNITY_EDITOR
+            AddCollisionCheck(checkRay);
+#endif
             rootNode.GetColliding(ref checkRay, collidingWith, maxDistance);
         }
 
@@ -269,7 +281,7 @@ namespace Mirage.Components.InterestManagement
         /// Grow the octree to fit in all objects.
         /// </summary>
         /// <param name="direction">Direction to grow.</param>
-        void Grow(Vector3 direction)
+        private void Grow(Vector3 direction)
         {
             int xDirection = direction.x >= 0 ? 1 : -1;
             int yDirection = direction.y >= 0 ? 1 : -1;
@@ -316,7 +328,7 @@ namespace Mirage.Components.InterestManagement
         /// <summary>
         /// Shrink the octree if possible, else leave it the same.
         /// </summary>
-        void Shrink()
+        private void Shrink()
         {
             rootNode = rootNode.ShrinkIfPossible(initialSize);
         }
@@ -328,7 +340,7 @@ namespace Mirage.Components.InterestManagement
         /// <param name="yDir">Y direction of growth. 1 or -1.</param>
         /// <param name="zDir">Z direction of growth. 1 or -1.</param>
         /// <returns>Octant where the root node should be.</returns>
-        static int GetRootPosIndex(int xDir, int yDir, int zDir)
+        private static int GetRootPosIndex(int xDir, int yDir, int zDir)
         {
             int result = xDir > 0 ? 1 : 0;
             if (yDir < 0) result += 4;

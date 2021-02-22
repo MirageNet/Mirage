@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -14,7 +15,7 @@ namespace Mirage.Examples.InterestManagement
 
         private void Awake()
         {
-            _serverObject.Server.Started.AddListener(SpawnEnemies);
+            _serverObject.Server.Started.AddListener(OnStartServer);
 
             Mesh mesh = _plane.GetComponent<MeshFilter>().mesh;
 
@@ -22,8 +23,15 @@ namespace Mirage.Examples.InterestManagement
             _planeZ = (mesh.bounds.size.z / 2) * _plane.localScale.z;
         }
 
-        private void SpawnEnemies()
+        private void OnStartServer()
         {
+            StartCoroutine(nameof(SpawnEnemies));
+        }
+
+        private IEnumerator SpawnEnemies()
+        {
+            var spawned = 0;
+
             for (int i = 0; i < _numberOfEnemiesSpawn; i++)
             {
                 float xRand = Random.Range(-_planeX, _planeX);
@@ -32,6 +40,15 @@ namespace Mirage.Examples.InterestManagement
                 NetworkIdentity enemy = Instantiate(_enemyPrefab, new Vector3(xRand, 1, zRand), Quaternion.identity);
 
                 _serverObject.Spawn(enemy);
+
+                spawned++;
+
+                if(spawned == 100)
+                {
+                    yield return new WaitForEndOfFrame();
+
+                    spawned = 0;
+                }
             }
         }
     }

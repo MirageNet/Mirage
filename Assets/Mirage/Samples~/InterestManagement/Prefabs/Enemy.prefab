@@ -176,8 +176,8 @@ GameObject:
   - component: {fileID: 887491563423388292}
   - component: {fileID: 1143206540915927667}
   - component: {fileID: 3175779197224890082}
-  - component: {fileID: -2379877191592498782}
-  - component: {fileID: -5208645517015270607}
+  - component: {fileID: 4672470780564014270}
+  - component: {fileID: -6563604579066020439}
   m_Layer: 8
   m_Name: Enemy
   m_TagString: Untagged
@@ -286,24 +286,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &-2379877191592498782
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8872462076811691049}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9cddc2e496c474e538a494465be0192a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  speed: 1
-  movementProbability: 0.5
-  movementDistance: 20
---- !u!114 &-5208645517015270607
+--- !u!114 &4672470780564014270
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -317,7 +300,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  CurrentPlayerVisibilityRange: 10
   _minimumVisibilityRange: 1
   _maximumVisibilityRange: 10
   InterestManager: {fileID: 0}
+--- !u!114 &-6563604579066020439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8872462076811691049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bee3fa414d597f4eb3b9b38c3f0d461, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

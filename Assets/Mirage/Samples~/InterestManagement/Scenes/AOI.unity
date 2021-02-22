@@ -1422,6 +1422,7 @@ MonoBehaviour:
   _minimumNodeSize: 1
   _looseness: 1.2
   _server: {fileID: 1092843210}
+  _visualDebug: 0
 --- !u!1 &1113070485
 GameObject:
   m_ObjectHideFlags: 0

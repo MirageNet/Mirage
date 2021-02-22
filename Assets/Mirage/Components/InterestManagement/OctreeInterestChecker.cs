@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Mirage.Components.InterestManagement
 {
-    public class QuadTreeInterestChecker : NetworkVisibility
+    public class OctreeInterestChecker : NetworkVisibility
     {
         #region Fields
 
@@ -25,6 +25,8 @@ namespace Mirage.Components.InterestManagement
         private Vector3 _colliderSize;
         private Bounds _currentBounds;
         private readonly List<NetworkIdentity> _tempList = new List<NetworkIdentity>();
+        private Vector3 _currentPosition;
+        private Transform _currentTransform;
 
         #endregion
 
@@ -45,21 +47,24 @@ namespace Mirage.Components.InterestManagement
         {
             InterestManager ??= FindObjectOfType<NetworkInterestManager>();
             _colliderSize = GetComponent<Collider>().bounds.size;
+            _currentTransform = GetComponent<Transform>();
 
             CurrentPlayerVisibilityRange = Mathf.Max(_minimumVisibilityRange, _maximumVisibilityRange);
         }
 
         private void Update()
         {
-            if (!Server || NetIdentity is null) return;
+            if (!Server || NetIdentity is null || Vector3.Distance(_currentPosition, _currentTransform.position) < 0.1f) return;
 
-            InterestManager.QuadTree.Remove(NetIdentity);
+            InterestManager.Octree.Remove(NetIdentity);
 
-            _currentBounds = new Bounds(transform.position, _colliderSize * CurrentPlayerVisibilityRange);
+            _currentBounds = new Bounds(_currentTransform.position, _colliderSize * CurrentPlayerVisibilityRange);
 
-            InterestManager.QuadTree.Add(NetIdentity, _currentBounds);
+            InterestManager.Octree.Add(NetIdentity, _currentBounds);
 
             NetIdentity.RebuildObservers(false);
+
+            _currentPosition = _currentTransform.position;
         }
 
         #endregion
@@ -106,25 +111,16 @@ namespace Mirage.Components.InterestManagement
             var bounds = new Bounds(colliderComponent.bounds.center,
                 colliderComponent.bounds.size * CurrentPlayerVisibilityRange);
 
-            return InterestManager.QuadTree.IsColliding(bounds);
+            return InterestManager.Octree.IsColliding(bounds);
         }
 
         public override void OnRebuildObservers(HashSet<INetworkConnection> observers, bool initialize)
         {
             foreach (INetworkConnection conn in Server.connections)
             {
-                _tempList.Clear();
-
-                InterestManager.QuadTree.GetColliding(_tempList, _currentBounds);
-
-                for (int i = _tempList.Count - 1; i >= 0; i--)
+                if (InterestManager.Octree.IsColliding(_currentBounds, conn.Identity))
                 {
-                    if (conn != null && conn.Identity != null && conn.Identity.Equals(_tempList[i]))
-                    {
-                        observers.Add(conn);
-
-                        break;
-                    }
+                    observers.Add(conn);
                 }
             }
         }

@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Mirage.Components.InterestManagement
@@ -24,7 +23,7 @@ namespace Mirage.Components.InterestManagement
         [Header("Debug Settings.")]
         [SerializeField] private bool _visualDebug = false;
 
-        internal BoundsOctree<NetworkIdentity> QuadTree;
+        internal BoundsOctree<NetworkIdentity> Octree;
 
         #endregion
 
@@ -39,7 +38,11 @@ namespace Mirage.Components.InterestManagement
         {
             netId.TryGetComponent(out Collider colliderComponent);
 
-            QuadTree.Add(netId, colliderComponent.bounds);
+            netId.TryGetComponent(out OctreeInterestChecker octreeInterestChecker);
+
+            Octree.Add(netId,
+                new Bounds(netId.transform.position,
+                    colliderComponent.bounds.size * octreeInterestChecker.CurrentPlayerVisibilityRange));
         }
 
         #endregion
@@ -50,7 +53,7 @@ namespace Mirage.Components.InterestManagement
         {
             _server ??= FindObjectOfType<ServerObjectManager>();
 
-            QuadTree = new BoundsOctree<NetworkIdentity>(_initialWorldSize, transform.position, _minimumNodeSize,
+            Octree = new BoundsOctree<NetworkIdentity>(_initialWorldSize, transform.position, _minimumNodeSize,
                 _looseness);
 
             if (_server == null)
@@ -70,8 +73,9 @@ namespace Mirage.Components.InterestManagement
         {
             if(!Application.isPlaying || !_visualDebug) return;
 
-            QuadTree.DrawAllBounds();
-            QuadTree.DrawAllObjects();
+            Octree.DrawAllBounds();
+            Octree.DrawAllObjects();
+            Octree.DrawCollisionChecks();
         }
 
         #endregion
