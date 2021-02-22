@@ -140,7 +140,7 @@ namespace Mirage
             Label versionText = root.Q<Label>("VersionText");
             versionText.text = "v" + GetVersion();
 
-            ParseChangeLog();
+            DrawChangeLog(ParseChangeLog());
 
             #region Page buttons
 
@@ -239,7 +239,7 @@ namespace Mirage
         }
 
         //parse the change log file
-        private void ParseChangeLog()
+        private List<string> ParseChangeLog()
         {
             List<string> content = new List<string>();
 
@@ -268,7 +268,7 @@ namespace Mirage
                 }
             }
 
-            DrawChangeLog(content);
+            return content;
         }
 
         //draw the parsed information
