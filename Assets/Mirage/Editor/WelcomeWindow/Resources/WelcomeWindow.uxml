@@ -48,12 +48,6 @@
                 <ui:VisualElement name="Spacer" />
                 <ui:Button name="Redirect" text="Open FAQ" class="redirect" />
             </ui:VisualElement>
-            <ui:VisualElement name="Sponsor" class="screen" style="display: none;">
-                <ui:Label name="Header" text="Sponsor Us" />
-                <ui:Label name="Description" text="Sponsoring will give you access to Mirage PRO which gives you special access to tools and priority support" style="-unity-text-align: upper-left;" />
-                <ui:VisualElement name="Spacer" />
-                <ui:Button name="Redirect" text="Sponsor Us" class="redirect" />
-            </ui:VisualElement>
             <ui:VisualElement name="Discord" class="screen" style="display: none;">
                 <ui:Label name="Header" text="Discord" />
                 <ui:Label name="Description" text="Mirage has an official Discord channel that you can join. Discord is the best way to contact the developers and request help with your code." style="-unity-text-align: upper-left;" />
