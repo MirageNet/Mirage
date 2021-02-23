@@ -2,7 +2,7 @@
     <Style src="WelcomeWindow.uss" />
     <ui:VisualElement name="Banner">
         <ui:Label name="VersionText" text="Placeholder" />
-        <ui:Image name="Icon" style="background-image: url(&apos;/Assets/Mirage/Editor/WelcomeWindow/Resources/MirageIcon.png&apos;);" />
+        <ui:Image name="Icon" style="background-image: resource('MirageIcon.png');" />
     </ui:VisualElement>
     <ui:Label name="Title" text="Welcome to Mirage!" />
     <ui:Box name="ColumnContainer" style="flex-grow: 1;">
@@ -13,7 +13,6 @@
             <ui:Button name="FaqButton" text="FAQ" class="light-selected-tab dark-selected-tab navButton" />
             <ui:Button name="BestPracticesButton" text="Best Practices" class="light-selected-tab dark-selected-tab navButton" />
             <ui:Button name="ChangeLogButton" text="Change Log" class="light-selected-tab dark-selected-tab navButton" />
-            <ui:Button name="SponsorButton" text="Sponsor Us" style="display: none;" />
             <ui:Button name="DiscordButton" text="Discord" class="light-selected-tab dark-selected-tab navButton" />
         </ui:VisualElement>
         <ui:VisualElement name="Spacer" style="display: none;" />
@@ -47,12 +46,6 @@
                 <ui:Label name="Description" text="The FAQ page holds commonly asked questions. Currently, the FAQ page contains answers to: &#10;&#10;   1. Syncing custom data types &#10;   2. How to connect &#10;   3. Host migration &#10;   4. Server lists and matchmaking" style="-unity-text-align: upper-left;" />
                 <ui:VisualElement name="Spacer" />
                 <ui:Button name="Redirect" text="Open FAQ" class="redirect" />
-            </ui:VisualElement>
-            <ui:VisualElement name="Sponsor" class="screen" style="display: none;">
-                <ui:Label name="Header" text="Sponsor Us" />
-                <ui:Label name="Description" text="Sponsoring will give you access to Mirage PRO which gives you special access to tools and priority support" style="-unity-text-align: upper-left;" />
-                <ui:VisualElement name="Spacer" />
-                <ui:Button name="Redirect" text="Sponsor Us" class="redirect" />
             </ui:VisualElement>
             <ui:VisualElement name="Discord" class="screen" style="display: none;">
                 <ui:Label name="Header" text="Discord" />

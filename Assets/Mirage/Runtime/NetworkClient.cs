@@ -64,11 +64,6 @@ namespace Mirage
         /// </summary>
         public INetworkConnection Connection { get; internal set; }
 
-        /// <summary>
-        /// NetworkIdentity of the localPlayer
-        /// </summary>
-        public NetworkIdentity LocalPlayer => Connection?.Identity;
-
         internal ConnectState connectState = ConnectState.Disconnected;
 
         /// <summary>
