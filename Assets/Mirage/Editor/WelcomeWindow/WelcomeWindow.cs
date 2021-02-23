@@ -250,10 +250,15 @@ namespace Mirage
                 while((line = reader.ReadLine()) != null)
                 {
                     //we dont need to parse an empty string
-                    if(line == string.Empty) { continue; }
+                    if(line == string.Empty) 
+                        continue;
 
                     //always add the first line
-                    if(content.Count == 0) { content.Add(line); continue; }
+                    if(content.Count == 0) 
+                    {
+                        content.Add(line); 
+                        continue;
+                    }
 
                     //if we havent reached the next version yet
                     if(line.Contains("https://github.com/MirageNet/Mirage/compare/"))
