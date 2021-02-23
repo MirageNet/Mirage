@@ -256,15 +256,10 @@ namespace Mirage
                     if(content.Count == 0) { content.Add(line); continue; }
 
                     //if we havent reached the next version yet
-                    if(!line.Contains("https://github.com/MirageNet/Mirage/compare/"))
-                    {
-                        content.Add(line);
-                    }
-                    else
-                    {
-                        //break because the next version was reached
+                    if(line.Contains("https://github.com/MirageNet/Mirage/compare/"))
                         break;
-                    }
+
+                    content.Add(line);
                 }
             }
 
