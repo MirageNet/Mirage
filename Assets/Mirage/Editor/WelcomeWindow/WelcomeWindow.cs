@@ -31,7 +31,6 @@ namespace Mirage
         private const string ChangelogUrl = "https://github.com/MirageNet/Mirage/blob/master/Assets/Mirage/CHANGELOG.md";
         private const string BestPracticesUrl = "https://miragenet.github.io/Mirage/Articles/Guides/BestPractices.html";
         private const string FaqUrl = "https://miragenet.github.io/Mirage/Articles/Guides/FAQ.html";
-        private const string SponsorUrl = "";
         private const string DiscordInviteUrl = "https://discord.gg/DTBPBYvexy";
 
         private readonly List<Package> Packages = new List<Package>()
@@ -143,7 +142,6 @@ namespace Mirage
             ConfigureTab("QuickStartButton", "QuickStart", QuickStartUrl);
             ConfigureTab("BestPracticesButton", "BestPractices", BestPracticesUrl);
             ConfigureTab("FaqButton", "Faq", FaqUrl);
-            ConfigureTab("SponsorButton", "Sponsor", SponsorUrl);
             ConfigureTab("DiscordButton", "Discord", DiscordInviteUrl);
             ConfigurePackagesTab();
 
