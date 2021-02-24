@@ -1,3 +1,76 @@
+## [68.0.1](https://github.com/MirageNet/Mirage/compare/v68.0.0...v68.0.1) (2021-02-23)
+
+
+### Bug Fixes
+
+* welcome window icon not being found ([#635](https://github.com/MirageNet/Mirage/issues/635)) ([263a7b2](https://github.com/MirageNet/Mirage/commit/263a7b21c36357f8e6a7fa48f9ea74d1e6233216))
+
+# [68.0.0](https://github.com/MirageNet/Mirage/compare/v67.4.0...v68.0.0) (2021-02-22)
+
+
+### Code Refactoring
+
+* move LocalPlayer to ClientObjectManager ([#619](https://github.com/MirageNet/Mirage/issues/619)) ([df1e379](https://github.com/MirageNet/Mirage/commit/df1e379e064cdea01309fbf9ada0bab1f3bbd7dd))
+
+
+### Features
+
+* add more control over player spawning ([#626](https://github.com/MirageNet/Mirage/issues/626)) ([e0dd626](https://github.com/MirageNet/Mirage/commit/e0dd626d5bd23e6c555730c6a4c3517694ea3bba))
+
+
+### BREAKING CHANGES
+
+* removed NetworkClient.LocalPlayer,  use ClientObjectManager.LocalPlayer instead
+
+# [67.4.0](https://github.com/MirageNet/Mirage/compare/v67.3.2...v67.4.0) (2021-02-21)
+
+
+### Features
+
+* support generic network behaviors ([#574](https://github.com/MirageNet/Mirage/issues/574)) ([715642c](https://github.com/MirageNet/Mirage/commit/715642ceb5de02dc500d8ba3f4cda883431decb7))
+
+## [67.3.2](https://github.com/MirageNet/Mirage/compare/v67.3.1...v67.3.2) (2021-02-21)
+
+
+### Bug Fixes
+
+* passing NetworkBehaviors in syncvars work with il2pp ([#631](https://github.com/MirageNet/Mirage/issues/631)) ([cd7317f](https://github.com/MirageNet/Mirage/commit/cd7317f368bd65c6bd594c337de4bdc676fe2805)), closes [#630](https://github.com/MirageNet/Mirage/issues/630) [#629](https://github.com/MirageNet/Mirage/issues/629)
+
+## [67.3.1](https://github.com/MirageNet/Mirage/compare/v67.3.0...v67.3.1) (2021-02-21)
+
+
+### Bug Fixes
+
+* passing NetworkBehaviors in RPC works with IL2PP ([#630](https://github.com/MirageNet/Mirage/issues/630)) ([87becee](https://github.com/MirageNet/Mirage/commit/87becee8fdc028ca86abd6aa13a55396ea202567)), closes [#629](https://github.com/MirageNet/Mirage/issues/629)
+
+# [67.3.0](https://github.com/MirageNet/Mirage/compare/v67.2.7...v67.3.0) (2021-02-21)
+
+
+### Features
+
+* install/uninstall modules from welcome window ([#593](https://github.com/MirageNet/Mirage/issues/593)) ([53ac404](https://github.com/MirageNet/Mirage/commit/53ac40492ade8059338436ad15b69e3573ad1482))
+
+## [67.2.7](https://github.com/MirageNet/Mirage/compare/v67.2.6...v67.2.7) (2021-02-21)
+
+
+### Bug Fixes
+
+* show selected tab when welcome screen is opened ([#628](https://github.com/MirageNet/Mirage/issues/628)) ([f6cae98](https://github.com/MirageNet/Mirage/commit/f6cae984f1dfb2941a35cd4bfd1dd0050ce06873))
+
+## [67.2.6](https://github.com/MirageNet/Mirage/compare/v67.2.5...v67.2.6) (2021-02-20)
+
+
+### Bug Fixes
+
+* bug in tanks sample ([#575](https://github.com/MirageNet/Mirage/issues/575)) ([d82efea](https://github.com/MirageNet/Mirage/commit/d82efea9015cf2db9436f12deaa9a7dd65ba862d))
+
+## [67.2.5](https://github.com/MirageNet/Mirage/compare/v67.2.4...v67.2.5) (2021-02-20)
+
+
+### Bug Fixes
+
+* revert preprocessor change ([b89c454](https://github.com/MirageNet/Mirage/commit/b89c45489755a9fa598ec804e8d71b35cfc8f438))
+
 ## [67.2.4](https://github.com/MirageNet/Mirage/compare/v67.2.3...v67.2.4) (2021-02-20)
 
 

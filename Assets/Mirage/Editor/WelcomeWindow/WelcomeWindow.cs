@@ -1,6 +1,9 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor.PackageManager;
+using UnityEditor.PackageManager.Requests;
+using System.Collections.Generic;
 
 /**
  * Docs used:
@@ -17,8 +20,7 @@ namespace Mirage
     public class WelcomeWindow : EditorWindow
     {
         private Button lastClickedTab;
-        private StyleColor defaultButtonBackgroundColor;
-        private StyleColor defaultButtonBorderColor;
+        private readonly List<Button> installButtons = new List<Button>();
 
         #region Setup
 
@@ -29,13 +31,27 @@ namespace Mirage
         private const string ChangelogUrl = "https://github.com/MirageNet/Mirage/blob/master/Assets/Mirage/CHANGELOG.md";
         private const string BestPracticesUrl = "https://miragenet.github.io/Mirage/Articles/Guides/BestPractices.html";
         private const string FaqUrl = "https://miragenet.github.io/Mirage/Articles/Guides/FAQ.html";
-        private const string SponsorUrl = "";
-        private const string DiscordInviteUrl = "https://discord.gg/rp6Fv3JjEz";
+        private const string DiscordInviteUrl = "https://discord.gg/DTBPBYvexy";
+
+        private readonly List<Package> Packages = new List<Package>()
+        {
+            new Package { displayName = "LAN Discovery", packageName = "com.miragenet.discovery", gitUrl = "https://github.com/MirageNet/Discovery.git?path=/Assets/Discovery"},
+            new Package { displayName = "Steam (Facepunch)", packageName = "com.miragenet.steamyface", gitUrl = "https://github.com/MirageNet/SteamyFaceNG.git?path=/Assets/Mirage/Runtime/Transport/SteamyFaceMirror" },
+            new Package { displayName = "Steam (Steamworks.NET)", packageName = "com.miragenet.steamy", gitUrl = "https://github.com/MirageNet/FizzySteamyMirror.git?path=/Assets/Mirage/Runtime/Transport/FizzySteamyMirror" },
+        };
 
         #endregion
 
+        //request for the module install
+        private static AddRequest installRequest;
+        private static RemoveRequest uninstallRequest;
+        private static ListRequest listRequest;
+
+        private static WelcomeWindow currentWindow;
+
         //window size of the welcome screen
         private static Vector2 windowSize = new Vector2(500, 415);
+        private static string screenToOpenKey = "MirageScreenToOpen";
 
         //editorprefs keys
         private static string firstStartUpKey = string.Empty;
@@ -78,6 +94,8 @@ namespace Mirage
 
             if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirageUnknown")
             {
+                EditorPrefs.SetString(screenToOpenKey, ShowChangeLog ? "ChangeLog" : "Welcome");
+
                 OpenWindow();
             }
         }
@@ -87,12 +105,12 @@ namespace Mirage
         public static void OpenWindow()
         {
             //create the window
-            WelcomeWindow window = GetWindow<WelcomeWindow>("Mirage Welcome Page");
+            currentWindow = GetWindow<WelcomeWindow>("Mirage Welcome Page");
             //set the position and size
-            window.position = new Rect(new Vector2(100, 100), windowSize);
+            currentWindow.position = new Rect(new Vector2(100, 100), windowSize);
             //set min and max sizes so we cant readjust window size
-            window.maxSize = windowSize;
-            window.minSize = windowSize;
+            currentWindow.maxSize = windowSize;
+            currentWindow.minSize = windowSize;
         }
 
         #endregion
@@ -117,11 +135,6 @@ namespace Mirage
             Label versionText = root.Q<Label>("VersionText");
             versionText.text = "v" + GetVersion();
 
-            //set button default colors (used in page nav)
-            IStyle sampleStyle = rootVisualElement.Q<Button>("WelcomeButton").style;
-            defaultButtonBackgroundColor = sampleStyle.backgroundColor;
-            defaultButtonBorderColor = sampleStyle.borderTopColor;
-
             #region Page buttons
 
             ConfigureTab("WelcomeButton", "Welcome", WelcomePageUrl);
@@ -129,10 +142,15 @@ namespace Mirage
             ConfigureTab("QuickStartButton", "QuickStart", QuickStartUrl);
             ConfigureTab("BestPracticesButton", "BestPractices", BestPracticesUrl);
             ConfigureTab("FaqButton", "Faq", FaqUrl);
-            ConfigureTab("SponsorButton", "Sponsor", SponsorUrl);
             ConfigureTab("DiscordButton", "Discord", DiscordInviteUrl);
+            ConfigurePackagesTab();
 
-            ShowTab(ShowChangeLog ? "ChangeLog" : "Welcome");
+            ShowTab(EditorPrefs.GetString(screenToOpenKey, "Welcome"));
+
+            //set the screen's button to be tinted when welcome window is opened
+            Button openedButton = rootVisualElement.Q<Button>(EditorPrefs.GetString(screenToOpenKey, "Welcome") + "Button");
+            ToggleMenuButtonColor(openedButton, true);
+            lastClickedTab = openedButton;
 
             #endregion
         }
@@ -145,21 +163,29 @@ namespace Mirage
             EditorPrefs.SetBool(firstTimeMirageKey, true);
         }
 
+        //menu button setup
         private void ConfigureTab(string tabButtonName, string tab, string url)
         {
             Button tabButton = rootVisualElement.Q<Button>(tabButtonName);
+
+            tabButton.EnableInClassList("dark-selected-tab", false);
+            tabButton.EnableInClassList("light-selected-tab", false);
+
             tabButton.clicked += () => 
             {
                 ToggleMenuButtonColor(tabButton, true);
                 ToggleMenuButtonColor(lastClickedTab, false);
                 ShowTab(tab);
+
                 lastClickedTab = tabButton;
+                EditorPrefs.SetString(screenToOpenKey, tab);
             };
 
             Button redirectButton = rootVisualElement.Q<VisualElement>(tab).Q<Button>("Redirect");
             redirectButton.clicked += () => Application.OpenURL(url);
         }
 
+        //switch between content
         private void ShowTab(string screen)
         {
             VisualElement rightColumn = rootVisualElement.Q<VisualElement>("RightColumnBox");
@@ -182,23 +208,204 @@ namespace Mirage
             }
         }
 
+        //changes the background and border color of the button
+        //if toggle == true, keep the button tinted
+        //otherwise, return the button to the default, not active, colors
         private void ToggleMenuButtonColor(Button button, bool toggle)
         {
-            if(button == null) { return; }
+            if (button == null) { return; }
 
-            if(toggle)
+            //dark mode
+            if (EditorGUIUtility.isProSkin)
             {
-                button.style.backgroundColor = button.resolvedStyle.backgroundColor;
-                button.style.borderBottomColor = button.style.borderTopColor = button.style.borderLeftColor = button.style.borderRightColor = button.resolvedStyle.borderBottomColor;
+                button.EnableInClassList("dark-selected-tab", toggle);
             }
+            //light mode
             else
             {
-                button.style.backgroundColor = defaultButtonBackgroundColor;
-                button.style.borderBottomColor = button.style.borderTopColor = button.style.borderLeftColor = button.style.borderRightColor = defaultButtonBorderColor;
+                button.EnableInClassList("light-selected-tab", toggle);
+            }
+        }
+
+        #region Packages
+
+        //configure the package tab when the tab button is pressed
+        private void ConfigurePackagesTab()
+        {
+            Button tabButton = rootVisualElement.Q<Button>("PackagesButton");
+
+            tabButton.EnableInClassList("dark-selected-tab", false);
+            tabButton.EnableInClassList("light-selected-tab", false);
+
+            tabButton.clicked += () =>
+            {
+                ToggleMenuButtonColor(tabButton, true);
+                ToggleMenuButtonColor(lastClickedTab, false);
+                ShowTab("Packages");
+
+                lastClickedTab = tabButton;
+                EditorPrefs.SetString(screenToOpenKey, "Packages");
+            };
+
+            listRequest = UnityEditor.PackageManager.Client.List(true, false);
+
+            //subscribe to ListPackageProgress for updates
+            EditorApplication.update += ListPackageProgress;
+        }
+
+        //install the package
+        private void InstallPackage(string packageName)
+        {
+            installRequest = UnityEditor.PackageManager.Client.Add(Packages.Find((x) => x.displayName == packageName).gitUrl);
+
+            //subscribe to InstallPackageProgress for updates
+            EditorApplication.update += InstallPackageProgress;
+        }
+
+        //uninstall the package
+        private void UninstallPackage(string packageName)
+        {
+            uninstallRequest = UnityEditor.PackageManager.Client.Remove(Packages.Find((x) => x.displayName == packageName).packageName);
+
+            //subscribe to UninstallPackageProgress for updates
+            EditorApplication.update += UninstallPackageProgress;
+        }
+
+        //keeps track of the package install progress
+        private void InstallPackageProgress()
+        {
+            if (installRequest.IsCompleted)
+            {
+                //log results
+                if (installRequest.Status == StatusCode.Success)
+                {
+                    Debug.Log("Package install successful.");
+                }
+                else if (installRequest.Status == StatusCode.Failure)
+                {
+                    Debug.LogError("Package install was unsuccessful. \n Error Code: " + installRequest.Error.errorCode + "\n Error Message: " + installRequest.Error.message);
+                }
+
+                EditorApplication.update -= InstallPackageProgress;
+
+                //refresh the package tab
+                currentWindow?.Close();
+                OpenWindow();
+            }
+        }
+
+        private void UninstallPackageProgress()
+        {
+            if (uninstallRequest.IsCompleted)
+            {
+                //log results
+                EditorApplication.update -= UninstallPackageProgress;
+
+                if (uninstallRequest.Status == StatusCode.Success)
+                {
+                    Debug.Log("Package uninstall successful.");
+                }
+                else if (uninstallRequest.Status == StatusCode.Failure)
+                {
+                    Debug.LogError("Package uninstall was unsuccessful. \n Error Code: " + uninstallRequest.Error.errorCode + "\n Error Message: " + uninstallRequest.Error.message);
+                }
+
+                //refresh the package tab
+                currentWindow?.Close();
+                OpenWindow();
+            }
+        }
+
+        private void ListPackageProgress()
+        {
+            if (listRequest.IsCompleted)
+            {
+                EditorApplication.update -= ListPackageProgress;
+
+                if (listRequest.Status == StatusCode.Success)
+                {
+                    List<string> installedPackages = new List<string>();
+
+                    //populate installedPackages
+                    foreach (var package in listRequest.Result)
+                    {
+                        Package? miragePackage = Packages.Find((x) => x.packageName == package.name);
+                        if (miragePackage != null)
+                        {
+                            installedPackages.Add(miragePackage.Value.displayName);
+                        }
+                    }
+
+                    ConfigureInstallButtons(installedPackages);
+                }
+                //log error
+                else if (listRequest.Status == StatusCode.Failure)
+                {
+                    Debug.LogError("There was an issue finding packages. \n Error Code: " + listRequest.Error.errorCode + "\n Error Message: " + listRequest.Error.message);
+                }
+            }
+        }
+
+        //configures the install button
+        //changes text and functionality after button press
+        private void ConfigureInstallButtons(List<string> installedPackages)
+        {
+            //get all the packages
+            foreach (VisualElement package in rootVisualElement.Q<VisualElement>("ModulesList").Children())
+            {
+                //get the button and name of the package
+                Button installButton = package.Q<Button>("InstallButton");
+                string packageName = package.Q<Label>("Name").text;
+                bool foundInInstalledPackages = installedPackages.Contains(packageName);
+
+                //set text
+                installButton.text = !foundInInstalledPackages ? "Install" : "Uninstall";
+                
+                //set functionality
+                if (!foundInInstalledPackages)
+                {
+                    installButton.clicked += () => 
+                    { 
+                        InstallPackage(packageName);
+                        installButton.text = "Installing";
+                        DisableInstallButtons();
+                    };
+                }
+                else
+                {
+                    installButton.clicked += () => 
+                    { 
+                        UninstallPackage(packageName);
+                        installButton.text = "Uninstalling";
+                        DisableInstallButtons();
+                    };
+                }
+
+                installButtons.Add(installButton);
+            }
+        }
+
+        //prevents user from spamming install button
+        //spamming the button while installing/uninstalling throws errors
+        //buttons enabled again after window refreshes
+        private void DisableInstallButtons()
+        {
+            foreach (Button button in installButtons)
+            {
+                button.SetEnabled(false);
             }
         }
 
         #endregion
+
+        #endregion
     }
 
+    //module data type
+    public struct Package
+    {
+        public string displayName;
+        public string packageName;
+        public string gitUrl;
+    }
 }

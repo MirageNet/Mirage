@@ -79,7 +79,7 @@ namespace Mirage.Weaver
             // invoke internal send and return
             // load 'base.' to call the SendServerRpc function with
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType));
+            worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType.ConvertToGenericIfNeeded()));
             // invokerClass
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
             worker.Append(worker.Create(OpCodes.Ldstr, cmdName));
@@ -146,10 +146,9 @@ namespace Mirage.Weaver
         MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc)
         {
             MethodDefinition cmd = method.DeclaringType.AddMethod(SkeletonPrefix + method.Name,
-                MethodAttributes.Family | MethodAttributes.Static | MethodAttributes.HideBySig,
+                MethodAttributes.Family | MethodAttributes.HideBySig,
                 userCodeFunc.ReturnType);
 
-            _ = cmd.AddParam<NetworkBehaviour>("obj");
             _ = cmd.AddParam<NetworkReader>("reader");
             _ = cmd.AddParam<INetworkConnection>("senderConnection");
             _ = cmd.AddParam<int>("replyId");
@@ -159,7 +158,6 @@ namespace Mirage.Weaver
 
             // setup for reader
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Castclass, method.DeclaringType));
 
             if (!ReadArguments(method, worker, false))
                 return cmd;
@@ -214,7 +212,7 @@ namespace Mirage.Weaver
             bool requireAuthority = cmdResult.requireAuthority;
 
             TypeDefinition netBehaviourSubclass = skeleton.DeclaringType;
-            worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
+            worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass.ConvertToGenericIfNeeded()));
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
             worker.Append(worker.Create(OpCodes.Ldstr, cmdName));
             worker.Append(worker.Create(OpCodes.Ldnull));

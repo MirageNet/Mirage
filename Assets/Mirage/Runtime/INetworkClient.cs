@@ -27,11 +27,6 @@ namespace Mirage
         INetworkConnection Connection { get; }
 
         /// <summary>
-        /// NetworkIdentity of the localPlayer
-        /// </summary>
-        NetworkIdentity LocalPlayer { get; }
-
-        /// <summary>
         /// active is true while a client is connecting/connected
         /// (= while the network is active)
         /// </summary>

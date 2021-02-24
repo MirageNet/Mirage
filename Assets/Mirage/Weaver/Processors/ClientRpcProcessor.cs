@@ -51,18 +51,15 @@ namespace Mirage.Weaver
         {
             MethodDefinition rpc = md.DeclaringType.AddMethod(
                 SkeletonPrefix + md.Name,
-                MethodAttributes.Family | MethodAttributes.Static | MethodAttributes.HideBySig);
+                MethodAttributes.Family | MethodAttributes.HideBySig);
 
-            _ = rpc.AddParam<NetworkBehaviour>("obj");
             _ = rpc.AddParam<NetworkReader>("reader");
             _ = rpc.AddParam<INetworkConnection>("senderConnection");
             _ = rpc.AddParam<int>("replyId");
 
             ILProcessor worker = rpc.Body.GetILProcessor();
 
-            // setup for reader
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Castclass, md.DeclaringType));
 
             // NetworkConnection parameter is only required for Client.Connection
             Client target = clientRpcAttr.GetField("target", Client.Observers);
@@ -168,7 +165,7 @@ namespace Mirage.Weaver
             else if (target == Client.Owner)
                 worker.Append(worker.Create(OpCodes.Ldnull));
 
-            worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType));
+            worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType.ConvertToGenericIfNeeded()));
             // invokerClass
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
             worker.Append(worker.Create(OpCodes.Ldstr, rpcName));
@@ -237,7 +234,7 @@ namespace Mirage.Weaver
         */
         void GenerateRegisterRemoteDelegate(ILProcessor worker, MethodDefinition func, string cmdName)
         {
-            TypeDefinition netBehaviourSubclass = func.DeclaringType;
+            TypeReference netBehaviourSubclass = func.DeclaringType.ConvertToGenericIfNeeded();
             worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
             worker.Append(worker.Create(OpCodes.Ldstr, cmdName));

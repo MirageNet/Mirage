@@ -24,6 +24,11 @@ namespace Mirage
         /// </summary>
         SpawnEvent UnSpawned { get; }
 
+        /// <summary>
+        /// NetworkIdentity of the localPlayer
+        /// </summary>
+        NetworkIdentity LocalPlayer { get; }
+
         NetworkIdentity GetPrefab(Guid assetId);
 
         void RegisterPrefab(NetworkIdentity identity);

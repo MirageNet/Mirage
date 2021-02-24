@@ -97,6 +97,8 @@ namespace Mirage.Examples.Tanks
 
         bool GetAllReadyState()
         {
+            if (!LocalPlayer || !LocalPlayer.isReady) return false;
+            
             bool AllReady = true;
             foreach (Tank tank in players)
             {
@@ -144,10 +146,10 @@ namespace Mirage.Examples.Tanks
         void FindLocalTank()
         {
             //Check to see if the player is loaded in yet
-            if (NetworkManager.Client.LocalPlayer == null)
+            if (NetworkManager.ClientObjectManager.LocalPlayer == null)
                 return;
 
-            LocalPlayer = NetworkManager.Client.LocalPlayer.GetComponent<Tank>();
+            LocalPlayer = NetworkManager.ClientObjectManager.LocalPlayer.GetComponent<Tank>();
         }
 
         void UpdateStats()
