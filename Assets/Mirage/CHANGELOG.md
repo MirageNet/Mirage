@@ -1,3 +1,10 @@
+## [68.0.2](https://github.com/MirageNet/Mirage/compare/v68.0.1...v68.0.2) (2021-02-24)
+
+
+### Bug Fixes
+
+* mirage icon missing in welcome window ([#637](https://github.com/MirageNet/Mirage/issues/637)) ([6c4dc9e](https://github.com/MirageNet/Mirage/commit/6c4dc9ee9639503631da43f74f92f0394fadab29))
+
 ## [68.0.1](https://github.com/MirageNet/Mirage/compare/v68.0.0...v68.0.1) (2021-02-23)
 
 
