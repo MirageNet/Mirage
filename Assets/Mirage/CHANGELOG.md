@@ -1,3 +1,34 @@
+## [68.0.2](https://github.com/MirageNet/Mirage/compare/v68.0.1...v68.0.2) (2021-02-24)
+
+
+### Bug Fixes
+
+* mirage icon missing in welcome window ([#637](https://github.com/MirageNet/Mirage/issues/637)) ([6c4dc9e](https://github.com/MirageNet/Mirage/commit/6c4dc9ee9639503631da43f74f92f0394fadab29))
+
+## [68.0.1](https://github.com/MirageNet/Mirage/compare/v68.0.0...v68.0.1) (2021-02-23)
+
+
+### Bug Fixes
+
+* welcome window icon not being found ([#635](https://github.com/MirageNet/Mirage/issues/635)) ([263a7b2](https://github.com/MirageNet/Mirage/commit/263a7b21c36357f8e6a7fa48f9ea74d1e6233216))
+
+# [68.0.0](https://github.com/MirageNet/Mirage/compare/v67.4.0...v68.0.0) (2021-02-22)
+
+
+### Code Refactoring
+
+* move LocalPlayer to ClientObjectManager ([#619](https://github.com/MirageNet/Mirage/issues/619)) ([df1e379](https://github.com/MirageNet/Mirage/commit/df1e379e064cdea01309fbf9ada0bab1f3bbd7dd))
+
+
+### Features
+
+* add more control over player spawning ([#626](https://github.com/MirageNet/Mirage/issues/626)) ([e0dd626](https://github.com/MirageNet/Mirage/commit/e0dd626d5bd23e6c555730c6a4c3517694ea3bba))
+
+
+### BREAKING CHANGES
+
+* removed NetworkClient.LocalPlayer,  use ClientObjectManager.LocalPlayer instead
+
 # [67.4.0](https://github.com/MirageNet/Mirage/compare/v67.3.2...v67.4.0) (2021-02-21)
 
 
