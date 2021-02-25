@@ -1,3 +1,10 @@
+## [68.0.3](https://github.com/MirageNet/Mirage/compare/v68.0.2...v68.0.3) (2021-02-25)
+
+
+### Bug Fixes
+
+* welcome window layout ([#634](https://github.com/MirageNet/Mirage/issues/634)) ([2bceedb](https://github.com/MirageNet/Mirage/commit/2bceedb0baa0dd5d5767e440deea74077469fd11))
+
 ## [68.0.2](https://github.com/MirageNet/Mirage/compare/v68.0.1...v68.0.2) (2021-02-24)
 
 
