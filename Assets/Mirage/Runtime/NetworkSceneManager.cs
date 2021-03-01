@@ -150,7 +150,7 @@ namespace Mirage
                 }
             }
 
-            ApplySceneOperationAsync(msg.scenePath, msg.sceneOperation).Forget();
+            ApplyOperationAsync(msg.scenePath, msg.sceneOperation).Forget();
         }
 
         internal void ClientSceneReadyMessage(INetworkConnection conn, SceneReadyMessage msg)
@@ -192,7 +192,7 @@ namespace Mirage
 
             if (pendingAdditiveSceneList.Count > 0 && Client && !Client.IsLocalClient)
             {
-                ApplySceneOperationAsync(pendingAdditiveSceneList[0], SceneOperation.LoadAdditive).Forget();
+                ApplyOperationAsync(pendingAdditiveSceneList[0], SceneOperation.LoadAdditive).Forget();
                 pendingAdditiveSceneList.RemoveAt(0);
                 return;
             }
@@ -253,7 +253,7 @@ namespace Mirage
             OnServerChangeScene(scenePath, sceneOperation);
 
             if (!Server.LocalClientActive)
-                ApplySceneOperationAsync(scenePath, sceneOperation).Forget();
+                ApplyOperationAsync(scenePath, sceneOperation).Forget();
 
             // notify all clients about the new scene
             Server.SendToAll(new SceneMessage { scenePath = scenePath, sceneOperation = sceneOperation });
@@ -285,19 +285,19 @@ namespace Mirage
         }
 
         #endregion
-        UniTask ApplySceneOperationAsync(string scenePath, SceneOperation sceneOperation = SceneOperation.Normal)
+        UniTask ApplyOperationAsync(string scenePath, SceneOperation sceneOperation = SceneOperation.Normal)
         {
             switch (sceneOperation)
             {
-                case SceneOperation.Normal: return ApplyNormalSceneOperationAsync(scenePath);
-                case SceneOperation.LoadAdditive: return ApplyAdditiveLoadSceneOperationAsync(scenePath);
-                case SceneOperation.UnloadAdditive: return ApplyUnloadAdditiveSceneOperationAsync(scenePath);
+                case SceneOperation.Normal: return ApplyNormalOperationAsync(scenePath);
+                case SceneOperation.LoadAdditive: return ApplyAdditiveLoadOperationAsync(scenePath);
+                case SceneOperation.UnloadAdditive: return ApplyUnloadAdditiveOperationAsync(scenePath);
                 default:
                     return UniTask.CompletedTask;
             }
         }
 
-        async UniTask ApplyNormalSceneOperationAsync(string scenePath)
+        async UniTask ApplyNormalOperationAsync(string scenePath)
         {
             //Scene is already active.
             if (ActiveScenePath.Equals(scenePath))
@@ -319,7 +319,7 @@ namespace Mirage
             }
         }
 
-        async UniTask ApplyAdditiveLoadSceneOperationAsync(string scenePath)
+        async UniTask ApplyAdditiveLoadOperationAsync(string scenePath)
         {
             // Ensure additive scene is not already loaded
             if (SceneManager.GetSceneByPath(scenePath).IsValid())
@@ -336,7 +336,7 @@ namespace Mirage
             }
         }
 
-        async UniTask ApplyUnloadAdditiveSceneOperationAsync(string scenePath)
+        async UniTask ApplyUnloadAdditiveOperationAsync(string scenePath)
         {
             // Ensure additive scene is actually loaded
             if (SceneManager.GetSceneByPath(scenePath).IsValid())
