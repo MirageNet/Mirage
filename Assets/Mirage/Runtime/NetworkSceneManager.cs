@@ -112,7 +112,6 @@ namespace Mirage
             }
         }
 
-        // called after successful authentication
         void OnClientAuthenticated(INetworkConnection conn)
         {
             logger.Log("NetworkSceneManager.OnClientAuthenticated");
