@@ -1,6 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -150,7 +150,7 @@ namespace Mirage
                 }
             }
 
-            StartCoroutine(ApplySceneOperation(msg.scenePath, msg.sceneOperation));
+            ApplySceneOperationAsync(msg.scenePath, msg.sceneOperation).Forget();
         }
 
         internal void ClientSceneReadyMessage(INetworkConnection conn, SceneReadyMessage msg)
@@ -192,7 +192,7 @@ namespace Mirage
 
             if (pendingAdditiveSceneList.Count > 0 && Client && !Client.IsLocalClient)
             {
-                StartCoroutine(ApplySceneOperation(pendingAdditiveSceneList[0], SceneOperation.LoadAdditive));
+                ApplySceneOperationAsync(pendingAdditiveSceneList[0], SceneOperation.LoadAdditive).Forget();
                 pendingAdditiveSceneList.RemoveAt(0);
                 return;
             }
@@ -253,7 +253,7 @@ namespace Mirage
             OnServerChangeScene(scenePath, sceneOperation);
 
             if (!Server.LocalClientActive)
-                StartCoroutine(ApplySceneOperation(scenePath, sceneOperation));
+                ApplySceneOperationAsync(scenePath, sceneOperation).Forget();
 
             // notify all clients about the new scene
             Server.SendToAll(new SceneMessage { scenePath = scenePath, sceneOperation = sceneOperation });
@@ -285,58 +285,69 @@ namespace Mirage
         }
 
         #endregion
-
-        IEnumerator ApplySceneOperation(string scenePath, SceneOperation sceneOperation = SceneOperation.Normal)
+        UniTask ApplySceneOperationAsync(string scenePath, SceneOperation sceneOperation = SceneOperation.Normal)
         {
             switch (sceneOperation)
             {
-                case SceneOperation.Normal:
-                    //Scene is already active.
-                    if (ActiveScenePath.Equals(scenePath))
-                    {
-                        FinishLoadScene(scenePath, sceneOperation);
-                    }
-                    else
-                    {
-                        asyncOperation = SceneManager.LoadSceneAsync(scenePath);
-                        asyncOperation.completed += OnAsyncComplete;
+                case SceneOperation.Normal: return ApplyNormalSceneOperationAsync(scenePath);
+                case SceneOperation.LoadAdditive: return ApplyAdditiveLoadSceneOperationAsync(scenePath);
+                case SceneOperation.UnloadAdditive: return ApplyUnloadAdditiveSceneOperationAsync(scenePath);
+                default:
+                    return UniTask.CompletedTask;
+            }
+        }
 
-                        //If non host client. Wait for server to finish scene change
-                        if (Client && Client.Active && !Client.IsLocalClient)
-                        {
-                            asyncOperation.allowSceneActivation = false;
-                        }
+        async UniTask ApplyNormalSceneOperationAsync(string scenePath)
+        {
+            //Scene is already active.
+            if (ActiveScenePath.Equals(scenePath))
+            {
+                FinishLoadScene(scenePath, SceneOperation.Normal);
+            }
+            else
+            {
+                asyncOperation = SceneManager.LoadSceneAsync(scenePath);
 
-                        yield return asyncOperation;
-                    }
+                //If non host client. Wait for server to finish scene change
+                if (Client && Client.Active && !Client.IsLocalClient)
+                {
+                    asyncOperation.allowSceneActivation = false;
+                }
 
-                    break;
-                case SceneOperation.LoadAdditive:
-                    // Ensure additive scene is not already loaded
-                    if (!SceneManager.GetSceneByPath(scenePath).IsValid())
-                    {
-                        yield return SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
-                        additiveSceneList.Add(scenePath);
-                        FinishLoadScene(scenePath, sceneOperation);
-                    }
-                    else
-                    {
-                        logger.LogWarning($"Scene {scenePath} is already loaded");
-                    }
-                    break;
-                case SceneOperation.UnloadAdditive:
-                    // Ensure additive scene is actually loaded
-                    if (SceneManager.GetSceneByPath(scenePath).IsValid())
-                    {
-                        yield return SceneManager.UnloadSceneAsync(scenePath, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
-                        additiveSceneList.Remove(scenePath);
-                        FinishLoadScene(scenePath, sceneOperation);
-                    }
-                    else
-                    {
-                        logger.LogWarning($"Cannot unload {scenePath} with UnloadAdditive operation");
-                    }
-                    break;
+                await asyncOperation;
+                OnAsyncComplete(asyncOperation);
+            }
+        }
+
+        async UniTask ApplyAdditiveLoadSceneOperationAsync(string scenePath)
+        {
+            // Ensure additive scene is not already loaded
+            if (SceneManager.GetSceneByPath(scenePath).IsValid())
+            {
+                logger.LogWarning($"Scene {scenePath} is already loaded");
+                return;
+            }
+            else
+            {
+                AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
+                await asyncOperation;
+                additiveSceneList.Add(scenePath);
+                FinishLoadScene(scenePath, SceneOperation.LoadAdditive);
+            }
+        }
+
+        async UniTask ApplyUnloadAdditiveSceneOperationAsync(string scenePath)
+        {
+            // Ensure additive scene is actually loaded
+            if (SceneManager.GetSceneByPath(scenePath).IsValid())
+            {
+                await SceneManager.UnloadSceneAsync(scenePath, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
+                additiveSceneList.Remove(scenePath);
+                FinishLoadScene(scenePath, SceneOperation.UnloadAdditive);
+            }
+            else
+            {
+                logger.LogWarning($"Cannot unload {scenePath} with UnloadAdditive operation");
             }
         }
 
