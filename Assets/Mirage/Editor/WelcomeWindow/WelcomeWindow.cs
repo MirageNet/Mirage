@@ -171,7 +171,7 @@ namespace Mirage
             tabButton.EnableInClassList("dark-selected-tab", false);
             tabButton.EnableInClassList("light-selected-tab", false);
 
-            tabButton.clicked += () => 
+            tabButton.clicked += () =>
             {
                 ToggleMenuButtonColor(tabButton, true);
                 ToggleMenuButtonColor(lastClickedTab, false);
@@ -360,12 +360,12 @@ namespace Mirage
 
                 //set text
                 installButton.text = !foundInInstalledPackages ? "Install" : "Uninstall";
-                
+
                 //set functionality
                 if (!foundInInstalledPackages)
                 {
-                    installButton.clicked += () => 
-                    { 
+                    installButton.clicked += () =>
+                    {
                         InstallPackage(packageName);
                         installButton.text = "Installing";
                         DisableInstallButtons();
@@ -373,8 +373,8 @@ namespace Mirage
                 }
                 else
                 {
-                    installButton.clicked += () => 
-                    { 
+                    installButton.clicked += () =>
+                    {
                         UninstallPackage(packageName);
                         installButton.text = "Uninstalling";
                         DisableInstallButtons();

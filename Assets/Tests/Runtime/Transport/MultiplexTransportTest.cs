@@ -146,7 +146,7 @@ namespace Mirage.Tests
             transport1.Supported.Returns(false);
             transport2.Supported.Returns(false);
 
-            
+
             Assert.That(transport.Scheme, Is.Empty);
         }
 

@@ -87,7 +87,7 @@ namespace Mirage
 
         // A constructor is needed for serialization when an
         // exception propagates from a remoting server to the client.
-        protected MethodInvocationException(SerializationInfo info,StreamingContext context) : base(info, context)
+        protected MethodInvocationException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }
@@ -110,8 +110,8 @@ namespace Mirage
     /// Prevents players without authority from running this method.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class HasAuthorityAttribute : Attribute 
-    { 
+    public class HasAuthorityAttribute : Attribute
+    {
         /// <summary>
         /// If true,  when the method is called from a client, it throws an error
         /// If false, no error is thrown, but the method won't execute

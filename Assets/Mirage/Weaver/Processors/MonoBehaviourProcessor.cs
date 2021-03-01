@@ -46,7 +46,7 @@ namespace Mirage.Weaver
                 if (md.HasCustomAttribute<ClientRpcAttribute>())
                     logger.Error($"ClientRpc {md.Name} must be declared inside a NetworkBehaviour", md);
                 if (md.HasCustomAttribute<ClientAttribute>())
-                    logger.Error($"Client method {md.Name} must be declared inside a NetworkBehaviour", md);                        
+                    logger.Error($"Client method {md.Name} must be declared inside a NetworkBehaviour", md);
                 if (md.HasCustomAttribute<ServerAttribute>())
                     logger.Error($"Server method {md.Name} must be declared inside a NetworkBehaviour", md);
             }

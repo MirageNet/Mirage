@@ -75,7 +75,7 @@ namespace Mirage
 
         public void Start()
         {
-            if(DontDestroy)
+            if (DontDestroy)
                 DontDestroyOnLoad(gameObject);
 
             if (Client != null)

@@ -163,7 +163,7 @@ namespace Mirage.Weaver
             DeleteOutputOnClear = false;
         }
 
-       
+
 
         public static AssemblyDefinition Build(IWeaverLogger logger)
         {
@@ -178,7 +178,7 @@ namespace Mirage.Weaver
             {
                 assemblyBuilder.compilerOptions.AllowUnsafeCode = true;
             }
-            
+
             assemblyBuilder.buildFinished += delegate (string assemblyPath, CompilerMessage[] compilerMessages)
             {
                 CompilerMessages.AddRange(compilerMessages);

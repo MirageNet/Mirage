@@ -54,7 +54,7 @@ namespace Mirage.Tests.Host
             await AsyncUtil.WaitUntilWithTimeout(() => !client.Active);
 
             sceneManager.ServerSceneChanged.AddListener(func1);
-            
+
             sceneManager.FinishLoadScene("test", SceneOperation.Normal);
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());

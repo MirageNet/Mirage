@@ -11,7 +11,7 @@ namespace Mirage.Tests.Host
     [TestFixture]
     public class ClientObjectManagerTest : HostSetup<MockComponent>
     {
-        GameObject playerReplacement;       
+        GameObject playerReplacement;
 
         [Test]
         public void OnSpawnAssetSceneIDFailureExceptionTest()
@@ -148,7 +148,7 @@ namespace Mirage.Tests.Host
             {
                 testGuid = GenerateUniqueGuid();
             }
-            return testGuid;    
+            return testGuid;
         }
 
         [Test]

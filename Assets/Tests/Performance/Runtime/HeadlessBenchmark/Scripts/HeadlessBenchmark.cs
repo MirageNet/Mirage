@@ -48,7 +48,7 @@ namespace Mirage.HeadlessBenchmark
                 {
                     messageCount = transport != null ? ((KcpTransport)transport).ReceivedMessageCount : 0;
                 }
-                
+
                 long messages = messageCount - previousMessageCount;
 
 #if UNITY_EDITOR

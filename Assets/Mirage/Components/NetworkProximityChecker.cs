@@ -35,15 +35,17 @@ namespace Mirage
 
         public void Start()
         {
-            NetIdentity.OnStartServer.AddListener(() => {
+            NetIdentity.OnStartServer.AddListener(() =>
+            {
                 InvokeRepeating(nameof(RebuildObservers), 0, VisibilityUpdateInterval);
             });
 
-            NetIdentity.OnStopServer.AddListener(() => {
+            NetIdentity.OnStopServer.AddListener(() =>
+            {
                 CancelInvoke(nameof(RebuildObservers));
             });
         }
-        
+
         void RebuildObservers()
         {
             NetIdentity.RebuildObservers(false);

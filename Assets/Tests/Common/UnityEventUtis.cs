@@ -3,7 +3,7 @@ using UnityEngine.Events;
 
 namespace Mirage.Tests
 {
-    public static class UnityEventUtis 
+    public static class UnityEventUtis
     {
 
         public static int GetListenerNumber(this UnityEventBase unityEvent)

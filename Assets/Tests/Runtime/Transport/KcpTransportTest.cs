@@ -40,7 +40,7 @@ namespace Mirage.Tests
             transport.Port = port;
             // speed this up
             transport.HashCashBits = 3;
-       
+
             transport.Connected.AddListener(connection => serverConnection = (KcpConnection)connection);
 
             listenTask = transport.ListenAsync();
@@ -64,7 +64,7 @@ namespace Mirage.Tests
             clientConnection.Timeout = 500;
 
             data = new byte[Random.Range(10, 255)];
-            for (int i=0; i< data.Length; i++)
+            for (int i = 0; i < data.Length; i++)
                 data[i] = (byte)Random.Range(1, 255);
         });
 

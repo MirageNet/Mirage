@@ -5,7 +5,7 @@ namespace Mirage
 {
     public interface IServerObjectManager
     {
-      
+
         /// <summary>
         /// Raised when the client spawns an object
         /// </summary>
