@@ -8,7 +8,7 @@ Built to support games of any scale, from LAN party games to dedicated high-volu
 
 -   **Full Source included** for debugging convenience
 -   Several working examples included
--   Active [Discord](https://discord.gg/2BvnM4R) for prompt support
+-   Active [Discord](https://discord.gg/DTBPBYvexy) for prompt support
 -   **Requires Unity 2018.4 LTS and Runtime .Net 4.x (default in Unity 2019) and .Net 2.0 Compatibility is recommended**
 -   Alpha / Beta Unity versions cannot be supported
 
