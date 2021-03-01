@@ -708,7 +708,7 @@ namespace Mirage
         ///     It is like calling NetworkServer.Spawn() for each of them.
         /// </para>
         /// </summary>
-        /// <exception cref="InvalidOperationException">Thrown when server is not active</exception>
+        /// <exception cref="T:InvalidOperationException">Thrown when server is not active</exception>
         public void SpawnObjects()
         {
             // only if server active
