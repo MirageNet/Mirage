@@ -34,6 +34,6 @@ namespace Mirage
 
         void UnSpawn(GameObject obj);
 
-        bool SpawnObjects();
+        void SpawnObjects();
     }
 }
