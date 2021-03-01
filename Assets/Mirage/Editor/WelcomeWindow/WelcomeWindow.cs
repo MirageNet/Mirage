@@ -324,10 +324,10 @@ namespace Mirage
 
                 if (listRequest.Status == StatusCode.Success)
                 {
-                    List<string> installedPackages = new List<string>();
+                    var installedPackages = new List<string>();
 
                     //populate installedPackages
-                    foreach (var package in listRequest.Result)
+                    foreach (UnityEditor.PackageManager.PackageInfo package in listRequest.Result)
                     {
                         Package? miragePackage = Packages.Find((x) => x.packageName == package.name);
                         if (miragePackage != null)
