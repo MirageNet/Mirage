@@ -87,6 +87,7 @@ namespace Mirage.Tests.ClientServer
         {
             serverIdentity.sceneId = 42;
             serverIdentity.gameObject.SetActive(false);
+            serverObjectManager.SpawnObjects();
             Assert.That(serverIdentity.gameObject.activeSelf, Is.True);
         }
 
@@ -95,6 +96,7 @@ namespace Mirage.Tests.ClientServer
         {
             serverIdentity.sceneId = 0;
             serverIdentity.gameObject.SetActive(false);
+            serverObjectManager.SpawnObjects();
             Assert.That(serverIdentity.gameObject.activeSelf, Is.False);
         }
 
