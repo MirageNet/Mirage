@@ -315,7 +315,8 @@ namespace Mirage
                 }
 
                 await asyncOperation;
-                // todo should this use scenePath or ActiveScenePath
+
+                logger.Assert(scenePath == ActiveScenePath, "Scene being loaded was not the active scene");
                 FinishLoadScene(ActiveScenePath, SceneOperation.Normal);
             }
         }
