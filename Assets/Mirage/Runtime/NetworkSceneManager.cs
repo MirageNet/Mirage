@@ -315,7 +315,8 @@ namespace Mirage
                 }
 
                 await asyncOperation;
-                OnAsyncComplete();
+                // todo should this use scenePath or ActiveScenePath
+                FinishLoadScene(ActiveScenePath, SceneOperation.Normal);
             }
         }
 
@@ -349,12 +350,6 @@ namespace Mirage
             {
                 logger.LogWarning($"Cannot unload {scenePath} with UnloadAdditive operation");
             }
-        }
-
-        void OnAsyncComplete()
-        {
-            //This is only called in a normal scene change
-            FinishLoadScene(ActiveScenePath, SceneOperation.Normal);
         }
 
         internal void FinishLoadScene(string scenePath, SceneOperation sceneOperation)
