@@ -135,34 +135,23 @@ namespace Mirage
 
         void SpawnOrActivate()
         {
-            // host mode?
-            if (Server.LocalClientActive)
-            {
-                // server scene was loaded. now spawn all the objects
-                ActivateHostScene();
-            }
-            // server-only mode?
-            else if (Server && Server.Active)
+            if (Server && Server.Active)
             {
                 SpawnObjects();
-            }
-        }
 
-        void StartedHost()
-        {
-            if (TryGetComponent(out ClientObjectManager ClientObjectManager))
-            {
-                ClientObjectManager.ServerObjectManager = this;
+                // host mode?
+                if (Server.LocalClientActive)
+                {
+                    StartHostClientObjects();
+                }
             }
         }
 
         /// <summary>
         /// Loops spawned collection for NetworkIdentieis that are not IsClient and calls StartClient().
         /// </summary>
-        internal void ActivateHostScene()
+        void StartHostClientObjects()
         {
-            SpawnObjects();
-
             foreach (NetworkIdentity identity in SpawnedObjects.Values)
             {
                 if (!identity.IsClient)
@@ -171,6 +160,14 @@ namespace Mirage
 
                     identity.StartClient();
                 }
+            }
+        }
+
+        void StartedHost()
+        {
+            if (TryGetComponent(out ClientObjectManager ClientObjectManager))
+            {
+                ClientObjectManager.ServerObjectManager = this;
             }
         }
 
