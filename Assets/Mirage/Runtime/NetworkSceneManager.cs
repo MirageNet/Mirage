@@ -284,6 +284,9 @@ namespace Mirage
         }
 
         #endregion
+
+        #region Scene Operations
+
         UniTask ApplyOperationAsync(string scenePath, SceneOperation sceneOperation = SceneOperation.Normal)
         {
             switch (sceneOperation)
@@ -383,5 +386,7 @@ namespace Mirage
                 OnClientSceneChanged(scenePath, sceneOperation);
             }
         }
+
+        #endregion
     }
 }
