@@ -20,10 +20,10 @@ namespace Mirage.Tests.Performance.Runtime
         private NetworkManager benchmarker;
 
         [UnitySetUp]
-        public IEnumerator SetUp() => UniTask.ToCoroutine(async () =>
+        public IEnumerator SetUp()
         {
             // load scene
-            await EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
             Scene scene = SceneManager.GetSceneByPath(ScenePath);
             SceneManager.SetActiveScene(scene);
 
