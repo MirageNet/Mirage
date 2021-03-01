@@ -315,7 +315,7 @@ namespace Mirage
                 }
 
                 await asyncOperation;
-                OnAsyncComplete(asyncOperation);
+                OnAsyncComplete();
             }
         }
 
@@ -351,7 +351,7 @@ namespace Mirage
             }
         }
 
-        void OnAsyncComplete(AsyncOperation asyncOperation)
+        void OnAsyncComplete()
         {
             //This is only called in a normal scene change
             FinishLoadScene(ActiveScenePath, SceneOperation.Normal);
