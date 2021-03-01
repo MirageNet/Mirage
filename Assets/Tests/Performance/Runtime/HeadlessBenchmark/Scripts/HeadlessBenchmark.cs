@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using Mirage.KCP;
 using UnityEngine;
-using Cysharp.Threading.Tasks;
 #if IGNORANCE
 using Mirror.ENet;
 #endif

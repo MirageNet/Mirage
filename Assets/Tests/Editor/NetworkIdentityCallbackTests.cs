@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
-using Object = UnityEngine.Object;
 using UnityEngine.Events;
-
 using static Mirage.Tests.LocalConnections;
+using Object = UnityEngine.Object;
 
 namespace Mirage
 {
