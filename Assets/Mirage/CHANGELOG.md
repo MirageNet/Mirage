@@ -1,3 +1,10 @@
+## [69.1.1](https://github.com/MirageNet/Mirage/compare/v69.1.0...v69.1.1) (2021-03-02)
+
+
+### Bug Fixes
+
+* multi scene example nre and event errors ([#649](https://github.com/MirageNet/Mirage/issues/649)) ([8c4c352](https://github.com/MirageNet/Mirage/commit/8c4c352bd226e12324f851218d6a9d56be894662))
+
 # [69.1.0](https://github.com/MirageNet/Mirage/compare/v69.0.0...v69.1.0) (2021-03-02)
 
 
