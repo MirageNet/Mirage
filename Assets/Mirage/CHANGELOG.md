@@ -1,3 +1,15 @@
+# [69.0.0](https://github.com/MirageNet/Mirage/compare/v68.0.3...v69.0.0) (2021-03-02)
+
+
+### Styles
+
+* renaming NumPlayers to NumberOfPlayers ([#646](https://github.com/MirageNet/Mirage/issues/646)) ([27b99be](https://github.com/MirageNet/Mirage/commit/27b99be272ef4f6df73717d877385981e7565259))
+
+
+### BREAKING CHANGES
+
+* Use NetworkServer.NumberOfPlayers instead of NetworkServer.NumPlayers
+
 ## [68.0.3](https://github.com/MirageNet/Mirage/compare/v68.0.2...v68.0.3) (2021-02-25)
 
 
