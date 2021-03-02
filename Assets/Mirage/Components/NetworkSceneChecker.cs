@@ -35,7 +35,7 @@ namespace Mirage
             currentScene = gameObject.scene;
             if (logger.LogEnabled()) logger.Log($"NetworkSceneChecker.Awake currentScene: {currentScene}");
 
-            NetIdentity.OnStartServer.AddListener(OnStartServer);
+            OnStartServer();
         }
 
         public void OnStartServer()
