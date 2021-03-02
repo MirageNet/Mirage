@@ -1,3 +1,10 @@
+# [69.1.0](https://github.com/MirageNet/Mirage/compare/v69.0.0...v69.1.0) (2021-03-02)
+
+
+### Features
+
+* adding assert extension method to logger ([#642](https://github.com/MirageNet/Mirage/issues/642)) ([1df6081](https://github.com/MirageNet/Mirage/commit/1df6081e5d1244a1f780b9945f5bd3c0a10387f0))
+
 # [69.0.0](https://github.com/MirageNet/Mirage/compare/v68.0.3...v69.0.0) (2021-03-02)
 
 
