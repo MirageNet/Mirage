@@ -52,7 +52,7 @@ namespace Mirage.HeadlessBenchmark
                 long messages = messageCount - previousMessageCount;
 
 #if UNITY_EDITOR
-                Debug.LogFormat("{0} FPS {1} messages {2} clients", frames, messages, server.NumPlayers);
+                Debug.LogFormat("{0} FPS {1} messages {2} clients", frames, messages, server.NumberOfPlayers);
 #else
                 Console.WriteLine("{0} FPS {1} messages {2} clients", frames, messages, server.NumPlayers);
 #endif
