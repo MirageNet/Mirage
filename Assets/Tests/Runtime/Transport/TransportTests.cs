@@ -11,6 +11,7 @@ using Cysharp.Threading.Tasks;
 using Mirage.KCP;
 using NSubstitute;
 using System.Collections.Generic;
+using Random = UnityEngine.Random;
 
 namespace Mirage.Tests
 {
@@ -19,11 +20,17 @@ namespace Mirage.Tests
     {
         #region SetUp
 
-        private T transport;
-        private GameObject transportObj;
+        private T serverTransport;
+        private GameObject serverTransportObj;
+
+        private T clientTransport;
+        private GameObject clientTransportObj;
         private readonly Uri uri;
         private readonly int port;
         private readonly string[] scheme;
+
+        byte[] data1;
+        byte[] data2;
 
         public TransportTests(string[] scheme, string uri, int port)
         {
@@ -44,17 +51,24 @@ namespace Mirage.Tests
         [UnitySetUp]
         public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
         {
-            transportObj = new GameObject();
-
-            transport = transportObj.AddComponent<T>();
-
-            transport.Connected.AddListener((connection) =>
+            serverTransportObj = new GameObject("Server Transport");
+            serverTransport = serverTransportObj.AddComponent<T>();
+            serverTransport.Connected.AddListener((connection) =>
                 serverConnection = connection);
+            listenTask = serverTransport.ListenAsync();
 
-            listenTask = transport.ListenAsync();
-            clientConnection = await transport.ConnectAsync(uri);
+            clientTransportObj = new GameObject("Client Transport");
+            clientTransport = clientTransportObj.AddComponent<T>();
 
-            await UniTask.WaitUntil(() => serverConnection != null);
+            UniTask<IConnection> connectTask = clientTransport.ConnectAsync(uri).Timeout(TimeSpan.FromSeconds(2));
+
+            while (!connectTask.Status.IsCompleted() || serverConnection == null)
+            {
+                serverTransport.Poll();
+                clientTransport.Poll();
+                await UniTask.Delay(10);
+            }
+            clientConnection = await connectTask;
 
             clientMessages = new Queue<(byte[], int)>();
             serverMessages = new Queue<(byte[], int)>();
@@ -68,44 +82,64 @@ namespace Mirage.Tests
                 serverMessages.Enqueue((data.ToArray(), channel));
             };
 
+            data1 = CreateRandomData();
+            data2 = CreateRandomData();
         });
 
+        private byte[] CreateRandomData()
+        {
+            byte[] data = new byte[Random.Range(10, 255)];
+            for (int i = 0; i < data.Length; i++)
+                data[i] = (byte)Random.Range(1, 255);
+            return data;
+        }
 
         [UnityTearDown]
         public IEnumerator TearDown() => UniTask.ToCoroutine(async () =>
         {
             clientConnection.Disconnect();
             serverConnection.Disconnect();
-            transport.Disconnect();
+            serverTransport.Disconnect();
 
             await listenTask;
-            Object.Destroy(transportObj);
+            Object.Destroy(serverTransportObj);
+            Object.Destroy(clientTransportObj);
         });
+
+        public async UniTask WaitForMessage()
+        {
+            while (clientMessages.Count == 0 && serverMessages.Count == 0)
+            {
+                serverTransport.Poll();
+                clientTransport.Poll();
+                await UniTask.Delay(10);
+            }
+        }
 
         #endregion
 
-        [Test]
-        public void ClientToServerTest()
+        [UnityTest]
+        public IEnumerator ClientToServerTest() => UniTask.ToCoroutine(async () =>
         {
-            Encoding utf8 = Encoding.UTF8;
-            string message = "Hello from the client";
-            byte[] data = utf8.GetBytes(message);
+            clientConnection.Send(new ArraySegment<byte>(data1));
+            await WaitForMessage();
+            Assert.That(serverMessages.Dequeue().data, Is.EquivalentTo(data1));
+        });
 
-            clientConnection.Send(new ArraySegment<byte>(data));
-
-            transport.Poll();
-
-            Assert.That(serverMessages.Dequeue().data, Is.EquivalentTo(data));
-        }
+        [UnityTest]
+        public IEnumerator ServerToClientTest() => UniTask.ToCoroutine(async () =>
+        {
+            serverConnection.Send(new ArraySegment<byte>(data1));
+            await WaitForMessage();
+            Assert.That(clientMessages.Dequeue().data, Is.EquivalentTo(data1));
+        });
 
         [Test]
         public void EndpointAddress()
         {
             // should give either IPv4 or IPv6 local address
             var endPoint = (IPEndPoint)serverConnection.GetEndPointAddress();
-
             IPAddress ipAddress = endPoint.Address;
-
             if (ipAddress.IsIPv4MappedToIPv6)
             {
                 // mono IsLoopback seems buggy,
@@ -113,40 +147,23 @@ namespace Mirage.Tests
                 // so map it back down to IPv4
                 ipAddress = ipAddress.MapToIPv4();
             }
-
             Assert.That(IPAddress.IsLoopback(ipAddress), "Expected loopback address but got {0}", ipAddress);
             // random port
         }
 
-        [Test]
-        public void ClientToServerMultipleTest()
+        [UnityTest]
+        public IEnumerator ClientToServerMultipleTest() => UniTask.ToCoroutine(async () =>
         {
-            Encoding utf8 = Encoding.UTF8;
-            string message = "Hello from the client 1";
-            byte[] data = utf8.GetBytes(message);
-            clientConnection.Send(new ArraySegment<byte>(data));
-
-            string message2 = "Hello from the client 2";
-            byte[] data2 = utf8.GetBytes(message2);
+            clientConnection.Send(new ArraySegment<byte>(data1));
             clientConnection.Send(new ArraySegment<byte>(data2));
 
-            transport.Poll();
+            await WaitForMessage();
+            Assert.That(serverMessages.Dequeue().data, Is.EquivalentTo(data1));
 
-            Assert.That(serverMessages.Dequeue().data, Is.EquivalentTo(data));
+            await WaitForMessage();
             Assert.That(serverMessages.Dequeue().data, Is.EquivalentTo(data2));
-        }
+        });
 
-        [Test]
-        public void ServerToClientTest()
-        {
-            Encoding utf8 = Encoding.UTF8;
-            string message = "Hello from the server";
-            byte[] data = utf8.GetBytes(message);
-            serverConnection.Send(new ArraySegment<byte>(data));
-
-            transport.Poll();
-            Assert.That(clientMessages.Dequeue().data, Is.EquivalentTo(data));
-        }
 
         [Test]
         public void DisconnectServerTest()
@@ -155,7 +172,7 @@ namespace Mirage.Tests
             clientConnection.Disconnected += disconnectMock;
 
             serverConnection.Disconnect();
-            transport.Poll();
+            serverTransport.Poll();
 
             disconnectMock.Received().Invoke();
         }
@@ -167,7 +184,7 @@ namespace Mirage.Tests
             serverConnection.Disconnected += disconnectMock;
 
             clientConnection.Disconnect();
-            transport.Poll();
+            serverTransport.Poll();
 
             disconnectMock.Received().Invoke();
         }
@@ -179,7 +196,7 @@ namespace Mirage.Tests
             clientConnection.Disconnected += disconnectMock;
 
             clientConnection.Disconnect();
-            transport.Poll();
+            serverTransport.Poll();
 
             disconnectMock.Received().Invoke();
         }
@@ -187,7 +204,7 @@ namespace Mirage.Tests
         [Test]
         public void TestServerUri()
         {
-            Uri serverUri = transport.ServerUri().First();
+            Uri serverUri = serverTransport.ServerUri().First();
 
             Assert.That(serverUri.Port, Is.EqualTo(port));
             Assert.That(serverUri.Host, Is.EqualTo(Dns.GetHostName()).IgnoreCase);
@@ -197,7 +214,7 @@ namespace Mirage.Tests
         [Test]
         public void TestScheme()
         {
-            Assert.That(transport.Scheme, Is.EquivalentTo(scheme));
+            Assert.That(serverTransport.Scheme, Is.EquivalentTo(scheme));
         }
     }
 }

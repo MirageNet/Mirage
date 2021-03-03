@@ -115,6 +115,16 @@ namespace Mirage.Tests
             // wait a frame so object will be destroyed
         });
 
+        public async UniTask WaitForMessage()
+        {
+            while (clientMessages.Count == 0 && serverMessages.Count == 0)
+            {
+                serverTransport.Poll();
+                clientTransport.Poll();
+                await UniTask.Delay(10);
+            }
+        }
+
         // A Test behaves as an ordinary method
         [Test]
         public void Connect()
@@ -123,62 +133,42 @@ namespace Mirage.Tests
             Assert.That(serverConnection, Is.Not.Null);
         }
 
-        [Test]
-        public void SendDataFromClient()
-        {
-            clientConnection.Send(new ArraySegment<byte>(data));
-            serverTransport.Poll();
-            Assert.That(serverMessages.Dequeue().data, Is.EquivalentTo(data));
-        }
-
-        [Test]
-        public void SendDataFromServer()
-        {
-            serverConnection.Send(new ArraySegment<byte>(data));
-            serverTransport.Poll();
-            Assert.That(clientMessages.Dequeue().data, Is.EquivalentTo(data));
-        }
-
-        [Test]
-        public void ReceivedBytes()
-        {
+        [UnityTest]
+        public IEnumerator ReceivedBytes() => UniTask.ToCoroutine( async () => {
             long received = serverTransport.ReceivedBytes;
             Assert.That(received, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
 
             clientConnection.Send(new ArraySegment<byte>(data));
 
-            serverTransport.Poll();
+            await WaitForMessage();
             Assert.That(serverTransport.ReceivedBytes, Is.GreaterThan(received + data.Length), "Client sent data,  we should have received");
 
-        }
+        });
 
-        [Test]
-        public void SentBytes()
-        {
+        [UnityTest]
+        public IEnumerator SentBytes() => UniTask.ToCoroutine( async () => {
             long sent = serverTransport.SentBytes;
             Assert.That(sent, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
 
             serverConnection.Send(new ArraySegment<byte>(data));
-            serverTransport.Poll();
+            await WaitForMessage();
             Assert.That(serverTransport.SentBytes, Is.GreaterThan(sent + data.Length), "Client sent data,  we should have received");
 
-        }
+        });
 
-        [Test]
-        public void SendUnreliableDataFromServer()
-        {
+        [UnityTest]
+        public IEnumerator SendUnreliableDataFromServer() => UniTask.ToCoroutine( async () => {
             serverConnection.Send(new ArraySegment<byte>(data), Channel.Unreliable);
-            serverTransport.Poll();
+            await WaitForMessage();
             Assert.That(clientMessages.Dequeue().channel, Is.EqualTo(Channel.Unreliable));
-        }
+        });
 
-        [Test]
-        public void SendUnreliableDataFromClient()
-        {
+        [UnityTest]
+        public IEnumerator SendUnreliableDataFromClient() => UniTask.ToCoroutine( async () => {
             clientConnection.Send(new ArraySegment<byte>(data), Channel.Unreliable);
-            serverTransport.Poll();
+            await WaitForMessage();
             Assert.That(serverMessages.Dequeue().channel, Is.EqualTo(Channel.Unreliable));
-        }
+        });
 
 
         [UnityTest]
@@ -229,7 +219,7 @@ namespace Mirage.Tests
            while (serverTransport.connections.Count > 0)
            {
                serverTransport.Poll();
-               await UniTask.Delay(1);
+               await UniTask.Delay(10);
            }
 
            Assert.That(serverTransport.connections, Is.Empty);
