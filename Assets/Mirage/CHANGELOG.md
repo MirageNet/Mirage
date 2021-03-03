@@ -1,3 +1,10 @@
+## [69.1.2](https://github.com/MirageNet/Mirage/compare/v69.1.1...v69.1.2) (2021-03-03)
+
+
+### Bug Fixes
+
+* **weaver:** adding missing errors when Attributes are used in monobehaviour ([64b580b](https://github.com/MirageNet/Mirage/commit/64b580bb15048e60ba96de843ba47ffdc1a9fd0b))
+
 ## [69.1.1](https://github.com/MirageNet/Mirage/compare/v69.1.0...v69.1.1) (2021-03-02)
 
 
