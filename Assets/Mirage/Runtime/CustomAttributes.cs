@@ -41,7 +41,8 @@ namespace Mirage
     }
 
     /// <summary>
-    /// Prevents clients from running this method.
+    /// Prevents a method from running if server is not active.
+    /// <para>Can only be used inside a NetworkBehaviour</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class ServerAttribute : Attribute
@@ -91,7 +92,8 @@ namespace Mirage
     }
 
     /// <summary>
-    /// Prevents the server from running this method.
+    /// Prevents this method from running if client is not active.
+    /// <para>Can only be used inside a NetworkBehaviour</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class ClientAttribute : Attribute
@@ -106,10 +108,11 @@ namespace Mirage
 
     /// <summary>
     /// Prevents players without authority from running this method.
+    /// <para>Can only be used inside a NetworkBehaviour</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class HasAuthorityAttribute : Attribute 
-    { 
+    public class HasAuthorityAttribute : Attribute
+    {
         /// <summary>
         /// If true,  when the method is called from a client, it throws an error
         /// If false, no error is thrown, but the method won't execute
@@ -120,6 +123,7 @@ namespace Mirage
 
     /// <summary>
     /// Prevents nonlocal players from running this method.
+    /// <para>Can only be used inside a NetworkBehaviour</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class LocalPlayerAttribute : Attribute
