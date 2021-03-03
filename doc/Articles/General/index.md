@@ -1,6 +1,6 @@
 # General Overview
 
-Mirage is a high level multiplayer library for Unity games. The goal is to make it as easy as possible to add multiplayer for your game.
+Mirage is a high level multiplayer library for Unity games. The goal is to make it as easy as possible to add multiplayer to your game.
 
 Some of the key features of Mirage include:
 * Sending and receiving messages
@@ -32,7 +32,7 @@ If you wish to use this funtionality, you will need to have a <xref:Mirage.Netwo
 
 ## Object Layer
 
-This layer is the highest level layer,  the classes in this layer are concerned about [synchcronizing state](../Guides/Sync/index.md) between object and [RPC calls](../Guides/Communications/RemoteActions.md).
+This layer is the highest level layer,  the classes in this layer are concerned about [synchcronizing state](../Guides/Sync/index.md) between objects, as well as sending [RPC calls](../Guides/Communications/RemoteActions.md).
 
 The client needs a <xref:Mirage.ClientObjectManager>,  the server needs a <xref:Mirage.ServerObjectManager>. It will spawn and destroy objects and keep the objects in the client in sync with the objects in the server
 
@@ -42,7 +42,7 @@ Mirage supports 2 modes of operation which can work at the same time.
 
 ## Host mode
 
-In host mode,  the server is also a client and share all networked objects.  There is a direct in memory channel of communication between the <xref:Mirage.NetworkServer> and <xref:Mirage.NetworkClient>.  Since the objects are shared, there is no need to synchronize data.
+In host mode,  the server and client are running in the same application and share all networked objects.  There is a direct in-memory channel of communication between the <xref:Mirage.NetworkServer> and <xref:Mirage.NetworkClient>.  Since the objects are shared, there is no need to synchronize data.
 
 Note that host mode bypasses the Transport Layer.
 
