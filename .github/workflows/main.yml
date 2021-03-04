@@ -45,7 +45,7 @@ jobs:
         
       - name: Cache Library
         id: cache-primes
-        uses: actions/cache@v2ß
+        uses: actions/cache@v2
         with:
           path: Library
           key: Library
