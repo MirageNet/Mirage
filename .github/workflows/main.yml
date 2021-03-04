@@ -8,7 +8,8 @@ on:
     paths-ignore:
       - 'doc/**'
       - '*.md'
-  
+
+jobs:
   CI:
     name: Test
     runs-on: ubuntu-latest
