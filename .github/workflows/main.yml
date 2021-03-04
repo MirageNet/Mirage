@@ -44,7 +44,7 @@ jobs:
           fetch-depth: 0
         
       - name: Cache Library
-        id: cache-primes
+        id: cache-library
         uses: actions/cache@v2
         with:
           path: Library
