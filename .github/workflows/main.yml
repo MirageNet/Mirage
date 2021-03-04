@@ -6,8 +6,7 @@ name: CI
 on: 
   push:
     paths-ignore:
-      - 'doc/**'
-      - '*.md'
+      - '/*.md'
 
 jobs:
   CI:
