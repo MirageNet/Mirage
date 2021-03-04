@@ -1,12 +1,12 @@
 using System;
 using System.Collections;
+using System.Linq;
 using Cysharp.Threading.Tasks;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Events;
-using NSubstitute;
 using UnityEngine.TestTools;
-using System.Linq;
 
 namespace Mirage.Tests.ClientServer
 {

@@ -1,9 +1,9 @@
+using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
-using UnityEngine.UIElements;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
-using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 /**
  * Docs used:
@@ -171,7 +171,7 @@ namespace Mirage
             tabButton.EnableInClassList("dark-selected-tab", false);
             tabButton.EnableInClassList("light-selected-tab", false);
 
-            tabButton.clicked += () => 
+            tabButton.clicked += () =>
             {
                 ToggleMenuButtonColor(tabButton, true);
                 ToggleMenuButtonColor(lastClickedTab, false);
@@ -324,10 +324,10 @@ namespace Mirage
 
                 if (listRequest.Status == StatusCode.Success)
                 {
-                    List<string> installedPackages = new List<string>();
+                    var installedPackages = new List<string>();
 
                     //populate installedPackages
-                    foreach (var package in listRequest.Result)
+                    foreach (UnityEditor.PackageManager.PackageInfo package in listRequest.Result)
                     {
                         Package? miragePackage = Packages.Find((x) => x.packageName == package.name);
                         if (miragePackage != null)
@@ -360,12 +360,12 @@ namespace Mirage
 
                 //set text
                 installButton.text = !foundInInstalledPackages ? "Install" : "Uninstall";
-                
+
                 //set functionality
                 if (!foundInInstalledPackages)
                 {
-                    installButton.clicked += () => 
-                    { 
+                    installButton.clicked += () =>
+                    {
                         InstallPackage(packageName);
                         installButton.text = "Installing";
                         DisableInstallButtons();
@@ -373,8 +373,8 @@ namespace Mirage
                 }
                 else
                 {
-                    installButton.clicked += () => 
-                    { 
+                    installButton.clicked += () =>
+                    {
                         UninstallPackage(packageName);
                         installButton.text = "Uninstalling";
                         DisableInstallButtons();

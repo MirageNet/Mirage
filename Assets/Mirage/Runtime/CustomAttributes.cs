@@ -86,7 +86,7 @@ namespace Mirage
 
         // A constructor is needed for serialization when an
         // exception propagates from a remoting server to the client.
-        protected MethodInvocationException(SerializationInfo info,StreamingContext context) : base(info, context)
+        protected MethodInvocationException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

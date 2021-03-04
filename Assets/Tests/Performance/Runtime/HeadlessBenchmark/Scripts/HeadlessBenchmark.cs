@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using Mirage.KCP;
 using UnityEngine;
-using Cysharp.Threading.Tasks;
 #if IGNORANCE
 using Mirror.ENet;
 #endif
@@ -48,7 +48,7 @@ namespace Mirage.HeadlessBenchmark
                 {
                     messageCount = transport != null ? ((KcpTransport)transport).ReceivedMessageCount : 0;
                 }
-                
+
                 long messages = messageCount - previousMessageCount;
 
 #if UNITY_EDITOR
