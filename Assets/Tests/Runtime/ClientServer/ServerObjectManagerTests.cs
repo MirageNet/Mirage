@@ -87,7 +87,7 @@ namespace Mirage.Tests.ClientServer
         {
             serverIdentity.sceneId = 42;
             serverIdentity.gameObject.SetActive(false);
-            Assert.That(serverObjectManager.SpawnObjects(), Is.True);
+            serverObjectManager.SpawnObjects();
             Assert.That(serverIdentity.gameObject.activeSelf, Is.True);
         }
 
@@ -96,7 +96,7 @@ namespace Mirage.Tests.ClientServer
         {
             serverIdentity.sceneId = 0;
             serverIdentity.gameObject.SetActive(false);
-            Assert.That(serverObjectManager.SpawnObjects(), Is.True);
+            serverObjectManager.SpawnObjects();
             Assert.That(serverIdentity.gameObject.activeSelf, Is.False);
         }
 
@@ -260,7 +260,12 @@ namespace Mirage.Tests.ClientServer
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
 
-            Assert.That(serverObjectManager.SpawnObjects(), Is.False);
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                serverObjectManager.SpawnObjects();
+            });
+
+            Assert.That(exception, Has.Message.EqualTo("Server was not active"));
         });
     }
 }

@@ -699,15 +699,18 @@ namespace Mirage
 
         /// <summary>
         /// This causes NetworkIdentity objects in a scene to be spawned on a server.
-        /// <para>NetworkIdentity objects in a scene are disabled by default. Calling SpawnObjects() causes these scene objects to be enabled and spawned. It is like calling NetworkServer.Spawn() for each of them.</para>
+        /// <para>
+        ///     NetworkIdentity objects in a scene are disabled by default.
+        ///     Calling SpawnObjects() causes these scene objects to be enabled and spawned.
+        ///     It is like calling NetworkServer.Spawn() for each of them.
+        /// </para>
         /// </summary>
-        /// <param name="client">The client associated to the objects.</param>
-        /// <returns>Success if objects where spawned.</returns>
-        public bool SpawnObjects()
+        /// <exception cref="T:InvalidOperationException">Thrown when server is not active</exception>
+        public void SpawnObjects()
         {
             // only if server active
             if (!Server || !Server.Active)
-                return false;
+                throw new InvalidOperationException("Server was not active");
 
             NetworkIdentity[] identities = Resources.FindObjectsOfTypeAll<NetworkIdentity>();
             Array.Sort(identities, new NetworkIdentityComparer());
@@ -722,8 +725,6 @@ namespace Mirage
                     Spawn(identity.gameObject);
                 }
             }
-
-            return true;
         }
 
         /// <summary>
