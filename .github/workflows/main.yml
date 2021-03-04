@@ -68,6 +68,30 @@ jobs:
           path: "Tests/*.xml"
           access-token: ${{ secrets.GITHUB_TOKEN }}
   
+      - name: Generate API
+        uses: nikeee/docfx-action@v1.0.0
+        with:
+          args: metadata --logLevel Warning --warningsAsErrors doc/docfx.json
+
+      - name: Compile Docs
+        uses: nikeee/docfx-action@v1.0.0
+        with:
+          args: build --logLevel Warning --warningsAsErrors doc/docfx.json
+
+      - name: Publish Docs
+        uses: crazy-max/ghaction-github-pages@v2.2.0
+        if: github.ref == 'refs/heads/master'
+        with:
+          # Create incremental commit instead of doing push force
+          keep_history: true
+          # Allow an empty commit to be created
+          allow_empty_commit: true
+          jekyll: false
+          # Build directory to deploy
+          build_dir: doc/_site
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Release
         uses: cycjimmy/semantic-release-action@v2
         id: semantic
