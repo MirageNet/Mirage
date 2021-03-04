@@ -43,6 +43,13 @@ jobs:
         with:
           fetch-depth: 0
         
+      - name: Cache Library
+        id: cache-primes
+        uses: actions/cache@v2ß
+        with:
+          path: Library
+          key: Library
+          
       - name: Activate license
         uses: MirageNet/unity-runner@3.1.0
         with:
