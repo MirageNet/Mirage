@@ -29,32 +29,32 @@ namespace Mirage
         public bool DontDestroy = true;
 
         [Header("Events")]
+        [FormerlySerializedAs("ClientChangeScene")]
+        [SerializeField] ClientSceneChangeEvent _clientChangeScene = new ClientSceneChangeEvent();
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
-        [FormerlySerializedAs("ClientChangeScene")]
-        [SerializeField] ClientSceneChangeEvent _clientChangeScene = new ClientSceneChangeEvent();
         public ClientSceneChangeEvent ClientChangeScene => _clientChangeScene;
 
+        [FormerlySerializedAs("ClientSceneChanged")]
+        [SerializeField] ClientSceneChangeEvent _clientSceneChanged = new ClientSceneChangeEvent();
         /// <summary>
         /// Event fires after the Client has completed its scene change.
         /// </summary>
-        [FormerlySerializedAs("ClientSceneChanged")]
-        [SerializeField] ClientSceneChangeEvent _clientSceneChanged = new ClientSceneChangeEvent();
         public ClientSceneChangeEvent ClientSceneChanged => _clientSceneChanged;
 
+        [FormerlySerializedAs("ServerChangeScene")]
+        [SerializeField] ClientSceneChangeEvent _serverChangeScene = new ClientSceneChangeEvent();
         /// <summary>
         /// Event fires before Server changes scene.
         /// </summary>
-        [FormerlySerializedAs("ServerChangeScene")]
-        [SerializeField] ClientSceneChangeEvent _serverChangeScene = new ClientSceneChangeEvent();
         public ClientSceneChangeEvent ServerChangeScene => _serverChangeScene;
 
+        [FormerlySerializedAs("ServerSceneChanged")]
+        [SerializeField] ClientSceneChangeEvent _serverSceneChanged = new ClientSceneChangeEvent();
         /// <summary>
         /// Event fires after Server has completed scene change.
         /// </summary>
-        [FormerlySerializedAs("ServerSceneChanged")]
-        [SerializeField] ClientSceneChangeEvent _serverSceneChanged = new ClientSceneChangeEvent();
         public ClientSceneChangeEvent ServerSceneChanged => _serverSceneChanged;
 
         /// <summary>

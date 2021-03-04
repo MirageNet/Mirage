@@ -1,3 +1,36 @@
+## [69.1.2](https://github.com/MirageNet/Mirage/compare/v69.1.1...v69.1.2) (2021-03-03)
+
+
+### Bug Fixes
+
+* **weaver:** adding missing errors when Attributes are used in monobehaviour ([64b580b](https://github.com/MirageNet/Mirage/commit/64b580bb15048e60ba96de843ba47ffdc1a9fd0b))
+
+## [69.1.1](https://github.com/MirageNet/Mirage/compare/v69.1.0...v69.1.1) (2021-03-02)
+
+
+### Bug Fixes
+
+* multi scene example nre and event errors ([#649](https://github.com/MirageNet/Mirage/issues/649)) ([8c4c352](https://github.com/MirageNet/Mirage/commit/8c4c352bd226e12324f851218d6a9d56be894662))
+
+# [69.1.0](https://github.com/MirageNet/Mirage/compare/v69.0.0...v69.1.0) (2021-03-02)
+
+
+### Features
+
+* adding assert extension method to logger ([#642](https://github.com/MirageNet/Mirage/issues/642)) ([1df6081](https://github.com/MirageNet/Mirage/commit/1df6081e5d1244a1f780b9945f5bd3c0a10387f0))
+
+# [69.0.0](https://github.com/MirageNet/Mirage/compare/v68.0.3...v69.0.0) (2021-03-02)
+
+
+### Styles
+
+* renaming NumPlayers to NumberOfPlayers ([#646](https://github.com/MirageNet/Mirage/issues/646)) ([27b99be](https://github.com/MirageNet/Mirage/commit/27b99be272ef4f6df73717d877385981e7565259))
+
+
+### BREAKING CHANGES
+
+* Use NetworkServer.NumberOfPlayers instead of NetworkServer.NumPlayers
+
 ## [68.0.3](https://github.com/MirageNet/Mirage/compare/v68.0.2...v68.0.3) (2021-02-25)
 
 

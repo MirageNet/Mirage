@@ -114,7 +114,7 @@ namespace Mirage.Tests.ClientServer
         [Test]
         public void NumPlayersTest()
         {
-            Assert.That(server.NumPlayers, Is.EqualTo(1));
+            Assert.That(server.NumberOfPlayers, Is.EqualTo(1));
         }
 
         [Test]
