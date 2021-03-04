@@ -24,6 +24,13 @@ jobs:
         with:
           fetch-depth: 0
         
+      - name: Cache Library
+        id: cache-library
+        uses: actions/cache@v2
+        with:
+          path: Library
+          key: Library
+          
       - name: Activate license
         uses: MirageNet/unity-runner@3.1.0
         with:
