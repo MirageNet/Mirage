@@ -84,10 +84,8 @@ jobs:
         with:
           # Create incremental commit instead of doing push force
           keep_history: true
-          # Allow an empty commit to be created
           allow_empty_commit: true
           jekyll: false
-          # Build directory to deploy
           build_dir: doc/_site
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
