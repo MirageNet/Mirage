@@ -6,7 +6,7 @@ namespace Mirage
         /// Gets a hash for a string. This hash will be the same on all platforms 
         /// </summary>
         /// <remarks>
-        /// <see cref="string.GetHashCode"/> is not guaranteed to be the same on all platforms
+        /// string.GetHashCode is not guaranteed to be the same on all platforms
         /// </remarks>
         public static int GetStableHashCode(this string text)
         {
