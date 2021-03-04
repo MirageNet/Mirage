@@ -5,7 +5,7 @@ Transports are low level components that are responsible for sending and receivi
 The table below shows a list of available transports.
 
 |                |        Kcp (built-in)        | [Websocket](https://github.com/MirageNet/WebsocketNG) | Steam ([SteamWorks.NET](https://github.com/MirageNet/FizzySteamyMirror), [Facepunch](https://github.com/MirageNet/SteamyFaceNG)) |
-| -------------- | :----------------: | :--------------------------------------------------: | :---------------------------------------------------------: | :------------------------------------------------------: |
+| -------------- | :----------------: | :--------------------------------------------------: | :---------------------------------------------------------: |
 | **CCU**        |       1000+        |                          ?                           |                              ?                              |
 | **Protocol**   |        UDP         |                         TCP                          |                             UDP                             |
 | **Unreliable** | :white_check_mark: |                                                      |                     :white_check_mark:                      |
