@@ -3,9 +3,8 @@
         {
             "src": [
                 {
-                    "files": [
-                        "doc.csproj"
-                    ]
+                    "files": "Mirage.sln",
+                    "src": "../"
                 }
             ],
             "dest": "api",
