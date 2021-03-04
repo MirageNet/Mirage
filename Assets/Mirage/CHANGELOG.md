@@ -1,3 +1,15 @@
+# [70.0.0](https://github.com/MirageNet/Mirage/compare/v69.1.2...v70.0.0) (2021-03-04)
+
+
+### Code Refactoring
+
+* spawnobjects throws exception instead of returning false ([#639](https://github.com/MirageNet/Mirage/issues/639)) ([4cb8afb](https://github.com/MirageNet/Mirage/commit/4cb8afb6e33be80b1c2e5fa3db57a246be203b74))
+
+
+### BREAKING CHANGES
+
+* SpawnObjects throws Exception instead of returning false
+
 ## [69.1.2](https://github.com/MirageNet/Mirage/compare/v69.1.1...v69.1.2) (2021-03-03)
 
 
