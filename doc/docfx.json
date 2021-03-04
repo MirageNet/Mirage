@@ -3,7 +3,7 @@
         {
             "src": [
                 {
-                    "files": "Mirage.sln",
+                    "files": "*.sln",
                     "src": "../"
                 }
             ],
