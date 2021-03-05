@@ -60,7 +60,7 @@ namespace Mirage
         /// <summary>
         /// The path of the current active scene.
         /// <para>If using additive scenes this will be the first scene.</para>
-        /// <para>Value from <see cref="SceneManager.GetActiveScene()"/> </para>
+        /// <para>Value from SceneManager.GetActiveScene() </para>
         /// </summary>
         /// <remarks>
         /// <para>New clients that connect to a server will automatically load this scene.</para>
