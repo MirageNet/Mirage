@@ -59,11 +59,6 @@ namespace Mirage
         private static string firstStartUpKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
 
-        private static string GetVersion()
-        {
-            return typeof(NetworkIdentity).Assembly.GetName().Version.ToString();
-        }
-
         #region Handle visibility
 
         private static bool ShowChangeLog
@@ -92,7 +87,7 @@ namespace Mirage
         private static void ShowWindowOnFirstStart()
         {
             EditorApplication.update -= ShowWindowOnFirstStart;
-            firstStartUpKey = GetVersion();
+            firstStartUpKey = MirageVersion.Version;
 
             if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirageUnknown")
             {
@@ -135,7 +130,7 @@ namespace Mirage
 
             //set the version text
             Label versionText = root.Q<Label>("VersionText");
-            versionText.text = "v" + GetVersion();
+            versionText.text = "v" + MirageVersion.Version;
 
             #region Page buttons
 
