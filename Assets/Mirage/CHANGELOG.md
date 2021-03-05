@@ -1,3 +1,17 @@
+# [71.0.0](https://github.com/MirageNet/Mirage/compare/v70.0.0...v71.0.0) (2021-03-05)
+
+
+### Styles
+
+* renaming NetworkScenePath to ActiveScenePath ([#647](https://github.com/MirageNet/Mirage/issues/647)) ([7a26360](https://github.com/MirageNet/Mirage/commit/7a26360b9d11e7d76ef73628f593503d0d785380))
+
+
+### BREAKING CHANGES
+
+* Use NetworkSceneManager.ActiveScenePath instead of NetworkSceneManager.NetworkScenePath
+
+* removing cref till docs are fixed
+
 # [70.0.0](https://github.com/MirageNet/Mirage/compare/v69.1.2...v70.0.0) (2021-03-04)
 
 
