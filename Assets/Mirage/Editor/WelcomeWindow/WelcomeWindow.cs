@@ -19,6 +19,8 @@ namespace Mirage
     [InitializeOnLoad]
     public class WelcomeWindow : EditorWindow
     {
+        static readonly ILogger logger = LogFactory.GetLogger<WelcomeWindow>();
+
         private Button lastClickedTab;
         private readonly List<Button> installButtons = new List<Button>();
 
@@ -279,11 +281,11 @@ namespace Mirage
                 //log results
                 if (installRequest.Status == StatusCode.Success)
                 {
-                    Debug.Log("Package install successful.");
+                    if (logger.LogEnabled()) logger.Log("Package install successful.");
                 }
                 else if (installRequest.Status == StatusCode.Failure)
                 {
-                    Debug.LogError("Package install was unsuccessful. \n Error Code: " + installRequest.Error.errorCode + "\n Error Message: " + installRequest.Error.message);
+                    if (logger.ErrorEnabled()) logger.LogError($"Package install was unsuccessful. \n Error Code: {installRequest.Error.errorCode}\n Error Message: {installRequest.Error.message}");
                 }
 
                 EditorApplication.update -= InstallPackageProgress;
@@ -303,11 +305,11 @@ namespace Mirage
 
                 if (uninstallRequest.Status == StatusCode.Success)
                 {
-                    Debug.Log("Package uninstall successful.");
+                    if (logger.LogEnabled()) logger.Log("Package uninstall successful.");
                 }
                 else if (uninstallRequest.Status == StatusCode.Failure)
                 {
-                    Debug.LogError("Package uninstall was unsuccessful. \n Error Code: " + uninstallRequest.Error.errorCode + "\n Error Message: " + uninstallRequest.Error.message);
+                    if (logger.ErrorEnabled()) logger.LogError($"Package uninstall was unsuccessful. \n Error Code: {uninstallRequest.Error.errorCode}\n Error Message: {uninstallRequest.Error.message}");
                 }
 
                 //refresh the package tab
@@ -341,7 +343,7 @@ namespace Mirage
                 //log error
                 else if (listRequest.Status == StatusCode.Failure)
                 {
-                    Debug.LogError("There was an issue finding packages. \n Error Code: " + listRequest.Error.errorCode + "\n Error Message: " + listRequest.Error.message);
+                    if (logger.ErrorEnabled()) logger.LogError($"There was an issue finding packages. \n Error Code: {listRequest.Error.errorCode}\n Error Message: {listRequest.Error.message}");
                 }
             }
         }
