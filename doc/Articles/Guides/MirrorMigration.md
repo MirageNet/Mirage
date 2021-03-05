@@ -20,8 +20,22 @@ Many roles that `NetworkManager` fulfilled in Mirror were split into multiple si
 > [!TIP]
 > The easiest way to get started is to right click in the Hierarchy > Network > NetworkManager. This will create a GameObject with all the necessary components and references already set up.
 
+### Accessing Mirage components from NetworkBehaviour
+Despite Mirage removing all static state, you can still access the important networking components from within `NetworkBehaviour` easily. This table shows how to access different components in comparison to Mirror:
+
+| Mirror (static) | Mirage (property of `NetworkBehaviour`) |
+|:---------------:|:---------------------------------------:|
+| `NetworkServer` | `Server`                                |
+| `NetworkClient` | `Client`                                |
+| `NetworkTime`   | `NetworkTime`                           |
+| doesn't exist   | `ClientObjectManager`                   |
+| doesn't exist   | `ServerObjectManager`                   |
+
 ## Network Events Lifecycle
-Lifecycle management is no longer based on overrides. Instead, there are many UnityEvents that can be hooked into without direct coupling.
+Lifecycle management is no longer based on overrides. Instead, there are many UnityEvents that can be hooked into without direct coupling. They can also be used to hook callbacks via Unity Inspector.
+
+> [!TIP]
+> This guide only shows the Mirror counterpart events, but Mirage has more events available, so be sure to check them out as they might be useful.
 
 ### Server and client events
 The table below shows the override method names from Mirror's `NetworkManager` and the corresponding events from Mirage.
@@ -176,6 +190,7 @@ These fields/properties have been renamed:
 | `NetworkBehaviour.connectionToClient` | [NetworkBehaviour.ConnectionToClient](xref:Mirage.NetworkBehaviour.ConnectionToClient) |
 | `NetworkBehaviour.connectionToServer` | [NetworkBehaviour.ConnectionToServer](xref:Mirage.NetworkBehaviour.ConnectionToServer) |
 | `NetworkBehaviour.hasAuthority`       | [NetworkBehaviour.HasAuthority](xref:Mirage.NetworkBehaviour.HasAuthority)             |
+| `NetworkBehaviour.netIdentity`        | [NetworkBehaviour.NetIdentity](xref:Mirage.NetworkBehaviour.NetIdentity)               |
 | `NetworkBehaviour.netId`              | [NetworkBehaviour.NetId](xref:Mirage.NetworkBehaviour.NetId)                           |
 | `NetworkBehaviour.isClientOnly`       | [NetworkBehaviour.IsClientOnly](xref:Mirage.NetworkBehaviour.IsClientOnly)             |
 | `NetworkBehaviour.islocalPlayer`      | [NetworkBehaviour.IsLocalPlayer](xref:Mirage.NetworkBehaviour.IsLocalPlayer)           |
@@ -184,3 +199,15 @@ These fields/properties have been renamed:
 | `NetworkServer.active`                | [NetworkServer.Active](xref:Mirage.NetworkServer.Active)                               |
 | `NetworkServer.localConnection`       | [NetworkServer.LocalConnection](xref:Mirage.NetworkServer.LocalConnection)             |
 | `NetworkClient.connection`            | [NetworkClient.Connection](xref:Mirage.NetworkClient.Connection)                       |
+| `NetworkTime.time`                    | [NetworkTime.Time](xref:Mirage.NetworkTime.Time)                                       |
+
+## Object Management
+Registered spawnable prefabs were moved from `NetworkManager` to <xref:Mirage.ClientObjectManager> component. You can use the Inspector to register all NetworkIdentities via single click.
+
+### Spawning and destroying
+Table below shows how to spawn objects in Mirage from `NetworkBehaviour`:
+
+| Mirror                  | Mirage                                                                                     |
+|:-----------------------:|:------------------------------------------------------------------------------------------:|
+| `NetworkServer.Spawn`   | [ServerObjectManager.Spawn](xref:Mirage.ServerObjectManager.Spawn(Mirage.NetworkIdentity)) |
+| `NetworkServer.Destroy` | [ServerObjectManager.Destroy](xref:Mirage.ServerObjectManager.Destroy(GameObject))         |
