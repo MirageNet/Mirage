@@ -98,7 +98,11 @@ namespace Mirage
             {
                 EditorPrefs.SetString(screenToOpenKey, ShowChangeLog ? "ChangeLog" : "Welcome");
 
+#if UNITY_2020_1_OR_NEWER
                 OpenWindow();
+#else
+                if (logger.LogEnabled()) logger.Log($"WelcomeWindow not supported in {Application.unityVersion}, it is only supproted in Unity 2020.1 or newer");
+#endif
             }
         }
 
