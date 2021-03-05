@@ -72,10 +72,10 @@ namespace Mirage.Tests.Host
 
             sceneManager.ChangeServerScene("Assets/Mirror/Tests/Runtime/testScene.unity");
 
-            await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.NetworkScenePath.Equals("Assets/Mirror/Tests/Runtime/testScene.unity"));
+            await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ActiveScenePath.Equals("Assets/Mirror/Tests/Runtime/testScene.unity"));
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
-            Assert.That(sceneManager.NetworkScenePath, Is.EqualTo("Assets/Mirror/Tests/Runtime/testScene.unity"));
+            Assert.That(sceneManager.ActiveScenePath, Is.EqualTo("Assets/Mirror/Tests/Runtime/testScene.unity"));
             Assert.That(invokeClientSceneMessage, Is.True);
             Assert.That(invokeNotReadyMessage, Is.True);
         });
