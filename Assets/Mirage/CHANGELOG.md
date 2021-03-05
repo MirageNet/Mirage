@@ -1,3 +1,15 @@
+# [72.0.0](https://github.com/MirageNet/Mirage/compare/v71.0.0...v72.0.0) (2021-03-05)
+
+
+### Code Refactoring
+
+* removing un-used INetworkManager interface ([#661](https://github.com/MirageNet/Mirage/issues/661)) ([347bf6c](https://github.com/MirageNet/Mirage/commit/347bf6c0aaa3e69a4b9027defda0e999541f8a7c))
+
+
+### BREAKING CHANGES
+
+* removing INetworkManager
+
 # [71.0.0](https://github.com/MirageNet/Mirage/compare/v70.0.0...v71.0.0) (2021-03-05)
 
 
