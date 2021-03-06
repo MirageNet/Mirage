@@ -9,9 +9,9 @@ namespace Mirage
         ClientRpc
     }
 
-    public enum Version
+    public static class Version
     {
-        Current = 1
+        public static readonly string Current = typeof(NetworkIdentity).Assembly.GetName().Version.ToString();
     }
 
     /// <summary>

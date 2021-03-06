@@ -162,7 +162,8 @@ namespace Mirage
             initialized = true;
 
             Application.quitting += Disconnect;
-            if (logger.LogEnabled()) logger.Log("NetworkServer Created version " + Version.Current);
+            if (logger.LogEnabled()) logger.Log($"NetworkServer Created, Mirage version: {Version.Current}");
+
 
             //Make sure connections are cleared in case any old connections references exist from previous sessions
             connections.Clear();
