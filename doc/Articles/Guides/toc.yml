@@ -28,6 +28,8 @@
 - name: GameObjects
   href: GameObjects/toc.yml
   topicHref: GameObjects/index.md
+- name: Mirror Migration Guide
+  topicHref: MirrorMigration.md
 - name: Community Guides
   href: CommunityGuides/toc.yml
   topicHref: CommunityGuides/index.md
