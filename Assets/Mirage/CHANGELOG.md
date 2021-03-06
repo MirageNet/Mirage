@@ -1,3 +1,15 @@
+# [73.0.0](https://github.com/MirageNet/Mirage/compare/v72.0.1...v73.0.0) (2021-03-06)
+
+
+### Code Refactoring
+
+* replacing version enum with assembly version ([#663](https://github.com/MirageNet/Mirage/issues/663)) ([d8facb7](https://github.com/MirageNet/Mirage/commit/d8facb7c4cf06033935f7e7386a25cb3ec855737))
+
+
+### BREAKING CHANGES
+
+* Version.Current is no longer an enum and now returns Mirage's assembly version
+
 ## [72.0.1](https://github.com/MirageNet/Mirage/compare/v72.0.0...v72.0.1) (2021-03-06)
 
 
