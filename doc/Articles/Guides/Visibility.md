@@ -38,8 +38,6 @@ The default implementation of `OnSetLocalVisibility` disables or enables all ren
 
 Sometimes you might want to use other kinds of visibility check, such as grid-based rules, line-of-sight tests, navigation path tests, or any other type of test that suits your game.
 
-To do this, you can create your own custom Network Observer from a [script template](../General/ScriptTemplates.md) via the Assets menu by clicking Create -> Mirage -> Network Observer.
-
 It may be helpful to understand how the Network Proximity Checker works.
 
 The Network Proximity Checker is implemented using the public visibility interface of Mirage’s HLAPI. Using this same interface, you can implement any kind of visibility rules you desire. Each `NetworkIdentity` keeps track of the set of players that it is visible to. The players that a NetworkIdentity game object is visible to are called the “observers” of the NetworkIdentity.
