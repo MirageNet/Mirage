@@ -6,11 +6,6 @@ This document describes steps to creating a multiplayer game with Mirage. The pr
 
 Check out these [awesome videos](https://www.youtube.com/playlist?list=PLkx8oFug638oBYF5EOwsSS-gOVBXj1dkP) showing you how to get started with mirror. Courtesy of [First Gear Games](https://www.youtube.com/channel/UCGIF1XekJqHYIafvE7l0c2A) also known as Punfish in discord.
 
-## Script Templates
--   Create new Network Behaviours and other common scripts faster
-
-See [Script Templates](ScriptTemplates.md).
-
 ## Networking set-up
 -   Right click in the Scene, select *Network* > *NetworkManager*. This will create a new GameObject with all the neccessary networking components set up for you.
 -   Add the NetworkManagerHUD component to the game object. This provides the default UI for managing the network game state.
