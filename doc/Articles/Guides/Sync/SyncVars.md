@@ -1,69 +1,52 @@
 # SyncVars
+SyncVars are properties of classes that inherit from <xref:Mirage.NetworkBehaviour>, which are synchronized from the server to clients. When a game object is spawned, or a new player joins a game in progress, they are sent the latest state of all SyncVars on networked objects that are visible to them. Use the [[SyncVar]](xref:Mirage.SyncVarAttribute) custom attribute to specify which variables in your script you want to synchronize.
 
-SyncVars are properties of classes that inherit from NetworkBehaviour, which are synchronized from the server to clients. When a game object is spawned, or a new player joins a game in progress, they are sent the latest state of all SyncVars on networked objects that are visible to them. Use the `SyncVar` custom attribute to specify which variables in your script you want to synchronize.
+> [!NOTE]
+> The state of SyncVars is applied to game objects on clients before [NetIdentity.OnStartClient](xref:Mirage.NetworkIdentity.OnStartClient) event is invoked, so the state of the object is always up-to-date in subscribed callbacks.
 
-The state of SyncVars is applied to game objects on clients before `OnStartClient()` is called, so the state of the object is always up-to-date inside `OnStartClient()`.
-
-SyncVars can use any [type supported by Mirage](../DataTypes.md). You can have up to 64 SyncVars on a single NetworkBehaviour script, including SyncLists (see next section, below).
+SyncVars can use any [type supported by Mirage](../DataTypes.md). You can have up to 64 SyncVars on a single NetworkBehaviour script, including [SyncLists](SyncLists.md) and other sync types.
 
 The server automatically sends SyncVar updates when the value of a SyncVar changes, so you do not need to track when they change or send information about the changes yourself. Changing a value in the inspector will not trigger an update.
 
->   The [SyncVar hook](SyncVarHook.md) attribute can be used to specify a method to be called when the SyncVar changes value on the client.
-
-## SyncVar Example
-Let's say we have a networked object with a script called Enemy:
+## Example
+Let's have a simple `Player` class with the following code:
 
 ``` cs
-public class Enemy : NetworkBehaviour
+using Mirage;
+using UnityEngine;
+
+public class Player : NetworkBehaviour
 {
     [SyncVar]
-    public int health = 100;
-
-    void OnMouseUp()
-    {
-        NetworkIdentity ni = NetworkClient.connection.identity;
-        PlayerController pc = ni.GetComponent<PlayerController>();
-        pc.currentTarget = gameObject;
-    }
-}
-```
-
-The `PlayerController` might look like this:
-
-``` cs
-public class PlayerController : NetworkBehaviour
-{
-    public GameObject currentTarget;
+    public int clickCount;
 
     void Update()
     {
-        if (isLocalPlayer)
-            if (currentTarget != null)
-                if (currentTarget.tag == "Enemy")
-                    if (Input.GetKeyDown(KeyCode.X))
-                        CmdShoot(currentTarget);
+        if (IsLocalPlayer && Input.GetMouseButtonDown(0))
+        {
+            IncreaseClicks();
+        }
     }
 
-    [Command]
-    public void CmdShoot(GameObject enemy)
+    [ServerRpc]
+    public void IncreaseClicks()
     {
-        // Do your own shot validation here because this runs on the server
-        enemy.GetComponent<Enemy>().health -= 5;
+        // This is executed on the server
+        clickCount++;
     }
 }
 ```
 
-In this example, when a Player clicks on an Enemy, the networked enemy game object is assigned to `PlayerController.currentTarget`. When the player presses X, with a correct target selected, that target is passed through a Command, which runs on the server, to decrement the `health` SyncVar. All clients will be updated with that new value. You can then have a UI on the enemy to show the current value.
+In this example, when a Player A clicks the left mosue button, he sends a RPC to the server where the `clickCount` SyncVar is incremented. All other visible players will be informed about Player A's new `clickCount` value.
 
 ## Class inheritance
-
 SyncVars work with class inheritance. Consider this example:
 
 ```cs
 class Pet : NetworkBehaviour
 {
     [SyncVar] 
-    String name;
+    string name;
 }
 
 class Cat : Pet
@@ -75,4 +58,61 @@ class Cat : Pet
 
 You can attach the Cat component to your cat prefab, and it will synchronize both it's `name` and `color`.
 
->   **Warning** Both `Cat` and `Pet` should be in the same assembly. If they are in separate assemblies, make sure not to change `name` from inside `Cat` directly, add a method to `Pet` instead. 
+> [!WARNING]
+> Both `Cat` and `Pet` should be in the same assembly. If they are in separate assemblies, make sure not to change `name` from inside `Cat` directly, add a method to `Pet` instead. 
+
+## SyncVar hook
+The `hook` property of SyncVar can be used to specify a function to be called when the SyncVar changes value on the client.
+
+**Trivia:**
+- The hook callback must have two parameters of the same type as the SyncVar property. One for the old value, one for the new value.
+- The hook is always called after the SyncVar value is set. You don't need to set it yourself.
+- The hook only fires for changed values, and changing a value in the inspector will not trigger an update.
+- Hooks can be virtual methods and overriden in a derived class.
+
+### Example
+Below is a simple example of assigning a random color to each player when they're spawned on the server.  All clients will see all players in the correct colors, even if they join later.
+
+```cs
+using UnityEngine;
+using Mirage;
+
+public class Player : NetworkBehaviour
+{
+    [SyncVar(hook = nameof(UpdateColor))]
+    Color playerColor = Color.black;
+
+    Renderer renderer;
+
+    // Unity makes a clone of the Material every time renderer.material is used.
+    // Cache it here and Destroy it in OnDestroy to prevent a memory leak.
+    Material cachedMaterial;
+
+    void Awake()
+    {
+        renderer = GetComponent<Renderer>();
+        NetIdentity.OnStartServer.AddListener(OnStartServer);
+    }
+
+    void OnStartServer()
+    {
+        playerColor = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+    }
+
+    void UpdateColor(Color oldColor, Color newColor)
+    {
+        // this is executed on this player for each client
+        if (cachedMaterial == null)
+        {
+            cachedMaterial = renderer.material;
+        }
+
+        cachedMaterial.color = newColor;
+    }
+
+    void OnDestroy()
+    {
+        Destroy(cachedMaterial);
+    }
+}
+```
