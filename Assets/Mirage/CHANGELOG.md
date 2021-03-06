@@ -1,3 +1,10 @@
+## [72.0.1](https://github.com/MirageNet/Mirage/compare/v72.0.0...v72.0.1) (2021-03-06)
+
+
+### Bug Fixes
+
+* disabling welcome window before unity 2020.1 ([#662](https://github.com/MirageNet/Mirage/issues/662)) ([a527af4](https://github.com/MirageNet/Mirage/commit/a527af4455c366d5b0ad5826c557dd52f1f3728f))
+
 # [72.0.0](https://github.com/MirageNet/Mirage/compare/v71.0.0...v72.0.0) (2021-03-05)
 
 
