@@ -37,7 +37,7 @@ public class Player : NetworkBehaviour
 }
 ```
 
-In this example, when a Player A clicks the left mosue button, he sends a RPC to the server where the `clickCount` SyncVar is incremented. All other visible players will be informed about Player A's new `clickCount` value.
+In this example, when Player A clicks the left mouse button, he sends a RPC to the server where the `clickCount` SyncVar is incremented. All other visible players will be informed about Player A's new `clickCount` value.
 
 ## Class inheritance
 SyncVars work with class inheritance. Consider this example:
