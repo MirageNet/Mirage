@@ -91,7 +91,7 @@ namespace Mirage.Tests
         [UnityTest]
         public IEnumerator SendDataFromClient() => UniTask.ToCoroutine(async () =>
         {
-            await clientConnection.SendAsync(new ArraySegment<byte>(data));
+            clientConnection.Send(new ArraySegment<byte>(data));
 
             var buffer = new MemoryStream();
             await serverConnection.ReceiveAsync(buffer);
@@ -102,7 +102,7 @@ namespace Mirage.Tests
         [UnityTest]
         public IEnumerator SendDataFromServer() => UniTask.ToCoroutine(async () =>
         {
-            await serverConnection.SendAsync(new ArraySegment<byte>(data));
+            serverConnection.Send(new ArraySegment<byte>(data));
 
             var buffer = new MemoryStream();
             await clientConnection.ReceiveAsync(buffer);
@@ -115,7 +115,7 @@ namespace Mirage.Tests
             long received = transport.ReceivedBytes;
             Assert.That(received, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
 
-            await clientConnection.SendAsync(new ArraySegment<byte>(data));
+            clientConnection.Send(new ArraySegment<byte>(data));
 
             var buffer = new MemoryStream();
             await serverConnection.ReceiveAsync(buffer);
@@ -130,7 +130,7 @@ namespace Mirage.Tests
             long sent = transport.SentBytes;
             Assert.That(sent, Is.GreaterThan(0), "Must have received some bytes to establish the connection");
 
-            await serverConnection.SendAsync(new ArraySegment<byte>(data));
+            serverConnection.Send(new ArraySegment<byte>(data));
 
             var buffer = new MemoryStream();
             await clientConnection.ReceiveAsync(buffer);
@@ -142,7 +142,7 @@ namespace Mirage.Tests
         [UnityTest]
         public IEnumerator SendUnreliableDataFromServer() => UniTask.ToCoroutine(async () =>
         {
-            await serverConnection.SendAsync(new ArraySegment<byte>(data), Channel.Unreliable);
+            serverConnection.Send(new ArraySegment<byte>(data), Channel.Unreliable);
 
             var buffer = new MemoryStream();
             int channel = await clientConnection.ReceiveAsync(buffer);
@@ -153,7 +153,7 @@ namespace Mirage.Tests
         [UnityTest]
         public IEnumerator SendUnreliableDataFromClient() => UniTask.ToCoroutine(async () =>
         {
-            await clientConnection.SendAsync(new ArraySegment<byte>(data), Channel.Unreliable);
+            clientConnection.Send(new ArraySegment<byte>(data), Channel.Unreliable);
 
             var buffer = new MemoryStream();
             int channel = await serverConnection.ReceiveAsync(buffer);
