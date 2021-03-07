@@ -167,29 +167,11 @@ namespace Mirage.Weaver
             if (!method.IsGenericInstance)
                 return;
 
-            bool isMessage =
-                method.Is(typeof(MessagePacker), nameof(MessagePacker.Pack)) ||
-                method.Is(typeof(MessagePacker), nameof(MessagePacker.GetId)) ||
-                method.Is(typeof(MessagePacker), nameof(MessagePacker.Unpack)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.Send)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.SendAsync)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.RegisterHandler)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.UnregisterHandler)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.Send)) ||
-                method.Is<NetworkConnection>(nameof(NetworkConnection.Send)) ||
-                method.Is<NetworkConnection>(nameof(NetworkConnection.SendAsync)) ||
-                method.Is<NetworkConnection>(nameof(NetworkConnection.RegisterHandler)) ||
-                method.Is<NetworkConnection>(nameof(NetworkConnection.UnregisterHandler)) ||
-                method.Is<INetworkClient>(nameof(INetworkClient.Send)) ||
-                method.Is<INetworkClient>(nameof(INetworkClient.SendAsync)) ||
-                method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
-                method.Is<NetworkClient>(nameof(NetworkClient.SendAsync)) ||
-                method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
-                method.Is<INetworkServer>(nameof(INetworkServer.SendToAll));
+            // generate methods for message or types used by generic read/write
+            bool isMessage = IsMessageMethod(method);
 
             bool generate = isMessage ||
-                method.Is<NetworkWriter>(nameof(NetworkWriter.Write)) ||
-                method.Is<NetworkReader>(nameof(NetworkReader.Read));
+                IsReadWriteMethod(method);
 
             if (generate)
             {
@@ -225,6 +207,41 @@ namespace Mirage.Weaver
                 writers.GetWriteFunc(parameterType, sequencePoint);
                 readers.GetReadFunc(parameterType, sequencePoint);
             }
+        }
+
+        /// <summary>
+        /// is method used to send a message? if it use then T is a message and needs read/write functions
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns></returns>
+        private static bool IsMessageMethod(MethodReference method)
+        {
+            return
+                method.Is(typeof(MessagePacker), nameof(MessagePacker.Pack)) ||
+                method.Is(typeof(MessagePacker), nameof(MessagePacker.GetId)) ||
+                method.Is(typeof(MessagePacker), nameof(MessagePacker.Unpack)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.Send)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.SendAsync)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.RegisterHandler)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.UnregisterHandler)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.Send)) ||
+                method.Is<NetworkConnection>(nameof(NetworkConnection.Send)) ||
+                method.Is<NetworkConnection>(nameof(NetworkConnection.SendAsync)) ||
+                method.Is<NetworkConnection>(nameof(NetworkConnection.RegisterHandler)) ||
+                method.Is<NetworkConnection>(nameof(NetworkConnection.UnregisterHandler)) ||
+                method.Is<INetworkClient>(nameof(INetworkClient.Send)) ||
+                method.Is<INetworkClient>(nameof(INetworkClient.SendAsync)) ||
+                method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
+                method.Is<NetworkClient>(nameof(NetworkClient.SendAsync)) ||
+                method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
+                method.Is<INetworkServer>(nameof(INetworkServer.SendToAll));
+        }
+
+        private static bool IsReadWriteMethod(MethodReference method)
+        {
+            return
+                method.Is<NetworkWriter>(nameof(NetworkWriter.Write)) ||
+                method.Is<NetworkReader>(nameof(NetworkReader.Read));
         }
 
         void LoadDeclaredWriters(TypeDefinition klass)
