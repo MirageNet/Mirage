@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.IO;
 using System.Net;
@@ -23,9 +23,9 @@ namespace Mirage
             (c1, c2) = PipeConnection.CreatePipe();
         }
 
-        private static UniTask SendData(IConnection c, byte[] data)
+        private static void SendData(IConnection c, byte[] data)
         {
-            return c.SendAsync(new ArraySegment<byte>(data));
+            c.Send(new ArraySegment<byte>(data));
         }
 
 
@@ -41,7 +41,7 @@ namespace Mirage
         [UnityTest]
         public IEnumerator TestSendAndReceive() => RunAsync(async () =>
         {
-            await SendData(c1, new byte[] { 1, 2, 3, 4 });
+            SendData(c1, new byte[] { 1, 2, 3, 4 });
 
             await ExpectData(c2, new byte[] { 1, 2, 3, 4 });
         });
@@ -49,8 +49,8 @@ namespace Mirage
         [UnityTest]
         public IEnumerator TestSendAndReceiveMultiple() => RunAsync(async () =>
         {
-            await SendData(c1, new byte[] { 1, 2, 3, 4 });
-            await SendData(c1, new byte[] { 5, 6, 7, 8 });
+            SendData(c1, new byte[] { 1, 2, 3, 4 });
+            SendData(c1, new byte[] { 5, 6, 7, 8 });
 
             await ExpectData(c2, new byte[] { 1, 2, 3, 4 });
             await ExpectData(c2, new byte[] { 5, 6, 7, 8 });
