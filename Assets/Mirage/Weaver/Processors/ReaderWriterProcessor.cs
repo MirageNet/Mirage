@@ -167,7 +167,34 @@ namespace Mirage.Weaver
             if (!method.IsGenericInstance)
                 return;
 
-            bool isMessage =
+            // generate methods for message or types used by generic read/write
+            bool isMessage = IsMessageMethod(method);
+
+            bool generate = isMessage ||
+                IsReadWriteMethod(method);
+
+            if (generate)
+            {
+                var instanceMethod = (GenericInstanceMethod)method;
+                TypeReference parameterType = instanceMethod.GenericArguments[0];
+
+                if (parameterType.IsGenericParameter)
+                    return;
+
+                GenerateReadersWriters(parameterType, sequencePoint);
+                if (isMessage)
+                    messages.Add(parameterType);
+            }
+        }
+
+        /// <summary>
+        /// is method used to send a message? if it use then T is a message and needs read/write functions
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns></returns>
+        private static bool IsMessageMethod(MethodReference method)
+        {
+            return
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.Pack)) ||
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.GetId)) ||
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.Unpack)) ||
@@ -186,23 +213,13 @@ namespace Mirage.Weaver
                 method.Is<NetworkClient>(nameof(NetworkClient.SendAsync)) ||
                 method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
                 method.Is<INetworkServer>(nameof(INetworkServer.SendToAll));
+        }
 
-            bool generate = isMessage ||
+        private static bool IsReadWriteMethod(MethodReference method)
+        {
+            return
                 method.Is<NetworkWriter>(nameof(NetworkWriter.Write)) ||
                 method.Is<NetworkReader>(nameof(NetworkReader.Read));
-
-            if (generate)
-            {
-                var instanceMethod = (GenericInstanceMethod)method;
-                TypeReference parameterType = instanceMethod.GenericArguments[0];
-
-                if (parameterType.IsGenericParameter)
-                    return;
-
-                GenerateReadersWriters(parameterType, sequencePoint);
-                if (isMessage)
-                    messages.Add(parameterType);
-            }
         }
 
         private void GenerateReadersWriters(TypeReference parameterType, SequencePoint sequencePoint)
