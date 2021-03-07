@@ -260,7 +260,12 @@ namespace Mirage
 
         public void Send<T>(T message, int channelId = Channel.Reliable)
         {
-            Connection.SendAsync(message, channelId).Forget();
+            Connection.Send(message, channelId);
+        }
+
+        public UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable)
+        {
+            return Connection.SendAsync(segment, channelId);
         }
 
         internal void Update()
