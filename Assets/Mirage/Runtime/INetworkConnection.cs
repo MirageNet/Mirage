@@ -37,7 +37,7 @@ namespace Mirage
     }
 
     /// <summary>
-    /// An object that can send nofity messages
+    /// An object that can send notify messages
     /// </summary>
     public interface INotifySender
     {
@@ -51,7 +51,7 @@ namespace Mirage
     }
 
     /// <summary>
-    /// An object that can receive nofity messages
+    /// An object that can receive notify messages
     /// </summary>
     public interface INotifyReceiver
     {
