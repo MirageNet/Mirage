@@ -187,6 +187,28 @@ namespace Mirage.Weaver
             }
         }
 
+        private void GenerateReadersWriters(TypeReference parameterType, SequencePoint sequencePoint)
+        {
+            if (!parameterType.IsGenericParameter && parameterType.CanBeResolved())
+            {
+                TypeDefinition typeDefinition = parameterType.Resolve();
+
+                if (typeDefinition.IsClass && !typeDefinition.IsValueType)
+                {
+                    MethodDefinition constructor = typeDefinition.GetMethod(".ctor");
+
+                    bool hasAccess = constructor.IsPublic
+                        || constructor.IsAssembly && typeDefinition.Module == module;
+
+                    if (!hasAccess)
+                        return;
+                }
+
+                writers.GetWriteFunc(parameterType, sequencePoint);
+                readers.GetReadFunc(parameterType, sequencePoint);
+            }
+        }
+
         /// <summary>
         /// is method used to send a message? if it use then T is a message and needs read/write functions
         /// </summary>
@@ -220,28 +242,6 @@ namespace Mirage.Weaver
             return
                 method.Is<NetworkWriter>(nameof(NetworkWriter.Write)) ||
                 method.Is<NetworkReader>(nameof(NetworkReader.Read));
-        }
-
-        private void GenerateReadersWriters(TypeReference parameterType, SequencePoint sequencePoint)
-        {
-            if (!parameterType.IsGenericParameter && parameterType.CanBeResolved())
-            {
-                TypeDefinition typeDefinition = parameterType.Resolve();
-
-                if (typeDefinition.IsClass && !typeDefinition.IsValueType)
-                {
-                    MethodDefinition constructor = typeDefinition.GetMethod(".ctor");
-
-                    bool hasAccess = constructor.IsPublic
-                        || constructor.IsAssembly && typeDefinition.Module == module;
-
-                    if (!hasAccess)
-                        return;
-                }
-
-                writers.GetWriteFunc(parameterType, sequencePoint);
-                readers.GetReadFunc(parameterType, sequencePoint);
-            }
         }
 
         void LoadDeclaredWriters(TypeDefinition klass)
