@@ -17,7 +17,7 @@ namespace Mirage
 
     public interface IConnection
     {
-        UniTask SendAsync(ArraySegment<byte> data, int channel = Channel.Reliable);
+        void Send(ArraySegment<byte> data, int channel = Channel.Reliable);
 
         /// <summary>
         /// reads a message from connection

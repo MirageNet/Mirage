@@ -79,13 +79,12 @@ namespace Mirage
             return 0;
         }
 
-        public UniTask SendAsync(ArraySegment<byte> data, int channel = Channel.Reliable)
+        public void Send(ArraySegment<byte> data, int channel = Channel.Reliable)
         {
             // add some data to the writer in the connected connection
             // and increase the message count
             connected.writer.WriteBytesAndSizeSegment(data);
             connected.MessageCount.Release();
-            return UniTask.CompletedTask;
         }
     }
 }
