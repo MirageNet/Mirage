@@ -4,6 +4,9 @@ using Cysharp.Threading.Tasks;
 
 namespace Mirage
 {
+    /// <summary>
+    /// An object that can send messages
+    /// </summary>
     public interface IMessageSender
     {
         void Send<T>(T msg, int channelId = Channel.Reliable);
@@ -13,6 +16,9 @@ namespace Mirage
         UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable);
     }
 
+    /// <summary>
+    /// An object that can receive messages
+    /// </summary>
     public interface IMessageReceiver
     {
         void RegisterHandler<T>(Action<INetworkConnection, T> handler);
@@ -30,6 +36,9 @@ namespace Mirage
         UniTask ProcessMessagesAsync();
     }
 
+    /// <summary>
+    /// An object that can send nofity messages
+    /// </summary>
     public interface INotifySender
     {
         /// <summary>
@@ -40,6 +49,10 @@ namespace Mirage
         /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
         void SendNotify<T>(T msg, object token, int channelId = Channel.Unreliable);
     }
+
+    /// <summary>
+    /// An object that can receive nofity messages
+    /// </summary>
     public interface INotifyReceiver
     {
         /// <summary>
@@ -54,7 +67,7 @@ namespace Mirage
     }
 
     /// <summary>
-    /// An object that can send and receive messages
+    /// An object that can send and receive messages and notify messages
     /// </summary>
     public interface IMessageHandler : IMessageSender, IMessageReceiver, INotifySender, INotifyReceiver
     {
