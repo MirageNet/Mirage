@@ -228,8 +228,6 @@ namespace Mirage.Weaver
                 method.Is<NetworkConnection>(nameof(NetworkConnection.SendAsync)) ||
                 method.Is<NetworkConnection>(nameof(NetworkConnection.RegisterHandler)) ||
                 method.Is<NetworkConnection>(nameof(NetworkConnection.UnregisterHandler)) ||
-                method.Is<INetworkClient>(nameof(INetworkClient.Send)) ||
-                method.Is<INetworkClient>(nameof(INetworkClient.SendAsync)) ||
                 method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
                 method.Is<NetworkClient>(nameof(NetworkClient.SendAsync)) ||
                 method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
