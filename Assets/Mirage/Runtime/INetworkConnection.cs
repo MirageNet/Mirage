@@ -43,9 +43,9 @@ namespace Mirage
         /// Sends a message, but notify when it is delivered or lost
         /// </summary>
         /// <typeparam name="T">type of message to send</typeparam>
-        /// <param name="msg">message to send</param>
+        /// <param name="message">message to send</param>
         /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
-        void SendNotify<T>(T msg, object token, int channelId = Channel.Unreliable);
+        void SendNotify<T>(T message, object token, int channelId = Channel.Unreliable);
     }
 
     /// <summary>
