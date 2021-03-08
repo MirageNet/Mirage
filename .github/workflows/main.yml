@@ -58,7 +58,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          /dotnet-sonarscanner begin \
+          ./dotnet-sonarscanner begin \
             /o:miragenet \
             /k:MirageNet_Mirage \
             /n:Mirage \
@@ -68,7 +68,7 @@ jobs:
             /d:sonar.cs.nunit.reportsPaths=Tests/editmode-results.xml,Tests/playmode-results.xml \
             /d:sonar.cs.opencover.reportsPaths=Tests/workspace-opencov/EditMode/TestCoverageResults_0000.xml,Tests/workspace-opencov/PlayMode/TestCoverageResults_0000.xml
           $DOTNET_ROOT/dotnet build workspace.sln
-          /dotnet-sonarscanner end /d:sonar.login=$SONAR_TOKEN
+          ./dotnet-sonarscanner end /d:sonar.login=$SONAR_TOKEN
 
       - name: Run editor Tests
         run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
