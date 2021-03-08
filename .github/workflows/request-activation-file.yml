@@ -16,4 +16,9 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
             name: Manual Activation File
-            path: '*.alf'
+            path: Unity_v2020.1.17f1.alf
+
+      - name: Instructions
+        run: |
+          echo "Upload the file to https://license.unity3d.com/manual to get a license"
+
