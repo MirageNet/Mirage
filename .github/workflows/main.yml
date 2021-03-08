@@ -23,6 +23,8 @@ jobs:
       - name: activate unity
         run: |
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
+          pwd
+          ls -ltr
           unity-editor -manualLicenseFile UnityLicenseFile.ulf -quit
 
       - name: Checkout repository
