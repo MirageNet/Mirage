@@ -12,13 +12,13 @@ jobs:
         continue-on-error: true
         run: unity-editor -logFile /dev/stdout -createManualActivationFile -quit 
 
-      - name: Expose as artifact
+      - name: Upload License Request
         uses: actions/upload-artifact@v1
         with:
             name: Manual Activation File
             path: Unity_v2020.1.17f1.alf
 
-      - name: Instructions
+      - name: Next Steps
         run: |
           echo "Upload the file to https://license.unity3d.com/manual to get a license"
           echo "Then save the license in a secret called UNITY_LICENSE"
