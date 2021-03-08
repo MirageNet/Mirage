@@ -29,7 +29,7 @@ namespace Mirage
         public bool DontDestroy = true;
 
         [Header("Events")]
-        
+
         [FormerlySerializedAs("ClientChangeScene")]
         [SerializeField] ClientSceneChangeEvent _clientChangeScene = new ClientSceneChangeEvent();
 
@@ -73,7 +73,7 @@ namespace Mirage
         /// </remarks>
         public string ActiveScenePath => SceneManager.GetActiveScene().path;
 
-        internal AsyncOperation asyncOperation;
+        AsyncOperation asyncOperation;
 
         /// <summary>
         /// Used by the server to track all additive scenes. To notify clients upon connection 

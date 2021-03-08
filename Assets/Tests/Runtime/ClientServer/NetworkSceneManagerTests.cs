@@ -61,31 +61,34 @@ namespace Mirage.Tests.ClientServer
         [UnityTest]
         public IEnumerator ClientSceneMessageInvokeTest() => UniTask.ToCoroutine(async () =>
         {
-            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
-            clientSceneManager.ClientChangeScene.AddListener(func1);
+            int startInvoked = 0;
+            int endInvoked = 0;
+
+            clientSceneManager.ClientChangeScene.AddListener((_, __) => startInvoked++);
+            clientSceneManager.ClientSceneChanged.AddListener((_, __) => endInvoked++);
             clientSceneManager.ClientSceneMessage(null, new SceneMessage { scenePath = "Assets/Mirror/Tests/Runtime/testScene.unity" });
 
-            await AsyncUtil.WaitUntilWithTimeout(() => clientSceneManager.asyncOperation != null);
+            await AsyncUtil.WaitUntilWithTimeout(() => startInvoked == 1);
+
+            // wait 1/2 a second to see if end invokes itself
+            await UniTask.Delay(500);
+            Assert.That(startInvoked == 1, "Start should only be called once");
+            Assert.That(endInvoked == 0, "Should wait for ready before end is called");
 
             clientSceneManager.ClientSceneReadyMessage(connectionToServer, new SceneReadyMessage());
 
-            await AsyncUtil.WaitUntilWithTimeout(() => clientSceneManager.asyncOperation.isDone);
+            await AsyncUtil.WaitUntilWithTimeout(() => endInvoked == 1);
 
             Assert.That(clientSceneManager.ActiveScenePath, Is.EqualTo("Assets/Mirror/Tests/Runtime/testScene.unity"));
 
-            func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+            Assert.That(startInvoked == 1, "Start should only be called once");
+            Assert.That(endInvoked == 1, "End should only be called once");
         });
 
         [Test]
         public void NetworkSceneNameStringValueTest()
         {
             Assert.That(clientSceneManager.ActiveScenePath.Equals(SceneManager.GetActiveScene().path));
-        }
-
-        [Test]
-        public void AsyncOperationInitStateTest()
-        {
-            Assert.That(clientSceneManager.asyncOperation, Is.Null);
         }
 
         [Test]
