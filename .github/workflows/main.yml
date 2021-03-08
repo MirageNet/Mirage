@@ -17,7 +17,7 @@ jobs:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
     container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
     env:
-      DOTNET_ROOT: '/opt/unity/Editor/Data/NetCore/Sdk-2.2.107/'
+      DOTNET_ROOT: '/opt/unity/Editor/Data/NetCore/Sdk-2.2.107'
 
     steps:
       - name: Activate unity
