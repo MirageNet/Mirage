@@ -73,7 +73,7 @@ namespace Mirage
         /// </remarks>
         public string ActiveScenePath => SceneManager.GetActiveScene().path;
 
-        AsyncOperation asyncOperation;
+        AsyncOperation clientLoadingOperation;
 
         /// <summary>
         /// Used by the server to track all additive scenes. To notify clients upon connection 
@@ -157,8 +157,8 @@ namespace Mirage
             logger.Log("ClientSceneReadyMessage");
 
             //Server has finished changing scene. Allow the client to finish.
-            if (asyncOperation != null)
-                asyncOperation.allowSceneActivation = true;
+            if (clientLoadingOperation != null)
+                clientLoadingOperation.allowSceneActivation = true;
         }
 
         internal void ClientNotReadyMessage(INetworkConnection conn, NotReadyMessage msg)
@@ -309,15 +309,15 @@ namespace Mirage
             }
             else
             {
-                asyncOperation = SceneManager.LoadSceneAsync(scenePath);
+                clientLoadingOperation = SceneManager.LoadSceneAsync(scenePath);
 
                 //If non host client. Wait for server to finish scene change
                 if (Client && Client.Active && !Client.IsLocalClient)
                 {
-                    asyncOperation.allowSceneActivation = false;
+                    clientLoadingOperation.allowSceneActivation = false;
                 }
 
-                await asyncOperation;
+                await clientLoadingOperation;
 
                 logger.Assert(scenePath == ActiveScenePath, "Scene being loaded was not the active scene");
                 FinishLoadScene(ActiveScenePath, SceneOperation.Normal);
@@ -333,8 +333,7 @@ namespace Mirage
             }
             else
             {
-                AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
-                await asyncOperation;
+                await SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
                 additiveSceneList.Add(scenePath);
                 FinishLoadScene(scenePath, SceneOperation.LoadAdditive);
             }
