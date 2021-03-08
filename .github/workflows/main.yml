@@ -16,14 +16,18 @@ jobs:
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
     container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
     steps:
+      - name: activate unity
+        run: |
+          echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
+          unity-editor -manualLicenseFile UnityLicenseFile.ulf -quit
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: check unity
-        run: unity-editor -version
-        
       - name: Cache Library
         id: cache-library
         uses: actions/cache@v2
