@@ -221,15 +221,12 @@ namespace Mirage.Weaver
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.GetId)) ||
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.Unpack)) ||
                 method.Is<IMessageSender>(nameof(IMessageSender.Send)) ||
-                method.Is<IMessageSender>(nameof(IMessageSender.SendAsync)) ||
                 method.Is<IMessageSender>(nameof(IMessageReceiver.RegisterHandler)) ||
                 method.Is<IMessageSender>(nameof(IMessageReceiver.UnregisterHandler)) ||
                 method.Is<NetworkConnection>(nameof(NetworkConnection.Send)) ||
-                method.Is<NetworkConnection>(nameof(NetworkConnection.SendAsync)) ||
                 method.Is<NetworkConnection>(nameof(NetworkConnection.RegisterHandler)) ||
                 method.Is<NetworkConnection>(nameof(NetworkConnection.UnregisterHandler)) ||
                 method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
-                method.Is<NetworkClient>(nameof(NetworkClient.SendAsync)) ||
                 method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
                 method.Is<INetworkServer>(nameof(INetworkServer.SendToAll));
         }

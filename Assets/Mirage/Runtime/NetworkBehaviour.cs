@@ -241,7 +241,7 @@ namespace Mirage
                 payload = writer.ToArraySegment()
             };
 
-            Client.SendAsync(message, channelId).Forget();
+            Client.Send(message, channelId);
         }
 
         private void ValidateServerRpc(Type invokeClass, string cmdName, bool requireAuthority)
@@ -284,7 +284,7 @@ namespace Mirage
                 payload = writer.ToArraySegment()
             };
 
-            Client.SendAsync(message, channelId).Forget();
+            Client.Send(message, channelId);
 
             return task;
         }

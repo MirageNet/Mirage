@@ -253,19 +253,14 @@ namespace Mirage
         /// <param name="message"></param>
         /// <param name="channelId"></param>
         /// <returns>True if message was sent.</returns>
-        public UniTask SendAsync<T>(T message, int channelId = Channel.Reliable)
-        {
-            return Connection.SendAsync(message, channelId);
-        }
-
         public void Send<T>(T message, int channelId = Channel.Reliable)
         {
             Connection.Send(message, channelId);
         }
 
-        public UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable)
+        public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
-            return Connection.SendAsync(segment, channelId);
+            Connection.Send(segment, channelId);
         }
 
         internal void Update()
