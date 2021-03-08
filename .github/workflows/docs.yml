@@ -47,7 +47,7 @@ jobs:
       - name: Build Docs
         run: $MONO_HOME/mono docfx/docfx.exe build --logLevel Warning --warningsAsErrors doc/docfx.json
 
-      - name: GitHub Pages
+      - name: Publish docs
         uses: crazy-max/ghaction-github-pages@v2.2.0
         if: github.ref == 'refs/heads/master'
         with:
