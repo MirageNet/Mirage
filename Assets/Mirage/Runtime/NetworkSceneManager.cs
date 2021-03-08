@@ -29,29 +29,34 @@ namespace Mirage
         public bool DontDestroy = true;
 
         [Header("Events")]
+        
         [FormerlySerializedAs("ClientChangeScene")]
         [SerializeField] ClientSceneChangeEvent _clientChangeScene = new ClientSceneChangeEvent();
+
+        [FormerlySerializedAs("ClientSceneChanged")]
+        [SerializeField] ClientSceneChangeEvent _clientSceneChanged = new ClientSceneChangeEvent();
+
+        [FormerlySerializedAs("ServerChangeScene")]
+        [SerializeField] ClientSceneChangeEvent _serverChangeScene = new ClientSceneChangeEvent();
+
+        [FormerlySerializedAs("ServerSceneChanged")]
+        [SerializeField] ClientSceneChangeEvent _serverSceneChanged = new ClientSceneChangeEvent();
+
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
         public ClientSceneChangeEvent ClientChangeScene => _clientChangeScene;
 
-        [FormerlySerializedAs("ClientSceneChanged")]
-        [SerializeField] ClientSceneChangeEvent _clientSceneChanged = new ClientSceneChangeEvent();
         /// <summary>
         /// Event fires after the Client has completed its scene change.
         /// </summary>
         public ClientSceneChangeEvent ClientSceneChanged => _clientSceneChanged;
 
-        [FormerlySerializedAs("ServerChangeScene")]
-        [SerializeField] ClientSceneChangeEvent _serverChangeScene = new ClientSceneChangeEvent();
         /// <summary>
         /// Event fires before Server changes scene.
         /// </summary>
         public ClientSceneChangeEvent ServerChangeScene => _serverChangeScene;
 
-        [FormerlySerializedAs("ServerSceneChanged")]
-        [SerializeField] ClientSceneChangeEvent _serverSceneChanged = new ClientSceneChangeEvent();
         /// <summary>
         /// Event fires after Server has completed scene change.
         /// </summary>
