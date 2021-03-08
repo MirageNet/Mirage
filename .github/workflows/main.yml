@@ -13,16 +13,22 @@ jobs:
   CI:
     name: Test
     runs-on: ubuntu-latest
+    container: unityci/hub
+
     env:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-    if: true
     steps:
-  
+
+      # get the link from https://unity3d.com/get-unity/download/archive
+      - name: Install Unity
+        run: unity-hub install --version 2020.1.17f1 --changeset 9957aee8edc2
+
+      - name: check unity
+        run: unity --version
+        
       # Checkout repository (required to test local actions)
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
         
       - name: Cache Library
         id: cache-library
