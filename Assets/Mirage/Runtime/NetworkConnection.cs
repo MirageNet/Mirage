@@ -221,7 +221,7 @@ namespace Mirage
         // the client. they would be detected as a message. send messages instead.
         public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
-            connection.SendAsync(segment, channelId);
+            connection.Send(segment, channelId);
         }
 
 

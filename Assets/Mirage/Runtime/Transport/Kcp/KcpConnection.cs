@@ -192,14 +192,12 @@ namespace Mirage.KCP
             }
         }
 
-        public UniTask SendAsync(ArraySegment<byte> data, int channel = Channel.Reliable)
+        public void Send(ArraySegment<byte> data, int channel = Channel.Reliable)
         {
             if (channel == Channel.Reliable)
                 kcp.Send(data.Array, data.Offset, data.Count);
             else if (channel == Channel.Unreliable)
                 unreliable.Send(data.Array, data.Offset, data.Count);
-
-            return UniTask.CompletedTask;
         }
 
         /// <summary>
@@ -283,7 +281,7 @@ namespace Mirage.KCP
             {
                 try
                 {
-                    SendAsync(Goodby).Forget();
+                    Send(Goodby);
                     kcp.Flush();
                 }
                 catch (SocketException)
