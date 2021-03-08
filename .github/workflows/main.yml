@@ -41,10 +41,10 @@ jobs:
         run: unity-editor -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
 
       - name: Run editor Tests
-        run: unity-editor -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+        run: unity-editor -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml 
 
       - name: Run play Tests
-        run: unity-editor -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+        run: unity-editor -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml 
 
       - name: Archive test results
         uses: actions/upload-artifact@v1
