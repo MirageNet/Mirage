@@ -39,12 +39,6 @@ jobs:
           path: Library
           key: Library-2020.1.17
 
-      - name: Cache dotnet
-        uses: actions/cache@v2
-        with:
-          path: .store
-          key: dotnet
-          
       - name: Install sonar scanner
         run: |
           $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 4.7.1
