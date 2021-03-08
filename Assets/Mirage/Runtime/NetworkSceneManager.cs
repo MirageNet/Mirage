@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
+using InvalidEnumArgumentException = System.ComponentModel.InvalidEnumArgumentException;
 
 namespace Mirage
 {
@@ -296,7 +297,7 @@ namespace Mirage
                 case SceneOperation.UnloadAdditive: return ApplyUnloadAdditiveOperationAsync(scenePath);
                 default:
                     // Should never happen
-                    throw new ArgumentOutOfRangeException($"Unknown SceneOperation: {sceneOperation}");
+                    throw new InvalidEnumArgumentException(nameof(sceneOperation), (int)sceneOperation, typeof(SceneOperation));
             }
         }
 
