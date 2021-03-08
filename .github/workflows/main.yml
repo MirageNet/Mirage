@@ -25,7 +25,7 @@ jobs:
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
           pwd
           ls -ltr
-          unity-editor -manualLicenseFile UnityLicenseFile.ulf -quit
+          unity-editor -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
 
       - name: Checkout repository
         uses: actions/checkout@v2
