@@ -1,3 +1,22 @@
+# [74.0.0](https://github.com/MirageNet/Mirage/compare/v73.0.0...v74.0.0) (2021-03-08)
+
+
+### Bug Fixes
+
+* invoking started event when Listening is false ([#675](https://github.com/MirageNet/Mirage/issues/675)) ([afef2d4](https://github.com/MirageNet/Mirage/commit/afef2d4a552a348d3bf91703c188bab6c8967b1e))
+
+
+### Code Refactoring
+
+* **transports:** removing sendAsync from transports ([#673](https://github.com/MirageNet/Mirage/issues/673)) ([42b165f](https://github.com/MirageNet/Mirage/commit/42b165ff0b267c67c93407db5c5a36c647301126))
+* removing sendasync from networkconnection ([#672](https://github.com/MirageNet/Mirage/issues/672)) ([e79b00e](https://github.com/MirageNet/Mirage/commit/e79b00eefd77ac8982cf23acf872dbcd3e4e9b31))
+
+
+### BREAKING CHANGES
+
+* **transports:** Removed SendAsync from transport,  use Send instead
+* Removed SendAsync from NetworkConnection.  Use Send instead
+
 # [73.0.0](https://github.com/MirageNet/Mirage/compare/v72.0.1...v73.0.0) (2021-03-06)
 
 
