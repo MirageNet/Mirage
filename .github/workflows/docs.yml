@@ -10,10 +10,10 @@ jobs:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
     container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
     env:
-      MONO_HOME=/opt/unity/Editor/Data/MonoBleedingEdge/bin-linux64
+      MONO_HOME: /opt/unity/Editor/Data/MonoBleedingEdge/bin-linux64
 
     steps:
-
+ß
       - name: Activate unity
         # exit code is 1 for manual activation
         continue-on-error: true
