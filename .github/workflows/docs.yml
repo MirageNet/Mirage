@@ -21,42 +21,42 @@ jobs:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE2 }}
         run: |          
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
-          unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
+          unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit
 
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Cache Library
-      id: cache-library
-      uses: actions/cache@v2
-      with:
-        path: Library
-        key: Library-2020.1.17
+      - name: Cache Library
+        id: cache-library
+        uses: actions/cache@v2
+        with:
+          path: Library
+          key: Library-2020.1.17
 
-    - name: Generate Solution
-      run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
+      - name: Generate Solution
+        run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
 
-    - name: Install docfx
-      run: |
-        apt-get install -y unzip
-        wget https://github.com/dotnet/docfx/releases/download/v2.56.6/docfx.zip
-        unzip docfx.zip -d docfx
+      - name: Install docfx
+        run: |
+          apt-get install -y unzip
+          wget https://github.com/dotnet/docfx/releases/download/v2.56.6/docfx.zip
+          unzip docfx.zip -d docfx
 
-    - name: Generate API
-      run: $MONO_HOME/mono docfx/docfx.exe metadata --logLevel Warning --warningsAsErrors doc/docfx.json
+      - name: Generate API
+        run: $MONO_HOME/mono docfx/docfx.exe metadata --logLevel Warning --warningsAsErrors doc/docfx.json
 
-    - name: Build Docs
-      run: $MONO_HOME/mono docfx/docfx.exe build --logLevel Warning --warningsAsErrors doc/docfx.json
+      - name: Build Docs
+        run: $MONO_HOME/mono docfx/docfx.exe build --logLevel Warning --warningsAsErrors doc/docfx.json
 
-    - name: GitHub Pages
-      uses: crazy-max/ghaction-github-pages@v2.2.0
-      if: github.ref == 'refs/heads/master'
-      with:
-        # Create incremental commit instead of doing push force
-        keep_history: true
-        # Allow an empty commit to be created
-        allow_empty_commit: true
-        jekyll: false
-        # Build directory to deploy
-        build_dir: doc/_site
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: GitHub Pages
+        uses: crazy-max/ghaction-github-pages@v2.2.0
+        if: github.ref == 'refs/heads/master'
+        with:
+          # Create incremental commit instead of doing push force
+          keep_history: true
+          # Allow an empty commit to be created
+          allow_empty_commit: true
+          jekyll: false
+          # Build directory to deploy
+          build_dir: doc/_site
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
