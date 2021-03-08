@@ -13,18 +13,16 @@ jobs:
   CI:
     name: Test
     runs-on: ubuntu-latest
-    container: unityci/hub
+    # available list of containers here:
+    # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
+    container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
 
     env:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
     steps:
 
-      # get the link from https://unity3d.com/get-unity/download/archive
-      - name: Install Unity
-        run: unity-hub install --version 2020.1.17f1 --changeset 9957aee8edc2
-
       - name: check unity
-        run: unity --version
+        run: unity-editor help
 
       # Checkout repository (required to test local actions)
       - name: Checkout repository
