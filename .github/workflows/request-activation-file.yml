@@ -21,4 +21,5 @@ jobs:
       - name: Instructions
         run: |
           echo "Upload the file to https://license.unity3d.com/manual to get a license"
+          echo "Then save the license in a secret called UNITY_LICENSE"
 
