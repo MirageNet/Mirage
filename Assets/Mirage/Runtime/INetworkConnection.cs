@@ -11,9 +11,7 @@ namespace Mirage
     {
         void Send<T>(T msg, int channelId = Channel.Reliable);
 
-        UniTask SendAsync<T>(T msg, int channelId = Channel.Reliable);
-
-        UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable);
+        void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable);
     }
 
     /// <summary>

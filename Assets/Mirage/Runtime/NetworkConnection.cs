@@ -179,18 +179,6 @@ namespace Mirage
             messageHandlers.Clear();
         }
 
-        /// <summary>
-        /// This sends a network message to the connection.
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="msg">The message to send</param>
-        /// <param name="channelId">The transport layer channel to send on.</param>
-        /// <returns></returns>
-        public virtual void Send<T>(T msg, int channelId = Channel.Reliable)
-        {
-            SendAsync(msg, channelId).Forget();
-        }
-
         public static void Send<T>(IEnumerable<INetworkConnection> connections, T msg, int channelId = Channel.Reliable)
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -203,7 +191,7 @@ namespace Mirage
                 foreach (INetworkConnection conn in connections)
                 {
                     // send to all connections, but don't wait for them
-                    conn.SendAsync(segment, channelId).Forget();
+                    conn.Send(segment, channelId);
                     count++;
                 }
 
@@ -212,28 +200,28 @@ namespace Mirage
         }
 
         /// <summary>
-        /// This sends a network message to the connection. You can await it to check for errors
+        /// This sends a network message to the connection.
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="msg">The message to send.</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
         /// <returns></returns>
-        public virtual UniTask SendAsync<T>(T msg, int channelId = Channel.Reliable)
+        public virtual void Send<T>(T msg, int channelId = Channel.Reliable)
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 // pack message and send allocation free
                 MessagePacker.Pack(msg, writer);
                 NetworkDiagnostics.OnSend(msg, channelId, writer.Length, 1);
-                return SendAsync(writer.ToArraySegment(), channelId);
+                Send(writer.ToArraySegment(), channelId);
             }
         }
 
         // internal because no one except Mirage should send bytes directly to
         // the client. they would be detected as a message. send messages instead.
-        public UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable)
+        public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
-            return connection.SendAsync(segment, channelId);
+            connection.SendAsync(segment, channelId);
         }
 
 
@@ -429,7 +417,7 @@ namespace Mirage
                 MessagePacker.Pack(notifyPacket, writer);
                 MessagePacker.Pack(msg, writer);
                 NetworkDiagnostics.OnSend(msg, channelId, writer.Length, 1);
-                SendAsync(writer.ToArraySegment(), channelId).Forget();
+                Send(writer.ToArraySegment(), channelId);
                 lastNotifySentTime = Time.unscaledTime;
             }
 
