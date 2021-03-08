@@ -50,6 +50,38 @@ jobs:
           $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 4.7.1
           apt-get install -y default-jre
 
+      - name: Run editor Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+
+      - name: Run play Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: Test results
+          path: Tests
+
+      - name: Publish test results
+        uses: MirageNet/nunit-reporter@v1.0.9
+        if: always()
+        with:
+          path: "Tests/*.xml"
+          access-token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Release
+        uses: cycjimmy/semantic-release-action@v2
+        id: semantic
+        with:
+          extra_plugins: |
+            @semantic-release/exec
+            @semantic-release/changelog
+            @semantic-release/git
+          branch: master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
 
@@ -72,26 +104,5 @@ jobs:
             /d:sonar.cs.opencover.reportsPaths=Tests/workspace-opencov/EditMode/TestCoverageResults_0000.xml,Tests/workspace-opencov/PlayMode/TestCoverageResults_0000.xml
           $DOTNET_ROOT/dotnet build Mirage.sln
           ./dotnet-sonarscanner end /d:sonar.login=$SONAR_TOKEN
-
-      - name: Run editor Tests
-        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
-
-      - name: Run play Tests
-        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
-
-      - name: Archive test results
-        uses: actions/upload-artifact@v1
-        if: always()
-        with:
-          name: Test results
-          path: Tests
-
-      - name: Publish test results
-        uses: MirageNet/nunit-reporter@v1.0.9
-        if: always()
-        with:
-          path: "Tests/*.xml"
-          access-token: ${{ secrets.GITHUB_TOKEN }}
-
 
             
