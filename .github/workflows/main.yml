@@ -18,15 +18,18 @@ jobs:
     container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
 
     steps:
-      - name: activate unity
+
+      - name: Install dependencies
+        run: apt-get install -y libnotify4
+
+      - name: Activate unity
         # exit code is 1 for manual activation
         continue-on-error: true
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE2 }}
-        run: |
-          apt-get install -y libnotify4
+        run: |          
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
-          unity-editor -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
+          unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
       
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -39,10 +42,10 @@ jobs:
           key: Library-2020.1.17
 
       - name: Run editor Tests
-        run: unity-editor -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
 
       - name: Run play Tests
-        run: unity-editor -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
 
       - name: Archive test results
         uses: actions/upload-artifact@v1
@@ -59,4 +62,4 @@ jobs:
           access-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Solution
-        run: unity-editor -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
+        run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
