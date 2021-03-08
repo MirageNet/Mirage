@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: check unity
-        run: unity-editor help
+        run: unity-editor -version
         
       - name: Cache Library
         id: cache-library
