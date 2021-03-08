@@ -13,7 +13,7 @@ jobs:
       MONO_HOME: /opt/unity/Editor/Data/MonoBleedingEdge/bin-linux64
 
     steps:
-ß
+
       - name: Activate unity
         # exit code is 1 for manual activation
         continue-on-error: true
