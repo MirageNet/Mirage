@@ -123,10 +123,10 @@ namespace Mirage
             }
             if (string.IsNullOrEmpty(msg.scenePath))
             {
-                throw new ArgumentNullException(msg.scenePath, "ClientSceneMessage: " + msg.scenePath + " cannot be empty or null");
+                throw new ArgumentNullException(nameof(msg.scenePath), $"ClientSceneMessage: {nameof(msg.scenePath)} cannot be empty or null");
             }
 
-            if (logger.LogEnabled()) logger.Log("ClientSceneMessage: changing scenes from: " + ActiveScenePath + " to:" + msg.scenePath);
+            if (logger.LogEnabled()) logger.Log($"ClientSceneMessage: changing scenes from: {ActiveScenePath} to: {msg.scenePath}");
 
             // Let client prepare for scene change
             OnClientChangeScene(msg.scenePath, msg.sceneOperation);
