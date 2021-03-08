@@ -25,7 +25,7 @@ jobs:
 
       - name: check unity
         run: unity --version
-        
+
       # Checkout repository (required to test local actions)
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -37,71 +37,4 @@ jobs:
           path: Library
           key: Library
           
-      - name: Activate license
-        uses: MirageNet/unity-runner@3.1.0
-        with:
-          entrypoint: /activate.sh
-          
-      - name: Generate Solution
-        uses: MirageNet/unity-runner@3.1.0
-        with:
-          # Arguments to pass to unity
-          args: -buildTarget StandaloneWindows64 -customBuildName Mirage -customBuildPath ./build/StandaloneWindows64 -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
-  
-      # Configure test runner
-      - name: Run editor Tests
-        uses: MirageNet/unity-runner@3.1.0
-        with:
-          args: -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
-
-      - name: Run play Tests
-        uses: MirageNet/unity-runner@3.1.0
-        with:
-          args: -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
-          
-      # Upload artifacts
-      - name: Archive test results
-        uses: actions/upload-artifact@v1
-        if: always()
-        with:
-          name: Test results
-          path: Tests
-
-      - name: Publish test results
-        uses: MirageNet/nunit-reporter@v1.0.9
-        if: always()
-        with:
-          path: "Tests/*.xml"
-          access-token: ${{ secrets.GITHUB_TOKEN }}
-  
-      - name: Release
-        uses: cycjimmy/semantic-release-action@v2
-        id: semantic
-        with:
-          extra_plugins: |
-            @semantic-release/exec
-            @semantic-release/changelog
-            @semantic-release/git
-          branch: master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
-      - name: SonarQube analysis
-        if: always()
-        uses: MirageNet/unity-runner@3.1.0
-        with:
-          entrypoint: /sonar-scanner.sh
-          projectKey: MirageNet_Mirage
-          projectName: Mirage
-          sonarOrganisation: miragenet
-          beginArguments: >-
-            /d:sonar.verbose="false" 
-            ${{ steps.semantic.outputs.new_release_published == 'true' && format('/v:{0}',steps.semantic.outputs.new_release_version) || '' }}
-            /d:sonar.cs.nunit.reportsPaths=Tests/editmode-results.xml,Tests/playmode-results.xml 
-            /d:sonar.cs.opencover.reportsPaths=Tests/workspace-opencov/EditMode/TestCoverageResults_0000.xml,Tests/workspace-opencov/PlayMode/TestCoverageResults_0000.xml
-        env:
-          FrameworkPathOverride: /opt/Unity/Editor/Data/MonoBleedingEdge/
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   
