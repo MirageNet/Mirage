@@ -21,6 +21,8 @@ jobs:
 
     steps:
       - name: activate unity
+        # exit code is 1 for manual activation
+        continue-on-error: true
         run: |
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
           unity-editor -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
