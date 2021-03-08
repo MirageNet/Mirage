@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: Library
-          key: Library
+          key: Library-2020.1.17
 
       - name: Generate Solution
         run: unity-editor -buildTarget StandaloneWindows64 -customBuildName Mirage -customBuildPath ./build/StandaloneWindows64 -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
