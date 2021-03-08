@@ -16,11 +16,10 @@ jobs:
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
     container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
+    env:
+      DOTNET_ROOT=/opt/unity/Editor/Data/NetCore/Sdk-2.2.107/
 
     steps:
-
-      - name: Install dependencies
-        run: apt-get install -y libnotify4
 
       - name: Activate unity
         # exit code is 1 for manual activation
@@ -40,6 +39,31 @@ jobs:
         with:
           path: Library
           key: Library-2020.1.17
+
+      - name: Generate Solution
+        run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
+
+      - name: Install sonar scanner
+        run: |
+          $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 4.7.1
+
+      - name: SonarQube analysis
+        env:
+          FrameworkPathOverride: /opt/unity/Editor/Data/MonoBleedingEdge/
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          /dotnet-sonarscanner begin \
+            /o:miragenet \
+            /k:MirageNet_Mirage \
+            /n:Mirage \
+            /d:sonar.verbose=false \
+            /d:sonar.login=$SONAR_TOKEN \
+            ${{ steps.semantic.outputs.new_release_published == 'true' && format('/v:{0}',steps.semantic.outputs.new_release_version) || '' }} \
+            /d:sonar.cs.nunit.reportsPaths=Tests/editmode-results.xml,Tests/playmode-results.xml \
+            /d:sonar.cs.opencover.reportsPaths=Tests/workspace-opencov/EditMode/TestCoverageResults_0000.xml,Tests/workspace-opencov/PlayMode/TestCoverageResults_0000.xml
+          $DOTNET_ROOT/dotnet build workspace.sln
+          /dotnet-sonarscanner end /d:sonar.login=$SONAR_TOKEN
 
       - name: Run editor Tests
         run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
@@ -61,5 +85,5 @@ jobs:
           path: "Tests/*.xml"
           access-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate Solution
-        run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
+
+            
