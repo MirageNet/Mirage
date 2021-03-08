@@ -58,6 +58,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          ls -l
           ./dotnet-sonarscanner begin \
             /o:miragenet \
             /k:MirageNet_Mirage \
@@ -68,7 +69,7 @@ jobs:
             ${{ steps.semantic.outputs.new_release_published == 'true' && format('/v:{0}',steps.semantic.outputs.new_release_version) || '' }} \
             /d:sonar.cs.nunit.reportsPaths=Tests/editmode-results.xml,Tests/playmode-results.xml \
             /d:sonar.cs.opencover.reportsPaths=Tests/workspace-opencov/EditMode/TestCoverageResults_0000.xml,Tests/workspace-opencov/PlayMode/TestCoverageResults_0000.xml
-          $DOTNET_ROOT/dotnet build workspace.sln
+          $DOTNET_ROOT/dotnet build Mirage.sln
           ./dotnet-sonarscanner end /d:sonar.login=$SONAR_TOKEN
 
       - name: Run editor Tests
