@@ -204,6 +204,11 @@ namespace Mirage
                     Transport.Connected.AddListener(TransportConnected);
                     await Transport.ListenAsync();
                 }
+                else
+                {
+                    // if not listening then call started events right away
+                    NotListeningStarted();
+                }
             }
             catch (Exception ex)
             {
@@ -215,6 +220,14 @@ namespace Mirage
                 Transport.Started.RemoveListener(TransportStarted);
                 Cleanup();
             }
+        }
+
+        private void NotListeningStarted()
+        {
+            logger.Log("Server started but not Listening");
+            Active = true;
+            // (useful for loading & spawning stuff from database etc.)
+            Started?.Invoke();
         }
 
         private void TransportStarted()
