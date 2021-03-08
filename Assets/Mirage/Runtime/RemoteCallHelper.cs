@@ -13,6 +13,9 @@ namespace Mirage.RemoteCalls
     public delegate void CmdDelegate(NetworkBehaviour obj, NetworkReader reader, INetworkConnection senderConnection, int replyId);
     public delegate UniTask<T> RequestDelegate<T>(NetworkBehaviour obj, NetworkReader reader, INetworkConnection senderConnection, int replyId);
 
+    /// <summary>
+    /// Stub Skeleton for RPC
+    /// </summary>
     class Skeleton
     {
         public Type invokeClass;
@@ -27,7 +30,6 @@ namespace Mirage.RemoteCalls
                     this.invokeFunction == invokeFunction;
         }
 
-        // InvokeCmd/Rpc can all use the same function here
         internal void Invoke(NetworkReader reader, NetworkBehaviour invokingType, INetworkConnection senderConnection = null, int replyId = 0)
         {
             if (invokeClass.IsInstanceOfType(invokingType))
