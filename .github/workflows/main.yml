@@ -48,6 +48,7 @@ jobs:
       - name: Install sonar scanner
         run: |
           $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 4.7.1
+          apt-get install -y default-jre
 
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
