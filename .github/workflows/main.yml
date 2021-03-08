@@ -24,6 +24,7 @@ jobs:
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE2 }}
         run: |
+          apt-get install -y libnotify4
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
           unity-editor -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
       
