@@ -70,9 +70,14 @@ namespace Mirage
 
         internal AsyncOperation asyncOperation;
 
-        //Used by the server to track all additive scenes. To notify clients upon connection
+        /// <summary>
+        /// Used by the server to track all additive scenes. To notify clients upon connection 
+        /// </summary>
         internal List<string> additiveSceneList = new List<string>();
-        //Used by the client to load the full additive scene list that the server has upon connection
+
+        /// <summary>
+        /// Used by the client to load the full additive scene list that the server has upon connection
+        /// </summary>
         internal List<string> pendingAdditiveSceneList = new List<string>();
 
         public void Start()
