@@ -6,18 +6,16 @@ on:
 jobs:
   requestActivationFile:
     runs-on: ubuntu-latest
+    container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Request manual activation file
-        uses: MirageNet/unity-runner@3.1.0
-        id: getManualLicenseFile
-        with:
-            entrypoint: /request_activation.sh
+        run: unity-editor -logFile /dev/stdout -createManualActivationFile -quit 
 
       - name: Expose as artifact
         uses: actions/upload-artifact@v1
         with:
             name: Manual Activation File
-            path: ${{ steps.getManualLicenseFile.outputs.filePath }}
+            path: *.alf
