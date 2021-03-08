@@ -5,9 +5,21 @@ using Cysharp.Threading.Tasks;
 namespace Mirage
 {
     /// <summary>
-    /// An object that can send and receive messages
+    /// An object that can send messages
     /// </summary>
-    public interface IMessageHandler
+    public interface IMessageSender
+    {
+        void Send<T>(T msg, int channelId = Channel.Reliable);
+
+        UniTask SendAsync<T>(T msg, int channelId = Channel.Reliable);
+
+        UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable);
+    }
+
+    /// <summary>
+    /// An object that can receive messages
+    /// </summary>
+    public interface IMessageReceiver
     {
         void RegisterHandler<T>(Action<INetworkConnection, T> handler);
 
@@ -17,14 +29,18 @@ namespace Mirage
 
         void ClearHandlers();
 
-        void Send<T>(T msg, int channelId = Channel.Reliable);
-
-        UniTask SendAsync<T>(T msg, int channelId = Channel.Reliable);
-
-        UniTask SendAsync(ArraySegment<byte> segment, int channelId = Channel.Reliable);
-
+        /// <summary>
+        /// ProcessMessages loop, should loop unitil object is closed
+        /// </summary>
+        /// <returns></returns>
         UniTask ProcessMessagesAsync();
+    }
 
+    /// <summary>
+    /// An object that can send notify messages
+    /// </summary>
+    public interface INotifySender
+    {
         /// <summary>
         /// Sends a message, but notify when it is delivered or lost
         /// </summary>
@@ -32,7 +48,13 @@ namespace Mirage
         /// <param name="msg">message to send</param>
         /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
         void SendNotify<T>(T msg, object token, int channelId = Channel.Unreliable);
+    }
 
+    /// <summary>
+    /// An object that can receive notify messages
+    /// </summary>
+    public interface INotifyReceiver
+    {
         /// <summary>
         /// Raised when a message is delivered
         /// </summary>
@@ -42,6 +64,14 @@ namespace Mirage
         /// Raised when a message is lost
         /// </summary>
         event Action<INetworkConnection, object> NotifyLost;
+    }
+
+    /// <summary>
+    /// An object that can send and receive messages and notify messages
+    /// </summary>
+    public interface IMessageHandler : IMessageSender, IMessageReceiver, INotifySender, INotifyReceiver
+    {
+
     }
 
     /// <summary>
