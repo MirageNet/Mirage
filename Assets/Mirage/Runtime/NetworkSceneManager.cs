@@ -330,7 +330,6 @@ namespace Mirage
             if (SceneManager.GetSceneByPath(scenePath).IsValid())
             {
                 logger.LogWarning($"Scene {scenePath} is already loaded");
-                return;
             }
             else
             {
