@@ -295,8 +295,8 @@ namespace Mirage
                 case SceneOperation.LoadAdditive: return ApplyAdditiveLoadOperationAsync(scenePath);
                 case SceneOperation.UnloadAdditive: return ApplyUnloadAdditiveOperationAsync(scenePath);
                 default:
-                    // todo should we throw here instead? this should only happen if SceneOperation in message has been changed
-                    return UniTask.CompletedTask;
+                    // Should never happen
+                    throw new ArgumentOutOfRangeException($"Unknown SceneOperation: {sceneOperation}");
             }
         }
 
