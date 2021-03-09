@@ -11,7 +11,6 @@ jobs:
     container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
 
     steps:
-
       - name: Activate unity
         # exit code is 1 for manual activation
         continue-on-error: true
