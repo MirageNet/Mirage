@@ -33,9 +33,6 @@ jobs:
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
 
-      - name: Install sudo
-        run: apt-get install -y sudo
-        
       - name: Install docfx
         uses: MirageNet/setup-docfx@v1
 
