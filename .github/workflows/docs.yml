@@ -37,7 +37,7 @@ jobs:
         run: apt-get install -y sudo
         
       - name: Install docfx
-        uses: MirageNet/setup-docfx
+        uses: MirageNet/setup-docfx@v1
 
       - name: Generate API
         run: docfx metadata --logLevel Warning --warningsAsErrors doc/docfx.json
