@@ -34,7 +34,7 @@ jobs:
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
 
       - name: Install docfx
-        uses: MirageNet/setup-docfx
+        uses: MirageNet/setup-docfx@v1
 
       - name: Generate API
         run: docfx metadata --logLevel Warning --warningsAsErrors doc/docfx.json
