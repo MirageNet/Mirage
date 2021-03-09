@@ -49,6 +49,12 @@ namespace Mirage
             if (!condition)
                 logger.Log(LogType.Assert, message);
         }
+        [System.Diagnostics.Conditional("UNITY_ASSERTIONS")]
+        public static void Assert(this ILogger logger, bool condition)
+        {
+            if (!condition)
+                logger.Log(LogType.Assert, "Failed Assertion");
+        }
 
         public static void LogWarning(this ILogger logger, object message)
         {
