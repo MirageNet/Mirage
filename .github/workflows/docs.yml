@@ -9,8 +9,6 @@ jobs:
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
     container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
-    env:
-      MONO_HOME: /opt/unity/Editor/Data/MonoBleedingEdge/bin-linux64
 
     steps:
 
@@ -35,17 +33,20 @@ jobs:
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
 
+      - name: Install mono
+        uses: MirageNet/setup-mono
+
       - name: Install docfx
         run: |
-          apt-get install -y unzip
+          apt install -y unzip
           wget https://github.com/dotnet/docfx/releases/download/v2.56.6/docfx.zip
           unzip docfx.zip -d docfx
 
       - name: Generate API
-        run: $MONO_HOME/mono docfx/docfx.exe metadata --logLevel Warning --warningsAsErrors doc/docfx.json
+        run: mono docfx/docfx.exe metadata --logLevel Warning --warningsAsErrors doc/docfx.json
 
       - name: Build Docs
-        run: $MONO_HOME/mono docfx/docfx.exe build --logLevel Warning --warningsAsErrors doc/docfx.json
+        run: mono docfx/docfx.exe build --logLevel Warning --warningsAsErrors doc/docfx.json
 
       - name: Publish docs
         uses: crazy-max/ghaction-github-pages@v2.2.0
