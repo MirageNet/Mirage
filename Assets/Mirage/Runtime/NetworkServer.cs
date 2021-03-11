@@ -4,6 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Mirage.SocketLayer;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
@@ -39,7 +40,8 @@ namespace Mirage
         public bool Listening = true;
 
         // transport to use to accept connections
-        public Transport Transport;
+        public Peer peer;
+        public TransportV2 socketCreator;
 
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
@@ -152,8 +154,7 @@ namespace Mirage
             {
                 player.Connection?.Disconnect();
             }
-            if (Transport != null)
-                Transport.Disconnect();
+            peer?.Close();
         }
 
         void Initialize()
@@ -170,10 +171,21 @@ namespace Mirage
             //Make sure connections are cleared in case any old connections references exist from previous sessions
             Players.Clear();
 
-            if (Transport is null)
-                Transport = GetComponent<Transport>();
-            if (Transport == null)
+            if (socketCreator is null)
+                socketCreator = GetComponent<TransportV2>();
+            if (socketCreator == null)
                 throw new InvalidOperationException("Transport could not be found for NetworkServer");
+
+            ISocket socket = socketCreator.CreateServerSocket();
+            peer = new Peer(socket, new Config
+            {
+                MaxConnections = MaxConnections,
+                // todo expose these setting
+                MaxConnectAttempts = 10,
+                ConnectAttemptInterval = 2,
+                DisconnectTimeout = 30,
+                KeepAliveInterval = 10,
+            });
 
             if (authenticator != null)
             {
@@ -193,7 +205,7 @@ namespace Mirage
         /// </summary>
         /// <param name="maxConns">Maximum number of allowed connections</param>
         /// <returns></returns>
-        public async UniTask ListenAsync()
+        public void Listen()
         {
             Initialize();
 
@@ -202,15 +214,19 @@ namespace Mirage
                 // only start server if we want to listen
                 if (Listening)
                 {
-                    Transport.Started.AddListener(TransportStarted);
-                    Transport.Connected.AddListener(TransportConnected);
-                    await Transport.ListenAsync();
+                    Started.Invoke();
+                    peer.OnConnected += TransportConnected;
+                    peer.Bind(socketCreator.GetBindEndPoint());
                 }
                 else
                 {
                     // if not listening then call started events right away
                     NotListeningStarted();
                 }
+
+                Active = true;
+                // (useful for loading & spawning stuff from database etc.)
+                Started?.Invoke();
             }
             catch (Exception ex)
             {
@@ -218,29 +234,23 @@ namespace Mirage
             }
             finally
             {
-                Transport.Connected.RemoveListener(TransportConnected);
-                Transport.Started.RemoveListener(TransportStarted);
                 Cleanup();
+                // clear reference to peer, we can create new instance each time we start
+                peer = null;
             }
         }
 
         private void NotListeningStarted()
         {
             logger.Log("Server started but not Listening");
-            Active = true;
-            // (useful for loading & spawning stuff from database etc.)
-            Started?.Invoke();
         }
 
         private void TransportStarted()
         {
             logger.Log("Server started listening");
-            Active = true;
-            // (useful for loading & spawning stuff from database etc.)
-            Started?.Invoke();
         }
 
-        private void TransportConnected(IConnection connection)
+        private void TransportConnected(Connection connection)
         {
             INetworkPlayer networkConnectionToClient = GetNewPlayer(connection);
             ConnectionAcceptedAsync(networkConnectionToClient).Forget();
@@ -250,13 +260,13 @@ namespace Mirage
         /// This starts a network "host" - a server and client in the same application.
         /// <para>The client returned from StartHost() is a special "local" client that communicates to the in-process server using a message queue instead of the real network. But in almost all other cases, it can be treated as a normal client.</para>
         /// </summary>
-        public UniTask StartHost(NetworkClient client)
+        public void StartHost(NetworkClient client)
         {
             if (!client)
                 throw new InvalidOperationException("NetworkClient not assigned. Unable to StartHost()");
 
             // start listening to network connections
-            UniTask task = ListenAsync();
+            Listen();
 
             Active = true;
 
@@ -268,7 +278,6 @@ namespace Mirage
             OnStartHost?.Invoke();
 
             logger.Log("NetworkServer StartHost");
-            return task;
         }
 
         /// <summary>
@@ -304,7 +313,7 @@ namespace Mirage
         /// <summary>
         /// Creates a new INetworkConnection based on the provided IConnection.
         /// </summary>
-        public virtual INetworkPlayer GetNewPlayer(IConnection connection)
+        public virtual INetworkPlayer GetNewPlayer(Connection connection)
         {
             return new NetworkPlayer(connection);
         }
@@ -346,12 +355,14 @@ namespace Mirage
                 throw new InvalidOperationException("Local Connection already exists");
             }
 
-            INetworkPlayer player = GetNewPlayer(tconn);
-            LocalPlayer = player;
-            LocalClient = client;
+            // todo work out how to handle local connection
+            throw new NotImplementedException();
 
-            ConnectionAcceptedAsync(player).Forget();
+            // INetworkPlayer player = GetNewPlayer(tconn);
+            // LocalPlayer = player;
+            // LocalClient = client;
 
+            // ConnectionAcceptedAsync(player).Forget();
         }
 
         /// <summary>
