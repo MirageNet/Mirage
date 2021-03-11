@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using InvalidEnumArgumentException = System.ComponentModel.InvalidEnumArgumentException;
 
 namespace Mirage.Tests.ClientServer
 {
@@ -84,6 +85,29 @@ namespace Mirage.Tests.ClientServer
             Assert.That(startInvoked == 1, "Start should only be called once");
             Assert.That(endInvoked == 1, "End should only be called once");
         });
+
+        [Test]
+        public void ClientSceneMessageThrowsIfInvalidSceneOperation()
+        {
+            int startInvoked = 0;
+            int endInvoked = 0;
+
+            clientSceneManager.ClientChangeScene.AddListener((_, __) => startInvoked++);
+            clientSceneManager.ClientSceneChanged.AddListener((_, __) => endInvoked++);
+
+            var invalidOperation = (SceneOperation)10;
+            InvalidEnumArgumentException exception = Assert.Throws<InvalidEnumArgumentException>(() =>
+            {
+                clientSceneManager.ClientSceneMessage(null, new SceneMessage
+                {
+                    scenePath = "Assets/Mirror/Tests/Runtime/testScene.unity",
+                    sceneOperation = invalidOperation
+                });
+            });
+
+            string message = new InvalidEnumArgumentException("sceneOperation", 10, typeof(SceneOperation)).Message;
+            Assert.That(exception, Has.Message.EqualTo(message));
+        }
 
         [Test]
         public void NetworkSceneNameStringValueTest()
