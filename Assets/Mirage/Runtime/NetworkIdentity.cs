@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Security.Cryptography;
 using Mirage.RemoteCalls;
 using UnityEngine;
@@ -573,7 +572,6 @@ namespace Mirage
         //    if no scene is in build settings then Editor and Build have
         //    different indices too (Editor=0, Build=-1)
         // => ONLY USE THIS FROM POSTPROCESSSCENE!
-        [EditorBrowsable(EditorBrowsableState.Never)]
         public void SetSceneIdSceneHashPartInternal()
         {
             // get deterministic scene hash

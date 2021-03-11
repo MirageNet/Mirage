@@ -1,12 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using JetBrains.Annotations;
 
 namespace Mirage
 {
-    [EditorBrowsable(EditorBrowsableState.Never)]
     public class SyncIDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISyncObject, IReadOnlyDictionary<TKey, TValue>
     {
         protected readonly IDictionary<TKey, TValue> objects;

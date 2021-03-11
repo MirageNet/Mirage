@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using Cysharp.Threading.Tasks;
 using Mirage.RemoteCalls;
 using UnityEngine;
@@ -225,7 +224,6 @@ namespace Mirage
         }
 
         #region ServerRpcs
-        [EditorBrowsable(EditorBrowsableState.Never)]
         protected internal void SendServerRpcInternal(Type invokeClass, string cmdName, NetworkWriter writer, int channelId, bool requireAuthority = true)
         {
             ValidateServerRpc(invokeClass, cmdName, requireAuthority);
@@ -292,7 +290,6 @@ namespace Mirage
         #endregion
 
         #region Client RPCs
-        [EditorBrowsable(EditorBrowsableState.Never)]
         protected internal void SendRpcInternal(Type invokeClass, string rpcName, NetworkWriter writer, int channelId, bool excludeOwner)
         {
             // this was in Weaver before
@@ -324,7 +321,6 @@ namespace Mirage
             NetIdentity.SendToObservers(message, includeOwner, channelId);
         }
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
         protected internal void SendTargetRpcInternal(INetworkConnection conn, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
         {
             // this was in Weaver before
@@ -363,7 +359,6 @@ namespace Mirage
 
         #region Helpers
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
         protected internal bool SyncVarEqual<T>(T value, T fieldValue)
         {
             // newly initialized or changed value?
