@@ -101,6 +101,28 @@ namespace Mirage.SocketLayer
             keepAliveTracker.SetSendTime();
         }
 
+        public void SendReliable(ArraySegment<byte> segment) => peer.SendReliable(this);
+        public void SendUnreiable(ArraySegment<byte> segment) => peer.SendUnreliable(this);
+        public void SendNotifiy() => peer.SendNotify(this);
+
+
+        public void AddPlayer(IPlayer player)
+        {
+            players.Add(player);
+        }
+        public void DisconnectPlayer(IPlayer player)
+        {
+            players.Remove(player);
+            if (players.Count == 0)
+            {
+                Disconnect();
+            }
+        }
+
+        internal void Disconnect()
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// client connecting attempts
