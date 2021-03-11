@@ -172,8 +172,7 @@ namespace Mirage.SocketLayer
                 case PacketType.Unreliable:
                 case PacketType.Notify:
                     // todo are these handled differently?
-                    IMessageReceiver receiver = getReceiver(connection);
-                    receiver.TransportReceive(packet.ToSegment());
+                    connection.ReceivePacket(packet);
                     break;
                 case PacketType.KeepAlive:
                     // do nothing
@@ -185,12 +184,6 @@ namespace Mirage.SocketLayer
 
             connection.SetReceiveTime();
         }
-
-        private IMessageReceiver getReceiver(Connection connection)
-        {
-            throw new NotImplementedException();
-        }
-
 
         private void HandleCommand(Connection connection, Packet packet)
         {
@@ -400,7 +393,8 @@ namespace Mirage.SocketLayer
 
         public ArraySegment<byte> ToSegment()
         {
-            return new ArraySegment<byte>(data, 0, length);
+            // ingore packet type
+            return new ArraySegment<byte>(data, 1, length);
         }
     }
 

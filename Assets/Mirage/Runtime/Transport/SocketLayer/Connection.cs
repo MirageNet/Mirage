@@ -23,6 +23,12 @@ namespace Mirage.SocketLayer
         Destroyed = 10,
     }
 
+    public interface IPlayer
+    {
+        // todo move this to different interface
+        void Receive(ArraySegment<byte> segment);
+    }
+
     public sealed class Connection
     {
         static readonly ILogger logger = LogFactory.GetLogger<Connection>();
@@ -123,6 +129,17 @@ namespace Mirage.SocketLayer
         {
             throw new NotImplementedException();
         }
+
+        internal void ReceivePacket(Packet packet)
+        {
+            ArraySegment<byte> segment = packet.ToSegment();
+            foreach (IPlayer player in players)
+            {
+                // todo move this from player to something else
+                player.Receive(segment);
+            }
+        }
+
 
         /// <summary>
         /// client connecting attempts
