@@ -211,8 +211,8 @@ namespace Mirage
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 // pack message and send allocation free
-                MessagePacker.Pack(msg, writer);
-                NetworkDiagnostics.OnSend(msg, channelId, writer.Length, 1);
+                MessagePacker.Pack(message, writer);
+                NetworkDiagnostics.OnSend(message, channelId, writer.Length, 1);
                 Send(writer.ToArraySegment(), channelId);
             }
         }
