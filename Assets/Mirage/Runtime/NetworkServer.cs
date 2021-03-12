@@ -148,7 +148,7 @@ namespace Mirage
             var connectionscopy = new HashSet<INetworkPlayer>(connections);
             foreach (INetworkPlayer conn in connectionscopy)
             {
-                conn.Disconnect();
+                conn.Connection?.Disconnect();
             }
             if (Transport != null)
                 Transport.Disconnect();
@@ -375,7 +375,7 @@ namespace Mirage
             //  Transport can't do that)
             if (connections.Count >= MaxConnections)
             {
-                conn.Disconnect();
+                conn.Connection?.Disconnect();
                 if (logger.WarnEnabled()) logger.LogWarning("Server full, kicked client:" + conn);
                 return;
             }

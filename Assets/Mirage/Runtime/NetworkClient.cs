@@ -241,7 +241,7 @@ namespace Mirage
         /// </summary>
         public void Disconnect()
         {
-            Connection?.Disconnect();
+            Connection?.Connection?.Disconnect();
         }
 
         /// <summary>
