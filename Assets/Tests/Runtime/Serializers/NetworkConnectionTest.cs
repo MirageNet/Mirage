@@ -7,7 +7,7 @@ namespace Mirage.Tests
 {
     public class NetworkConnectionTest
     {
-        private NetworkConnection connection;
+        private NetworkPlayer connection;
         private byte[] serializedMessage;
         private IConnection mockTransportConnection;
 
@@ -15,9 +15,9 @@ namespace Mirage.Tests
 
         private NotifyPacket lastSent;
 
-        private Action<INetworkConnection, object> delivered;
+        private Action<INetworkPlayer, object> delivered;
 
-        private Action<INetworkConnection, object> lost;
+        private Action<INetworkPlayer, object> lost;
 
         private byte[] lastSerializedPacket;
 
@@ -41,13 +41,13 @@ namespace Mirage.Tests
             mockTransportConnection.Send(
                 Arg.Do<ArraySegment<byte>>(ParsePacket), Channel.Unreliable);
 
-            connection = new NetworkConnection(mockTransportConnection);
+            connection = new NetworkPlayer(mockTransportConnection);
 
             serializedMessage = MessagePacker.Pack(new ReadyMessage());
             connection.RegisterHandler<ReadyMessage>(message => { });
 
-            delivered = Substitute.For<Action<INetworkConnection, object>>();
-            lost = Substitute.For<Action<INetworkConnection, object>>();
+            delivered = Substitute.For<Action<INetworkPlayer, object>>();
+            lost = Substitute.For<Action<INetworkPlayer, object>>();
 
             connection.NotifyDelivered += delivered;
             connection.NotifyLost += lost;
@@ -255,7 +255,7 @@ namespace Mirage.Tests
 
             connection.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
 
-            delivered.DidNotReceive().Invoke(Arg.Any<INetworkConnection>(), 5);
+            delivered.DidNotReceive().Invoke(Arg.Any<INetworkPlayer>(), 5);
 
             reply = new NotifyPacket
             {

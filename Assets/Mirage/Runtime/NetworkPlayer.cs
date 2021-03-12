@@ -23,12 +23,12 @@ namespace Mirage
     /// <para>NetworkConnection objects also act as observers for networked objects. When a connection is an observer of a networked object with a NetworkIdentity, then the object will be visible to corresponding client for the connection, and incremental state changes will be sent to the client.</para>
     /// <para>There are many virtual functions on NetworkConnection that allow its behaviour to be customized. NetworkClient and NetworkServer can both be made to instantiate custom classes derived from NetworkConnection by setting their networkConnectionClass member variable.</para>
     /// </remarks>
-    public class NetworkConnection : INetworkConnection
+    public class NetworkPlayer : INetworkPlayer
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkConnection));
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
         // Handles network messages on client and server
-        internal delegate void NetworkMessageDelegate(INetworkConnection conn, NetworkReader reader, int channelId);
+        internal delegate void NetworkMessageDelegate(INetworkPlayer conn, NetworkReader reader, int channelId);
 
         // internal so it can be tested
         private readonly HashSet<NetworkIdentity> visList = new HashSet<NetworkIdentity>();
@@ -83,7 +83,7 @@ namespace Mirage
         /// Creates a new NetworkConnection with the specified address and connectionId
         /// </summary>
         /// <param name="networkConnectionId"></param>
-        public NetworkConnection(IConnection connection)
+        public NetworkPlayer(IConnection connection)
         {
             Assert.IsNotNull(connection);
             this.connection = connection;
@@ -101,9 +101,9 @@ namespace Mirage
             connection.Disconnect();
         }
 
-        private static NetworkMessageDelegate MessageHandler<T>(Action<INetworkConnection, T> handler)
+        private static NetworkMessageDelegate MessageHandler<T>(Action<INetworkPlayer, T> handler)
         {
-            void AdapterFunction(INetworkConnection conn, NetworkReader reader, int channelId)
+            void AdapterFunction(INetworkPlayer conn, NetworkReader reader, int channelId)
             {
                 // protect against DOS attacks if attackers try to send invalid
                 // data packets to crash the server/client. there are a thousand
@@ -139,7 +139,7 @@ namespace Mirage
         /// <typeparam name="T">Message type</typeparam>
         /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
         /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
-        public void RegisterHandler<T>(Action<INetworkConnection, T> handler)
+        public void RegisterHandler<T>(Action<INetworkPlayer, T> handler)
         {
             int msgType = MessagePacker.GetId<T>();
             if (logger.filterLogType == LogType.Log && messageHandlers.ContainsKey(msgType))
@@ -179,7 +179,7 @@ namespace Mirage
             messageHandlers.Clear();
         }
 
-        public static void Send<T>(IEnumerable<INetworkConnection> connections, T msg, int channelId = Channel.Reliable)
+        public static void Send<T>(IEnumerable<INetworkPlayer> connections, T msg, int channelId = Channel.Reliable)
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -188,7 +188,7 @@ namespace Mirage
                 var segment = writer.ToArraySegment();
                 int count = 0;
 
-                foreach (INetworkConnection conn in connections)
+                foreach (INetworkPlayer conn in connections)
                 {
                     // send to all connections, but don't wait for them
                     conn.Send(segment, channelId);
@@ -488,12 +488,12 @@ namespace Mirage
         /// <summary>
         /// Raised when a message is delivered
         /// </summary>
-        public event Action<INetworkConnection, object> NotifyDelivered;
+        public event Action<INetworkPlayer, object> NotifyDelivered;
 
         /// <summary>
         /// Raised when a message is lost
         /// </summary>
-        public event Action<INetworkConnection, object> NotifyLost;
+        public event Action<INetworkPlayer, object> NotifyLost;
         #endregion
     }
 }

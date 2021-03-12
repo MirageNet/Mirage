@@ -12,8 +12,8 @@ namespace Mirage.Tests
         #region test components
         class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
         {
-            public override bool OnCheckObserver(INetworkConnection conn) { return true; }
-            public override void OnRebuildObservers(HashSet<INetworkConnection> observers, bool initialize) { }
+            public override bool OnCheckObserver(INetworkPlayer conn) { return true; }
+            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
             public override void OnSetHostVisibility(bool visible)
             {
             }
@@ -63,8 +63,8 @@ namespace Mirage.Tests
         [Test]
         public void AddAllReadyServerConnectionsToObservers()
         {
-            var connection1 = new NetworkConnection(tconn42) { IsReady = true };
-            var connection2 = new NetworkConnection(tconn43) { IsReady = false };
+            var connection1 = new NetworkPlayer(tconn42) { IsReady = true };
+            var connection2 = new NetworkPlayer(tconn43) { IsReady = false };
             // add some server connections
             server.connections.Add(connection1);
             server.connections.Add(connection2);
@@ -96,7 +96,7 @@ namespace Mirage.Tests
             gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection
-            (_, NetworkConnection connection) = PipedConnections();
+            (_, NetworkPlayer connection) = PipedConnections();
             connection.IsReady = true;
             identity.ConnectionToClient = connection;
 

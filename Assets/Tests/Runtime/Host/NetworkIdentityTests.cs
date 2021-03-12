@@ -79,7 +79,7 @@ namespace Mirage.Tests.Host
             // test the callback too
             int callbackCalled = 0;
 
-            void Callback(INetworkConnection conn, NetworkIdentity networkIdentity, bool state)
+            void Callback(INetworkPlayer conn, NetworkIdentity networkIdentity, bool state)
             {
                 ++callbackCalled;
                 Assert.That(networkIdentity, Is.EqualTo(testIdentity));
@@ -141,7 +141,7 @@ namespace Mirage.Tests.Host
             // another connection
             Assert.Throws<InvalidOperationException>(() =>
             {
-                testIdentity.AssignClientAuthority(new NetworkConnection(Substitute.For<IConnection>()));
+                testIdentity.AssignClientAuthority(new NetworkPlayer(Substitute.For<IConnection>()));
             });
         }
 
