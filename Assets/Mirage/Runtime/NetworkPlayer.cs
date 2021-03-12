@@ -206,7 +206,7 @@ namespace Mirage
         /// <param name="msg">The message to send.</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
         /// <returns></returns>
-        public virtual void Send<T>(T msg, int channelId = Channel.Reliable)
+        public virtual void Send<T>(T message, int channelId = Channel.Reliable)
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -373,7 +373,7 @@ namespace Mirage
         }
         const int ACK_MASK_BITS = sizeof(ulong) * 8;
         const int WINDOW_SIZE = 512;
-        // packages will be acked no longer than this time;
+        // packages will be acked no longer than this time
         public float NOTIFY_ACK_TIMEOUT = 0.3f;
 
         private Sequencer sequencer = new Sequencer(16);
