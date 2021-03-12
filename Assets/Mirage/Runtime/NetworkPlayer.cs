@@ -65,6 +65,8 @@ namespace Mirage
         /// </summary>
         public virtual EndPoint Address => connection.GetEndPointAddress();
 
+        public IConnection Connection => connection;
+
         /// <summary>
         /// The NetworkIdentity for this connection.
         /// </summary>

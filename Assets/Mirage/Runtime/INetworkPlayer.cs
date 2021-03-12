@@ -105,5 +105,7 @@ namespace Mirage
         object AuthenticationData { get; set; }
 
         void Disconnect();
+
+        IConnection Connection { get; }
     }
 }
