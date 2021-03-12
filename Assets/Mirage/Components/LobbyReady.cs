@@ -11,7 +11,7 @@ namespace Mirage
 
         // just a cached memory area where we can collect connections
         // for broadcasting messages
-        private static readonly List<INetworkConnection> connectionsCache = new List<INetworkConnection>();
+        private static readonly List<INetworkPlayer> connectionsCache = new List<INetworkPlayer>();
 
         public void SetAllClientsNotReady()
         {
@@ -36,7 +36,7 @@ namespace Mirage
                 }
             }
 
-            NetworkConnection.Send(connectionsCache, msg, channelId);
+            NetworkPlayer.Send(connectionsCache, msg, channelId);
         }
     }
 }

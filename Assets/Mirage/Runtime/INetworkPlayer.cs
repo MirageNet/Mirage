@@ -19,7 +19,7 @@ namespace Mirage
     /// </summary>
     public interface IMessageReceiver
     {
-        void RegisterHandler<T>(Action<INetworkConnection, T> handler);
+        void RegisterHandler<T>(Action<INetworkPlayer, T> handler);
 
         void RegisterHandler<T>(Action<T> handler);
 
@@ -56,12 +56,12 @@ namespace Mirage
         /// <summary>
         /// Raised when a message is delivered
         /// </summary>
-        event Action<INetworkConnection, object> NotifyDelivered;
+        event Action<INetworkPlayer, object> NotifyDelivered;
 
         /// <summary>
         /// Raised when a message is lost
         /// </summary>
-        event Action<INetworkConnection, object> NotifyLost;
+        event Action<INetworkPlayer, object> NotifyLost;
     }
 
     /// <summary>
@@ -98,7 +98,7 @@ namespace Mirage
     /// A connection to a remote endpoint.
     /// May be from the server to client or from client to server
     /// </summary>
-    public interface INetworkConnection : IMessageHandler, IVisibilityTracker, IObjectOwner
+    public interface INetworkPlayer : IMessageHandler, IVisibilityTracker, IObjectOwner
     {
         bool IsReady { get; set; }
         EndPoint Address { get; }

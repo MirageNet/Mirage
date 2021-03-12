@@ -93,7 +93,7 @@ namespace Mirage
         // original HLAPI has .localConnections list with only m_LocalConnection in it
         // (for backwards compatibility because they removed the real localConnections list a while ago)
         // => removed it for easier code. use .localConnection now!
-        public INetworkConnection LocalConnection { get; private set; }
+        public INetworkPlayer LocalConnection { get; private set; }
 
         /// <summary>
         /// The host client for this server 
@@ -114,7 +114,7 @@ namespace Mirage
         /// <summary>
         /// A list of local connections on the server.
         /// </summary>
-        public readonly HashSet<INetworkConnection> connections = new HashSet<INetworkConnection>();
+        public readonly HashSet<INetworkPlayer> connections = new HashSet<INetworkPlayer>();
 
         /// <summary>
         /// <para>Checks if the server has been started.</para>
@@ -145,8 +145,8 @@ namespace Mirage
             // make a copy,  during disconnect, it is possible that connections
             // are modified, so it throws
             // System.InvalidOperationException : Collection was modified; enumeration operation may not execute.
-            var connectionscopy = new HashSet<INetworkConnection>(connections);
-            foreach (INetworkConnection conn in connectionscopy)
+            var connectionscopy = new HashSet<INetworkPlayer>(connections);
+            foreach (INetworkPlayer conn in connectionscopy)
             {
                 conn.Disconnect();
             }
@@ -240,7 +240,7 @@ namespace Mirage
 
         private void TransportConnected(IConnection connection)
         {
-            INetworkConnection networkConnectionToClient = GetNewConnection(connection);
+            INetworkPlayer networkConnectionToClient = GetNewConnection(connection);
             ConnectionAcceptedAsync(networkConnectionToClient).Forget();
         }
 
@@ -302,9 +302,9 @@ namespace Mirage
         /// <summary>
         /// Creates a new INetworkConnection based on the provided IConnection.
         /// </summary>
-        public virtual INetworkConnection GetNewConnection(IConnection connection)
+        public virtual INetworkPlayer GetNewConnection(IConnection connection)
         {
-            return new NetworkConnection(connection);
+            return new NetworkPlayer(connection);
         }
 
         /// <summary>
@@ -312,7 +312,7 @@ namespace Mirage
         /// <para>This connection will use the callbacks registered with the server.</para>
         /// </summary>
         /// <param name="conn">Network connection to add.</param>
-        public void AddConnection(INetworkConnection conn)
+        public void AddConnection(INetworkPlayer conn)
         {
             if (!connections.Contains(conn))
             {
@@ -327,7 +327,7 @@ namespace Mirage
         /// This removes an external connection added with AddExternalConnection().
         /// </summary>
         /// <param name="connectionId">The id of the connection to remove.</param>
-        public void RemoveConnection(INetworkConnection conn)
+        public void RemoveConnection(INetworkPlayer conn)
         {
             connections.Remove(conn);
         }
@@ -344,7 +344,7 @@ namespace Mirage
                 throw new InvalidOperationException("Local Connection already exists");
             }
 
-            INetworkConnection conn = GetNewConnection(tconn);
+            INetworkPlayer conn = GetNewConnection(tconn);
             LocalConnection = conn;
             LocalClient = client;
 
@@ -361,10 +361,10 @@ namespace Mirage
         public void SendToAll<T>(T msg, int channelId = Channel.Reliable)
         {
             if (logger.LogEnabled()) logger.Log("Server.SendToAll id:" + typeof(T));
-            NetworkConnection.Send(connections, msg, channelId);
+            NetworkPlayer.Send(connections, msg, channelId);
         }
 
-        async UniTaskVoid ConnectionAcceptedAsync(INetworkConnection conn)
+        async UniTaskVoid ConnectionAcceptedAsync(INetworkPlayer conn)
         {
             if (logger.LogEnabled()) logger.Log("Server accepted client:" + conn);
 
@@ -402,7 +402,7 @@ namespace Mirage
         }
 
         //called once a client disconnects from the server
-        void OnDisconnected(INetworkConnection connection)
+        void OnDisconnected(INetworkPlayer connection)
         {
             if (logger.LogEnabled()) logger.Log("Server disconnect client:" + connection);
 
@@ -417,7 +417,7 @@ namespace Mirage
                 LocalConnection = null;
         }
 
-        internal void OnAuthenticated(INetworkConnection conn)
+        internal void OnAuthenticated(INetworkPlayer conn)
         {
             if (logger.LogEnabled()) logger.Log("Server authenticate client:" + conn);
 
