@@ -104,8 +104,6 @@ namespace Mirage
         EndPoint Address { get; }
         object AuthenticationData { get; set; }
 
-        void Disconnect();
-
         IConnection Connection { get; }
     }
 }

@@ -95,13 +95,6 @@ namespace Mirage
             RegisterHandler<NotifyAck>(msg => { });
         }
 
-        /// <summary>
-        /// Disconnects this connection.
-        /// </summary>
-        public virtual void Disconnect()
-        {
-            connection.Disconnect();
-        }
 
         private static NetworkMessageDelegate MessageHandler<T>(Action<INetworkPlayer, T> handler)
         {
