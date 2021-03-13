@@ -17,8 +17,8 @@ namespace Mirage
 
             Quaternion decompressed = Compression.Decompress(compressed);
 
-            // decompressed should be almost the same,  dot product of 2 quaternion is 1 if they are the same
-            Assert.That(Mathf.Abs(Quaternion.Dot(expected, decompressed)), Is.GreaterThan(1 - 0.001));
+            // decompressed should be almost the same,  dot product of 2 normalized quaternion is 1 if they are the same
+            Assert.That(Mathf.Abs(Quaternion.Dot(expected, decompressed)), Is.EqualTo(1).Within(0.001));
         }
 
         [Test]
@@ -45,8 +45,8 @@ namespace Mirage
 
             Quaternion decompressed = Compression.Decompress(compressed);
 
-            // decompressed should be almost the same,  dot product of 2 quaternion is 1 if they are the same
-            Assert.That(Mathf.Abs(Quaternion.Dot(expected, decompressed)), Is.GreaterThan(1 - 0.001));
+            // decompressed should be almost the same,  dot product of 2 normalized quaternion is 1 if they are the same
+            Assert.That(Mathf.Abs(Quaternion.Dot(expected, decompressed)), Is.EqualTo(1).Within(0.001));
 
         }
     }
