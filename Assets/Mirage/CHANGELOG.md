@@ -1,3 +1,10 @@
+# [75.1.0](https://github.com/MirageNet/Mirage/compare/v75.0.0...v75.1.0) (2021-03-13)
+
+
+### Features
+
+* 0 is not lossy when compressing quaternions ([#695](https://github.com/MirageNet/Mirage/issues/695)) ([c1552c0](https://github.com/MirageNet/Mirage/commit/c1552c0daed8209a7af1a2b3194ff21df5488484))
+
 # [75.0.0](https://github.com/MirageNet/Mirage/compare/v74.0.0...v75.0.0) (2021-03-13)
 
 
