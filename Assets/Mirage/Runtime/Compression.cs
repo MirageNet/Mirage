@@ -17,7 +17,7 @@ namespace Mirage
     /// </summary>
     public static class Compression
     {
-        private const float Minimum = -1.0f / 1.414214f; // note: 1.0f / sqrt(2)
+        // note: 1.0f / sqrt(2)
         private const float Maximum = +1.0f / 1.414214f;
 
         private const int BitsPerAxis = 10;
