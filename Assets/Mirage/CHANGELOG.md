@@ -1,3 +1,15 @@
+# [76.0.0](https://github.com/MirageNet/Mirage/compare/v75.1.0...v76.0.0) (2021-03-13)
+
+
+### Code Refactoring
+
+* remove local visibility hacks ([#696](https://github.com/MirageNet/Mirage/issues/696)) ([df499ab](https://github.com/MirageNet/Mirage/commit/df499abb8b4e29f8b7067adedcab576eea564a29))
+
+
+### BREAKING CHANGES
+
+* NetworkVisibility no longer disables renderers in host mode
+
 # [75.1.0](https://github.com/MirageNet/Mirage/compare/v75.0.0...v75.1.0) (2021-03-13)
 
 
