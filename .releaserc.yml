@@ -1,3 +1,4 @@
+repositoryUrl: https://github.com/MirageNet/Mirage.git
 plugins:
   - '@semantic-release/github'
   - '@semantic-release/release-notes-generator'
