@@ -122,7 +122,7 @@ namespace Mirage
         internal void RegisterHostHandlers()
         {
             Client.Connection.RegisterHandler<ObjectDestroyMessage>(OnHostClientObjectDestroy);
-            Client.Connection.RegisterHandler<ObjectHideMessage>(OnHostClientObjectHide);
+            Client.Connection.RegisterHandler<ObjectHideMessage>(msg => { });
             Client.Connection.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
             Client.Connection.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
             // host mode reuses objects in the server
@@ -519,16 +519,6 @@ namespace Mirage
             SpawnedObjects.Remove(msg.netId);
         }
 
-        internal void OnHostClientObjectHide(ObjectHideMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log("ClientScene::OnLocalObjectObjHide netId:" + msg.netId);
-
-            if (SpawnedObjects.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
-            {
-                localObject.OnSetHostVisibility(false);
-            }
-        }
-
         internal void OnHostClientSpawn(SpawnMessage msg)
         {
             if (SpawnedObjects.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
@@ -541,7 +531,6 @@ namespace Mirage
                 localObject.HasAuthority = msg.isOwner;
                 localObject.NotifyAuthority();
                 localObject.StartClient();
-                localObject.OnSetHostVisibility(true);
                 CheckForLocalPlayer(localObject);
             }
         }
