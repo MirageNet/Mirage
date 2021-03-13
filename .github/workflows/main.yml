@@ -64,6 +64,10 @@ jobs:
           path: "Tests/*.xml"
           access-token: ${{ secrets.GITHUB_TOKEN }}
       
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+  
       - name: Release
         uses: cycjimmy/semantic-release-action@v2
         id: semantic
