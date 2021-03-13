@@ -29,7 +29,9 @@ namespace Mirage
             Quaternion decompressed = Compression.Decompress(compressed);
 
             Vector3 euler = decompressed.eulerAngles;
+            Assert.That(euler.x, Is.Zero);
             Assert.That(euler.y, Is.EqualTo(90).Within(0.1));
+            Assert.That(euler.z, Is.Zero);
         }
 
         [Test]
@@ -49,5 +51,6 @@ namespace Mirage
             Assert.That(Mathf.Abs(Quaternion.Dot(expected, decompressed)), Is.EqualTo(1).Within(0.001));
 
         }
+
     }
 }
