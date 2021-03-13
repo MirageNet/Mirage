@@ -13,28 +13,6 @@ namespace Mirage
     {
         #region test components
 
-        class SetHostVisibilityExceptionNetworkBehaviour : NetworkVisibility
-        {
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer conn) { return true; }
-            public override void OnSetHostVisibility(bool visible)
-            {
-                throw new Exception("some exception");
-            }
-        }
-
-        class SetHostVisibilityNetworkBehaviour : NetworkVisibility
-        {
-            public int called;
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer conn) { return true; }
-            public override void OnSetHostVisibility(bool visible)
-            {
-                ++called;
-                base.OnSetHostVisibility(visible);
-            }
-        }
-
         class CheckObserverExceptionNetworkBehaviour : NetworkVisibility
         {
             public int called;
@@ -46,7 +24,6 @@ namespace Mirage
                 valuePassed = conn;
                 throw new Exception("some exception");
             }
-            public override void OnSetHostVisibility(bool visible) { }
         }
 
         class CheckObserverTrueNetworkBehaviour : NetworkVisibility
@@ -58,7 +35,6 @@ namespace Mirage
                 ++called;
                 return true;
             }
-            public override void OnSetHostVisibility(bool visible) { }
         }
 
         class CheckObserverFalseNetworkBehaviour : NetworkVisibility
@@ -70,7 +46,6 @@ namespace Mirage
                 ++called;
                 return false;
             }
-            public override void OnSetHostVisibility(bool visible) { }
         }
 
         class SerializeTest1NetworkBehaviour : NetworkBehaviour
@@ -137,20 +112,12 @@ namespace Mirage
             {
                 observers.Add(observer);
             }
-            public override void OnSetHostVisibility(bool visible) { }
         }
 
         class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
         {
             public override bool OnCheckObserver(INetworkPlayer conn) { return true; }
             public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public int hostVisibilityCalled;
-            public bool hostVisibilityValue;
-            public override void OnSetHostVisibility(bool visible)
-            {
-                ++hostVisibilityCalled;
-                hostVisibilityValue = visible;
-            }
         }
 
         #endregion
@@ -496,18 +463,6 @@ namespace Mirage
             // same as before
             startAuthFunc.Received(1).Invoke();
             stopAuthFunc.Received(1).Invoke();
-        }
-
-        [Test]
-        public void OnSetHostVisibilityCallsComponentsAndCatchesExceptions()
-        {
-            // add component
-            gameObject.AddComponent<SetHostVisibilityExceptionNetworkBehaviour>();
-
-            Assert.Throws<Exception>(() =>
-            {
-                identity.OnSetHostVisibility(true);
-            });
         }
 
         [Test]
@@ -864,17 +819,5 @@ namespace Mirage
             Assert.That(identity.observers, Is.EquivalentTo(new[] { readyConnection }));
         }
 
-        [Test]
-        public void OnSetHostVisibilityBaseTest()
-        {
-            SpriteRenderer renderer;
-
-            renderer = gameObject.AddComponent<SpriteRenderer>();
-            SetHostVisibilityNetworkBehaviour comp = gameObject.AddComponent<SetHostVisibilityNetworkBehaviour>();
-            comp.OnSetHostVisibility(false);
-
-            Assert.That(comp.called, Is.EqualTo(1));
-            Assert.That(renderer.enabled, Is.False);
-        }
     }
 }

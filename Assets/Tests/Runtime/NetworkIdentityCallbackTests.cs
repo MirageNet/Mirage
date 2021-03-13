@@ -14,9 +14,6 @@ namespace Mirage.Tests
         {
             public override bool OnCheckObserver(INetworkPlayer conn) { return true; }
             public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override void OnSetHostVisibility(bool visible)
-            {
-            }
         }
 
 
