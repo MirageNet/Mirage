@@ -97,11 +97,15 @@ namespace Mirage
     /// A connection to a remote endpoint.
     /// May be from the server to client or from client to server
     /// </summary>
-    public interface INetworkPlayer : IMessageHandler, IVisibilityTracker, IObjectOwner
+    public interface INetworkPlayer : IMessageHandler, IVisibilityTracker, IObjectOwner, IAuthenticatedObject
     {
         bool IsReady { get; set; }
-        object AuthenticationData { get; set; }
 
         IConnection Connection { get; }
+    }
+
+    public interface IAuthenticatedObject
+    {
+        object AuthenticationData { get; set; }
     }
 }
