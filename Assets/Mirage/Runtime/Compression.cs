@@ -24,8 +24,8 @@ namespace Mirage
         private const int LargestComponentShift = BitsPerAxis * 3;
         private const int AShift = BitsPerAxis * 2;
         private const int BShift = BitsPerAxis * 1;
-        private const int ComponentScale = (1 << BitsPerAxis) - 1;
-        private const float ReverseScale = 1f / ComponentScale;
+        private const int IntScale = (1 << (BitsPerAxis-1)) - 1;
+        private const int IntMask = (1 << BitsPerAxis) - 1;
 
         internal static uint Compress(Quaternion quaternion)
         {
@@ -99,21 +99,25 @@ namespace Mirage
 
         private static uint ScaleToUint(float v)
         {
-            float normalized = (v - Minimum) / (Maximum - Minimum);
-            return (uint)Mathf.RoundToInt(normalized * ComponentScale);
+            float normalized = v / Maximum;
+            return (uint)Mathf.RoundToInt(normalized * IntScale) & IntMask;
         }
 
         private static float ScaleToFloat(uint v)
         {
-            return v * ReverseScale * (Maximum - Minimum) + Minimum;
+            float unscaled = v * Maximum / IntScale;
+
+            if (unscaled > Maximum)
+                unscaled -= Maximum * 2;
+            return unscaled;
         }
 
         internal static Quaternion Decompress(uint compressed)
         {
             var largestComponentType = (ComponentType)(compressed >> LargestComponentShift);
-            uint integerA = (compressed >> AShift) & ComponentScale;
-            uint integerB = (compressed >> BShift) & ComponentScale;
-            uint integerC = compressed & ComponentScale;
+            uint integerA = (compressed >> AShift) & IntMask;
+            uint integerB = (compressed >> BShift) & IntMask;
+            uint integerC = compressed & IntMask;
 
             float a = ScaleToFloat(integerA);
             float b = ScaleToFloat(integerB);
