@@ -99,13 +99,16 @@ namespace Mirage
     /// </summary>
     public interface INetworkPlayer : IMessageHandler, IVisibilityTracker, IObjectOwner, IAuthenticatedObject
     {
-        bool IsReady { get; set; }
-
         IConnection Connection { get; }
     }
 
     public interface IAuthenticatedObject
     {
         object AuthenticationData { get; set; }
+    }
+
+    public interface ISceneLoader
+    {
+        bool IsReady { get; set; }
     }
 }
