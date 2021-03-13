@@ -13,19 +13,6 @@ namespace Mirage
     {
         #region test components
 
-        class SetHostVisibilityExceptionNetworkBehaviour : NetworkVisibility
-        {
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer conn) { return true; }
-        }
-
-        class SetHostVisibilityNetworkBehaviour : NetworkVisibility
-        {
-            public int called;
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer conn) { return true; }
-        }
-
         class CheckObserverExceptionNetworkBehaviour : NetworkVisibility
         {
             public int called;
