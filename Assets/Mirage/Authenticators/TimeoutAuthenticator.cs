@@ -66,7 +66,7 @@ namespace Mirage.Authenticators
                 if (logger.LogEnabled()) logger.Log($"Authentication Timeout {conn}");
 
                 pendingAuthentication.Remove(conn);
-                conn.Disconnect();
+                conn.Connection?.Disconnect();
             }
         }
     }

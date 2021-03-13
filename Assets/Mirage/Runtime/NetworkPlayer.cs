@@ -95,13 +95,6 @@ namespace Mirage
             RegisterHandler<NotifyAck>(msg => { });
         }
 
-        /// <summary>
-        /// Disconnects this connection.
-        /// </summary>
-        public virtual void Disconnect()
-        {
-            connection.Disconnect();
-        }
 
         private static NetworkMessageDelegate MessageHandler<T>(Action<INetworkPlayer, T> handler)
         {
@@ -309,7 +302,7 @@ namespace Mirage
                 catch (Exception ex)
                 {
                     logger.LogError("Closed connection: " + this + ". Invalid message " + ex);
-                    Disconnect();
+                    Connection?.Disconnect();
                 }
             }
         }
@@ -432,7 +425,7 @@ namespace Mirage
             // sequence is so far out of bounds we can't save, just kick him (or her!)
             if (Math.Abs(sequenceDistance) > WINDOW_SIZE)
             {
-                Disconnect();
+                connection?.Disconnect();
                 return;
             }
 

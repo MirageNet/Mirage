@@ -83,7 +83,7 @@ namespace Mirage.Authenticators
         public IEnumerator DelayedDisconnect(INetworkPlayer conn, float waitTime)
         {
             yield return new WaitForSeconds(waitTime);
-            conn.Disconnect();
+            conn.Connection?.Disconnect();
         }
 
         public void OnAuthResponseMessage(INetworkPlayer conn, AuthResponseMessage msg)
@@ -99,7 +99,7 @@ namespace Mirage.Authenticators
             {
                 logger.LogFormat(LogType.Error, "Authentication Response: {0}", msg.Message);
                 // disconnect the client
-                conn.Disconnect();
+                conn.Connection?.Disconnect();
             }
         }
     }
