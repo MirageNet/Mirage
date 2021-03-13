@@ -1279,7 +1279,7 @@ namespace Mirage
 
             if (includeOwner)
             {
-                NetworkPlayer.Send(observers, msg, channelId);
+                NetworkServer.SendToMany(observers, msg, channelId);
             }
             else
             {
@@ -1291,7 +1291,7 @@ namespace Mirage
                         connectionsExcludeSelf.Add(conn);
                     }
                 }
-                NetworkPlayer.Send(connectionsExcludeSelf, msg, channelId);
+                NetworkServer.SendToMany(connectionsExcludeSelf, msg, channelId);
             }
         }
 

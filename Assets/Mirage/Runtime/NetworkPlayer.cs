@@ -174,26 +174,6 @@ namespace Mirage
             messageHandlers.Clear();
         }
 
-        public static void Send<T>(IEnumerable<INetworkPlayer> connections, T msg, int channelId = Channel.Reliable)
-        {
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
-            {
-                // pack message into byte[] once
-                MessagePacker.Pack(msg, writer);
-                var segment = writer.ToArraySegment();
-                int count = 0;
-
-                foreach (INetworkPlayer conn in connections)
-                {
-                    // send to all connections, but don't wait for them
-                    conn.Send(segment, channelId);
-                    count++;
-                }
-
-                NetworkDiagnostics.OnSend(msg, channelId, segment.Count, count);
-            }
-        }
-
         /// <summary>
         /// This sends a network message to the connection.
         /// </summary>

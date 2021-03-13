@@ -361,7 +361,27 @@ namespace Mirage
         public void SendToAll<T>(T msg, int channelId = Channel.Reliable)
         {
             if (logger.LogEnabled()) logger.Log("Server.SendToAll id:" + typeof(T));
-            NetworkPlayer.Send(connections, msg, channelId);
+            SendToMany(connections, msg, channelId);
+        }
+
+        public static void SendToMany<T>(IEnumerable<INetworkPlayer> connections, T msg, int channelId = Channel.Reliable)
+        {
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                // pack message into byte[] once
+                MessagePacker.Pack(msg, writer);
+                var segment = writer.ToArraySegment();
+                int count = 0;
+
+                foreach (INetworkPlayer conn in connections)
+                {
+                    // send to all connections, but don't wait for them
+                    conn.Send(segment, channelId);
+                    count++;
+                }
+
+                NetworkDiagnostics.OnSend(msg, channelId, segment.Count, count);
+            }
         }
 
         async UniTaskVoid ConnectionAcceptedAsync(INetworkPlayer conn)

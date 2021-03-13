@@ -228,6 +228,7 @@ namespace Mirage.Weaver
                 method.Is<NetworkPlayer>(nameof(NetworkPlayer.UnregisterHandler)) ||
                 method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
                 method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
+                method.Is<NetworkServer>(nameof(NetworkServer.SendToMany)) ||
                 method.Is<INetworkServer>(nameof(INetworkServer.SendToAll));
         }
 
