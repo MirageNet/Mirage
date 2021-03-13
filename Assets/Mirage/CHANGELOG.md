@@ -1,3 +1,48 @@
+# [75.0.0](https://github.com/MirageNet/Mirage/compare/v74.0.0...v75.0.0) (2021-03-13)
+
+
+### Bug Fixes
+
+* adding ISceneLoader to INetworkPlayer ([e8ab7a4](https://github.com/MirageNet/Mirage/commit/e8ab7a41b9f29007c7bab8132b34d715e0a8b5d2))
+* compression of 90 degrees angle ([#689](https://github.com/MirageNet/Mirage/issues/689)) ([2c0bac6](https://github.com/MirageNet/Mirage/commit/2c0bac6e2e4fab7d055be7ec095eb2297ec457e2))
+* fixing uses of message ([f2a5522](https://github.com/MirageNet/Mirage/commit/f2a55222ab7ec9916aa1ba77f8a6c93d27632d23))
+
+
+### Code Refactoring
+
+* moving static send to NetworkServer ([#692](https://github.com/MirageNet/Mirage/issues/692)) ([5b19dc3](https://github.com/MirageNet/Mirage/commit/5b19dc3214e034c331dd9906f53195eb968d1165))
+* removing address property from player ([#691](https://github.com/MirageNet/Mirage/issues/691)) ([d772e53](https://github.com/MirageNet/Mirage/commit/d772e53d9d5f65eb4053782a066b1fcfab9fe8d6))
+* removing disconnect method from player ([#688](https://github.com/MirageNet/Mirage/issues/688)) ([e1daf92](https://github.com/MirageNet/Mirage/commit/e1daf92934b0de03ceada857a969b6aed717752c))
+* rename PlayerSpawner to CharacterSpawner ([#686](https://github.com/MirageNet/Mirage/issues/686)) ([1db3498](https://github.com/MirageNet/Mirage/commit/1db3498120d18d8270e149b6af9df52fd3d92e90))
+* renaming NetworkConnection to NetworkPlayer ([#684](https://github.com/MirageNet/Mirage/issues/684)) ([3ecb659](https://github.com/MirageNet/Mirage/commit/3ecb6593ea05928df40e66f3a33b3b3ccb4a5283))
+
+
+### Features
+
+* adding Connection property to NetworkPlayer ([#687](https://github.com/MirageNet/Mirage/issues/687)) ([5e1c4ba](https://github.com/MirageNet/Mirage/commit/5e1c4bad4c800b96d3ecc75cbde5c0c1e0f22da9))
+* adding logger.Assert that doesn't require a message ([8c213e3](https://github.com/MirageNet/Mirage/commit/8c213e30532feee8a4e8f0ec32c58e26cd8f7afb))
+
+
+### BREAKING CHANGES
+
+* moving NetworkPlayer.Send to NetworkServer.SendToMany
+* Address replaced with Connection.GetEndPointAddress
+
+* updating uses of Address
+* Disconnect replaced with Connection.Disconnect
+
+* fixing uses in Mirage
+
+* updating uses in authenticators
+* Renamed PlayerSpawner to CharacterSpawner
+* renaming NetworkConnection to NetworkPlayer
+
+* renaming types in weaver tests
+
+* fixing test message
+
+* fixing xref in docs
+
 # [74.0.0](https://github.com/MirageNet/Mirage/compare/v73.0.0...v74.0.0) (2021-03-08)
 
 
