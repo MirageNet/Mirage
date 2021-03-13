@@ -20,9 +20,6 @@ jobs:
       DOTNET_ROOT: '/opt/unity/Editor/Data/NetCore/Sdk-2.2.107'
 
     steps:
-      - name: Install git
-        run: apt-get install -y git
-
       - name: Activate unity
         # exit code is 1 for manual activation
         continue-on-error: true
