@@ -7,7 +7,7 @@
     "author": "Mirage",
     "repository": {
         "type": "git",
-        "url": "https://github.com/MirageNet/Mirage.git#upm"
+        "url": "https://github.com/MirageNet/Mirage.git"
     },
     "dependencies": {
         "com.unity.nuget.mono-cecil": "1.10.1",
