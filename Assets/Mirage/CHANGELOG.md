@@ -1,3 +1,15 @@
+# [77.0.0](https://github.com/MirageNet/Mirage/compare/v76.0.0...v77.0.0) (2021-03-14)
+
+
+### Code Refactoring
+
+* move logging into a folder and namespace ([#697](https://github.com/MirageNet/Mirage/issues/697)) ([814653f](https://github.com/MirageNet/Mirage/commit/814653f06654f96c68f762dfcebd3e86cc8c92dc))
+
+
+### BREAKING CHANGES
+
+* Logging moved into a namespace, use Mirror.Logging
+
 # [76.0.0](https://github.com/MirageNet/Mirage/compare/v75.1.0...v76.0.0) (2021-03-13)
 
 
