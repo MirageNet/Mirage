@@ -1,4 +1,5 @@
 using UnityEngine;
+using Mirage.Logging;
 
 namespace Mirage.Examples.MultipleAdditiveScenes
 {

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using InvalidEnumArgumentException = System.ComponentModel.InvalidEnumArgumentException;
+using Mirage.Logging;
 
 namespace Mirage
 {

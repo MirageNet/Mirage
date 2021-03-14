@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using Mirage.Logging;
 
 namespace Mirage.Authenticators
 {

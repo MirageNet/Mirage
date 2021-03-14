@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Mirage.RemoteCalls;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Mirage.Logging;
 
 namespace Mirage
 {

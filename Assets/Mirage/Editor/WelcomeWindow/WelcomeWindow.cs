@@ -4,6 +4,7 @@ using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Mirage.Logging;
 
 /**
  * Docs used:

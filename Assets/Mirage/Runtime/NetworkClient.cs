@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+using Mirage.Logging;
 
 namespace Mirage
 {
