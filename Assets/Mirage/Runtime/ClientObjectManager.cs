@@ -256,7 +256,7 @@ namespace Mirage
                 throw new InvalidOperationException("RegisterPrefab game object " + identity.name + " has no " + nameof(identity) + ". Use RegisterSpawnHandler() instead?");
             }
 
-            if (logger.LogEnabled()) logger.Log("Registering custom prefab '" + identity.name + "' as asset:" + identity.AssetId + " " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
+            if (logger.LogEnabled()) logger.Log("Registering custom prefab '" + identity.name + "' as asset:" + identity.AssetId + " " + spawnHandler.Method.Name + "/" + unspawnHandler.Method.Name);
 
             spawnHandlers[identity.AssetId] = spawnHandler;
             unspawnHandlers[identity.AssetId] = unspawnHandler;
@@ -285,7 +285,7 @@ namespace Mirage
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
         public void RegisterSpawnHandler(Guid assetId, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
-            if (logger.LogEnabled()) logger.Log("RegisterSpawnHandler asset '" + assetId + "' " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
+            if (logger.LogEnabled()) logger.Log("RegisterSpawnHandler asset '" + assetId + "' " + spawnHandler.Method.Name + "/" + unspawnHandler.Method.Name);
 
             spawnHandlers[assetId] = spawnHandler;
             unspawnHandlers[assetId] = unspawnHandler;

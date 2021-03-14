@@ -97,7 +97,7 @@ namespace Mirage.RemoteCalls
             if (logger.LogEnabled())
             {
                 string requireAuthorityMessage = invokerType == MirageInvokeType.ServerRpc ? $" RequireAuthority:{cmdRequireAuthority}" : "";
-                logger.Log($"RegisterDelegate hash: {cmdHash} invokerType: {invokerType} method: {func.GetMethodName()}{requireAuthorityMessage}");
+                logger.Log($"RegisterDelegate hash: {cmdHash} invokerType: {invokerType} method: {func.Method.Name}{requireAuthorityMessage}");
             }
 
             return cmdHash;
@@ -143,7 +143,7 @@ namespace Mirage.RemoteCalls
                     return true;
                 }
 
-                logger.LogError($"Function {oldInvoker.invokeClass}.{oldInvoker.invokeFunction.GetMethodName()} and {invokeClass}.{func.GetMethodName()} have the same hash.  Please rename one of them");
+                logger.LogError($"Function {oldInvoker.invokeClass}.{oldInvoker.invokeFunction.Method.Name} and {invokeClass}.{func.Method.Name} have the same hash.  Please rename one of them");
             }
 
             return false;
