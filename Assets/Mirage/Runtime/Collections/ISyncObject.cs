@@ -1,6 +1,6 @@
 using System;
 
-namespace Mirage
+namespace Mirage.Collections
 {
     /// <summary>
     /// A sync object is an object that can synchronize it's state

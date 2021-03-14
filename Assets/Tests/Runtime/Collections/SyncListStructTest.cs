@@ -1,3 +1,4 @@
+using Mirage.Collections;
 using NUnit.Framework;
 
 namespace Mirage.Tests

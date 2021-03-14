@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Mirage.Collections;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 

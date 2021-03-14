@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace Mirage
+namespace Mirage.Collections
 {
     public class SyncIDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISyncObject, IReadOnlyDictionary<TKey, TValue>
     {
