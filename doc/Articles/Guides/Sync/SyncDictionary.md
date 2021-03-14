@@ -44,7 +44,7 @@ public class Player : NetworkBehaviour
 ## Callbacks
 You can detect when a SyncDictionary changes on the client and/or server. This is especially useful for refreshing your UI, character appearance etc.
 
-There are different callbacks for different operations, such as `OnChange` (any change to the dictionary), `OnInsert` (adding new element) etc. Please check the [SyncDictionary API reference](xref:Mirage.SyncIDictionary`2) for the complete list of callbacks.
+There are different callbacks for different operations, such as `OnChange` (any change to the dictionary), `OnInsert` (adding new element) etc. Please check the [SyncDictionary API reference](xref:Mirage.Collections.SyncIDictionary`2) for the complete list of callbacks.
 
 Depending on where you want to invoke the callbacks, you can use these methods to register them:
 - `Awake` for both client and server
