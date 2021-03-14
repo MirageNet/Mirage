@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Mirage
+namespace Mirage.Collections
 {
     public class SyncList<T> : IList<T>, IReadOnlyList<T>, ISyncObject
     {

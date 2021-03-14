@@ -1,10 +1,10 @@
 # SyncLists
 SyncLists are array based lists similar to C\# [List\<T\>](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=netframework-4.7.2) that synchronize their contents from the server to the clients.
 
-A <xref:Mirage.SyncList`1> can contain any [supported Mirage type](../DataTypes.md).
+A <xref:Mirage.Collections.SyncList`1> can contain any [supported Mirage type](../DataTypes.md).
 
 ## Usage
-Add a field of type `SyncList<T>` on any <xref:Mirage.NetworkBehaviour> where `T` can be any supported Mirage type and initialize it.
+Add a field of type <xref:Mirage.Collections.SyncList`1> on any <xref:Mirage.NetworkBehaviour> where `T` can be any supported Mirage type and initialize it.
 
 > [!IMPORTANT]
 > You need to initialize the SyncList immediately after definition in order for them to work. You can mark them as `readonly` to enforce proper usage.
@@ -12,6 +12,7 @@ Add a field of type `SyncList<T>` on any <xref:Mirage.NetworkBehaviour> where `T
 ### Basic example
 ```cs
 using Mirage;
+using Mirage.Collections;
 
 [System.Serializable]
 public struct Item
@@ -50,7 +51,7 @@ public class Player : NetworkBehaviour
 ## Callbacks
 You can detect when a SyncList changes on the client and/or server. This is especially useful for refreshing your UI, character appearance etc.
 
-There are different callbacks for different operations, such as `OnChange` (any change to the list), `OnInsert` (adding new element) etc. Please check the [SyncList API reference](xref:Mirage.SyncList`1) for the complete list of callbacks.
+There are different callbacks for different operations, such as `OnChange` (any change to the list), `OnInsert` (adding new element) etc. Please check the [SyncList API reference](xref:Mirage.Collections.SyncList`1) for the complete list of callbacks.
 
 Depending on where you want to invoke the callbacks, you can use these methods to register them:
 - `Awake` for both client and server
@@ -63,6 +64,7 @@ Depending on where you want to invoke the callbacks, you can use these methods t
 ### Example
 ```cs
 using Mirage;
+using Mirage.Collections;
 
 public class Player : NetworkBehaviour {
     readonly SyncList<Item> inventory = new SyncList<Item>();

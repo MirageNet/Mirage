@@ -1,5 +1,6 @@
 using Mirage;
 using UnityEngine;
+using Mirage.Collections;
 
 namespace SyncListTests.SyncListNestedInAbstractClassWithInvalid
 {
