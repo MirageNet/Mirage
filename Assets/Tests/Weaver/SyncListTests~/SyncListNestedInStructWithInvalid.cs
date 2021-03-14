@@ -1,5 +1,6 @@
 using Mirage;
 using UnityEngine;
+using Mirage.Collections;
 
 namespace SyncListTests.SyncListNestedInStructWithInvalid
 {
@@ -13,7 +14,7 @@ namespace SyncListTests.SyncListNestedInStructWithInvalid
             public int usefulNumber;
             public Object target;
 
-            public class SyncList : Mirage.SyncList<SomeData> { }
+            public class SyncList : Mirage.Collections.SyncList<SomeData> { }
         }
     }
 }

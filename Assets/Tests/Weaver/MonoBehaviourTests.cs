@@ -21,7 +21,7 @@ namespace Mirage.Weaver
         public void MonoBehaviourSyncList()
         {
             HasError("potato is a SyncObject and must be inside a NetworkBehaviour.  MonoBehaviourSyncList is not a NetworkBehaviour",
-                "Mirage.SyncList`1<System.Int32> MonoBehaviourTests.MonoBehaviourSyncList.MonoBehaviourSyncList::potato");
+                "Mirage.Collections.SyncList`1<System.Int32> MonoBehaviourTests.MonoBehaviourSyncList.MonoBehaviourSyncList::potato");
         }
 
         [Test]
