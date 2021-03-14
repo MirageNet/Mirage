@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Mirage.RemoteCalls;
 using UnityEngine;
+using Mirage.Logging;
 
 namespace Mirage
 {

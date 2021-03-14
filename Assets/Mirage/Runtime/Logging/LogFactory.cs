@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Mirage
+namespace Mirage.Logging
 {
     public static class LogFactory
     {

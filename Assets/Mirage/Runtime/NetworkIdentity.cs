@@ -5,6 +5,7 @@ using Mirage.RemoteCalls;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.Events;
+using Mirage.Logging;
 #if UNITY_EDITOR
 using UnityEditor;
 #if UNITY_2018_3_OR_NEWER

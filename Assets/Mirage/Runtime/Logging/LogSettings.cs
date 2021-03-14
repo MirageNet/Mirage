@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Mirage
+namespace Mirage.Logging
 {
     [ExecuteInEditMode]
     [AddComponentMenu("Network/LogSettings")]
