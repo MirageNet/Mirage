@@ -1,3 +1,15 @@
+# [78.0.0](https://github.com/MirageNet/Mirage/compare/v77.0.0...v78.0.0) (2021-03-14)
+
+
+### Code Refactoring
+
+* move collections to Mirage.Collections ([#698](https://github.com/MirageNet/Mirage/issues/698)) ([e22f765](https://github.com/MirageNet/Mirage/commit/e22f765c39b2d7b8c835357f530cc597664858db))
+
+
+### BREAKING CHANGES
+
+* collections moved to Mirage.Collections
+
 # [77.0.0](https://github.com/MirageNet/Mirage/compare/v76.0.0...v77.0.0) (2021-03-14)
 
 
