@@ -1,3 +1,5 @@
+using Mirage.Serialization;
+
 namespace Mirage.Weaver.Extra
 {
     public struct SomeDataWithWriter

@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Mirage.Serialization;
 
 namespace Mirage
 {

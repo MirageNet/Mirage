@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 using RangeAttribute = NUnit.Framework.RangeAttribute;
+using Mirage.Serialization;
 
 namespace Mirage
 {

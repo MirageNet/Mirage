@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 
-namespace Mirage
+namespace Mirage.Serialization
 {
     /// <summary>
     /// a class that holds writers for the different types

@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Mirage.Logging;
+using Mirage.Serialization;
 
 namespace Mirage
 {

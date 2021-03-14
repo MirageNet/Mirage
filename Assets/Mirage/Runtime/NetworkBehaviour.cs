@@ -5,6 +5,7 @@ using Mirage.Collections;
 using Mirage.RemoteCalls;
 using UnityEngine;
 using Mirage.Logging;
+using Mirage.Serialization;
 
 namespace Mirage
 {

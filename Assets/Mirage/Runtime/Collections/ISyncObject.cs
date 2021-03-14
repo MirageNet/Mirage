@@ -1,4 +1,5 @@
 using System;
+using Mirage.Serialization;
 
 namespace Mirage.Collections
 {
