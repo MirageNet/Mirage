@@ -1,10 +1,10 @@
 # SyncDictionary
-A <xref:Mirage.SyncDictionary`2> is an associative array containing an unordered list of key, value pairs. Keys and values can be any of [Mirage supported types](../DataTypes.md).
+A <xref:Mirage.Collections.SyncDictionary`2> is an associative array containing an unordered list of key, value pairs. Keys and values can be any of [Mirage supported types](../DataTypes.md).
 
 SyncDictionary works much like [SyncLists](SyncLists.md): when you make a change on the server, the change is propagated to all clients and the appropriate callback is called.
 
 ## Usage
-Add a field of type `SyncDictionary<TKey, TValue>` on any <xref:Mirage.NetworkBehaviour> where `TKey` and `TValue` can be any supported Mirage type and initialize it.
+Add a field of type <xref:Mirage.Collections.SyncDictionary`2> on any <xref:Mirage.NetworkBehaviour> where `TKey` and `TValue` can be any supported Mirage type and initialize it.
 
 > [!IMPORTANT]
 > You need to initialize the SyncDictionary immediately after definition in order for them to work. You can mark them as `readonly` to enforce proper usage.
@@ -13,6 +13,7 @@ Add a field of type `SyncDictionary<TKey, TValue>` on any <xref:Mirage.NetworkBe
 ```cs
 using UnityEngine;
 using Mirage;
+using Mirage.Collections;
 
 [System.Serializable]
 public struct Item
@@ -56,6 +57,7 @@ Depending on where you want to invoke the callbacks, you can use these methods t
 ### Example
 ```cs
 using Mirage;
+using Mirage.Collections;
 
 public class Player : NetworkBehaviour {
     public readonly SyncDictionary<stirng, Item> Equipment = new SyncDictionary<string, Item>();
