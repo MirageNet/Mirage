@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Mirage.Logging;
 using Mono.Cecil;
 using NUnit.Framework;
 using Unity.CompilationPipeline.Common.Diagnostics;
