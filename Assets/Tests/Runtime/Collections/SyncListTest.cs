@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Mirage.Collections;
+using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 

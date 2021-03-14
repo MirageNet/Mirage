@@ -1,4 +1,5 @@
 using System.Linq;
+using Mirage.Serialization;
 using NUnit.Framework;
 
 namespace Mirage.Tests
