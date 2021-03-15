@@ -6,6 +6,9 @@ using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Mirage.Logging;
+using Mirage.Serialization;
+using Mirage.InterestManagement;
 
 namespace Mirage
 {
@@ -61,6 +64,8 @@ namespace Mirage
         [SerializeField] SpawnEvent _unSpawned = new SpawnEvent();
         public SpawnEvent UnSpawned => _unSpawned;
 
+        public InterestManager InterestManager;
+
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => checked(nextNetworkId++);
 
@@ -76,6 +81,15 @@ namespace Mirage
 
         public void Start()
         {
+            if (InterestManager == null)
+            {
+                InterestManager = gameObject.AddComponent<GlobalInterestManager>();
+            }
+            if (Server == null)
+            {
+                Server = GetComponent<NetworkServer>();
+            }
+
             if (Server != null)
             {
                 Server.Started.AddListener(SpawnOrActivate);
@@ -194,7 +208,7 @@ namespace Mirage
         /// </summary>
         /// <param name="player">Connection which is adding the player.</param>
         /// <param name="client">Client associated to the player.</param> 
-        /// <param name="character">Player object spawned for the player.</param>
+        /// <param name="character">Character object spawned for the player.</param>
         /// <param name="assetId"></param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
@@ -217,34 +231,6 @@ namespace Mirage
         public bool ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority = false)
         {
             return InternalReplacePlayerForConnection(player, client, character, keepAuthority);
-        }
-
-        void SpawnObserversForConnection(INetworkPlayer player)
-        {
-            if (logger.LogEnabled()) logger.Log("Spawning " + SpawnedObjects.Count + " objects for conn " + player);
-
-            if (!player.IsReady)
-            {
-                // client needs to finish initializing before we can spawn objects
-                // otherwise it would not find them.
-                return;
-            }
-
-            // add connection to each nearby NetworkIdentity's observers, which
-            // internally sends a spawn message for each one to the connection.
-            foreach (NetworkIdentity identity in SpawnedObjects.Values)
-            {
-                if (identity.gameObject.activeSelf)
-                {
-                    if (logger.LogEnabled()) logger.Log("Sending spawn message for current server objects name='" + identity.name + "' netId=" + identity.NetId + " sceneId=" + identity.sceneId);
-
-                    bool visible = identity.OnCheckObserver(player);
-                    if (visible)
-                    {
-                        identity.AddObserver(player);
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -362,13 +348,6 @@ namespace Mirage
                 Server.LocalClient.Player.Identity = identity;
             }
 
-            // add connection to observers AFTER the playerController was set.
-            // by definition, there is nothing to observe if there is no player
-            // controller.
-            //
-            // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
-            SpawnObserversForConnection(player);
-
             if (logger.LogEnabled()) logger.Log("Replacing playerGameObject object netId: " + character.GetComponent<NetworkIdentity>().NetId + " asset ID " + character.GetComponent<NetworkIdentity>().AssetId);
 
             Respawn(identity);
@@ -381,8 +360,7 @@ namespace Mirage
 
         internal void ShowForConnection(NetworkIdentity identity, INetworkPlayer player)
         {
-            if (player.IsReady)
-                SendSpawnMessage(identity, player);
+            SendSpawnMessage(identity, player);
         }
 
         internal void HideForConnection(NetworkIdentity identity, INetworkPlayer player)
@@ -482,8 +460,6 @@ namespace Mirage
             }
 
             if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.NetId + " asset ID " + identity.AssetId);
-
-            identity.RebuildObservers(true);
         }
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
@@ -630,7 +606,6 @@ namespace Mirage
 
             identity.SendToRemoteObservers(new ObjectDestroyMessage { netId = identity.NetId });
 
-            identity.ClearObservers();
             if (Server.LocalClientActive)
             {
                 identity.StopClient();
@@ -745,10 +720,6 @@ namespace Mirage
 
             // set ready
             player.IsReady = true;
-
-            // client is ready to start spawning objects
-            if (player.Identity != null)
-                SpawnObserversForConnection(player);
         }
 
         /// <summary>
@@ -774,8 +745,6 @@ namespace Mirage
             {
                 if (logger.LogEnabled()) logger.Log("PlayerNotReady " + player);
                 player.IsReady = false;
-                player.RemoveObservers();
-
                 player.Send(new NotReadyMessage());
             }
         }
