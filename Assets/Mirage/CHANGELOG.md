@@ -1,3 +1,15 @@
+# [79.0.0](https://github.com/MirageNet/Mirage/compare/v78.0.0...v79.0.0) (2021-03-15)
+
+
+### Code Refactoring
+
+* move serialization into Mirage.Serialization ([#700](https://github.com/MirageNet/Mirage/issues/700)) ([5dc037d](https://github.com/MirageNet/Mirage/commit/5dc037dbb6db48c1ad94d20a63aa5f953ade90c2))
+
+
+### BREAKING CHANGES
+
+* NetworkReader and NetworkWriter moved to Mirage.Serialization namespace
+
 # [78.0.0](https://github.com/MirageNet/Mirage/compare/v77.0.0...v78.0.0) (2021-03-14)
 
 
