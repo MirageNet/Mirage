@@ -54,7 +54,7 @@ namespace Mirage.HeadlessBenchmark
 #if UNITY_EDITOR
                 Debug.LogFormat("{0} FPS {1} messages {2} clients", frames, messages, server.NumberOfPlayers);
 #else
-                Console.WriteLine("{0} FPS {1} messages {2} clients", frames, messages, server.NumPlayers);
+                Console.WriteLine("{0} FPS {1} messages {2} clients", frames, messages, server.NumberOfPlayers);
 #endif
                 previousFrameCount = frameCount;
                 previousMessageCount = messageCount;
