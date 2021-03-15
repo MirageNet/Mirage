@@ -366,26 +366,26 @@ namespace Mirage
         /// <summary>
         /// used when adding players
         /// </summary>
-        /// <param name="conn"></param>
-        internal void SetClientOwner(INetworkPlayer conn)
+        /// <param name="player"></param>
+        internal void SetClientOwner(INetworkPlayer player)
         {
             // do nothing if it already has an owner
-            if (ConnectionToClient != null && conn != ConnectionToClient)
+            if (ConnectionToClient != null && player != ConnectionToClient)
             {
                 throw new InvalidOperationException($"Object {this} netId={NetId} already has an owner. Use RemoveClientAuthority() first");
             }
 
             // otherwise set the owner connection
-            ConnectionToClient = conn;
+            ConnectionToClient = player;
         }
 
         /// <summary>
         /// The delegate type for the clientAuthorityCallback.
         /// </summary>
-        /// <param name="conn">The network connection that is gaining or losing authority.</param>
+        /// <param name="player">The network connection that is gaining or losing authority.</param>
         /// <param name="identity">The object whose client authority status is being changed.</param>
         /// <param name="authorityState">The new state of client authority of the object for the connection.</param>
-        public delegate void ClientAuthorityCallback(INetworkPlayer conn, NetworkIdentity identity, bool authorityState);
+        public delegate void ClientAuthorityCallback(INetworkPlayer player, NetworkIdentity identity, bool authorityState);
 
         /// <summary>
         /// A callback that can be populated to be notified when the client-authority state of objects changes.
@@ -397,10 +397,10 @@ namespace Mirage
         /// <summary>
         /// this is used when a connection is destroyed, since the "observers" property is read-only
         /// </summary>
-        /// <param name="conn"></param>
-        internal void RemoveObserverInternal(INetworkPlayer conn)
+        /// <param name="player"></param>
+        internal void RemoveObserverInternal(INetworkPlayer player)
         {
-            observers.Remove(conn);
+            observers.Remove(player);
         }
 
         /// <summary>
@@ -725,13 +725,13 @@ namespace Mirage
         ///     </description></item>
         /// </list>
         /// </summary>
-        /// <param name="conn"></param>
+        /// <param name="player"></param>
         /// <returns></returns>
-        internal bool OnCheckObserver(INetworkPlayer conn)
+        internal bool OnCheckObserver(INetworkPlayer player)
         {
             if (Visibility != null)
             {
-                return Visibility.OnCheckObserver(conn);
+                return Visibility.OnCheckObserver(player);
             }
             return true;
         }
@@ -899,14 +899,14 @@ namespace Mirage
         /// <param name="functionHash"></param>
         /// <param name="invokeType"></param>
         /// <param name="reader"></param>
-        /// <param name="senderConnection"></param>
-        internal void HandleRemoteCall(Skeleton skeleton, int componentIndex, NetworkReader reader, INetworkPlayer senderConnection = null, int replyId = 0)
+        /// <param name="senderPlayer"></param>
+        internal void HandleRemoteCall(Skeleton skeleton, int componentIndex, NetworkReader reader, INetworkPlayer senderPlayer = null, int replyId = 0)
         {
             // find the right component to invoke the function on
             if (componentIndex >= 0 && componentIndex < NetworkBehaviours.Length)
             {
                 NetworkBehaviour invokeComponent = NetworkBehaviours[componentIndex];
-                skeleton?.Invoke(reader, invokeComponent, senderConnection, replyId);
+                skeleton?.Invoke(reader, invokeComponent, senderPlayer, replyId);
             }
             else
             {
@@ -919,28 +919,28 @@ namespace Mirage
         /// </summary>
         internal void ClearObservers()
         {
-            foreach (INetworkPlayer conn in observers)
+            foreach (INetworkPlayer player in observers)
             {
-                conn.RemoveFromVisList(this);
+                player.RemoveFromVisList(this);
             }
             observers.Clear();
         }
 
-        internal void AddObserver(INetworkPlayer conn)
+        internal void AddObserver(INetworkPlayer player)
         {
-            if (observers.Contains(conn))
+            if (observers.Contains(player))
             {
                 // if we try to add a connectionId that was already added, then
                 // we may have generated one that was already in use.
                 return;
             }
 
-            if (logger.LogEnabled()) logger.Log("Added observer " + conn.Connection.GetEndPointAddress() + " added for " + gameObject);
-            observers.Add(conn);
-            conn.AddToVisList(this);
+            if (logger.LogEnabled()) logger.Log("Added observer " + player.Connection.GetEndPointAddress() + " added for " + gameObject);
+            observers.Add(player);
+            player.AddToVisList(this);
 
             // spawn identity for this conn
-            ServerObjectManager.ShowForConnection(this, conn);
+            ServerObjectManager.ShowForConnection(this, player);
         }
 
         /// <summary>
@@ -975,16 +975,16 @@ namespace Mirage
         internal void AddAllReadyServerConnectionsToObservers()
         {
             // add all server connections
-            foreach (INetworkPlayer conn in Server.connections)
+            foreach (INetworkPlayer player in Server.Players)
             {
-                if (conn.IsReady)
-                    AddObserver(conn);
+                if (player.IsReady)
+                    AddObserver(player);
             }
 
             // add local host connection (if any)
-            if (Server.LocalConnection != null && Server.LocalConnection.IsReady)
+            if (Server.LocalPlayer != null && Server.LocalPlayer.IsReady)
             {
-                AddObserver(Server.LocalConnection);
+                AddObserver(Server.LocalPlayer);
             }
         }
 
@@ -1030,10 +1030,10 @@ namespace Mirage
             if (changed)
             {
                 observers.Clear();
-                foreach (INetworkPlayer conn in newObservers)
+                foreach (INetworkPlayer player in newObservers)
                 {
-                    if (conn != null && conn.IsReady)
-                        observers.Add(conn);
+                    if (player != null && player.IsReady)
+                        observers.Add(player);
                 }
             }
         }
@@ -1041,15 +1041,15 @@ namespace Mirage
         // remove all old .observers that aren't in newObservers anymore
         bool RemoveOldObservers(bool changed)
         {
-            foreach (INetworkPlayer conn in observers)
+            foreach (INetworkPlayer player in observers)
             {
-                if (!newObservers.Contains(conn))
+                if (!newObservers.Contains(player))
                 {
                     // removed observer
-                    conn.RemoveFromVisList(this);
-                    ServerObjectManager.HideForConnection(this, conn);
+                    player.RemoveFromVisList(this);
+                    ServerObjectManager.HideForConnection(this, player);
 
-                    if (logger.LogEnabled()) logger.Log("Removed Observer for " + gameObject + " " + conn);
+                    if (logger.LogEnabled()) logger.Log("Removed Observer for " + gameObject + " " + player);
                     changed = true;
                 }
             }
@@ -1060,17 +1060,17 @@ namespace Mirage
         // add all newObservers that aren't in .observers yet
         bool AddNewObservers(bool initialize, bool changed)
         {
-            foreach (INetworkPlayer conn in newObservers)
+            foreach (INetworkPlayer player in newObservers)
             {
                 // only add ready connections.
                 // otherwise the player might not be in the world yet or anymore
-                if (conn != null && conn.IsReady && (initialize || !observers.Contains(conn)))
+                if (player != null && player.IsReady && (initialize || !observers.Contains(player)))
                 {
                     // new observer
-                    conn.AddToVisList(this);
+                    player.AddToVisList(this);
                     // spawn identity for this conn
-                    ServerObjectManager.ShowForConnection(this, conn);
-                    if (logger.LogEnabled()) logger.Log("New Observer for " + gameObject + " " + conn);
+                    ServerObjectManager.ShowForConnection(this, player);
+                    if (logger.LogEnabled()) logger.Log("New Observer for " + gameObject + " " + player);
                     changed = true;
                 }
             }
@@ -1083,31 +1083,31 @@ namespace Mirage
         /// <para>This causes hasAuthority to be set on the client that owns the object, and NetworkBehaviour.OnStartAuthority will be called on that client. This object then will be in the NetworkConnection.clientOwnedObjects list for the connection.</para>
         /// <para>Authority can be removed with RemoveClientAuthority. Only one client can own an object at any time. This does not need to be called for player objects, as their authority is setup automatically.</para>
         /// </summary>
-        /// <param name="conn">	The connection of the client to assign authority to.</param>
-        public void AssignClientAuthority(INetworkPlayer conn)
+        /// <param name="player">	The connection of the client to assign authority to.</param>
+        public void AssignClientAuthority(INetworkPlayer player)
         {
             if (!IsServer)
             {
                 throw new InvalidOperationException("AssignClientAuthority can only be called on the server for spawned objects");
             }
 
-            if (conn == null)
+            if (player == null)
             {
                 throw new InvalidOperationException("AssignClientAuthority for " + gameObject + " owner cannot be null. Use RemoveClientAuthority() instead");
             }
 
-            if (ConnectionToClient != null && conn != ConnectionToClient)
+            if (ConnectionToClient != null && player != ConnectionToClient)
             {
                 throw new InvalidOperationException("AssignClientAuthority for " + gameObject + " already has an owner. Use RemoveClientAuthority() first");
             }
 
-            SetClientOwner(conn);
+            SetClientOwner(player);
 
             // The client will match to the existing object
             // update all variables and assign authority
-            ServerObjectManager.SendSpawnMessage(this, conn);
+            ServerObjectManager.SendSpawnMessage(this, player);
 
-            clientAuthorityCallback?.Invoke(conn, this, true);
+            clientAuthorityCallback?.Invoke(player, this, true);
         }
 
         /// <summary>
@@ -1252,11 +1252,11 @@ namespace Mirage
             else
             {
                 connectionsExcludeSelf.Clear();
-                foreach (INetworkPlayer conn in observers)
+                foreach (INetworkPlayer player in observers)
                 {
-                    if (ConnectionToClient != conn)
+                    if (ConnectionToClient != player)
                     {
-                        connectionsExcludeSelf.Add(conn);
+                        connectionsExcludeSelf.Add(player);
                     }
                 }
                 NetworkServer.SendToMany(connectionsExcludeSelf, msg, channelId);

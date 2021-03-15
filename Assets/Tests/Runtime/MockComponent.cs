@@ -42,12 +42,12 @@ namespace Mirage.Tests
 
         public int targetRpcArg1;
         public string targetRpcArg2;
-        public INetworkPlayer targetRpcConn;
+        public INetworkPlayer targetRpcPlayer;
 
-        [ClientRpc(target = Mirage.Client.Connection)]
-        public void ClientConnRpcTest(INetworkPlayer conn, int arg1, string arg2)
+        [ClientRpc(target = Mirage.Client.Player)]
+        public void ClientConnRpcTest(INetworkPlayer player, int arg1, string arg2)
         {
-            targetRpcConn = conn;
+            targetRpcPlayer = player;
             targetRpcArg1 = arg1;
             targetRpcArg2 = arg2;
         }

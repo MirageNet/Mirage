@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using InvalidEnumArgumentException = System.ComponentModel.InvalidEnumArgumentException;
-using Mirage.Logging;
 
 namespace Mirage
 {
@@ -104,20 +104,20 @@ namespace Mirage
 
         #region Client
 
-        void RegisterClientMessages(INetworkPlayer connection)
+        void RegisterClientMessages(INetworkPlayer player)
         {
-            connection.RegisterHandler<SceneMessage>(ClientSceneMessage);
+            player.RegisterHandler<SceneMessage>(ClientSceneMessage);
             if (!Client.IsLocalClient)
             {
-                connection.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
-                connection.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
+                player.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
+                player.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
             }
         }
 
-        void OnClientAuthenticated(INetworkPlayer conn)
+        void OnClientAuthenticated(INetworkPlayer player)
         {
             logger.Log("NetworkSceneManager.OnClientAuthenticated");
-            RegisterClientMessages(conn);
+            RegisterClientMessages(player);
         }
 
         void OnDestroy()
@@ -126,7 +126,7 @@ namespace Mirage
                 Client.Authenticated?.RemoveListener(OnClientAuthenticated);
         }
 
-        internal void ClientSceneMessage(INetworkPlayer conn, SceneMessage msg)
+        internal void ClientSceneMessage(INetworkPlayer player, SceneMessage msg)
         {
             if (!Client.IsConnected)
             {
@@ -154,7 +154,7 @@ namespace Mirage
             ApplyOperationAsync(msg.scenePath, msg.sceneOperation).Forget();
         }
 
-        internal void ClientSceneReadyMessage(INetworkPlayer conn, SceneReadyMessage msg)
+        internal void ClientSceneReadyMessage(INetworkPlayer player, SceneReadyMessage msg)
         {
             logger.Log("ClientSceneReadyMessage");
 
@@ -163,11 +163,11 @@ namespace Mirage
                 clientLoadingOperation.allowSceneActivation = true;
         }
 
-        internal void ClientNotReadyMessage(INetworkPlayer conn, NotReadyMessage msg)
+        internal void ClientNotReadyMessage(INetworkPlayer player, NotReadyMessage msg)
         {
             logger.Log("NetworkSceneManager.OnClientNotReadyMessageInternal");
 
-            Client.Connection.IsReady = false;
+            Client.Player.IsReady = false;
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace Mirage
             }
 
             //set ready after scene change has completed
-            if (!Client.Connection.IsReady)
+            if (!Client.Player.IsReady)
                 SetClientReady();
         }
 
@@ -216,10 +216,10 @@ namespace Mirage
 
             // Set these before sending the ReadyMessage, otherwise host client
             // will fail in InternalAddPlayer with null readyConnection.
-            Client.Connection.IsReady = true;
+            Client.Player.IsReady = true;
 
             // Tell server we're ready to have a player object spawned
-            Client.Connection.Send(new ReadyMessage());
+            Client.Player.Send(new ReadyMessage());
         }
 
         #endregion
@@ -227,12 +227,12 @@ namespace Mirage
         #region Server
 
         // called after successful authentication
-        void OnServerAuthenticated(INetworkPlayer conn)
+        void OnServerAuthenticated(INetworkPlayer player)
         {
             logger.Log("NetworkSceneManager.OnServerAuthenticated");
 
-            conn.Send(new SceneMessage { scenePath = ActiveScenePath, additiveScenes = additiveSceneList.ToArray() });
-            conn.Send(new SceneReadyMessage());
+            player.Send(new SceneMessage { scenePath = ActiveScenePath, additiveScenes = additiveSceneList.ToArray() });
+            player.Send(new SceneReadyMessage());
         }
 
         /// <summary>

@@ -159,9 +159,9 @@ namespace Mirage.Tests.Host
             replacementIdentity.AssetId = Guid.NewGuid();
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            serverObjectManager.ReplacePlayerForConnection(server.LocalConnection, client, playerReplacement, true);
+            serverObjectManager.ReplaceCharacter(server.LocalPlayer, client, playerReplacement, true);
 
-            Assert.That(server.LocalClient.Connection.Identity, Is.EqualTo(replacementIdentity));
+            Assert.That(server.LocalClient.Player.Identity, Is.EqualTo(replacementIdentity));
         }
 
         [UnityTest]

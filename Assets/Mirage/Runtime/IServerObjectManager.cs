@@ -16,19 +16,19 @@ namespace Mirage
         /// </summary>
         SpawnEvent UnSpawned { get; }
 
-        bool AddPlayerForConnection(INetworkPlayer conn, GameObject player);
+        bool AddCharacter(INetworkPlayer player, GameObject character);
 
-        bool AddPlayerForConnection(INetworkPlayer conn, GameObject player, Guid assetId);
+        bool AddCharacter(INetworkPlayer player, GameObject character, Guid assetId);
 
-        bool ReplacePlayerForConnection(INetworkPlayer conn, NetworkClient client, GameObject player, bool keepAuthority = false);
+        bool ReplaceCharacter(INetworkPlayer player, NetworkClient client, GameObject character, bool keepAuthority = false);
 
-        bool ReplacePlayerForConnection(INetworkPlayer conn, NetworkClient client, GameObject player, Guid assetId, bool keepAuthority = false);
+        bool ReplaceCharacter(INetworkPlayer player, NetworkClient client, GameObject character, Guid assetId, bool keepAuthority = false);
 
-        void Spawn(GameObject obj, GameObject ownerPlayer);
+        void Spawn(GameObject obj, GameObject owner);
 
-        void Spawn(GameObject obj, INetworkPlayer ownerConnection = null);
+        void Spawn(GameObject obj, INetworkPlayer owner = null);
 
-        void Spawn(GameObject obj, Guid assetId, INetworkPlayer ownerConnection = null);
+        void Spawn(GameObject obj, Guid assetId, INetworkPlayer owner = null);
 
         void Destroy(GameObject obj);
 

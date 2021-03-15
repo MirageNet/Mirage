@@ -70,7 +70,7 @@ namespace Mirage.Tests.ClientServer
             // process spawn message from server
             await AsyncUtil.WaitUntilWithTimeout(() => clientComponent.targetRpcArg1 != 0);
 
-            Assert.That(clientComponent.targetRpcConn, Is.SameAs(connectionToServer));
+            Assert.That(clientComponent.targetRpcPlayer, Is.SameAs(connectionToServer));
             Assert.That(clientComponent.targetRpcArg1, Is.EqualTo(1));
             Assert.That(clientComponent.targetRpcArg2, Is.EqualTo("hello"));
         });

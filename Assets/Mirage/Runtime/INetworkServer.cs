@@ -40,7 +40,7 @@ namespace Mirage
         /// <summary>
         /// The connection to the host mode client (if any).
         /// </summary>
-        INetworkPlayer LocalConnection { get; }
+        INetworkPlayer LocalPlayer { get; }
 
         /// <summary>
         /// The host client for this server 
@@ -60,9 +60,9 @@ namespace Mirage
 
         void Disconnect();
 
-        void AddConnection(INetworkPlayer conn);
+        void AddConnection(INetworkPlayer player);
 
-        void RemoveConnection(INetworkPlayer conn);
+        void RemoveConnection(INetworkPlayer player);
 
         void SendToAll<T>(T msg, int channelId = Channel.Reliable);
     }

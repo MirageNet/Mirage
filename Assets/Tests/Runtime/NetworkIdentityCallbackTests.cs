@@ -12,7 +12,7 @@ namespace Mirage.Tests
         #region test components
         class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
         {
-            public override bool OnCheckObserver(INetworkPlayer conn) { return true; }
+            public override bool OnCheckObserver(INetworkPlayer player) { return true; }
             public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
         }
 
@@ -63,21 +63,21 @@ namespace Mirage.Tests
             var connection1 = new NetworkPlayer(tconn42) { IsReady = true };
             var connection2 = new NetworkPlayer(tconn43) { IsReady = false };
             // add some server connections
-            server.connections.Add(connection1);
-            server.connections.Add(connection2);
+            server.Players.Add(connection1);
+            server.Players.Add(connection2);
 
             // add a host connection
             (_, IConnection localConnection) = PipeConnection.CreatePipe();
 
             server.SetLocalConnection(client, localConnection);
-            server.LocalConnection.IsReady = true;
+            server.LocalPlayer.IsReady = true;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
 
             // add all to observers. should have the two ready connections then.
             identity.AddAllReadyServerConnectionsToObservers();
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { connection1, server.LocalConnection }));
+            Assert.That(identity.observers, Is.EquivalentTo(new[] { connection1, server.LocalPlayer }));
 
             // clean up
             server.Disconnect();

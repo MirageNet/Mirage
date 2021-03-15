@@ -100,7 +100,7 @@ namespace Mirage.Tests
         [Test]
         public void AddPlayerMessageTest()
         {
-            TestSerializeDeserialize(new AddPlayerMessage());
+            TestSerializeDeserialize(new AddCharacterMessage());
         }
 
         [Test]

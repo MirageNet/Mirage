@@ -26,7 +26,7 @@ namespace Mirage
         public bool requireAuthority = true;
     }
 
-    public enum Client { Owner, Observers, Connection }
+    public enum Client { Owner, Observers, Player }
 
     /// <summary>
     /// The server uses a Remote Procedure Call (RPC) to run this function on specific clients.

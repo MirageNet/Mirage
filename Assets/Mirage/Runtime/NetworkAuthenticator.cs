@@ -22,18 +22,18 @@ namespace Mirage
         #region server
 
         // This will get more code in the near future
-        internal void OnServerAuthenticateInternal(INetworkPlayer conn)
+        internal void OnServerAuthenticateInternal(INetworkPlayer player)
         {
-            OnServerAuthenticate(conn);
+            OnServerAuthenticate(player);
         }
 
         /// <summary>
         /// Called on server from OnServerAuthenticateInternal when a client needs to authenticate
         /// </summary>
-        /// <param name="conn">Connection to client.</param>
-        public virtual void OnServerAuthenticate(INetworkPlayer conn)
+        /// <param name="player">Connection to client.</param>
+        public virtual void OnServerAuthenticate(INetworkPlayer player)
         {
-            OnServerAuthenticated?.Invoke(conn);
+            OnServerAuthenticated?.Invoke(player);
         }
 
         #endregion
@@ -41,18 +41,18 @@ namespace Mirage
         #region client
 
         // This will get more code in the near future
-        internal void OnClientAuthenticateInternal(INetworkPlayer conn)
+        internal void OnClientAuthenticateInternal(INetworkPlayer player)
         {
-            OnClientAuthenticate(conn);
+            OnClientAuthenticate(player);
         }
 
         /// <summary>
         /// Called on client from OnClientAuthenticateInternal when a client needs to authenticate
         /// </summary>
-        /// <param name="conn">Connection of the client.</param>
-        public virtual void OnClientAuthenticate(INetworkPlayer conn)
+        /// <param name="player">Connection of the client.</param>
+        public virtual void OnClientAuthenticate(INetworkPlayer player)
         {
-            OnClientAuthenticated?.Invoke(conn);
+            OnClientAuthenticated?.Invoke(player);
         }
 
         #endregion

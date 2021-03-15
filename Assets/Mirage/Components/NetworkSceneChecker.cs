@@ -87,14 +87,14 @@ namespace Mirage
         /// Callback used by the visibility system to determine if an observer (player) can see this object.
         /// <para>If this function returns true, the network connection will be added as an observer.</para>
         /// </summary>
-        /// <param name="conn">Network connection of a player.</param>
+        /// <param name="player">Network connection of a player.</param>
         /// <returns>True if the player can see this object.</returns>
-        public override bool OnCheckObserver(INetworkPlayer conn)
+        public override bool OnCheckObserver(INetworkPlayer player)
         {
             if (forceHidden)
                 return false;
 
-            return conn.Identity.gameObject.scene == gameObject.scene;
+            return player.Identity.gameObject.scene == gameObject.scene;
         }
 
         /// <summary>

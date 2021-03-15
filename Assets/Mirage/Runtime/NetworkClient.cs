@@ -63,7 +63,7 @@ namespace Mirage
         /// <summary>
         /// The NetworkConnection object this client is using.
         /// </summary>
-        public INetworkPlayer Connection { get; internal set; }
+        public INetworkPlayer Player { get; internal set; }
 
         internal ConnectState connectState = ConnectState.Disconnected;
 
@@ -150,7 +150,7 @@ namespace Mirage
                 InitializeAuthEvents();
 
                 // setup all the handlers
-                Connection = GetNewConnection(transportConnection);
+                Player = GetNewPlayer(transportConnection);
                 Time.Reset();
 
                 RegisterMessageHandlers();
@@ -176,7 +176,7 @@ namespace Mirage
 
             server.SetLocalConnection(this, c2);
             IsLocalClient = true;
-            Connection = GetNewConnection(c1);
+            Player = GetNewPlayer(c1);
             RegisterHostHandlers();
 
             OnConnected().Forget();
@@ -185,7 +185,7 @@ namespace Mirage
         /// <summary>
         /// Creates a new INetworkConnection based on the provided IConnection.
         /// </summary>
-        public virtual INetworkPlayer GetNewConnection(IConnection connection)
+        public virtual INetworkPlayer GetNewPlayer(IConnection connection)
         {
             return new NetworkPlayer(connection);
         }
@@ -212,12 +212,12 @@ namespace Mirage
             // the handler may want to send messages to the client
             // thus we should set the connected state before calling the handler
             connectState = ConnectState.Connected;
-            Connected?.Invoke(Connection);
+            Connected?.Invoke(Player);
 
             // start processing messages
             try
             {
-                await Connection.ProcessMessagesAsync();
+                await Player.ProcessMessagesAsync();
             }
             catch (Exception ex)
             {
@@ -231,9 +231,9 @@ namespace Mirage
             }
         }
 
-        internal void OnAuthenticated(INetworkPlayer conn)
+        internal void OnAuthenticated(INetworkPlayer player)
         {
-            Authenticated?.Invoke(conn);
+            Authenticated?.Invoke(player);
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace Mirage
         /// </summary>
         public void Disconnect()
         {
-            Connection?.Connection?.Disconnect();
+            Player?.Connection?.Disconnect();
         }
 
         /// <summary>
@@ -256,12 +256,12 @@ namespace Mirage
         /// <returns>True if message was sent.</returns>
         public void Send<T>(T message, int channelId = Channel.Reliable)
         {
-            Connection.Send(message, channelId);
+            Player.Send(message, channelId);
         }
 
         public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
-            Connection.Send(segment, channelId);
+            Player.Send(segment, channelId);
         }
 
         internal void Update()
@@ -276,12 +276,12 @@ namespace Mirage
 
         internal void RegisterHostHandlers()
         {
-            Connection.RegisterHandler<NetworkPongMessage>(msg => { });
+            Player.RegisterHandler<NetworkPongMessage>(msg => { });
         }
 
         internal void RegisterMessageHandlers()
         {
-            Connection.RegisterHandler<NetworkPongMessage>(Time.OnClientPong);
+            Player.RegisterHandler<NetworkPongMessage>(Time.OnClientPong);
         }
 
 
