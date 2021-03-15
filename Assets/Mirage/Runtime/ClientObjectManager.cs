@@ -558,7 +558,7 @@ namespace Mirage
 
             Skeleton skeleton = RemoteCallHelper.GetSkeleton(msg.functionHash);
 
-            if (skeleton.invokeType != MirageInvokeType.ClientRpc)
+            if (skeleton.invokeType != RpcInvokeType.ClientRpc)
             {
                 throw new MethodInvocationException($"Invalid RPC call with id {msg.functionHash}");
             }
