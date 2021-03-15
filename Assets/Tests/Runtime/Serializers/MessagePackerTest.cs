@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Mirage.Serialization;
 using NUnit.Framework;
 
 namespace Mirage.Tests

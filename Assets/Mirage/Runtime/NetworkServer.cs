@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 using Mirage.Logging;
+using Mirage.Serialization;
 
 namespace Mirage
 {

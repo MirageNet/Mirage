@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Mirage
+namespace Mirage.Serialization
 {
     // message packing all in one place, instead of constructing headers in all
     // kinds of different places

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Mirage
+namespace Mirage.Serialization
 {
     enum ComponentType : uint
     {

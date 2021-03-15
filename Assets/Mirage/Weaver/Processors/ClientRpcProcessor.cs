@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Mirage.RemoteCalls;
+using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 namespace Mirage.Weaver

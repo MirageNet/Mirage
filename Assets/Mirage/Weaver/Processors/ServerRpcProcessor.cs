@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
 using Mirage.RemoteCalls;
+using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MethodAttributes = Mono.Cecil.MethodAttributes;

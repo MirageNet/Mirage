@@ -15,44 +15,17 @@ namespace Mirage
     }
 
     /// <summary>
-    /// Converts between uint and float without allocations
+    /// An object that implements this interface can find objects by their net id
+    /// This is used by readers when trying to deserialize gameobjects
     /// </summary>
-    [StructLayout(LayoutKind.Explicit)]
-    internal struct UIntFloat
+    public interface IObjectLocator
     {
-        [FieldOffset(0)]
-        public float floatValue;
-
-        [FieldOffset(0)]
-        public uint intValue;
+        /// <summary>
+        /// Finds a network identity by id
+        /// </summary>
+        /// <param name="netId">the id of the object to find</param>
+        /// <returns>The NetworkIdentity matching the netid or null if none is found</returns>
+        NetworkIdentity this[uint netId] { get; }
     }
 
-    /// <summary>
-    /// Converts between ulong and double without allocations
-    /// </summary>
-    [StructLayout(LayoutKind.Explicit)]
-    internal struct UIntDouble
-    {
-        [FieldOffset(0)]
-        public double doubleValue;
-
-        [FieldOffset(0)]
-        public ulong longValue;
-    }
-
-    /// <summary>
-    /// Converts between ulong and decimal without allocations
-    /// </summary>
-    [StructLayout(LayoutKind.Explicit)]
-    internal struct UIntDecimal
-    {
-        [FieldOffset(0)]
-        public ulong longValue1;
-
-        [FieldOffset(8)]
-        public ulong longValue2;
-
-        [FieldOffset(0)]
-        public decimal decimalValue;
-    }
 }

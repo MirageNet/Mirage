@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Mirage.Serialization;
 using NUnit.Framework;
 using UnityEngine;
 

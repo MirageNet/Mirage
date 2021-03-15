@@ -1,4 +1,5 @@
 using Mirage;
+using Mirage.Serialization;
 
 namespace GeneratedReaderWriter.CanUseCustomReadWriteForAbstractClass
 {

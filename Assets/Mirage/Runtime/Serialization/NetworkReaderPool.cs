@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using Mirage.Logging;
 
-namespace Mirage
+namespace Mirage.Serialization
 {
     /// <summary>
     /// NetworkReader to be used with <see cref="NetworkReaderPool">NetworkReaderPool</see>

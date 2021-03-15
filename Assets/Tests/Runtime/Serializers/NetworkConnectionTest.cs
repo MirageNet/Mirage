@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 

@@ -17,6 +17,7 @@
 //   interpolation. interpolation over time is never that good.
 //
 using UnityEngine;
+using Mirage.Serialization;
 
 namespace Mirage
 {
