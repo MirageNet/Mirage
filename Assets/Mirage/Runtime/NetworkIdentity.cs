@@ -187,23 +187,22 @@ namespace Mirage
         /// </summary>
         public ClientObjectManager ClientObjectManager;
 
-        INetworkPlayer _connectionToClient;
-
+        IObjectOwner _owner;
         /// <summary>
-        /// The NetworkConnection associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is valid for player and other owned objects in the server.
-        /// <para>Use it to return details such as the connection&apos;s identity, IP address and ready status.</para>
+        /// What Player has control over this Identity
         /// </summary>
-        public INetworkPlayer ConnectionToClient
+        // todo remove word "player" from doc comment?
+        public IObjectOwner Owner
         {
-            get => _connectionToClient;
-
-            internal set
+            get => _owner;
+            set
             {
-                if (_connectionToClient != null)
-                    _connectionToClient.RemoveOwnedObject(this);
+                if (_owner == value)
+                    return;
 
-                _connectionToClient = value;
-                _connectionToClient?.AddOwnedObject(this);
+                _owner?.RemoveOwnedObject(this);
+                _owner = value;
+                _owner?.AddOwnedObject(this);
             }
         }
 
