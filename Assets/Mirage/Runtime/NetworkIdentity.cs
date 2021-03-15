@@ -146,7 +146,7 @@ namespace Mirage
         /// <summary>
         /// The set of network connections (players) that can see this object.
         /// </summary>
-        public readonly HashSet<INetworkPlayer> observers = new HashSet<INetworkPlayer>();
+        public readonly HashSet<IVisibilityTracker> observers = new HashSet<IVisibilityTracker>();
 
         /// <summary>
         /// Unique identifier for this particular object instance, used for tracking objects between networked clients and the server.
