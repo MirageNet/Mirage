@@ -2,13 +2,6 @@ using System.Runtime.InteropServices;
 
 namespace Mirage
 {
-    // invoke type for Rpc
-    public enum MirageInvokeType
-    {
-        ServerRpc,
-        ClientRpc
-    }
-
     public static class Version
     {
         public static readonly string Current = typeof(NetworkIdentity).Assembly.GetName().Version.ToString();

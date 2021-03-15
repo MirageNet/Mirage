@@ -15,17 +15,24 @@ namespace Mirage.RemoteCalls
     public delegate void CmdDelegate(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderConnection, int replyId);
     public delegate UniTask<T> RequestDelegate<T>(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderConnection, int replyId);
 
+    // invoke type for Rpc
+    public enum RpcInvokeType
+    {
+        ServerRpc,
+        ClientRpc
+    }
+
     /// <summary>
     /// Stub Skeleton for RPC
     /// </summary>
     class Skeleton
     {
         public Type invokeClass;
-        public MirageInvokeType invokeType;
+        public RpcInvokeType invokeType;
         public CmdDelegate invokeFunction;
         public bool cmdRequireAuthority;
 
-        public bool AreEqual(Type invokeClass, MirageInvokeType invokeType, CmdDelegate invokeFunction)
+        public bool AreEqual(Type invokeClass, RpcInvokeType invokeType, CmdDelegate invokeFunction)
         {
             return this.invokeClass == invokeClass &&
                     this.invokeType == invokeType &&
@@ -78,7 +85,7 @@ namespace Mirage.RemoteCalls
         /// <param name="func"></param>
         /// <param name="cmdRequireAuthority"></param>
         /// <returns>remote function hash</returns>
-        public static int RegisterDelegate(Type invokeClass, string cmdName, MirageInvokeType invokerType, CmdDelegate func, bool cmdRequireAuthority = true)
+        public static int RegisterDelegate(Type invokeClass, string cmdName, RpcInvokeType invokerType, CmdDelegate func, bool cmdRequireAuthority = true)
         {
             // type+func so Inventory.RpcUse != Equipment.RpcUse
             int cmdHash = GetMethodHash(invokeClass, cmdName);
@@ -98,7 +105,7 @@ namespace Mirage.RemoteCalls
 
             if (logger.LogEnabled())
             {
-                string requireAuthorityMessage = invokerType == MirageInvokeType.ServerRpc ? $" RequireAuthority:{cmdRequireAuthority}" : "";
+                string requireAuthorityMessage = invokerType == RpcInvokeType.ServerRpc ? $" RequireAuthority:{cmdRequireAuthority}" : "";
                 logger.Log($"RegisterDelegate hash: {cmdHash} invokerType: {invokerType} method: {func.Method.Name}{requireAuthorityMessage}");
             }
 
@@ -130,10 +137,10 @@ namespace Mirage.RemoteCalls
                 Wrapper(obj, reader, senderConnection, replyId).Forget();
             }
 
-            RegisterDelegate(invokeClass, cmdName, MirageInvokeType.ServerRpc, CmdWrapper, cmdRequireAuthority);
+            RegisterDelegate(invokeClass, cmdName, RpcInvokeType.ServerRpc, CmdWrapper, cmdRequireAuthority);
         }
 
-        static bool CheckIfDelegateExists(Type invokeClass, MirageInvokeType invokerType, CmdDelegate func, int cmdHash)
+        static bool CheckIfDelegateExists(Type invokeClass, RpcInvokeType invokerType, CmdDelegate func, int cmdHash)
         {
             if (cmdHandlerDelegates.ContainsKey(cmdHash))
             {
@@ -153,12 +160,12 @@ namespace Mirage.RemoteCalls
 
         public static void RegisterServerRpcDelegate(Type invokeClass, string cmdName, CmdDelegate func, bool requireAuthority)
         {
-            RegisterDelegate(invokeClass, cmdName, MirageInvokeType.ServerRpc, func, requireAuthority);
+            RegisterDelegate(invokeClass, cmdName, RpcInvokeType.ServerRpc, func, requireAuthority);
         }
 
         public static void RegisterRpcDelegate(Type invokeClass, string rpcName, CmdDelegate func)
         {
-            RegisterDelegate(invokeClass, rpcName, MirageInvokeType.ClientRpc, func);
+            RegisterDelegate(invokeClass, rpcName, RpcInvokeType.ClientRpc, func);
         }
 
         /// <summary>

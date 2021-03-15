@@ -421,7 +421,7 @@ namespace Mirage
             }
             Skeleton skeleton = RemoteCallHelper.GetSkeleton(msg.functionHash);
 
-            if (skeleton.invokeType != MirageInvokeType.ServerRpc)
+            if (skeleton.invokeType != RpcInvokeType.ServerRpc)
             {
                 throw new MethodInvocationException($"Invalid ServerRpc for id {msg.functionHash}");
             }
