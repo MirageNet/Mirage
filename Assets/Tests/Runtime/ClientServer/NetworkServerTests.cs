@@ -27,7 +27,7 @@ namespace Mirage.Tests.ClientServer
         [Test]
         public void InitializeTest()
         {
-            Assert.That(server.connections, Has.Count.EqualTo(1));
+            Assert.That(server.Players, Has.Count.EqualTo(1));
             Assert.That(server.Active);
             Assert.That(server.LocalClientActive, Is.False);
         }
@@ -120,7 +120,7 @@ namespace Mirage.Tests.ClientServer
         [Test]
         public void GetNewConnectionTest()
         {
-            Assert.That(server.GetNewConnection(Substitute.For<IConnection>()), Is.Not.Null);
+            Assert.That(server.GetNewPlayer(Substitute.For<IConnection>()), Is.Not.Null);
         }
 
         [Test]

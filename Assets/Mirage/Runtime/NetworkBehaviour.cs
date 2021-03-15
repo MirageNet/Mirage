@@ -261,7 +261,7 @@ namespace Mirage
                 throw new UnauthorizedAccessException($"Trying to send ServerRpc for object without authority. {invokeClass}.{cmdName}");
             }
 
-            if (Client.Connection == null)
+            if (Client.Player == null)
             {
                 throw new InvalidOperationException("Send ServerRpc attempted with no client running [client=" + ConnectionToServer + "].");
             }
@@ -324,7 +324,7 @@ namespace Mirage
             NetIdentity.SendToObservers(message, includeOwner, channelId);
         }
 
-        protected internal void SendTargetRpcInternal(INetworkPlayer conn, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
+        protected internal void SendTargetRpcInternal(INetworkPlayer player, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
         {
             // this was in Weaver before
             if (!Server || !Server.Active)
@@ -333,9 +333,9 @@ namespace Mirage
             }
 
             // connection parameter is optional. assign if null.
-            if (conn == null)
+            if (player == null)
             {
-                conn = ConnectionToClient;
+                player = ConnectionToClient;
             }
 
             // This cannot use Server.active, as that is not specific to this object.
@@ -356,7 +356,7 @@ namespace Mirage
                 payload = writer.ToArraySegment()
             };
 
-            conn.Send(message, channelId);
+            player.Send(message, channelId);
         }
         #endregion
 

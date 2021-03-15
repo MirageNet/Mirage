@@ -43,7 +43,7 @@ namespace Mirage.Tests.Host
         public IEnumerator DontAutoSpawnTest() => UniTask.ToCoroutine(async () =>
         {
             bool invokeAddPlayerMessage = false;
-            server.LocalConnection.RegisterHandler<AddPlayerMessage>(msg => invokeAddPlayerMessage = true);
+            server.LocalPlayer.RegisterHandler<AddCharacterMessage>(msg => invokeAddPlayerMessage = true);
 
             sceneManager.ChangeServerScene("Assets/Mirror/Tests/Runtime/testScene.unity");
             // wait for messages to be processed
@@ -57,7 +57,7 @@ namespace Mirage.Tests.Host
         public void ManualSpawnTest()
         {
             bool invokeAddPlayerMessage = false;
-            server.LocalConnection.RegisterHandler<AddPlayerMessage>(msg => invokeAddPlayerMessage = true);
+            server.LocalPlayer.RegisterHandler<AddCharacterMessage>(msg => invokeAddPlayerMessage = true);
 
             spawner.RequestServerSpawnPlayer();
 

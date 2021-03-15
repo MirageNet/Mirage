@@ -30,7 +30,7 @@ namespace Mirage
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
         // Handles network messages on client and server
-        internal delegate void NetworkMessageDelegate(INetworkPlayer conn, NetworkReader reader, int channelId);
+        internal delegate void NetworkMessageDelegate(INetworkPlayer player, NetworkReader reader, int channelId);
 
         // internal so it can be tested
         private readonly HashSet<NetworkIdentity> visList = new HashSet<NetworkIdentity>();
@@ -100,7 +100,7 @@ namespace Mirage
 
         private static NetworkMessageDelegate MessageHandler<T>(Action<INetworkPlayer, T> handler)
         {
-            void AdapterFunction(INetworkPlayer conn, NetworkReader reader, int channelId)
+            void AdapterFunction(INetworkPlayer player, NetworkReader reader, int channelId)
             {
                 // protect against DOS attacks if attackers try to send invalid
                 // data packets to crash the server/client. there are a thousand
@@ -124,7 +124,7 @@ namespace Mirage
                     NetworkDiagnostics.OnReceive(message, channelId, reader.Length);
                 }
 
-                handler(conn, message);
+                handler(player, message);
             }
             return AdapterFunction;
         }

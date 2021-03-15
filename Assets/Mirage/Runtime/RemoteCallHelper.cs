@@ -12,8 +12,8 @@ namespace Mirage.RemoteCalls
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="reader"></param>
-    public delegate void CmdDelegate(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderConnection, int replyId);
-    public delegate UniTask<T> RequestDelegate<T>(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderConnection, int replyId);
+    public delegate void CmdDelegate(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId);
+    public delegate UniTask<T> RequestDelegate<T>(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId);
 
     // invoke type for Rpc
     public enum RpcInvokeType
@@ -39,11 +39,11 @@ namespace Mirage.RemoteCalls
                     this.invokeFunction == invokeFunction;
         }
 
-        internal void Invoke(NetworkReader reader, NetworkBehaviour invokingType, INetworkPlayer senderConnection = null, int replyId = 0)
+        internal void Invoke(NetworkReader reader, NetworkBehaviour invokingType, INetworkPlayer senderPlayer = null, int replyId = 0)
         {
             if (invokeClass.IsInstanceOfType(invokingType))
             {
-                invokeFunction(invokingType, reader, senderConnection, replyId);
+                invokeFunction(invokingType, reader, senderPlayer, replyId);
                 return;
             }
             throw new MethodInvocationException($"Invalid Rpc call {invokeFunction} for component {invokingType}");
@@ -114,10 +114,10 @@ namespace Mirage.RemoteCalls
 
         public static void RegisterRequestDelegate<T>(Type invokeClass, string cmdName, RequestDelegate<T> func, bool cmdRequireAuthority = true)
         {
-            async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderConnection, int replyId)
+            async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
             {
                 /// invoke the serverRpc and send a reply message
-                T result = await func(obj, reader, senderConnection, replyId);
+                T result = await func(obj, reader, senderPlayer, replyId);
 
                 using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
                 {
@@ -128,13 +128,13 @@ namespace Mirage.RemoteCalls
                         payload = writer.ToArraySegment()
                     };
 
-                    senderConnection.Send(serverRpcReply);
+                    senderPlayer.Send(serverRpcReply);
                 }
             }
 
-            void CmdWrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderConnection, int replyId)
+            void CmdWrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
             {
-                Wrapper(obj, reader, senderConnection, replyId).Forget();
+                Wrapper(obj, reader, senderPlayer, replyId).Forget();
             }
 
             RegisterDelegate(invokeClass, cmdName, RpcInvokeType.ServerRpc, CmdWrapper, cmdRequireAuthority);

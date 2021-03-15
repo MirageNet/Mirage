@@ -33,12 +33,12 @@ namespace Mirage.Tests.Host
             // add first ready client
             (_, NetworkPlayer first) = PipedConnections();
             first.IsReady = true;
-            server.connections.Add(first);
+            server.Players.Add(first);
 
             // add second ready client
             (_, NetworkPlayer second) = PipedConnections();
             second.IsReady = true;
-            server.connections.Add(second);
+            server.Players.Add(second);
 
             // set all not ready
             serverObjectManager.SetAllClientsNotReady();

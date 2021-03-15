@@ -18,13 +18,13 @@ namespace Mirage.Tests.Host
         [Test]
         public void ConnectionTest()
         {
-            Assert.That(client.Connection != null);
+            Assert.That(client.Player != null);
         }
 
         [Test]
         public void GetNewConnectionTest()
         {
-            Assert.That(client.GetNewConnection(Substitute.For<IConnection>()), Is.Not.Null);
+            Assert.That(client.GetNewPlayer(Substitute.For<IConnection>()), Is.Not.Null);
         }
 
         [UnityTest]
@@ -39,7 +39,7 @@ namespace Mirage.Tests.Host
         [Test]
         public void ConnectionClearHandlersTest()
         {
-            var clientConn = client.Connection as NetworkPlayer;
+            var clientConn = client.Player as NetworkPlayer;
 
             Assert.That(clientConn.messageHandlers.Count > 0);
 

@@ -91,17 +91,17 @@ namespace Mirage.Tests.ClientServer
             // now start the client
             await client.ConnectAsync("localhost");
 
-            await AsyncUtil.WaitUntilWithTimeout(() => server.connections.Count > 0);
+            await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > 0);
 
             // get the connections so that we can spawn players
-            connectionToClient = server.connections.First();
-            connectionToServer = client.Connection;
+            connectionToClient = server.Players.First();
+            connectionToServer = client.Player;
 
             // create a player object in the server
             serverPlayerGO = Object.Instantiate(playerPrefab);
             serverIdentity = serverPlayerGO.GetComponent<NetworkIdentity>();
             serverComponent = serverPlayerGO.GetComponent<T>();
-            serverObjectManager.AddPlayerForConnection(connectionToClient, serverPlayerGO);
+            serverObjectManager.AddCharacter(connectionToClient, serverPlayerGO);
 
             // wait for client to spawn it
             await AsyncUtil.WaitUntilWithTimeout(() => connectionToServer.Identity != null);

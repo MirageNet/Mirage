@@ -13,7 +13,7 @@ namespace Mirage
     public struct NotReadyMessage { }
 
     [NetworkMessage]
-    public struct AddPlayerMessage { }
+    public struct AddCharacterMessage { }
 
     [NetworkMessage]
     public struct SceneMessage

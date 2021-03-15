@@ -12,7 +12,7 @@ namespace Mirage
 
         // just a cached memory area where we can collect connections
         // for broadcasting messages
-        private static readonly List<INetworkPlayer> connectionsCache = new List<INetworkPlayer>();
+        private static readonly List<INetworkPlayer> playerCache = new List<INetworkPlayer>();
 
         public void SetAllClientsNotReady()
         {
@@ -26,18 +26,18 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("Server.SendToReady msgType:" + typeof(T));
 
-            connectionsCache.Clear();
+            playerCache.Clear();
 
             foreach (ObjectReady objectReady in ObjectReadyList)
             {
                 bool isOwner = objectReady.NetIdentity == identity;
                 if ((!isOwner || includeOwner) && objectReady.IsReady)
                 {
-                    connectionsCache.Add(objectReady.NetIdentity.ConnectionToClient);
+                    playerCache.Add(objectReady.NetIdentity.ConnectionToClient);
                 }
             }
 
-            NetworkServer.SendToMany(connectionsCache, msg, channelId);
+            NetworkServer.SendToMany(playerCache, msg, channelId);
         }
     }
 }

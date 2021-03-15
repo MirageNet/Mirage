@@ -59,10 +59,10 @@ namespace Mirage.Tests.Host
             identity = playerGO.AddComponent<NetworkIdentity>();
             component = playerGO.AddComponent<T>();
 
-            serverObjectManager.AddPlayerForConnection(server.LocalConnection, playerGO);
+            serverObjectManager.AddCharacter(server.LocalPlayer, playerGO);
 
             // wait for client to spawn it
-            await AsyncUtil.WaitUntilWithTimeout(() => client.Connection.Identity != null);
+            await AsyncUtil.WaitUntilWithTimeout(() => client.Player.Identity != null);
         });
 
 

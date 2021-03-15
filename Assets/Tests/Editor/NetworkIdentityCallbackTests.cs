@@ -19,10 +19,10 @@ namespace Mirage
             public int called;
             public INetworkPlayer valuePassed;
             public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer conn)
+            public override bool OnCheckObserver(INetworkPlayer player)
             {
                 ++called;
-                valuePassed = conn;
+                valuePassed = player;
                 throw new Exception("some exception");
             }
         }
@@ -31,7 +31,7 @@ namespace Mirage
         {
             public int called;
             public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer conn)
+            public override bool OnCheckObserver(INetworkPlayer player)
             {
                 ++called;
                 return true;
@@ -42,7 +42,7 @@ namespace Mirage
         {
             public int called;
             public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer conn)
+            public override bool OnCheckObserver(INetworkPlayer player)
             {
                 ++called;
                 return false;
@@ -108,7 +108,7 @@ namespace Mirage
         class RebuildObserversNetworkBehaviour : NetworkVisibility
         {
             public INetworkPlayer observer;
-            public override bool OnCheckObserver(INetworkPlayer conn) { return true; }
+            public override bool OnCheckObserver(INetworkPlayer player) { return true; }
             public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
             {
                 observers.Add(observer);
@@ -117,7 +117,7 @@ namespace Mirage
 
         class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
         {
-            public override bool OnCheckObserver(INetworkPlayer conn) { return true; }
+            public override bool OnCheckObserver(INetworkPlayer player) { return true; }
             public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
         }
 
@@ -269,16 +269,16 @@ namespace Mirage
             identity.StartServer();
 
             // add an observer connection
-            INetworkPlayer connection = Substitute.For<INetworkPlayer>();
-            identity.observers.Add(connection);
+            INetworkPlayer player = Substitute.For<INetworkPlayer>();
+            identity.observers.Add(player);
 
-            INetworkPlayer connection2 = Substitute.For<INetworkPlayer>();
+            INetworkPlayer player2 = Substitute.For<INetworkPlayer>();
             // RemoveObserverInternal with invalid connection should do nothing
-            identity.RemoveObserverInternal(connection2);
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { connection }));
+            identity.RemoveObserverInternal(player2);
+            Assert.That(identity.observers, Is.EquivalentTo(new[] { player }));
 
             // RemoveObserverInternal with existing connection should remove it
-            identity.RemoveObserverInternal(connection);
+            identity.RemoveObserverInternal(player);
             Assert.That(identity.observers, Is.Empty);
         }
 
@@ -811,8 +811,8 @@ namespace Mirage
             notReadyConnection.IsReady.Returns(false);
 
             // add some server connections
-            server.connections.Add(readyConnection);
-            server.connections.Add(notReadyConnection);
+            server.Players.Add(readyConnection);
+            server.Players.Add(notReadyConnection);
 
             // rebuild observers should add all ready server connections
             // because no component implements OnRebuildObservers

@@ -47,7 +47,7 @@ namespace Mirage
                 }
                 else
                 {
-                    Client.Authenticated.AddListener(c => Client.Send(new AddPlayerMessage()));
+                    Client.Authenticated.AddListener(c => Client.Send(new AddCharacterMessage()));
                 }
 
                 if (ClientObjectManager != null)
@@ -74,7 +74,7 @@ namespace Mirage
             if (Client != null && SceneManager != null)
             {
                 SceneManager.ClientSceneChanged.RemoveListener(OnClientSceneChanged);
-                Client.Authenticated.RemoveListener(c => Client.Send(new AddPlayerMessage()));
+                Client.Authenticated.RemoveListener(c => Client.Send(new AddCharacterMessage()));
             }
             if (Server != null)
             {
@@ -82,10 +82,10 @@ namespace Mirage
             }
         }
 
-        private void OnServerAuthenticated(INetworkPlayer connection)
+        private void OnServerAuthenticated(INetworkPlayer player)
         {
             // wait for client to send us an AddPlayerMessage
-            connection.RegisterHandler<AddPlayerMessage>(OnServerAddPlayerInternal);
+            player.RegisterHandler<AddCharacterMessage>(OnServerAddPlayerInternal);
         }
 
         /// <summary>
@@ -101,34 +101,34 @@ namespace Mirage
 
         public virtual void RequestServerSpawnPlayer()
         {
-            Client.Send(new AddPlayerMessage());
+            Client.Send(new AddCharacterMessage());
         }
 
-        void OnServerAddPlayerInternal(INetworkPlayer conn, AddPlayerMessage msg)
+        void OnServerAddPlayerInternal(INetworkPlayer player, AddCharacterMessage msg)
         {
             logger.Log("CharacterSpawner.OnServerAddPlayer");
 
-            if (conn.Identity != null)
+            if (player.Identity != null)
             {
                 throw new InvalidOperationException("There is already a player for this connection.");
             }
 
-            OnServerAddPlayer(conn);
+            OnServerAddPlayer(player);
         }
 
         /// <summary>
         /// Called on the server when a client adds a new player with ClientScene.AddPlayer.
         /// <para>The default implementation for this function creates a new player object from the playerPrefab.</para>
         /// </summary>
-        /// <param name="conn">Connection from client.</param>
-        public virtual void OnServerAddPlayer(INetworkPlayer conn)
+        /// <param name="player">Connection from client.</param>
+        public virtual void OnServerAddPlayer(INetworkPlayer player)
         {
             Transform startPos = GetStartPosition();
-            NetworkIdentity player = startPos != null
+            NetworkIdentity character = startPos != null
                 ? Instantiate(PlayerPrefab, startPos.position, startPos.rotation)
                 : Instantiate(PlayerPrefab);
 
-            ServerObjectManager.AddPlayerForConnection(conn, player.gameObject);
+            ServerObjectManager.AddCharacter(player, character.gameObject);
         }
 
         /// <summary>

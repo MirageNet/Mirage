@@ -16,9 +16,9 @@ namespace Mirage
         /// Callback used by the visibility system to determine if an observer (player) can see this object.
         /// <para>If this function returns true, the network connection will be added as an observer.</para>
         /// </summary>
-        /// <param name="conn">Network connection of a player.</param>
+        /// <param name="player">Network connection of a player.</param>
         /// <returns>True if the player can see this object.</returns>
-        public abstract bool OnCheckObserver(INetworkPlayer conn);
+        public abstract bool OnCheckObserver(INetworkPlayer player);
 
         /// <summary>
         /// Callback used by the visibility system to (re)construct the set of observers that can see this object.

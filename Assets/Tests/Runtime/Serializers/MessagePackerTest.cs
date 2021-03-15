@@ -36,7 +36,7 @@ namespace Mirage.Tests
 
             Assert.Throws<FormatException>(() =>
             {
-                _ = MessagePacker.Unpack<AddPlayerMessage>(data);
+                _ = MessagePacker.Unpack<AddCharacterMessage>(data);
             });
         }
 

@@ -21,7 +21,7 @@ namespace Mirage.Tests.Host
 
             secondClient.ConnectAsync("localhost").Forget();
 
-            Assert.That(server.connections, Has.Count.EqualTo(1));
+            Assert.That(server.Players, Has.Count.EqualTo(1));
 
             Object.Destroy(secondGO);
         }
