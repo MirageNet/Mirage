@@ -1,3 +1,15 @@
+# [80.0.0](https://github.com/MirageNet/Mirage/compare/v79.0.0...v80.0.0) (2021-03-15)
+
+
+### Code Refactoring
+
+* rename connection to player ([#706](https://github.com/MirageNet/Mirage/issues/706)) ([03e8cfa](https://github.com/MirageNet/Mirage/commit/03e8cfab37184ebbf137ea3bddea217da6b45c95))
+
+
+### BREAKING CHANGES
+
+* Connection renamed to player
+
 # [79.0.0](https://github.com/MirageNet/Mirage/compare/v78.0.0...v79.0.0) (2021-03-15)
 
 
