@@ -179,7 +179,7 @@ namespace Mirage
         /// </summary>
         /// <param name="player">Connection which is adding the player.</param>
         /// <param name="client">Client associated to the player.</param> 
-        /// <param name="player">Player object spawned for the player.</param>
+        /// <param name="character">Player object spawned for the player.</param>
         /// <param name="assetId"></param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
