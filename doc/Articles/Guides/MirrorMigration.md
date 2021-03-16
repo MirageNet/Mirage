@@ -197,8 +197,8 @@ These fields/properties have been renamed:
 | `NetworkConnection.isReady`           | [NetworkPlayer.IsReady](xref:Mirage.NetworkPlayer.IsReady)                     |
 | `NetworkConnection.identity`          | [NetworkPlayer.Identity](xref:Mirage.NetworkPlayer.Identity)                   |
 | `NetworkServer.active`                | [NetworkServer.Active](xref:Mirage.NetworkServer.Active)                               |
-| `NetworkServer.localConnection`       | [NetworkServer.LocalConnection](xref:Mirage.NetworkServer.LocalConnection)             |
-| `NetworkClient.connection`            | [NetworkClient.Connection](xref:Mirage.NetworkClient.Connection)                       |
+| `NetworkServer.localConnection`       | [NetworkServer.LocalPlayer](xref:Mirage.NetworkServer.LocalPlayer)             |
+| `NetworkClient.connection`            | [NetworkClient.Player](xref:Mirage.NetworkClient.Player)                       |
 | `NetworkTime.time`                    | [NetworkTime.Time](xref:Mirage.NetworkTime.Time)                                       |
 
 ## Object Management
