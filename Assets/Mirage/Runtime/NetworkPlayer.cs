@@ -22,7 +22,7 @@ namespace Mirage
     /// <para>NetworkConnection objects also act as observers for networked objects. When a connection is an observer of a networked object with a NetworkIdentity, then the object will be visible to corresponding client for the connection, and incremental state changes will be sent to the client.</para>
     /// <para>There are many virtual functions on NetworkConnection that allow its behaviour to be customized. NetworkClient and NetworkServer can both be made to instantiate custom classes derived from NetworkConnection by setting their networkConnectionClass member variable.</para>
     /// </remarks>
-    public class NetworkPlayer : INetworkPlayer
+    public sealed class NetworkPlayer : INetworkPlayer
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
@@ -48,7 +48,7 @@ namespace Mirage
         /// The IP address / URL / FQDN associated with the connection.
         /// Can be useful for a game master to do IP Bans etc.
         /// </summary>
-        public virtual EndPoint Address => Connection.GetEndPointAddress();
+        public EndPoint Address => Connection.GetEndPointAddress();
 
         /// <summary>
         /// Transport level connection
