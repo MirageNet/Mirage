@@ -472,7 +472,7 @@ namespace Mirage
             // add component
             gameObject.AddComponent<CheckObserverExceptionNetworkBehaviour>();
 
-            var connection = new NetworkPlayer(tconn42);
+            var connection = new NetworkPlayer(tconn42, Substitute.For<IMessageHandler>());
 
             // should catch the exception internally and not throw it
             Assert.Throws<Exception>(() =>
@@ -489,7 +489,7 @@ namespace Mirage
             var gameObjectTrue = new GameObject();
             NetworkIdentity identityTrue = gameObjectTrue.AddComponent<NetworkIdentity>();
             CheckObserverTrueNetworkBehaviour compTrue = gameObjectTrue.AddComponent<CheckObserverTrueNetworkBehaviour>();
-            var connection = new NetworkPlayer(tconn42);
+            var connection = new NetworkPlayer(tconn42, Substitute.For<IMessageHandler>());
             Assert.That(identityTrue.OnCheckObserver(connection), Is.True);
             Assert.That(compTrue.called, Is.EqualTo(1));
         }
@@ -503,7 +503,7 @@ namespace Mirage
             var gameObjectFalse = new GameObject();
             NetworkIdentity identityFalse = gameObjectFalse.AddComponent<NetworkIdentity>();
             CheckObserverFalseNetworkBehaviour compFalse = gameObjectFalse.AddComponent<CheckObserverFalseNetworkBehaviour>();
-            var connection = new NetworkPlayer(tconn42);
+            var connection = new NetworkPlayer(tconn42, Substitute.For<IMessageHandler>());
             Assert.That(identityFalse.OnCheckObserver(connection), Is.False);
             Assert.That(compFalse.called, Is.EqualTo(1));
         }
@@ -666,8 +666,8 @@ namespace Mirage
         {
             identity.Server = server;
             // create some connections
-            var connection1 = new NetworkPlayer(tconn42);
-            var connection2 = new NetworkPlayer(tconn43);
+            var connection1 = new NetworkPlayer(tconn42, Substitute.For<IMessageHandler>());
+            var connection2 = new NetworkPlayer(tconn43, Substitute.For<IMessageHandler>());
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
@@ -689,8 +689,8 @@ namespace Mirage
             identity.StartServer();
 
             // add some observers
-            identity.observers.Add(new NetworkPlayer(tconn42));
-            identity.observers.Add(new NetworkPlayer(tconn43));
+            identity.observers.Add(new NetworkPlayer(tconn42, Substitute.For<IMessageHandler>()));
+            identity.observers.Add(new NetworkPlayer(tconn43, Substitute.For<IMessageHandler>()));
 
             // call ClearObservers
             identity.ClearObservers();
@@ -703,8 +703,8 @@ namespace Mirage
         {
             // creates .observers and generates a netId
             identity.StartServer();
-            identity.ConnectionToClient = new NetworkPlayer(tconn42);
-            identity.observers.Add(new NetworkPlayer(tconn42));
+            identity.ConnectionToClient = new NetworkPlayer(tconn42, Substitute.For<IMessageHandler>());
+            identity.observers.Add(new NetworkPlayer(tconn42, Substitute.For<IMessageHandler>()));
 
             // mark for reset and reset
             identity.Reset();
@@ -717,7 +717,7 @@ namespace Mirage
         {
             // add components
             RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
-            comp.observer = new NetworkPlayer(tconn42);
+            comp.observer = new NetworkPlayer(tconn42, Substitute.For<IMessageHandler>());
 
             // get new observers
             var observers = new HashSet<INetworkPlayer>();
@@ -734,7 +734,7 @@ namespace Mirage
             // it and not do anything else
             var observers = new HashSet<INetworkPlayer>
             {
-                new NetworkPlayer(tconn42)
+                new NetworkPlayer(tconn42, Substitute.For<IMessageHandler>())
             };
             identity.GetNewObservers(observers, true);
             Assert.That(observers.Count, Is.EqualTo(0));
