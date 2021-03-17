@@ -23,11 +23,9 @@ namespace Mirage.HeadlessBenchmark
 
         void Start()
         {
-            cachedArgs = Environment.GetCommandLineArgs();
-
-#if UNITY_EDITOR
-            cachedArgs = editorArgs.Split(' ');
-#endif
+            cachedArgs = Application.isEditor ?
+                cachedArgs = editorArgs.Split(' '):
+                Environment.GetCommandLineArgs();
 
             HeadlessStart();
 
@@ -51,11 +49,10 @@ namespace Mirage.HeadlessBenchmark
 
                 long messages = messageCount - previousMessageCount;
 
-#if UNITY_EDITOR
-                Debug.LogFormat("{0} FPS {1} messages {2} clients", frames, messages, server.NumberOfPlayers);
-#else
-                Console.WriteLine("{0} FPS {1} messages {2} clients", frames, messages, server.NumberOfPlayers);
-#endif
+                if (Application.isEditor)
+                    Debug.LogFormat("{0} FPS {1} messages {2} clients", frames, messages, server.NumberOfPlayers);
+                else
+                    Console.WriteLine("{0} FPS {1} messages {2} clients", frames, messages, server.NumberOfPlayers);
                 previousFrameCount = frameCount;
                 previousMessageCount = messageCount;
             }
