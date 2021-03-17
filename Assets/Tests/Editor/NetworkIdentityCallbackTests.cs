@@ -554,7 +554,6 @@ namespace Mirage
             // creates .observers and generates a netId
             identity.StartServer();
             identity.ConnectionToClient = new NetworkPlayer(tconn42);
-            identity.ConnectionToServer = new NetworkPlayer(tconn43);
 
             // mark for reset and reset
             identity.Reset();

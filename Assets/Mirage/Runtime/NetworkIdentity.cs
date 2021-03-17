@@ -1034,6 +1034,28 @@ namespace Mirage
 
         static readonly List<INetworkPlayer> connectionsExcludeSelf = new List<INetworkPlayer>(100);
 
+
+        // this is basically a delegate for player.Send,
+        // but it is allocation free
+        readonly struct SendAction : InterestManager.PlayerAction
+        {
+            private readonly ArraySegment<byte> data;
+            private readonly int channel;
+            private readonly INetworkPlayer owner;
+
+            internal SendAction(ArraySegment<byte> data, int channel, INetworkPlayer owner)
+            {
+                this.data = data;
+                this.channel = channel;
+                this.owner = owner;
+            }
+            public void Run(INetworkPlayer player)
+            {
+                if (player != owner)
+                    player.Send(data, channel);
+            }
+        }
+
         /// <summary>
         /// Send a message to all the remote observers
         /// </summary>
@@ -1048,16 +1070,22 @@ namespace Mirage
             if (Observers.Count == 0)
                 return;
 
-            connectionsExcludeSelf.Clear();
-            foreach (INetworkPlayer player in observers)
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                if (player == Server.LocalPlayer)
-                    continue;
+                // pack message into byte[] once
+                MessagePacker.Pack(msg, writer);
+                var segment = writer.ToArraySegment();
+                int count = Observers.Count;
 
-                if (includeOwner || ConnectionToClient != player)
-                {
-                    connectionsExcludeSelf.Add(player);
-                }
+                InterestManager interestManager = ServerObjectManager.InterestManager;
+
+                // just a delegate to call send, but allocation free
+                SendAction action = new SendAction(segment, channelId, includeOwner ? null : ConnectionToClient);
+
+
+                interestManager.ForEach(this, action);
+
+                NetworkDiagnostics.OnSend(msg, channelId, segment.Count, count);
             }
 
             if (connectionsExcludeSelf.Count > 0)
