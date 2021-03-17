@@ -44,9 +44,9 @@ namespace Mirage.HeadlessBenchmark
                 int frames = frameCount - previousFrameCount;
 
                 long messageCount = 0;
-                if (transport is KcpTransport)
+                if (transport is KcpTransport kcpTransport)
                 {
-                    messageCount = transport != null ? ((KcpTransport)transport).ReceivedMessageCount : 0;
+                    messageCount = kcpTransport.ReceivedMessageCount;
                 }
 
                 long messages = messageCount - previousMessageCount;
