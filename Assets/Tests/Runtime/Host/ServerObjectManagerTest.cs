@@ -80,7 +80,7 @@ namespace Mirage.Tests.Host
         {
             // add connection
 
-            NetworkPlayer connectionToClient = Substitute.For<NetworkPlayer>(Substitute.For<IConnection>());
+            INetworkPlayer connectionToClient = Substitute.For<INetworkPlayer>();
 
             NetworkIdentity identity = new GameObject().AddComponent<NetworkIdentity>();
 
