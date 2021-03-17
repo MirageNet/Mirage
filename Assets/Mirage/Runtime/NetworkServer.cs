@@ -134,6 +134,8 @@ namespace Mirage
             get { return _time; }
         }
 
+        public IMessageHandler MessageHandler { get; private set; }
+
         /// <summary>
         /// This shuts down the server and disconnects all clients.
         /// </summary>
@@ -196,6 +198,7 @@ namespace Mirage
         /// <returns></returns>
         public async UniTask ListenAsync()
         {
+            MessageHandler = new MessageBroker();
             Initialize();
 
             try
@@ -300,6 +303,7 @@ namespace Mirage
             Stopped?.Invoke();
             initialized = false;
             Active = false;
+            MessageHandler = null;
         }
 
         /// <summary>
@@ -307,7 +311,7 @@ namespace Mirage
         /// </summary>
         public virtual INetworkPlayer GetNewPlayer(IConnection connection)
         {
-            return new NetworkPlayer(connection);
+            return new NetworkPlayer(connection, MessageHandler);
         }
 
         /// <summary>
@@ -322,7 +326,8 @@ namespace Mirage
                 // connection cannot be null here or conn.connectionId
                 // would throw NRE
                 Players.Add(player);
-                player.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
+                // todo is registering handler multiple times a problem?
+                MessageHandler.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
             }
         }
 
@@ -412,7 +417,7 @@ namespace Mirage
             // now process messages until the connection closes
             try
             {
-                await player.ProcessMessagesAsync();
+                await MessageHandler.ProcessMessagesAsync(player);
             }
             catch (Exception ex)
             {
