@@ -98,5 +98,12 @@ namespace Mirage.Tests.Host
         });
 
         #endregion
+
+
+        [Test]
+        public void SetupPasses()
+        {
+            Assert.Pass();
+        }
     }
 }
