@@ -1,3 +1,10 @@
+## [80.0.1](https://github.com/MirageNet/Mirage/compare/v80.0.0...v80.0.1) (2021-03-17)
+
+
+### Bug Fixes
+
+* compilation issue on standalone build ([d6bea93](https://github.com/MirageNet/Mirage/commit/d6bea93c6885185f546aaf6b6e7c29abbe420012))
+
 # [80.0.0](https://github.com/MirageNet/Mirage/compare/v79.0.0...v80.0.0) (2021-03-15)
 
 
