@@ -171,6 +171,7 @@ namespace Mirage
         internal void ConnectHost(NetworkServer server)
         {
             logger.Log("Client Connect Host to Server");
+            MessageHandler = new MessageBroker();
             connectState = ConnectState.Connected;
 
             InitializeAuthEvents();
