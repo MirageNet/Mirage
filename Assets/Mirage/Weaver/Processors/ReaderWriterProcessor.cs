@@ -221,18 +221,32 @@ namespace Mirage.Weaver
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.Pack)) ||
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.GetId)) ||
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.Unpack)) ||
-                method.Is<IMessageSender>(nameof(IMessageSender.Send)) ||
-                method.Is<IMessageSender>(nameof(IMessageReceiver.RegisterHandler)) ||
-                method.Is<IMessageSender>(nameof(IMessageReceiver.UnregisterHandler)) ||
-                method.Is<NetworkPlayer>(nameof(NetworkPlayer.Send)) ||
+                // interfaces and types that implement them
+                method.Is<IMessageReceiver>(nameof(IMessageReceiver.RegisterHandler)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.RegisterHandler)) ||
                 method.Is<MessageBroker>(nameof(MessageBroker.RegisterHandler)) ||
+
+                method.Is<IMessageReceiver>(nameof(IMessageReceiver.UnregisterHandler)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.UnregisterHandler)) ||
                 method.Is<MessageBroker>(nameof(MessageBroker.UnregisterHandler)) ||
+
+                method.Is<IMessageSender>(nameof(IMessageSender.Send)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.Send)) ||
                 method.Is<MessageBroker>(nameof(MessageBroker.Send)) ||
+
+                method.Is<INotifySender>(nameof(INotifySender.SendNotify)) ||
+                method.Is<IMessageHandler>(nameof(IMessageHandler.SendNotify)) ||
                 method.Is<MessageBroker>(nameof(MessageBroker.SendNotify)) ||
+
+                method.Is<INetworkPlayer>(nameof(NetworkPlayer.Send)) ||
+                method.Is<NetworkPlayer>(nameof(NetworkPlayer.Send)) ||
+
+                method.Is<INetworkClient>(nameof(NetworkClient.Send)) ||
                 method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
+
+                method.Is<INetworkServer>(nameof(INetworkServer.SendToAll)) ||
                 method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
-                method.Is<NetworkServer>(nameof(NetworkServer.SendToMany)) ||
-                method.Is<INetworkServer>(nameof(INetworkServer.SendToAll));
+                method.Is<NetworkServer>(nameof(NetworkServer.SendToMany));
         }
 
         private static bool IsReadWriteMethod(MethodReference method)

@@ -101,7 +101,7 @@ namespace Mirage.Tests
         [Test]
         public void SendsNotifyPacket()
         {
-            messageBroker.SendNotify(Arg.Any<INetworkPlayer>(), data, 1);
+            messageBroker.SendNotify(player, data, 1);
 
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {

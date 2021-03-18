@@ -134,7 +134,7 @@ namespace Mirage
             get { return _time; }
         }
 
-        public IMessageHandler MessageHandler { get; private set; }
+        public IMessageHandler MessageHandler { get; internal set; }
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.
