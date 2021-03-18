@@ -38,8 +38,18 @@ Machines
 
 RPC
 - function that exists on GameObjects
-- Rpc target players 
+- Client RPC: 
+    - invoked by the server
+    - Rpc target players 
+- Server RPC:
+    - invoked by player
+    - rpc targets server
 - if player has no connection, invoke locally
 - if player has connection, invoke remotely
 - if "send to all" repeat above for each player
 
+
+
+
+- invoked by players
+- 
