@@ -30,6 +30,11 @@
             "path": "Samples~/ListServer"
         },
         {
+            "displayName": "InterestManagement",
+            "description": "Demo for interest management",
+            "path": "Samples~/InterestManagement"
+        },
+        {
             "displayName": "Chat",
             "description": "Simple chat and custom UI demo",
             "path": "Samples~/Chat"
