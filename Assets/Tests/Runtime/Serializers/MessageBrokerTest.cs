@@ -23,7 +23,7 @@ namespace Mirage.Tests
             var reader = new NetworkReader(new byte[] { 1, 2, 3, 4 });
             InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
             {
-                messageBroker.InvokeHandler(Arg.Any<INetworkPlayer>(), messageId, reader, 0);
+                messageBroker.InvokeHandler(default, messageId, reader, 0);
             });
 
             Assert.That(exception.Message, Does.StartWith("Unexpected message Mirage.SceneMessage received"));
@@ -37,14 +37,13 @@ namespace Mirage.Tests
             InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
             {
                 // some random id with no message
-                messageBroker.InvokeHandler(Arg.Any<INetworkPlayer>(), 1234, reader, 0);
+                messageBroker.InvokeHandler(default, 1234, reader, 0);
             });
 
             Assert.That(exception.Message, Does.StartWith("Unexpected message ID 1234 received"));
         }
-
-
     }
+
     public class MessageBrokerNofityTest
     {
         private MessageBroker messageBroker;
