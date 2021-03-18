@@ -97,17 +97,45 @@ namespace Mirage
             // todo get MessageHandler in a different way, MessageHandler should exist outside of client/server
             if (Client != null)
             {
+                // invoke now or when active
+                if (Client.IsConnected)
+                {
+                    ClientConnected(default);
+                }
+                else
+                {
+                    Client.Connected.AddListener(ClientConnected);
+                }
                 Client.Authenticated.AddListener(OnClientAuthenticated);
-                Client.Connected.AddListener((_) => { messageHandler = Client.MessageHandler; });
             }
             if (Server != null)
             {
+                // invoke now or when active
+                if (Server.Active)
+                {
+                    ServerStarted();
+                }
+                else
+                {
+                    Server.Started.AddListener(ServerStarted);
+                }
                 Server.Authenticated.AddListener(OnServerAuthenticated);
-                Server.Started.AddListener(() => { messageHandler = Server.MessageHandler; });
             }
         }
 
         #region Client
+
+        void ClientConnected(INetworkPlayer _)
+        {
+            logger.Log("NetworkSceneManager.ClientConnected");
+            messageHandler = Client.MessageHandler;
+        }
+
+        void ServerStarted()
+        {
+            logger.Log("NetworkSceneManager.ServerStarted");
+            messageHandler = Server.MessageHandler;
+        }
 
         void RegisterClientMessages()
         {
