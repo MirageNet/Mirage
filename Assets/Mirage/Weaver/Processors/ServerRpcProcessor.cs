@@ -62,7 +62,7 @@ namespace Mirage.Weaver
 
             ILProcessor worker = md.Body.GetILProcessor();
 
-            // if (IsLocalClient)
+            // if (IsServer)
             // {
             //    call the body
             //    return;
@@ -108,7 +108,7 @@ namespace Mirage.Weaver
 
         private void CallBody(ILProcessor worker, MethodDefinition rpc)
         {
-            IfLocalClient(worker, () =>
+            IsServer(worker, () =>
             {
                 InvokeBody(worker, rpc);
                 worker.Append(worker.Create(OpCodes.Ret));
