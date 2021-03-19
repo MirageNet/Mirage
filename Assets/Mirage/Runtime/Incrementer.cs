@@ -9,7 +9,7 @@ namespace Mirage
     /// <remarks>
     /// Incrementer will not wrap back to 0, instead it will throw <see cref="System.OverflowException"/>
     /// </remarks>
-    internal class Incrementer
+    public class Incrementer
     {
         uint next;
 
