@@ -7,6 +7,15 @@ namespace Mirage.Events
     /// <summary>
     /// Event that can only run once, adding handler late will it invoke right away
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// RunOnceEvent should be used for events that are invoked once for the lifespan. For example Server Started event.
+    /// So that handlers can be added before or after the event is invoked and the handlers will still be called
+    /// </para>
+    /// <para>
+    /// Events that are invoked multiple times, like Spawn Event, should use a regular event so that they can be invoked multiple times. 
+    /// </para>
+    /// </remarks>
     [Serializable]
     public sealed class RunOnceEvent : RunOnceEventBase, IRunOnceEvent
     {
@@ -36,7 +45,7 @@ namespace Mirage.Events
 
     /// <summary>
     /// Version of <see cref="RunOnceEvent"/> with 1 argument
-    /// <para>Create a non-generic class inheirting from this to use in inspector. Same rules as <see cref="UnityEvent"/></para>
+    /// <para>Create a non-generic class inheriting from this to use in inspector. Same rules as <see cref="UnityEvent"/></para>
     /// </summary>
     /// <typeparam name="T0">argument 0</typeparam>
     /// <typeparam name="TEvent">UnityEvent</typeparam>
@@ -72,7 +81,7 @@ namespace Mirage.Events
 
     /// <summary>
     /// Version of <see cref="RunOnceEvent"/> with 2 arguments
-    /// <para>Create a non-generic class inheirting from this to use in inspector. Same rules as <see cref="UnityEvent"/></para>
+    /// <para>Create a non-generic class inheriting from this to use in inspector. Same rules as <see cref="UnityEvent"/></para>
     /// </summary>
     /// <typeparam name="T0"></typeparam>
     /// <typeparam name="T1"></typeparam>
