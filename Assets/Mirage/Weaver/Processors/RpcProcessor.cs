@@ -375,29 +375,13 @@ namespace Mirage.Weaver
             }
         }
 
-
-        public void IsServer(ILProcessor worker, Action body)
-        {
-            // if (IsLocalClient) {
-            Instruction endif = worker.Create(OpCodes.Nop);
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
-            worker.Append(worker.Create(OpCodes.Brfalse, endif));
-
-            body();
-
-            // }
-            worker.Append(endif);
-
-        }
-
         protected void InvokeBody(ILProcessor worker, MethodDefinition rpc)
         {
-            for (int i = 0; i < rpc.Parameters.Count; i++)
+            for (int i = 0; i <= rpc.Parameters.Count; i++)
             {
                 worker.Append(worker.Create(OpCodes.Ldarg, i));
             }
-            worker.Append(worker.Create(OpCodes.Callvirt, rpc));
+            worker.Append(worker.Create(OpCodes.Call, rpc));
         }
 
     }

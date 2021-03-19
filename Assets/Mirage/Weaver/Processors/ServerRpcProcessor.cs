@@ -106,6 +106,21 @@ namespace Mirage.Weaver
             return cmd;
         }
 
+        public void IsServer(ILProcessor worker, Action body)
+        {
+            // if (IsLocalClient) {
+            Instruction endif = worker.Create(OpCodes.Nop);
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
+            worker.Append(worker.Create(OpCodes.Brfalse, endif));
+
+            body();
+
+            // }
+            worker.Append(endif);
+
+        }
+
         private void CallBody(ILProcessor worker, MethodDefinition rpc)
         {
             IsServer(worker, () =>
