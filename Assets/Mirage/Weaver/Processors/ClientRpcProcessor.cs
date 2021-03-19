@@ -66,12 +66,13 @@ namespace Mirage.Weaver
             Client target = clientRpcAttr.GetField("target", Client.Observers);
             bool hasNetworkConnection = target == Client.Connection && HasNetworkConnectionParameter(md);
 
-            if (hasNetworkConnection)
-            {
-                //client.connection
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.ConnectionToServer));
-            }
+            // todo re-add connection/player argument for RPC with targets
+            //if (hasNetworkConnection)
+            //{
+            //    //client.connection
+            //    worker.Append(worker.Create(OpCodes.Ldarg_0));
+            //    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.ConnectionToServer));
+            //}
 
             if (!ReadArguments(md, worker, hasNetworkConnection))
                 return rpc;
