@@ -47,7 +47,7 @@ namespace Mirage
         uint nextNetworkId = 1;
         uint GetNextNetworkId() 
         {
-            while (SpawnedObjects.HasKey(nextNetworkId))
+            while (SpawnedObjects.HasKey(nextNetworkId) || nextNetworkId == 0)
                 nextNetworkId++;
             return nextNetworkId++;
         }
