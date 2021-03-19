@@ -631,7 +631,7 @@ namespace Mirage
             SpawnedObjects.Remove(identity.NetId);
             identity.ConnectionToClient?.RemoveOwnedObject(identity);
 
-            identity.SendToObservers(new ObjectDestroyMessage { netId = identity.NetId });
+            identity.SendToRemoteObservers(new ObjectDestroyMessage { netId = identity.NetId });
 
             identity.ClearObservers();
             if (Server.LocalClientActive)
