@@ -9,6 +9,23 @@ using Mirage.Serialization;
 
 namespace Mirage
 {
+    public static class GameobjectExtension
+    {
+        /// <summary>
+        /// Gets <see cref="NetworkIdentity"/> on a <see cref="GameObject"/> and throws <see cref="InvalidOperationException"/> if the GameObject does not have one.
+        /// </summary>
+        /// <param name="gameObject"></param>
+        /// <returns>attached NetworkIdentity</returns>
+        /// <exception cref="InvalidOperationException">Throws when <paramref name="gameObject"/> does not have a NetworkIdentity attached</exception>
+        public static NetworkIdentity GetNetworkIdentity(this GameObject gameObject)
+        {
+            if (!gameObject.TryGetComponent(out NetworkIdentity identity))
+            {
+                throw new InvalidOperationException($"Gameobject {gameObject.name} doesn't have NetworkIdentity.");
+            }
+            return identity;
+        }
+    }
 
     /// <summary>
     /// The ServerObjectManager.
@@ -185,7 +202,7 @@ namespace Mirage
         /// <returns></returns>
         public bool ReplaceCharacter(INetworkPlayer player, NetworkClient client, GameObject character, Guid assetId, bool keepAuthority = false)
         {
-            NetworkIdentity identity = GetNetworkIdentity(character);
+            NetworkIdentity identity = character.GetNetworkIdentity();
             identity.AssetId = assetId;
             return InternalReplacePlayerForConnection(player, client, character, keepAuthority);
         }
@@ -243,7 +260,7 @@ namespace Mirage
         /// <returns></returns>
         public bool AddCharacter(INetworkPlayer player, GameObject character, Guid assetId)
         {
-            NetworkIdentity identity = GetNetworkIdentity(character);
+            NetworkIdentity identity = character.GetNetworkIdentity();
             identity.AssetId = assetId;
             return AddCharacter(player, character);
         }
@@ -364,15 +381,6 @@ namespace Mirage
             return true;
         }
 
-        internal NetworkIdentity GetNetworkIdentity(GameObject go)
-        {
-            NetworkIdentity identity = go.GetComponent<NetworkIdentity>();
-            if (identity is null)
-            {
-                throw new InvalidOperationException($"Gameobject {go.name} doesn't have NetworkIdentity.");
-            }
-            return identity;
-        }
 
         internal void ShowForConnection(NetworkIdentity identity, INetworkPlayer player)
         {
@@ -594,7 +602,7 @@ namespace Mirage
         {
             if (VerifyCanSpawn(obj))
             {
-                NetworkIdentity identity = GetNetworkIdentity(obj);
+                NetworkIdentity identity = obj.GetNetworkIdentity();
                 identity.AssetId = assetId;
                 SpawnObject(obj, owner);
             }
@@ -654,7 +662,7 @@ namespace Mirage
                 return;
             }
 
-            NetworkIdentity identity = GetNetworkIdentity(obj);
+            NetworkIdentity identity = obj.GetNetworkIdentity();
             DestroyObject(identity, true);
         }
 
@@ -672,7 +680,7 @@ namespace Mirage
                 return;
             }
 
-            NetworkIdentity identity = GetNetworkIdentity(obj);
+            NetworkIdentity identity = obj.GetNetworkIdentity();
             DestroyObject(identity, false);
         }
 

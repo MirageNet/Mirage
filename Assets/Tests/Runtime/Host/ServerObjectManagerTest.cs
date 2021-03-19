@@ -11,6 +11,33 @@ using Object = UnityEngine.Object;
 namespace Mirage.Tests.Host
 {
 
+    public class GameobjectExtensionTests : HostSetup<MockComponent>
+    {
+        [Test]
+        public void GetNetworkIdentity()
+        {
+            Assert.That(playerGO.GetNetworkIdentity(), Is.EqualTo(identity));
+        }
+
+        [Test]
+        public void GetNoNetworkIdentity()
+        {
+            // create a GameObject without NetworkIdentity
+            var goWithout = new GameObject();
+
+            // GetNetworkIdentity for GO without identity
+            // (error log is expected)
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                _ = goWithout.GetNetworkIdentity();
+            });
+
+            // clean up
+            Object.Destroy(goWithout);
+        }
+
+    }
+
     [TestFixture]
     public class ServerObjectManagerHostTest : HostSetup<MockComponent>
     {
@@ -46,28 +73,7 @@ namespace Mirage.Tests.Host
             Assert.That(second.IsReady, Is.False);
         }
 
-        [Test]
-        public void GetNetworkIdentity()
-        {
-            Assert.That(serverObjectManager.GetNetworkIdentity(playerGO), Is.EqualTo(identity));
-        }
 
-        [Test]
-        public void GetNoNetworkIdentity()
-        {
-            // create a GameObject without NetworkIdentity
-            var goWithout = new GameObject();
-
-            // GetNetworkIdentity for GO without identity
-            // (error log is expected)
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                _ = serverObjectManager.GetNetworkIdentity(goWithout);
-            });
-
-            // clean up
-            Object.Destroy(goWithout);
-        }
 
         [Test]
         public void HideForConnection()
