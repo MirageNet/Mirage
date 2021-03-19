@@ -5,10 +5,10 @@ namespace Mirage
     public class SequencerTest
     {
         [Test]
-        public void FirstValueShouldBe1()
+        public void SequencerStartAt0()
         {
             var sequencer = new Sequencer(3);
-            Assert.That(sequencer.Next(), Is.EqualTo(1));
+            Assert.That(sequencer.Next(), Is.EqualTo(0));
         }
 
         [Test]
@@ -22,6 +22,7 @@ namespace Mirage
         public void ItShouldStartOverAfterLastSequenceNumber()
         {
             var sequencer = new Sequencer(2);
+            Assert.That(sequencer.Next(), Is.EqualTo(0));
             Assert.That(sequencer.Next(), Is.EqualTo(1));
             Assert.That(sequencer.Next(), Is.EqualTo(2));
             Assert.That(sequencer.Next(), Is.EqualTo(3));

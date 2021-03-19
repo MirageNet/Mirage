@@ -23,6 +23,31 @@ THE SOFTWARE.
 
 namespace Mirage
 {
+    /// <summary>
+    /// A sequence generator that can wrap.
+    /// For example a 2 bit sequencer would generate
+    /// the following numbers:
+    /// <code>
+    ///     0,1,2,3,0,1,2,3,0,1,2,3...
+    /// </code>
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// // create a 8 bit sequence generator
+    /// Sequencer sequencer = new Sequencer(8);
+    ///
+    /// ulong zero = sequencer.Next();
+    /// ulong one = sequencer.Next();
+    /// ...
+    /// ulong n = sequencer.Next();
+    /// 
+    /// // you can determine the distance between 2 sequences
+    /// // as long as they are withing 1/2 of the sequence space
+    ///
+    /// // this is equivalent to a - b adjusted for wrapping
+    /// int d = sequencer.Distance(a, b);
+    /// </code>
+    /// </example>
     public struct Sequencer
     {
         readonly int shift;
@@ -32,6 +57,10 @@ namespace Mirage
 
         public int Bits => bits;
 
+        /// <summary>
+        /// Creates a sequencer
+        /// </summary>
+        /// <param name="bits">amount of bits for the sequence</param>
         public Sequencer(int bits)
         {
             // 1 byte
@@ -47,7 +76,9 @@ namespace Mirage
 
         public ulong Next()
         {
-            return sequence = NextAfter(sequence);
+            ulong current = sequence;
+            sequence = NextAfter(sequence);
+            return current;
         }
 
         public ulong NextAfter(ulong sequence)
