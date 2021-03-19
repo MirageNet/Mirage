@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Mirage.Logging;
 using Mirage.RemoteCalls;
+using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
-using Mirage.Logging;
-using Mirage.Serialization;
 
 namespace Mirage
 {
@@ -44,8 +44,7 @@ namespace Mirage
         [SerializeField] SpawnEvent _unSpawned = new SpawnEvent();
         public SpawnEvent UnSpawned => _unSpawned;
 
-        uint nextNetworkId = 1;
-        uint GetNextNetworkId() => nextNetworkId++;
+        readonly Incrementer idIncrementer = new Incrementer();
 
         public readonly Dictionary<uint, NetworkIdentity> SpawnedObjects = new Dictionary<uint, NetworkIdentity>();
 
@@ -123,6 +122,7 @@ namespace Mirage
             }
 
             SpawnedObjects.Clear();
+            idIncrementer.Reset();
         }
 
         void OnServerChangeScene(string scenePath, SceneOperation sceneOperation)
@@ -470,7 +470,7 @@ namespace Mirage
             if (identity.NetId == 0)
             {
                 // the object has not been spawned yet
-                identity.NetId = GetNextNetworkId();
+                identity.NetId = idIncrementer.GetNext();
                 SpawnedObjects[identity.NetId] = identity;
                 identity.StartServer();
                 Spawned.Invoke(identity);
