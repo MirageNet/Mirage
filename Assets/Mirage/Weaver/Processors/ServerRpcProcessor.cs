@@ -62,6 +62,13 @@ namespace Mirage.Weaver
 
             ILProcessor worker = md.Body.GetILProcessor();
 
+            // if (IsServer)
+            // {
+            //    call the body
+            //    return;
+            // }
+            CallBody(worker, cmd);
+
             // NetworkWriter writer = NetworkWriterPool.GetWriter()
             VariableDefinition writer = md.AddLocal<PooledNetworkWriter>();
             worker.Append(worker.Create(OpCodes.Call, md.Module.ImportReference(() => NetworkWriterPool.GetWriter())));
@@ -97,6 +104,30 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ret));
 
             return cmd;
+        }
+
+        public void IsServer(ILProcessor worker, Action body)
+        {
+            // if (IsLocalClient) {
+            Instruction endif = worker.Create(OpCodes.Nop);
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
+            worker.Append(worker.Create(OpCodes.Brfalse, endif));
+
+            body();
+
+            // }
+            worker.Append(endif);
+
+        }
+
+        private void CallBody(ILProcessor worker, MethodDefinition rpc)
+        {
+            IsServer(worker, () =>
+            {
+                InvokeBody(worker, rpc);
+                worker.Append(worker.Create(OpCodes.Ret));
+            });
         }
 
         private void CallSendServerRpc(MethodDefinition md, ILProcessor worker)

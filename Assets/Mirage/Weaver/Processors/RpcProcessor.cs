@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
@@ -372,6 +373,15 @@ namespace Mirage.Weaver
                 calledMethod = null;
                 return false;
             }
+        }
+
+        protected void InvokeBody(ILProcessor worker, MethodDefinition rpc)
+        {
+            for (int i = 0; i <= rpc.Parameters.Count; i++)
+            {
+                worker.Append(worker.Create(OpCodes.Ldarg, i));
+            }
+            worker.Append(worker.Create(OpCodes.Call, rpc));
         }
 
     }

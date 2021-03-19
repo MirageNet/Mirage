@@ -11,26 +11,6 @@ namespace Mirage.Tests.Host
 {
     public class HostComponentTests : HostSetup<MockComponent>
     {
-        [Test]
-        public void ServerRpcWithoutAuthority()
-        {
-            var gameObject2 = new GameObject("rpcObject", typeof(NetworkIdentity), typeof(MockComponent));
-            MockComponent rpcComponent2 = gameObject2.GetComponent<MockComponent>();
-
-            // spawn it without client authority
-            serverObjectManager.Spawn(gameObject2);
-
-            // process spawn message from server
-            client.Update();
-
-            // only authorized clients can call ServerRpc
-            Assert.Throws<UnauthorizedAccessException>(() =>
-           {
-               rpcComponent2.Test(1, "hello");
-           });
-
-        }
-
         [UnityTest]
         public IEnumerator ServerRpc() => UniTask.ToCoroutine(async () =>
         {
