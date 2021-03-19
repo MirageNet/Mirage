@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Mirage.Collections;
-using Mirage.RemoteCalls;
-using UnityEngine;
 using Mirage.Logging;
+using Mirage.RemoteCalls;
 using Mirage.Serialization;
+using UnityEngine;
 
 namespace Mirage
 {
@@ -108,11 +108,6 @@ namespace Mirage
         /// Quick Reference to the NetworkIdentities ClientObjectManager. Present only for instances instances.
         /// </summary>
         public ClientObjectManager ClientObjectManager => NetIdentity.ClientObjectManager;
-
-        /// <summary>
-        /// The <see cref="NetworkPlayer">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the client.
-        /// </summary>
-        public INetworkPlayer ConnectionToServer => NetIdentity.ConnectionToServer;
 
         /// <summary>
         /// The <see cref="NetworkPlayer">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
@@ -263,7 +258,7 @@ namespace Mirage
 
             if (Client.Player == null)
             {
-                throw new InvalidOperationException("Send ServerRpc attempted with no client running [client=" + ConnectionToServer + "].");
+                throw new InvalidOperationException("Send ServerRpc attempted with no client connection.");
             }
         }
 

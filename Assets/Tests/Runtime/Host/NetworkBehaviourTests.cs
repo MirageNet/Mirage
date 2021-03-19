@@ -107,13 +107,6 @@ namespace Mirage.Tests.Host
         }
 
         [Test]
-        public void HasIdentitysConnectionToServer()
-        {
-            (identity.ConnectionToServer, _) = PipedConnections();
-            Assert.That(component.ConnectionToServer, Is.EqualTo(identity.ConnectionToServer));
-        }
-
-        [Test]
         public void HasIdentitysConnectionToClient()
         {
             (_, identity.ConnectionToClient) = PipedConnections();

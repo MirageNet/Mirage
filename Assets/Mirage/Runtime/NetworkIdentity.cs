@@ -1156,7 +1156,6 @@ namespace Mirage
             Client = null;
             ServerObjectManager = null;
             ClientObjectManager = null;
-            ConnectionToServer = null;
             ConnectionToClient = null;
             networkBehavioursCache = null;
 
