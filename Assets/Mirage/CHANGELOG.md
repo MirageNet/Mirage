@@ -1,3 +1,15 @@
+# [81.0.0](https://github.com/MirageNet/Mirage/compare/v80.0.1...v81.0.0) (2021-03-19)
+
+
+### Performance Improvements
+
+* serverrpc bypasses network on host mode ([#708](https://github.com/MirageNet/Mirage/issues/708)) ([695eb46](https://github.com/MirageNet/Mirage/commit/695eb4686fb5c0d6d1db3e3f3d8f7803226c009f))
+
+
+### BREAKING CHANGES
+
+* ServerRpc execute synchronous in host mode
+
 ## [80.0.1](https://github.com/MirageNet/Mirage/compare/v80.0.0...v80.0.1) (2021-03-17)
 
 
