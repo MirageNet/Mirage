@@ -357,7 +357,10 @@ namespace Mirage
         readonly Queue<PacketEnvelope> sendWindow = new Queue<PacketEnvelope>(WINDOW_SIZE);
         private float lastNotifySentTime;
 
-        private ushort receiveSequence;
+        // the first sequence will be 0,  so
+        // we need the last received sequence to be just before that
+        // this is unsigned and wraps,  so 0 - 1 == ushort.MaxValue
+        private ushort receiveSequence = ushort.MaxValue;
         private ulong receiveMask;
 
 

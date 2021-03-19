@@ -92,8 +92,8 @@ namespace Mirage.Tests
 
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
-                Sequence = 1,
-                ReceiveSequence = 0,
+                Sequence = 0,
+                ReceiveSequence = ushort.MaxValue,
                 AckMask = 0
             }));
         }
@@ -104,23 +104,23 @@ namespace Mirage.Tests
             connection.SendNotify(data, 1);
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
-                Sequence = 1,
-                ReceiveSequence = 0,
+                Sequence = 0,
+                ReceiveSequence = ushort.MaxValue,
                 AckMask = 0
             }));
 
             connection.SendNotify(data, 1);
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
-                Sequence = 2,
-                ReceiveSequence = 0,
+                Sequence = 1,
+                ReceiveSequence = ushort.MaxValue,
                 AckMask = 0
             }));
             connection.SendNotify(data, 1);
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
-                Sequence = 3,
-                ReceiveSequence = 0,
+                Sequence = 2,
+                ReceiveSequence = ushort.MaxValue,
                 AckMask = 0
             }));
         }
@@ -136,8 +136,8 @@ namespace Mirage.Tests
 
             var reply = new NotifyPacket
             {
-                Sequence = 1,
-                ReceiveSequence = 3,
+                Sequence = 0,
+                ReceiveSequence = 2,
                 AckMask = 0b111
             };
 
@@ -162,8 +162,8 @@ namespace Mirage.Tests
 
             var reply = new NotifyPacket
             {
-                Sequence = 1,
-                ReceiveSequence = 3,
+                Sequence = 0,
+                ReceiveSequence = 2,
                 AckMask = 0b001
             };
 
@@ -184,8 +184,8 @@ namespace Mirage.Tests
 
             var reply = new NotifyPacket
             {
-                Sequence = 1,
-                ReceiveSequence = 1,
+                Sequence = 0,
+                ReceiveSequence = 0,
                 AckMask = 0b001
             };
 
@@ -199,7 +199,7 @@ namespace Mirage.Tests
         [Test]
         public void LoseOldPackets()
         {
-            for (int i = 1; i < 10; i++)
+            for (int i = 0; i < 10; i++)
             {
                 var packet = new NotifyPacket
                 {
@@ -222,7 +222,7 @@ namespace Mirage.Tests
 
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
-                Sequence = 1,
+                Sequence = 0,
                 ReceiveSequence = 100,
                 AckMask = 1
             }));
@@ -249,8 +249,8 @@ namespace Mirage.Tests
 
             var reply = new NotifyPacket
             {
-                Sequence = 1,
-                ReceiveSequence = 2,
+                Sequence = 0,
+                ReceiveSequence = 1,
                 AckMask = 0b011
             };
 
@@ -260,8 +260,8 @@ namespace Mirage.Tests
 
             reply = new NotifyPacket
             {
-                Sequence = 2,
-                ReceiveSequence = 3,
+                Sequence = 1,
+                ReceiveSequence = 2,
                 AckMask = 0b111
             };
 
