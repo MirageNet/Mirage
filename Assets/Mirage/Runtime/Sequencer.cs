@@ -55,6 +55,10 @@ namespace Mirage
         readonly ulong mask;
         ulong sequence;
 
+        /// <summary>
+        /// Number of bits used for the sequence generator
+        /// up to 64
+        /// </summary>
         public int Bits => bits;
 
         /// <summary>
@@ -74,6 +78,11 @@ namespace Mirage
             shift = sizeof(ulong) * 8 - bits;
         }
 
+        /// <summary>
+        /// Generates the next value in the sequence
+        /// starts with 0
+        /// </summary>
+        /// <returns>0, 1, 2, ... 2^n-1, 0, 1, 2, ...</returns>
         public ulong Next()
         {
             ulong current = sequence;
@@ -81,20 +90,29 @@ namespace Mirage
             return current;
         }
 
+        /// <summary>
+        /// Gets the next sequence value after a given sequence
+        /// wraps if necessary
+        /// </summary>
+        /// <param name="sequence">current sequence value</param>
+        /// <returns>the next sequence value</returns>
         public ulong NextAfter(ulong sequence)
         {
             return (sequence + 1UL) & mask;
         }
 
+        /// <summary>
+        /// Calculates the distance between 2 sequences, taking into account
+        /// wrapping
+        /// </summary>
+        /// <param name="from">current sequence value</param>
+        /// <param name="to">previous sequence value</param>
+        /// <returns>from - to, adjusted for wrapping</returns>
         public long Distance(ulong from, ulong to)
         {
             to <<= shift;
             from <<= shift;
             return ((long)(from - to)) >> shift;
         }
-
-        // 0 1 2 3 4 5 6 7 8 9 ... 255
-        // wraps around back to 0
-
     }
 }
