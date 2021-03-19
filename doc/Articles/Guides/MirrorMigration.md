@@ -182,23 +182,23 @@ These fields/properties have been renamed:
 | Mirror                                | Mirage                                                                                 |
 |:-------------------------------------:|:--------------------------------------------------------------------------------------:|
 | `ClientScene.localPlayer`             | [ClientObjectManager.LocalPlayer](xref:Mirage.ClientObjectManager.LocalPlayer)         |
-| `ClientScene.ready`                   | [NetworkClient.Connection.IsReady](xref:Mirage.NetworkPlayer.IsReady)              |
+| `ClientScene.ready`                   | [NetworkClient.Connection.IsReady](xref:Mirage.NetworkPlayer.IsReady)                  |
 | `NetworkIdentity.assetId`             | [NetworkIdentity.AssetId](xref:Mirage.NetworkIdentity.AssetId)                         |
 | `NetworkIdentity.netId`               | [NetworkIdentity.NetId](xref:Mirage.NetworkIdentity.NetId)                             |
 | `NetworkIdentity.connectionToClient`  | [NetworkIdentity.ConnectionToClient](xref:Mirage.NetworkIdentity.ConnectionToClient)   |
 | `NetworkBehaviour.isServer`           | [NetworkBehaviour.IsServer](xref:Mirage.NetworkBehaviour.IsServer)                     |
 | `NetworkBehaviour.connectionToClient` | [NetworkBehaviour.ConnectionToClient](xref:Mirage.NetworkBehaviour.ConnectionToClient) |
-| `NetworkBehaviour.connectionToServer` | [NetworkBehaviour.ConnectionToServer](xref:Mirage.NetworkBehaviour.ConnectionToServer) |
+| `NetworkBehaviour.connectionToServer` | Removed, use [Client.Player](xref:Mirage.NetworkClient.Player) instead                 |
 | `NetworkBehaviour.hasAuthority`       | [NetworkBehaviour.HasAuthority](xref:Mirage.NetworkBehaviour.HasAuthority)             |
 | `NetworkBehaviour.netIdentity`        | [NetworkBehaviour.NetIdentity](xref:Mirage.NetworkBehaviour.NetIdentity)               |
 | `NetworkBehaviour.netId`              | [NetworkBehaviour.NetId](xref:Mirage.NetworkBehaviour.NetId)                           |
 | `NetworkBehaviour.isClientOnly`       | [NetworkBehaviour.IsClientOnly](xref:Mirage.NetworkBehaviour.IsClientOnly)             |
 | `NetworkBehaviour.islocalPlayer`      | [NetworkBehaviour.IsLocalPlayer](xref:Mirage.NetworkBehaviour.IsLocalPlayer)           |
-| `NetworkConnection.isReady`           | [NetworkPlayer.IsReady](xref:Mirage.NetworkPlayer.IsReady)                     |
-| `NetworkConnection.identity`          | [NetworkPlayer.Identity](xref:Mirage.NetworkPlayer.Identity)                   |
+| `NetworkConnection.isReady`           | [NetworkPlayer.IsReady](xref:Mirage.NetworkPlayer.IsReady)                             |
+| `NetworkConnection.identity`          | [NetworkPlayer.Identity](xref:Mirage.NetworkPlayer.Identity)                           |
 | `NetworkServer.active`                | [NetworkServer.Active](xref:Mirage.NetworkServer.Active)                               |
-| `NetworkServer.localConnection`       | [NetworkServer.LocalPlayer](xref:Mirage.NetworkServer.LocalPlayer)             |
-| `NetworkClient.connection`            | [NetworkClient.Player](xref:Mirage.NetworkClient.Player)                       |
+| `NetworkServer.localConnection`       | [NetworkServer.LocalPlayer](xref:Mirage.NetworkServer.LocalPlayer)                     |
+| `NetworkClient.connection`            | [NetworkClient.Player](xref:Mirage.NetworkClient.Player)                               |
 | `NetworkTime.time`                    | [NetworkTime.Time](xref:Mirage.NetworkTime.Time)                                       |
 
 ## Object Management
