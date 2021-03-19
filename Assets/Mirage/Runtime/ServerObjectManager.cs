@@ -470,7 +470,7 @@ namespace Mirage
             if (identity.NetId == 0)
             {
                 // the object has not been spawned yet
-                identity.NetId = idIncrementer.GetNext();
+                identity.NetId = idIncrementer.Next();
                 SpawnedObjects[identity.NetId] = identity;
                 identity.StartServer();
                 Spawned.Invoke(identity);
