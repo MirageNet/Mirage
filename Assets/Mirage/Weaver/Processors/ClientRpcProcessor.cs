@@ -68,8 +68,11 @@ namespace Mirage.Weaver
 
             if (hasNetworkConnection)
             {
-                // todo re-add connection/player argument for RPC with targets (currently is just null)
-                worker.Append(worker.Create(OpCodes.Ldnull));
+               // this is called in the skeleton (the client)
+               // the client should just get the connection to the server and pass that in
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
+                worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
             }
 
             if (!ReadArguments(md, worker, hasNetworkConnection))
