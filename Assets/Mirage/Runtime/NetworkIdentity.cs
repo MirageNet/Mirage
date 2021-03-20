@@ -1213,7 +1213,7 @@ namespace Mirage
                     if (observersWritten > 0)
                     {
                         varsMessage.payload = observersWriter.ToArraySegment();
-                        SendToObservers(varsMessage, false);
+                        SendToRemoteObservers(varsMessage, false);
                     }
 
                     // clear dirty bits only for the components that we serialized
@@ -1231,36 +1231,33 @@ namespace Mirage
         static readonly List<INetworkPlayer> connectionsExcludeSelf = new List<INetworkPlayer>(100);
 
         /// <summary>
-        /// this is like SendToReady - but it doesn't check the ready flag on the connection.
-        /// this is used for ObjectDestroy messages.
+        /// Send a message to all the remote observers
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="msg"> the message to deliver to to clients</param>
         /// <param name="includeOwner">Wether the owner should receive this message too</param>
         /// <param name="channelId"> the transport channel that should be used to deliver the message</param>
-        internal void SendToObservers<T>(T msg, bool includeOwner = true, int channelId = Channel.Reliable)
+        internal void SendToRemoteObservers<T>(T msg, bool includeOwner = true, int channelId = Channel.Reliable)
         {
             if (logger.LogEnabled()) logger.Log("Server.SendToObservers id:" + typeof(T));
 
             if (observers.Count == 0)
                 return;
 
-            if (includeOwner)
+            connectionsExcludeSelf.Clear();
+            foreach (INetworkPlayer player in observers)
             {
-                NetworkServer.SendToMany(observers, msg, channelId);
-            }
-            else
-            {
-                connectionsExcludeSelf.Clear();
-                foreach (INetworkPlayer player in observers)
+                if (player == Server.LocalPlayer)
+                    continue;
+
+                if (includeOwner || ConnectionToClient != player)
                 {
-                    if (ConnectionToClient != player)
-                    {
-                        connectionsExcludeSelf.Add(player);
-                    }
+                    connectionsExcludeSelf.Add(player);
                 }
-                NetworkServer.SendToMany(connectionsExcludeSelf, msg, channelId);
             }
+
+            if (connectionsExcludeSelf.Count > 0)
+                NetworkServer.SendToMany(connectionsExcludeSelf, msg, channelId);
         }
 
         /// <summary>

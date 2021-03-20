@@ -108,7 +108,7 @@ namespace Mirage.Weaver
 
         public void IsServer(ILProcessor worker, Action body)
         {
-            // if (IsLocalClient) {
+            // if (IsServer) {
             Instruction endif = worker.Create(OpCodes.Nop);
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));

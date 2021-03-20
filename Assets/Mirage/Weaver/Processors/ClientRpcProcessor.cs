@@ -142,6 +142,12 @@ namespace Mirage.Weaver
 
             ILProcessor worker = md.Body.GetILProcessor();
 
+            // if (IsClient)
+            // {
+            //    call the body
+            // }
+            CallBody(worker, rpc);
+
             // NetworkWriter writer = NetworkWriterPool.GetWriter()
             VariableDefinition writer = md.AddLocal<PooledNetworkWriter>();
             worker.Append(worker.Create(OpCodes.Call, () => NetworkWriterPool.GetWriter()));
@@ -193,6 +199,29 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ret));
 
             return rpc;
+        }
+
+        public void IsClient(ILProcessor worker, Action body)
+        {
+            // if (IsLocalClient) {
+            Instruction endif = worker.Create(OpCodes.Nop);
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsClient));
+            worker.Append(worker.Create(OpCodes.Brfalse, endif));
+
+            body();
+
+            // }
+            worker.Append(endif);
+
+        }
+
+        private void CallBody(ILProcessor worker, MethodDefinition rpc)
+        {
+            IsClient(worker, () =>
+            {
+                InvokeBody(worker, rpc);
+            });
         }
 
         bool Validate(MethodDefinition md, CustomAttribute clientRpcAttr)
