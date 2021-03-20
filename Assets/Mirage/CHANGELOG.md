@@ -1,3 +1,10 @@
+## [81.0.1](https://github.com/MirageNet/Mirage/compare/v81.0.0...v81.0.1) (2021-03-20)
+
+
+### Performance Improvements
+
+* clientrpc in host mode bypasses network ([#714](https://github.com/MirageNet/Mirage/issues/714)) ([edb0705](https://github.com/MirageNet/Mirage/commit/edb0705e5038684e3c3565c38e3529578832fb1d))
+
 # [81.0.0](https://github.com/MirageNet/Mirage/compare/v80.0.1...v81.0.0) (2021-03-19)
 
 
