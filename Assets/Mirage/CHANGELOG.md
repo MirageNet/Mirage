@@ -1,3 +1,10 @@
+## [81.0.2](https://github.com/MirageNet/Mirage/compare/v81.0.1...v81.0.2) (2021-03-22)
+
+
+### Bug Fixes
+
+* show syncvar label ([c32a940](https://github.com/MirageNet/Mirage/commit/c32a9403be7be30a5e56b0f4c71ddc05263a746a))
+
 ## [81.0.1](https://github.com/MirageNet/Mirage/compare/v81.0.0...v81.0.1) (2021-03-20)
 
 
