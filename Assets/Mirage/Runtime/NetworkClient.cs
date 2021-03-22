@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
-using Mirage.Logging;
 
 namespace Mirage
 {

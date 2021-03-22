@@ -1,6 +1,6 @@
+using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Mirage.Logging;
 
 namespace Mirage
 {

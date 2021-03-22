@@ -24,7 +24,7 @@ namespace Mirage.Serialization
         private const int LargestComponentShift = BitsPerAxis * 3;
         private const int AShift = BitsPerAxis * 2;
         private const int BShift = BitsPerAxis * 1;
-        private const int IntScale = (1 << (BitsPerAxis-1)) - 1;
+        private const int IntScale = (1 << (BitsPerAxis - 1)) - 1;
         private const int IntMask = (1 << BitsPerAxis) - 1;
 
         internal static uint Compress(Quaternion quaternion)

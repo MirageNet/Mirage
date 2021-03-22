@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using Mirage.Logging;
 using Mirage.Serialization;
+using UnityEngine;
 
 namespace Mirage.RemoteCalls
 {

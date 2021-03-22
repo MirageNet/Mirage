@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Mirage.Collections;
+using Mirage.Logging;
 using UnityEditor;
 using UnityEngine;
-using Mirage.Logging;
 
 namespace Mirage
 {

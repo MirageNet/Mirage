@@ -1,6 +1,6 @@
 using System;
-using UnityEngine;
 using Mirage.Logging;
+using UnityEngine;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
 namespace Mirage

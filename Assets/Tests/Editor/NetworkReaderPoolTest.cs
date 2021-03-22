@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
-using NUnit.Framework;
 using Mirage.Serialization;
+using NUnit.Framework;
 
 namespace Mirage
 {

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using Mirage.Logging;
 using UnityEditor;
 using UnityEngine;
-using Mirage.Logging;
 
 namespace Mirage
 {

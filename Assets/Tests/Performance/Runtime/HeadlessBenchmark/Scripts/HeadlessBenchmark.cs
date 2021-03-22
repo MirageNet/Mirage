@@ -24,7 +24,7 @@ namespace Mirage.HeadlessBenchmark
         void Start()
         {
             cachedArgs = Application.isEditor ?
-                cachedArgs = editorArgs.Split(' '):
+                cachedArgs = editorArgs.Split(' ') :
                 Environment.GetCommandLineArgs();
 
             HeadlessStart();

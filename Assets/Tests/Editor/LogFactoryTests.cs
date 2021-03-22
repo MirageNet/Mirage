@@ -1,7 +1,7 @@
+using Mirage.Logging;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
-using Mirage.Logging;
 
 namespace Mirage
 {

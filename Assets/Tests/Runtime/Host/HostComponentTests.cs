@@ -1,9 +1,7 @@
-using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.TestTools;
 

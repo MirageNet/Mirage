@@ -1,8 +1,8 @@
 using System.Linq;
-using UnityEngine;
-using UnityEngine.Serialization;
 using Mirage.Logging;
 using Mirage.Serialization;
+using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Mirage
 {

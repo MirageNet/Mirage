@@ -1,5 +1,3 @@
-using System.Runtime.InteropServices;
-
 namespace Mirage
 {
     public static class Version

@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
+using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Events;
 using static Mirage.Tests.LocalConnections;
 using Object = UnityEngine.Object;
-using Mirage.Serialization;
 
 namespace Mirage
 {

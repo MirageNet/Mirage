@@ -1,6 +1,6 @@
+using Mirage.Serialization;
 using NUnit.Framework;
 using UnityEngine;
-using Mirage.Serialization;
 
 namespace Mirage
 {

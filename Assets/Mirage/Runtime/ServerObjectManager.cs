@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Mirage.Logging;
 using Mirage.RemoteCalls;
+using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
-using Mirage.Logging;
-using Mirage.Serialization;
 
 namespace Mirage
 {

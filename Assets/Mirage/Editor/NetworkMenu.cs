@@ -1,7 +1,7 @@
 using Mirage.KCP;
+using Mirage.Logging;
 using UnityEditor;
 using UnityEngine;
-using Mirage.Logging;
 
 namespace Mirage
 {

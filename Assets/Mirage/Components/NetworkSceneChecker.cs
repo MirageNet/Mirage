@@ -1,7 +1,7 @@
 using System.Collections.Generic;
+using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Mirage.Logging;
 
 namespace Mirage
 {

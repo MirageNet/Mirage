@@ -5,8 +5,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using Mirage.Logging;
+using UnityEngine;
 
 namespace Mirage.KCP
 {

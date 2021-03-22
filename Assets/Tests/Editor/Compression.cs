@@ -1,7 +1,7 @@
+using Mirage.Serialization;
 using NUnit.Framework;
 using UnityEngine;
 using RangeAttribute = NUnit.Framework.RangeAttribute;
-using Mirage.Serialization;
 
 namespace Mirage
 {
@@ -25,7 +25,7 @@ namespace Mirage
         [Test]
         public void Compress90Degrees()
         {
-            uint compressed = Compression.Compress(Quaternion.Euler(0,90,0));
+            uint compressed = Compression.Compress(Quaternion.Euler(0, 90, 0));
 
             Quaternion decompressed = Compression.Decompress(compressed);
 
