@@ -604,9 +604,9 @@ namespace Mirage
         private readonly Dictionary<int, Action<NetworkReader>> callbacks = new Dictionary<int, Action<NetworkReader>>();
         private int replyId;
 
-        public bool TryGetIdentity(uint id, out NetworkIdentity identity)
+        public bool TryGetIdentity(uint netId, out NetworkIdentity identity)
         {
-            return SpawnedObjects.TryGetValue(id, out identity) && identity != null;
+            return SpawnedObjects.TryGetValue(netId, out identity) && identity != null;
         }
 
         /// <summary>
