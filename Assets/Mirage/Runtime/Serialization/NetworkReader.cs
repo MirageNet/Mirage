@@ -391,7 +391,10 @@ namespace Mirage.Serialization
 
             if (reader.ObjectLocator != null)
             {
-                return reader.ObjectLocator[netId];
+                // if not found return c# null
+                return reader.ObjectLocator.TryGetIdentity(netId, out NetworkIdentity identity)
+                    ? identity
+                    : null;
             }
 
             if (logger.WarnEnabled()) logger.LogFormat(LogType.Warning, "ReadNetworkIdentity netId:{0} not found in spawned", netId);
