@@ -69,13 +69,9 @@ namespace Mirage
         public readonly HashSet<NetworkIdentity> DirtyObjects = new HashSet<NetworkIdentity>();
         private readonly List<NetworkIdentity> DirtyObjectsTmp = new List<NetworkIdentity>();
 
-        public NetworkIdentity this[uint netId]
+        public bool TryGetIdentity(uint id, out NetworkIdentity identity)
         {
-            get
-            {
-                SpawnedObjects.TryGetValue(netId, out NetworkIdentity identity);
-                return identity;
-            }
+            return SpawnedObjects.TryGetValue(id, out identity) && identity != null;
         }
 
         public void Start()
