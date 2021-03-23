@@ -165,7 +165,7 @@ namespace Mirage
         /// <summary>
         /// The NetworkServer associated with this NetworkIdentity.
         /// </summary>
-        public NetworkServer Server { get; internal set; }
+        public INetworkServer Server { get; internal set; }
 
         /// <summary>
         /// The ServerObjectManager is present only for server/host instances.

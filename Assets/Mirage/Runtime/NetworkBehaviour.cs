@@ -92,7 +92,7 @@ namespace Mirage
         /// <summary>
         /// The <see cref="NetworkServer">NetworkClient</see> associated to this object.
         /// </summary>
-        public NetworkServer Server => NetIdentity.Server;
+        public INetworkServer Server => NetIdentity.Server;
 
         /// <summary>
         /// Quick Reference to the NetworkIdentities ServerObjectManager. Present only for server/host instances.
