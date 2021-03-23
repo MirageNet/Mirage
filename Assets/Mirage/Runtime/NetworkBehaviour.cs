@@ -102,7 +102,7 @@ namespace Mirage
         /// <summary>
         /// The <see cref="NetworkClient">NetworkClient</see> associated to this object.
         /// </summary>
-        public NetworkClient Client => NetIdentity.Client;
+        public INetworkClient Client => NetIdentity.Client;
 
         /// <summary>
         /// Quick Reference to the NetworkIdentities ClientObjectManager. Present only for instances instances.

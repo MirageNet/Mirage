@@ -100,7 +100,7 @@ namespace Mirage
         /// <summary>
         /// The host client for this server 
         /// </summary>
-        public NetworkClient LocalClient { get; private set; }
+        public INetworkClient LocalClient { get; private set; }
 
         /// <summary>
         /// True if there is a local client connected to this server (host mode)
@@ -339,7 +339,7 @@ namespace Mirage
         /// </summary>
         /// <param name="client">The local client</param>
         /// <param name="tconn">The connection to the client</param>
-        internal void SetLocalConnection(NetworkClient client, IConnection tconn)
+        internal void SetLocalConnection(INetworkClient client, IConnection tconn)
         {
             if (LocalPlayer != null)
             {
