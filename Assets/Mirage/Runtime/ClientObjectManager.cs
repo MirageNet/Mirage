@@ -127,9 +127,6 @@ namespace Mirage
             Client.Player.RegisterHandler<ObjectHideMessage>(msg => { });
             Client.Player.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
             Client.Player.RegisterHandler<ServerRpcReply>(msg => { });
-            // host mode reuses objects in the server
-            // so we don't need to spawn them
-            Client.Player.RegisterHandler<UpdateVarsMessage>(msg => { });
             Client.Player.RegisterHandler<RpcMessage>(msg => { });
         }
 
@@ -139,7 +136,6 @@ namespace Mirage
             Client.Player.RegisterHandler<ObjectHideMessage>(OnObjectHide);
             Client.Player.RegisterHandler<SpawnMessage>(OnSpawn);
             Client.Player.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
-            Client.Player.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
             Client.Player.RegisterHandler<RpcMessage>(OnRpcMessage);
         }
 
@@ -527,21 +523,6 @@ namespace Mirage
                 localObject.NotifyAuthority();
                 localObject.StartClient();
                 CheckForLocalPlayer(localObject);
-            }
-        }
-
-        internal void OnUpdateVarsMessage(UpdateVarsMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log("ClientScene.OnUpdateVarsMessage " + msg.netId);
-
-            if (SpawnedObjects.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
-            {
-                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
-                    localObject.OnDeserializeAllSafely(networkReader, false);
-            }
-            else
-            {
-                if (logger.WarnEnabled()) logger.LogWarning("Did not find target for sync message for " + msg.netId + " . Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
             }
         }
 
