@@ -66,8 +66,7 @@ namespace Mirage
 
         public readonly Dictionary<uint, NetworkIdentity> SpawnedObjects = new Dictionary<uint, NetworkIdentity>();
 
-        public readonly HashSet<NetworkIdentity> DirtyObjects = new HashSet<NetworkIdentity>();
-        private readonly List<NetworkIdentity> DirtyObjectsTmp = new List<NetworkIdentity>();
+        public SyncVarSender SyncVarSender { get; private set; }
 
         public bool TryGetIdentity(uint netId, out NetworkIdentity identity)
         {
@@ -78,7 +77,7 @@ namespace Mirage
         {
             if (Server != null)
             {
-                Server.Started.AddListener(SpawnOrActivate);
+                Server.Started.AddListener(OnServerStarted);
                 Server.OnStartHost.AddListener(StartedHost);
                 Server.Authenticated.AddListener(OnAuthenticated);
                 Server.Stopped.AddListener(OnServerStopped);
@@ -94,26 +93,7 @@ namespace Mirage
         // The user should never need to pump the update loop manually
         internal void Update()
         {
-            if (!Server || !Server.Active)
-                return;
-
-            DirtyObjectsTmp.Clear();
-
-            foreach (NetworkIdentity identity in DirtyObjects)
-            {
-                if (identity != null)
-                {
-                    identity.ServerUpdate();
-
-                    if (identity.StillDirty())
-                        DirtyObjectsTmp.Add(identity);
-                }
-            }
-
-            DirtyObjects.Clear();
-
-            foreach (NetworkIdentity obj in DirtyObjectsTmp)
-                DirtyObjects.Add(obj);
+            SyncVarSender?.Update();
         }
 
         internal void RegisterMessageHandlers(INetworkPlayer player)
@@ -127,6 +107,12 @@ namespace Mirage
             RegisterMessageHandlers(player);
         }
 
+        void OnServerStarted()
+        {
+            SyncVarSender = new SyncVarSender();
+            SpawnOrActivate();
+        }
+
         void OnServerStopped()
         {
             foreach (NetworkIdentity obj in SpawnedObjects.Values.Reverse())
@@ -136,6 +122,7 @@ namespace Mirage
             }
 
             SpawnedObjects.Clear();
+            SyncVarSender = null;
             // reset so ids stay small in each session
             nextNetworkId = 1;
         }
