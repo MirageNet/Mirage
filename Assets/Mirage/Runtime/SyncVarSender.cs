@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Mirage
 {
@@ -24,7 +24,7 @@ namespace Mirage
             {
                 if (identity != null)
                 {
-                    identity.ServerUpdate();
+                    identity.UpdateVars();
 
                     if (identity.StillDirty())
                         DirtyObjectsTmp.Add(identity);

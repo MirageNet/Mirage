@@ -1162,7 +1162,7 @@ namespace Mirage
             ClearObservers();
         }
 
-        internal void ServerUpdate()
+        internal void UpdateVars()
         {
             if (observers.Count > 0)
             {
