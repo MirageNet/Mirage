@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine.Events;
 
 namespace Mirage
@@ -57,6 +58,10 @@ namespace Mirage
         /// <para>This will be true after NetworkServer.Listen() has been called.</para>
         /// </summary>
         bool Active { get; }
+
+        NetworkTime Time { get; }
+
+        IReadOnlyCollection<INetworkPlayer> Players { get; }
 
         void Disconnect();
 
