@@ -62,7 +62,7 @@ namespace Mirage
         public SpawnEvent UnSpawned => _unSpawned;
 
         uint nextNetworkId = 1;
-        uint GetNextNetworkId() => nextNetworkId++;
+        uint GetNextNetworkId() => checked(nextNetworkId++);
 
         public readonly Dictionary<uint, NetworkIdentity> SpawnedObjects = new Dictionary<uint, NetworkIdentity>();
 
