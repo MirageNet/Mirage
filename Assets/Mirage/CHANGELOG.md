@@ -1,3 +1,15 @@
+# [83.0.0](https://github.com/MirageNet/Mirage/compare/v82.0.0...v83.0.0) (2021-03-24)
+
+
+### Code Refactoring
+
+* using interface instead of network client ([#721](https://github.com/MirageNet/Mirage/issues/721)) ([703596a](https://github.com/MirageNet/Mirage/commit/703596aa4678eeef6e6e89b8877fceb8062e4476))
+
+
+### BREAKING CHANGES
+
+* fields and parameters using NetworkClient are now using INetworkClient Instead
+
 # [82.0.0](https://github.com/MirageNet/Mirage/compare/v81.0.2...v82.0.0) (2021-03-24)
 
 
