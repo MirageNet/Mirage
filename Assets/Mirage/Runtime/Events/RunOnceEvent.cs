@@ -16,6 +16,54 @@ namespace Mirage.Events
     /// Events that are invoked multiple times, like Spawn Event, should use a regular event so that they can be invoked multiple times. 
     /// </para>
     /// </remarks>
+    /// <example>
+    /// This Example shows uses of Event
+    /// <code>
+    /// 
+    /// public class Server : MonoBehaviour
+    /// {
+    ///     // shows in inspector
+    ///     [SerializeField]
+    ///     private RunOnceEvent _started;
+    ///
+    ///     // expose interface so others can add handlers, but does not let them invoke
+    ///     public IRunOnceEvent Started => customEvent;
+    ///
+    ///     public void StartServer()
+    ///     {
+    ///         // ...
+    ///
+    ///         // invoke using field
+    ///         _started.Invoke();
+    ///     }
+    ///
+    ///     public void StopServer()
+    ///     {
+    ///         // ...
+    ///
+    ///         // reset event, removes handlers and allowes it to be invoked again
+    ///         _started.Reset();
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    /// <example>
+    /// This is an example to show how to create events with arguments:
+    /// <code>
+    /// [Serializable]
+    /// public class IntUnityEvent : UnityEvent&lt;int&gt; { }
+    /// [Serializable]
+    /// public class IntRunOnceEvent : RunOnceEvent&lt;int, IntUnityEvent&gt; { }
+    /// 
+    /// public class MyClass : MonoBehaviour
+    /// {
+    ///     [SerializeField]
+    ///     private IntRunOnceEvent customEvent;
+    /// 
+    ///     public IRunOnceEvent&lt;int&gt; CustomEvent => customEvent;
+    /// }
+    /// </code>
+    /// </example>
     [Serializable]
     public sealed class RunOnceEvent : RunOnceEventBase, IRunOnceEvent
     {
