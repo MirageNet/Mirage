@@ -198,7 +198,7 @@ namespace Mirage
         /// <param name="assetId"></param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
-        public bool ReplaceCharacter(INetworkPlayer player, NetworkClient client, GameObject character, Guid assetId, bool keepAuthority = false)
+        public bool ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, Guid assetId, bool keepAuthority = false)
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
             identity.AssetId = assetId;
@@ -214,7 +214,7 @@ namespace Mirage
         /// <param name="character">Player object spawned for the player.</param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
-        public bool ReplaceCharacter(INetworkPlayer player, NetworkClient client, GameObject character, bool keepAuthority = false)
+        public bool ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority = false)
         {
             return InternalReplacePlayerForConnection(player, client, character, keepAuthority);
         }
@@ -329,7 +329,7 @@ namespace Mirage
             }
         }
 
-        internal bool InternalReplacePlayerForConnection(INetworkPlayer player, NetworkClient client, GameObject character, bool keepAuthority)
+        internal bool InternalReplacePlayerForConnection(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority)
         {
             NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
             if (identity is null)

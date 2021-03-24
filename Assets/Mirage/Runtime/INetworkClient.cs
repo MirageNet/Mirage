@@ -36,6 +36,8 @@ namespace Mirage
         /// </summary>
         bool IsLocalClient { get; }
 
+        NetworkTime Time { get; }
+
         void Disconnect();
     }
 }
