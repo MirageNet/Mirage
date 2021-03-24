@@ -92,7 +92,7 @@ namespace Mirage
         /// <summary>
         /// The <see cref="NetworkServer">NetworkClient</see> associated to this object.
         /// </summary>
-        public NetworkServer Server => NetIdentity.Server;
+        public INetworkServer Server => NetIdentity.Server;
 
         /// <summary>
         /// Quick Reference to the NetworkIdentities ServerObjectManager. Present only for server/host instances.
@@ -291,9 +291,9 @@ namespace Mirage
         protected internal void SendRpcInternal(Type invokeClass, string rpcName, NetworkWriter writer, int channelId, bool excludeOwner)
         {
             // this was in Weaver before
-            if (!Server || !Server.Active)
+            if (Server == null || !Server.Active)
             {
-                throw new InvalidOperationException("RPC Function " + rpcName + " called on Client.");
+                throw new InvalidOperationException($"RPC Function {rpcName} called when server is not active.");
             }
             // This cannot use Server.active, as that is not specific to this object.
             if (!IsServer)
@@ -322,9 +322,9 @@ namespace Mirage
         protected internal void SendTargetRpcInternal(INetworkPlayer player, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
         {
             // this was in Weaver before
-            if (!Server || !Server.Active)
+            if (Server == null || !Server.Active)
             {
-                throw new InvalidOperationException("RPC Function " + rpcName + " called on client.");
+                throw new InvalidOperationException($"RPC Function {rpcName} called when server is not active.");
             }
 
             // connection parameter is optional. assign if null.

@@ -117,6 +117,7 @@ namespace Mirage
         /// A list of local connections on the server.
         /// </summary>
         public readonly HashSet<INetworkPlayer> Players = new HashSet<INetworkPlayer>();
+        IReadOnlyCollection<INetworkPlayer> INetworkServer.Players => Players;
 
         /// <summary>
         /// <para>Checks if the server has been started.</para>
