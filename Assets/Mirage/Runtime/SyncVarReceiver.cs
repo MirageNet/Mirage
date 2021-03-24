@@ -1,4 +1,4 @@
-﻿using Mirage.Logging;
+using Mirage.Logging;
 using Mirage.Serialization;
 using UnityEngine;
 
@@ -10,23 +10,33 @@ namespace Mirage
     public class SyncVarReceiver
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(SyncVarReceiver));
+
         private readonly IObjectLocator objectLocator;
 
         public SyncVarReceiver(NetworkClient client, IObjectLocator objectLocator)
         {
             this.objectLocator = objectLocator;
-            client.Connected.AddListener(player =>
+            if (client.IsConnected)
             {
-                if (client.IsLocalClient)
-                {
-                    player.RegisterHandler<UpdateVarsMessage>(_ => { });
-                }
-                else
-                {
-                    player.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
+                AddHandlers(client, client.Player);
+            }
+            else
+            {
+                // todo replace this with RunOnceEvent
+                client.Connected.AddListener(player => AddHandlers(client, player));
+            }
+        }
 
-                }
-            });
+        private void AddHandlers(NetworkClient client, INetworkPlayer player)
+        {
+            if (client.IsLocalClient)
+            {
+                player.RegisterHandler<UpdateVarsMessage>(_ => { });
+            }
+            else
+            {
+                player.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
+            }
         }
 
         void OnUpdateVarsMessage(UpdateVarsMessage msg)

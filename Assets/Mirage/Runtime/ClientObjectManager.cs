@@ -84,6 +84,8 @@ namespace Mirage
 
         internal ServerObjectManager ServerObjectManager;
 
+        SyncVarReceiver syncVarReceiver;
+
         public void Start()
         {
             if (Client != null)
@@ -98,6 +100,7 @@ namespace Mirage
 
         void OnClientConnected(INetworkPlayer player)
         {
+            syncVarReceiver = new SyncVarReceiver(Client, this);
             RegisterSpawnPrefabs();
 
             if (Client.IsLocalClient)
@@ -114,6 +117,7 @@ namespace Mirage
         {
             ClearSpawners();
             DestroyAllClientObjects();
+            syncVarReceiver = null;
         }
 
         void OnClientSceneChanged(string scenePath, SceneOperation sceneOperation)
