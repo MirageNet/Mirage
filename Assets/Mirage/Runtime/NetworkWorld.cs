@@ -35,7 +35,7 @@ namespace Mirage
         internal void AddIdentity(uint netId, NetworkIdentity identity)
         {
             SpawnedObjects.Add(netId, identity);
-            onSpawn.Invoke(identity);
+            onSpawn?.Invoke(identity);
         }
         internal void RemoveIdentity(NetworkIdentity identity)
         {
