@@ -136,6 +136,8 @@ namespace Mirage
             }
 
             SpawnedObjects.Clear();
+            // reset so ids stay small in each session
+            nextNetworkId = 1;
         }
 
         void OnServerChangeScene(string scenePath, SceneOperation sceneOperation)
