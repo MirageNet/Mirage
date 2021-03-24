@@ -1,3 +1,41 @@
+# [82.0.0](https://github.com/MirageNet/Mirage/compare/v81.0.2...v82.0.0) (2021-03-24)
+
+
+### Code Refactoring
+
+* changing indexer to try get ([#720](https://github.com/MirageNet/Mirage/issues/720)) ([01ca9bb](https://github.com/MirageNet/Mirage/commit/01ca9bb48ce14446052cd45d5c41a9a299a1efcf))
+* removing connection to server ([#703](https://github.com/MirageNet/Mirage/issues/703)) ([ff95634](https://github.com/MirageNet/Mirage/commit/ff95634c8c08be20574f8c73530926725944ecae))
+
+
+### BREAKING CHANGES
+
+* ObjectLocator now has TryGet method instead of indexer that returns null
+
+* updating uses of objectLocator
+
+* fixing names not being the same
+* Removed ConnectionToServer property
+
+* removing uses of ConnectionToServer
+
+* removing use in test
+
+* removing ClientRpc player target
+
+* creating null
+
+* changing tests to expect null
+
+* fixing docs
+
+* using client player for target rpc
+
+Co-authored-by: Paul Pacheco <paulpach@gmail.com>
+
+* fixing tests for rpc target
+
+Co-authored-by: Paul Pacheco <paulpach@gmail.com>
+
 ## [81.0.2](https://github.com/MirageNet/Mirage/compare/v81.0.1...v81.0.2) (2021-03-22)
 
 
