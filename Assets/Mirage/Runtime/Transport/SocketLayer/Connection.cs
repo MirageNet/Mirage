@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
 
@@ -31,7 +32,7 @@ namespace Mirage.SocketLayer
 
     public sealed class Connection
     {
-        static readonly ILogger logger = LogFactory.GetLogger<Connection>();
+        readonly ILogger logger;
 
         public ConnectionState State { get; private set; }
 
@@ -46,9 +47,12 @@ namespace Mirage.SocketLayer
         private KeepAliveTracker keepAliveTracker;
         private DisconnectedTracker disconnectedTracker;
 
-        public Connection(Peer peer, EndPoint endPoint, Config config, Time time)
+        HashSet<IPlayer> players;
+
+        public Connection(Peer peer, EndPoint endPoint, Config config, Time time, ILogger logger)
         {
             this.peer = peer;
+            this.logger = logger ?? Debug.unityLogger;
             EndPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
             this.config = config;
             this.time = time;
@@ -65,19 +69,19 @@ namespace Mirage.SocketLayer
             switch (state)
             {
                 case ConnectionState.Connected:
-                    logger.Assert(State == ConnectionState.Created || State == ConnectionState.Connecting);
+                    if (State == ConnectionState.Created || State == ConnectionState.Connecting) logger.Log(LogType.Assert, "Failed Assertion");
                     break;
 
                 case ConnectionState.Connecting:
-                    logger.Assert(State == ConnectionState.Created);
+                    if (State == ConnectionState.Created) logger.Log(LogType.Assert, "Failed Assertion");
                     break;
 
                 case ConnectionState.Disconnected:
-                    logger.Assert(State == ConnectionState.Connected);
+                    if (State == ConnectionState.Connected) logger.Log(LogType.Assert, "Failed Assertion");
                     break;
             }
 
-            if (logger.LogEnabled()) logger.Log($"{EndPoint} changed state from {State} to {state}");
+            if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log($"{EndPoint} changed state from {State} to {state}");
             State = state;
         }
 

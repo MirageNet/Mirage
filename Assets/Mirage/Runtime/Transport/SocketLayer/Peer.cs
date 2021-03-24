@@ -27,7 +27,7 @@ namespace Mirage.SocketLayer
     /// </summary>
     public sealed class Peer
     {
-        static readonly ILogger logger = LogFactory.GetLogger<Peer>();
+        readonly ILogger logger;
 
         // todo SendUnreliable
         // tood SendNotify
@@ -45,8 +45,9 @@ namespace Mirage.SocketLayer
         public event Action<Connection> OnConnected;
         public event Action<Connection, RejectReason> OnConnectionFailed;
 
-        public Peer(ISocket socket, Config config)
+        public Peer(ISocket socket, Config config, ILogger logger)
         {
+            this.logger = logger ?? Debug.unityLogger;
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
             this.config = config;
             time = new Time();
@@ -74,8 +75,9 @@ namespace Mirage.SocketLayer
             throw new NotImplementedException();
         }
 
-        public void SendNotify() => throw new NotImplementedException();
-        public void SendUnreliable() => throw new NotImplementedException();
+        public void SendNotify(Connection connection) => throw new NotImplementedException();
+        public void SendReliable(Connection connection) => throw new NotImplementedException();
+        public void SendUnreliable(Connection connection) => throw new NotImplementedException();
 
         private void Send(Connection connection, Packet packet) => Send(connection, packet.data, packet.length);
         private void Send(Connection connection, byte[] data, int? length = null)
@@ -253,7 +255,7 @@ namespace Mirage.SocketLayer
         }
         private void AcceptNewConnection(EndPoint endPoint)
         {
-            if (logger.LogEnabled()) logger.Log($"Accepting new connection from:{endPoint}");
+            if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log($"Accepting new connection from:{endPoint}");
 
             Connection connection = CreateNewConnection(endPoint);
 
@@ -262,7 +264,7 @@ namespace Mirage.SocketLayer
 
         private Connection CreateNewConnection(EndPoint endPoint)
         {
-            var connection = new Connection(this, endPoint, config, time);
+            var connection = new Connection(this, endPoint, config, time, logger);
             connection.SetReceiveTime();
             connections.Add(endPoint, connection);
             return connection;
@@ -323,7 +325,7 @@ namespace Mirage.SocketLayer
             {
                 case ConnectionState.Connecting:
                     var reason = (RejectReason)packet.data[2];
-                    if (logger.LogEnabled()) logger.Log($"Connection Refused: {reason}");
+                    if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log($"Connection Refused: {reason}");
                     RemoveConnection(connection);
                     OnConnectionFailed?.Invoke(connection, reason);
                     break;
