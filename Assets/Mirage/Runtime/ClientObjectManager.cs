@@ -603,13 +603,9 @@ namespace Mirage
         private readonly Dictionary<int, Action<NetworkReader>> callbacks = new Dictionary<int, Action<NetworkReader>>();
         private int replyId;
 
-        public NetworkIdentity this[uint netId]
+        public bool TryGetIdentity(uint netId, out NetworkIdentity identity)
         {
-            get
-            {
-                SpawnedObjects.TryGetValue(netId, out NetworkIdentity identity);
-                return identity;
-            }
+            return SpawnedObjects.TryGetValue(netId, out identity) && identity != null;
         }
 
         /// <summary>

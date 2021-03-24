@@ -1,4 +1,4 @@
-﻿using Mirage.Serialization;
+using Mirage.Serialization;
 using UnityEngine;
 
 namespace Mirage
@@ -28,11 +28,9 @@ namespace Mirage
                 if (gameObject != null)
                     return gameObject;
 
-                if (objectLocator != null)
+                if (objectLocator != null && objectLocator.TryGetIdentity(NetId, out NetworkIdentity result))
                 {
-                    NetworkIdentity result = objectLocator[netId];
-                    if (result != null)
-                        return result.gameObject;
+                    return result.gameObject;
                 }
 
                 return null;
@@ -60,14 +58,13 @@ namespace Mirage
             uint netId = reader.ReadPackedUInt32();
 
             NetworkIdentity identity = null;
-            if (!(reader.ObjectLocator is null))
-                identity = reader.ObjectLocator[netId];
+            bool hasValue = reader.ObjectLocator?.TryGetIdentity(netId, out identity) ?? false;
 
             return new GameObjectSyncvar
             {
                 objectLocator = reader.ObjectLocator,
                 netId = netId,
-                gameObject = identity != null ? identity.gameObject : null
+                gameObject = hasValue ? identity.gameObject : null
             };
         }
     }
