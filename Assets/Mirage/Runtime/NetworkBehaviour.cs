@@ -110,11 +110,6 @@ namespace Mirage
         public ClientObjectManager ClientObjectManager => NetIdentity.ClientObjectManager;
 
         /// <summary>
-        /// The <see cref="NetworkPlayer">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the client.
-        /// </summary>
-        public INetworkPlayer ConnectionToServer => NetIdentity.ConnectionToServer;
-
-        /// <summary>
         /// The <see cref="NetworkPlayer">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
         /// </summary>
         public INetworkPlayer ConnectionToClient => NetIdentity.ConnectionToClient;
@@ -263,7 +258,7 @@ namespace Mirage
 
             if (Client.Player == null)
             {
-                throw new InvalidOperationException("Send ServerRpc attempted with no client running [client=" + ConnectionToServer + "].");
+                throw new InvalidOperationException("Send ServerRpc attempted with no client connection.");
             }
         }
 

@@ -68,9 +68,11 @@ namespace Mirage.Weaver
 
             if (hasNetworkConnection)
             {
-                //client.connection
+               // this is called in the skeleton (the client)
+               // the client should just get the connection to the server and pass that in
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.ConnectionToServer));
+                worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
+                worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
             }
 
             if (!ReadArguments(md, worker, hasNetworkConnection))

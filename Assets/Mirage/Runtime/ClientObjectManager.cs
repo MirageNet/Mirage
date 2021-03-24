@@ -577,7 +577,6 @@ namespace Mirage
             if (identity && identity == LocalPlayer)
             {
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
-                identity.ConnectionToServer = Client.Player;
                 identity.StartLocalPlayer();
 
                 if (logger.LogEnabled()) logger.Log("ClientScene.OnOwnerMessage - player=" + identity.name);
