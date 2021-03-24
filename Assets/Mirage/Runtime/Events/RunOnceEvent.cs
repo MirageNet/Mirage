@@ -50,6 +50,7 @@ namespace Mirage.Events
     /// <example>
     /// This is an example to show how to create events with arguments:
     /// <code>
+    /// // Serializable so that it can be used in inspector
     /// [Serializable]
     /// public class IntUnityEvent : UnityEvent&lt;int&gt; { }
     /// [Serializable]
