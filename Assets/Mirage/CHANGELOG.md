@@ -1,3 +1,15 @@
+# [84.0.0](https://github.com/MirageNet/Mirage/compare/v83.0.0...v84.0.0) (2021-03-24)
+
+
+### Code Refactoring
+
+* using interface instead of network server ([#722](https://github.com/MirageNet/Mirage/issues/722)) ([7312bd8](https://github.com/MirageNet/Mirage/commit/7312bd8cd83f2133f9d0a6162dea9689630d88f2))
+
+
+### BREAKING CHANGES
+
+* fields and parameters using NetworkServer are now using INetworkServer Instead
+
 # [83.0.0](https://github.com/MirageNet/Mirage/compare/v82.0.0...v83.0.0) (2021-03-24)
 
 
