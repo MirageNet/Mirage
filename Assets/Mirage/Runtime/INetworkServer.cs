@@ -59,7 +59,7 @@ namespace Mirage
         /// </summary>
         bool Active { get; }
 
-        NetworkTime Time { get; }
+        NetworkWorld World { get; }
 
         IReadOnlyCollection<INetworkPlayer> Players { get; }
 

@@ -37,7 +37,7 @@ namespace Mirage
     /// </remarks>
     [AddComponentMenu("Network/ServerObjectManager")]
     [DisallowMultipleComponent]
-    public class ServerObjectManager : MonoBehaviour, IServerObjectManager, IObjectLocator
+    public class ServerObjectManager : MonoBehaviour, IServerObjectManager
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
 
@@ -46,32 +46,10 @@ namespace Mirage
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
-        [Header("Events")]
-        /// <summary>
-        /// Raised when the client spawns an object
-        /// </summary>
-        [FormerlySerializedAs("Spawned")]
-        [SerializeField] SpawnEvent _spawned = new SpawnEvent();
-        public SpawnEvent Spawned => _spawned;
-
-        /// <summary>
-        /// Raised when the client unspawns an object
-        /// </summary>
-        [FormerlySerializedAs("UnSpawned")]
-        [SerializeField] SpawnEvent _unSpawned = new SpawnEvent();
-        public SpawnEvent UnSpawned => _unSpawned;
-
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => checked(nextNetworkId++);
 
-        public readonly Dictionary<uint, NetworkIdentity> SpawnedObjects = new Dictionary<uint, NetworkIdentity>();
-
         public SyncVarSender SyncVarSender { get; private set; }
-
-        public bool TryGetIdentity(uint netId, out NetworkIdentity identity)
-        {
-            return SpawnedObjects.TryGetValue(netId, out identity) && identity != null;
-        }
 
         public void Start()
         {
@@ -115,13 +93,13 @@ namespace Mirage
 
         void OnServerStopped()
         {
-            foreach (NetworkIdentity obj in SpawnedObjects.Values.Reverse())
+            foreach (NetworkIdentity obj in Server.World.SpawnedIdentities.Reverse())
             {
                 if (obj.AssetId != Guid.Empty)
                     DestroyObject(obj, true);
             }
 
-            SpawnedObjects.Clear();
+            Server.World.ClearSpawnedObjects();
             SyncVarSender = null;
             // reset so ids stay small in each session
             nextNetworkId = 1;
@@ -156,7 +134,7 @@ namespace Mirage
         /// </summary>
         void StartHostClientObjects()
         {
-            foreach (NetworkIdentity identity in SpawnedObjects.Values)
+            foreach (NetworkIdentity identity in Server.World.SpawnedIdentities)
             {
                 if (!identity.IsClient)
                 {
@@ -208,7 +186,7 @@ namespace Mirage
 
         void SpawnObserversForConnection(INetworkPlayer player)
         {
-            if (logger.LogEnabled()) logger.Log("Spawning " + SpawnedObjects.Count + " objects for conn " + player);
+            if (logger.LogEnabled()) logger.Log("Spawning " + Server.World.SpawnedIdentities.Count + " objects for conn " + player);
 
             if (!player.IsReady)
             {
@@ -219,7 +197,7 @@ namespace Mirage
 
             // add connection to each nearby NetworkIdentity's observers, which
             // internally sends a spawn message for each one to the connection.
-            foreach (NetworkIdentity identity in SpawnedObjects.Values)
+            foreach (NetworkIdentity identity in Server.World.SpawnedIdentities)
             {
                 if (identity.gameObject.activeSelf)
                 {
@@ -406,7 +384,7 @@ namespace Mirage
         /// <param name="msg"></param>
         void OnServerRpcMessage(INetworkPlayer player, ServerRpcMessage msg)
         {
-            if (!SpawnedObjects.TryGetValue(msg.netId, out NetworkIdentity identity) || identity is null)
+            if (!Server.World.TryGetIdentity(msg.netId, out NetworkIdentity identity) || identity is null)
             {
                 if (logger.WarnEnabled()) logger.LogWarning("Spawned object not found when handling ServerRpc message [netId=" + msg.netId + "]");
                 return;
@@ -431,7 +409,7 @@ namespace Mirage
 
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
             {
-                networkReader.ObjectLocator = this;
+                networkReader.ObjectLocator = Server.World;
                 identity.HandleRemoteCall(skeleton, msg.componentIndex, networkReader, player, msg.replyId);
             }
         }
@@ -463,9 +441,9 @@ namespace Mirage
             {
                 // the object has not been spawned yet
                 identity.NetId = GetNextNetworkId();
-                SpawnedObjects[identity.NetId] = identity;
+                Server.World.AddIdentity(identity.NetId, identity);
+                // todo should this be called before Add?
                 identity.StartServer();
-                Spawned.Invoke(identity);
             }
 
             if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.NetId + " asset ID " + identity.AssetId);
@@ -610,9 +588,8 @@ namespace Mirage
         void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
         {
             if (logger.LogEnabled()) logger.Log("DestroyObject instance:" + identity.NetId);
-            UnSpawned.Invoke(identity);
 
-            SpawnedObjects.Remove(identity.NetId);
+            Server.World.RemoveIdentity(identity);
             identity.ConnectionToClient?.RemoveOwnedObject(identity);
 
             identity.SendToRemoteObservers(new ObjectDestroyMessage { netId = identity.NetId });

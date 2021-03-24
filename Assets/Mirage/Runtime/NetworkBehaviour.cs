@@ -114,10 +114,13 @@ namespace Mirage
         /// </summary>
         public INetworkPlayer ConnectionToClient => NetIdentity.ConnectionToClient;
 
+
+        public NetworkWorld NetworkWorld => NetIdentity.NetworkWorld;
+
         /// <summary>
         /// Returns the appropriate NetworkTime instance based on if this NetworkBehaviour is running as a Server or Client.
         /// </summary>
-        public NetworkTime NetworkTime => IsClient ? Client.Time : Server.Time;
+        public NetworkTime NetworkTime => NetworkWorld.Time;
 
         protected internal ulong SyncVarDirtyBits { get; private set; }
         ulong syncVarHookGuard;

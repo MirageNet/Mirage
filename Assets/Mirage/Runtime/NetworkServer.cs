@@ -125,14 +125,12 @@ namespace Mirage
         /// </summary>
         public bool Active { get; private set; }
 
-        readonly NetworkTime _time = new NetworkTime();
         /// <summary>
         /// Time kept in this server
         /// </summary>
-        public NetworkTime Time
-        {
-            get { return _time; }
-        }
+        public NetworkTime Time => World.Time;
+
+        public NetworkWorld World { get; private set; }
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.
@@ -163,6 +161,7 @@ namespace Mirage
                 return;
 
             initialized = true;
+            World = new NetworkWorld(this, LocalClient);
 
             Application.quitting += Disconnect;
             if (logger.LogEnabled()) logger.Log($"NetworkServer Created, Mirage version: {Version.Current}");
@@ -238,6 +237,9 @@ namespace Mirage
         {
             if (!client)
                 throw new InvalidOperationException("NetworkClient not assigned. Unable to StartHost()");
+
+            // need to set local client before listen as that is when world is created
+            LocalClient = client;
 
             // start listening to network connections
             UniTask task = ListenAsync();

@@ -78,14 +78,12 @@ namespace Mirage
         /// </summary>
         public bool IsConnected => connectState == ConnectState.Connected;
 
-        readonly NetworkTime _time = new NetworkTime();
         /// <summary>
         /// Time kept in this client
         /// </summary>
-        public NetworkTime Time
-        {
-            get { return _time; }
-        }
+        public NetworkTime Time => World.Time;
+
+        public NetworkWorld World { get; private set; }
 
         /// <summary>
         /// NetworkClient can connect to local server in host mode too
@@ -147,6 +145,7 @@ namespace Mirage
             {
                 IConnection transportConnection = await Transport.ConnectAsync(uri);
 
+                World = new NetworkWorld(null, this);
                 InitializeAuthEvents();
 
                 // setup all the handlers
@@ -157,10 +156,9 @@ namespace Mirage
                 Time.UpdateClient(this);
                 OnConnected().Forget();
             }
-            catch (Exception)
+            finally
             {
                 connectState = ConnectState.Disconnected;
-                throw;
             }
         }
 
@@ -169,6 +167,7 @@ namespace Mirage
             logger.Log("Client Connect Host to Server");
             connectState = ConnectState.Connected;
 
+            World = server.World;
             InitializeAuthEvents();
 
             // create local connection objects and connect them
