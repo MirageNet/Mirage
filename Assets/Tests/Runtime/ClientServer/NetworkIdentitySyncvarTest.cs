@@ -48,7 +48,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             var networkIdentitySyncvar = new NetworkIdentitySyncvar
             {
-                objectLocator = clientObjectManager,
+                objectLocator = client.World,
                 netId = serverIdentity.NetId,
                 identity = null,
             };
@@ -67,10 +67,9 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             // wait until the client spawns it
             uint newObjectId = newBehavior.NetId;
-            await UniTask.WaitUntil(() => clientObjectManager.SpawnedObjects.ContainsKey(newObjectId));
+            NetworkIdentity newClientObject = await AsyncUtil.WaitUntilSpawn(client.World, newObjectId);
 
             // check if the target was set correctly in the client
-            NetworkIdentity newClientObject = clientObjectManager.SpawnedObjects[newObjectId];
             SampleBehaviorWithNI newClientBehavior = newClientObject.GetComponent<SampleBehaviorWithNI>();
             Assert.That(newClientBehavior.target, Is.SameAs(clientIdentity));
 
