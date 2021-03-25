@@ -237,7 +237,7 @@ namespace Mirage
                 payload = writer.ToArraySegment()
             };
 
-            Client.Send(message, channelId);
+            Client.MessageHandler.Send(Client.Player, message, channelId);
         }
 
         private void ValidateServerRpc(Type invokeClass, string cmdName, bool requireAuthority)
@@ -280,7 +280,7 @@ namespace Mirage
                 payload = writer.ToArraySegment()
             };
 
-            Client.Send(message, channelId);
+            Client.MessageHandler.Send(Client.Player, message, channelId);
 
             return task;
         }
