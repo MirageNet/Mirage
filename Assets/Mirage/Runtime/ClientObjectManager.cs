@@ -312,7 +312,10 @@ namespace Mirage
         /// </summary>
         public void DestroyAllClientObjects()
         {
-            foreach (NetworkIdentity identity in Client.World.SpawnedIdentities)
+            // create copy so they can be removed inside loop
+            // todo remove allocation? might not be a problem as this is clean up
+            NetworkIdentity[] all = Client.World.SpawnedIdentities.ToArray();
+            foreach (NetworkIdentity identity in all)
             {
                 if (identity != null && identity.gameObject != null)
                 {
@@ -354,8 +357,6 @@ namespace Mirage
                 }
             }
 
-            Client.World.AddIdentity(msg.netId, identity);
-
             // objects spawned as part of initial state are started on a second pass
             identity.NotifyAuthority();
             identity.StartClient();
@@ -388,6 +389,10 @@ namespace Mirage
             }
 
             ApplySpawnPayload(identity, msg);
+
+            // add after applying payload, but only if it is new object
+            if (!existing)
+                Client.World.AddIdentity(msg.netId, identity);
         }
 
         NetworkIdentity SpawnPrefab(SpawnMessage msg)
