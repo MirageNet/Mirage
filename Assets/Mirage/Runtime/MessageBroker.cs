@@ -131,6 +131,11 @@ namespace Mirage
             }
         }
 
+        public void TransportReceive(ArraySegment<byte> data, int channel = 0)
+        {
+            throw new NotImplementedException();
+        }
+
         // note: original HLAPI HandleBytes function handled >1 message in a while loop, but this wasn't necessary
         //       anymore because NetworkServer/NetworkClient Update both use while loops to handle >1 data events per
         //       frame already.
@@ -254,7 +259,6 @@ namespace Mirage
         {
             Send(player.Connection, segment, channelId);
         }
-
         #endregion
 
         #region Notify

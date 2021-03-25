@@ -41,8 +41,6 @@ namespace Mirage
 
         NetworkWorld World { get; }
 
-        NetworkTime Time { get; }
-
         void Disconnect();
     }
 }
