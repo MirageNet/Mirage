@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Mirage.Logging;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Mirage
 {
