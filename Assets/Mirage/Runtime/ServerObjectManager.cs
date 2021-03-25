@@ -47,7 +47,7 @@ namespace Mirage
         public NetworkSceneManager NetworkSceneManager;
 
         uint nextNetworkId = 1;
-        uint GetNextNetworkId() => nextNetworkId++;
+        uint GetNextNetworkId() => checked(nextNetworkId++);
 
         public SyncVarSender SyncVarSender { get; private set; }
 
@@ -76,8 +76,8 @@ namespace Mirage
 
         internal void RegisterMessageHandlers(INetworkPlayer player)
         {
-            player.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
-            player.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
+            Server.MessageHandler.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
+            Server.MessageHandler.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
         }
 
         void OnAuthenticated(INetworkPlayer player)
@@ -101,6 +101,8 @@ namespace Mirage
 
             Server.World.ClearSpawnedObjects();
             SyncVarSender = null;
+            // reset so ids stay small in each session
+            nextNetworkId = 1;
         }
 
         void OnServerChangeScene(string scenePath, SceneOperation sceneOperation)

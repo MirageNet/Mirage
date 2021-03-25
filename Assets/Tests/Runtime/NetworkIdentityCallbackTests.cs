@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -26,20 +28,27 @@ namespace Mirage.Tests
         private NetworkClient client;
         private GameObject networkServerGameObject;
 
+        IMessageHandler messageHandler;
         IConnection tconn42;
         IConnection tconn43;
+
 
         [SetUp]
         public void SetUp()
         {
+            messageHandler = Substitute.For<IMessageHandler>();
+            messageHandler.ProcessMessagesAsync(Arg.Any<INetworkPlayer>()).Returns(UniTask.Never(CancellationToken.None));
+
             networkServerGameObject = new GameObject();
             server = networkServerGameObject.AddComponent<NetworkServer>();
+            server.MessageHandler = messageHandler;
             serverObjectManager = networkServerGameObject.AddComponent<ServerObjectManager>();
             serverObjectManager.Server = server;
             client = networkServerGameObject.AddComponent<NetworkClient>();
 
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
+
             identity.Server = server;
             identity.ServerObjectManager = serverObjectManager;
 
@@ -60,8 +69,8 @@ namespace Mirage.Tests
         [Test]
         public void AddAllReadyServerConnectionsToObservers()
         {
-            var connection1 = new NetworkPlayer(tconn42) { IsReady = true };
-            var connection2 = new NetworkPlayer(tconn43) { IsReady = false };
+            var connection1 = new NetworkPlayer(tconn42, messageHandler) { IsReady = true };
+            var connection2 = new NetworkPlayer(tconn43, messageHandler) { IsReady = false };
             // add some server connections
             server.Players.Add(connection1);
             server.Players.Add(connection2);

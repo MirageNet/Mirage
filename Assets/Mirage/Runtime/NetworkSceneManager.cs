@@ -87,37 +87,70 @@ namespace Mirage
         /// </summary>
         internal List<string> pendingAdditiveSceneList = new List<string>();
 
+        IMessageHandler messageHandler;
+
         public void Start()
         {
             if (DontDestroy)
                 DontDestroyOnLoad(gameObject);
 
+            // todo get MessageHandler in a different way, MessageHandler should exist outside of client/server
             if (Client != null)
             {
+                // invoke now or when active
+                if (Client.IsConnected)
+                {
+                    ClientConnected(default);
+                }
+                else
+                {
+                    Client.Connected.AddListener(ClientConnected);
+                }
                 Client.Authenticated.AddListener(OnClientAuthenticated);
             }
             if (Server != null)
             {
+                // invoke now or when active
+                if (Server.Active)
+                {
+                    ServerStarted();
+                }
+                else
+                {
+                    Server.Started.AddListener(ServerStarted);
+                }
                 Server.Authenticated.AddListener(OnServerAuthenticated);
             }
         }
 
         #region Client
 
-        void RegisterClientMessages(INetworkPlayer player)
+        void ClientConnected(INetworkPlayer _)
         {
-            player.RegisterHandler<SceneMessage>(ClientSceneMessage);
+            logger.Log("NetworkSceneManager.ClientConnected");
+            messageHandler = Client.MessageHandler;
+        }
+
+        void ServerStarted()
+        {
+            logger.Log("NetworkSceneManager.ServerStarted");
+            messageHandler = Server.MessageHandler;
+        }
+
+        void RegisterClientMessages()
+        {
+            messageHandler.RegisterHandler<SceneMessage>(ClientSceneMessage);
             if (!Client.IsLocalClient)
             {
-                player.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
-                player.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
+                messageHandler.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
+                messageHandler.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
             }
         }
 
         void OnClientAuthenticated(INetworkPlayer player)
         {
             logger.Log("NetworkSceneManager.OnClientAuthenticated");
-            RegisterClientMessages(player);
+            RegisterClientMessages();
         }
 
         void OnDestroy()
@@ -231,8 +264,8 @@ namespace Mirage
         {
             logger.Log("NetworkSceneManager.OnServerAuthenticated");
 
-            player.Send(new SceneMessage { scenePath = ActiveScenePath, additiveScenes = additiveSceneList.ToArray() });
-            player.Send(new SceneReadyMessage());
+            messageHandler.Send(player, new SceneMessage { scenePath = ActiveScenePath, additiveScenes = additiveSceneList.ToArray() });
+            messageHandler.Send(player, new SceneReadyMessage());
         }
 
         /// <summary>

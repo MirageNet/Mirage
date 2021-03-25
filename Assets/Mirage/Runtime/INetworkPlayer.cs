@@ -8,9 +8,8 @@ namespace Mirage
     /// </summary>
     public interface IMessageSender
     {
-        void Send<T>(T message, int channelId = Channel.Reliable);
-
-        void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable);
+        void Send<T>(INetworkPlayer player, T message, int channelId = Channel.Reliable);
+        void Send(INetworkPlayer player, ArraySegment<byte> segment, int channelId = Channel.Reliable);
     }
 
     /// <summary>
@@ -30,7 +29,7 @@ namespace Mirage
         /// ProcessMessages loop, should loop unitil object is closed
         /// </summary>
         /// <returns></returns>
-        UniTask ProcessMessagesAsync();
+        UniTask ProcessMessagesAsync(INetworkPlayer player);
 
         // todo remove channel
         void TransportReceive(ArraySegment<byte> data, int channel = default);
@@ -47,7 +46,7 @@ namespace Mirage
         /// <typeparam name="T">type of message to send</typeparam>
         /// <param name="message">message to send</param>
         /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
-        void SendNotify<T>(T message, object token, int channelId = Channel.Unreliable);
+        void SendNotify<T>(INetworkPlayer player, T message, object token, int channelId = Channel.Unreliable);
     }
 
     /// <summary>
@@ -100,9 +99,13 @@ namespace Mirage
     /// A connection to a remote endpoint.
     /// May be from the server to client or from client to server
     /// </summary>
-    public interface INetworkPlayer : IMessageHandler, IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
+    public interface INetworkPlayer : IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
     {
         IConnection Connection { get; }
+
+        IMessageHandler MessageHandler { get; }
+        void Send<T>(T message, int channelId = 0);
+        void Send(ArraySegment<byte> segment, int channelId = 0);
     }
 
     public interface IAuthenticatedObject

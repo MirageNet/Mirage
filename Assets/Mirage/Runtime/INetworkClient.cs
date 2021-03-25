@@ -2,7 +2,7 @@ using UnityEngine.Events;
 
 namespace Mirage
 {
-    public interface INetworkClient : IMessageSender
+    public interface INetworkClient
     {
 
         /// <summary>
@@ -35,6 +35,9 @@ namespace Mirage
         /// NetworkClient can connect to local server in host mode too
         /// </summary>
         bool IsLocalClient { get; }
+        IMessageHandler MessageHandler { get; }
+
+        NetworkTime Time { get; }
 
         NetworkWorld World { get; }
 

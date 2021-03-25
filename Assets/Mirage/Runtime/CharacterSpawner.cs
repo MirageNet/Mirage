@@ -85,7 +85,7 @@ namespace Mirage
         private void OnServerAuthenticated(INetworkPlayer player)
         {
             // wait for client to send us an AddPlayerMessage
-            player.RegisterHandler<AddCharacterMessage>(OnServerAddPlayerInternal);
+            Server.MessageHandler.RegisterHandler<AddCharacterMessage>(OnServerAddPlayerInternal);
         }
 
         /// <summary>
