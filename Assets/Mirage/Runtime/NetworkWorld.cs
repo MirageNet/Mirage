@@ -58,8 +58,6 @@ namespace Mirage
             SpawnedObjects.Clear();
         }
 
-        public NetworkPlayer LocalPlayer { get; private set; }
-
         public INetworkServer Server { get; }
         public INetworkClient Client { get; }
 
