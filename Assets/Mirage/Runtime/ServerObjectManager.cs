@@ -430,6 +430,7 @@ namespace Mirage
             identity.ConnectionToClient = ownerPlayer;
             identity.Server = Server;
             identity.ServerObjectManager = this;
+            identity.World = Server.World;
             identity.Client = Server.LocalClient;
 
             // special case to make sure hasAuthority is set

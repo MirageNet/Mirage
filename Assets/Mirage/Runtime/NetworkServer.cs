@@ -128,7 +128,7 @@ namespace Mirage
         /// <summary>
         /// Time kept in this server
         /// </summary>
-        public NetworkTime Time => World.Time;
+        public NetworkTime Time { get; } = new NetworkTime();
 
         public NetworkWorld World { get; private set; }
 

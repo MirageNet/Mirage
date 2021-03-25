@@ -343,6 +343,7 @@ namespace Mirage
             identity.NetId = msg.netId;
             identity.Client = Client;
             identity.ClientObjectManager = this;
+            identity.World = Client.World;
 
             if (msg.isLocalPlayer)
                 InternalAddPlayer(identity);

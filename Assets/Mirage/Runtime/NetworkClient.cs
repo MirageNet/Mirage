@@ -81,7 +81,7 @@ namespace Mirage
         /// <summary>
         /// Time kept in this client
         /// </summary>
-        public NetworkTime Time => World.Time;
+        public NetworkTime Time { get; } = new NetworkTime();
 
         public NetworkWorld World { get; private set; }
 
@@ -156,9 +156,10 @@ namespace Mirage
                 Time.UpdateClient(this);
                 OnConnected().Forget();
             }
-            finally
+            catch (Exception e)
             {
                 connectState = ConnectState.Disconnected;
+                throw;
             }
         }
 

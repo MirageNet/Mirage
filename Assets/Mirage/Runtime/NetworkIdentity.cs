@@ -170,7 +170,7 @@ namespace Mirage
         /// <summary>
         /// The world this object exists in
         /// </summary>
-        public NetworkWorld NetworkWorld;
+        public NetworkWorld World { get; internal set; }
 
         /// <summary>
         /// The ServerObjectManager is present only for server/host instances.

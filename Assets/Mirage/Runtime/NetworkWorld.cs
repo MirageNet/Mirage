@@ -59,14 +59,12 @@ namespace Mirage
         }
 
         public NetworkPlayer LocalPlayer { get; private set; }
-        public NetworkTime Time { get; }
 
         public INetworkServer Server { get; }
         public INetworkClient Client { get; }
 
         public NetworkWorld(INetworkServer server, INetworkClient client)
         {
-            Time = new NetworkTime();
             Server = server;
             Client = client;
         }
