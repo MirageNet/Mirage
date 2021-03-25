@@ -1,3 +1,10 @@
+# [84.1.0](https://github.com/MirageNet/Mirage/compare/v84.0.0...v84.1.0) (2021-03-25)
+
+
+### Features
+
+* sample for interest management ([#727](https://github.com/MirageNet/Mirage/issues/727)) ([0f4cdc5](https://github.com/MirageNet/Mirage/commit/0f4cdc50910e3ec63a3b93c12633b026039cd696))
+
 # [84.0.0](https://github.com/MirageNet/Mirage/compare/v83.0.0...v84.0.0) (2021-03-24)
 
 
