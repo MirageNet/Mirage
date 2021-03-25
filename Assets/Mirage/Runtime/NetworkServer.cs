@@ -102,7 +102,7 @@ namespace Mirage
         /// <summary>
         /// The host client for this server 
         /// </summary>
-        public NetworkClient LocalClient { get; private set; }
+        public INetworkClient LocalClient { get; private set; }
 
         /// <summary>
         /// True if there is a local client connected to this server (host mode)
@@ -119,6 +119,7 @@ namespace Mirage
         /// A list of local connections on the server.
         /// </summary>
         public readonly HashSet<INetworkPlayer> Players = new HashSet<INetworkPlayer>();
+        IReadOnlyCollection<INetworkPlayer> INetworkServer.Players => Players;
 
         /// <summary>
         /// <para>Checks if the server has been started.</para>
@@ -126,14 +127,12 @@ namespace Mirage
         /// </summary>
         public bool Active { get; private set; }
 
-        readonly NetworkTime _time = new NetworkTime();
         /// <summary>
         /// Time kept in this server
         /// </summary>
-        public NetworkTime Time
-        {
-            get { return _time; }
-        }
+        public NetworkTime Time { get; } = new NetworkTime();
+
+        public NetworkWorld World { get; private set; }
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.
@@ -163,6 +162,7 @@ namespace Mirage
                 return;
 
             initialized = true;
+            World = new NetworkWorld(this, LocalClient);
 
             Application.quitting += Disconnect;
             if (logger.LogEnabled()) logger.Log($"NetworkServer Created, Mirage version: {Version.Current}");
@@ -265,6 +265,9 @@ namespace Mirage
             if (!client)
                 throw new InvalidOperationException("NetworkClient not assigned. Unable to StartHost()");
 
+            // need to set local client before listen as that is when world is created
+            LocalClient = client;
+
             // start listening to network connections
             Listen();
 
@@ -348,7 +351,7 @@ namespace Mirage
         /// </summary>
         /// <param name="client">The local client</param>
         /// <param name="tconn">The connection to the client</param>
-        internal void SetLocalConnection(NetworkClient client, IConnection tconn)
+        internal void SetLocalConnection(INetworkClient client, IConnection tconn)
         {
             if (LocalPlayer != null)
             {

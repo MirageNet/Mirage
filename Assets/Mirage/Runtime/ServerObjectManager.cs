@@ -37,7 +37,7 @@ namespace Mirage
     /// </remarks>
     [AddComponentMenu("Network/ServerObjectManager")]
     [DisallowMultipleComponent]
-    public class ServerObjectManager : MonoBehaviour, IServerObjectManager, IObjectLocator
+    public class ServerObjectManager : MonoBehaviour, IServerObjectManager
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
 
@@ -46,39 +46,16 @@ namespace Mirage
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
-        [Header("Events")]
-        /// <summary>
-        /// Raised when the client spawns an object
-        /// </summary>
-        [FormerlySerializedAs("Spawned")]
-        [SerializeField] SpawnEvent _spawned = new SpawnEvent();
-        public SpawnEvent Spawned => _spawned;
-
-        /// <summary>
-        /// Raised when the client unspawns an object
-        /// </summary>
-        [FormerlySerializedAs("UnSpawned")]
-        [SerializeField] SpawnEvent _unSpawned = new SpawnEvent();
-        public SpawnEvent UnSpawned => _unSpawned;
-
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => nextNetworkId++;
 
-        public readonly Dictionary<uint, NetworkIdentity> SpawnedObjects = new Dictionary<uint, NetworkIdentity>();
-
-        public readonly HashSet<NetworkIdentity> DirtyObjects = new HashSet<NetworkIdentity>();
-        private readonly List<NetworkIdentity> DirtyObjectsTmp = new List<NetworkIdentity>();
-
-        public bool TryGetIdentity(uint netId, out NetworkIdentity identity)
-        {
-            return SpawnedObjects.TryGetValue(netId, out identity) && identity != null;
-        }
+        public SyncVarSender SyncVarSender { get; private set; }
 
         public void Start()
         {
             if (Server != null)
             {
-                Server.Started.AddListener(SpawnOrActivate);
+                Server.Started.AddListener(OnServerStarted);
                 Server.OnStartHost.AddListener(StartedHost);
                 Server.Authenticated.AddListener(OnAuthenticated);
                 Server.Stopped.AddListener(OnServerStopped);
@@ -94,26 +71,7 @@ namespace Mirage
         // The user should never need to pump the update loop manually
         internal void Update()
         {
-            if (!Server || !Server.Active)
-                return;
-
-            DirtyObjectsTmp.Clear();
-
-            foreach (NetworkIdentity identity in DirtyObjects)
-            {
-                if (identity != null)
-                {
-                    identity.ServerUpdate();
-
-                    if (identity.StillDirty())
-                        DirtyObjectsTmp.Add(identity);
-                }
-            }
-
-            DirtyObjects.Clear();
-
-            foreach (NetworkIdentity obj in DirtyObjectsTmp)
-                DirtyObjects.Add(obj);
+            SyncVarSender?.Update();
         }
 
         internal void RegisterMessageHandlers(INetworkPlayer player)
@@ -127,15 +85,22 @@ namespace Mirage
             RegisterMessageHandlers(player);
         }
 
+        void OnServerStarted()
+        {
+            SyncVarSender = new SyncVarSender();
+            SpawnOrActivate();
+        }
+
         void OnServerStopped()
         {
-            foreach (NetworkIdentity obj in SpawnedObjects.Values.Reverse())
+            foreach (NetworkIdentity obj in Server.World.SpawnedIdentities.Reverse())
             {
                 if (obj.AssetId != Guid.Empty)
                     DestroyObject(obj, true);
             }
 
-            SpawnedObjects.Clear();
+            Server.World.ClearSpawnedObjects();
+            SyncVarSender = null;
         }
 
         void OnServerChangeScene(string scenePath, SceneOperation sceneOperation)
@@ -167,7 +132,7 @@ namespace Mirage
         /// </summary>
         void StartHostClientObjects()
         {
-            foreach (NetworkIdentity identity in SpawnedObjects.Values)
+            foreach (NetworkIdentity identity in Server.World.SpawnedIdentities)
             {
                 if (!identity.IsClient)
                 {
@@ -196,7 +161,7 @@ namespace Mirage
         /// <param name="assetId"></param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
-        public bool ReplaceCharacter(INetworkPlayer player, NetworkClient client, GameObject character, Guid assetId, bool keepAuthority = false)
+        public bool ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, Guid assetId, bool keepAuthority = false)
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
             identity.AssetId = assetId;
@@ -212,14 +177,14 @@ namespace Mirage
         /// <param name="character">Player object spawned for the player.</param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
-        public bool ReplaceCharacter(INetworkPlayer player, NetworkClient client, GameObject character, bool keepAuthority = false)
+        public bool ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority = false)
         {
             return InternalReplacePlayerForConnection(player, client, character, keepAuthority);
         }
 
         void SpawnObserversForConnection(INetworkPlayer player)
         {
-            if (logger.LogEnabled()) logger.Log("Spawning " + SpawnedObjects.Count + " objects for conn " + player);
+            if (logger.LogEnabled()) logger.Log("Spawning " + Server.World.SpawnedIdentities.Count + " objects for conn " + player);
 
             if (!player.IsReady)
             {
@@ -230,7 +195,7 @@ namespace Mirage
 
             // add connection to each nearby NetworkIdentity's observers, which
             // internally sends a spawn message for each one to the connection.
-            foreach (NetworkIdentity identity in SpawnedObjects.Values)
+            foreach (NetworkIdentity identity in Server.World.SpawnedIdentities)
             {
                 if (identity.gameObject.activeSelf)
                 {
@@ -327,7 +292,7 @@ namespace Mirage
             }
         }
 
-        internal bool InternalReplacePlayerForConnection(INetworkPlayer player, NetworkClient client, GameObject character, bool keepAuthority)
+        internal bool InternalReplacePlayerForConnection(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority)
         {
             NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
             if (identity is null)
@@ -418,7 +383,7 @@ namespace Mirage
         /// <param name="msg"></param>
         void OnServerRpcMessage(INetworkPlayer player, ServerRpcMessage msg)
         {
-            if (!SpawnedObjects.TryGetValue(msg.netId, out NetworkIdentity identity) || identity is null)
+            if (!Server.World.TryGetIdentity(msg.netId, out NetworkIdentity identity) || identity is null)
             {
                 if (logger.WarnEnabled()) logger.LogWarning("Spawned object not found when handling ServerRpc message [netId=" + msg.netId + "]");
                 return;
@@ -443,7 +408,7 @@ namespace Mirage
 
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
             {
-                networkReader.ObjectLocator = this;
+                networkReader.ObjectLocator = Server.World;
                 identity.HandleRemoteCall(skeleton, msg.componentIndex, networkReader, player, msg.replyId);
             }
         }
@@ -464,6 +429,7 @@ namespace Mirage
             identity.ConnectionToClient = ownerPlayer;
             identity.Server = Server;
             identity.ServerObjectManager = this;
+            identity.World = Server.World;
             identity.Client = Server.LocalClient;
 
             // special case to make sure hasAuthority is set
@@ -475,9 +441,9 @@ namespace Mirage
             {
                 // the object has not been spawned yet
                 identity.NetId = GetNextNetworkId();
-                SpawnedObjects[identity.NetId] = identity;
+                Server.World.AddIdentity(identity.NetId, identity);
+                // todo should this be called before Add?
                 identity.StartServer();
-                Spawned.Invoke(identity);
             }
 
             if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.NetId + " asset ID " + identity.AssetId);
@@ -622,9 +588,8 @@ namespace Mirage
         void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
         {
             if (logger.LogEnabled()) logger.Log("DestroyObject instance:" + identity.NetId);
-            UnSpawned.Invoke(identity);
 
-            SpawnedObjects.Remove(identity.NetId);
+            Server.World.RemoveIdentity(identity);
             identity.ConnectionToClient?.RemoveOwnedObject(identity);
 
             identity.SendToRemoteObservers(new ObjectDestroyMessage { netId = identity.NetId });

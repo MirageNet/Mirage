@@ -165,7 +165,12 @@ namespace Mirage
         /// <summary>
         /// The NetworkServer associated with this NetworkIdentity.
         /// </summary>
-        public NetworkServer Server { get; internal set; }
+        public INetworkServer Server { get; internal set; }
+
+        /// <summary>
+        /// The world this object exists in
+        /// </summary>
+        public NetworkWorld World { get; internal set; }
 
         /// <summary>
         /// The ServerObjectManager is present only for server/host instances.
@@ -175,7 +180,7 @@ namespace Mirage
         /// <summary>
         /// The NetworkClient associated with this NetworkIdentity.
         /// </summary>
-        public NetworkClient Client { get; internal set; }
+        public INetworkClient Client { get; internal set; }
 
         /// <summary>
         /// The ClientObjectManager is present only for client instances.
@@ -871,7 +876,7 @@ namespace Mirage
         internal void OnDeserializeAllSafely(NetworkReader reader, bool initialState)
         {
             // needed so that we can deserialize gameobjects and NI
-            reader.ObjectLocator = ClientObjectManager;
+            reader.ObjectLocator = Client != null ? Client.World : null;
             // deserialize all components that were received
             NetworkBehaviour[] components = NetworkBehaviours;
             while (reader.Position < reader.Length)
@@ -1162,7 +1167,7 @@ namespace Mirage
             ClearObservers();
         }
 
-        internal void ServerUpdate()
+        internal void UpdateVars()
         {
             if (observers.Count > 0)
             {

@@ -165,9 +165,10 @@ namespace Mirage.Tests.ClientServer
 
             // wait until the client spawns it
             uint newObjectId = newBehavior.NetId;
-            await UniTask.WaitUntil(() => clientObjectManager.SpawnedObjects.ContainsKey(newObjectId));
+
+            NetworkIdentity newClientObject = await AsyncUtil.WaitUntilSpawn(client.World, newObjectId);
             // check if the target was set correctly in the client
-            NetworkIdentity newClientObject = clientObjectManager.SpawnedObjects[newObjectId];
+
             GenericBehaviourWithSyncVarImplement newClientBehavior = newClientObject.GetComponent<GenericBehaviourWithSyncVarImplement>();
             Assert.AreEqual(newClientBehavior.baseValue, 2);
             Assert.AreEqual(newClientBehavior.childValue, 22);

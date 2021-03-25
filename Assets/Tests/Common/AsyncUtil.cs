@@ -8,6 +8,13 @@ namespace Mirage.Tests
 {
     public static class AsyncUtil
     {
+        public static async UniTask<NetworkIdentity> WaitUntilSpawn(NetworkWorld world, uint netId)
+        {
+            NetworkIdentity identity = null;
+            await UniTask.WaitUntil(() => world.TryGetIdentity(netId, out identity));
+
+            return identity;
+        }
 
         public static UniTask WaitUntilWithTimeout(Func<bool> predicate)
         {

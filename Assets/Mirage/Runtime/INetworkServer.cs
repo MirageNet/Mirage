@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine.Events;
 
 namespace Mirage
@@ -45,7 +46,7 @@ namespace Mirage
         /// <summary>
         /// The host client for this server 
         /// </summary> 
-        NetworkClient LocalClient { get; }
+        INetworkClient LocalClient { get; }
 
         /// <summary>
         /// True if there is a local client connected to this server (host mode)
@@ -57,6 +58,12 @@ namespace Mirage
         /// <para>This will be true after NetworkServer.Listen() has been called.</para>
         /// </summary>
         bool Active { get; }
+
+        NetworkTime Time { get; }
+
+        NetworkWorld World { get; }
+
+        IReadOnlyCollection<INetworkPlayer> Players { get; }
 
         void Disconnect();
 

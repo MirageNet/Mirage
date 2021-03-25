@@ -53,7 +53,7 @@ namespace Mirage
             offsetMax = double.MaxValue;
         }
 
-        internal void UpdateClient(NetworkClient client)
+        internal void UpdateClient(INetworkClient client)
         {
             if (UnityEngine.Time.time - lastPingTime >= PingFrequency)
             {
@@ -61,7 +61,7 @@ namespace Mirage
                 {
                     clientTime = LocalTime()
                 };
-                client.Player.Send(pingMessage, Channel.Unreliable);
+                client.Send(pingMessage, Channel.Unreliable);
                 lastPingTime = UnityEngine.Time.time;
             }
         }
