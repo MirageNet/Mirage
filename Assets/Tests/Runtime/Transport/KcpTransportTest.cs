@@ -161,7 +161,6 @@ namespace Mirage.Tests
             Assert.That(channel, Is.EqualTo(Channel.Unreliable));
         });
 
-
         [UnityTest]
         public IEnumerator DisconnectFromServer() => UniTask.ToCoroutine(async () =>
         {

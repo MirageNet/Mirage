@@ -20,7 +20,6 @@ namespace Mirage.Tests.ClientServer
             Assert.That(clientPlayerGO, Is.Not.Null);
         }
 
-
         [UnityTest]
         public IEnumerator ServerRpc() => UniTask.ToCoroutine(async () =>
         {
@@ -31,7 +30,6 @@ namespace Mirage.Tests.ClientServer
             Assert.That(serverComponent.cmdArg1, Is.EqualTo(1));
             Assert.That(serverComponent.cmdArg2, Is.EqualTo("hello"));
         });
-
 
         [UnityTest]
         public IEnumerator ServerRpcReturn() => UniTask.ToCoroutine(async () =>

@@ -27,7 +27,6 @@ namespace Mirage.Weaver
         {
         }
 
-
         /// <summary>
         /// Generates a skeleton for an RPC
         /// </summary>
@@ -250,7 +249,6 @@ namespace Mirage.Weaver
             return true;
 
         }
-
 
         public void RegisterClientRpcs(ILProcessor cctorWorker)
         {

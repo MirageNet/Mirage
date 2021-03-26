@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-
 namespace Mirage
 {
     [CustomEditor(typeof(ClientObjectManager), true)]

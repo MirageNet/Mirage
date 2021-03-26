@@ -45,7 +45,6 @@ namespace Mirage.Weaver
         public string[] Defines { get; set; }
     }
 
-
     public class Assembler : ScriptableObject
     {
         static string _outputDirectory;
@@ -162,8 +161,6 @@ namespace Mirage.Weaver
             AllowUnsafe = false;
             DeleteOutputOnClear = false;
         }
-
-
 
         public static AssemblyDefinition Build(IWeaverLogger logger)
         {

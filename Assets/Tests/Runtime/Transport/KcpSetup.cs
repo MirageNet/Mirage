@@ -93,7 +93,6 @@ namespace Mirage.Tests
             client.Mtu = 1000;
             client.SetWindowSize(16, 16);
 
-
             Tick(server, token).Forget();
             Tick(client, token).Forget();
         }

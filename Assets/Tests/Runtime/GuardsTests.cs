@@ -162,7 +162,6 @@ namespace Mirage.Tests
             guardedComponent.CallAuthorityNoErrorFunction();
             Assert.That(guardedComponent.hasAuthorityNoErrorCalled, Is.False);
 
-
             Object.Destroy(obj);
         }
 

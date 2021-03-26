@@ -379,7 +379,6 @@ namespace Mirage
             return true;
         }
 
-
         internal void ShowForConnection(NetworkIdentity identity, INetworkPlayer player)
         {
             if (player.IsReady)

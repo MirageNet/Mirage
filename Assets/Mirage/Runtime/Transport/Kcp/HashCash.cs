@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.Security.Cryptography;
 
@@ -116,9 +116,7 @@ namespace Mirage.KCP
             }
         }
 
-
         #endregion
-
 
         #region Validation
         private static readonly HashAlgorithm hashAlgorithm = SHA256.Create();
@@ -154,7 +152,6 @@ namespace Mirage.KCP
 
             return (hash[bytesToCheck] & remainderMask) == 0;
         }
-
 
         internal bool ValidateHash(int bits = 20)
         {

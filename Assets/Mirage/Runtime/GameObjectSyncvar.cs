@@ -45,7 +45,6 @@ namespace Mirage
         }
     }
 
-
     public static class GameObjectSerializers
     {
         public static void WriteGameObjectSyncVar(this NetworkWriter writer, GameObjectSyncvar id)

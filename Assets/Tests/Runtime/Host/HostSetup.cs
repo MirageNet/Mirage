@@ -65,7 +65,6 @@ namespace Mirage.Tests.Host
             await AsyncUtil.WaitUntilWithTimeout(() => client.Player.Identity != null);
         });
 
-
         protected async UniTask StartHost()
         {
             var completionSource = new UniTaskCompletionSource();

@@ -39,7 +39,6 @@ namespace Mirage.Tests
             M, N, O, P
         }
 
-
         [Test]
         public void ByteIsSentForByteEnum()
         {
