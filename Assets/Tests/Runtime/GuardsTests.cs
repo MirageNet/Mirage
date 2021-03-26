@@ -1,4 +1,4 @@
-using Mirage.Tests.ClientServer;
+using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
 using UnityEngine;
 
