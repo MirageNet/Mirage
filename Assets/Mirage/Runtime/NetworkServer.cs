@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 namespace Mirage
@@ -45,12 +45,11 @@ namespace Mirage
         public NetworkAuthenticator authenticator;
 
         [Header("Events")]
+        [SerializeField] AddLateEvent _started = new AddLateEvent();
         /// <summary>
         /// This is invoked when a server is started - including when a host is started.
         /// </summary>
-        [FormerlySerializedAs("Started")]
-        [SerializeField] UnityEvent _started = new UnityEvent();
-        public UnityEvent Started => _started;
+        public IAddLateEvent Started => _started;
 
         /// <summary>
         /// Event fires once a new Client has connect to the Server.
@@ -73,21 +72,21 @@ namespace Mirage
         [SerializeField] NetworkConnectionEvent _disconnected = new NetworkConnectionEvent();
         public NetworkConnectionEvent Disconnected => _disconnected;
 
-        [SerializeField] UnityEvent _stopped = new UnityEvent();
-        public UnityEvent Stopped => _stopped;
+        [SerializeField] AddLateEvent _stopped = new AddLateEvent();
+        public IAddLateEvent Stopped => _stopped;
 
         /// <summary>
         /// This is invoked when a host is started.
         /// <para>StartHost has multiple signatures, but they all cause this hook to be called.</para>
         /// </summary>
-        [SerializeField] UnityEvent _onStartHost = new UnityEvent();
-        public UnityEvent OnStartHost => _onStartHost;
+        [SerializeField] AddLateEvent _onStartHost = new AddLateEvent();
+        public IAddLateEvent OnStartHost => _onStartHost;
 
         /// <summary>
         /// This is called when a host is stopped.
         /// </summary>
-        [SerializeField] UnityEvent _onStopHost = new UnityEvent();
-        public UnityEvent OnStopHost => _onStopHost;
+        [SerializeField] AddLateEvent _onStopHost = new AddLateEvent();
+        public IAddLateEvent OnStopHost => _onStopHost;
 
         /// <summary>
         /// The connection to the host mode client (if any).
@@ -139,7 +138,7 @@ namespace Mirage
         {
             if (LocalClient != null)
             {
-                OnStopHost?.Invoke();
+                _onStopHost?.Invoke();
                 LocalClient.Disconnect();
             }
 
@@ -220,7 +219,7 @@ namespace Mirage
             logger.Log("Server started listening");
             Active = true;
             // (useful for loading & spawning stuff from database etc.)
-            Started?.Invoke();
+            _started?.Invoke();
         }
 
         private void TransportConnected(IConnection connection)
@@ -251,7 +250,7 @@ namespace Mirage
             // call OnStartHost AFTER SetupServer. this way we can use
             // NetworkServer.Spawn etc. in there too. just like OnStartServer
             // is called after the server is actually properly started.
-            OnStartHost?.Invoke();
+            _onStartHost?.Invoke();
 
             logger.Log("NetworkServer StartHost");
             return task;
@@ -282,9 +281,14 @@ namespace Mirage
                 Connected.RemoveListener(OnAuthenticated);
             }
 
-            Stopped?.Invoke();
+            _stopped?.Invoke();
             initialized = false;
             Active = false;
+
+            _started.Reset();
+            _onStartHost.Reset();
+            _onStopHost.Reset();
+            _stopped.Reset();
         }
 
         /// <summary>

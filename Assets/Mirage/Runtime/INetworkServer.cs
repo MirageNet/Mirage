@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using UnityEngine.Events;
+using Mirage.Events;
 
 namespace Mirage
 {
@@ -8,7 +8,7 @@ namespace Mirage
         /// <summary>
         /// This is invoked when a server is started - including when a host is started.
         /// </summary>
-        UnityEvent Started { get; }
+        IAddLateEvent Started { get; }
 
         /// <summary>
         /// Event fires once a new Client has connect to the Server.
@@ -25,18 +25,18 @@ namespace Mirage
         /// </summary>
         NetworkConnectionEvent Disconnected { get; }
 
-        UnityEvent Stopped { get; }
+        IAddLateEvent Stopped { get; }
 
         /// <summary>
         /// This is invoked when a host is started.
         /// <para>StartHost has multiple signatures, but they all cause this hook to be called.</para>
         /// </summary>
-        UnityEvent OnStartHost { get; }
+        IAddLateEvent OnStartHost { get; }
 
         /// <summary>
         /// This is called when a host is stopped.
         /// </summary>
-        UnityEvent OnStopHost { get; }
+        IAddLateEvent OnStopHost { get; }
 
         /// <summary>
         /// The connection to the host mode client (if any).

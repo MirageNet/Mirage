@@ -79,7 +79,6 @@ namespace Mirage.Tests.Runtime.Host
             manager.Server.StartHost(client).Forget();
 
             await completionSource.Task;
-            server.Started.RemoveListener(Started);
         }
 
         public virtual void ExtraTearDown() { }
