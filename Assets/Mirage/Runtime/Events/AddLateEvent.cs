@@ -74,14 +74,14 @@ namespace Mirage.Events
 
         public void AddListener(UnityAction handler)
         {
+            // invoke handler if event has been invoked atleast once
             if (hasInvoked)
             {
                 handler.Invoke();
             }
-            else
-            {
-                _event.AddListener(handler);
-            }
+
+            // add handler to inner event so that it can be invoked again
+            _event.AddListener(handler);
         }
 
         public void Invoke()
@@ -109,14 +109,14 @@ namespace Mirage.Events
 
         public void AddListener(UnityAction<T0> handler)
         {
+            // invoke handler if event has been invoked atleast once
             if (hasInvoked)
             {
                 handler.Invoke(arg0);
             }
-            else
-            {
-                _event.AddListener(handler);
-            }
+
+            // add handler to inner event so that it can be invoked again
+            _event.AddListener(handler);
         }
 
         public void Invoke(T0 arg0)
@@ -146,14 +146,14 @@ namespace Mirage.Events
 
         public void AddListener(UnityAction<T0, T1> handler)
         {
+            // invoke handler if event has been invoked atleast once
             if (hasInvoked)
             {
                 handler.Invoke(arg0, arg1);
             }
-            else
-            {
-                _event.AddListener(handler);
-            }
+
+            // add handler to inner event so that it can be invoked again
+            _event.AddListener(handler);
         }
 
         public void Invoke(T0 arg0, T1 arg1)

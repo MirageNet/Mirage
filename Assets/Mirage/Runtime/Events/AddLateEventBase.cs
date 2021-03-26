@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine.Events;
 
 namespace Mirage.Events
@@ -10,8 +9,6 @@ namespace Mirage.Events
 
         protected void MarkInvoked()
         {
-            if (hasInvoked) throw new InvalidOperationException("Event can only be invoked once Invoke");
-
             hasInvoked = true;
         }
 

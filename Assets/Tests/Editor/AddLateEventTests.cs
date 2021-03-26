@@ -73,7 +73,7 @@ namespace Mirage.Events.Tests
         }
 
         [Test]
-        public void AddingListenerLateInvokesListenerOnceThenCanBeInvokedAgain()
+        public void AddingListenerLateCanBeInvokedMultipleTimes()
         {
             Invoke();
             Assert.That(listenerCallCount, Is.EqualTo(0));
