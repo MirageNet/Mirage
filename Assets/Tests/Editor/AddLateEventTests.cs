@@ -1,4 +1,3 @@
-using System;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 using UnityEngine.Events;
@@ -33,20 +32,19 @@ namespace Mirage.Events.Tests
 
 
         [Test]
-        public void EventCantBeInvokedTwice()
+        public void EventCanBeInvokedTwice()
         {
             AddListener();
-            Invoke();
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
-            {
-                Invoke();
-            });
-            Assert.That(exception, Has.Message.EqualTo("Event can only be invoked once Invoke"));
+            Invoke();
+            Assert.That(listenerCallCount, Is.EqualTo(1));
+
+            Invoke();
+            Assert.That(listenerCallCount, Is.EqualTo(2));
         }
 
         [Test]
-        public void EventCantBeInvokedEmpty()
+        public void EventCanBeInvokedEmpty()
         {
             Assert.DoesNotThrow(() =>
             {
@@ -55,7 +53,7 @@ namespace Mirage.Events.Tests
         }
 
         [Test]
-        public void AddingListenerLateRunsListener()
+        public void AddingListenerLateInvokesListener()
         {
             Invoke();
             Assert.That(listenerCallCount, Is.EqualTo(0));
@@ -64,7 +62,31 @@ namespace Mirage.Events.Tests
         }
 
         [Test]
-        public void ResetEventAllowsEventToBeInvokedAgain()
+        public void AddingListenerLateInvokesListenerOnce()
+        {
+            Invoke();
+            Invoke();
+            Invoke();
+            Assert.That(listenerCallCount, Is.EqualTo(0));
+            AddListener();
+            Assert.That(listenerCallCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void AddingListenerLateInvokesListenerOnceThenCanBeInvokedAgain()
+        {
+            Invoke();
+            Assert.That(listenerCallCount, Is.EqualTo(0));
+
+            AddListener();
+            Assert.That(listenerCallCount, Is.EqualTo(1));
+
+            Invoke();
+            Assert.That(listenerCallCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ResetThenAddListenerDoesntInvokeRightAway()
         {
             AddListener();
 
@@ -74,6 +96,7 @@ namespace Mirage.Events.Tests
             Reset();
 
             AddListener();
+            Assert.That(listenerCallCount, Is.EqualTo(1), "Event should not auto invoke after reset");
 
             Invoke();
             Assert.That(listenerCallCount, Is.EqualTo(2));
