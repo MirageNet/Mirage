@@ -1,3 +1,10 @@
+## [84.1.1](https://github.com/MirageNet/Mirage/compare/v84.1.0...v84.1.1) (2021-03-26)
+
+
+### Bug Fixes
+
+* make sure resolved typedef isn't null ([#731](https://github.com/MirageNet/Mirage/issues/731)) ([2f6414f](https://github.com/MirageNet/Mirage/commit/2f6414f7f676b250786c5caffaf83d8fa16daffb))
+
 # [84.1.0](https://github.com/MirageNet/Mirage/compare/v84.0.0...v84.1.0) (2021-03-25)
 
 
