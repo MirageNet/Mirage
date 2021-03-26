@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Mirage.Tests.Host
+namespace Mirage.Tests.Runtime.Host
 {
 
     [TestFixture]

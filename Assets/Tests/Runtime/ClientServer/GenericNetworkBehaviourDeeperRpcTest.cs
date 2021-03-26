@@ -7,7 +7,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer
 {
     public class GenericBehaviourWithRpcDeeperBase<T> : NetworkBehaviour where T : NetworkBehaviour
     {

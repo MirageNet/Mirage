@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 using Guid = System.Guid;
 using Object = UnityEngine.Object;
 
-namespace Mirage.Tests.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer
 {
     public class ClientServerComponentTests : ClientServerSetup<MockComponent>
     {

@@ -5,7 +5,7 @@ using NUnit.Framework;
 using UnityEngine.Events;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Host
+namespace Mirage.Tests.Runtime.Host
 {
     public class HostComponentTests : HostSetup<MockComponent>
     {

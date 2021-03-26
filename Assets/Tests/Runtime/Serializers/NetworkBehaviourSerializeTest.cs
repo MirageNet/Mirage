@@ -5,7 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 
 // Note: Weaver doesn't run on nested class so so use namespace to group classes instead
-namespace Mirage.Tests.NetworkBehaviourSerialize
+namespace Mirage.Tests.Runtime.NetworkBehaviourSerialize
 {
     #region No OnSerialize/OnDeserialize override
     abstract class AbstractBehaviour : NetworkBehaviour

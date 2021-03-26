@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using InvalidEnumArgumentException = System.ComponentModel.InvalidEnumArgumentException;
 
-namespace Mirage.Tests.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer
 {
 
     [TestFixture]
