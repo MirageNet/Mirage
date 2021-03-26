@@ -374,6 +374,7 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("Server accepted client:" + player);
 
+            //Only allow host client to connect when not Listening for new connections
             if(!Listening && player != LocalPlayer)
             {
                 return;
