@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 namespace Mirage.Events.Tests
 {
-    public abstract class RunOnceEventTestsBase
+    public abstract class AddLateEventTestsBase
     {
         int listenerCallCount;
         protected void TestListener() => listenerCallCount++;
@@ -99,12 +99,12 @@ namespace Mirage.Events.Tests
     }
 
 
-    public class RunOnceEvent0ArgTest : RunOnceEventTestsBase
+    public class AddLateEvent0ArgTest : AddLateEventTestsBase
     {
-        RunOnceEvent onceEvent;
+        AddLateEvent onceEvent;
         protected override void Init()
         {
-            onceEvent = new RunOnceEvent();
+            onceEvent = new AddLateEvent();
         }
 
         protected override void Invoke()
@@ -125,14 +125,14 @@ namespace Mirage.Events.Tests
 
 
     public class IntUnityEvent : UnityEvent<int> { }
-    public class IntRunOnceEvent : RunOnceEvent<int, IntUnityEvent> { }
-    public class RunOnceEvent1ArgTest : RunOnceEventTestsBase
+    public class IntAddLateEvent : AddLateEvent<int, IntUnityEvent> { }
+    public class AddLateEvent1ArgTest : AddLateEventTestsBase
     {
-        IntRunOnceEvent onceEvent;
+        IntAddLateEvent onceEvent;
 
         protected override void Init()
         {
-            onceEvent = new IntRunOnceEvent();
+            onceEvent = new IntAddLateEvent();
         }
 
         protected override void Invoke()
@@ -190,14 +190,14 @@ namespace Mirage.Events.Tests
 
 
     public class IntStringUnityEvent : UnityEvent<int, string> { }
-    public class IntStringRunOnceEvent : RunOnceEvent<int, string, IntStringUnityEvent> { }
-    public class RunOnceEvent2ArgTest : RunOnceEventTestsBase
+    public class IntStringAddLateEvent : AddLateEvent<int, string, IntStringUnityEvent> { }
+    public class AddLateEvent2ArgTest : AddLateEventTestsBase
     {
-        IntStringRunOnceEvent onceEvent;
+        IntStringAddLateEvent onceEvent;
 
         protected override void Init()
         {
-            onceEvent = new IntStringRunOnceEvent();
+            onceEvent = new IntStringAddLateEvent();
         }
 
         protected override void Invoke()

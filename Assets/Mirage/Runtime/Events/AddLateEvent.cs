@@ -9,7 +9,7 @@ namespace Mirage.Events
     /// </summary>
     /// <remarks>
     /// <para>
-    /// RunOnceEvent should be used for events that are invoked once for the lifespan. For example Server Started event.
+    /// AddLateEvent should be used for events that are invoked once for the lifespan. For example Server Started event.
     /// So that handlers can be added before or after the event is invoked and the handlers will still be called
     /// </para>
     /// <para>
@@ -24,10 +24,10 @@ namespace Mirage.Events
     /// {
     ///     // shows in inspector
     ///     [SerializeField]
-    ///     private RunOnceEvent _started;
+    ///     private AddLateEvent _started;
     ///
     ///     // expose interface so others can add handlers, but does not let them invoke
-    ///     public IRunOnceEvent Started => customEvent;
+    ///     public IAddLateEvent Started => customEvent;
     ///
     ///     public void StartServer()
     ///     {
@@ -54,19 +54,19 @@ namespace Mirage.Events
     /// [Serializable]
     /// public class IntUnityEvent : UnityEvent&lt;int&gt; { }
     /// [Serializable]
-    /// public class IntRunOnceEvent : RunOnceEvent&lt;int, IntUnityEvent&gt; { }
+    /// public class IntAddLateEvent : AddLateEvent&lt;int, IntUnityEvent&gt; { }
     /// 
     /// public class MyClass : MonoBehaviour
     /// {
     ///     [SerializeField]
-    ///     private IntRunOnceEvent customEvent;
+    ///     private IntAddLateEvent customEvent;
     /// 
-    ///     public IRunOnceEvent&lt;int&gt; CustomEvent => customEvent;
+    ///     public IAddLateEvent&lt;int&gt; CustomEvent => customEvent;
     /// }
     /// </code>
     /// </example>
     [Serializable]
-    public sealed class RunOnceEvent : RunOnceEventBase, IRunOnceEvent
+    public sealed class AddLateEvent : AddLateEventBase, IAddLateEvent
     {
         [SerializeField] UnityEvent _event = new UnityEvent();
 
@@ -93,13 +93,13 @@ namespace Mirage.Events
     }
 
     /// <summary>
-    /// Version of <see cref="RunOnceEvent"/> with 1 argument
+    /// Version of <see cref="AddLateEvent"/> with 1 argument
     /// <para>Create a non-generic class inheriting from this to use in inspector. Same rules as <see cref="UnityEvent"/></para>
     /// </summary>
     /// <typeparam name="T0">argument 0</typeparam>
     /// <typeparam name="TEvent">UnityEvent</typeparam>
     [Serializable]
-    public abstract class RunOnceEvent<T0, TEvent> : RunOnceEventBase, IRunOnceEvent<T0>
+    public abstract class AddLateEvent<T0, TEvent> : AddLateEventBase, IAddLateEvent<T0>
         where TEvent : UnityEvent<T0>, new()
     {
         [SerializeField] TEvent _event = new TEvent();
@@ -129,13 +129,13 @@ namespace Mirage.Events
     }
 
     /// <summary>
-    /// Version of <see cref="RunOnceEvent"/> with 2 arguments
+    /// Version of <see cref="AddLateEvent"/> with 2 arguments
     /// <para>Create a non-generic class inheriting from this to use in inspector. Same rules as <see cref="UnityEvent"/></para>
     /// </summary>
     /// <typeparam name="T0"></typeparam>
     /// <typeparam name="T1"></typeparam>
     [Serializable]
-    public abstract class RunOnceEvent<T0, T1, TEvent> : RunOnceEventBase, IRunOnceEvent<T0, T1>
+    public abstract class AddLateEvent<T0, T1, TEvent> : AddLateEventBase, IAddLateEvent<T0, T1>
         where TEvent : UnityEvent<T0, T1>, new()
     {
         [SerializeField] TEvent _event = new TEvent();

@@ -3,7 +3,7 @@ using UnityEngine.Events;
 
 namespace Mirage.Events
 {
-    public abstract class RunOnceEventBase
+    public abstract class AddLateEventBase
     {
         protected abstract UnityEventBase baseEvent { get; }
         protected bool hasInvoked { get; private set; }
