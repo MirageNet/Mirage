@@ -5,7 +5,15 @@ using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
-    public class Time
+    /// <summary>
+    /// Handlers data from SocketLayer
+    /// </summary>
+    public interface IDataHandler
+    {
+        void ReceiveData(IConnectionPlayer player, ArraySegment<byte> segment);
+    }
+
+    internal class Time
     {
         public float Now => UnityEngine.Time.time;
     }
@@ -33,6 +41,7 @@ namespace Mirage.SocketLayer
         // tood SendNotify
 
         readonly ISocket socket;
+        readonly IDataHandler dataHandler;
         readonly Config config;
         readonly Time time;
 
@@ -43,12 +52,14 @@ namespace Mirage.SocketLayer
         readonly byte[] commandBuffer = new byte[3];
 
         public event Action<Connection> OnConnected;
+        public event Action<Connection> OnDisconnected;
         public event Action<Connection, RejectReason> OnConnectionFailed;
 
-        public Peer(ISocket socket, Config config, ILogger logger)
+        public Peer(ISocket socket, IDataHandler dataHandler, Config config, ILogger logger)
         {
             this.logger = logger ?? Debug.unityLogger;
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
+            this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
             this.config = config;
             time = new Time();
 
@@ -264,7 +275,7 @@ namespace Mirage.SocketLayer
 
         private Connection CreateNewConnection(EndPoint endPoint)
         {
-            var connection = new Connection(this, endPoint, config, time, logger);
+            var connection = new Connection(this, endPoint, dataHandler, config, time, logger);
             connection.SetReceiveTime();
             connections.Add(endPoint, connection);
             return connection;
@@ -336,9 +347,10 @@ namespace Mirage.SocketLayer
             }
         }
 
-        private void RemoveConnection(Connection connection)
+        internal void RemoveConnection(Connection connection)
         {
-            throw new NotImplementedException();
+            connections.Remove(connection.EndPoint);
+            OnDisconnected.Invoke(connection);
         }
 
         void HandleConnectionDisconnect(Connection connection)
@@ -455,6 +467,7 @@ namespace Mirage.SocketLayer
     {
         None = 0,
         ServerFull = 1,
+        Timeout = 2,
     }
 
     // todo how should we use this?
@@ -479,7 +492,7 @@ namespace Mirage.SocketLayer
         public abstract ISocket CreateServerSocket();
 
         public abstract EndPoint GetBindEndPoint();
-        public abstract EndPoint GetConnectEndPoint();
+        public abstract EndPoint GetConnectEndPoint(string address);
 
         public abstract bool ClientSupported { get; }
         public abstract bool ServerSupported { get; }

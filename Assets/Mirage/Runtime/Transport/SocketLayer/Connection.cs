@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using UnityEngine;
 
@@ -24,10 +25,9 @@ namespace Mirage.SocketLayer
         Destroyed = 10,
     }
 
-    public interface IPlayer
+    public interface IConnectionPlayer
     {
-        // todo move this to different interface
-        void Receive(ArraySegment<byte> segment);
+        Connection Connection { get; }
     }
 
     public sealed class Connection
@@ -38,7 +38,7 @@ namespace Mirage.SocketLayer
 
         private readonly Peer peer;
         public readonly EndPoint EndPoint;
-
+        private readonly IDataHandler dataHandler;
         private readonly Config config;
         private readonly Time time;
 
@@ -47,13 +47,16 @@ namespace Mirage.SocketLayer
         private KeepAliveTracker keepAliveTracker;
         private DisconnectedTracker disconnectedTracker;
 
-        HashSet<IPlayer> players;
+        HashSet<IConnectionPlayer> players = new HashSet<IConnectionPlayer>();
 
-        public Connection(Peer peer, EndPoint endPoint, Config config, Time time, ILogger logger)
+        public IReadOnlyCollection<IConnectionPlayer> Players => players;
+
+        internal Connection(Peer peer, EndPoint endPoint, IDataHandler dataHandler, Config config, Time time, ILogger logger)
         {
             this.peer = peer;
             this.logger = logger ?? Debug.unityLogger;
             EndPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
+            this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
             this.config = config;
             this.time = time;
             State = ConnectionState.Created;
@@ -116,11 +119,11 @@ namespace Mirage.SocketLayer
         public void SendNotifiy() => peer.SendNotify(this);
 
 
-        public void AddPlayer(IPlayer player)
+        public void AddPlayer(IConnectionPlayer player)
         {
             players.Add(player);
         }
-        public void DisconnectPlayer(IPlayer player)
+        public void DisconnectPlayer(IConnectionPlayer player)
         {
             players.Remove(player);
             if (players.Count == 0)
@@ -131,17 +134,14 @@ namespace Mirage.SocketLayer
 
         internal void Disconnect()
         {
-            throw new NotImplementedException();
+            peer.RemoveConnection(this);
         }
 
         internal void ReceivePacket(Packet packet)
         {
             ArraySegment<byte> segment = packet.ToSegment();
-            foreach (IPlayer player in players)
-            {
-                // todo move this from player to something else
-                player.Receive(segment);
-            }
+            // todo what if no players?
+            dataHandler.ReceiveData(players.First(), segment);
         }
 
 

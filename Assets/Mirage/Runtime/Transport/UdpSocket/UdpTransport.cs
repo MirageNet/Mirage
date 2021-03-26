@@ -7,7 +7,6 @@ namespace Mirage
 {
     public sealed class UdpTransport : TransportV2
     {
-        [SerializeField] string address;
         [SerializeField] int port;
 
         public override ISocket CreateClientSocket()
@@ -24,7 +23,7 @@ namespace Mirage
         {
             return new IPEndPoint(IPAddress.Any, port);
         }
-        public override EndPoint GetConnectEndPoint()
+        public override EndPoint GetConnectEndPoint(string address)
         {
             return new IPEndPoint(IPAddress.Parse(address), port);
         }
