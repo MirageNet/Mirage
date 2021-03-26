@@ -37,7 +37,7 @@ namespace Mirage.Weaver
                 }
 
                 TypeDefinition tf = fd.FieldType.Resolve();
-                if (fd.FieldType.Resolve() == null)
+                if (tf == null)
                 {
                     continue;
                 }
