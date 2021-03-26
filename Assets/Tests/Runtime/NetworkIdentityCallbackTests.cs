@@ -5,7 +5,7 @@ using UnityEngine;
 using static Mirage.Tests.LocalConnections;
 using Object = UnityEngine.Object;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class NetworkIdentityCallbackTests
     {

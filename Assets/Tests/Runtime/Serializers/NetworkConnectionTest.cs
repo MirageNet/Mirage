@@ -4,7 +4,7 @@ using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class NetworkConnectionTest
     {

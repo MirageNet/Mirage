@@ -2,7 +2,7 @@ using System;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     [TestFixture(Category = "NetworkDiagnostics")]
     public class NetworkDiagnosticsTests

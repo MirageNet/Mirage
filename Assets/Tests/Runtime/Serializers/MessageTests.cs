@@ -2,7 +2,7 @@ using System;
 using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class AssertionMethodAttribute : Attribute { }
 

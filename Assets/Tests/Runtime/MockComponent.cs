@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class MockComponent : NetworkBehaviour
     {
