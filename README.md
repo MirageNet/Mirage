@@ -26,7 +26,13 @@ To install Mirage, follow these steps:
 
 1) Install [Unity 2020.1.17 or later](https://unity.com/)
 2) Start a new project or open your existing one
-3) Add openupm registry.  Click on the menu Edit -> Project settings...,  and add a scoped registry like so:
+3) Add openupm registry.  Click on the menu Edit -> Project settings...,  and add a scoped registry like so: <br/>
+    Name: `OpenUPM` <br/>
+    Url: https://package.openupm.com <br/>
+    Scopes:
+    - `com.cysharp.unitask`
+    - `com.openupm`
+    - `com.miragenet`
    ![Scoped Registry](doc/images/Scoped%20Registry.png)
 4) Close the project settings
 5) Open the package manager.  Click on menu Window -> Package Manager and select "Packages: My Registries", select the latest version of Mirage and click install, like so:
