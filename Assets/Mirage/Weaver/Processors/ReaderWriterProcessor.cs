@@ -223,7 +223,7 @@ namespace Mirage.Weaver
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.Unpack)) ||
                 // interfaces and types that implement them
                 method.Is<IMessageReceiver>(nameof(IMessageReceiver.RegisterHandler)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.RegisterHandler)) ||
+                method.Is<IMessageHandler>(nameof(IMessageReceiver.RegisterHandler)) ||
                 method.Is<MessageBroker>(nameof(MessageBroker.RegisterHandler)) ||
 
                 method.Is<IMessageReceiver>(nameof(IMessageReceiver.UnregisterHandler)) ||
@@ -231,11 +231,11 @@ namespace Mirage.Weaver
                 method.Is<MessageBroker>(nameof(MessageBroker.UnregisterHandler)) ||
 
                 method.Is<IMessageSender>(nameof(IMessageSender.Send)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.Send)) ||
+                method.Is<IMessageHandler>(nameof(IMessageSender.Send)) ||
                 method.Is<MessageBroker>(nameof(MessageBroker.Send)) ||
 
                 method.Is<INotifySender>(nameof(INotifySender.SendNotify)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.SendNotify)) ||
+                method.Is<IMessageHandler>(nameof(IMessageSender.SendNotify)) ||
                 method.Is<MessageBroker>(nameof(MessageBroker.SendNotify)) ||
 
                 method.Is<NetworkPlayer>(nameof(NetworkPlayer.Send)) ||

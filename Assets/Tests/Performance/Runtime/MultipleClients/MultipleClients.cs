@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
@@ -9,6 +10,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.TestTools;
+using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Performance.Runtime
 {
@@ -54,7 +56,7 @@ namespace Mirage.Tests.Performance.Runtime
 
             // wait 1 frame before Starting server to give time for Unity to call "Start"
             await UniTask.Yield();
-            Server.ListenAsync().Forget();
+            Server.Listen();
 
             await started.Task;
 
@@ -79,10 +81,12 @@ namespace Mirage.Tests.Performance.Runtime
             ClientObjectManager objectManager = clientGo.GetComponent<ClientObjectManager>();
             objectManager.Client = client;
             objectManager.Start();
-            client.Transport = transport;
+            // todo fix
+            throw new NotImplementedException();
+            //client.Transport = transport;
 
             objectManager.RegisterPrefab(MonsterPrefab);
-            client.ConnectAsync("localhost");
+            client.Connect("localhost");
             while (!client.IsConnected)
                 yield return null;
         }

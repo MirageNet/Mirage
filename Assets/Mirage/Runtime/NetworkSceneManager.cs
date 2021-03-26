@@ -87,8 +87,6 @@ namespace Mirage
         /// </summary>
         internal List<string> pendingAdditiveSceneList = new List<string>();
 
-        IMessageHandler messageHandler;
-
         public void Start()
         {
             if (DontDestroy)
@@ -128,22 +126,20 @@ namespace Mirage
         void ClientConnected(NetworkPlayer _)
         {
             logger.Log("NetworkSceneManager.ClientConnected");
-            messageHandler = Client.MessageHandler;
         }
 
         void ServerStarted()
         {
             logger.Log("NetworkSceneManager.ServerStarted");
-            messageHandler = Server.MessageHandler;
         }
 
         void RegisterClientMessages()
         {
-            messageHandler.RegisterHandler<SceneMessage>(ClientSceneMessage);
+            Client.MessageReceiver.RegisterHandler<SceneMessage>(ClientSceneMessage);
             if (!Client.IsLocalClient)
             {
-                messageHandler.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
-                messageHandler.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
+                Client.MessageReceiver.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
+                Client.MessageReceiver.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
             }
         }
 
@@ -264,8 +260,8 @@ namespace Mirage
         {
             logger.Log("NetworkSceneManager.OnServerAuthenticated");
 
-            messageHandler.Send(player, new SceneMessage { scenePath = ActiveScenePath, additiveScenes = additiveSceneList.ToArray() });
-            messageHandler.Send(player, new SceneReadyMessage());
+            Server.MessageSender.Send(player, new SceneMessage { scenePath = ActiveScenePath, additiveScenes = additiveSceneList.ToArray() });
+            Server.MessageSender.Send(player, new SceneReadyMessage());
         }
 
         /// <summary>

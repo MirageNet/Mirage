@@ -11,7 +11,7 @@ namespace Mirage
     /// <summary>
     /// Sends and handles messages
     /// </summary>
-    public sealed class MessageBroker : IMessageHandler, IMessageSender, IMessageReceiver, INotifySender, INotifyReceiver, IDataHandler
+    public sealed class MessageBroker : IMessageSender, IMessageReceiver, INotifySender, INotifyReceiver, IDataHandler
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(MessageBroker));
 

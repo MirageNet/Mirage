@@ -76,8 +76,8 @@ namespace Mirage
 
         internal void RegisterMessageHandlers(NetworkPlayer player)
         {
-            Server.MessageHandler.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
-            Server.MessageHandler.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
+            Server.MessageReceiver.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
+            Server.MessageReceiver.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
         }
 
         void OnAuthenticated(NetworkPlayer player)

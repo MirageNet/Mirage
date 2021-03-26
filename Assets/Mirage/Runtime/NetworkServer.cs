@@ -39,7 +39,7 @@ namespace Mirage
         public bool Listening = true;
 
         // transport to use to accept connections
-        public Peer peer;
+        public Peer Peer { get; private set; }
         public TransportV2 socketCreator;
 
         [Tooltip("Authentication component attached to this object")]
@@ -133,7 +133,8 @@ namespace Mirage
 
         public NetworkWorld World { get; private set; }
 
-        public IMessageHandler MessageHandler { get; internal set; }
+        public IMessageSender MessageSender { get; private set; }
+        public IMessageReceiver MessageReceiver { get; internal set; }
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.
@@ -154,7 +155,7 @@ namespace Mirage
             {
                 player.Connection?.DisconnectPlayer(player);
             }
-            peer?.Close();
+            Peer?.Close();
         }
 
         void Initialize()
@@ -177,8 +178,13 @@ namespace Mirage
             if (socketCreator == null)
                 throw new InvalidOperationException("Transport could not be found for NetworkServer");
 
+
+            var broker = new MessageBroker();
+            MessageReceiver = broker;
+            MessageSender = broker;
+
             ISocket socket = socketCreator.CreateServerSocket();
-            peer = new Peer(socket, MessageHandler, new Config
+            Peer = new Peer(socket, broker, new Config
             {
                 MaxConnections = MaxConnections,
                 // todo expose these setting
@@ -188,8 +194,8 @@ namespace Mirage
                 KeepAliveInterval = 10,
             }, LogFactory.GetLogger<Peer>());
 
-            peer.OnConnected += TransportConnected;
-            peer.OnDisconnected += TransportDisconnected;
+            Peer.OnConnected += TransportConnected;
+            Peer.OnDisconnected += TransportDisconnected;
 
 
             if (authenticator != null)
@@ -212,7 +218,6 @@ namespace Mirage
         /// <returns></returns>
         public void Listen()
         {
-            MessageHandler = new MessageBroker();
             Initialize();
 
             try
@@ -221,8 +226,8 @@ namespace Mirage
                 if (Listening)
                 {
                     Started.Invoke();
-                    peer.OnConnected += TransportConnected;
-                    peer.Bind(socketCreator.GetBindEndPoint());
+                    Peer.OnConnected += TransportConnected;
+                    Peer.Bind(socketCreator.GetBindEndPoint());
                 }
                 else
                 {
@@ -242,7 +247,7 @@ namespace Mirage
             {
                 Cleanup();
                 // clear reference to peer, we can create new instance each time we start
-                peer = null;
+                Peer = null;
             }
         }
 
@@ -318,7 +323,9 @@ namespace Mirage
             Stopped?.Invoke();
             initialized = false;
             Active = false;
-            MessageHandler = null;
+            Peer = null;
+            MessageReceiver = null;
+            MessageSender = null;
         }
 
         /// <summary>
@@ -326,7 +333,7 @@ namespace Mirage
         /// </summary>
         public virtual NetworkPlayer GetNewPlayer(Connection connection)
         {
-            return new NetworkPlayer(connection, MessageHandler);
+            return new NetworkPlayer(connection, MessageSender);
         }
 
         /// <summary>
@@ -342,7 +349,7 @@ namespace Mirage
                 // would throw NRE
                 Players.Add(player);
                 // todo is registering handler multiple times a problem?
-                MessageHandler.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
+                MessageReceiver.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
             }
         }
 

@@ -57,14 +57,6 @@ namespace Mirage
     }
 
     /// <summary>
-    /// An object that can send and receive messages and notify messages
-    /// </summary>
-    public interface IMessageHandler : IMessageSender, IMessageReceiver, INotifySender, INotifyReceiver, IDataHandler
-    {
-
-    }
-
-    /// <summary>
     /// An object that can observe NetworkIdentities.
     /// this is useful for interest management
     /// </summary>

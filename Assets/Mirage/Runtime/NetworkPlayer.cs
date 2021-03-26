@@ -23,7 +23,7 @@ namespace Mirage
     /// <para>NetworkConnection objects also act as observers for networked objects. When a connection is an observer of a networked object with a NetworkIdentity, then the object will be visible to corresponding client for the connection, and incremental state changes will be sent to the client.</para>
     /// <para>There are many virtual functions on NetworkConnection that allow its behaviour to be customized. NetworkClient and NetworkServer can both be made to instantiate custom classes derived from NetworkConnection by setting their networkConnectionClass member variable.</para>
     /// </remarks>
-    public sealed class NetworkPlayer : IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader, IConnectionPlayer
+    public class NetworkPlayer : IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader, IConnectionPlayer
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
@@ -60,7 +60,7 @@ namespace Mirage
         /// <para>Clients do not know their connectionId on the server, and do not know the connectionId of other clients on the server.</para>
         /// </remarks>
         public Connection Connection { get; }
-        public IMessageHandler MessageHandler { get; }
+        public IMessageSender MessageSender { get; }
 
         /// <summary>
         /// The NetworkIdentity for this connection.
@@ -80,11 +80,11 @@ namespace Mirage
         /// Creates a new NetworkConnection with the specified address and connectionId
         /// </summary>
         /// <param name="networkConnectionId"></param>
-        public NetworkPlayer(Connection connection, IMessageHandler messageHandler)
+        internal NetworkPlayer(Connection connection, IMessageSender messageSender)
         {
             Assert.IsNotNull(connection);
             Connection = connection;
-            MessageHandler = messageHandler;
+            MessageSender = messageSender;
         }
 
         public override string ToString()
@@ -144,12 +144,12 @@ namespace Mirage
 
         public void Send<T>(T message, int channelId = 0)
         {
-            MessageHandler.Send(this, message, channelId);
+            MessageSender.Send(this, message, channelId);
         }
 
         public void Send(ArraySegment<byte> segment, int channelId = 0)
         {
-            MessageHandler.Send(this, segment, channelId);
+            MessageSender.Send(this, segment, channelId);
         }
     }
 }

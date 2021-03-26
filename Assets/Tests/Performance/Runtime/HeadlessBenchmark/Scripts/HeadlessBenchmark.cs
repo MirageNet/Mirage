@@ -102,7 +102,7 @@ namespace Mirage.HeadlessBenchmark
 
                 server = serverGo.GetComponent<NetworkServer>();
                 server.MaxConnections = 9999;
-                server.peer = transport;
+                server.Peer = transport;
                 serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
 
                 NetworkSceneManager networkSceneManager = serverGo.GetComponent<NetworkSceneManager>();

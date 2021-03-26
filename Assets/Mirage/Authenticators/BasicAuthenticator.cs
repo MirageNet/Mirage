@@ -30,12 +30,12 @@ namespace Mirage.Authenticators
         public override void OnServerAuthenticate(NetworkPlayer player)
         {
             // wait for AuthRequestMessage from client
-            player.MessageHandler.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage);
+            player.MessageReceiver.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage);
         }
 
         public override void OnClientAuthenticate(NetworkPlayer player)
         {
-            player.MessageHandler.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage);
+            player.MessageReceiver.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage);
 
             var authRequestMessage = new AuthRequestMessage
             {

@@ -36,9 +36,9 @@ namespace Mirage.Examples.Additive
             GameObject target = null;
             float distance = 100f;
 
-            foreach (NetworkPlayernetworkConnection in NetIdentity.observers)
+            foreach (NetworkPlayer player in NetIdentity.observers)
             {
-                GameObject tempTarget = networkConnection.Identity.gameObject;
+                GameObject tempTarget = player.Identity.gameObject;
                 float tempDistance = Vector3.Distance(tempTarget.transform.position, transform.position);
 
                 if (target == null || distance > tempDistance)

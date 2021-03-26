@@ -69,7 +69,7 @@ namespace Mirage.Tests.ClientServer
         {
             bool invoked = false;
 
-            client.MessageHandler.RegisterHandler<SpawnMessage>(msg => invoked = true);
+            client.MessageReceiver.RegisterHandler<SpawnMessage>(msg => invoked = true);
 
             connectionToClient.IsReady = true;
 

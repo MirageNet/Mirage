@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Serialization;
@@ -24,7 +23,7 @@ namespace Mirage
             // some transports might not be ready until Start.
             if (Server && SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null && startOnHeadless)
             {
-                Server.ListenAsync().Forget();
+                Server.Listen();
             }
         }
     }

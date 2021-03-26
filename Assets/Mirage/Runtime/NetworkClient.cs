@@ -78,10 +78,11 @@ namespace Mirage
         public bool IsConnected => connectState == ConnectState.Connected;
 
         // transport to use to accept connections
-        public Peer peer;
+        public Peer Peer { get; private set; }
         public TransportV2 socketCreator;
 
-        public IMessageHandler MessageHandler { get; private set; }
+        public IMessageSender MessageSender { get; private set; }
+        public IMessageReceiver MessageReceiver { get; internal set; }
 
         readonly NetworkTime _time = new NetworkTime();
 
@@ -133,8 +134,12 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("Client Connect: " + endPoint);
 
+            var broker = new MessageBroker();
+            MessageSender = broker;
+            MessageReceiver = broker;
+
             ISocket socket = socketCreator.CreateServerSocket();
-            peer = new Peer(socket, MessageHandler, new Config
+            Peer = new Peer(socket, broker, new Config
             {
                 MaxConnections = 1,
                 // todo expose these setting
@@ -144,17 +149,17 @@ namespace Mirage
                 KeepAliveInterval = 10,
             }, LogFactory.GetLogger<Peer>());
 
-            MessageHandler = new MessageBroker();
+
             connectState = ConnectState.Connecting;
 
             try
             {
 
-                peer.OnConnected += OnConnected;
-                peer.OnConnectionFailed += OnConnectFailed;
-                peer.OnDisconnected += OnDisconnected;
+                Peer.OnConnected += OnConnected;
+                Peer.OnConnectionFailed += OnConnectFailed;
+                Peer.OnDisconnected += OnDisconnected;
 
-                Connection transportConnection = peer.Connect(endPoint);
+                Connection transportConnection = Peer.Connect(endPoint);
 
                 World = new NetworkWorld(null, this);
                 InitializeAuthEvents();
@@ -200,7 +205,7 @@ namespace Mirage
         /// </summary>
         public virtual NetworkPlayer GetNewPlayer(Connection connection)
         {
-            return new NetworkPlayer(connection, MessageHandler);
+            return new NetworkPlayer(connection, MessageSender);
         }
 
         void InitializeAuthEvents()
@@ -267,12 +272,12 @@ namespace Mirage
         /// <returns>True if message was sent.</returns>
         public void Send<T>(T message, int channelId = Channel.Reliable)
         {
-            MessageHandler.Send(Player, message, channelId);
+            MessageSender.Send(Player, message, channelId);
         }
 
         public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
-            MessageHandler.Send(Player, segment, channelId);
+            MessageSender.Send(Player, segment, channelId);
         }
 
         internal void Update()
@@ -287,12 +292,12 @@ namespace Mirage
 
         internal void RegisterHostHandlers()
         {
-            MessageHandler.RegisterHandler<NetworkPongMessage>(msg => { });
+            MessageReceiver.RegisterHandler<NetworkPongMessage>(msg => { });
         }
 
         internal void RegisterMessageHandlers()
         {
-            MessageHandler.RegisterHandler<NetworkPongMessage>(Time.OnClientPong);
+            MessageReceiver.RegisterHandler<NetworkPongMessage>(Time.OnClientPong);
         }
 
 
@@ -319,7 +324,9 @@ namespace Mirage
                 // if no authenticator, consider connection as authenticated
                 Connected.RemoveListener(OnAuthenticated);
             }
-            MessageHandler = null;
+            MessageReceiver = null;
+            MessageSender = null;
+            Peer = null;
         }
     }
 }

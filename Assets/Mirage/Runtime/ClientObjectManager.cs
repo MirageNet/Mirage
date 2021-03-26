@@ -95,20 +95,20 @@ namespace Mirage
 
         internal void RegisterHostHandlers()
         {
-            Client.MessageHandler.RegisterHandler<ObjectDestroyMessage>(OnHostClientObjectDestroy);
-            Client.MessageHandler.RegisterHandler<ObjectHideMessage>(msg => { });
-            Client.MessageHandler.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
-            Client.MessageHandler.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
-            Client.MessageHandler.RegisterHandler<RpcMessage>(OnRpcMessage);
+            Client.MessageReceiver.RegisterHandler<ObjectDestroyMessage>(OnHostClientObjectDestroy);
+            Client.MessageReceiver.RegisterHandler<ObjectHideMessage>(msg => { });
+            Client.MessageReceiver.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
+            Client.MessageReceiver.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
+            Client.MessageReceiver.RegisterHandler<RpcMessage>(OnRpcMessage);
         }
 
         internal void RegisterMessageHandlers()
         {
-            Client.MessageHandler.RegisterHandler<ObjectDestroyMessage>(OnObjectDestroy);
-            Client.MessageHandler.RegisterHandler<ObjectHideMessage>(OnObjectHide);
-            Client.MessageHandler.RegisterHandler<SpawnMessage>(OnSpawn);
-            Client.MessageHandler.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
-            Client.MessageHandler.RegisterHandler<RpcMessage>(OnRpcMessage);
+            Client.MessageReceiver.RegisterHandler<ObjectDestroyMessage>(OnObjectDestroy);
+            Client.MessageReceiver.RegisterHandler<ObjectHideMessage>(OnObjectHide);
+            Client.MessageReceiver.RegisterHandler<SpawnMessage>(OnSpawn);
+            Client.MessageReceiver.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
+            Client.MessageReceiver.RegisterHandler<RpcMessage>(OnRpcMessage);
         }
 
         bool ConsiderForSpawning(NetworkIdentity identity)

@@ -35,7 +35,7 @@ namespace Mirage
         /// NetworkClient can connect to local server in host mode too
         /// </summary>
         bool IsLocalClient { get; }
-        IMessageHandler MessageHandler { get; }
+        IMessageSender MessageSender { get; }
 
         NetworkTime Time { get; }
 
