@@ -9,12 +9,7 @@ namespace Mirage.Tests
     public static class AsyncUtil
     {
 
-        public static UniTask WaitUntilWithTimeout(Func<bool> predicate)
-        {
-            return WaitUntilWithTimeout(predicate, 2);
-        }
-
-        public static UniTask WaitUntilWithTimeout(Func<bool> predicate, double seconds)
+        public static UniTask WaitUntilWithTimeout(Func<bool> predicate, double seconds = 2)
         {
             return UniTask.WaitUntil(predicate).Timeout(TimeSpan.FromSeconds(seconds));
         }
