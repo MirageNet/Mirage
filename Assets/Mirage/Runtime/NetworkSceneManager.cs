@@ -33,36 +33,36 @@ namespace Mirage
         [Header("Events")]
 
         [FormerlySerializedAs("ClientChangeScene")]
-        [SerializeField] ClientSceneChangeEvent _clientChangeScene = new ClientSceneChangeEvent();
+        [SerializeField] SceneChangeEvent _clientChangeScene = new SceneChangeEvent();
 
         [FormerlySerializedAs("ClientSceneChanged")]
-        [SerializeField] ClientSceneChangeEvent _clientSceneChanged = new ClientSceneChangeEvent();
+        [SerializeField] SceneChangeEvent _clientSceneChanged = new SceneChangeEvent();
 
         [FormerlySerializedAs("ServerChangeScene")]
-        [SerializeField] ClientSceneChangeEvent _serverChangeScene = new ClientSceneChangeEvent();
+        [SerializeField] SceneChangeEvent _serverChangeScene = new SceneChangeEvent();
 
         [FormerlySerializedAs("ServerSceneChanged")]
-        [SerializeField] ClientSceneChangeEvent _serverSceneChanged = new ClientSceneChangeEvent();
+        [SerializeField] SceneChangeEvent _serverSceneChanged = new SceneChangeEvent();
 
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
-        public ClientSceneChangeEvent ClientChangeScene => _clientChangeScene;
+        public SceneChangeEvent ClientChangeScene => _clientChangeScene;
 
         /// <summary>
         /// Event fires after the Client has completed its scene change.
         /// </summary>
-        public ClientSceneChangeEvent ClientSceneChanged => _clientSceneChanged;
+        public SceneChangeEvent ClientSceneChanged => _clientSceneChanged;
 
         /// <summary>
         /// Event fires before Server changes scene.
         /// </summary>
-        public ClientSceneChangeEvent ServerChangeScene => _serverChangeScene;
+        public SceneChangeEvent ServerChangeScene => _serverChangeScene;
 
         /// <summary>
         /// Event fires after Server has completed scene change.
         /// </summary>
-        public ClientSceneChangeEvent ServerSceneChanged => _serverSceneChanged;
+        public SceneChangeEvent ServerSceneChanged => _serverSceneChanged;
 
         /// <summary>
         /// The path of the current active scene.
