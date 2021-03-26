@@ -242,7 +242,7 @@ namespace Mirage
             Disconnected?.Invoke();
         }
 
-        internal void OnAuthenticated(INetworkPlayer player)
+        internal void OnAuthenticated(NetworkPlayer player)
         {
             Authenticated?.Invoke(player);
         }

@@ -66,7 +66,7 @@ namespace Mirage
             }
         }
 
-        void OnClientConnected(INetworkPlayer player)
+        void OnClientConnected(NetworkPlayer player)
         {
             syncVarReceiver = new SyncVarReceiver(Client, Client.World);
             RegisterSpawnPrefabs();
@@ -532,7 +532,7 @@ namespace Mirage
             }
         }
 
-        private void OnServerRpcReply(INetworkPlayer player, ServerRpcReply reply)
+        private void OnServerRpcReply(NetworkPlayer player, ServerRpcReply reply)
         {
             // find the callback that was waiting for this and invoke it.
             if (callbacks.TryGetValue(reply.replyId, out Action<NetworkReader> action))

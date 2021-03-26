@@ -125,7 +125,7 @@ namespace Mirage
 
         #region Client
 
-        void ClientConnected(INetworkPlayer _)
+        void ClientConnected(NetworkPlayer _)
         {
             logger.Log("NetworkSceneManager.ClientConnected");
             messageHandler = Client.MessageHandler;
@@ -147,7 +147,7 @@ namespace Mirage
             }
         }
 
-        void OnClientAuthenticated(INetworkPlayer player)
+        void OnClientAuthenticated(NetworkPlayer player)
         {
             logger.Log("NetworkSceneManager.OnClientAuthenticated");
             RegisterClientMessages();
@@ -159,7 +159,7 @@ namespace Mirage
                 Client.Authenticated?.RemoveListener(OnClientAuthenticated);
         }
 
-        internal void ClientSceneMessage(INetworkPlayer player, SceneMessage msg)
+        internal void ClientSceneMessage(NetworkPlayer player, SceneMessage msg)
         {
             if (!Client.IsConnected)
             {
@@ -187,7 +187,7 @@ namespace Mirage
             ApplyOperationAsync(msg.scenePath, msg.sceneOperation).Forget();
         }
 
-        internal void ClientSceneReadyMessage(INetworkPlayer player, SceneReadyMessage msg)
+        internal void ClientSceneReadyMessage(NetworkPlayer player, SceneReadyMessage msg)
         {
             logger.Log("ClientSceneReadyMessage");
 
@@ -196,7 +196,7 @@ namespace Mirage
                 clientLoadingOperation.allowSceneActivation = true;
         }
 
-        internal void ClientNotReadyMessage(INetworkPlayer player, NotReadyMessage msg)
+        internal void ClientNotReadyMessage(NetworkPlayer player, NotReadyMessage msg)
         {
             logger.Log("NetworkSceneManager.OnClientNotReadyMessageInternal");
 
@@ -260,7 +260,7 @@ namespace Mirage
         #region Server
 
         // called after successful authentication
-        void OnServerAuthenticated(INetworkPlayer player)
+        void OnServerAuthenticated(NetworkPlayer player)
         {
             logger.Log("NetworkSceneManager.OnServerAuthenticated");
 

@@ -181,7 +181,7 @@ namespace Mirage
                 observerRect.x += 20;
                 observerRect.y += observerRect.height;
 
-                foreach (INetworkPlayer player in identity.observers)
+                foreach (NetworkPlayer player in identity.observers)
                 {
                     GUI.Label(observerRect, player.Connection.GetEndPointAddress() + ":" + player, styles.ComponentName);
                     observerRect.y += observerRect.height;

@@ -238,7 +238,6 @@ namespace Mirage.Weaver
                 method.Is<IMessageHandler>(nameof(IMessageHandler.SendNotify)) ||
                 method.Is<MessageBroker>(nameof(MessageBroker.SendNotify)) ||
 
-                method.Is<INetworkPlayer>(nameof(NetworkPlayer.Send)) ||
                 method.Is<NetworkPlayer>(nameof(NetworkPlayer.Send)) ||
 
                 method.Is<INetworkClient>(nameof(NetworkClient.Send)) ||

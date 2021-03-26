@@ -112,7 +112,7 @@ namespace Mirage
         /// <summary>
         /// The <see cref="NetworkPlayer">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
         /// </summary>
-        public INetworkPlayer ConnectionToClient => NetIdentity.ConnectionToClient;
+        public NetworkPlayer ConnectionToClient => NetIdentity.ConnectionToClient;
 
 
         public NetworkWorld World => NetIdentity.World;
@@ -322,7 +322,7 @@ namespace Mirage
             NetIdentity.SendToRemoteObservers(message, includeOwner, channelId);
         }
 
-        protected internal void SendTargetRpcInternal(INetworkPlayer player, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
+        protected internal void SendTargetRpcInternal(NetworkPlayer player, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
         {
             // this was in Weaver before
             if (Server == null || !Server.Active)

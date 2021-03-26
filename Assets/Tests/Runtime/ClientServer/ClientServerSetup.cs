@@ -34,8 +34,8 @@ namespace Mirage.Tests.ClientServer
         protected GameObject playerPrefab;
 
         protected Transport testTransport;
-        protected INetworkPlayer connectionToServer;
-        protected INetworkPlayer connectionToClient;
+        protected NetworkPlayer connectionToServer;
+        protected NetworkPlayer connectionToClient;
 
         public virtual void ExtraSetup() { }
 

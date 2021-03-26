@@ -48,7 +48,7 @@ namespace Mirage.Tests
     {
         private MessageBroker messageBroker;
 
-        private INetworkPlayer player;
+        private NetworkPlayer player;
         private IConnection connection;
 
         private SceneMessage data;
@@ -56,9 +56,9 @@ namespace Mirage.Tests
 
         private NotifyPacket lastSent;
 
-        private Action<INetworkPlayer, object> delivered;
+        private Action<NetworkPlayer, object> delivered;
 
-        private Action<INetworkPlayer, object> lost;
+        private Action<NetworkPlayer, object> lost;
 
         private byte[] lastSerializedPacket;
 
@@ -83,14 +83,14 @@ namespace Mirage.Tests
             // add ParsePacket function to Substitute to validate
             connection.Send(Arg.Do<ArraySegment<byte>>(ParsePacket), Channel.Unreliable);
 
-            player = Substitute.For<INetworkPlayer>();
+            player = Substitute.For<NetworkPlayer>();
             player.Connection.Returns(connection);
 
             serializedMessage = MessagePacker.Pack(new ReadyMessage());
             messageBroker.RegisterHandler<ReadyMessage>(message => { });
 
-            delivered = Substitute.For<Action<INetworkPlayer, object>>();
-            lost = Substitute.For<Action<INetworkPlayer, object>>();
+            delivered = Substitute.For<Action<NetworkPlayer, object>>();
+            lost = Substitute.For<Action<NetworkPlayer, object>>();
 
             messageBroker.NotifyDelivered += delivered;
             messageBroker.NotifyLost += lost;
@@ -268,7 +268,7 @@ namespace Mirage.Tests
 
             messageBroker.ReceiveNotify(player, reply, new NetworkReader(serializedMessage), Channel.Unreliable);
 
-            delivered.DidNotReceive().Invoke(Arg.Any<INetworkPlayer>(), 5);
+            delivered.DidNotReceive().Invoke(Arg.Any<NetworkPlayer>(), 5);
 
             reply = new NotifyPacket
             {

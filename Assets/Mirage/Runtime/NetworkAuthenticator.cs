@@ -12,17 +12,17 @@ namespace Mirage
         /// <summary>
         /// Notify subscribers on the server when a client is authenticated
         /// </summary>
-        public event Action<INetworkPlayer> OnServerAuthenticated;
+        public event Action<NetworkPlayer> OnServerAuthenticated;
 
         /// <summary>
         /// Notify subscribers on the client when the client is authenticated
         /// </summary>
-        public event Action<INetworkPlayer> OnClientAuthenticated;
+        public event Action<NetworkPlayer> OnClientAuthenticated;
 
         #region server
 
         // This will get more code in the near future
-        internal void OnServerAuthenticateInternal(INetworkPlayer player)
+        internal void OnServerAuthenticateInternal(NetworkPlayer player)
         {
             OnServerAuthenticate(player);
         }
@@ -31,7 +31,7 @@ namespace Mirage
         /// Called on server from OnServerAuthenticateInternal when a client needs to authenticate
         /// </summary>
         /// <param name="player">Connection to client.</param>
-        public virtual void OnServerAuthenticate(INetworkPlayer player)
+        public virtual void OnServerAuthenticate(NetworkPlayer player)
         {
             OnServerAuthenticated?.Invoke(player);
         }
@@ -41,7 +41,7 @@ namespace Mirage
         #region client
 
         // This will get more code in the near future
-        internal void OnClientAuthenticateInternal(INetworkPlayer player)
+        internal void OnClientAuthenticateInternal(NetworkPlayer player)
         {
             OnClientAuthenticate(player);
         }
@@ -50,7 +50,7 @@ namespace Mirage
         /// Called on client from OnClientAuthenticateInternal when a client needs to authenticate
         /// </summary>
         /// <param name="player">Connection of the client.</param>
-        public virtual void OnClientAuthenticate(INetworkPlayer player)
+        public virtual void OnClientAuthenticate(NetworkPlayer player)
         {
             OnClientAuthenticated?.Invoke(player);
         }

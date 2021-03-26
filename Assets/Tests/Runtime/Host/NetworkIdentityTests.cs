@@ -79,7 +79,7 @@ namespace Mirage.Tests.Host
             // test the callback too
             int callbackCalled = 0;
 
-            void Callback(INetworkPlayer player, NetworkIdentity networkIdentity, bool state)
+            void Callback(NetworkPlayer player, NetworkIdentity networkIdentity, bool state)
             {
                 ++callbackCalled;
                 Assert.That(networkIdentity, Is.EqualTo(testIdentity));

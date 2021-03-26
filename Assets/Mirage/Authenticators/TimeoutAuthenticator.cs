@@ -25,21 +25,21 @@ namespace Mirage.Authenticators
             Authenticator.OnServerAuthenticated += HandleServerAuthenticated;
         }
 
-        private readonly HashSet<INetworkPlayer> pendingAuthentication = new HashSet<INetworkPlayer>();
+        private readonly HashSet<NetworkPlayer> pendingAuthentication = new HashSet<NetworkPlayer>();
 
-        private void HandleServerAuthenticated(INetworkPlayer player)
+        private void HandleServerAuthenticated(NetworkPlayer player)
         {
             pendingAuthentication.Remove(player);
             base.OnClientAuthenticate(player);
         }
 
-        private void HandleClientAuthenticated(INetworkPlayer player)
+        private void HandleClientAuthenticated(NetworkPlayer player)
         {
             pendingAuthentication.Remove(player);
             base.OnServerAuthenticate(player);
         }
 
-        public override void OnClientAuthenticate(INetworkPlayer player)
+        public override void OnClientAuthenticate(NetworkPlayer player)
         {
             pendingAuthentication.Add(player);
             Authenticator.OnClientAuthenticate(player);
@@ -48,7 +48,7 @@ namespace Mirage.Authenticators
                 StartCoroutine(BeginAuthentication(player));
         }
 
-        public override void OnServerAuthenticate(INetworkPlayer player)
+        public override void OnServerAuthenticate(NetworkPlayer player)
         {
             pendingAuthentication.Add(player);
             Authenticator.OnServerAuthenticate(player);
@@ -56,7 +56,7 @@ namespace Mirage.Authenticators
                 StartCoroutine(BeginAuthentication(player));
         }
 
-        IEnumerator BeginAuthentication(INetworkPlayer player)
+        IEnumerator BeginAuthentication(NetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log($"Authentication countdown started {player} {Timeout}");
 

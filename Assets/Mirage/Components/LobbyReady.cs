@@ -12,7 +12,7 @@ namespace Mirage
 
         // just a cached memory area where we can collect connections
         // for broadcasting messages
-        private static readonly List<INetworkPlayer> playerCache = new List<INetworkPlayer>();
+        private static readonly List<NetworkPlayer> playerCache = new List<NetworkPlayer>();
 
         public void SetAllClientsNotReady()
         {

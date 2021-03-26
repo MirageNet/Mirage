@@ -38,9 +38,9 @@ namespace Mirage
         /// <typeparam name="T">Message type</typeparam>
         /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
         /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
-        public void RegisterHandler<T>(Action<INetworkPlayer, T> handler)
+        public void RegisterHandler<T>(Action<NetworkPlayer, T> handler)
         {
-            RegisterHandler((IConnectionPlayer connPlayer, T value) => { handler(connPlayer as INetworkPlayer, value); });
+            RegisterHandler((IConnectionPlayer connPlayer, T value) => { handler(connPlayer as NetworkPlayer, value); });
         }
 
         /// <summary>
@@ -224,14 +224,14 @@ namespace Mirage
         /// <param name="msg">The message to send.</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
         /// <returns></returns>
-        public void Send<T>(INetworkPlayer player, T message, int channelId = Channel.Reliable)
+        public void Send<T>(NetworkPlayer player, T message, int channelId = Channel.Reliable)
         {
             Send(player.Connection, message, channelId);
         }
 
         // internal because no one except Mirage should send bytes directly to
         // the client. they would be detected as a message. send messages instead.
-        public void Send(INetworkPlayer player, ArraySegment<byte> segment, int channelId = Channel.Reliable)
+        public void Send(NetworkPlayer player, ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
             Send(player.Connection, segment, channelId);
         }

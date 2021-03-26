@@ -22,18 +22,18 @@ namespace Mirage.Examples.Chat
             public string name;
         }
 
-        public void OnServerAuthenticated(INetworkPlayer player)
+        public void OnServerAuthenticated(NetworkPlayerplayer)
         {
             Server.MessageHandler.RegisterHandler<CreateCharacterMessage>(OnCreatePlayer);
         }
 
-        public void OnClientAuthenticated(INetworkPlayer player)
+        public void OnClientAuthenticated(NetworkPlayerplayer)
         {
             // tell the server to create a player with this name
             player.Send(new CreateCharacterMessage { name = PlayerName });
         }
 
-        private void OnCreatePlayer(INetworkPlayer player, CreateCharacterMessage createCharacterMessage)
+        private void OnCreatePlayer(NetworkPlayerplayer, CreateCharacterMessage createCharacterMessage)
         {
             // create a gameobject using the name supplied by client
             GameObject playergo = Instantiate(playerPrefab).gameObject;

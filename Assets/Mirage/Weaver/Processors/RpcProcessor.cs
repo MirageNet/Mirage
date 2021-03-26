@@ -31,12 +31,12 @@ namespace Mirage.Weaver
         public bool HasNetworkConnectionParameter(MethodDefinition md)
         {
             return md.Parameters.Count > 0 &&
-                   md.Parameters[0].ParameterType.Is<INetworkPlayer>();
+                   md.Parameters[0].ParameterType.Is<NetworkPlayer>();
         }
 
         public static bool IsNetworkConnection(TypeReference type)
         {
-            return type.Resolve().ImplementsInterface<INetworkPlayer>();
+            return type.Resolve().ImplementsInterface<NetworkPlayer>();
         }
 
         public bool WriteArguments(ILProcessor worker, MethodDefinition method, VariableDefinition writer, RemoteCallType callType)

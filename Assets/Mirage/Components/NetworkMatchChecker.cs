@@ -105,7 +105,7 @@ namespace Mirage
         /// </summary>
         /// <param name="player">Network connection of a player.</param>
         /// <returns>True if the player can see this object.</returns>
-        public override bool OnCheckObserver(INetworkPlayer player)
+        public override bool OnCheckObserver(NetworkPlayer player)
         {
             // Not Visible if not in a match
             if (MatchId == Guid.Empty)
@@ -125,7 +125,7 @@ namespace Mirage
         /// </summary>
         /// <param name="observers">The new set of observers for this object.</param>
         /// <param name="initialize">True if the set of observers is being built for the first time.</param>
-        public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
+        public override void OnRebuildObservers(HashSet<NetworkPlayer> observers, bool initialize)
         {
             if (currentMatch == Guid.Empty) return;
 

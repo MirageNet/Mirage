@@ -5,7 +5,7 @@ namespace ServerRpcTests.ServerRpcThatIgnoresAuthorityWithSenderConnection
     class ServerRpcThatIgnoresAuthorityWithSenderConnection : NetworkBehaviour
     {
         [ServerRpc(requireAuthority = false)]
-        void CmdFunction(INetworkPlayer connection = null)
+        void CmdFunction(NetworkPlayer connection = null)
         {
             // do something
         }

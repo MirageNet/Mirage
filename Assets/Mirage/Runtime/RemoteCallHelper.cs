@@ -12,8 +12,8 @@ namespace Mirage.RemoteCalls
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="reader"></param>
-    public delegate void CmdDelegate(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId);
-    public delegate UniTask<T> RequestDelegate<T>(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId);
+    public delegate void CmdDelegate(NetworkBehaviour obj, NetworkReader reader, NetworkPlayer senderPlayer, int replyId);
+    public delegate UniTask<T> RequestDelegate<T>(NetworkBehaviour obj, NetworkReader reader, NetworkPlayer senderPlayer, int replyId);
 
     // invoke type for Rpc
     public enum RpcInvokeType
@@ -39,7 +39,7 @@ namespace Mirage.RemoteCalls
                     this.invokeFunction == invokeFunction;
         }
 
-        internal void Invoke(NetworkReader reader, NetworkBehaviour invokingType, INetworkPlayer senderPlayer = null, int replyId = 0)
+        internal void Invoke(NetworkReader reader, NetworkBehaviour invokingType, NetworkPlayer senderPlayer = null, int replyId = 0)
         {
             if (invokeClass.IsInstanceOfType(invokingType))
             {
@@ -114,7 +114,7 @@ namespace Mirage.RemoteCalls
 
         public static void RegisterRequestDelegate<T>(Type invokeClass, string cmdName, RequestDelegate<T> func, bool cmdRequireAuthority = true)
         {
-            async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
+            async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, NetworkPlayer senderPlayer, int replyId)
             {
                 /// invoke the serverRpc and send a reply message
                 T result = await func(obj, reader, senderPlayer, replyId);
@@ -132,7 +132,7 @@ namespace Mirage.RemoteCalls
                 }
             }
 
-            void CmdWrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
+            void CmdWrapper(NetworkBehaviour obj, NetworkReader reader, NetworkPlayer senderPlayer, int replyId)
             {
                 Wrapper(obj, reader, senderPlayer, replyId).Forget();
             }

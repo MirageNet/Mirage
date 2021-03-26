@@ -8,8 +8,8 @@ namespace Mirage
     /// </summary>
     public interface IMessageSender
     {
-        void Send<T>(INetworkPlayer player, T message, int channelId = Channel.Reliable);
-        void Send(INetworkPlayer player, ArraySegment<byte> segment, int channelId = Channel.Reliable);
+        void Send<T>(NetworkPlayer player, T message, int channelId = Channel.Reliable);
+        void Send(NetworkPlayer player, ArraySegment<byte> segment, int channelId = Channel.Reliable);
     }
 
     /// <summary>
@@ -17,7 +17,7 @@ namespace Mirage
     /// </summary>
     public interface IMessageReceiver
     {
-        void RegisterHandler<T>(Action<INetworkPlayer, T> handler);
+        void RegisterHandler<T>(Action<NetworkPlayer, T> handler);
 
         void RegisterHandler<T>(Action<T> handler);
 
@@ -84,18 +84,6 @@ namespace Mirage
         void RemoveOwnedObject(NetworkIdentity networkIdentity);
         void AddOwnedObject(NetworkIdentity networkIdentity);
         void DestroyOwnedObjects();
-    }
-
-    /// <summary>
-    /// A connection to a remote endpoint.
-    /// May be from the server to client or from client to server
-    /// </summary>
-    [System.Obsolete("Use NetworkPlayer, or sub part instead", true)]
-    public interface INetworkPlayer : IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
-    {
-        IMessageHandler MessageHandler { get; }
-        void Send<T>(T message, int channelId = 0);
-        void Send(ArraySegment<byte> segment, int channelId = 0);
     }
 
     public interface IAuthenticatedObject

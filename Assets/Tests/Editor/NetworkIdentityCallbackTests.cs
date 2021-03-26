@@ -17,9 +17,9 @@ namespace Mirage
         class CheckObserverExceptionNetworkBehaviour : NetworkVisibility
         {
             public int called;
-            public INetworkPlayer valuePassed;
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer player)
+            public NetworkPlayer valuePassed;
+            public override void OnRebuildObservers(HashSet<NetworkPlayer> observers, bool initialize) { }
+            public override bool OnCheckObserver(NetworkPlayer player)
             {
                 ++called;
                 valuePassed = player;
@@ -30,8 +30,8 @@ namespace Mirage
         class CheckObserverTrueNetworkBehaviour : NetworkVisibility
         {
             public int called;
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer player)
+            public override void OnRebuildObservers(HashSet<NetworkPlayer> observers, bool initialize) { }
+            public override bool OnCheckObserver(NetworkPlayer player)
             {
                 ++called;
                 return true;
@@ -41,8 +41,8 @@ namespace Mirage
         class CheckObserverFalseNetworkBehaviour : NetworkVisibility
         {
             public int called;
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
-            public override bool OnCheckObserver(INetworkPlayer player)
+            public override void OnRebuildObservers(HashSet<NetworkPlayer> observers, bool initialize) { }
+            public override bool OnCheckObserver(NetworkPlayer player)
             {
                 ++called;
                 return false;
@@ -107,9 +107,9 @@ namespace Mirage
 
         class RebuildObserversNetworkBehaviour : NetworkVisibility
         {
-            public INetworkPlayer observer;
-            public override bool OnCheckObserver(INetworkPlayer player) { return true; }
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
+            public NetworkPlayer observer;
+            public override bool OnCheckObserver(NetworkPlayer player) { return true; }
+            public override void OnRebuildObservers(HashSet<NetworkPlayer> observers, bool initialize)
             {
                 observers.Add(observer);
             }
@@ -117,8 +117,8 @@ namespace Mirage
 
         class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
         {
-            public override bool OnCheckObserver(INetworkPlayer player) { return true; }
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
+            public override bool OnCheckObserver(NetworkPlayer player) { return true; }
+            public override void OnRebuildObservers(HashSet<NetworkPlayer> observers, bool initialize) { }
         }
 
         #endregion
@@ -269,10 +269,10 @@ namespace Mirage
             identity.StartServer();
 
             // add an observer connection
-            INetworkPlayer player = Substitute.For<INetworkPlayer>();
+            NetworkPlayer player = Substitute.For<NetworkPlayer>();
             identity.observers.Add(player);
 
-            INetworkPlayer player2 = Substitute.For<INetworkPlayer>();
+            NetworkPlayer player2 = Substitute.For<NetworkPlayer>();
             // RemoveObserverInternal with invalid connection should do nothing
             identity.RemoveObserverInternal(player2);
             Assert.That(identity.observers, Is.EquivalentTo(new[] { player }));
@@ -720,7 +720,7 @@ namespace Mirage
             comp.observer = new NetworkPlayer(tconn42, Substitute.For<IMessageHandler>());
 
             // get new observers
-            var observers = new HashSet<INetworkPlayer>();
+            var observers = new HashSet<NetworkPlayer>();
             bool result = identity.GetNewObservers(observers, true);
             Assert.That(result, Is.True);
             Assert.That(observers.Count, Is.EqualTo(1));
@@ -732,7 +732,7 @@ namespace Mirage
         {
             // get new observers. no observer components so it should just clear
             // it and not do anything else
-            var observers = new HashSet<INetworkPlayer>
+            var observers = new HashSet<NetworkPlayer>
             {
                 new NetworkPlayer(tconn42, Substitute.For<IMessageHandler>())
             };
@@ -744,7 +744,7 @@ namespace Mirage
         public void GetNewObserversFalseIfNoComponents()
         {
             // get new observers. no observer components so it should be false
-            var observers = new HashSet<INetworkPlayer>();
+            var observers = new HashSet<NetworkPlayer>();
             bool result = identity.GetNewObservers(observers, true);
             Assert.That(result, Is.False);
         }
@@ -777,7 +777,7 @@ namespace Mirage
             // add a proximity checker
             // one with a ready connection, one with no ready connection, one with null connection
             RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
-            comp.observer = Substitute.For<INetworkPlayer>();
+            comp.observer = Substitute.For<NetworkPlayer>();
             comp.observer.IsReady.Returns(true);
 
             // rebuild observers should add all component's ready observers
@@ -792,7 +792,7 @@ namespace Mirage
             // add a proximity checker
             // one with a ready connection, one with no ready connection, one with null connection
             RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
-            comp.observer = Substitute.For<INetworkPlayer>();
+            comp.observer = Substitute.For<NetworkPlayer>();
             comp.observer.IsReady.Returns(false);
 
             // rebuild observers should add all component's ready observers
@@ -803,9 +803,9 @@ namespace Mirage
         [Test]
         public void RebuildObserversAddsReadyServerConnectionsIfNotImplemented()
         {
-            INetworkPlayer readyConnection = Substitute.For<INetworkPlayer>();
+            NetworkPlayer readyConnection = Substitute.For<NetworkPlayer>();
             readyConnection.IsReady.Returns(true);
-            INetworkPlayer notReadyConnection = Substitute.For<INetworkPlayer>();
+            NetworkPlayer notReadyConnection = Substitute.For<NetworkPlayer>();
             notReadyConnection.IsReady.Returns(false);
 
             // add some server connections

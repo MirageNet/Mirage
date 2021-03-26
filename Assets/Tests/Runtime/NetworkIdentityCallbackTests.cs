@@ -14,8 +14,8 @@ namespace Mirage.Tests
         #region test components
         class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
         {
-            public override bool OnCheckObserver(INetworkPlayer player) { return true; }
-            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
+            public override bool OnCheckObserver(NetworkPlayer player) { return true; }
+            public override void OnRebuildObservers(HashSet<NetworkPlayer> observers, bool initialize) { }
         }
 
 
@@ -37,7 +37,7 @@ namespace Mirage.Tests
         public void SetUp()
         {
             messageHandler = Substitute.For<IMessageHandler>();
-            messageHandler.ProcessMessagesAsync(Arg.Any<INetworkPlayer>()).Returns(UniTask.Never(CancellationToken.None));
+            messageHandler.ProcessMessagesAsync(Arg.Any<NetworkPlayer>()).Returns(UniTask.Never(CancellationToken.None));
 
             networkServerGameObject = new GameObject();
             server = networkServerGameObject.AddComponent<NetworkServer>();

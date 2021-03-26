@@ -82,7 +82,7 @@ namespace Mirage
             }
         }
 
-        private void OnServerAuthenticated(INetworkPlayer player)
+        private void OnServerAuthenticated(NetworkPlayer player)
         {
             // wait for client to send us an AddPlayerMessage
             Server.MessageHandler.RegisterHandler<AddCharacterMessage>(OnServerAddPlayerInternal);
@@ -104,7 +104,7 @@ namespace Mirage
             Client.Send(new AddCharacterMessage());
         }
 
-        void OnServerAddPlayerInternal(INetworkPlayer player, AddCharacterMessage msg)
+        void OnServerAddPlayerInternal(NetworkPlayer player, AddCharacterMessage msg)
         {
             logger.Log("CharacterSpawner.OnServerAddPlayer");
 
@@ -121,7 +121,7 @@ namespace Mirage
         /// <para>The default implementation for this function creates a new player object from the playerPrefab.</para>
         /// </summary>
         /// <param name="player">Connection from client.</param>
-        public virtual void OnServerAddPlayer(INetworkPlayer player)
+        public virtual void OnServerAddPlayer(NetworkPlayer player)
         {
             Transform startPos = GetStartPosition();
             NetworkIdentity character = startPos != null

@@ -96,7 +96,7 @@ namespace Mirage
         // original HLAPI has .localConnections list with only m_LocalConnection in it
         // (for backwards compatibility because they removed the real localConnections list a while ago)
         // => removed it for easier code. use .localConnection now!
-        public INetworkPlayer LocalPlayer { get; private set; }
+        public NetworkPlayer LocalPlayer { get; private set; }
 
         /// <summary>
         /// The host client for this server 
@@ -117,8 +117,8 @@ namespace Mirage
         /// <summary>
         /// A list of local connections on the server.
         /// </summary>
-        public readonly HashSet<INetworkPlayer> Players = new HashSet<INetworkPlayer>();
-        IReadOnlyCollection<INetworkPlayer> INetworkServer.Players => Players;
+        public readonly HashSet<NetworkPlayer> Players = new HashSet<NetworkPlayer>();
+        IReadOnlyCollection<NetworkPlayer> INetworkServer.Players => Players;
 
         /// <summary>
         /// <para>Checks if the server has been started.</para>
@@ -149,8 +149,8 @@ namespace Mirage
             // make a copy,  during disconnect, it is possible that connections
             // are modified, so it throws
             // System.InvalidOperationException : Collection was modified; enumeration operation may not execute.
-            var playersCopy = new HashSet<INetworkPlayer>(Players);
-            foreach (INetworkPlayer player in playersCopy)
+            var playersCopy = new HashSet<NetworkPlayer>(Players);
+            foreach (NetworkPlayer player in playersCopy)
             {
                 player.Connection?.DisconnectPlayer(player);
             }
@@ -258,7 +258,7 @@ namespace Mirage
 
         private void TransportConnected(Connection connection)
         {
-            INetworkPlayer player = GetNewPlayer(connection);
+            NetworkPlayer player = GetNewPlayer(connection);
             connection.AddPlayer(player);
             ConnectionAccepted(player);
         }
@@ -324,7 +324,7 @@ namespace Mirage
         /// <summary>
         /// Creates a new INetworkConnection based on the provided IConnection.
         /// </summary>
-        public virtual INetworkPlayer GetNewPlayer(Connection connection)
+        public virtual NetworkPlayer GetNewPlayer(Connection connection)
         {
             return new NetworkPlayer(connection, MessageHandler);
         }
@@ -334,7 +334,7 @@ namespace Mirage
         /// <para>This connection will use the callbacks registered with the server.</para>
         /// </summary>
         /// <param name="player">Network connection to add.</param>
-        public void AddConnection(INetworkPlayer player)
+        public void AddConnection(NetworkPlayer player)
         {
             if (!Players.Contains(player))
             {
@@ -350,7 +350,7 @@ namespace Mirage
         /// This removes an external connection added with AddExternalConnection().
         /// </summary>
         /// <param name="connectionId">The id of the connection to remove.</param>
-        public void RemoveConnection(INetworkPlayer player)
+        public void RemoveConnection(NetworkPlayer player)
         {
             Players.Remove(player);
         }
@@ -370,7 +370,7 @@ namespace Mirage
             // todo work out how to handle local connection
             throw new NotImplementedException();
 
-            // INetworkPlayer player = GetNewPlayer(tconn);
+            // NetworkPlayer player = GetNewPlayer(tconn);
             // LocalPlayer = player;
             // LocalClient = client;
 
@@ -389,7 +389,7 @@ namespace Mirage
             SendToMany(Players, msg, channelId);
         }
 
-        public static void SendToMany<T>(IEnumerable<INetworkPlayer> players, T msg, int channelId = Channel.Reliable)
+        public static void SendToMany<T>(IEnumerable<NetworkPlayer> players, T msg, int channelId = Channel.Reliable)
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -398,7 +398,7 @@ namespace Mirage
                 var segment = writer.ToArraySegment();
                 int count = 0;
 
-                foreach (INetworkPlayer player in players)
+                foreach (NetworkPlayer player in players)
                 {
                     // send to all connections, but don't wait for them
                     player.Send(segment, channelId);
@@ -409,7 +409,7 @@ namespace Mirage
             }
         }
 
-        void ConnectionAccepted(INetworkPlayer player)
+        void ConnectionAccepted(NetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log("Server accepted client:" + player);
 
@@ -424,7 +424,7 @@ namespace Mirage
         {
             foreach (IConnectionPlayer player in connection.Players)
             {
-                if (player is INetworkPlayer networkPlayer)
+                if (player is NetworkPlayer networkPlayer)
                 {
                     OnDisconnected(networkPlayer);
                 }
@@ -435,7 +435,7 @@ namespace Mirage
             }
         }
         //called once a client disconnects from the server
-        void OnDisconnected(INetworkPlayer player)
+        void OnDisconnected(NetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log("Server disconnect client:" + player);
 
@@ -450,7 +450,7 @@ namespace Mirage
                 LocalPlayer = null;
         }
 
-        internal void OnAuthenticated(INetworkPlayer player)
+        internal void OnAuthenticated(NetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log("Server authenticate client:" + player);
 
