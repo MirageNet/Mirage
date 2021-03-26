@@ -111,7 +111,7 @@ namespace Mirage
             if (MatchId == Guid.Empty)
                 return false;
 
-            NetworkMatchChecker networkMatchChecker = player.Identity.GetComponent<NetworkMatchChecker>();
+            NetworkMatchChecker networkMatchChecker = ((IObjectOwner)player).Identity.GetComponent<NetworkMatchChecker>();
 
             if (networkMatchChecker == null)
                 return false;

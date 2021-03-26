@@ -23,7 +23,7 @@ namespace Mirage
         /// <summary>
         /// The NetworkConnection object this client is using.
         /// </summary>
-        INetworkPlayer Player { get; }
+        NetworkPlayer Player { get; }
 
         /// <summary>
         /// active is true while a client is connecting/connected

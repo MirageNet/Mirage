@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
@@ -153,7 +152,7 @@ namespace Mirage
             var playersCopy = new HashSet<INetworkPlayer>(Players);
             foreach (INetworkPlayer player in playersCopy)
             {
-                player.Connection?.Disconnect();
+                player.Connection?.DisconnectPlayer(player);
             }
             peer?.Close();
         }
@@ -179,7 +178,7 @@ namespace Mirage
                 throw new InvalidOperationException("Transport could not be found for NetworkServer");
 
             ISocket socket = socketCreator.CreateServerSocket();
-            peer = new Peer(socket, new Config
+            peer = new Peer(socket, MessageHandler, new Config
             {
                 MaxConnections = MaxConnections,
                 // todo expose these setting
@@ -187,7 +186,11 @@ namespace Mirage
                 ConnectAttemptInterval = 2,
                 DisconnectTimeout = 30,
                 KeepAliveInterval = 10,
-            });
+            }, LogFactory.GetLogger<Peer>());
+
+            peer.OnConnected += TransportConnected;
+            peer.OnDisconnected += TransportDisconnected;
+
 
             if (authenticator != null)
             {
@@ -255,8 +258,9 @@ namespace Mirage
 
         private void TransportConnected(Connection connection)
         {
-            INetworkPlayer networkConnectionToClient = GetNewPlayer(connection);
-            ConnectionAcceptedAsync(networkConnectionToClient).Forget();
+            INetworkPlayer player = GetNewPlayer(connection);
+            connection.AddPlayer(player);
+            ConnectionAccepted(player);
         }
 
         /// <summary>
@@ -405,43 +409,31 @@ namespace Mirage
             }
         }
 
-        async UniTaskVoid ConnectionAcceptedAsync(INetworkPlayer player)
+        void ConnectionAccepted(INetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log("Server accepted client:" + player);
-
-            // are more connections allowed? if not, kick
-            // (it's easier to handle this in Mirage, so Transports can have
-            //  less code and third party transport might not do that anyway)
-            // (this way we could also send a custom 'tooFull' message later,
-            //  Transport can't do that)
-            if (Players.Count >= MaxConnections)
-            {
-                player.Connection?.Disconnect();
-                if (logger.WarnEnabled()) logger.LogWarning("Server full, kicked client:" + player);
-                return;
-            }
 
             // add connection
             AddConnection(player);
 
             // let everyone know we just accepted a connection
             Connected?.Invoke(player);
-
-            // now process messages until the connection closes
-            try
-            {
-                await MessageHandler.ProcessMessagesAsync(player);
-            }
-            catch (Exception ex)
-            {
-                logger.LogException(ex);
-            }
-            finally
-            {
-                OnDisconnected(player);
-            }
         }
 
+        void TransportDisconnected(Connection connection)
+        {
+            foreach (IConnectionPlayer player in connection.Players)
+            {
+                if (player is INetworkPlayer networkPlayer)
+                {
+                    OnDisconnected(networkPlayer);
+                }
+                else
+                {
+                    logger.LogError("Player on connection was not a NetworkPlayer");
+                }
+            }
+        }
         //called once a client disconnects from the server
         void OnDisconnected(INetworkPlayer player)
         {

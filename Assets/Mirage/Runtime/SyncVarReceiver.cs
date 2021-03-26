@@ -16,26 +16,18 @@ namespace Mirage
         public SyncVarReceiver(NetworkClient client, IObjectLocator objectLocator)
         {
             this.objectLocator = objectLocator;
-            if (client.IsConnected)
-            {
-                AddHandlers(client, client.Player);
-            }
-            else
-            {
-                // todo replace this with RunOnceEvent
-                client.Connected.AddListener(player => AddHandlers(client, player));
-            }
+            AddHandlers(client, client.MessageHandler);
         }
 
-        private void AddHandlers(NetworkClient client, INetworkPlayer player)
+        private void AddHandlers(NetworkClient client, IMessageHandler messageHandler)
         {
             if (client.IsLocalClient)
             {
-                player.RegisterHandler<UpdateVarsMessage>(_ => { });
+                messageHandler.RegisterHandler<UpdateVarsMessage>(_ => { });
             }
             else
             {
-                player.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
+                messageHandler.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
             }
         }
 

@@ -935,7 +935,7 @@ namespace Mirage
                 return;
             }
 
-            if (logger.LogEnabled()) logger.Log("Added observer " + player.Connection.GetEndPointAddress() + " added for " + gameObject);
+            if (logger.LogEnabled()) logger.Log("Added observer " + player.Connection.EndPoint + " added for " + gameObject);
             observers.Add(player);
             player.AddToVisList(this);
 

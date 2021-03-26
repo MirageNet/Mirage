@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Mirage.SocketLayer;
 using UnityEngine;
 
 namespace Mirage
@@ -11,12 +11,12 @@ namespace Mirage
     /// <summary>
     /// Sends and handles messages
     /// </summary>
-    public sealed class MessageBroker : IMessageHandler, IMessageSender, IMessageReceiver, INotifySender, INotifyReceiver
+    public sealed class MessageBroker : IMessageHandler, IMessageSender, IMessageReceiver, INotifySender, INotifyReceiver, IDataHandler
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(MessageBroker));
 
         // Handles network messages on client and server
-        internal delegate void NetworkMessageDelegate(INetworkPlayer player, NetworkReader reader, int channelId);
+        internal delegate void NetworkMessageDelegate(IConnectionPlayer player, NetworkReader reader, int channelId);
 
         // message handlers for this connection
         internal readonly Dictionary<int, NetworkMessageDelegate> messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
@@ -40,12 +40,7 @@ namespace Mirage
         /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
         public void RegisterHandler<T>(Action<INetworkPlayer, T> handler)
         {
-            int msgType = MessagePacker.GetId<T>();
-            if (logger.filterLogType == LogType.Log && messageHandlers.ContainsKey(msgType))
-            {
-                logger.Log("NetworkServer.RegisterHandler replacing " + msgType);
-            }
-            messageHandlers[msgType] = MessageHandler(handler);
+            RegisterHandler((IConnectionPlayer connPlayer, T value) => { handler(connPlayer as INetworkPlayer, value); });
         }
 
         /// <summary>
@@ -58,6 +53,23 @@ namespace Mirage
         public void RegisterHandler<T>(Action<T> handler)
         {
             RegisterHandler<T>((_, value) => { handler(value); });
+        }
+
+        /// <summary>
+        /// Register a handler for a particular message type.
+        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
+        /// </summary>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
+        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
+        public void RegisterHandler<T>(Action<IConnectionPlayer, T> handler)
+        {
+            int msgType = MessagePacker.GetId<T>();
+            if (logger.filterLogType == LogType.Log && messageHandlers.ContainsKey(msgType))
+            {
+                logger.Log("NetworkServer.RegisterHandler replacing " + msgType);
+            }
+            messageHandlers[msgType] = MessageHandler(handler);
         }
 
         /// <summary>
@@ -79,9 +91,9 @@ namespace Mirage
         }
 
 
-        private static NetworkMessageDelegate MessageHandler<T>(Action<INetworkPlayer, T> handler)
+        private static NetworkMessageDelegate MessageHandler<T>(Action<IConnectionPlayer, T> handler)
         {
-            void AdapterFunction(INetworkPlayer player, NetworkReader reader, int channelId)
+            void AdapterFunction(IConnectionPlayer player, NetworkReader reader, int channelId)
             {
                 // protect against DOS attacks if attackers try to send invalid
                 // data packets to crash the server/client. there are a thousand
@@ -111,7 +123,41 @@ namespace Mirage
         }
 
 
-        internal void InvokeHandler(INetworkPlayer player, int msgType, NetworkReader reader, int channelId)
+        // use explict interface to hide at high level
+        void IDataHandler.ReceiveData(IConnectionPlayer player, ArraySegment<byte> segment)
+        {
+            // unpack message
+            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(segment))
+            {
+                try
+                {
+                    int msgType = MessagePacker.UnpackId(networkReader);
+
+                    if (msgType == MessagePacker.GetId<NotifyPacket>())
+                    {
+                        // this is a notify message, send to the notify receive
+                        NotifyPacket notifyPacket = networkReader.ReadNotifyPacket();
+                        ReceiveNotify(player, notifyPacket, networkReader);
+                    }
+                    else
+                    {
+                        // try to invoke the handler for that message
+                        InvokeHandler(player, msgType, networkReader);
+                    }
+                }
+                catch (InvalidDataException ex)
+                {
+                    logger.Log(ex.ToString());
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError("Closed connection: " + this + ". Invalid message " + ex);
+                    player?.Connection?.DisconnectPlayer(player);
+                }
+            }
+        }
+
+        internal void InvokeHandler(IConnectionPlayer player, int msgType, NetworkReader reader, int channelId = default)
         {
             if (messageHandlers.TryGetValue(msgType, out NetworkMessageDelegate msgDelegate))
             {
@@ -130,76 +176,6 @@ namespace Mirage
                 }
             }
         }
-
-        public void TransportReceive(ArraySegment<byte> data, int channel = 0)
-        {
-            throw new NotImplementedException();
-        }
-
-        // note: original HLAPI HandleBytes function handled >1 message in a while loop, but this wasn't necessary
-        //       anymore because NetworkServer/NetworkClient Update both use while loops to handle >1 data events per
-        //       frame already.
-        //       -> in other words, we always receive 1 message per Receive call, never two.
-        //       -> can be tested easily with a 1000ms send delay and then logging amount received in while loops here
-        //          and in NetworkServer/Client Update. HandleBytes already takes exactly one.
-        /// <summary>
-        /// This function allows custom network connection classes to process data from the network before it is passed to the application.
-        /// </summary>
-        /// <param name="buffer">The data received.</param>
-        internal void TransportReceive(INetworkPlayer player, ArraySegment<byte> buffer, int channelId)
-        {
-            // unpack message
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(buffer))
-            {
-                try
-                {
-                    int msgType = MessagePacker.UnpackId(networkReader);
-
-                    if (msgType == MessagePacker.GetId<NotifyPacket>())
-                    {
-                        // this is a notify message, send to the notify receive
-                        NotifyPacket notifyPacket = networkReader.ReadNotifyPacket();
-                        ReceiveNotify(player, notifyPacket, networkReader, channelId);
-                    }
-                    else
-                    {
-                        // try to invoke the handler for that message
-                        InvokeHandler(player, msgType, networkReader, channelId);
-                    }
-                }
-                catch (InvalidDataException ex)
-                {
-                    logger.Log(ex.ToString());
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError("Closed connection: " + this + ". Invalid message " + ex);
-                    player?.Connection?.Disconnect();
-                }
-            }
-        }
-
-        public async UniTask ProcessMessagesAsync(INetworkPlayer player)
-        {
-            var buffer = new MemoryStream();
-
-            logger.Assert(player.Connection != null, "");
-            try
-            {
-                while (true)
-                {
-                    int channel = await player.Connection.ReceiveAsync(buffer);
-
-                    buffer.TryGetBuffer(out ArraySegment<byte> data);
-                    TransportReceive(player, data, channel);
-                }
-            }
-            catch (EndOfStreamException)
-            {
-                // connection closed,  normal
-            }
-        }
-
         #endregion
 
         #region Send
@@ -211,7 +187,7 @@ namespace Mirage
         /// <param name="msg">The message to send.</param>
         /// <param name="channelId">The transport layer channel to send on.</param>
         /// <returns></returns>
-        public void Send<T>(IConnection connection, T message, int channelId = Channel.Reliable)
+        public void Send<T>(Connection connection, T message, int channelId = Channel.Reliable)
         {
             if (connection == null)
             {
@@ -231,7 +207,7 @@ namespace Mirage
 
         // internal because no one except Mirage should send bytes directly to
         // the client. they would be detected as a message. send messages instead.
-        public void Send(IConnection connection, ArraySegment<byte> segment, int channelId = Channel.Reliable)
+        public void Send(Connection connection, ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
             if (connection == null)
             {
@@ -288,7 +264,7 @@ namespace Mirage
         /// <typeparam name="T">type of message to send</typeparam>
         /// <param name="message">message to send</param>
         /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
-        public void SendNotify<T>(INetworkPlayer player, T message, object token, int channelId = Channel.Unreliable)
+        public void SendNotify<T>(IConnectionPlayer player, T message, object token, int channelId = Channel.Unreliable)
         {
             if (sendWindow.Count == WINDOW_SIZE)
             {
@@ -314,20 +290,20 @@ namespace Mirage
                 MessagePacker.Pack(notifyPacket, writer);
                 MessagePacker.Pack(message, writer);
                 NetworkDiagnostics.OnSend(message, channelId, writer.Length, 1);
-                Send(player, writer.ToArraySegment(), channelId);
+                Send(player.Connection, writer.ToArraySegment(), channelId);
                 lastNotifySentTime = Time.unscaledTime;
             }
 
         }
 
-        internal void ReceiveNotify(INetworkPlayer player, NotifyPacket notifyPacket, NetworkReader networkReader, int channelId)
+        internal void ReceiveNotify(IConnectionPlayer player, NotifyPacket notifyPacket, NetworkReader networkReader, int channelId = default)
         {
             int sequenceDistance = (int)sequencer.Distance(notifyPacket.Sequence, receiveSequence);
 
             // sequence is so far out of bounds we can't save, just kick them
             if (Math.Abs(sequenceDistance) > WINDOW_SIZE)
             {
-                player?.Connection?.Disconnect();
+                player?.Connection?.DisconnectPlayer(player);
                 return;
             }
 
@@ -357,7 +333,7 @@ namespace Mirage
         // the other end just sent us a message
         // and it told us the latest message it got
         // and the ack mask
-        private void AckPackets(INetworkPlayer player, ushort receiveSequence, ulong ackMask)
+        private void AckPackets(IConnectionPlayer player, ushort receiveSequence, ulong ackMask)
         {
             while (sendWindow.Count > 0)
             {
@@ -382,15 +358,31 @@ namespace Mirage
             }
         }
 
+
         /// <summary>
         /// Raised when a message is delivered
         /// </summary>
-        public event Action<INetworkPlayer, object> NotifyDelivered;
+        public event Action<IConnectionPlayer, object> NotifyDelivered;
 
         /// <summary>
         /// Raised when a message is lost
         /// </summary>
-        public event Action<INetworkPlayer, object> NotifyLost;
+        public event Action<IConnectionPlayer, object> NotifyLost;
         #endregion
+    }
+    public static class ConnectionChannelExtensions
+    {
+        public static void Send(this Connection connection, ArraySegment<byte> segment, int channel)
+        {
+            switch (channel)
+            {
+                case Channel.Reliable:
+                    connection.SendReliable(segment);
+                    break;
+                case Channel.Unreliable:
+                    connection.SendUnreiable(segment);
+                    break;
+            }
+        }
     }
 }

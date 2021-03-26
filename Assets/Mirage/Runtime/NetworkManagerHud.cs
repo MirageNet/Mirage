@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -42,21 +41,21 @@ namespace Mirage
         public void StartHostButtonHandler()
         {
             labelText = "Host Mode";
-            NetworkManager.Server.StartHost(NetworkManager.Client).Forget();
+            NetworkManager.Server.StartHost(NetworkManager.Client);
             OnlineSetActive();
         }
 
         public void StartServerOnlyButtonHandler()
         {
             labelText = "Server Mode";
-            NetworkManager.Server.ListenAsync().Forget();
+            NetworkManager.Server.Listen();
             OnlineSetActive();
         }
 
         public void StartClientButtonHandler()
         {
             labelText = "Client Mode";
-            NetworkManager.Client.ConnectAsync(NetworkAddress).Forget();
+            NetworkManager.Client.Connect(NetworkAddress);
             OnlineSetActive();
         }
 

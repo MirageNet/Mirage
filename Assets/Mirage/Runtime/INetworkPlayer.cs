@@ -1,5 +1,5 @@
 using System;
-using Cysharp.Threading.Tasks;
+using Mirage.SocketLayer;
 
 namespace Mirage
 {
@@ -24,15 +24,6 @@ namespace Mirage
         void UnregisterHandler<T>();
 
         void ClearHandlers();
-
-        /// <summary>
-        /// ProcessMessages loop, should loop unitil object is closed
-        /// </summary>
-        /// <returns></returns>
-        UniTask ProcessMessagesAsync(INetworkPlayer player);
-
-        // todo remove channel
-        void TransportReceive(ArraySegment<byte> data, int channel = default);
     }
 
     /// <summary>
@@ -46,7 +37,7 @@ namespace Mirage
         /// <typeparam name="T">type of message to send</typeparam>
         /// <param name="message">message to send</param>
         /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
-        void SendNotify<T>(INetworkPlayer player, T message, object token, int channelId = Channel.Unreliable);
+        void SendNotify<T>(IConnectionPlayer player, T message, object token, int channelId = Channel.Unreliable);
     }
 
     /// <summary>
@@ -57,18 +48,18 @@ namespace Mirage
         /// <summary>
         /// Raised when a message is delivered
         /// </summary>
-        event Action<INetworkPlayer, object> NotifyDelivered;
+        event Action<IConnectionPlayer, object> NotifyDelivered;
 
         /// <summary>
         /// Raised when a message is lost
         /// </summary>
-        event Action<INetworkPlayer, object> NotifyLost;
+        event Action<IConnectionPlayer, object> NotifyLost;
     }
 
     /// <summary>
     /// An object that can send and receive messages and notify messages
     /// </summary>
-    public interface IMessageHandler : IMessageSender, IMessageReceiver, INotifySender, INotifyReceiver
+    public interface IMessageHandler : IMessageSender, IMessageReceiver, INotifySender, INotifyReceiver, IDataHandler
     {
 
     }
@@ -99,10 +90,9 @@ namespace Mirage
     /// A connection to a remote endpoint.
     /// May be from the server to client or from client to server
     /// </summary>
+    [System.Obsolete("Use NetworkPlayer, or sub part instead", true)]
     public interface INetworkPlayer : IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
     {
-        IConnection Connection { get; }
-
         IMessageHandler MessageHandler { get; }
         void Send<T>(T message, int channelId = 0);
         void Send(ArraySegment<byte> segment, int channelId = 0);
