@@ -313,10 +313,7 @@ namespace Mirage
                 payload = writer.ToArraySegment()
             };
 
-            // The public facing parameter is excludeOwner in [ClientRpc]
-            // so we negate it here to logically align with SendToReady.
-            bool includeOwner = !excludeOwner;
-            NetIdentity.SendToRemoteObservers(message, includeOwner, channelId);
+            ServerObjectManager.InterestManager.Send(NetIdentity, message, channelId, excludeOwner ? ConnectionToClient : null);
         }
 
         protected internal void SendTargetRpcInternal(INetworkPlayer player, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)

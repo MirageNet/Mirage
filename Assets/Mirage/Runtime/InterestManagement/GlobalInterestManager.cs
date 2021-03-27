@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Mirage.InterestManagement
 {
@@ -26,6 +27,22 @@ namespace Mirage.InterestManagement
             {
                 ServerObjectManager.ShowForConnection(identity, player);
             }
+        }
+
+        protected override int Send(NetworkIdentity identity, ArraySegment<byte> data, int channelId = 0, INetworkPlayer skip = null)
+        {
+            int count = 0;
+
+            foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
+            {
+                if (player != skip)
+                {
+                    // send to all connections, but don't wait for them
+                    player.Send(data, channelId);
+                    count++;
+                }
+            }
+            return count;
         }
     }
 }

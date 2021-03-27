@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Mirage.Serialization;
 using UnityEngine;
 
 namespace Mirage.InterestManagement
@@ -49,5 +50,57 @@ namespace Mirage.InterestManagement
         /// <param name="identity"></param>
         /// <returns></returns>
         public abstract IReadOnlyCollection<INetworkPlayer> Observers(NetworkIdentity identity);
+
+
+        /// <summary>
+        /// Send a message to all observers of an identity
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <param name="msg"></param>
+        /// <param name="channelId"></param>
+        public virtual void Send<T>(NetworkIdentity identity, T msg, int channelId = Channel.Reliable, INetworkPlayer skip = null) 
+        {
+            IReadOnlyCollection<INetworkPlayer> observers = Observers(identity);
+
+            if (observers.Count == 0)
+                return;
+
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                // pack message into byte[] once
+                MessagePacker.Pack(msg, writer);
+                var segment = writer.ToArraySegment();
+                int count = Send(identity, segment, channelId, skip);
+
+                if (count > 0)
+                    NetworkDiagnostics.OnSend(msg, channelId, segment.Count, count);
+            }
+        }
+
+        /// <summary>
+        /// Send a message to all observers of an identity
+        /// </summary>
+        /// <remarks>Override if you wish to provide
+        /// an allocation free send method</remarks>
+        /// <param name="identity">the object that wants to send a message</param>
+        /// <param name="data">the data to send</param>
+        /// <param name="channelId">the channel to send it on</param>
+        /// <param name="skip">a player who should not receive the message</param>
+        /// <returns>Total amounts of messages sent</returns>
+        protected virtual int Send(NetworkIdentity identity, ArraySegment<byte> data, int channelId = Channel.Reliable, INetworkPlayer skip = null)
+        {
+            int count = 0;
+
+            foreach (INetworkPlayer player in Observers(identity))
+            {
+                if (player != skip)
+                {
+                    // send to all connections, but don't wait for them
+                    player.Send(data, channelId);
+                    count++;
+                }
+            }
+            return count;
+        }
     }
 }
