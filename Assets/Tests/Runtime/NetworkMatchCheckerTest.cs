@@ -5,7 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class NetworkMatchCheckerTest
     {

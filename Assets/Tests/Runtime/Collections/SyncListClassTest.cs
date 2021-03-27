@@ -2,7 +2,7 @@ using System.Linq;
 using Mirage.Collections;
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     class TestObjectBehaviour : NetworkBehaviour
     {

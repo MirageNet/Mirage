@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Random = UnityEngine.Random;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class KcpTransportTest
     {

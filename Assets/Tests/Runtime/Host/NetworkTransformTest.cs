@@ -1,4 +1,4 @@
-using Mirage.Tests.Host;
+using Mirage.Tests.Runtime.Host;
 using NUnit.Framework;
 
 namespace Mirage.Experimental.Tests.Host

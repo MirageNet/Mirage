@@ -1,8 +1,8 @@
-using Mirage.Tests.ClientServer;
+using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class ExampleGuards : NetworkBehaviour
     {

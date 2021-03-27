@@ -1,6 +1,6 @@
 using Mirage.Serialization;
 using NUnit.Framework;
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     [TestFixture]
     public class ArrayWriterTest

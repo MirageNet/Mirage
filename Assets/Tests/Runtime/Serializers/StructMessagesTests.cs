@@ -1,7 +1,7 @@
 using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage.Tests.StructMessages
+namespace Mirage.Tests.Runtime.StructMessages
 {
     public struct SomeStructMessage
     {

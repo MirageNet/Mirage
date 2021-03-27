@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Host
+namespace Mirage.Tests.Runtime.Host
 {
     [TestFixture]
     public class NetworkManagerTest : HostSetup<MockComponent>

@@ -4,7 +4,7 @@ using UnityEngine;
 
 using static Mirage.Tests.LocalConnections;
 
-namespace Mirage.Tests.Host
+namespace Mirage.Tests.Runtime.Host
 {
     public class SampleBehavior : NetworkBehaviour
     {

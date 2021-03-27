@@ -2,7 +2,7 @@ using Mirage.Collections;
 using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class SyncListStructTest
     {

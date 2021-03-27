@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
 
     [TestFixture(0f, 0f, 0)]

@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 using static Mirage.Tests.LocalConnections;
 using Object = UnityEngine.Object;
 
-namespace Mirage.Tests.Host
+namespace Mirage.Tests.Runtime.Host
 {
 
     public class GameobjectExtensionTests : HostSetup<MockComponent>

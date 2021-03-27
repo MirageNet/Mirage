@@ -1,7 +1,7 @@
 using Mirage.Experimental;
 using NUnit.Framework;
 
-namespace Mirage.Tests.Host
+namespace Mirage.Tests.Runtime.Host
 {
     [TestFixture]
     public class NetworkRigidbodyTest : HostSetup<NetworkRigidbody>
