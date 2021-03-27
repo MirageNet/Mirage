@@ -1,3 +1,10 @@
+# [84.2.0](https://github.com/MirageNet/Mirage/compare/v84.1.1...v84.2.0) (2021-03-27)
+
+
+### Features
+
+* configurable wait time for tests ([#729](https://github.com/MirageNet/Mirage/issues/729)) ([b10f3e8](https://github.com/MirageNet/Mirage/commit/b10f3e8a6b2097e7550f74426b3051464b6b9d23))
+
 ## [84.1.1](https://github.com/MirageNet/Mirage/compare/v84.1.0...v84.1.1) (2021-03-26)
 
 
