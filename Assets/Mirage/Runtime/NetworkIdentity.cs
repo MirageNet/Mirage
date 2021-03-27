@@ -1017,7 +1017,7 @@ namespace Mirage
                     if (observersWritten > 0)
                     {
                         varsMessage.payload = observersWriter.ToArraySegment();
-                        SendToRemoteObservers(varsMessage, false);
+                        ServerObjectManager.InterestManager.Send(this, varsMessage);
                     }
 
                     // clear dirty bits only for the components that we serialized
@@ -1030,38 +1030,6 @@ namespace Mirage
                     ClearDirtyComponentsDirtyBits();
                 }
             }
-        }
-
-        static readonly List<INetworkPlayer> connectionsExcludeSelf = new List<INetworkPlayer>(100);
-
-        /// <summary>
-        /// Send a message to all the remote observers
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="msg"> the message to deliver to to clients</param>
-        /// <param name="includeOwner">Wether the owner should receive this message too</param>
-        /// <param name="channelId"> the transport channel that should be used to deliver the message</param>
-        internal void SendToRemoteObservers<T>(T msg, bool includeOwner = true, int channelId = Channel.Reliable)
-        {
-            if (logger.LogEnabled()) logger.Log("Server.SendToObservers id:" + typeof(T));
-
-            if (Observers.Count == 0)
-                return;
-
-            connectionsExcludeSelf.Clear();
-            foreach (INetworkPlayer player in observers)
-            {
-                if (player == Server.LocalPlayer)
-                    continue;
-
-                if (includeOwner || ConnectionToClient != player)
-                {
-                    connectionsExcludeSelf.Add(player);
-                }
-            }
-
-            if (connectionsExcludeSelf.Count > 0)
-                NetworkServer.SendToMany(connectionsExcludeSelf, msg, channelId);
         }
 
         /// <summary>
