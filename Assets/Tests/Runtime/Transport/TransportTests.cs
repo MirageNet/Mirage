@@ -1,17 +1,17 @@
+using System;
 using System.Collections;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using Cysharp.Threading.Tasks;
+using Mirage.KCP;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using System.Text;
-using System.IO;
-using System.Net;
-using System;
 using Object = UnityEngine.Object;
-using System.Linq;
-using Cysharp.Threading.Tasks;
-using Mirage.KCP;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     [TestFixture(typeof(KcpTransport), new[] { "kcp" }, "kcp://localhost", 7777)]
     public class TransportTests<T> where T : Transport
@@ -72,7 +72,7 @@ namespace Mirage.Tests
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the client";
             byte[] data = utf8.GetBytes(message);
-            await clientConnection.SendAsync(new ArraySegment<byte>(data));
+            clientConnection.Send(new ArraySegment<byte>(data));
 
             var stream = new MemoryStream();
 
@@ -107,11 +107,11 @@ namespace Mirage.Tests
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the client 1";
             byte[] data = utf8.GetBytes(message);
-            await clientConnection.SendAsync(new ArraySegment<byte>(data));
+            clientConnection.Send(new ArraySegment<byte>(data));
 
             string message2 = "Hello from the client 2";
             byte[] data2 = utf8.GetBytes(message2);
-            await clientConnection.SendAsync(new ArraySegment<byte>(data2));
+            clientConnection.Send(new ArraySegment<byte>(data2));
 
             var stream = new MemoryStream();
 
@@ -131,7 +131,7 @@ namespace Mirage.Tests
             Encoding utf8 = Encoding.UTF8;
             string message = "Hello from the server";
             byte[] data = utf8.GetBytes(message);
-            await serverConnection.SendAsync(new ArraySegment<byte>(data));
+            serverConnection.Send(new ArraySegment<byte>(data));
 
             var stream = new MemoryStream();
 

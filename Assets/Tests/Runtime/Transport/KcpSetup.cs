@@ -5,7 +5,7 @@ using Mirage.KCP;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class KcpSetup
     {
@@ -92,7 +92,6 @@ namespace Mirage.Tests
             server.SetNoDelay(KcpDelayMode.Fast3);
             client.Mtu = 1000;
             client.SetWindowSize(16, 16);
-
 
             Tick(server, token).Forget();
             Tick(client, token).Forget();

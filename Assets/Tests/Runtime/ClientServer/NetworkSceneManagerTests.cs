@@ -7,8 +7,9 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using InvalidEnumArgumentException = System.ComponentModel.InvalidEnumArgumentException;
 
-namespace Mirage.Tests.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer
 {
 
     [TestFixture]
@@ -61,31 +62,57 @@ namespace Mirage.Tests.ClientServer
         [UnityTest]
         public IEnumerator ClientSceneMessageInvokeTest() => UniTask.ToCoroutine(async () =>
         {
-            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
-            clientSceneManager.ClientChangeScene.AddListener(func1);
+            int startInvoked = 0;
+            int endInvoked = 0;
+
+            clientSceneManager.ClientChangeScene.AddListener((_, __) => startInvoked++);
+            clientSceneManager.ClientSceneChanged.AddListener((_, __) => endInvoked++);
             clientSceneManager.ClientSceneMessage(null, new SceneMessage { scenePath = "Assets/Mirror/Tests/Runtime/testScene.unity" });
 
-            await AsyncUtil.WaitUntilWithTimeout(() => clientSceneManager.asyncOperation != null);
+            await AsyncUtil.WaitUntilWithTimeout(() => startInvoked == 1);
+
+            // wait 1/2 a second to see if end invokes itself
+            await UniTask.Delay(500);
+            Assert.That(startInvoked == 1, "Start should only be called once");
+            Assert.That(endInvoked == 0, "Should wait for ready before end is called");
 
             clientSceneManager.ClientSceneReadyMessage(connectionToServer, new SceneReadyMessage());
 
-            await AsyncUtil.WaitUntilWithTimeout(() => clientSceneManager.asyncOperation.isDone);
+            await AsyncUtil.WaitUntilWithTimeout(() => endInvoked == 1);
 
-            Assert.That(clientSceneManager.NetworkScenePath, Is.EqualTo("Assets/Mirror/Tests/Runtime/testScene.unity"));
+            Assert.That(clientSceneManager.ActiveScenePath, Is.EqualTo("Assets/Mirror/Tests/Runtime/testScene.unity"));
 
-            func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+            Assert.That(startInvoked == 1, "Start should only be called once");
+            Assert.That(endInvoked == 1, "End should only be called once");
         });
+
+        [Test]
+        public void ClientSceneMessageThrowsIfInvalidSceneOperation()
+        {
+            int startInvoked = 0;
+            int endInvoked = 0;
+
+            clientSceneManager.ClientChangeScene.AddListener((_, __) => startInvoked++);
+            clientSceneManager.ClientSceneChanged.AddListener((_, __) => endInvoked++);
+
+            var invalidOperation = (SceneOperation)10;
+            InvalidEnumArgumentException exception = Assert.Throws<InvalidEnumArgumentException>(() =>
+            {
+                clientSceneManager.ClientSceneMessage(null, new SceneMessage
+                {
+                    scenePath = "Assets/Mirror/Tests/Runtime/testScene.unity",
+                    sceneOperation = invalidOperation
+                });
+            });
+
+            string message = new InvalidEnumArgumentException("sceneOperation", 10, typeof(SceneOperation)).Message;
+            Assert.That(exception, Has.Message.EqualTo(message));
+        }
 
         [Test]
         public void NetworkSceneNameStringValueTest()
         {
-            Assert.That(clientSceneManager.NetworkScenePath.Equals(SceneManager.GetActiveScene().path));
-        }
-
-        [Test]
-        public void AsyncOperationInitStateTest()
-        {
-            Assert.That(clientSceneManager.asyncOperation, Is.Null);
+            Assert.That(clientSceneManager.ActiveScenePath.Equals(SceneManager.GetActiveScene().path));
         }
 
         [Test]
@@ -124,7 +151,7 @@ namespace Mirage.Tests.ClientServer
         {
             //Check for the additive scene in the pending list at the time of ClientSceneChanged before its removed as part of it being loaded.
             clientSceneManager.ClientSceneChanged.AddListener(CheckForAdditiveScene);
-            clientSceneManager.ClientSceneMessage(client.Connection, new SceneMessage { scenePath = "Assets/Mirror/Tests/Runtime/testScene.unity", additiveScenes = new[] { "Assets/Mirror/Tests/Runtime/testScene.unity" } });
+            clientSceneManager.ClientSceneMessage(client.Player, new SceneMessage { scenePath = "Assets/Mirror/Tests/Runtime/testScene.unity", additiveScenes = new[] { "Assets/Mirror/Tests/Runtime/testScene.unity" } });
 
             Assert.That(additiveSceneWasFound);
         }

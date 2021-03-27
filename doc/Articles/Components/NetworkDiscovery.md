@@ -8,7 +8,7 @@ Mirage comes with a simple implementation of Network Discovery you can simply us
 
 ![Inspector](NetworkDiscovery.png)
 
-NetworkDiscovery and NetworkDiscoveryHUD components are included, or you can make your own from a [ScriptTemplate](../General/ScriptTemplates.md).
+NetworkDiscovery and NetworkDiscoveryHUD components are included.
 
 Network Discovery uses a UDP broadcast on the LAN enabling clients to find the running server and connect to it.
 
@@ -48,10 +48,6 @@ Sometimes you want to provide more information in the discovery messages. Some u
 -   The client can show the ping to each server so the player can chose the fastest server
 -   The client can show the language
 -   The client can show if the server is password protected
-
-To do this, we've provided a [Template](../General/ScriptTemplates.md), so from the Assets menu, click Create > Mirage > Network Discovery.
-
-This will create a script in your project with 2 empty message classes and a custom NetworkDiscovery class that inherits from NetworkDiscoveryBase and has all the override methods included and documented for you.
 
 The message classes define what is sent between the client and server. As long as you keep your messages simple using the [data types](../Guides/DataTypes.md) that Mirage can serialize, you won't need to write custom serializers for them.
 

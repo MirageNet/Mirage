@@ -1,3 +1,4 @@
+using Mirage.Logging;
 using UnityEngine;
 
 namespace Mirage.Experimental

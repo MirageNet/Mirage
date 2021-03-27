@@ -1,4 +1,6 @@
-﻿namespace Mirage
+﻿using Mirage.Serialization;
+
+namespace Mirage
 {
     // header for notify packet
     public struct NotifyPacket

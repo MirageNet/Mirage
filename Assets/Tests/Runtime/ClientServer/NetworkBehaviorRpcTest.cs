@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using NSubstitute;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using System.Linq;
-using NUnit.Framework;
 
-namespace Mirage.Tests.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer
 {
     public class SampleBehaviorWithRpc : NetworkBehaviour
     {

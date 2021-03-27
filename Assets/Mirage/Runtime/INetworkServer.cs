@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine.Events;
 
 namespace Mirage
@@ -40,12 +41,12 @@ namespace Mirage
         /// <summary>
         /// The connection to the host mode client (if any).
         /// </summary>
-        INetworkConnection LocalConnection { get; }
+        INetworkPlayer LocalPlayer { get; }
 
         /// <summary>
         /// The host client for this server 
         /// </summary> 
-        NetworkClient LocalClient { get; }
+        INetworkClient LocalClient { get; }
 
         /// <summary>
         /// True if there is a local client connected to this server (host mode)
@@ -58,11 +59,15 @@ namespace Mirage
         /// </summary>
         bool Active { get; }
 
+        NetworkTime Time { get; }
+
+        IReadOnlyCollection<INetworkPlayer> Players { get; }
+
         void Disconnect();
 
-        void AddConnection(INetworkConnection conn);
+        void AddConnection(INetworkPlayer player);
 
-        void RemoveConnection(INetworkConnection conn);
+        void RemoveConnection(INetworkPlayer player);
 
         void SendToAll<T>(T msg, int channelId = Channel.Reliable);
     }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Mirage.Logging;
 using UnityEngine;
 
 namespace Mirage.Authenticators
@@ -24,49 +25,49 @@ namespace Mirage.Authenticators
             Authenticator.OnServerAuthenticated += HandleServerAuthenticated;
         }
 
-        private readonly HashSet<INetworkConnection> pendingAuthentication = new HashSet<INetworkConnection>();
+        private readonly HashSet<INetworkPlayer> pendingAuthentication = new HashSet<INetworkPlayer>();
 
-        private void HandleServerAuthenticated(INetworkConnection connection)
+        private void HandleServerAuthenticated(INetworkPlayer player)
         {
-            pendingAuthentication.Remove(connection);
-            base.OnClientAuthenticate(connection);
+            pendingAuthentication.Remove(player);
+            base.OnClientAuthenticate(player);
         }
 
-        private void HandleClientAuthenticated(INetworkConnection connection)
+        private void HandleClientAuthenticated(INetworkPlayer player)
         {
-            pendingAuthentication.Remove(connection);
-            base.OnServerAuthenticate(connection);
+            pendingAuthentication.Remove(player);
+            base.OnServerAuthenticate(player);
         }
 
-        public override void OnClientAuthenticate(INetworkConnection conn)
+        public override void OnClientAuthenticate(INetworkPlayer player)
         {
-            pendingAuthentication.Add(conn);
-            Authenticator.OnClientAuthenticate(conn);
-            
+            pendingAuthentication.Add(player);
+            Authenticator.OnClientAuthenticate(player);
+
             if (Timeout > 0)
-                StartCoroutine(BeginAuthentication(conn));
+                StartCoroutine(BeginAuthentication(player));
         }
 
-        public override void OnServerAuthenticate(INetworkConnection conn)
+        public override void OnServerAuthenticate(INetworkPlayer player)
         {
-            pendingAuthentication.Add(conn);
-            Authenticator.OnServerAuthenticate(conn);
+            pendingAuthentication.Add(player);
+            Authenticator.OnServerAuthenticate(player);
             if (Timeout > 0)
-                StartCoroutine(BeginAuthentication(conn));
+                StartCoroutine(BeginAuthentication(player));
         }
 
-        IEnumerator BeginAuthentication(INetworkConnection conn)
+        IEnumerator BeginAuthentication(INetworkPlayer player)
         {
-            if (logger.LogEnabled()) logger.Log($"Authentication countdown started {conn} {Timeout}");
+            if (logger.LogEnabled()) logger.Log($"Authentication countdown started {player} {Timeout}");
 
             yield return new WaitForSecondsRealtime(Timeout);
 
-            if (pendingAuthentication.Contains(conn))
+            if (pendingAuthentication.Contains(player))
             {
-                if (logger.LogEnabled()) logger.Log($"Authentication Timeout {conn}");
+                if (logger.LogEnabled()) logger.Log($"Authentication Timeout {player}");
 
-                pendingAuthentication.Remove(conn);
-                conn.Disconnect();
+                pendingAuthentication.Remove(player);
+                player.Connection?.Disconnect();
             }
         }
     }

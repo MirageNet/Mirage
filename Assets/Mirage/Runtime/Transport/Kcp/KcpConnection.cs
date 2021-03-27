@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Mirage.Logging;
 using UnityEngine;
 
 namespace Mirage.KCP
@@ -178,7 +179,7 @@ namespace Mirage.KCP
 
         protected abstract void RawSend(byte[] data, int length);
 
-        private void SendWithChecksum(byte [] data, int length)
+        private void SendWithChecksum(byte[] data, int length)
         {
             // add a CRC64 checksum in the reserved space
             ulong crc = Crc64.Compute(data, RESERVED, length - RESERVED);
@@ -192,14 +193,12 @@ namespace Mirage.KCP
             }
         }
 
-        public UniTask SendAsync(ArraySegment<byte> data, int channel = Channel.Reliable)
+        public void Send(ArraySegment<byte> data, int channel = Channel.Reliable)
         {
             if (channel == Channel.Reliable)
                 kcp.Send(data.Array, data.Offset, data.Count);
             else if (channel == Channel.Unreliable)
                 unreliable.Send(data.Array, data.Offset, data.Count);
-
-            return UniTask.CompletedTask;
         }
 
         /// <summary>
@@ -283,7 +282,7 @@ namespace Mirage.KCP
             {
                 try
                 {
-                    SendAsync(Goodby).Forget();
+                    Send(Goodby);
                     kcp.Flush();
                 }
                 catch (SocketException)

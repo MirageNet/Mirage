@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 using Guid = System.Guid;
 using Object = UnityEngine.Object;
 
-namespace Mirage.Tests.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer
 {
     public class ClientServerComponentTests : ClientServerSetup<MockComponent>
     {
@@ -20,7 +20,6 @@ namespace Mirage.Tests.ClientServer
             Assert.That(clientPlayerGO, Is.Not.Null);
         }
 
-
         [UnityTest]
         public IEnumerator ServerRpc() => UniTask.ToCoroutine(async () =>
         {
@@ -31,7 +30,6 @@ namespace Mirage.Tests.ClientServer
             Assert.That(serverComponent.cmdArg1, Is.EqualTo(1));
             Assert.That(serverComponent.cmdArg2, Is.EqualTo("hello"));
         });
-
 
         [UnityTest]
         public IEnumerator ServerRpcReturn() => UniTask.ToCoroutine(async () =>
@@ -70,7 +68,7 @@ namespace Mirage.Tests.ClientServer
             // process spawn message from server
             await AsyncUtil.WaitUntilWithTimeout(() => clientComponent.targetRpcArg1 != 0);
 
-            Assert.That(clientComponent.targetRpcConn, Is.SameAs(connectionToServer));
+            Assert.That(clientComponent.targetRpcPlayer, Is.EqualTo(connectionToServer));
             Assert.That(clientComponent.targetRpcArg1, Is.EqualTo(1));
             Assert.That(clientComponent.targetRpcArg2, Is.EqualTo("hello"));
         });

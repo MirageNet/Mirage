@@ -12,7 +12,7 @@ namespace Mirage.Weaver
         public const string SkeletonPrefix = "Skeleton_";
         public const string UserCodePrefix = "UserCode_";
 
-        protected readonly ModuleDefinition  module;
+        protected readonly ModuleDefinition module;
         protected readonly Readers readers;
         protected readonly Writers writers;
         protected readonly IWeaverLogger logger;
@@ -31,12 +31,12 @@ namespace Mirage.Weaver
         public bool HasNetworkConnectionParameter(MethodDefinition md)
         {
             return md.Parameters.Count > 0 &&
-                   md.Parameters[0].ParameterType.Is<INetworkConnection>();
+                   md.Parameters[0].ParameterType.Is<INetworkPlayer>();
         }
 
         public static bool IsNetworkConnection(TypeReference type)
         {
-            return type.Resolve().ImplementsInterface<INetworkConnection>();
+            return type.Resolve().ImplementsInterface<INetworkPlayer>();
         }
 
         public bool WriteArguments(ILProcessor worker, MethodDefinition method, VariableDefinition writer, RemoteCallType callType)
@@ -372,6 +372,15 @@ namespace Mirage.Weaver
                 calledMethod = null;
                 return false;
             }
+        }
+
+        protected void InvokeBody(ILProcessor worker, MethodDefinition rpc)
+        {
+            for (int i = 0; i <= rpc.Parameters.Count; i++)
+            {
+                worker.Append(worker.Create(OpCodes.Ldarg, i));
+            }
+            worker.Append(worker.Create(OpCodes.Call, rpc));
         }
 
     }

@@ -23,6 +23,31 @@ THE SOFTWARE.
 
 namespace Mirage
 {
+    /// <summary>
+    /// A sequence generator that can wrap.
+    /// For example a 2 bit sequencer would generate
+    /// the following numbers:
+    /// <code>
+    ///     0,1,2,3,0,1,2,3,0,1,2,3...
+    /// </code>
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// // create a 8 bit sequence generator
+    /// Sequencer sequencer = new Sequencer(8);
+    ///
+    /// ulong zero = sequencer.Next();
+    /// ulong one = sequencer.Next();
+    /// ...
+    /// ulong n = sequencer.Next();
+    /// 
+    /// // you can determine the distance between 2 sequences
+    /// // as long as they are withing 1/2 of the sequence space
+    ///
+    /// // this is equivalent to a - b adjusted for wrapping
+    /// int d = sequencer.Distance(a, b);
+    /// </code>
+    /// </example>
     public struct Sequencer
     {
         readonly int shift;
@@ -30,8 +55,16 @@ namespace Mirage
         readonly ulong mask;
         ulong sequence;
 
+        /// <summary>
+        /// Number of bits used for the sequence generator
+        /// up to 64
+        /// </summary>
         public int Bits => bits;
 
+        /// <summary>
+        /// Creates a sequencer
+        /// </summary>
+        /// <param name="bits">amount of bits for the sequence</param>
         public Sequencer(int bits)
         {
             // 1 byte
@@ -45,25 +78,41 @@ namespace Mirage
             shift = sizeof(ulong) * 8 - bits;
         }
 
+        /// <summary>
+        /// Generates the next value in the sequence
+        /// starts with 0
+        /// </summary>
+        /// <returns>0, 1, 2, ... 2^n-1, 0, 1, 2, ...</returns>
         public ulong Next()
         {
-            return sequence = NextAfter(sequence);
+            ulong current = sequence;
+            sequence = NextAfter(sequence);
+            return current;
         }
 
+        /// <summary>
+        /// Gets the next sequence value after a given sequence
+        /// wraps if necessary
+        /// </summary>
+        /// <param name="sequence">current sequence value</param>
+        /// <returns>the next sequence value</returns>
         public ulong NextAfter(ulong sequence)
         {
             return (sequence + 1UL) & mask;
         }
 
+        /// <summary>
+        /// Calculates the distance between 2 sequences, taking into account
+        /// wrapping
+        /// </summary>
+        /// <param name="from">current sequence value</param>
+        /// <param name="to">previous sequence value</param>
+        /// <returns>from - to, adjusted for wrapping</returns>
         public long Distance(ulong from, ulong to)
         {
             to <<= shift;
             from <<= shift;
             return ((long)(from - to)) >> shift;
         }
-
-        // 0 1 2 3 4 5 6 7 8 9 ... 255
-        // wraps around back to 0
-
     }
 }

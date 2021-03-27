@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Linq;
 
 namespace Mirage.Examples.Additive
 {
@@ -12,7 +13,7 @@ namespace Mirage.Examples.Additive
 
         NetworkAnimator networkAnimator;
 
-        [Server(error=false)]
+        [Server(error = false)]
         void Start()
         {
             networkAnimator = GetComponent<NetworkAnimator>();
@@ -23,7 +24,7 @@ namespace Mirage.Examples.Additive
 
         void Update()
         {
-            if (IsServer && NetIdentity.observers.Count > 0)
+            if (IsServer && NetIdentity.Observers.Any())
                 ShootNearestPlayer();
 
             if (IsClient)
@@ -36,7 +37,7 @@ namespace Mirage.Examples.Additive
             GameObject target = null;
             float distance = 100f;
 
-            foreach (INetworkConnection networkConnection in NetIdentity.observers)
+            foreach (INetworkPlayer networkConnection in NetIdentity.Observers)
             {
                 GameObject tempTarget = networkConnection.Identity.gameObject;
                 float tempDistance = Vector3.Distance(tempTarget.transform.position, transform.position);

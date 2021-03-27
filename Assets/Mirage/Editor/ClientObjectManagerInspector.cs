@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-
 namespace Mirage
 {
     [CustomEditor(typeof(ClientObjectManager), true)]
@@ -39,7 +38,7 @@ namespace Mirage
 
             string[] guids = AssetDatabase.FindAssets("t:GameObject", new[] { path });
 
-            for (int i = 0; i< guids.Length; i++)
+            for (int i = 0; i < guids.Length; i++)
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
 

@@ -2,7 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Mirage.Tests.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer
 {
     [TestFixture]
     public class NetworkManagerHudClientServerTest : ClientServerSetup<MockComponent>

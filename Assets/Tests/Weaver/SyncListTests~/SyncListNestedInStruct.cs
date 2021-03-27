@@ -1,4 +1,5 @@
 using Mirage;
+using Mirage.Collections;
 
 namespace SyncListTests.SyncListNestedInStruct
 {
@@ -11,7 +12,7 @@ namespace SyncListTests.SyncListNestedInStruct
         {
             public int usefulNumber;
 
-            public class SyncList : Mirage.SyncList<SomeData> { }
+            public class SyncList : Mirage.Collections.SyncList<SomeData> { }
         }
     }
 }

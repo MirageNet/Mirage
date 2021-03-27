@@ -1,3 +1,354 @@
+# [84.2.0](https://github.com/MirageNet/Mirage/compare/v84.1.1...v84.2.0) (2021-03-27)
+
+
+### Features
+
+* configurable wait time for tests ([#729](https://github.com/MirageNet/Mirage/issues/729)) ([b10f3e8](https://github.com/MirageNet/Mirage/commit/b10f3e8a6b2097e7550f74426b3051464b6b9d23))
+
+## [84.1.1](https://github.com/MirageNet/Mirage/compare/v84.1.0...v84.1.1) (2021-03-26)
+
+
+### Bug Fixes
+
+* make sure resolved typedef isn't null ([#731](https://github.com/MirageNet/Mirage/issues/731)) ([2f6414f](https://github.com/MirageNet/Mirage/commit/2f6414f7f676b250786c5caffaf83d8fa16daffb))
+
+# [84.1.0](https://github.com/MirageNet/Mirage/compare/v84.0.0...v84.1.0) (2021-03-25)
+
+
+### Features
+
+* sample for interest management ([#727](https://github.com/MirageNet/Mirage/issues/727)) ([0f4cdc5](https://github.com/MirageNet/Mirage/commit/0f4cdc50910e3ec63a3b93c12633b026039cd696))
+
+# [84.0.0](https://github.com/MirageNet/Mirage/compare/v83.0.0...v84.0.0) (2021-03-24)
+
+
+### Code Refactoring
+
+* using interface instead of network server ([#722](https://github.com/MirageNet/Mirage/issues/722)) ([7312bd8](https://github.com/MirageNet/Mirage/commit/7312bd8cd83f2133f9d0a6162dea9689630d88f2))
+
+
+### BREAKING CHANGES
+
+* fields and parameters using NetworkServer are now using INetworkServer Instead
+
+# [83.0.0](https://github.com/MirageNet/Mirage/compare/v82.0.0...v83.0.0) (2021-03-24)
+
+
+### Code Refactoring
+
+* using interface instead of network client ([#721](https://github.com/MirageNet/Mirage/issues/721)) ([703596a](https://github.com/MirageNet/Mirage/commit/703596aa4678eeef6e6e89b8877fceb8062e4476))
+
+
+### BREAKING CHANGES
+
+* fields and parameters using NetworkClient are now using INetworkClient Instead
+
+# [82.0.0](https://github.com/MirageNet/Mirage/compare/v81.0.2...v82.0.0) (2021-03-24)
+
+
+### Code Refactoring
+
+* changing indexer to try get ([#720](https://github.com/MirageNet/Mirage/issues/720)) ([01ca9bb](https://github.com/MirageNet/Mirage/commit/01ca9bb48ce14446052cd45d5c41a9a299a1efcf))
+* removing connection to server ([#703](https://github.com/MirageNet/Mirage/issues/703)) ([ff95634](https://github.com/MirageNet/Mirage/commit/ff95634c8c08be20574f8c73530926725944ecae))
+
+
+### BREAKING CHANGES
+
+* ObjectLocator now has TryGet method instead of indexer that returns null
+
+* updating uses of objectLocator
+
+* fixing names not being the same
+* Removed ConnectionToServer property
+
+* removing uses of ConnectionToServer
+
+* removing use in test
+
+* removing ClientRpc player target
+
+* creating null
+
+* changing tests to expect null
+
+* fixing docs
+
+* using client player for target rpc
+
+Co-authored-by: Paul Pacheco <paulpach@gmail.com>
+
+* fixing tests for rpc target
+
+Co-authored-by: Paul Pacheco <paulpach@gmail.com>
+
+## [81.0.2](https://github.com/MirageNet/Mirage/compare/v81.0.1...v81.0.2) (2021-03-22)
+
+
+### Bug Fixes
+
+* show syncvar label ([c32a940](https://github.com/MirageNet/Mirage/commit/c32a9403be7be30a5e56b0f4c71ddc05263a746a))
+
+## [81.0.1](https://github.com/MirageNet/Mirage/compare/v81.0.0...v81.0.1) (2021-03-20)
+
+
+### Performance Improvements
+
+* clientrpc in host mode bypasses network ([#714](https://github.com/MirageNet/Mirage/issues/714)) ([edb0705](https://github.com/MirageNet/Mirage/commit/edb0705e5038684e3c3565c38e3529578832fb1d))
+
+# [81.0.0](https://github.com/MirageNet/Mirage/compare/v80.0.1...v81.0.0) (2021-03-19)
+
+
+### Performance Improvements
+
+* serverrpc bypasses network on host mode ([#708](https://github.com/MirageNet/Mirage/issues/708)) ([695eb46](https://github.com/MirageNet/Mirage/commit/695eb4686fb5c0d6d1db3e3f3d8f7803226c009f))
+
+
+### BREAKING CHANGES
+
+* ServerRpc execute synchronous in host mode
+
+## [80.0.1](https://github.com/MirageNet/Mirage/compare/v80.0.0...v80.0.1) (2021-03-17)
+
+
+### Bug Fixes
+
+* compilation issue on standalone build ([d6bea93](https://github.com/MirageNet/Mirage/commit/d6bea93c6885185f546aaf6b6e7c29abbe420012))
+
+# [80.0.0](https://github.com/MirageNet/Mirage/compare/v79.0.0...v80.0.0) (2021-03-15)
+
+
+### Code Refactoring
+
+* rename connection to player ([#706](https://github.com/MirageNet/Mirage/issues/706)) ([03e8cfa](https://github.com/MirageNet/Mirage/commit/03e8cfab37184ebbf137ea3bddea217da6b45c95))
+
+
+### BREAKING CHANGES
+
+* Connection renamed to player
+
+# [79.0.0](https://github.com/MirageNet/Mirage/compare/v78.0.0...v79.0.0) (2021-03-15)
+
+
+### Code Refactoring
+
+* move serialization into Mirage.Serialization ([#700](https://github.com/MirageNet/Mirage/issues/700)) ([5dc037d](https://github.com/MirageNet/Mirage/commit/5dc037dbb6db48c1ad94d20a63aa5f953ade90c2))
+
+
+### BREAKING CHANGES
+
+* NetworkReader and NetworkWriter moved to Mirage.Serialization namespace
+
+# [78.0.0](https://github.com/MirageNet/Mirage/compare/v77.0.0...v78.0.0) (2021-03-14)
+
+
+### Code Refactoring
+
+* move collections to Mirage.Collections ([#698](https://github.com/MirageNet/Mirage/issues/698)) ([e22f765](https://github.com/MirageNet/Mirage/commit/e22f765c39b2d7b8c835357f530cc597664858db))
+
+
+### BREAKING CHANGES
+
+* collections moved to Mirage.Collections
+
+# [77.0.0](https://github.com/MirageNet/Mirage/compare/v76.0.0...v77.0.0) (2021-03-14)
+
+
+### Code Refactoring
+
+* move logging into a folder and namespace ([#697](https://github.com/MirageNet/Mirage/issues/697)) ([814653f](https://github.com/MirageNet/Mirage/commit/814653f06654f96c68f762dfcebd3e86cc8c92dc))
+
+
+### BREAKING CHANGES
+
+* Logging moved into a namespace, use Mirror.Logging
+
+# [76.0.0](https://github.com/MirageNet/Mirage/compare/v75.1.0...v76.0.0) (2021-03-13)
+
+
+### Code Refactoring
+
+* remove local visibility hacks ([#696](https://github.com/MirageNet/Mirage/issues/696)) ([df499ab](https://github.com/MirageNet/Mirage/commit/df499abb8b4e29f8b7067adedcab576eea564a29))
+
+
+### BREAKING CHANGES
+
+* NetworkVisibility no longer disables renderers in host mode
+
+# [75.1.0](https://github.com/MirageNet/Mirage/compare/v75.0.0...v75.1.0) (2021-03-13)
+
+
+### Features
+
+* 0 is not lossy when compressing quaternions ([#695](https://github.com/MirageNet/Mirage/issues/695)) ([c1552c0](https://github.com/MirageNet/Mirage/commit/c1552c0daed8209a7af1a2b3194ff21df5488484))
+
+# [75.0.0](https://github.com/MirageNet/Mirage/compare/v74.0.0...v75.0.0) (2021-03-13)
+
+
+### Bug Fixes
+
+* adding ISceneLoader to INetworkPlayer ([e8ab7a4](https://github.com/MirageNet/Mirage/commit/e8ab7a41b9f29007c7bab8132b34d715e0a8b5d2))
+* compression of 90 degrees angle ([#689](https://github.com/MirageNet/Mirage/issues/689)) ([2c0bac6](https://github.com/MirageNet/Mirage/commit/2c0bac6e2e4fab7d055be7ec095eb2297ec457e2))
+* fixing uses of message ([f2a5522](https://github.com/MirageNet/Mirage/commit/f2a55222ab7ec9916aa1ba77f8a6c93d27632d23))
+
+
+### Code Refactoring
+
+* moving static send to NetworkServer ([#692](https://github.com/MirageNet/Mirage/issues/692)) ([5b19dc3](https://github.com/MirageNet/Mirage/commit/5b19dc3214e034c331dd9906f53195eb968d1165))
+* removing address property from player ([#691](https://github.com/MirageNet/Mirage/issues/691)) ([d772e53](https://github.com/MirageNet/Mirage/commit/d772e53d9d5f65eb4053782a066b1fcfab9fe8d6))
+* removing disconnect method from player ([#688](https://github.com/MirageNet/Mirage/issues/688)) ([e1daf92](https://github.com/MirageNet/Mirage/commit/e1daf92934b0de03ceada857a969b6aed717752c))
+* rename PlayerSpawner to CharacterSpawner ([#686](https://github.com/MirageNet/Mirage/issues/686)) ([1db3498](https://github.com/MirageNet/Mirage/commit/1db3498120d18d8270e149b6af9df52fd3d92e90))
+* renaming NetworkConnection to NetworkPlayer ([#684](https://github.com/MirageNet/Mirage/issues/684)) ([3ecb659](https://github.com/MirageNet/Mirage/commit/3ecb6593ea05928df40e66f3a33b3b3ccb4a5283))
+
+
+### Features
+
+* adding Connection property to NetworkPlayer ([#687](https://github.com/MirageNet/Mirage/issues/687)) ([5e1c4ba](https://github.com/MirageNet/Mirage/commit/5e1c4bad4c800b96d3ecc75cbde5c0c1e0f22da9))
+* adding logger.Assert that doesn't require a message ([8c213e3](https://github.com/MirageNet/Mirage/commit/8c213e30532feee8a4e8f0ec32c58e26cd8f7afb))
+
+
+### BREAKING CHANGES
+
+* moving NetworkPlayer.Send to NetworkServer.SendToMany
+* Address replaced with Connection.GetEndPointAddress
+
+* updating uses of Address
+* Disconnect replaced with Connection.Disconnect
+
+* fixing uses in Mirage
+
+* updating uses in authenticators
+* Renamed PlayerSpawner to CharacterSpawner
+* renaming NetworkConnection to NetworkPlayer
+
+* renaming types in weaver tests
+
+* fixing test message
+
+* fixing xref in docs
+
+# [74.0.0](https://github.com/MirageNet/Mirage/compare/v73.0.0...v74.0.0) (2021-03-08)
+
+
+### Bug Fixes
+
+* invoking started event when Listening is false ([#675](https://github.com/MirageNet/Mirage/issues/675)) ([afef2d4](https://github.com/MirageNet/Mirage/commit/afef2d4a552a348d3bf91703c188bab6c8967b1e))
+
+
+### Code Refactoring
+
+* **transports:** removing sendAsync from transports ([#673](https://github.com/MirageNet/Mirage/issues/673)) ([42b165f](https://github.com/MirageNet/Mirage/commit/42b165ff0b267c67c93407db5c5a36c647301126))
+* removing sendasync from networkconnection ([#672](https://github.com/MirageNet/Mirage/issues/672)) ([e79b00e](https://github.com/MirageNet/Mirage/commit/e79b00eefd77ac8982cf23acf872dbcd3e4e9b31))
+
+
+### BREAKING CHANGES
+
+* **transports:** Removed SendAsync from transport,  use Send instead
+* Removed SendAsync from NetworkConnection.  Use Send instead
+
+# [73.0.0](https://github.com/MirageNet/Mirage/compare/v72.0.1...v73.0.0) (2021-03-06)
+
+
+### Code Refactoring
+
+* replacing version enum with assembly version ([#663](https://github.com/MirageNet/Mirage/issues/663)) ([d8facb7](https://github.com/MirageNet/Mirage/commit/d8facb7c4cf06033935f7e7386a25cb3ec855737))
+
+
+### BREAKING CHANGES
+
+* Version.Current is no longer an enum and now returns Mirage's assembly version
+
+## [72.0.1](https://github.com/MirageNet/Mirage/compare/v72.0.0...v72.0.1) (2021-03-06)
+
+
+### Bug Fixes
+
+* disabling welcome window before unity 2020.1 ([#662](https://github.com/MirageNet/Mirage/issues/662)) ([a527af4](https://github.com/MirageNet/Mirage/commit/a527af4455c366d5b0ad5826c557dd52f1f3728f))
+
+# [72.0.0](https://github.com/MirageNet/Mirage/compare/v71.0.0...v72.0.0) (2021-03-05)
+
+
+### Code Refactoring
+
+* removing un-used INetworkManager interface ([#661](https://github.com/MirageNet/Mirage/issues/661)) ([347bf6c](https://github.com/MirageNet/Mirage/commit/347bf6c0aaa3e69a4b9027defda0e999541f8a7c))
+
+
+### BREAKING CHANGES
+
+* removing INetworkManager
+
+# [71.0.0](https://github.com/MirageNet/Mirage/compare/v70.0.0...v71.0.0) (2021-03-05)
+
+
+### Styles
+
+* renaming NetworkScenePath to ActiveScenePath ([#647](https://github.com/MirageNet/Mirage/issues/647)) ([7a26360](https://github.com/MirageNet/Mirage/commit/7a26360b9d11e7d76ef73628f593503d0d785380))
+
+
+### BREAKING CHANGES
+
+* Use NetworkSceneManager.ActiveScenePath instead of NetworkSceneManager.NetworkScenePath
+
+* removing cref till docs are fixed
+
+# [70.0.0](https://github.com/MirageNet/Mirage/compare/v69.1.2...v70.0.0) (2021-03-04)
+
+
+### Code Refactoring
+
+* spawnobjects throws exception instead of returning false ([#639](https://github.com/MirageNet/Mirage/issues/639)) ([4cb8afb](https://github.com/MirageNet/Mirage/commit/4cb8afb6e33be80b1c2e5fa3db57a246be203b74))
+
+
+### BREAKING CHANGES
+
+* SpawnObjects throws Exception instead of returning false
+
+## [69.1.2](https://github.com/MirageNet/Mirage/compare/v69.1.1...v69.1.2) (2021-03-03)
+
+
+### Bug Fixes
+
+* **weaver:** adding missing errors when Attributes are used in monobehaviour ([64b580b](https://github.com/MirageNet/Mirage/commit/64b580bb15048e60ba96de843ba47ffdc1a9fd0b))
+
+## [69.1.1](https://github.com/MirageNet/Mirage/compare/v69.1.0...v69.1.1) (2021-03-02)
+
+
+### Bug Fixes
+
+* multi scene example nre and event errors ([#649](https://github.com/MirageNet/Mirage/issues/649)) ([8c4c352](https://github.com/MirageNet/Mirage/commit/8c4c352bd226e12324f851218d6a9d56be894662))
+
+# [69.1.0](https://github.com/MirageNet/Mirage/compare/v69.0.0...v69.1.0) (2021-03-02)
+
+
+### Features
+
+* adding assert extension method to logger ([#642](https://github.com/MirageNet/Mirage/issues/642)) ([1df6081](https://github.com/MirageNet/Mirage/commit/1df6081e5d1244a1f780b9945f5bd3c0a10387f0))
+
+# [69.0.0](https://github.com/MirageNet/Mirage/compare/v68.0.3...v69.0.0) (2021-03-02)
+
+
+### Styles
+
+* renaming NumPlayers to NumberOfPlayers ([#646](https://github.com/MirageNet/Mirage/issues/646)) ([27b99be](https://github.com/MirageNet/Mirage/commit/27b99be272ef4f6df73717d877385981e7565259))
+
+
+### BREAKING CHANGES
+
+* Use NetworkServer.NumberOfPlayers instead of NetworkServer.NumPlayers
+
+## [68.0.3](https://github.com/MirageNet/Mirage/compare/v68.0.2...v68.0.3) (2021-02-25)
+
+
+### Bug Fixes
+
+* welcome window layout ([#634](https://github.com/MirageNet/Mirage/issues/634)) ([2bceedb](https://github.com/MirageNet/Mirage/commit/2bceedb0baa0dd5d5767e440deea74077469fd11))
+
+## [68.0.2](https://github.com/MirageNet/Mirage/compare/v68.0.1...v68.0.2) (2021-02-24)
+
+
+### Bug Fixes
+
+* mirage icon missing in welcome window ([#637](https://github.com/MirageNet/Mirage/issues/637)) ([6c4dc9e](https://github.com/MirageNet/Mirage/commit/6c4dc9ee9639503631da43f74f92f0394fadab29))
+
 ## [68.0.1](https://github.com/MirageNet/Mirage/compare/v68.0.0...v68.0.1) (2021-02-23)
 
 

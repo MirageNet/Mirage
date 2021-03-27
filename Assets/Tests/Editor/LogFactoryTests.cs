@@ -1,3 +1,4 @@
+using Mirage.Logging;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Mirage.Collections;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -35,7 +36,13 @@ namespace Mirage.Weaver
                     continue;
                 }
 
-                if (fd.FieldType.Resolve().ImplementsInterface<ISyncObject>())
+                TypeDefinition tf = fd.FieldType.Resolve();
+                if (tf == null)
+                {
+                    continue;
+                }
+
+                if (tf.ImplementsInterface<ISyncObject>())
                 {
                     if (fd.IsStatic)
                     {

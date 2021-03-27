@@ -1,6 +1,6 @@
 [![Documentation](https://img.shields.io/badge/documentation-brightgreen.svg)](https://miragenet.github.io/Mirage/)
 [![Forum](https://img.shields.io/badge/forum-brightgreen.svg)](https://forum.unity.com/threads/mirror-networking-for-unity-aka-hlapi-community-edition.425437/)
-[![Discord](https://img.shields.io/discord/343440455738064897.svg)](https://discordapp.com/invite/DTBPBYvexy)
+[![Discord](https://img.shields.io/discord/809535064551456888.svg)](https://discordapp.com/invite/DTBPBYvexy)
 [![release](https://img.shields.io/github/release/MirageNet/Mirage.svg)](https://github.com/MirageNet/Mirage/releases/latest)
 [![openupm](https://img.shields.io/npm/v/com.miragenet.mirage?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.miragenet.mirage/)
 
@@ -26,7 +26,13 @@ To install Mirage, follow these steps:
 
 1) Install [Unity 2020.1.17 or later](https://unity.com/)
 2) Start a new project or open your existing one
-3) Add openupm registry.  Click on the menu Edit -> Project settings...,  and add a scoped registry like so:
+3) Add openupm registry.  Click on the menu Edit -> Project settings...,  and add a scoped registry like so: <br/>
+    Name: `OpenUPM` <br/>
+    Url: https://package.openupm.com <br/>
+    Scopes:
+    - `com.cysharp.unitask`
+    - `com.openupm`
+    - `com.miragenet`
    ![Scoped Registry](doc/images/Scoped%20Registry.png)
 4) Close the project settings
 5) Open the package manager.  Click on menu Window -> Package Manager and select "Packages: My Registries", select the latest version of Mirage and click install, like so:
@@ -106,19 +112,9 @@ Here is a list of some transports supported by NG and how they compare to each o
 
 ## Contributing
 
-There are several ways to contribute to this project:
 
-* Pull requests for bug fixes and features are always appreciated.
-* Pull requests to improve the documentation is also welcome
-* Make tutorials on how to use this
-* Test it and open issues
-* Review existing pull requests
-* Donations
-
-When contributing code, please keep these things in mind:
-
-* [KISS](https://en.wikipedia.org/wiki/KISS_principle) principle. Everything needs to be **as simple as possible**. 
-* An API is like a joke,  if you have to explain it is not a good one.  Do not require people to read the documentation if you can avoid it.
-* Follow [C# code conventions](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions).
-* Follow [SOLID principles](https://en.wikipedia.org/wiki/SOLID) as much as possible. 
-* Keep your pull requests small and obvious,  if a PR can be split into several small ones, do so.
+1. Fork it!
+2. Create your feature branch: `git checkout -b my-new-feature`
+3. Commit your changes: `git commit -am 'Add some feature'`
+4. Push to the branch: `git push origin my-new-feature`
+5. Submit a pull request :smiley:

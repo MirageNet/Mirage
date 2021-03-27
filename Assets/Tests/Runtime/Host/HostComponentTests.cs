@@ -1,36 +1,14 @@
-using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Host
+namespace Mirage.Tests.Runtime.Host
 {
     public class HostComponentTests : HostSetup<MockComponent>
     {
-        [Test]
-        public void ServerRpcWithoutAuthority()
-        {
-            var gameObject2 = new GameObject("rpcObject", typeof(NetworkIdentity), typeof(MockComponent));
-            MockComponent rpcComponent2 = gameObject2.GetComponent<MockComponent>();
-
-            // spawn it without client authority
-            serverObjectManager.Spawn(gameObject2);
-
-            // process spawn message from server
-            client.Update();
-
-            // only authorized clients can call ServerRpc
-            Assert.Throws<UnauthorizedAccessException>(() =>
-           {
-               rpcComponent2.Test(1, "hello");
-           });
-
-        }
-
         [UnityTest]
         public IEnumerator ServerRpc() => UniTask.ToCoroutine(async () =>
         {
@@ -66,11 +44,11 @@ namespace Mirage.Tests.Host
         [UnityTest]
         public IEnumerator ClientConnRpc() => UniTask.ToCoroutine(async () =>
         {
-            component.ClientConnRpcTest(manager.Server.LocalConnection, 1, "hello");
+            component.ClientConnRpcTest(manager.Server.LocalPlayer, 1, "hello");
             // process spawn message from server
             await AsyncUtil.WaitUntilWithTimeout(() => component.targetRpcArg1 != 0);
 
-            Assert.That(component.targetRpcConn, Is.SameAs(manager.Client.Connection));
+            Assert.That(component.targetRpcPlayer, Is.EqualTo(manager.Client.Player));
             Assert.That(component.targetRpcArg1, Is.EqualTo(1));
             Assert.That(component.targetRpcArg2, Is.EqualTo("hello"));
         });
@@ -91,7 +69,7 @@ namespace Mirage.Tests.Host
         {
             // set local connection
             Assert.That(server.LocalClientActive, Is.True);
-            Assert.That(server.connections, Has.Count.EqualTo(1));
+            Assert.That(server.Players, Has.Count.EqualTo(1));
 
             server.Disconnect();
 
@@ -99,9 +77,9 @@ namespace Mirage.Tests.Host
             await AsyncUtil.WaitUntilWithTimeout(() => !server.LocalClientActive);
 
             // state cleared?
-            Assert.That(server.connections, Is.Empty);
+            Assert.That(server.Players, Is.Empty);
             Assert.That(server.Active, Is.False);
-            Assert.That(server.LocalConnection, Is.Null);
+            Assert.That(server.LocalPlayer, Is.Null);
             Assert.That(server.LocalClientActive, Is.False);
         });
 
@@ -113,7 +91,7 @@ namespace Mirage.Tests.Host
             // wait for server to disconnect
             await UniTask.WaitUntil(() => !server.Active);
 
-            var mockListener = Substitute.For<UnityAction<string, SceneOperation>>();
+            UnityAction<string, SceneOperation> mockListener = Substitute.For<UnityAction<string, SceneOperation>>();
             sceneManager.ClientChangeScene.AddListener(mockListener);
             await StartHost();
 

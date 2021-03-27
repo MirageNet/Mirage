@@ -4,13 +4,15 @@
             "src": [
                 {
                     "files": [
-                        "doc.csproj"
-                    ]
+                        "Mirage.csproj",
+                        "Mirage.Authenticators.csproj",
+                        "Mirage.Components.csproj"
+                    ],
+                    "src": "../"
                 }
             ],
             "dest": "api",
-            "disableDefaultFilter": false,
-            "filter": "filterConfig.yml"
+            "disableDefaultFilter": false
         }
     ],
     "build": {
@@ -62,10 +64,13 @@
         "fileMetadataFiles": [],
         "template": [
             "default",
-            "templates"
+            "templates/unity"
         ],
         "xrefService": [
             "https://xref.docs.microsoft.com/query?uid={uid}"
+        ],
+        "xref": [
+            "https://normanderwan.github.io/UnityXrefMaps/xrefmap.yml"
         ],
         "postProcessors": [],
         "markdownEngineName": "markdig",

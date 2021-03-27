@@ -1,14 +1,15 @@
 using System;
-using System.Collections.Generic;
+using Mirage.InterestManagement;
+using Mirage.Logging;
 using UnityEngine;
 
 namespace Mirage.Components.InterestManagement
 {
-    public class OctreeInterestChecker : NetworkVisibility
+    public class OctreeInterestChecker : NetworkBehaviour
     {
         #region Fields
 
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkProximityChecker));
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(OctreeInterestChecker));
 
         /// <summary>
         ///     The real player visibility range to process incoming or outgoing data
@@ -23,8 +24,7 @@ namespace Mirage.Components.InterestManagement
         public NetworkInterestManager InterestManager;
 
         private Vector3 _colliderSize;
-        private Bounds _currentBounds;
-        private readonly List<NetworkIdentity> _tempList = new List<NetworkIdentity>();
+        protected internal Bounds CurrentBounds;
         private Vector3 _currentPosition;
         private Transform _currentTransform;
 
@@ -54,15 +54,13 @@ namespace Mirage.Components.InterestManagement
 
         private void Update()
         {
-            if (!Server || NetIdentity is null || Vector3.Distance(_currentPosition, _currentTransform.position) < 0.1f) return;
+            if (!IsServer || NetIdentity is null || Vector3.Distance(_currentPosition, _currentTransform.position) < 0.1f) return;
 
             InterestManager.Octree.Remove(NetIdentity);
 
-            _currentBounds = new Bounds(_currentTransform.position, _colliderSize * CurrentPlayerVisibilityRange);
+            CurrentBounds = new Bounds(_currentTransform.position, _colliderSize * CurrentPlayerVisibilityRange);
 
-            InterestManager.Octree.Add(NetIdentity, _currentBounds);
-
-            NetIdentity.RebuildObservers(false);
+            InterestManager.Octree.Add(NetIdentity, CurrentBounds);
 
             _currentPosition = _currentTransform.position;
         }
@@ -98,31 +96,6 @@ namespace Mirage.Components.InterestManagement
             }
 
             CurrentPlayerVisibilityRange = visibilityRange;
-        }
-
-        #endregion
-
-        #region Mirage Overrides
-
-        public override bool OnCheckObserver(INetworkConnection conn)
-        {
-            conn.Identity.TryGetComponent(out Collider colliderComponent);
-
-            var bounds = new Bounds(colliderComponent.bounds.center,
-                colliderComponent.bounds.size * CurrentPlayerVisibilityRange);
-
-            return InterestManager.Octree.IsColliding(bounds);
-        }
-
-        public override void OnRebuildObservers(HashSet<INetworkConnection> observers, bool initialize)
-        {
-            foreach (INetworkConnection conn in Server.connections)
-            {
-                if (InterestManager.Octree.IsColliding(_currentBounds, conn.Identity))
-                {
-                    observers.Add(conn);
-                }
-            }
         }
 
         #endregion

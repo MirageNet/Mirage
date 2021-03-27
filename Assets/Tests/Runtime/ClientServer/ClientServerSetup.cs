@@ -2,12 +2,13 @@ using System;
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.InterestManagement;
 using UnityEngine;
 using UnityEngine.TestTools;
 
 using Object = UnityEngine.Object;
 
-namespace Mirage.Tests.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer
 {
     // set's up a client and a server
     public class ClientServerSetup<T> where T : NetworkBehaviour
@@ -18,6 +19,7 @@ namespace Mirage.Tests.ClientServer
         protected NetworkServer server;
         protected NetworkSceneManager serverSceneManager;
         protected ServerObjectManager serverObjectManager;
+        protected InterestManager interestManager;
         protected GameObject serverPlayerGO;
         protected NetworkIdentity serverIdentity;
         protected T serverComponent;
@@ -33,15 +35,15 @@ namespace Mirage.Tests.ClientServer
         protected GameObject playerPrefab;
 
         protected Transport testTransport;
-        protected INetworkConnection connectionToServer;
-        protected INetworkConnection connectionToClient;
+        protected INetworkPlayer connectionToServer;
+        protected INetworkPlayer connectionToClient;
 
         public virtual void ExtraSetup() { }
 
         [UnitySetUp]
         public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
         {
-            serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(NetworkServer));
+            serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(NetworkServer), typeof(GlobalInterestManager));
             clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(ClientObjectManager), typeof(NetworkClient));
             testTransport = serverGo.AddComponent<LoopbackTransport>();
 
@@ -70,6 +72,9 @@ namespace Mirage.Tests.ClientServer
             clientObjectManager.NetworkSceneManager = clientSceneManager;
             clientObjectManager.Start();
 
+            interestManager = serverGo.GetComponent<InterestManager>();
+            interestManager.Start();
+
             ExtraSetup();
 
             // create and register a prefab
@@ -91,17 +96,17 @@ namespace Mirage.Tests.ClientServer
             // now start the client
             await client.ConnectAsync("localhost");
 
-            await AsyncUtil.WaitUntilWithTimeout(() => server.connections.Count > 0);
+            await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > 0);
 
             // get the connections so that we can spawn players
-            connectionToClient = server.connections.First();
-            connectionToServer = client.Connection;
+            connectionToClient = server.Players.First();
+            connectionToServer = client.Player;
 
             // create a player object in the server
             serverPlayerGO = Object.Instantiate(playerPrefab);
             serverIdentity = serverPlayerGO.GetComponent<NetworkIdentity>();
             serverComponent = serverPlayerGO.GetComponent<T>();
-            serverObjectManager.AddPlayerForConnection(connectionToClient, serverPlayerGO);
+            serverObjectManager.AddCharacter(connectionToClient, serverPlayerGO);
 
             // wait for client to spawn it
             await AsyncUtil.WaitUntilWithTimeout(() => connectionToServer.Identity != null);

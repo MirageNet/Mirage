@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Mirage.Serialization;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     [TestFixture]
     public class NetworkWriterTest

@@ -28,8 +28,7 @@ namespace Mirage.Tests.Performance
         {
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
-            identity.ConnectionToClient = Substitute.For<INetworkConnection>();
-            identity.observers.Add(identity.ConnectionToClient);
+            identity.ConnectionToClient = Substitute.For<INetworkPlayer>();
             health = gameObject.AddComponent<Health>();
             health.syncMode = SyncMode.Owner;
             health.syncInterval = 0f;

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Mirage.Logging;
+using Mirage.Serialization;
 using UnityEngine;
 
 namespace Mirage.RemoteCalls
@@ -10,29 +12,38 @@ namespace Mirage.RemoteCalls
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="reader"></param>
-    public delegate void CmdDelegate(NetworkBehaviour obj, NetworkReader reader, INetworkConnection senderConnection, int replyId);
-    public delegate UniTask<T> RequestDelegate<T>(NetworkBehaviour obj, NetworkReader reader, INetworkConnection senderConnection, int replyId);
+    public delegate void CmdDelegate(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId);
+    public delegate UniTask<T> RequestDelegate<T>(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId);
 
+    // invoke type for Rpc
+    public enum RpcInvokeType
+    {
+        ServerRpc,
+        ClientRpc
+    }
+
+    /// <summary>
+    /// Stub Skeleton for RPC
+    /// </summary>
     class Skeleton
     {
         public Type invokeClass;
-        public MirageInvokeType invokeType;
+        public RpcInvokeType invokeType;
         public CmdDelegate invokeFunction;
         public bool cmdRequireAuthority;
 
-        public bool AreEqual(Type invokeClass, MirageInvokeType invokeType, CmdDelegate invokeFunction)
+        public bool AreEqual(Type invokeClass, RpcInvokeType invokeType, CmdDelegate invokeFunction)
         {
             return this.invokeClass == invokeClass &&
                     this.invokeType == invokeType &&
                     this.invokeFunction == invokeFunction;
         }
 
-        // InvokeCmd/Rpc can all use the same function here
-        internal void Invoke(NetworkReader reader, NetworkBehaviour invokingType, INetworkConnection senderConnection = null, int replyId=0)
+        internal void Invoke(NetworkReader reader, NetworkBehaviour invokingType, INetworkPlayer senderPlayer = null, int replyId = 0)
         {
             if (invokeClass.IsInstanceOfType(invokingType))
             {
-                invokeFunction(invokingType, reader, senderConnection, replyId);
+                invokeFunction(invokingType, reader, senderPlayer, replyId);
                 return;
             }
             throw new MethodInvocationException($"Invalid Rpc call {invokeFunction} for component {invokingType}");
@@ -74,7 +85,7 @@ namespace Mirage.RemoteCalls
         /// <param name="func"></param>
         /// <param name="cmdRequireAuthority"></param>
         /// <returns>remote function hash</returns>
-        public static int RegisterDelegate(Type invokeClass, string cmdName, MirageInvokeType invokerType, CmdDelegate func, bool cmdRequireAuthority = true)
+        public static int RegisterDelegate(Type invokeClass, string cmdName, RpcInvokeType invokerType, CmdDelegate func, bool cmdRequireAuthority = true)
         {
             // type+func so Inventory.RpcUse != Equipment.RpcUse
             int cmdHash = GetMethodHash(invokeClass, cmdName);
@@ -94,8 +105,8 @@ namespace Mirage.RemoteCalls
 
             if (logger.LogEnabled())
             {
-                string requireAuthorityMessage = invokerType == MirageInvokeType.ServerRpc ? $" RequireAuthority:{cmdRequireAuthority}" : "";
-                logger.Log($"RegisterDelegate hash: {cmdHash} invokerType: {invokerType} method: {func.GetMethodName()}{requireAuthorityMessage}");
+                string requireAuthorityMessage = invokerType == RpcInvokeType.ServerRpc ? $" RequireAuthority:{cmdRequireAuthority}" : "";
+                logger.Log($"RegisterDelegate hash: {cmdHash} invokerType: {invokerType} method: {func.Method.Name}{requireAuthorityMessage}");
             }
 
             return cmdHash;
@@ -103,10 +114,10 @@ namespace Mirage.RemoteCalls
 
         public static void RegisterRequestDelegate<T>(Type invokeClass, string cmdName, RequestDelegate<T> func, bool cmdRequireAuthority = true)
         {
-            async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkConnection senderConnection, int replyId)
+            async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
             {
                 /// invoke the serverRpc and send a reply message
-                T result = await func(obj, reader, senderConnection, replyId);
+                T result = await func(obj, reader, senderPlayer, replyId);
 
                 using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
                 {
@@ -117,19 +128,19 @@ namespace Mirage.RemoteCalls
                         payload = writer.ToArraySegment()
                     };
 
-                    senderConnection.Send(serverRpcReply);
+                    senderPlayer.Send(serverRpcReply);
                 }
             }
 
-            void CmdWrapper(NetworkBehaviour obj, NetworkReader reader, INetworkConnection senderConnection, int replyId)
+            void CmdWrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
             {
-                Wrapper(obj, reader, senderConnection, replyId).Forget();
+                Wrapper(obj, reader, senderPlayer, replyId).Forget();
             }
 
-            RegisterDelegate(invokeClass, cmdName, MirageInvokeType.ServerRpc, CmdWrapper, cmdRequireAuthority);
+            RegisterDelegate(invokeClass, cmdName, RpcInvokeType.ServerRpc, CmdWrapper, cmdRequireAuthority);
         }
 
-        static bool CheckIfDelegateExists(Type invokeClass, MirageInvokeType invokerType, CmdDelegate func, int cmdHash)
+        static bool CheckIfDelegateExists(Type invokeClass, RpcInvokeType invokerType, CmdDelegate func, int cmdHash)
         {
             if (cmdHandlerDelegates.ContainsKey(cmdHash))
             {
@@ -141,7 +152,7 @@ namespace Mirage.RemoteCalls
                     return true;
                 }
 
-                logger.LogError($"Function {oldInvoker.invokeClass}.{oldInvoker.invokeFunction.GetMethodName()} and {invokeClass}.{func.GetMethodName()} have the same hash.  Please rename one of them");
+                logger.LogError($"Function {oldInvoker.invokeClass}.{oldInvoker.invokeFunction.Method.Name} and {invokeClass}.{func.Method.Name} have the same hash.  Please rename one of them");
             }
 
             return false;
@@ -149,12 +160,12 @@ namespace Mirage.RemoteCalls
 
         public static void RegisterServerRpcDelegate(Type invokeClass, string cmdName, CmdDelegate func, bool requireAuthority)
         {
-            RegisterDelegate(invokeClass, cmdName, MirageInvokeType.ServerRpc, func, requireAuthority);
+            RegisterDelegate(invokeClass, cmdName, RpcInvokeType.ServerRpc, func, requireAuthority);
         }
 
         public static void RegisterRpcDelegate(Type invokeClass, string rpcName, CmdDelegate func)
         {
-            RegisterDelegate(invokeClass, rpcName, MirageInvokeType.ClientRpc, func);
+            RegisterDelegate(invokeClass, rpcName, RpcInvokeType.ClientRpc, func);
         }
 
         /// <summary>

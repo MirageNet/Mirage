@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Host
+namespace Mirage.Tests.Runtime.Host
 {
     [TestFixture]
     public class LobbyReadyTest : HostSetup<MockComponent>
@@ -43,7 +43,7 @@ namespace Mirage.Tests.Host
             readyComp.IsReady = true;
 
             bool invokeWovenTestMessage = false;
-            client.Connection.RegisterHandler<SceneMessage>(msg => invokeWovenTestMessage = true);
+            client.Player.RegisterHandler<SceneMessage>(msg => invokeWovenTestMessage = true);
             lobby.SendToReady(identity, new SceneMessage(), true, Channel.Reliable);
 
             await AsyncUtil.WaitUntilWithTimeout(() => invokeWovenTestMessage);
@@ -84,7 +84,7 @@ namespace Mirage.Tests.Host
             readyPlayer.AddComponent<NetworkIdentity>();
             readyComp = readyPlayer.AddComponent<ObjectReady>();
 
-            serverObjectManager.Spawn(readyPlayer, server.LocalConnection);
+            serverObjectManager.Spawn(readyPlayer, server.LocalPlayer);
             readyComp.Ready();
 
             await AsyncUtil.WaitUntilWithTimeout(() => readyComp.IsReady);

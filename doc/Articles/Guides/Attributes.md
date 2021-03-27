@@ -28,4 +28,4 @@ These attributes can be used for Unity game loop methods like Start or Update, a
     -   NetworkIdentity
 
 -   **SyncVar**  
-    [SyncVars](Sync/SyncVars.md) are used to synchronize a variable from the server to all clients automatically. Don't assign them from a client, it's pointless. Don't let them be null, you will get errors. You can use int, long, float, string, Vector3 etc. (all simple types) and NetworkIdentity. You can use [hooks](Sync/SyncVarHook.md).
+    [SyncVars](Sync/SyncVars.md) are used to synchronize a variable from the server to all clients automatically.

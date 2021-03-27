@@ -1,9 +1,10 @@
+using Mirage.Collections;
 using NUnit.Framework;
 using UnityEngine;
 
 using static Mirage.Tests.LocalConnections;
 
-namespace Mirage.Tests.Host
+namespace Mirage.Tests.Runtime.Host
 {
     public class SampleBehavior : NetworkBehaviour
     {
@@ -103,13 +104,6 @@ namespace Mirage.Tests.Host
         {
             SampleBehavior behaviour1 = playerGO.AddComponent<SampleBehavior>();
             Assert.That(behaviour1.NetworkTime, Is.EqualTo(client.Time));
-        }
-
-        [Test]
-        public void HasIdentitysConnectionToServer()
-        {
-            (identity.ConnectionToServer, _) = PipedConnections();
-            Assert.That(component.ConnectionToServer, Is.EqualTo(identity.ConnectionToServer));
         }
 
         [Test]

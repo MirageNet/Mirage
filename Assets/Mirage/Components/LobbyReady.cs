@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Mirage.Logging;
 using UnityEngine;
 
 namespace Mirage
@@ -11,11 +12,11 @@ namespace Mirage
 
         // just a cached memory area where we can collect connections
         // for broadcasting messages
-        private static readonly List<INetworkConnection> connectionsCache = new List<INetworkConnection>();
+        private static readonly List<INetworkPlayer> playerCache = new List<INetworkPlayer>();
 
         public void SetAllClientsNotReady()
         {
-            foreach(ObjectReady obj in ObjectReadyList)
+            foreach (ObjectReady obj in ObjectReadyList)
             {
                 obj.SetClientNotReady();
             }
@@ -25,18 +26,18 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("Server.SendToReady msgType:" + typeof(T));
 
-            connectionsCache.Clear();
+            playerCache.Clear();
 
             foreach (ObjectReady objectReady in ObjectReadyList)
             {
                 bool isOwner = objectReady.NetIdentity == identity;
                 if ((!isOwner || includeOwner) && objectReady.IsReady)
                 {
-                    connectionsCache.Add(objectReady.NetIdentity.ConnectionToClient);
+                    playerCache.Add(objectReady.NetIdentity.ConnectionToClient);
                 }
             }
 
-            NetworkConnection.Send(connectionsCache, msg, channelId);
+            NetworkServer.SendToMany(playerCache, msg, channelId);
         }
     }
 }

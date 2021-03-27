@@ -1,4 +1,6 @@
 using System.Linq;
+using Mirage.Logging;
+using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -171,7 +173,7 @@ namespace Mirage
             {
                 RpcOnAnimationClientMessage(stateHash, normalizedTime, layerId, weight, parameters);
             }
-            else if (Client.Connection != null)
+            else if (Client.Player != null)
             {
                 CmdOnAnimationServerMessage(stateHash, normalizedTime, layerId, weight, parameters);
             }
@@ -183,7 +185,7 @@ namespace Mirage
             {
                 RpcOnAnimationParametersClientMessage(parameters);
             }
-            else if (Client.Connection != null)
+            else if (Client.Player != null)
             {
                 CmdOnAnimationParametersServerMessage(parameters);
             }
@@ -437,7 +439,7 @@ namespace Mirage
                     return;
                 }
 
-                if (Client.Connection != null)
+                if (Client.Player != null)
                     CmdOnAnimationTriggerServerMessage(hash);
 
                 // call on client right away
@@ -486,7 +488,7 @@ namespace Mirage
                     return;
                 }
 
-                if (Client.Connection != null)
+                if (Client.Player != null)
                     CmdOnAnimationResetTriggerServerMessage(hash);
 
                 // call on client right away

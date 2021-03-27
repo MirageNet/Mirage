@@ -7,7 +7,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer
 {
     public class GenericBehaviourWithRpcDeeperBase<T> : NetworkBehaviour where T : NetworkBehaviour
     {
@@ -132,7 +132,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendNetworkIdentityCalled += callback;
 
             serverComponent.SendNetworkIdentity(serverIdentity);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(clientIdentity);
         });
 
@@ -143,7 +143,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendNetworkBehaviourCalled += callback;
 
             serverComponent.SendNetworkBehaviour(serverComponent);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(clientComponent);
         });
 
@@ -154,7 +154,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
             serverComponent.SendNetworkBehaviourDerived(serverComponent);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(clientComponent);
         });
 
@@ -165,7 +165,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendGameObjectCalled += callback;
 
             serverComponent.SendGameObject(serverPlayerGO);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(clientPlayerGO);
         });
 
@@ -189,7 +189,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendNetworkIdentityCalled += callback;
 
             serverComponent.SendNetworkIdentity(null);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(null);
         });
 
@@ -200,7 +200,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendNetworkBehaviourCalled += callback;
 
             serverComponent.SendNetworkBehaviour(null);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(null);
         });
 
@@ -211,7 +211,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
             serverComponent.SendNetworkBehaviourDerived(null);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(null);
         });
 
@@ -222,7 +222,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendGameObjectCalled += callback;
 
             serverComponent.SendGameObject(null);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(null);
         });
 
@@ -233,7 +233,7 @@ namespace Mirage.Tests.ClientServer
             serverComponent.onSendNetworkIdentityCalled += callback;
 
             clientComponent.SendNetworkIdentityToServer(clientIdentity);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(serverIdentity);
         });
 
@@ -244,7 +244,7 @@ namespace Mirage.Tests.ClientServer
             serverComponent.onSendNetworkBehaviourCalled += callback;
 
             clientComponent.SendNetworkBehaviourToServer(clientComponent);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(serverComponent);
         });
 
@@ -255,7 +255,7 @@ namespace Mirage.Tests.ClientServer
             serverComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
             clientComponent.SendNetworkBehaviourDerivedToServer(clientComponent);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(serverComponent);
         });
 
@@ -266,7 +266,7 @@ namespace Mirage.Tests.ClientServer
             serverComponent.onSendGameObjectCalled += callback;
 
             clientComponent.SendGameObjectToServer(clientPlayerGO);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(serverPlayerGO);
         });
 
@@ -290,7 +290,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendDeeperNetworkIdentityCalled += callback;
 
             serverComponent.SendDeeperNetworkIdentity(serverIdentity);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(clientIdentity);
         });
 
@@ -301,7 +301,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendDeeperNetworkBehaviourCalled += callback;
 
             serverComponent.SendDeeperNetworkBehaviour(serverComponent);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(clientComponent);
         });
 
@@ -312,7 +312,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendDeeperNetworkBehaviourDerivedCalled += callback;
 
             serverComponent.SendDeeperNetworkBehaviourDerived(serverComponent);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(clientComponent);
         });
 
@@ -323,7 +323,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendDeeperGameObjectCalled += callback;
 
             serverComponent.SendDeeperGameObject(serverPlayerGO);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(clientPlayerGO);
         });
 
@@ -347,7 +347,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendDeeperNetworkIdentityCalled += callback;
 
             serverComponent.SendDeeperNetworkIdentity(null);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(null);
         });
 
@@ -358,7 +358,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendDeeperNetworkBehaviourCalled += callback;
 
             serverComponent.SendDeeperNetworkBehaviour(null);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(null);
         });
 
@@ -369,7 +369,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendDeeperNetworkBehaviourDerivedCalled += callback;
 
             serverComponent.SendDeeperNetworkBehaviourDerived(null);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(null);
         });
 
@@ -380,7 +380,7 @@ namespace Mirage.Tests.ClientServer
             clientComponent.onSendDeeperGameObjectCalled += callback;
 
             serverComponent.SendDeeperGameObject(null);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(null);
         });
 
@@ -402,7 +402,7 @@ namespace Mirage.Tests.ClientServer
             serverComponent.onSendDeeperNetworkBehaviourCalled += callback;
 
             clientComponent.SendDeeperNetworkBehaviourToServer(clientComponent);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2));
             callback.Received().Invoke(serverComponent);
         });
 
@@ -413,7 +413,7 @@ namespace Mirage.Tests.ClientServer
             serverComponent.onSendDeeperNetworkBehaviourDerivedCalled += callback;
 
             clientComponent.SendDeeperNetworkBehaviourDerivedToServer(clientComponent);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(serverComponent);
         });
 
@@ -424,7 +424,7 @@ namespace Mirage.Tests.ClientServer
             serverComponent.onSendDeeperGameObjectCalled += callback;
 
             clientComponent.SendDeeperGameObjectToServer(clientPlayerGO);
-            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any()).Timeout(TimeSpan.FromSeconds(2)); ;
             callback.Received().Invoke(serverPlayerGO);
         });
 

@@ -1,9 +1,10 @@
+using System.Collections.Generic;
+using Mirage.Logging;
 using UnityEditor;
-using UnityEngine;
-using UnityEngine.UIElements;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
-using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 /**
  * Docs used:
@@ -19,6 +20,8 @@ namespace Mirage
     [InitializeOnLoad]
     public class WelcomeWindow : EditorWindow
     {
+        static readonly ILogger logger = LogFactory.GetLogger<WelcomeWindow>();
+
         private Button lastClickedTab;
         private readonly List<Button> installButtons = new List<Button>();
 
@@ -57,11 +60,6 @@ namespace Mirage
         private static string firstStartUpKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
 
-        private static string GetVersion()
-        {
-            return typeof(NetworkIdentity).Assembly.GetName().Version.ToString();
-        }
-
         #region Handle visibility
 
         private static bool ShowChangeLog
@@ -90,13 +88,17 @@ namespace Mirage
         private static void ShowWindowOnFirstStart()
         {
             EditorApplication.update -= ShowWindowOnFirstStart;
-            firstStartUpKey = GetVersion();
+            firstStartUpKey = Version.Current;
 
             if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirageUnknown")
             {
                 EditorPrefs.SetString(screenToOpenKey, ShowChangeLog ? "ChangeLog" : "Welcome");
 
+#if UNITY_2020_1_OR_NEWER
                 OpenWindow();
+#else
+                if (logger.LogEnabled()) logger.Log($"WelcomeWindow not supported in {Application.unityVersion}, it is only supported in Unity 2020.1 or newer");
+#endif
             }
         }
 
@@ -133,7 +135,7 @@ namespace Mirage
 
             //set the version text
             Label versionText = root.Q<Label>("VersionText");
-            versionText.text = "v" + GetVersion();
+            versionText.text = "v" + Version.Current;
 
             #region Page buttons
 
@@ -171,7 +173,7 @@ namespace Mirage
             tabButton.EnableInClassList("dark-selected-tab", false);
             tabButton.EnableInClassList("light-selected-tab", false);
 
-            tabButton.clicked += () => 
+            tabButton.clicked += () =>
             {
                 ToggleMenuButtonColor(tabButton, true);
                 ToggleMenuButtonColor(lastClickedTab, false);
@@ -279,11 +281,11 @@ namespace Mirage
                 //log results
                 if (installRequest.Status == StatusCode.Success)
                 {
-                    Debug.Log("Package install successful.");
+                    if (logger.LogEnabled()) logger.Log("Package install successful.");
                 }
                 else if (installRequest.Status == StatusCode.Failure)
                 {
-                    Debug.LogError("Package install was unsuccessful. \n Error Code: " + installRequest.Error.errorCode + "\n Error Message: " + installRequest.Error.message);
+                    if (logger.ErrorEnabled()) logger.LogError($"Package install was unsuccessful. \n Error Code: {installRequest.Error.errorCode}\n Error Message: {installRequest.Error.message}");
                 }
 
                 EditorApplication.update -= InstallPackageProgress;
@@ -303,11 +305,11 @@ namespace Mirage
 
                 if (uninstallRequest.Status == StatusCode.Success)
                 {
-                    Debug.Log("Package uninstall successful.");
+                    if (logger.LogEnabled()) logger.Log("Package uninstall successful.");
                 }
                 else if (uninstallRequest.Status == StatusCode.Failure)
                 {
-                    Debug.LogError("Package uninstall was unsuccessful. \n Error Code: " + uninstallRequest.Error.errorCode + "\n Error Message: " + uninstallRequest.Error.message);
+                    if (logger.ErrorEnabled()) logger.LogError($"Package uninstall was unsuccessful. \n Error Code: {uninstallRequest.Error.errorCode}\n Error Message: {uninstallRequest.Error.message}");
                 }
 
                 //refresh the package tab
@@ -324,10 +326,10 @@ namespace Mirage
 
                 if (listRequest.Status == StatusCode.Success)
                 {
-                    List<string> installedPackages = new List<string>();
+                    var installedPackages = new List<string>();
 
                     //populate installedPackages
-                    foreach (var package in listRequest.Result)
+                    foreach (UnityEditor.PackageManager.PackageInfo package in listRequest.Result)
                     {
                         Package? miragePackage = Packages.Find((x) => x.packageName == package.name);
                         if (miragePackage != null)
@@ -341,7 +343,7 @@ namespace Mirage
                 //log error
                 else if (listRequest.Status == StatusCode.Failure)
                 {
-                    Debug.LogError("There was an issue finding packages. \n Error Code: " + listRequest.Error.errorCode + "\n Error Message: " + listRequest.Error.message);
+                    if (logger.ErrorEnabled()) logger.LogError($"There was an issue finding packages. \n Error Code: {listRequest.Error.errorCode}\n Error Message: {listRequest.Error.message}");
                 }
             }
         }
@@ -360,12 +362,12 @@ namespace Mirage
 
                 //set text
                 installButton.text = !foundInInstalledPackages ? "Install" : "Uninstall";
-                
+
                 //set functionality
                 if (!foundInInstalledPackages)
                 {
-                    installButton.clicked += () => 
-                    { 
+                    installButton.clicked += () =>
+                    {
                         InstallPackage(packageName);
                         installButton.text = "Installing";
                         DisableInstallButtons();
@@ -373,8 +375,8 @@ namespace Mirage
                 }
                 else
                 {
-                    installButton.clicked += () => 
-                    { 
+                    installButton.clicked += () =>
+                    {
                         UninstallPackage(packageName);
                         installButton.text = "Uninstalling";
                         DisableInstallButtons();

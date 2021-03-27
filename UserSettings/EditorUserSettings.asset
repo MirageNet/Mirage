@@ -5,6 +5,15 @@ EditorUserSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 4
   m_ConfigSettings:
+    RecentlyUsedScenePath-0:
+      value: 224247031146467e150f01321c264c5f34160b232f67153328271820adc52c39eff73aeca92f31352d1b
+      flags: 0
+    RecentlyUsedScenePath-1:
+      value: 224247031146467e150f01321c264c5f3f190c2f3e2d352400281332e5e5393decf379dae43f31392a4ddc3f01300471e704001fef
+      flags: 0
+    RecentlyUsedScenePath-2:
+      value: 224247031146467e150f01321c264c5f3f190c2f3e2d352400281332e5e5393decf379dae43f31392a4dce132d701431fb1e10
+      flags: 0
     UIBuilder.HideNotificationAboutMissingUITKPackage:
       value: 37434103
       flags: 0
@@ -18,5 +27,7 @@ EditorUserSettings:
   m_SemanticMergeMode: 2
   m_VCShowFailedCheckout: 1
   m_VCOverwriteFailedCheckoutAssets: 1
-  m_VCOverlayIcons: 1
+  m_VCProjectOverlayIcons: 1
+  m_VCHierarchyOverlayIcons: 1
+  m_VCOtherOverlayIcons: 1
   m_VCAllowAsyncUpdate: 0

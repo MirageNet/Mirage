@@ -1,6 +1,7 @@
+using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public struct TestMessage
     {
@@ -67,7 +68,7 @@ namespace Mirage.Tests
 
             ClassWithoutBaseMessage unpacked = MessagePacker.Unpack<ClassWithoutBaseMessage>(data);
 
-            Assert.That(unpacked.array, Is.EquivalentTo(new [] { 3, 4, 5 }));
+            Assert.That(unpacked.array, Is.EquivalentTo(new[] { 3, 4, 5 }));
         }
 
         [Test]

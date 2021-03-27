@@ -1,4 +1,5 @@
 using Mirage;
+using Mirage.Collections;
 
 namespace SyncDictionaryTests.SyncDictionaryErrorForGenericStructItem
 {

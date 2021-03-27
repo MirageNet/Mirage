@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Mirage.RemoteCalls;
+using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 namespace Mirage.Weaver
@@ -25,7 +26,6 @@ namespace Mirage.Weaver
         public ClientRpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger) : base(module, readers, writers, logger)
         {
         }
-
 
         /// <summary>
         /// Generates a skeleton for an RPC
@@ -54,7 +54,7 @@ namespace Mirage.Weaver
                 MethodAttributes.Family | MethodAttributes.HideBySig);
 
             _ = rpc.AddParam<NetworkReader>("reader");
-            _ = rpc.AddParam<INetworkConnection>("senderConnection");
+            _ = rpc.AddParam<INetworkPlayer>("senderConnection");
             _ = rpc.AddParam<int>("replyId");
 
             ILProcessor worker = rpc.Body.GetILProcessor();
@@ -67,11 +67,13 @@ namespace Mirage.Weaver
 
             if (hasNetworkConnection)
             {
-                //client.connection
+               // this is called in the skeleton (the client)
+               // the client should just get the connection to the server and pass that in
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.ConnectionToServer));
+                worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
+                worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
             }
-            
+
             if (!ReadArguments(md, worker, hasNetworkConnection))
                 return rpc;
 
@@ -141,6 +143,12 @@ namespace Mirage.Weaver
 
             ILProcessor worker = md.Body.GetILProcessor();
 
+            // if (IsClient)
+            // {
+            //    call the body
+            // }
+            CallBody(worker, rpc);
+
             // NetworkWriter writer = NetworkWriterPool.GetWriter()
             VariableDefinition writer = md.AddLocal<PooledNetworkWriter>();
             worker.Append(worker.Create(OpCodes.Call, () => NetworkWriterPool.GetWriter()));
@@ -152,7 +160,7 @@ namespace Mirage.Weaver
 
             string rpcName = md.Name;
 
-            Client target = clientRpcAttr.GetField("target", Client.Observers); 
+            Client target = clientRpcAttr.GetField("target", Client.Observers);
             int channel = clientRpcAttr.GetField("channel", 0);
             bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
 
@@ -194,6 +202,29 @@ namespace Mirage.Weaver
             return rpc;
         }
 
+        public void IsClient(ILProcessor worker, Action body)
+        {
+            // if (IsLocalClient) {
+            Instruction endif = worker.Create(OpCodes.Nop);
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsClient));
+            worker.Append(worker.Create(OpCodes.Brfalse, endif));
+
+            body();
+
+            // }
+            worker.Append(endif);
+
+        }
+
+        private void CallBody(ILProcessor worker, MethodDefinition rpc)
+        {
+            IsClient(worker, () =>
+            {
+                InvokeBody(worker, rpc);
+            });
+        }
+
         bool Validate(MethodDefinition md, CustomAttribute clientRpcAttr)
         {
             if (!md.ReturnType.Is(typeof(void)))
@@ -202,7 +233,7 @@ namespace Mirage.Weaver
                 return false;
             }
 
-            Client target = clientRpcAttr.GetField("target", Client.Observers); 
+            Client target = clientRpcAttr.GetField("target", Client.Observers);
             if (target == Client.Connection && !HasNetworkConnectionParameter(md))
             {
                 logger.Error("ClientRpc with Client.Connection needs a network connection parameter", md);
@@ -218,7 +249,6 @@ namespace Mirage.Weaver
             return true;
 
         }
-
 
         public void RegisterClientRpcs(ILProcessor cctorWorker)
         {

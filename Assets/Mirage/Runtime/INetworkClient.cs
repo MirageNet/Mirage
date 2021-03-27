@@ -1,11 +1,10 @@
-using Cysharp.Threading.Tasks;
 using UnityEngine.Events;
 
 namespace Mirage
 {
-    public interface INetworkClient
+    public interface INetworkClient : IMessageSender
     {
-      
+
         /// <summary>
         /// Event fires once the Client has connected its Server.
         /// </summary>
@@ -24,7 +23,7 @@ namespace Mirage
         /// <summary>
         /// The NetworkConnection object this client is using.
         /// </summary>
-        INetworkConnection Connection { get; }
+        INetworkPlayer Player { get; }
 
         /// <summary>
         /// active is true while a client is connecting/connected
@@ -37,10 +36,8 @@ namespace Mirage
         /// </summary>
         bool IsLocalClient { get; }
 
+        NetworkTime Time { get; }
+
         void Disconnect();
-
-        void Send<T>(T message, int channelId = Channel.Reliable);
-
-        UniTask SendAsync<T>(T message, int channelId = Channel.Reliable);
     }
 }

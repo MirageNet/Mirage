@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using Mirage.KCP;
 using UnityEngine;
-using Cysharp.Threading.Tasks;
 #if IGNORANCE
 using Mirror.ENet;
 #endif
@@ -23,11 +23,9 @@ namespace Mirage.HeadlessBenchmark
 
         void Start()
         {
-            cachedArgs = Environment.GetCommandLineArgs();
-
-#if UNITY_EDITOR
-            cachedArgs = editorArgs.Split(' ');
-#endif
+            cachedArgs = Application.isEditor ?
+                cachedArgs = editorArgs.Split(' ') :
+                Environment.GetCommandLineArgs();
 
             HeadlessStart();
 
@@ -44,18 +42,17 @@ namespace Mirage.HeadlessBenchmark
                 int frames = frameCount - previousFrameCount;
 
                 long messageCount = 0;
-                if (transport is KcpTransport)
+                if (transport is KcpTransport kcpTransport)
                 {
-                    messageCount = transport != null ? ((KcpTransport)transport).ReceivedMessageCount : 0;
+                    messageCount = kcpTransport.ReceivedMessageCount;
                 }
-                
+
                 long messages = messageCount - previousMessageCount;
 
-#if UNITY_EDITOR
-                Debug.LogFormat("{0} FPS {1} messages {2} clients", frames, messages, server.NumPlayers);
-#else
-                Console.WriteLine("{0} FPS {1} messages {2} clients", frames, messages, server.NumPlayers);
-#endif
+                if (Application.isEditor)
+                    Debug.LogFormat("{0} FPS {1} messages {2} clients", frames, messages, server.NumberOfPlayers);
+                else
+                    Console.WriteLine("{0} FPS {1} messages {2} clients", frames, messages, server.NumberOfPlayers);
                 previousFrameCount = frameCount;
                 previousMessageCount = messageCount;
             }
@@ -101,7 +98,7 @@ namespace Mirage.HeadlessBenchmark
         {
             if (!string.IsNullOrEmpty(GetArg("-server")))
             {
-                var serverGo = new GameObject($"Server", typeof(NetworkServer), typeof(ServerObjectManager), typeof(NetworkSceneManager), typeof(PlayerSpawner));
+                var serverGo = new GameObject($"Server", typeof(NetworkServer), typeof(ServerObjectManager), typeof(NetworkSceneManager), typeof(CharacterSpawner));
 
                 server = serverGo.GetComponent<NetworkServer>();
                 server.MaxConnections = 9999;
@@ -115,7 +112,7 @@ namespace Mirage.HeadlessBenchmark
                 serverObjectManager.NetworkSceneManager = networkSceneManager;
                 serverObjectManager.Start();
 
-                PlayerSpawner spawner = serverGo.GetComponent<PlayerSpawner>();
+                CharacterSpawner spawner = serverGo.GetComponent<CharacterSpawner>();
                 spawner.PlayerPrefab = PlayerPrefab.GetComponent<NetworkIdentity>();
                 spawner.ServerObjectManager = serverObjectManager;
                 spawner.Server = server;
@@ -162,10 +159,10 @@ namespace Mirage.HeadlessBenchmark
 
         async UniTask StartClient(int i, string networkAddress)
         {
-            var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager), typeof(PlayerSpawner), typeof(NetworkSceneManager));
+            var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager), typeof(CharacterSpawner), typeof(NetworkSceneManager));
             NetworkClient client = clientGo.GetComponent<NetworkClient>();
             ClientObjectManager objectManager = clientGo.GetComponent<ClientObjectManager>();
-            PlayerSpawner spawner = clientGo.GetComponent<PlayerSpawner>();
+            CharacterSpawner spawner = clientGo.GetComponent<CharacterSpawner>();
             NetworkSceneManager networkSceneManager = clientGo.GetComponent<NetworkSceneManager>();
             networkSceneManager.Client = client;
 

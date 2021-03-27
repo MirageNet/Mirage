@@ -484,7 +484,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _enemyPrefab: {fileID: 8537344390966522168, guid: 8e8e2d109f733874cb5319e2b29aeae0, type: 3}
-  _numberOfEnemiesSpawn: 100
+  _numberOfEnemiesSpawn: 1000
   _serverObject: {fileID: 1092843210}
   _plane: {fileID: 114156689}
 --- !u!1 &186169289
@@ -1112,27 +1112,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Levels:
-  - Name: NetworkSceneManager
+  - Name: NetworkIdentity
     level: 2
-  - Name: ServerObjectManager
-    level: 2
-  - Name: RemoteCallHelper
+  - Name: OctreeInterestChecker
     level: 2
   - Name: NetworkBehaviour
-    level: 2
-  - Name: PlayerSpawner
-    level: 2
-  - Name: ClientObjectManager
-    level: 2
-  - Name: NetworkIdentity
     level: 2
   - Name: NetworkClient
     level: 2
   - Name: NetworkTime
     level: 2
+  - Name: RemoteCallHelper
+    level: 2
+  - Name: ServerObjectManager
+    level: 2
+  - Name: NetworkSceneManager
+    level: 2
   - Name: NetworkServer
     level: 2
+  - Name: ClientObjectManager
+    level: 2
+  - Name: CharacterSpawner
+    level: 2
   - Name: NetworkBehaviourInspector
+    level: 2
+  - Name: OmnPlayerSpawner
+    level: 2
+  - Name: SteamyTransport
+    level: 2
+  - Name: PlayerSpawner
     level: 2
   - Name: NetworkProximityChecker
     level: 2
@@ -1141,10 +1149,6 @@ MonoBehaviour:
   - Name: ZoneHandler
     level: 2
   - Name: EpicTransport
-    level: 2
-  - Name: SteamyTransport
-    level: 2
-  - Name: OmnPlayerSpawner
     level: 2
   - Name: ChatWindow
     level: 2
@@ -1204,6 +1208,12 @@ MonoBehaviour:
     level: 4
   - Name: Tests
     level: 4
+  - Name: WelcomeWindow
+    level: 2
+  - Name: Peer
+    level: 2
+  - Name: NetworkPlayer
+    level: 2
 --- !u!114 &1092843207
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1242,6 +1252,7 @@ MonoBehaviour:
   ClientObjectManager: {fileID: 1092843209}
   ServerObjectManager: {fileID: 1092843210}
   PlayerPrefab: {fileID: 8537344390966522168, guid: 3278e6f989772b244b11585e367587b7, type: 3}
+  AutoSpawn: 1
   startPositionIndex: 0
   startPositions: []
   playerSpawnMethod: 0
@@ -1288,6 +1299,7 @@ MonoBehaviour:
   _unSpawned:
     m_PersistentCalls:
       m_Calls: []
+  InterestManager: {fileID: 1092843216}
 --- !u!114 &1092843211
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1418,6 +1430,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a359b62d47614fdda750117ef5efaab3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ServerObjectManager: {fileID: 1092843210}
   _initialWorldSize: 1000
   _minimumNodeSize: 1
   _looseness: 1.2

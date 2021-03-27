@@ -16,7 +16,7 @@ namespace Mirage
             var valueRect = new Rect(position.x, position.y, valueWidth, position.height);
             var labelRect = new Rect(position.x + valueWidth, position.y, syncVarIndicatorRect.x, position.height);
 
-            EditorGUI.PropertyField(valueRect, property, true);
+            EditorGUI.PropertyField(valueRect, property, label, true);
             GUI.Label(labelRect, syncVarIndicatorContent, EditorStyles.miniLabel);
         }
 

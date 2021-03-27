@@ -1,4 +1,5 @@
 using System.IO;
+using Mirage.Serialization;
 using NUnit.Framework;
 
 namespace Mirage

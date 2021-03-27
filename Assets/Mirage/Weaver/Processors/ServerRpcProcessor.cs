@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
 using Mirage.RemoteCalls;
+using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
@@ -14,7 +15,7 @@ namespace Mirage.Weaver
     /// <summary>
     /// Processes [ServerRpc] methods in NetworkBehaviour
     /// </summary>
-    public class ServerRpcProcessor :RpcProcessor
+    public class ServerRpcProcessor : RpcProcessor
     {
         struct ServerRpcMethod
         {
@@ -26,7 +27,7 @@ namespace Mirage.Weaver
         readonly List<ServerRpcMethod> serverRpcs = new List<ServerRpcMethod>();
 
         public ServerRpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger) : base(module, readers, writers, logger)
-        {            
+        {
         }
 
         /// <summary>
@@ -60,6 +61,13 @@ namespace Mirage.Weaver
             MethodDefinition cmd = SubstituteMethod(md);
 
             ILProcessor worker = md.Body.GetILProcessor();
+
+            // if (IsServer)
+            // {
+            //    call the body
+            //    return;
+            // }
+            CallBody(worker, cmd);
 
             // NetworkWriter writer = NetworkWriterPool.GetWriter()
             VariableDefinition writer = md.AddLocal<PooledNetworkWriter>();
@@ -96,6 +104,30 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ret));
 
             return cmd;
+        }
+
+        public void IsServer(ILProcessor worker, Action body)
+        {
+            // if (IsServer) {
+            Instruction endif = worker.Create(OpCodes.Nop);
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
+            worker.Append(worker.Create(OpCodes.Brfalse, endif));
+
+            body();
+
+            // }
+            worker.Append(endif);
+
+        }
+
+        private void CallBody(ILProcessor worker, MethodDefinition rpc)
+        {
+            IsServer(worker, () =>
+            {
+                InvokeBody(worker, rpc);
+                worker.Append(worker.Create(OpCodes.Ret));
+            });
         }
 
         private void CallSendServerRpc(MethodDefinition md, ILProcessor worker)
@@ -150,7 +182,7 @@ namespace Mirage.Weaver
                 userCodeFunc.ReturnType);
 
             _ = cmd.AddParam<NetworkReader>("reader");
-            _ = cmd.AddParam<INetworkConnection>("senderConnection");
+            _ = cmd.AddParam<INetworkPlayer>("senderConnection");
             _ = cmd.AddParam<int>("replyId");
 
 
