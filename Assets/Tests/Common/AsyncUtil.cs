@@ -9,9 +9,9 @@ namespace Mirage.Tests
     public static class AsyncUtil
     {
 
-        public static UniTask WaitUntilWithTimeout(Func<bool> predicate)
+        public static UniTask WaitUntilWithTimeout(Func<bool> predicate, double seconds = 2)
         {
-            return UniTask.WaitUntil(predicate).Timeout(TimeSpan.FromSeconds(2));
+            return UniTask.WaitUntil(predicate).Timeout(TimeSpan.FromSeconds(seconds));
         }
 
         // Unity's nunit does not support async tests
