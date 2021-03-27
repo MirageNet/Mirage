@@ -1,3 +1,10 @@
+## [84.2.1](https://github.com/MirageNet/Mirage/compare/v84.2.0...v84.2.1) (2021-03-27)
+
+
+### Bug Fixes
+
+* invoke client rpc only once in host mode ([#744](https://github.com/MirageNet/Mirage/issues/744)) ([ee6e55e](https://github.com/MirageNet/Mirage/commit/ee6e55e6dc7376308e702e431387ebdf12051a98))
+
 # [84.2.0](https://github.com/MirageNet/Mirage/compare/v84.1.1...v84.2.0) (2021-03-27)
 
 
