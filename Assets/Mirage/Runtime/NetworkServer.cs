@@ -34,7 +34,7 @@ namespace Mirage
 
         /// <summary>
         /// <para>If you disable this, the server will not listen for incoming connections on the regular network port.</para>
-        /// <para>This can be used if the game is running in host mode and does not want external players to be able to connect - making it like a single-player game. Also this can be useful when using AddExternalConnection().</para>
+        /// <para>This can be used if the game is running in host mode and does not want external players to be able to connect - making it like a single-player game.</para>
         /// </summary>
         public bool Listening = true;
 
@@ -200,18 +200,9 @@ namespace Mirage
 
             try
             {
-                // only start server if we want to listen
-                if (Listening)
-                {
-                    Transport.Started.AddListener(TransportStarted);
-                    Transport.Connected.AddListener(TransportConnected);
-                    await Transport.ListenAsync();
-                }
-                else
-                {
-                    // if not listening then call started events right away
-                    NotListeningStarted();
-                }
+                Transport.Started.AddListener(TransportStarted);
+                Transport.Connected.AddListener(TransportConnected);
+                await Transport.ListenAsync();
             }
             catch (Exception ex)
             {
@@ -223,14 +214,6 @@ namespace Mirage
                 Transport.Started.RemoveListener(TransportStarted);
                 Cleanup();
             }
-        }
-
-        private void NotListeningStarted()
-        {
-            logger.Log("Server started but not Listening");
-            Active = true;
-            // (useful for loading & spawning stuff from database etc.)
-            Started?.Invoke();
         }
 
         private void TransportStarted()
@@ -327,7 +310,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// This removes an external connection added with AddExternalConnection().
+        /// This removes an external connection.
         /// </summary>
         /// <param name="connectionId">The id of the connection to remove.</param>
         public void RemoveConnection(INetworkPlayer player)
@@ -390,6 +373,12 @@ namespace Mirage
         async UniTaskVoid ConnectionAcceptedAsync(INetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log("Server accepted client:" + player);
+
+            //Only allow host client to connect when not Listening for new connections
+            if(!Listening && player != LocalPlayer)
+            {
+                return;
+            }
 
             // are more connections allowed? if not, kick
             // (it's easier to handle this in Mirage, so Transports can have
