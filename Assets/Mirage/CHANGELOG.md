@@ -1,3 +1,10 @@
+# [84.3.0](https://github.com/MirageNet/Mirage/compare/v84.2.1...v84.3.0) (2021-03-27)
+
+
+### Features
+
+* not listening can now be toggled at runtime. fixes host spawning ([#728](https://github.com/MirageNet/Mirage/issues/728)) ([256b16c](https://github.com/MirageNet/Mirage/commit/256b16c12c1550f66ccbdf6d289ec75e6abab315))
+
 ## [84.2.1](https://github.com/MirageNet/Mirage/compare/v84.2.0...v84.2.1) (2021-03-27)
 
 
