@@ -1017,7 +1017,7 @@ namespace Mirage
                     if (observersWritten > 0)
                     {
                         varsMessage.payload = observersWriter.ToArraySegment();
-                        ServerObjectManager.InterestManager.Send(this, varsMessage);
+                        ServerObjectManager.InterestManager.Send(this, varsMessage, Channel.Reliable, Server.LocalPlayer);
                     }
 
                     // clear dirty bits only for the components that we serialized
