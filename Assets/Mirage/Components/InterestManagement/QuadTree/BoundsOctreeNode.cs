@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 // A node in a BoundsOctree
@@ -206,6 +207,8 @@ namespace Mirage.Components.InterestManagement
             // Check against any objects in this node
             for (int i = 0; i < objects.Length; i++)
             {
+                if (objects[i].Obj is null) continue;
+
                 if (objects[i].Bounds.Intersects(checkBounds))
                 {
                     return true;
@@ -244,6 +247,8 @@ namespace Mirage.Components.InterestManagement
             // Check against any objects in this node
             for (int i = 0; i < objects.Length; i++)
             {
+                if (objects[i].Obj is null) continue;
+
                 if (objects[i].Bounds.IntersectRay(checkRay, out distance) && distance <= maxDistance)
                 {
                     return true;
@@ -282,6 +287,8 @@ namespace Mirage.Components.InterestManagement
             // Check against any objects in this node
             for (int i = 0; i < objects.Length; i++)
             {
+                if (objects[i].Obj is null) continue;
+
                 if (objects[i].Bounds.Intersects(checkBounds))
                 {
                     result.Add(objects[i].Obj);
@@ -316,6 +323,8 @@ namespace Mirage.Components.InterestManagement
             // Check against any objects in this node
             for (int i = 0; i < objects.Length; i++)
             {
+                if (objects[i].Obj is null) continue;
+
                 if (objects[i].Bounds.IntersectRay(checkRay, out distance) && distance <= maxDistance)
                 {
                     result.Add(objects[i].Obj);
@@ -390,6 +399,8 @@ namespace Mirage.Components.InterestManagement
 
             foreach (OctreeObject obj in objects)
             {
+                if (obj.Obj is null) continue;
+
                 Gizmos.DrawCube(obj.Bounds.center, obj.Bounds.size);
             }
 
@@ -420,7 +431,16 @@ namespace Mirage.Components.InterestManagement
                 return this;
             }
 
-            if (objects.Length == 0 && (children == null || children.Length == 0))
+            int objectsCount = 0;
+
+            for (int i = 0; i < objects.Length; i++)
+            {
+                if(!(objects[i].Obj is null)) continue;
+
+                objectsCount++;
+            }
+
+            if (objectsCount == 0 && (children == null || children.Length == 0))
             {
                 return this;
             }
@@ -543,15 +563,23 @@ namespace Mirage.Components.InterestManagement
         /// <param name="objBounds">3D bounding box around the object.</param>
         private void SubAdd(T obj, Bounds objBounds)
         {
+            int objectsCount = 0;
+
+            for (int i = 0; i < objects.Length; i++)
+            {
+                if (objects[i].Obj is null) continue;
+
+                objectsCount++;
+            }
             // We know it fits at this level if we've got this far
             // Just add if few objects are here, or children would be below min size
-            if (objects.Length < numObjectsAllowed || (BaseLength / 2) < minSize)
+            if (objectsCount < numObjectsAllowed || (BaseLength / 2) < minSize)
             {
                 OctreeObject newObj = new OctreeObject {Obj = obj, Bounds = objBounds};
 
                 for (int i = 0; i < objects.Length; i++)
                 {
-                    if(objects[i].Obj == null) continue;
+                    if(objects[i].Obj != null) continue;
 
                     objects[i] = newObj;
                 }
@@ -605,7 +633,7 @@ namespace Mirage.Components.InterestManagement
 
                     for (int i = 0; i < objects.Length; i++)
                     {
-                        if (objects[i].Obj == null) continue;
+                        if (objects[i].Obj != null) continue;
 
                         objects[i] = newObj;
                     }
@@ -724,7 +752,15 @@ namespace Mirage.Components.InterestManagement
         /// <returns>True if this node or any of its children, grandchildren etc have something in them</returns>
         internal bool HasAnyObjects()
         {
-            if (objects.Length > 0) return true;
+            int objectCount = 0;
+
+            for (int i = 0; i < objects.Length; i++)
+            {
+                if (objects[i].Obj is null) continue;
+
+                objectCount++;
+            }
+            if (objectCount > 0) return true;
 
             if (children != null)
             {

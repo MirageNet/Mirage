@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using Mirage.Components.InterestManagement;
-using UnityEditor;
 using UnityEngine;
 
 namespace Mirage.InterestManagement
@@ -32,7 +30,9 @@ namespace Mirage.InterestManagement
         private bool _visualDebug = false;
 
         internal BoundsOctree<NetworkIdentity> Octree;
-        private List<NetworkIdentity> List = new List<NetworkIdentity>();
+        private readonly List<INetworkPlayer> _observersList = new List<INetworkPlayer>();
+        private readonly List<NetworkIdentity> _octreeObjectsShow = new List<NetworkIdentity>();
+        private readonly List<NetworkIdentity> _octreeObservers = new List<NetworkIdentity>();
 
         #endregion
 
@@ -73,6 +73,35 @@ namespace Mirage.InterestManagement
             _server.Spawned.AddListener(OnPlayerAuthenticated);
         }
 
+        private void Update()
+        {
+            if(!ServerObjectManager.Server.Active) return;
+
+            foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
+            {
+                if (player.Identity is null) continue;
+
+                _octreeObjectsShow.Clear();
+
+                Octree.GetColliding(_octreeObjectsShow, player.Identity.GetComponent<OctreeInterestChecker>().CurrentBounds);
+
+                foreach (NetworkIdentity spawnedObject in ServerObjectManager.SpawnedObjects.Values)
+                {
+                    if(spawnedObject == player.Identity) continue;
+
+                    if (_octreeObjectsShow.Contains(spawnedObject))
+                    {
+                        ServerObjectManager.ShowForConnection(spawnedObject, player);
+                    }
+                    else
+                    {
+                        ServerObjectManager.HideForConnection(spawnedObject, player);
+                    }
+
+                }
+            }
+        }
+
         private void OnValidate()
         {
             _server ??= FindObjectOfType<ServerObjectManager>();
@@ -82,9 +111,11 @@ namespace Mirage.InterestManagement
         {
             if (!Application.isPlaying || !_visualDebug) return;
 
+#if UNITY_EDITOR
             Octree.DrawAllBounds();
             Octree.DrawAllObjects();
             Octree.DrawCollisionChecks();
+#endif
         }
 
         #endregion
@@ -100,8 +131,6 @@ namespace Mirage.InterestManagement
         {
             foreach (NetworkIdentity identity in ServerObjectManager.SpawnedObjects.Values)
             {
-                //if(!Octree.IsColliding(identity.GetComponent<OctreeInterestChecker>().CurrentBounds, player)) continue;
-
                 ServerObjectManager.ShowForConnection(identity, player);
             }
         }
@@ -117,7 +146,7 @@ namespace Mirage.InterestManagement
 
             foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
             {
-                if (!Octree.IsColliding(colliderComponent.CurrentBounds, player.Identity) && identity != player.Identity) continue;
+                if (!Octree.IsColliding(colliderComponent.CurrentBounds, player.Identity) && player.Identity != identity) continue;
 
                 ServerObjectManager.ShowForConnection(identity, player);
             }
@@ -130,22 +159,19 @@ namespace Mirage.InterestManagement
         /// <returns></returns>
         public override IReadOnlyCollection<INetworkPlayer> Observers(NetworkIdentity identity)
         {
-            List.Clear();
+            _observersList.Clear();
+            _octreeObservers.Clear();
 
-            identity.TryGetComponent(out OctreeInterestChecker colliderComponent);
+            Octree.GetColliding(_octreeObservers, identity.GetComponent<OctreeInterestChecker>().CurrentBounds);
 
-            Octree.GetColliding(List, colliderComponent.CurrentBounds);
-
-            var temp = new List<INetworkPlayer>();
-
-            for (int index = 0; index < List.Count; index++)
+            foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
             {
-                NetworkIdentity player = List[index];
+                if (!_octreeObservers.Contains(player.Identity)) continue;
 
-                temp.Add(player.ConnectionToClient);
+                _observersList.Add(player);
             }
 
-            return temp;
+            return _observersList;
         }
 
         #endregion

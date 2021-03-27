@@ -363,7 +363,7 @@ namespace Mirage
             SendSpawnMessage(identity, player);
         }
 
-        internal void HideForConnection(NetworkIdentity identity, INetworkPlayer player)
+        public void HideForConnection(NetworkIdentity identity, INetworkPlayer player)
         {
             player.Send(new ObjectHideMessage { netId = identity.NetId });
         }
