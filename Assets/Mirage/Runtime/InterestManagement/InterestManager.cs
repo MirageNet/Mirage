@@ -58,7 +58,7 @@ namespace Mirage.InterestManagement
         /// <param name="identity"></param>
         /// <param name="msg"></param>
         /// <param name="channelId"></param>
-        public virtual void Send<T>(NetworkIdentity identity, T msg, int channelId = Channel.Reliable, INetworkPlayer skip = null) 
+        protected internal virtual void Send<T>(NetworkIdentity identity, T msg, int channelId = Channel.Reliable, INetworkPlayer skip = null) 
         {
             IReadOnlyCollection<INetworkPlayer> observers = Observers(identity);
 
