@@ -130,7 +130,7 @@ namespace Mirage
             // host mode reuses objects in the server
             // so we don't need to spawn them
             Client.Player.RegisterHandler<UpdateVarsMessage>(msg => { });
-            Client.Player.RegisterHandler<RpcMessage>(OnRpcMessage);
+            Client.Player.RegisterHandler<RpcMessage>(msg => { });
         }
 
         internal void RegisterMessageHandlers()
