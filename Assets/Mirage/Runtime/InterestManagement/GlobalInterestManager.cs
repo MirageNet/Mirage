@@ -35,7 +35,7 @@ namespace Mirage.InterestManagement
 
             foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
             {
-                if (player != skip)
+                if (player != skip && player != ServerObjectManager.Server.LocalPlayer)
                 {
                     // send to all connections, but don't wait for them
                     player.Send(data, channelId);
