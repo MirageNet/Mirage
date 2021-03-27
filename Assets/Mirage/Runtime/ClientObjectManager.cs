@@ -123,14 +123,14 @@ namespace Mirage
 
         internal void RegisterHostHandlers()
         {
-            Client.Player.RegisterHandler<ObjectDestroyMessage>(OnHostClientObjectDestroy);
+            Client.Player.RegisterHandler<ObjectDestroyMessage>(msg => { });
             Client.Player.RegisterHandler<ObjectHideMessage>(msg => { });
             Client.Player.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
-            Client.Player.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
+            Client.Player.RegisterHandler<ServerRpcReply>(msg => { });
             // host mode reuses objects in the server
             // so we don't need to spawn them
             Client.Player.RegisterHandler<UpdateVarsMessage>(msg => { });
-            Client.Player.RegisterHandler<RpcMessage>(OnRpcMessage);
+            Client.Player.RegisterHandler<RpcMessage>(msg => { });
         }
 
         internal void RegisterMessageHandlers()
@@ -512,13 +512,6 @@ namespace Mirage
             {
                 logger.LogWarning("Did not find target for destroy message for " + netId);
             }
-        }
-
-        internal void OnHostClientObjectDestroy(ObjectDestroyMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log("ClientScene.OnLocalObjectObjDestroy netId:" + msg.netId);
-
-            SpawnedObjects.Remove(msg.netId);
         }
 
         internal void OnHostClientSpawn(SpawnMessage msg)

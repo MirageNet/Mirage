@@ -225,6 +225,30 @@ namespace Mirage.Weaver
             });
         }
 
+        protected void InvokeBody(ILProcessor worker, MethodDefinition rpc)
+        {
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+
+            for (int i = 0; i < rpc.Parameters.Count; i++)
+            {
+                ParameterDefinition parameter = rpc.Parameters[i];
+                if (parameter.ParameterType.Is<INetworkPlayer>())
+                {
+                    // when a client rpc is invoked in host mode
+                    // and it receives a INetworkPlayer,  we
+                    // need to change the value we pass to the
+                    // local connection to the server
+                    worker.Append(worker.Create(OpCodes.Ldarg_0));
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkClient nc) => nc.Player));
+                }
+                else
+                {
+                    worker.Append(worker.Create(OpCodes.Ldarg, i + 1));
+                }
+            }
+            worker.Append(worker.Create(OpCodes.Call, rpc));
+        }
         bool Validate(MethodDefinition md, CustomAttribute clientRpcAttr)
         {
             if (!md.ReturnType.Is(typeof(void)))

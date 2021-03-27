@@ -291,5 +291,14 @@ namespace Mirage.Weaver
                 skeleton = skeletonFunc
             });
         }
+
+        protected void InvokeBody(ILProcessor worker, MethodDefinition rpc)
+        {
+            for (int i = 0; i <= rpc.Parameters.Count; i++)
+            {
+                worker.Append(worker.Create(OpCodes.Ldarg, i));
+            }
+            worker.Append(worker.Create(OpCodes.Call, rpc));
+        }
     }
 }
