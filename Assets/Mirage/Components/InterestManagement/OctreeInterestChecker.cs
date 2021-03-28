@@ -15,11 +15,13 @@ namespace Mirage.Components.InterestManagement
         ///     The real player visibility range to process incoming or outgoing data
         ///     to all player's using this visibility range.
         /// </summary>
-        [SyncVar, NonSerialized] public float CurrentPlayerVisibilityRange;
+        [SyncVar, NonSerialized] protected float CurrentPlayerVisibilityRange;
 
         [Header("Interest Management Settings")]
         [SerializeField, Tooltip("Intended for server to check against hackers.")] private float _minimumVisibilityRange = 1;
         [SerializeField, Tooltip("Intended for server to check against hackers.")] private float _maximumVisibilityRange = 10;
+        [SerializeField, Tooltip("The distance we should wait before making updates"), Range(0.1f, 1f)] private float _distanceUpdateCheck = 0.1f;
+        [SerializeField, Tooltip("The number of frames we should wait to update also."), Range(10, 1000)] private int _frameUpdateCycle = 100;
 
         public NetworkInterestManager InterestManager;
 
@@ -27,6 +29,7 @@ namespace Mirage.Components.InterestManagement
         protected internal Bounds CurrentBounds;
         private Vector3 _currentPosition;
         private Transform _currentTransform;
+        private float _updateTimer;
 
         #endregion
 
@@ -54,15 +57,22 @@ namespace Mirage.Components.InterestManagement
 
         private void Update()
         {
-            if (!IsServer || NetIdentity is null || Vector3.Distance(_currentPosition, _currentTransform.position) < 0.1f) return;
+            if (!IsServer || NetIdentity is null) return;
 
-            InterestManager.Octree.Remove(NetIdentity);
+            if (_updateTimer >= _frameUpdateCycle && Vector3.Distance(_currentPosition, _currentTransform.position) > _distanceUpdateCheck)
+            {
+                _updateTimer = 0;
 
-            CurrentBounds = new Bounds(_currentTransform.position, _colliderSize * CurrentPlayerVisibilityRange);
+                InterestManager.Octree.Remove(NetIdentity);
 
-            InterestManager.Octree.Add(NetIdentity, CurrentBounds);
+                CurrentBounds = new Bounds(_currentTransform.position, _colliderSize * CurrentPlayerVisibilityRange);
 
-            _currentPosition = _currentTransform.position;
+                InterestManager.Octree.Add(NetIdentity, CurrentBounds);
+
+                _currentPosition = _currentTransform.position;
+            }
+
+            _updateTimer += Time.deltaTime * 60;
         }
 
         #endregion

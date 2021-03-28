@@ -33,26 +33,7 @@ namespace Mirage.InterestManagement
         private readonly List<INetworkPlayer> _observersList = new List<INetworkPlayer>();
         private readonly List<NetworkIdentity> _octreeObjectsShow = new List<NetworkIdentity>();
         private readonly List<NetworkIdentity> _octreeObservers = new List<NetworkIdentity>();
-
-        #endregion
-
-        #region Class Specific
-
-        /// <summary>
-        ///     When player gets authenticated we want to get some info to add them
-        ///     to the quad tree list and maintain them from there.
-        /// </summary>
-        /// <param name="netId"></param>
-        private void OnPlayerAuthenticated(NetworkIdentity netId)
-        {
-            netId.TryGetComponent(out Collider colliderComponent);
-
-            netId.TryGetComponent(out OctreeInterestChecker octreeInterestChecker);
-
-            Octree.Add(netId,
-                new Bounds(netId.transform.position,
-                    colliderComponent.bounds.size * octreeInterestChecker.CurrentPlayerVisibilityRange));
-        }
+        private readonly Dictionary<INetworkPlayer, OctreeInterestChecker> _spawnedPlayers = new Dictionary<INetworkPlayer, OctreeInterestChecker>();
 
         #endregion
 
@@ -64,38 +45,29 @@ namespace Mirage.InterestManagement
 
             Octree = new BoundsOctree<NetworkIdentity>(_initialWorldSize, transform.position, _minimumNodeSize,
                 _looseness);
-
-            if (_server == null)
-            {
-                return;
-            }
-
-            _server.Spawned.AddListener(OnPlayerAuthenticated);
         }
 
         private void Update()
         {
             if(!ServerObjectManager.Server.Active) return;
 
-            foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
+            foreach (KeyValuePair<INetworkPlayer, OctreeInterestChecker> player in _spawnedPlayers)
             {
-                if (player.Identity is null) continue;
-
                 _octreeObjectsShow.Clear();
 
-                Octree.GetColliding(_octreeObjectsShow, player.Identity.GetComponent<OctreeInterestChecker>().CurrentBounds);
+                Octree.GetColliding(_octreeObjectsShow, player.Value.CurrentBounds);
 
                 foreach (NetworkIdentity spawnedObject in ServerObjectManager.SpawnedObjects.Values)
                 {
-                    if(spawnedObject == player.Identity) continue;
+                    if (spawnedObject == player.Key.Identity) continue;
 
                     if (_octreeObjectsShow.Contains(spawnedObject))
                     {
-                        ServerObjectManager.ShowForConnection(spawnedObject, player);
+                        ServerObjectManager.ShowForConnection(spawnedObject, player.Key);
                     }
                     else
                     {
-                        ServerObjectManager.HideForConnection(spawnedObject, player);
+                        ServerObjectManager.HideForConnection(spawnedObject, player.Key);
                     }
 
                 }
@@ -131,7 +103,7 @@ namespace Mirage.InterestManagement
         {
             foreach (NetworkIdentity identity in ServerObjectManager.SpawnedObjects.Values)
             {
-                ServerObjectManager.ShowForConnection(identity, player);
+                ServerObjectManager.HideForConnection(identity, player);
             }
         }
 
@@ -143,6 +115,18 @@ namespace Mirage.InterestManagement
         protected override void OnSpawned(NetworkIdentity identity)
         {
             identity.TryGetComponent(out OctreeInterestChecker colliderComponent);
+
+            // Let's add player to our list to ilerate over later in update.
+            if (identity.ConnectionToClient != null && !_spawnedPlayers.ContainsKey(identity.ConnectionToClient))
+                _spawnedPlayers.Add(identity.ConnectionToClient, colliderComponent);
+
+            if (colliderComponent is null)
+            {
+                return;
+            }
+
+            Octree.Add(identity,
+                new Bounds(identity.transform.position, colliderComponent.CurrentBounds.size));
 
             foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
             {
@@ -164,11 +148,11 @@ namespace Mirage.InterestManagement
 
             Octree.GetColliding(_octreeObservers, identity.GetComponent<OctreeInterestChecker>().CurrentBounds);
 
-            foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
+            for (int i = _octreeObservers.Count - 1; i >= 0; i--)
             {
-                if (!_octreeObservers.Contains(player.Identity)) continue;
+                if (_octreeObservers[i].ConnectionToClient is null) continue;
 
-                _observersList.Add(player);
+                _observersList.Add(_octreeObservers[i].ConnectionToClient);
             }
 
             return _observersList;

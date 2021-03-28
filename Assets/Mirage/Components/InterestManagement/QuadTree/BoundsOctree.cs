@@ -26,24 +26,24 @@ namespace Mirage.Components.InterestManagement
         public int Count { get; private set; }
 
         // Root node of the octree
-        private BoundsOctreeNode<T> rootNode;
+        private BoundsOctreeNode<T> _rootNode;
 
         // Should be a value between 1 and 2. A multiplier for the base size of a node.
         // 1.0 is a "normal" octree, while values > 1 have overlap
-        private readonly float looseness;
+        private readonly float _looseness;
 
         // Size that the octree was on creation
-        private readonly float initialSize;
+        private readonly float _initialSize;
 
         // Minimum side length that a node can be - essentially an alternative to having a max depth
-        private readonly float minSize;
+        private readonly float _minSize;
 
         // For collision visualisation. Automatically removed in builds.
 #if UNITY_EDITOR
 
-        private const int numCollisionsToSave = 4;
-        private readonly Queue<Bounds> lastBoundsCollisionChecks;
-        private readonly Queue<Ray> lastRayCollisionChecks;
+        private const int NumCollisionsToSave = 4;
+        private readonly Queue<Bounds> _lastBoundsCollisionChecks;
+        private readonly Queue<Ray> _lastRayCollisionChecks;
 
 #endif
 
@@ -64,14 +64,14 @@ namespace Mirage.Components.InterestManagement
             }
 
             Count = 0;
-            initialSize = initialWorldSize;
-            minSize = minNodeSize;
-            looseness = Mathf.Clamp(loosenessVal, 1.0f, 2.0f);
-            rootNode = new BoundsOctreeNode<T>(initialSize, minSize, loosenessVal, initialWorldPos);
+            _initialSize = initialWorldSize;
+            _minSize = minNodeSize;
+            _looseness = Mathf.Clamp(loosenessVal, 1.0f, 2.0f);
+            _rootNode = new BoundsOctreeNode<T>(_initialSize, _minSize, loosenessVal, initialWorldPos);
 
 #if UNITY_EDITOR
-            lastRayCollisionChecks = new Queue<Ray>();
-            lastBoundsCollisionChecks = new Queue<Bounds>();
+            _lastRayCollisionChecks = new Queue<Ray>();
+            _lastBoundsCollisionChecks = new Queue<Bounds>();
 #endif
         }
 
@@ -85,9 +85,9 @@ namespace Mirage.Components.InterestManagement
             // Add object or expand the octree until it can be added
             int count = 0; // Safety check against infinite/excessive growth
 
-            if (!rootNode.Add(obj, objBounds))
+            if (!_rootNode.Add(obj, objBounds))
             {
-                Grow(objBounds.center - rootNode.Center);
+                Grow(objBounds.center - _rootNode.Center);
 
                 if (++count > 20)
                 {
@@ -107,17 +107,19 @@ namespace Mirage.Components.InterestManagement
         /// <returns>True if the object was removed successfully.</returns>
         public bool Remove(T obj)
         {
-            bool removed = rootNode.Remove(obj);
+            bool removed = _rootNode.Remove(obj);
 
             // See if we can shrink the octree down now that we've removed the item
-            if (removed)
+            if (!removed)
             {
-                Count--;
-
-                Shrink();
+                return false;
             }
 
-            return removed;
+            Count--;
+
+            Shrink();
+
+            return true;
         }
 
         /// <summary>
@@ -130,7 +132,7 @@ namespace Mirage.Components.InterestManagement
 #if UNITY_EDITOR
             AddCollisionCheck(checkBounds);
 #endif
-            return rootNode.IsColliding(ref checkBounds);
+            return _rootNode.IsColliding(ref checkBounds);
         }
 
         /// <summary>
@@ -145,7 +147,7 @@ namespace Mirage.Components.InterestManagement
 #if UNITY_EDITOR
             AddCollisionCheck(checkBounds);
 #endif
-            return rootNode.IsColliding(ref checkBounds, ref obj);
+            return _rootNode.IsColliding(ref checkBounds, ref obj);
         }
 
         /// <summary>
@@ -159,7 +161,7 @@ namespace Mirage.Components.InterestManagement
 #if UNITY_EDITOR
             AddCollisionCheck(checkRay);
 #endif
-            return rootNode.IsColliding(ref checkRay, maxDistance);
+            return _rootNode.IsColliding(ref checkRay, maxDistance);
         }
 
         /// <summary>
@@ -173,7 +175,7 @@ namespace Mirage.Components.InterestManagement
 #if UNITY_EDITOR
             AddCollisionCheck(checkBounds);
 #endif
-            rootNode.GetColliding(ref checkBounds, collidingWith);
+            _rootNode.GetColliding(ref checkBounds, collidingWith);
         }
 
         /// <summary>
@@ -188,12 +190,12 @@ namespace Mirage.Components.InterestManagement
 #if UNITY_EDITOR
             AddCollisionCheck(checkRay);
 #endif
-            rootNode.GetColliding(ref checkRay, collidingWith, maxDistance);
+            _rootNode.GetColliding(ref checkRay, collidingWith, maxDistance);
         }
 
         public Bounds GetMaxBounds()
         {
-            return rootNode.GetBounds();
+            return _rootNode.GetBounds();
         }
 
         /// <summary>
@@ -202,7 +204,7 @@ namespace Mirage.Components.InterestManagement
         /// </summary>
         public void DrawAllBounds()
         {
-            rootNode.DrawAllBounds();
+            _rootNode.DrawAllBounds();
         }
 
         /// <summary>
@@ -211,7 +213,7 @@ namespace Mirage.Components.InterestManagement
         /// </summary>
         public void DrawAllObjects()
         {
-            rootNode.DrawAllObjects();
+            _rootNode.DrawAllObjects();
         }
 
         // Intended for debugging. Must be called from OnDrawGizmos externally
@@ -225,16 +227,16 @@ namespace Mirage.Components.InterestManagement
         {
             int count = 0;
 
-            foreach (Bounds collisionCheck in lastBoundsCollisionChecks)
+            foreach (Bounds collisionCheck in _lastBoundsCollisionChecks)
             {
-                Gizmos.color = new Color(1.0f, 1.0f - ((float)count / numCollisionsToSave), 1.0f);
+                Gizmos.color = new Color(1.0f, 1.0f - ((float)count / NumCollisionsToSave), 1.0f);
                 Gizmos.DrawCube(collisionCheck.center, collisionCheck.size);
                 count++;
             }
 
-            foreach (Ray collisionCheck in lastRayCollisionChecks)
+            foreach (Ray collisionCheck in _lastRayCollisionChecks)
             {
-                Gizmos.color = new Color(1.0f, 1.0f - ((float)count / numCollisionsToSave), 1.0f);
+                Gizmos.color = new Color(1.0f, 1.0f - ((float)count / NumCollisionsToSave), 1.0f);
                 Gizmos.DrawRay(collisionCheck.origin, collisionCheck.direction);
                 count++;
             }
@@ -251,11 +253,11 @@ namespace Mirage.Components.InterestManagement
 #if UNITY_EDITOR
         void AddCollisionCheck(Bounds checkBounds)
         {
-            lastBoundsCollisionChecks.Enqueue(checkBounds);
+            _lastBoundsCollisionChecks.Enqueue(checkBounds);
 
-            if (lastBoundsCollisionChecks.Count > numCollisionsToSave)
+            if (_lastBoundsCollisionChecks.Count > NumCollisionsToSave)
             {
-                lastBoundsCollisionChecks.Dequeue();
+                _lastBoundsCollisionChecks.Dequeue();
             }
         }
 #endif
@@ -268,11 +270,11 @@ namespace Mirage.Components.InterestManagement
 #if UNITY_EDITOR
         void AddCollisionCheck(Ray checkRay)
         {
-            lastRayCollisionChecks.Enqueue(checkRay);
+            _lastRayCollisionChecks.Enqueue(checkRay);
 
-            if (lastRayCollisionChecks.Count > numCollisionsToSave)
+            if (_lastRayCollisionChecks.Count > NumCollisionsToSave)
             {
-                lastRayCollisionChecks.Dequeue();
+                _lastRayCollisionChecks.Dequeue();
             }
         }
 #endif
@@ -287,42 +289,44 @@ namespace Mirage.Components.InterestManagement
             int yDirection = direction.y >= 0 ? 1 : -1;
             int zDirection = direction.z >= 0 ? 1 : -1;
 
-            BoundsOctreeNode<T> oldRoot = rootNode;
+            BoundsOctreeNode<T> oldRoot = _rootNode;
 
-            float half = rootNode.BaseLength / 2;
-            float newLength = rootNode.BaseLength * 2;
+            float half = _rootNode.BaseLength / 2;
+            float newLength = _rootNode.BaseLength * 2;
 
-            Vector3 newCenter = rootNode.Center + new Vector3(xDirection * half, yDirection * half, zDirection * half);
+            Vector3 newCenter = _rootNode.Center + new Vector3(xDirection * half, yDirection * half, zDirection * half);
 
             // Create a new, bigger octree root node
-            rootNode = new BoundsOctreeNode<T>(newLength, minSize, looseness, newCenter);
+            _rootNode = new BoundsOctreeNode<T>(newLength, _minSize, _looseness, newCenter);
 
-            if (oldRoot.HasAnyObjects())
+            if (!oldRoot.HasAnyObjects())
             {
-                // Create 7 new octree children to go with the old root as children of the new root
-                int rootPos = GetRootPosIndex(xDirection, yDirection, zDirection);
-
-                BoundsOctreeNode<T>[] children = new BoundsOctreeNode<T>[8];
-
-                for (int i = 0; i < 8; i++)
-                {
-                    if (i == rootPos)
-                    {
-                        children[i] = oldRoot;
-                    }
-                    else
-                    {
-                        xDirection = i % 2 == 0 ? -1 : 1;
-                        yDirection = i > 3 ? -1 : 1;
-                        zDirection = (i < 2 || (i > 3 && i < 6)) ? -1 : 1;
-                        children[i] = new BoundsOctreeNode<T>(rootNode.BaseLength, minSize, looseness,
-                            newCenter + new Vector3(xDirection * half, yDirection * half, zDirection * half));
-                    }
-                }
-
-                // Attach the new children to the new root node
-                rootNode.SetChildren(children);
+                return;
             }
+
+            // Create 7 new octree children to go with the old root as children of the new root
+            int rootPos = GetRootPosIndex(xDirection, yDirection, zDirection);
+
+            BoundsOctreeNode<T>[] children = new BoundsOctreeNode<T>[8];
+
+            for (int i = 0; i < 8; i++)
+            {
+                if (i == rootPos)
+                {
+                    children[i] = oldRoot;
+                }
+                else
+                {
+                    xDirection = i % 2 == 0 ? -1 : 1;
+                    yDirection = i > 3 ? -1 : 1;
+                    zDirection = (i < 2 || (i > 3 && i < 6)) ? -1 : 1;
+                    children[i] = new BoundsOctreeNode<T>(_rootNode.BaseLength, _minSize, _looseness,
+                        newCenter + new Vector3(xDirection * half, yDirection * half, zDirection * half));
+                }
+            }
+
+            // Attach the new children to the new root node
+            _rootNode.SetChildren(children);
         }
 
         /// <summary>
@@ -330,7 +334,7 @@ namespace Mirage.Components.InterestManagement
         /// </summary>
         private void Shrink()
         {
-            rootNode = rootNode.ShrinkIfPossible(initialSize);
+            _rootNode = _rootNode.ShrinkIfPossible(_initialSize);
         }
 
         /// <summary>
