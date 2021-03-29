@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using UnityEngine;
 
@@ -9,7 +7,7 @@ namespace Mirage.SocketLayer
     public enum ConnectionState
     {
         /// <summary>
-        /// Inital state
+        /// Initial state
         /// </summary>
         Created = 1,
         /// <summary>
@@ -32,9 +30,38 @@ namespace Mirage.SocketLayer
 
     public sealed class Connection
     {
+        void Assert(bool condition)
+        {
+            if (!condition) logger.Log(LogType.Assert, "Failed Assertion");
+        }
         readonly ILogger logger;
 
-        public ConnectionState State { get; private set; }
+        public ConnectionState _state;
+        public ConnectionState State
+        {
+            get => _state;
+            set
+            {
+                // check new state is allowed for current state
+                switch (value)
+                {
+                    case ConnectionState.Connected:
+                        Assert(_state == ConnectionState.Created || _state == ConnectionState.Connecting);
+                        break;
+
+                    case ConnectionState.Connecting:
+                        Assert(_state == ConnectionState.Created);
+                        break;
+
+                    case ConnectionState.Disconnected:
+                        Assert(_state == ConnectionState.Connected);
+                        break;
+                }
+
+                if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log($"{EndPoint} changed state from {_state} to {value}");
+                _state = value;
+            }
+        }
 
         private readonly Peer peer;
         public readonly EndPoint EndPoint;
@@ -47,9 +74,7 @@ namespace Mirage.SocketLayer
         private KeepAliveTracker keepAliveTracker;
         private DisconnectedTracker disconnectedTracker;
 
-        HashSet<IConnectionPlayer> players = new HashSet<IConnectionPlayer>();
-
-        public IReadOnlyCollection<IConnectionPlayer> Players => players;
+        IConnectionPlayer player;
 
         internal Connection(Peer peer, EndPoint endPoint, IDataHandler dataHandler, Config config, Time time, ILogger logger)
         {
@@ -64,28 +89,7 @@ namespace Mirage.SocketLayer
             connectingTracker = new ConnectingTracker(config, time);
             timeoutTracker = new TimeoutTracker(config, time);
             keepAliveTracker = new KeepAliveTracker(config, time);
-            disconnectedTracker = new DisconnectedTracker();
-        }
-
-        public void ChangeState(ConnectionState state)
-        {
-            switch (state)
-            {
-                case ConnectionState.Connected:
-                    if (State == ConnectionState.Created || State == ConnectionState.Connecting) logger.Log(LogType.Assert, "Failed Assertion");
-                    break;
-
-                case ConnectionState.Connecting:
-                    if (State == ConnectionState.Created) logger.Log(LogType.Assert, "Failed Assertion");
-                    break;
-
-                case ConnectionState.Disconnected:
-                    if (State == ConnectionState.Connected) logger.Log(LogType.Assert, "Failed Assertion");
-                    break;
-            }
-
-            if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log($"{EndPoint} changed state from {State} to {state}");
-            State = state;
+            disconnectedTracker = new DisconnectedTracker(config, time);
         }
 
         public void Update()
@@ -121,27 +125,30 @@ namespace Mirage.SocketLayer
 
         public void AddPlayer(IConnectionPlayer player)
         {
-            players.Add(player);
-        }
-        public void DisconnectPlayer(IConnectionPlayer player)
-        {
-            players.Remove(player);
-            if (players.Count == 0)
-            {
-                Disconnect();
-            }
+            if (this.player != null) throw new InvalidOperationException("Cant set player if one is already set");
+
+            this.player = player;
         }
 
-        internal void Disconnect()
+        /// <summary>
+        /// starts disconnecting this connection
+        /// </summary>
+        public void Disconnect()
         {
-            peer.RemoveConnection(this);
+            Disconnect(DisconnectReason.RequestedByPeer);
+        }
+        internal void Disconnect(DisconnectReason reason, bool sendToOther = true)
+        {
+            State = ConnectionState.Disconnected;
+            disconnectedTracker.Disconnect();
+            if (sendToOther)
+                peer.SendCommand(this, Commands.Disconnect, (byte)reason);
         }
 
         internal void ReceivePacket(Packet packet)
         {
             ArraySegment<byte> segment = packet.ToSegment();
-            // todo what if no players?
-            dataHandler.ReceiveData(players.First(), segment);
+            dataHandler.ReceiveData(player, segment);
         }
 
 
@@ -154,7 +161,7 @@ namespace Mirage.SocketLayer
             {
                 if (connectingTracker.MaxAttempts())
                 {
-                    // client failed to connect
+                    peer.RemoveConnection(this);
                 }
 
                 connectingTracker.OnAttempt();
@@ -163,11 +170,10 @@ namespace Mirage.SocketLayer
         }
         void UpdateDisconnected()
         {
-            // todo why not remove disconnected right away
-            //if ((connection.DisconnectTime + _config.DisconnectIdleTime) < _clock.ElapsedInSeconds)
-            //{
-            //    RemoveConnection(connection);
-            //}
+            if (disconnectedTracker.TimeToRemove())
+            {
+                peer.RemoveConnection(this);
+            }
         }
 
         /// <summary>
@@ -180,6 +186,7 @@ namespace Mirage.SocketLayer
                 // disconnect here
                 throw new NotImplementedException();
                 return;
+                Disconnect(DisconnectReason.Timeout);
             }
 
             if (keepAliveTracker.TimeToSend())
@@ -207,12 +214,12 @@ namespace Mirage.SocketLayer
                 return lastAttempt + config.ConnectAttemptInterval < time.Now;
             }
 
-            internal bool MaxAttempts()
+            public bool MaxAttempts()
             {
                 return AttemptCount >= config.MaxConnectAttempts;
             }
 
-            internal void OnAttempt()
+            public void OnAttempt()
             {
                 AttemptCount++;
                 lastAttempt = time.Now;
@@ -233,7 +240,7 @@ namespace Mirage.SocketLayer
 
             public bool TimeToDisconnect()
             {
-                return lastRecvTime + config.DisconnectTimeout < time.Now;
+                return lastRecvTime + config.TimeoutDuration < time.Now;
             }
 
             public void SetReceiveTime()
@@ -259,11 +266,34 @@ namespace Mirage.SocketLayer
                 return lastSendTime + config.KeepAliveInterval < time.Now;
             }
 
-            internal void SetSendTime()
+            public void SetSendTime()
             {
                 lastSendTime = time.Now;
             }
         }
-        class DisconnectedTracker { }
+        class DisconnectedTracker
+        {
+            bool isDisonnected;
+            float disconnectTime;
+            readonly Config config;
+            readonly Time time;
+
+            public DisconnectedTracker(Config config, Time time)
+            {
+                this.config = config;
+                this.time = time ?? throw new ArgumentNullException(nameof(time));
+            }
+
+            public void Disconnect()
+            {
+                disconnectTime = time.Now + config.DisconnectDuration;
+                isDisonnected = true;
+            }
+
+            public bool TimeToRemove()
+            {
+                return isDisonnected && disconnectTime < time.Now;
+            }
+        }
     }
 }

@@ -10,6 +10,11 @@ namespace Mirage.SocketLayer
     /// </summary>
     public interface IDataHandler
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="player">player attached to connect that recieved the message, could be null</param>
+        /// <param name="segment"></param>
         void ReceiveData(IConnectionPlayer player, ArraySegment<byte> segment);
     }
 
@@ -35,6 +40,10 @@ namespace Mirage.SocketLayer
     /// </summary>
     public sealed class Peer
     {
+        void Assert(bool condition)
+        {
+            if (!condition) logger.Log(LogType.Assert, "Failed Assertion");
+        }
         readonly ILogger logger;
 
         // todo SendUnreliable
@@ -52,7 +61,7 @@ namespace Mirage.SocketLayer
         readonly byte[] commandBuffer = new byte[3];
 
         public event Action<Connection> OnConnected;
-        public event Action<Connection> OnDisconnected;
+        public event Action<Connection, DisconnectReason> OnDisconnected;
         public event Action<Connection, RejectReason> OnConnectionFailed;
 
         public Peer(ISocket socket, IDataHandler dataHandler, Config config, ILogger logger)
@@ -214,7 +223,7 @@ namespace Mirage.SocketLayer
                     HandleConnectionRejected(connection, packet);
                     break;
                 case Commands.Disconnect:
-                    HandleConnectionDisconnect(connection);
+                    HandleConnectionDisconnect(connection, packet);
                     break;
                 default:
                     // handle message invalid command type
@@ -303,7 +312,7 @@ namespace Mirage.SocketLayer
 
         private void SetConnectionAsConnected(Connection connection)
         {
-            connection.ChangeState(ConnectionState.Connected);
+            connection.State = ConnectionState.Connected;
             OnConnected?.Invoke(connection);
         }
 
@@ -347,15 +356,26 @@ namespace Mirage.SocketLayer
             }
         }
 
+        internal void OnConnectionDisconnected(Connection connection, DisconnectReason reason)
+        {
+            OnDisconnected.Invoke(connection, reason);
+        }
         internal void RemoveConnection(Connection connection)
         {
-            connections.Remove(connection.EndPoint);
-            OnDisconnected.Invoke(connection);
+            // shouldn't be trying to removed a destroyed connected
+            Assert(connection.State != ConnectionState.Destroyed);
+
+            bool removed = connections.Remove(connection.EndPoint);
+            connection.State = ConnectionState.Destroyed;
+
+            // value should be removed from dictionary
+            Assert(removed);
         }
 
-        void HandleConnectionDisconnect(Connection connection)
+        void HandleConnectionDisconnect(Connection connection, Packet packet)
         {
-            throw new NotImplementedException();
+            var reason = (DisconnectReason)packet.data[2];
+            connection.Disconnect(reason, false);
         }
 
         void UpdateConnections()
@@ -468,6 +488,19 @@ namespace Mirage.SocketLayer
         None = 0,
         ServerFull = 1,
         Timeout = 2,
+    }
+
+    public enum DisconnectReason
+    {
+        None,
+        /// <summary>
+        /// No message recieved in timeout window
+        /// </summary>
+        Timeout = 1,
+        /// <summary>
+        /// Disconnect called by higher level
+        /// </summary>
+        RequestedByPeer = 2,
     }
 
     // todo how should we use this?
