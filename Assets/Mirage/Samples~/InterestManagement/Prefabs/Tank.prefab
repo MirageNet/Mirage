@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 6900008319038825817}
   - component: {fileID: 5194388907919410155}
   - component: {fileID: 114654712548978148}
-  - component: {fileID: -5216695118302212130}
   m_Layer: 0
   m_Name: Tank
   m_TagString: Player
@@ -32,7 +31,7 @@ Transform:
   m_GameObject: {fileID: 1916082411674582}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children:
   - {fileID: 7831918942946891954}
   - {fileID: 6564220120147636086}
@@ -61,7 +60,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 114654712548978148}
-        m_TargetAssemblyTypeName: Mirage.Examples.InterestManagement.Tank, Mirage.Examples
         m_MethodName: SetRandomName
         m_Mode: 1
         m_Arguments:
@@ -182,23 +180,6 @@ MonoBehaviour:
   rotationSpeed: 80
   playerName: 
   nameText: {fileID: 6763574687443798610}
---- !u!114 &-5216695118302212130
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1916082411674582}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1731d8de2d0c84333b08ebe1e79f4118, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  VisibilityRange: 2
-  VisibilityUpdateInterval: 1
-  ForceHidden: 0
 --- !u!1 &1794225417093723422
 GameObject:
   m_ObjectHideFlags: 0
@@ -246,7 +227,6 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -271,7 +251,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!102 &6763574687443798610
 TextMesh:
   serializedVersion: 3
@@ -484,6 +463,7 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 38b49695fc0a4418bbc350f2366660c5, type: 3}
 --- !u!4 &7831918942946891954 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400010, guid: 38b49695fc0a4418bbc350f2366660c5, type: 3}
+  m_CorrespondingSourceObject: {fileID: 400010, guid: 38b49695fc0a4418bbc350f2366660c5,
+    type: 3}
   m_PrefabInstance: {fileID: 7831918942947279416}
   m_PrefabAsset: {fileID: 0}

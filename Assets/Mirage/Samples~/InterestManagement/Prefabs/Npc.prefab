@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 8166229233224018893}
   - component: {fileID: 5745257042001409199}
   - component: {fileID: 6411109812051327673}
-  - component: {fileID: 8918006532685550525}
   - component: {fileID: -5847114806862335758}
   - component: {fileID: -5831635982431117221}
   - component: {fileID: 1157770445662775453}
@@ -32,7 +31,7 @@ Transform:
   m_GameObject: {fileID: 1902385843019246699}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 4.5784225, y: 0.113, z: 0.19971979}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -60,7 +59,6 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -85,7 +83,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &6411109812051327673
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -106,7 +103,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1157770445662775453}
-        m_TargetAssemblyTypeName: Mirage.Examples.InterestManagement.Wander, Mirage.Examples
         m_MethodName: StartMoving
         m_Mode: 1
         m_Arguments:
@@ -118,7 +114,6 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: -5847114806862335758}
-        m_TargetAssemblyTypeName: UnityEngine.Behaviour, UnityEngine
         m_MethodName: set_enabled
         m_Mode: 6
         m_Arguments:
@@ -148,23 +143,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   hasSpawned: 0
---- !u!114 &8918006532685550525
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1902385843019246699}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1731d8de2d0c84333b08ebe1e79f4118, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  VisibilityRange: 3
-  VisibilityUpdateInterval: 1
-  ForceHidden: 0
 --- !u!195 &-5847114806862335758
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -220,4 +198,4 @@ MonoBehaviour:
   agent: {fileID: -5847114806862335758}
   bounds:
     m_Center: {x: 0, y: 0.1, z: 0}
-    m_Extent: {x: 4.5, y: 0, z: 4.5}
+    m_Extent: {x: 45, y: 0, z: 45}
