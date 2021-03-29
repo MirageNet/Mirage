@@ -23,12 +23,17 @@ namespace Mirage.SocketLayer
         Destroyed = 10,
     }
 
-    public interface IConnectionPlayer
+    public interface IConnection
     {
-        Connection Connection { get; }
+        ConnectionState State { get; }
+
+        void Disconnect();
+        void SendNotifiy();
+        void SendReliable(ArraySegment<byte> segment);
+        void SendUnreiable(ArraySegment<byte> segment);
     }
 
-    public sealed class Connection
+    public sealed class Connection : IConnection
     {
         void Assert(bool condition)
         {
@@ -73,8 +78,6 @@ namespace Mirage.SocketLayer
         private TimeoutTracker timeoutTracker;
         private KeepAliveTracker keepAliveTracker;
         private DisconnectedTracker disconnectedTracker;
-
-        IConnectionPlayer player;
 
         internal Connection(Peer peer, EndPoint endPoint, IDataHandler dataHandler, Config config, Time time, ILogger logger)
         {
@@ -122,14 +125,6 @@ namespace Mirage.SocketLayer
         public void SendUnreiable(ArraySegment<byte> segment) => peer.SendUnreliable(this);
         public void SendNotifiy() => peer.SendNotify(this);
 
-
-        public void AddPlayer(IConnectionPlayer player)
-        {
-            if (this.player != null) throw new InvalidOperationException("Cant set player if one is already set");
-
-            this.player = player;
-        }
-
         /// <summary>
         /// starts disconnecting this connection
         /// </summary>
@@ -148,7 +143,7 @@ namespace Mirage.SocketLayer
         internal void ReceivePacket(Packet packet)
         {
             ArraySegment<byte> segment = packet.ToSegment();
-            dataHandler.ReceiveData(player, segment);
+            dataHandler.ReceiveData(this, segment);
         }
 
 

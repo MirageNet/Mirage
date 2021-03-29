@@ -13,9 +13,9 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="player">player attached to connect that recieved the message, could be null</param>
+        /// <param name="connection">player attached to connect that recieved the message, could be null</param>
         /// <param name="segment"></param>
-        void ReceiveData(IConnectionPlayer player, ArraySegment<byte> segment);
+        void ReceiveData(IConnection connection, ArraySegment<byte> segment);
     }
 
     internal class Time
@@ -80,7 +80,7 @@ namespace Mirage.SocketLayer
         public Connection Connect(EndPoint endPoint)
         {
             Connection connection = CreateNewConnection(endPoint);
-            connection.ChangeState(ConnectionState.Connecting);
+            connection.State = ConnectionState.Connecting;
 
             // update now to send connectRequest command
             connection.Update();
