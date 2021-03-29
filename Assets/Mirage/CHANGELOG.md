@@ -1,3 +1,10 @@
+## [84.3.1](https://github.com/MirageNet/Mirage/compare/v84.3.0...v84.3.1) (2021-03-29)
+
+
+### Bug Fixes
+
+* adding FormerlySerializedAs to networkanimator ([39f8fbd](https://github.com/MirageNet/Mirage/commit/39f8fbd0c8b1450f15b33ddba7965f147433ff11))
+
 # [84.3.0](https://github.com/MirageNet/Mirage/compare/v84.2.1...v84.3.0) (2021-03-27)
 
 
