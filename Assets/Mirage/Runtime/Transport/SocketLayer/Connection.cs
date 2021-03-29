@@ -33,7 +33,7 @@ namespace Mirage.SocketLayer
         void SendUnreiable(ArraySegment<byte> segment);
     }
 
-    public sealed class Connection : IConnection
+    internal sealed class Connection : IConnection
     {
         void Assert(bool condition)
         {
@@ -178,9 +178,6 @@ namespace Mirage.SocketLayer
         {
             if (timeoutTracker.TimeToDisconnect())
             {
-                // disconnect here
-                throw new NotImplementedException();
-                return;
                 Disconnect(DisconnectReason.Timeout);
             }
 
@@ -189,7 +186,6 @@ namespace Mirage.SocketLayer
                 peer.SendKeepAlive(this);
             }
         }
-
 
         class ConnectingTracker
         {
@@ -220,7 +216,6 @@ namespace Mirage.SocketLayer
                 lastAttempt = time.Now;
             }
         }
-
         class TimeoutTracker
         {
             float lastRecvTime = float.MinValue;

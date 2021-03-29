@@ -60,9 +60,9 @@ namespace Mirage.SocketLayer
 
         readonly byte[] commandBuffer = new byte[3];
 
-        public event Action<Connection> OnConnected;
-        public event Action<Connection, DisconnectReason> OnDisconnected;
-        public event Action<Connection, RejectReason> OnConnectionFailed;
+        public event Action<IConnection> OnConnected;
+        public event Action<IConnection, DisconnectReason> OnDisconnected;
+        public event Action<IConnection, RejectReason> OnConnectionFailed;
 
         public Peer(ISocket socket, IDataHandler dataHandler, Config config, ILogger logger)
         {
@@ -77,7 +77,7 @@ namespace Mirage.SocketLayer
 
 
         public void Bind(EndPoint endPoint) => socket.Bind(endPoint);
-        public Connection Connect(EndPoint endPoint)
+        public IConnection Connect(EndPoint endPoint)
         {
             Connection connection = CreateNewConnection(endPoint);
             connection.State = ConnectionState.Connecting;
@@ -95,9 +95,9 @@ namespace Mirage.SocketLayer
             throw new NotImplementedException();
         }
 
-        public void SendNotify(Connection connection) => throw new NotImplementedException();
-        public void SendReliable(Connection connection) => throw new NotImplementedException();
-        public void SendUnreliable(Connection connection) => throw new NotImplementedException();
+        internal void SendNotify(Connection connection) => throw new NotImplementedException();
+        internal void SendReliable(Connection connection) => throw new NotImplementedException();
+        internal void SendUnreliable(Connection connection) => throw new NotImplementedException();
 
         private void Send(Connection connection, Packet packet) => Send(connection, packet.data, packet.length);
         private void Send(Connection connection, byte[] data, int? length = null)
