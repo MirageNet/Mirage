@@ -10,7 +10,90 @@ namespace Mirage.InterestManagement
     /// </summary>
     public class DistanceConstantSightInterestManager : InterestManager
     {
+        private class NetIdComparer : IEqualityComparer<NetworkIdentity>
+        {
+            public bool Equals(NetworkIdentity x, NetworkIdentity y)
+            {
+                return x.NetId == y.NetId;
+            }
+
+            public int GetHashCode(NetworkIdentity obj)
+            {
+                return (int)obj.NetId;
+            }
+        }
+
         public float SightDistnace = 10;
+        public float UpdateInterval = 0;
+        float nextUpdate = 0;
+
+        public void Update()
+        {
+            if (nextUpdate < Time.time)
+            {
+                rebuild();
+                nextUpdate += UpdateInterval;
+            }
+        }
+
+        Dictionary<INetworkPlayer, HashSet<NetworkIdentity>> lastFrame = new Dictionary<INetworkPlayer, HashSet<NetworkIdentity>>();
+        Dictionary<INetworkPlayer, HashSet<NetworkIdentity>> nextFrame = new Dictionary<INetworkPlayer, HashSet<NetworkIdentity>>();
+
+        private void rebuild()
+        {
+            foreach (NetworkIdentity identity in ServerObjectManager.SpawnedObjects.Values)
+            {
+                IReadOnlyCollection<INetworkPlayer> observers = Observers(identity);
+                foreach (INetworkPlayer player in observers)
+                {
+                    if (!nextFrame.TryGetValue(player, out HashSet<NetworkIdentity> nextSet))
+                    {
+                        nextSet = new HashSet<NetworkIdentity>(new NetIdComparer());
+                        nextFrame[player] = nextSet;
+                    }
+
+                    nextSet.Add(identity);
+                }
+            }
+
+            foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
+            {
+                if (!lastFrame.TryGetValue(player, out HashSet<NetworkIdentity> lastSet))
+                {
+                    lastSet = new HashSet<NetworkIdentity>(new NetIdComparer());
+                    lastFrame[player] = lastSet;
+                }
+                if (!nextFrame.TryGetValue(player, out HashSet<NetworkIdentity> nextSet))
+                {
+                    nextSet = new HashSet<NetworkIdentity>(new NetIdComparer());
+                    nextFrame[player] = nextSet;
+                }
+
+
+                foreach (NetworkIdentity identity in lastSet)
+                {
+                    if (!nextSet.Contains(identity))
+                    {
+                        ServerObjectManager.HideForConnection(identity, player);
+                    }
+                }
+                foreach (NetworkIdentity identity in nextSet)
+                {
+                    if (!lastSet.Contains(identity))
+                    {
+                        ServerObjectManager.ShowForConnection(identity, player);
+                    }
+                }
+
+                // reset collections
+                lastSet.Clear();
+                foreach (NetworkIdentity identity in nextSet)
+                {
+                    lastSet.Add(identity);
+                }
+                nextSet.Clear();
+            }
+        }
 
         List<INetworkPlayer> temp = new List<INetworkPlayer>();
 
