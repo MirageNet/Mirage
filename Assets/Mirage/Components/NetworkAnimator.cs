@@ -23,6 +23,7 @@ namespace Mirage
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkAnimator));
 
         [Header("Authority")]
+        [FormerlySerializedAs("clientAuthority")]
         [Tooltip("Set to true if animations come from owner client,  set to false if animations always come from server")]
         public bool ClientAuthority;
 
@@ -30,6 +31,7 @@ namespace Mirage
         /// The animator component to synchronize.
         /// </summary>
         [FormerlySerializedAs("m_Animator")]
+        [FormerlySerializedAs("animator")]
         [Header("Animator")]
         [Tooltip("Animator that will have parameters synchronized")]
         public Animator Animator;
