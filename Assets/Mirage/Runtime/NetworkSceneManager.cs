@@ -10,9 +10,10 @@ using InvalidEnumArgumentException = System.ComponentModel.InvalidEnumArgumentEx
 namespace Mirage
 {
     /// <summary>
-    /// Provides Scene Management to a NetworkServer and or NetworkClient.
+    /// NetworkSceneManager is an optional component that helps keep scene in sync between server and client.
     /// <para>The <see cref="NetworkClient">NetworkClient</see> loads scenes as instructed by the <see cref="NetworkServer">NetworkServer</see>.</para>
     /// <para>The <see cref="NetworkServer">NetworkServer</see> controls the currently active Scene and any additive Load/Unload.</para>
+    /// <para>when a client connect NetworkSceneManager will send a message telling the new client to load the scene that is active on the server</para>
     /// </summary>
     [AddComponentMenu("Network/NetworkSceneManager")]
     [DisallowMultipleComponent]
