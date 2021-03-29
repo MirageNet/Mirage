@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using Mirage.InterestManagement;
@@ -10,6 +11,43 @@ using static UnityEngine.Object;
 
 namespace Mirage.Tests.Performance.Runtime
 {
+    [Ignore("NotImplemented")]
+    public class SpatialHashInterestManagementPerformanceTest : InterestManagementPerformanceBase
+    {
+        protected override IEnumerator SetupInterestManagement(NetworkServer server)
+        {
+            throw new NotImplementedException();
+            //server.gameObject.AddComponent<SpatialHashInterestManager>();
+
+            // wait frame for setup
+            yield return null;
+        }
+    }
+    [Ignore("NotImplemented")]
+    public class GridAndDistanceInterestManagementPerformanceTest : InterestManagementPerformanceBase
+    {
+        protected override IEnumerator SetupInterestManagement(NetworkServer server)
+        {
+            throw new NotImplementedException();
+            //server.gameObject.AddComponent<SpatialHashInterestManager>();
+
+            // wait frame for setup
+            yield return null;
+        }
+    }
+
+    [Ignore("NotImplemented")]
+    public class QuadTreeInterestManagementPerformanceTest : InterestManagementPerformanceBase
+    {
+        protected override IEnumerator SetupInterestManagement(NetworkServer server)
+        {
+            throw new NotImplementedException();
+            //server.gameObject.AddComponent<QuadTreeInterestManager>();
+
+            // wait frame for setup
+            yield return null;
+        }
+    }
     [Category("Performance"), Category("InterestManagement")]
     public abstract class InterestManagementPerformanceBase
     {
