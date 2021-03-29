@@ -19,6 +19,10 @@ namespace Mirage.SocketLayer
         {
             if (!condition) logger.Log(LogType.Assert, "Failed Assertion");
         }
+        void Error(string error)
+        {
+            logger.Log(LogType.Error, error);
+        }
         readonly ILogger logger;
 
         // todo SendUnreliable
@@ -280,8 +284,8 @@ namespace Mirage.SocketLayer
                     break;
 
                 case ConnectionState.Connecting:
-                    // todo use better Exception type
-                    throw new Exception($"Server connections should not be in {nameof(ConnectionState.Connecting)} state");
+                    Error($"Server connections should not be in {nameof(ConnectionState.Connecting)} state");
+                    break;
             }
         }
 
@@ -302,8 +306,8 @@ namespace Mirage.SocketLayer
             switch (connection.State)
             {
                 case ConnectionState.Created:
-                    // todo use better Exception type
-                    throw new Exception($"Accepted Connections should not be in {nameof(ConnectionState.Created)} state");
+                    Error($"Accepted Connections should not be in {nameof(ConnectionState.Created)} state");
+                    break;
 
                 case ConnectionState.Connected:
                     // ignore this, command may have been re-sent or recieved twice
@@ -326,8 +330,8 @@ namespace Mirage.SocketLayer
                     break;
 
                 default:
-                    // todo use better Exception type
-                    throw new Exception($"Rejected Connections should not be in {nameof(ConnectionState.Created)} state");
+                    Error($"Rejected Connections should not be in {nameof(ConnectionState.Created)} state");
+                    break;
             }
         }
 
