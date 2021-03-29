@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Mirage
 {
-    public sealed class UdpTransport : TransportV2
+    public sealed class UdpTransport : SocketCreator
     {
         [SerializeField] int port;
 

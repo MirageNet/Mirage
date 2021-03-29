@@ -4,25 +4,6 @@ using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
-    public enum ConnectionState
-    {
-        /// <summary>
-        /// Initial state
-        /// </summary>
-        Created = 1,
-        /// <summary>
-        /// Client is connecting to server
-        /// </summary>
-        Connecting = 2,
-        /// <summary>
-        /// Server as accepted connection
-        /// </summary>
-        Connected = 3,
-
-        Disconnected = 9,
-        Destroyed = 10,
-    }
-
     public interface IConnection
     {
         ConnectionState State { get; }
@@ -136,8 +117,7 @@ namespace Mirage.SocketLayer
         {
             State = ConnectionState.Disconnected;
             disconnectedTracker.Disconnect();
-            if (sendToOther)
-                peer.SendCommand(this, Commands.Disconnect, (byte)reason);
+            peer.OnConnectionDisconnected(this, reason, sendToOther);
         }
 
         internal void ReceivePacket(Packet packet)

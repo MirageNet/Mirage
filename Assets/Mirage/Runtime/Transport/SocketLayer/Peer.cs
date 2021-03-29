@@ -5,34 +5,9 @@ using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
-    /// <summary>
-    /// Handlers data from SocketLayer
-    /// </summary>
-    public interface IDataHandler
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection">player attached to connect that recieved the message, could be null</param>
-        /// <param name="segment"></param>
-        void ReceiveData(IConnection connection, ArraySegment<byte> segment);
-    }
-
     internal class Time
     {
         public float Now => UnityEngine.Time.time;
-    }
-    internal class ConnectKeyValidator
-    {
-        // todo pass in key instead of having constant
-        readonly byte[] key = new[] { (byte)'H' };
-
-        public bool Validate(Packet packet)
-        {
-            byte keyByte = packet.data[2];
-
-            return keyByte == key[0];
-        }
     }
 
     /// <summary>
@@ -356,8 +331,17 @@ namespace Mirage.SocketLayer
             }
         }
 
-        internal void OnConnectionDisconnected(Connection connection, DisconnectReason reason)
+        /// <summary>
+        /// Called by connection when it is disconnected
+        /// </summary>
+        internal void OnConnectionDisconnected(Connection connection, DisconnectReason reason, bool sendToOther)
         {
+            if (sendToOther)
+            {
+                SendCommand(connection, Commands.Disconnect, (byte)reason);
+            }
+
+            // tell high level
             OnDisconnected.Invoke(connection, reason);
         }
         internal void RemoveConnection(Connection connection)
@@ -385,149 +369,5 @@ namespace Mirage.SocketLayer
                 kvp.Value.Update();
             }
         }
-    }
-    internal struct Packet
-    {
-        const int MinPacketSize = 1;
-        const int MinCommandSize = 2;
-        /// <summary>
-        /// Min size of message given to Mirage
-        /// </summary>
-        const int MinMessageSize = 3;
-
-        public byte[] data;
-        public int length;
-
-        public Packet(byte[] data, int length)
-        {
-            this.data = data ?? throw new ArgumentNullException(nameof(data));
-            this.length = length;
-        }
-
-        public bool IsValidSize()
-        {
-            if (length < MinPacketSize)
-                return false;
-
-            switch (type)
-            {
-                case PacketType.Command:
-                    return length >= MinCommandSize;
-
-                case PacketType.Unreliable:
-                case PacketType.Notify:
-                    return length >= MinMessageSize;
-
-                default:
-                case PacketType.KeepAlive:
-                    return true;
-            }
-        }
-
-        public PacketType type => (PacketType)data[0];
-        public Commands command => (Commands)data[1];
-
-        public ArraySegment<byte> ToSegment()
-        {
-            // ingore packet type
-            return new ArraySegment<byte>(data, 1, length);
-        }
-    }
-
-    internal enum PacketType
-    {
-        /// <summary>
-        /// see <see cref="Commands"/>
-        /// </summary>
-        Command = 1,
-
-        Unreliable = 2,
-        Notify = 3,
-
-        /// <summary>
-        /// Used to keep connection alive.
-        /// <para>Similar to ping/pong</para>
-        /// </summary>
-        KeepAlive = 4,
-    }
-
-    /// <summary>
-    /// Small message used to control a connection
-    /// <para>
-    ///     <see cref="PacketType"/> and Commands uses their own byte/enum to split up the flow and add struture to the code.
-    /// </para>
-    /// </summary>
-    internal enum Commands
-    {
-        /// <summary>
-        /// Sent from client to request to connect to server
-        /// </summary>
-        ConnectRequest = 1,
-
-        /// <summary>
-        /// Sent when Server accepts client
-        /// </summary>
-        ConnectionAccepted = 2,
-
-        /// <summary>
-        /// Sent when server rejects client
-        /// </summary>
-        ConnectionRejected = 3,
-
-        /// <summary>
-        /// Sent from client or server to close connection
-        /// </summary>
-        Disconnect = 4,
-    }
-
-    /// <summary>
-    /// Reson for reject sent from server
-    /// </summary>
-    public enum RejectReason
-    {
-        None = 0,
-        ServerFull = 1,
-        Timeout = 2,
-    }
-
-    public enum DisconnectReason
-    {
-        None,
-        /// <summary>
-        /// No message recieved in timeout window
-        /// </summary>
-        Timeout = 1,
-        /// <summary>
-        /// Disconnect called by higher level
-        /// </summary>
-        RequestedByPeer = 2,
-    }
-
-    // todo how should we use this?
-    public sealed class PeerDebug
-    {
-        public int ReceivedBytes { get; set; }
-        public int SentBytes { get; set; }
-    }
-
-
-    /// <summary>
-    /// Creates <see cref="ISocket"/>
-    /// </summary>
-    /// <remarks>
-    /// The only job of Transport is to create a <see cref="ISocket"/> that will be used by mirage to send/recieve data.
-    /// <para>This is a MonoBehaviour so can be attached in the inspector</para>
-    /// </remarks>
-    // todo rename this to Transport when finished
-    public abstract class TransportV2 : MonoBehaviour
-    {
-        public abstract ISocket CreateClientSocket();
-        public abstract ISocket CreateServerSocket();
-
-        public abstract EndPoint GetBindEndPoint();
-        public abstract EndPoint GetConnectEndPoint(string address);
-
-        public abstract bool ClientSupported { get; }
-        public abstract bool ServerSupported { get; }
     }
 }
