@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using Mirage.Examples.InterestManagement;
 using Mirage.InterestManagement;
 using NUnit.Framework;
+using Unity.PerformanceTesting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -52,7 +54,12 @@ namespace Mirage.Tests.Performance.Runtime
     public abstract class InterestManagementPerformanceBase
     {
         const string testScene = "Assets/Examples/InterestManagement/Scenes/Scene.unity";
-        const int clientCount = 10;
+        const string NpcSpawnerName = "NpcSpawner";
+        const string LootSpawnerName = "LootSpawner";
+        const int clientCount = 100;
+        const int stationaryCount = 3500;
+        const int movingCount = 500;
+
 
         private NetworkServer server;
         private LoopbackTransport transport;
@@ -66,6 +73,9 @@ namespace Mirage.Tests.Performance.Runtime
 
             // wait 1 frame for start to be called
             yield return null;
+            GameObject.Find(LootSpawnerName).GetComponent<Spawner>().count = stationaryCount;
+            GameObject.Find(NpcSpawnerName).GetComponent<Spawner>().count = movingCount;
+
 
             server = FindObjectOfType<NetworkServer>();
             transport = server.gameObject.AddComponent<LoopbackTransport>();
@@ -130,5 +140,23 @@ namespace Mirage.Tests.Performance.Runtime
         {
             yield return new WaitForSeconds(5);
         }
+
+        [UnityTest, Performance]
+        public IEnumerator FramePerformance()
+        {
+            SampleGroup[] sampleGroups =
+            {
+                new SampleGroup("Observers", SampleUnit.Microsecond),
+                new SampleGroup("OnAuthenticated", SampleUnit.Microsecond),
+                new SampleGroup("OnSpawned", SampleUnit.Microsecond),
+            };
+
+            yield return Measure.Frames()
+                .ProfilerMarkers(sampleGroups)
+                .WarmupCount(5)
+                .MeasurementCount(300)
+                .Run();
+        }
+
     }
 }
