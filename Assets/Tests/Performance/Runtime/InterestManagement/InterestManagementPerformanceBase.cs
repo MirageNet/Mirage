@@ -1,5 +1,6 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using Mirage.InterestManagement;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -10,7 +11,7 @@ using static UnityEngine.Object;
 namespace Mirage.Tests.Performance.Runtime
 {
     [Category("Performance"), Category("InterestManagement")]
-    public class InterestManagementPerformanceBase
+    public abstract class InterestManagementPerformanceBase
     {
         const string testScene = "Assets/Examples/InterestManagement/Scenes/Scene.unity";
         const int clientCount = 10;
@@ -35,6 +36,10 @@ namespace Mirage.Tests.Performance.Runtime
             bool started = false;
             server.MaxConnections = clientCount;
 
+            removeExistingIM();
+            // wait frame for destroy
+            yield return null;
+
             yield return SetupInterestManagement(server);
 
             server.Started.AddListener(() => started = true);
@@ -54,12 +59,21 @@ namespace Mirage.Tests.Performance.Runtime
             }
         }
 
+        private void removeExistingIM()
+        {
+            InterestManager[] existing = server.GetComponents<InterestManager>();
+            for (int i = 0; i < existing.Length; i++)
+            {
+                Destroy(existing[i]);
+            }
+        }
+
         /// <summary>
         /// Called before server starts
         /// </summary>
         /// <param name="server"></param>
         /// <returns></returns>
-        protected virtual IEnumerator SetupInterestManagement(NetworkServer server) { yield return null; }
+        protected abstract IEnumerator SetupInterestManagement(NetworkServer server);
 
 
         [UnityTearDown]
@@ -71,9 +85,6 @@ namespace Mirage.Tests.Performance.Runtime
             // open new scene so that old one is destroyed
             SceneManager.CreateScene("empty", new CreateSceneParameters(LocalPhysicsMode.None));
             yield return EditorSceneManager.UnloadSceneAsync(testScene);
-
-            yield return new WaitForSeconds(5);
-
         }
 
         [UnityTest]
