@@ -9,9 +9,9 @@ namespace Mirage.SocketLayer
         ConnectionState State { get; }
 
         void Disconnect();
-        void SendNotifiy();
+        void SendNotify();
         void SendReliable(ArraySegment<byte> segment);
-        void SendUnreiable(ArraySegment<byte> segment);
+        void SendUnreliable(ArraySegment<byte> segment);
     }
 
     internal sealed class Connection : IConnection
@@ -103,8 +103,8 @@ namespace Mirage.SocketLayer
         }
 
         public void SendReliable(ArraySegment<byte> segment) => peer.SendReliable(this);
-        public void SendUnreiable(ArraySegment<byte> segment) => peer.SendUnreliable(this);
-        public void SendNotifiy() => peer.SendNotify(this);
+        public void SendUnreliable(ArraySegment<byte> segment) => peer.SendUnreliable(this, segment);
+        public void SendNotify() => peer.SendNotify(this);
 
         /// <summary>
         /// starts disconnecting this connection
@@ -143,6 +143,10 @@ namespace Mirage.SocketLayer
                 peer.SendCommand(this, Commands.ConnectRequest);
             }
         }
+
+        /// <summary>
+        /// Used to remove connection after it has been disconnected
+        /// </summary>
         void UpdateDisconnected()
         {
             if (disconnectedTracker.TimeToRemove())
@@ -152,7 +156,7 @@ namespace Mirage.SocketLayer
         }
 
         /// <summary>
-        /// Used
+        /// Used to keep connection alive
         /// </summary>
         void UpdateConnected()
         {

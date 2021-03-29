@@ -8,13 +8,14 @@ namespace Mirage.SocketLayer
         Command = 1,
 
         Unreliable = 2,
-        Notify = 3,
+        Reliable = 3,
+        Notify = 4,
 
         /// <summary>
         /// Used to keep connection alive.
         /// <para>Similar to ping/pong</para>
         /// </summary>
-        KeepAlive = 4,
+        KeepAlive = 10,
     }
 
     /// <summary>

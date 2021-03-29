@@ -26,7 +26,7 @@ namespace Mirage.SocketLayer
         readonly ILogger logger;
 
         // todo SendUnreliable
-        // tood SendNotify
+        // todo SendNotify
 
         readonly ISocket socket;
         readonly IDataHandler dataHandler;
@@ -76,7 +76,16 @@ namespace Mirage.SocketLayer
 
         internal void SendNotify(Connection connection) => throw new NotImplementedException();
         internal void SendReliable(Connection connection) => throw new NotImplementedException();
-        internal void SendUnreliable(Connection connection) => throw new NotImplementedException();
+        internal void SendUnreliable(Connection connection, ArraySegment<byte> message)
+        {
+            // copy message to buffer 
+            byte[] buffer = getBuffer();
+            Buffer.BlockCopy(message.Array, message.Offset, buffer, 1, message.Count);
+            // set header
+            buffer[0] = (byte)PacketType.Unreliable;
+
+            Send(connection, buffer, message.Count);
+        }
 
         private void Send(Connection connection, Packet packet) => Send(connection, packet.data, packet.length);
         private void Send(Connection connection, byte[] data, int? length = null)
@@ -161,7 +170,9 @@ namespace Mirage.SocketLayer
 
         private byte[] getBuffer()
         {
-            throw new NotImplementedException();
+            // todo pool buffer
+            // todo use MTU
+            return new byte[1200];
         }
 
 
@@ -232,6 +243,7 @@ namespace Mirage.SocketLayer
             // - connect request
             // - simple key/phrase send from client with first message
             // - hashcash??
+            // - white/black list for endpoint?
 
             if (packet.type != PacketType.Command)
                 return false;
