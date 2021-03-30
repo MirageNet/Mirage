@@ -118,6 +118,7 @@ namespace Mirage.SocketLayer
         private void Send(Connection connection, Packet packet) => Send(connection, packet.data, packet.length);
         private void Send(Connection connection, byte[] data, int? length = null)
         {
+            // todo check connection state before sending
             socket.Send(connection.EndPoint, data, length);
             connection.SetSendTime();
         }
