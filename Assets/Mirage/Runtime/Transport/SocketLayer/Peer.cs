@@ -10,10 +10,22 @@ namespace Mirage.SocketLayer
         public float Now => UnityEngine.Time.time;
     }
 
+    public interface IPeer
+    {
+        event Action<IConnection> OnConnected;
+        event Action<IConnection, RejectReason> OnConnectionFailed;
+        event Action<IConnection, DisconnectReason> OnDisconnected;
+
+        void Bind(EndPoint endPoint);
+        void Close();
+        IConnection Connect(EndPoint endPoint);
+        void Update();
+    }
+
     /// <summary>
     /// Controls flow of data in/out of mirage, Uses <see cref="ISocket"/>
     /// </summary>
-    public sealed class Peer
+    public sealed class Peer : IPeer
     {
         void Assert(bool condition)
         {
@@ -25,9 +37,6 @@ namespace Mirage.SocketLayer
         }
         readonly ILogger logger;
 
-        // todo SendUnreliable
-        // todo SendNotify
-
         readonly ISocket socket;
         readonly IDataHandler dataHandler;
         readonly Config config;
@@ -35,13 +44,15 @@ namespace Mirage.SocketLayer
 
         readonly ConnectKeyValidator connectKeyValidator;
 
-        readonly Dictionary<EndPoint, Connection> connections;
+        readonly Dictionary<EndPoint, Connection> connections = new Dictionary<EndPoint, Connection>();
 
         readonly byte[] commandBuffer = new byte[3];
 
         public event Action<IConnection> OnConnected;
         public event Action<IConnection, DisconnectReason> OnDisconnected;
         public event Action<IConnection, RejectReason> OnConnectionFailed;
+
+        bool active;
 
         public Peer(ISocket socket, IDataHandler dataHandler, Config config, ILogger logger)
         {
@@ -55,23 +66,37 @@ namespace Mirage.SocketLayer
         }
 
 
-        public void Bind(EndPoint endPoint) => socket.Bind(endPoint);
+        public void Bind(EndPoint endPoint)
+        {
+            socket.Bind(endPoint);
+            active = true;
+        }
+
         public IConnection Connect(EndPoint endPoint)
         {
             Connection connection = CreateNewConnection(endPoint);
             connection.State = ConnectionState.Connecting;
 
             // update now to send connectRequest command
-            connection.Update();
 
+            connection.Update();
+            active = true;
             return connection;
         }
 
         public void Close()
         {
+            if (!active) throw new InvalidOperationException("Peer is not active");
+
+            // send disconnect messages
+            foreach (Connection conn in connections.Values)
+            {
+                conn.Disconnect(DisconnectReason.RequestedByPeer);
+            }
+
+            active = false;
+            // close socket
             socket.Close();
-            // todo clean up other state
-            throw new NotImplementedException();
         }
 
         internal void SendNotify(Connection connection) => throw new NotImplementedException();
