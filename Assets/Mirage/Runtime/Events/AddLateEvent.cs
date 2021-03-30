@@ -5,15 +5,15 @@ using UnityEngine.Events;
 namespace Mirage.Events
 {
     /// <summary>
-    /// Event that can only run once, adding handler late will it invoke right away
+    /// An event that will invoke handlers immediately if they are added after <see cref="Invoke"/> has been called
     /// </summary>
     /// <remarks>
     /// <para>
-    /// AddLateEvent should be used for events that are invoked once for the lifespan. For example Server Started event.
-    /// So that handlers can be added before or after the event is invoked and the handlers will still be called
+    /// AddLateEvent should be used for time sensitive events where Invoke might be called before the user has chance to add a handler. 
+    /// For example Server Started event.
     /// </para>
     /// <para>
-    /// Events that are invoked multiple times, like Spawn Event, should use a regular event so that they can be invoked multiple times. 
+    /// Events that are invoked multiple times, like AuthorityChanged, will have the most recent <see cref="Invoke"/> argument sent to new handler. 
     /// </para>
     /// </remarks>
     /// <example>
@@ -41,7 +41,7 @@ namespace Mirage.Events
     ///     {
     ///         // ...
     ///
-    ///         // reset event, removes handlers and allowes it to be invoked again
+    ///         // reset event, removes handlers and reset the hasInvoked flag
     ///         _started.Reset();
     ///     }
     /// }
