@@ -1,12 +1,12 @@
 - name: General
   href: General/toc.yml
-  topicHref: General/
+  topicHref: General/index.md
 - name: Guides
   href: Guides/toc.yml
-  topicHref: Guides/
+  topicHref: Guides/index.md
 - name: Components
   href: Components/toc.yml
-  topicHref: Components/
+  topicHref: Components/index.md
 - name: Examples
   href: Examples/toc.yml
-  topicHref: Examples/
+  topicHref: Examples/index.md
