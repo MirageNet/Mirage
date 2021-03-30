@@ -103,7 +103,7 @@ namespace Mirage.SocketLayer
         internal void SendNotify(Connection connection) => throw new NotImplementedException();
         // todo SendReliable
         internal void SendReliable(Connection connection) => throw new NotImplementedException();
-       
+
         internal void SendUnreliable(Connection connection, ArraySegment<byte> message)
         {
             // copy message to buffer 
@@ -212,6 +212,7 @@ namespace Mirage.SocketLayer
                     HandleCommand(connection, packet);
                     break;
                 case PacketType.Unreliable:
+                case PacketType.Reliable:
                 case PacketType.Notify:
                     // todo are these handled differently?
                     connection.ReceivePacket(packet);
