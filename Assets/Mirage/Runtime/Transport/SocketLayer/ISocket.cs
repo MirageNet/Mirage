@@ -26,8 +26,8 @@ namespace Mirage.SocketLayer
         /// Gets next Message
         /// <para>Should be called after Poll</para>
         /// </summary>
-        /// <param name="data">recieved data</param>
-        void Recieve(byte[] data, ref EndPoint endPoint, out int bytesReceived);
+        /// <param name="data">Received data</param>
+        void Receive(byte[] data, ref EndPoint endPoint, out int bytesReceived);
 
         /// <summary>
         /// Sends to 

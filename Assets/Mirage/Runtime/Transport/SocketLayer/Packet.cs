@@ -3,7 +3,7 @@ using System;
 namespace Mirage.SocketLayer
 {
     /// <summary>
-    /// Recieved packet
+    /// Received packet
     /// <para>contains raw data and helper methods to help process that data</para>
     /// </summary>
     internal struct Packet

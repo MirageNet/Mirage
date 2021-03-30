@@ -64,7 +64,7 @@ namespace Mirage.SocketLayer
     {
         None,
         /// <summary>
-        /// No message recieved in timeout window
+        /// No message Received in timeout window
         /// </summary>
         Timeout = 1,
         /// <summary>

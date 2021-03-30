@@ -7,7 +7,7 @@ namespace Mirage.SocketLayer
     /// Creates <see cref="ISocket"/>
     /// </summary>
     /// <remarks>
-    /// The only job of Transport is to create a <see cref="ISocket"/> that will be used by mirage to send/recieve data.
+    /// The only job of Transport is to create a <see cref="ISocket"/> that will be used by mirage to send/Receive data.
     /// <para>This is a MonoBehaviour so can be attached in the inspector</para>
     /// </remarks>
     public abstract class SocketCreator : MonoBehaviour

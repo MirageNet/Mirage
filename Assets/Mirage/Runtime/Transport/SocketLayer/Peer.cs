@@ -99,9 +99,9 @@ namespace Mirage.SocketLayer
             socket.Close();
         }
 
-        // todo
+        // todo SendNotify
         internal void SendNotify(Connection connection) => throw new NotImplementedException();
-        // todo
+        // todo SendReliable
         internal void SendReliable(Connection connection) => throw new NotImplementedException();
        
         internal void SendUnreliable(Connection connection, ArraySegment<byte> message)
@@ -173,7 +173,7 @@ namespace Mirage.SocketLayer
             {
                 //todo do we need to pass in endpoint?
                 EndPoint endPoint = null;
-                socket.Recieve(buffer, ref endPoint, out int length);
+                socket.Receive(buffer, ref endPoint, out int length);
 
                 var packet = new Packet(buffer, length);
 
@@ -350,7 +350,7 @@ namespace Mirage.SocketLayer
                     break;
 
                 case ConnectionState.Connected:
-                    // ignore this, command may have been re-sent or recieved twice
+                    // ignore this, command may have been re-sent or Received twice
                     break;
 
                 case ConnectionState.Connecting:
