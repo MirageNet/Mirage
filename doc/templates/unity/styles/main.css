@@ -14,11 +14,12 @@
 body.light-theme {
   --color-foreground: #465563;
   --color-breadcrumb: #4a4a4a;
-  --color-toc-hover: #4c4c4c;
+  --color-toc-hover: #fff;
   --color-background: #ffffff;
-  --color-background-subnav: #f5f5f5;
-  --color-background-dark: #ddd;
+  --color-background-subnav: #ddd;
+  --color-background-dark: #1f2a2d;
   --color-background-table-alt: #f9f9f9;
+  --color-navbar: #fff;
 }
 
 body {
