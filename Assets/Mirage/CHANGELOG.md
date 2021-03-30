@@ -1,3 +1,20 @@
+# [85.0.0](https://github.com/MirageNet/Mirage/compare/v84.3.1...v85.0.0) (2021-03-30)
+
+
+### Code Refactoring
+
+* moving syncvar sending to its own class ([9699e03](https://github.com/MirageNet/Mirage/commit/9699e03c75973342e72375ac4a424abb1181bd17))
+
+
+### Features
+
+* adding class that will invoke late handlers ([631adce](https://github.com/MirageNet/Mirage/commit/631adceee9ea3d9a4f1ff0f885bfcec4b8e21502))
+
+
+### BREAKING CHANGES
+
+* Dirty object collection is now inside SyncVarSender
+
 ## [84.3.1](https://github.com/MirageNet/Mirage/compare/v84.3.0...v84.3.1) (2021-03-29)
 
 
