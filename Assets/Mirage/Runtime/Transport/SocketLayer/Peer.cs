@@ -99,8 +99,11 @@ namespace Mirage.SocketLayer
             socket.Close();
         }
 
+        // todo
         internal void SendNotify(Connection connection) => throw new NotImplementedException();
+        // todo
         internal void SendReliable(Connection connection) => throw new NotImplementedException();
+       
         internal void SendUnreliable(Connection connection, ArraySegment<byte> message)
         {
             // copy message to buffer 
@@ -176,7 +179,7 @@ namespace Mirage.SocketLayer
 
                 if (!packet.IsValidSize())
                 {
-                    // handle message that are too small
+                    // todo handle message that are too small
                     throw new NotImplementedException();
                 }
 
@@ -217,7 +220,7 @@ namespace Mirage.SocketLayer
                     // do nothing
                     break;
                 default:
-                    // handle message invalid packet type
+                    // todo handle message invalid packet type
                     throw new NotImplementedException();
             }
 
@@ -241,7 +244,7 @@ namespace Mirage.SocketLayer
                     HandleConnectionDisconnect(connection, packet);
                     break;
                 default:
-                    // handle message invalid command type
+                    // todo handle message invalid command type
                     throw new NotImplementedException();
             }
         }
