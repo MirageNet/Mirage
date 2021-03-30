@@ -217,7 +217,7 @@ namespace Mirage
         {
             if (IsServer)
             {
-                ServerObjectManager.DirtyObjects.Add(NetIdentity);
+                ServerObjectManager.SyncVarSender.AddDirtyObject(NetIdentity);
             }
         }
 
@@ -374,7 +374,7 @@ namespace Mirage
         {
             SyncVarDirtyBits |= dirtyBit;
             if (IsServer)
-                ServerObjectManager.DirtyObjects.Add(NetIdentity);
+                ServerObjectManager.SyncVarSender.AddDirtyObject(NetIdentity);
         }
 
         /// <summary>
