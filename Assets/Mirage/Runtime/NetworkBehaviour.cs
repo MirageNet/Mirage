@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Mirage.Collections;
+using Mirage.Entity;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
@@ -24,7 +25,7 @@ namespace Mirage
     /// </remarks>
     [AddComponentMenu("")]
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Guides/GameObjects/NetworkBehaviour.html")]
-    public abstract class NetworkBehaviour : MonoBehaviour
+    public class NetworkBehaviour : INetworkBehaviour
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviour));
 
