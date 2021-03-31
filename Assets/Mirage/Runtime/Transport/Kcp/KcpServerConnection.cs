@@ -20,7 +20,7 @@ namespace Mirage.KCP
         internal async UniTask HandshakeAsync()
         {
             // send a greeting and see if the server replies
-            await SendAsync(Hello);
+            Send(Hello);
             var stream = new MemoryStream();
 
             try

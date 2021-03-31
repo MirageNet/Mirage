@@ -1,7 +1,8 @@
+using Mirage.Serialization;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
 
     class MockPlayer : NetworkBehaviour

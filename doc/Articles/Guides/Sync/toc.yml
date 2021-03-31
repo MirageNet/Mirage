@@ -2,10 +2,6 @@
   href: index.md
 - name: SyncVars
   href: SyncVars.md
-- name: SyncVar Hooks
-  href: SyncVarHook.md
-- name: SyncEvents
-  href: SyncEvent.md
 - name: SyncLists
   href: SyncLists.md
 - name: SyncDictionary

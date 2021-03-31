@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.Serialization;
 using UnityEngine;
 
 namespace Mirage
@@ -22,12 +21,11 @@ namespace Mirage
     [AttributeUsage(AttributeTargets.Method)]
     public class ServerRpcAttribute : Attribute
     {
-        // this is zero
         public int channel = Channel.Reliable;
         public bool requireAuthority = true;
     }
 
-    public enum Client { Owner, Observers, Connection }
+    public enum Client { Owner, Observers, Player }
 
     /// <summary>
     /// The server uses a Remote Procedure Call (RPC) to run this function on specific clients.
@@ -36,14 +34,14 @@ namespace Mirage
     [AttributeUsage(AttributeTargets.Method)]
     public class ClientRpcAttribute : Attribute
     {
-        // this is zero
         public int channel = Channel.Reliable;
         public Client target = Client.Observers;
         public bool excludeOwner;
     }
 
     /// <summary>
-    /// Prevents clients from running this method.
+    /// Prevents a method from running if server is not active.
+    /// <para>Can only be used inside a NetworkBehaviour</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class ServerAttribute : Attribute
@@ -65,35 +63,8 @@ namespace Mirage
     }
 
     /// <summary>
-    /// Exception thrown if a guarded method is invoked incorrectly
-    /// </summary>
-    [System.Serializable]
-    public class MethodInvocationException : Exception
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:MethodInvocationException"/> class
-        /// </summary>
-        public MethodInvocationException()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:MethodInvocationException"/> class
-        /// </summary>
-        /// <param name="message">A <see cref="T:System.String"/> that describes the exception. </param>
-        public MethodInvocationException(string message) : base(message)
-        {
-        }
-
-        // A constructor is needed for serialization when an
-        // exception propagates from a remoting server to the client.
-        protected MethodInvocationException(SerializationInfo info,StreamingContext context) : base(info, context)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Prevents the server from running this method.
+    /// Prevents this method from running if client is not active.
+    /// <para>Can only be used inside a NetworkBehaviour</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class ClientAttribute : Attribute
@@ -108,10 +79,11 @@ namespace Mirage
 
     /// <summary>
     /// Prevents players without authority from running this method.
+    /// <para>Can only be used inside a NetworkBehaviour</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class HasAuthorityAttribute : Attribute 
-    { 
+    public class HasAuthorityAttribute : Attribute
+    {
         /// <summary>
         /// If true,  when the method is called from a client, it throws an error
         /// If false, no error is thrown, but the method won't execute
@@ -122,6 +94,7 @@ namespace Mirage
 
     /// <summary>
     /// Prevents nonlocal players from running this method.
+    /// <para>Can only be used inside a NetworkBehaviour</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class LocalPlayerAttribute : Attribute

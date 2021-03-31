@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine.TestTools;
 using Random = UnityEngine.Random;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class KcpFragmentationTest : KcpSetup
     {
@@ -12,7 +12,7 @@ namespace Mirage.Tests
         private static byte[] MakeRandomData(int size)
         {
             byte[] data = new byte[size];
-            for (int i = 0; i< size; i++)
+            for (int i = 0; i < size; i++)
             {
                 data[i] = (byte)Random.Range(0, 255);
             }

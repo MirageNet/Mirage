@@ -8,7 +8,7 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Host
+namespace Mirage.Tests.Runtime.Host
 {
     public class NetworkSceneManagerTests : HostSetup<MockComponent>
     {
@@ -54,7 +54,7 @@ namespace Mirage.Tests.Host
             await AsyncUtil.WaitUntilWithTimeout(() => !client.Active);
 
             sceneManager.ServerSceneChanged.AddListener(func1);
-            
+
             sceneManager.FinishLoadScene("test", SceneOperation.Normal);
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
@@ -66,16 +66,16 @@ namespace Mirage.Tests.Host
             bool invokeClientSceneMessage = false;
             bool invokeNotReadyMessage = false;
             UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
-            client.Connection.RegisterHandler<SceneMessage>(msg => invokeClientSceneMessage = true);
-            client.Connection.RegisterHandler<NotReadyMessage>(msg => invokeNotReadyMessage = true);
+            client.Player.RegisterHandler<SceneMessage>(msg => invokeClientSceneMessage = true);
+            client.Player.RegisterHandler<NotReadyMessage>(msg => invokeNotReadyMessage = true);
             sceneManager.ServerChangeScene.AddListener(func1);
 
             sceneManager.ChangeServerScene("Assets/Mirror/Tests/Runtime/testScene.unity");
 
-            await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.NetworkScenePath.Equals("Assets/Mirror/Tests/Runtime/testScene.unity"));
+            await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ActiveScenePath.Equals("Assets/Mirror/Tests/Runtime/testScene.unity"));
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
-            Assert.That(sceneManager.NetworkScenePath, Is.EqualTo("Assets/Mirror/Tests/Runtime/testScene.unity"));
+            Assert.That(sceneManager.ActiveScenePath, Is.EqualTo("Assets/Mirror/Tests/Runtime/testScene.unity"));
             Assert.That(invokeClientSceneMessage, Is.True);
             Assert.That(invokeNotReadyMessage, Is.True);
         });
@@ -99,7 +99,7 @@ namespace Mirage.Tests.Host
         public void ReadyTest()
         {
             sceneManager.SetClientReady();
-            Assert.That(client.Connection.IsReady);
+            Assert.That(client.Player.IsReady);
         }
 
         [UnityTest]

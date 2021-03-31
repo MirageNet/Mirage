@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using UnityEditor;
@@ -118,7 +119,7 @@ namespace Mirage.Weaver
                     LoadDeclaredReaders(klass);
                 }
 
-                if (klass.GetCustomAttribute<NetworkMessageAttribute>()  != null)
+                if (klass.GetCustomAttribute<NetworkMessageAttribute>() != null)
                 {
                     readers.GetReadFunc(klass, null);
                     writers.GetWriteFunc(klass, null);
@@ -167,29 +168,11 @@ namespace Mirage.Weaver
             if (!method.IsGenericInstance)
                 return;
 
-            bool isMessage =
-                method.Is(typeof(MessagePacker), nameof(MessagePacker.Pack)) ||
-                method.Is(typeof(MessagePacker), nameof(MessagePacker.GetId)) ||
-                method.Is(typeof(MessagePacker), nameof(MessagePacker.Unpack)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.Send)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.SendAsync)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.RegisterHandler)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.UnregisterHandler)) ||
-                method.Is<IMessageHandler>(nameof(IMessageHandler.Send)) ||
-                method.Is<NetworkConnection>(nameof(NetworkConnection.Send)) ||
-                method.Is<NetworkConnection>(nameof(NetworkConnection.SendAsync)) ||
-                method.Is<NetworkConnection>(nameof(NetworkConnection.RegisterHandler)) ||
-                method.Is<NetworkConnection>(nameof(NetworkConnection.UnregisterHandler)) ||
-                method.Is<INetworkClient>(nameof(INetworkClient.Send)) ||
-                method.Is<INetworkClient>(nameof(INetworkClient.SendAsync)) ||
-                method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
-                method.Is<NetworkClient>(nameof(NetworkClient.SendAsync)) ||
-                method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
-                method.Is<INetworkServer>(nameof(INetworkServer.SendToAll));
+            // generate methods for message or types used by generic read/write
+            bool isMessage = IsMessageMethod(method);
 
             bool generate = isMessage ||
-                method.Is<NetworkWriter>(nameof(NetworkWriter.Write)) ||
-                method.Is<NetworkReader>(nameof(NetworkReader.Read));
+                IsReadWriteMethod(method);
 
             if (generate)
             {
@@ -227,6 +210,36 @@ namespace Mirage.Weaver
             }
         }
 
+        /// <summary>
+        /// is method used to send a message? if it use then T is a message and needs read/write functions
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns></returns>
+        private static bool IsMessageMethod(MethodReference method)
+        {
+            return
+                method.Is(typeof(MessagePacker), nameof(MessagePacker.Pack)) ||
+                method.Is(typeof(MessagePacker), nameof(MessagePacker.GetId)) ||
+                method.Is(typeof(MessagePacker), nameof(MessagePacker.Unpack)) ||
+                method.Is<IMessageSender>(nameof(IMessageSender.Send)) ||
+                method.Is<IMessageSender>(nameof(IMessageReceiver.RegisterHandler)) ||
+                method.Is<IMessageSender>(nameof(IMessageReceiver.UnregisterHandler)) ||
+                method.Is<NetworkPlayer>(nameof(NetworkPlayer.Send)) ||
+                method.Is<NetworkPlayer>(nameof(NetworkPlayer.RegisterHandler)) ||
+                method.Is<NetworkPlayer>(nameof(NetworkPlayer.UnregisterHandler)) ||
+                method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
+                method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
+                method.Is<NetworkServer>(nameof(NetworkServer.SendToMany)) ||
+                method.Is<INetworkServer>(nameof(INetworkServer.SendToAll));
+        }
+
+        private static bool IsReadWriteMethod(MethodReference method)
+        {
+            return
+                method.Is<NetworkWriter>(nameof(NetworkWriter.Write)) ||
+                method.Is<NetworkReader>(nameof(NetworkReader.Read));
+        }
+
         void LoadDeclaredWriters(TypeDefinition klass)
         {
             // register all the writers in this class.  Skip the ones with wrong signature
@@ -252,7 +265,7 @@ namespace Mirage.Weaver
             }
         }
 
-        void LoadDeclaredReaders( TypeDefinition klass)
+        void LoadDeclaredReaders(TypeDefinition klass)
         {
             // register all the reader in this class.  Skip the ones with wrong signature
             foreach (MethodDefinition method in klass.Methods)
@@ -280,7 +293,7 @@ namespace Mirage.Weaver
         {
             return module.AssemblyReferences.Any(assemblyReference =>
                 assemblyReference.Name == "Mirage.Editor"
-                ) ;
+                );
         }
 
         /// <summary>
@@ -297,7 +310,7 @@ namespace Mirage.Weaver
                 "InitReadWriters",
                 Mono.Cecil.MethodAttributes.Public | Mono.Cecil.MethodAttributes.Static);
 
-            ConstructorInfo attributeconstructor = typeof(RuntimeInitializeOnLoadMethodAttribute).GetConstructor(new [] { typeof(RuntimeInitializeLoadType)});
+            ConstructorInfo attributeconstructor = typeof(RuntimeInitializeOnLoadMethodAttribute).GetConstructor(new[] { typeof(RuntimeInitializeLoadType) });
 
             var customAttributeRef = new CustomAttribute(module.ImportReference(attributeconstructor));
             customAttributeRef.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportReference<RuntimeInitializeLoadType>(), RuntimeInitializeLoadType.BeforeSceneLoad));

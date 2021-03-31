@@ -1,4 +1,6 @@
-﻿namespace Mirage
+using Mirage.Serialization;
+
+namespace Mirage
 {
 
     /// <summary>
@@ -27,12 +29,11 @@
                 if (component != null)
                     return component;
 
-                if (objectLocator != null)
+                if (objectLocator != null && objectLocator.TryGetIdentity(NetId, out NetworkIdentity result))
                 {
-                    NetworkIdentity identity = objectLocator[netId];
-                    if (identity != null)
-                        return identity.NetworkBehaviours[componentId];
+                    return result.NetworkBehaviours[componentId];
                 }
+
 
                 return null;
             }
@@ -64,15 +65,14 @@
             int componentId = reader.ReadPackedInt32();
 
             NetworkIdentity identity = null;
-            if (!(reader.ObjectLocator is null))
-                identity = reader.ObjectLocator[netId];
+            bool hasValue = reader.ObjectLocator?.TryGetIdentity(netId, out identity) ?? false;
 
             return new NetworkBehaviorSyncvar
             {
                 objectLocator = reader.ObjectLocator,
                 netId = netId,
                 componentId = componentId,
-                component = identity != null ? identity.NetworkBehaviours[componentId] : null
+                component = hasValue ? identity.NetworkBehaviours[componentId] : null
             };
         }
     }

@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.Logging;
 using Mirage.RemoteCalls;
+using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -42,7 +44,7 @@ namespace Mirage
         /// <summary>
         /// NetworkIdentity of the localPlayer
         /// </summary>
-        public NetworkIdentity LocalPlayer => Client.Connection?.Identity;
+        public NetworkIdentity LocalPlayer => Client.Player?.Identity;
 
         [Header("Prefabs")]
         /// <summary>
@@ -82,6 +84,8 @@ namespace Mirage
 
         internal ServerObjectManager ServerObjectManager;
 
+        SyncVarReceiver syncVarReceiver;
+
         public void Start()
         {
             if (Client != null)
@@ -94,8 +98,9 @@ namespace Mirage
             }
         }
 
-        void OnClientConnected(INetworkConnection conn)
+        void OnClientConnected(INetworkPlayer player)
         {
+            syncVarReceiver = new SyncVarReceiver(Client, this);
             RegisterSpawnPrefabs();
 
             if (Client.IsLocalClient)
@@ -112,6 +117,7 @@ namespace Mirage
         {
             ClearSpawners();
             DestroyAllClientObjects();
+            syncVarReceiver = null;
         }
 
         void OnClientSceneChanged(string scenePath, SceneOperation sceneOperation)
@@ -121,24 +127,20 @@ namespace Mirage
 
         internal void RegisterHostHandlers()
         {
-            Client.Connection.RegisterHandler<ObjectDestroyMessage>(OnHostClientObjectDestroy);
-            Client.Connection.RegisterHandler<ObjectHideMessage>(OnHostClientObjectHide);
-            Client.Connection.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
-            Client.Connection.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
-            // host mode reuses objects in the server
-            // so we don't need to spawn them
-            Client.Connection.RegisterHandler<UpdateVarsMessage>(msg => { });
-            Client.Connection.RegisterHandler<RpcMessage>(OnRpcMessage);
+            Client.Player.RegisterHandler<ObjectDestroyMessage>(msg => { });
+            Client.Player.RegisterHandler<ObjectHideMessage>(msg => { });
+            Client.Player.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
+            Client.Player.RegisterHandler<ServerRpcReply>(msg => { });
+            Client.Player.RegisterHandler<RpcMessage>(msg => { });
         }
 
         internal void RegisterMessageHandlers()
         {
-            Client.Connection.RegisterHandler<ObjectDestroyMessage>(OnObjectDestroy);
-            Client.Connection.RegisterHandler<ObjectHideMessage>(OnObjectHide);
-            Client.Connection.RegisterHandler<SpawnMessage>(OnSpawn);
-            Client.Connection.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
-            Client.Connection.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
-            Client.Connection.RegisterHandler<RpcMessage>(OnRpcMessage);
+            Client.Player.RegisterHandler<ObjectDestroyMessage>(OnObjectDestroy);
+            Client.Player.RegisterHandler<ObjectHideMessage>(OnObjectHide);
+            Client.Player.RegisterHandler<SpawnMessage>(OnSpawn);
+            Client.Player.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
+            Client.Player.RegisterHandler<RpcMessage>(OnRpcMessage);
         }
 
         bool ConsiderForSpawning(NetworkIdentity identity)
@@ -153,9 +155,9 @@ namespace Mirage
         // this is called from message handler for Owner message
         internal void InternalAddPlayer(NetworkIdentity identity)
         {
-            if (Client.Connection != null)
+            if (Client.Player != null)
             {
-                Client.Connection.Identity = identity;
+                Client.Player.Identity = identity;
             }
             else
             {
@@ -256,7 +258,7 @@ namespace Mirage
                 throw new InvalidOperationException("RegisterPrefab game object " + identity.name + " has no " + nameof(identity) + ". Use RegisterSpawnHandler() instead?");
             }
 
-            if (logger.LogEnabled()) logger.Log("Registering custom prefab '" + identity.name + "' as asset:" + identity.AssetId + " " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
+            if (logger.LogEnabled()) logger.Log("Registering custom prefab '" + identity.name + "' as asset:" + identity.AssetId + " " + spawnHandler.Method.Name + "/" + unspawnHandler.Method.Name);
 
             spawnHandlers[identity.AssetId] = spawnHandler;
             unspawnHandlers[identity.AssetId] = unspawnHandler;
@@ -285,7 +287,7 @@ namespace Mirage
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
         public void RegisterSpawnHandler(Guid assetId, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
-            if (logger.LogEnabled()) logger.Log("RegisterSpawnHandler asset '" + assetId + "' " + spawnHandler.GetMethodName() + "/" + unspawnHandler.GetMethodName());
+            if (logger.LogEnabled()) logger.Log("RegisterSpawnHandler asset '" + assetId + "' " + spawnHandler.Method.Name + "/" + unspawnHandler.Method.Name);
 
             spawnHandlers[assetId] = spawnHandler;
             unspawnHandlers[assetId] = unspawnHandler;
@@ -512,23 +514,6 @@ namespace Mirage
             }
         }
 
-        internal void OnHostClientObjectDestroy(ObjectDestroyMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log("ClientScene.OnLocalObjectObjDestroy netId:" + msg.netId);
-
-            SpawnedObjects.Remove(msg.netId);
-        }
-
-        internal void OnHostClientObjectHide(ObjectHideMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log("ClientScene::OnLocalObjectObjHide netId:" + msg.netId);
-
-            if (SpawnedObjects.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
-            {
-                localObject.OnSetHostVisibility(false);
-            }
-        }
-
         internal void OnHostClientSpawn(SpawnMessage msg)
         {
             if (SpawnedObjects.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
@@ -541,23 +526,7 @@ namespace Mirage
                 localObject.HasAuthority = msg.isOwner;
                 localObject.NotifyAuthority();
                 localObject.StartClient();
-                localObject.OnSetHostVisibility(true);
                 CheckForLocalPlayer(localObject);
-            }
-        }
-
-        internal void OnUpdateVarsMessage(UpdateVarsMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log("ClientScene.OnUpdateVarsMessage " + msg.netId);
-
-            if (SpawnedObjects.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
-            {
-                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
-                    localObject.OnDeserializeAllSafely(networkReader, false);
-            }
-            else
-            {
-                if (logger.WarnEnabled()) logger.LogWarning("Did not find target for sync message for " + msg.netId + " . Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
             }
         }
 
@@ -567,7 +536,7 @@ namespace Mirage
 
             Skeleton skeleton = RemoteCallHelper.GetSkeleton(msg.functionHash);
 
-            if (skeleton.invokeType != MirageInvokeType.ClientRpc)
+            if (skeleton.invokeType != RpcInvokeType.ClientRpc)
             {
                 throw new MethodInvocationException($"Invalid RPC call with id {msg.functionHash}");
             }
@@ -586,14 +555,13 @@ namespace Mirage
             if (identity && identity == LocalPlayer)
             {
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
-                identity.ConnectionToServer = Client.Connection;
                 identity.StartLocalPlayer();
 
                 if (logger.LogEnabled()) logger.Log("ClientScene.OnOwnerMessage - player=" + identity.name);
             }
         }
 
-        private void OnServerRpcReply(INetworkConnection connection, ServerRpcReply reply)
+        private void OnServerRpcReply(INetworkPlayer player, ServerRpcReply reply)
         {
             // find the callback that was waiting for this and invoke it.
             if (callbacks.TryGetValue(reply.replyId, out Action<NetworkReader> action))
@@ -613,13 +581,9 @@ namespace Mirage
         private readonly Dictionary<int, Action<NetworkReader>> callbacks = new Dictionary<int, Action<NetworkReader>>();
         private int replyId;
 
-        public NetworkIdentity this[uint netId]
+        public bool TryGetIdentity(uint netId, out NetworkIdentity identity)
         {
-            get
-            {
-                SpawnedObjects.TryGetValue(netId, out NetworkIdentity identity);
-                return identity;
-            }
+            return SpawnedObjects.TryGetValue(netId, out identity) && identity != null;
         }
 
         /// <summary>

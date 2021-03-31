@@ -1,7 +1,8 @@
 using System;
+using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class AssertionMethodAttribute : Attribute { }
 
@@ -99,7 +100,7 @@ namespace Mirage.Tests
         [Test]
         public void AddPlayerMessageTest()
         {
-            TestSerializeDeserialize(new AddPlayerMessage());
+            TestSerializeDeserialize(new AddCharacterMessage());
         }
 
         [Test]

@@ -1,9 +1,10 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Host
+namespace Mirage.Tests.Runtime.Host
 {
     // set's up a host
     public class HostSetup<T> where T : NetworkBehaviour
@@ -28,6 +29,9 @@ namespace Mirage.Tests.Host
         public IEnumerator SetupHost() => UniTask.ToCoroutine(async () =>
         {
             networkManagerGo = new GameObject();
+            // set gameobject name to test name (helps with debugging)
+            networkManagerGo.name = TestContext.CurrentContext.Test.MethodName;
+
             networkManagerGo.AddComponent<MockTransport>();
             sceneManager = networkManagerGo.AddComponent<NetworkSceneManager>();
             serverObjectManager = networkManagerGo.AddComponent<ServerObjectManager>();
@@ -55,12 +59,11 @@ namespace Mirage.Tests.Host
             identity = playerGO.AddComponent<NetworkIdentity>();
             component = playerGO.AddComponent<T>();
 
-            serverObjectManager.AddPlayerForConnection(server.LocalConnection, playerGO);
+            serverObjectManager.AddCharacter(server.LocalPlayer, playerGO);
 
             // wait for client to spawn it
-            await AsyncUtil.WaitUntilWithTimeout(() => client.Connection.Identity != null);
+            await AsyncUtil.WaitUntilWithTimeout(() => client.Player.Identity != null);
         });
-
 
         protected async UniTask StartHost()
         {

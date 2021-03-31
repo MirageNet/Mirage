@@ -1,3 +1,4 @@
+using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;

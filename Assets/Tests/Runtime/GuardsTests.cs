@@ -1,8 +1,8 @@
-using Mirage.Tests.ClientServer;
+using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class ExampleGuards : NetworkBehaviour
     {
@@ -21,7 +21,7 @@ namespace Mirage.Tests
             serverFunctionCalled = true;
         }
 
-        [Server(error=false)]
+        [Server(error = false)]
         public void CallServerCallbackFunction()
         {
             serverCallbackFunctionCalled = true;
@@ -40,13 +40,13 @@ namespace Mirage.Tests
         }
 
         [HasAuthority]
-        public void CallAuthorityFunction() 
+        public void CallAuthorityFunction()
         {
             hasAuthorityCalled = true;
         }
 
         [HasAuthority(error = false)]
-        public void CallAuthorityNoErrorFunction() 
+        public void CallAuthorityNoErrorFunction()
         {
             hasAuthorityNoErrorCalled = true;
         }
@@ -86,7 +86,7 @@ namespace Mirage.Tests
         {
             Assert.Throws<MethodInvocationException>(() =>
             {
-               serverComponent.CallClientFunction();
+                serverComponent.CallClientFunction();
             });
         }
 
@@ -102,7 +102,7 @@ namespace Mirage.Tests
         {
             Assert.Throws<MethodInvocationException>(() =>
             {
-               clientComponent.CallServerFunction();
+                clientComponent.CallServerFunction();
             });
         }
 
@@ -146,10 +146,10 @@ namespace Mirage.Tests
         {
             var obj = new GameObject("randomObject", typeof(NetworkIdentity), typeof(ExampleGuards));
             ExampleGuards guardedComponent = obj.GetComponent<ExampleGuards>();
-            Assert.Throws<MethodInvocationException>( () => 
-            {
-                guardedComponent.CallAuthorityFunction();
-            });
+            Assert.Throws<MethodInvocationException>(() =>
+           {
+               guardedComponent.CallAuthorityFunction();
+           });
 
             Object.Destroy(obj);
         }
@@ -161,7 +161,6 @@ namespace Mirage.Tests
             ExampleGuards guardedComponent = obj.GetComponent<ExampleGuards>();
             guardedComponent.CallAuthorityNoErrorFunction();
             Assert.That(guardedComponent.hasAuthorityNoErrorCalled, Is.False);
-
 
             Object.Destroy(obj);
         }

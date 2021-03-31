@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Security.Cryptography;
 using Mirage.RemoteCalls;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.Events;
+using Mirage.Logging;
+using Mirage.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #if UNITY_2018_3_OR_NEWER
@@ -37,68 +38,72 @@ namespace Mirage
     ///     The NetworkIdentity manages the dirty state of the NetworkBehaviours of the object.
     ///     When it discovers that NetworkBehaviours are dirty, it causes an update packet to be created and sent to clients.
     /// </para>
-    /// <para>
-    ///     The flow for serialization updates managed by the NetworkIdentity is:
+    /// 
     /// <list type="bullet">
-    ///     <item>
+    ///     <listheader><description>
+    ///         The flow for serialization updates managed by the NetworkIdentity is:
+    ///     </description></listheader>
+    ///     
+    ///     <item><description>
     ///         Each NetworkBehaviour has a dirty mask. This mask is available inside OnSerialize as syncVarDirtyBits
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         Each SyncVar in a NetworkBehaviour script is assigned a bit in the dirty mask.
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         Changing the value of SyncVars causes the bit for that SyncVar to be set in the dirty mask
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         Alternatively, calling SetDirtyBit() writes directly to the dirty mask
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         NetworkIdentity objects are checked on the server as part of it&apos;s update loop
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         If any NetworkBehaviours on a NetworkIdentity are dirty, then an UpdateVars packet is created for that object
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         The UpdateVars packet is populated by calling OnSerialize on each NetworkBehaviour on the object
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         NetworkBehaviours that are NOT dirty write a zero to the packet for their dirty bits
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         NetworkBehaviours that are dirty write their dirty mask, then the values for the SyncVars that have changed
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         If OnSerialize returns true for a NetworkBehaviour, the dirty mask is reset for that NetworkBehaviour,
     ///         so it will not send again until its value changes.
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         The UpdateVars packet is sent to ready clients that are observing the object
-    ///     </item>
+    ///     </description></item>
     /// </list>
-    /// </para>
-    /// <para>
-    ///     On the client:
+    /// 
     /// <list type="bullet">
-    ///     <item>
+    ///     <listheader><description>
+    ///         On the client:
+    ///     </description></listheader>
+    /// 
+    ///     <item><description>
     ///         an UpdateVars packet is received for an object
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         The OnDeserialize function is called for each NetworkBehaviour script on the object
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         Each NetworkBehaviour script on the object reads a dirty mask.
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         If the dirty mask for a NetworkBehaviour is zero, the OnDeserialize functions returns without reading any more
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         If the dirty mask is non-zero value, then the OnDeserialize function reads the values for the SyncVars that correspond to the dirty bits that are set
-    ///     </item>
-    ///     <item>
+    ///     </description></item>
+    ///     <item><description>
     ///         If there are SyncVar hook functions, those are invoked with the value read from the stream.
-    ///     </item>
+    ///     </description></item>
     /// </list>
-    /// </para>
     /// </remarks>
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/NetworkIdentity")]
@@ -141,7 +146,7 @@ namespace Mirage
         /// <summary>
         /// The set of network connections (players) that can see this object.
         /// </summary>
-        public readonly HashSet<INetworkConnection> observers = new HashSet<INetworkConnection>();
+        public readonly HashSet<INetworkPlayer> observers = new HashSet<INetworkPlayer>();
 
         /// <summary>
         /// Unique identifier for this particular object instance, used for tracking objects between networked clients and the server.
@@ -160,7 +165,7 @@ namespace Mirage
         /// <summary>
         /// The NetworkServer associated with this NetworkIdentity.
         /// </summary>
-        public NetworkServer Server { get; internal set; }
+        public INetworkServer Server { get; internal set; }
 
         /// <summary>
         /// The ServerObjectManager is present only for server/host instances.
@@ -168,27 +173,22 @@ namespace Mirage
         public ServerObjectManager ServerObjectManager;
 
         /// <summary>
-        /// The NetworkConnection associated with this NetworkIdentity. This is only valid for player objects on a local client.
-        /// </summary>
-        public INetworkConnection ConnectionToServer { get; internal set; }
-
-        /// <summary>
         /// The NetworkClient associated with this NetworkIdentity.
         /// </summary>
-        public NetworkClient Client { get; internal set; }
+        public INetworkClient Client { get; internal set; }
 
         /// <summary>
         /// The ClientObjectManager is present only for client instances.
         /// </summary>
         public ClientObjectManager ClientObjectManager;
 
-        INetworkConnection _connectionToClient;
+        INetworkPlayer _connectionToClient;
 
         /// <summary>
         /// The NetworkConnection associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is valid for player and other owned objects in the server.
         /// <para>Use it to return details such as the connection&apos;s identity, IP address and ready status.</para>
         /// </summary>
-        public INetworkConnection ConnectionToClient
+        public INetworkPlayer ConnectionToClient
         {
             get => _connectionToClient;
 
@@ -242,18 +242,18 @@ namespace Mirage
         /// <remarks>
         /// The AssetId trick:
         /// <list type="bullet">
-        ///     <item>
+        ///     <item><description>
         ///         Ideally we would have a serialized 'Guid m_AssetId' but Unity can't
         ///         serialize it because Guid's internal bytes are private
-        ///     </item>
-        ///     <item>
+        ///     </description></item>
+        ///     <item><description>
         ///         UNET used 'NetworkHash128' originally, with byte0, ..., byte16
         ///         which works, but it just unnecessary extra code
-        ///     </item>
-        ///     <item>
+        ///     </description></item>
+        ///     <item><description>
         ///         Using just the Guid string would work, but it's 32 chars long and
         ///         would then be sent over the network as 64 instead of 16 bytes
-        ///     </item>
+        ///     </description></item>
         /// </list>
         /// The solution is to serialize the string internally here and then
         /// use the real 'Guid' type for everything else via .assetId
@@ -361,26 +361,26 @@ namespace Mirage
         /// <summary>
         /// used when adding players
         /// </summary>
-        /// <param name="conn"></param>
-        internal void SetClientOwner(INetworkConnection conn)
+        /// <param name="player"></param>
+        internal void SetClientOwner(INetworkPlayer player)
         {
             // do nothing if it already has an owner
-            if (ConnectionToClient != null && conn != ConnectionToClient)
+            if (ConnectionToClient != null && player != ConnectionToClient)
             {
                 throw new InvalidOperationException($"Object {this} netId={NetId} already has an owner. Use RemoveClientAuthority() first");
             }
 
             // otherwise set the owner connection
-            ConnectionToClient = conn;
+            ConnectionToClient = player;
         }
 
         /// <summary>
         /// The delegate type for the clientAuthorityCallback.
         /// </summary>
-        /// <param name="conn">The network connection that is gaining or losing authority.</param>
+        /// <param name="player">The network connection that is gaining or losing authority.</param>
         /// <param name="identity">The object whose client authority status is being changed.</param>
         /// <param name="authorityState">The new state of client authority of the object for the connection.</param>
-        public delegate void ClientAuthorityCallback(INetworkConnection conn, NetworkIdentity identity, bool authorityState);
+        public delegate void ClientAuthorityCallback(INetworkPlayer player, NetworkIdentity identity, bool authorityState);
 
         /// <summary>
         /// A callback that can be populated to be notified when the client-authority state of objects changes.
@@ -392,10 +392,10 @@ namespace Mirage
         /// <summary>
         /// this is used when a connection is destroyed, since the "observers" property is read-only
         /// </summary>
-        /// <param name="conn"></param>
-        internal void RemoveObserverInternal(INetworkConnection conn)
+        /// <param name="player"></param>
+        internal void RemoveObserverInternal(INetworkPlayer player)
         {
-            observers.Remove(conn);
+            observers.Remove(player);
         }
 
         /// <summary>
@@ -569,7 +569,6 @@ namespace Mirage
         //    if no scene is in build settings then Editor and Build have
         //    different indices too (Editor=0, Build=-1)
         // => ONLY USE THIS FROM POSTPROCESSSCENE!
-        [EditorBrowsable(EditorBrowsableState.Never)]
         public void SetSceneIdSceneHashPartInternal()
         {
             // get deterministic scene hash
@@ -710,32 +709,24 @@ namespace Mirage
             OnStopAuthority?.Invoke();
         }
 
-        internal void OnSetHostVisibility(bool visible)
-        {
-            if (Visibility != null)
-            {
-                Visibility.OnSetHostVisibility(visible);
-            }
-        }
-
         /// <summary>
         /// check if observer can be seen by connection.
         /// <list type="bullet">
-        ///     <item>
+        ///     <item><description>
         ///         returns visibility.OnCheckObserver
-        ///     </item>
-        ///     <item>
+        ///     </description></item>
+        ///     <item><description>
         ///         returns true if we have no NetworkVisibility, default objects are visible
-        ///     </item>
+        ///     </description></item>
         /// </list>
         /// </summary>
-        /// <param name="conn"></param>
+        /// <param name="player"></param>
         /// <returns></returns>
-        internal bool OnCheckObserver(INetworkConnection conn)
+        internal bool OnCheckObserver(INetworkPlayer player)
         {
             if (Visibility != null)
             {
-                return Visibility.OnCheckObserver(conn);
+                return Visibility.OnCheckObserver(player);
             }
             return true;
         }
@@ -764,18 +755,18 @@ namespace Mirage
         /// paul: readstring bug prevention
         /// <see cref="https://issuetracker.unity3d.com/issues/unet-networkwriter-dot-write-causing-readstring-slash-readbytes-out-of-range-errors-in-clients"/>
         /// <list type="bullet">
-        ///     <item>
+        ///     <item><description>
         ///         OnSerialize writes componentData, barrier, componentData, barrier,componentData,...
-        ///     </item>
-        ///     <item>
+        ///     </description></item>
+        ///     <item><description>
         ///         OnDeserialize carefully extracts each data, then deserializes the barrier and check it
-        ///     </item>
-        ///     <item>
+        ///     </description></item>
+        ///     <item><description>
         ///         If we read too many or too few bytes,  the barrier is very unlikely to match
-        ///     </item>
-        ///     <item>
+        ///     </description></item>
+        ///     <item><description>
         ///         We can properly track down errors
-        ///     </item>
+        ///     </description></item>
         /// </list>
         /// </remarks>
         void OnSerializeSafely(NetworkBehaviour comp, NetworkWriter writer, bool initialState)
@@ -893,7 +884,7 @@ namespace Mirage
                     OnDeserializeSafely(components[index], reader, initialState);
                 }
             }
-           
+
         }
 
         /// <summary>
@@ -903,14 +894,14 @@ namespace Mirage
         /// <param name="functionHash"></param>
         /// <param name="invokeType"></param>
         /// <param name="reader"></param>
-        /// <param name="senderConnection"></param>
-        internal void HandleRemoteCall(Skeleton skeleton, int componentIndex, NetworkReader reader, INetworkConnection senderConnection = null, int replyId = 0)
+        /// <param name="senderPlayer"></param>
+        internal void HandleRemoteCall(Skeleton skeleton, int componentIndex, NetworkReader reader, INetworkPlayer senderPlayer = null, int replyId = 0)
         {
             // find the right component to invoke the function on
             if (componentIndex >= 0 && componentIndex < NetworkBehaviours.Length)
             {
                 NetworkBehaviour invokeComponent = NetworkBehaviours[componentIndex];
-                skeleton?.Invoke(reader, invokeComponent, senderConnection, replyId);
+                skeleton?.Invoke(reader, invokeComponent, senderPlayer, replyId);
             }
             else
             {
@@ -923,28 +914,28 @@ namespace Mirage
         /// </summary>
         internal void ClearObservers()
         {
-            foreach (INetworkConnection conn in observers)
+            foreach (INetworkPlayer player in observers)
             {
-                conn.RemoveFromVisList(this);
+                player.RemoveFromVisList(this);
             }
             observers.Clear();
         }
 
-        internal void AddObserver(INetworkConnection conn)
+        internal void AddObserver(INetworkPlayer player)
         {
-            if (observers.Contains(conn))
+            if (observers.Contains(player))
             {
                 // if we try to add a connectionId that was already added, then
                 // we may have generated one that was already in use.
                 return;
             }
 
-            if (logger.LogEnabled()) logger.Log("Added observer " + conn.Address + " added for " + gameObject);
-            observers.Add(conn);
-            conn.AddToVisList(this);
+            if (logger.LogEnabled()) logger.Log("Added observer " + player.Connection.GetEndPointAddress() + " added for " + gameObject);
+            observers.Add(player);
+            player.AddToVisList(this);
 
             // spawn identity for this conn
-            ServerObjectManager.ShowForConnection(this, conn);
+            ServerObjectManager.ShowForConnection(this, player);
         }
 
         /// <summary>
@@ -956,7 +947,7 @@ namespace Mirage
         /// <param name="observersSet"></param>
         /// <param name="initialize"></param>
         /// <returns></returns>
-        internal bool GetNewObservers(HashSet<INetworkConnection> observersSet, bool initialize)
+        internal bool GetNewObservers(HashSet<INetworkPlayer> observersSet, bool initialize)
         {
             observersSet.Clear();
 
@@ -979,20 +970,20 @@ namespace Mirage
         internal void AddAllReadyServerConnectionsToObservers()
         {
             // add all server connections
-            foreach (INetworkConnection conn in Server.connections)
+            foreach (INetworkPlayer player in Server.Players)
             {
-                if (conn.IsReady)
-                    AddObserver(conn);
+                if (player.IsReady)
+                    AddObserver(player);
             }
 
             // add local host connection (if any)
-            if (Server.LocalConnection != null && Server.LocalConnection.IsReady)
+            if (Server.LocalPlayer != null && Server.LocalPlayer.IsReady)
             {
-                AddObserver(Server.LocalConnection);
+                AddObserver(Server.LocalPlayer);
             }
         }
 
-        static readonly HashSet<INetworkConnection> newObservers = new HashSet<INetworkConnection>();
+        static readonly HashSet<INetworkPlayer> newObservers = new HashSet<INetworkPlayer>();
 
         /// <summary>
         /// This causes the set of players that can see this object to be rebuild.
@@ -1034,52 +1025,26 @@ namespace Mirage
             if (changed)
             {
                 observers.Clear();
-                foreach (INetworkConnection conn in newObservers)
+                foreach (INetworkPlayer player in newObservers)
                 {
-                    if (conn != null && conn.IsReady)
-                        observers.Add(conn);
+                    if (player != null && player.IsReady)
+                        observers.Add(player);
                 }
-            }
-
-            // special case for host mode: we use SetHostVisibility to hide
-            // NetworkIdentities that aren't in observer range from host.
-            // this is what games like Dota/Counter-Strike do too, where a host
-            // does NOT see all players by default. they are in memory, but
-            // hidden to the host player.
-            //
-            // this code is from UNET, it's a bit strange but it works:
-            // * it hides newly connected identities in host mode
-            //   => that part was the intended behaviour
-            // * it hides ALL NetworkIdentities in host mode when the host
-            //   connects but hasn't selected a character yet
-            //   => this only works because we have no .localConnection != null
-            //      check. at this stage, localConnection is null because
-            //      StartHost starts the server first, then calls this code,
-            //      then starts the client and sets .localConnection. so we can
-            //      NOT add a null check without breaking host visibility here.
-            // * it hides ALL NetworkIdentities in server-only mode because
-            //   observers never contain the 'null' .localConnection
-            //   => that was not intended, but let's keep it as it is so we
-            //      don't break anything in host mode. it's way easier than
-            //      iterating all identities in a special function in StartHost.
-            if (initialize && !newObservers.Contains(Server.LocalConnection))
-            {
-                OnSetHostVisibility(false);
             }
         }
 
         // remove all old .observers that aren't in newObservers anymore
         bool RemoveOldObservers(bool changed)
         {
-            foreach (INetworkConnection conn in observers)
+            foreach (INetworkPlayer player in observers)
             {
-                if (!newObservers.Contains(conn))
+                if (!newObservers.Contains(player))
                 {
                     // removed observer
-                    conn.RemoveFromVisList(this);
-                    ServerObjectManager.HideForConnection(this, conn);
+                    player.RemoveFromVisList(this);
+                    ServerObjectManager.HideForConnection(this, player);
 
-                    if (logger.LogEnabled()) logger.Log("Removed Observer for " + gameObject + " " + conn);
+                    if (logger.LogEnabled()) logger.Log("Removed Observer for " + gameObject + " " + player);
                     changed = true;
                 }
             }
@@ -1090,17 +1055,17 @@ namespace Mirage
         // add all newObservers that aren't in .observers yet
         bool AddNewObservers(bool initialize, bool changed)
         {
-            foreach (INetworkConnection conn in newObservers)
+            foreach (INetworkPlayer player in newObservers)
             {
                 // only add ready connections.
                 // otherwise the player might not be in the world yet or anymore
-                if (conn != null && conn.IsReady && (initialize || !observers.Contains(conn)))
+                if (player != null && player.IsReady && (initialize || !observers.Contains(player)))
                 {
                     // new observer
-                    conn.AddToVisList(this);
+                    player.AddToVisList(this);
                     // spawn identity for this conn
-                    ServerObjectManager.ShowForConnection(this, conn);
-                    if (logger.LogEnabled()) logger.Log("New Observer for " + gameObject + " " + conn);
+                    ServerObjectManager.ShowForConnection(this, player);
+                    if (logger.LogEnabled()) logger.Log("New Observer for " + gameObject + " " + player);
                     changed = true;
                 }
             }
@@ -1109,35 +1074,35 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Assign control of an object to a client via the client's <see cref="NetworkConnection">NetworkConnection.</see>
+        /// Assign control of an object to a client via the client's <see cref="NetworkPlayer">NetworkConnection.</see>
         /// <para>This causes hasAuthority to be set on the client that owns the object, and NetworkBehaviour.OnStartAuthority will be called on that client. This object then will be in the NetworkConnection.clientOwnedObjects list for the connection.</para>
         /// <para>Authority can be removed with RemoveClientAuthority. Only one client can own an object at any time. This does not need to be called for player objects, as their authority is setup automatically.</para>
         /// </summary>
-        /// <param name="conn">	The connection of the client to assign authority to.</param>
-        public void AssignClientAuthority(INetworkConnection conn)
+        /// <param name="player">	The connection of the client to assign authority to.</param>
+        public void AssignClientAuthority(INetworkPlayer player)
         {
             if (!IsServer)
             {
                 throw new InvalidOperationException("AssignClientAuthority can only be called on the server for spawned objects");
             }
 
-            if (conn == null)
+            if (player == null)
             {
                 throw new InvalidOperationException("AssignClientAuthority for " + gameObject + " owner cannot be null. Use RemoveClientAuthority() instead");
             }
 
-            if (ConnectionToClient != null && conn != ConnectionToClient)
+            if (ConnectionToClient != null && player != ConnectionToClient)
             {
                 throw new InvalidOperationException("AssignClientAuthority for " + gameObject + " already has an owner. Use RemoveClientAuthority() first");
             }
 
-            SetClientOwner(conn);
+            SetClientOwner(player);
 
             // The client will match to the existing object
             // update all variables and assign authority
-            ServerObjectManager.SendSpawnMessage(this, conn);
+            ServerObjectManager.SendSpawnMessage(this, player);
 
-            clientAuthorityCallback?.Invoke(conn, this, true);
+            clientAuthorityCallback?.Invoke(player, this, true);
         }
 
         /// <summary>
@@ -1161,7 +1126,7 @@ namespace Mirage
             {
                 clientAuthorityCallback?.Invoke(ConnectionToClient, this, false);
 
-                INetworkConnection previousOwner = ConnectionToClient;
+                INetworkPlayer previousOwner = ConnectionToClient;
 
                 ConnectionToClient = null;
 
@@ -1191,14 +1156,13 @@ namespace Mirage
             Client = null;
             ServerObjectManager = null;
             ClientObjectManager = null;
-            ConnectionToServer = null;
             ConnectionToClient = null;
             networkBehavioursCache = null;
 
             ClearObservers();
         }
 
-        internal void ServerUpdate()
+        internal void UpdateVars()
         {
             if (observers.Count > 0)
             {
@@ -1243,7 +1207,7 @@ namespace Mirage
                     if (observersWritten > 0)
                     {
                         varsMessage.payload = observersWriter.ToArraySegment();
-                        SendToObservers(varsMessage, false);
+                        SendToRemoteObservers(varsMessage, false);
                     }
 
                     // clear dirty bits only for the components that we serialized
@@ -1258,39 +1222,36 @@ namespace Mirage
             }
         }
 
-        static readonly List<INetworkConnection> connectionsExcludeSelf = new List<INetworkConnection>(100);
+        static readonly List<INetworkPlayer> connectionsExcludeSelf = new List<INetworkPlayer>(100);
 
         /// <summary>
-        /// this is like SendToReady - but it doesn't check the ready flag on the connection.
-        /// this is used for ObjectDestroy messages.
+        /// Send a message to all the remote observers
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="msg"> the message to deliver to to clients</param>
         /// <param name="includeOwner">Wether the owner should receive this message too</param>
         /// <param name="channelId"> the transport channel that should be used to deliver the message</param>
-        internal void SendToObservers<T>(T msg, bool includeOwner = true, int channelId = Channel.Reliable)
+        internal void SendToRemoteObservers<T>(T msg, bool includeOwner = true, int channelId = Channel.Reliable)
         {
             if (logger.LogEnabled()) logger.Log("Server.SendToObservers id:" + typeof(T));
 
             if (observers.Count == 0)
                 return;
 
-            if (includeOwner)
+            connectionsExcludeSelf.Clear();
+            foreach (INetworkPlayer player in observers)
             {
-                NetworkConnection.Send(observers, msg, channelId);
-            }
-            else
-            {
-                connectionsExcludeSelf.Clear();
-                foreach (INetworkConnection conn in observers)
+                if (player == Server.LocalPlayer)
+                    continue;
+
+                if (includeOwner || ConnectionToClient != player)
                 {
-                    if (ConnectionToClient != conn)
-                    {
-                        connectionsExcludeSelf.Add(conn);
-                    }
+                    connectionsExcludeSelf.Add(player);
                 }
-                NetworkConnection.Send(connectionsExcludeSelf, msg, channelId);
             }
+
+            if (connectionsExcludeSelf.Count > 0)
+                NetworkServer.SendToMany(connectionsExcludeSelf, msg, channelId);
         }
 
         /// <summary>

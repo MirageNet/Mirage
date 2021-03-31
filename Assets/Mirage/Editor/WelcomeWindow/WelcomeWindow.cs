@@ -62,7 +62,7 @@ namespace Mirage
 
         /// <summary>
         ///     Hard coded for source code version. If package version is found, this will
-        ///     be set later on to package version. through checking for packages anyways.
+        ///     be set later on to package version. through checking for packages anyways
         /// </summary>
         private static string changeLogPath = "Assets/Mirage/CHANGELOG.md";
 

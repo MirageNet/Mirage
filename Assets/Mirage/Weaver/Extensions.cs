@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using Mono.Cecil;
-using Mono.Collections.Generic;
 
 namespace Mirage.Weaver
 {
@@ -54,7 +53,7 @@ namespace Mirage.Weaver
 
             if (field == null)
             {
-                field = new FieldDefinition(fieldName, FieldAttributes.Literal| FieldAttributes.NotSerialized | FieldAttributes.Private, td.Module.ImportReference<T>());
+                field = new FieldDefinition(fieldName, FieldAttributes.Literal | FieldAttributes.NotSerialized | FieldAttributes.Private, td.Module.ImportReference<T>());
                 td.Fields.Add(field);
             }
 
@@ -146,7 +145,6 @@ namespace Mirage.Weaver
             }
             return true;
         }
-
 
         /// <summary>
         /// Given a method of a generic class such as ArraySegment`T.get_Count,

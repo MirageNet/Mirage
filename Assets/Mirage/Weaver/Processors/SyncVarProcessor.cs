@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using UnityEngine;
@@ -215,7 +216,7 @@ namespace Mirage.Weaver
             }
         }
 
-        private void LoadField(FieldDefinition fd, TypeReference originalType,  ILProcessor worker)
+        private void LoadField(FieldDefinition fd, TypeReference originalType, ILProcessor worker)
         {
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
@@ -589,9 +590,9 @@ namespace Mirage.Weaver
                 // base
                 serWorker.Append(serWorker.Create(OpCodes.Ldarg_0));
                 // reader
-                serWorker.Append(serWorker.Create(OpCodes.Ldarg,readerParam));
+                serWorker.Append(serWorker.Create(OpCodes.Ldarg, readerParam));
                 // initialState
-                serWorker.Append(serWorker.Create(OpCodes.Ldarg,initializeParam));
+                serWorker.Append(serWorker.Create(OpCodes.Ldarg, initializeParam));
                 serWorker.Append(serWorker.Create(OpCodes.Call, module.ImportReference(baseDeserialize)));
             }
 
@@ -670,7 +671,7 @@ namespace Mirage.Weaver
 
             // T oldValue = value;
             VariableDefinition oldValue = deserialize.AddLocal(originalType);
-            LoadField(syncVar, originalType,  serWorker);
+            LoadField(syncVar, originalType, serWorker);
 
             serWorker.Append(serWorker.Create(OpCodes.Stloc, oldValue));
 

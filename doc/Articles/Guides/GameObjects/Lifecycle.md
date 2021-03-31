@@ -83,7 +83,7 @@ Subscribe to this event by using `AddListener` or adding your method in the even
 
 # Start Local Player
 
-If the object spawned is the [player object](SpawnPlayer.md),  the event <xref:Mirage.NetworkIdentity.OnStartLocalPlayer>
+If the object spawned is the [character object](SpawnPlayer.md),  the event <xref:Mirage.NetworkIdentity.OnStartLocalPlayer>
 is invoked.
 Subscribe to this event by using `AddListener` or adding your method in the event in the inspector
 
@@ -96,7 +96,7 @@ Note the Authority can be revoked, and granted again.  Every time the client los
 # Server Stop
 
 Either because the client disconnected, the server stopped, 
-you called <xref:Mirage.ServerObjectManager.UnSpawn(GameObject)>,  or you called <xref:Mirage.ServerObjectManager.Destroy(GameObject)> the object may stop in the server.
+you called <xref:Mirage.ServerObjectManager.UnSpawn(UnityEngine.GameObject)>,  or you called <xref:Mirage.ServerObjectManager.Destroy(UnityEngine.GameObject)> the object may stop in the server.
 During this state, a message is sent to all the clients to unspawn the object.
 The event <xref:Mirage.NetworkIdentity.OnStopServer> will be invoked. 
 

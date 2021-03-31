@@ -1,3 +1,4 @@
+using Mirage.Logging;
 using UnityEngine;
 
 namespace Mirage.Examples.MultipleAdditiveScenes
@@ -17,7 +18,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
                 randomColor = GetComponent<RandomColor>();
         }
 
-        [Server(error=false)]
+        [Server(error = false)]
         void OnTriggerEnter(Collider other)
         {
             if (other.gameObject.CompareTag("Player"))

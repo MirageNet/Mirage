@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using Cysharp.Threading.Tasks;
+using Mirage.Collections;
+using Mirage.Logging;
 using Mirage.RemoteCalls;
+using Mirage.Serialization;
 using UnityEngine;
 
 namespace Mirage
@@ -90,7 +92,7 @@ namespace Mirage
         /// <summary>
         /// The <see cref="NetworkServer">NetworkClient</see> associated to this object.
         /// </summary>
-        public NetworkServer Server => NetIdentity.Server;
+        public INetworkServer Server => NetIdentity.Server;
 
         /// <summary>
         /// Quick Reference to the NetworkIdentities ServerObjectManager. Present only for server/host instances.
@@ -100,7 +102,7 @@ namespace Mirage
         /// <summary>
         /// The <see cref="NetworkClient">NetworkClient</see> associated to this object.
         /// </summary>
-        public NetworkClient Client => NetIdentity.Client;
+        public INetworkClient Client => NetIdentity.Client;
 
         /// <summary>
         /// Quick Reference to the NetworkIdentities ClientObjectManager. Present only for instances instances.
@@ -108,14 +110,9 @@ namespace Mirage
         public ClientObjectManager ClientObjectManager => NetIdentity.ClientObjectManager;
 
         /// <summary>
-        /// The <see cref="NetworkConnection">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the client.
+        /// The <see cref="NetworkPlayer">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
         /// </summary>
-        public INetworkConnection ConnectionToServer => NetIdentity.ConnectionToServer;
-
-        /// <summary>
-        /// The <see cref="NetworkConnection">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
-        /// </summary>
-        public INetworkConnection ConnectionToClient => NetIdentity.ConnectionToClient;
+        public INetworkPlayer ConnectionToClient => NetIdentity.ConnectionToClient;
 
         /// <summary>
         /// Returns the appropriate NetworkTime instance based on if this NetworkBehaviour is running as a Server or Client.
@@ -125,12 +122,12 @@ namespace Mirage
         protected internal ulong SyncVarDirtyBits { get; private set; }
         ulong syncVarHookGuard;
 
-        internal protected bool GetSyncVarHookGuard(ulong dirtyBit)
+        protected internal bool GetSyncVarHookGuard(ulong dirtyBit)
         {
             return (syncVarHookGuard & dirtyBit) != 0UL;
         }
 
-        internal protected void SetSyncVarHookGuard(ulong dirtyBit, bool value)
+        protected internal void SetSyncVarHookGuard(ulong dirtyBit, bool value)
         {
             if (value)
                 syncVarHookGuard |= dirtyBit;
@@ -210,7 +207,7 @@ namespace Mirage
         // this gets called in the constructor by the weaver
         // for every SyncObject in the component (e.g. SyncLists).
         // We collect all of them and we synchronize them with OnSerialize/OnDeserialize
-        internal protected void InitSyncObject(ISyncObject syncObject)
+        protected internal void InitSyncObject(ISyncObject syncObject)
         {
             syncObjects.Add(syncObject);
             syncObject.OnChange += SyncObject_OnChange;
@@ -220,12 +217,11 @@ namespace Mirage
         {
             if (IsServer)
             {
-                ServerObjectManager.DirtyObjects.Add(NetIdentity);
+                ServerObjectManager.SyncVarSender.AddDirtyObject(NetIdentity);
             }
         }
 
         #region ServerRpcs
-        [EditorBrowsable(EditorBrowsableState.Never)]
         protected internal void SendServerRpcInternal(Type invokeClass, string cmdName, NetworkWriter writer, int channelId, bool requireAuthority = true)
         {
             ValidateServerRpc(invokeClass, cmdName, requireAuthority);
@@ -241,7 +237,7 @@ namespace Mirage
                 payload = writer.ToArraySegment()
             };
 
-            Client.SendAsync(message, channelId).Forget();
+            Client.Send(message, channelId);
         }
 
         private void ValidateServerRpc(Type invokeClass, string cmdName, bool requireAuthority)
@@ -260,9 +256,9 @@ namespace Mirage
                 throw new UnauthorizedAccessException($"Trying to send ServerRpc for object without authority. {invokeClass}.{cmdName}");
             }
 
-            if (Client.Connection == null)
+            if (Client.Player == null)
             {
-                throw new InvalidOperationException("Send ServerRpc attempted with no client running [client=" + ConnectionToServer + "].");
+                throw new InvalidOperationException("Send ServerRpc attempted with no client connection.");
             }
         }
 
@@ -284,7 +280,7 @@ namespace Mirage
                 payload = writer.ToArraySegment()
             };
 
-            Client.SendAsync(message, channelId).Forget();
+            Client.Send(message, channelId);
 
             return task;
         }
@@ -292,13 +288,12 @@ namespace Mirage
         #endregion
 
         #region Client RPCs
-        [EditorBrowsable(EditorBrowsableState.Never)]
         protected internal void SendRpcInternal(Type invokeClass, string rpcName, NetworkWriter writer, int channelId, bool excludeOwner)
         {
             // this was in Weaver before
-            if (!Server || !Server.Active)
+            if (Server == null || !Server.Active)
             {
-                throw new InvalidOperationException("RPC Function " + rpcName + " called on Client.");
+                throw new InvalidOperationException($"RPC Function {rpcName} called when server is not active.");
             }
             // This cannot use Server.active, as that is not specific to this object.
             if (!IsServer)
@@ -321,22 +316,21 @@ namespace Mirage
             // The public facing parameter is excludeOwner in [ClientRpc]
             // so we negate it here to logically align with SendToReady.
             bool includeOwner = !excludeOwner;
-            NetIdentity.SendToObservers(message, includeOwner, channelId);
+            NetIdentity.SendToRemoteObservers(message, includeOwner, channelId);
         }
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        protected internal void SendTargetRpcInternal(INetworkConnection conn, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
+        protected internal void SendTargetRpcInternal(INetworkPlayer player, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
         {
             // this was in Weaver before
-            if (!Server || !Server.Active)
+            if (Server == null || !Server.Active)
             {
-                throw new InvalidOperationException("RPC Function " + rpcName + " called on client.");
+                throw new InvalidOperationException($"RPC Function {rpcName} called when server is not active.");
             }
 
             // connection parameter is optional. assign if null.
-            if (conn == null)
+            if (player == null)
             {
-                conn = ConnectionToClient;
+                player = ConnectionToClient;
             }
 
             // This cannot use Server.active, as that is not specific to this object.
@@ -357,13 +351,12 @@ namespace Mirage
                 payload = writer.ToArraySegment()
             };
 
-            conn.Send(message, channelId);
+            player.Send(message, channelId);
         }
         #endregion
 
         #region Helpers
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
         protected internal bool SyncVarEqual<T>(T value, T fieldValue)
         {
             // newly initialized or changed value?
@@ -381,7 +374,7 @@ namespace Mirage
         {
             SyncVarDirtyBits |= dirtyBit;
             if (IsServer)
-                ServerObjectManager.DirtyObjects.Add(NetIdentity);
+                ServerObjectManager.SyncVarSender.AddDirtyObject(NetIdentity);
         }
 
         /// <summary>

@@ -1,3 +1,4 @@
+using Mirage.Serialization;
 using NUnit.Framework;
 using UnityEngine;
 

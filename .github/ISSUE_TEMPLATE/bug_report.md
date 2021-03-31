@@ -29,7 +29,7 @@ If applicable, add screenshots to help explain your problem.
 * OS: \[e.g. Windows, MacOS\]
 * Build target: \[e.g.  Android, webgl, standalone, iOS\]
 * Unity version: \[e.g. 2017.4]
-* Mirror branch: \[e.g.  master, 2018\]
+* Mirage version: \[e.g.  master, 2018\]
 
 **Additional context**
 Add any other context about the problem here.

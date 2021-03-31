@@ -1,16 +1,19 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
+using InvalidEnumArgumentException = System.ComponentModel.InvalidEnumArgumentException;
 
 namespace Mirage
 {
     /// <summary>
-    /// Provides Scene Management to a NetworkServer and or NetworkClient.
+    /// NetworkSceneManager is an optional component that helps keep scene in sync between server and client.
     /// <para>The <see cref="NetworkClient">NetworkClient</see> loads scenes as instructed by the <see cref="NetworkServer">NetworkServer</see>.</para>
     /// <para>The <see cref="NetworkServer">NetworkServer</see> controls the currently active Scene and any additive Load/Unload.</para>
+    /// <para>when a client connect NetworkSceneManager will send a message telling the new client to load the scene that is active on the server</para>
     /// </summary>
     [AddComponentMenu("Network/NetworkSceneManager")]
     [DisallowMultipleComponent]
@@ -29,53 +32,65 @@ namespace Mirage
         public bool DontDestroy = true;
 
         [Header("Events")]
+
+        [FormerlySerializedAs("ClientChangeScene")]
+        [SerializeField] SceneChangeEvent _clientChangeScene = new SceneChangeEvent();
+
+        [FormerlySerializedAs("ClientSceneChanged")]
+        [SerializeField] SceneChangeEvent _clientSceneChanged = new SceneChangeEvent();
+
+        [FormerlySerializedAs("ServerChangeScene")]
+        [SerializeField] SceneChangeEvent _serverChangeScene = new SceneChangeEvent();
+
+        [FormerlySerializedAs("ServerSceneChanged")]
+        [SerializeField] SceneChangeEvent _serverSceneChanged = new SceneChangeEvent();
+
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
-        [FormerlySerializedAs("ClientChangeScene")]
-        [SerializeField] ClientSceneChangeEvent _clientChangeScene = new ClientSceneChangeEvent();
-        public ClientSceneChangeEvent ClientChangeScene => _clientChangeScene;
+        public SceneChangeEvent ClientChangeScene => _clientChangeScene;
 
         /// <summary>
         /// Event fires after the Client has completed its scene change.
         /// </summary>
-        [FormerlySerializedAs("ClientSceneChanged")]
-        [SerializeField] ClientSceneChangeEvent _clientSceneChanged = new ClientSceneChangeEvent();
-        public ClientSceneChangeEvent ClientSceneChanged => _clientSceneChanged;
+        public SceneChangeEvent ClientSceneChanged => _clientSceneChanged;
 
         /// <summary>
         /// Event fires before Server changes scene.
         /// </summary>
-        [FormerlySerializedAs("ServerChangeScene")]
-        [SerializeField] ClientSceneChangeEvent _serverChangeScene = new ClientSceneChangeEvent();
-        public ClientSceneChangeEvent ServerChangeScene => _serverChangeScene;
+        public SceneChangeEvent ServerChangeScene => _serverChangeScene;
 
         /// <summary>
         /// Event fires after Server has completed scene change.
         /// </summary>
-        [FormerlySerializedAs("ServerSceneChanged")]
-        [SerializeField] ClientSceneChangeEvent _serverSceneChanged = new ClientSceneChangeEvent();
-        public ClientSceneChangeEvent ServerSceneChanged => _serverSceneChanged;
+        public SceneChangeEvent ServerSceneChanged => _serverSceneChanged;
 
         /// <summary>
-        /// The path of the current network scene.
+        /// The path of the current active scene.
+        /// <para>If using additive scenes this will be the first scene.</para>
+        /// <para>Value from  <see cref="SceneManager.GetActiveScene()"/> </para>
         /// </summary>
         /// <remarks>
         /// <para>New clients that connect to a server will automatically load this scene.</para>
         /// <para>This is used to make sure that all scene changes are initialized by Mirage.</para>
         /// </remarks>
-        public string NetworkScenePath => SceneManager.GetActiveScene().path;
+        public string ActiveScenePath => SceneManager.GetActiveScene().path;
 
-        internal AsyncOperation asyncOperation;
+        AsyncOperation clientLoadingOperation;
 
-        //Used by the server to track all additive scenes. To notify clients upon connection
+        /// <summary>
+        /// Used by the server to track all additive scenes. To notify clients upon connection 
+        /// </summary>
         internal List<string> additiveSceneList = new List<string>();
-        //Used by the client to load the full additive scene list that the server has upon connection
+
+        /// <summary>
+        /// Used by the client to load the full additive scene list that the server has upon connection
+        /// </summary>
         internal List<string> pendingAdditiveSceneList = new List<string>();
 
         public void Start()
         {
-            if(DontDestroy)
+            if (DontDestroy)
                 DontDestroyOnLoad(gameObject);
 
             if (Client != null)
@@ -90,21 +105,20 @@ namespace Mirage
 
         #region Client
 
-        void RegisterClientMessages(INetworkConnection connection)
+        void RegisterClientMessages(INetworkPlayer player)
         {
-            connection.RegisterHandler<SceneMessage>(ClientSceneMessage);
+            player.RegisterHandler<SceneMessage>(ClientSceneMessage);
             if (!Client.IsLocalClient)
             {
-                connection.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
-                connection.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
+                player.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
+                player.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
             }
         }
 
-        // called after successful authentication
-        void OnClientAuthenticated(INetworkConnection conn)
+        void OnClientAuthenticated(INetworkPlayer player)
         {
             logger.Log("NetworkSceneManager.OnClientAuthenticated");
-            RegisterClientMessages(conn);
+            RegisterClientMessages(player);
         }
 
         void OnDestroy()
@@ -113,7 +127,7 @@ namespace Mirage
                 Client.Authenticated?.RemoveListener(OnClientAuthenticated);
         }
 
-        internal void ClientSceneMessage(INetworkConnection conn, SceneMessage msg)
+        internal void ClientSceneMessage(INetworkPlayer player, SceneMessage msg)
         {
             if (!Client.IsConnected)
             {
@@ -121,10 +135,10 @@ namespace Mirage
             }
             if (string.IsNullOrEmpty(msg.scenePath))
             {
-                throw new ArgumentNullException(msg.scenePath, "ClientSceneMessage: " + msg.scenePath + " cannot be empty or null");
+                throw new ArgumentNullException(nameof(msg.scenePath), $"ClientSceneMessage: {nameof(msg.scenePath)} cannot be empty or null");
             }
 
-            if (logger.LogEnabled()) logger.Log("ClientSceneMessage: changing scenes from: " + NetworkScenePath + " to:" + msg.scenePath);
+            if (logger.LogEnabled()) logger.Log($"ClientSceneMessage: changing scenes from: {ActiveScenePath} to: {msg.scenePath}");
 
             // Let client prepare for scene change
             OnClientChangeScene(msg.scenePath, msg.sceneOperation);
@@ -138,23 +152,23 @@ namespace Mirage
                 }
             }
 
-            StartCoroutine(ApplySceneOperation(msg.scenePath, msg.sceneOperation));
+            ApplyOperationAsync(msg.scenePath, msg.sceneOperation).Forget();
         }
 
-        internal void ClientSceneReadyMessage(INetworkConnection conn, SceneReadyMessage msg)
+        internal void ClientSceneReadyMessage(INetworkPlayer player, SceneReadyMessage msg)
         {
             logger.Log("ClientSceneReadyMessage");
 
             //Server has finished changing scene. Allow the client to finish.
-            if (asyncOperation != null)
-                asyncOperation.allowSceneActivation = true;
+            if (clientLoadingOperation != null)
+                clientLoadingOperation.allowSceneActivation = true;
         }
 
-        internal void ClientNotReadyMessage(INetworkConnection conn, NotReadyMessage msg)
+        internal void ClientNotReadyMessage(INetworkPlayer player, NotReadyMessage msg)
         {
             logger.Log("NetworkSceneManager.OnClientNotReadyMessageInternal");
 
-            Client.Connection.IsReady = false;
+            Client.Player.IsReady = false;
         }
 
         /// <summary>
@@ -180,13 +194,13 @@ namespace Mirage
 
             if (pendingAdditiveSceneList.Count > 0 && Client && !Client.IsLocalClient)
             {
-                StartCoroutine(ApplySceneOperation(pendingAdditiveSceneList[0], SceneOperation.LoadAdditive));
+                ApplyOperationAsync(pendingAdditiveSceneList[0], SceneOperation.LoadAdditive).Forget();
                 pendingAdditiveSceneList.RemoveAt(0);
                 return;
             }
 
             //set ready after scene change has completed
-            if (!Client.Connection.IsReady)
+            if (!Client.Player.IsReady)
                 SetClientReady();
         }
 
@@ -203,10 +217,10 @@ namespace Mirage
 
             // Set these before sending the ReadyMessage, otherwise host client
             // will fail in InternalAddPlayer with null readyConnection.
-            Client.Connection.IsReady = true;
+            Client.Player.IsReady = true;
 
             // Tell server we're ready to have a player object spawned
-            Client.Connection.Send(new ReadyMessage());
+            Client.Player.Send(new ReadyMessage());
         }
 
         #endregion
@@ -214,16 +228,16 @@ namespace Mirage
         #region Server
 
         // called after successful authentication
-        void OnServerAuthenticated(INetworkConnection conn)
+        void OnServerAuthenticated(INetworkPlayer player)
         {
             logger.Log("NetworkSceneManager.OnServerAuthenticated");
 
-            conn.Send(new SceneMessage { scenePath = NetworkScenePath, additiveScenes = additiveSceneList.ToArray() });
-            conn.Send(new SceneReadyMessage());
+            player.Send(new SceneMessage { scenePath = ActiveScenePath, additiveScenes = additiveSceneList.ToArray() });
+            player.Send(new SceneReadyMessage());
         }
 
         /// <summary>
-        /// This causes the server to switch scenes and sets the NetworkScenePath.
+        /// This causes the server to switch scenes and sets the ActiveScenePath.
         /// <para>Clients that connect to this server will automatically switch to this scene. This automatically sets clients to be not-ready. The clients must call Ready() again to participate in the new scene.</para>
         /// </summary>
         /// <param name="scenePath"></param>
@@ -241,7 +255,7 @@ namespace Mirage
             OnServerChangeScene(scenePath, sceneOperation);
 
             if (!Server.LocalClientActive)
-                StartCoroutine(ApplySceneOperation(scenePath, sceneOperation));
+                ApplyOperationAsync(scenePath, sceneOperation).Forget();
 
             // notify all clients about the new scene
             Server.SendToAll(new SceneMessage { scenePath = scenePath, sceneOperation = sceneOperation });
@@ -274,64 +288,73 @@ namespace Mirage
 
         #endregion
 
-        IEnumerator ApplySceneOperation(string scenePath, SceneOperation sceneOperation = SceneOperation.Normal)
+        #region Scene Operations
+
+        UniTask ApplyOperationAsync(string scenePath, SceneOperation sceneOperation = SceneOperation.Normal)
         {
             switch (sceneOperation)
             {
-                case SceneOperation.Normal:
-                    //Scene is already active.
-                    if (NetworkScenePath.Equals(scenePath))
-                    {
-                        FinishLoadScene(scenePath, sceneOperation);
-                    }
-                    else
-                    {
-                        asyncOperation = SceneManager.LoadSceneAsync(scenePath);
-                        asyncOperation.completed += OnAsyncComplete;
-
-                        //If non host client. Wait for server to finish scene change
-                        if (Client && Client.Active && !Client.IsLocalClient)
-                        {
-                            asyncOperation.allowSceneActivation = false;
-                        }
-
-                        yield return asyncOperation;
-                    }
-
-                    break;
-                case SceneOperation.LoadAdditive:
-                    // Ensure additive scene is not already loaded
-                    if (!SceneManager.GetSceneByPath(scenePath).IsValid())
-                    {
-                        yield return SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
-                        additiveSceneList.Add(scenePath);
-                        FinishLoadScene(scenePath, sceneOperation);
-                    }
-                    else
-                    {
-                        logger.LogWarning($"Scene {scenePath} is already loaded");
-                    }
-                    break;
-                case SceneOperation.UnloadAdditive:
-                    // Ensure additive scene is actually loaded
-                    if (SceneManager.GetSceneByPath(scenePath).IsValid())
-                    {
-                        yield return SceneManager.UnloadSceneAsync(scenePath, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
-                        additiveSceneList.Remove(scenePath);
-                        FinishLoadScene(scenePath, sceneOperation);
-                    }
-                    else
-                    {
-                        logger.LogWarning($"Cannot unload {scenePath} with UnloadAdditive operation");
-                    }
-                    break;
+                case SceneOperation.Normal: return ApplyNormalOperationAsync(scenePath);
+                case SceneOperation.LoadAdditive: return ApplyAdditiveLoadOperationAsync(scenePath);
+                case SceneOperation.UnloadAdditive: return ApplyUnloadAdditiveOperationAsync(scenePath);
+                default:
+                    // Should never happen
+                    throw new InvalidEnumArgumentException(nameof(sceneOperation), (int)sceneOperation, typeof(SceneOperation));
             }
         }
 
-        void OnAsyncComplete(AsyncOperation asyncOperation)
+        async UniTask ApplyNormalOperationAsync(string scenePath)
         {
-            //This is only called in a normal scene change
-            FinishLoadScene(NetworkScenePath, SceneOperation.Normal);
+            //Scene is already active.
+            if (ActiveScenePath.Equals(scenePath))
+            {
+                FinishLoadScene(scenePath, SceneOperation.Normal);
+            }
+            else
+            {
+                clientLoadingOperation = SceneManager.LoadSceneAsync(scenePath);
+
+                //If non host client. Wait for server to finish scene change
+                if (Client && Client.Active && !Client.IsLocalClient)
+                {
+                    clientLoadingOperation.allowSceneActivation = false;
+                }
+
+                await clientLoadingOperation;
+
+                logger.Assert(scenePath == ActiveScenePath, "Scene being loaded was not the active scene");
+                FinishLoadScene(ActiveScenePath, SceneOperation.Normal);
+            }
+        }
+
+        async UniTask ApplyAdditiveLoadOperationAsync(string scenePath)
+        {
+            // Ensure additive scene is not already loaded
+            if (SceneManager.GetSceneByPath(scenePath).IsValid())
+            {
+                logger.LogWarning($"Scene {scenePath} is already loaded");
+            }
+            else
+            {
+                await SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
+                additiveSceneList.Add(scenePath);
+                FinishLoadScene(scenePath, SceneOperation.LoadAdditive);
+            }
+        }
+
+        async UniTask ApplyUnloadAdditiveOperationAsync(string scenePath)
+        {
+            // Ensure additive scene is actually loaded
+            if (SceneManager.GetSceneByPath(scenePath).IsValid())
+            {
+                await SceneManager.UnloadSceneAsync(scenePath, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
+                additiveSceneList.Remove(scenePath);
+                FinishLoadScene(scenePath, SceneOperation.UnloadAdditive);
+            }
+            else
+            {
+                logger.LogWarning($"Cannot unload {scenePath} with UnloadAdditive operation");
+            }
         }
 
         internal void FinishLoadScene(string scenePath, SceneOperation sceneOperation)
@@ -365,5 +388,7 @@ namespace Mirage
                 OnClientSceneChanged(scenePath, sceneOperation);
             }
         }
+
+        #endregion
     }
 }

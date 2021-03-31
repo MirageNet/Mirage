@@ -1,4 +1,6 @@
 using System.Linq;
+using Mirage.Logging;
+using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -21,6 +23,7 @@ namespace Mirage
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkAnimator));
 
         [Header("Authority")]
+        [FormerlySerializedAs("clientAuthority")]
         [Tooltip("Set to true if animations come from owner client,  set to false if animations always come from server")]
         public bool ClientAuthority;
 
@@ -28,6 +31,7 @@ namespace Mirage
         /// The animator component to synchronize.
         /// </summary>
         [FormerlySerializedAs("m_Animator")]
+        [FormerlySerializedAs("animator")]
         [Header("Animator")]
         [Tooltip("Animator that will have parameters synchronized")]
         public Animator Animator;
@@ -171,7 +175,7 @@ namespace Mirage
             {
                 RpcOnAnimationClientMessage(stateHash, normalizedTime, layerId, weight, parameters);
             }
-            else if (Client.Connection != null)
+            else if (Client.Player != null)
             {
                 CmdOnAnimationServerMessage(stateHash, normalizedTime, layerId, weight, parameters);
             }
@@ -183,7 +187,7 @@ namespace Mirage
             {
                 RpcOnAnimationParametersClientMessage(parameters);
             }
-            else if (Client.Connection != null)
+            else if (Client.Player != null)
             {
                 CmdOnAnimationParametersServerMessage(parameters);
             }
@@ -437,7 +441,7 @@ namespace Mirage
                     return;
                 }
 
-                if (Client.Connection != null)
+                if (Client.Player != null)
                     CmdOnAnimationTriggerServerMessage(hash);
 
                 // call on client right away
@@ -486,7 +490,7 @@ namespace Mirage
                     return;
                 }
 
-                if (Client.Connection != null)
+                if (Client.Player != null)
                     CmdOnAnimationResetTriggerServerMessage(hash);
 
                 // call on client right away

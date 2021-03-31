@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Mirage.Logging;
 using Mono.Cecil;
 using NUnit.Framework;
 using Unity.CompilationPipeline.Common.Diagnostics;
@@ -18,7 +19,7 @@ namespace Mirage.Weaver
             string className = TestContext.CurrentContext.Test.ClassName.Split('.').Last();
 
             BuildAndWeaveTestAssembly(className, TestContext.CurrentContext.Test.Name);
-            
+
         }
 
         [AssertionMethod]
@@ -31,8 +32,8 @@ namespace Mirage.Weaver
         protected void HasError(string messsage, string atType)
         {
             Assert.That(weaverLog.Diagnostics
-                .Where(d=> d.DiagnosticType == DiagnosticType.Error)
-                .Select(d=> d.MessageData), Contains.Item($"{messsage} (at {atType})"));
+                .Where(d => d.DiagnosticType == DiagnosticType.Error)
+                .Select(d => d.MessageData), Contains.Item($"{messsage} (at {atType})"));
         }
 
         [AssertionMethod]

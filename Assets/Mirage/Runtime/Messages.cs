@@ -13,10 +13,10 @@ namespace Mirage
     public struct NotReadyMessage { }
 
     [NetworkMessage]
-    public struct AddPlayerMessage { }
+    public struct AddCharacterMessage { }
 
     [NetworkMessage]
-    public struct SceneMessage 
+    public struct SceneMessage
     {
         public string scenePath;
         // Normal = 0, LoadAdditive = 1, UnloadAdditive = 2
@@ -140,7 +140,7 @@ namespace Mirage
     // The server responds with this message
     // The client can use this to calculate RTT and sync time
     [NetworkMessage]
-    public struct NetworkPongMessage 
+    public struct NetworkPongMessage
     {
         public double clientTime;
         public double serverTime;

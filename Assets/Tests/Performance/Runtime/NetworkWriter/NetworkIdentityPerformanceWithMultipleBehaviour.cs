@@ -20,7 +20,7 @@ namespace Mirage.Tests.Performance
         {
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
-            identity.ConnectionToClient = Substitute.For<INetworkConnection>();
+            identity.ConnectionToClient = Substitute.For<INetworkPlayer>();
             identity.observers.Add(identity.ConnectionToClient);
             health = new Health[healthCount];
             for (int i = 0; i < healthCount; i++)
@@ -54,7 +54,7 @@ namespace Mirage.Tests.Performance
                 {
                     health[i].SetDirtyBit(1UL);
                 }
-                identity.ServerUpdate();
+                identity.UpdateVars();
             }
         }
 
@@ -72,7 +72,7 @@ namespace Mirage.Tests.Performance
         {
             for (int j = 0; j < 1000; j++)
             {
-                identity.ServerUpdate();
+                identity.UpdateVars();
             }
         }
     }

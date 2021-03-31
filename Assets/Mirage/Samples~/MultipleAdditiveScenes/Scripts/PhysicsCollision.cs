@@ -21,7 +21,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
             rigidbody3D.isKinematic = !IsServer;
         }
 
-        [Server(error=false)]
+        [Server(error = false)]
         void OnCollisionStay(Collision other)
         {
             if (other.gameObject.CompareTag("Player"))
@@ -34,7 +34,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
                 direction = direction.normalized;
 
                 // push this away from player...a bit less force for host player
-                if (other.gameObject.GetComponent<NetworkIdentity>().ConnectionToClient == Server.LocalConnection)
+                if (other.gameObject.GetComponent<NetworkIdentity>().ConnectionToClient == Server.LocalPlayer)
                     rigidbody3D.AddForce(direction * force * .5f);
                 else
                     rigidbody3D.AddForce(direction * force);

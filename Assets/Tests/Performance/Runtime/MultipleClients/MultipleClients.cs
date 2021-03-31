@@ -50,7 +50,10 @@ namespace Mirage.Tests.Performance.Runtime
             Server.Authenticated.AddListener(conn => ServerObjectManager.SetClientReady(conn));
 
             var started = new UniTaskCompletionSource();
-            Server.Started.AddListener(()=> started.TrySetResult());
+            Server.Started.AddListener(() => started.TrySetResult());
+
+            // wait 1 frame before Starting server to give time for Unity to call "Start"
+            await UniTask.Yield();
             Server.ListenAsync().Forget();
 
             await started.Task;

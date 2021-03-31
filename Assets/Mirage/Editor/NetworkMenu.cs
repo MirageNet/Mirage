@@ -1,6 +1,7 @@
-using UnityEngine;
-using UnityEditor;
 using Mirage.KCP;
+using Mirage.Logging;
+using UnityEditor;
+using UnityEngine;
 
 namespace Mirage
 {
@@ -11,7 +12,7 @@ namespace Mirage
         [MenuItem("GameObject/Network/NetworkManager", priority = 7)]
         public static GameObject CreateNetworkManager()
         {
-            var go = new GameObject("NetworkManager", typeof(NetworkManager), typeof(NetworkServer), typeof(NetworkClient), typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(ClientObjectManager), typeof(PlayerSpawner), typeof(KcpTransport), typeof(LogSettings));
+            var go = new GameObject("NetworkManager", typeof(NetworkManager), typeof(NetworkServer), typeof(NetworkClient), typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(ClientObjectManager), typeof(CharacterSpawner), typeof(KcpTransport), typeof(LogSettings));
 
             KcpTransport transport = go.GetComponent<KcpTransport>();
             NetworkSceneManager nsm = go.GetComponent<NetworkSceneManager>();
@@ -37,7 +38,7 @@ namespace Mirage
             networkManager.ClientObjectManager = clientObjectManager;
             networkManager.SceneManager = nsm;
 
-            PlayerSpawner playerSpawner = go.GetComponent<PlayerSpawner>();
+            CharacterSpawner playerSpawner = go.GetComponent<CharacterSpawner>();
             playerSpawner.Client = networkClient;
             playerSpawner.Server = networkServer;
             playerSpawner.SceneManager = nsm;

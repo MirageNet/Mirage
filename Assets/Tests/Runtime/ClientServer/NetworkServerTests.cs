@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer
 {
     public class NetworkServerTests : ClientServerSetup<MockComponent>
     {
@@ -27,7 +27,7 @@ namespace Mirage.Tests.ClientServer
         [Test]
         public void InitializeTest()
         {
-            Assert.That(server.connections, Has.Count.EqualTo(1));
+            Assert.That(server.Players, Has.Count.EqualTo(1));
             Assert.That(server.Active);
             Assert.That(server.LocalClientActive, Is.False);
         }
@@ -62,7 +62,7 @@ namespace Mirage.Tests.ClientServer
         {
             bool invoked = false;
 
-            connectionToServer.RegisterHandler<WovenTestMessage>(msg => invoked = true) ;
+            connectionToServer.RegisterHandler<WovenTestMessage>(msg => invoked = true);
 
             serverIdentity.ConnectionToClient.Send(message);
 
@@ -76,7 +76,7 @@ namespace Mirage.Tests.ClientServer
         {
             bool invoked = false;
 
-            connectionToClient.RegisterHandler< WovenTestMessage>(msg => invoked = true);
+            connectionToClient.RegisterHandler<WovenTestMessage>(msg => invoked = true);
             connectionToServer.Send(message);
 
             await AsyncUtil.WaitUntilWithTimeout(() => invoked);
@@ -114,13 +114,13 @@ namespace Mirage.Tests.ClientServer
         [Test]
         public void NumPlayersTest()
         {
-            Assert.That(server.NumPlayers, Is.EqualTo(1));
+            Assert.That(server.NumberOfPlayers, Is.EqualTo(1));
         }
 
         [Test]
         public void GetNewConnectionTest()
         {
-            Assert.That(server.GetNewConnection(Substitute.For<IConnection>()), Is.Not.Null);
+            Assert.That(server.GetNewPlayer(Substitute.For<IConnection>()), Is.Not.Null);
         }
 
         [Test]
@@ -139,7 +139,7 @@ namespace Mirage.Tests.ClientServer
 
         [UnityTest]
         public IEnumerator StoppedInvokeTest() => UniTask.ToCoroutine(async () =>
-        
+
         {
             UnityAction func1 = Substitute.For<UnityAction>();
             server.Stopped.AddListener(func1);

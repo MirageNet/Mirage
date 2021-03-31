@@ -1,4 +1,5 @@
 using System;
+using Mirage.Logging;
 using UnityEngine;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
@@ -52,7 +53,7 @@ namespace Mirage
             offsetMax = double.MaxValue;
         }
 
-        internal void UpdateClient(NetworkClient client)
+        internal void UpdateClient(INetworkClient client)
         {
             if (UnityEngine.Time.time - lastPingTime >= PingFrequency)
             {
@@ -60,7 +61,7 @@ namespace Mirage
                 {
                     clientTime = LocalTime()
                 };
-                client.Connection.Send(pingMessage, Channel.Unreliable);
+                client.Player.Send(pingMessage, Channel.Unreliable);
                 lastPingTime = UnityEngine.Time.time;
             }
         }
@@ -68,9 +69,9 @@ namespace Mirage
         // executed at the server when we receive a ping message
         // reply with a pong containing the time from the client
         // and time from the server
-        internal void OnServerPing(INetworkConnection conn, NetworkPingMessage msg)
+        internal void OnServerPing(INetworkPlayer player, NetworkPingMessage msg)
         {
-            if (logger.LogEnabled()) logger.Log("OnPingServerMessage  conn=" + conn);
+            if (logger.LogEnabled()) logger.Log("OnPingServerMessage  conn=" + player);
 
             var pongMsg = new NetworkPongMessage
             {
@@ -78,7 +79,7 @@ namespace Mirage
                 serverTime = LocalTime()
             };
 
-            conn.Send(pongMsg, Channel.Unreliable);
+            player.Send(pongMsg, Channel.Unreliable);
         }
 
         // Executed at the client when we receive a Pong message

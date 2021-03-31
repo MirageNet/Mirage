@@ -17,30 +17,30 @@ namespace Mirage.Examples.Chat
             Client.Authenticated.AddListener(OnClientAuthenticated);
         }
 
-        public struct CreatePlayerMessage
+        public struct CreateCharacterMessage
         {
             public string name;
         }
 
-        public void OnServerAuthenticated(INetworkConnection conn)
+        public void OnServerAuthenticated(INetworkPlayer player)
         {
-            conn.RegisterHandler<CreatePlayerMessage>(OnCreatePlayer);
+            player.RegisterHandler<CreateCharacterMessage>(OnCreatePlayer);
         }
 
-        public void OnClientAuthenticated(INetworkConnection conn)
+        public void OnClientAuthenticated(INetworkPlayer player)
         {
             // tell the server to create a player with this name
-            conn.Send(new CreatePlayerMessage { name = PlayerName });
+            player.Send(new CreateCharacterMessage { name = PlayerName });
         }
 
-        private void OnCreatePlayer(INetworkConnection connection, CreatePlayerMessage createPlayerMessage)
+        private void OnCreatePlayer(INetworkPlayer player, CreateCharacterMessage createCharacterMessage)
         {
             // create a gameobject using the name supplied by client
             GameObject playergo = Instantiate(playerPrefab).gameObject;
-            playergo.GetComponent<Player>().playerName = createPlayerMessage.name;
+            playergo.GetComponent<Player>().playerName = createCharacterMessage.name;
 
             // set it as the player
-            ServerObjectManager.AddPlayerForConnection(connection, playergo);
+            ServerObjectManager.AddCharacter(player, playergo);
 
             chatWindow.gameObject.SetActive(true);
         }

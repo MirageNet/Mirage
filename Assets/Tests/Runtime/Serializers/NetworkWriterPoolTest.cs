@@ -1,7 +1,8 @@
 using System.Linq;
+using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class NetworkWriterPoolTest
     {

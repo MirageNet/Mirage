@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Mirage.Examples.Pong
 {
-    public class PaddleSpawner : PlayerSpawner
+    public class PaddleSpawner : CharacterSpawner
     {
         public Transform leftRacketSpawn;
         public Transform rightRacketSpawn;
@@ -10,15 +10,15 @@ namespace Mirage.Examples.Pong
 
         GameObject ball;
 
-        public override void OnServerAddPlayer(INetworkConnection conn)
+        public override void OnServerAddPlayer(INetworkPlayer player)
         {
             // add player at correct spawn position
-            Transform start = Server.NumPlayers == 0 ? leftRacketSpawn : rightRacketSpawn;
-            NetworkIdentity player = Instantiate(PlayerPrefab, start.position, start.rotation);
-            ServerObjectManager.AddPlayerForConnection(conn, player.gameObject);
+            Transform start = Server.NumberOfPlayers == 0 ? leftRacketSpawn : rightRacketSpawn;
+            NetworkIdentity character = Instantiate(PlayerPrefab, start.position, start.rotation);
+            ServerObjectManager.AddCharacter(player, character.gameObject);
 
             // spawn ball if two players
-            if (Server.NumPlayers == 2)
+            if (Server.NumberOfPlayers == 2)
             {
                 ball = Instantiate(ballPrefab);
                 ServerObjectManager.Spawn(ball);
@@ -26,7 +26,7 @@ namespace Mirage.Examples.Pong
         }
 
 
-        public void OnServerDisconnect(INetworkConnection conn)
+        public void OnServerDisconnect(INetworkPlayer player)
         {
             // destroy ball
             if (ball != null)

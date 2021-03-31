@@ -16,33 +16,45 @@ namespace Mirage.Examples.MultipleAdditiveScenes
 
         readonly List<Scene> subScenes = new List<Scene>();
 
+        /// <summary>
+        /// This is invoked when a server is started - including when a host is started.
+        /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
+        /// </summary>
+        public void Start()
+        {
+            Server.Started.AddListener(() => StartCoroutine(LoadSubScenes()));
+            Server.Authenticated.AddListener(OnServerAddPlayer);
+            Server.Stopped.AddListener(OnStopServer);
+            Client.Disconnected.AddListener(OnStopClient);
+        }
+
         #region Server System Callbacks
 
         /// <summary>
         /// Called on the server when a client adds a new player with ClientScene.AddPlayer.
         /// <para>The default implementation for this function creates a new player object from the playerPrefab.</para>
         /// </summary>
-        /// <param name="conn">Connection from client.</param>
-        public void OnServerAddPlayer(NetworkConnection conn)
+        /// <param name="player">Connection from client.</param>
+        public void OnServerAddPlayer(INetworkPlayer player)
         {
             // This delay is really for the host player that loads too fast for the server to have subscene loaded
-            StartCoroutine(AddPlayerDelayed(conn));
+            StartCoroutine(AddPlayerDelayed(player));
         }
 
         int playerId = 1;
 
-        IEnumerator AddPlayerDelayed(NetworkConnection conn)
+        IEnumerator AddPlayerDelayed(INetworkPlayer player)
         {
             yield return new WaitForSeconds(.5f);
-            conn.Send(new SceneMessage { scenePath = gameScene, sceneOperation = SceneOperation.LoadAdditive });
+            player.Send(new SceneMessage { scenePath = gameScene, sceneOperation = SceneOperation.LoadAdditive });
 
-            PlayerScore playerScore = conn.Identity.GetComponent<PlayerScore>();
+            PlayerScore playerScore = player.Identity.GetComponent<PlayerScore>();
             playerScore.playerNumber = playerId;
             playerScore.scoreIndex = playerId / subScenes.Count;
             playerScore.matchIndex = playerId % subScenes.Count;
 
             if (subScenes.Count > 0)
-                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(conn.Identity.gameObject, subScenes[playerId % subScenes.Count]);
+                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(player.Identity.gameObject, subScenes[playerId % subScenes.Count]);
 
             playerId++;
         }
@@ -51,14 +63,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
 
         #region Start & Stop Callbacks
 
-        /// <summary>
-        /// This is invoked when a server is started - including when a host is started.
-        /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
-        /// </summary>
-        public void OnStartServer()
-        {
-            StartCoroutine(LoadSubScenes());
-        }
+
 
         IEnumerator LoadSubScenes()
         {

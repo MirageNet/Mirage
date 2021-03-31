@@ -2,22 +2,18 @@ using System.Collections.Generic;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
+using static Mirage.Tests.LocalConnections;
 using Object = UnityEngine.Object;
 
-using static Mirage.Tests.LocalConnections;
-
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public class NetworkIdentityCallbackTests
     {
         #region test components
         class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
         {
-            public override bool OnCheckObserver(INetworkConnection conn) { return true; }
-            public override void OnRebuildObservers(HashSet<INetworkConnection> observers, bool initialize) { }
-            public override void OnSetHostVisibility(bool visible)
-            {
-            }
+            public override bool OnCheckObserver(INetworkPlayer player) { return true; }
+            public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize) { }
         }
 
 
@@ -64,24 +60,24 @@ namespace Mirage.Tests
         [Test]
         public void AddAllReadyServerConnectionsToObservers()
         {
-            var connection1 = new NetworkConnection(tconn42) { IsReady = true };
-            var connection2 = new NetworkConnection(tconn43) { IsReady = false };
+            var connection1 = new NetworkPlayer(tconn42) { IsReady = true };
+            var connection2 = new NetworkPlayer(tconn43) { IsReady = false };
             // add some server connections
-            server.connections.Add(connection1);
-            server.connections.Add(connection2);
+            server.Players.Add(connection1);
+            server.Players.Add(connection2);
 
             // add a host connection
             (_, IConnection localConnection) = PipeConnection.CreatePipe();
 
             server.SetLocalConnection(client, localConnection);
-            server.LocalConnection.IsReady = true;
+            server.LocalPlayer.IsReady = true;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
 
             // add all to observers. should have the two ready connections then.
             identity.AddAllReadyServerConnectionsToObservers();
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { connection1, server.LocalConnection }));
+            Assert.That(identity.observers, Is.EquivalentTo(new[] { connection1, server.LocalPlayer }));
 
             // clean up
             server.Disconnect();
@@ -97,7 +93,7 @@ namespace Mirage.Tests
             gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection
-            (_, NetworkConnection connection) = PipedConnections();
+            (_, NetworkPlayer connection) = PipedConnections();
             connection.IsReady = true;
             identity.ConnectionToClient = connection;
 

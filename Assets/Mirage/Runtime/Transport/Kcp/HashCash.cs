@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.Security.Cryptography;
 
@@ -116,9 +116,7 @@ namespace Mirage.KCP
             }
         }
 
-
         #endregion
-
 
         #region Validation
         private static readonly HashAlgorithm hashAlgorithm = SHA256.Create();
@@ -139,14 +137,14 @@ namespace Mirage.KCP
         // validate that the first n bits in a hash are zero
         internal static bool Validate(byte[] hash, int bits = 18)
         {
-            int bytesToCheck = bits >> 3 ;
+            int bytesToCheck = bits >> 3;
             int remainderBitsToCheck = bits & 0b111;
             byte remainderMask = (byte)(0xFF << (8 - remainderBitsToCheck));
 
             if (bytesToCheck >= hash.Length)
                 return false;
 
-            for (int i=0; i< bytesToCheck; i++)
+            for (int i = 0; i < bytesToCheck; i++)
             {
                 if (hash[i] != 0)
                     return false;
@@ -154,7 +152,6 @@ namespace Mirage.KCP
 
             return (hash[bytesToCheck] & remainderMask) == 0;
         }
-
 
         internal bool ValidateHash(int bits = 20)
         {
@@ -205,7 +202,7 @@ namespace Mirage.KCP
             encoder.Encode64U(hashCash.salt);
             encoder.Encode64U(hashCash.counter);
 
-            return encoder.Position - index ;
+            return encoder.Position - index;
         }
 
         /// <summary>
@@ -223,7 +220,7 @@ namespace Mirage.KCP
             ulong salt = decoder.Decode64U();
             ulong counter = decoder.Decode64U();
 
-            var token = new HashCash (
+            var token = new HashCash(
                 new DateTime(ticks),
                 resource,
                 salt,

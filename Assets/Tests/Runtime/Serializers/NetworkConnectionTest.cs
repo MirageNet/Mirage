@@ -1,13 +1,14 @@
-﻿using System;
+using System;
 using System.IO;
+using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
-    public class NetworkConnectionTest 
+    public class NetworkConnectionTest
     {
-        private NetworkConnection connection;
+        private NetworkPlayer connection;
         private byte[] serializedMessage;
         private IConnection mockTransportConnection;
 
@@ -15,9 +16,9 @@ namespace Mirage.Tests
 
         private NotifyPacket lastSent;
 
-        private Action<INetworkConnection, object> delivered;
+        private Action<INetworkPlayer, object> delivered;
 
-        private Action<INetworkConnection, object> lost;
+        private Action<INetworkPlayer, object> lost;
 
         private byte[] lastSerializedPacket;
 
@@ -38,16 +39,16 @@ namespace Mirage.Tests
                 Array.Copy(data.Array, data.Offset, lastSerializedPacket, 0, data.Count);
             }
 
-            mockTransportConnection.SendAsync(
+            mockTransportConnection.Send(
                 Arg.Do<ArraySegment<byte>>(ParsePacket), Channel.Unreliable);
 
-            connection = new NetworkConnection(mockTransportConnection);
+            connection = new NetworkPlayer(mockTransportConnection);
 
             serializedMessage = MessagePacker.Pack(new ReadyMessage());
             connection.RegisterHandler<ReadyMessage>(message => { });
 
-            delivered = Substitute.For<Action<INetworkConnection, object>>();
-            lost = Substitute.For<Action<INetworkConnection, object>>();
+            delivered = Substitute.For<Action<INetworkPlayer, object>>();
+            lost = Substitute.For<Action<INetworkPlayer, object>>();
 
             connection.NotifyDelivered += delivered;
             connection.NotifyLost += lost;
@@ -91,8 +92,8 @@ namespace Mirage.Tests
 
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
-                Sequence = 1,
-                ReceiveSequence = 0,
+                Sequence = 0,
+                ReceiveSequence = ushort.MaxValue,
                 AckMask = 0
             }));
         }
@@ -103,23 +104,23 @@ namespace Mirage.Tests
             connection.SendNotify(data, 1);
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
-                Sequence = 1,
-                ReceiveSequence = 0,
+                Sequence = 0,
+                ReceiveSequence = ushort.MaxValue,
                 AckMask = 0
             }));
 
             connection.SendNotify(data, 1);
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
-                Sequence = 2,
-                ReceiveSequence = 0,
+                Sequence = 1,
+                ReceiveSequence = ushort.MaxValue,
                 AckMask = 0
             }));
             connection.SendNotify(data, 1);
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
-                Sequence = 3,
-                ReceiveSequence = 0,
+                Sequence = 2,
+                ReceiveSequence = ushort.MaxValue,
                 AckMask = 0
             }));
         }
@@ -135,8 +136,8 @@ namespace Mirage.Tests
 
             var reply = new NotifyPacket
             {
-                Sequence = 1,
-                ReceiveSequence = 3,
+                Sequence = 0,
+                ReceiveSequence = 2,
                 AckMask = 0b111
             };
 
@@ -161,8 +162,8 @@ namespace Mirage.Tests
 
             var reply = new NotifyPacket
             {
-                Sequence = 1,
-                ReceiveSequence = 3,
+                Sequence = 0,
+                ReceiveSequence = 2,
                 AckMask = 0b001
             };
 
@@ -183,8 +184,8 @@ namespace Mirage.Tests
 
             var reply = new NotifyPacket
             {
-                Sequence = 1,
-                ReceiveSequence = 1,
+                Sequence = 0,
+                ReceiveSequence = 0,
                 AckMask = 0b001
             };
 
@@ -198,7 +199,7 @@ namespace Mirage.Tests
         [Test]
         public void LoseOldPackets()
         {
-            for (int i = 1; i < 10; i++)
+            for (int i = 0; i < 10; i++)
             {
                 var packet = new NotifyPacket
                 {
@@ -219,8 +220,9 @@ namespace Mirage.Tests
 
             connection.SendNotify(data, 1);
 
-            Assert.That(lastSent, Is.EqualTo(new NotifyPacket {
-                Sequence = 1,
+            Assert.That(lastSent, Is.EqualTo(new NotifyPacket
+            {
+                Sequence = 0,
                 ReceiveSequence = 100,
                 AckMask = 1
             }));
@@ -247,19 +249,19 @@ namespace Mirage.Tests
 
             var reply = new NotifyPacket
             {
-                Sequence = 1,
-                ReceiveSequence = 2,
+                Sequence = 0,
+                ReceiveSequence = 1,
                 AckMask = 0b011
             };
 
             connection.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
 
-            delivered.DidNotReceive().Invoke(Arg.Any<INetworkConnection>(), 5);
+            delivered.DidNotReceive().Invoke(Arg.Any<INetworkPlayer>(), 5);
 
             reply = new NotifyPacket
             {
-                Sequence = 2,
-                ReceiveSequence = 3,
+                Sequence = 1,
+                ReceiveSequence = 2,
                 AckMask = 0b111
             };
 

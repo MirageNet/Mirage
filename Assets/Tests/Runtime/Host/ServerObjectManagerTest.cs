@@ -8,8 +8,35 @@ using UnityEngine.TestTools;
 using static Mirage.Tests.LocalConnections;
 using Object = UnityEngine.Object;
 
-namespace Mirage.Tests.Host
+namespace Mirage.Tests.Runtime.Host
 {
+
+    public class GameobjectExtensionTests : HostSetup<MockComponent>
+    {
+        [Test]
+        public void GetNetworkIdentity()
+        {
+            Assert.That(playerGO.GetNetworkIdentity(), Is.EqualTo(identity));
+        }
+
+        [Test]
+        public void GetNoNetworkIdentity()
+        {
+            // create a GameObject without NetworkIdentity
+            var goWithout = new GameObject();
+
+            // GetNetworkIdentity for GO without identity
+            // (error log is expected)
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                _ = goWithout.GetNetworkIdentity();
+            });
+
+            // clean up
+            Object.Destroy(goWithout);
+        }
+
+    }
 
     [TestFixture]
     public class ServerObjectManagerHostTest : HostSetup<MockComponent>
@@ -17,7 +44,7 @@ namespace Mirage.Tests.Host
         [Test]
         public void SetClientReadyAndNotReadyTest()
         {
-            (_, NetworkConnection connection) = PipedConnections();
+            (_, NetworkPlayer connection) = PipedConnections();
             Assert.That(connection.IsReady, Is.False);
 
             serverObjectManager.SetClientReady(connection);
@@ -31,14 +58,14 @@ namespace Mirage.Tests.Host
         public void SetAllClientsNotReadyTest()
         {
             // add first ready client
-            (_, NetworkConnection first) = PipedConnections();
+            (_, NetworkPlayer first) = PipedConnections();
             first.IsReady = true;
-            server.connections.Add(first);
+            server.Players.Add(first);
 
             // add second ready client
-            (_, NetworkConnection second) = PipedConnections();
+            (_, NetworkPlayer second) = PipedConnections();
             second.IsReady = true;
-            server.connections.Add(second);
+            server.Players.Add(second);
 
             // set all not ready
             serverObjectManager.SetAllClientsNotReady();
@@ -46,35 +73,14 @@ namespace Mirage.Tests.Host
             Assert.That(second.IsReady, Is.False);
         }
 
-        [Test]
-        public void GetNetworkIdentity()
-        {
-            Assert.That(serverObjectManager.GetNetworkIdentity(playerGO), Is.EqualTo(identity));
-        }
 
-        [Test]
-        public void GetNoNetworkIdentity()
-        {
-            // create a GameObject without NetworkIdentity
-            var goWithout = new GameObject();
-
-            // GetNetworkIdentity for GO without identity
-            // (error log is expected)
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                _ = serverObjectManager.GetNetworkIdentity(goWithout);
-            });
-
-            // clean up
-            Object.Destroy(goWithout);
-        }
 
         [Test]
         public void HideForConnection()
         {
             // add connection
 
-            NetworkConnection connectionToClient = Substitute.For<NetworkConnection>(Substitute.For<IConnection>());
+            NetworkPlayer connectionToClient = Substitute.For<NetworkPlayer>(Substitute.For<IConnection>());
 
             NetworkIdentity identity = new GameObject().AddComponent<NetworkIdentity>();
 
@@ -119,7 +125,7 @@ namespace Mirage.Tests.Host
         [UnityTest]
         public IEnumerator DestroyAllSpawnedOnStopTest() => UniTask.ToCoroutine(async () =>
         {
-            GameObject spawnTestObj = new GameObject("testObj", typeof(NetworkIdentity));
+            var spawnTestObj = new GameObject("testObj", typeof(NetworkIdentity));
             serverObjectManager.Spawn(spawnTestObj);
 
             //1 is the player. should be 2 at this point

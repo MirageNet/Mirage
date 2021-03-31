@@ -1,13 +1,13 @@
 {
     "name": "com.miragenet.mirage",
     "displayName": "Mirage",
-    "version": "68.0.2",
+    "version": "85.0.0",
     "unity": "2019.1",
     "description": "Mirage is a high level Networking API for Unity, supporting different low level Transports.",
     "author": "Mirage",
     "repository": {
         "type": "git",
-        "url": "https://github.com/MirageNet/Mirage.git#upm"
+        "url": "https://github.com/MirageNet/Mirage.git"
     },
     "dependencies": {
         "com.unity.nuget.mono-cecil": "1.10.1",
@@ -28,6 +28,11 @@
             "displayName": "ChangeScene",
             "description": "Demo for normal or additive scene switching",
             "path": "Samples~/ListServer"
+        },
+        {
+            "displayName": "InterestManagement",
+            "description": "Demo for interest management",
+            "path": "Samples~/InterestManagement"
         },
         {
             "displayName": "Chat",

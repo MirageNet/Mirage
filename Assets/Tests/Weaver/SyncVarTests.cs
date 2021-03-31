@@ -73,7 +73,7 @@ namespace Mirage.Weaver
         [Test]
         public void SyncVarsSyncList()
         {
-            HasWarning("syncints has [SyncVar] attribute. SyncLists should not be marked with SyncVar", "Mirage.SyncList`1<System.Int32> SyncVarTests.SyncVarsSyncList.SyncVarsSyncList::syncints");
+            HasWarning("syncints has [SyncVar] attribute. SyncLists should not be marked with SyncVar", "Mirage.Collections.SyncList`1<System.Int32> SyncVarTests.SyncVarsSyncList.SyncVarsSyncList::syncints");
         }
 
         [Test]

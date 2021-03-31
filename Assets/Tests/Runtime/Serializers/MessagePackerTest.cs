@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     [TestFixture]
     public class MessagePackerTest
@@ -35,7 +36,7 @@ namespace Mirage.Tests
 
             Assert.Throws<FormatException>(() =>
             {
-                _ = MessagePacker.Unpack<AddPlayerMessage>(data);
+                _ = MessagePacker.Unpack<AddCharacterMessage>(data);
             });
         }
 

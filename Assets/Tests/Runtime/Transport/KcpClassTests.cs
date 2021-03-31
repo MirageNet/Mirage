@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
 
     [TestFixture]

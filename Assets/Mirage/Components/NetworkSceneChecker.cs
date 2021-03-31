@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -29,13 +30,13 @@ namespace Mirage
 
         Scene currentScene;
 
-        [Server(error=false)]
+        [Server(error = false)]
         void Awake()
         {
             currentScene = gameObject.scene;
             if (logger.LogEnabled()) logger.Log($"NetworkSceneChecker.Awake currentScene: {currentScene}");
 
-            NetIdentity.OnStartServer.AddListener(OnStartServer);
+            OnStartServer();
         }
 
         public void OnStartServer()
@@ -46,7 +47,7 @@ namespace Mirage
             sceneCheckerObjects[currentScene].Add(NetIdentity);
         }
 
-        [Server(error=false)]
+        [Server(error = false)]
         void Update()
         {
             if (currentScene == gameObject.scene)
@@ -86,14 +87,14 @@ namespace Mirage
         /// Callback used by the visibility system to determine if an observer (player) can see this object.
         /// <para>If this function returns true, the network connection will be added as an observer.</para>
         /// </summary>
-        /// <param name="conn">Network connection of a player.</param>
+        /// <param name="player">Network connection of a player.</param>
         /// <returns>True if the player can see this object.</returns>
-        public override bool OnCheckObserver(INetworkConnection conn)
+        public override bool OnCheckObserver(INetworkPlayer player)
         {
             if (forceHidden)
                 return false;
 
-            return conn.Identity.gameObject.scene == gameObject.scene;
+            return player.Identity.gameObject.scene == gameObject.scene;
         }
 
         /// <summary>
@@ -102,7 +103,7 @@ namespace Mirage
         /// </summary>
         /// <param name="observers">The new set of observers for this object.</param>
         /// <param name="initialize">True if the set of observers is being built for the first time.</param>
-        public override void OnRebuildObservers(HashSet<INetworkConnection> observers, bool initialize)
+        public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
         {
             // If forceHidden then return without adding any observers.
             if (forceHidden)

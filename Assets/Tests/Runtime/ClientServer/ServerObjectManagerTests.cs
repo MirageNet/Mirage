@@ -1,14 +1,14 @@
 using System;
 using System.Collections;
+using System.Linq;
 using Cysharp.Threading.Tasks;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Events;
-using NSubstitute;
 using UnityEngine.TestTools;
-using System.Linq;
 
-namespace Mirage.Tests.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer
 {
 
     [TestFixture]
@@ -87,7 +87,7 @@ namespace Mirage.Tests.ClientServer
         {
             serverIdentity.sceneId = 42;
             serverIdentity.gameObject.SetActive(false);
-            Assert.That(serverObjectManager.SpawnObjects(), Is.True);
+            serverObjectManager.SpawnObjects();
             Assert.That(serverIdentity.gameObject.activeSelf, Is.True);
         }
 
@@ -96,7 +96,7 @@ namespace Mirage.Tests.ClientServer
         {
             serverIdentity.sceneId = 0;
             serverIdentity.gameObject.SetActive(false);
-            Assert.That(serverObjectManager.SpawnObjects(), Is.True);
+            serverObjectManager.SpawnObjects();
             Assert.That(serverIdentity.gameObject.activeSelf, Is.False);
         }
 
@@ -159,7 +159,7 @@ namespace Mirage.Tests.ClientServer
             replacementIdentity.AssetId = Guid.NewGuid();
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            serverObjectManager.ReplacePlayerForConnection(connectionToClient, client, playerReplacement);
+            serverObjectManager.ReplaceCharacter(connectionToClient, client, playerReplacement);
 
             Assert.That(connectionToClient.Identity, Is.EqualTo(replacementIdentity));
         }
@@ -172,7 +172,7 @@ namespace Mirage.Tests.ClientServer
             replacementIdentity.AssetId = Guid.NewGuid();
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            serverObjectManager.ReplacePlayerForConnection(connectionToClient, client, playerReplacement, true);
+            serverObjectManager.ReplaceCharacter(connectionToClient, client, playerReplacement, true);
 
             Assert.That(clientIdentity.ConnectionToClient, Is.EqualTo(null));
         }
@@ -186,7 +186,7 @@ namespace Mirage.Tests.ClientServer
             replacementIdentity.AssetId = replacementGuid;
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            serverObjectManager.ReplacePlayerForConnection(connectionToClient, client, playerReplacement, replacementGuid);
+            serverObjectManager.ReplaceCharacter(connectionToClient, client, playerReplacement, replacementGuid);
 
             Assert.That(connectionToClient.Identity.AssetId, Is.EqualTo(replacementGuid));
         }
@@ -202,7 +202,7 @@ namespace Mirage.Tests.ClientServer
 
             connectionToClient.Identity = null;
 
-            Assert.That(serverObjectManager.AddPlayerForConnection(connectionToClient, playerReplacement, replacementGuid), Is.True);
+            Assert.That(serverObjectManager.AddCharacter(connectionToClient, playerReplacement, replacementGuid), Is.True);
         }
 
         [UnityTest]
@@ -250,7 +250,7 @@ namespace Mirage.Tests.ClientServer
         [Test]
         public void AddPlayerForConnectionFalseTest()
         {
-            Assert.That(serverObjectManager.AddPlayerForConnection(connectionToClient, new GameObject()), Is.False);
+            Assert.That(serverObjectManager.AddCharacter(connectionToClient, new GameObject()), Is.False);
         }
 
         [UnityTest]
@@ -260,7 +260,12 @@ namespace Mirage.Tests.ClientServer
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
 
-            Assert.That(serverObjectManager.SpawnObjects(), Is.False);
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                serverObjectManager.SpawnObjects();
+            });
+
+            Assert.That(exception, Has.Message.EqualTo("Server was not active"));
         });
     }
 }

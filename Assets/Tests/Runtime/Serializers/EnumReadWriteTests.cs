@@ -1,6 +1,7 @@
+using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     public static class MyCustomEnumReadWrite
     {
@@ -37,7 +38,6 @@ namespace Mirage.Tests
         {
             M, N, O, P
         }
-
 
         [Test]
         public void ByteIsSentForByteEnum()

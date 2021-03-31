@@ -4,7 +4,7 @@ namespace NetworkBehaviourTests.NetworkBehaviourClientRpcParamNetworkConnection
 {
     class NetworkBehaviourClientRpcParamNetworkConnection : NetworkBehaviour
     {
-        [ClientRpc(target = Mirage.Client.Connection)]
-        public void RpcCantHaveParamOptional(INetworkConnection monkeyCon) { }
+        [ClientRpc(target = Mirage.Client.Player)]
+        public void RpcCantHaveParamOptional(INetworkPlayer monkeyCon) { }
     }
 }

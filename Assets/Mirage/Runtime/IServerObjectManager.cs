@@ -5,7 +5,7 @@ namespace Mirage
 {
     public interface IServerObjectManager
     {
-      
+
         /// <summary>
         /// Raised when the client spawns an object
         /// </summary>
@@ -16,24 +16,24 @@ namespace Mirage
         /// </summary>
         SpawnEvent UnSpawned { get; }
 
-        bool AddPlayerForConnection(INetworkConnection conn, GameObject player);
+        bool AddCharacter(INetworkPlayer player, GameObject character);
 
-        bool AddPlayerForConnection(INetworkConnection conn, GameObject player, Guid assetId);
+        bool AddCharacter(INetworkPlayer player, GameObject character, Guid assetId);
 
-        bool ReplacePlayerForConnection(INetworkConnection conn, NetworkClient client, GameObject player, bool keepAuthority = false);
+        bool ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority = false);
 
-        bool ReplacePlayerForConnection(INetworkConnection conn, NetworkClient client, GameObject player, Guid assetId, bool keepAuthority = false);
+        bool ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, Guid assetId, bool keepAuthority = false);
 
-        void Spawn(GameObject obj, GameObject ownerPlayer);
+        void Spawn(GameObject obj, GameObject owner);
 
-        void Spawn(GameObject obj, INetworkConnection ownerConnection = null);
+        void Spawn(GameObject obj, INetworkPlayer owner = null);
 
-        void Spawn(GameObject obj, Guid assetId, INetworkConnection ownerConnection = null);
+        void Spawn(GameObject obj, Guid assetId, INetworkPlayer owner = null);
 
         void Destroy(GameObject obj);
 
         void UnSpawn(GameObject obj);
 
-        bool SpawnObjects();
+        void SpawnObjects();
     }
 }

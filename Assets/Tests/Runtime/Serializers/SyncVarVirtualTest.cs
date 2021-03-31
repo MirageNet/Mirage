@@ -1,8 +1,9 @@
 using System;
+using Mirage.Serialization;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirage.Tests
+namespace Mirage.Tests.Runtime
 {
     abstract class SyncVarHookTesterBase : NetworkBehaviour
     {
