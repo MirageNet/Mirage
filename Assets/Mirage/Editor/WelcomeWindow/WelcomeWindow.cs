@@ -62,7 +62,7 @@ namespace Mirage
 
         /// <summary>
         ///     Hard coded for source code version. If package version is found, this will
-        ///     be set later on to package version. through checking for packages anyways
+        ///     be set later on to package version. through checking for packages anyways.
         /// </summary>
         private static string changeLogPath = "Assets/Mirage/CHANGELOG.md";
 
@@ -398,38 +398,45 @@ namespace Mirage
 
         private void ListPackageProgress()
         {
-            if (listRequest.IsCompleted)
+            if (!listRequest.IsCompleted)
             {
-                EditorApplication.update -= ListPackageProgress;
+                return;
+            }
 
-                if (listRequest.Status == StatusCode.Success)
+            EditorApplication.update -= ListPackageProgress;
+
+            switch (listRequest.Status)
+            {
+                //log error
+                case StatusCode.Success:
                 {
-                    List<string> installedPackages = new List<string>();
+                    var installedPackages = new List<string>();
 
                     //populate installedPackages
                     foreach (PackageInfo package in listRequest.Result)
                     {
                         Package? miragePackage = Packages.Find((x) => x.packageName == package.name);
 
-                        if (miragePackage?.packageName != null)
+                        if (miragePackage?.packageName == null)
                         {
-                            if (miragePackage.Value.packageName != null && miragePackage.Value.packageName.Equals("Mirage"))
-                            {
-                                // Found mirage package let's set up our change log path.
-                                changeLogPath = "Packages/com.miragenet.mirage/CHANGELOG.md";
-                            }
-
-                            installedPackages.Add(miragePackage.Value.displayName);
+                            continue;
                         }
+
+                        if (miragePackage.Value.packageName != null && miragePackage.Value.packageName.Equals("Mirage"))
+                        {
+                            // Found mirage package let's set up our change log path.
+                            changeLogPath = "Packages/com.miragenet.mirage/CHANGELOG.md";
+                        }
+
+                        installedPackages.Add(miragePackage.Value.displayName);
                     }
 
                     ConfigureInstallButtons(installedPackages);
+                    break;
                 }
-                //log error
-                else if (listRequest.Status == StatusCode.Failure)
-                {
+                case StatusCode.Failure:
                     Debug.LogError("There was an issue finding packages. \n Error Code: " + listRequest.Error.errorCode + "\n Error Message: " + listRequest.Error.message);
-                }
+                    break;
             }
         }
 
