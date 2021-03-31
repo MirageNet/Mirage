@@ -6,6 +6,7 @@ using UnityEditor.PackageManager.Requests;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 /**
  * Docs used:
@@ -59,7 +60,11 @@ namespace Mirage
         private static string firstStartUpKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
 
-        private const string changeLogPath = "Packages/com.miragenet.mirage/CHANGELOG.md";
+        /// <summary>
+        ///     Hard coded for source code version. If package version is found, this will
+        ///     be set later on to package version. through checking for packages anyways.
+        /// </summary>
+        private static string changeLogPath = "Assets/Mirage/CHANGELOG.md";
 
         private static string GetVersion()
         {
@@ -402,11 +407,18 @@ namespace Mirage
                     List<string> installedPackages = new List<string>();
 
                     //populate installedPackages
-                    foreach (var package in listRequest.Result)
+                    foreach (PackageInfo package in listRequest.Result)
                     {
                         Package? miragePackage = Packages.Find((x) => x.packageName == package.name);
-                        if (miragePackage != null)
+
+                        if (miragePackage?.packageName != null)
                         {
+                            if (miragePackage.Value.packageName != null && miragePackage.Value.packageName.Equals("Mirage"))
+                            {
+                                // Found mirage package let's set up our change log path.
+                                changeLogPath = "Packages/com.miragenet.mirage/CHANGELOG.md";
+                            }
+
                             installedPackages.Add(miragePackage.Value.displayName);
                         }
                     }
