@@ -315,6 +315,7 @@ namespace Mirage
         /// This is invoked for NetworkBehaviour objects when they become active on the server.
         /// <para>This could be triggered by NetworkServer.Listen() for objects in the scene, or by NetworkServer.Spawn() for objects that are dynamically created.</para>
         /// <para>This will be called for objects on a "host" as well as for object on a dedicated server.</para>
+        /// <para>OnStartServer is invoked before this object is added to collection of spawned objects</para>
         /// </summary>
         public UnityEvent OnStartServer = new UnityEvent();
 

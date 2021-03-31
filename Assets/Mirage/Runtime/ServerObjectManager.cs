@@ -442,9 +442,8 @@ namespace Mirage
             {
                 // the object has not been spawned yet
                 identity.NetId = GetNextNetworkId();
-                Server.World.AddIdentity(identity.NetId, identity);
-                // todo should this be called before Add?
                 identity.StartServer();
+                Server.World.AddIdentity(identity.NetId, identity);
             }
 
             if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.NetId + " asset ID " + identity.AssetId);

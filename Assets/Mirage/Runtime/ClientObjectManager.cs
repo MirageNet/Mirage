@@ -313,7 +313,7 @@ namespace Mirage
         public void DestroyAllClientObjects()
         {
             // create copy so they can be removed inside loop
-            // todo remove allocation? might not be a problem as this is clean up
+            // allocation here are fine because is part of clean up
             NetworkIdentity[] all = Client.World.SpawnedIdentities.ToArray();
             foreach (NetworkIdentity identity in all)
             {
