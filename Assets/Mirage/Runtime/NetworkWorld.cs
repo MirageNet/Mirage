@@ -34,6 +34,11 @@ namespace Mirage
         /// <param name="identity"></param>
         internal void AddIdentity(uint netId, NetworkIdentity identity)
         {
+            if (netId == 0) throw new ArgumentException("id can not be zero", nameof(netId));
+            if (SpawnedObjects.ContainsKey(netId)) throw new ArgumentException("An item with same id already exists", nameof(netId));
+            if (identity == null) throw new ArgumentNullException(nameof(identity));
+            if (netId != identity.NetId) throw new ArgumentException("NetworkIdentity did not have matching netId", nameof(identity));
+
             SpawnedObjects.Add(netId, identity);
             onSpawn?.Invoke(identity);
         }
