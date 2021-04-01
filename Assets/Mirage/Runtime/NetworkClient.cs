@@ -145,7 +145,7 @@ namespace Mirage
             {
                 IConnection transportConnection = await Transport.ConnectAsync(uri);
 
-                World = new NetworkWorld(null, this);
+                World = new NetworkWorld();
                 InitializeAuthEvents();
 
                 // setup all the handlers
@@ -156,7 +156,7 @@ namespace Mirage
                 Time.UpdateClient(this);
                 OnConnected().Forget();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 connectState = ConnectState.Disconnected;
                 throw;

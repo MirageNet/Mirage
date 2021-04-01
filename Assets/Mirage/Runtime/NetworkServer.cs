@@ -161,7 +161,7 @@ namespace Mirage
                 return;
 
             initialized = true;
-            World = new NetworkWorld(this, LocalClient);
+            World = new NetworkWorld();
 
             Application.quitting += Disconnect;
             if (logger.LogEnabled()) logger.Log($"NetworkServer Created, Mirage version: {Version.Current}");
@@ -377,7 +377,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("Server accepted client:" + player);
 
             //Only allow host client to connect when not Listening for new connections
-            if(!Listening && player != LocalPlayer)
+            if (!Listening && player != LocalPlayer)
             {
                 return;
             }

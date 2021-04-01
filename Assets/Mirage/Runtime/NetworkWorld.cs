@@ -58,13 +58,9 @@ namespace Mirage
             SpawnedObjects.Clear();
         }
 
-        public INetworkServer Server { get; }
-        public INetworkClient Client { get; }
-
-        public NetworkWorld(INetworkServer server, INetworkClient client)
+        public NetworkWorld()
         {
-            Server = server;
-            Client = client;
+
         }
     }
 }
