@@ -50,7 +50,8 @@ namespace Mirage
         }
         internal void RemoveIdentity(uint netId)
         {
-            if (netId == 0) throw new ArgumentException("netid = 0 is invalid");
+            if (netId == 0) throw new ArgumentException("id can not be zero", nameof(netId));
+
 
             SpawnedObjects.TryGetValue(netId, out NetworkIdentity identity);
             SpawnedObjects.Remove(netId);

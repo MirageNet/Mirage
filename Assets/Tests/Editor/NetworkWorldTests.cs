@@ -201,12 +201,103 @@ namespace Mirage.Tests
             spawnListener.DidNotReceiveWithAnyArgs().Invoke(default);
         }
 
-        [Test] public void RemoveFromCollectionUsingIdentity() { Assert.Ignore("NotImplemented"); }
-        [Test] public void RemoveFromCollectionUsingNetId() { Assert.Ignore("NotImplemented"); }
-        [Test] public void RemoveInvokesEvent() { Assert.Ignore("NotImplemented"); }
-        [Test] public void RemoveThrowsIfIdIs0() { Assert.Ignore("NotImplemented"); }
+        [Test]
+        public void RemoveFromCollectionUsingIdentity()
+        {
+            AddValidIdentity(out uint id, out NetworkIdentity identity);
+            Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(1));
 
-        [Test] public void ClearRemovesAllFromCollection() { Assert.Ignore("NotImplemented"); }
-        [Test] public void ClearDoesNotInvokeEvent() { Assert.Ignore("NotImplemented"); }
+            world.RemoveIdentity(identity);
+            Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(0));
+
+            Assert.That(world.TryGetIdentity(id, out NetworkIdentity identityOut), Is.False);
+            Assert.That(identityOut, Is.EqualTo(null));
+        }
+        [Test]
+        public void RemoveFromCollectionUsingNetId()
+        {
+            AddValidIdentity(out uint id, out NetworkIdentity identity);
+            Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(1));
+
+            world.RemoveIdentity(id);
+            Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(0));
+
+            Assert.That(world.TryGetIdentity(id, out NetworkIdentity identityOut), Is.False);
+            Assert.That(identityOut, Is.EqualTo(null));
+        }
+        [Test]
+        public void RemoveOnlyRemovesCorrectItem()
+        {
+            AddValidIdentity(out uint id1, out NetworkIdentity identity1);
+            AddValidIdentity(out uint id2, out NetworkIdentity identity2);
+            AddValidIdentity(out uint id3, out NetworkIdentity identity3);
+            Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(3));
+
+            world.RemoveIdentity(identity2);
+            Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(2));
+
+            Assert.That(world.TryGetIdentity(id1, out NetworkIdentity identityOut1), Is.True);
+            Assert.That(world.TryGetIdentity(id2, out NetworkIdentity identityOut2), Is.False);
+            Assert.That(world.TryGetIdentity(id3, out NetworkIdentity identityOut3), Is.True);
+            Assert.That(identityOut1, Is.EqualTo(identity1));
+            Assert.That(identityOut2, Is.EqualTo(null));
+            Assert.That(identityOut3, Is.EqualTo(identity3));
+        }
+        [Test]
+        public void RemoveInvokesEvent()
+        {
+            AddValidIdentity(out uint id1, out NetworkIdentity identity1);
+            AddValidIdentity(out uint id2, out NetworkIdentity identity2);
+            AddValidIdentity(out uint id3, out NetworkIdentity identity3);
+            Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(3));
+
+            world.RemoveIdentity(identity3);
+            unspawnListener.Received(1).Invoke(identity3);
+
+            world.RemoveIdentity(id1);
+            unspawnListener.Received(1).Invoke(identity1);
+
+            world.RemoveIdentity(id2);
+            unspawnListener.Received(1).Invoke(identity2);
+        }
+
+        [Test]
+        public void RemoveThrowsIfIdIs0()
+        {
+            uint id = 0;
+
+            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            {
+                world.RemoveIdentity(id);
+            });
+
+            var expected = new ArgumentException("id can not be zero", "netId");
+            Assert.That(exception, Has.Message.EqualTo(expected.Message));
+
+            unspawnListener.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [Test]
+        public void ClearRemovesAllFromCollection()
+        {
+            AddValidIdentity(out uint id1, out NetworkIdentity identity1);
+            AddValidIdentity(out uint id2, out NetworkIdentity identity2);
+            AddValidIdentity(out uint id3, out NetworkIdentity identity3);
+            Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(3));
+
+            world.ClearSpawnedObjects();
+            Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(0));
+        }
+        [Test]
+        public void ClearDoesNotInvokeEvent()
+        {
+            AddValidIdentity(out uint id1, out NetworkIdentity identity1);
+            AddValidIdentity(out uint id2, out NetworkIdentity identity2);
+            AddValidIdentity(out uint id3, out NetworkIdentity identity3);
+            Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(3));
+
+            world.ClearSpawnedObjects();
+            unspawnListener.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
     }
 }
