@@ -92,6 +92,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             var gameObject = new GameObject();
             NetworkIdentity identity = gameObject.AddComponent<NetworkIdentity>();
             identity.AssetId = guid;
+            identity.NetId = (uint)Random.Range(0, int.MaxValue);
 
             clientObjectManager.RegisterSpawnHandler(guid, SpawnDelegateTest, go => { });
             clientObjectManager.RegisterPrefab(identity, guid);
@@ -110,6 +111,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             var gameObject = new GameObject();
             NetworkIdentity identity = gameObject.AddComponent<NetworkIdentity>();
             identity.AssetId = guid;
+            identity.NetId = (uint)Random.Range(0, int.MaxValue);
 
             UnSpawnDelegate unspawnDelegate = Substitute.For<UnSpawnDelegate>();
 
