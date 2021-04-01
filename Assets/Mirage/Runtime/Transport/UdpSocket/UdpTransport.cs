@@ -67,7 +67,7 @@ namespace Mirage
             return socket.Poll(0, SelectMode.SelectRead);
         }
 
-        public void Recieve(byte[] buffer, ref EndPoint endPoint, out int bytesReceived)
+        public void Receive(byte[] buffer, ref EndPoint endPoint, out int bytesReceived)
         {
             // todo do we need to set if null
             endPoint = endPoint ?? new IPEndPoint(IPAddress.Any, 0);
