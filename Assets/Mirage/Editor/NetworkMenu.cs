@@ -36,7 +36,7 @@ namespace Mirage
             networkManager.Server = networkServer;
             networkManager.ServerObjectManager = serverObjectManager;
             networkManager.ClientObjectManager = clientObjectManager;
-            networkManager.SceneManager = nsm;
+            networkManager.NetworkSceneManager = nsm;
 
             CharacterSpawner playerSpawner = go.GetComponent<CharacterSpawner>();
             playerSpawner.Client = networkClient;
