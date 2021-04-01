@@ -1,4 +1,4 @@
-﻿/*
+/*
 The MIT License (MIT)
 
 Copyright (c) 2020 Fredrik Holmstrom
@@ -21,7 +21,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-namespace Mirage
+using System;
+
+namespace Mirage.SocketLayer
 {
     /// <summary>
     /// A sequence generator that can wrap.
@@ -56,17 +58,17 @@ namespace Mirage
         ulong sequence;
 
         /// <summary>
-        /// Number of bits used for the sequence generator
-        /// up to 64
+        /// Number of bits used for the sequence generator up to 64
         /// </summary>
         public int Bits => bits;
 
-        /// <summary>
-        /// Creates a sequencer
-        /// </summary>
         /// <param name="bits">amount of bits for the sequence</param>
         public Sequencer(int bits)
         {
+            if (bits <= 0 || bits > 63) throw new ArgumentOutOfRangeException(nameof(bits), bits, "Bits should be between 1 and 63");
+
+            // todo add context to the below comment
+
             // 1 byte
             // (1 << 8) = 256
             // - 1      = 255
@@ -80,9 +82,9 @@ namespace Mirage
 
         /// <summary>
         /// Generates the next value in the sequence
-        /// starts with 0
+        /// <para>starts with 0</para>
         /// </summary>
-        /// <returns>0, 1, 2, ... 2^n-1, 0, 1, 2, ...</returns>
+        /// <returns>0, 1, 2, ..., (2^n)-1, 0, 1, 2, ...</returns>
         public ulong Next()
         {
             ulong current = sequence;

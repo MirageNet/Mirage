@@ -1,21 +1,46 @@
+using System;
 using NUnit.Framework;
 
-namespace Mirage
+namespace Mirage.SocketLayer.Tests
 {
+    [Category("SocketLayer")]
     public class SequencerTest
     {
         [Test]
-        public void SequencerStartAt0()
+        public void StartsAt0([Range(1, 63)] int bits)
         {
-            var sequencer = new Sequencer(3);
+            var sequencer = new Sequencer(bits);
             Assert.That(sequencer.Next(), Is.EqualTo(0));
         }
 
         [Test]
-        public void ItShouldRememberBitSize()
+        public void ThrowsErrorIfBitsisOver63([Range(64, 70)] int bits)
         {
-            var sequencer = new Sequencer(3);
-            Assert.That(sequencer.Bits, Is.EqualTo(3));
+            ArgumentOutOfRangeException exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                var sequencer = new Sequencer(bits);
+            });
+
+            var expected = new ArgumentOutOfRangeException("bits", bits, "Bits should be between 1 and 63");
+            Assert.That(exception, Has.Message.EqualTo(expected.Message));
+        }
+        [Test]
+        public void ThrowsErrorIfBitsisOver0([Range(-10, 0)] int bits)
+        {
+            ArgumentOutOfRangeException exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                var sequencer = new Sequencer(bits);
+            });
+
+            var expected = new ArgumentOutOfRangeException("bits", bits, "Bits should be between 1 and 63");
+            Assert.That(exception, Has.Message.EqualTo(expected.Message));
+        }
+
+        [Test]
+        public void ItShouldRememberBitSize([Range(1, 63)] int bits)
+        {
+            var sequencer = new Sequencer(bits);
+            Assert.That(sequencer.Bits, Is.EqualTo(bits));
         }
 
         [Test]
