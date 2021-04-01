@@ -1,3 +1,15 @@
+# [86.0.0](https://github.com/MirageNet/Mirage/compare/v85.0.0...v86.0.0) (2021-04-01)
+
+
+### Bug Fixes
+
+* better name to stop namespace conflict with Unity ([#755](https://github.com/MirageNet/Mirage/issues/755)) ([69784e7](https://github.com/MirageNet/Mirage/commit/69784e70f8a0f6b2d5e0d4734358688088044abd))
+
+
+### BREAKING CHANGES
+
+* networkManager.SceneManager removed to networkManager.NetworkSceneManager
+
 # [85.0.0](https://github.com/MirageNet/Mirage/compare/v84.3.1...v85.0.0) (2021-03-30)
 
 
