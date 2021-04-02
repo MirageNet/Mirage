@@ -1,3 +1,10 @@
+## [86.0.1](https://github.com/MirageNet/Mirage/compare/v86.0.0...v86.0.1) (2021-04-02)
+
+
+### Bug Fixes
+
+* changed icon to new mirage icons. ([#758](https://github.com/MirageNet/Mirage/issues/758)) ([04edac0](https://github.com/MirageNet/Mirage/commit/04edac0d1bce1f7b5f3dec23dde4dae11f422db3))
+
 # [86.0.0](https://github.com/MirageNet/Mirage/compare/v85.0.0...v86.0.0) (2021-04-01)
 
 
