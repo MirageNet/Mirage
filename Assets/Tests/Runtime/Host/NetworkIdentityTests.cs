@@ -197,7 +197,7 @@ namespace Mirage.Tests.Runtime.Host
             UnityAction mockHandler = Substitute.For<UnityAction>();
             testIdentity.OnStopServer.AddListener(mockHandler);
 
-            serverObjectManager.UnSpawn(gameObject);
+            serverObjectManager.Destroy(gameObject, false);
 
             await UniTask.Delay(1);
             mockHandler.Received().Invoke();
