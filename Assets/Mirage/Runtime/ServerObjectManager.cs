@@ -714,7 +714,6 @@ namespace Mirage
                 if (ValidateSceneObject(identity))
                 {
                     if (logger.LogEnabled()) logger.Log("SpawnObjects sceneId:" + identity.sceneId.ToString("X") + " name:" + identity.gameObject.name);
-                    identity.gameObject.SetActive(true);
 
                     Spawn(identity.gameObject);
                 }
