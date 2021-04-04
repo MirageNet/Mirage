@@ -671,8 +671,7 @@ namespace Mirage
         /// <summary>
         /// This causes NetworkIdentity objects in a scene to be spawned on a server.
         /// <para>
-        ///     NetworkIdentity objects in a scene are disabled by default.
-        ///     Calling SpawnObjects() causes these scene objects to be enabled and spawned.
+        ///     Calling SpawnObjects() causes all scene objects to be spawned.
         ///     It is like calling NetworkServer.Spawn() for each of them.
         /// </para>
         /// </summary>
@@ -691,7 +690,6 @@ namespace Mirage
                 if (ValidateSceneObject(identity))
                 {
                     if (logger.LogEnabled()) logger.Log("SpawnObjects sceneId:" + identity.sceneId.ToString("X") + " name:" + identity.gameObject.name);
-                    identity.gameObject.SetActive(true);
 
                     Spawn(identity.gameObject);
                 }
