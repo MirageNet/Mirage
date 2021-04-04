@@ -61,7 +61,7 @@ namespace Mirage
                 {
                     clientTime = LocalTime()
                 };
-                client.Player.Send(pingMessage, Channel.Unreliable);
+                client.Send(pingMessage, Channel.Unreliable);
                 lastPingTime = UnityEngine.Time.time;
             }
         }

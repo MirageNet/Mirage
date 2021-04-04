@@ -206,17 +206,5 @@ namespace Mirage.Tests.Runtime.Host
 
             Object.Destroy(prefabObject);
         }
-
-        [Test]
-        public void SpawnedNotNullTest()
-        {
-            Assert.That(clientObjectManager.Spawned, Is.Not.Null);
-        }
-
-        [Test]
-        public void UnSpawnedNotNullTest()
-        {
-            Assert.That(clientObjectManager.UnSpawned, Is.Not.Null);
-        }
     }
 }

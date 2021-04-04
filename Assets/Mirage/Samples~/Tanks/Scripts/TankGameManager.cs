@@ -84,9 +84,9 @@ namespace Mirage.Examples.Tanks
 
         void CheckPlayersNotInList()
         {
-            foreach (KeyValuePair<uint, NetworkIdentity> kvp in NetworkManager.ClientObjectManager.SpawnedObjects)
+            foreach (NetworkIdentity identity in NetworkManager.Client.World.SpawnedIdentities)
             {
-                Tank comp = kvp.Value.GetComponent<Tank>();
+                Tank comp = identity.GetComponent<Tank>();
                 if (comp != null && !players.Contains(comp))
                 {
                     //Add if new
