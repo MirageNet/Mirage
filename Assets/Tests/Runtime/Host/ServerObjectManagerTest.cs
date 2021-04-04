@@ -129,25 +129,13 @@ namespace Mirage.Tests.Runtime.Host
             serverObjectManager.Spawn(spawnTestObj);
 
             //1 is the player. should be 2 at this point
-            Assert.That(serverObjectManager.SpawnedObjects.Count, Is.GreaterThan(1));
+            Assert.That(server.World.SpawnedIdentities.Count, Is.GreaterThan(1));
 
             server.Disconnect();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
 
-            Assert.That(serverObjectManager.SpawnedObjects.Count, Is.Zero);
+            Assert.That(server.World.SpawnedIdentities.Count, Is.Zero);
         });
-
-        [Test]
-        public void SpawnedNotNullTest()
-        {
-            Assert.That(serverObjectManager.Spawned, Is.Not.Null);
-        }
-
-        [Test]
-        public void UnSpawnedNotNullTest()
-        {
-            Assert.That(serverObjectManager.UnSpawned, Is.Not.Null);
-        }
     }
 }

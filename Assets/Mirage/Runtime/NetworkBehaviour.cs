@@ -114,6 +114,9 @@ namespace Mirage
         /// </summary>
         public INetworkPlayer ConnectionToClient => NetIdentity.ConnectionToClient;
 
+
+        public NetworkWorld World => NetIdentity.World;
+
         /// <summary>
         /// Returns the appropriate NetworkTime instance based on if this NetworkBehaviour is running as a Server or Client.
         /// </summary>

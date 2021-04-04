@@ -5,17 +5,6 @@ namespace Mirage
 {
     public interface IServerObjectManager
     {
-
-        /// <summary>
-        /// Raised when the client spawns an object
-        /// </summary>
-        SpawnEvent Spawned { get; }
-
-        /// <summary>
-        /// Raised when the client unspawns an object
-        /// </summary>
-        SpawnEvent UnSpawned { get; }
-
         bool AddCharacter(INetworkPlayer player, GameObject character);
 
         bool AddCharacter(INetworkPlayer player, GameObject character, Guid assetId);

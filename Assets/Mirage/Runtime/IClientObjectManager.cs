@@ -14,16 +14,6 @@ namespace Mirage
     public interface IClientObjectManager
     {
         /// <summary>
-        /// Raised when the client spawns an object
-        /// </summary>
-        SpawnEvent Spawned { get; }
-
-        /// <summary>
-        /// Raised when the client unspawns an object
-        /// </summary>
-        SpawnEvent UnSpawned { get; }
-
-        /// <summary>
         /// NetworkIdentity of the localPlayer
         /// </summary>
         NetworkIdentity LocalPlayer { get; }
