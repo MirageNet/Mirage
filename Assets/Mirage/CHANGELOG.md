@@ -1,3 +1,10 @@
+## [86.0.2](https://github.com/MirageNet/Mirage/compare/v86.0.1...v86.0.2) (2021-04-05)
+
+
+### Bug Fixes
+
+* removing redundant null checks ([909b668](https://github.com/MirageNet/Mirage/commit/909b668d7508fd3022ba309c6b441feb04e48ba1))
+
 ## [86.0.1](https://github.com/MirageNet/Mirage/compare/v86.0.0...v86.0.1) (2021-04-02)
 
 
