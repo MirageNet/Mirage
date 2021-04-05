@@ -467,7 +467,7 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnObjDestroy netId:" + netId);
 
-            if (Client.World.TryGetIdentity(netId, out NetworkIdentity localObject) && localObject != null)
+            if (Client.World.TryGetIdentity(netId, out NetworkIdentity localObject))
             {
                 UnSpawn(localObject);
             }
@@ -479,7 +479,7 @@ namespace Mirage
 
         internal void OnHostClientSpawn(SpawnMessage msg)
         {
-            if (Client.World.TryGetIdentity(msg.netId, out NetworkIdentity localObject) && localObject != null)
+            if (Client.World.TryGetIdentity(msg.netId, out NetworkIdentity localObject))
             {
                 if (msg.isLocalPlayer)
                     InternalAddPlayer(localObject);
@@ -503,7 +503,7 @@ namespace Mirage
             {
                 throw new MethodInvocationException($"Invalid RPC call with id {msg.functionHash}");
             }
-            if (Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity) && identity != null)
+            if (Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity))
             {
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
                 {
