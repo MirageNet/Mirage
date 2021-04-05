@@ -384,7 +384,7 @@ namespace Mirage
         /// <param name="msg"></param>
         void OnServerRpcMessage(INetworkPlayer player, ServerRpcMessage msg)
         {
-            if (!Server.World.TryGetIdentity(msg.netId, out NetworkIdentity identity) || identity is null)
+            if (!Server.World.TryGetIdentity(msg.netId, out NetworkIdentity identity))
             {
                 if (logger.WarnEnabled()) logger.LogWarning("Spawned object not found when handling ServerRpc message [netId=" + msg.netId + "]");
                 return;
