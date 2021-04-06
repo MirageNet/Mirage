@@ -124,8 +124,8 @@ Table below shows the Mirror's `NetworkBehaviour` override method names on the l
 | `OnStartClient`        | [NetIdentity.OnStartClient](xref:Mirage.NetworkIdentity.OnStartClient)            |
 | `OnStopClient`         | [NetIdentity.OnStopClient](xref:Mirage.NetworkIdentity.OnStopClient)              |
 | `OnStartLocalPlayer`   | [NetIdentity.OnStartLocalPlayer](xref:Mirage.NetworkIdentity.OnStartLocalPlayer)  |
-| `OnStartAuthority`     | [NetIdentity.OnStartAuthority](xref:Mirage.NetworkIdentity.OnStartAuthority)      |
-| `OnStopAuthority`      | [NetIdentity.OnStopAuthority](xref:Mirage.NetworkIdentity.OnStopAuthority)        |
+| `OnStartAuthority`     | [NetIdentity.OnAuthorityChanged](xref:Mirage.NetworkIdentity.OnAuthorityChanged)      |
+| `OnStopAuthority`      | [NetIdentity.OnAuthorityChanged](xref:Mirage.NetworkIdentity.OnAuthorityChanged)        |
 
 Let's take this `Player` class as an example. In Mirror, you would do:
 
