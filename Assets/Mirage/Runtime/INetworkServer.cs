@@ -13,17 +13,17 @@ namespace Mirage
         /// <summary>
         /// Event fires once a new Client has connect to the Server.
         /// </summary>
-        NetworkConnectionEvent Connected { get; }
+        NetworkPlayerEvent Connected { get; }
 
         /// <summary>
         /// Event fires once a new Client has passed Authentication to the Server.
         /// </summary>
-        NetworkConnectionEvent Authenticated { get; }
+        NetworkPlayerEvent Authenticated { get; }
 
         /// <summary>
         /// Event fires once a Client has Disconnected from the Server.
         /// </summary>
-        NetworkConnectionEvent Disconnected { get; }
+        NetworkPlayerEvent Disconnected { get; }
 
         IAddLateEvent Stopped { get; }
 

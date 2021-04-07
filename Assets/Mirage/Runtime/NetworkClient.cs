@@ -4,17 +4,10 @@ using Cysharp.Threading.Tasks;
 using Mirage.Events;
 using Mirage.Logging;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 namespace Mirage
 {
 
-    /// <summary>
-    /// Event fires from a <see cref="NetworkClient">NetworkClient</see> or <see cref="NetworkServer">NetworkServer</see> during a new connection, a new authentication, or a disconnection.
-    /// <para>INetworkConnection - connection creating the event</para>
-    /// </summary>
-    [Serializable] public class NetworkConnectionEvent : UnityEvent<INetworkPlayer> { }
 
     public enum ConnectState
     {
