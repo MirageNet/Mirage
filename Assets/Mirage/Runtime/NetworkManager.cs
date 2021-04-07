@@ -33,7 +33,8 @@ namespace Mirage
         /// helper enum to know if we started the networkmanager as server/client/host.
         /// </summary>
         public NetworkManagerMode mode
-        { get
+        {
+            get
             {
                 if (!Server.Active && !Client.Active)
                     return NetworkManagerMode.Offline;
