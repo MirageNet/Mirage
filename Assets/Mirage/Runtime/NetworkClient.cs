@@ -292,6 +292,12 @@ namespace Mirage
             if (authenticator != null)
             {
                 authenticator.OnClientAuthenticated -= OnAuthenticated;
+                Connected.RemoveListener(authenticator.OnClientAuthenticateInternal);
+            }
+            else
+            {
+                // if no authenticator, consider connection as authenticated
+                Connected.RemoveListener(OnAuthenticated);
             }
 
             _connected.Reset();
