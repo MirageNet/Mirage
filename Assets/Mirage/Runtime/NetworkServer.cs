@@ -55,22 +55,22 @@ namespace Mirage
         /// Event fires once a new Client has connect to the Server.
         /// </summary>
         [FormerlySerializedAs("Connected")]
-        [SerializeField] NetworkConnectionEvent _connected = new NetworkConnectionEvent();
-        public NetworkConnectionEvent Connected => _connected;
+        [SerializeField] NetworkPlayerEvent _connected = new NetworkPlayerEvent();
+        public NetworkPlayerEvent Connected => _connected;
 
         /// <summary>
         /// Event fires once a new Client has passed Authentication to the Server.
         /// </summary>
         [FormerlySerializedAs("Authenticated")]
-        [SerializeField] NetworkConnectionEvent _authenticated = new NetworkConnectionEvent();
-        public NetworkConnectionEvent Authenticated => _authenticated;
+        [SerializeField] NetworkPlayerEvent _authenticated = new NetworkPlayerEvent();
+        public NetworkPlayerEvent Authenticated => _authenticated;
 
         /// <summary>
         /// Event fires once a Client has Disconnected from the Server.
         /// </summary>
         [FormerlySerializedAs("Disconnected")]
-        [SerializeField] NetworkConnectionEvent _disconnected = new NetworkConnectionEvent();
-        public NetworkConnectionEvent Disconnected => _disconnected;
+        [SerializeField] NetworkPlayerEvent _disconnected = new NetworkPlayerEvent();
+        public NetworkPlayerEvent Disconnected => _disconnected;
 
         [SerializeField] AddLateEvent _stopped = new AddLateEvent();
         public IAddLateEvent Stopped => _stopped;
