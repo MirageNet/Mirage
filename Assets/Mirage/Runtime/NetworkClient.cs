@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.Events;
 using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.Events;
@@ -39,26 +40,24 @@ namespace Mirage
         public NetworkAuthenticator authenticator;
 
         [Header("Events")]
+        [SerializeField] NetworkPlayerAddLateEvent _connected = new NetworkPlayerAddLateEvent();
+        [SerializeField] NetworkPlayerAddLateEvent _authenticated = new NetworkPlayerAddLateEvent();
+        [SerializeField] AddLateEvent _disconnected = new AddLateEvent();
+
         /// <summary>
         /// Event fires once the Client has connected its Server.
         /// </summary>
-        [FormerlySerializedAs("Connected")]
-        [SerializeField] NetworkConnectionEvent _connected = new NetworkConnectionEvent();
-        public NetworkConnectionEvent Connected => _connected;
+        public IAddLateEvent<INetworkPlayer> Connected => _connected;
 
         /// <summary>
         /// Event fires after the Client connection has sucessfully been authenticated with its Server.
         /// </summary>
-        [FormerlySerializedAs("Authenticated")]
-        [SerializeField] NetworkConnectionEvent _authenticated = new NetworkConnectionEvent();
-        public NetworkConnectionEvent Authenticated => _authenticated;
+        public IAddLateEvent<INetworkPlayer> Authenticated => _authenticated;
 
         /// <summary>
         /// Event fires after the Client has disconnected from its Server and Cleanup has been called.
         /// </summary>
-        [FormerlySerializedAs("Disconnected")]
-        [SerializeField] UnityEvent _disconnected = new UnityEvent();
-        public UnityEvent Disconnected => _disconnected;
+        public IAddLateEvent Disconnected => _disconnected;
 
         /// <summary>
         /// The NetworkConnection object this client is using.
@@ -212,7 +211,7 @@ namespace Mirage
             // the handler may want to send messages to the client
             // thus we should set the connected state before calling the handler
             connectState = ConnectState.Connected;
-            Connected?.Invoke(Player);
+            _connected.Invoke(Player);
 
             // start processing messages
             try
@@ -227,13 +226,13 @@ namespace Mirage
             {
                 Cleanup();
 
-                Disconnected?.Invoke();
+                _disconnected?.Invoke();
             }
         }
 
         internal void OnAuthenticated(INetworkPlayer player)
         {
-            Authenticated?.Invoke(player);
+            _authenticated.Invoke(player);
         }
 
         /// <summary>
@@ -300,14 +299,11 @@ namespace Mirage
             if (authenticator != null)
             {
                 authenticator.OnClientAuthenticated -= OnAuthenticated;
+            }
 
-                Connected.RemoveListener(authenticator.OnClientAuthenticateInternal);
-            }
-            else
-            {
-                // if no authenticator, consider connection as authenticated
-                Connected.RemoveListener(OnAuthenticated);
-            }
+            _connected.Reset();
+            _authenticated.Reset();
+            _disconnected.Reset();
         }
     }
 }
