@@ -3,7 +3,7 @@ using UnityEngine.Serialization;
 
 namespace Mirage
 {
-    public enum NetworkManagerMode { Offline, ServerOnly, ClientOnly, Host }
+    public enum NetworkManagerMode { Offline, Server, Client, Host }
 
     [AddComponentMenu("Network/NetworkManager")]
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Guides/Communications/NetworkManager.html")]
@@ -41,9 +41,9 @@ namespace Mirage
                 else if (Server.Active && Client.Active)
                     return NetworkManagerMode.Host;
                 else if (Server.Active)
-                    return NetworkManagerMode.ServerOnly;
+                    return NetworkManagerMode.Server;
                 else
-                    return NetworkManagerMode.ClientOnly;
+                    return NetworkManagerMode.Client;
             }
         }
     }
