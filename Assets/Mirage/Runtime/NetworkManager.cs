@@ -1,9 +1,16 @@
+using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace Mirage
 {
-    public enum NetworkManagerMode { Offline, Server, Client, Host }
+    [Flags]
+    public enum NetworkManagerMode {
+        Offline = 0,
+        Server = 1,
+        Client = 2,
+        Host = Server | Client
+    }
 
     [AddComponentMenu("Network/NetworkManager")]
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Guides/Communications/NetworkManager.html")]
