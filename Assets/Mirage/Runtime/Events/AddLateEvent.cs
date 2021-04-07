@@ -84,6 +84,11 @@ namespace Mirage.Events
             _event.AddListener(handler);
         }
 
+        public void RemoveListener(UnityAction handler)
+        {
+            _event.RemoveListener(handler);
+        }
+
         public void Invoke()
         {
             MarkInvoked();
@@ -117,6 +122,11 @@ namespace Mirage.Events
 
             // add handler to inner event so that it can be invoked again
             _event.AddListener(handler);
+        }
+
+        public void RemoveListener(UnityAction<T0> handler)
+        {
+            _event.RemoveListener(handler);
         }
 
         public void Invoke(T0 arg0)
@@ -154,6 +164,11 @@ namespace Mirage.Events
 
             // add handler to inner event so that it can be invoked again
             _event.AddListener(handler);
+        }
+
+        public void RemoveListener(UnityAction<T0, T1> handler)
+        {
+            _event.RemoveListener(handler);
         }
 
         public void Invoke(T0 arg0, T1 arg1)

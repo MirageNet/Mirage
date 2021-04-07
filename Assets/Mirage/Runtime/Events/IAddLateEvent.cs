@@ -11,6 +11,7 @@ namespace Mirage.Events
     public interface IAddLateEvent
     {
         void AddListener(UnityAction handler);
+        void RemoveListener(UnityAction handler);
     }
 
 
@@ -20,6 +21,7 @@ namespace Mirage.Events
     public interface IAddLateEvent<T0>
     {
         void AddListener(UnityAction<T0> handler);
+        void RemoveListener(UnityAction<T0> handler);
     }
 
 
@@ -29,5 +31,6 @@ namespace Mirage.Events
     public interface IAddLateEvent<T0, T1>
     {
         void AddListener(UnityAction<T0, T1> handler);
+        void RemoveListener(UnityAction<T0, T1> handler);
     }
 }
