@@ -631,7 +631,6 @@ namespace Mirage
 
         /// <summary>
         /// Destroys this object and corresponding objects on all clients.
-        /// <para>In some cases it is useful to remove an object but not delete it on the server.</para>
         /// <param name="obj">Game object to destroy.</param>
         /// <param name="persistServerObject">In some cases it is useful to remove an object but not delete it on the server.</param>
         /// </summary>

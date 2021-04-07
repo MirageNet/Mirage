@@ -116,7 +116,7 @@ namespace Mirage.Tests.Runtime.Host
         public void UnSpawn()
         {
             // unspawn
-            serverObjectManager.UnSpawn(playerGO);
+            serverObjectManager.Destroy(playerGO, false);
 
             // it should have been marked for reset now
             Assert.That(identity.NetId, Is.Zero);
