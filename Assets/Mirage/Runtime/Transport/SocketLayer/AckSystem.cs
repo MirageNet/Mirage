@@ -14,18 +14,24 @@ namespace Mirage.SocketLayer
     internal class AckSystem
     {
         const int HEADER_SIZE = 9;
-        Sequencer sequencer = new(16);
+        Sequencer sequencer = new Sequencer(16);
 
         ulong receivedSequence;
         ulong receivedMask;
+        readonly IRawConnection connection;
 
-        public ReceivedPacket Recieve(byte[] packet)
+        public AckSystem(IRawConnection connection)
+        {
+            this.connection = connection;
+        }
+
+        public ReceivedPacket Receive(byte[] packet)
         {
             // todo assert packet is notify
 
-            ulong sequence = (ulong)(packet[1] + (packet[2] << 8));
-            ulong receivedSequence = (ulong)(packet[3] + (packet[4] << 8));
-            ulong receivedMask = (ulong)(packet[5] + (packet[6] << 8) + (packet[7] << 16) + (packet[8] << 24));
+            ulong sequence = (ulong)(packet[1] | (packet[2] << 8));
+            ulong receivedSequence = (ulong)(packet[3] | (packet[4] << 8));
+            ulong receivedMask = (ulong)(packet[5] | (packet[6] << 8) | (packet[7] << 16) | (packet[8] << 24));
 
             setReievedNumbers(sequence);
 
@@ -73,6 +79,8 @@ namespace Mirage.SocketLayer
             final[6] = (byte)(receivedSequence >> 8);
             final[7] = (byte)(receivedSequence >> 16);
             final[8] = (byte)(receivedSequence >> 24);
+
+            connection.SendRaw(final);
         }
     }
 }
