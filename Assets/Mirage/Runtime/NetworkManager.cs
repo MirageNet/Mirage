@@ -39,7 +39,7 @@ namespace Mirage
         /// <summary>
         /// helper enum to know if we started the networkmanager as server/client/host.
         /// </summary>
-        public NetworkManagerMode mode
+        public NetworkManagerMode NetworkMode
         {
             get
             {

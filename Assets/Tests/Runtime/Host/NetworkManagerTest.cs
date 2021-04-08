@@ -44,5 +44,11 @@ namespace Mirage.Tests.Runtime.Host
                 manager.Server.StartHost(manager.Client).GetAwaiter().GetResult();
             });
         }
+
+        [Test]
+        public void NetworkManagerModeHostTest()
+        {
+            Assert.That(manager.NetworkMode == NetworkManagerMode.Host);
+        }
     }
 }
