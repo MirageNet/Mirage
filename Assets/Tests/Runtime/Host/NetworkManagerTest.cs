@@ -50,5 +50,15 @@ namespace Mirage.Tests.Runtime.Host
         {
             Assert.That(manager.NetworkMode == NetworkManagerMode.Host);
         }
+
+        [UnityTest]
+        public IEnumerator NetworkManagerModeOfflineHostTest() => UniTask.ToCoroutine(async () =>
+        {
+            server.StopHost();
+
+            await AsyncUtil.WaitUntilWithTimeout(() => !server.Active && !client.Active);
+
+            Assert.That(manager.NetworkMode == NetworkManagerMode.None);
+        });
     }
 }
