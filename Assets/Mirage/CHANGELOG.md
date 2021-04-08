@@ -1,3 +1,45 @@
+# [87.0.0](https://github.com/MirageNet/Mirage/compare/v86.0.2...v87.0.0) (2021-04-08)
+
+
+### Bug Fixes
+
+* using add late event for authority and combining start and stop events ([#767](https://github.com/MirageNet/Mirage/issues/767)) ([8903f00](https://github.com/MirageNet/Mirage/commit/8903f00653b1ba527eb87af4dba106ba0cd9544a))
+* using AddLateEvent to stop race condition for client events  ([#768](https://github.com/MirageNet/Mirage/issues/768)) ([681875b](https://github.com/MirageNet/Mirage/commit/681875b814e79bc17e4bdeb8e58a124ddab2fe72))
+* using AddLateEvent to stop race condition for network identity events ([#766](https://github.com/MirageNet/Mirage/issues/766)) ([4f8bf11](https://github.com/MirageNet/Mirage/commit/4f8bf110d4144d41da9a5d80aaba49d46a7f3b54))
+* using AddLateEvent to stop race condition for server events ([#765](https://github.com/MirageNet/Mirage/issues/765)) ([a1ec84c](https://github.com/MirageNet/Mirage/commit/a1ec84c714cefc63ce458733df464ab48f8c2913))
+
+
+### Features
+
+* adding RemoveListener and RemoveAllListeners to AddLateEvent ([#764](https://github.com/MirageNet/Mirage/issues/764)) ([d67c96c](https://github.com/MirageNet/Mirage/commit/d67c96cc5e8cfe9720cdd8909fe1533f27834f4d))
+* adding RemoveListener and RemoveAllListeners to AddLateEvent ([#764](https://github.com/MirageNet/Mirage/issues/764)) ([0ca2804](https://github.com/MirageNet/Mirage/commit/0ca2804b95287fcfa445d2148cc6263cc8f851f4))
+
+
+### BREAKING CHANGES
+
+* - NetworkClient.Connected event is now type of IAddLateEvent
+- NetworkClient.Authenticated event is now type of IAddLateEvent
+- NetworkClient.Disconnected event is now type of IAddLateEvent
+
+* refactor: removing NetworkConnectionEvent use NetworkPlayerEvent instead
+* NetworkConnectionEvent renamed to NetworkPlayerEvent
+
+* reverting clean up change
+* - Identity.OnStartAuthority and IdentityOnStopAuthority are now Identity.OnAuthorityChanged and are type of IAddLateEvent<bool>
+* - Server.Started event is now type of IAddLateEvent
+- Server.Stoped event is now type of IAddLateEvent
+- Server.OnStartHost event is now type of IAddLateEvent
+- Server.OnStopHost event is now type of IAddLateEvent
+- inspector values for changed events will need to be re-assigned
+* - Identity.OnStartServer event is now type of IAddLateEvent
+- Identity.OnStopServer event is now type of IAddLateEvent
+- Identity.OnStartClient event is now type of IAddLateEvent
+- Identity.OnStopClient event is now type of IAddLateEvent
+- Identity.OnStartLocalPlayer event is now type of IAddLateEvent
+- inspector values for changed events will need to be re-assigned
+* AddLateEvent Reset no longer removes listeners
+* AddLateEvent Reset no longer removes listeners
+
 ## [86.0.2](https://github.com/MirageNet/Mirage/compare/v86.0.1...v86.0.2) (2021-04-05)
 
 
