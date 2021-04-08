@@ -1,3 +1,10 @@
+# [87.1.0](https://github.com/MirageNet/Mirage/compare/v87.0.1...v87.1.0) (2021-04-08)
+
+
+### Features
+
+* add NetworkManagerMode back to NetMan ([#756](https://github.com/MirageNet/Mirage/issues/756)) ([f1f8f57](https://github.com/MirageNet/Mirage/commit/f1f8f57b64e49a81225916db981f5ae1d6809e51))
+
 ## [87.0.1](https://github.com/MirageNet/Mirage/compare/v87.0.0...v87.0.1) (2021-04-08)
 
 
