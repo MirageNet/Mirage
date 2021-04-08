@@ -6,7 +6,7 @@ namespace Mirage
 {
     [Flags]
     public enum NetworkManagerMode {
-        Offline = 0,
+        None = 0,
         Server = 1,
         Client = 2,
         Host = Server | Client
@@ -44,7 +44,7 @@ namespace Mirage
             get
             {
                 if (!Server.Active && !Client.Active)
-                    return NetworkManagerMode.Offline;
+                    return NetworkManagerMode.None;
                 else if (Server.Active && Client.Active)
                     return NetworkManagerMode.Host;
                 else if (Server.Active)
