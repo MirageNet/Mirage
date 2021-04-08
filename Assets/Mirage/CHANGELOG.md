@@ -1,3 +1,10 @@
+## [87.0.1](https://github.com/MirageNet/Mirage/compare/v87.0.0...v87.0.1) (2021-04-08)
+
+
+### Bug Fixes
+
+* add icons to all mirage monobehaviours ([#769](https://github.com/MirageNet/Mirage/issues/769)) ([3a9673f](https://github.com/MirageNet/Mirage/commit/3a9673ffb4b34d638817c008cec629316f381072))
+
 # [87.0.0](https://github.com/MirageNet/Mirage/compare/v86.0.2...v87.0.0) (2021-04-08)
 
 
