@@ -9,7 +9,6 @@ using Mirage.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 using Mirage.Events;
-using UnityEngine.Events;
 #if UNITY_2018_3_OR_NEWER
 using UnityEditor.Experimental.SceneManagement;
 #endif
@@ -315,6 +314,7 @@ namespace Mirage
         [SerializeField] AddLateEvent _onStartServer = new AddLateEvent();
         [SerializeField] AddLateEvent _onStartClient = new AddLateEvent();
         [SerializeField] AddLateEvent _onStartLocalPlayer = new AddLateEvent();
+        [SerializeField] BoolAddLateEvent _onAuthorityChanged = new BoolAddLateEvent();
         [SerializeField] AddLateEvent _onStopClient = new AddLateEvent();
         [SerializeField] AddLateEvent _onStopServer = new AddLateEvent();
 
@@ -343,18 +343,17 @@ namespace Mirage
         public IAddLateEvent OnStartLocalPlayer => _onStartLocalPlayer;
 
         /// <summary>
-        /// This is invoked on behaviours that have authority, based on context and <see cref="HasAuthority">NetworkIdentity.hasAuthority</see>.
+        /// This is invoked on behaviours that have authority given or removed, see <see cref="HasAuthority">NetworkIdentity.hasAuthority</see>
         /// <para>This is called after <see cref="OnStartServer">OnStartServer</see> and before <see cref="OnStartClient">OnStartClient.</see></para>
-        /// <para>When <see cref="AssignClientAuthority"/> is called on the server, this will be called on the client that owns the object. When an object is spawned with <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included, this will be called on the client that owns the object.</para>
+        /// <para>
+        /// When <see cref="AssignClientAuthority"/> or <see cref="RemoveClientAuthority"/> is called on the server, this will be called on the client that owns the object.
+        /// </para>
+        /// <para>
+        /// When an object is spawned with <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included,
+        /// this will be called on the client that owns the object.
+        /// </para>
         /// </summary>
-        public UnityEvent OnStartAuthority = new UnityEvent();
-
-        /// <summary>
-        /// This is invoked on behaviours when authority is removed.
-        /// <para>When NetworkIdentity.RemoveClientAuthority is called on the server, this will be called on the client that owns the object.</para>
-        /// </summary>
-        public UnityEvent OnStopAuthority = new UnityEvent();
-
+        public IAddLateEvent<bool> OnAuthorityChanged => _onAuthorityChanged;
 
         /// <summary>
         /// This is invoked on clients when the server has caused this object to be destroyed.
@@ -717,12 +716,12 @@ namespace Mirage
 
         internal void StartAuthority()
         {
-            OnStartAuthority.Invoke();
+            _onAuthorityChanged.Invoke(true);
         }
 
         internal void StopAuthority()
         {
-            OnStopAuthority.Invoke();
+            _onAuthorityChanged.Invoke(false);
         }
 
         /// <summary>
@@ -1185,6 +1184,7 @@ namespace Mirage
             _onStartServer.Reset();
             _onStartClient.Reset();
             _onStartLocalPlayer.Reset();
+            _onAuthorityChanged.Reset();
             _onStopClient.Reset();
             _onStopServer.Reset();
         }
