@@ -6,9 +6,9 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Mirage.Events;
 #if UNITY_EDITOR
 using UnityEditor;
-using Mirage.Events;
 #if UNITY_2018_3_OR_NEWER
 using UnityEditor.Experimental.SceneManagement;
 #endif
