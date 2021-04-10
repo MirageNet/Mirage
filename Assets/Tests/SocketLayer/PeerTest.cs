@@ -1,39 +1,33 @@
 using System;
+using System.Collections;
 using System.Net;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
-namespace Mirage.SocketLayer.Tests
+namespace Mirage.SocketLayer.Tests.PeerTests
 {
-    [Category("SocketLayer")]
-    public class PeerTest
+    public class PeerTestBase
     {
-        private ISocket socket;
-        private IDataHandler dataHandler;
-        private Config config;
-        private ILogger logger;
-        private Peer peer;
+        PeerInstance instance;
+
+        // helper properties to access instance
+        protected ISocket socket => instance.socket;
+        protected IDataHandler dataHandler => instance.dataHandler;
+        protected Config config => instance.config;
+        protected ILogger logger => instance.logger;
+        protected Peer peer => instance.peer;
 
         [SetUp]
         public void SetUp()
         {
-            socket = Substitute.For<ISocket>();
-            dataHandler = Substitute.For<IDataHandler>();
-            config = new Config();
-            logger = Substitute.For<ILogger>();
-            peer = new Peer(socket, dataHandler, config, logger);
+            instance = new PeerInstance();
         }
-
-        [Test]
-        public void BindShoudlCallSocketBind()
-        {
-            EndPoint endPoint = Substitute.For<EndPoint>();
-            peer.Bind(endPoint);
-
-            socket.Received(1).Bind(Arg.Is(endPoint));
-        }
-
+    }
+    [Category("SocketLayer"), Description("tests for Peer that apply to both server and client")]
+    public class PeerTest : PeerTestBase
+    {
         [Test]
         public void CloseShouldThrowIfNoActive()
         {
@@ -44,6 +38,65 @@ namespace Mirage.SocketLayer.Tests
             Assert.That(exception, Has.Message.EqualTo("Peer is not active"));
         }
 
+
+
+        [Test]
+        public void CloseShouldCallSocketClose()
+        {
+            // activate peer
+            peer.Bind(default);
+            // close peer
+            peer.Close();
+            socket.Received(1).Close();
+        }
+    }
+
+    [Category("SocketLayer"), Description("tests for Peer that only apply to server")]
+    public class PeerTestAsServer : PeerTestBase
+    {
+        [Test]
+        public void BindShoudlCallSocketBind()
+        {
+            EndPoint endPoint = Substitute.For<EndPoint>();
+            peer.Bind(endPoint);
+
+            socket.Received(1).Bind(Arg.Is(endPoint));
+        }
+
+        [Test]
+        public void CloseSendsDisconnectMessageToAllConnections()
+        {
+            EndPoint endPoint = Substitute.For<EndPoint>();
+            peer.Bind(endPoint);
+
+            Assert.Ignore("NotImplemented");
+            // todo add connections
+
+            var clientEndPoints = new EndPoint[] {
+                Substitute.For<EndPoint>(),
+                Substitute.For<EndPoint>() };
+
+            peer.Close();
+            byte[] expected = new byte[2]
+            {
+                (byte)PacketType.Command,
+                (byte)Commands.Disconnect,
+            };
+            socket.Received(1).Send(
+                Arg.Is(clientEndPoints[0]),
+                Arg.Is<byte[]>(actual => actual.AreEquivalentIgnoringLength(expected)),
+                Arg.Is(expected.Length)
+            );
+            socket.Received(1).Send(
+                Arg.Is(clientEndPoints[1]),
+                Arg.Is<byte[]>(actual => actual.AreEquivalentIgnoringLength(expected)),
+                Arg.Is(expected.Length)
+            );
+        }
+    }
+    [Category("SocketLayer"), Description("tests for Peer that only apply to client")]
+    public class PeerTestAsClient : PeerTestBase
+    {
         [Test]
         public void ConnectShouldSendMessageToSocket()
         {
@@ -71,25 +124,33 @@ namespace Mirage.SocketLayer.Tests
             Assert.That(conn.State, Is.EqualTo(ConnectionState.Connecting), "new connection should be connecting");
         }
 
-
-
-        [Test]
-        public void CloseShouldCallSocketClose()
+        [UnityTest]
+        public IEnumerator OnDisconnectedIsNotInvokedIfClosedBeforeConnected()
         {
-            // activate peer
-            peer.Bind(default);
-            // close peer
+            int disconnectedCalled = 0;
+            peer.OnDisconnected += (conn, reason) =>
+            {
+                disconnectedCalled++;
+            };
+
+            EndPoint endPoint = Substitute.For<EndPoint>();
+            IConnection conn = peer.Connect(endPoint);
+
             peer.Close();
-            socket.Received(1).Close();
+
+            // wait enough time so that OnDisconnected would have been called
+            yield return new WaitForSeconds(1.5f);
+
+            Assert.That(disconnectedCalled, Is.Zero, "Disconnect should not have been called");
         }
 
         [Test]
-        public void CloseShouldSendDisconnectMessage()
+        public void CloseSendsDisconnectMessageIfConnected()
         {
             // todo set up connected connections,
             // todo test as server with multiple connections
             // todo test as client with 1 connection
-            throw new NotImplementedException("What should happen if close/disconnect is called while still connecting");
+            Assert.Ignore("new NotImplementedException(What should happen if close / disconnect is called while still connecting)");
 
             EndPoint endPoint = Substitute.For<EndPoint>();
             IConnection conn = peer.Connect(endPoint);
@@ -107,6 +168,69 @@ namespace Mirage.SocketLayer.Tests
                 Arg.Is<byte[]>(actual => actual.AreEquivalentIgnoringLength(expected)),
                 Arg.Is(expected.Length)
                 );
+        }
+    }
+
+    public class PeerTestConnecting
+    {
+        const int ClientCount = 4;
+        PeerInstance server;
+        PeerInstance[] clients;
+
+        [SetUp]
+        public void SetUp()
+        {
+            server = new PeerInstance(new Config { MaxConnections = ClientCount });
+            clients = new PeerInstance[ClientCount];
+            for (int i = 0; i < ClientCount; i++)
+            {
+                clients[i] = new PeerInstance();
+            }
+        }
+
+        [Test]
+        public void AllClientsCanJoin()
+        {
+            // remote endpoints
+            EndPoint serverEndPoint = Substitute.For<EndPoint>();
+            var clientEndPoint = new EndPoint[ClientCount];
+
+            server.peer.Bind(Substitute.For<EndPoint>());
+            for (int i = 0; i < ClientCount; i++)
+            {
+                clientEndPoint[i] = Substitute.For<EndPoint>();
+
+                clients[i].peer.Connect(Substitute.For<EndPoint>());
+
+                clients[i].socket.Receive()
+            }
+        }
+    }
+
+    /// <summary>
+    /// Peer and Substitute for test
+    /// </summary>
+    public class PeerInstance
+    {
+        public ISocket socket;
+        public IDataHandler dataHandler;
+        public Config config;
+        public ILogger logger;
+        public Peer peer;
+
+        public PeerInstance(Config config = null)
+        {
+            socket = Substitute.For<ISocket>();
+            dataHandler = Substitute.For<IDataHandler>();
+
+            this.config = config ?? new Config()
+            {
+                // 1 second before "failed to connect"
+                MaxConnectAttempts = 5,
+                ConnectAttemptInterval = 0.2f,
+            };
+            logger = Substitute.For<ILogger>();
+            peer = new Peer(socket, dataHandler, config, logger);
         }
     }
 

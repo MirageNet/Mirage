@@ -15,7 +15,7 @@ namespace Mirage.SocketLayer
     }
     internal interface IRawConnection
     {
-        void SendRaw(byte[] data);
+        void SendRaw(byte[] packet);
     }
 
     internal sealed class Connection : IConnection, IRawConnection
@@ -109,7 +109,7 @@ namespace Mirage.SocketLayer
         public void SendReliable(ArraySegment<byte> segment) => peer.SendReliable(this);
         public void SendUnreliable(ArraySegment<byte> segment) => peer.SendUnreliable(this, segment);
         public void SendNotify() => peer.SendNotify(this);
-        public void SendRaw(byte[] data) => peer.SendRaw(this, data);
+        public void SendRaw(byte[] packet) => peer.SendRaw(this, packet);
 
         /// <summary>
         /// starts disconnecting this connection

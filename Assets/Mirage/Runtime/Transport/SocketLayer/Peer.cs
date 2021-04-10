@@ -114,10 +114,10 @@ namespace Mirage.SocketLayer
 
             Send(connection, buffer, message.Count);
         }
-        internal void SendRaw(Connection connection, byte[] data)
+        internal void SendRaw(Connection connection, byte[] packet)
         {
             // todo asset header is command?
-            Send(connection, data);
+            Send(connection, packet);
         }
 
         private void Send(Connection connection, Packet packet) => Send(connection, packet.data, packet.length);
