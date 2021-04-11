@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Net;
 using NSubstitute;
 using NUnit.Framework;
@@ -174,39 +175,125 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     public class PeerTestConnecting
     {
         const int ClientCount = 4;
-        PeerInstance server;
-        PeerInstance[] clients;
+        PeerInstanceWithSocket server;
+        PeerInstanceWithSocket[] clients;
 
         [SetUp]
         public void SetUp()
         {
-            server = new PeerInstance(new Config { MaxConnections = ClientCount });
-            clients = new PeerInstance[ClientCount];
+            server = new PeerInstanceWithSocket(new Config { MaxConnections = ClientCount });
+            clients = new PeerInstanceWithSocket[ClientCount];
             for (int i = 0; i < ClientCount; i++)
             {
-                clients[i] = new PeerInstance();
+                clients[i] = new PeerInstanceWithSocket();
+
+                // add remotes so they can send message to each other
+                server.testSocket.AddRemote(clients[i].testSocket);
+                clients[i].testSocket.AddRemote(server.testSocket);
             }
         }
 
         [Test]
-        public void AllClientsCanJoin()
+        public void ServerAcceptsAllClients()
         {
-            // remote endpoints
-            EndPoint serverEndPoint = Substitute.For<EndPoint>();
-            var clientEndPoint = new EndPoint[ClientCount];
-
             server.peer.Bind(Substitute.For<EndPoint>());
+
             for (int i = 0; i < ClientCount; i++)
             {
-                clientEndPoint[i] = Substitute.For<EndPoint>();
+                // tell client i to connect
+                clients[i].peer.Connect(server.endPoint);
 
-                clients[i].peer.Connect(Substitute.For<EndPoint>());
+                server.peer.OnConnected +=;
+                // run tick on server, should read packet from client i
+                server.peer.Update();
 
-                clients[i].socket.Receive()
+                // server should then reply with connection accept
+                // server should then......
+                throw new NotImplementedException();
             }
+
+            throw new NotImplementedException();
         }
     }
 
+    public class TestSocket : ISocket
+    {
+        struct Packet
+        {
+            public EndPoint endPoint;
+            public byte[] data;
+            public int? length;
+        }
+
+        public readonly EndPoint endPoint;
+        Dictionary<EndPoint, TestSocket> remoteSockets = new Dictionary<EndPoint, TestSocket>();
+        Queue<Packet> received;
+
+        public TestSocket(EndPoint endPoint = null)
+        {
+            this.endPoint = endPoint ?? Substitute.For<EndPoint>();
+        }
+        public void AddRemote(EndPoint endPoint, TestSocket socket)
+        {
+            remoteSockets.Add(endPoint, socket);
+        }
+        public void AddRemote(TestSocket socket)
+        {
+            remoteSockets.Add(socket.endPoint, socket);
+        }
+
+        void ISocket.Bind(EndPoint endPoint)
+        {
+            //
+        }
+
+        void ISocket.Close()
+        {
+            //
+        }
+
+        bool ISocket.Poll()
+        {
+            return received.Count > 0;
+        }
+
+        void ISocket.Receive(byte[] data, ref EndPoint endPoint, out int bytesReceived)
+        {
+            Packet next = received.Dequeue();
+            endPoint = next.endPoint;
+            int length = next.length ?? next.data.Length;
+            bytesReceived = length;
+
+            Buffer.BlockCopy(next.data, 0, data, 0, length);
+        }
+
+        void ISocket.Send(EndPoint endPoint, byte[] data, int? length)
+        {
+            TestSocket other = remoteSockets[endPoint];
+            other.received.Enqueue(new Packet
+            {
+                endPoint = this.endPoint,
+                data = data,
+                length = length
+            });
+        }
+    }
+
+
+    public class PeerInstanceWithSocket : PeerInstance
+    {
+        public TestSocket testSocket;
+        /// <summary>
+        /// endpoint that other sockets use to send to this
+        /// </summary>
+        public EndPoint endPoint;
+
+        public PeerInstanceWithSocket(Config config = null) : base(config, socket: new TestSocket())
+        {
+            testSocket = (TestSocket)base.socket;
+            endPoint = testSocket.endPoint;
+        }
+    }
     /// <summary>
     /// Peer and Substitute for test
     /// </summary>
@@ -218,9 +305,9 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         public ILogger logger;
         public Peer peer;
 
-        public PeerInstance(Config config = null)
+        public PeerInstance(Config config = null, ISocket socket = null)
         {
-            socket = Substitute.For<ISocket>();
+            this.socket = socket ?? Substitute.For<ISocket>();
             dataHandler = Substitute.For<IDataHandler>();
 
             this.config = config ?? new Config()
