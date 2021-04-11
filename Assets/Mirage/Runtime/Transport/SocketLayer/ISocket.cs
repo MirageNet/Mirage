@@ -25,12 +25,14 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// Gets next Message
         /// <para>Should be called after Poll</para>
+        /// <para>Implementation should check that incoming packet is within the size of <paramref name="data"/></para>
         /// </summary>
         /// <param name="data">Received data</param>
         void Receive(byte[] data, ref EndPoint endPoint, out int bytesReceived);
 
         /// <summary>
-        /// Sends to 
+        /// Sends data to endpoint
+        /// <para>Implementation should use <paramref name="length"/> if given as <paramref name="data"/> is a buffer that may contain values from previous packets</para>
         /// </summary>
         /// <param name="data"></param>
         void Send(EndPoint endPoint, byte[] data, int? length);
