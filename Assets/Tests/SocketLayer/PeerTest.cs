@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using NSubstitute;
 using NUnit.Framework;
@@ -30,6 +31,43 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     public class PeerTest : PeerTestBase
     {
         [Test]
+        public void ThrowIfSocketIsNull()
+        {
+            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
+            {
+                new Peer(null, Substitute.For<IDataHandler>(), new Config(), Substitute.For<ILogger>());
+            });
+            var expected = new ArgumentNullException("socket");
+            Assert.That(exception, Has.Message.EqualTo(expected.Message));
+        }
+        [Test]
+        public void ThrowIfDataHandlerIsNull()
+        {
+            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
+            {
+                new Peer(Substitute.For<ISocket>(), null, new Config(), Substitute.For<ILogger>());
+            });
+            var expected = new ArgumentNullException("dataHandler");
+            Assert.That(exception, Has.Message.EqualTo(expected.Message));
+        }
+        [Test]
+        public void DoesNotThrowIfConfigIsNull()
+        {
+            Assert.DoesNotThrow(() =>
+            {
+                new Peer(Substitute.For<ISocket>(), Substitute.For<IDataHandler>(), null, Substitute.For<ILogger>());
+            });
+        }
+        [Test]
+        public void DoesNotThrowIfLoggerIsNull()
+        {
+            Assert.DoesNotThrow(() =>
+            {
+                new Peer(Substitute.For<ISocket>(), Substitute.For<IDataHandler>(), new Config(), null);
+            });
+        }
+
+        [Test]
         public void CloseShouldThrowIfNoActive()
         {
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
@@ -38,8 +76,6 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             });
             Assert.That(exception, Has.Message.EqualTo("Peer is not active"));
         }
-
-
 
         [Test]
         public void CloseShouldCallSocketClose()
@@ -94,6 +130,226 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 Arg.Is(expected.Length)
             );
         }
+
+        [Test]
+        public void AcceptsForValidMessage()
+        {
+            peer.Bind(Substitute.For<EndPoint>());
+
+            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            peer.OnConnected += connectAction;
+
+            var validator = new ConnectKeyValidator();
+            byte[] valid = new byte[3]
+            {
+                (byte)PacketType.Command,
+                (byte)Commands.ConnectRequest,
+                0
+            };
+            validator.CopyTo(valid);
+            EndPoint endPoint = Substitute.For<EndPoint>();
+            SetupRecieveCall(socket, valid, endPoint);
+            peer.Update();
+
+            // server sends accept and invokes event locally
+            socket.Received(1).Send(endPoint, Arg.Is<byte[]>(x =>
+                x.Length >= 2 &&
+                x[0] == (byte)PacketType.Command &&
+                x[1] == (byte)Commands.ConnectionAccepted
+            ), 2);
+            connectAction.ReceivedWithAnyArgs(1).Invoke(default);
+        }
+
+        [Test]
+        public void AcceptsUpToMaxConnections()
+        {
+            peer.Bind(Substitute.For<EndPoint>());
+
+            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            peer.OnConnected += connectAction;
+
+            var validator = new ConnectKeyValidator();
+            byte[] valid = new byte[3]
+            {
+                (byte)PacketType.Command,
+                (byte)Commands.ConnectRequest,
+                0
+            };
+            validator.CopyTo(valid);
+            const int maxConnections = 5;
+            var endPoints = new EndPoint[maxConnections];
+            for (int i = 0; i < maxConnections; i++)
+            {
+                endPoints[i] = Substitute.For<EndPoint>();
+
+                SetupRecieveCall(socket, valid, endPoints[i]);
+                peer.Update();
+            }
+
+
+            // server sends accept and invokes event locally
+            connectAction.ReceivedWithAnyArgs(maxConnections).Invoke(default);
+            for (int i = 0; i < maxConnections; i++)
+            {
+                socket.Received(1).Send(endPoints[i], Arg.Is<byte[]>(x =>
+                    x.Length >= 2 &&
+                    x[0] == (byte)PacketType.Command &&
+                    x[1] == (byte)Commands.ConnectionAccepted
+                ), 2);
+            }
+        }
+
+        [Test]
+        public void RejectsConnectionOverMax()
+        {
+            peer.Bind(Substitute.For<EndPoint>());
+
+            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            peer.OnConnected += connectAction;
+
+            var validator = new ConnectKeyValidator();
+            byte[] valid = new byte[3]
+            {
+                (byte)PacketType.Command,
+                (byte)Commands.ConnectRequest,
+                validator.GetKey(),
+            };
+
+
+            const int maxConnections = 5;
+            for (int i = 0; i < maxConnections; i++)
+            {
+                SetupRecieveCall(socket, valid);
+                peer.Update();
+            }
+
+            // clear calls from valid connections
+            socket.ClearReceivedCalls();
+            connectAction.ClearReceivedCalls();
+
+            EndPoint overMaxEndpoint = Substitute.For<EndPoint>();
+            SetupRecieveCall(socket, valid, overMaxEndpoint);
+
+
+            byte[] received = null;
+            socket.WhenForAnyArgs(x => x.Send(default, default, default)).Do(x =>
+            {
+                received = (byte[])x[1];
+            });
+
+            peer.Update();
+
+            Debug.Log($"Length:{received.Length} [{received[0]},{received[1]},{received[2]}]");
+            const int length = 3;
+            socket.Received(1).Send(overMaxEndpoint, Arg.Is<byte[]>(x =>
+                x.Length >= length &&
+                x[0] == (byte)PacketType.Command &&
+                x[1] == (byte)Commands.ConnectionRejected &&
+                x[2] == (byte)RejectReason.ServerFull
+            ), length);
+            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [Test, Description("Should reject with no reason given")]
+        public void IgnoresMessageThatIsInvalid()
+        {
+            peer.Bind(Substitute.For<EndPoint>());
+
+            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            peer.OnConnected += connectAction;
+
+            SetupRecieveCall(socket, new byte[2] {
+                (byte)PacketType.Command,
+                (byte)Commands.ConnectRequest
+            });
+            peer.Update();
+
+            // server does nothing for invalid
+            socket.DidNotReceiveWithAnyArgs().Send(default, default, default);
+            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [Test]
+        public void IgnoresMessageThatIsTooShort()
+        {
+            peer.Bind(Substitute.For<EndPoint>());
+
+            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            peer.OnConnected += connectAction;
+
+            SetupRecieveCall(socket, new byte[1] {
+                (byte)UnityEngine.Random.Range(0, 255),
+            });
+
+            peer.Update();
+
+            // server does nothing for invalid
+            socket.DidNotReceiveWithAnyArgs().Send(default, default, default);
+            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [Test]
+        public void IgnoresMessageThatIsTooLong()
+        {
+            peer.Bind(Substitute.For<EndPoint>());
+
+            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            peer.OnConnected += connectAction;
+
+            const int aboveMTU = 5000;
+            SetupRecieveCall(socket, new byte[aboveMTU]);
+
+            peer.Update();
+
+            // server does nothing for invalid
+            socket.DidNotReceiveWithAnyArgs().Send(default, default, default);
+            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [Test]
+        [Repeat(10)]
+        public void IgnoresRandomData()
+        {
+            peer.Bind(Substitute.For<EndPoint>());
+
+            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            peer.OnConnected += connectAction;
+
+            EndPoint endPoint = Substitute.For<EndPoint>();
+
+            // 2 is min length of a message
+            byte[] randomData = new byte[UnityEngine.Random.Range(2, 20)];
+            for (int i = 0; i < randomData.Length; i++)
+            {
+                randomData[i] = (byte)UnityEngine.Random.Range(0, 255);
+            }
+            SetupRecieveCall(socket, randomData);
+
+            peer.Update();
+
+            // server does nothing for invalid
+            socket.DidNotReceiveWithAnyArgs().Send(default, default, default);
+            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        void SetupRecieveCall(ISocket socket, byte[] data, EndPoint endPoint = null)
+        {
+            socket.Poll().Returns(true, false);
+            socket
+               // when any call
+               .When(x => x.Receive(Arg.Any<byte[]>(), ref Arg.Any<EndPoint>(), out Arg.Any<int>()))
+               // return the data from endpoint
+               .Do(x =>
+               {
+                   byte[] dataArg = (byte[])x[0];
+                   for (int i = 0; i < data.Length; i++)
+                   {
+                       dataArg[i] = data[i];
+                   }
+                   x[1] = endPoint ?? Substitute.For<EndPoint>();
+                   x[2] = data.Length;
+               });
+        }
     }
     [Category("SocketLayer"), Description("tests for Peer that only apply to client")]
     public class PeerTestAsClient : PeerTestBase
@@ -128,11 +384,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [UnityTest]
         public IEnumerator OnDisconnectedIsNotInvokedIfClosedBeforeConnected()
         {
-            int disconnectedCalled = 0;
-            peer.OnDisconnected += (conn, reason) =>
-            {
-                disconnectedCalled++;
-            };
+            Action<IConnection, DisconnectReason> disconnectAction = Substitute.For<Action<IConnection, DisconnectReason>>();
+            peer.OnDisconnected += disconnectAction;
 
             EndPoint endPoint = Substitute.For<EndPoint>();
             IConnection conn = peer.Connect(endPoint);
@@ -140,9 +393,15 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             peer.Close();
 
             // wait enough time so that OnDisconnected would have been called
-            yield return new WaitForSeconds(1.5f);
+            // make sure to call update so events are invoked
+            float start = UnityEngine.Time.time;
+            while (start + 1.5f < UnityEngine.Time.time)
+            {
+                peer.Update();
+                yield return null;
+            }
 
-            Assert.That(disconnectedCalled, Is.Zero, "Disconnect should not have been called");
+            disconnectAction.DidNotReceiveWithAnyArgs().Invoke(default, default);
         }
 
         [Test]
@@ -172,6 +431,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
     }
 
+    [Category("SocketLayer"), Description("tests using multiple instances of peer to check they can connect to each other")]
     public class PeerTestConnecting
     {
         const int ClientCount = 4;
@@ -188,8 +448,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 clients[i] = new PeerInstanceWithSocket();
 
                 // add remotes so they can send message to each other
-                server.testSocket.AddRemote(clients[i].testSocket);
-                clients[i].testSocket.AddRemote(server.testSocket);
+                server.socket.AddRemote(clients[i].socket);
+                clients[i].socket.AddRemote(server.socket);
             }
         }
 
@@ -198,27 +458,71 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             server.peer.Bind(Substitute.For<EndPoint>());
 
+            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            server.peer.OnConnected += connectAction;
+
+            for (int i = 0; i < ClientCount; i++)
+            {
+                // tell client i to connect
+                clients[i].peer.Connect(server.endPoint);
+                Action<IConnection> clientConnectAction = Substitute.For<Action<IConnection>>();
+                clients[i].peer.OnConnected += clientConnectAction;
+
+                // no change untill update
+                Assert.That(server.socket.Sent.Count, Is.EqualTo(i));
+                connectAction.ReceivedWithAnyArgs(i).Invoke(default);
+
+                // run tick on server, should read packet from client i
+                server.peer.Update();
+
+                // server invokes connect event 
+                connectAction.ReceivedWithAnyArgs(i + 1).Invoke(default);
+
+                // sever send accept packet
+                Assert.That(server.socket.Sent.Count, Is.EqualTo(i + 1));
+                TestSocket.Packet lastSent = server.socket.Sent.Last();
+                Assert.That(lastSent.endPoint, Is.EqualTo(clients[i].socket.endPoint));
+                // check first 2 bytes of message
+                Assert.That(ArgCollection.AreEquivalentIgnoringLength(lastSent.data, new byte[2] {
+                    (byte)PacketType.Command,
+                    (byte)Commands.ConnectionAccepted
+                }));
+
+                // no change on cleint till update
+                clientConnectAction.ReceivedWithAnyArgs(0).Invoke(default);
+                clients[i].peer.Update();
+                clientConnectAction.ReceivedWithAnyArgs(1).Invoke(default);
+            }
+        }
+
+        [Test]
+        public void EachServerConnectionIsANewInstance()
+        {
+            server.peer.Bind(Substitute.For<EndPoint>());
+            var serverConnections = new List<IConnection>();
+
+            Action<IConnection> connectAction = (conn) =>
+            {
+                serverConnections.Add(conn);
+            };
+            server.peer.OnConnected += connectAction;
+
             for (int i = 0; i < ClientCount; i++)
             {
                 // tell client i to connect
                 clients[i].peer.Connect(server.endPoint);
 
-                server.peer.OnConnected +=;
                 // run tick on server, should read packet from client i
                 server.peer.Update();
 
-                // server should then reply with connection accept
-                // server should then......
-                throw new NotImplementedException();
+                Assert.That(serverConnections, Is.Unique);
             }
-
-            throw new NotImplementedException();
         }
     }
 
     public class TestSocket : ISocket
     {
-        struct Packet
+        public struct Packet
         {
             public EndPoint endPoint;
             public byte[] data;
@@ -227,7 +531,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
         public readonly EndPoint endPoint;
         Dictionary<EndPoint, TestSocket> remoteSockets = new Dictionary<EndPoint, TestSocket>();
-        Queue<Packet> received;
+        Queue<Packet> received = new Queue<Packet>();
+        public List<Packet> Sent = new List<Packet>();
 
         public TestSocket(EndPoint endPoint = null)
         {
@@ -267,12 +572,18 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             Buffer.BlockCopy(next.data, 0, data, 0, length);
         }
 
-        void ISocket.Send(EndPoint endPoint, byte[] data, int? length)
+        void ISocket.Send(EndPoint remoteEndPoint, byte[] data, int? length)
         {
-            TestSocket other = remoteSockets[endPoint];
+            TestSocket other = remoteSockets[remoteEndPoint];
+            Sent.Add(new Packet
+            {
+                endPoint = remoteEndPoint,
+                data = data,
+                length = length
+            });
             other.received.Enqueue(new Packet
             {
-                endPoint = this.endPoint,
+                endPoint = endPoint,
                 data = data,
                 length = length
             });
@@ -282,7 +593,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
     public class PeerInstanceWithSocket : PeerInstance
     {
-        public TestSocket testSocket;
+        public new TestSocket socket;
         /// <summary>
         /// endpoint that other sockets use to send to this
         /// </summary>
@@ -290,8 +601,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
         public PeerInstanceWithSocket(Config config = null) : base(config, socket: new TestSocket())
         {
-            testSocket = (TestSocket)base.socket;
-            endPoint = testSocket.endPoint;
+            socket = (TestSocket)base.socket;
+            endPoint = socket.endPoint;
         }
     }
     /// <summary>
@@ -312,12 +623,13 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
             this.config = config ?? new Config()
             {
+                MaxConnections = 5,
                 // 1 second before "failed to connect"
                 MaxConnectAttempts = 5,
                 ConnectAttemptInterval = 0.2f,
             };
             logger = Substitute.For<ILogger>();
-            peer = new Peer(socket, dataHandler, config, logger);
+            peer = new Peer(this.socket, dataHandler, this.config, logger);
         }
     }
 

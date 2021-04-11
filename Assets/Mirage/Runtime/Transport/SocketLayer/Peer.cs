@@ -54,12 +54,12 @@ namespace Mirage.SocketLayer
 
         bool active;
 
-        public Peer(ISocket socket, IDataHandler dataHandler, Config config, ILogger logger)
+        public Peer(ISocket socket, IDataHandler dataHandler, Config config = null, ILogger logger = null)
         {
             this.logger = logger ?? Debug.unityLogger;
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
             this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
-            this.config = config;
+            this.config = config ?? new Config();
             time = new Time();
 
             connectKeyValidator = new ConnectKeyValidator();
@@ -139,6 +139,10 @@ namespace Mirage.SocketLayer
             SendUnconnected(endPoint, packet);
         }
 
+        internal void SendConnectRequest(Connection connection)
+        {
+            SendCommand(connection, Commands.ConnectRequest, connectKeyValidator.GetKey());
+        }
         internal void SendCommand(Connection connection, Commands command, byte? extra = null)
         {
             Packet packet = CreateCommandPacket(command, extra);
@@ -260,7 +264,7 @@ namespace Mirage.SocketLayer
         private void HandleNewConnection(EndPoint endPoint, Packet packet)
         {
             // if invalid, then reject without reason
-            if (Validate(endPoint, packet)) { return; }
+            if (!Validate(endPoint, packet)) { return; }
 
             if (AtMaxConnections())
             {
@@ -344,7 +348,7 @@ namespace Mirage.SocketLayer
 
         private void RejectConnectionWithReason(EndPoint endPoint, RejectReason reason)
         {
-            SendCommandUnconnected(endPoint, Commands.ConnectionAccepted, (byte)reason);
+            SendCommandUnconnected(endPoint, Commands.ConnectionRejected, (byte)reason);
         }
 
 

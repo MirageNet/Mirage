@@ -7,13 +7,19 @@ namespace Mirage.SocketLayer
     internal class ConnectKeyValidator
     {
         // todo pass in key instead of having constant
-        readonly byte[] key = new[] { (byte)'H' };
+        readonly byte key = (byte)'H';
 
         public bool Validate(Packet packet)
         {
             byte keyByte = packet.data[2];
 
-            return keyByte == key[0];
+            return keyByte == key;
         }
+
+        public void CopyTo(byte[] buffer)
+        {
+            buffer[2] = key;
+        }
+        public byte GetKey() => key;
     }
 }

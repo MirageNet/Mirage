@@ -145,7 +145,7 @@ namespace Mirage.SocketLayer
                 }
 
                 connectingTracker.OnAttempt();
-                peer.SendCommand(this, Commands.ConnectRequest);
+                peer.SendConnectRequest(this);
             }
         }
 
