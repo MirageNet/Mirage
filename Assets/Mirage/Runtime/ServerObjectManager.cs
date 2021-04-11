@@ -241,15 +241,13 @@ namespace Mirage
             NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
             if (identity is null)
             {
-                logger.Log("AddPlayer: playerGameObject has no NetworkIdentity. Please add a NetworkIdentity to " + character);
-                return;
+                throw new InvalidOperationException("AddPlayer: playerGameObject has no NetworkIdentity. Please add a NetworkIdentity to " + character);
             }
 
             // cannot have a player object in "Add" version
             if (player.Identity != null)
             {
-                logger.Log("AddPlayer: player object already exists");
-                return;
+                throw new InvalidOperationException("AddPlayer: player object already exists");
             }
 
             // make sure we have a controller before we call SetClientReady
