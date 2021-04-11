@@ -190,8 +190,8 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(connectionToClient.Identity.AssetId, Is.EqualTo(replacementGuid));
         }
 
-        [Test]
-        public void AddPlayerForConnectionAssetIdTest()
+        [UnityTest]
+        public IEnumerator AddPlayerForConnectionAssetIdTest() => UniTask.ToCoroutine(async () =>
         {
             var replacementGuid = Guid.NewGuid();
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
@@ -201,8 +201,10 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             connectionToClient.Identity = null;
 
-            Assert.That(serverObjectManager.AddCharacter(connectionToClient, playerReplacement, replacementGuid), Is.True);
-        }
+            serverObjectManager.AddCharacter(connectionToClient, playerReplacement, replacementGuid);
+
+            await AsyncUtil.WaitUntilWithTimeout(() => replacementIdentity == connectionToClient.Identity);
+        });
 
         [UnityTest]
         public IEnumerator RemovePlayerForConnectionTest() => UniTask.ToCoroutine(async () =>
@@ -249,7 +251,10 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void AddPlayerForConnectionFalseTest()
         {
-            Assert.That(serverObjectManager.AddCharacter(connectionToClient, new GameObject()), Is.False);
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                serverObjectManager.AddCharacter(connectionToClient, new GameObject());
+            });
         }
 
         [UnityTest]
