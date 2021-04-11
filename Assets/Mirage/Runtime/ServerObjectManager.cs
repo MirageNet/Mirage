@@ -163,11 +163,11 @@ namespace Mirage
         /// <param name="assetId"></param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
-        public bool ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, Guid assetId, bool keepAuthority = false)
+        public void ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, Guid assetId, bool keepAuthority = false)
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
             identity.AssetId = assetId;
-            return InternalReplacePlayerForConnection(player, client, character, keepAuthority);
+            InternalReplacePlayerForConnection(player, client, character, keepAuthority);
         }
 
         /// <summary>
@@ -179,9 +179,9 @@ namespace Mirage
         /// <param name="character">Player object spawned for the player.</param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
-        public bool ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority = false)
+        public void ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority = false)
         {
-            return InternalReplacePlayerForConnection(player, client, character, keepAuthority);
+            InternalReplacePlayerForConnection(player, client, character, keepAuthority);
         }
 
         void SpawnObserversForConnection(INetworkPlayer player)
@@ -221,11 +221,11 @@ namespace Mirage
         /// <param name="character">Player object spawned for the player.</param>
         /// <param name="assetId"></param>
         /// <returns></returns>
-        public bool AddCharacter(INetworkPlayer player, GameObject character, Guid assetId)
+        public void AddCharacter(INetworkPlayer player, GameObject character, Guid assetId)
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
             identity.AssetId = assetId;
-            return AddCharacter(player, character);
+            AddCharacter(player, character);
         }
 
         /// <summary>
@@ -236,20 +236,20 @@ namespace Mirage
         /// <param name="client">Client associated to the player.</param>
         /// <param name="character">Player object spawned for the player.</param>
         /// <returns></returns>
-        public bool AddCharacter(INetworkPlayer player, GameObject character)
+        public void AddCharacter(INetworkPlayer player, GameObject character)
         {
             NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
             if (identity is null)
             {
                 logger.Log("AddPlayer: playerGameObject has no NetworkIdentity. Please add a NetworkIdentity to " + character);
-                return false;
+                return;
             }
 
             // cannot have a player object in "Add" version
             if (player.Identity != null)
             {
                 logger.Log("AddPlayer: player object already exists");
-                return false;
+                return;
             }
 
             // make sure we have a controller before we call SetClientReady
@@ -277,7 +277,6 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.AssetId);
 
             Respawn(identity);
-            return true;
         }
 
         void Respawn(NetworkIdentity identity)
@@ -294,19 +293,19 @@ namespace Mirage
             }
         }
 
-        internal bool InternalReplacePlayerForConnection(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority)
+        internal void InternalReplacePlayerForConnection(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority)
         {
             NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
             if (identity is null)
             {
                 logger.LogError("ReplacePlayer: playerGameObject has no NetworkIdentity. Please add a NetworkIdentity to " + character);
-                return false;
+                return;
             }
 
             if (identity.ConnectionToClient != null && identity.ConnectionToClient != player)
             {
                 logger.LogError("Cannot replace player for connection. New player is already owned by a different connection" + character);
-                return false;
+                return;
             }
 
             //NOTE: there can be an existing player
@@ -340,8 +339,6 @@ namespace Mirage
 
             if (!keepAuthority)
                 previousPlayer.RemoveClientAuthority();
-
-            return true;
         }
 
         internal void ShowForConnection(NetworkIdentity identity, INetworkPlayer player)
