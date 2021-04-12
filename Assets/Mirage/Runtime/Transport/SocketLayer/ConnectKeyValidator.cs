@@ -9,9 +9,11 @@ namespace Mirage.SocketLayer
         // todo pass in key instead of having constant
         readonly byte key = (byte)'H';
 
+        public int KeyLength => 1;
+
         public bool Validate(Packet packet)
         {
-            byte keyByte = packet.data[2];
+            byte keyByte = packet.buffer.array[2];
 
             return keyByte == key;
         }

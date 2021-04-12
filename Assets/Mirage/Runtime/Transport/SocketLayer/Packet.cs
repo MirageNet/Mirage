@@ -10,17 +10,18 @@ namespace Mirage.SocketLayer
     {
         const int MinPacketSize = 1;
         const int MinCommandSize = 2;
+        const int MinNotifySize = 1 + 2 + 2 + 4;
         /// <summary>
         /// Min size of message given to Mirage
         /// </summary>
-        const int MinMessageSize = 3;
+        const int MinUnreliableSize = 3;
 
-        public byte[] data;
+        public ByteBuffer buffer;
         public int length;
 
-        public Packet(byte[] data, int length)
+        public Packet(ByteBuffer data, int length)
         {
-            this.data = data ?? throw new ArgumentNullException(nameof(data));
+            buffer = data ?? throw new ArgumentNullException(nameof(data));
             this.length = length;
         }
 
@@ -35,8 +36,10 @@ namespace Mirage.SocketLayer
                     return length >= MinCommandSize;
 
                 case PacketType.Unreliable:
+                    return length >= MinUnreliableSize;
+
                 case PacketType.Notify:
-                    return length >= MinMessageSize;
+                    return length >= MinNotifySize;
 
                 default:
                 case PacketType.KeepAlive:
@@ -44,13 +47,13 @@ namespace Mirage.SocketLayer
             }
         }
 
-        public PacketType type => (PacketType)data[0];
-        public Commands command => (Commands)data[1];
+        public PacketType type => (PacketType)buffer.array[0];
+        public Commands command => (Commands)buffer.array[1];
 
         public ArraySegment<byte> ToSegment()
         {
             // ingore packet type
-            return new ArraySegment<byte>(data, 1, length);
+            return new ArraySegment<byte>(buffer.array, 1, length);
         }
     }
 }
