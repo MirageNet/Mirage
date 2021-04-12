@@ -296,14 +296,12 @@ namespace Mirage
             NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
             if (identity is null)
             {
-                logger.LogError("ReplacePlayer: playerGameObject has no NetworkIdentity. Please add a NetworkIdentity to " + character);
-                return;
+                throw new ArgumentException("ReplacePlayer: playerGameObject has no NetworkIdentity. Please add a NetworkIdentity to " + character);
             }
 
             if (identity.ConnectionToClient != null && identity.ConnectionToClient != player)
             {
-                logger.LogError("Cannot replace player for connection. New player is already owned by a different connection" + character);
-                return;
+                throw new ArgumentException("Cannot replace player for connection. New player is already owned by a different connection" + character);
             }
 
             //NOTE: there can be an existing player
