@@ -1,10 +1,12 @@
-using System.Collections.Generic;
-using Mirage.Logging;
 using UnityEditor;
-using UnityEditor.PackageManager;
-using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor.PackageManager;
+using UnityEditor.PackageManager.Requests;
+using System.Collections.Generic;
+using System.IO;
+using System;
+using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 /**
  * Docs used:
@@ -20,8 +22,6 @@ namespace Mirage
     [InitializeOnLoad]
     public class WelcomeWindow : EditorWindow
     {
-        static readonly ILogger logger = LogFactory.GetLogger<WelcomeWindow>();
-
         private Button lastClickedTab;
         private readonly List<Button> installButtons = new List<Button>();
 
@@ -60,6 +60,17 @@ namespace Mirage
         private static string firstStartUpKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
 
+        /// <summary>
+        ///     Hard coded for source code version. If package version is found, this will
+        ///     be set later on to package version. through checking for packages anyways.
+        /// </summary>
+        private static string changeLogPath = "Assets/Mirage/CHANGELOG.md";
+
+        private static string GetVersion()
+        {
+            return typeof(NetworkIdentity).Assembly.GetName().Version.ToString();
+        }
+
         #region Handle visibility
 
         private static bool ShowChangeLog
@@ -88,17 +99,13 @@ namespace Mirage
         private static void ShowWindowOnFirstStart()
         {
             EditorApplication.update -= ShowWindowOnFirstStart;
-            firstStartUpKey = Version.Current;
+            firstStartUpKey = GetVersion();
 
             if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirageUnknown")
             {
                 EditorPrefs.SetString(screenToOpenKey, ShowChangeLog ? "ChangeLog" : "Welcome");
 
-#if UNITY_2020_1_OR_NEWER
                 OpenWindow();
-#else
-                if (logger.LogEnabled()) logger.Log($"WelcomeWindow not supported in {Application.unityVersion}, it is only supported in Unity 2020.1 or newer");
-#endif
             }
         }
 
@@ -135,7 +142,9 @@ namespace Mirage
 
             //set the version text
             Label versionText = root.Q<Label>("VersionText");
-            versionText.text = "v" + Version.Current;
+            versionText.text = "v" + GetVersion();
+
+            DrawChangeLog(ParseChangeLog());
 
             #region Page buttons
 
@@ -173,7 +182,7 @@ namespace Mirage
             tabButton.EnableInClassList("dark-selected-tab", false);
             tabButton.EnableInClassList("light-selected-tab", false);
 
-            tabButton.clicked += () =>
+            tabButton.clicked += () => 
             {
                 ToggleMenuButtonColor(tabButton, true);
                 ToggleMenuButtonColor(lastClickedTab, false);
@@ -184,7 +193,10 @@ namespace Mirage
             };
 
             Button redirectButton = rootVisualElement.Q<VisualElement>(tab).Q<Button>("Redirect");
-            redirectButton.clicked += () => Application.OpenURL(url);
+            if(redirectButton != null)
+            {
+                redirectButton.clicked += () => Application.OpenURL(url);
+            }
         }
 
         //switch between content
@@ -226,6 +238,72 @@ namespace Mirage
             else
             {
                 button.EnableInClassList("light-selected-tab", toggle);
+            }
+        }
+
+        //parse the change log file
+        private List<string> ParseChangeLog()
+        {
+            List<string> content = new List<string>();
+
+            using(StreamReader reader = new StreamReader(changeLogPath))
+            {
+                string line;
+
+                while((line = reader.ReadLine()) != null)
+                {
+                    //we dont need to parse an empty string
+                    if(line == string.Empty) 
+                        continue;
+
+                    //always add the first line
+                    if(content.Count == 0) 
+                    {
+                        content.Add(line); 
+                        continue;
+                    }
+
+                    //if we havent reached the next version yet
+                    if(line.Contains("https://github.com/MirageNet/Mirage/compare/"))
+                        break;
+
+                    content.Add(line);
+                }
+            }
+
+            return content;
+        }
+
+        //draw the parsed information
+        private void DrawChangeLog(List<string> content)
+        {
+            Label changeLogText = rootVisualElement.Q<Label>("ChangeLogText");
+
+            for (int i = 0; i < content.Count; i++)
+            {
+                string item = content[i];
+
+                //if the item is a version
+                if (item.Contains("# [") || item.Contains("## ["))
+                {
+                    string version = GetVersion();
+                    rootVisualElement.Q<Label>("ChangeLogVersion").text = "Version " + version.Substring(0, version.Length - 2);
+                }
+                //if the item is a change title
+                else if (item.Contains("###"))
+                {
+                    //only add a space above the title if it isn't the first title
+                    if (i > 2) { changeLogText.text += "\n"; }
+
+                    changeLogText.text += item.Substring(4) + "\n";
+                }
+                //if the item is a change
+                else
+                {
+                    string change = item.Split(new string[] { "([" }, StringSplitOptions.None)[0];
+                    change = change.Replace("*", "-");
+                    changeLogText.text += change + "\n";
+                }
             }
         }
 
@@ -281,11 +359,11 @@ namespace Mirage
                 //log results
                 if (installRequest.Status == StatusCode.Success)
                 {
-                    if (logger.LogEnabled()) logger.Log("Package install successful.");
+                    Debug.Log("Package install successful.");
                 }
                 else if (installRequest.Status == StatusCode.Failure)
                 {
-                    if (logger.ErrorEnabled()) logger.LogError($"Package install was unsuccessful. \n Error Code: {installRequest.Error.errorCode}\n Error Message: {installRequest.Error.message}");
+                    Debug.LogError("Package install was unsuccessful. \n Error Code: " + installRequest.Error.errorCode + "\n Error Message: " + installRequest.Error.message);
                 }
 
                 EditorApplication.update -= InstallPackageProgress;
@@ -305,11 +383,11 @@ namespace Mirage
 
                 if (uninstallRequest.Status == StatusCode.Success)
                 {
-                    if (logger.LogEnabled()) logger.Log("Package uninstall successful.");
+                    Debug.Log("Package uninstall successful.");
                 }
                 else if (uninstallRequest.Status == StatusCode.Failure)
                 {
-                    if (logger.ErrorEnabled()) logger.LogError($"Package uninstall was unsuccessful. \n Error Code: {uninstallRequest.Error.errorCode}\n Error Message: {uninstallRequest.Error.message}");
+                    Debug.LogError("Package uninstall was unsuccessful. \n Error Code: " + uninstallRequest.Error.errorCode + "\n Error Message: " + uninstallRequest.Error.message);
                 }
 
                 //refresh the package tab
@@ -320,31 +398,45 @@ namespace Mirage
 
         private void ListPackageProgress()
         {
-            if (listRequest.IsCompleted)
+            if (!listRequest.IsCompleted)
             {
-                EditorApplication.update -= ListPackageProgress;
+                return;
+            }
 
-                if (listRequest.Status == StatusCode.Success)
+            EditorApplication.update -= ListPackageProgress;
+
+            switch (listRequest.Status)
+            {
+                //log error
+                case StatusCode.Success:
                 {
                     var installedPackages = new List<string>();
 
                     //populate installedPackages
-                    foreach (UnityEditor.PackageManager.PackageInfo package in listRequest.Result)
+                    foreach (PackageInfo package in listRequest.Result)
                     {
                         Package? miragePackage = Packages.Find((x) => x.packageName == package.name);
-                        if (miragePackage != null)
+
+                        if (miragePackage?.packageName == null)
                         {
-                            installedPackages.Add(miragePackage.Value.displayName);
+                            continue;
                         }
+
+                        if (miragePackage.Value.packageName != null && miragePackage.Value.packageName.Equals("Mirage"))
+                        {
+                            // Found mirage package let's set up our change log path.
+                            changeLogPath = "Packages/com.miragenet.mirage/CHANGELOG.md";
+                        }
+
+                        installedPackages.Add(miragePackage.Value.displayName);
                     }
 
                     ConfigureInstallButtons(installedPackages);
+                    break;
                 }
-                //log error
-                else if (listRequest.Status == StatusCode.Failure)
-                {
-                    if (logger.ErrorEnabled()) logger.LogError($"There was an issue finding packages. \n Error Code: {listRequest.Error.errorCode}\n Error Message: {listRequest.Error.message}");
-                }
+                case StatusCode.Failure:
+                    Debug.LogError("There was an issue finding packages. \n Error Code: " + listRequest.Error.errorCode + "\n Error Message: " + listRequest.Error.message);
+                    break;
             }
         }
 
@@ -362,12 +454,12 @@ namespace Mirage
 
                 //set text
                 installButton.text = !foundInInstalledPackages ? "Install" : "Uninstall";
-
+                
                 //set functionality
                 if (!foundInInstalledPackages)
                 {
-                    installButton.clicked += () =>
-                    {
+                    installButton.clicked += () => 
+                    { 
                         InstallPackage(packageName);
                         installButton.text = "Installing";
                         DisableInstallButtons();
@@ -375,8 +467,8 @@ namespace Mirage
                 }
                 else
                 {
-                    installButton.clicked += () =>
-                    {
+                    installButton.clicked += () => 
+                    { 
                         UninstallPackage(packageName);
                         installButton.text = "Uninstalling";
                         DisableInstallButtons();
