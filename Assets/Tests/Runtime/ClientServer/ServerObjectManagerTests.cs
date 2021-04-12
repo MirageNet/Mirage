@@ -249,9 +249,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        public void AddPlayerForConnectionFalseTest()
+        public void AddCharacterNoIdentityTest()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 serverObjectManager.AddCharacter(connectionToClient, new GameObject());
             });
