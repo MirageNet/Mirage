@@ -39,6 +39,20 @@ namespace Mirage.SocketLayer
         /// How long after disconnect before connection is fully removed from Peer
         /// </summary>
         public float DisconnectDuration = 2;
+
+        /// <summary>
+        /// Max size of a packet (excluding peer header)
+        /// </summary>
+        public int Mtu = 1280 - 20 - 8;
+        /// <summary>
+        /// How many buffers to create at start
+        /// </summary>
+        public int BufferPoolStartSize = 10;
+        /// <summary>
+        /// max number of buffers allowed to be stored in pool
+        /// <para>buffers over this limit will be left for GC</para>
+        /// </summary>
+        public int BufferPoolMaxSize = 100;
         #endregion
     }
 }
