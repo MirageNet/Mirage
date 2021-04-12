@@ -1,3 +1,10 @@
+## [87.1.2](https://github.com/MirageNet/Mirage/compare/v87.1.1...v87.1.2) (2021-04-12)
+
+
+### Bug Fixes
+
+* bug with scene object spawning ([#773](https://github.com/MirageNet/Mirage/issues/773)) ([b02c13d](https://github.com/MirageNet/Mirage/commit/b02c13d4115fac58905c5b8aeb3f41b790a0b4cc))
+
 ## [87.1.1](https://github.com/MirageNet/Mirage/compare/v87.1.0...v87.1.1) (2021-04-10)
 
 
