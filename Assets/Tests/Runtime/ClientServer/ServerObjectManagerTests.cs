@@ -249,11 +249,20 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        public void AddCharacterNoIdentityTest()
+        public void AddCharacterNoIdentityExceptionTest()
         {
             Assert.Throws<ArgumentException>(() =>
             {
                 serverObjectManager.AddCharacter(connectionToClient, new GameObject());
+            });
+        }
+
+        [Test]
+        public void InternalReplacePlayerNoIdentityExceptionTest()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                serverObjectManager.InternalReplacePlayerForConnection(connectionToClient, client, new GameObject(), true);
             });
         }
 
