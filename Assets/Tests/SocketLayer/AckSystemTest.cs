@@ -80,7 +80,7 @@ namespace Mirage.SocketLayer.Tests
         public void SetUp()
         {
             connection = new SubIRawConnection();
-            ackSystem = new AckSystem(connection);
+            ackSystem = new AckSystem(connection, new Time());
 
             message = createRandomData(1);
             ackSystem.Send(message);
@@ -161,7 +161,7 @@ namespace Mirage.SocketLayer.Tests
         {
             instance = new AckTestInstance();
             instance.connection = new SubIRawConnection();
-            instance.ackSystem = new AckSystem(instance.connection);
+            instance.ackSystem = new AckSystem(instance.connection, new Time());
 
             // create and send n messages
             instance.messages = new List<byte[]>();
@@ -250,12 +250,12 @@ namespace Mirage.SocketLayer.Tests
         {
             instance1 = new AckTestInstance();
             instance1.connection = new SubIRawConnection();
-            instance1.ackSystem = new AckSystem(instance1.connection);
+            instance1.ackSystem = new AckSystem(instance1.connection, new Time());
 
 
             instance2 = new AckTestInstance();
             instance2.connection = new SubIRawConnection();
-            instance2.ackSystem = new AckSystem(instance2.connection);
+            instance2.ackSystem = new AckSystem(instance2.connection, new Time());
 
             // create and send n messages
             instance1.messages = new List<byte[]>();
