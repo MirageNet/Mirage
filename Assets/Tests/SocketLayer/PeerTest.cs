@@ -74,7 +74,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
-            socket.SetupRecieveCall(new byte[1] {
+            socket.SetupReceiveCall(new byte[1] {
                 (byte)UnityEngine.Random.Range(0, 255),
             });
 
@@ -86,7 +86,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
 
         [Test]
-        public void IgnoresMessageThatIsTooLong()
+        public void ThrowsIfSocketGivesLengthThatIsTooHigh()
         {
             peer.Bind(Substitute.For<EndPoint>());
 
@@ -94,13 +94,14 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             peer.OnConnected += connectAction;
 
             const int aboveMTU = 5000;
-            socket.SetupRecieveCall(new byte[aboveMTU]);
+            socket.SetupReceiveCall(new byte[1000], length: aboveMTU);
 
-            peer.Update();
+            IndexOutOfRangeException exception = Assert.Throws<IndexOutOfRangeException>(() =>
+            {
+                peer.Update();
+            });
 
-            // server does nothing for invalid
-            socket.DidNotReceiveWithAnyArgs().Send(default, default, default);
-            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
+            Assert.That(exception, Has.Message.EqualTo($"Socket returned length above MTU: MTU:{config.Mtu} length:{aboveMTU}"));
         }
 
         [Test]
@@ -120,7 +121,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             {
                 randomData[i] = (byte)UnityEngine.Random.Range(0, 255);
             }
-            socket.SetupRecieveCall(randomData);
+            socket.SetupReceiveCall(randomData);
 
             peer.Update();
 

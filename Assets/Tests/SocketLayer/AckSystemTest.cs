@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
-namespace Mirage.SocketLayer.Tests
+namespace Mirage.SocketLayer.Tests.AckSystemTests
 {
     /// <summary>
     /// helper methods for testing AckSystem

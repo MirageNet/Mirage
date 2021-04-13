@@ -25,9 +25,14 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// Gets next Message
         /// <para>Should be called after Poll</para>
-        /// <para>Implementation should check that incoming packet is within the size of <paramref name="data"/></para>
+        /// <para>
+        ///     Implementation should check that incoming packet is within the size of <paramref name="data"/>,
+        ///     and make sure not to return <paramref name="bytesReceived"/> above that size
+        /// </para>
         /// </summary>
         /// <param name="data">Received data</param>
+        /// <param name="endPoint"></param>
+        /// <param name="bytesReceived">received length should not be above data array length</param>
         void Receive(byte[] data, ref EndPoint endPoint, out int bytesReceived);
 
         /// <summary>

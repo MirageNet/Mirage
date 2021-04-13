@@ -318,7 +318,7 @@ namespace Mirage.SocketLayer
             // todo implement
             //   send packet using notify
             //   if lost resend
-            //   if recieved twice, ignore 2nd
+            //   if received twice, ignore 2nd
             throw new NotImplementedException();
         }
 

@@ -40,7 +40,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
 
         [Test]
-        public void InvokesConnectEventAfterRecieveingAcccept()
+        public void InvokesConnectEventAfterReceiveingAcccept()
         {
             Assert.Ignore("not implemented");
         }
@@ -116,7 +116,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             EndPoint endPoint = Substitute.For<EndPoint>();
             IConnection conn = peer.Connect(endPoint);
 
-            socket.SetupRecieveCall(new byte[3] {
+            socket.SetupReceiveCall(new byte[3] {
                 (byte) PacketType.Command,
                 (byte) Commands.ConnectionRejected,
                 (byte)RejectReason.ServerFull,
@@ -197,7 +197,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             };
             validator.CopyTo(valid);
             EndPoint endPoint = Substitute.For<EndPoint>();
-            socket.SetupRecieveCall(valid, endPoint);
+            socket.SetupReceiveCall(valid, endPoint);
             peer.Update();
 
             // server sends accept and invokes event locally

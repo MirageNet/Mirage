@@ -186,7 +186,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             return true;
         }
 
-        public static void SetupRecieveCall(this ISocket socket, byte[] data, EndPoint endPoint = null)
+        public static void SetupReceiveCall(this ISocket socket, byte[] data, EndPoint endPoint = null, int? length = null)
         {
             socket.Poll().Returns(true, false);
             socket
@@ -201,7 +201,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                        dataArg[i] = data[i];
                    }
                    x[1] = endPoint ?? Substitute.For<EndPoint>();
-                   x[2] = data.Length;
+                   x[2] = length ?? data.Length;
                });
         }
     }

@@ -66,7 +66,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             };
             validator.CopyTo(valid);
             EndPoint endPoint = Substitute.For<EndPoint>();
-            socket.SetupRecieveCall(valid, endPoint);
+            socket.SetupReceiveCall(valid, endPoint);
             peer.Update();
 
             // server sends accept and invokes event locally
@@ -100,7 +100,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             {
                 endPoints[i] = Substitute.For<EndPoint>();
 
-                socket.SetupRecieveCall(valid, endPoints[i]);
+                socket.SetupReceiveCall(valid, endPoints[i]);
                 peer.Update();
             }
 
@@ -137,7 +137,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             const int maxConnections = 5;
             for (int i = 0; i < maxConnections; i++)
             {
-                socket.SetupRecieveCall(valid);
+                socket.SetupReceiveCall(valid);
                 peer.Update();
             }
 
@@ -146,7 +146,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             connectAction.ClearReceivedCalls();
 
             EndPoint overMaxEndpoint = Substitute.For<EndPoint>();
-            socket.SetupRecieveCall(valid, overMaxEndpoint);
+            socket.SetupReceiveCall(valid, overMaxEndpoint);
 
 
             byte[] received = null;
@@ -176,7 +176,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
-            socket.SetupRecieveCall(new byte[2] {
+            socket.SetupReceiveCall(new byte[2] {
                 (byte)PacketType.Command,
                 (byte)Commands.ConnectRequest
             });

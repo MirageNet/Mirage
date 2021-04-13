@@ -52,12 +52,12 @@ namespace Mirage.SocketLayer
 
         bool active;
 
-        public Peer(ISocket socket, IDataHandler dataHandler, Config config = null, ILogger logger = null)
+        public Peer(ISocket socket, IDataHandler dataHandler, Config _config = null, ILogger _logger = null)
         {
-            this.logger = logger ?? Debug.unityLogger;
+            logger = _logger ?? Debug.unityLogger;
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
             this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
-            this.config = config ?? new Config();
+            config = _config ?? new Config();
             time = new Time();
 
             connectKeyValidator = new ConnectKeyValidator();
@@ -193,6 +193,10 @@ namespace Mirage.SocketLayer
                     EndPoint endPoint = null;
                     socket.Receive(buffer.array, ref endPoint, out int length);
 
+                    // this should never happen: buffer size is only MTU, if socket returns higher length then it has a bug.
+                    if (length > config.Mtu)
+                        throw new IndexOutOfRangeException($"Socket returned length above MTU: MTU:{config.Mtu} length:{length}");
+
                     var packet = new Packet(buffer, length);
 
                     if (connections.TryGetValue(endPoint, out Connection connection))
@@ -228,7 +232,7 @@ namespace Mirage.SocketLayer
                     break;
                 default:
                     // ignore invalid PacketType
-                    // return not break, so that recieve time is not set for invalid packet
+                    // return not break, so that receive time is not set for invalid packet
                     return;
             }
 
