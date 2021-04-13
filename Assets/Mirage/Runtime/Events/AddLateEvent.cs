@@ -41,7 +41,7 @@ namespace Mirage.Events
     ///     {
     ///         // ...
     ///
-    ///         // reset event, removes handlers and reset the hasInvoked flag
+    ///         // reset event, resets the hasInvoked flag
     ///         _started.Reset();
     ///     }
     /// }
