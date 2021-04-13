@@ -50,7 +50,7 @@ namespace Mirage.SocketLayer
     /// int d = sequencer.Distance(a, b);
     /// </code>
     /// </example>
-    public struct Sequencer
+    public class Sequencer
     {
         readonly int shift;
         readonly int bits;

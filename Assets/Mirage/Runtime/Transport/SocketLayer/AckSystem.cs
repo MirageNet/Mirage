@@ -250,6 +250,7 @@ namespace Mirage.SocketLayer
         }
         public void Receive(byte[] packet)
         {
+            //todo get messages from pecket and invoke
             ReceivedPacket received = ackSystem.Receive(packet);
             while (sent.Count > 0)
             {
