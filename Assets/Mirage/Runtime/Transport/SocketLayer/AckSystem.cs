@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine.Assertions;
 
 namespace Mirage.SocketLayer
@@ -68,9 +69,9 @@ namespace Mirage.SocketLayer
 
     struct ReceivedPacket
     {
-        public ulong sequence;
-        public ulong receivedSequence;
-        public ulong receivedMask;
+        public ushort sequence;
+        public ushort receivedSequence;
+        public uint receivedMask;
 
         public ArraySegment<byte> packet;
         /// <summary>
@@ -85,18 +86,20 @@ namespace Mirage.SocketLayer
     internal class AckSystem
     {
         const int HEADER_SIZE = 9;
-        Sequencer sequencer = new Sequencer(16);
+        public readonly Sequencer sequencer = new Sequencer(16);
 
-        // start at 
         ushort receivedSequence;
         uint receivedMask;
         bool[] received = new bool[sizeof(int) * 8];
         bool[] receivedNext = new bool[sizeof(int) * 8];
         readonly IRawConnection connection;
+        readonly Time time;
+        float lastSentTime;
 
-        public AckSystem(IRawConnection connection)
+        public AckSystem(IRawConnection connection, Time time)
         {
             this.connection = connection;
+            this.time = time;
 
             // set received to first sequence
             // this means that it will always be 1 before first sent packet
@@ -120,8 +123,6 @@ namespace Mirage.SocketLayer
 
             if (setReievedNumbers(sequence))
             {
-
-
                 return new ReceivedPacket
                 {
                     isValid = true,
@@ -139,6 +140,7 @@ namespace Mirage.SocketLayer
 
         private bool setReievedNumbers(ushort sequence)
         {
+            // todo optimzie this
             long distance = sequencer.Distance(receivedSequence, sequence);
 
             // duplicate
@@ -210,6 +212,119 @@ namespace Mirage.SocketLayer
             Assert.AreEqual(offset, HEADER_SIZE);
 
             connection.SendRaw(final);
+            lastSentTime = time.Now;
+        }
+
+
+        public void Update()
+        {
+            // todo send ack if not recently been sent
+            // ack only packet sent if no other sent within last frame
+        }
+    }
+
+    internal class NotifySystem
+    {
+        readonly AckSystem ackSystem;
+        readonly float timeout;
+
+
+        const int MaxSentQueue = 512;
+        Queue<NotifyToken> sent = new Queue<NotifyToken>(MaxSentQueue);
+
+        public NotifySystem(IRawConnection connection, float timeout, Time time)
+        {
+            ackSystem = new AckSystem(connection, time);
+            this.timeout = timeout;
+        }
+
+        public NotifyToken SendMessage(byte[] packet)
+        {
+            if (sent.Count >= MaxSentQueue)
+            {
+                throw new InvalidOperationException("Sent queue is full");
+            }
+
+            ackSystem.Send(packet);
+            return new NotifyToken();
+        }
+        public void Receive(byte[] packet)
+        {
+            ReceivedPacket received = ackSystem.Receive(packet);
+            while (sent.Count > 0)
+            {
+                NotifyToken next = sent.Peek();
+
+                int distance = (int)ackSystem.sequencer.Distance(next.Sequence, received.receivedSequence);
+
+                // posititve distance means next is sent after last ack, so nothing to ack yet
+                if (distance > 0)
+                    return;
+
+                // negative distance means it should have been acked, or mark it as lost
+                sent.Dequeue();
+
+                const int maskSize = sizeof(uint) * 8;
+                int posDistance = -distance;
+                // if distance above size then it is outside of mask, so set as lost
+
+                bool outsideOfMask = posDistance > maskSize;
+
+                uint ackBit = 1u << posDistance;
+                bool notInMask = (received.receivedMask & ackBit) == 0u;
+
+                // todo clean this code up with multiple methods
+                bool lost = outsideOfMask || notInMask;
+
+                next.Notify(!lost);
+            }
+        }
+
+        public void Update()
+        {
+            ackSystem.Update();
+        }
+    }
+
+    public class NotifyToken
+    {
+        public event Action Delivered;
+        public event Action Lost;
+
+        bool notified;
+        internal ushort Sequence;
+
+        internal void Notify(bool delivered)
+        {
+            if (notified) throw new InvalidOperationException("this token as already been notified");
+            notified = true;
+
+            if (delivered)
+                Delivered.Invoke();
+            else
+                Lost.Invoke();
+        }
+    }
+
+    public class ReliableSystem
+    {
+        NotifySystem notifySystem;
+
+        Queue<Sent> sent;
+
+        public void Send(byte[] packet)
+        {
+            // todo implement
+            //   send packet using notify
+            //   if lost resend
+            //   if recieved twice, ignore 2nd
+            throw new NotImplementedException();
+        }
+
+        struct Sent
+        {
+            byte[] packet;
+            NotifyToken token;
         }
     }
 }
