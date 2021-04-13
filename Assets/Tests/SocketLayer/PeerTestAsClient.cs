@@ -3,6 +3,7 @@ using System.Collections;
 using System.Net;
 using NSubstitute;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.SocketLayer.Tests.PeerTests
@@ -72,7 +73,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                     sendCount++;
 
                     // check send
-                    socket.Received(sendCount).Send(
+                    int expectedCount = Mathf.Min(sendCount, config.MaxConnectAttempts);
+                    socket.Received(expectedCount).Send(
                         Arg.Is(endPoint),
                         Arg.Is<byte[]>(actual => actual.AreEquivalentIgnoringLength(expected)),
                         Arg.Is(expected.Length)
