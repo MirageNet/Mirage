@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using UnityEngine;
 
@@ -88,7 +89,9 @@ namespace Mirage.SocketLayer
             if (!active) throw new InvalidOperationException("Peer is not active");
 
             // send disconnect messages
-            foreach (Connection conn in connections.Values)
+            // use toArray because disconnect can alter collection
+            Connection[] values = connections.Values.ToArray();
+            foreach (Connection conn in values)
             {
                 conn.Disconnect(DisconnectReason.RequestedByPeer);
             }
