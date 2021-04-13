@@ -158,7 +158,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             replacementIdentity.AssetId = Guid.NewGuid();
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            serverObjectManager.ReplaceCharacter(connectionToClient, client, playerReplacement);
+            serverObjectManager.ReplaceCharacter(connectionToClient, playerReplacement);
 
             Assert.That(connectionToClient.Identity, Is.EqualTo(replacementIdentity));
         }
@@ -171,7 +171,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             replacementIdentity.AssetId = Guid.NewGuid();
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            serverObjectManager.ReplaceCharacter(connectionToClient, client, playerReplacement, true);
+            serverObjectManager.ReplaceCharacter(connectionToClient, playerReplacement, true);
 
             Assert.That(clientIdentity.ConnectionToClient, Is.EqualTo(null));
         }
@@ -185,7 +185,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             replacementIdentity.AssetId = replacementGuid;
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            serverObjectManager.ReplaceCharacter(connectionToClient, client, playerReplacement, replacementGuid);
+            serverObjectManager.ReplaceCharacter(connectionToClient, playerReplacement, replacementGuid);
 
             Assert.That(connectionToClient.Identity.AssetId, Is.EqualTo(replacementGuid));
         }
