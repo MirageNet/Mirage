@@ -190,8 +190,8 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(connectionToClient.Identity.AssetId, Is.EqualTo(replacementGuid));
         }
 
-        [UnityTest]
-        public IEnumerator AddPlayerForConnectionAssetIdTest() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void AddPlayerForConnectionAssetIdTest()
         {
             var replacementGuid = Guid.NewGuid();
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
@@ -203,8 +203,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             serverObjectManager.AddCharacter(connectionToClient, playerReplacement, replacementGuid);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => replacementIdentity == connectionToClient.Identity);
-        });
+            Assert.That(replacementIdentity == connectionToClient.Identity);
+        }
 
         [UnityTest]
         public IEnumerator RemovePlayerForConnectionTest() => UniTask.ToCoroutine(async () =>
