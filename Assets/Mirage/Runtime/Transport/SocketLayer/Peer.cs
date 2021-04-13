@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using UnityEngine;
 
@@ -46,6 +45,8 @@ namespace Mirage.SocketLayer
         readonly ConnectKeyValidator connectKeyValidator;
         readonly BufferPool bufferPool;
         readonly Dictionary<EndPoint, Connection> connections = new Dictionary<EndPoint, Connection>();
+        // list so that remove can take place after foreach loops
+        readonly List<Connection> connectionsToRemove = new List<Connection>();
 
         public event Action<IConnection> OnConnected;
         public event Action<IConnection, DisconnectReason> OnDisconnected;
@@ -89,12 +90,12 @@ namespace Mirage.SocketLayer
             if (!active) throw new InvalidOperationException("Peer is not active");
 
             // send disconnect messages
-            // use toArray because disconnect can alter collection
-            Connection[] values = connections.Values.ToArray();
-            foreach (Connection conn in values)
+            foreach (Connection conn in connections.Values)
             {
                 conn.Disconnect(DisconnectReason.RequestedByPeer);
             }
+            RemoveConnections();
+
 
             active = false;
             // close socket
@@ -420,12 +421,10 @@ namespace Mirage.SocketLayer
         {
             // shouldn't be trying to removed a destroyed connected
             Assert(connection.State != ConnectionState.Destroyed);
+            Assert(connection.State != ConnectionState.Removing);
 
-            bool removed = connections.Remove(connection.EndPoint);
-            connection.State = ConnectionState.Destroyed;
-
-            // value should be removed from dictionary
-            Assert(removed);
+            connection.State = ConnectionState.Removing;
+            connectionsToRemove.Add(connection);
         }
 
         void HandleConnectionDisconnect(Connection connection, Packet packet)
@@ -436,10 +435,28 @@ namespace Mirage.SocketLayer
 
         void UpdateConnections()
         {
-            foreach (KeyValuePair<EndPoint, Connection> kvp in connections)
+            foreach (Connection connection in connections.Values)
             {
-                kvp.Value.Update();
+                connection.Update();
             }
+
+            RemoveConnections();
+        }
+
+        void RemoveConnections()
+        {
+            if (connectionsToRemove.Count == 0)
+                return;
+
+            foreach (Connection connection in connectionsToRemove)
+            {
+                bool removed = connections.Remove(connection.EndPoint);
+                connection.State = ConnectionState.Destroyed;
+
+                // value should be removed from dictionary
+                Assert(removed);
+            }
+            connectionsToRemove.Clear();
         }
     }
 }

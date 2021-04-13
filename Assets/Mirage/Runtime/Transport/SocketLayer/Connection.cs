@@ -46,6 +46,10 @@ namespace Mirage.SocketLayer
                     case ConnectionState.Disconnected:
                         Assert(_state == ConnectionState.Connected);
                         break;
+
+                    case ConnectionState.Destroyed:
+                        Assert(_state == ConnectionState.Removing);
+                        break;
                 }
 
                 if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log($"{EndPoint} changed state from {_state} to {value}");
@@ -134,6 +138,7 @@ namespace Mirage.SocketLayer
 
                 case ConnectionState.Created:
                 case ConnectionState.Disconnected:
+                case ConnectionState.Removing:
                 case ConnectionState.Destroyed:
                     Assert(false);
                     break;

@@ -1,4 +1,4 @@
-﻿namespace Mirage.SocketLayer
+namespace Mirage.SocketLayer
 {
     public enum ConnectionState
     {
@@ -16,6 +16,7 @@
         Connected = 3,
 
         Disconnected = 9,
-        Destroyed = 10,
+        Removing = 10,
+        Destroyed = 11,
     }
 }

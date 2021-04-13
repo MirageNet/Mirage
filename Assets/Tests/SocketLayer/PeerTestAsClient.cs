@@ -10,19 +10,22 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     [Category("SocketLayer"), Description("tests for Peer that only apply to client")]
     public class PeerTestAsClient : PeerTestBase
     {
+        byte[] connectRequest = new byte[3]
+        {
+            (byte)PacketType.Command,
+            (byte)Commands.ConnectRequest,
+            new ConnectKeyValidator().GetKey(),
+        };
+
+
         [Test]
         public void ConnectShouldSendMessageToSocket()
         {
             EndPoint endPoint = Substitute.For<EndPoint>();
             peer.Connect(endPoint);
-            byte key = new ConnectKeyValidator().GetKey();
 
-            byte[] expected = new byte[3]
-            {
-                (byte)PacketType.Command,
-                (byte)Commands.ConnectRequest,
-                key,
-            };
+            byte[] expected = connectRequest;
+
             socket.Received(1).Send(
                 Arg.Is(endPoint),
                 Arg.Is<byte[]>(actual => actual.AreEquivalentIgnoringLength(expected)),
@@ -52,11 +55,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             EndPoint endPoint = Substitute.For<EndPoint>();
             _ = peer.Connect(endPoint);
 
-            byte[] expected = new byte[2]
-            {
-                (byte)PacketType.Command,
-                (byte)Commands.ConnectRequest,
-            };
+            byte[] expected = connectRequest;
 
             // wait enough time so that  would have been called
             // make sure to call update so events are invoked
@@ -64,7 +63,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             float end = time.Now + config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
             float nextSendCheck = 0;
             int sendCount = 0;
-            while (end < time.Now)
+            while (end > time.Now)
             {
                 peer.Update();
                 if (nextSendCheck < time.Now)
@@ -83,7 +82,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             }
 
             // check send is called max attempts times
-            socket.Received(sendCount).Send(
+            socket.Received(config.MaxConnectAttempts).Send(
                 Arg.Is(endPoint),
                 Arg.Is<byte[]>(actual => actual.AreEquivalentIgnoringLength(expected)),
                 Arg.Is(expected.Length)
@@ -100,7 +99,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             // make sure to call update so events are invoked
             // 0.5 little extra to be sure
             float end = time.Now + config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
-            while (end < time.Now)
+            while (end > time.Now)
             {
                 peer.Update();
                 yield return null;
@@ -188,16 +187,9 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
-            var validator = new ConnectKeyValidator();
-            byte[] valid = new byte[3]
-            {
-                (byte)PacketType.Command,
-                (byte)Commands.ConnectRequest,
-                0
-            };
-            validator.CopyTo(valid);
+            byte[] expected = connectRequest;
             EndPoint endPoint = Substitute.For<EndPoint>();
-            socket.SetupReceiveCall(valid, endPoint);
+            socket.SetupReceiveCall(expected, endPoint);
             peer.Update();
 
             // server sends accept and invokes event locally
