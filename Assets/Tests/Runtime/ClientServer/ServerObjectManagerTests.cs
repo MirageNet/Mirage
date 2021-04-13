@@ -267,7 +267,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [UnityTest]
-        public IEnumerator SpawnObjectsFalseTest() => UniTask.ToCoroutine(async () =>
+        public IEnumerator SpawnObjectsExceptionTest() => UniTask.ToCoroutine(async () =>
         {
             server.Disconnect();
 
