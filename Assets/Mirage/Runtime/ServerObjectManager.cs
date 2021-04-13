@@ -163,11 +163,11 @@ namespace Mirage
         /// <param name="assetId"></param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
-        public bool ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, Guid assetId, bool keepAuthority = false)
+        public bool ReplaceCharacter(INetworkPlayer player, GameObject character, Guid assetId, bool keepAuthority = false)
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
             identity.AssetId = assetId;
-            return InternalReplacePlayerForConnection(player, client, character, keepAuthority);
+            return InternalReplacePlayerForConnection(player, character, keepAuthority);
         }
 
         /// <summary>
@@ -179,9 +179,9 @@ namespace Mirage
         /// <param name="character">Player object spawned for the player.</param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
-        public bool ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority = false)
+        public bool ReplaceCharacter(INetworkPlayer player, GameObject character, bool keepAuthority = false)
         {
-            return InternalReplacePlayerForConnection(player, client, character, keepAuthority);
+            return InternalReplacePlayerForConnection(player, character, keepAuthority);
         }
 
         void SpawnObserversForConnection(INetworkPlayer player)
@@ -294,7 +294,7 @@ namespace Mirage
             }
         }
 
-        internal bool InternalReplacePlayerForConnection(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority)
+        internal bool InternalReplacePlayerForConnection(INetworkPlayer player, GameObject character, bool keepAuthority)
         {
             NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
             if (identity is null)
@@ -315,7 +315,6 @@ namespace Mirage
             NetworkIdentity previousPlayer = player.Identity;
 
             player.Identity = identity;
-            identity.Client = client;
 
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
             identity.SetClientOwner(player);
