@@ -55,6 +55,10 @@ namespace Mirage.SocketLayer
         None = 0,
         ServerFull = 1,
         Timeout = 2,
+        /// <summary>
+        /// Closed called locally before connect
+        /// </summary>
+        ClosedByPeer = 3,
     }
 
     /// <summary>

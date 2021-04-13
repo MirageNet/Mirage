@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Net;
 using NSubstitute;
@@ -15,11 +15,13 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             EndPoint endPoint = Substitute.For<EndPoint>();
             peer.Connect(endPoint);
+            byte key = new ConnectKeyValidator().GetKey();
 
-            byte[] expected = new byte[2]
+            byte[] expected = new byte[3]
             {
                 (byte)PacketType.Command,
                 (byte)Commands.ConnectRequest,
+                key,
             };
             socket.Received(1).Send(
                 Arg.Is(endPoint),
@@ -37,12 +39,99 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             Assert.That(conn.State, Is.EqualTo(ConnectionState.Connecting), "new connection should be connecting");
         }
 
-        [UnityTest]
-        public IEnumerator OnDisconnectedIsNotInvokedIfClosedBeforeConnected()
+        [Test]
+        public void InvokesConnectEventAfterRecieveingAcccept()
         {
-            Action<IConnection, DisconnectReason> disconnectAction = Substitute.For<Action<IConnection, DisconnectReason>>();
-            peer.OnDisconnected += disconnectAction;
+            Assert.Ignore("not implemented");
+        }
 
+
+        [UnityTest]
+        public IEnumerator ShouldResendConnectMessageIfNoReply()
+        {
+            EndPoint endPoint = Substitute.For<EndPoint>();
+            _ = peer.Connect(endPoint);
+
+            byte[] expected = new byte[2]
+            {
+                (byte)PacketType.Command,
+                (byte)Commands.ConnectRequest,
+            };
+
+            // wait enough time so that  would have been called
+            // make sure to call update so events are invoked
+            // 0.5 little extra to be sure
+            float end = time.Now + config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
+            float nextSendCheck = 0;
+            int sendCount = 0;
+            while (end < time.Now)
+            {
+                peer.Update();
+                if (nextSendCheck < time.Now)
+                {
+                    nextSendCheck = time.Now + config.ConnectAttemptInterval * 1.1f;
+                    sendCount++;
+
+                    // check send
+                    socket.Received(sendCount).Send(
+                        Arg.Is(endPoint),
+                        Arg.Is<byte[]>(actual => actual.AreEquivalentIgnoringLength(expected)),
+                        Arg.Is(expected.Length)
+                    );
+                }
+                yield return null;
+            }
+
+            // check send is called max attempts times
+            socket.Received(sendCount).Send(
+                Arg.Is(endPoint),
+                Arg.Is<byte[]>(actual => actual.AreEquivalentIgnoringLength(expected)),
+                Arg.Is(expected.Length)
+            );
+        }
+
+        [UnityTest]
+        public IEnumerator ShouldInvokeConnectionFailedIfNoReplyAfterMax()
+        {
+            EndPoint endPoint = Substitute.For<EndPoint>();
+            IConnection conn = peer.Connect(endPoint);
+
+            // wait enough time so that  would have been called
+            // make sure to call update so events are invoked
+            // 0.5 little extra to be sure
+            float end = time.Now + config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
+            while (end < time.Now)
+            {
+                peer.Update();
+                yield return null;
+            }
+
+            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
+            disconnectAction.DidNotReceiveWithAnyArgs().Invoke(default, default);
+            connectFailedAction.Received(1).Invoke(conn, RejectReason.Timeout);
+        }
+        [Test]
+        public void ShouldInvokeConnectionFailedIfServerRejects()
+        {
+            EndPoint endPoint = Substitute.For<EndPoint>();
+            IConnection conn = peer.Connect(endPoint);
+
+            socket.SetupRecieveCall(new byte[3] {
+                (byte) PacketType.Command,
+                (byte) Commands.ConnectionRejected,
+                (byte)RejectReason.ServerFull,
+            }, endPoint);
+            peer.Update();
+
+            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
+            disconnectAction.DidNotReceiveWithAnyArgs().Invoke(default, default);
+            connectFailedAction.Received(1).Invoke(conn, RejectReason.ServerFull);
+        }
+
+
+        [UnityTest]
+        public IEnumerator InvokesConnectFailedIfClosedBeforeConnect()
+        {
             EndPoint endPoint = Substitute.For<EndPoint>();
             IConnection conn = peer.Connect(endPoint);
 
@@ -51,13 +140,17 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             // wait enough time so that OnDisconnected would have been called
             // make sure to call update so events are invoked
             float start = UnityEngine.Time.time;
-            while (start + 1.5f < UnityEngine.Time.time)
+            // 0.5 little extra to be sure
+            float maxTime = config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
+            while (start + maxTime < UnityEngine.Time.time)
             {
                 peer.Update();
                 yield return null;
             }
 
+            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
             disconnectAction.DidNotReceiveWithAnyArgs().Invoke(default, default);
+            connectFailedAction.Received(1).Invoke(conn, RejectReason.ClosedByPeer);
         }
 
         [Test]
@@ -84,6 +177,36 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 Arg.Is<byte[]>(actual => actual.AreEquivalentIgnoringLength(expected)),
                 Arg.Is(expected.Length)
                 );
+        }
+
+        [Test]
+        public void IgnoresRequestToConnect()
+        {
+            Assert.Ignore("not implemented");
+            peer.Connect(Substitute.For<EndPoint>());
+
+            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            peer.OnConnected += connectAction;
+
+            var validator = new ConnectKeyValidator();
+            byte[] valid = new byte[3]
+            {
+                (byte)PacketType.Command,
+                (byte)Commands.ConnectRequest,
+                0
+            };
+            validator.CopyTo(valid);
+            EndPoint endPoint = Substitute.For<EndPoint>();
+            socket.SetupRecieveCall(valid, endPoint);
+            peer.Update();
+
+            // server sends accept and invokes event locally
+            socket.Received(1).Send(endPoint, Arg.Is<byte[]>(x =>
+                x.Length >= 2 &&
+                x[0] == (byte)PacketType.Command &&
+                x[1] == (byte)Commands.ConnectionAccepted
+            ), 2);
+            connectAction.ReceivedWithAnyArgs(1).Invoke(default);
         }
     }
 }

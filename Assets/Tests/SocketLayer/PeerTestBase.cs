@@ -13,6 +13,9 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     public class PeerTestBase
     {
         PeerInstance instance;
+        protected Action<IConnection> connectAction;
+        protected Action<IConnection, RejectReason> connectFailedAction;
+        protected Action<IConnection, DisconnectReason> disconnectAction;
 
         // helper properties to access instance
         protected ISocket socket => instance.socket;
@@ -21,10 +24,19 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         protected ILogger logger => instance.logger;
         protected Peer peer => instance.peer;
 
+        internal readonly Time time = new Time();
+
         [SetUp]
         public void SetUp()
         {
             instance = new PeerInstance();
+
+            connectAction = Substitute.For<Action<IConnection>>();
+            connectFailedAction = Substitute.For<Action<IConnection, RejectReason>>();
+            disconnectAction = Substitute.For<Action<IConnection, DisconnectReason>>();
+            peer.OnConnected += connectAction;
+            peer.OnConnectionFailed += connectFailedAction;
+            peer.OnDisconnected += disconnectAction;
         }
     }
 

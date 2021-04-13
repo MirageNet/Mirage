@@ -148,6 +148,7 @@ namespace Mirage.SocketLayer
             Packet packet = CreateCommandPacket(command, extra);
             Send(connection, packet);
         }
+
         private Packet CreateCommandPacket(Commands command, byte? extra = null)
         {
             using (ByteBuffer buffer = bufferPool.Take())
@@ -375,9 +376,7 @@ namespace Mirage.SocketLayer
             {
                 case ConnectionState.Connecting:
                     var reason = (RejectReason)packet.buffer.array[2];
-                    if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log($"Connection Refused: {reason}");
-                    RemoveConnection(connection);
-                    OnConnectionFailed?.Invoke(connection, reason);
+                    FailedToConnect(connection, reason);
                     break;
 
                 default:
@@ -399,6 +398,17 @@ namespace Mirage.SocketLayer
             // tell high level
             OnDisconnected.Invoke(connection, reason);
         }
+
+        internal void FailedToConnect(Connection connection, RejectReason reason)
+        {
+            if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log($"Connection Failed to connect: {reason}");
+
+            RemoveConnection(connection);
+
+            // tell high level
+            OnConnectionFailed.Invoke(connection, reason);
+        }
+
         internal void RemoveConnection(Connection connection)
         {
             // shouldn't be trying to removed a destroyed connected

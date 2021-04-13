@@ -120,9 +120,24 @@ namespace Mirage.SocketLayer
         }
         internal void Disconnect(DisconnectReason reason, bool sendToOther = true)
         {
-            State = ConnectionState.Disconnected;
-            disconnectedTracker.Disconnect();
-            peer.OnConnectionDisconnected(this, reason, sendToOther);
+            switch (State)
+            {
+                case ConnectionState.Connecting:
+                    peer.FailedToConnect(this, RejectReason.ClosedByPeer);
+                    break;
+
+                case ConnectionState.Connected:
+                    peer.OnConnectionDisconnected(this, reason, sendToOther);
+                    State = ConnectionState.Disconnected;
+                    disconnectedTracker.Disconnect();
+                    break;
+
+                case ConnectionState.Created:
+                case ConnectionState.Disconnected:
+                case ConnectionState.Destroyed:
+                    Assert(false);
+                    break;
+            }
         }
 
         internal void ReceivePacket(Packet packet)
@@ -141,11 +156,13 @@ namespace Mirage.SocketLayer
             {
                 if (connectingTracker.MaxAttempts())
                 {
-                    peer.RemoveConnection(this);
+                    peer.FailedToConnect(this, RejectReason.Timeout);
                 }
-
-                connectingTracker.OnAttempt();
-                peer.SendConnectRequest(this);
+                else
+                {
+                    connectingTracker.OnAttempt();
+                    peer.SendConnectRequest(this);
+                }
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using NSubstitute;
 using NUnit.Framework;
@@ -50,7 +50,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
 
         [Test]
-        public void AcceptsForValidMessage()
+        public void AcceptsConnectionForValidMessage()
         {
             peer.Bind(Substitute.For<EndPoint>());
 
@@ -79,7 +79,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
 
         [Test]
-        public void AcceptsUpToMaxConnections()
+        public void AcceptsConnectionsUpToMax()
         {
             peer.Bind(Substitute.For<EndPoint>());
 
