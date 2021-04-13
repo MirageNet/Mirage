@@ -1180,7 +1180,7 @@ namespace Mirage
 
         private void ResetEvents()
         {
-            // removes handlers and reset's stored args
+            // resets stored args and invoked flag
             _onStartServer.Reset();
             _onStartClient.Reset();
             _onStartLocalPlayer.Reset();
