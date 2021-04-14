@@ -8,16 +8,8 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal struct Packet
     {
-        const int MinPacketSize = 1;
-        const int MinCommandSize = 2;
-        const int MinNotifySize = 1 + 2 + 2 + 4;
-        /// <summary>
-        /// Min size of message given to Mirage
-        /// </summary>
-        const int MinUnreliableSize = 3;
-
-        public ByteBuffer buffer;
-        public int length;
+        public readonly ByteBuffer buffer;
+        public readonly int length;
 
         public Packet(ByteBuffer data, int length)
         {
@@ -27,8 +19,16 @@ namespace Mirage.SocketLayer
 
         public bool IsValidSize()
         {
+            const int MinPacketSize = 1;
+
             if (length < MinPacketSize)
                 return false;
+
+
+            const int MinCommandSize = 2;
+            const int MinNotifySize = 1 + 2 + 2 + 4;
+            // Min size of message given to Mirage
+            const int MinUnreliableSize = 3;
 
             switch (type)
             {
