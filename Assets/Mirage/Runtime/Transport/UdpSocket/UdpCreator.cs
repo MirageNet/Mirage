@@ -5,18 +5,18 @@ using UnityEngine;
 
 namespace Mirage
 {
-    public sealed class UdpTransport : SocketCreator
+    public sealed class UdpCreator : SocketCreator
     {
         [SerializeField] int port;
 
         public override ISocket CreateClientSocket()
         {
-            return new UDPSocket();
+            return new UdpSocket();
         }
 
         public override ISocket CreateServerSocket()
         {
-            return new UDPSocket();
+            return new UdpSocket();
         }
 
         public override EndPoint GetBindEndPoint()
@@ -33,11 +33,11 @@ namespace Mirage
         private static bool platformNotWebgl => Application.platform != RuntimePlatform.WebGLPlayer;
     }
 
-    public class UDPSocket : ISocket
+    public class UdpSocket : ISocket
     {
         readonly Socket socket;
 
-        public UDPSocket()
+        public UdpSocket()
         {
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         }
