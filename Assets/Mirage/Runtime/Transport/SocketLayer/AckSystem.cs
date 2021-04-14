@@ -246,6 +246,8 @@ namespace Mirage.SocketLayer
             }
 
             ackSystem.Send(packet);
+
+            // todo use pool to stop allocations
             return new NotifyToken();
         }
         public void Receive(byte[] packet)

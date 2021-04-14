@@ -10,7 +10,7 @@ namespace Mirage.SocketLayer
 
         void Disconnect();
 
-        void SendNotify(byte[] packet);
+        NotifyToken SendNotify(byte[] packet);
         void SendUnreliable(byte[] packet);
     }
     internal interface IRawConnection
@@ -115,7 +115,7 @@ namespace Mirage.SocketLayer
         }
 
         public void SendUnreliable(byte[] packet) => peer.SendUnreliable(this, packet);
-        public void SendNotify(byte[] packet) => notifySystem.Send(packet);
+        public NotifyToken SendNotify(byte[] packet) => notifySystem.Send(packet);
         public void SendRaw(byte[] packet) => peer.SendRaw(this, packet);
 
         /// <summary>
