@@ -13,11 +13,6 @@ namespace Mirage
 
     public interface IClientObjectManager
     {
-        /// <summary>
-        /// NetworkIdentity of the localPlayer
-        /// </summary>
-        NetworkIdentity LocalPlayer { get; }
-
         NetworkIdentity GetPrefab(Guid assetId);
 
         void RegisterPrefab(NetworkIdentity identity);
