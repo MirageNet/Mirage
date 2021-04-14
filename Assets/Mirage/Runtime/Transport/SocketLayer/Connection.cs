@@ -28,7 +28,7 @@ namespace Mirage.SocketLayer
         /// <para>packet given to this function as assumed to already have a header</para>
         /// </summary>
         /// <param name="packet">header and messages</param>
-        void SendRaw(byte[] packet);
+        void SendRaw(byte[] packet, int length);
     }
 
     /// <summary>
@@ -133,7 +133,7 @@ namespace Mirage.SocketLayer
         // todo check state
         public void SendUnreliable(byte[] packet) => peer.SendUnreliable(this, packet);
         public NotifyToken SendNotify(byte[] packet) => notifySystem.Send(packet);
-        public void SendRaw(byte[] packet) => peer.SendRaw(this, packet);
+        public void SendRaw(byte[] packet, int length) => peer.SendRaw(this, packet, length);
 
         /// <summary>
         /// starts disconnecting this connection

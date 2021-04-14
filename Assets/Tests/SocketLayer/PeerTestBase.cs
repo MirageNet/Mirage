@@ -49,7 +49,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             public EndPoint endPoint;
             public byte[] data;
-            public int? length;
+            public int length;
         }
 
         public readonly EndPoint endPoint;
@@ -89,13 +89,13 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             Packet next = received.Dequeue();
             endPoint = next.endPoint;
-            int length = next.length ?? next.data.Length;
+            int length = next.length;
             bytesReceived = length;
 
             Buffer.BlockCopy(next.data, 0, data, 0, length);
         }
 
-        void ISocket.Send(EndPoint remoteEndPoint, byte[] data, int? length)
+        void ISocket.Send(EndPoint remoteEndPoint, byte[] data, int length)
         {
             TestSocket other = remoteSockets[remoteEndPoint];
             Sent.Add(new Packet

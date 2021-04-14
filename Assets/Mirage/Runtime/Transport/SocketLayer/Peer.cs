@@ -113,21 +113,21 @@ namespace Mirage.SocketLayer
                 Send(connection, buffer.array, packet.Length + 1);
             }
         }
-        internal void SendRaw(Connection connection, byte[] packet)
+        internal void SendRaw(Connection connection, byte[] packet, int length)
         {
             // todo asset header is command?
-            Send(connection, packet);
+            Send(connection, packet, length);
         }
 
         private void Send(Connection connection, Packet packet) => Send(connection, packet.buffer.array, packet.length);
-        private void Send(Connection connection, byte[] data, int? length = null)
+        private void Send(Connection connection, byte[] data, int length)
         {
             // todo check connection state before sending
             socket.Send(connection.EndPoint, data, length);
             connection.SetSendTime();
         }
         private void SendUnconnected(EndPoint endPoint, Packet packet) => SendUnconnected(endPoint, packet.buffer.array, packet.length);
-        internal void SendUnconnected(EndPoint endPoint, byte[] data, int? length = null)
+        internal void SendUnconnected(EndPoint endPoint, byte[] data, int length)
         {
             socket.Send(endPoint, data, length);
         }

@@ -133,7 +133,7 @@ namespace Mirage.SocketLayer
         public void Send(byte[] packet)
         {
             // todo check packet size is within MTU
-
+            // todo use pool to stop allocations
             byte[] final = new byte[packet.Length + HEADER_SIZE];
             Buffer.BlockCopy(packet, 0, final, HEADER_SIZE, packet.Length);
 
@@ -148,7 +148,7 @@ namespace Mirage.SocketLayer
 
             Assert.AreEqual(offset, HEADER_SIZE);
 
-            connection.SendRaw(final);
+            connection.SendRaw(final, final.Length);
             lastSentTime = time.Now;
         }
 

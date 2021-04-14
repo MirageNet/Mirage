@@ -52,7 +52,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     {
         public List<byte[]> packets = new List<byte[]>();
 
-        public void SendRaw(byte[] packet)
+        public void SendRaw(byte[] packet, int length)
         {
             packets.Add(packet);
         }

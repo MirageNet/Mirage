@@ -3,43 +3,48 @@ using System.Net;
 namespace Mirage.SocketLayer
 {
     /// <summary>
-    /// Link between Mirage and the outside world...
+    /// Link between Mirage and the outside world
     /// </summary>
     public interface ISocket
     {
         /// <summary>
         /// Starts listens for data on an endpoint
-        /// <para>Used by Server to accpet data from clients</para>
+        /// <para>Used by Server to allow clients to connect</para>
         /// </summary>
-        /// <param name="endPoint"></param>
+        /// <param name="endPoint">the endpoint to listen on</param>
         void Bind(EndPoint endPoint);
 
+        /// <summary>
+        /// Closes the socket, stops receiving messages from other peers
+        /// </summary>
         void Close();
 
         /// <summary>
-        /// Is message avaliable
+        /// Checks if a packet is available 
         /// </summary>
-        /// <returns>true if data to read</returns>
+        /// <returns>true if there is atleast 1 packet to read</returns>
         bool Poll();
 
         /// <summary>
-        /// Gets next Message
+        /// Gets next packet
         /// <para>Should be called after Poll</para>
         /// <para>
-        ///     Implementation should check that incoming packet is within the size of <paramref name="data"/>,
+        ///     Implementation should check that incoming packet is within the size of <paramref name="buffer"/>,
         ///     and make sure not to return <paramref name="bytesReceived"/> above that size
         /// </para>
         /// </summary>
-        /// <param name="data">Received data</param>
-        /// <param name="endPoint"></param>
-        /// <param name="bytesReceived">received length should not be above data array length</param>
-        void Receive(byte[] data, ref EndPoint endPoint, out int bytesReceived);
+        /// <param name="buffer">buffer to write recevived packet into</param>
+        /// <param name="endPoint">where packet came from</param>
+        /// <param name="bytesReceived">length of packet, should not be above <paramref name="buffer"/> length</param>
+        void Receive(byte[] buffer, ref EndPoint endPoint, out int bytesReceived);
 
         /// <summary>
-        /// Sends data to endpoint
-        /// <para>Implementation should use <paramref name="length"/> if given as <paramref name="data"/> is a buffer that may contain values from previous packets</para>
+        /// Sends a packet to an endpoint
+        /// <para>Implementation should use <paramref name="length"/> because <paramref name="packet"/> is a buffer than may contain data from previous packets</para>
         /// </summary>
-        /// <param name="data"></param>
-        void Send(EndPoint endPoint, byte[] data, int? length);
+        /// <param name="endPoint">where packet is being sent to</param>
+        /// <param name="packet">buffer that contains the packet, starting at index 0</param>
+        /// <param name="length">length of the packet</param>
+        void Send(EndPoint endPoint, byte[] packet, int length);
     }
 }
