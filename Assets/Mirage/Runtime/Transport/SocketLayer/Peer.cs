@@ -221,7 +221,6 @@ namespace Mirage.SocketLayer
                     HandleCommand(connection, packet);
                     break;
                 case PacketType.Unreliable:
-                case PacketType.Reliable:
                 case PacketType.Notify:
                     // todo are these handled differently?
                     connection.ReceivePacket(packet);

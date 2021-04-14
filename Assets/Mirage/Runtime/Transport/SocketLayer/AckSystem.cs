@@ -85,7 +85,7 @@ namespace Mirage.SocketLayer
 
     internal class AckSystem
     {
-        const int HEADER_SIZE = 9;
+        public const int HEADER_SIZE = 9;
         public readonly Sequencer sequencer = new Sequencer(16);
 
         ushort receivedSequence;
@@ -95,6 +95,7 @@ namespace Mirage.SocketLayer
         readonly IRawConnection connection;
         readonly Time time;
         float lastSentTime;
+
 
         public AckSystem(IRawConnection connection, Time time)
         {

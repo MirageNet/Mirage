@@ -150,7 +150,23 @@ namespace Mirage.SocketLayer
 
         internal void ReceivePacket(Packet packet)
         {
-            ArraySegment<byte> segment = packet.ToSegment();
+            int offset;
+            switch (packet.type)
+            {
+                case PacketType.Unreliable:
+                    offset = 1;
+                    break;
+                case PacketType.Notify:
+                    notifySystem.Receive(packet.buffer.array);
+                    offset = AckSystem.HEADER_SIZE;
+                    break;
+                default:
+                    Assert(false);
+                    return;
+            }
+
+            int count = packet.length - offset;
+            var segment = new ArraySegment<byte>(packet.buffer.array, offset, count);
             dataHandler.ReceiveData(this, segment);
         }
 

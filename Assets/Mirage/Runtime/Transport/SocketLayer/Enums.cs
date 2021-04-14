@@ -8,8 +8,7 @@ namespace Mirage.SocketLayer
         Command = 1,
 
         Unreliable = 2,
-        Reliable = 3,
-        Notify = 4,
+        Notify = 3,
 
         /// <summary>
         /// Used to keep connection alive.

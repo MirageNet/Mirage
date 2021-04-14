@@ -13,7 +13,7 @@ namespace Mirage.SocketLayer
         /// <para>will contain byte from just 1 high level message</para>
         /// </summary>
         /// <param name="connection">connection that sent data</param>
-        /// <param name="segment"></param>
-        void ReceiveData(IConnection connection, ArraySegment<byte> segment);
+        /// <param name="packet"></param>
+        void ReceiveData(IConnection connection, ArraySegment<byte> packet);
     }
 }

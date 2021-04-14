@@ -49,11 +49,5 @@ namespace Mirage.SocketLayer
 
         public PacketType type => (PacketType)buffer.array[0];
         public Commands command => (Commands)buffer.array[1];
-
-        public ArraySegment<byte> ToSegment()
-        {
-            // ingore packet type
-            return new ArraySegment<byte>(buffer.array, 1, length);
-        }
     }
 }
