@@ -14,12 +14,15 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         PeerInstanceWithSocket server;
         PeerInstanceWithSocket[] clients;
 
-        List<IConnection> clientConnections = new List<IConnection>();
-        List<IConnection> serverConnections = new List<IConnection>();
+        List<IConnection> clientConnections;
+        List<IConnection> serverConnections;
 
         [SetUp]
         public void SetUp()
         {
+            clientConnections = new List<IConnection>();
+            serverConnections = new List<IConnection>();
+
             server = new PeerInstanceWithSocket(new Config { MaxConnections = ClientCount });
             clients = new PeerInstanceWithSocket[ClientCount];
             Action<IConnection> serverConnect = (conn) => serverConnections.Add(conn);

@@ -11,12 +11,12 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     [Category("SocketLayer"), Description("tests for Peer that only apply to client")]
     public class PeerTestAsClient : PeerTestBase
     {
-        byte[] connectRequest = new byte[3]
-        {
+        readonly byte[] connectRequest = new byte[3]
+          {
             (byte)PacketType.Command,
             (byte)Commands.ConnectRequest,
             new ConnectKeyValidator().GetKey(),
-        };
+          };
 
 
         [Test]
