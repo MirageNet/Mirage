@@ -46,6 +46,15 @@ namespace Mirage
         public void Bind(EndPoint endPoint)
         {
             socket.Bind(endPoint);
+            // todo check socket options
+            /*
+            // options from https://github.com/phodoval/Mirage/blob/SimplifyTransports/Assets/Mirage/Runtime/Transport/Udp/UdpSocket.cs#L27
+            socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.ReuseAddress, true);
+
+            const uint IOC_IN = 0x80000000;
+            const uint IOC_VENDOR = 0x18000000;
+            socket.IOControl(unchecked((int)(IOC_IN | IOC_VENDOR | 12)), new[] { Convert.ToByte(false) }, null);
+             */
         }
 
         public void Connect(EndPoint endPoint)
