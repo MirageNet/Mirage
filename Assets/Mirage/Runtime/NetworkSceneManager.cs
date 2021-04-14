@@ -190,8 +190,6 @@ namespace Mirage
         /// <param name="sceneOperation">Scene operation that was just  happen</param>
         internal void OnClientSceneChanged(string scenePath, SceneOperation sceneOperation)
         {
-            ClientSceneChanged?.Invoke(scenePath, sceneOperation);
-
             if (pendingAdditiveSceneList.Count > 0 && Client && !Client.IsLocalClient)
             {
                 ApplyOperationAsync(pendingAdditiveSceneList[0], SceneOperation.LoadAdditive).Forget();
@@ -202,6 +200,9 @@ namespace Mirage
             //set ready after scene change has completed
             if (!Client.Player.IsReady)
                 SetClientReady();
+
+            //Call event once all scene related actions (subscenes and ready) are done.
+            ClientSceneChanged?.Invoke(scenePath, sceneOperation);
         }
 
         /// <summary>
