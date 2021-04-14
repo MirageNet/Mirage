@@ -136,21 +136,16 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void OnClientSceneChangedAdditiveListTest()
         {
-            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
-            clientSceneManager.ClientSceneChanged.AddListener(func1);
             clientSceneManager.pendingAdditiveSceneList.Add("Assets/Mirror/Tests/Runtime/testScene.unity");
-
             clientSceneManager.OnClientSceneChanged(null, SceneOperation.Normal);
-
-            func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
             Assert.That(clientSceneManager.pendingAdditiveSceneList.Count == 0);
         }
 
         [Test]
         public void ClientSceneMessagePendingAdditiveSceneListTest()
         {
-            //Check for the additive scene in the pending list at the time of ClientSceneChanged before its removed as part of it being loaded.
-            clientSceneManager.ClientSceneChanged.AddListener(CheckForAdditiveScene);
+            //Check for the additive scene in the pending list at the time of ClientChangeScene before its removed as part of it being loaded.
+            clientSceneManager.ClientChangeScene.AddListener(CheckForAdditiveScene);
             clientSceneManager.ClientSceneMessage(client.Player, new SceneMessage { scenePath = "Assets/Mirror/Tests/Runtime/testScene.unity", additiveScenes = new[] { "Assets/Mirror/Tests/Runtime/testScene.unity" } });
 
             Assert.That(additiveSceneWasFound);
