@@ -15,8 +15,17 @@ namespace Mirage.SocketLayer
         /// </summary>
         Connected = 3,
 
+        /// <summary>
+        /// Server or client has disconnected the connection and is waiting to be cleaned up
+        /// </summary>
         Disconnected = 9,
+        /// <summary>
+        /// Marked to be removed from the connection collection
+        /// </summary>
         Removing = 10,
+        /// <summary>
+        /// Removed from collection and all state cleaned up
+        /// </summary>
         Destroyed = 11,
     }
 }

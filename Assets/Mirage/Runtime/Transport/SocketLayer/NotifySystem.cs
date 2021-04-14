@@ -61,7 +61,8 @@ namespace Mirage.SocketLayer
         }
         public void Receive(byte[] packet)
         {
-            //todo get messages from pecket and invoke
+            // tdo check order of packet, do we drop old packets?
+            // todo get messages from pecket and invoke
             ReceivedPacket received = ackSystem.Receive(packet);
             while (sent.Count > 0)
             {

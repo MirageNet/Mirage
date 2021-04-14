@@ -6,11 +6,16 @@ namespace Mirage.SocketLayer
     /// </summary>
     public enum DisconnectReason
     {
-        None,
+        /// <summary>
+        /// No reason given
+        /// </summary>
+        None = 0,
+
         /// <summary>
         /// No message Received in timeout window
         /// </summary>
         Timeout = 1,
+
         /// <summary>
         /// Disconnect called by higher level
         /// </summary>

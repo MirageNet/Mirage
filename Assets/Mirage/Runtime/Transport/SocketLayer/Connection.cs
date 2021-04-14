@@ -130,6 +130,7 @@ namespace Mirage.SocketLayer
             keepAliveTracker.SetSendTime();
         }
 
+        // todo check state
         public void SendUnreliable(byte[] packet) => peer.SendUnreliable(this, packet);
         public NotifyToken SendNotify(byte[] packet) => notifySystem.Send(packet);
         public void SendRaw(byte[] packet) => peer.SendRaw(this, packet);
