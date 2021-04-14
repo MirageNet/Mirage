@@ -1,3 +1,10 @@
+## [87.2.1](https://github.com/MirageNet/Mirage/compare/v87.2.0...v87.2.1) (2021-04-14)
+
+
+### Bug Fixes
+
+* clientchangedscene event called too early ([#776](https://github.com/MirageNet/Mirage/issues/776)) ([82dda04](https://github.com/MirageNet/Mirage/commit/82dda04882e80ed2e7e32f25c431ac5a6a1fbba8))
+
 # [87.2.0](https://github.com/MirageNet/Mirage/compare/v87.1.2...v87.2.0) (2021-04-12)
 
 
