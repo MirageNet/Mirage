@@ -139,11 +139,8 @@ namespace Mirage.Tests.Runtime.Host
         public void ClientSceneReadyAfterChangedTest()
         {
             bool _readyAfterSceneChanged = false;
-
-            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
             sceneManager.ClientSceneChanged.AddListener((string name, SceneOperation operation) => _readyAfterSceneChanged = client.Player.IsReady);
             sceneManager.OnClientSceneChanged("test", SceneOperation.Normal);
-            func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
 
             Assert.That(_readyAfterSceneChanged, Is.True);
         }
