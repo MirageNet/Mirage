@@ -160,17 +160,17 @@ namespace Mirage.SocketLayer
         /// <param name="extra">optional extra data as 3rd byte</param>
         /// <returns>length written</returns>
         private int CreateCommandPacket(ByteBuffer buffer, Commands command, byte? extra = null)
-            {
-                buffer.array[0] = (byte)PacketType.Command;
-                buffer.array[1] = (byte)command;
+        {
+            buffer.array[0] = (byte)PacketType.Command;
+            buffer.array[1] = (byte)command;
 
-                if (extra.HasValue)
-                {
-                    buffer.array[2] = extra.Value;
+            if (extra.HasValue)
+            {
+                buffer.array[2] = extra.Value;
                 return 3;
-                }
-                else
-                {
+            }
+            else
+            {
                 return 2;
             }
         }
