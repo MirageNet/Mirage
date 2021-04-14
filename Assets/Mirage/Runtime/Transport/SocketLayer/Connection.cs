@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
+    /// <summary>
+    /// Connection for <see cref="Peer"/>
+    /// </summary>
     public interface IConnection
     {
         ConnectionState State { get; }
@@ -13,11 +16,24 @@ namespace Mirage.SocketLayer
         NotifyToken SendNotify(byte[] packet);
         void SendUnreliable(byte[] packet);
     }
+
+    /// <summary>
+    /// A connection that can send data directly to sockets
+    /// <para>Only things inside socket layer should be sending raw packets. Others should use the methods inside <see cref="Connection"/></para>
+    /// </summary>
     internal interface IRawConnection
     {
+        /// <summary>
+        /// Sends directly to socket without adding header
+        /// <para>packet given to this function as assumed to already have a header</para>
+        /// </summary>
+        /// <param name="packet">header and messages</param>
         void SendRaw(byte[] packet);
     }
 
+    /// <summary>
+    /// Objects that represends a connection to/from a server/client. Holds state that is needed to update, send, and receive data
+    /// </summary>
     internal sealed class Connection : IConnection, IRawConnection
     {
         void Assert(bool condition)
