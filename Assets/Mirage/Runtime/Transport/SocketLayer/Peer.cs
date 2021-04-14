@@ -102,20 +102,15 @@ namespace Mirage.SocketLayer
             socket.Close();
         }
 
-        // todo SendNotify
-        internal void SendNotify(Connection connection) => throw new NotImplementedException();
-        // todo SendReliable
-        internal void SendReliable(Connection connection) => throw new NotImplementedException();
-
-        internal void SendUnreliable(Connection connection, ArraySegment<byte> message)
+        internal void SendUnreliable(Connection connection, byte[] packet)
         {
             using (ByteBuffer buffer = bufferPool.Take())
             {
-                Buffer.BlockCopy(message.Array, message.Offset, buffer.array, 1, message.Count);
+                Buffer.BlockCopy(packet, 0, buffer.array, 1, packet.Length);
                 // set header
                 buffer.array[0] = (byte)PacketType.Unreliable;
 
-                Send(connection, buffer.array, message.Count);
+                Send(connection, buffer.array, packet.Length + 1);
             }
         }
         internal void SendRaw(Connection connection, byte[] packet)

@@ -9,9 +9,9 @@ namespace Mirage.SocketLayer
         ConnectionState State { get; }
 
         void Disconnect();
-        void SendNotify();
-        void SendReliable(ArraySegment<byte> segment);
-        void SendUnreliable(ArraySegment<byte> segment);
+
+        void SendNotify(byte[] packet);
+        void SendUnreliable(byte[] packet);
     }
     internal interface IRawConnection
     {
@@ -63,10 +63,12 @@ namespace Mirage.SocketLayer
         private readonly Config config;
         private readonly Time time;
 
-        private ConnectingTracker connectingTracker;
-        private TimeoutTracker timeoutTracker;
-        private KeepAliveTracker keepAliveTracker;
-        private DisconnectedTracker disconnectedTracker;
+        private readonly ConnectingTracker connectingTracker;
+        private readonly TimeoutTracker timeoutTracker;
+        private readonly KeepAliveTracker keepAliveTracker;
+        private readonly DisconnectedTracker disconnectedTracker;
+
+        private readonly NotifySystem notifySystem;
 
         internal Connection(Peer peer, EndPoint endPoint, IDataHandler dataHandler, Config config, Time time, ILogger logger)
         {
@@ -82,6 +84,8 @@ namespace Mirage.SocketLayer
             timeoutTracker = new TimeoutTracker(config, time);
             keepAliveTracker = new KeepAliveTracker(config, time);
             disconnectedTracker = new DisconnectedTracker(config, time);
+
+            notifySystem = new NotifySystem(this, config.NotifyTimeout, time);
         }
 
         public void Update()
@@ -110,9 +114,8 @@ namespace Mirage.SocketLayer
             keepAliveTracker.SetSendTime();
         }
 
-        public void SendReliable(ArraySegment<byte> segment) => peer.SendReliable(this);
-        public void SendUnreliable(ArraySegment<byte> segment) => peer.SendUnreliable(this, segment);
-        public void SendNotify() => peer.SendNotify(this);
+        public void SendUnreliable(byte[] packet) => peer.SendUnreliable(this, packet);
+        public void SendNotify(byte[] packet) => notifySystem.Send(packet);
         public void SendRaw(byte[] packet) => peer.SendRaw(this, packet);
 
         /// <summary>

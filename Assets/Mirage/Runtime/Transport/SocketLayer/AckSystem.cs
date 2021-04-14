@@ -238,7 +238,7 @@ namespace Mirage.SocketLayer
             this.timeout = timeout;
         }
 
-        public NotifyToken SendMessage(byte[] packet)
+        public NotifyToken Send(byte[] packet)
         {
             if (sent.Count >= MaxSentQueue)
             {

@@ -53,6 +53,11 @@ namespace Mirage.SocketLayer
         /// <para>buffers over this limit will be left for GC</para>
         /// </summary>
         public int BufferPoolMaxSize = 100;
+
+        /// <summary>
+        /// how long before packet is assumed lost
+        /// </summary>
+        public float NotifyTimeout = 0.3f;
         #endregion
     }
 }
