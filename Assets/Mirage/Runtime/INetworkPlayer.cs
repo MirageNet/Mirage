@@ -94,7 +94,7 @@ namespace Mirage
     }
 
     /// <summary>
-    /// A connection to a remote endpoint.
+    /// An object owned by a player that can: send/receive messages, have network visibility, be an object owner, authenticated permissions, and load scenes.
     /// May be from the server to client or from client to server
     /// </summary>
     public interface INetworkPlayer : IMessageHandler, IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader

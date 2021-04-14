@@ -190,7 +190,7 @@ namespace Mirage
         INetworkPlayer _connectionToClient;
 
         /// <summary>
-        /// The NetworkConnection associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is valid for player and other owned objects in the server.
+        /// The INetworkPlayer associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is valid for player and other owned objects in the server.
         /// <para>Use it to return details such as the connection&apos;s identity, IP address and ready status.</para>
         /// </summary>
         public INetworkPlayer ConnectionToClient
