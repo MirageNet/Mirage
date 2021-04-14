@@ -309,26 +309,4 @@ namespace Mirage.SocketLayer
                 Lost.Invoke();
         }
     }
-
-    public class ReliableSystem
-    {
-        NotifySystem notifySystem;
-
-        Queue<Sent> sent;
-
-        public void Send(byte[] packet)
-        {
-            // todo implement
-            //   send packet using notify
-            //   if lost resend
-            //   if received twice, ignore 2nd
-            throw new NotImplementedException();
-        }
-
-        struct Sent
-        {
-            byte[] packet;
-            NotifyToken token;
-        }
-    }
 }
