@@ -47,7 +47,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             serverObjectManager.Spawn(serverIdentity);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => serverIdentity.Server == server);
+            await AsyncUtil.WaitUntilWithTimeout(() => (NetworkServer)serverIdentity.Server == server);
         });
 
         [Test]
@@ -262,7 +262,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                serverObjectManager.InternalReplacePlayerForConnection(connectionToClient, client, new GameObject(), true);
+                serverObjectManager.InternalReplacePlayerForConnection(connectionToClient, new GameObject(), true);
             });
         }
 

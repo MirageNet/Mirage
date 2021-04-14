@@ -167,7 +167,7 @@ namespace Mirage
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
             identity.AssetId = assetId;
-            InternalReplacePlayerForConnection(player, client, character, keepAuthority);
+            InternalReplacePlayerForConnection(player, character, keepAuthority);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Mirage
         /// <returns></returns>
         public void ReplaceCharacter(INetworkPlayer player, GameObject character, bool keepAuthority = false)
         {
-            InternalReplacePlayerForConnection(player, client, character, keepAuthority);
+            InternalReplacePlayerForConnection(player, character, keepAuthority);
         }
 
         void SpawnObserversForConnection(INetworkPlayer player)
