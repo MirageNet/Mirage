@@ -1,0 +1,98 @@
+using System;
+using System.Collections.Generic;
+
+namespace Mirage.SocketLayer
+{
+    /// <summary>
+    /// Object returned from <see cref="NotifySystem.Send(byte[])"/> with events for when packet is Lost or Delivered
+    /// </summary>
+    public class NotifyToken
+    {
+        public event Action Delivered;
+        public event Action Lost;
+
+        bool notified;
+        internal ushort Sequence;
+
+        internal void Notify(bool delivered)
+        {
+            if (notified) throw new InvalidOperationException("this token as already been notified");
+            notified = true;
+
+            if (delivered)
+                Delivered.Invoke();
+            else
+                Lost.Invoke();
+        }
+    }
+
+    /// <summary>
+    /// keeps track of tokens sent and received 
+    /// </summary>
+    // todo add more docs
+    internal class NotifySystem
+    {
+        readonly AckSystem ackSystem;
+        readonly float timeout;
+
+
+        const int MaxSentQueue = 512;
+        Queue<NotifyToken> sent = new Queue<NotifyToken>(MaxSentQueue);
+
+        public NotifySystem(IRawConnection connection, float timeout, Time time)
+        {
+            ackSystem = new AckSystem(connection, time);
+            this.timeout = timeout;
+        }
+
+        public NotifyToken Send(byte[] packet)
+        {
+            if (sent.Count >= MaxSentQueue)
+            {
+                throw new InvalidOperationException("Sent queue is full");
+            }
+
+            ackSystem.Send(packet);
+
+            // todo use pool to stop allocations
+            return new NotifyToken();
+        }
+        public void Receive(byte[] packet)
+        {
+            //todo get messages from pecket and invoke
+            ReceivedPacket received = ackSystem.Receive(packet);
+            while (sent.Count > 0)
+            {
+                NotifyToken next = sent.Peek();
+
+                int distance = (int)ackSystem.sequencer.Distance(next.Sequence, received.receivedSequence);
+
+                // posititve distance means next is sent after last ack, so nothing to ack yet
+                if (distance > 0)
+                    return;
+
+                // negative distance means it should have been acked, or mark it as lost
+                sent.Dequeue();
+
+                const int maskSize = sizeof(uint) * 8;
+                int posDistance = -distance;
+                // if distance above size then it is outside of mask, so set as lost
+
+                bool outsideOfMask = posDistance > maskSize;
+
+                uint ackBit = 1u << posDistance;
+                bool notInMask = (received.receivedMask & ackBit) == 0u;
+
+                // todo clean this code up with multiple methods
+                bool lost = outsideOfMask || notInMask;
+
+                next.Notify(!lost);
+            }
+        }
+
+        public void Update()
+        {
+            ackSystem.Update();
+        }
+    }
+}
