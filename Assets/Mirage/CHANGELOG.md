@@ -1,3 +1,18 @@
+# [87.2.0](https://github.com/MirageNet/Mirage/compare/v87.1.2...v87.2.0) (2021-04-12)
+
+
+### Features
+
+* adding change log parsing to welcome window. ([#771](https://github.com/MirageNet/Mirage/issues/771)) ([e5409ff](https://github.com/MirageNet/Mirage/commit/e5409ffac6f7494da78ee9e1a36165e5788e30e8))
+* dark mode ([#750](https://github.com/MirageNet/Mirage/issues/750)) ([e3f1d26](https://github.com/MirageNet/Mirage/commit/e3f1d26c2f2d783b0b26c911c3b37ce7988fffaf))
+
+## [87.1.2](https://github.com/MirageNet/Mirage/compare/v87.1.1...v87.1.2) (2021-04-12)
+
+
+### Bug Fixes
+
+* bug with scene object spawning ([#773](https://github.com/MirageNet/Mirage/issues/773)) ([b02c13d](https://github.com/MirageNet/Mirage/commit/b02c13d4115fac58905c5b8aeb3f41b790a0b4cc))
+
 ## [87.1.1](https://github.com/MirageNet/Mirage/compare/v87.1.0...v87.1.1) (2021-04-10)
 
 

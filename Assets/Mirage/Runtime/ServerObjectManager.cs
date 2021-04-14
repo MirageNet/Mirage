@@ -163,7 +163,7 @@ namespace Mirage
         /// <param name="assetId"></param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
-        public void ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, Guid assetId, bool keepAuthority = false)
+        public void ReplaceCharacter(INetworkPlayer player, GameObject character, Guid assetId, bool keepAuthority = false)
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
             identity.AssetId = assetId;
@@ -179,7 +179,7 @@ namespace Mirage
         /// <param name="character">Player object spawned for the player.</param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
-        public void ReplaceCharacter(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority = false)
+        public void ReplaceCharacter(INetworkPlayer player, GameObject character, bool keepAuthority = false)
         {
             InternalReplacePlayerForConnection(player, client, character, keepAuthority);
         }
@@ -291,7 +291,7 @@ namespace Mirage
             }
         }
 
-        internal void InternalReplacePlayerForConnection(INetworkPlayer player, INetworkClient client, GameObject character, bool keepAuthority)
+        internal void InternalReplacePlayerForConnection(INetworkPlayer player, GameObject character, bool keepAuthority)
         {
             NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
             if (identity is null)
@@ -310,7 +310,6 @@ namespace Mirage
             NetworkIdentity previousPlayer = player.Identity;
 
             player.Identity = identity;
-            identity.Client = client;
 
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
             identity.SetClientOwner(player);
