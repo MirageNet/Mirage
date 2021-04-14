@@ -52,8 +52,10 @@ namespace Mirage.SocketLayer
                 throw new InvalidOperationException("Sent queue is full");
             }
 
+            // todo get sequence from ack system and assign to token
             ackSystem.Send(packet);
 
+            // todo add token to queue
             // todo use pool to stop allocations
             return new NotifyToken();
         }
