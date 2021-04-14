@@ -50,6 +50,7 @@ namespace Mirage
 
         public void Connect(EndPoint endPoint)
         {
+            // todo check if connect should be called for udp or if it should be something else
             socket.Connect(endPoint);
         }
 
