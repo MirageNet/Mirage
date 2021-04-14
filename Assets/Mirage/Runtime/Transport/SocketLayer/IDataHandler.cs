@@ -9,11 +9,10 @@ namespace Mirage.SocketLayer
     public interface IDataHandler
     {
         /// <summary>
-        /// New Message from low level
-        /// <para>will contain byte from just 1 high level message</para>
+        /// Receives a new Packet from low level
         /// </summary>
         /// <param name="connection">connection that sent data</param>
-        /// <param name="packet"></param>
-        void ReceiveData(IConnection connection, ArraySegment<byte> packet);
+        /// <param name="packet">packet that was sent from another peer</param>
+        void ReceivePacket(IConnection connection, ArraySegment<byte> packet);
     }
 }

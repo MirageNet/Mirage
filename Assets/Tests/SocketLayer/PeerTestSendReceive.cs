@@ -67,7 +67,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             {
                 IDataHandler handler = clients[i].dataHandler;
 
-                handler.Received(1).ReceiveData(clientConnections[i], Arg.Is<ArraySegment<byte>>(x => x.SequenceEqual(packet)));
+                handler.Received(1).ReceivePacket(clientConnections[i], Arg.Is<ArraySegment<byte>>(x => x.SequenceEqual(packet)));
             }
         }
 

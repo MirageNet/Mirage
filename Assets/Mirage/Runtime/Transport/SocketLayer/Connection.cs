@@ -184,7 +184,7 @@ namespace Mirage.SocketLayer
 
             int count = packet.length - offset;
             var segment = new ArraySegment<byte>(packet.buffer.array, offset, count);
-            dataHandler.ReceiveData(this, segment);
+            dataHandler.ReceivePacket(this, segment);
         }
 
 
