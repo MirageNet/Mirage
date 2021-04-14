@@ -140,9 +140,6 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log($"ClientSceneMessage: changing scenes from: {ActiveScenePath} to: {msg.scenePath}");
 
-            // Let client prepare for scene change
-            OnClientChangeScene(msg.scenePath, msg.sceneOperation);
-
             //Additive are scenes loaded on server and this client is not a host client
             if (msg.additiveScenes != null && msg.additiveScenes.Length > 0 && Client && !Client.IsLocalClient)
             {
@@ -151,6 +148,9 @@ namespace Mirage
                     pendingAdditiveSceneList.Add(scene);
                 }
             }
+
+            // Let client prepare for scene change
+            OnClientChangeScene(msg.scenePath, msg.sceneOperation);
 
             ApplyOperationAsync(msg.scenePath, msg.sceneOperation).Forget();
         }
