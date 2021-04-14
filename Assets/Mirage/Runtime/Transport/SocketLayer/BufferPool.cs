@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
-    public class ByteBuffer : IDisposable
+    public sealed class ByteBuffer : IDisposable
     {
         public readonly byte[] array;
         BufferPool pool;
@@ -20,6 +20,7 @@ namespace Mirage.SocketLayer
         }
         void IDisposable.Dispose() => Release();
     }
+
     public class BufferPool
     {
         const int PoolEmpty = -1;
