@@ -119,14 +119,12 @@ namespace Mirage.SocketLayer
             Send(connection, packet, length);
         }
 
-        private void Send(Connection connection, Packet packet) => Send(connection, packet.buffer.array, packet.length);
         private void Send(Connection connection, byte[] data, int length)
         {
             // todo check connection state before sending
             socket.Send(connection.EndPoint, data, length);
             connection.SetSendTime();
         }
-        private void SendUnconnected(EndPoint endPoint, Packet packet) => SendUnconnected(endPoint, packet.buffer.array, packet.length);
         internal void SendUnconnected(EndPoint endPoint, byte[] data, int length)
         {
             socket.Send(endPoint, data, length);
@@ -134,8 +132,11 @@ namespace Mirage.SocketLayer
 
         internal void SendCommandUnconnected(EndPoint endPoint, Commands command, byte? extra = null)
         {
-            Packet packet = CreateCommandPacket(command, extra);
-            SendUnconnected(endPoint, packet);
+            using (ByteBuffer buffer = bufferPool.Take())
+            {
+                int length = CreateCommandPacket(buffer, command, extra);
+                SendUnconnected(endPoint, buffer.array, length);
+            }
         }
 
         internal void SendConnectRequest(Connection connection)
@@ -144,13 +145,21 @@ namespace Mirage.SocketLayer
         }
         internal void SendCommand(Connection connection, Commands command, byte? extra = null)
         {
-            Packet packet = CreateCommandPacket(command, extra);
-            Send(connection, packet);
+            using (ByteBuffer buffer = bufferPool.Take())
+            {
+                int length = CreateCommandPacket(buffer, command, extra);
+                Send(connection, buffer.array, length);
+            }
         }
 
-        private Packet CreateCommandPacket(Commands command, byte? extra = null)
-        {
-            using (ByteBuffer buffer = bufferPool.Take())
+        /// <summary>
+        /// Create a command packet from command and extra data
+        /// </summary>
+        /// <param name="buffer">buffer to write to</param>
+        /// <param name="command"></param>
+        /// <param name="extra">optional extra data as 3rd byte</param>
+        /// <returns>length written</returns>
+        private int CreateCommandPacket(ByteBuffer buffer, Commands command, byte? extra = null)
             {
                 buffer.array[0] = (byte)PacketType.Command;
                 buffer.array[1] = (byte)command;
@@ -158,12 +167,11 @@ namespace Mirage.SocketLayer
                 if (extra.HasValue)
                 {
                     buffer.array[2] = extra.Value;
-                    return new Packet(buffer, 3);
+                return 3;
                 }
                 else
                 {
-                    return new Packet(buffer, 2);
-                }
+                return 2;
             }
         }
 
