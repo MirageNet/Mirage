@@ -35,8 +35,8 @@ namespace Mirage.SocketLayer
         /// </summary>
         /// <param name="buffer">buffer to write recevived packet into</param>
         /// <param name="endPoint">where packet came from</param>
-        /// <param name="bytesReceived">length of packet, should not be above <paramref name="buffer"/> length</param>
-        void Receive(byte[] buffer, ref EndPoint endPoint, out int bytesReceived);
+        /// <returns>length of packet, should not be above <paramref name="buffer"/> length</returns>
+        int Receive(byte[] buffer, ref EndPoint endPoint);
 
         /// <summary>
         /// Sends a packet to an endpoint

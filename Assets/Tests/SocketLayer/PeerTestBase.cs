@@ -85,14 +85,14 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             return received.Count > 0;
         }
 
-        void ISocket.Receive(byte[] data, ref EndPoint endPoint, out int bytesReceived)
+        int ISocket.Receive(byte[] data, ref EndPoint endPoint)
         {
             Packet next = received.Dequeue();
             endPoint = next.endPoint;
             int length = next.length;
-            bytesReceived = length;
 
             Buffer.BlockCopy(next.data, 0, data, 0, length);
+            return length;
         }
 
         void ISocket.Send(EndPoint remoteEndPoint, byte[] data, int length)
@@ -191,7 +191,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             socket.Poll().Returns(true, false);
             socket
                // when any call
-               .When(x => x.Receive(Arg.Any<byte[]>(), ref Arg.Any<EndPoint>(), out Arg.Any<int>()))
+               .When(x => x.Receive(Arg.Any<byte[]>(), ref Arg.Any<EndPoint>()))
                // return the data from endpoint
                .Do(x =>
                {
@@ -201,8 +201,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                        dataArg[i] = data[i];
                    }
                    x[1] = endPoint ?? Substitute.For<EndPoint>();
-                   x[2] = length ?? data.Length;
                });
+            socket.Receive(Arg.Any<byte[]>(), ref Arg.Any<EndPoint>()).Returns(length ?? data.Length);
         }
     }
 }

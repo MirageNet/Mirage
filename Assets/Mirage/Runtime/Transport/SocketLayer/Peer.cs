@@ -198,7 +198,7 @@ namespace Mirage.SocketLayer
                 {
                     //todo do we need to pass in endpoint?
                     EndPoint endPoint = null;
-                    socket.Receive(buffer.array, ref endPoint, out int length);
+                    int length = socket.Receive(buffer.array, ref endPoint);
 
                     // this should never happen: buffer size is only MTU, if socket returns higher length then it has a bug.
                     if (length > config.Mtu)
