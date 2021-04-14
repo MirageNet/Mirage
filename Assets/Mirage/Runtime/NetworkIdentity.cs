@@ -134,7 +134,7 @@ namespace Mirage
         /// This returns true if this object is the one that represents the player on the local machine.
         /// <para>This is set when the server has spawned an object for this particular client.</para>
         /// </summary>
-        public bool IsLocalPlayer => ClientObjectManager != null && ClientObjectManager.LocalPlayer == this;
+        public bool IsLocalPlayer => Client != null && Client.Player.Identity == this;
 
         /// <summary>
         /// This returns true if this object is the authoritative player object on the client.
