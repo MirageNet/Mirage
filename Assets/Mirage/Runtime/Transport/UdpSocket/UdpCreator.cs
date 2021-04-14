@@ -40,6 +40,7 @@ namespace Mirage
         public UdpSocket()
         {
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            socket.Blocking = false;
         }
 
         public void Bind(EndPoint endPoint)
