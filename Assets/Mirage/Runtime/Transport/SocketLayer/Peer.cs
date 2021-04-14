@@ -301,7 +301,7 @@ namespace Mirage.SocketLayer
             if (packet.command != Commands.ConnectRequest)
                 return false;
 
-            if (!connectKeyValidator.Validate(packet))
+            if (!connectKeyValidator.Validate(packet.buffer.array))
                 return false;
 
             //if (!hashCashValidator.Validate(packet))

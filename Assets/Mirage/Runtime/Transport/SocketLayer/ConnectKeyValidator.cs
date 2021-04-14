@@ -11,9 +11,9 @@ namespace Mirage.SocketLayer
 
         public int KeyLength => 1;
 
-        public bool Validate(Packet packet)
+        public bool Validate(byte[] buffer)
         {
-            byte keyByte = packet.buffer.array[2];
+            byte keyByte = buffer[2];
 
             return keyByte == key;
         }
