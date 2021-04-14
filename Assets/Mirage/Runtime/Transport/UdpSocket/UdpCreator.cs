@@ -39,6 +39,7 @@ namespace Mirage
 
         public UdpSocket()
         {
+            // todo do we need to use AddressFamily from endpoint?
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             socket.Blocking = false;
         }
