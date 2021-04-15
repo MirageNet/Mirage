@@ -6,6 +6,7 @@ using Mirage.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Serialization;
 
 namespace Mirage
@@ -171,8 +172,7 @@ namespace Mirage
 
             if (Transport is null)
                 Transport = GetComponent<Transport>();
-            if (Transport == null)
-                throw new InvalidOperationException("Transport could not be found for NetworkServer");
+            Assert.IsNotNull(Transport, "Transport could not be found for NetworkServer");
 
             if (authenticator != null)
             {

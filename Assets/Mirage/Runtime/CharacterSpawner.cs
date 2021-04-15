@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Mirage.Logging;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Serialization;
 
 namespace Mirage
@@ -35,10 +36,7 @@ namespace Mirage
         // Start is called before the first frame update
         public virtual void Start()
         {
-            if (PlayerPrefab == null)
-            {
-                throw new InvalidOperationException("Assign a player in the CharacterSpawner");
-            }
+            Assert.IsNotNull(PlayerPrefab, "Assign a player in the CharacterSpawner");
             if (Client != null)
             {
                 if (SceneManager != null)
@@ -50,22 +48,14 @@ namespace Mirage
                     Client.Authenticated.AddListener(c => Client.Send(new AddCharacterMessage()));
                 }
 
-                if (ClientObjectManager != null)
-                {
-                    ClientObjectManager.RegisterPrefab(PlayerPrefab);
-                }
-                else
-                {
-                    throw new InvalidOperationException("Assign a ClientObjectManager");
-                }
+                Assert.IsNotNull(ClientObjectManager, "Assign a ClientObjectManager");
+                ClientObjectManager.RegisterPrefab(PlayerPrefab);
             }
             if (Server != null)
             {
                 Server.Authenticated.AddListener(OnServerAuthenticated);
-                if (ServerObjectManager == null)
-                {
-                    throw new InvalidOperationException("Assign a ServerObjectManager");
-                }
+
+                Assert.IsNotNull(ServerObjectManager, "Assign a ServerObjectManager");
             }
         }
 

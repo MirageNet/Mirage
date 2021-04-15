@@ -6,6 +6,7 @@ using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Mirage
 {
@@ -294,9 +295,12 @@ namespace Mirage
         protected internal void SendRpcInternal(Type invokeClass, string rpcName, NetworkWriter writer, int channelId, bool excludeOwner)
         {
             // this was in Weaver before
+            
+            
             if (Server == null || !Server.Active)
             {
-                throw new InvalidOperationException($"RPC Function {rpcName} called when server is not active.");
+                Assert.IsNotNull(Server, $"RPC Function {rpcName} called when server is not active.");
+                Assert.IsTrue(Server.Active, $"RPC Function {rpcName} called when server is not active.");
             }
             // This cannot use Server.active, as that is not specific to this object.
             if (!IsServer)
