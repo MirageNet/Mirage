@@ -168,7 +168,7 @@ namespace Mirage.SocketLayer
 
         private void SendAck()
         {
-            throw new NotImplementedException();
+            // todo Send ack without a packet
         }
     }
 }
