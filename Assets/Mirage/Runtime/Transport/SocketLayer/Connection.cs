@@ -101,7 +101,7 @@ namespace Mirage.SocketLayer
             keepAliveTracker = new KeepAliveTracker(config, time);
             disconnectedTracker = new DisconnectedTracker(config, time);
 
-            notifySystem = new NotifySystem(this, config.NotifyTimeout, time);
+            notifySystem = new NotifySystem(this, config.NotifyTimeout, config.SendAckTime, time);
         }
 
         public void Update()

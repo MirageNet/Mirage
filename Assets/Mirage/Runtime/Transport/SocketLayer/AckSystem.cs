@@ -30,15 +30,15 @@ namespace Mirage.SocketLayer
         readonly bool[] receivedNext = new bool[sizeof(int) * 8];
         readonly IRawConnection connection;
         readonly Time time;
-        readonly float sendRelyAckTime;
+        readonly float sendAckTime;
         float lastSentTime;
 
 
-        public AckSystem(IRawConnection connection, float sendRelyAckTime, Time time)
+        public AckSystem(IRawConnection connection, float sendAckTime, Time time)
         {
             this.connection = connection;
             this.time = time;
-            this.sendRelyAckTime = sendRelyAckTime;
+            this.sendAckTime = sendAckTime;
 
             // set received to first sequence
             // this means that it will always be 1 before first sent packet
@@ -159,7 +159,7 @@ namespace Mirage.SocketLayer
         {
             // todo send ack if not recently been sent
             // ack only packet sent if no other sent within last frame
-            if (lastSentTime + sendRelyAckTime < time.Now)
+            if (lastSentTime + sendAckTime < time.Now)
             {
                 // send ack
                 SendAck();

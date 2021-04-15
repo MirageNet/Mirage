@@ -39,9 +39,9 @@ namespace Mirage.SocketLayer
         const int MaxSentQueue = 512;
         Queue<NotifyToken> sent = new Queue<NotifyToken>(MaxSentQueue);
 
-        public NotifySystem(IRawConnection connection, float timeout, Time time)
+        public NotifySystem(IRawConnection connection, float timeout, float sendAckTime, Time time)
         {
-            ackSystem = new AckSystem(connection, time);
+            ackSystem = new AckSystem(connection, sendAckTime, time);
             this.timeout = timeout;
         }
 
