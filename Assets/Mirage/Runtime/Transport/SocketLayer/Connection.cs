@@ -76,8 +76,6 @@ namespace Mirage.SocketLayer
         private readonly Peer peer;
         public readonly EndPoint EndPoint;
         private readonly IDataHandler dataHandler;
-        private readonly Config config;
-        private readonly Time time;
 
         private readonly ConnectingTracker connectingTracker;
         private readonly TimeoutTracker timeoutTracker;
@@ -92,8 +90,6 @@ namespace Mirage.SocketLayer
             this.logger = logger ?? Debug.unityLogger;
             EndPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
             this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
-            this.config = config;
-            this.time = time;
             State = ConnectionState.Created;
 
             connectingTracker = new ConnectingTracker(config, time);
@@ -130,10 +126,27 @@ namespace Mirage.SocketLayer
             keepAliveTracker.SetSendTime();
         }
 
-        // todo check state
-        public void SendUnreliable(byte[] packet) => peer.SendUnreliable(this, packet);
-        public NotifyToken SendNotify(byte[] packet) => notifySystem.Send(packet);
-        public void SendRaw(byte[] packet, int length) => peer.SendRaw(this, packet, length);
+        void ThrowIfNotConnected()
+        {
+            if (_state != ConnectionState.Connected)
+                throw new InvalidOperationException("Connection is not connected");
+        }
+        public void SendUnreliable(byte[] packet)
+        {
+            ThrowIfNotConnected();
+            peer.SendUnreliable(this, packet);
+        }
+
+        public NotifyToken SendNotify(byte[] packet)
+        {
+            ThrowIfNotConnected();
+            return notifySystem.Send(packet);
+        }
+
+        void IRawConnection.SendRaw(byte[] packet, int length)
+        {
+            peer.SendRaw(this, packet, length);
+        }
 
         /// <summary>
         /// starts disconnecting this connection
@@ -156,10 +169,7 @@ namespace Mirage.SocketLayer
                     disconnectedTracker.Disconnect();
                     break;
 
-                case ConnectionState.Created:
-                case ConnectionState.Disconnected:
-                case ConnectionState.Removing:
-                case ConnectionState.Destroyed:
+                default:
                     Assert(false);
                     break;
             }
@@ -227,6 +237,8 @@ namespace Mirage.SocketLayer
             {
                 Disconnect(DisconnectReason.Timeout);
             }
+
+            notifySystem.Update();
 
             if (keepAliveTracker.TimeToSend())
             {
