@@ -3,14 +3,18 @@ using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
+    /// <summary>
+    /// Warpper around a byte[] that belongs to a <see cref="BufferPool"/>
+    /// </summary>
     public sealed class ByteBuffer : IDisposable
     {
         public readonly byte[] array;
-        BufferPool pool;
+        readonly BufferPool pool;
 
         public ByteBuffer(int bufferSize, BufferPool pool)
         {
-            this.pool = pool;
+            this.pool = pool ?? throw new ArgumentNullException(nameof(pool));
+
             array = new byte[bufferSize];
         }
 
@@ -18,9 +22,13 @@ namespace Mirage.SocketLayer
         {
             pool.Put(this);
         }
+
         void IDisposable.Dispose() => Release();
     }
 
+    /// <summary>
+    /// Holds a collection of <see cref="ByteBuffer"/> so they can be re-used without allocations
+    /// </summary>
     public class BufferPool
     {
         const int PoolEmpty = -1;
@@ -29,7 +37,7 @@ namespace Mirage.SocketLayer
         readonly int maxPoolSize;
         readonly ILogger logger;
 
-        ByteBuffer[] pool;
+        readonly ByteBuffer[] pool;
         int next = -1;
         int created = 0;
 
@@ -42,7 +50,7 @@ namespace Mirage.SocketLayer
         /// <param name="logger"></param>
         public BufferPool(int bufferSize, int startPoolSize, int maxPoolSize, ILogger logger)
         {
-            if (startPoolSize > maxPoolSize) throw new ArgumentException(nameof(startPoolSize), "Start Size must be less than max size");
+            if (startPoolSize > maxPoolSize) throw new ArgumentException("Start Size must be less than max size", nameof(startPoolSize));
 
             this.bufferSize = bufferSize;
             this.maxPoolSize = maxPoolSize;
