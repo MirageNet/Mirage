@@ -7,7 +7,7 @@ namespace Mirage
 {
     public sealed class UdpCreator : SocketCreator
     {
-        [SerializeField] int port;
+        [SerializeField] int port = 7777;
 
         public override ISocket CreateClientSocket()
         {
@@ -86,11 +86,11 @@ namespace Mirage
             return socket.ReceiveFrom(buffer, ref endPoint);
         }
 
-        public void Send(EndPoint endPoint, byte[] data, int length)
+        public void Send(EndPoint endPoint, byte[] packet, int length)
         {
             // todo check disconnected
             // todo what SocketFlags??
-            socket.SendTo(data, length, SocketFlags.None, (IPEndPoint)endPoint);
+            socket.SendTo(packet, length, SocketFlags.None, (IPEndPoint)endPoint);
         }
     }
 }
