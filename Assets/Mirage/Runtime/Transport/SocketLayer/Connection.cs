@@ -42,7 +42,7 @@ namespace Mirage.SocketLayer
         }
         readonly ILogger logger;
 
-        public ConnectionState _state;
+        ConnectionState _state;
         public ConnectionState State
         {
             get => _state;
@@ -145,7 +145,7 @@ namespace Mirage.SocketLayer
 
         void IRawConnection.SendRaw(byte[] packet, int length)
         {
-            peer.SendRaw(this, packet, length);
+            peer.Send(this, packet, length);
         }
 
         /// <summary>
@@ -175,23 +175,22 @@ namespace Mirage.SocketLayer
             }
         }
 
-        internal void ReceivePacket(Packet packet)
+        internal void ReceiveUnreliablePacket(Packet packet)
         {
-            int offset;
-            switch (packet.type)
-            {
-                case PacketType.Unreliable:
-                    offset = 1;
-                    break;
-                case PacketType.Notify:
-                    notifySystem.Receive(packet.buffer.array);
-                    offset = AckSystem.HEADER_SIZE;
-                    break;
-                default:
-                    Assert(false);
-                    return;
-            }
+            int offset = 1;
+            ReceivePacket(packet, offset);
+        }
 
+        internal void ReceiveNotifyPacket(Packet packet)
+        {
+            notifySystem.Receive(packet.buffer.array);
+
+            int offset = AckSystem.HEADER_SIZE;
+            ReceivePacket(packet, offset);
+        }
+
+        void ReceivePacket(Packet packet, int offset)
+        {
             int count = packet.length - offset;
             var segment = new ArraySegment<byte>(packet.buffer.array, offset, count);
             dataHandler.ReceivePacket(this, segment);

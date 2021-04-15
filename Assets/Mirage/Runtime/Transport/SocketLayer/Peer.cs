@@ -17,8 +17,8 @@ namespace Mirage.SocketLayer
         event Action<IConnection, DisconnectReason> OnDisconnected;
 
         void Bind(EndPoint endPoint);
-        void Close();
         IConnection Connect(EndPoint endPoint);
+        void Close();
         void Update();
     }
 
@@ -53,6 +53,8 @@ namespace Mirage.SocketLayer
         public event Action<IConnection, RejectReason> OnConnectionFailed;
 
         bool active;
+
+        EndPoint receiveEndPoint = null;
 
         public Peer(ISocket socket, IDataHandler dataHandler, Config _config = null, ILogger _logger = null)
         {
@@ -102,6 +104,14 @@ namespace Mirage.SocketLayer
             socket.Close();
         }
 
+        internal void Send(Connection connection, byte[] data, int length)
+        {
+            Assert(connection.State == ConnectionState.Connected);
+
+            socket.Send(connection.EndPoint, data, length);
+            connection.SetSendTime();
+        }
+
         internal void SendUnreliable(Connection connection, byte[] packet)
         {
             using (ByteBuffer buffer = bufferPool.Take())
@@ -113,29 +123,13 @@ namespace Mirage.SocketLayer
                 Send(connection, buffer.array, packet.Length + 1);
             }
         }
-        internal void SendRaw(Connection connection, byte[] packet, int length)
-        {
-            // todo asset header is command?
-            Send(connection, packet, length);
-        }
-
-        private void Send(Connection connection, byte[] data, int length)
-        {
-            // todo check connection state before sending
-            socket.Send(connection.EndPoint, data, length);
-            connection.SetSendTime();
-        }
-        internal void SendUnconnected(EndPoint endPoint, byte[] data, int length)
-        {
-            socket.Send(endPoint, data, length);
-        }
 
         internal void SendCommandUnconnected(EndPoint endPoint, Commands command, byte? extra = null)
         {
             using (ByteBuffer buffer = bufferPool.Take())
             {
                 int length = CreateCommandPacket(buffer, command, extra);
-                SendUnconnected(endPoint, buffer.array, length);
+                socket.Send(endPoint, buffer.array, length);
             }
         }
 
@@ -143,6 +137,7 @@ namespace Mirage.SocketLayer
         {
             SendCommand(connection, Commands.ConnectRequest, connectKeyValidator.GetKey());
         }
+
         internal void SendCommand(Connection connection, Commands command, byte? extra = null)
         {
             using (ByteBuffer buffer = bufferPool.Take())
@@ -190,29 +185,28 @@ namespace Mirage.SocketLayer
             UpdateConnections();
         }
 
+
         private void ReceiveLoop()
         {
             using (ByteBuffer buffer = bufferPool.Take())
             {
                 while (socket.Poll())
                 {
-                    //todo do we need to pass in endpoint?
-                    EndPoint endPoint = null;
-                    int length = socket.Receive(buffer.array, ref endPoint);
+                    int length = socket.Receive(buffer.array, ref receiveEndPoint);
 
-                    // this should never happen: buffer size is only MTU, if socket returns higher length then it has a bug.
+                    // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
                     if (length > config.Mtu)
                         throw new IndexOutOfRangeException($"Socket returned length above MTU: MTU:{config.Mtu} length:{length}");
 
                     var packet = new Packet(buffer, length);
 
-                    if (connections.TryGetValue(endPoint, out Connection connection))
+                    if (connections.TryGetValue(receiveEndPoint, out Connection connection))
                     {
                         HandleMessage(connection, packet);
                     }
                     else
                     {
-                        HandleNewConnection(endPoint, packet);
+                        HandleNewConnection(receiveEndPoint, packet);
                     }
                 }
             }
@@ -229,9 +223,10 @@ namespace Mirage.SocketLayer
                     HandleCommand(connection, packet);
                     break;
                 case PacketType.Unreliable:
+                    connection.ReceiveUnreliablePacket(packet);
+                    break;
                 case PacketType.Notify:
-                    // todo are these handled differently?
-                    connection.ReceivePacket(packet);
+                    connection.ReceiveNotifyPacket(packet);
                     break;
                 case PacketType.KeepAlive:
                     // do nothing
@@ -266,7 +261,6 @@ namespace Mirage.SocketLayer
                     break;
             }
         }
-
 
         private void HandleNewConnection(EndPoint endPoint, Packet packet)
         {
