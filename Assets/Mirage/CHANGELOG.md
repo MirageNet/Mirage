@@ -1,3 +1,10 @@
+## [87.2.2](https://github.com/MirageNet/Mirage/compare/v87.2.1...v87.2.2) (2021-04-16)
+
+
+### Bug Fixes
+
+* **WelcomeWindow:** re-adding logger and if 2020.1 or newer ([288ed0f](https://github.com/MirageNet/Mirage/commit/288ed0f62e9f0855995e623db0317b84948059bb))
+
 ## [87.2.1](https://github.com/MirageNet/Mirage/compare/v87.2.0...v87.2.1) (2021-04-14)
 
 
