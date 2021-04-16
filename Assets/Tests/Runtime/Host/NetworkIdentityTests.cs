@@ -172,7 +172,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void RemoveClientAuthorityOfOwner()
         {
-            serverObjectManager.ReplaceCharacter(server.LocalPlayer, server.LocalClient, gameObject);
+            serverObjectManager.ReplaceCharacter(server.LocalPlayer, gameObject);
 
             Assert.Throws<InvalidOperationException>(() =>
             {
