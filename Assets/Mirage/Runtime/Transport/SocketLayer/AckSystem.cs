@@ -89,6 +89,7 @@ namespace Mirage.SocketLayer
 
             // if no dropped distance should be -1
 
+            Array.Clear(receivedNext, 0, receivedNext.Length);
             // calculate next receive mask
             for (int i = 0; i < received.Length; i++)
             {
@@ -127,6 +128,7 @@ namespace Mirage.SocketLayer
 
             receivedSequence = sequence;
             receivedMask = mask;
+
 
             return true;
         }
