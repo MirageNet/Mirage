@@ -60,16 +60,15 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void AddAllReadyServerConnectionsToObservers()
         {
-            player1.IsReady = true;
-            player2.IsReady = false;
+            player1.IsReady.Returns(true);
+            player2.IsReady.Returns(false);
+
             // add some server connections
             server.Players.Add(player1);
             server.Players.Add(player2);
 
             // add a host connection
-            (_, IConnection localConnection) = PipeConnection.CreatePipe();
-
-            server.SetLocalConnection(client, localConnection);
+            server.SetLocalConnection(client, Substitute.For<SocketLayer.IConnection>());
             server.LocalPlayer.IsReady = true;
 
             // call OnStartServer so that observers dict is created

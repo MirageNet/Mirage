@@ -14,6 +14,8 @@ using Object = UnityEngine.Object;
 namespace Mirage.Tests.Runtime
 {
     [TestFixture(typeof(KcpTransport), new[] { "kcp" }, "kcp://localhost", 7777)]
+    [System.Obsolete("Use peer instead", true)]
+    [Ignore("Test for old code")]
     public class TransportTests<T> where T : Transport
     {
         #region SetUp

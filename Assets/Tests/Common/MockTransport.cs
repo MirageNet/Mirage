@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 
 namespace Mirage.Tests
 {
 
+    [System.Obsolete("Use peer instead", true)]
     public class MockTransport : Transport
     {
         public override IEnumerable<string> Scheme => new[] { "kcp" };

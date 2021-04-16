@@ -1,15 +1,42 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cysharp.Threading.Tasks;
+using System.Net;
 using Mirage.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Mirage.SocketLayer;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace Mirage
 {
+    /// <summary>
+    /// This class will later be removed when we have a better implemenation for IDataHandler
+    /// </summary>
+    internal class DataHandler : IDataHandler
+    {
+        readonly Dictionary<SocketLayer.IConnection, INetworkPlayer> players;
+
+        public DataHandler(Dictionary<SocketLayer.IConnection, INetworkPlayer> connections)
+        {
+            players = connections;
+        }
+
+        public void ReceivePacket(SocketLayer.IConnection connection, ArraySegment<byte> packet)
+        {
+            if (players.TryGetValue(connection, out INetworkPlayer handler))
+            {
+                handler.HandleMessage(packet);
+            }
+            else
+            {
+                // todo remove or replace with assert
+                Debug.LogWarning($"No player found for {connection}");
+            }
+        }
+    }
+
     /// <summary>
     /// The NetworkServer.
     /// </summary>
@@ -38,8 +65,11 @@ namespace Mirage
         /// </summary>
         public bool Listening = true;
 
-        // transport to use to accept connections
-        public Transport Transport;
+        [Tooltip("Creates Socket for Peer to use")]
+        public SocketFactory SocketFactory;
+
+        Peer peer;
+        DataHandler dataHandler;
 
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
@@ -116,6 +146,8 @@ namespace Mirage
         /// A list of local connections on the server.
         /// </summary>
         public readonly HashSet<INetworkPlayer> Players = new HashSet<INetworkPlayer>();
+        readonly Dictionary<SocketLayer.IConnection, INetworkPlayer> connections = new Dictionary<SocketLayer.IConnection, INetworkPlayer>();
+
         IReadOnlyCollection<INetworkPlayer> INetworkServer.Players => Players;
 
         /// <summary>
@@ -143,16 +175,14 @@ namespace Mirage
                 LocalClient.Disconnect();
             }
 
-            // make a copy,  during disconnect, it is possible that connections
-            // are modified, so it throws
-            // System.InvalidOperationException : Collection was modified; enumeration operation may not execute.
-            var playersCopy = new HashSet<INetworkPlayer>(Players);
-            foreach (INetworkPlayer player in playersCopy)
-            {
-                player.Connection?.Disconnect();
-            }
-            if (Transport != null)
-                Transport.Disconnect();
+            // just clear list, connections will be disconnected when peer is closed
+            Players.Clear();
+            LocalPlayer = null;
+
+            Cleanup();
+
+            // remove listen when server is stopped so that 
+            Application.quitting -= Stop;
         }
 
         void Initialize()
@@ -169,11 +199,12 @@ namespace Mirage
 
             //Make sure connections are cleared in case any old connections references exist from previous sessions
             Players.Clear();
+            connections.Clear();
 
-            if (Transport is null)
-                Transport = GetComponent<Transport>();
-            if (Transport == null)
-                throw new InvalidOperationException("Transport could not be found for NetworkServer");
+            if (SocketFactory is null)
+                SocketFactory = GetComponent<SocketFactory>();
+            if (SocketFactory == null)
+                throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for ${nameof(NetworkServer)}");
 
             if (authenticator != null)
             {
@@ -194,7 +225,7 @@ namespace Mirage
         /// </summary>
         /// <param name="localClient">if not null then start the server and client in hostmode</param>
         /// <returns></returns>
-        public async UniTask StartAsync(NetworkClient localClient = null)
+        public void Start(NetworkClient localClient = null)
         {
             if (Active) throw new InvalidOperationException("Server is already active");
 
@@ -202,27 +233,53 @@ namespace Mirage
 
             Initialize();
 
+            CreateAndBindSocket();
+
             if (LocalClient != null)
             {
-                localClient.ConnectHost(this);
+                localClient.ConnectHost(this, dataHandler);
                 logger.Log("NetworkServer StartHost");
             }
+        }
 
-            try
+        void CreateAndBindSocket()
+        {
+            ISocket socket = SocketFactory.CreateServerSocket();
+            dataHandler = new DataHandler(connections);
+            ILogger peerLogger = LogFactory.GetLogger<Peer>();
+            peer = new Peer(socket, dataHandler, logger: peerLogger);
+            EndPoint endpoint = SocketFactory.GetBindEndPoint();
+
+            peer.OnConnected += Peer_OnConnected;
+            peer.OnDisconnected += Peer_OnDisconnected;
+            peer.Bind(endpoint);
+
+            TransportStarted();
+        }
+        private void Update()
+        {
+            peer?.Update();
+        }
+
+
+        private void Peer_OnConnected(SocketLayer.IConnection conn)
+        {
+            var networkConnectionToClient = new NetworkPlayer(conn);
+            ConnectionAccepted(networkConnectionToClient);
+        }
+
+        private void Peer_OnDisconnected(SocketLayer.IConnection conn, DisconnectReason reason)
+        {
+            if (logger.LogEnabled()) logger.Log($"[{conn}] discconnected with reason {reason}");
+
+            if (connections.TryGetValue(conn, out INetworkPlayer player))
             {
-                Transport.Started.AddListener(TransportStarted);
-                Transport.Connected.AddListener(TransportConnected);
-                await Transport.ListenAsync();
+                OnDisconnected(player);
             }
-            catch (Exception ex)
+            else
             {
-                logger.LogException(ex);
-            }
-            finally
-            {
-                Transport.Connected.RemoveListener(TransportConnected);
-                Transport.Started.RemoveListener(TransportStarted);
-                Cleanup();
+                // todo remove or replace with assert
+                Debug.LogWarning("no handler found for connection");
             }
         }
 
@@ -241,18 +298,11 @@ namespace Mirage
             }
         }
 
-        private void TransportConnected(IConnection connection)
-        {
-            var networkConnectionToClient = new NetworkPlayer(connection);
-            ConnectionAcceptedAsync(networkConnectionToClient).Forget();
-        }
-
         /// <summary>
         /// cleanup resources so that we can start again
         /// </summary>
         private void Cleanup()
         {
-
             if (authenticator != null)
             {
                 authenticator.OnServerAuthenticated -= OnAuthenticated;
@@ -274,6 +324,15 @@ namespace Mirage
             _stopped.Reset();
 
             Application.quitting -= Stop;
+
+            if (peer != null)
+            {
+                //remove handlers first to stop loop
+                peer.OnConnected -= Peer_OnConnected;
+                peer.OnDisconnected -= Peer_OnDisconnected;
+                peer.Close();
+                peer = null;
+            }
         }
 
         /// <summary>
@@ -288,6 +347,7 @@ namespace Mirage
                 // connection cannot be null here or conn.connectionId
                 // would throw NRE
                 Players.Add(player);
+                connections.Add(player.Connection, player);
                 player.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
             }
         }
@@ -299,6 +359,7 @@ namespace Mirage
         public void RemoveConnection(INetworkPlayer player)
         {
             Players.Remove(player);
+            connections.Remove(player.Connection);
         }
 
         /// <summary>
@@ -306,7 +367,7 @@ namespace Mirage
         /// </summary>
         /// <param name="client">The local client</param>
         /// <param name="connection">The connection to the client</param>
-        internal void SetLocalConnection(INetworkClient client, IConnection connection)
+        internal void SetLocalConnection(INetworkClient client, SocketLayer.IConnection connection)
         {
             if (LocalPlayer != null)
             {
@@ -317,8 +378,7 @@ namespace Mirage
             LocalPlayer = player;
             LocalClient = client;
 
-            ConnectionAcceptedAsync(player).Forget();
-
+            ConnectionAccepted(player);
         }
 
         /// <summary>
@@ -353,7 +413,7 @@ namespace Mirage
             }
         }
 
-        async UniTaskVoid ConnectionAcceptedAsync(INetworkPlayer player)
+        void ConnectionAccepted(INetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log("Server accepted client:" + player);
 
@@ -380,26 +440,15 @@ namespace Mirage
 
             // let everyone know we just accepted a connection
             Connected?.Invoke(player);
-
-            // now process messages until the connection closes
-            try
-            {
-                await player.ProcessMessagesAsync();
-            }
-            catch (Exception ex)
-            {
-                logger.LogException(ex);
-            }
-            finally
-            {
-                OnDisconnected(player);
-            }
         }
 
         //called once a client disconnects from the server
         void OnDisconnected(INetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log("Server disconnect client:" + player);
+
+            // set flag first so we dont try to send message to connection
+            player.MarkAsDisconnected();
 
             RemoveConnection(player);
 

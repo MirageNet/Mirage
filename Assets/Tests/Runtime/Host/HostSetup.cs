@@ -34,7 +34,7 @@ namespace Mirage.Tests.Runtime.Host
             // set gameobject name to test name (helps with debugging)
             networkManagerGo.name = TestContext.CurrentContext.Test.MethodName;
 
-            networkManagerGo.AddComponent<MockTransport>();
+            networkManagerGo.AddComponent<TestSocketFactory>();
             sceneManager = networkManagerGo.AddComponent<NetworkSceneManager>();
             serverObjectManager = networkManagerGo.AddComponent<ServerObjectManager>();
             clientObjectManager = networkManagerGo.AddComponent<ClientObjectManager>();
@@ -81,7 +81,7 @@ namespace Mirage.Tests.Runtime.Host
 
             server.Started.AddListener(Started);
             // now start the host
-            manager.Server.StartAsync(client).Forget();
+            manager.Server.Start(client);
 
             await completionSource.Task;
         }

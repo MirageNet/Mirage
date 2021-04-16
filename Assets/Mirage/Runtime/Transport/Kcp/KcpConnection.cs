@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace Mirage.KCP
 {
+    [System.Obsolete("Use peer instead", true)]
     public abstract class KcpConnection : IConnection
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(KcpConnection));

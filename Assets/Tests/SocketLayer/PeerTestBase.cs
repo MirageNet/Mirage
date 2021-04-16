@@ -66,12 +66,12 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
             this.config = config ?? new Config()
             {
-                MaxConnections = 5,
+                MaxConnections = PeerTestBase.maxConnections,
                 // 1 second before "failed to connect"
                 MaxConnectAttempts = 5,
                 ConnectAttemptInterval = 0.2f,
             };
-            logger = Substitute.For<ILogger>();
+            logger = Debug.unityLogger;
             peer = new Peer(this.socket, dataHandler, this.config, logger);
         }
     }

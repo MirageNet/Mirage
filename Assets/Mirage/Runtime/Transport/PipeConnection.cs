@@ -1,91 +1,122 @@
 using System;
-using System.IO;
 using System.Net;
-using System.Threading;
-using Cysharp.Threading.Tasks;
-using Mirage.Serialization;
+using Mirage.Logging;
+using Mirage.SocketLayer;
+using UnityEngine;
 
 namespace Mirage
 {
-
     /// <summary>
-    /// A connection that is directly connected to another connection
-    /// If you send data in one of them,  you receive it on the other one
+    /// A <see cref="SocketLayer.IConnection"/> that is directly sends data to a <see cref="IDataHandler"/>
     /// </summary>
-    public class PipeConnection : IConnection
+    public class PipePeerConnection : SocketLayer.IConnection
     {
+        static readonly ILogger logger = LogFactory.GetLogger<PipePeerConnection>();
 
-        private PipeConnection connected;
+        /// <summary>
+        /// handler of other conection
+        /// </summary>
+        IDataHandler otherHandler;
+        /// <summary>
+        /// other connection that is passed to handler
+        /// </summary>
+        SocketLayer.IConnection otherConnection;
 
-        // should only be created by CreatePipe
-        private PipeConnection()
+        /// <summary>
+        /// Name used for debugging
+        /// </summary>
+        string name;
+
+        private PipePeerConnection() { }
+
+        public static (SocketLayer.IConnection clientConn, SocketLayer.IConnection serverConn) Create(IDataHandler clientHandler, IDataHandler serverHandler)
         {
+            var client = new PipePeerConnection();
+            var server = new PipePeerConnection();
 
+            client.otherHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
+            server.otherHandler = clientHandler ?? throw new ArgumentNullException(nameof(clientHandler));
+
+            client.otherConnection = server;
+            server.otherConnection = client;
+
+            client.State = ConnectionState.Connected;
+            server.State = ConnectionState.Connected;
+
+            client.name = "[Client Pipe Connection]";
+            server.name = "[Server Pipe Connection]";
+
+            return (client, server);
         }
 
-        // buffer where we can queue up data
-        readonly NetworkWriter writer = new NetworkWriter();
-        readonly NetworkReader reader = new NetworkReader(new byte[] { });
-
-        // counts how many messages we have pending
-        private readonly SemaphoreSlim MessageCount = new SemaphoreSlim(0);
-
-        public static (IConnection, IConnection) CreatePipe()
+        public override string ToString()
         {
-            var c1 = new PipeConnection();
-            var c2 = new PipeConnection();
-
-            c1.connected = c2;
-            c2.connected = c1;
-
-            return (c1, c2);
+            return name;
         }
 
-        public void Disconnect()
-        {
-            // disconnect both ends of the pipe
-            connected.writer.WriteBytesAndSizeSegment(new ArraySegment<byte>(Array.Empty<byte>()));
-            connected.MessageCount.Release();
+        EndPoint SocketLayer.IConnection.EndPoint => new PipeEndPoint();
 
-            writer.WriteBytesAndSizeSegment(new ArraySegment<byte>(Array.Empty<byte>()));
-            MessageCount.Release();
+
+        public ConnectionState State { get; private set; } = ConnectionState.Connected;
+
+        void SocketLayer.IConnection.Disconnect()
+        {
+            State = ConnectionState.Disconnected;
         }
 
-        // technically not an IPEndpoint,  will fix later
-        public EndPoint GetEndPointAddress() => new IPEndPoint(IPAddress.Loopback, 0);
-
-        public async UniTask<int> ReceiveAsync(MemoryStream buffer)
+        INotifyToken SocketLayer.IConnection.SendNotify(byte[] packet)
         {
-            // wait for a message
-            await MessageCount.WaitAsync();
+            logger.Assert(State == ConnectionState.Connected);
+            otherHandler.ReceivePacket(otherConnection, new ArraySegment<byte>(packet));
 
-            buffer.SetLength(0);
-            reader.buffer = writer.ToArraySegment();
+            return new PipeNotifyToken();
+        }
 
-            ArraySegment<byte> data = reader.ReadBytesAndSizeSegment();
+        void SocketLayer.IConnection.SendReliable(byte[] packet)
+        {
+            logger.Assert(State == ConnectionState.Connected);
+            otherHandler.ReceivePacket(otherConnection, new ArraySegment<byte>(packet));
+        }
 
-            if (data.Count == 0)
-                throw new EndOfStreamException();
+        void SocketLayer.IConnection.SendUnreliable(byte[] packet)
+        {
+            logger.Assert(State == ConnectionState.Connected);
+            otherHandler.ReceivePacket(otherConnection, new ArraySegment<byte>(packet));
+        }
 
-            buffer.SetLength(0);
-            buffer.Write(data.Array, data.Offset, data.Count);
 
-            if (reader.Position == reader.Length)
+        public class PipeEndPoint : EndPoint
+        {
+        }
+
+        /// <summary>
+        /// Token that invokes <see cref="INotifyToken.Delivered"/> immediately
+        /// </summary>
+        public struct PipeNotifyToken : INotifyToken
+        {
+            public event Action Delivered
             {
-                // if we reached the end of the buffer, reset the buffer to recycle memory
-                writer.SetLength(0);
-                reader.Position = 0;
+                add
+                {
+                    value.Invoke();
+                }
+                remove
+                {
+                    // nothing
+                }
             }
-
-            return 0;
+            public event Action Lost
+            {
+                add
+                {
+                    // nothing
+                }
+                remove
+                {
+                    // nothing
+                }
+            }
         }
 
-        public void Send(ArraySegment<byte> data, int channel = Channel.Reliable)
-        {
-            // add some data to the writer in the connected connection
-            // and increase the message count
-            connected.writer.WriteBytesAndSizeSegment(data);
-            connected.MessageCount.Release();
-        }
     }
 }

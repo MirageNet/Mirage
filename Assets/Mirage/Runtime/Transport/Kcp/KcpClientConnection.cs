@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Mirage.KCP
 {
+    [System.Obsolete("Use peer instead", true)]
     public class KcpClientConnection : KcpConnection
     {
 

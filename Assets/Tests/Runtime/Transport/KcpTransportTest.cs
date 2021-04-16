@@ -11,6 +11,8 @@ using Random = UnityEngine.Random;
 
 namespace Mirage.Tests.Runtime
 {
+    [System.Obsolete("Use peer instead", true)]
+    [Ignore("Test for old code")]
     public class KcpTransportTest
     {
         public ushort port = 7896;

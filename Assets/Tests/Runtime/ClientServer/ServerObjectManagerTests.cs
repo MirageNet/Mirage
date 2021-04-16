@@ -80,7 +80,9 @@ namespace Mirage.Tests.Runtime.ClientServer
             // call ShowForConnection
             serverObjectManager.ShowForConnection(serverIdentity, connectionToClient);
 
-            connectionToServer.ProcessMessagesAsync().Forget();
+            // todo assert correct message was sent using Substitute for socket or player
+
+            //connectionToServer.ProcessMessagesAsync().Forget();
 
             await AsyncUtil.WaitUntilWithTimeout(() => invoked);
         });

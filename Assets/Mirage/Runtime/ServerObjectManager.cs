@@ -93,6 +93,7 @@ namespace Mirage
 
         void OnServerStopped()
         {
+            // todo dont send messages on server stop, only reset NI
             foreach (NetworkIdentity obj in Server.World.SpawnedIdentities.Reverse())
             {
                 // Unspawn all, but only destroy non-scene objects on server

@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using Mirage.Serialization;
 using NSubstitute;
@@ -6,57 +5,34 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime
 {
-    public class NetworkPlayerTest
+    public class NetworkPlayerMessageHandlingTest
     {
         private NetworkPlayer player;
-        private byte[] serializedMessage;
-        private IConnection mockTransportConnection;
-
-        private SceneMessage data;
-
-        private NotifyPacket lastSent;
-
-        private Action<INetworkPlayer, object> delivered;
-
-        private Action<INetworkPlayer, object> lost;
-
-        private byte[] lastSerializedPacket;
-
+        private SocketLayer.IConnection mockConnection;
 
         [SetUp]
         public void SetUp()
         {
-            data = new SceneMessage();
-            mockTransportConnection = Substitute.For<IConnection>();
+            mockConnection = Substitute.For<SocketLayer.IConnection>();
+            player = new NetworkPlayer(mockConnection);
+        }
 
-            void ParsePacket(ArraySegment<byte> data)
-            {
-                var reader = new NetworkReader(data);
-                _ = MessagePacker.UnpackId(reader);
-                lastSent = reader.ReadNotifyPacket();
 
-                lastSerializedPacket = new byte[data.Count];
-                Array.Copy(data.Array, data.Offset, lastSerializedPacket, 0, data.Count);
-            }
-
-            mockTransportConnection.Send(
-                Arg.Do<ArraySegment<byte>>(ParsePacket), Channel.Unreliable);
-
-            player = new NetworkPlayer(mockTransportConnection);
-
-            serializedMessage = MessagePacker.Pack(new ReadyMessage());
-            player.RegisterHandler<ReadyMessage>(message => { });
-
-            delivered = Substitute.For<Action<INetworkPlayer, object>>();
-            lost = Substitute.For<Action<INetworkPlayer, object>>();
-
-            player.NotifyDelivered += delivered;
-            player.NotifyLost += lost;
-
+        [Test]
+        public void DisconnectsIfHandlerHasException()
+        {
+            // todo add handler that throws, cause it to be invoked, and see if disconnect is called
+            Assert.Ignore("NotImplemented");
+        }
+        [Test]
+        public void InvokesMessageHandler()
+        {
+            // todo add handler, cause it to be invoked, check it was invoked
+            Assert.Ignore("NotImplemented");
         }
 
         [Test]
-        public void NoHandler()
+        public void ThrowsWhenNoHandlerIsFound()
         {
             int messageId = MessagePacker.GetId<SceneMessage>();
             var reader = new NetworkReader(new byte[] { 1, 2, 3, 4 });
@@ -69,7 +45,7 @@ namespace Mirage.Tests.Runtime
         }
 
         [Test]
-        public void UnknownMessage()
+        public void ThrowsWhenUnknownMessage()
         {
             _ = MessagePacker.GetId<SceneMessage>();
             var reader = new NetworkReader(new byte[] { 1, 2, 3, 4 });
@@ -83,8 +59,46 @@ namespace Mirage.Tests.Runtime
         }
 
         #region Notify
+        // todo move usedful tests from below to socket layer tests
+        /*
+
+        private byte[] serializedMessage;
+        private SceneMessage data;
+        private NotifyPacket lastSent;
+        private Action<INetworkPlayer, object> delivered;
+        private Action<INetworkPlayer, object> lost;
+        private byte[] lastSerializedPacket;
 
 
+        void SetupNotify()
+        {
+            void ParsePacket(ArraySegment<byte> data)
+            {
+                var reader = new NetworkReader(data);
+                _ = MessagePacker.UnpackId(reader);
+                lastSent = reader.ReadNotifyPacket();
+
+                lastSerializedPacket = new byte[data.Count];
+                Array.Copy(data.Array, data.Offset, lastSerializedPacket, 0, data.Count);
+            }
+
+            mockConnection.Send(
+                Arg.Do<ArraySegment<byte>>(ParsePacket), Channel.Unreliable);
+
+            data = new SceneMessage();
+
+
+
+
+            serializedMessage = MessagePacker.Pack(new ReadyMessage());
+            player.RegisterHandler<ReadyMessage>(message => { });
+
+            delivered = Substitute.For<Action<INetworkPlayer, object>>();
+            lost = Substitute.For<Action<INetworkPlayer, object>>();
+
+            player.NotifyDelivered += delivered;
+            player.NotifyLost += lost;
+        }
         [Test]
         public void SendsNotifyPacket()
         {
@@ -269,7 +283,7 @@ namespace Mirage.Tests.Runtime
 
             delivered.Received().Invoke(player, 5);
         }
-
+        */
         #endregion
     }
 }

@@ -1,15 +1,58 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
-using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Mirage.SocketLayer;
 using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace Mirage
 {
+    public class ReliableSystem
+    {
+        // todo make sure message are received in order
+
+
+        readonly SocketLayer.IConnection connection;
+        //readonly Dictionary<NotifyToken, byte[]> SentPackets = new Dictionary<NotifyToken, byte[]>();
+
+        public ReliableSystem(SocketLayer.IConnection connection)
+        {
+            this.connection = connection;
+        }
+
+        public void Send(ArraySegment<byte> segment)
+        {
+            // todo use buffer pool
+            byte[] packet = segment.ToArray();
+
+            INotifyToken token = connection.SendNotify(packet);
+            //SentPackets.Add(token, packet);
+            token.Delivered += Token_Delivered;
+            token.Lost += Token_Lost;
+
+
+            void Token_Delivered()
+            {
+                //SentPackets.Remove(token);
+                CleanToken();
+            }
+            void Token_Lost()
+            {
+                Send(segment);
+                CleanToken();
+            }
+
+            void CleanToken()
+            {
+                token.Delivered -= Token_Delivered;
+                token.Lost -= Token_Lost;
+            }
+        }
+    }
     [NetworkMessage]
     public struct NotifyAck
     {
@@ -46,7 +89,7 @@ namespace Mirage
         /// <para>Transport layers connections begin at one. So on a client with a single connection to a server, the connectionId of that connection will be one. In NetworkServer, the connectionId of the local connection is zero.</para>
         /// <para>Clients do not know their connectionId on the server, and do not know the connectionId of other clients on the server.</para>
         /// </remarks>
-        private readonly IConnection connection;
+        private readonly SocketLayer.IConnection connection;
 
         /// <summary>
         /// General purpose object to hold authentication data, character selection, tokens, etc.
@@ -65,14 +108,28 @@ namespace Mirage
         /// The IP address / URL / FQDN associated with the connection.
         /// Can be useful for a game master to do IP Bans etc.
         /// </summary>
-        public EndPoint Address => connection.GetEndPointAddress();
+        public EndPoint Address => connection.EndPoint;
 
-        public IConnection Connection => connection;
+        public SocketLayer.IConnection Connection => connection;
 
+        public void Disconnect()
+        {
+            connection.Disconnect();
+            isDisconnect = true;
+        }
+
+        public void MarkAsDisconnected()
+        {
+            isDisconnect = true;
+        }
+
+        bool isDisconnect = false;
         /// <summary>
         /// The NetworkIdentity for this connection.
         /// </summary>
         public NetworkIdentity Identity { get; set; }
+
+        readonly ReliableSystem Reliable;
 
         /// <summary>
         /// A list of the NetworkIdentity objects owned by this connection. This list is read-only.
@@ -87,10 +144,11 @@ namespace Mirage
         /// Creates a new NetworkConnection with the specified address and connectionId
         /// </summary>
         /// <param name="networkConnectionId"></param>
-        public NetworkPlayer(IConnection connection)
+        public NetworkPlayer(SocketLayer.IConnection connection)
         {
             Assert.IsNotNull(connection);
             this.connection = connection;
+            Reliable = new ReliableSystem(connection);
 
             lastNotifySentTime = Time.unscaledTime;
             // a black message to ensure a notify timeout
@@ -202,7 +260,18 @@ namespace Mirage
         // the client. they would be detected as a message. send messages instead.
         public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
-            connection.Send(segment, channelId);
+            if (isDisconnect) { return; }
+
+            if (channelId == Channel.Reliable)
+            {
+                Reliable.Send(segment);
+            }
+            else
+            {
+                // todo use buffer pool
+                byte[] packet = segment.ToArray();
+                connection.SendUnreliable(packet);
+            }
         }
 
 
@@ -250,36 +319,18 @@ namespace Mirage
             }
         }
 
-        // note: original HLAPI HandleBytes function handled >1 message in a while loop, but this wasn't necessary
-        //       anymore because NetworkServer/NetworkClient Update both use while loops to handle >1 data events per
-        //       frame already.
-        //       -> in other words, we always receive 1 message per Receive call, never two.
-        //       -> can be tested easily with a 1000ms send delay and then logging amount received in while loops here
-        //          and in NetworkServer/Client Update. HandleBytes already takes exactly one.
-        /// <summary>
-        /// This function allows custom network connection classes to process data from the network before it is passed to the application.
-        /// </summary>
-        /// <param name="buffer">The data received.</param>
-        internal void TransportReceive(ArraySegment<byte> buffer, int channelId)
+        void IMessageHandler.HandleMessage(ArraySegment<byte> packet)
         {
             // unpack message
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(buffer))
+            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(packet))
             {
                 try
                 {
                     int msgType = MessagePacker.UnpackId(networkReader);
 
-                    if (msgType == MessagePacker.GetId<NotifyPacket>())
-                    {
-                        // this is a notify message, send to the notify receive
-                        NotifyPacket notifyPacket = networkReader.ReadNotifyPacket();
-                        ReceiveNotify(notifyPacket, networkReader, channelId);
-                    }
-                    else
-                    {
-                        // try to invoke the handler for that message
-                        InvokeHandler(msgType, networkReader, channelId);
-                    }
+                    // todo remove channel from handler
+                    const int channelId = 0;
+                    InvokeHandler(msgType, networkReader, channelId);
                 }
                 catch (InvalidDataException ex)
                 {
@@ -324,27 +375,6 @@ namespace Mirage
             clientOwnedObjects.Clear();
         }
 
-        public async UniTask ProcessMessagesAsync()
-        {
-            var buffer = new MemoryStream();
-
-            try
-            {
-                while (true)
-                {
-
-                    int channel = await connection.ReceiveAsync(buffer);
-
-                    buffer.TryGetBuffer(out ArraySegment<byte> data);
-                    TransportReceive(data, channel);
-                }
-            }
-            catch (EndOfStreamException)
-            {
-                // connection closed,  normal
-            }
-        }
-
         #region Notify
 
         internal struct PacketEnvelope
@@ -375,6 +405,7 @@ namespace Mirage
         /// <typeparam name="T">type of message to send</typeparam>
         /// <param name="message">message to send</param>
         /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
+        [System.Obsolete("Use Peer instead", true)]
         public void SendNotify<T>(T message, object token, int channelId = Channel.Unreliable)
         {
             if (sendWindow.Count == WINDOW_SIZE)
@@ -407,6 +438,7 @@ namespace Mirage
 
         }
 
+        [System.Obsolete("Use Peer instead", true)]
         internal void ReceiveNotify(NotifyPacket notifyPacket, NetworkReader networkReader, int channelId)
         {
             int sequenceDistance = (int)sequencer.Distance(notifyPacket.Sequence, receiveSequence);
@@ -444,6 +476,7 @@ namespace Mirage
         // the other end just sent us a message
         // and it told us the latest message it got
         // and the ack mask
+        [System.Obsolete("Use Peer instead", true)]
         private void AckPackets(ushort receiveSequence, ulong ackMask)
         {
             while (sendWindow.Count > 0)
@@ -472,11 +505,13 @@ namespace Mirage
         /// <summary>
         /// Raised when a message is delivered
         /// </summary>
+        [System.Obsolete("Use Peer instead", true)]
         public event Action<INetworkPlayer, object> NotifyDelivered;
 
         /// <summary>
         /// Raised when a message is lost
         /// </summary>
+        [System.Obsolete("Use Peer instead", true)]
         public event Action<INetworkPlayer, object> NotifyLost;
         #endregion
     }

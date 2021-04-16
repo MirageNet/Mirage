@@ -37,9 +37,9 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal sealed class Connection : IConnection, IRawConnection
     {
-        void Assert(bool condition)
+        void Assert(bool condition, object msg = null)
         {
-            if (!condition) logger.Log(LogType.Assert, "Failed Assertion");
+            if (!condition) logger.Log(LogType.Assert, msg == null ? "Failed Assertion" : $"Failed Assertion: {msg}");
         }
         readonly ILogger logger;
 
@@ -160,6 +160,7 @@ namespace Mirage.SocketLayer
         }
         internal void Disconnect(DisconnectReason reason, bool sendToOther = true)
         {
+            if (logger.filterLogType == LogType.Log) logger.Log($"Disconnect with reason: {reason}");
             switch (State)
             {
                 case ConnectionState.Connecting:
@@ -167,13 +168,12 @@ namespace Mirage.SocketLayer
                     break;
 
                 case ConnectionState.Connected:
-                    peer.OnConnectionDisconnected(this, reason, sendToOther);
                     State = ConnectionState.Disconnected;
                     disconnectedTracker.OnDisconnect();
+                    peer.OnConnectionDisconnected(this, reason, sendToOther);
                     break;
 
                 default:
-                    Assert(false);
                     break;
             }
         }
