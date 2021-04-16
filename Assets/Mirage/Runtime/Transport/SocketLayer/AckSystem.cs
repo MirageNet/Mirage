@@ -28,15 +28,21 @@ namespace Mirage.SocketLayer
         uint receivedMask;
         readonly IRawConnection connection;
         readonly Time time;
-        readonly float sendAckTime;
+        readonly float ackTimeout;
         float lastSentTime;
 
 
-        public AckSystem(IRawConnection connection, float sendAckTime, Time time)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="ackTimeout">how long after last send before sending empty ack</param>
+        /// <param name="time"></param>
+        public AckSystem(IRawConnection connection, float ackTimeout, Time time)
         {
             this.connection = connection;
             this.time = time;
-            this.sendAckTime = sendAckTime;
+            this.ackTimeout = ackTimeout;
 
             // set received to first sequence
             // this means that it will always be 1 before first sent packet
@@ -93,8 +99,11 @@ namespace Mirage.SocketLayer
             return true;
         }
 
-        // todo keep track of sequence and packet nunber
-        public void Send(byte[] packet)
+        /// <summary>
+        /// </summary>
+        /// <param name="packet"></param>
+        /// <returns>sequence number of sent packet</returns>
+        public ushort Send(byte[] packet)
         {
             // todo check packet size is within MTU
             // todo use pool to stop allocations
@@ -114,6 +123,8 @@ namespace Mirage.SocketLayer
 
             connection.SendRaw(final, final.Length);
             lastSentTime = time.Now;
+
+            return (ushort)sequence;
         }
 
 
@@ -121,7 +132,7 @@ namespace Mirage.SocketLayer
         {
             // todo send ack if not recently been sent
             // ack only packet sent if no other sent within last frame
-            if (lastSentTime + sendAckTime < time.Now)
+            if (lastSentTime + ackTimeout < time.Now)
             {
                 // send ack
                 SendAck();
