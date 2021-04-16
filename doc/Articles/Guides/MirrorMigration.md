@@ -181,7 +181,7 @@ These fields/properties have been renamed:
 
 | Mirror                                | Mirage                                                                                 |
 |:-------------------------------------:|:--------------------------------------------------------------------------------------:|
-| `ClientScene.localPlayer`             | [Client.Player.Identity](xref:Mirage.NetworkClient.Player.Identity)                    |
+| `ClientScene.localPlayer`             | [NetworkPlayer.Identity](xref:Mirage.NetworkPlayer.Identity)             |
 | `ClientScene.ready`                   | [NetworkClient.Connection.IsReady](xref:Mirage.NetworkPlayer.IsReady)                  |
 | `NetworkIdentity.assetId`             | [NetworkIdentity.AssetId](xref:Mirage.NetworkIdentity.AssetId)                         |
 | `NetworkIdentity.netId`               | [NetworkIdentity.NetId](xref:Mirage.NetworkIdentity.NetId)                             |
