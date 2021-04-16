@@ -550,7 +550,6 @@ namespace Mirage
         /// </summary>
         /// <param name="obj">The object to spawn.</param>
         /// <param name="assetId">The assetId of the object to spawn. Used for custom spawn handlers.</param>
-        /// <param name="client">The client associated to the object.</param>
         /// <param name="owner">The connection that has authority over the object</param>
         public void Spawn(GameObject obj, Guid assetId, INetworkPlayer owner = null)
         {
@@ -567,7 +566,6 @@ namespace Mirage
         /// <para>This will cause a new object to be instantiated from the registered prefab, or from a custom spawn function.</para>
         /// </summary>
         /// <param name="obj">Game object with NetworkIdentity to spawn.</param>
-        /// <param name="client">Client associated to the object.</param>
         /// <param name="owner">The connection that has authority over the object</param>
         public void Spawn(GameObject obj, INetworkPlayer owner = null)
         {
