@@ -97,7 +97,7 @@ namespace Mirage.SocketLayer
             keepAliveTracker = new KeepAliveTracker(config, time);
             disconnectedTracker = new DisconnectedTracker(config, time);
 
-            notifySystem = new NotifySystem(this, config.NotifyTimeout, config.SendAckTime, time);
+            notifySystem = new NotifySystem(this, config.AckTimeout, time);
         }
 
         public void Update()
@@ -188,6 +188,12 @@ namespace Mirage.SocketLayer
             int offset = AckSystem.HEADER_SIZE;
             ReceivePacket(packet, offset);
         }
+
+        internal void ReceiveNotifyAck(Packet packet)
+        {
+            notifySystem.ReceiveAck(packet.buffer.array);
+        }
+
 
         void ReceivePacket(Packet packet, int offset)
         {

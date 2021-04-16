@@ -56,16 +56,17 @@ namespace Mirage.SocketLayer
 
         EndPoint receiveEndPoint = null;
 
-        public Peer(ISocket socket, IDataHandler dataHandler, Config _config = null, ILogger _logger = null)
+        public Peer(ISocket socket, IDataHandler dataHandler, Config config = null, ILogger logger = null)
         {
-            logger = _logger ?? Debug.unityLogger;
+            this.logger = logger ?? Debug.unityLogger;
+            this.config = config ?? new Config();
+
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
             this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
-            config = _config ?? new Config();
             time = new Time();
 
             connectKeyValidator = new ConnectKeyValidator();
-            bufferPool = new BufferPool(config.Mtu, config.BufferPoolStartSize, config.BufferPoolMaxSize, logger);
+            bufferPool = new BufferPool(this.config.Mtu, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
         }
 
 
@@ -227,6 +228,9 @@ namespace Mirage.SocketLayer
                     break;
                 case PacketType.Notify:
                     connection.ReceiveNotifyPacket(packet);
+                    break;
+                case PacketType.NotifyAck:
+                    connection.ReceiveNotifyAck(packet);
                     break;
                 case PacketType.KeepAlive:
                     // do nothing

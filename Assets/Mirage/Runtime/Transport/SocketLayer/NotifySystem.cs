@@ -69,11 +69,25 @@ namespace Mirage.SocketLayer
             sent.Enqueue(token);
             return token;
         }
+
+
+        internal void ReceiveAck(byte[] array)
+        {
+            ReceivedPacket received = ackSystem.ReceiveAck(array);
+
+            NotifySent(received);
+        }
+
         public void Receive(byte[] packet)
         {
             ReceivedPacket received = ackSystem.Receive(packet);
             if (!received.isValid) { return; }
 
+            NotifySent(received);
+        }
+
+        private void NotifySent(ReceivedPacket received)
+        {
             while (sent.Count > 0)
             {
                 NotifyToken token = sent.Peek();

@@ -17,6 +17,10 @@ namespace Mirage.SocketLayer
         /// data packet sent with ack header so sender knows if packet gets delivered or lost
         /// </summary>
         Notify = 3,
+        /// <summary>
+        /// packet with just acks
+        /// </summary>
+        NotifyAck = 4,
 
         /// <summary>
         /// Used to keep connection alive.

@@ -5,11 +5,9 @@ namespace Mirage.SocketLayer
 {
     struct ReceivedPacket
     {
-        public ushort sequence;
         public ushort receivedSequence;
         public uint receivedMask;
 
-        public ArraySegment<byte> packet;
         /// <summary>
         /// should packet be used and sent higher up to mirage
         /// <para>It could be invalid because it as a duplicate packet or arrived late</para>
@@ -22,6 +20,7 @@ namespace Mirage.SocketLayer
     internal class AckSystem
     {
         public const int HEADER_SIZE = 9;
+        public const int HEADER_SIZE_ACK = 7;
         public readonly Sequencer sequencer = new Sequencer(16);
 
         ushort receivedSequence;
@@ -52,16 +51,16 @@ namespace Mirage.SocketLayer
 
         public ReceivedPacket Receive(byte[] packet)
         {
-            // todo assert packet is notify
             int offset = 0;
             var packetType = (PacketType)ByteUtils.ReadByte(packet, ref offset);
+            // todo replace assert with log
             Assert.AreEqual(packetType, PacketType.Notify);
-
 
             ushort sequence = ByteUtils.ReadUShort(packet, ref offset);
             ushort receivedSequence = ByteUtils.ReadUShort(packet, ref offset);
             uint receivedMask = ByteUtils.ReadUInt(packet, ref offset);
 
+            // todo replace assert with log
             Assert.AreEqual(offset, HEADER_SIZE);
 
             if (SetReievedNumbers(sequence))
@@ -69,16 +68,35 @@ namespace Mirage.SocketLayer
                 return new ReceivedPacket
                 {
                     isValid = true,
-                    sequence = sequence,
                     receivedSequence = receivedSequence,
                     receivedMask = receivedMask,
-                    packet = new ArraySegment<byte>(packet, HEADER_SIZE, packet.Length - HEADER_SIZE)
                 };
             }
             else
             {
                 return ReceivedPacket.Invalid();
             }
+        }
+
+        public ReceivedPacket ReceiveAck(byte[] packet)
+        {
+            int offset = 0;
+            var packetType = (PacketType)ByteUtils.ReadByte(packet, ref offset);
+            // todo replace assert with log
+            Assert.AreEqual(packetType, PacketType.NotifyAck);
+
+            ushort receivedSequence = ByteUtils.ReadUShort(packet, ref offset);
+            uint receivedMask = ByteUtils.ReadUInt(packet, ref offset);
+
+            // todo replace assert with log
+            Assert.AreEqual(offset, HEADER_SIZE_ACK);
+
+            return new ReceivedPacket
+            {
+                isValid = true,
+                receivedSequence = receivedSequence,
+                receivedMask = receivedMask,
+            };
         }
 
         private bool SetReievedNumbers(ushort sequence)
@@ -119,6 +137,7 @@ namespace Mirage.SocketLayer
             ByteUtils.WriteUShort(final, ref offset, receivedSequence);
             ByteUtils.WriteUInt(final, ref offset, receivedMask);
 
+            // todo replace assert with log
             Assert.AreEqual(offset, HEADER_SIZE);
 
             connection.SendRaw(final, final.Length);
@@ -141,7 +160,20 @@ namespace Mirage.SocketLayer
 
         private void SendAck()
         {
-            // todo Send ack without a packet
+            // todo use pool to stop allocations
+            byte[] final = new byte[HEADER_SIZE_ACK];
+            int offset = 0;
+
+            ByteUtils.WriteByte(final, ref offset, (byte)PacketType.NotifyAck);
+
+            ByteUtils.WriteUShort(final, ref offset, receivedSequence);
+            ByteUtils.WriteUInt(final, ref offset, receivedMask);
+
+            // todo replace assert with log
+            Assert.AreEqual(offset, HEADER_SIZE_ACK);
+
+            connection.SendRaw(final, final.Length);
+            lastSentTime = time.Now;
         }
     }
 }

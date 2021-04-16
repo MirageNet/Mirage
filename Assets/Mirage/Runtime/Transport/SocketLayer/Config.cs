@@ -55,14 +55,9 @@ namespace Mirage.SocketLayer
         public int BufferPoolMaxSize = 100;
 
         /// <summary>
-        /// how long before packet is assumed lost
-        /// </summary>
-        public float NotifyTimeout = 0.3f;
-
-        /// <summary>
         /// how long after last send to send ack without a message
         /// </summary>
-        public float SendAckTime = 1.5f / 60f;
+        public float AckTimeout = 1.5f / 60f;
         #endregion
     }
 }
