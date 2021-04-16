@@ -64,32 +64,33 @@ namespace Mirage.SocketLayer
             // tdo check order of packet, do we drop old packets?
             // todo get messages from pecket and invoke
             ReceivedPacket received = ackSystem.Receive(packet);
+            if (!received.isValid) { return; }
+
             while (sent.Count > 0)
             {
-                NotifyToken next = sent.Peek();
+                NotifyToken token = sent.Peek();
 
-                int distance = (int)ackSystem.sequencer.Distance(next.Sequence, received.receivedSequence);
+                int distance = (int)ackSystem.sequencer.Distance(received.receivedSequence, token.Sequence);
 
-                // posititve distance means next is sent after last ack, so nothing to ack yet
-                if (distance > 0)
+                // negative distance means next is sent after last ack, so nothing to ack yet
+                if (distance < 0)
                     return;
 
-                // negative distance means it should have been acked, or mark it as lost
+                // positive distance means it should have been acked, or mark it as lost
                 sent.Dequeue();
 
                 const int maskSize = sizeof(uint) * 8;
-                int posDistance = -distance;
                 // if distance above size then it is outside of mask, so set as lost
 
-                bool outsideOfMask = posDistance > maskSize;
+                bool outsideOfMask = distance > maskSize;
 
-                uint ackBit = 1u << posDistance;
+                uint ackBit = 1u << distance;
                 bool notInMask = (received.receivedMask & ackBit) == 0u;
 
                 // todo clean this code up with multiple methods
                 bool lost = outsideOfMask || notInMask;
 
-                next.Notify(!lost);
+                token.Notify(!lost);
             }
         }
 

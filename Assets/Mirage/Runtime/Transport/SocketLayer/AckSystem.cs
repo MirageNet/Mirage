@@ -26,8 +26,6 @@ namespace Mirage.SocketLayer
 
         ushort receivedSequence;
         uint receivedMask;
-        readonly bool[] received = new bool[sizeof(int) * 8];
-        readonly bool[] receivedNext = new bool[sizeof(int) * 8];
         readonly IRawConnection connection;
         readonly Time time;
         readonly float sendAckTime;
@@ -60,7 +58,7 @@ namespace Mirage.SocketLayer
 
             Assert.AreEqual(offset, HEADER_SIZE);
 
-            if (setReievedNumbers(sequence))
+            if (SetReievedNumbers(sequence))
             {
                 return new ReceivedPacket
                 {
@@ -77,58 +75,20 @@ namespace Mirage.SocketLayer
             }
         }
 
-        private bool setReievedNumbers(ushort sequence)
+        private bool SetReievedNumbers(ushort sequence)
         {
-            // todo optimzie this
-            long distance = sequencer.Distance(receivedSequence, sequence);
+            int distance = (int)sequencer.Distance(sequence, receivedSequence);
 
-            // duplicate
-            if (distance == 0) { return false; }
-            // arrived late
-            if (distance > 1) { return false; }
+            // duplicate or arrived late
+            if (distance <= 0) { return false; }
 
-            // if no dropped distance should be -1
-
-            Array.Clear(receivedNext, 0, receivedNext.Length);
-            // calculate next receive mask
-            for (int i = 0; i < received.Length; i++)
-            {
-                // if to stop out of range
-                long next = i - distance;
-                if (next >= 0 && next < received.Length)
-                    receivedNext[next] = received[i];
-            }
-            // first is current packet so should be true
-            receivedNext[0] = true;
-
-            // copy to received
-            uint mask = 0;
-            for (int i = 0; i < received.Length; i++)
-            {
-                received[i] = receivedNext[i];
-
-                // set bit if received
-                mask |= received[i] ? 1u : 0u;
-                // shift
-                mask <<= 1;
-            }
-
-            //create mask in reverce order
-            for (int i = received.Length - 1; i >= 0; i--)
-            {
-                // set bit if received
-                mask |= received[i] ? 1u : 0u;
-
-                // shift (not not last)
-                if (i != 0)
-                {
-                    mask <<= 1;
-                }
-            }
+            // shift mask by distance, then add 1
+            // eg distance = 2
+            // this will mean mask will be ..01
+            // which means that 1 packet was missed
+            receivedMask = (receivedMask << distance) | 1;
 
             receivedSequence = sequence;
-            receivedMask = mask;
-
 
             return true;
         }
