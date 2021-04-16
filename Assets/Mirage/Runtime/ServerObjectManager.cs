@@ -235,7 +235,7 @@ namespace Mirage
         /// <param name="player">Connection which is adding the player.</param>
         /// <param name="client">Client associated to the player.</param>
         /// <param name="character">Player object spawned for the player.</param>
-        /// <returns></returns>
+        /// <exception cref="ArgumentException">NetworkIdentity must not be null.</exception>
         public void AddCharacter(INetworkPlayer player, GameObject character)
         {
             NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
@@ -352,6 +352,7 @@ namespace Mirage
         /// </summary>
         /// <param name="player">The connection of the client to remove from</param>
         /// <param name="destroyServerObject">Indicates whether the server object should be destroyed</param>
+        /// <exception cref="InvalidOperationException">Received remove player message but connection has no player</exception>
         public void RemovePlayerForConnection(INetworkPlayer player, bool destroyServerObject = false)
         {
             if (player.Identity != null)
@@ -519,6 +520,7 @@ namespace Mirage
         /// </summary>
         /// <param name="obj">The object to spawn.</param>
         /// <param name="owner">The player object to set Client Authority to.</param>
+        /// <exception cref="InvalidOperationException">NetworkIdentity and NetworkPlayer must not be null.</exception>
         public void Spawn(GameObject obj, GameObject owner)
         {
             NetworkIdentity identity = owner.GetComponent<NetworkIdentity>();
@@ -665,7 +667,7 @@ namespace Mirage
         ///     It is like calling NetworkServer.Spawn() for each of them.
         /// </para>
         /// </summary>
-        /// <exception cref="T:InvalidOperationException">Thrown when server is not active</exception>
+        /// <exception cref="InvalidOperationException">Thrown when server is not active</exception>
         public void SpawnObjects()
         {
             // only if server active

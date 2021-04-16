@@ -209,6 +209,7 @@ namespace Mirage
         /// Signal that the client connection is ready to enter the game.
         /// <para>This could be for example when a client enters an ongoing game and has finished loading the current scene. The server should respond to the message with an appropriate handler which instantiates the players object for example.</para>
         /// </summary>
+        /// <exception cref="InvalidOperationException">When called with an null or disconnected client</exception>
         public void SetClientReady()
         {
             if (!Client || !Client.Active)
@@ -243,6 +244,7 @@ namespace Mirage
         /// </summary>
         /// <param name="scenePath"></param>
         /// <param name="operation"></param>
+        /// <exception cref="ArgumentNullException">Scene path was not valid.</exception>
         public void ChangeServerScene(string scenePath, SceneOperation sceneOperation = SceneOperation.Normal)
         {
             if (string.IsNullOrEmpty(scenePath))
