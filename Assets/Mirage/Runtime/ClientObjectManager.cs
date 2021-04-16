@@ -510,7 +510,7 @@ namespace Mirage
 
         void CheckForLocalPlayer(NetworkIdentity identity)
         {
-            if (identity && identity == Client.Player.Identity)
+            if (identity && identity == Client.Player?.Identity)
             {
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
                 identity.StartLocalPlayer();
