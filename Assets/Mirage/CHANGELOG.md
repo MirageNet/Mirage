@@ -1,3 +1,10 @@
+## [87.2.3](https://github.com/MirageNet/Mirage/compare/v87.2.2...v87.2.3) (2021-04-16)
+
+
+### Bug Fixes
+
+* param no longer exists. updating summary ([c9a919f](https://github.com/MirageNet/Mirage/commit/c9a919f9d5e3a672793f6db228b8eb720abf5af6))
+
 ## [87.2.2](https://github.com/MirageNet/Mirage/compare/v87.2.1...v87.2.2) (2021-04-16)
 
 
