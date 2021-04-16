@@ -1,3 +1,10 @@
+## [87.2.4](https://github.com/MirageNet/Mirage/compare/v87.2.3...v87.2.4) (2021-04-16)
+
+
+### Bug Fixes
+
+* add some exception documentation ([829f10a](https://github.com/MirageNet/Mirage/commit/829f10a506f1ea9dcf7e664d672202538057a88b))
+
 ## [87.2.3](https://github.com/MirageNet/Mirage/compare/v87.2.2...v87.2.3) (2021-04-16)
 
 
