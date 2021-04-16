@@ -224,7 +224,7 @@ namespace Mirage
 
         private void TransportConnected(IConnection connection)
         {
-            INetworkPlayer networkConnectionToClient = GetNewPlayer(connection);
+            var networkConnectionToClient = new NetworkPlayer(connection);
             ConnectionAcceptedAsync(networkConnectionToClient).Forget();
         }
 
@@ -292,14 +292,6 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Creates a new INetworkConnection based on the provided IConnection.
-        /// </summary>
-        public virtual INetworkPlayer GetNewPlayer(IConnection connection)
-        {
-            return new NetworkPlayer(connection);
-        }
-
-        /// <summary>
         /// <para>This accepts a network connection and adds it to the server.</para>
         /// <para>This connection will use the callbacks registered with the server.</para>
         /// </summary>
@@ -328,15 +320,15 @@ namespace Mirage
         /// called by LocalClient to add itself. dont call directly.
         /// </summary>
         /// <param name="client">The local client</param>
-        /// <param name="tconn">The connection to the client</param>
-        internal void SetLocalConnection(INetworkClient client, IConnection tconn)
+        /// <param name="connection">The connection to the client</param>
+        internal void SetLocalConnection(INetworkClient client, IConnection connection)
         {
             if (LocalPlayer != null)
             {
                 throw new InvalidOperationException("Local Connection already exists");
             }
 
-            INetworkPlayer player = GetNewPlayer(tconn);
+            var player = new NetworkPlayer(connection);
             LocalPlayer = player;
             LocalClient = client;
 

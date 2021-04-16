@@ -141,7 +141,7 @@ namespace Mirage
                 InitializeAuthEvents();
 
                 // setup all the handlers
-                Player = GetNewPlayer(transportConnection);
+                Player = new NetworkPlayer(transportConnection);
                 Time.Reset();
 
                 RegisterMessageHandlers();
@@ -168,18 +168,10 @@ namespace Mirage
 
             server.SetLocalConnection(this, c2);
             IsLocalClient = true;
-            Player = GetNewPlayer(c1);
+            Player = new NetworkPlayer(c1);
             RegisterHostHandlers();
 
             OnConnected().Forget();
-        }
-
-        /// <summary>
-        /// Creates a new INetworkConnection based on the provided IConnection.
-        /// </summary>
-        public virtual INetworkPlayer GetNewPlayer(IConnection connection)
-        {
-            return new NetworkPlayer(connection);
         }
 
         void InitializeAuthEvents()
