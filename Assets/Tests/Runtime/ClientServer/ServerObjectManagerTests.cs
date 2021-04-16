@@ -47,7 +47,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             serverObjectManager.Spawn(serverIdentity);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => serverIdentity.Server == server);
+            await AsyncUtil.WaitUntilWithTimeout(() => (NetworkServer)serverIdentity.Server == server);
         });
 
         [Test]
@@ -201,7 +201,9 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             connectionToClient.Identity = null;
 
-            Assert.That(serverObjectManager.AddCharacter(connectionToClient, playerReplacement, replacementGuid), Is.True);
+            serverObjectManager.AddCharacter(connectionToClient, playerReplacement, replacementGuid);
+
+            Assert.That(replacementIdentity == connectionToClient.Identity);
         }
 
         [UnityTest]
@@ -247,13 +249,25 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        public void AddPlayerForConnectionFalseTest()
+        public void AddCharacterNoIdentityExceptionTest()
         {
-            Assert.That(serverObjectManager.AddCharacter(connectionToClient, new GameObject()), Is.False);
+            Assert.Throws<ArgumentException>(() =>
+            {
+                serverObjectManager.AddCharacter(connectionToClient, new GameObject());
+            });
+        }
+
+        [Test]
+        public void InternalReplacePlayerNoIdentityExceptionTest()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                serverObjectManager.InternalReplacePlayerForConnection(connectionToClient, new GameObject(), true);
+            });
         }
 
         [UnityTest]
-        public IEnumerator SpawnObjectsFalseTest() => UniTask.ToCoroutine(async () =>
+        public IEnumerator SpawnObjectsExceptionTest() => UniTask.ToCoroutine(async () =>
         {
             server.Disconnect();
 
