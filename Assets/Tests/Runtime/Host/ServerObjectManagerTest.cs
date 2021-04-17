@@ -80,13 +80,13 @@ namespace Mirage.Tests.Runtime.Host
         {
             // add connection
 
-            NetworkPlayer connectionToClient = Substitute.For<NetworkPlayer>(Substitute.For<IConnection>());
+            INetworkPlayer player = Substitute.For<INetworkPlayer>();
 
             NetworkIdentity identity = new GameObject().AddComponent<NetworkIdentity>();
 
-            serverObjectManager.HideForConnection(identity, connectionToClient);
+            serverObjectManager.HideForConnection(identity, player);
 
-            connectionToClient.Received().Send(Arg.Is<ObjectHideMessage>(msg => msg.netId == identity.NetId));
+            player.Received().Send(Arg.Is<ObjectHideMessage>(msg => msg.netId == identity.NetId));
 
             // destroy GO after shutdown, otherwise isServer is true in OnDestroy and it tries to call
             // GameObject.Destroy (but we need DestroyImmediate in Editor)

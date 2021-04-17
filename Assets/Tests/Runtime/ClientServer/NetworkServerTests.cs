@@ -118,12 +118,6 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        public void GetNewConnectionTest()
-        {
-            Assert.That(server.GetNewPlayer(Substitute.For<IConnection>()), Is.Not.Null);
-        }
-
-        [Test]
         public void VariableTest()
         {
             Assert.That(server.MaxConnections, Is.EqualTo(4));
