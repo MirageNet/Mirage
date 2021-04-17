@@ -210,4 +210,4 @@ Table below shows how to spawn objects in Mirage from `NetworkBehaviour`:
 | Mirror                  | Mirage                                                                                     |
 |:-----------------------:|:------------------------------------------------------------------------------------------:|
 | `NetworkServer.Spawn`   | [ServerObjectManager.Spawn](xref:Mirage.ServerObjectManager.Spawn(Mirage.NetworkIdentity)) |
-| `NetworkServer.Destroy` | [ServerObjectManager.Destroy](xref:Mirage.ServerObjectManager.Destroy(UnityEngine.GameObject))         |
+| `NetworkServer.Destroy` | [ServerObjectManager.Destroy](xref:Mirage.ServerObjectManager.Destroy(UnityEngine.GameObject, System.Boolean))         |

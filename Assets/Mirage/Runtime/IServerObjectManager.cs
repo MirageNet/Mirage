@@ -19,9 +19,7 @@ namespace Mirage
 
         void Spawn(GameObject obj, Guid assetId, INetworkPlayer owner = null);
 
-        void Destroy(GameObject obj);
-
-        void UnSpawn(GameObject obj);
+        void Destroy(GameObject obj, bool destroyServerObject = true);
 
         void SpawnObjects();
     }

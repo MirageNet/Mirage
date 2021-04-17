@@ -357,11 +357,7 @@ namespace Mirage
         {
             if (player.Identity != null)
             {
-                if (destroyServerObject)
-                    Destroy(player.Identity.gameObject);
-                else
-                    UnSpawn(player.Identity.gameObject);
-
+                Destroy(player.Identity.gameObject, destroyServerObject);
                 player.Identity = null;
             }
             else
@@ -604,10 +600,10 @@ namespace Mirage
 
         /// <summary>
         /// Destroys this object and corresponding objects on all clients.
-        /// <para>In some cases it is useful to remove an object but not delete it on the server. For that, use NetworkServer.UnSpawn() instead of NetworkServer.Destroy().</para>
-        /// </summary>
         /// <param name="obj">Game object to destroy.</param>
-        public void Destroy(GameObject obj)
+        /// <param name="persistServerObject">In some cases it is useful to remove an object but not delete it on the server.</param>
+        /// </summary>
+        public void Destroy(GameObject obj, bool destroyServerObject = true)
         {
             if (obj == null)
             {
@@ -616,25 +612,7 @@ namespace Mirage
             }
 
             NetworkIdentity identity = obj.GetNetworkIdentity();
-            DestroyObject(identity, true);
-        }
-
-        /// <summary>
-        /// This takes an object that has been spawned and un-spawns it.
-        /// <para>The object will be removed from clients that it was spawned on, or the custom spawn handler function on the client will be called for the object.</para>
-        /// <para>Unlike when calling NetworkServer.Destroy(), on the server the object will NOT be destroyed. This allows the server to re-use the object, even spawn it again later.</para>
-        /// </summary>
-        /// <param name="obj">The spawned object to be unspawned.</param>
-        public void UnSpawn(GameObject obj)
-        {
-            if (obj == null)
-            {
-                logger.Log("NetworkServer UnspawnObject is null");
-                return;
-            }
-
-            NetworkIdentity identity = obj.GetNetworkIdentity();
-            DestroyObject(identity, false);
+            DestroyObject(identity, destroyServerObject);
         }
 
         internal bool ValidateSceneObject(NetworkIdentity identity)

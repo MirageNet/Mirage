@@ -96,7 +96,7 @@ Note the Authority can be revoked, and granted again.  Every time the client los
 # Server Stop
 
 Either because the client disconnected, the server stopped, 
-you called <xref:Mirage.ServerObjectManager.UnSpawn(UnityEngine.GameObject)>,  or you called <xref:Mirage.ServerObjectManager.Destroy(UnityEngine.GameObject)> the object may stop in the server.
+you called <xref:Mirage.ServerObjectManager.Destroy(UnityEngine.GameObject,System.Boolean)> the object may stop in the server.
 During this state, a message is sent to all the clients to unspawn the object.
 The event <xref:Mirage.NetworkIdentity.OnStopServer> will be invoked. 
 
