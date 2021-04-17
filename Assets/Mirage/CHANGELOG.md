@@ -1,3 +1,17 @@
+# [88.0.0](https://github.com/MirageNet/Mirage/compare/v87.2.4...v88.0.0) (2021-04-17)
+
+
+### Code Refactoring
+
+* remove unspawn as its redundant with destroy ([#760](https://github.com/MirageNet/Mirage/issues/760)) ([6a8497c](https://github.com/MirageNet/Mirage/commit/6a8497c309dfb71caf533dc35efc337745b324a4))
+* removing GetNewPlayer and sealing networkplayer ([#781](https://github.com/MirageNet/Mirage/issues/781)) ([16a6ba0](https://github.com/MirageNet/Mirage/commit/16a6ba00920423d07b75aa5054da1d6b8b41dce8))
+
+
+### BREAKING CHANGES
+
+* removed Unspawn method, use with Destroy with destroyServerObject flag instead
+* no longer possible to create custom INetworkPlayer to be used inside mirage
+
 ## [87.2.4](https://github.com/MirageNet/Mirage/compare/v87.2.3...v87.2.4) (2021-04-16)
 
 
