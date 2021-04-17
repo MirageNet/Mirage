@@ -179,6 +179,7 @@ namespace Mirage.Weaver
             assemblyBuilder.buildFinished += delegate (string assemblyPath, CompilerMessage[] compilerMessages)
             {
                 CompilerMessages.AddRange(compilerMessages);
+#if !UNITY_2020_2_OR_NEWER
                 foreach (CompilerMessage cm in compilerMessages)
                 {
                     if (cm.type == CompilerMessageType.Error)
@@ -187,6 +188,7 @@ namespace Mirage.Weaver
                         CompilerErrors = true;
                     }
                 }
+#endif
 
                 // assembly builder does not call ILPostProcessor (WTF Unity?),  so we must invoke it ourselves.
                 var compiledAssembly = new CompiledAssembly(assemblyPath)
