@@ -16,7 +16,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
             name: Manual Activation File
-            path: Unity_v2020.1.17f1.alf
+            path: Unity_v2020.3.4f1.alf
 
       - name: Next Steps
         run: |
