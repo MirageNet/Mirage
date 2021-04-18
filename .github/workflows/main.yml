@@ -37,7 +37,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: Library
-          key: Library-2020.1.17
+          key: Library-2020.3.4
 
       - name: Install sonar scanner
         run: |
