@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -186,6 +187,15 @@ namespace Mirage.Weaver
                     {
                         Debug.LogErrorFormat("{0}:{1} -- {2}", cm.file, cm.line, cm.message);
                         CompilerErrors = true;
+                    }
+                }
+#else
+                foreach (CompilerMessage cm in compilerMessages)
+                {
+                    // check regex to make sure it is one of Mirage messages
+                    if (cm.type == CompilerMessageType.Warning && Regex.Match(cm.message, @"\(at .*\)$").Success)
+                    {
+                        logger.Warning(string.Format("{0}:{1} -- {2}", cm.file, cm.line, cm.message));
                     }
                 }
 #endif
