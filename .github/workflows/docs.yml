@@ -27,7 +27,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: Library
-          key: Library-2020.1.17
+          key: Library-2020.3.4
 
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
