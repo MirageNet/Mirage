@@ -1,11 +1,10 @@
 using System.Net;
 using System.Net.Sockets;
-using Mirage.SocketLayer;
 using UnityEngine;
 
-namespace Mirage
+namespace Mirage.SocketLayer.Udp
 {
-    public sealed class UdpCreator : SocketCreator
+    public sealed class UdpSocketFactory : SocketFactory
     {
         [SerializeField] string address = "localhost";
         [SerializeField] int port = 7777;
