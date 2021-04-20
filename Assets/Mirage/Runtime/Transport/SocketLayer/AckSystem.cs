@@ -47,6 +47,13 @@ namespace Mirage.SocketLayer
             // this means that it will always be 1 before first sent packet
             // so first receieved will have correcct distance
             receivedSequence = (ushort)sequencer.Next();
+
+            SetSendTime();
+        }
+
+        void SetSendTime()
+        {
+            lastSentTime = time.Now;
         }
 
         public ReceivedPacket Receive(byte[] packet)
@@ -141,7 +148,7 @@ namespace Mirage.SocketLayer
             Assert.AreEqual(offset, HEADER_SIZE);
 
             connection.SendRaw(final, final.Length);
-            lastSentTime = time.Now;
+            SetSendTime();
 
             return (ushort)sequence;
         }
@@ -173,7 +180,7 @@ namespace Mirage.SocketLayer
             Assert.AreEqual(offset, HEADER_SIZE_ACK);
 
             connection.SendRaw(final, final.Length);
-            lastSentTime = time.Now;
+            SetSendTime();
         }
     }
 }
