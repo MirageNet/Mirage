@@ -167,7 +167,7 @@ namespace Mirage
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
             identity.AssetId = assetId;
-            InternalReplacePlayerForConnection(player, character, keepAuthority);
+            ReplaceCharacter(player, character, keepAuthority);
         }
 
         /// <summary>
@@ -181,7 +181,47 @@ namespace Mirage
         /// <returns></returns>
         public void ReplaceCharacter(INetworkPlayer player, GameObject character, bool keepAuthority = false)
         {
-            InternalReplacePlayerForConnection(player, character, keepAuthority);
+            NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
+            if (identity is null)
+            {
+                throw new ArgumentException("ReplacePlayer: playerGameObject has no NetworkIdentity. Please add a NetworkIdentity to " + character);
+            }
+
+            if (identity.ConnectionToClient != null && identity.ConnectionToClient != player)
+            {
+                throw new ArgumentException("Cannot replace player for connection. New player is already owned by a different connection" + character);
+            }
+
+            //NOTE: there can be an existing player
+            logger.Log("NetworkServer ReplacePlayer");
+
+            NetworkIdentity previousPlayer = player.Identity;
+
+            player.Identity = identity;
+
+            // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
+            identity.SetClientOwner(player);
+
+            // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
+            if (player == Server.LocalPlayer)
+            {
+                identity.HasAuthority = true;
+                Server.LocalClient.Player.Identity = identity;
+            }
+
+            // add connection to observers AFTER the playerController was set.
+            // by definition, there is nothing to observe if there is no player
+            // controller.
+            //
+            // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
+            SpawnObserversForConnection(player);
+
+            if (logger.LogEnabled()) logger.Log("Replacing playerGameObject object netId: " + character.GetComponent<NetworkIdentity>().NetId + " asset ID " + character.GetComponent<NetworkIdentity>().AssetId);
+
+            Respawn(identity);
+
+            if (!keepAuthority)
+                previousPlayer.RemoveClientAuthority();
         }
 
         void SpawnObserversForConnection(INetworkPlayer player)
@@ -289,51 +329,6 @@ namespace Mirage
                 // otherwise just replace his data
                 SendSpawnMessage(identity, identity.ConnectionToClient);
             }
-        }
-
-        internal void InternalReplacePlayerForConnection(INetworkPlayer player, GameObject character, bool keepAuthority)
-        {
-            NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
-            if (identity is null)
-            {
-                throw new ArgumentException("ReplacePlayer: playerGameObject has no NetworkIdentity. Please add a NetworkIdentity to " + character);
-            }
-
-            if (identity.ConnectionToClient != null && identity.ConnectionToClient != player)
-            {
-                throw new ArgumentException("Cannot replace player for connection. New player is already owned by a different connection" + character);
-            }
-
-            //NOTE: there can be an existing player
-            logger.Log("NetworkServer ReplacePlayer");
-
-            NetworkIdentity previousPlayer = player.Identity;
-
-            player.Identity = identity;
-
-            // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
-            identity.SetClientOwner(player);
-
-            // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
-            if (player == Server.LocalPlayer)
-            {
-                identity.HasAuthority = true;
-                Server.LocalClient.Player.Identity = identity;
-            }
-
-            // add connection to observers AFTER the playerController was set.
-            // by definition, there is nothing to observe if there is no player
-            // controller.
-            //
-            // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
-            SpawnObserversForConnection(player);
-
-            if (logger.LogEnabled()) logger.Log("Replacing playerGameObject object netId: " + character.GetComponent<NetworkIdentity>().NetId + " asset ID " + character.GetComponent<NetworkIdentity>().AssetId);
-
-            Respawn(identity);
-
-            if (!keepAuthority)
-                previousPlayer.RemoveClientAuthority();
         }
 
         internal void ShowForConnection(NetworkIdentity identity, INetworkPlayer player)
