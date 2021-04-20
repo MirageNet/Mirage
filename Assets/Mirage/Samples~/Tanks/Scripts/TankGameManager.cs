@@ -146,10 +146,10 @@ namespace Mirage.Examples.Tanks
         void FindLocalTank()
         {
             //Check to see if the player is loaded in yet
-            if (NetworkManager.ClientObjectManager.LocalPlayer == null)
+            if (NetworkManager.Client.Player == null)
                 return;
 
-            LocalPlayer = NetworkManager.ClientObjectManager.LocalPlayer.GetComponent<Tank>();
+            LocalPlayer = NetworkManager.Client.Player.Identity.GetComponent<Tank>();
         }
 
         void UpdateStats()

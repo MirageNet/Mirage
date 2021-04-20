@@ -26,11 +26,6 @@ namespace Mirage
         internal readonly Dictionary<Guid, SpawnHandlerDelegate> spawnHandlers = new Dictionary<Guid, SpawnHandlerDelegate>();
         internal readonly Dictionary<Guid, UnSpawnDelegate> unspawnHandlers = new Dictionary<Guid, UnSpawnDelegate>();
 
-        /// <summary>
-        /// NetworkIdentity of the localPlayer
-        /// </summary>
-        public NetworkIdentity LocalPlayer => Client.Player?.Identity;
-
         [Header("Prefabs")]
         /// <summary>
         /// List of prefabs that will be registered with the spawning system.
@@ -515,7 +510,7 @@ namespace Mirage
 
         void CheckForLocalPlayer(NetworkIdentity identity)
         {
-            if (identity && identity == LocalPlayer)
+            if (identity && identity == Client.Player?.Identity)
             {
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
                 identity.StartLocalPlayer();
