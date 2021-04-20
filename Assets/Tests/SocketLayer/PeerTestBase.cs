@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using NSubstitute;
 using NUnit.Framework;
@@ -97,17 +98,19 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
         void ISocket.Send(EndPoint remoteEndPoint, byte[] data, int length)
         {
+            // todo create copy because data is from buffer
+            byte[] clone = data.ToArray();
             TestSocket other = remoteSockets[remoteEndPoint];
             Sent.Add(new Packet
             {
                 endPoint = remoteEndPoint,
-                data = data,
+                data = clone,
                 length = length
             });
             other.received.Enqueue(new Packet
             {
                 endPoint = endPoint,
-                data = data,
+                data = clone,
                 length = length
             });
         }
