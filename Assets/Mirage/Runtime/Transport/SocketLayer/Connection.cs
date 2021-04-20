@@ -9,6 +9,7 @@ namespace Mirage.SocketLayer
     /// </summary>
     public interface IConnection
     {
+        EndPoint EndPoint { get; }
         ConnectionState State { get; }
 
         void Disconnect();
@@ -83,6 +84,8 @@ namespace Mirage.SocketLayer
         private readonly DisconnectedTracker disconnectedTracker;
 
         private readonly NotifySystem notifySystem;
+
+        EndPoint IConnection.EndPoint => EndPoint;
 
         internal Connection(Peer peer, EndPoint endPoint, IDataHandler dataHandler, Config config, Time time, ILogger logger)
         {
