@@ -1,8 +1,9 @@
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
+using Mirage.SocketLayer;
 
-namespace Mirage.SocketLayer.Udp
+namespace Mirage.Sockets.Udp
 {
     public sealed class UdpSocketFactory : SocketFactory
     {
