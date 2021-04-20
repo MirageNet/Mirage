@@ -41,6 +41,7 @@ namespace Mirage.Weaver
         }
 
         public override bool WillProcess(ICompiledAssembly compiledAssembly) =>
-            compiledAssembly.Name == RuntimeAssemblyName);
+            compiledAssembly.Name == RuntimeAssemblyName ||
+            compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RuntimeAssemblyName);
     }
 }
