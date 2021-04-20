@@ -13,7 +13,7 @@ namespace Mirage.SocketLayer
 
         void Disconnect();
 
-        NotifyToken SendNotify(byte[] packet);
+        INotifyToken SendNotify(byte[] packet);
         void SendUnreliable(byte[] packet);
     }
 
@@ -137,7 +137,7 @@ namespace Mirage.SocketLayer
             peer.SendUnreliable(this, packet);
         }
 
-        public NotifyToken SendNotify(byte[] packet)
+        public INotifyToken SendNotify(byte[] packet)
         {
             ThrowIfNotConnected();
             return notifySystem.Send(packet);

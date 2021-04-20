@@ -7,7 +7,16 @@ namespace Mirage.SocketLayer
     /// <summary>
     /// Object returned from <see cref="NotifySystem.Send(byte[])"/> with events for when packet is Lost or Delivered
     /// </summary>
-    public class NotifyToken
+    public interface INotifyToken
+    {
+        event Action Delivered;
+        event Action Lost;
+    }
+
+    /// <summary>
+    /// Object returned from <see cref="NotifySystem.Send(byte[])"/> with events for when packet is Lost or Delivered
+    /// </summary>
+    public class NotifyToken : INotifyToken
     {
         public event Action Delivered;
         public event Action Lost;
@@ -55,7 +64,7 @@ namespace Mirage.SocketLayer
             ackSystem = new AckSystem(connection, ackTimeout, time);
         }
 
-        public NotifyToken Send(byte[] packet)
+        public INotifyToken Send(byte[] packet)
         {
             if (sent.Count >= MaxSentQueue)
             {
