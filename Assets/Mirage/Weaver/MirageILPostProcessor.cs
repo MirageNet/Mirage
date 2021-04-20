@@ -4,13 +4,15 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 
+using ILPPInterface = Unity.CompilationPipeline.Common.ILPostProcessing.ILPostProcessor;
+
 namespace Mirage.Weaver
 {
-    public class MirageILPostProcessor : ILPostProcessor
+    public class MirageILPostProcessor : ILPPInterface
     {
         public const string RuntimeAssemblyName = "Mirage";
 
-        public override ILPostProcessor GetInstance() => this;
+        public override ILPPInterface GetInstance() => this;
 
         public override ILPostProcessResult Process(ICompiledAssembly compiledAssembly)
         {
@@ -39,6 +41,6 @@ namespace Mirage.Weaver
         }
 
         public override bool WillProcess(ICompiledAssembly compiledAssembly) =>
-            compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RuntimeAssemblyName);
+            compiledAssembly.Name == RuntimeAssemblyName);
     }
 }
