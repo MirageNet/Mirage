@@ -416,6 +416,8 @@ namespace Mirage
                 throw new InvalidOperationException("SpawnObject " + obj + " has no NetworkIdentity. Please add a NetworkIdentity to " + obj);
             }
 
+            VerifyCanSpawn(obj);
+
             identity.ConnectionToClient = ownerPlayer;
             identity.Server = Server;
             identity.ServerObjectManager = this;
@@ -551,12 +553,9 @@ namespace Mirage
         /// <param name="owner">The connection that has authority over the object</param>
         public void Spawn(GameObject obj, Guid assetId, INetworkPlayer owner = null)
         {
-            if (VerifyCanSpawn(obj))
-            {
-                NetworkIdentity identity = obj.GetNetworkIdentity();
-                identity.AssetId = assetId;
-                SpawnObject(obj, owner);
-            }
+            NetworkIdentity identity = obj.GetNetworkIdentity();
+            identity.AssetId = assetId;
+            SpawnObject(obj, owner);
         }
 
         /// <summary>
@@ -567,10 +566,7 @@ namespace Mirage
         /// <param name="owner">The connection that has authority over the object</param>
         public void Spawn(GameObject obj, INetworkPlayer owner = null)
         {
-            if (VerifyCanSpawn(obj))
-            {
-                SpawnObject(obj, owner);
-            }
+            SpawnObject(obj, owner);
         }
 
         void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
