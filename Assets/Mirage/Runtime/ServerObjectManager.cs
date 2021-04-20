@@ -416,7 +416,11 @@ namespace Mirage
                 throw new InvalidOperationException("SpawnObject " + obj + " has no NetworkIdentity. Please add a NetworkIdentity to " + obj);
             }
 
-            VerifyCanSpawn(obj);
+            if (CheckForPrefab(obj))
+            {
+                logger.LogFormat(LogType.Error, "GameObject {0} is a prefab, it can't be spawned. This will cause errors in builds.", obj.name);
+                return;
+            }
 
             identity.ConnectionToClient = ownerPlayer;
             identity.Server = Server;
@@ -499,17 +503,6 @@ namespace Mirage
 #else
             return false;
 #endif
-        }
-
-        bool VerifyCanSpawn(GameObject obj)
-        {
-            if (CheckForPrefab(obj))
-            {
-                logger.LogFormat(LogType.Error, "GameObject {0} is a prefab, it can't be spawned. This will cause errors in builds.", obj.name);
-                return false;
-            }
-
-            return true;
         }
 
         /// <summary>
