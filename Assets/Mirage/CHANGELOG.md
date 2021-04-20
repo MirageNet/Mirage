@@ -1,3 +1,10 @@
+# [88.1.0](https://github.com/MirageNet/Mirage/compare/v88.0.0...v88.1.0) (2021-04-20)
+
+
+### Features
+
+* new socket layer ([#749](https://github.com/MirageNet/Mirage/issues/749)) ([fb84452](https://github.com/MirageNet/Mirage/commit/fb844522fc4974d09194af8f1cdac4b167e161d8))
+
 # [88.0.0](https://github.com/MirageNet/Mirage/compare/v87.2.4...v88.0.0) (2021-04-17)
 
 
