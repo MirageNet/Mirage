@@ -7,6 +7,7 @@ namespace Mirage
 {
     public sealed class UdpCreator : SocketCreator
     {
+        [SerializeField] string address = "localhost";
         [SerializeField] int port = 7777;
 
         public override ISocket CreateClientSocket()
@@ -23,9 +24,14 @@ namespace Mirage
         {
             return new IPEndPoint(IPAddress.Any, port);
         }
-        public override EndPoint GetConnectEndPoint(string address)
+        public override EndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
-            return new IPEndPoint(IPAddress.Parse(address), port);
+            string addressString = address ?? this.address;
+            var ipAddress = IPAddress.Parse(addressString);
+
+            ushort portIn = port ?? (ushort)this.port;
+
+            return new IPEndPoint(ipAddress, portIn);
         }
 
         public override bool ClientSupported => platformNotWebgl;

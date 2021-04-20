@@ -18,7 +18,7 @@ namespace Mirage.SocketLayer
         public abstract ISocket CreateServerSocket();
 
         public abstract EndPoint GetBindEndPoint();
-        public abstract EndPoint GetConnectEndPoint(string address);
+        public abstract EndPoint GetConnectEndPoint(string address = null, ushort? port = null);
 
         public abstract bool ClientSupported { get; }
         public abstract bool ServerSupported { get; }
