@@ -407,7 +407,7 @@ namespace Mirage
         {
             if (!Server || !Server.Active)
             {
-                throw new InvalidOperationException("SpawnObject for " + obj + ", NetworkServer is not active. Cannot spawn objects without an active server.");
+                throw new InvalidOperationException("NetworkServer is not active. Cannot spawn objects without an active server.");
             }
 
             NetworkIdentity identity = obj.GetComponent<NetworkIdentity>();
