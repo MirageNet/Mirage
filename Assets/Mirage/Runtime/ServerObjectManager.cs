@@ -418,7 +418,7 @@ namespace Mirage
 
             if (CheckForPrefab(obj))
             {
-                throw new InvalidOperationException($"GameObject {obj.name} is a prefab, it can't be spawned. This will cause errors in builds.");
+                throw new InvalidOperationException($"GameObject {obj.name} is a prefab, it can't be spawned.");
             }
 
             identity.ConnectionToClient = ownerPlayer;
