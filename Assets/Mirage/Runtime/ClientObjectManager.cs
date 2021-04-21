@@ -330,15 +330,7 @@ namespace Mirage
                 identity.gameObject.SetActive(true);
             }
 
-            // apply local values for VR support
-            identity.transform.localPosition = msg.position;
-            identity.transform.localRotation = msg.rotation;
-            identity.transform.localScale = msg.scale;
-            identity.HasAuthority = msg.isOwner;
-            identity.NetId = msg.netId;
-            identity.Client = Client;
-            identity.ClientObjectManager = this;
-            identity.World = Client.World;
+            SetIdentityValues(identity, msg);
 
             if (msg.isLocalPlayer)
                 InternalAddPlayer(identity);
@@ -357,6 +349,24 @@ namespace Mirage
             identity.NotifyAuthority();
             identity.StartClient();
             CheckForLocalPlayer(identity);
+        }
+
+        void SetIdentityValues(NetworkIdentity identity, SpawnMessage msg)
+        {
+            //host mode
+            if(Client.IsLocalClient)
+            {
+                // apply local values for VR support
+                identity.transform.localPosition = msg.position;
+                identity.transform.localRotation = msg.rotation;
+                identity.transform.localScale = msg.scale;
+                identity.NetId = msg.netId;
+                identity.World = Client.World;
+            }
+
+            identity.Client = Client;
+            identity.ClientObjectManager = this;
+            identity.HasAuthority = msg.isOwner;
         }
 
         internal void OnSpawn(SpawnMessage msg)
@@ -479,9 +489,8 @@ namespace Mirage
                 if (msg.isLocalPlayer)
                     InternalAddPlayer(localObject);
 
-                localObject.Client = Client;
-                localObject.ClientObjectManager = this;
-                localObject.HasAuthority = msg.isOwner;
+                SetIdentityValues(localObject, msg);
+
                 localObject.NotifyAuthority();
                 localObject.StartClient();
                 CheckForLocalPlayer(localObject);
