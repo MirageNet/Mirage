@@ -11,7 +11,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 {
 
     [TestFixture]
-    public class ServerObjectManagerTest : ClientServerSetup<MockComponent>
+    public class ServerObjectManagerTests : ClientServerSetup<MockComponent>
     {
         GameObject playerReplacement;
 
