@@ -353,17 +353,12 @@ namespace Mirage
 
         void SetIdentityValues(NetworkIdentity identity, SpawnMessage msg)
         {
-            //host mode
-            if(Client.IsLocalClient)
-            {
-                // apply local values for VR support
-                identity.transform.localPosition = msg.position;
-                identity.transform.localRotation = msg.rotation;
-                identity.transform.localScale = msg.scale;
-                identity.NetId = msg.netId;
-                identity.World = Client.World;
-            }
-
+            // apply local values for VR support
+            identity.transform.localPosition = msg.position;
+            identity.transform.localRotation = msg.rotation;
+            identity.transform.localScale = msg.scale;
+            identity.NetId = msg.netId;
+            identity.World = Client.World;
             identity.Client = Client;
             identity.ClientObjectManager = this;
             identity.HasAuthority = msg.isOwner;
