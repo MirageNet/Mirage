@@ -1,3 +1,11 @@
+## [88.1.1](https://github.com/MirageNet/Mirage/compare/v88.1.0...v88.1.1) (2021-04-21)
+
+
+### Bug Fixes
+
+* class name did not match file name ([5eb58eb](https://github.com/MirageNet/Mirage/commit/5eb58eb9ba0a04e88ce348b7541364c7e17d9db1))
+* test was not correctly checking for offline server ([e913004](https://github.com/MirageNet/Mirage/commit/e913004986cf9e08618184f5066fadaf1d4af7bc))
+
 # [88.1.0](https://github.com/MirageNet/Mirage/compare/v88.0.0...v88.1.0) (2021-04-20)
 
 
