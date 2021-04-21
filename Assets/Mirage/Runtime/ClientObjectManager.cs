@@ -330,7 +330,7 @@ namespace Mirage
                 identity.gameObject.SetActive(true);
             }
 
-            SetIdentityValues(identity, msg);
+            identity.SetClientValues(this, msg);
 
             if (msg.isLocalPlayer)
                 InternalAddPlayer(identity);
@@ -349,19 +349,6 @@ namespace Mirage
             identity.NotifyAuthority();
             identity.StartClient();
             CheckForLocalPlayer(identity);
-        }
-
-        void SetIdentityValues(NetworkIdentity identity, SpawnMessage msg)
-        {
-            // apply local values for VR support
-            identity.transform.localPosition = msg.position;
-            identity.transform.localRotation = msg.rotation;
-            identity.transform.localScale = msg.scale;
-            identity.NetId = msg.netId;
-            identity.World = Client.World;
-            identity.Client = Client;
-            identity.ClientObjectManager = this;
-            identity.HasAuthority = msg.isOwner;
         }
 
         internal void OnSpawn(SpawnMessage msg)
@@ -484,7 +471,7 @@ namespace Mirage
                 if (msg.isLocalPlayer)
                     InternalAddPlayer(localObject);
 
-                SetIdentityValues(localObject, msg);
+                localObject.SetClientValues(this, msg);
 
                 localObject.NotifyAuthority();
                 localObject.StartClient();
