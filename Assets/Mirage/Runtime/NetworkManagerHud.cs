@@ -247,7 +247,6 @@ namespace Mirage
 
         private void ClickClient()
         {
-            Debug.Log(NetworkAddress);
             NetworkManager.Client.ConnectAsync(NetworkAddress);
         }
     }
