@@ -16,7 +16,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         GameObject playerReplacement;
 
         [Test]
-        public void SpawnObjectExposeExceptionTest()
+        public void SpawnObjectServerOfflineExceptionTest()
         {
             var obj = new GameObject();
 
@@ -31,7 +31,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        public void SpawnNoIdentExceptionTest()
+        public void SpawnNoIdentityExceptionTest()
         {
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
