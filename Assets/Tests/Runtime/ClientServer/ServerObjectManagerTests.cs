@@ -18,14 +18,13 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void SpawnObjectExposeExceptionTest()
         {
-            var gameObject = new GameObject();
-            ServerObjectManager comp = gameObject.AddComponent<ServerObjectManager>();
-
             var obj = new GameObject();
+
+            server.Disconnect();
 
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                comp.SpawnObject(obj, connectionToServer);
+                serverObjectManager.SpawnObject(new GameObject(), connectionToServer);
             });
 
             Assert.That(ex.Message, Is.EqualTo("SpawnObject for " + obj + ", NetworkServer is not active. Cannot spawn objects without an active server."));
