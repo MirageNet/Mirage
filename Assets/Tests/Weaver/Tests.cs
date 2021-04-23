@@ -41,7 +41,7 @@ namespace Mirage.Weaver
         {
             Assert.That(weaverLog.Diagnostics
                 .Where(d => d.DiagnosticType == DiagnosticType.Warning)
-                .Select(d => d.MessageData), Contains.Item($"{messsage} (at {atType})"));
+                .Any(d => d.MessageData.Contains($"{messsage} (at {atType})")));
         }
     }
 
@@ -67,7 +67,10 @@ namespace Mirage.Weaver
             foreach (DiagnosticMessage error in weaverLog.Diagnostics)
             {
                 // ensure all errors have a location
-                Assert.That(error.MessageData, Does.Match(@"\(at .*\)$"));
+                if (error.DiagnosticType == DiagnosticType.Error)
+                {
+                    Assert.That(error.MessageData, Does.Match(@"\(at .*\)$"));
+                }
             }
         }
 

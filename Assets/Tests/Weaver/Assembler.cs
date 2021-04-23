@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEditor;
@@ -181,11 +182,19 @@ namespace Mirage.Weaver
                 CompilerMessages.AddRange(compilerMessages);
                 foreach (CompilerMessage cm in compilerMessages)
                 {
+#if UNITY_2020_2_OR_NEWER
+                    // check regex to make sure it is one of Mirage messages
+                    if (cm.type == CompilerMessageType.Warning && Regex.Match(cm.message, @"\(at .*\)$").Success)
+                    {
+                        logger.Warning(string.Format("{0}:{1} -- {2}", cm.file, cm.line, cm.message));
+                    }
+#else
                     if (cm.type == CompilerMessageType.Error)
                     {
                         Debug.LogErrorFormat("{0}:{1} -- {2}", cm.file, cm.line, cm.message);
                         CompilerErrors = true;
                     }
+#endif
                 }
 
                 // assembly builder does not call ILPostProcessor (WTF Unity?),  so we must invoke it ourselves.
