@@ -924,6 +924,27 @@ namespace Mirage
             }
         }
 
+        internal void SetServerValues(NetworkServer networkServer, ServerObjectManager serverObjectManager)
+        {
+            Server = networkServer;
+            ServerObjectManager = serverObjectManager;
+            World = networkServer.World;
+            Client = networkServer.LocalClient;
+        }
+
+        internal void SetClientValues(ClientObjectManager clientObjectManager, SpawnMessage msg)
+        {
+            // apply local values for VR support
+            transform.localPosition = msg.position;
+            transform.localRotation = msg.rotation;
+            transform.localScale = msg.scale;
+            NetId = msg.netId;
+            World = clientObjectManager.Client.World;
+            Client = clientObjectManager.Client;
+            ClientObjectManager = clientObjectManager;
+            HasAuthority = msg.isOwner;
+        }
+
         /// <summary>
         /// Called when NetworkIdentity is destroyed
         /// </summary>

@@ -294,10 +294,7 @@ namespace Mirage
             // because the observers will be rebuilt only if we have a controller
             player.Identity = identity;
 
-            // set server to the NetworkIdentity
-            identity.Server = Server;
-            identity.ServerObjectManager = this;
-            identity.Client = Server.LocalClient;
+            identity.SetServerValues(Server, this);
 
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
             identity.SetClientOwner(player);
@@ -412,10 +409,8 @@ namespace Mirage
             }
 
             identity.ConnectionToClient = ownerPlayer;
-            identity.Server = Server;
-            identity.ServerObjectManager = this;
-            identity.World = Server.World;
-            identity.Client = Server.LocalClient;
+
+            identity.SetServerValues(Server, this);
 
             // special case to make sure hasAuthority is set
             // on start server in host mode
