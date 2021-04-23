@@ -257,11 +257,11 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        public void InternalReplacePlayerNoIdentityExceptionTest()
+        public void ReplacePlayerNoIdentityExceptionTest()
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                serverObjectManager.InternalReplacePlayerForConnection(connectionToClient, new GameObject(), true);
+                serverObjectManager.ReplaceCharacter(connectionToClient, new GameObject(), true);
             });
         }
 
