@@ -65,8 +65,6 @@ namespace Mirage.Weaver
         }
         public static string OutputFile { get; set; }
         public static HashSet<string> SourceFiles { get; private set; }
-        public static HashSet<string> ReferenceAssemblies { get; private set; }
-        public static bool AllowUnsafe { get; set; }
         public static List<CompilerMessage> CompilerMessages { get; private set; }
         public static bool CompilerErrors { get; private set; }
         public static bool DeleteOutputOnClear { get; set; }
@@ -75,7 +73,6 @@ namespace Mirage.Weaver
         static Assembler()
         {
             SourceFiles = new HashSet<string>();
-            ReferenceAssemblies = new HashSet<string>();
             CompilerMessages = new List<CompilerMessage>();
         }
 
@@ -108,12 +105,6 @@ namespace Mirage.Weaver
             }
 
             return false;
-        }
-
-        // Add reference (not cleared during calls to Clear)
-        public static void ClearReferences()
-        {
-            ReferenceAssemblies.Clear();
         }
 
         // Delete output dll / pdb / mdb
@@ -158,7 +149,6 @@ namespace Mirage.Weaver
             OutputFile = "";
             SourceFiles.Clear();
             CompilerMessages.Clear();
-            AllowUnsafe = false;
             DeleteOutputOnClear = false;
         }
 
@@ -170,11 +160,6 @@ namespace Mirage.Weaver
             {
                 referencesOptions = ReferencesOptions.UseEngineModules
             };
-
-            if (AllowUnsafe)
-            {
-                assemblyBuilder.compilerOptions.AllowUnsafeCode = true;
-            }
 
             assemblyBuilder.buildFinished += delegate (string assemblyPath, CompilerMessage[] compilerMessages)
             {
