@@ -1,3 +1,10 @@
+## [88.1.2](https://github.com/MirageNet/Mirage/compare/v88.1.1...v88.1.2) (2021-04-27)
+
+
+### Bug Fixes
+
+* using null propagation to stop null ref being throw ([5da2c6d](https://github.com/MirageNet/Mirage/commit/5da2c6dce2094db534da1b375036460bb37044c8))
+
 ## [88.1.1](https://github.com/MirageNet/Mirage/compare/v88.1.0...v88.1.1) (2021-04-21)
 
 
