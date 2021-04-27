@@ -115,13 +115,17 @@ namespace Mirage
                 // let's catch them all and then disconnect that connection to avoid
                 // further attacks.
                 var message = default(T);
+
+                // record start position for NetworkDiagnostics because reader might contain multiple messages if using batching
+                int startPos = reader.Position;
                 try
                 {
                     message = reader.Read<T>();
                 }
                 finally
                 {
-                    NetworkDiagnostics.OnReceive(message, channelId, reader.Length);
+                    int endPos = reader.Position;
+                    NetworkDiagnostics.OnReceive(message, channelId, endPos - startPos);
                 }
 
                 handler(player, message);
