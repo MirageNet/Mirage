@@ -14,7 +14,6 @@ namespace Mirage
         public GameObject OfflineGO;
         public GameObject OnlineGO;
         public Text StatusLabel;
-        string labelText;
 
         private void Start()
         {
@@ -22,9 +21,9 @@ namespace Mirage
             Application.runInBackground = true;
         }
 
-        private void Update()
+        void SetLabel(string value)
         {
-            if (StatusLabel) StatusLabel.text = labelText;
+            if (StatusLabel) StatusLabel.text = value;
         }
 
         internal void OnlineSetActive()
@@ -41,28 +40,28 @@ namespace Mirage
 
         public void StartHostButtonHandler()
         {
-            labelText = "Host Mode";
+            SetLabel("Host Mode");
             NetworkManager.Server.StartHost(NetworkManager.Client).Forget();
             OnlineSetActive();
         }
 
         public void StartServerOnlyButtonHandler()
         {
-            labelText = "Server Mode";
+            SetLabel("Server Mode");
             NetworkManager.Server.ListenAsync().Forget();
             OnlineSetActive();
         }
 
         public void StartClientButtonHandler()
         {
-            labelText = "Client Mode";
+            SetLabel("Client Mode");
             NetworkManager.Client.ConnectAsync(NetworkAddress).Forget();
             OnlineSetActive();
         }
 
         public void StopButtonHandler()
         {
-            labelText = string.Empty;
+            SetLabel(string.Empty);
             NetworkManager.Server.StopHost();
             NetworkManager.Client.Disconnect();
             OfflineSetActive();
