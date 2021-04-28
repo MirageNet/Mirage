@@ -64,6 +64,7 @@ namespace Mirage.Weaver
             }
         }
         public string OutputFile { get; set; }
+        public string ProjectPathFile => Path.Combine(WeaverTestLocator.OutputDirectory, WeaverTestLocator.OutputFile);
         public List<CompilerMessage> CompilerMessages { get; private set; }
         public bool CompilerErrors { get; private set; }
 
@@ -92,23 +93,21 @@ namespace Mirage.Weaver
                 return;
             }
 
-            string projPathFile = Path.Combine(OutputDirectory, OutputFile);
-
             try
             {
-                File.Delete(projPathFile);
+                File.Delete(ProjectPathFile);
             }
             catch { /* Do Nothing */ }
 
             try
             {
-                File.Delete(Path.ChangeExtension(projPathFile, ".pdb"));
+                File.Delete(Path.ChangeExtension(ProjectPathFile, ".pdb"));
             }
             catch { /* Do Nothing */ }
 
             try
             {
-                File.Delete(Path.ChangeExtension(projPathFile, ".dll.mdb"));
+                File.Delete(Path.ChangeExtension(ProjectPathFile, ".dll.mdb"));
             }
             catch { /* Do Nothing */ }
         }
@@ -131,7 +130,7 @@ namespace Mirage.Weaver
         {
             AssemblyDefinition assembly = null;
 
-            var assemblyBuilder = new AssemblyBuilder(Path.Combine(OutputDirectory, OutputFile), sourceFiles.ToArray())
+            var assemblyBuilder = new AssemblyBuilder(ProjectPathFile, sourceFiles.ToArray())
             {
                 referencesOptions = ReferencesOptions.UseEngineModules
             };
