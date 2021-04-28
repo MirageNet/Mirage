@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
-using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
 
@@ -120,6 +119,7 @@ namespace Mirage.Weaver
 
             assemblyBuilder.buildFinished += delegate (string assemblyPath, CompilerMessage[] compilerMessages)
             {
+#if !UNITY_2020_2_OR_NEWER
                 CompilerMessages.AddRange(compilerMessages);
                 foreach (CompilerMessage cm in compilerMessages)
                 {
@@ -129,6 +129,7 @@ namespace Mirage.Weaver
                         CompilerErrors = true;
                     }
                 }
+#endif
 
                 // assembly builder does not call ILPostProcessor (WTF Unity?),  so we must invoke it ourselves.
                 var compiledAssembly = new CompiledAssembly(assemblyPath)
