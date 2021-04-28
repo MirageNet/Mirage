@@ -20,7 +20,7 @@ jobs:
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit
 
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - name: Cache Library
         id: cache-library
@@ -42,7 +42,7 @@ jobs:
         run: docfx build --logLevel Warning --warningsAsErrors doc/docfx.json
 
       - name: Publish docs
-        uses: crazy-max/ghaction-github-pages@v2.2.0
+        uses: crazy-max/ghaction-github-pages@v2.3.0
         if: github.ref == 'refs/heads/master'
         with:
           # Create incremental commit instead of doing push force

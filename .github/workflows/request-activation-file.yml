@@ -13,7 +13,7 @@ jobs:
         run: unity-editor -logFile /dev/stdout -createManualActivationFile -quit 
 
       - name: Upload License Request
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
             name: Manual Activation File
             path: Unity_v2020.1.17f1.alf
