@@ -52,6 +52,18 @@ namespace Mirage
         // Change this
         public const string PACKAGE_NAME = "com.miragenet.mirage";
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void InitializeLoggers()
+        {
+            MirageProjectSettings settings = Get();
+
+            for (int i = 0; i < settings.logLevels.Count; i++)
+            {
+                ILogger logger = LogFactory.GetLogger(settings.logLevels[i].name);
+                logger.filterLogType = settings.logLevels[i].level;
+            }
+        }
+
 #if UNITY_EDITOR
         static MirageProjectSettings()
         {
