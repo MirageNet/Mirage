@@ -98,7 +98,10 @@ namespace Mirage
                 GUILayout.BeginVertical();
 
                 labelWidth = EditorGUIUtility.labelWidth;
-                EditorGUIUtility.labelWidth = 250;
+                if (EditorGUIUtility.currentViewWidth > 550)
+                {
+                    EditorGUIUtility.labelWidth = 250;
+                }
                 GUILayout.BeginHorizontal();
                 GUILayout.Space(7);
                 GUILayout.BeginVertical();
