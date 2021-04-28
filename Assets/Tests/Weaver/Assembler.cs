@@ -47,8 +47,8 @@ namespace Mirage.Weaver
 
     public class Assembler : ScriptableObject
     {
-        static string _outputDirectory;
-        public static string OutputDirectory
+        string _outputDirectory;
+        public string OutputDirectory
         {
             get
             {
@@ -63,21 +63,20 @@ namespace Mirage.Weaver
                 return _outputDirectory;
             }
         }
-        public static string OutputFile { get; set; }
-        public static HashSet<string> SourceFiles { get; private set; }
-        public static List<CompilerMessage> CompilerMessages { get; private set; }
-        public static bool CompilerErrors { get; private set; }
-        public static bool DeleteOutputOnClear { get; set; }
+        public string OutputFile { get; set; }
+        public HashSet<string> SourceFiles { get; private set; }
+        public List<CompilerMessage> CompilerMessages { get; private set; }
+        public bool CompilerErrors { get; private set; }
+        public bool DeleteOutputOnClear { get; set; }
 
-        // static constructor to initialize static properties
-        static Assembler()
+        public Assembler()
         {
             SourceFiles = new HashSet<string>();
             CompilerMessages = new List<CompilerMessage>();
         }
 
         // Add a range of source files to compile
-        public static void AddSourceFiles(string[] sourceFiles)
+        public void AddSourceFiles(string[] sourceFiles)
         {
             foreach (string src in sourceFiles)
             {
@@ -108,7 +107,7 @@ namespace Mirage.Weaver
         }
 
         // Delete output dll / pdb / mdb
-        public static void DeleteOutput()
+        public void DeleteOutput()
         {
             // "x.dll" shortest possible dll name
             if (OutputFile.Length < 5)
@@ -138,7 +137,7 @@ namespace Mirage.Weaver
         }
 
         // clear all settings except for referenced assemblies (which are cleared with ClearReferences)
-        public static void Clear()
+        public void Clear()
         {
             if (DeleteOutputOnClear)
             {
@@ -152,7 +151,7 @@ namespace Mirage.Weaver
             DeleteOutputOnClear = false;
         }
 
-        public static AssemblyDefinition Build(IWeaverLogger logger)
+        public AssemblyDefinition Build(IWeaverLogger logger)
         {
             AssemblyDefinition assembly = null;
 

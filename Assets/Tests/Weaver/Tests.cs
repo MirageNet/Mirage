@@ -54,16 +54,18 @@ namespace Mirage.Weaver
 
         protected AssemblyDefinition assembly;
 
+        protected Assembler assembler = new Assembler();
+
         protected void BuildAndWeaveTestAssembly(string className, string testName)
         {
             weaverLog.Diagnostics.Clear();
 
             string testSourceDirectory = className + "~";
-            Assembler.OutputFile = Path.Combine(testSourceDirectory, testName + ".dll");
-            Assembler.AddSourceFiles(new string[] { Path.Combine(testSourceDirectory, testName + ".cs") });
-            assembly = Assembler.Build(weaverLog);
+            assembler.OutputFile = Path.Combine(testSourceDirectory, testName + ".dll");
+            assembler.AddSourceFiles(new string[] { Path.Combine(testSourceDirectory, testName + ".cs") });
+            assembly = assembler.Build(weaverLog);
 
-            Assert.That(Assembler.CompilerErrors, Is.False);
+            Assert.That(assembler.CompilerErrors, Is.False);
             foreach (DiagnosticMessage error in weaverLog.Diagnostics)
             {
                 // ensure all errors have a location
@@ -74,8 +76,8 @@ namespace Mirage.Weaver
         [TearDown]
         public void TestCleanup()
         {
-            Assembler.DeleteOutputOnClear = true;
-            Assembler.Clear();
+            assembler.DeleteOutputOnClear = true;
+            assembler.Clear();
         }
     }
 }
