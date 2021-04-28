@@ -76,8 +76,7 @@ namespace Mirage.Weaver
         [TearDown]
         public void TestCleanup()
         {
-            assembler.DeleteOutputOnClear = true;
-            assembler.Clear();
+            assembler.Clear(true);
         }
     }
 }

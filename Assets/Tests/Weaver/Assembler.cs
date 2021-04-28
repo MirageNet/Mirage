@@ -67,7 +67,6 @@ namespace Mirage.Weaver
         public HashSet<string> SourceFiles { get; private set; }
         public List<CompilerMessage> CompilerMessages { get; private set; }
         public bool CompilerErrors { get; private set; }
-        public bool DeleteOutputOnClear { get; set; }
 
         public Assembler()
         {
@@ -137,9 +136,9 @@ namespace Mirage.Weaver
         }
 
         // clear all settings except for referenced assemblies (which are cleared with ClearReferences)
-        public void Clear()
+        public void Clear(bool deleteOutputOnClear)
         {
-            if (DeleteOutputOnClear)
+            if (deleteOutputOnClear)
             {
                 DeleteOutput();
             }
@@ -148,7 +147,6 @@ namespace Mirage.Weaver
             OutputFile = "";
             SourceFiles.Clear();
             CompilerMessages.Clear();
-            DeleteOutputOnClear = false;
         }
 
         public AssemblyDefinition Build(IWeaverLogger logger)
