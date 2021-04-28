@@ -7,14 +7,16 @@ namespace Mirage.Logging
     {
         internal static readonly Dictionary<string, ILogger> loggers = new Dictionary<string, ILogger>();
 
+        public static IReadOnlyDictionary<string, ILogger> Loggers => loggers;
+
         public static ILogger GetLogger<T>(LogType defaultLogLevel = LogType.Warning)
         {
-            return GetLogger(typeof(T).Name, defaultLogLevel);
+            return GetLogger(typeof(T).FullName, defaultLogLevel);
         }
 
         public static ILogger GetLogger(System.Type type, LogType defaultLogLevel = LogType.Warning)
         {
-            return GetLogger(type.Name, defaultLogLevel);
+            return GetLogger(type.FullName, defaultLogLevel);
         }
 
         public static ILogger GetLogger(string loggerName, LogType defaultLogLevel = LogType.Warning)
