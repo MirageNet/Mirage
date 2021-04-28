@@ -60,7 +60,7 @@ namespace Mirage.Weaver
             weaverLog.Diagnostics.Clear();
 
             string testSourceDirectory = className + "~";
-            assembler.OutputFile = Path.Combine(testSourceDirectory, testName + ".dll");
+            WeaverTestLocator.OutputFile = Path.Combine(testSourceDirectory, testName + ".dll");
             assembler.AddSourceFiles(new string[] { Path.Combine(testSourceDirectory, testName + ".cs") });
             assembly = assembler.Build(weaverLog);
 

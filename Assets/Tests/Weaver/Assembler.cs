@@ -45,25 +45,8 @@ namespace Mirage.Weaver
         public string[] Defines { get; set; }
     }
 
-    public class Assembler : ScriptableObject
+    public class Assembler
     {
-        string _outputDirectory;
-        public string OutputDirectory
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_outputDirectory))
-                {
-                    ScriptableObject assemblerObj = CreateInstance<Assembler>();
-
-                    var monoScript = MonoScript.FromScriptableObject(assemblerObj);
-                    string myPath = AssetDatabase.GetAssetPath(monoScript);
-                    _outputDirectory = Path.GetDirectoryName(myPath);
-                }
-                return _outputDirectory;
-            }
-        }
-        public string OutputFile { get; set; }
         public string ProjectPathFile => Path.Combine(WeaverTestLocator.OutputDirectory, WeaverTestLocator.OutputFile);
         public List<CompilerMessage> CompilerMessages { get; private set; }
         public bool CompilerErrors { get; private set; }
@@ -80,7 +63,7 @@ namespace Mirage.Weaver
         {
             foreach (string src in sourceFiles)
             {
-                this.sourceFiles.Add(Path.Combine(OutputDirectory, src));
+                this.sourceFiles.Add(Path.Combine(WeaverTestLocator.OutputDirectory, src));
             }
         }
 
@@ -88,7 +71,7 @@ namespace Mirage.Weaver
         public void DeleteOutput()
         {
             // "x.dll" shortest possible dll name
-            if (OutputFile.Length < 5)
+            if (WeaverTestLocator.OutputFile.Length < 5)
             {
                 return;
             }
@@ -121,7 +104,7 @@ namespace Mirage.Weaver
             }
 
             CompilerErrors = false;
-            OutputFile = "";
+            WeaverTestLocator.OutputFile = "";
             sourceFiles.Clear();
             CompilerMessages.Clear();
         }
