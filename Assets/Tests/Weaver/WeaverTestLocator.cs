@@ -20,5 +20,4 @@ public class WeaverTestLocator : ScriptableObject
             return _outputDirectory;
         }
     }
-    public static string OutputFile { get; set; }
 }

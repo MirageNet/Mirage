@@ -46,7 +46,8 @@ namespace Mirage.Weaver
 
     public class Assembler
     {
-        public string ProjectPathFile => Path.Combine(WeaverTestLocator.OutputDirectory, WeaverTestLocator.OutputFile);
+        public string OutputFile { get; set; }
+        public string ProjectPathFile => Path.Combine(WeaverTestLocator.OutputDirectory, OutputFile);
         public List<CompilerMessage> CompilerMessages { get; private set; }
         public bool CompilerErrors { get; private set; }
 
@@ -70,7 +71,7 @@ namespace Mirage.Weaver
         public void DeleteOutput()
         {
             // "x.dll" shortest possible dll name
-            if (WeaverTestLocator.OutputFile.Length < 5)
+            if (OutputFile.Length < 5)
             {
                 return;
             }
@@ -103,7 +104,7 @@ namespace Mirage.Weaver
             }
 
             CompilerErrors = false;
-            WeaverTestLocator.OutputFile = "";
+            OutputFile = "";
             sourceFiles.Clear();
             CompilerMessages.Clear();
         }
