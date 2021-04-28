@@ -27,7 +27,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                 serverObjectManager.SpawnObject(new GameObject(), connectionToServer);
             });
 
-            Assert.That(ex.Message, Is.EqualTo("SpawnObject for " + obj + ", NetworkServer is not active. Cannot spawn objects without an active server."));
+            Assert.That(ex.Message, Is.EqualTo("NetworkServer is not active. Cannot spawn objects without an active server."));
         }
 
         [Test]
