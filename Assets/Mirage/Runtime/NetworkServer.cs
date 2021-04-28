@@ -189,13 +189,22 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Start the server, setting the maximum number of connections.
+        /// Start the server
+        /// <para>If <paramref name="localClient"/> is given then will start in host mode</para>
         /// </summary>
-        /// <param name="maxConns">Maximum number of allowed connections</param>
+        /// <param name="localClient">if not null then start the server and client in hostmode</param>
         /// <returns></returns>
-        public async UniTask ListenAsync()
+        public async UniTask StartAsync(NetworkClient localClient = null)
         {
+            LocalClient = localClient;
+
             Initialize();
+
+            if (LocalClient != null)
+            {
+                localClient.ConnectHost(this);
+                logger.Log("NetworkServer StartHost");
+            }
 
             try
             {
@@ -221,40 +230,19 @@ namespace Mirage
             Active = true;
             // (useful for loading & spawning stuff from database etc.)
             _started?.Invoke();
+
+            if (LocalClient != null)
+            {
+                // we should call onStartHost after transport is ready to be used
+                // this allows server methods like NetworkServer.Spawn to be called in there
+                _onStartHost?.Invoke();
+            }
         }
 
         private void TransportConnected(IConnection connection)
         {
             var networkConnectionToClient = new NetworkPlayer(connection);
             ConnectionAcceptedAsync(networkConnectionToClient).Forget();
-        }
-
-        /// <summary>
-        /// This starts a network "host" - a server and client in the same application.
-        /// <para>The client returned from StartHost() is a special "local" client that communicates to the in-process server using a message queue instead of the real network. But in almost all other cases, it can be treated as a normal client.</para>
-        /// </summary>
-        public UniTask StartHost(NetworkClient client)
-        {
-            if (!client)
-                throw new InvalidOperationException("NetworkClient not assigned. Unable to StartHost()");
-
-            // need to set local client before listen as that is when world is created
-            LocalClient = client;
-
-            // start listening to network connections
-            UniTask task = ListenAsync();
-
-            Active = true;
-
-            client.ConnectHost(this);
-
-            // call OnStartHost AFTER SetupServer. this way we can use
-            // NetworkServer.Spawn etc. in there too. just like OnStartServer
-            // is called after the server is actually properly started.
-            _onStartHost?.Invoke();
-
-            logger.Log("NetworkServer StartHost");
-            return task;
         }
 
         /// <summary>
