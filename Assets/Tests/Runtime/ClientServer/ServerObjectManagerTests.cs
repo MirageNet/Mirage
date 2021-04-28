@@ -20,7 +20,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             var obj = new GameObject();
 
-            server.Disconnect();
+            server.Stop();
 
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
@@ -268,7 +268,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SpawnObjectsExceptionTest() => UniTask.ToCoroutine(async () =>
         {
-            server.Disconnect();
+            server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
 

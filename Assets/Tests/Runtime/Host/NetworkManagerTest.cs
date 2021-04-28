@@ -18,7 +18,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator IsNetworkActiveStopTest() => UniTask.ToCoroutine(async () =>
         {
-            manager.Server.Disconnect();
+            manager.Server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !client.Active);
 

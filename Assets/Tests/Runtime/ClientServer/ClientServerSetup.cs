@@ -117,7 +117,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator ShutdownHost() => UniTask.ToCoroutine(async () =>
         {
             client.Disconnect();
-            server.Disconnect();
+            server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !client.Active);
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);

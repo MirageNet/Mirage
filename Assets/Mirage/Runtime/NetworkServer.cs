@@ -134,7 +134,7 @@ namespace Mirage
         /// <summary>
         /// This shuts down the server and disconnects all clients.
         /// </summary>
-        public void Disconnect()
+        public void Stop()
         {
             if (LocalClient != null)
             {
@@ -162,7 +162,7 @@ namespace Mirage
             initialized = true;
             World = new NetworkWorld();
 
-            Application.quitting += Disconnect;
+            Application.quitting += Stop;
             if (logger.LogEnabled()) logger.Log($"NetworkServer Created, Mirage version: {Version.Current}");
 
 
@@ -261,7 +261,7 @@ namespace Mirage
         /// </summary>
         public void StopHost()
         {
-            Disconnect();
+            Stop();
         }
 
         /// <summary>
@@ -290,7 +290,7 @@ namespace Mirage
             _onStopHost.Reset();
             _stopped.Reset();
 
-            Application.quitting -= Disconnect;
+            Application.quitting -= Stop;
         }
 
         /// <summary>

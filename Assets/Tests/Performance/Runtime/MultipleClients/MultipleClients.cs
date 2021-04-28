@@ -100,7 +100,7 @@ namespace Mirage.Tests.Performance.Runtime
         public IEnumerator TearDown()
         {
             // shutdown
-            Server.Disconnect();
+            Server.Stop();
             yield return null;
 
             // unload scene

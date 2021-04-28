@@ -71,7 +71,7 @@ namespace Mirage.Tests.Runtime.Host
             Assert.That(server.LocalClientActive, Is.True);
             Assert.That(server.Players, Has.Count.EqualTo(1));
 
-            server.Disconnect();
+            server.Stop();
 
             // wait for messages to get dispatched
             await AsyncUtil.WaitUntilWithTimeout(() => !server.LocalClientActive);
@@ -86,7 +86,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ClientSceneChangedOnReconnect() => UniTask.ToCoroutine(async () =>
         {
-            server.Disconnect();
+            server.Stop();
 
             // wait for server to disconnect
             await UniTask.WaitUntil(() => !server.Active);
