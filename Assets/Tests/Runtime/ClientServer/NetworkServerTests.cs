@@ -126,7 +126,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator DisconnectStateTest() => UniTask.ToCoroutine(async () =>
         {
-            server.Disconnect();
+            server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
         });
@@ -138,7 +138,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             UnityAction func1 = Substitute.For<UnityAction>();
             server.Stopped.AddListener(func1);
 
-            server.Disconnect();
+            server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
 

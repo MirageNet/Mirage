@@ -131,7 +131,7 @@ namespace Mirage.Tests.Runtime.Host
             //1 is the player. should be 2 at this point
             Assert.That(server.World.SpawnedIdentities.Count, Is.GreaterThan(1));
 
-            server.Disconnect();
+            server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
 

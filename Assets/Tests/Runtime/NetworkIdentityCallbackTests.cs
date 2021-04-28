@@ -80,7 +80,7 @@ namespace Mirage.Tests.Runtime
             Assert.That(identity.observers, Is.EquivalentTo(new[] { connection1, server.LocalPlayer }));
 
             // clean up
-            server.Disconnect();
+            server.Stop();
         }
 
         // RebuildObservers should always add the own ready connection
