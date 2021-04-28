@@ -19,7 +19,6 @@ namespace Mirage.Weaver
             string className = TestContext.CurrentContext.Test.ClassName.Split('.').Last();
 
             BuildAndWeaveTestAssembly(className, TestContext.CurrentContext.Test.Name);
-
         }
 
         [AssertionMethod]

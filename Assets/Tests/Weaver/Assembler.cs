@@ -83,28 +83,6 @@ namespace Mirage.Weaver
             }
         }
 
-        // Find reference assembly specified by asmName and store its full path in asmFullPath
-        // do not pass in paths in asmName, just assembly names
-        public static bool FindReferenceAssemblyPath(string asmName, out string asmFullPath)
-        {
-            asmFullPath = "";
-
-            Assembly[] asms = CompilationPipeline.GetAssemblies();
-            foreach (Assembly asm in asms)
-            {
-                foreach (string asmRef in asm.compiledAssemblyReferences)
-                {
-                    if (asmRef.EndsWith(asmName))
-                    {
-                        asmFullPath = asmRef;
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
         // Delete output dll / pdb / mdb
         public void DeleteOutput()
         {
