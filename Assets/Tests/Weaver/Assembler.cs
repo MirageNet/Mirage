@@ -113,7 +113,7 @@ namespace Mirage.Weaver
         }
 
         // clear all settings except for referenced assemblies (which are cleared with ClearReferences)
-        public void Clear(bool deleteOutputOnClear)
+        public void Clear(bool deleteOutputOnClear = true)
         {
             if (deleteOutputOnClear)
             {
