@@ -1,3 +1,11 @@
+## [88.1.3](https://github.com/MirageNet/Mirage/compare/v88.1.2...v88.1.3) (2021-04-28)
+
+
+### Bug Fixes
+
+* removing quitting handler on cleanup ([1132d92](https://github.com/MirageNet/Mirage/commit/1132d9246e4640036acdb10bac4d2c8a2e426b78))
+* server offline does not need a specific object ([#788](https://github.com/MirageNet/Mirage/issues/788)) ([9ca7639](https://github.com/MirageNet/Mirage/commit/9ca7639818d311d72f56f035c58dd516cbe73c27))
+
 ## [88.1.2](https://github.com/MirageNet/Mirage/compare/v88.1.1...v88.1.2) (2021-04-27)
 
 
