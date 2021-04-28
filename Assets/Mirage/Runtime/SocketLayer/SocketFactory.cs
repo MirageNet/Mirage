@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using UnityEngine;
 
@@ -14,13 +15,19 @@ namespace Mirage.SocketLayer
     /// </remarks>
     public abstract class SocketFactory : MonoBehaviour
     {
-        public abstract ISocket CreateClientSocket();
+        /// <summary>Creates a <see cref="ISocket"/> to be used by <see cref="Peer"/> on the server</summary>
+        /// <exception cref="NotSupportedException">Throw when Server is not supported on current platform</exception>
         public abstract ISocket CreateServerSocket();
 
+        /// <summary>Creates the <see cref="EndPoint"/> that the Server Socket will bind to</summary>
         public abstract EndPoint GetBindEndPoint();
-        public abstract EndPoint GetConnectEndPoint(string address = null, ushort? port = null);
 
-        public abstract bool ClientSupported { get; }
-        public abstract bool ServerSupported { get; }
+
+        /// <summary>Creates a <see cref="ISocket"/> to be used by <see cref="Peer"/> on the client</summary>
+        /// <exception cref="NotSupportedException">Throw when Client is not supported on current platform</exception>
+        public abstract ISocket CreateClientSocket();
+
+        /// <summary>Creates the <see cref="EndPoint"/> that the Client Socket will connect to using the parameter given</summary>
+        public abstract EndPoint GetConnectEndPoint(string address = null, ushort? port = null);
     }
 }

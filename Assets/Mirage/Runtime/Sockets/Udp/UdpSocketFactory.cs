@@ -1,7 +1,8 @@
+using System;
 using System.Net;
 using System.Net.Sockets;
-using UnityEngine;
 using Mirage.SocketLayer;
+using UnityEngine;
 
 namespace Mirage.Sockets.Udp
 {
@@ -12,11 +13,15 @@ namespace Mirage.Sockets.Udp
 
         public override ISocket CreateClientSocket()
         {
+            ThrowIfNotSupported();
+
             return new UdpSocket();
         }
 
         public override ISocket CreateServerSocket()
         {
+            ThrowIfNotSupported();
+
             return new UdpSocket();
         }
 
@@ -34,9 +39,15 @@ namespace Mirage.Sockets.Udp
             return new IPEndPoint(ipAddress, portIn);
         }
 
-        public override bool ClientSupported => platformNotWebgl;
-        public override bool ServerSupported => platformNotWebgl;
-        private static bool platformNotWebgl => Application.platform != RuntimePlatform.WebGLPlayer;
+        void ThrowIfNotSupported()
+        {
+            if (IsWebgl)
+            {
+                throw new NotSupportedException("Udp Socket can not be created in Webgl builds, Use WebSocket instead");
+            }
+        }
+
+        private static bool IsWebgl => Application.platform == RuntimePlatform.WebGLPlayer;
     }
 
     public class UdpSocket : ISocket
