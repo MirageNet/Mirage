@@ -289,6 +289,8 @@ namespace Mirage
             _onStartHost.Reset();
             _onStopHost.Reset();
             _stopped.Reset();
+
+            Application.quitting -= Disconnect;
         }
 
         /// <summary>
