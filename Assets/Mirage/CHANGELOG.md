@@ -1,3 +1,15 @@
+# [89.0.0](https://github.com/MirageNet/Mirage/compare/v88.1.3...v89.0.0) (2021-04-28)
+
+
+### Code Refactoring
+
+* renaming network server disconnect to stop ([#793](https://github.com/MirageNet/Mirage/issues/793)) ([634139c](https://github.com/MirageNet/Mirage/commit/634139c8a6dde8f6b83d72a54ef779631005050c))
+
+
+### BREAKING CHANGES
+
+* NetworkServer.Disconnect is now called Stop
+
 ## [88.1.3](https://github.com/MirageNet/Mirage/compare/v88.1.2...v88.1.3) (2021-04-28)
 
 
