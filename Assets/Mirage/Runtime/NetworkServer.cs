@@ -133,6 +133,7 @@ namespace Mirage
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.
+        /// <para>If In host mode, this will also stop the local client</para>
         /// </summary>
         public void Stop()
         {
@@ -254,14 +255,6 @@ namespace Mirage
 
             logger.Log("NetworkServer StartHost");
             return task;
-        }
-
-        /// <summary>
-        /// This stops both the client and the server that the manager is using.
-        /// </summary>
-        public void StopHost()
-        {
-            Stop();
         }
 
         /// <summary>

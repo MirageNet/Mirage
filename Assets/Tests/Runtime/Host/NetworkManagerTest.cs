@@ -54,7 +54,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator NetworkManagerModeOfflineHostTest() => UniTask.ToCoroutine(async () =>
         {
-            server.StopHost();
+            server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active && !client.Active);
 

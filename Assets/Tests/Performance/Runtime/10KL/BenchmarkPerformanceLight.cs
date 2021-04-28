@@ -36,7 +36,7 @@ namespace Mirage.Tests.Performance.Runtime
         public IEnumerator TearDown()
         {
             // shutdown
-            benchmarker.Server.StopHost();
+            benchmarker.Server.Stop();
             yield return null;
 
             // unload scene

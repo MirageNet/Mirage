@@ -87,7 +87,7 @@ namespace Mirage.Tests.Runtime.Host
         public IEnumerator ShutdownHost() => UniTask.ToCoroutine(async () =>
         {
             Object.Destroy(playerGO);
-            manager.Server.StopHost();
+            manager.Server.Stop();
 
             await UniTask.Delay(1);
             Object.Destroy(networkManagerGo);
