@@ -12,7 +12,7 @@ namespace Mirage
         [MenuItem("GameObject/Network/NetworkManager", priority = 7)]
         public static GameObject CreateNetworkManager()
         {
-            var go = new GameObject("NetworkManager", typeof(NetworkManager), typeof(NetworkServer), typeof(NetworkClient), typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(ClientObjectManager), typeof(CharacterSpawner), typeof(KcpTransport), typeof(LogSettings));
+            var go = new GameObject("NetworkManager", typeof(NetworkManager), typeof(NetworkServer), typeof(NetworkClient), typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(ClientObjectManager), typeof(CharacterSpawner), typeof(KcpTransport));
 
             KcpTransport transport = go.GetComponent<KcpTransport>();
             NetworkSceneManager nsm = go.GetComponent<NetworkSceneManager>();
