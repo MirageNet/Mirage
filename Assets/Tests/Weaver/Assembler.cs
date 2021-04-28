@@ -64,13 +64,13 @@ namespace Mirage.Weaver
             }
         }
         public string OutputFile { get; set; }
-        public HashSet<string> SourceFiles { get; private set; }
         public List<CompilerMessage> CompilerMessages { get; private set; }
         public bool CompilerErrors { get; private set; }
 
+        readonly HashSet<string> sourceFiles = new HashSet<string>();
+
         public Assembler()
         {
-            SourceFiles = new HashSet<string>();
             CompilerMessages = new List<CompilerMessage>();
         }
 
@@ -79,7 +79,7 @@ namespace Mirage.Weaver
         {
             foreach (string src in sourceFiles)
             {
-                SourceFiles.Add(Path.Combine(OutputDirectory, src));
+                this.sourceFiles.Add(Path.Combine(OutputDirectory, src));
             }
         }
 
@@ -145,7 +145,7 @@ namespace Mirage.Weaver
 
             CompilerErrors = false;
             OutputFile = "";
-            SourceFiles.Clear();
+            sourceFiles.Clear();
             CompilerMessages.Clear();
         }
 
@@ -153,7 +153,7 @@ namespace Mirage.Weaver
         {
             AssemblyDefinition assembly = null;
 
-            var assemblyBuilder = new AssemblyBuilder(Path.Combine(OutputDirectory, OutputFile), SourceFiles.ToArray())
+            var assemblyBuilder = new AssemblyBuilder(Path.Combine(OutputDirectory, OutputFile), sourceFiles.ToArray())
             {
                 referencesOptions = ReferencesOptions.UseEngineModules
             };
