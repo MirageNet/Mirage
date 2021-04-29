@@ -62,7 +62,6 @@ namespace Mirage
         {
             string resourcesPath = $"{Application.dataPath}/Resources";
             string packagePath = $"{resourcesPath}/{MirageProjectSettings.PACKAGE_NAME}";
-            Debug.Log($"PostProcessBuild {createdResources} | {createdPackageFolder} | {packagePath} | {resourcesPath}");
 
             if (createdResources && createdPackageFolder && Directory.Exists(packagePath))
             {
