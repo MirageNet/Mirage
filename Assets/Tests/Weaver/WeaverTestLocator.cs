@@ -2,22 +2,28 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-public class WeaverTestLocator : ScriptableObject
+namespace Mirage.Weaver
 {
-    static string _outputDirectory;
-    public static string OutputDirectory
+    /// <summary>
+    /// This class is used by weaver tests to find the current directory used for weaver outputs
+    /// </summary>
+    public class WeaverTestLocator : ScriptableObject
     {
-        get
+        static string _outputDirectory;
+        public static string OutputDirectory
         {
-            if (string.IsNullOrEmpty(_outputDirectory))
+            get
             {
-                ScriptableObject assemblerObj = CreateInstance<WeaverTestLocator>();
+                if (string.IsNullOrEmpty(_outputDirectory))
+                {
+                    ScriptableObject assemblerObj = CreateInstance<WeaverTestLocator>();
 
-                var monoScript = MonoScript.FromScriptableObject(assemblerObj);
-                string myPath = AssetDatabase.GetAssetPath(monoScript);
-                _outputDirectory = Path.GetDirectoryName(myPath);
+                    var monoScript = MonoScript.FromScriptableObject(assemblerObj);
+                    string myPath = AssetDatabase.GetAssetPath(monoScript);
+                    _outputDirectory = Path.GetDirectoryName(myPath);
+                }
+                return _outputDirectory;
             }
-            return _outputDirectory;
         }
     }
 }
