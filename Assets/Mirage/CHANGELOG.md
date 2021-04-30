@@ -1,3 +1,15 @@
+# [90.0.0](https://github.com/MirageNet/Mirage/compare/v89.0.0...v90.0.0) (2021-04-30)
+
+
+### Code Refactoring
+
+* removing stop host ([#794](https://github.com/MirageNet/Mirage/issues/794)) ([55536fc](https://github.com/MirageNet/Mirage/commit/55536fc6fb674b164bf599367022428df3b8ed63))
+
+
+### BREAKING CHANGES
+
+* NetworkServer.StopHost removed, use NetworkServer.Disconnect instead
+
 # [89.0.0](https://github.com/MirageNet/Mirage/compare/v88.1.3...v89.0.0) (2021-04-28)
 
 
