@@ -72,5 +72,11 @@ namespace Mirage.Weaver
                 Assert.That(error.MessageData, Does.Match(@"\(at .*\)$"));
             }
         }
+
+        [TearDown]
+        public void TestCleanup()
+        {
+            assembler.DeleteOutput();
+        }
     }
 }
