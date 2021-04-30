@@ -42,6 +42,7 @@ jobs:
       - name: Install sonar scanner
         run: |
           $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 4.7.1
+          apt-cache policy openjdk-11-jre-headless
           apt install -y openjdk-11-jre-headless=11.0.11+9-0ubuntu2~18.04
 
       - name: Run editor Tests
