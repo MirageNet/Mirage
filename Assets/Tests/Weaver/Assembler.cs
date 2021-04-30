@@ -95,20 +95,6 @@ namespace Mirage.Weaver
             catch { /* Do Nothing */ }
         }
 
-        // clear all settings except for referenced assemblies (which are cleared with ClearReferences)
-        public void Clear(bool deleteOutputOnClear = true)
-        {
-            if (deleteOutputOnClear)
-            {
-                DeleteOutput();
-            }
-
-            CompilerErrors = false;
-            OutputFile = "";
-            sourceFiles.Clear();
-            CompilerMessages.Clear();
-        }
-
         public AssemblyDefinition Build(IWeaverLogger logger)
         {
             AssemblyDefinition assembly = null;

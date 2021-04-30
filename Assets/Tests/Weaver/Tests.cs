@@ -53,11 +53,12 @@ namespace Mirage.Weaver
 
         protected AssemblyDefinition assembly;
 
-        protected Assembler assembler = new Assembler();
+        protected Assembler assembler;
 
         protected void BuildAndWeaveTestAssembly(string className, string testName)
         {
             weaverLog.Diagnostics.Clear();
+            assembler = new Assembler();
 
             string testSourceDirectory = className + "~";
             assembler.OutputFile = Path.Combine(testSourceDirectory, testName + ".dll");
@@ -70,12 +71,6 @@ namespace Mirage.Weaver
                 // ensure all errors have a location
                 Assert.That(error.MessageData, Does.Match(@"\(at .*\)$"));
             }
-        }
-
-        [TearDown]
-        public void TestCleanup()
-        {
-            assembler.Clear();
         }
     }
 }
