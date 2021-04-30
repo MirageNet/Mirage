@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
@@ -34,16 +33,6 @@ namespace Mirage.Tests.Runtime.Host
 
             await AsyncUtil.WaitUntilWithTimeout(() => !client.Active);
         });
-
-        [Test]
-        public void StartHostException()
-        {
-            manager.Client = null;
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                manager.Server.StartHost(manager.Client).GetAwaiter().GetResult();
-            });
-        }
 
         [Test]
         public void NetworkManagerModeHostTest()
