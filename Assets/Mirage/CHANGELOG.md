@@ -1,3 +1,17 @@
+# [91.0.0](https://github.com/MirageNet/Mirage/compare/v90.0.0...v91.0.0) (2021-05-01)
+
+
+### Code Refactoring
+
+* renaming listen to start and merging it with start host ([#795](https://github.com/MirageNet/Mirage/issues/795)) ([3d4e091](https://github.com/MirageNet/Mirage/commit/3d4e0916b14b3b1b494b9bfba366844f209f2414))
+
+
+### BREAKING CHANGES
+
+* - ListenAsync renamed to StartAsync
+- StartHost removed, use StartAsync with localClient parameter instead
+- OnStartHost is now always called after Started
+
 # [90.0.0](https://github.com/MirageNet/Mirage/compare/v89.0.0...v90.0.0) (2021-04-30)
 
 
