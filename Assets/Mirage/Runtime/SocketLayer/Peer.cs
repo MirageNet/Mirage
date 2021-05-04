@@ -52,6 +52,9 @@ namespace Mirage.SocketLayer
         public event Action<IConnection, DisconnectReason> OnDisconnected;
         public event Action<IConnection, RejectReason> OnConnectionFailed;
 
+        /// <summary>
+        /// is server listening on or connected to endpoint
+        /// </summary>
         bool active;
 
         EndPoint receiveEndPoint = null;
@@ -72,25 +75,30 @@ namespace Mirage.SocketLayer
 
         public void Bind(EndPoint endPoint)
         {
-            socket.Bind(endPoint);
+            if (active) throw new InvalidOperationException("Peer is already active");
             active = true;
+            socket.Bind(endPoint);
         }
 
         public IConnection Connect(EndPoint endPoint)
         {
+            if (active) throw new InvalidOperationException("Peer is already active");
+
+            active = true;
+            socket.Connect(endPoint);
+
             Connection connection = CreateNewConnection(endPoint);
             connection.State = ConnectionState.Connecting;
 
             // update now to send connectRequest command
-
             connection.Update();
-            active = true;
             return connection;
         }
 
         public void Close()
         {
             if (!active) throw new InvalidOperationException("Peer is not active");
+            active = false;
 
             // send disconnect messages
             foreach (Connection conn in connections.Values)
@@ -99,15 +107,15 @@ namespace Mirage.SocketLayer
             }
             RemoveConnections();
 
-
-            active = false;
             // close socket
             socket.Close();
         }
 
         internal void Send(Connection connection, byte[] data, int length)
         {
-            Assert(connection.State == ConnectionState.Connected);
+            // connecting connections can send connect messages so is allowed
+            // todo check connected before message are sent from high level
+            Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected);
 
             socket.Send(connection.EndPoint, data, length);
             connection.SetSendTime();
@@ -209,6 +217,9 @@ namespace Mirage.SocketLayer
                     {
                         HandleNewConnection(receiveEndPoint, packet);
                     }
+
+                    // socket might have been closed by message handler
+                    if (!active) { break; }
                 }
             }
         }
@@ -404,7 +415,7 @@ namespace Mirage.SocketLayer
             }
 
             // tell high level
-            OnDisconnected.Invoke(connection, reason);
+            OnDisconnected?.Invoke(connection, reason);
         }
 
         internal void FailedToConnect(Connection connection, RejectReason reason)
@@ -414,7 +425,7 @@ namespace Mirage.SocketLayer
             RemoveConnection(connection);
 
             // tell high level
-            OnConnectionFailed.Invoke(connection, reason);
+            OnConnectionFailed?.Invoke(connection, reason);
         }
 
         internal void RemoveConnection(Connection connection)

@@ -169,7 +169,7 @@ namespace Mirage.SocketLayer
                 case ConnectionState.Connected:
                     peer.OnConnectionDisconnected(this, reason, sendToOther);
                     State = ConnectionState.Disconnected;
-                    disconnectedTracker.Disconnect();
+                    disconnectedTracker.OnDisconnect();
                     break;
 
                 default:
@@ -341,7 +341,7 @@ namespace Mirage.SocketLayer
                 this.time = time ?? throw new ArgumentNullException(nameof(time));
             }
 
-            public void Disconnect()
+            public void OnDisconnect()
             {
                 disconnectTime = time.Now + config.DisconnectDuration;
                 isDisonnected = true;

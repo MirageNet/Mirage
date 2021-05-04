@@ -54,10 +54,10 @@ namespace Mirage.Tests
             AddThisSocket();
         }
 
-        //void ISocket.Connect(EndPoint endPoint)
-        //{
-        //    AddThisSocket();
-        //}
+        void ISocket.Connect(EndPoint endPoint)
+        {
+            AddThisSocket();
+        }
 
         void ISocket.Close()
         {
