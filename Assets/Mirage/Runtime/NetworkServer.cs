@@ -196,6 +196,8 @@ namespace Mirage
         /// <returns></returns>
         public async UniTask StartAsync(NetworkClient localClient = null)
         {
+            if (Active) throw new InvalidOperationException("Server is already active");
+
             LocalClient = localClient;
 
             Initialize();

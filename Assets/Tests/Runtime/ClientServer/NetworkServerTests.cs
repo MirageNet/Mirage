@@ -32,6 +32,16 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(server.LocalClientActive, Is.False);
         }
 
+        [Test]
+        public void ThrowsIfListenIsCalledWhileAlreadyActive()
+        {
+            InvalidOperationException expection = Assert.Throws<InvalidOperationException>(() =>
+            {
+                server.StartAsync().GetAwaiter().GetResult();
+            });
+            Assert.That(expection, Has.Message.EqualTo("Server is already active"));
+        }
+
         [UnityTest]
         public IEnumerator ReadyMessageSetsClientReadyTest() => UniTask.ToCoroutine(async () =>
         {
