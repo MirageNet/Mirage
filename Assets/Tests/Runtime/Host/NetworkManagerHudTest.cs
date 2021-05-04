@@ -8,10 +8,10 @@ using Object = UnityEngine.Object;
 namespace Mirage.Tests.Runtime.Host
 {
     [TestFixture]
-    public class NetworkManagerHudTest : HostSetup<MockComponent>
+    public class NetworkManagerHudTestSetup : HostSetup<MockComponent>
     {
         GameObject gameObject;
-        NetworkManagerHud networkManagerHud;
+        protected NetworkManagerHud networkManagerHud;
         public override void ExtraSetup()
         {
             gameObject = new GameObject("NetworkManagerHud", typeof(NetworkManagerHud));
@@ -31,7 +31,11 @@ namespace Mirage.Tests.Runtime.Host
             Object.DestroyImmediate(networkManagerHud.OnlineGO);
             Object.DestroyImmediate(gameObject);
         }
+    }
 
+    [TestFixture]
+    public class NetworkManagerHudTest : NetworkManagerHudTestSetup
+    {
         [Test]
         public void OnlineSetActiveTest()
         {
@@ -48,15 +52,7 @@ namespace Mirage.Tests.Runtime.Host
             Assert.That(networkManagerHud.OnlineGO.activeSelf, Is.False);
         }
 
-        [Test]
-        public void StartServerOnlyButtonTest()
-        {
-            networkManagerHud.StartServerOnlyButtonHandler();
-            Assert.That(networkManagerHud.OfflineGO.activeSelf, Is.False);
-            Assert.That(networkManagerHud.OnlineGO.activeSelf, Is.True);
 
-            Assert.That(manager.Server.Active, Is.True);
-        }
 
         [UnityTest]
         public IEnumerator StopButtonTest() => UniTask.ToCoroutine(async () =>
@@ -69,5 +65,21 @@ namespace Mirage.Tests.Runtime.Host
 
             Assert.That(manager.IsNetworkActive, Is.False);
         });
+    }
+
+    [TestFixture]
+    public class NetworkManagerHudTestNoAutoStart : NetworkManagerHudTestSetup
+    {
+        protected override bool AutoStartServer => false;
+
+        [Test]
+        public void StartServerOnlyButtonTest()
+        {
+            networkManagerHud.StartServerOnlyButtonHandler();
+            Assert.That(networkManagerHud.OfflineGO.activeSelf, Is.False);
+            Assert.That(networkManagerHud.OnlineGO.activeSelf, Is.True);
+
+            Assert.That(manager.Server.Active, Is.True);
+        }
     }
 }

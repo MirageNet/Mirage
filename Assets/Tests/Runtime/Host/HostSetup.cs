@@ -23,6 +23,8 @@ namespace Mirage.Tests.Runtime.Host
         protected NetworkIdentity identity;
         protected T component;
 
+        protected virtual bool AutoStartServer => true;
+
         public virtual void ExtraSetup() { }
 
         [UnitySetUp]
@@ -53,16 +55,19 @@ namespace Mirage.Tests.Runtime.Host
             // wait for all Start() methods to get invoked
             await UniTask.DelayFrame(1);
 
-            await StartHost();
+            if (AutoStartServer)
+            {
+                await StartHost();
 
-            playerGO = new GameObject("playerGO", typeof(Rigidbody));
-            identity = playerGO.AddComponent<NetworkIdentity>();
-            component = playerGO.AddComponent<T>();
+                playerGO = new GameObject("playerGO", typeof(Rigidbody));
+                identity = playerGO.AddComponent<NetworkIdentity>();
+                component = playerGO.AddComponent<T>();
 
-            serverObjectManager.AddCharacter(server.LocalPlayer, playerGO);
+                serverObjectManager.AddCharacter(server.LocalPlayer, playerGO);
 
-            // wait for client to spawn it
-            await AsyncUtil.WaitUntilWithTimeout(() => client.Player.Identity != null);
+                // wait for client to spawn it
+                await AsyncUtil.WaitUntilWithTimeout(() => client.Player.Identity != null);
+            }
         });
 
         protected async UniTask StartHost()
