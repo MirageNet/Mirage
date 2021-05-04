@@ -1,3 +1,10 @@
+## [91.0.1](https://github.com/MirageNet/Mirage/compare/v91.0.0...v91.0.1) (2021-05-04)
+
+
+### Bug Fixes
+
+* unspawning all server object on server stop ([5041a06](https://github.com/MirageNet/Mirage/commit/5041a06de8506574add2795dc075b71245e39d88))
+
 # [91.0.0](https://github.com/MirageNet/Mirage/compare/v90.0.0...v91.0.0) (2021-05-01)
 
 
