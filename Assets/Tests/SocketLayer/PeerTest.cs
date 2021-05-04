@@ -129,5 +129,15 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             socket.DidNotReceiveWithAnyArgs().Send(default, default, default);
             connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
         }
+
+        [Test]
+        public void StopsReceiveLoopIfClosedByMessageHandler()
+        {
+            // todo implement
+            Assert.Ignore("Not Implemented");
+
+            // if a receive handler calls close while in receive loop we should stop the loop before calling poll again
+            // if we dont we will get object disposed errors
+        }
     }
 }

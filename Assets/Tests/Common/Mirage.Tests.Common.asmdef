@@ -4,7 +4,8 @@
         "Mirage",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "UniTask"
+        "UniTask",
+        "Mirage.SocketLayer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
