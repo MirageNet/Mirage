@@ -61,7 +61,12 @@ namespace Mirage.SocketLayer
 
         public NotifySystem(IRawConnection connection, float ackTimeout, Time time)
         {
-            ackSystem = new AckSystem(connection, ackTimeout, time);
+
+        }
+
+        public NotifySystem(AckSystem ackSystem)
+        {
+            this.ackSystem = ackSystem;
         }
 
         public INotifyToken Send(byte[] packet)
@@ -84,7 +89,7 @@ namespace Mirage.SocketLayer
         {
             ReceivedPacket received = ackSystem.ReceiveAck(array);
 
-            NotifySent(received);
+            CheckSentQueue(received);
         }
 
         public void Receive(byte[] packet)
@@ -92,10 +97,10 @@ namespace Mirage.SocketLayer
             ReceivedPacket received = ackSystem.Receive(packet);
             if (!received.isValid) { return; }
 
-            NotifySent(received);
+            CheckSentQueue(received);
         }
 
-        private void NotifySent(ReceivedPacket received)
+        private void CheckSentQueue(ReceivedPacket received)
         {
             while (sent.Count > 0)
             {
@@ -134,6 +139,140 @@ namespace Mirage.SocketLayer
         public void Update()
         {
             ackSystem.Update();
+        }
+    }
+
+    internal class ReliableOrderSystem
+    {
+        // todo https://gafferongames.com/post/reliable_ordered_messages/
+
+        readonly AckSystem ackSystem;
+        const int MaxSentQueue = 512;
+        readonly Queue<SequencePacket> sent = new Queue<SequencePacket>(MaxSentQueue);
+
+        public ReliableOrderSystem(AckSystem ackSystem)
+        {
+            this.ackSystem = ackSystem;
+        }
+
+        public void Send(byte[] packet)
+        {
+            if (sent.Count >= MaxSentQueue)
+            {
+                throw new InvalidOperationException("Sent queue is full");
+            }
+
+            // todo add sequence to packet
+            //   onRecieve only send packet to higher level if in order
+
+            ushort sequence = ackSystem.Send(packet);
+            sent.Enqueue(new SequencePacket(sequence, packet));
+        }
+
+        public void Receive(byte[] packet)
+        {
+            ReceivedPacket received = ackSystem.Receive(packet);
+            if (!received.isValid) { return; }
+
+            CheckSentQueue(received);
+        }
+
+        private void CheckSentQueue(ReceivedPacket received)
+        {
+            while (sent.Count > 0)
+            {
+                SequencePacket packet = sent.Peek();
+
+                int distance = (int)ackSystem.sequencer.Distance(received.receivedSequence, packet.sequence);
+
+                // negative distance means next is sent after last ack, so nothing to ack yet
+                if (distance < 0)
+                    return;
+
+                // positive distance means it should have been acked, or mark it as lost
+                sent.Dequeue();
+
+                // if distance above size then it is outside of mask, so set as lost
+                bool lost = OutsideOfMask(distance) || NotInMask(distance, received.receivedMask);
+
+                Resend(packet);
+            }
+        }
+
+        private void Resend(SequencePacket packet)
+        {
+            throw new NotImplementedException();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool OutsideOfMask(int distance)
+        {
+            const int maskSize = sizeof(uint) * 8;
+            return distance > maskSize;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool NotInMask(int distance, uint receivedMask)
+        {
+            uint ackBit = 1u << distance;
+            return (receivedMask & ackBit) == 0u;
+        }
+
+        public struct SequencePacket
+        {
+            public uint sequence;
+            public byte[] packet;
+
+            public SequencePacket(uint sequence, byte[] packet)
+            {
+                this.sequence = sequence;
+                this.packet = packet;
+            }
+        }
+    }
+    public class RingBuffer
+    {
+        SequencePacket[] ring;
+        ulong head;
+        ulong tail;
+        Sequencer sequencer;
+
+        public RingBuffer()
+        {
+            head = 0;
+            tail = 0;
+            sequencer = new Sequencer(256);
+            ring = new SequencePacket[8];
+        }
+
+
+        public bool IsFull()
+        {
+            long distance = sequencer.Distance(head, tail);
+
+            return distance == -1;
+        }
+
+        public void AddNext(uint sequence, byte[] packet)
+        {
+            ring[head] = new SequencePacket(sequence, packet);
+            head = sequencer.NextAfter(head);
+        }
+        public void Remove(uint sequence)
+        {
+            throw new NotImplementedException();
+        }
+
+        public struct SequencePacket
+        {
+            public uint sequence;
+            public byte[] packet;
+
+            public SequencePacket(uint sequence, byte[] packet)
+            {
+                this.sequence = sequence;
+                this.packet = packet;
+            }
         }
     }
 }

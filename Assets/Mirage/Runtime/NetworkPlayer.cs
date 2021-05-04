@@ -262,14 +262,14 @@ namespace Mirage
         {
             if (isDisconnect) { return; }
 
+            // todo use buffer pool
+            byte[] packet = segment.ToArray();
             if (channelId == Channel.Reliable)
             {
-                Reliable.Send(segment);
+                connection.SendReliable(packet);
             }
             else
             {
-                // todo use buffer pool
-                byte[] packet = segment.ToArray();
                 connection.SendUnreliable(packet);
             }
         }

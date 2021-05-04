@@ -15,6 +15,7 @@ namespace Mirage.SocketLayer
         void Disconnect();
 
         INotifyToken SendNotify(byte[] packet);
+        void SendReliable(byte[] packet);
         void SendUnreliable(byte[] packet);
     }
 
@@ -84,6 +85,7 @@ namespace Mirage.SocketLayer
         private readonly DisconnectedTracker disconnectedTracker;
 
         private readonly NotifySystem notifySystem;
+        private readonly ReliableOrderSystem reliableSystem;
 
         EndPoint IConnection.EndPoint => EndPoint;
 
@@ -100,7 +102,10 @@ namespace Mirage.SocketLayer
             keepAliveTracker = new KeepAliveTracker(config, time);
             disconnectedTracker = new DisconnectedTracker(config, time);
 
-            notifySystem = new NotifySystem(this, config.AckTimeout, time);
+
+            var ackSystem = new AckSystem(this, config.AckTimeout, time);
+            notifySystem = new NotifySystem(ackSystem);
+            reliableSystem = new ReliableOrderSystem(ackSystem);
         }
 
         public void Update()
@@ -144,6 +149,11 @@ namespace Mirage.SocketLayer
         {
             ThrowIfNotConnected();
             return notifySystem.Send(packet);
+        }
+        public void SendReliable(byte[] packet)
+        {
+            ThrowIfNotConnected();
+            reliableSystem.Send(packet);
         }
 
         void IRawConnection.SendRaw(byte[] packet, int length)
