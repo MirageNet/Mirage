@@ -40,14 +40,14 @@ namespace Mirage
         public void StartHostButtonHandler()
         {
             SetLabel("Host Mode");
-            NetworkManager.Server.Start(NetworkManager.Client);
+            NetworkManager.Server.StartServer(NetworkManager.Client);
             OnlineSetActive();
         }
 
         public void StartServerOnlyButtonHandler()
         {
             SetLabel("Server Mode");
-            NetworkManager.Server.Start();
+            NetworkManager.Server.StartServer();
             OnlineSetActive();
         }
 

@@ -23,7 +23,7 @@ namespace Mirage
             // some transports might not be ready until Start.
             if (Server && SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null && startOnHeadless)
             {
-                Server.Start();
+                Server.StartServer();
             }
         }
     }

@@ -16,7 +16,7 @@ namespace Mirage.Examples.Chat
 
         public void StartHost()
         {
-            NetworkManager.Server.Start(NetworkManager.Client);
+            NetworkManager.Server.StartServer(NetworkManager.Client);
         }
 
         public void SetServerIp(string serverIp)

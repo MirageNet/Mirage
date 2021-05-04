@@ -120,7 +120,7 @@ namespace Mirage.HeadlessBenchmark
 
                 server.Started.AddListener(OnServerStarted);
                 server.Authenticated.AddListener(conn => serverObjectManager.SetClientReady(conn));
-                server.Start();
+                server.StartServer();
                 Console.WriteLine("Starting Server Only Mode");
             }
         }

@@ -81,7 +81,7 @@ namespace Mirage.Tests.Runtime.Host
 
             server.Started.AddListener(Started);
             // now start the host
-            manager.Server.Start(client);
+            manager.Server.StartServer(client);
 
             await completionSource.Task;
         }

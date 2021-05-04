@@ -224,8 +224,8 @@ namespace Mirage
         /// <para>If <paramref name="localClient"/> is given then will start in host mode</para>
         /// </summary>
         /// <param name="localClient">if not null then start the server and client in hostmode</param>
-        /// <returns></returns>
-        public void Start(NetworkClient localClient = null)
+        // Has to be called "StartServer" to stop unity complaining about "Start" method
+        public void StartServer(NetworkClient localClient = null)
         {
             if (Active) throw new InvalidOperationException("Server is already active");
 

@@ -51,7 +51,7 @@ namespace Mirage.Tests.Performance.Runtime
 
             // wait 1 frame before Starting server to give time for Unity to call "Start"
             await UniTask.Yield();
-            Server.Start();
+            Server.StartServer();
 
             await started.Task;
 

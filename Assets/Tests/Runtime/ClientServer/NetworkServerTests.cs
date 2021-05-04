@@ -37,7 +37,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             InvalidOperationException expection = Assert.Throws<InvalidOperationException>(() =>
             {
-                server.Start();
+                server.StartServer();
             });
             Assert.That(expection, Has.Message.EqualTo("Server is already active"));
         }

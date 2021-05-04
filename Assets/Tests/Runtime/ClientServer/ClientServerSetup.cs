@@ -84,7 +84,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             // start the server
             var started = new UniTaskCompletionSource();
             server.Started.AddListener(() => started.TrySetResult());
-            server.Start();
+            server.StartServer();
 
             await started.Task;
 
