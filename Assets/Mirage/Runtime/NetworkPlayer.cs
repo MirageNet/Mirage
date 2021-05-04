@@ -112,12 +112,23 @@ namespace Mirage
 
         public SocketLayer.IConnection Connection => connection;
 
+        /// <summary>
+        /// Disconnects the player.
+        /// <para>A disconnected player can not send messages</para>
+        /// </summary>
+        /// <remarks>
+        /// This method exists so that users do not need to add reference to SocketLayer asmdef
+        /// </remarks>
         public void Disconnect()
         {
             connection.Disconnect();
             isDisconnect = true;
         }
 
+        /// <summary>
+        /// Marks player as disconnected, used when the disconnect call is from peer
+        /// <para>A disconnected player can not send messages</para>
+        /// </summary>
         public void MarkAsDisconnected()
         {
             isDisconnect = true;
