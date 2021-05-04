@@ -5,54 +5,11 @@ using System.Linq;
 using System.Net;
 using Mirage.Logging;
 using Mirage.Serialization;
-using Mirage.SocketLayer;
 using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace Mirage
 {
-    public class ReliableSystem
-    {
-        // todo make sure message are received in order
-
-
-        readonly SocketLayer.IConnection connection;
-        //readonly Dictionary<NotifyToken, byte[]> SentPackets = new Dictionary<NotifyToken, byte[]>();
-
-        public ReliableSystem(SocketLayer.IConnection connection)
-        {
-            this.connection = connection;
-        }
-
-        public void Send(ArraySegment<byte> segment)
-        {
-            // todo use buffer pool
-            byte[] packet = segment.ToArray();
-
-            INotifyToken token = connection.SendNotify(packet);
-            //SentPackets.Add(token, packet);
-            token.Delivered += Token_Delivered;
-            token.Lost += Token_Lost;
-
-
-            void Token_Delivered()
-            {
-                //SentPackets.Remove(token);
-                CleanToken();
-            }
-            void Token_Lost()
-            {
-                Send(segment);
-                CleanToken();
-            }
-
-            void CleanToken()
-            {
-                token.Delivered -= Token_Delivered;
-                token.Lost -= Token_Lost;
-            }
-        }
-    }
     [NetworkMessage]
     public struct NotifyAck
     {
@@ -140,8 +97,6 @@ namespace Mirage
         /// </summary>
         public NetworkIdentity Identity { get; set; }
 
-        readonly ReliableSystem Reliable;
-
         /// <summary>
         /// A list of the NetworkIdentity objects owned by this connection. This list is read-only.
         /// <para>This includes the player object for the connection - if it has localPlayerAutority set, and any objects spawned with local authority or set with AssignLocalAuthority.</para>
@@ -159,7 +114,6 @@ namespace Mirage
         {
             Assert.IsNotNull(connection);
             this.connection = connection;
-            Reliable = new ReliableSystem(connection);
 
             lastNotifySentTime = Time.unscaledTime;
             // a black message to ensure a notify timeout
@@ -396,6 +350,7 @@ namespace Mirage
         const int ACK_MASK_BITS = sizeof(ulong) * 8;
         const int WINDOW_SIZE = 512;
         // packages will be acked no longer than this time
+        [System.Obsolete("Use Peer instead", true)]
         public float NOTIFY_ACK_TIMEOUT = 0.3f;
 
         private Sequencer sequencer = new Sequencer(16);
