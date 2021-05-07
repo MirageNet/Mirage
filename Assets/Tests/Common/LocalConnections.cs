@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Mirage.Tests
 {
 
@@ -7,22 +5,20 @@ namespace Mirage.Tests
     {
         public static (NetworkPlayer serverPlayer, NetworkPlayer clientPlayer) PipedConnections()
         {
-            var serverDictionary = new Dictionary<SocketLayer.IConnection, INetworkPlayer>();
-            var clientDictionary = new Dictionary<SocketLayer.IConnection, INetworkPlayer>();
-            var serverHandler = new DataHandler(serverDictionary);
-            var clientHandler = new DataHandler(clientDictionary);
+            // we can re-use networkclient's handlers here as it just needs connection and player
+            var serverHandler = new NetworkClient.DataHandler();
+            var clientHandler = new NetworkClient.DataHandler();
 
             (SocketLayer.IConnection clientConn, SocketLayer.IConnection serverConn) = PipePeerConnection.Create(clientHandler, serverHandler);
 
             var serverPlayer = new NetworkPlayer(serverConn);
             var clientPlayer = new NetworkPlayer(clientConn);
 
-            serverDictionary.Add(clientConn, clientPlayer);
-            clientDictionary.Add(serverConn, serverPlayer);
-
+            // give connections to each other so they can invoke handlers
+            serverHandler.SetConnection(clientConn, clientPlayer);
+            clientHandler.SetConnection(serverConn, serverPlayer);
 
             return (serverPlayer, clientPlayer);
         }
-
     }
 }

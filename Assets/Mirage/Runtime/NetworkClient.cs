@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Net;
 using Mirage.Events;
 using Mirage.Logging;
@@ -8,8 +7,6 @@ using UnityEngine;
 
 namespace Mirage
 {
-
-
     public enum ConnectState
     {
         Disconnected,
@@ -32,7 +29,6 @@ namespace Mirage
         public SocketFactory SocketFactory;
 
         Peer peer;
-        DataHandler dataHandler;
 
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
@@ -108,8 +104,7 @@ namespace Mirage
             try
             {
                 ISocket socket = SocketFactory.CreateClientSocket();
-                var connDictionary = new Dictionary<SocketLayer.IConnection, INetworkPlayer>();
-                dataHandler = new DataHandler(connDictionary);
+                var dataHandler = new DataHandler();
                 peer = new Peer(socket, dataHandler, logger: LogFactory.GetLogger<Peer>());
 
                 peer.OnConnected += Peer_OnConnected;
@@ -123,7 +118,7 @@ namespace Mirage
 
                 // setup all the handlers
                 Player = new NetworkPlayer(connection);
-                connDictionary.Add(connection, Player);
+                dataHandler.SetConnection(connection, Player);
                 Time.Reset();
 
                 RegisterMessageHandlers();
@@ -172,14 +167,13 @@ namespace Mirage
             InitializeAuthEvents();
 
             // create local connection objects and connect them
-            var connDictionary = new Dictionary<SocketLayer.IConnection, INetworkPlayer>();
-            dataHandler = new DataHandler(connDictionary);
+            var dataHandler = new DataHandler();
             (SocketLayer.IConnection clientConn, SocketLayer.IConnection serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler);
 
             // set up client before connecting to server, server could invoke handlers
             IsLocalClient = true;
             Player = new NetworkPlayer(clientConn);
-            connDictionary.Add(clientConn, Player);
+            dataHandler.SetConnection(clientConn, Player);
             RegisterHostHandlers();
 
             // client has to connect first or it will miss message in NetworkScenemanager
@@ -297,6 +291,25 @@ namespace Mirage
                 peer.OnDisconnected -= Peer_OnDisconnected;
                 peer.Close();
                 peer = null;
+            }
+        }
+
+
+        internal class DataHandler : IDataHandler
+        {
+            SocketLayer.IConnection connection;
+            INetworkPlayer player;
+
+            public void SetConnection(SocketLayer.IConnection connection, INetworkPlayer player)
+            {
+                this.connection = connection;
+                this.player = player;
+            }
+
+            public void ReceivePacket(SocketLayer.IConnection connection, ArraySegment<byte> packet)
+            {
+                logger.Assert(this.connection == connection);
+                player.HandleMessage(packet);
             }
         }
     }

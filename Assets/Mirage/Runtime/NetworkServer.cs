@@ -12,32 +12,6 @@ using UnityEngine.Serialization;
 namespace Mirage
 {
     /// <summary>
-    /// This class will later be removed when we have a better implemenation for IDataHandler
-    /// </summary>
-    internal class DataHandler : IDataHandler
-    {
-        readonly Dictionary<SocketLayer.IConnection, INetworkPlayer> players;
-
-        public DataHandler(Dictionary<SocketLayer.IConnection, INetworkPlayer> connections)
-        {
-            players = connections;
-        }
-
-        public void ReceivePacket(SocketLayer.IConnection connection, ArraySegment<byte> packet)
-        {
-            if (players.TryGetValue(connection, out INetworkPlayer handler))
-            {
-                handler.HandleMessage(packet);
-            }
-            else
-            {
-                // todo remove or replace with assert
-                Debug.LogWarning($"No player found for {connection}");
-            }
-        }
-    }
-
-    /// <summary>
     /// The NetworkServer.
     /// </summary>
     /// <remarks>
@@ -69,7 +43,6 @@ namespace Mirage
         public SocketFactory SocketFactory;
 
         Peer peer;
-        DataHandler dataHandler;
 
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
@@ -233,7 +206,8 @@ namespace Mirage
 
             Initialize();
 
-            CreateAndBindSocket();
+            var dataHandler = new DataHandler(connections);
+            CreateAndBindSocket(dataHandler);
 
             if (LocalClient != null)
             {
@@ -242,10 +216,9 @@ namespace Mirage
             }
         }
 
-        void CreateAndBindSocket()
+        void CreateAndBindSocket(DataHandler dataHandler)
         {
             ISocket socket = SocketFactory.CreateServerSocket();
-            dataHandler = new DataHandler(connections);
             ILogger peerLogger = LogFactory.GetLogger<Peer>();
             peer = new Peer(socket, dataHandler, logger: peerLogger);
             EndPoint endpoint = SocketFactory.GetBindEndPoint();
@@ -466,6 +439,32 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("Server authenticate client:" + player);
 
             Authenticated?.Invoke(player);
+        }
+
+        /// <summary>
+        /// This class will later be removed when we have a better implemenation for IDataHandler
+        /// </summary>
+        class DataHandler : IDataHandler
+        {
+            readonly Dictionary<SocketLayer.IConnection, INetworkPlayer> players;
+
+            public DataHandler(Dictionary<SocketLayer.IConnection, INetworkPlayer> connections)
+            {
+                players = connections;
+            }
+
+            public void ReceivePacket(SocketLayer.IConnection connection, ArraySegment<byte> packet)
+            {
+                if (players.TryGetValue(connection, out INetworkPlayer handler))
+                {
+                    handler.HandleMessage(packet);
+                }
+                else
+                {
+                    // todo remove or replace with assert
+                    logger.LogWarning($"No player found for {connection}");
+                }
+            }
         }
     }
 }
