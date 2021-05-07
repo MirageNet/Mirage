@@ -240,7 +240,10 @@ namespace Mirage.SocketLayer
                 case PacketType.Notify:
                     connection.ReceiveNotifyPacket(packet);
                     break;
-                case PacketType.NotifyAck:
+                case PacketType.Reliable:
+                    connection.ReceivReliablePacket(packet);
+                    break;
+                case PacketType.Ack:
                     connection.ReceiveNotifyAck(packet);
                     break;
                 case PacketType.KeepAlive:

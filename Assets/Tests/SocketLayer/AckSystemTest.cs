@@ -29,24 +29,9 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 expected.Skip(expectedOffset).Take(length),
                 actual.Skip(actualOffset).Take(length)
                 );
-
-            //todo remove this
-            //return;
-            ////int length = maxLength ?? Mathf.Min(A.Length - offsetA, B.Length - offsetB);
-            //for (int i = 0; i < length; i++)
-            //{
-            //    int ia = i + expectedOffset;
-            //    int ib = i + actualOffset;
-
-            //    Assert.That(expected[ia], Is.EqualTo(actual[ib]),
-            //        $"Arrays not the same offsets:[A:{expectedOffset}, B:{actualOffset}]\n" +
-            //        $"  A[{ia}] = {expected[ia]}\n" +
-            //        $"  B[{ib}] = {actual[ib]}\n");
-
-
-            //}
         }
     }
+
     // NSubstitute doesn't work for this type because interface is internal
     class SubIRawConnection : IRawConnection
     {
@@ -58,11 +43,27 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         }
     }
 
+    internal class AckTestInstance
+    {
+        public SubIRawConnection connection;
+        public AckSystem ackSystem;
+
+        /// <summary>
+        /// Bytes given to ack system
+        /// </summary>
+        public List<byte[]> messages;
+
+        /// <summary>Sent messages</summary>
+        public byte[] message(int i) => messages[i];
+        /// <summary>received packet</summary>
+        public byte[] packet(int i) => connection.packets[i];
+    }
+
     /// <summary>
     /// Send is done in setup, and then tests just valid that the sent data is correct
     /// </summary>
     [Category("SocketLayer")]
-    public class AckSystemTest_1stSend : AckSystemTestBase
+    public class AckSystemTest_Notify_1stSend : AckSystemTestBase
     {
         private SubIRawConnection connection;
         private AckSystem ackSystem;
@@ -83,7 +84,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             ackSystem = new AckSystem(connection, default, new Time());
 
             message = createRandomData(1);
-            ackSystem.Send(message);
+            ackSystem.SendNotify(message);
 
             // should have got 1 packet
             Assert.That(connection.packets.Count, Is.EqualTo(1));
@@ -132,25 +133,11 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         }
     }
 
-    internal class AckTestInstance
-    {
-        public SubIRawConnection connection;
-        public AckSystem ackSystem;
-
-        /// <summary>
-        /// Bytes given to ack system
-        /// </summary>
-        public List<byte[]> messages;
-
-        public byte[] message(int i) => messages[i];
-        public byte[] packet(int i) => connection.packets[i];
-    }
-
     /// <summary>
     /// Send is done in setup, and then tests just valid that the sent data is correct
     /// </summary>
     [Category("SocketLayer")]
-    public class AckSystemTest_ManySends : AckSystemTestBase
+    public class AckSystemTest_Notify_ManySends : AckSystemTestBase
     {
         const int messageCount = 5;
 
@@ -168,7 +155,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             for (int i = 0; i < messageCount; i++)
             {
                 instance.messages.Add(createRandomData(i + 1));
-                instance.ackSystem.Send(instance.messages[i]);
+                instance.ackSystem.SendNotify(instance.messages[i]);
             }
 
 
@@ -237,7 +224,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     /// Send is done in setup, and then tests just valid that the sent data is correct
     /// </summary>
     [Category("SocketLayer")]
-    public class AckSystemTest_NoDroppedSends : AckSystemTestBase
+    public class AckSystemTest_Notify_NoDroppedSends : AckSystemTestBase
     {
         const int messageCount = 5;
 
@@ -268,14 +255,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 // send inside loop so message sending alternates between 1 and 2
 
                 // send to conn1
-                instance1.ackSystem.Send(instance1.messages[i]);
+                instance1.ackSystem.SendNotify(instance1.messages[i]);
                 // give to instance2 from conn1
-                instance2.ackSystem.Receive(instance1.connection.packets[i]);
+                instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i]);
 
                 // send to conn2
-                instance2.ackSystem.Send(instance2.messages[i]);
+                instance2.ackSystem.SendNotify(instance2.messages[i]);
                 // give to instance1 from conn2
-                instance1.ackSystem.Receive(instance2.connection.packets[i]);
+                instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i]);
             }
 
             // should have got 1 packet
@@ -401,7 +388,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     /// Send is done in setup, and then tests just valid that the sent data is correct
     /// </summary>
     [Category("SocketLayer")]
-    public class AckSystemTest_DroppedSends : AckSystemTestBase
+    public class AckSystemTest_Notify_DroppedSends : AckSystemTestBase
     {
         const int messageCount = 5;
 
@@ -447,17 +434,17 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 // send inside loop so message sending alternates between 1 and 2
 
                 // send to conn1
-                instance1.ackSystem.Send(instance1.messages[i]);
+                instance1.ackSystem.SendNotify(instance1.messages[i]);
 
                 // give to instance2 if received
                 if (received2[i])
-                    instance2.ackSystem.Receive(instance1.connection.packets[i]);
+                    instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i]);
 
                 // send to conn2
-                instance2.ackSystem.Send(instance2.messages[i]);
+                instance2.ackSystem.SendNotify(instance2.messages[i]);
                 // give to instance1 if received
                 if (received1[i])
-                    instance1.ackSystem.Receive(instance2.connection.packets[i]);
+                    instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i]);
             }
 
             // should have got 1 packet

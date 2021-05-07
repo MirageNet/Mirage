@@ -84,8 +84,7 @@ namespace Mirage.SocketLayer
         private readonly KeepAliveTracker keepAliveTracker;
         private readonly DisconnectedTracker disconnectedTracker;
 
-        private readonly NotifySystem notifySystem;
-        private readonly ReliableOrderSystem reliableSystem;
+        private readonly AckSystem ackSystem;
 
         EndPoint IConnection.EndPoint => EndPoint;
 
@@ -102,10 +101,12 @@ namespace Mirage.SocketLayer
             keepAliveTracker = new KeepAliveTracker(config, time);
             disconnectedTracker = new DisconnectedTracker(config, time);
 
+            ackSystem = new AckSystem(this, config.AckTimeout, time);
+        }
 
-            var ackSystem = new AckSystem(this, config.AckTimeout, time);
-            notifySystem = new NotifySystem(ackSystem);
-            reliableSystem = new ReliableOrderSystem(ackSystem);
+        public override string ToString()
+        {
+            return $"[{EndPoint}]";
         }
 
         public void Update()
@@ -148,12 +149,12 @@ namespace Mirage.SocketLayer
         public INotifyToken SendNotify(byte[] packet)
         {
             ThrowIfNotConnected();
-            return notifySystem.Send(packet);
+            return ackSystem.SendNotify(packet);
         }
         public void SendReliable(byte[] packet)
         {
             ThrowIfNotConnected();
-            reliableSystem.Send(packet);
+            ackSystem.SendReliable(packet);
         }
 
         void IRawConnection.SendRaw(byte[] packet, int length)
@@ -191,28 +192,33 @@ namespace Mirage.SocketLayer
         internal void ReceiveUnreliablePacket(Packet packet)
         {
             int offset = 1;
-            ReceivePacket(packet, offset);
+            int count = packet.length - offset;
+            var segment = new ArraySegment<byte>(packet.buffer.array, offset, count);
+            dataHandler.ReceivePacket(this, segment);
+        }
+        internal void ReceivReliablePacket(Packet packet)
+        {
+            bool hasMessages = ackSystem.ReceiveReliable(packet.buffer.array);
+
+            // return early if no messages
+            if (!hasMessages) { return; }
+
+            // gets imessage in order
+            while (ackSystem.NextReliablePacket(out byte[] message))
+            {
+                dataHandler.ReceivePacket(this, new ArraySegment<byte>(message));
+            }
         }
 
         internal void ReceiveNotifyPacket(Packet packet)
         {
-            notifySystem.Receive(packet.buffer.array);
-
-            int offset = AckSystem.HEADER_SIZE;
-            ReceivePacket(packet, offset);
+            ArraySegment<byte> segment = ackSystem.ReceiveNotify(packet.buffer.array);
+            dataHandler.ReceivePacket(this, segment);
         }
 
         internal void ReceiveNotifyAck(Packet packet)
         {
-            notifySystem.ReceiveAck(packet.buffer.array);
-        }
-
-
-        void ReceivePacket(Packet packet, int offset)
-        {
-            int count = packet.length - offset;
-            var segment = new ArraySegment<byte>(packet.buffer.array, offset, count);
-            dataHandler.ReceivePacket(this, segment);
+            ackSystem.ReceiveNotifyAck(packet.buffer.array);
         }
 
 
@@ -256,7 +262,7 @@ namespace Mirage.SocketLayer
                 Disconnect(DisconnectReason.Timeout);
             }
 
-            notifySystem.Update();
+            ackSystem.Update();
 
             if (keepAliveTracker.TimeToSend())
             {
