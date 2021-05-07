@@ -145,8 +145,6 @@ namespace Mirage.SocketLayer
 
         public bool NextReliablePacket(out byte[] buffer)
         {
-            UnityEngine.Debug.Log($"NextReliablePacket:{connection} [{ReliableReceiveSequence}]");
-
             buffer = receivedPackets[ReliableReceiveSequence];
             // if next packet exists then return it
             if (buffer != null)
@@ -300,7 +298,6 @@ namespace Mirage.SocketLayer
 
             int distance = (int)ackSequencer.Distance(sequence, LatestAckSequence);
             long distanceFromReliable = reliableReceiveSequencer.Distance(reliableSequence, ReliableReceiveSequence);
-            UnityEngine.Debug.Log($"ReceiveReliable:{connection} [{reliableSequence}, {ReliableReceiveSequence}]");
 
             // duplicate or arrived late
             if (distance <= 0)
