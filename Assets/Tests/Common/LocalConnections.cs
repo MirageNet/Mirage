@@ -6,17 +6,17 @@ namespace Mirage.Tests
         public static (NetworkPlayer serverPlayer, NetworkPlayer clientPlayer) PipedConnections()
         {
             // we can re-use networkclient's handlers here as it just needs connection and player
-            var serverHandler = new NetworkClient.DataHandler();
             var clientHandler = new NetworkClient.DataHandler();
+            var serverHandler = new NetworkClient.DataHandler();
 
             (SocketLayer.IConnection clientConn, SocketLayer.IConnection serverConn) = PipePeerConnection.Create(clientHandler, serverHandler);
 
-            var serverPlayer = new NetworkPlayer(serverConn);
             var clientPlayer = new NetworkPlayer(clientConn);
+            var serverPlayer = new NetworkPlayer(serverConn);
 
             // give connections to each other so they can invoke handlers
-            serverHandler.SetConnection(clientConn, clientPlayer);
-            clientHandler.SetConnection(serverConn, serverPlayer);
+            clientHandler.SetConnection(clientConn, clientPlayer);
+            serverHandler.SetConnection(serverConn, serverPlayer);
 
             return (serverPlayer, clientPlayer);
         }

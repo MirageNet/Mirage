@@ -92,9 +92,9 @@ namespace Mirage.Tests.Runtime
             gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection
-            (_, NetworkPlayer connection) = PipedConnections();
-            connection.IsReady = true;
-            identity.ConnectionToClient = connection;
+            (NetworkPlayer serverPlayer, NetworkPlayer _) = PipedConnections();
+            serverPlayer.IsReady = true;
+            identity.ConnectionToClient = serverPlayer;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
