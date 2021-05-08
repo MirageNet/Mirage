@@ -87,7 +87,7 @@ namespace Mirage.SocketLayer
         public readonly Sequencer reliableReceiveSequencer = new Sequencer(8);
 
         readonly IRawConnection connection;
-        readonly Time time;
+        readonly ITime time;
         readonly float ackTimeout;
 
         /// <summary>
@@ -104,10 +104,6 @@ namespace Mirage.SocketLayer
         float lastSentTime;
 
         /// <summary>
-        /// Reiable needs its own sequence so that message can be ordered
-        /// </summary>
-        int ReliableSentSequence;
-        /// <summary>
         /// next received packet to be given to datahandler
         /// <para>used for Reliable Ordered messages</para>
         /// </summary>
@@ -123,7 +119,7 @@ namespace Mirage.SocketLayer
         /// <param name="connection"></param>
         /// <param name="ackTimeout">how long after last send before sending empty ack</param>
         /// <param name="time"></param>
-        public AckSystem(IRawConnection connection, float ackTimeout, Time time)
+        public AckSystem(IRawConnection connection, float ackTimeout, ITime time)
         {
             this.connection = connection;
             this.time = time;
@@ -255,8 +251,8 @@ namespace Mirage.SocketLayer
             connection.SendRaw(final, final.Length);
             SetSendTime();
 
-
-            sentPackets.Enqueue(SentPacket.Reliable(packet, sequence));
+            // enqueue the final buffer so that if it needs to be resent the sendSequance will still be in there
+            sentPackets.Enqueue(SentPacket.Reliable(final, sequence));
         }
 
 
@@ -332,7 +328,7 @@ namespace Mirage.SocketLayer
 
             LatestAckSequence = latest;
         }
-        internal void ReceiveNotifyAck(byte[] packet)
+        internal void ReceiveAck(byte[] packet)
         {
             // start at 1 to skip packet type
             int offset = 1;

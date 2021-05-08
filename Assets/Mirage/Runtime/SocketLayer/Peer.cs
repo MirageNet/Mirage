@@ -5,7 +5,11 @@ using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
-    internal class Time
+    public interface ITime
+    {
+        float Now { get; }
+    }
+    internal class Time : ITime
     {
         public float Now => UnityEngine.Time.time;
     }

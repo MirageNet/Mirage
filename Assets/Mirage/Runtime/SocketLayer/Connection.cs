@@ -218,7 +218,7 @@ namespace Mirage.SocketLayer
 
         internal void ReceiveNotifyAck(Packet packet)
         {
-            ackSystem.ReceiveNotifyAck(packet.buffer.array);
+            ackSystem.ReceiveAck(packet.buffer.array);
         }
 
 
