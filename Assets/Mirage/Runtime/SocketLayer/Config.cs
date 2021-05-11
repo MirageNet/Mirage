@@ -25,12 +25,12 @@ namespace Mirage.SocketLayer
         /// <para>Keep alive is to stop connection from timing out</para>
         /// <para>keep alive is sent over unreliable so this interval should be low enough so that <see cref="TimeoutDuration"/> does not timeout if some unreliable packets are missed </para>
         /// </summary>
-        public float KeepAliveInterval = 1;
+        public float KeepAliveInterval = 2;
 
         /// <summary>
         /// how long without a message before disconnecting connection
         /// </summary>
-        public float TimeoutDuration = 5;
+        public float TimeoutDuration = 10;
         #endregion
 
 
@@ -38,7 +38,7 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// How long after disconnect before connection is fully removed from Peer
         /// </summary>
-        public float DisconnectDuration = 2;
+        public float DisconnectDuration = 1;
 
         /// <summary>
         /// Max size of a packet (excluding peer header)
@@ -57,7 +57,7 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// how long after last send to send ack without a message
         /// </summary>
-        public float AckTimeout = 1.5f / 60f;
+        public float AckTimeout = 0.11f;
         #endregion
     }
 }
