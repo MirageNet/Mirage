@@ -89,6 +89,9 @@ namespace Mirage.SocketLayer
         readonly IRawConnection connection;
         readonly ITime time;
         readonly float ackTimeout;
+        /// <summary>how many empty acks to send</summary>
+        readonly int emptyAckLimit = 5;
+        int emptyAckCount = 0;
 
         /// <summary>
         /// most recent sequence received
@@ -136,7 +139,7 @@ namespace Mirage.SocketLayer
             // then the next value will be 1
             ReliableReceiveSequence = (ushort)reliableReceiveSequencer.Next();
 
-            SetSendTime();
+            OnNormalSend();
         }
 
         public bool NextReliablePacket(out byte[] buffer)
@@ -156,19 +159,45 @@ namespace Mirage.SocketLayer
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void OnSendEmptyAck()
+        {
+            emptyAckCount++;
+            SetSendTime();
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void OnNormalSend()
+        {
+            emptyAckCount = 0;
+            SetSendTime();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void SetSendTime()
         {
             lastSentTime = time.Now;
         }
+
         public void Update()
         {
             // todo send ack if not recently been sent
             // ack only packet sent if no other sent within last frame
-            if (lastSentTime + ackTimeout < time.Now)
+            if (ShouldSendEmptyAck() && TimeToSendAck())
             {
                 // send ack
                 SendAck();
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        bool TimeToSendAck()
+        {
+            return lastSentTime + ackTimeout < time.Now;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        bool ShouldSendEmptyAck()
+        {
+            return emptyAckCount < emptyAckLimit;
         }
 
         private void SendAck()
@@ -186,7 +215,7 @@ namespace Mirage.SocketLayer
             Assert.AreEqual(offset, HEADER_SIZE_ACK);
 
             connection.SendRaw(final, final.Length);
-            SetSendTime();
+            OnSendEmptyAck();
         }
 
         public INotifyToken SendNotify(byte[] packet)
@@ -214,7 +243,7 @@ namespace Mirage.SocketLayer
             Assert.AreEqual(offset, HEADER_SIZE_NOTIFY);
 
             connection.SendRaw(final, final.Length);
-            SetSendTime();
+            OnNormalSend();
 
             // todo use pool to stop allocations
             var token = new NotifyToken(sequence);
@@ -249,7 +278,7 @@ namespace Mirage.SocketLayer
             Assert.AreEqual(offset, HEADER_SIZE_RELIABLE);
 
             connection.SendRaw(final, final.Length);
-            SetSendTime();
+            OnNormalSend();
 
             // enqueue the final buffer so that if it needs to be resent the sendSequance will still be in there
             sentPackets.Enqueue(SentPacket.Reliable(final, sequence));
@@ -352,7 +381,7 @@ namespace Mirage.SocketLayer
             ByteUtils.WriteUInt(final, ref offset, AckMask);
 
             connection.SendRaw(final, final.Length);
-            SetSendTime();
+            OnNormalSend();
 
             sentPackets.Enqueue(SentPacket.Reliable(final, sequence));
         }
