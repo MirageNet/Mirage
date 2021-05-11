@@ -27,7 +27,7 @@ namespace Mirage.Sockets.Udp
 
         public override EndPoint GetBindEndPoint()
         {
-            return new IPEndPoint(IPAddress.Any, port);
+            return new IPEndPoint(IPAddress.IPv6Any, port);
         }
 
         public override EndPoint GetConnectEndPoint(string address = null, ushort? port = null)
@@ -48,7 +48,7 @@ namespace Mirage.Sockets.Udp
             IPAddress[] results = Dns.GetHostAddresses(addressString);
             foreach (IPAddress result in results)
             {
-                if (result.AddressFamily == AddressFamily.InterNetwork)
+                if (result.AddressFamily == AddressFamily.InterNetworkV6)
                 {
                     return result;
                 }
@@ -70,18 +70,24 @@ namespace Mirage.Sockets.Udp
 
     public class UdpSocket : ISocket
     {
-        readonly Socket socket;
+        Socket socket;
+        IPEndPoint AnyEndpoint;
 
-        public UdpSocket()
-        {
-            // todo do we need to use AddressFamily from endpoint?
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            socket.Blocking = false;
-            socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.ReuseAddress, true);
-        }
+        public UdpSocket() { }
 
         public void Bind(EndPoint endPoint)
         {
+            AnyEndpoint = endPoint as IPEndPoint;
+
+            socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
+            {
+                DualMode = true,
+                Blocking = false,
+
+            };
+
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+
             socket.Bind(endPoint);
             // todo check socket options
             /*
@@ -92,10 +98,22 @@ namespace Mirage.Sockets.Udp
             const uint IOC_VENDOR = 0x18000000;
             socket.IOControl(unchecked((int)(IOC_IN | IOC_VENDOR | 12)), new[] { Convert.ToByte(false) }, null);
              */
+
+
+            // maybe fix for "Connection reset by peer" https://stackoverflow.com/a/10337850/8479976
+            // socket options https://flylib.com/books/en/1.398.1.49/1/
         }
 
         public void Connect(EndPoint endPoint)
         {
+            AnyEndpoint = endPoint as IPEndPoint;
+
+            socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
+            {
+                Blocking = false,
+            };
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+
             // todo check if connect should be called for udp or if it should be something else
             socket.Connect(endPoint);
         }
@@ -115,18 +133,18 @@ namespace Mirage.Sockets.Udp
             return socket.Poll(0, SelectMode.SelectRead);
         }
 
-        public int Receive(byte[] buffer, ref EndPoint endPoint)
+        public int Receive(byte[] buffer, out EndPoint endPoint)
         {
-            // todo do we need to set if null
-            endPoint = endPoint ?? new IPEndPoint(IPAddress.Any, 0);
-            return socket.ReceiveFrom(buffer, ref endPoint);
+            endPoint = AnyEndpoint;
+            int c = socket.ReceiveFrom(buffer, ref endPoint);
+            return c;
         }
 
         public void Send(EndPoint endPoint, byte[] packet, int length)
         {
             // todo check disconnected
             // todo what SocketFlags??
-            socket.SendTo(packet, length, SocketFlags.None, (IPEndPoint)endPoint);
+            socket.SendTo(packet, length, SocketFlags.None, endPoint);
         }
     }
 }
