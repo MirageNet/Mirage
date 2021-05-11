@@ -31,9 +31,9 @@ namespace Mirage.SocketLayer
     /// </summary>
     public sealed class Peer : IPeer
     {
-        void Assert(bool condition)
+        void Assert(bool condition, object msg = null)
         {
-            if (!condition) logger.Log(LogType.Assert, "Failed Assertion");
+            if (!condition) logger.Log(LogType.Assert, msg == null ? "Failed Assertion" : $"Failed Assertion: {msg}");
         }
         void Error(string error)
         {
@@ -119,10 +119,22 @@ namespace Mirage.SocketLayer
         {
             // connecting connections can send connect messages so is allowed
             // todo check connected before message are sent from high level
-            Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected);
+            Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected, connection.State);
 
             socket.Send(connection.EndPoint, data, length);
             connection.SetSendTime();
+
+            if (logger.filterLogType == LogType.Log)
+            {
+                if ((PacketType)data[0] == PacketType.Command)
+                {
+                    logger.Log($"Send to {connection} type: Command, {(Commands)data[1]}");
+                }
+                else
+                {
+                    logger.Log($"Send to {connection} type: {(PacketType)data[0]}");
+                }
+            }
         }
 
         internal void SendUnreliable(Connection connection, byte[] packet)
@@ -142,7 +154,12 @@ namespace Mirage.SocketLayer
             using (ByteBuffer buffer = bufferPool.Take())
             {
                 int length = CreateCommandPacket(buffer, command, extra);
+
                 socket.Send(endPoint, buffer.array, length);
+                if (logger.filterLogType == LogType.Log)
+                {
+                    logger.Log($"Send to {endPoint} type: Command, {command}");
+                }
             }
         }
 
@@ -205,7 +222,7 @@ namespace Mirage.SocketLayer
             {
                 while (socket.Poll())
                 {
-                    int length = socket.Receive(buffer.array, ref receiveEndPoint);
+                    int length = socket.Receive(buffer.array, out EndPoint receiveEndPoint);
 
                     // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
                     if (length > config.Mtu)
@@ -233,30 +250,68 @@ namespace Mirage.SocketLayer
             // ingore message of invalid size
             if (!packet.IsValidSize()) { return; }
 
-            switch (packet.type)
+            if (logger.filterLogType == LogType.Log)
             {
-                case PacketType.Command:
-                    HandleCommand(connection, packet);
-                    break;
-                case PacketType.Unreliable:
-                    connection.ReceiveUnreliablePacket(packet);
-                    break;
-                case PacketType.Notify:
-                    connection.ReceiveNotifyPacket(packet);
-                    break;
-                case PacketType.Reliable:
-                    connection.ReceivReliablePacket(packet);
-                    break;
-                case PacketType.Ack:
-                    connection.ReceiveNotifyAck(packet);
-                    break;
-                case PacketType.KeepAlive:
-                    // do nothing
-                    break;
-                default:
-                    // ignore invalid PacketType
-                    // return not break, so that receive time is not set for invalid packet
-                    return;
+                if (packet.type == PacketType.Command)
+                {
+                    logger.Log($"Receive from {connection} type: Command, {packet.command}");
+                }
+                else
+                {
+                    logger.Log($"Receive from {connection} type: {packet.type}");
+                }
+            }
+
+            // if not connected then we can only handle commands
+            if (connection.State != ConnectionState.Connected && false)
+            {
+                switch (packet.type)
+                {
+                    case PacketType.Command:
+                        HandleCommand(connection, packet);
+                        break;
+                    case PacketType.Unreliable:
+                    case PacketType.Notify:
+                    case PacketType.Reliable:
+                    case PacketType.Ack:
+                        if (logger.filterLogType == LogType.Warning) logger.Log(LogType.Warning, $"Receive from {connection} type: {packet.type} while not connected");
+                        break;
+                    case PacketType.KeepAlive:
+                        // do nothing
+                        break;
+                    default:
+                        // ignore invalid PacketType
+                        // return not break, so that receive time is not set for invalid packet
+                        return;
+                }
+            }
+            else
+            {
+                switch (packet.type)
+                {
+                    case PacketType.Command:
+                        HandleCommand(connection, packet);
+                        break;
+                    case PacketType.Unreliable:
+                        connection.ReceiveUnreliablePacket(packet);
+                        break;
+                    case PacketType.Notify:
+                        connection.ReceiveNotifyPacket(packet);
+                        break;
+                    case PacketType.Reliable:
+                        connection.ReceivReliablePacket(packet);
+                        break;
+                    case PacketType.Ack:
+                        connection.ReceiveNotifyAck(packet);
+                        break;
+                    case PacketType.KeepAlive:
+                        // do nothing
+                        break;
+                    default:
+                        // ignore invalid PacketType
+                        // return not break, so that receive time is not set for invalid packet
+                        return;
+                }
             }
 
             connection.SetReceiveTime();
@@ -352,8 +407,10 @@ namespace Mirage.SocketLayer
             switch (connection.State)
             {
                 case ConnectionState.Created:
-                    SetConnectionAsConnected(connection);
+                    // mark as connected, send message, then invoke event
+                    connection.State = ConnectionState.Connected;
                     SendCommand(connection, Commands.ConnectionAccepted);
+                    OnConnected?.Invoke(connection);
                     break;
 
                 case ConnectionState.Connected:
@@ -367,11 +424,6 @@ namespace Mirage.SocketLayer
             }
         }
 
-        private void SetConnectionAsConnected(Connection connection)
-        {
-            connection.State = ConnectionState.Connected;
-            OnConnected?.Invoke(connection);
-        }
 
         private void RejectConnectionWithReason(EndPoint endPoint, RejectReason reason)
         {
@@ -392,7 +444,8 @@ namespace Mirage.SocketLayer
                     break;
 
                 case ConnectionState.Connecting:
-                    SetConnectionAsConnected(connection);
+                    connection.State = ConnectionState.Connected;
+                    OnConnected?.Invoke(connection);
                     break;
             }
         }
@@ -456,6 +509,10 @@ namespace Mirage.SocketLayer
             foreach (Connection connection in connections.Values)
             {
                 connection.Update();
+
+                // was closed while in conn.Update
+                // dont continue loop,
+                if (!active) { return; }
             }
 
             RemoveConnections();
