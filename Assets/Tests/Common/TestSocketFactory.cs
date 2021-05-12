@@ -69,7 +69,7 @@ namespace Mirage.Tests
             return received.Count > 0;
         }
 
-        int ISocket.Receive(byte[] data, ref EndPoint endPoint)
+        int ISocket.Receive(byte[] data, out EndPoint endPoint)
         {
             Packet next = received.Dequeue();
             endPoint = next.endPoint;
