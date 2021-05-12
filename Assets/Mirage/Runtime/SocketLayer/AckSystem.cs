@@ -75,23 +75,28 @@ namespace Mirage.SocketLayer
     {
         // todo https://gafferongames.com/post/reliable_ordered_messages/
 
-        const int MAX_SENT_QUEUE = 512;
-        const int MAX_RECEIVE_QUEUE = 256;
+        const bool VerboseLogging = true;
+
+        const int MAX_SENT_QUEUE = 1024;
+        const int MAX_RECEIVE_QUEUE = 1024;
+
+        const int ACK_SEQUENCER_BITS = 16;
+        // should be bit count of MAX_RECEIVE_QUEUE
+        const int RELIABLE_SEQUENCER_BITS = 10;
+
         public const int HEADER_SIZE_NOTIFY = 9;
-        public const int HEADER_SIZE_RELIABLE = 10;
+        public const int HEADER_SIZE_RELIABLE = 11;
         public const int HEADER_SIZE_ACK = 7;
-        public readonly Sequencer ackSequencer = new Sequencer(16);
+        public readonly Sequencer ackSequencer = new Sequencer(ACK_SEQUENCER_BITS);
         // send and receive need different sequencers
-        public readonly Sequencer reliableSendSequencer = new Sequencer(8);
-        // received sequencer is to release messages in order to high level
-        public readonly Sequencer reliableReceiveSequencer = new Sequencer(8);
+        public readonly Sequencer reliableSendSequencer = new Sequencer(RELIABLE_SEQUENCER_BITS);
+        readonly ReliableReceive reliableReceive = new ReliableReceive();
 
         readonly IRawConnection connection;
         readonly ITime time;
         readonly float ackTimeout;
         /// <summary>how many empty acks to send</summary>
         readonly int emptyAckLimit = 5;
-        int emptyAckCount = 0;
 
         /// <summary>
         /// most recent sequence received
@@ -105,16 +110,9 @@ namespace Mirage.SocketLayer
         uint AckMask;
 
         float lastSentTime;
-
-        /// <summary>
-        /// next received packet to be given to datahandler
-        /// <para>used for Reliable Ordered messages</para>
-        /// </summary>
-        uint ReliableReceiveSequence;
+        int emptyAckCount = 0;
 
         readonly Queue<SentPacket> sentPackets = new Queue<SentPacket>(MAX_SENT_QUEUE);
-        /// <summary>reliable ordered queue</summary>
-        readonly byte[][] receivedPackets = new byte[MAX_RECEIVE_QUEUE][];
 
         /// <summary>
         /// 
@@ -137,20 +135,19 @@ namespace Mirage.SocketLayer
             // first sent value is 0, which will be the reliableSentsSequencer first next
             // but receive increments after taking value, so we need to get the first expected id now, which is 0.
             // then the next value will be 1
-            ReliableReceiveSequence = (ushort)reliableReceiveSequencer.Next();
+            reliableReceive.next = (ushort)reliableReceive.Sequencer.Next();
 
             OnNormalSend();
         }
 
         public bool NextReliablePacket(out byte[] buffer)
         {
-            buffer = receivedPackets[ReliableReceiveSequence];
+            buffer = reliableReceive.GetNext();
             // if next packet exists then return it
             if (buffer != null)
             {
-                // clear it and increment sequence 
-                receivedPackets[ReliableReceiveSequence] = null;
-                ReliableReceiveSequence = (uint)reliableReceiveSequencer.Next();
+                reliableReceive.RemoveNext();
+                reliableReceive.MoveSequence();
                 return true;
             }
             else
@@ -272,7 +269,7 @@ namespace Mirage.SocketLayer
             ByteUtils.WriteUShort(final, ref offset, sequence);
             ByteUtils.WriteUShort(final, ref offset, LatestAckSequence);
             ByteUtils.WriteUInt(final, ref offset, AckMask);
-            ByteUtils.WriteByte(final, ref offset, (byte)reliableSendSequencer.Next());
+            ByteUtils.WriteUShort(final, ref offset, (byte)reliableSendSequencer.Next());
 
             // todo replace assert with log
             Assert.AreEqual(offset, HEADER_SIZE_RELIABLE);
@@ -299,7 +296,8 @@ namespace Mirage.SocketLayer
             // duplicate or arrived late
             if (distance <= 0) { return default; }
 
-            SetReceivedNumbers(sequence, distance);
+            SetAckMask(distance);
+            LatestAckSequence = sequence;
             CheckSentQueue(ackSequence, ackMask);
 
             var segment = new ArraySegment<byte>(packet, HEADER_SIZE_NOTIFY, packet.Length - HEADER_SIZE_NOTIFY);
@@ -311,7 +309,7 @@ namespace Mirage.SocketLayer
         /// </summary>
         /// <param name="packet"></param>
         /// <returns>true if there are ordered message to read</returns>
-        public bool ReceiveReliable(byte[] packet)
+        public (bool valid, byte[] nextInOrder, int offsetInBuffer) ReceiveReliable(byte[] packet)
         {
             // start at 1 to skip packet type
             int offset = 1;
@@ -319,43 +317,43 @@ namespace Mirage.SocketLayer
             ushort sequence = ByteUtils.ReadUShort(packet, ref offset);
             ushort ackSequence = ByteUtils.ReadUShort(packet, ref offset);
             uint ackMask = ByteUtils.ReadUInt(packet, ref offset);
-            byte reliableSequence = ByteUtils.ReadByte(packet, ref offset);
+            ushort reliableSequence = ByteUtils.ReadUShort(packet, ref offset);
 
             int distance = (int)ackSequencer.Distance(sequence, LatestAckSequence);
-            long distanceFromReliable = reliableReceiveSequencer.Distance(reliableSequence, ReliableReceiveSequence);
+            int distanceFromReliable = reliableReceive.Distance(reliableSequence);
 
-            // duplicate or arrived late
-            if (distance <= 0)
+            // duplicate 
+            if (distanceFromReliable < 0)
             {
-                // check distance from reliable index
-
-                // if still negative it is duplicate
-                // 0 is next packet, so is not duplicate.
-                if (distanceFromReliable < 0) { return false; }
-                // if positive it just arrived late and we can still use it
+                return (false, default, default);
             }
 
-            SetReceivedNumbers(sequence, distance);
+            SetAckMask(distance);
+            // only set latest if new one is later than current
+            if (distance > 0)
+            {
+                LatestAckSequence = sequence;
+            }
             CheckSentQueue(ackSequence, ackMask);
 
-            // copy to new array because packet will return to buffer
-            //todo use buffer to reduce allocations
-            byte[] savedPacket = new byte[packet.Length - HEADER_SIZE_RELIABLE];
-            Buffer.BlockCopy(packet, HEADER_SIZE_RELIABLE, savedPacket, 0, savedPacket.Length);
-            receivedPackets[reliableSequence] = savedPacket;
-
-            // if distance is 0 then it is the next packet
-            return distanceFromReliable == 0;
+            if (distanceFromReliable == 0)
+            { // is next
+                reliableReceive.MoveSequence();
+                return (true, packet, offset);
+            }
+            else
+            { // not next, add to queue
+                reliableReceive.Add(reliableSequence, packet);
+                return (false, default, default);
+            }
         }
-        private void SetReceivedNumbers(ushort latest, int distance)
+        private void SetAckMask(int distance)
         {
             // shift mask by distance, then add 1
             // eg distance = 2
             // this will mean mask will be ..01
             // which means that 1 packet was missed
             AckMask = (AckMask << distance) | 1;
-
-            LatestAckSequence = latest;
         }
         internal void ReceiveAck(byte[] packet)
         {
@@ -427,6 +425,50 @@ namespace Mirage.SocketLayer
         {
             uint ackBit = 1u << distance;
             return (receivedMask & ackBit) == 0u;
+        }
+
+
+        class ReliableReceive
+        {
+            public readonly Sequencer Sequencer = new Sequencer(10);
+
+            /// <summary>
+            /// next received packet to be given to datahandler
+            /// <para>used for Reliable Ordered messages</para>
+            /// </summary>
+            public uint next;
+
+            /// <summary>reliable ordered queue</summary>
+            public readonly byte[][] receivedPackets = new byte[MAX_RECEIVE_QUEUE][];
+
+            internal byte[] GetNext()
+            {
+                return receivedPackets[next];
+            }
+
+            internal void RemoveNext()
+            {
+                receivedPackets[next] = null;
+            }
+
+            internal void MoveSequence()
+            {
+                next = (uint)Sequencer.Next();
+            }
+
+            internal int Distance(ushort reliableSequence)
+            {
+                return (int)Sequencer.Distance(reliableSequence, next);
+            }
+
+            internal void Add(ushort reliableSequence, byte[] packet)
+            {
+                // copy to new array because packet will return to buffer
+                //todo use buffer to reduce allocations
+                byte[] savedPacket = new byte[packet.Length - HEADER_SIZE_RELIABLE];
+                Buffer.BlockCopy(packet, HEADER_SIZE_RELIABLE, savedPacket, 0, savedPacket.Length);
+                receivedPackets[reliableSequence] = savedPacket;
+            }
         }
     }
 }

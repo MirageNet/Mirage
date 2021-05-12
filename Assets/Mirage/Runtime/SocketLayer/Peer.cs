@@ -61,8 +61,6 @@ namespace Mirage.SocketLayer
         /// </summary>
         bool active;
 
-        EndPoint receiveEndPoint = null;
-
         public Peer(ISocket socket, IDataHandler dataHandler, Config config = null, ILogger logger = null)
         {
             this.logger = logger ?? Debug.unityLogger;

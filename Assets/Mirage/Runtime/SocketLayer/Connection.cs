@@ -198,10 +198,12 @@ namespace Mirage.SocketLayer
         }
         internal void ReceivReliablePacket(Packet packet)
         {
-            bool hasMessages = ackSystem.ReceiveReliable(packet.buffer.array);
+            (bool valid, byte[] nextInOrder, int offsetInBuffer) = ackSystem.ReceiveReliable(packet.buffer.array);
 
-            // return early if no messages
-            if (!hasMessages) { return; }
+            if (valid)
+            {
+                dataHandler.ReceivePacket(this, new ArraySegment<byte>(nextInOrder, offsetInBuffer, nextInOrder.Length - offsetInBuffer));
+            }
 
             // gets imessage in order
             while (ackSystem.NextReliablePacket(out byte[] message))
