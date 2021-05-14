@@ -1,7 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Mirage.SocketLayer.Tests.AckSystemTests
 {
@@ -24,12 +27,20 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             return buffer;
         }
 
-        protected static void AssertIsSameFromOffset(byte[] expected, int expectedOffset, byte[] actual, int actualOffset, int length)
+        /// <summary>
+        /// more effecient that CollectionAssert
+        /// </summary>
+        protected static void AssertAreSameFromOffsets(byte[] expected, int expectedOffset, byte[] actual, int actualOffset, int length)
         {
-            CollectionAssert.AreEqual(
-                expected.Skip(expectedOffset).Take(length),
-                actual.Skip(actualOffset).Take(length)
-                );
+            for (int i = 0; i < length; i++)
+            {
+                if (expected[i + expectedOffset] != actual[i + actualOffset])
+                {
+                    byte e = expected[i + expectedOffset];
+                    byte a = actual[i + actualOffset];
+                    Assert.Fail($"Arrays are not the same\n  expected {e}\n  actual {a}");
+                }
+            }
         }
     }
 
@@ -108,7 +119,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             int offset = 1;
             ushort sequance = ByteUtils.ReadUShort(packet, ref offset);
-            Assert.That(sequance, Is.EqualTo(1));
+            Assert.That(sequance, Is.EqualTo(0));
         }
 
         [Test]
@@ -129,8 +140,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void PacketShouldContainMessage()
         {
-            const int headerSize = 9;
-            AssertIsSameFromOffset(message, 0, packet, headerSize, message.Length);
+            AssertAreSameFromOffsets(message, 0, packet, AckSystem.HEADER_SIZE_NOTIFY, message.Length);
         }
     }
 
@@ -185,7 +195,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             {
                 int offset = 1;
                 ushort sequance = ByteUtils.ReadUShort(instance.packet(i), ref offset);
-                Assert.That(sequance, Is.EqualTo(i + 1), "sequnce should start at 1 and increment for each message");
+                Assert.That(sequance, Is.EqualTo(i), "sequnce should start at 1 and increment for each message");
             }
         }
 
@@ -215,8 +225,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             for (int i = 0; i < messageCount; i++)
             {
-                const int headerSize = 9;
-                AssertIsSameFromOffset(instance.message(i), 0, instance.packet(i), headerSize, instance.message(i).Length);
+                AssertAreSameFromOffsets(instance.message(i), 0, instance.packet(i), AckSystem.HEADER_SIZE_NOTIFY, instance.message(i).Length);
             }
         }
     }
@@ -302,14 +311,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             {
                 int offset = 1;
                 ushort sequance = ByteUtils.ReadUShort(instance1.packet(i), ref offset);
-                Assert.That(sequance, Is.EqualTo(i + 1), "sequnce should start at 1 and increment for each message");
+                Assert.That(sequance, Is.EqualTo(i), "sequnce should start at 1 and increment for each message");
             }
 
             for (int i = 0; i < messageCount; i++)
             {
                 int offset = 1;
                 ushort sequance = ByteUtils.ReadUShort(instance2.packet(i), ref offset);
-                Assert.That(sequance, Is.EqualTo(i + 1), "sequnce should start at 1 and increment for each message");
+                Assert.That(sequance, Is.EqualTo(i), "sequnce should start at 1 and increment for each message");
             }
         }
 
@@ -320,14 +329,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             {
                 int offset = 3;
                 ushort received = ByteUtils.ReadUShort(instance1.packet(i), ref offset);
-                Assert.That(received, Is.EqualTo(i), "Received should start at 0 and increment each time");
+                Assert.That(received, Is.EqualTo(Mathf.Clamp(i - 1, 0, messageCount)), "Received should start at 0 and increment each time");
             }
 
             for (int i = 0; i < messageCount; i++)
             {
                 int offset = 3;
                 ushort received = ByteUtils.ReadUShort(instance2.packet(i), ref offset);
-                Assert.That(received, Is.EqualTo(i + 1), "Received should start at 1 (received first message before sending) and increment each time");
+                Assert.That(received, Is.EqualTo(i), "Received should start at 1 (received first message before sending) and increment each time");
             }
         }
         [Test]
@@ -373,14 +382,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             for (int i = 0; i < messageCount; i++)
             {
-                const int headerSize = 9;
-                AssertIsSameFromOffset(instance1.message(i), 0, instance1.packet(i), headerSize, instance1.message(i).Length);
+                AssertAreSameFromOffsets(instance1.message(i), 0, instance1.packet(i), AckSystem.HEADER_SIZE_NOTIFY, instance1.message(i).Length);
             }
 
             for (int i = 0; i < messageCount; i++)
             {
-                const int headerSize = 9;
-                AssertIsSameFromOffset(instance2.message(i), 0, instance2.packet(i), headerSize, instance2.message(i).Length);
+                AssertAreSameFromOffsets(instance2.message(i), 0, instance2.packet(i), AckSystem.HEADER_SIZE_NOTIFY, instance2.message(i).Length);
             }
         }
     }
@@ -470,7 +477,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
                 // do at end becuase 1 is sending first
                 if (received1[i])
-                    nextReceive = (ushort)(i + 1);
+                    nextReceive = (ushort)(i);
             }
 
             nextReceive = 0;
@@ -478,7 +485,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             {
                 // do at start becuase 2 is sending second
                 if (received2[i])
-                    nextReceive = (ushort)(i + 1);
+                    nextReceive = (ushort)(i);
 
                 int offset = 3;
                 ushort received = ByteUtils.ReadUShort(instance2.packet(i), ref offset);
@@ -632,14 +639,16 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
         const float tick = 0.02f;
 
+        float timeout;
         BadSocket badSocket;
         Time time;
-        float timeout;
         AckTestInstance instance1;
         AckTestInstance instance2;
 
         List<byte[]> receives1;
         List<byte[]> receives2;
+
+        StreamWriter writer;
 
         [SetUp]
         public void SetUp()
@@ -664,9 +673,37 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
             receives1 = new List<byte[]>();
             receives2 = new List<byte[]>();
+
+
+            AckSystem.LogToFunction = false;
+            AckSystem.Log = LogToFile;
+            writer = new StreamWriter("./Logs/AckSystemTest.log");
+            writer.AutoFlush = true;
         }
 
-        [Test]
+        void LogToFile(string msg)
+        {
+            writer.WriteLine(msg);
+        }
+        [TearDown]
+        public void TearDown()
+        {
+            writer.Close();
+            writer.Dispose();
+            writer = null;
+            AckSystem.LogToFunction = false;
+            AckSystem.Log = null;
+
+            time = null;
+            badSocket = null;
+            instance1 = null;
+            instance2 = null;
+            receives1 = null;
+            receives2 = null;
+            System.GC.Collect();
+        }
+
+        [UnityTest]
         [TestCase(true, 100, 0f, 0f)]
         [TestCase(true, 100, 0.2f, 0f)]
         [TestCase(true, 100, 0.2f, 0.4f)]
@@ -677,11 +714,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [TestCase(false, 100, 0.2f, 0.4f)]
         [TestCase(false, 3000, 0.2f, 0f)]
         [TestCase(false, 3000, 0.2f, 0.4f)]
-        [Repeat(10)]
+        [Repeat(100)]
         public void AllMessagesShouldHaveBeenReceivedInOrder(bool instance2Sends, int messageCount, float dropChance, float skipChance)
         {
             SendManyMessages(instance2Sends, messageCount, dropChance, skipChance);
 
+            // ---- asserts ---- // 
             Assert.That(receives2, Has.Count.EqualTo(messageCount + 1));
             Assert.That(receives1, Has.Count.EqualTo(instance2Sends ? messageCount + 1 : 0));
 
@@ -691,7 +729,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 byte[] message = receives2[i];
 
                 byte[] expected = instance1.message(i);
-                AssertIsSameFromOffset(expected, 0, message, 0, expected.Length);
+                AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
             }
 
 
@@ -702,7 +740,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                     byte[] message = receives1[i];
 
                     byte[] expected = instance2.message(i);
-                    AssertIsSameFromOffset(expected, 0, message, 0, expected.Length);
+                    AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
                 }
             }
         }
@@ -730,8 +768,11 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 Tick(dropChance, skipChance);
             }
 
-            Debug.LogWarning(receives1.Count);
-            Debug.LogWarning(receives2.Count);
+            if (AckSystem.VerboseLogging)
+            {
+                Debug.LogWarning(receives1.Count);
+                Debug.LogWarning(receives2.Count);
+            }
 
 
             // send 1 more message so that other side will for sure get last message
@@ -749,8 +790,11 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 Tick(0, 0);
             }
 
-            Debug.LogWarning(receives1.Count);
-            Debug.LogWarning(receives2.Count);
+            if (AckSystem.VerboseLogging)
+            {
+                Debug.LogWarning(receives1.Count);
+                Debug.LogWarning(receives2.Count);
+            }
 
             // should not have null data
             Assert.That(instance1.connection.packets, Does.Not.Contain(null));
@@ -768,5 +812,98 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             receives1.AddRange(newMessages.Item1);
             receives2.AddRange(newMessages.Item2);
         }
+
+
+        [UnityTest]
+        [Explicit("Explicit Test: this test takes about 50 seconds to run")]
+        public IEnumerator AllMessagesShouldHaveBeenReceivedInOrderFrames()
+        {
+            bool instance2Sends = false;
+            int messageCount = 3000;
+            float dropChance = 0.2f;
+            float skipChance = 0.4f;
+
+            // send all messages
+            for (int i = 0; i < messageCount; i++)
+            {
+                instance1.messages.Add(createRandomData(i + 1));
+                instance2.messages.Add(createRandomData(i + 1));
+
+                // send inside loop so message sending alternates between 1 and 2
+
+                // send to conn1
+                instance1.ackSystem.SendReliable(instance1.messages[i]);
+
+                if (instance2Sends)
+                {
+                    // send to conn2
+                    instance2.ackSystem.SendReliable(instance2.messages[i]);
+                }
+
+                // fake Update
+                Tick(dropChance, skipChance);
+                yield return null;
+            }
+
+            if (AckSystem.VerboseLogging)
+            {
+                Debug.LogWarning(receives1.Count);
+                Debug.LogWarning(receives2.Count);
+            }
+
+
+            // send 1 more message so that other side will for sure get last message
+            // if we dont do then last message could be forgot and we receive 99/100
+            instance1.ackSystem.SendReliable(new byte[1] { 0 });
+            if (instance2Sends)
+            {
+                instance2.ackSystem.SendReliable(new byte[1] { 0 });
+            }
+            // run for enough updates that all message should be received
+            // wait more than timeout incase 
+            for (float t = 0; t < timeout * 2f; t += tick)
+            {
+                // fake Update
+                Tick(0, 0);
+            }
+
+            if (AckSystem.VerboseLogging)
+            {
+                Debug.LogWarning(receives1.Count);
+                Debug.LogWarning(receives2.Count);
+            }
+
+            // should not have null data
+            Assert.That(instance1.connection.packets, Does.Not.Contain(null));
+            Assert.That(instance2.connection.packets, Does.Not.Contain(null));
+
+
+
+            // ---- asserts ---- // 
+            Assert.That(receives2, Has.Count.EqualTo(messageCount + 1));
+            Assert.That(receives1, Has.Count.EqualTo(instance2Sends ? messageCount + 1 : 0));
+
+            // check all message reached other side
+            for (int i = 0; i < messageCount; i++)
+            {
+                byte[] message = receives2[i];
+
+                byte[] expected = instance1.message(i);
+                AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
+            }
+
+
+            if (instance2Sends)
+            {
+                for (int i = 0; i < messageCount; i++)
+                {
+                    byte[] message = receives1[i];
+
+                    byte[] expected = instance2.message(i);
+                    AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
+                }
+            }
+        }
+
     }
 }

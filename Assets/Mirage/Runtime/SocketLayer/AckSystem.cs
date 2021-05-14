@@ -77,6 +77,8 @@ namespace Mirage.SocketLayer
         // todo https://gafferongames.com/post/reliable_ordered_messages/
 
         public static bool VerboseLogging = false;
+        public static bool LogToFunction = false;
+        public static Action<string> Log;
 
         const int ACK_SEQUENCER_BITS = 16;
         // should be bit count of MAX_RECEIVE_QUEUE
@@ -299,6 +301,7 @@ namespace Mirage.SocketLayer
             ByteUtils.WriteUShort(final, ref offset, reliable.order);
 
             if (VerboseLogging) { Debug.LogWarning($"SendReliablePacket {reliable.order}"); }
+            if (AckSystem.LogToFunction) { AckSystem.Log($"SendReliablePacket {reliable.order}"); }
             connection.SendRaw(final, final.Length);
             OnNormalSend();
         }
@@ -350,6 +353,7 @@ namespace Mirage.SocketLayer
             long reliableDistance = reliableReceive.DistanceToRead(reliableSequence);
 
             if (VerboseLogging) { Debug.Log($"ReceiveReliable [sequence:{sequence}, distance:{distance}, reliableSequence:{reliableSequence} reliableDistance{reliableDistance}]"); }
+            if (AckSystem.LogToFunction) { AckSystem.Log($"ReceiveReliable [sequence:{sequence}, distance:{distance}, reliableSequence:{reliableSequence} reliableDistance{reliableDistance}]"); }
 
 
             if (reliableDistance < 0)
@@ -454,6 +458,7 @@ namespace Mirage.SocketLayer
                 // if we have already ackeds this, just remove it
                 if (ackable.IsReliable && ackable.reliablePacket.acked)
                 {
+                    if (LogToFunction) Log($"Ackable Remove {ackableSequence} (previously acked)");
                     sentAckablePackets.RemoveAt(ackableSequence);
                     continue;
                 }
@@ -471,6 +476,7 @@ namespace Mirage.SocketLayer
                 if (ackable.IsNotify)
                 {
                     ackable.token.Notify(!lost);
+                    if (LogToFunction) Log($"Ackable Remove {ackableSequence} (Notify)");
                     sentAckablePackets.RemoveAt(ackableSequence);
                 }
                 else
@@ -492,13 +498,17 @@ namespace Mirage.SocketLayer
 
                         if (needToResend)
                             toResend.Add(reliablePacket);
+                        else
+                            if (LogToFunction) Log($"Ackable Not resend order:{reliablePacket.order} (already resent)");
                     }
                     else
                     {
                         reliablePacket.acked = true;
+                        if (LogToFunction) Log($"Ackable acked order:{reliablePacket.order} [{sequence},{Convert.ToString((long)mask)}]");
                         foreach (ushort seq in reliablePacket.sequences)
                         {
                             sentAckablePackets.RemoveAt(seq);
+                            if (LogToFunction) Log($"Ackable Remove {seq} via {ackableSequence}");
                         }
                     }
                 }
@@ -516,7 +526,10 @@ namespace Mirage.SocketLayer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool OutsideOfMask(int distance)
         {
-            return distance > MASK_SIZE;
+            // if distance is 64 or greater
+            // important: this check is to stop the bitshift from breaking!!
+            // bit shifting only uses first 6 bits of RHS (64->0 65->1) so higher number wont shift correct and ack wrong packet
+            return distance >= MASK_SIZE;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool NotInMask(int distance, ulong receivedMask)
@@ -560,6 +573,7 @@ namespace Mirage.SocketLayer
             long dist = Sequencer.Distance(write, read);
             if (dist == -1) { throw new InvalidOperationException($"Buffer is full, write:{write} read:{read}"); }
 
+            if (AckSystem.LogToFunction) { AckSystem.Log($"Enqueue: write:{write} read:{read}"); }
             buffer[write] = item;
             uint sequence = write;
             write = (uint)Sequencer.NextAfter(write);
@@ -571,6 +585,7 @@ namespace Mirage.SocketLayer
             if (item != null)
             {
                 if (AckSystem.VerboseLogging) { Debug.LogWarning($"Dequeuing next {read}"); }
+                if (AckSystem.LogToFunction) { AckSystem.Log($"Dequeuing next {read}"); }
 
                 buffer[read] = null;
                 read = (uint)Sequencer.NextAfter(read);
@@ -600,12 +615,14 @@ namespace Mirage.SocketLayer
         /// </summary>
         public void MoveReadToNextNonEmpty()
         {
+            uint oldRead = read;
             // if read == write, buffer is empty, dont move it
             // if buffer[read] is empty then read to next item
             while (write != read && buffer[read] == null)
             {
                 read = (uint)Sequencer.NextAfter(read);
             }
+            if (AckSystem.LogToFunction) { AckSystem.Log($"Moving Read from {oldRead} to {read}"); }
         }
 
         /// <summary>
@@ -614,6 +631,8 @@ namespace Mirage.SocketLayer
         public void MoveReadOne()
         {
             if (AckSystem.VerboseLogging) { Debug.LogWarning($"Dequeuing(skip) next {read}"); }
+            if (AckSystem.LogToFunction) { AckSystem.Log($"Dequeuing(skip) next {read}"); }
+
 
             read = (uint)Sequencer.NextAfter(read);
         }
