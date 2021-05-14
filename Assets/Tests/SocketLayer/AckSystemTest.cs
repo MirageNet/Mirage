@@ -666,7 +666,6 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             receives2 = new List<byte[]>();
         }
 
-
         [Test]
         [TestCase(true, 100, 0f, 0f)]
         [TestCase(true, 100, 0.2f, 0f)]
@@ -678,12 +677,13 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [TestCase(false, 100, 0.2f, 0.4f)]
         [TestCase(false, 3000, 0.2f, 0f)]
         [TestCase(false, 3000, 0.2f, 0.4f)]
+        [Repeat(10)]
         public void AllMessagesShouldHaveBeenReceivedInOrder(bool instance2Sends, int messageCount, float dropChance, float skipChance)
         {
             SendManyMessages(instance2Sends, messageCount, dropChance, skipChance);
 
-            Assert.That(receives2, Has.Count.EqualTo(messageCount));
-            Assert.That(receives1, Has.Count.EqualTo(instance2Sends ? messageCount : 0));
+            Assert.That(receives2, Has.Count.EqualTo(messageCount + 1));
+            Assert.That(receives1, Has.Count.EqualTo(instance2Sends ? messageCount + 1 : 0));
 
             // check all message reached other side
             for (int i = 0; i < messageCount; i++)
@@ -707,14 +707,6 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             }
         }
 
-        [Test]
-        public void Help()
-        {
-            var er = new Sequencer(10);
-
-            Debug.Log(er.Distance(0, 2));
-        }
-
         void SendManyMessages(bool instance2Sends, int messageCount, float dropChance, float skipChance)
         {
             // send all messages
@@ -730,7 +722,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
                 if (instance2Sends)
                 {
-                    //// send to conn2
+                    // send to conn2
                     instance2.ackSystem.SendReliable(instance2.messages[i]);
                 }
 
@@ -741,7 +733,16 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             Debug.LogWarning(receives1.Count);
             Debug.LogWarning(receives2.Count);
 
+
+            // send 1 more message so that other side will for sure get last message
+            // if we dont do then last message could be forgot and we receive 99/100
+            instance1.ackSystem.SendReliable(new byte[1] { 0 });
+            if (instance2Sends)
+            {
+                instance2.ackSystem.SendReliable(new byte[1] { 0 });
+            }
             // run for enough updates that all message should be received
+            // wait more than timeout incase 
             for (float t = 0; t < timeout * 2f; t += tick)
             {
                 // fake Update
@@ -759,9 +760,9 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         private void Tick(float dropChance, float skipChance)
         {
             time.Now += tick;
-            Debug.Log("Updat1");
+            if (AckSystem.VerboseLogging) Debug.Log("Updat1");
             instance1.ackSystem.Update();
-            Debug.Log("Updat2");
+            if (AckSystem.VerboseLogging) Debug.Log("Updat2");
             instance2.ackSystem.Update();
             (List<byte[]>, List<byte[]>) newMessages = badSocket.Update(dropChance, skipChance);
             receives1.AddRange(newMessages.Item1);

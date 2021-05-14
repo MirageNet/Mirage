@@ -215,7 +215,10 @@ namespace Mirage.SocketLayer
         internal void ReceiveNotifyPacket(Packet packet)
         {
             ArraySegment<byte> segment = ackSystem.ReceiveNotify(packet.buffer.array);
-            dataHandler.ReceivePacket(this, segment);
+            if (segment != default)
+            {
+                dataHandler.ReceivePacket(this, segment);
+            }
         }
 
         internal void ReceiveNotifyAck(Packet packet)

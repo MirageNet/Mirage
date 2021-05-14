@@ -61,5 +61,57 @@ namespace Mirage.SocketLayer.Tests
             Assert.That(offset, Is.EqualTo(7), "Should have moved offset by 4");
             Assert.That(outValue, Is.EqualTo(value), "Out value should be equal to in value");
         }
+
+        [Test]
+        public void WriteReadULongTest()
+        {
+            byte[] buffer = new byte[20];
+            int offset = 3;
+            // value large enough to use all 4 bytes
+            ulong value = 0x12_34_56_78_90_24_68_02ul;
+
+            ByteUtils.WriteULong(buffer, ref offset, value);
+            Assert.That(offset, Is.EqualTo(11), "Should have moved offset by 8");
+            Assert.That(buffer[3], Is.Not.Zero, "Should have written to buffer");
+            Assert.That(buffer[4], Is.Not.Zero, "Should have written to buffer");
+            Assert.That(buffer[5], Is.Not.Zero, "Should have written to buffer");
+            Assert.That(buffer[6], Is.Not.Zero, "Should have written to buffer");
+            Assert.That(buffer[7], Is.Not.Zero, "Should have written to buffer");
+            Assert.That(buffer[8], Is.Not.Zero, "Should have written to buffer");
+            Assert.That(buffer[9], Is.Not.Zero, "Should have written to buffer");
+            Assert.That(buffer[10], Is.Not.Zero, "Should have written to buffer");
+
+            offset = 3;
+            ulong outValue = ByteUtils.ReadULong(buffer, ref offset);
+            Assert.That(offset, Is.EqualTo(11), "Should have moved offset by 8");
+            Assert.That(outValue, Is.EqualTo(value), "Out value should be equal to in value");
+        }
+
+        [Test]
+        [Explicit("c# only lets you bit shift by max of 63, It only takes first 6 bits, so will drop any extra bits and try to shift anyway")]
+        public void UlongShift()
+        {
+            ulong value = 0xfUL;
+            ulong shifted = value << 56;
+            ulong expected = 0x0F00_0000_0000_0000UL;
+
+            Assert.That(shifted, Is.EqualTo(expected));
+        }
+
+        [Test]
+        [Explicit("c# only lets you bit shift by max of 63. It only takes first 6 bits, so will drop any extra bits and try to shift anyway")]
+        public void UlongShift2()
+        {
+            ulong value = 0xfUL;
+            ulong shifted = value << 64;
+            ulong expected = 0;
+
+            // expected to shift value 64 times and end up with 0
+            // but instead it shifts 0 times (64 & 0xFFF === 0)
+            // this leaves the final result same as value
+
+            Assert.That(shifted, Is.EqualTo(expected));
+        }
+
     }
 }
