@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
@@ -14,6 +13,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     public class AckSystemTestBase
     {
         System.Random rand = new System.Random();
+        protected BufferPool bufferPool = new BufferPool(1300, 100, 1000);
 
         protected byte[] createRandomData(int id)
         {
@@ -51,7 +51,9 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
         public void SendRaw(byte[] packet, int length)
         {
-            packets.Add(packet);
+            byte[] clone = new byte[length];
+            System.Buffer.BlockCopy(packet, 0, clone, 0, length);
+            packets.Add(clone);
         }
     }
 
@@ -93,7 +95,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         public void SetUp()
         {
             connection = new SubIRawConnection();
-            ackSystem = new AckSystem(connection, default, new Time());
+            ackSystem = new AckSystem(connection, new Config(), new Time(), bufferPool);
 
             message = createRandomData(1);
             ackSystem.SendNotify(message);
@@ -159,7 +161,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             instance = new AckTestInstance();
             instance.connection = new SubIRawConnection();
-            instance.ackSystem = new AckSystem(instance.connection, default, new Time());
+            instance.ackSystem = new AckSystem(instance.connection, new Config(), new Time(), bufferPool);
 
             // create and send n messages
             instance.messages = new List<byte[]>();
@@ -247,12 +249,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             instance1 = new AckTestInstance();
             instance1.connection = new SubIRawConnection();
-            instance1.ackSystem = new AckSystem(instance1.connection, default, new Time());
+            instance1.ackSystem = new AckSystem(instance1.connection, new Config(), new Time(), bufferPool);
 
 
             instance2 = new AckTestInstance();
             instance2.connection = new SubIRawConnection();
-            instance2.ackSystem = new AckSystem(instance2.connection, default, new Time());
+            instance2.ackSystem = new AckSystem(instance2.connection, new Config(), new Time(), bufferPool);
 
             // create and send n messages
             instance1.messages = new List<byte[]>();
@@ -267,12 +269,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 // send to conn1
                 instance1.ackSystem.SendNotify(instance1.messages[i]);
                 // give to instance2 from conn1
-                instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i]);
+                instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i], instance1.connection.packets[i].Length);
 
                 // send to conn2
                 instance2.ackSystem.SendNotify(instance2.messages[i]);
                 // give to instance1 from conn2
-                instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i]);
+                instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i], instance2.connection.packets[i].Length);
             }
 
             // should have got 1 packet
@@ -282,7 +284,6 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             // should not have null data
             Assert.That(instance1.connection.packets, Does.Not.Contain(null));
             Assert.That(instance2.connection.packets, Does.Not.Contain(null));
-
         }
 
 
@@ -424,12 +425,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             instance1 = new AckTestInstance();
             instance1.connection = new SubIRawConnection();
-            instance1.ackSystem = new AckSystem(instance1.connection, default, new Time());
+            instance1.ackSystem = new AckSystem(instance1.connection, new Config(), new Time(), bufferPool);
 
 
             instance2 = new AckTestInstance();
             instance2.connection = new SubIRawConnection();
-            instance2.ackSystem = new AckSystem(instance2.connection, default, new Time());
+            instance2.ackSystem = new AckSystem(instance2.connection, new Config(), new Time(), bufferPool);
 
             // create and send n messages
             instance1.messages = new List<byte[]>();
@@ -446,13 +447,13 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
                 // give to instance2 if received
                 if (received2[i])
-                    instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i]);
+                    instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i], instance1.connection.packets[i].Length);
 
                 // send to conn2
                 instance2.ackSystem.SendNotify(instance2.messages[i]);
                 // give to instance1 if received
                 if (received1[i])
-                    instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i]);
+                    instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i], instance2.connection.packets[i].Length);
             }
 
             // should have got 1 packet
@@ -612,11 +613,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 switch (type)
                 {
                     case PacketType.Reliable:
-                        (bool valid, byte[] nextInOrder, int offsetInBuffer) = ackSystem.ReceiveReliable(packet);
-                        if (valid)
-                        {
-                            received.Add(nextInOrder.Skip(offsetInBuffer).ToArray());
-                        }
+                        ackSystem.ReceiveReliable(packet, packet.Length);
                         break;
                     case PacketType.Ack:
                         ackSystem.ReceiveAck(packet);
@@ -629,9 +626,9 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                         break;
                 }
 
-                while (ackSystem.NextReliablePacket(out byte[] outBuffer))
+                while (ackSystem.NextReliablePacket(out System.ArraySegment<byte> outBuffer))
                 {
-                    received.Add(outBuffer);
+                    received.Add(outBuffer.ToArray());
                 }
                 return received;
             }
@@ -648,22 +645,21 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         List<byte[]> receives1;
         List<byte[]> receives2;
 
-        StreamWriter writer;
-
         [SetUp]
         public void SetUp()
         {
             time = new Time();
-            timeout = new Config().AckTimeout;
+            var config = new Config();
+            timeout = config.TimeBeforeEmptyAck;
 
             instance1 = new AckTestInstance();
             instance1.connection = new SubIRawConnection();
-            instance1.ackSystem = new AckSystem(instance1.connection, timeout, time);
+            instance1.ackSystem = new AckSystem(instance1.connection, config, time, bufferPool);
 
 
             instance2 = new AckTestInstance();
             instance2.connection = new SubIRawConnection();
-            instance2.ackSystem = new AckSystem(instance2.connection, timeout, time);
+            instance2.ackSystem = new AckSystem(instance2.connection, config, time, bufferPool);
 
             badSocket = new BadSocket(instance1, instance2);
 
@@ -673,27 +669,11 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
             receives1 = new List<byte[]>();
             receives2 = new List<byte[]>();
-
-
-            AckSystem.LogToFunction = false;
-            AckSystem.Log = LogToFile;
-            writer = new StreamWriter("./Logs/AckSystemTest.log");
-            writer.AutoFlush = true;
         }
 
-        void LogToFile(string msg)
-        {
-            writer.WriteLine(msg);
-        }
         [TearDown]
         public void TearDown()
         {
-            writer.Close();
-            writer.Dispose();
-            writer = null;
-            AckSystem.LogToFunction = false;
-            AckSystem.Log = null;
-
             time = null;
             badSocket = null;
             instance1 = null;
@@ -768,13 +748,6 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 Tick(dropChance, skipChance);
             }
 
-            if (AckSystem.VerboseLogging)
-            {
-                Debug.LogWarning(receives1.Count);
-                Debug.LogWarning(receives2.Count);
-            }
-
-
             // send 1 more message so that other side will for sure get last message
             // if we dont do then last message could be forgot and we receive 99/100
             instance1.ackSystem.SendReliable(new byte[1] { 0 });
@@ -790,12 +763,6 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 Tick(0, 0);
             }
 
-            if (AckSystem.VerboseLogging)
-            {
-                Debug.LogWarning(receives1.Count);
-                Debug.LogWarning(receives2.Count);
-            }
-
             // should not have null data
             Assert.That(instance1.connection.packets, Does.Not.Contain(null));
             Assert.That(instance2.connection.packets, Does.Not.Contain(null));
@@ -804,9 +771,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         private void Tick(float dropChance, float skipChance)
         {
             time.Now += tick;
-            if (AckSystem.VerboseLogging) Debug.Log("Updat1");
             instance1.ackSystem.Update();
-            if (AckSystem.VerboseLogging) Debug.Log("Updat2");
             instance2.ackSystem.Update();
             (List<byte[]>, List<byte[]>) newMessages = badSocket.Update(dropChance, skipChance);
             receives1.AddRange(newMessages.Item1);
@@ -845,13 +810,6 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 yield return null;
             }
 
-            if (AckSystem.VerboseLogging)
-            {
-                Debug.LogWarning(receives1.Count);
-                Debug.LogWarning(receives2.Count);
-            }
-
-
             // send 1 more message so that other side will for sure get last message
             // if we dont do then last message could be forgot and we receive 99/100
             instance1.ackSystem.SendReliable(new byte[1] { 0 });
@@ -867,17 +825,9 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 Tick(0, 0);
             }
 
-            if (AckSystem.VerboseLogging)
-            {
-                Debug.LogWarning(receives1.Count);
-                Debug.LogWarning(receives2.Count);
-            }
-
             // should not have null data
             Assert.That(instance1.connection.packets, Does.Not.Contain(null));
             Assert.That(instance2.connection.packets, Does.Not.Contain(null));
-
-
 
             // ---- asserts ---- // 
             Assert.That(receives2, Has.Count.EqualTo(messageCount + 1));

@@ -394,7 +394,7 @@ namespace Mirage.SocketLayer
 
         private Connection CreateNewConnection(EndPoint endPoint)
         {
-            var connection = new Connection(this, endPoint, dataHandler, config, time, logger);
+            var connection = new Connection(this, endPoint, dataHandler, config, time, bufferPool, logger);
             connection.SetReceiveTime();
             connections.Add(endPoint, connection);
             return connection;

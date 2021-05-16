@@ -48,13 +48,13 @@ namespace Mirage.SocketLayer
         /// <param name="startPoolSize">how many buffers to create at start</param>
         /// <param name="maxPoolSize">max number of buffers in pool</param>
         /// <param name="logger"></param>
-        public BufferPool(int bufferSize, int startPoolSize, int maxPoolSize, ILogger logger)
+        public BufferPool(int bufferSize, int startPoolSize, int maxPoolSize, ILogger logger = null)
         {
             if (startPoolSize > maxPoolSize) throw new ArgumentException("Start Size must be less than max size", nameof(startPoolSize));
 
             this.bufferSize = bufferSize;
             this.maxPoolSize = maxPoolSize;
-            this.logger = logger;
+            this.logger = logger ?? Debug.unityLogger;
 
             pool = new ByteBuffer[maxPoolSize];
             for (int i = 0; i < startPoolSize; i++)
@@ -65,7 +65,7 @@ namespace Mirage.SocketLayer
 
         private ByteBuffer CreateNewBuffer()
         {
-            if (created >= maxPoolSize) logger.Log(LogType.Warning, $"Buffer Max Size reached, created:{created} max:{maxPoolSize}");
+            if (created >= maxPoolSize && logger.IsLogTypeAllowed(LogType.Warning)) logger.Log(LogType.Warning, $"Buffer Max Size reached, created:{created} max:{maxPoolSize}");
             created++;
             return new ByteBuffer(bufferSize, this);
         }
@@ -94,7 +94,7 @@ namespace Mirage.SocketLayer
             }
             else
             {
-                logger.Log(LogType.Warning, $"Cant Put buffer into full pool, leaving for GC");
+                if (logger.IsLogTypeAllowed(LogType.Warning)) logger.Log(LogType.Warning, $"Cant Put buffer into full pool, leaving for GC");
                 // buffer is left for GC, so decrement created
                 created--;
             }

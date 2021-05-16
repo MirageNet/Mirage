@@ -1,85 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace Mirage.SocketLayer
 {
-    class AckablePacket
-    {
-        public NotifyToken token;
-        public ReliablePacket reliablePacket;
-
-        public bool IsNotify => token != null;
-        public bool IsReliable => reliablePacket != null;
-
-        public AckablePacket(NotifyToken token)
-        {
-            this.token = token;
-            reliablePacket = null;
-        }
-
-        public AckablePacket(ReliablePacket reliablePacket)
-        {
-            this.reliablePacket = reliablePacket;
-            token = null;
-        }
-    }
-    class ReliablePacket
-    {
-        public List<ushort> sequences = new List<ushort>();
-        public bool acked;
-        public readonly byte[] packet;
-        public readonly ushort order;
-
-        public ReliablePacket(byte[] packet, ushort order)
-        {
-            this.packet = packet;
-            this.order = order;
-        }
-    }
-
-    /// <summary>
-    /// Object returned from <see cref="NotifySystem.Send(byte[])"/> with events for when packet is Lost or Delivered
-    /// </summary>
-    public interface INotifyToken
-    {
-        event Action Delivered;
-        event Action Lost;
-    }
-
-    /// <summary>
-    /// Object returned from <see cref="NotifySystem.Send(byte[])"/> with events for when packet is Lost or Delivered
-    /// </summary>
-    public class NotifyToken : INotifyToken
-    {
-        public event Action Delivered;
-        public event Action Lost;
-
-        bool notified;
-
-        internal void Notify(bool delivered)
-        {
-            if (notified) throw new InvalidOperationException("this token as already been notified");
-            notified = true;
-
-            if (delivered)
-                Delivered?.Invoke();
-            else
-                Lost?.Invoke();
-        }
-    }
-
     internal class AckSystem
     {
-        // todo https://gafferongames.com/post/reliable_ordered_messages/
-
-        public static bool VerboseLogging = false;
-        public static bool LogToFunction = false;
-        public static Action<string> Log;
-
         const int ACK_SEQUENCER_BITS = 16;
         // should be bit count of MAX_RECEIVE_QUEUE
         const int BUFFER_SIZE_BITS = 10;
@@ -98,18 +24,21 @@ namespace Mirage.SocketLayer
         readonly RingBuffer<AckablePacket> sentAckablePackets = new RingBuffer<AckablePacket>(BUFFER_SIZE_BITS);
         readonly Sequencer reliableOrder = new Sequencer(BUFFER_SIZE_BITS);
 
-        readonly RingBuffer<byte[]> reliableReceive = new RingBuffer<byte[]>(BUFFER_SIZE_BITS);
+
+        readonly RingBuffer<ReliableReceived> reliableReceive = new RingBuffer<ReliableReceived>(BUFFER_SIZE_BITS);
 
         // temp list for resending when processing sentqueue
         readonly HashSet<ReliablePacket> toResend = new HashSet<ReliablePacket>();
 
+        public readonly int MTU;
 
         readonly IRawConnection connection;
         readonly ITime time;
         readonly float ackTimeout;
         /// <summary>how many empty acks to send</summary>
-        readonly int emptyAckLimit = 20;
-        readonly int receivesBeforeEmpty = 8;
+        readonly int emptyAckLimit;
+        readonly int receivesBeforeEmpty;
+        private readonly BufferPool bufferPool;
 
         /// <summary>
         /// most recent sequence received
@@ -125,7 +54,10 @@ namespace Mirage.SocketLayer
         float lastSentTime;
         ushort lastSentAck;
         int emptyAckCount = 0;
+        ReliablePacket nextBatch;
 
+        ReliableReceived nextReliable;
+        int nextReliableOffset;
 
         /// <summary>
         /// 
@@ -133,48 +65,77 @@ namespace Mirage.SocketLayer
         /// <param name="connection"></param>
         /// <param name="ackTimeout">how long after last send before sending empty ack</param>
         /// <param name="time"></param>
-        public AckSystem(IRawConnection connection, float ackTimeout, ITime time)
+        public AckSystem(IRawConnection connection, Config config, ITime time, BufferPool bufferPool)
         {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+
             this.connection = connection;
             this.time = time;
-            this.ackTimeout = ackTimeout;
+            this.bufferPool = bufferPool;
 
-            //// set received to first sequence
-            //// this means that it will always be 1 before first sent packet
-            //// so first receieved will have correct distance
-            //LatestAckSequence = (ushort)ackSequencer.Next();
+            ackTimeout = config.TimeBeforeEmptyAck;
+            emptyAckLimit = config.EmptyAckLimit;
+            receivesBeforeEmpty = config.ReceivesBeforeEmptyAck;
+            MTU = config.Mtu;
 
-            OnNormalSend();
+            OnSend();
         }
 
-        public bool NextReliablePacket(out byte[] buffer)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns>True if there is a new reliable message</returns>
+        public bool NextReliablePacket(out ArraySegment<byte> message)
         {
-            return reliableReceive.TryDequeue(out buffer);
+            // todo return ReliableReceived (byte buffer and length) instead of segment and have consumer release buffer
+            // add static method that gets message from bytebuffer?
+
+            if (nextReliable.buffer == null)
+            {
+                if (reliableReceive.TryDequeue(out ReliableReceived byteBuffer))
+                {
+                    nextReliable = byteBuffer;
+                    nextReliableOffset = 0;
+                }
+                else
+                {
+                    message = default;
+                    return false;
+                }
+            }
+
+            ushort length = ByteUtils.ReadUShort(nextReliable.buffer.array, ref nextReliableOffset);
+            message = new ArraySegment<byte>(nextReliable.buffer.array, nextReliableOffset, length);
+            nextReliableOffset += length;
+
+            if (nextReliableOffset == nextReliable.length)
+            {
+                // todo dont release here, instead return bytebuffer
+                nextReliable.buffer.Release();
+                nextReliable = default;
+            }
+
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void OnSendEmptyAck()
+        void OnSend()
         {
             emptyAckCount++;
             lastSentAck = LatestAckSequence;
-            SetSendTime();
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void OnNormalSend()
-        {
-            emptyAckCount = 0;
-            lastSentAck = LatestAckSequence;
-            SetSendTime();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void SetSendTime()
-        {
             lastSentTime = time.Now;
         }
 
         public void Update()
         {
+            if (nextBatch != null)
+            {
+                SendReliablePacket(nextBatch);
+                nextBatch = null;
+            }
+
+
             // todo send ack if not recently been sent
             // ack only packet sent if no other sent within last frame
             if (ShouldSendEmptyAck() && TimeToSendAck())
@@ -182,17 +143,22 @@ namespace Mirage.SocketLayer
                 // send ack
                 SendAck();
             }
+
         }
 
+        /// <summary>
+        /// resets empty ack count, this should be called after LatestAckSequence increases
+        /// </summary>
+        void ResetEmptyAckCount()
+        {
+            emptyAckCount = 0;
+        }
         void CheckSendEmptyAck()
         {
             long distance = sentAckablePackets.Sequencer.Distance(LatestAckSequence, lastSentAck);
-            if (VerboseLogging) { Debug.Log($"distance To lastSentAck:{distance}"); }
             if (distance > receivesBeforeEmpty)
             {
                 SendAck();
-                // reset empty ack count beecause this is a new ack that should be received
-                emptyAckCount = 0;
             }
         }
 
@@ -205,36 +171,32 @@ namespace Mirage.SocketLayer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         bool ShouldSendEmptyAck()
         {
-            bool shouldSend = emptyAckCount < emptyAckLimit;
-            if (!shouldSend)
-            {
-                if (VerboseLogging) { Debug.LogWarning("no more empty acks"); }
-            }
-            return shouldSend;
+            return emptyAckCount < emptyAckLimit;
         }
 
         private void SendAck()
         {
-            if (VerboseLogging) { Debug.LogWarning($"empty acks, count:{emptyAckCount}"); }
+            using (ByteBuffer final = bufferPool.Take())
+            {
+                int offset = 0;
 
-            // todo use pool to stop allocations
-            byte[] final = new byte[HEADER_SIZE_ACK];
-            int offset = 0;
+                ByteUtils.WriteByte(final.array, ref offset, (byte)PacketType.Ack);
 
-            ByteUtils.WriteByte(final, ref offset, (byte)PacketType.Ack);
+                ByteUtils.WriteUShort(final.array, ref offset, LatestAckSequence);
+                ByteUtils.WriteULong(final.array, ref offset, AckMask);
 
-            ByteUtils.WriteUShort(final, ref offset, LatestAckSequence);
-            ByteUtils.WriteULong(final, ref offset, AckMask);
-
-            // todo replace assert with log
-            Assert.AreEqual(offset, HEADER_SIZE_ACK);
-
-            connection.SendRaw(final, final.Length);
-            OnSendEmptyAck();
+                connection.SendRaw(final.array, offset);
+            }
+            OnSend();
         }
 
         public INotifyToken SendNotify(byte[] packet)
         {
+            // todo batch nofity?
+            if (packet.Length + HEADER_SIZE_NOTIFY > MTU)
+            {
+                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Notify message size is {MTU - HEADER_SIZE_NOTIFY}");
+            }
             if (sentAckablePackets.IsFull)
             {
                 throw new InvalidOperationException("Sent queue is full");
@@ -257,54 +219,90 @@ namespace Mirage.SocketLayer
             ByteUtils.WriteUShort(final, ref offset, LatestAckSequence);
             ByteUtils.WriteULong(final, ref offset, AckMask);
 
-            // todo replace assert with log
-            Assert.AreEqual(offset, HEADER_SIZE_NOTIFY);
 
             connection.SendRaw(final, final.Length);
-            OnNormalSend();
+            OnSend();
 
             return token;
         }
 
 
-        public void SendReliable(byte[] packet)
+        public void SendReliable(byte[] message)
         {
+            if (message.Length + HEADER_SIZE_RELIABLE + 2 > MTU)
+            {
+                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Reliable message size is {MTU - HEADER_SIZE_RELIABLE - 2}");
+            }
             if (sentAckablePackets.IsFull)
             {
                 throw new InvalidOperationException("Sent queue is full");
             }
 
-            ulong order = reliableOrder.Next();
-            var reliablePacket = new ReliablePacket(packet, (ushort)order);
-            SendReliablePacket(reliablePacket);
+            if (nextBatch == null)
+            {
+                ushort order = (ushort)reliableOrder.Next();
+                nextBatch = CreateReliableBuffer(order);
+            }
+
+            int msgLength = message.Length + 2;
+            int batchLength = nextBatch.length;
+            if (batchLength + msgLength > MTU)
+            {
+                // if full, send and create new
+                SendReliablePacket(nextBatch);
+
+                ushort order = (ushort)reliableOrder.Next();
+                nextBatch = CreateReliableBuffer(order);
+            }
+
+            AddToBatch(nextBatch, message);
         }
-        private void SendReliablePacket(ReliablePacket reliable)
+
+        private ReliablePacket CreateReliableBuffer(ushort order)
+        {
+
+            ByteBuffer final = bufferPool.Take();
+
+            int offset = 0;
+            ByteUtils.WriteByte(final.array, ref offset, (byte)PacketType.Reliable);
+
+            offset = 13;
+            ByteUtils.WriteUShort(final.array, ref offset, order);
+
+            return new ReliablePacket(final, HEADER_SIZE_RELIABLE, order);
+        }
+        static void AddToBatch(ReliablePacket packet, byte[] message)
+        {
+            byte[] array = packet.buffer.array;
+            int offset = packet.length;
+
+            int msgLength = message.Length;
+            ByteUtils.WriteUShort(array, ref offset, (ushort)msgLength);
+            Buffer.BlockCopy(message, 0, array, offset, msgLength);
+            offset += msgLength;
+
+            packet.length = offset;
+        }
+
+        void SendReliablePacket(ReliablePacket reliable)
         {
             if (reliable.acked) { return; }
 
             ushort sequence = (ushort)sentAckablePackets.Enqueue(new AckablePacket(reliable));
 
-            byte[] packet = reliable.packet;
-            // todo check packet size is within MTU
-            // todo use pool to stop allocations
-            byte[] final = new byte[packet.Length + HEADER_SIZE_RELIABLE];
-            Buffer.BlockCopy(packet, 0, final, HEADER_SIZE_RELIABLE, packet.Length);
+            byte[] final = reliable.buffer.array;
 
-            int offset = 0;
+            int offset = 1;
 
-            ByteUtils.WriteByte(final, ref offset, (byte)PacketType.Reliable);
-
-            reliable.sequences.Add(sequence);
+            reliable.OnSend(sequence);
             ByteUtils.WriteUShort(final, ref offset, sequence);
             ByteUtils.WriteUShort(final, ref offset, LatestAckSequence);
             ByteUtils.WriteULong(final, ref offset, AckMask);
-            ByteUtils.WriteUShort(final, ref offset, reliable.order);
 
-            if (VerboseLogging) { Debug.LogWarning($"SendReliablePacket {reliable.order}"); }
-            if (AckSystem.LogToFunction) { AckSystem.Log($"SendReliablePacket {reliable.order}"); }
-            connection.SendRaw(final, final.Length);
-            OnNormalSend();
+            connection.SendRaw(final, reliable.length);
+            OnSend();
         }
+
 
         /// <summary>
         /// Receives incoming nofity packet
@@ -312,7 +310,7 @@ namespace Mirage.SocketLayer
         /// </summary>
         /// <param name="packet"></param>
         /// <returns>default or new packet to handle</returns>
-        public ArraySegment<byte> ReceiveNotify(byte[] packet)
+        public ArraySegment<byte> ReceiveNotify(byte[] packet, int length)
         {
             // start at 1 to skip packet type
             int offset = 1;
@@ -326,7 +324,7 @@ namespace Mirage.SocketLayer
             // duplicate or arrived late
             if (distance <= 0) { return default; }
 
-            var segment = new ArraySegment<byte>(packet, HEADER_SIZE_NOTIFY, packet.Length - HEADER_SIZE_NOTIFY);
+            var segment = new ArraySegment<byte>(packet, HEADER_SIZE_NOTIFY, length - HEADER_SIZE_NOTIFY);
             return segment;
         }
 
@@ -335,7 +333,7 @@ namespace Mirage.SocketLayer
         /// </summary>
         /// <param name="packet"></param>
         /// <returns>true if there are ordered message to read</returns>
-        public (bool valid, byte[] nextInOrder, int offsetInBuffer) ReceiveReliable(byte[] packet)
+        public void ReceiveReliable(byte[] packet, int length)
         {
             // start at 1 to skip packet type
             int offset = 1;
@@ -345,40 +343,35 @@ namespace Mirage.SocketLayer
             ulong ackMask = ByteUtils.ReadULong(packet, ref offset);
             ushort reliableSequence = ByteUtils.ReadUShort(packet, ref offset);
 
-            int distance = ProcessIncomingHeader(sequence, ackSequence, ackMask);
+            _ = ProcessIncomingHeader(sequence, ackSequence, ackMask);
 
             // checks acks, late message are allowed for reliable
             // but only update lastest if later than current
 
             long reliableDistance = reliableReceive.DistanceToRead(reliableSequence);
 
-            if (VerboseLogging) { Debug.Log($"ReceiveReliable [sequence:{sequence}, distance:{distance}, reliableSequence:{reliableSequence} reliableDistance{reliableDistance}]"); }
-            if (AckSystem.LogToFunction) { AckSystem.Log($"ReceiveReliable [sequence:{sequence}, distance:{distance}, reliableSequence:{reliableSequence} reliableDistance{reliableDistance}]"); }
-
-
             if (reliableDistance < 0)
             {
                 // old packet
-                return (false, default, default);
-            }
-            else if (reliableDistance == 0)
-            {
-                reliableReceive.MoveReadOne();
-                // next packet
-                return (true, packet, offset);
+                return;
             }
             else
             {
-                // new packet
-                byte[] savedPacket = new byte[packet.Length - HEADER_SIZE_RELIABLE];
-                Buffer.BlockCopy(packet, HEADER_SIZE_RELIABLE, savedPacket, 0, savedPacket.Length);
-                reliableReceive.InsertAt(reliableSequence, savedPacket);
-                return (false, default, default);
+                ReliableReceived existing = reliableReceive[reliableSequence];
+                if (existing.buffer == null)
+                {
+                    // new packet
+                    ByteBuffer savedPacket = bufferPool.Take();
+                    int bufferLength = length - HEADER_SIZE_RELIABLE;
+                    Buffer.BlockCopy(packet, HEADER_SIZE_RELIABLE, savedPacket.array, 0, bufferLength);
+                    reliableReceive.InsertAt(reliableSequence, new ReliableReceived(savedPacket, bufferLength));
+                }
+                return;
             }
         }
 
 
-        internal void ReceiveAck(byte[] packet)
+        public void ReceiveAck(byte[] packet)
         {
             // start at 1 to skip packet type
             int offset = 1;
@@ -404,7 +397,7 @@ namespace Mirage.SocketLayer
             if (distance > 0)
             {
                 // distance is too large to be shifted
-                if (distance > 64)
+                if (distance >= MASK_SIZE)
                 {
                     // this means 63 packets have gone missingg
                     // this should never happen, but if it does then just set mask to 1
@@ -419,50 +412,54 @@ namespace Mirage.SocketLayer
                     AckMask = (AckMask << (int)distance) | 1;
                 }
                 LatestAckSequence = sequence;
-                CheckSendEmptyAck();
             }
             else
             {
                 int negativeDistnace = -(int)distance;
 
                 // distance is too large to be shifted
-                if (negativeDistnace > 64)
+                if (negativeDistnace >= MASK_SIZE)
                     return;
 
                 ulong newAck = 1ul << negativeDistnace;
                 AckMask |= newAck;
             }
-            if (VerboseLogging)
-            {
-                Console.WriteLine($"Ackmask distance:{distance}\n" +
-                    $"{Convert.ToString((long)oldMask, 2)}\n" +
-                     $"{Convert.ToString((long)AckMask, 2)}\n");
-            }
+
+            // after receiving reset empty count and check if we should send ack right away
+            ResetEmptyAckCount();
+            CheckSendEmptyAck();
         }
 
         private void CheckSentQueue(ushort sequence, ulong mask)
         {
-            if (VerboseLogging) { Debug.Log($"Ack mask {Convert.ToString((long)mask, 2)}"); }
-
             // old sequence, nothing in buffer to ack/lost
             if (sentAckablePackets.DistanceToRead(sequence) < 0) { return; }
 
-            foreach (RingBuffer<AckablePacket>.Kvp kvp in sentAckablePackets)
-            {
-                AckablePacket ackable = kvp.item;
-                uint ackableSequence = kvp.sequence;
+            ackMessagesInSentQueue(sequence, mask);
+            sentAckablePackets.MoveReadToNextNonEmpty();
+            resendMessages();
+        }
+        private void ackMessagesInSentQueue(ushort sequence, ulong mask)
+        {
+            uint start = sentAckablePackets.Read;
+            uint end = sentAckablePackets.Write;
+            Sequencer sequencer = sentAckablePackets.Sequencer;
 
-                // null if packet has been acked
-                if (ackable == null) { continue; }
+            long count = sequencer.Distance(end, start);
+
+            for (uint i = 0; i < count; i++)
+            {
+                uint ackableSequence = (uint)sequencer.MoveInBounds(start + i);
+                AckablePacket ackable = sentAckablePackets[ackableSequence];
+                if (ackable.Equals(default)) { continue; }
 
                 // if we have already ackeds this, just remove it
                 if (ackable.IsReliable && ackable.reliablePacket.acked)
                 {
-                    if (LogToFunction) Log($"Ackable Remove {ackableSequence} (previously acked)");
+                    // todo this should never happen, can we remove this?
                     sentAckablePackets.RemoveAt(ackableSequence);
                     continue;
                 }
-
                 int distance = (int)sentAckablePackets.Sequencer.Distance(sequence, ackableSequence);
 
                 // negative distance means next is sent after last ack, so nothing to ack yet
@@ -476,7 +473,6 @@ namespace Mirage.SocketLayer
                 if (ackable.IsNotify)
                 {
                     ackable.token.Notify(!lost);
-                    if (LogToFunction) Log($"Ackable Remove {ackableSequence} (Notify)");
                     sentAckablePackets.RemoveAt(ackableSequence);
                 }
                 else
@@ -484,38 +480,39 @@ namespace Mirage.SocketLayer
                     ReliablePacket reliablePacket = ackable.reliablePacket;
                     if (lost)
                     {
-                        // we need to resend the packet if it has been possible for it to have been acked
-
-                        bool needToResend = true;
-                        foreach (ushort seq in reliablePacket.sequences)
-                        {
-                            // if any of the sequences are after sequence it has already been resent
-                            if (sentAckablePackets.Sequencer.Distance(sequence, seq) < 0)
-                            {
-                                needToResend = false;
-                            }
-                        }
-
-                        if (needToResend)
-                            toResend.Add(reliablePacket);
-                        else
-                            if (LogToFunction) Log($"Ackable Not resend order:{reliablePacket.order} (already resent)");
+                        reliableLost(sequence, reliablePacket);
                     }
                     else
                     {
-                        reliablePacket.acked = true;
-                        if (LogToFunction) Log($"Ackable acked order:{reliablePacket.order} [{sequence},{Convert.ToString((long)mask)}]");
-                        foreach (ushort seq in reliablePacket.sequences)
-                        {
-                            sentAckablePackets.RemoveAt(seq);
-                            if (LogToFunction) Log($"Ackable Remove {seq} via {ackableSequence}");
-                        }
+                        reliableAcked(reliablePacket);
                     }
                 }
             }
+        }
 
-            sentAckablePackets.MoveReadToNextNonEmpty();
+        private void reliableAcked(ReliablePacket reliablePacket)
+        {
+            reliablePacket.OnAck();
+            foreach (ushort seq in reliablePacket.sequences)
+            {
+                sentAckablePackets.RemoveAt(seq);
+            }
+        }
 
+        private void reliableLost(ushort sequence, ReliablePacket reliablePacket)
+        {
+            // we dont need to resend if it has not been possible to have been acked yet
+
+            // eg seq=99, last = 101 => dist = 99-101=-2 => sent after seq => dont resend
+            // => if positive, then resend
+            if (sentAckablePackets.Sequencer.Distance(sequence, reliablePacket.lastSequence) > 0)
+            {
+                toResend.Add(reliablePacket);
+            }
+        }
+
+        private void resendMessages()
+        {
             foreach (ReliablePacket reliable in toResend)
             {
                 SendReliablePacket(reliable);
@@ -537,166 +534,76 @@ namespace Mirage.SocketLayer
             ulong ackBit = 1ul << distance;
             return (receivedMask & ackBit) == 0u;
         }
-    }
-    public class RingBuffer<T> : IEnumerable<RingBuffer<T>.Kvp> where T : class
-    {
-        public readonly Sequencer Sequencer;
 
-        T[] buffer;
-        // oldtest item
-        uint read;
-        // newest item
-        uint write;
 
-        public uint Read => read;
-        public uint Write => write;
-
-        public RingBuffer(int bitCount)
+        struct AckablePacket : IEquatable<AckablePacket>
         {
-            Sequencer = new Sequencer(bitCount);
-            buffer = new T[1 << bitCount];
-        }
+            public NotifyToken token;
+            public ReliablePacket reliablePacket;
 
-        public bool IsFull => Sequencer.Distance(write, read) == -1;
-        public long DistanceToRead(uint from)
-        {
-            return Sequencer.Distance(from, read);
-        }
+            public bool IsNotify => token != null;
+            public bool IsReliable => reliablePacket != null;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns>sequance of written item</returns>
-        public uint Enqueue(T item)
-        {
-            long dist = Sequencer.Distance(write, read);
-            if (dist == -1) { throw new InvalidOperationException($"Buffer is full, write:{write} read:{read}"); }
-
-            if (AckSystem.LogToFunction) { AckSystem.Log($"Enqueue: write:{write} read:{read}"); }
-            buffer[write] = item;
-            uint sequence = write;
-            write = (uint)Sequencer.NextAfter(write);
-            return sequence;
-        }
-        public bool TryDequeue(out T item)
-        {
-            item = buffer[read];
-            if (item != null)
+            public AckablePacket(NotifyToken token)
             {
-                if (AckSystem.VerboseLogging) { Debug.LogWarning($"Dequeuing next {read}"); }
-                if (AckSystem.LogToFunction) { AckSystem.Log($"Dequeuing next {read}"); }
-
-                buffer[read] = null;
-                read = (uint)Sequencer.NextAfter(read);
-
-                return true;
+                this.token = token;
+                reliablePacket = null;
             }
-            else
+
+            public AckablePacket(ReliablePacket reliablePacket)
             {
-                return false;
+                this.reliablePacket = reliablePacket;
+                token = null;
+            }
+
+            public bool Equals(AckablePacket other)
+            {
+                return token == other.token &&
+                    reliablePacket == other.reliablePacket;
             }
         }
-
-        public void InsertAt(uint index, T item)
+        class ReliablePacket
         {
-            buffer[index] = item;
-        }
-        public void RemoveAt(uint index)
-        {
-            buffer[index] = null;
-        }
+            public List<ushort> sequences = new List<ushort>();
+            public ushort lastSequence;
+            public bool acked;
+            public readonly ByteBuffer buffer;
+            public int length;
+            public readonly ushort order;
 
-
-        /// <summary>
-        /// Moves read index to next non empty position
-        /// <para>this is useful when removing items from buffer in random order.</para>
-        /// <para>Will stop when write == read, or when next buffer item is not empty</para>
-        /// </summary>
-        public void MoveReadToNextNonEmpty()
-        {
-            uint oldRead = read;
-            // if read == write, buffer is empty, dont move it
-            // if buffer[read] is empty then read to next item
-            while (write != read && buffer[read] == null)
+            public void OnSend(ushort sequence)
             {
-                read = (uint)Sequencer.NextAfter(read);
+                sequences.Add(sequence);
+                lastSequence = sequence;
             }
-            if (AckSystem.LogToFunction) { AckSystem.Log($"Moving Read from {oldRead} to {read}"); }
-        }
 
-        /// <summary>
-        /// Moves read 1 index
-        /// </summary>
-        public void MoveReadOne()
-        {
-            if (AckSystem.VerboseLogging) { Debug.LogWarning($"Dequeuing(skip) next {read}"); }
-            if (AckSystem.LogToFunction) { AckSystem.Log($"Dequeuing(skip) next {read}"); }
-
-
-            read = (uint)Sequencer.NextAfter(read);
-        }
-
-        public IEnumerator<Kvp> GetEnumerator() => new Enumerator(this);
-        IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
-
-
-        public struct Kvp
-        {
-            public uint sequence;
-            public T item;
-
-            public Kvp(uint sequence, T item) : this()
+            public void OnAck()
             {
-                this.sequence = sequence;
-                this.item = item;
+                acked = true;
+                buffer.Release();
+            }
+
+            public ReliablePacket(ByteBuffer packet, int length, ushort order)
+            {
+                buffer = packet;
+                this.length = length;
+                this.order = order;
+            }
+
+            public override int GetHashCode()
+            {
+                return order;
             }
         }
-        public struct Enumerator : IEnumerator<Kvp>
+        struct ReliableReceived
         {
-            readonly RingBuffer<T> buffer;
-            ulong nextIndex;
-            Kvp current;
+            public readonly ByteBuffer buffer;
+            public readonly int length;
 
-            public Kvp Current => current;
-
-            public Enumerator(RingBuffer<T> buffer)
+            public ReliableReceived(ByteBuffer buffer, int length)
             {
                 this.buffer = buffer;
-                nextIndex = buffer.read;
-                current = default;
-            }
-
-            public bool MoveNext()
-            {
-                /*
-                 i = 99, write = 110,
-                 distance = 110 - 99 = 11  => go next
-
-                 i = 110, write = 110,
-                 distance = 0  => stop
-
-                 i = 111, write = 110,
-                 distance = -1  => stop
-                  */
-                if (buffer.Sequencer.Distance(buffer.write, nextIndex) > 0)
-                {
-                    current = new Kvp((uint)nextIndex, buffer.buffer[nextIndex]);
-                    nextIndex = buffer.Sequencer.NextAfter(nextIndex);
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            public void Reset() => nextIndex = buffer.read;
-            object IEnumerator.Current => Current;
-            public void Dispose()
-            {
-                // nothing to dispose
+                this.length = length;
             }
         }
     }

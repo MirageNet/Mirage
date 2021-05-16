@@ -88,7 +88,7 @@ namespace Mirage.SocketLayer
 
         EndPoint IConnection.EndPoint => EndPoint;
 
-        internal Connection(Peer peer, EndPoint endPoint, IDataHandler dataHandler, Config config, Time time, ILogger logger)
+        internal Connection(Peer peer, EndPoint endPoint, IDataHandler dataHandler, Config config, Time time, BufferPool bufferPool, ILogger logger)
         {
             this.peer = peer;
             this.logger = logger ?? Debug.unityLogger;
@@ -101,7 +101,7 @@ namespace Mirage.SocketLayer
             keepAliveTracker = new KeepAliveTracker(config, time);
             disconnectedTracker = new DisconnectedTracker(config, time);
 
-            ackSystem = new AckSystem(this, config.AckTimeout, time);
+            ackSystem = new AckSystem(this, config, time, bufferPool);
         }
 
         public override string ToString()
@@ -198,23 +198,18 @@ namespace Mirage.SocketLayer
         }
         internal void ReceivReliablePacket(Packet packet)
         {
-            (bool valid, byte[] nextInOrder, int offsetInBuffer) = ackSystem.ReceiveReliable(packet.buffer.array);
-
-            if (valid)
-            {
-                dataHandler.ReceivePacket(this, new ArraySegment<byte>(nextInOrder, offsetInBuffer, nextInOrder.Length - offsetInBuffer));
-            }
+            ackSystem.ReceiveReliable(packet.buffer.array, packet.length);
 
             // gets imessage in order
-            while (ackSystem.NextReliablePacket(out byte[] message))
+            while (ackSystem.NextReliablePacket(out ArraySegment<byte> message))
             {
-                dataHandler.ReceivePacket(this, new ArraySegment<byte>(message));
+                dataHandler.ReceivePacket(this, message);
             }
         }
 
         internal void ReceiveNotifyPacket(Packet packet)
         {
-            ArraySegment<byte> segment = ackSystem.ReceiveNotify(packet.buffer.array);
+            ArraySegment<byte> segment = ackSystem.ReceiveNotify(packet.buffer.array, packet.length);
             if (segment != default)
             {
                 dataHandler.ReceivePacket(this, segment);

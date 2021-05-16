@@ -57,7 +57,20 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// how long after last send to send ack without a message
         /// </summary>
-        public float AckTimeout = 0.11f;
+        public float TimeBeforeEmptyAck = 0.11f;
+
+        /// <summary>
+        /// How many receives before sending an empty ack
+        /// <para>this is so that acks are still sent even if receives many message before replying</para>
+        /// </summary>
+        public int ReceivesBeforeEmptyAck = 8;
+
+        /// <summary>
+        /// How many empty acks to send via <see cref="TimeBeforeEmptyAck"/>
+        /// <para>Send enough acks that there is a high chances that 1 of them reaches other size</para>
+        /// <para>Empty Ack count resets after receives new message</para>
+        /// </summary>
+        public int EmptyAckLimit = 8;
         #endregion
     }
 }
