@@ -47,12 +47,12 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// How many buffers to create at start
         /// </summary>
-        public int BufferPoolStartSize = 10;
+        public int BufferPoolStartSize = 100;
         /// <summary>
         /// max number of buffers allowed to be stored in pool
         /// <para>buffers over this limit will be left for GC</para>
         /// </summary>
-        public int BufferPoolMaxSize = 100;
+        public int BufferPoolMaxSize = 5000;
 
         /// <summary>
         /// how long after last send to send ack without a message
@@ -71,6 +71,20 @@ namespace Mirage.SocketLayer
         /// <para>Empty Ack count resets after receives new message</para>
         /// </summary>
         public int EmptyAckLimit = 8;
+
+        /// <summary>
+        /// How many packets can exist it ring buffers for Ack and Reliable system
+        /// <para>This value wont count null packets so can be set lower than <see cref="SequenceSize"/>'s value to limit actual number of packets waiting to be acked</para>
+        /// <para>Example: (max=2000) * (MTU=1200) * (connections=100) => 240MB</para>
+        /// </summary>
+        public int maxReliablePacketsInSendBufferPerConnection = 2000;
+
+        /// <summary>
+        /// Bit size of sequence used for AckSystem
+        /// <para>this value also determines the size of ring buffers for Ack and Reliable system</para>
+        /// <para>Max of 16</para>
+        /// </summary>
+        public int SequenceSize = 12;
         #endregion
     }
 }

@@ -6,10 +6,6 @@ namespace Mirage.SocketLayer
 {
     internal class AckSystem
     {
-        const int ACK_SEQUENCER_BITS = 16;
-        // should be bit count of MAX_RECEIVE_QUEUE
-        const int BUFFER_SIZE_BITS = 10;
-
         const int MASK_SIZE = sizeof(ulong) * 8;
 
         /// <summary>PacketType, sequence, ack sequannce, mask</summary>
@@ -21,24 +17,25 @@ namespace Mirage.SocketLayer
 
         //public readonly Sequencer ackSequencer = new Sequencer(ACK_SEQUENCER_BITS);
 
-        readonly RingBuffer<AckablePacket> sentAckablePackets = new RingBuffer<AckablePacket>(BUFFER_SIZE_BITS);
-        readonly Sequencer reliableOrder = new Sequencer(BUFFER_SIZE_BITS);
-
-
-        readonly RingBuffer<ReliableReceived> reliableReceive = new RingBuffer<ReliableReceived>(BUFFER_SIZE_BITS);
+        readonly RingBuffer<AckablePacket> sentAckablePackets;
+        readonly Sequencer reliableOrder;
+        readonly RingBuffer<ReliableReceived> reliableReceive;
 
         // temp list for resending when processing sentqueue
         readonly HashSet<ReliablePacket> toResend = new HashSet<ReliablePacket>();
 
-        public readonly int MTU;
-
         readonly IRawConnection connection;
         readonly ITime time;
+        readonly BufferPool bufferPool;
+        readonly Metrics metrics;
+
+        //todo implement this
+        readonly int maxPacketsInSendBufferPerConnection;
+        readonly int MTU;
         readonly float ackTimeout;
         /// <summary>how many empty acks to send</summary>
         readonly int emptyAckLimit;
         readonly int receivesBeforeEmpty;
-        private readonly BufferPool bufferPool;
 
         /// <summary>
         /// most recent sequence received
@@ -65,7 +62,7 @@ namespace Mirage.SocketLayer
         /// <param name="connection"></param>
         /// <param name="ackTimeout">how long after last send before sending empty ack</param>
         /// <param name="time"></param>
-        public AckSystem(IRawConnection connection, Config config, ITime time, BufferPool bufferPool)
+        public AckSystem(IRawConnection connection, Config config, ITime time, BufferPool bufferPool, Metrics metrics)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
 
@@ -77,6 +74,12 @@ namespace Mirage.SocketLayer
             emptyAckLimit = config.EmptyAckLimit;
             receivesBeforeEmpty = config.ReceivesBeforeEmptyAck;
             MTU = config.Mtu;
+            maxPacketsInSendBufferPerConnection = config.maxReliablePacketsInSendBufferPerConnection;
+
+            int size = config.SequenceSize;
+            sentAckablePackets = new RingBuffer<AckablePacket>(size);
+            reliableOrder = new Sequencer(size);
+            reliableReceive = new RingBuffer<ReliableReceived>(size);
 
             OnSend();
         }
@@ -393,7 +396,6 @@ namespace Mirage.SocketLayer
 
         private void SetAckValues(ushort sequence, long distance)
         {
-            ulong oldMask = AckMask;
             if (distance > 0)
             {
                 // distance is too large to be shifted
@@ -515,6 +517,7 @@ namespace Mirage.SocketLayer
         {
             foreach (ReliablePacket reliable in toResend)
             {
+                metrics?.OnResend(reliable.length);
                 SendReliablePacket(reliable);
             }
             toResend.Clear();

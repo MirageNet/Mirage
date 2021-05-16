@@ -40,7 +40,7 @@ namespace Mirage.SocketLayer
             logger.Log(LogType.Error, error);
         }
         readonly ILogger logger;
-
+        readonly Metrics metrics;
         readonly ISocket socket;
         readonly IDataHandler dataHandler;
         readonly Config config;
@@ -61,9 +61,10 @@ namespace Mirage.SocketLayer
         /// </summary>
         bool active;
 
-        public Peer(ISocket socket, IDataHandler dataHandler, Config config = null, ILogger logger = null)
+        public Peer(ISocket socket, IDataHandler dataHandler, Config config = null, ILogger logger = null, Metrics metrics = null)
         {
             this.logger = logger ?? Debug.unityLogger;
+            this.metrics = metrics;
             this.config = config ?? new Config();
 
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
@@ -120,6 +121,7 @@ namespace Mirage.SocketLayer
             Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected, connection.State);
 
             socket.Send(connection.EndPoint, data, length);
+            metrics?.OnSend(length);
             connection.SetSendTime();
 
             if (logger.filterLogType == LogType.Log)
@@ -154,6 +156,7 @@ namespace Mirage.SocketLayer
                 int length = CreateCommandPacket(buffer, command, extra);
 
                 socket.Send(endPoint, buffer.array, length);
+                metrics?.OnSendUnconnected(length);
                 if (logger.filterLogType == LogType.Log)
                 {
                     logger.Log($"Send to {endPoint} type: Command, {command}");
@@ -211,6 +214,7 @@ namespace Mirage.SocketLayer
         {
             ReceiveLoop();
             UpdateConnections();
+            metrics?.OnTick(connections.Count);
         }
 
 
@@ -230,10 +234,12 @@ namespace Mirage.SocketLayer
 
                     if (connections.TryGetValue(receiveEndPoint, out Connection connection))
                     {
+                        metrics?.OnReceive(length);
                         HandleMessage(connection, packet);
                     }
                     else
                     {
+                        metrics?.OnReceiveUnconnected(length);
                         HandleNewConnection(receiveEndPoint, packet);
                     }
 
@@ -394,7 +400,7 @@ namespace Mirage.SocketLayer
 
         private Connection CreateNewConnection(EndPoint endPoint)
         {
-            var connection = new Connection(this, endPoint, dataHandler, config, time, bufferPool, logger);
+            var connection = new Connection(this, endPoint, dataHandler, config, time, bufferPool, logger, metrics);
             connection.SetReceiveTime();
             connections.Add(endPoint, connection);
             return connection;

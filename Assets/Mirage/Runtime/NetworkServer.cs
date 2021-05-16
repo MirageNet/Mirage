@@ -25,6 +25,9 @@ namespace Mirage
 
         bool initialized;
 
+        public bool EnablePeerMetrics;
+        public Metrics Metrics { get; private set; }
+
         /// <summary>
         /// The maximum number of concurrent network connections to support.
         /// <para>This effects the memory usage of the network layer.</para>
@@ -220,7 +223,13 @@ namespace Mirage
         {
             ISocket socket = SocketFactory.CreateServerSocket();
             ILogger peerLogger = LogFactory.GetLogger<Peer>();
-            peer = new Peer(socket, dataHandler, logger: peerLogger);
+
+            var config = new Config
+            {
+                MaxConnections = MaxConnections,
+            };
+            Metrics = EnablePeerMetrics ? new Metrics() : null;
+            peer = new Peer(socket, dataHandler, logger: peerLogger, config: config, metrics: Metrics);
             EndPoint endpoint = SocketFactory.GetBindEndPoint();
 
             peer.OnConnected += Peer_OnConnected;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -33,6 +33,11 @@ namespace Mirage.SocketLayer
         public int Count => count;
 
         public T this[uint index]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => buffer[index];
+        }
+        public T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => buffer[index];

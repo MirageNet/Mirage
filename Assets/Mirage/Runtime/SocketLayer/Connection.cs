@@ -88,7 +88,7 @@ namespace Mirage.SocketLayer
 
         EndPoint IConnection.EndPoint => EndPoint;
 
-        internal Connection(Peer peer, EndPoint endPoint, IDataHandler dataHandler, Config config, Time time, BufferPool bufferPool, ILogger logger)
+        internal Connection(Peer peer, EndPoint endPoint, IDataHandler dataHandler, Config config, Time time, BufferPool bufferPool, ILogger logger, Metrics metrics)
         {
             this.peer = peer;
             this.logger = logger ?? Debug.unityLogger;
@@ -101,7 +101,7 @@ namespace Mirage.SocketLayer
             keepAliveTracker = new KeepAliveTracker(config, time);
             disconnectedTracker = new DisconnectedTracker(config, time);
 
-            ackSystem = new AckSystem(this, config, time, bufferPool);
+            ackSystem = new AckSystem(this, config, time, bufferPool, metrics);
         }
 
         public override string ToString()
