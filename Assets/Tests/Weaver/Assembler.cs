@@ -95,10 +95,18 @@ namespace Mirage.Weaver
             catch { /* Do Nothing */ }
         }
 
+        /// <summary>
+        /// Builds and Weaves an Assembly with references to unity engine and other asmdefs.
+        /// <para>
+        ///     NOTE: Does not write the weaved assemble to disk
+        /// </para>
+        /// </summary>
         public AssemblyDefinition Build(IWeaverLogger logger)
         {
             AssemblyDefinition assembly = null;
 
+            // This will compile scripts with the same references as files in the asset folder.
+            // This means that the dll will get references to all asmdef just as if it was the default "Assembly-CSharp.dll"
             var assemblyBuilder = new AssemblyBuilder(ProjectPathFile, sourceFiles.ToArray())
             {
                 referencesOptions = ReferencesOptions.UseEngineModules
