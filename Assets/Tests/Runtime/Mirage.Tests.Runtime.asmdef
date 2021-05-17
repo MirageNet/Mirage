@@ -8,7 +8,8 @@
         "Mirage.Authenticators",
         "MirageNG",
         "UniTask",
-        "Mirage.Components"
+        "Mirage.Components",
+        "WeaverTestExtraAssembly"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
