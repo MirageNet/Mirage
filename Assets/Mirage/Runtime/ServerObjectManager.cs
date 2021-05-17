@@ -416,10 +416,7 @@ namespace Mirage
                 throw new InvalidOperationException("SpawnObject " + obj + " has no NetworkIdentity. Please add a NetworkIdentity to " + obj);
             }
 
-            if (CheckForPrefab(obj))
-            {
-                throw new InvalidOperationException($"GameObject {obj.name} is a prefab, it can't be spawned.");
-            }
+            ThrowIfPrefab(obj);
 
             identity.ConnectionToClient = ownerPlayer;
             identity.Server = Server;
@@ -495,12 +492,18 @@ namespace Mirage
             return payload;
         }
 
-        bool CheckForPrefab(GameObject obj)
+        /// <summary>
+        /// Prefabs are not allowed to be spawbned, they most be instantiated first
+        /// <para>This check does nothing in builds</para>
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Throws in the editor if object is part of a prefab</exception>
+        static void ThrowIfPrefab(GameObject obj)
         {
 #if UNITY_EDITOR
-            return UnityEditor.PrefabUtility.IsPartOfPrefabAsset(obj);
-#else
-            return false;
+            if (UnityEditor.PrefabUtility.IsPartOfPrefabAsset(obj))
+            {
+                throw new InvalidOperationException($"GameObject {obj.name} is a prefab, it can't be spawned.");
+            }
 #endif
         }
 
