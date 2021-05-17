@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
+using Mirage.Tests;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -13,6 +12,14 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     /// </summary>
     public class PeerTestBase
     {
+        public const int maxConnections = 5;
+        protected static readonly byte[] connectRequest = new byte[3]
+        {
+            (byte)PacketType.Command,
+            (byte)Commands.ConnectRequest,
+            new ConnectKeyValidator().GetKey(),
+        };
+
         PeerInstance instance;
         protected Action<IConnection> connectAction;
         protected Action<IConnection, RejectReason> connectFailedAction;
@@ -38,81 +45,6 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             peer.OnConnected += connectAction;
             peer.OnConnectionFailed += connectFailedAction;
             peer.OnDisconnected += disconnectAction;
-        }
-    }
-
-    /// <summary>
-    /// Socket that can send message to other sockets
-    /// </summary>
-    public class TestSocket : ISocket
-    {
-        public struct Packet
-        {
-            public EndPoint endPoint;
-            public byte[] data;
-            public int length;
-        }
-
-        public readonly EndPoint endPoint;
-        Dictionary<EndPoint, TestSocket> remoteSockets = new Dictionary<EndPoint, TestSocket>();
-        Queue<Packet> received = new Queue<Packet>();
-        public List<Packet> Sent = new List<Packet>();
-
-        public TestSocket(EndPoint endPoint = null)
-        {
-            this.endPoint = endPoint ?? Substitute.For<EndPoint>();
-        }
-        public void AddRemote(EndPoint endPoint, TestSocket socket)
-        {
-            remoteSockets.Add(endPoint, socket);
-        }
-        public void AddRemote(TestSocket socket)
-        {
-            remoteSockets.Add(socket.endPoint, socket);
-        }
-
-        void ISocket.Bind(EndPoint endPoint)
-        {
-            //
-        }
-
-        void ISocket.Close()
-        {
-            //
-        }
-
-        bool ISocket.Poll()
-        {
-            return received.Count > 0;
-        }
-
-        int ISocket.Receive(byte[] data, ref EndPoint endPoint)
-        {
-            Packet next = received.Dequeue();
-            endPoint = next.endPoint;
-            int length = next.length;
-
-            Buffer.BlockCopy(next.data, 0, data, 0, length);
-            return length;
-        }
-
-        void ISocket.Send(EndPoint remoteEndPoint, byte[] data, int length)
-        {
-            // todo create copy because data is from buffer
-            byte[] clone = data.ToArray();
-            TestSocket other = remoteSockets[remoteEndPoint];
-            Sent.Add(new Packet
-            {
-                endPoint = remoteEndPoint,
-                data = clone,
-                length = length
-            });
-            other.received.Enqueue(new Packet
-            {
-                endPoint = endPoint,
-                data = clone,
-                length = length
-            });
         }
     }
 

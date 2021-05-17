@@ -1,3 +1,36 @@
+## [91.0.1](https://github.com/MirageNet/Mirage/compare/v91.0.0...v91.0.1) (2021-05-04)
+
+
+### Bug Fixes
+
+* unspawning all server object on server stop ([5041a06](https://github.com/MirageNet/Mirage/commit/5041a06de8506574add2795dc075b71245e39d88))
+
+# [91.0.0](https://github.com/MirageNet/Mirage/compare/v90.0.0...v91.0.0) (2021-05-01)
+
+
+### Code Refactoring
+
+* renaming listen to start and merging it with start host ([#795](https://github.com/MirageNet/Mirage/issues/795)) ([3d4e091](https://github.com/MirageNet/Mirage/commit/3d4e0916b14b3b1b494b9bfba366844f209f2414))
+
+
+### BREAKING CHANGES
+
+* - ListenAsync renamed to StartAsync
+- StartHost removed, use StartAsync with localClient parameter instead
+- OnStartHost is now always called after Started
+
+# [90.0.0](https://github.com/MirageNet/Mirage/compare/v89.0.0...v90.0.0) (2021-04-30)
+
+
+### Code Refactoring
+
+* removing stop host ([#794](https://github.com/MirageNet/Mirage/issues/794)) ([55536fc](https://github.com/MirageNet/Mirage/commit/55536fc6fb674b164bf599367022428df3b8ed63))
+
+
+### BREAKING CHANGES
+
+* NetworkServer.StopHost removed, use NetworkServer.Disconnect instead
+
 # [89.0.0](https://github.com/MirageNet/Mirage/compare/v88.1.3...v89.0.0) (2021-04-28)
 
 

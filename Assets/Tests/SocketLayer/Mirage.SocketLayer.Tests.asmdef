@@ -3,7 +3,8 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Mirage.SocketLayer"
+        "Mirage.SocketLayer",
+        "Mirage.Tests.Common"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

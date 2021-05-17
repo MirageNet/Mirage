@@ -26,8 +26,8 @@ namespace Mirage.Tests.Runtime
         private NetworkClient client;
         private GameObject networkServerGameObject;
 
-        IConnection tconn42;
-        IConnection tconn43;
+        INetworkPlayer player1;
+        INetworkPlayer player2;
 
         [SetUp]
         public void SetUp()
@@ -43,8 +43,8 @@ namespace Mirage.Tests.Runtime
             identity.Server = server;
             identity.ServerObjectManager = serverObjectManager;
 
-            tconn42 = Substitute.For<IConnection>();
-            tconn43 = Substitute.For<IConnection>();
+            player1 = Substitute.For<INetworkPlayer>();
+            player2 = Substitute.For<INetworkPlayer>();
         }
 
         [TearDown]
@@ -60,11 +60,11 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void AddAllReadyServerConnectionsToObservers()
         {
-            var connection1 = new NetworkPlayer(tconn42) { IsReady = true };
-            var connection2 = new NetworkPlayer(tconn43) { IsReady = false };
+            player1.IsReady = true;
+            player2.IsReady = false;
             // add some server connections
-            server.Players.Add(connection1);
-            server.Players.Add(connection2);
+            server.Players.Add(player1);
+            server.Players.Add(player2);
 
             // add a host connection
             (_, IConnection localConnection) = PipeConnection.CreatePipe();
@@ -77,7 +77,7 @@ namespace Mirage.Tests.Runtime
 
             // add all to observers. should have the two ready connections then.
             identity.AddAllReadyServerConnectionsToObservers();
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { connection1, server.LocalPlayer }));
+            Assert.That(identity.observers, Is.EquivalentTo(new[] { player1, server.LocalPlayer }));
 
             // clean up
             server.Stop();

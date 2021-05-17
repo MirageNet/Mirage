@@ -141,7 +141,7 @@ namespace Mirage.Tests.Runtime.Host
             // another connection
             Assert.Throws<InvalidOperationException>(() =>
             {
-                testIdentity.AssignClientAuthority(new NetworkPlayer(Substitute.For<IConnection>()));
+                testIdentity.AssignClientAuthority(Substitute.For<INetworkPlayer>());
             });
         }
 

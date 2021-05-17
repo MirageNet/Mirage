@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
-using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
 
@@ -45,79 +44,31 @@ namespace Mirage.Weaver
         public string[] Defines { get; set; }
     }
 
-    public class Assembler : ScriptableObject
+    public class Assembler
     {
-        static string _outputDirectory;
-        public static string OutputDirectory
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_outputDirectory))
-                {
-                    ScriptableObject assemblerObj = CreateInstance<Assembler>();
+        public string OutputFile { get; set; }
+        public string ProjectPathFile => Path.Combine(WeaverTestLocator.OutputDirectory, OutputFile);
+        public List<CompilerMessage> CompilerMessages { get; private set; }
+        public bool CompilerErrors { get; private set; }
 
-                    var monoScript = MonoScript.FromScriptableObject(assemblerObj);
-                    string myPath = AssetDatabase.GetAssetPath(monoScript);
-                    _outputDirectory = Path.GetDirectoryName(myPath);
-                }
-                return _outputDirectory;
-            }
-        }
-        public static string OutputFile { get; set; }
-        public static HashSet<string> SourceFiles { get; private set; }
-        public static HashSet<string> ReferenceAssemblies { get; private set; }
-        public static bool AllowUnsafe { get; set; }
-        public static List<CompilerMessage> CompilerMessages { get; private set; }
-        public static bool CompilerErrors { get; private set; }
-        public static bool DeleteOutputOnClear { get; set; }
+        readonly HashSet<string> sourceFiles = new HashSet<string>();
 
-        // static constructor to initialize static properties
-        static Assembler()
+        public Assembler()
         {
-            SourceFiles = new HashSet<string>();
-            ReferenceAssemblies = new HashSet<string>();
             CompilerMessages = new List<CompilerMessage>();
         }
 
         // Add a range of source files to compile
-        public static void AddSourceFiles(string[] sourceFiles)
+        public void AddSourceFiles(string[] sourceFiles)
         {
             foreach (string src in sourceFiles)
             {
-                SourceFiles.Add(Path.Combine(OutputDirectory, src));
+                this.sourceFiles.Add(Path.Combine(WeaverTestLocator.OutputDirectory, src));
             }
-        }
-
-        // Find reference assembly specified by asmName and store its full path in asmFullPath
-        // do not pass in paths in asmName, just assembly names
-        public static bool FindReferenceAssemblyPath(string asmName, out string asmFullPath)
-        {
-            asmFullPath = "";
-
-            Assembly[] asms = CompilationPipeline.GetAssemblies();
-            foreach (Assembly asm in asms)
-            {
-                foreach (string asmRef in asm.compiledAssemblyReferences)
-                {
-                    if (asmRef.EndsWith(asmName))
-                    {
-                        asmFullPath = asmRef;
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        // Add reference (not cleared during calls to Clear)
-        public static void ClearReferences()
-        {
-            ReferenceAssemblies.Clear();
         }
 
         // Delete output dll / pdb / mdb
-        public static void DeleteOutput()
+        public void DeleteOutput()
         {
             // "x.dll" shortest possible dll name
             if (OutputFile.Length < 5)
@@ -125,59 +76,37 @@ namespace Mirage.Weaver
                 return;
             }
 
-            string projPathFile = Path.Combine(OutputDirectory, OutputFile);
-
             try
             {
-                File.Delete(projPathFile);
+                File.Delete(ProjectPathFile);
             }
             catch { /* Do Nothing */ }
 
             try
             {
-                File.Delete(Path.ChangeExtension(projPathFile, ".pdb"));
+                File.Delete(Path.ChangeExtension(ProjectPathFile, ".pdb"));
             }
             catch { /* Do Nothing */ }
 
             try
             {
-                File.Delete(Path.ChangeExtension(projPathFile, ".dll.mdb"));
+                File.Delete(Path.ChangeExtension(ProjectPathFile, ".dll.mdb"));
             }
             catch { /* Do Nothing */ }
         }
 
-        // clear all settings except for referenced assemblies (which are cleared with ClearReferences)
-        public static void Clear()
-        {
-            if (DeleteOutputOnClear)
-            {
-                DeleteOutput();
-            }
-
-            CompilerErrors = false;
-            OutputFile = "";
-            SourceFiles.Clear();
-            CompilerMessages.Clear();
-            AllowUnsafe = false;
-            DeleteOutputOnClear = false;
-        }
-
-        public static AssemblyDefinition Build(IWeaverLogger logger)
+        public AssemblyDefinition Build(IWeaverLogger logger)
         {
             AssemblyDefinition assembly = null;
 
-            var assemblyBuilder = new AssemblyBuilder(Path.Combine(OutputDirectory, OutputFile), SourceFiles.ToArray())
+            var assemblyBuilder = new AssemblyBuilder(ProjectPathFile, sourceFiles.ToArray())
             {
                 referencesOptions = ReferencesOptions.UseEngineModules
             };
 
-            if (AllowUnsafe)
-            {
-                assemblyBuilder.compilerOptions.AllowUnsafeCode = true;
-            }
-
             assemblyBuilder.buildFinished += delegate (string assemblyPath, CompilerMessage[] compilerMessages)
             {
+#if !UNITY_2020_2_OR_NEWER
                 CompilerMessages.AddRange(compilerMessages);
                 foreach (CompilerMessage cm in compilerMessages)
                 {
@@ -187,6 +116,7 @@ namespace Mirage.Weaver
                         CompilerErrors = true;
                     }
                 }
+#endif
 
                 // assembly builder does not call ILPostProcessor (WTF Unity?),  so we must invoke it ourselves.
                 var compiledAssembly = new CompiledAssembly(assemblyPath)

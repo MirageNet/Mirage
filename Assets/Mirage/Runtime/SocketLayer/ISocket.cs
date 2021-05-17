@@ -15,6 +15,12 @@ namespace Mirage.SocketLayer
         void Bind(EndPoint endPoint);
 
         /// <summary>
+        /// Sets up Socket ready to send data to endpoint as a client
+        /// </summary>
+        /// <param name="endPoint"></param>
+        void Connect(EndPoint endPoint);
+
+        /// <summary>
         /// Closes the socket, stops receiving messages from other peers
         /// </summary>
         void Close();

@@ -95,8 +95,8 @@ namespace Mirage
         {
             foreach (NetworkIdentity obj in Server.World.SpawnedIdentities.Reverse())
             {
-                if (obj.AssetId != Guid.Empty)
-                    DestroyObject(obj, true);
+                // Unspawn all, but only destroy non-scene objects on server
+                DestroyObject(obj, obj.sceneId == 0);
             }
 
             Server.World.ClearSpawnedObjects();
