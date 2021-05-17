@@ -46,15 +46,14 @@ namespace Mirage.Sockets.Udp
                 return address;
 
             IPAddress[] results = Dns.GetHostAddresses(addressString);
-            foreach (IPAddress result in results)
+            if (results.Length == 0)
             {
-                if (result.AddressFamily == AddressFamily.InterNetworkV6)
-                {
-                    return result;
-                }
+                throw new FormatException("Could not parse address");
             }
-
-            throw new FormatException("Could not parse address");
+            else
+            {
+                return results[0];
+            }
         }
 
         void ThrowIfNotSupported()
@@ -73,7 +72,9 @@ namespace Mirage.Sockets.Udp
         Socket socket;
         IPEndPoint AnyEndpoint;
 
-        public UdpSocket() { }
+        public UdpSocket()
+        {
+        }
 
         public void Bind(EndPoint endPoint)
         {
@@ -83,7 +84,6 @@ namespace Mirage.Sockets.Udp
             {
                 DualMode = true,
                 Blocking = false,
-
             };
 
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
