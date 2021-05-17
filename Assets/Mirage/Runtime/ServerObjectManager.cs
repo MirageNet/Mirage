@@ -408,6 +408,8 @@ namespace Mirage
                 throw new InvalidOperationException("SpawnObject " + obj + " has no NetworkIdentity. Please add a NetworkIdentity to " + obj);
             }
 
+            ThrowIfPrefab(obj);
+
             identity.ConnectionToClient = ownerPlayer;
 
             identity.SetServerValues(Server, this);
@@ -480,24 +482,19 @@ namespace Mirage
             return payload;
         }
 
-        bool CheckForPrefab(GameObject obj)
+        /// <summary>
+        /// Prefabs are not allowed to be spawbned, they most be instantiated first
+        /// <para>This check does nothing in builds</para>
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Throws in the editor if object is part of a prefab</exception>
+        static void ThrowIfPrefab(GameObject obj)
         {
 #if UNITY_EDITOR
-            return UnityEditor.PrefabUtility.IsPartOfPrefabAsset(obj);
-#else
-            return false;
-#endif
-        }
-
-        bool VerifyCanSpawn(GameObject obj)
-        {
-            if (CheckForPrefab(obj))
+            if (UnityEditor.PrefabUtility.IsPartOfPrefabAsset(obj))
             {
-                logger.LogFormat(LogType.Error, "GameObject {0} is a prefab, it can't be spawned. This will cause errors in builds.", obj.name);
-                return false;
+                throw new InvalidOperationException($"GameObject {obj.name} is a prefab, it can't be spawned.");
             }
-
-            return true;
+#endif
         }
 
         /// <summary>
@@ -541,12 +538,12 @@ namespace Mirage
         /// <param name="owner">The connection that has authority over the object</param>
         public void Spawn(GameObject obj, Guid assetId, INetworkPlayer owner = null)
         {
-            if (VerifyCanSpawn(obj))
-            {
-                NetworkIdentity identity = obj.GetNetworkIdentity();
-                identity.AssetId = assetId;
-                SpawnObject(obj, owner);
-            }
+            // check first before setting AssetId
+            ThrowIfPrefab(obj);
+
+            NetworkIdentity identity = obj.GetNetworkIdentity();
+            identity.AssetId = assetId;
+            SpawnObject(obj, owner);
         }
 
         /// <summary>
@@ -557,10 +554,7 @@ namespace Mirage
         /// <param name="owner">The connection that has authority over the object</param>
         public void Spawn(GameObject obj, INetworkPlayer owner = null)
         {
-            if (VerifyCanSpawn(obj))
-            {
-                SpawnObject(obj, owner);
-            }
+            SpawnObject(obj, owner);
         }
 
         void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
