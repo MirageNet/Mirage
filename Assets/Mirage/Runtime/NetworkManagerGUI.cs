@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -82,14 +80,14 @@ namespace Mirage
                 {
                     if (GUILayout.Button("Stop Host"))
                     {
-                        NetworkManager.Server.StopHost();
+                        NetworkManager.Server.Stop();
                     }
                 }
                 else
                 {
                     if (GUILayout.Button("Stop Server"))
                     {
-                        NetworkManager.Server.Disconnect();
+                        NetworkManager.Server.Stop();
                     }
                 }
             }
@@ -102,7 +100,7 @@ namespace Mirage
                     NetworkManager.Client.Disconnect();
                 }
             }
-            else if(NetworkManager.Client.Active)
+            else if (NetworkManager.Client.Active)
             {
                 GUILayout.Label($"Connecting to {NetworkAddress}...");
                 //TODO: Implement cancel button when it's possible.
@@ -167,12 +165,12 @@ namespace Mirage
 
         private void ClickHost()
         {
-            NetworkManager.Server.StartHost(NetworkManager.Client).Forget();
+            NetworkManager.Server.StartAsync(NetworkManager.Client).Forget();
         }
 
         private void ClickServerOnly()
         {
-            NetworkManager.Server.ListenAsync().Forget();
+            NetworkManager.Server.StartAsync().Forget();
         }
 
         private void ClickClient()
