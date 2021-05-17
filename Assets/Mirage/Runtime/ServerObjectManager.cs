@@ -548,6 +548,9 @@ namespace Mirage
         /// <param name="owner">The connection that has authority over the object</param>
         public void Spawn(GameObject obj, Guid assetId, INetworkPlayer owner = null)
         {
+            // check first before setting AssetId
+            ThrowIfPrefab(obj);
+
             NetworkIdentity identity = obj.GetNetworkIdentity();
             identity.AssetId = assetId;
             SpawnObject(obj, owner);
