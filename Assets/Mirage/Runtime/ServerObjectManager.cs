@@ -158,7 +158,6 @@ namespace Mirage
         /// <para>If a connection already has a player object, this can be used to replace that object with a different player object. This does NOT change the ready state of the connection, so it can safely be used while changing scenes.</para>
         /// </summary>
         /// <param name="player">Connection which is adding the player.</param>
-        /// <param name="client">Client associated to the player.</param> 
         /// <param name="character">Player object spawned for the player.</param>
         /// <param name="assetId"></param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
@@ -167,7 +166,7 @@ namespace Mirage
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
             identity.AssetId = assetId;
-            ReplaceCharacter(player, character, keepAuthority);
+            ReplaceCharacter(player, identity, keepAuthority);
         }
 
         /// <summary>
@@ -175,21 +174,28 @@ namespace Mirage
         /// <para>If a connection already has a player object, this can be used to replace that object with a different player object. This does NOT change the ready state of the connection, so it can safely be used while changing scenes.</para>
         /// </summary>
         /// <param name="player">Connection which is adding the player.</param>
-        /// <param name="client">Client associated to the player.</param> 
         /// <param name="character">Player object spawned for the player.</param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
         public void ReplaceCharacter(INetworkPlayer player, GameObject character, bool keepAuthority = false)
         {
-            NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
-            if (identity is null)
-            {
-                throw new ArgumentException("ReplacePlayer: playerGameObject has no NetworkIdentity. Please add a NetworkIdentity to " + character);
-            }
+            NetworkIdentity identity = character.GetNetworkIdentity();
+            ReplaceCharacter(player, identity, keepAuthority);
+        }
 
+        /// <summary>
+        /// This replaces the player object for a connection with a different player object. The old player object is not destroyed.
+        /// <para>If a connection already has a player object, this can be used to replace that object with a different player object. This does NOT change the ready state of the connection, so it can safely be used while changing scenes.</para>
+        /// </summary>
+        /// <param name="player">Connection which is adding the player.</param>
+        /// <param name="identity">Player object spawned for the player.</param>
+        /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
+        /// <returns></returns>
+        public void ReplaceCharacter(INetworkPlayer player, NetworkIdentity identity, bool keepAuthority = false)
+        {
             if (identity.ConnectionToClient != null && identity.ConnectionToClient != player)
             {
-                throw new ArgumentException("Cannot replace player for connection. New player is already owned by a different connection" + character);
+                throw new ArgumentException($"Cannot replace player for connection. New player is already owned by a different connection {identity}");
             }
 
             //NOTE: there can be an existing player
@@ -216,7 +222,7 @@ namespace Mirage
             // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
             SpawnObserversForConnection(player);
 
-            if (logger.LogEnabled()) logger.Log("Replacing playerGameObject object netId: " + character.GetComponent<NetworkIdentity>().NetId + " asset ID " + character.GetComponent<NetworkIdentity>().AssetId);
+            if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.AssetId}");
 
             Respawn(identity);
 
@@ -257,7 +263,6 @@ namespace Mirage
         /// <para>When a player is added for a connection, the client for that connection is made ready automatically. The player object is automatically spawned, so you do not need to call NetworkServer.Spawn for that object. This function is used for "adding" a player, not for "replacing" the player on a connection. If there is already a player on this playerControllerId for this connection, this will fail.</para>
         /// </summary>
         /// <param name="player">Connection which is adding the player.</param>
-        /// <param name="client">Client associated to the player.</param> 
         /// <param name="character">Player object spawned for the player.</param>
         /// <param name="assetId"></param>
         /// <returns></returns>
@@ -265,7 +270,7 @@ namespace Mirage
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
             identity.AssetId = assetId;
-            AddCharacter(player, character);
+            AddCharacter(player, identity);
         }
 
         /// <summary>
@@ -273,17 +278,23 @@ namespace Mirage
         /// <para>When a player is added for a connection, the client for that connection is made ready automatically. The player object is automatically spawned, so you do not need to call NetworkServer.Spawn for that object. This function is used for "adding" a player, not for "replacing" the player on a connection. If there is already a player on this playerControllerId for this connection, this will fail.</para>
         /// </summary>
         /// <param name="player">Connection which is adding the player.</param>
-        /// <param name="client">Client associated to the player.</param>
         /// <param name="character">Player object spawned for the player.</param>
         /// <exception cref="ArgumentException">NetworkIdentity must not be null.</exception>
         public void AddCharacter(INetworkPlayer player, GameObject character)
         {
-            NetworkIdentity identity = character.GetComponent<NetworkIdentity>();
-            if (identity is null)
-            {
-                throw new ArgumentException("AddPlayer: playerGameObject has no NetworkIdentity. Please add a NetworkIdentity to " + character);
-            }
+            NetworkIdentity identity = character.GetNetworkIdentity();
+            AddCharacter(player, identity);
+        }
 
+        /// <summary>
+        /// <para>When an <see cref="AddCharacterMessage"/> message handler has received a request from a player, the server calls this to associate the player object with the connection.</para>
+        /// <para>When a player is added for a connection, the client for that connection is made ready automatically. The player object is automatically spawned, so you do not need to call NetworkServer.Spawn for that object. This function is used for "adding" a player, not for "replacing" the player on a connection. If there is already a player on this playerControllerId for this connection, this will fail.</para>
+        /// </summary>
+        /// <param name="player">Connection which is adding the player.</param>
+        /// <param name="identity">Player object spawned for the player.</param>
+        /// <exception cref="ArgumentException">NetworkIdentity must not be null.</exception>
+        public void AddCharacter(INetworkPlayer player, NetworkIdentity identity)
+        {
             // cannot have an existing player object while trying to Add another.
             if (player.Identity != null)
             {
@@ -395,28 +406,80 @@ namespace Mirage
             }
         }
 
-        internal void SpawnObject(GameObject obj, INetworkPlayer ownerPlayer)
+        /// <summary>
+        /// Spawns the <paramref name="identity"/> and setings its owner to the player that owns <paramref name="ownerObject"/>
+        /// </summary>
+        /// <param name="ownerObject">An object owned by a player</param>
+        public void Spawn(GameObject obj, GameObject ownerObject)
+        {
+            NetworkIdentity ownerIdentity = ownerObject.GetNetworkIdentity();
+
+            if (ownerIdentity.ConnectionToClient == null)
+            {
+                throw new InvalidOperationException("Player object is not a player in the connection");
+            }
+
+            Spawn(obj, ownerIdentity.ConnectionToClient);
+        }
+
+        /// <summary>
+        /// Assigns <paramref name="assetId"/> to the <paramref name="obj"/> and then it with <paramref name="owner"/>
+        /// <para>
+        ///     <see cref="NetworkIdentity.AssetId"/> can only be set on an identity if the current value is Empty
+        /// </para>
+        /// <para>
+        ///     This method is useful if you are creating network objects at runtime and both server and client know what <see cref="Guid"/> to set on an object
+        /// </para>
+        /// </summary>
+        /// <param name="obj">The object to spawn.</param>
+        /// <param name="assetId">The assetId of the object to spawn. Used for custom spawn handlers.</param>
+        /// <param name="owner">The connection that has authority over the object</param>
+        public void Spawn(GameObject obj, Guid assetId, INetworkPlayer owner = null)
+        {
+            // check first before setting AssetId
+            ThrowIfPrefab(obj);
+
+            NetworkIdentity identity = obj.GetNetworkIdentity();
+            identity.AssetId = assetId;
+            Spawn(identity, owner);
+        }
+
+        /// <summary>
+        /// Spawns the <paramref name="identity"/> and setings its owner to <paramref name="owner"/>
+        /// </summary>
+        public void Spawn(GameObject obj, INetworkPlayer owner = null)
+        {
+            NetworkIdentity identity = obj.GetNetworkIdentity();
+            Spawn(identity, owner);
+        }
+
+        /// <summary>
+        /// Spawns the <paramref name="identity"/> and keeping owner as <see cref="NetworkIdentity.ConnectionToClient"/>
+        /// </summary>
+        public void Spawn(NetworkIdentity identity)
+        {
+            Spawn(identity, identity.ConnectionToClient);
+        }
+
+        /// <summary>
+        /// Spawns the <paramref name="identity"/> and assigns <paramref name="owner"/> to be it's owner
+        /// </summary>
+        public void Spawn(NetworkIdentity identity, INetworkPlayer owner)
         {
             if (!Server || !Server.Active)
             {
                 throw new InvalidOperationException("NetworkServer is not active. Cannot spawn objects without an active server.");
             }
 
-            NetworkIdentity identity = obj.GetComponent<NetworkIdentity>();
-            if (identity is null)
-            {
-                throw new InvalidOperationException("SpawnObject " + obj + " has no NetworkIdentity. Please add a NetworkIdentity to " + obj);
-            }
+            ThrowIfPrefab(identity.gameObject);
 
-            ThrowIfPrefab(obj);
-
-            identity.ConnectionToClient = ownerPlayer;
+            identity.ConnectionToClient = owner;
 
             identity.SetServerValues(Server, this);
 
             // special case to make sure hasAuthority is set
             // on start server in host mode
-            if (ownerPlayer == Server.LocalPlayer)
+            if (owner == Server.LocalPlayer)
                 identity.HasAuthority = true;
 
             if (identity.NetId == 0)
@@ -495,66 +558,6 @@ namespace Mirage
                 throw new InvalidOperationException($"GameObject {obj.name} is a prefab, it can't be spawned.");
             }
 #endif
-        }
-
-        /// <summary>
-        /// This spawns an object like NetworkServer.Spawn() but also assigns Client Authority to the specified client.
-        /// <para>This is the same as calling NetworkIdentity.AssignClientAuthority on the spawned object.</para>
-        /// </summary>
-        /// <param name="obj">The object to spawn.</param>
-        /// <param name="owner">The player object to set Client Authority to.</param>
-        /// <exception cref="InvalidOperationException">NetworkIdentity and NetworkPlayer must not be null.</exception>
-        public void Spawn(GameObject obj, GameObject owner)
-        {
-            NetworkIdentity identity = owner.GetComponent<NetworkIdentity>();
-            if (identity is null)
-            {
-                throw new InvalidOperationException("Player object has no NetworkIdentity");
-            }
-
-            if (identity.ConnectionToClient == null)
-            {
-                throw new InvalidOperationException("Player object is not a player in the connection");
-            }
-
-            Spawn(obj, identity.ConnectionToClient);
-        }
-
-        /// <summary>
-        /// This spawns an object.
-        /// </summary>
-        /// <param name="identity">The identity to spawn.</param>
-        public void Spawn(NetworkIdentity identity)
-        {
-            Spawn(identity.gameObject, identity.ConnectionToClient);
-        }
-
-        /// <summary>
-        /// This spawns an object like NetworkServer.Spawn() but also assigns Client Authority to the specified client.
-        /// <para>This is the same as calling NetworkIdentity.AssignClientAuthority on the spawned object.</para>
-        /// </summary>
-        /// <param name="obj">The object to spawn.</param>
-        /// <param name="assetId">The assetId of the object to spawn. Used for custom spawn handlers.</param>
-        /// <param name="owner">The connection that has authority over the object</param>
-        public void Spawn(GameObject obj, Guid assetId, INetworkPlayer owner = null)
-        {
-            // check first before setting AssetId
-            ThrowIfPrefab(obj);
-
-            NetworkIdentity identity = obj.GetNetworkIdentity();
-            identity.AssetId = assetId;
-            SpawnObject(obj, owner);
-        }
-
-        /// <summary>
-        /// Spawn the given game object on all clients which are ready.
-        /// <para>This will cause a new object to be instantiated from the registered prefab, or from a custom spawn function.</para>
-        /// </summary>
-        /// <param name="obj">Game object with NetworkIdentity to spawn.</param>
-        /// <param name="owner">The connection that has authority over the object</param>
-        public void Spawn(GameObject obj, INetworkPlayer owner = null)
-        {
-            SpawnObject(obj, owner);
         }
 
         void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
