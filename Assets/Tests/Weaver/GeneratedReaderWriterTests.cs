@@ -229,5 +229,11 @@ namespace Mirage.Weaver
             HasError("Cannot generate writer for System.Collections.Generic.List`1<UnityEngine.MonoBehaviour>. Use a supported type or provide a custom writer", "System.Collections.Generic.List`1<UnityEngine.MonoBehaviour>");
             HasError("Cannot generate reader for component type MonoBehaviour. Use a supported type or provide a custom reader", "UnityEngine.MonoBehaviour");
         }
+
+        [Test]
+        public void CreatesForNullable()
+        {
+            IsSuccess();
+        }
     }
 }

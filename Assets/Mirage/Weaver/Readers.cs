@@ -58,6 +58,14 @@ namespace Mirage.Weaver
                 logger.Error($"{typeReference.Name} is not a supported type", typeReference, sequencePoint);
                 return null;
             }
+
+            if (typeReference.Is(typeof(Nullable<>)))
+            {
+                var genericInstance = (GenericInstanceType)typeReference;
+                TypeReference elementType = genericInstance.GenericArguments[0];
+
+                return GenerateReadCollection(typeReference, elementType, () => NetworkReaderExtensions.ReadNullable<byte>(default), sequencePoint);
+            }
             if (variableDefinition.Is(typeof(ArraySegment<>)))
             {
                 return GenerateArraySegmentReadFunc(typeReference, sequencePoint);
