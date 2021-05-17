@@ -1073,7 +1073,6 @@ namespace Mirage.Tests.Runtime
         [TestCase(1234)]
         public void NullableInt(int? value)
         {
-            var writer = new NetworkWriter();
             writer.Write<int?>(value);
             var reader = new NetworkReader(writer.ToArray());
             int? unpacked = reader.Read<int?>();
@@ -1087,7 +1086,6 @@ namespace Mirage.Tests.Runtime
         [TestCase(false)]
         public void NullableBool(bool? value)
         {
-            var writer = new NetworkWriter();
             writer.Write<bool?>(value);
             var reader = new NetworkReader(writer.ToArray());
             bool? unpacked = reader.Read<bool?>();
@@ -1101,7 +1099,6 @@ namespace Mirage.Tests.Runtime
         [TestCase(20202020ul)]
         public void NullableUlong(ulong? value)
         {
-            var writer = new NetworkWriter();
             writer.Write<ulong?>(value);
             var reader = new NetworkReader(writer.ToArray());
             ulong? unpacked = reader.Read<ulong?>();
