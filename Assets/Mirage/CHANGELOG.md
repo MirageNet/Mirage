@@ -1,3 +1,15 @@
+# [91.1.0](https://github.com/MirageNet/Mirage/compare/v91.0.1...v91.1.0) (2021-05-17)
+
+
+### Bug Fixes
+
+* fixing compile in new gui ([d2800be](https://github.com/MirageNet/Mirage/commit/d2800be08fd355077e8be9fdf3195cdf9cbc3c83))
+
+
+### Features
+
+* add optional imgui support to network manager hud ([#789](https://github.com/MirageNet/Mirage/issues/789)) ([7841794](https://github.com/MirageNet/Mirage/commit/7841794df1d210b316f5d3a9fb9f8e268ddb0fc2))
+
 ## [91.0.1](https://github.com/MirageNet/Mirage/compare/v91.0.0...v91.0.1) (2021-05-04)
 
 
