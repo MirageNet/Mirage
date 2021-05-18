@@ -1,3 +1,10 @@
+# [91.2.0](https://github.com/MirageNet/Mirage/compare/v91.1.0...v91.2.0) (2021-05-18)
+
+
+### Features
+
+* simplifying some checks in ServerObjectManager ([#801](https://github.com/MirageNet/Mirage/issues/801)) ([fe9a07a](https://github.com/MirageNet/Mirage/commit/fe9a07a9a2a24d03ac7d0a2239dbf51291dbe21d))
+
 # [91.1.0](https://github.com/MirageNet/Mirage/compare/v91.0.1...v91.1.0) (2021-05-17)
 
 
