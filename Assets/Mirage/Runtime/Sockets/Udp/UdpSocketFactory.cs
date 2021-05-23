@@ -48,7 +48,7 @@ namespace Mirage.Sockets.Udp
             IPAddress[] results = Dns.GetHostAddresses(addressString);
             if (results.Length == 0)
             {
-                throw new FormatException("Could not parse address");
+                throw new SocketException((int)SocketError.HostNotFound);
             }
             else
             {
