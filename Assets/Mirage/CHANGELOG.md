@@ -1,3 +1,20 @@
+# [92.0.0](https://github.com/MirageNet/Mirage/compare/v91.2.0...v92.0.0) (2021-05-23)
+
+
+### Code Refactoring
+
+* moving networkmanager gui and hud to components folder ([#802](https://github.com/MirageNet/Mirage/issues/802)) ([7612bb6](https://github.com/MirageNet/Mirage/commit/7612bb6efe030ffa6e0baab8640bf9f1772dc780))
+
+
+### Features
+
+* adding weaver support for nullable types ([#800](https://github.com/MirageNet/Mirage/issues/800)) ([14af628](https://github.com/MirageNet/Mirage/commit/14af62854c1d0aa957e232bc43ae39609b010604))
+
+
+### BREAKING CHANGES
+
+* NetworkManagerHud is now in the Mirage.Components asmdef
+
 # [91.2.0](https://github.com/MirageNet/Mirage/compare/v91.1.0...v91.2.0) (2021-05-18)
 
 
