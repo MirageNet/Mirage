@@ -28,7 +28,6 @@ namespace Mirage
 
         private static float GetLabelHeight(GUIContent label)
         {
-            // label + margin
             return Style.CalcSize(label).y + Margin;
         }
 
