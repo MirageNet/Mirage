@@ -1,3 +1,25 @@
+# [93.0.0](https://github.com/MirageNet/Mirage/compare/v92.0.0...v93.0.0) (2021-05-23)
+
+
+### Features
+
+* foldout for events on network server ([#806](https://github.com/MirageNet/Mirage/issues/806)) ([cbb12d1](https://github.com/MirageNet/Mirage/commit/cbb12d13d295c048f0a913ddb91203f4ed9f66f5))
+* replacing transport with peer ([#780](https://github.com/MirageNet/Mirage/issues/780)) ([66b2315](https://github.com/MirageNet/Mirage/commit/66b231565c019be49f8da2af8b5e8e17822ecd8f))
+
+
+### BREAKING CHANGES
+
+* - All Transports are obsolete.
+- Transports Are replaced with ISocket. Custom Transports should now implement ISocket and SocketFactory instead
+- Message handlers are now invoked in Update instead of in an Async Coroutine
+- Send Notify moved to SocketLayer
+- Server.StartAsync is no longer Async
+- Server.StartAsync is now called Server.StartServer
+- Client.Connect is no longer async
+- Local message in host mode invoke handlers immediately instead of waiting till next update
+- NetworkPlayer now has a Disconnect method. This means user does not need a reference to SocketLayer asmdef.
+- Disconnected players are blocked from sending messages
+
 # [92.0.0](https://github.com/MirageNet/Mirage/compare/v91.2.0...v92.0.0) (2021-05-23)
 
 
