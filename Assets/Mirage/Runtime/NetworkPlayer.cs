@@ -49,6 +49,13 @@ namespace Mirage
         private readonly SocketLayer.IConnection connection;
 
         /// <summary>
+        /// Has this player been marked as disconnected
+        /// <para>Messages sent to disconnected players will be ignored</para>
+        /// </summary>
+        bool isDisconnected = false;
+
+
+        /// <summary>
         /// General purpose object to hold authentication data, character selection, tokens, etc.
         /// associated with the connection for reference after Authentication completes.
         /// </summary>
@@ -91,7 +98,6 @@ namespace Mirage
             isDisconnected = true;
         }
 
-        bool isDisconnected = false;
         /// <summary>
         /// The NetworkIdentity for this connection.
         /// </summary>
