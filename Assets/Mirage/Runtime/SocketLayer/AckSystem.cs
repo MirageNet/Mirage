@@ -60,7 +60,7 @@ namespace Mirage.SocketLayer
         /// <param name="connection"></param>
         /// <param name="ackTimeout">how long after last send before sending empty ack</param>
         /// <param name="time"></param>
-        public AckSystem(IRawConnection connection, Config config, ITime time, BufferPool bufferPool, Metrics metrics)
+        public AckSystem(IRawConnection connection, Config config, ITime time, BufferPool bufferPool, Metrics metrics = null)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
 
