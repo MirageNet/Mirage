@@ -74,7 +74,7 @@ namespace Mirage.SocketLayer
             emptyAckLimit = config.EmptyAckLimit;
             receivesBeforeEmpty = config.ReceivesBeforeEmptyAck;
             MTU = config.Mtu;
-            maxPacketsInSendBufferPerConnection = config.maxReliablePacketsInSendBufferPerConnection;
+            maxPacketsInSendBufferPerConnection = config.MaxReliablePacketsInSendBufferPerConnection;
 
             int size = config.SequenceSize;
             sentAckablePackets = new RingBuffer<AckablePacket>(size);

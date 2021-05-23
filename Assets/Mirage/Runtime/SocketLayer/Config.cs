@@ -77,7 +77,7 @@ namespace Mirage.SocketLayer
         /// <para>This value wont count null packets so can be set lower than <see cref="SequenceSize"/>'s value to limit actual number of packets waiting to be acked</para>
         /// <para>Example: (max=2000) * (MTU=1200) * (connections=100) => 240MB</para>
         /// </summary>
-        public int maxReliablePacketsInSendBufferPerConnection = 2000;
+        public int MaxReliablePacketsInSendBufferPerConnection = 2000;
 
         /// <summary>
         /// Bit size of sequence used for AckSystem
