@@ -40,14 +40,26 @@ namespace Mirage.SocketLayer
         /// </summary>
         public float DisconnectDuration = 1;
 
+        // todo move these settings to socket
         /// <summary>
         /// Max size of a packet (excluding peer header)
         /// </summary>
-        public int Mtu = 1280 - 20 - 8;
+        public int Mtu => BufferSize - HEADER_SIZE;
+        /// <summary>
+        /// Peer+ udp socket size
+        /// </summary>
+        const int HEADER_SIZE = 20 + 8;
+        /// <summary>
+        /// Size of buffers, Should be Mtu + header size + header size for socket
+        /// <para>Udp Packet is 1280</para>
+        /// </summary>
+        public int BufferSize = 1280;
+
         /// <summary>
         /// How many buffers to create at start
         /// </summary>
         public int BufferPoolStartSize = 100;
+
         /// <summary>
         /// max number of buffers allowed to be stored in pool
         /// <para>buffers over this limit will be left for GC</para>
