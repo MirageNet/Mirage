@@ -327,18 +327,16 @@ namespace Mirage.SocketLayer
                 // old packet
                 return;
             }
-            else
+
+
+            ReliableReceived existing = reliableReceive[reliableSequence];
+            if (existing.buffer == null)
             {
-                ReliableReceived existing = reliableReceive[reliableSequence];
-                if (existing.buffer == null)
-                {
-                    // new packet
-                    ByteBuffer savedPacket = bufferPool.Take();
-                    int bufferLength = length - HEADER_SIZE_RELIABLE;
-                    Buffer.BlockCopy(packet, HEADER_SIZE_RELIABLE, savedPacket.array, 0, bufferLength);
-                    reliableReceive.InsertAt(reliableSequence, new ReliableReceived(savedPacket, bufferLength));
-                }
-                return;
+                // new packet
+                ByteBuffer savedPacket = bufferPool.Take();
+                int bufferLength = length - HEADER_SIZE_RELIABLE;
+                Buffer.BlockCopy(packet, HEADER_SIZE_RELIABLE, savedPacket.array, 0, bufferLength);
+                reliableReceive.InsertAt(reliableSequence, new ReliableReceived(savedPacket, bufferLength));
             }
         }
 
@@ -422,41 +420,55 @@ namespace Mirage.SocketLayer
             {
                 uint ackableSequence = (uint)sequencer.MoveInBounds(start + i);
                 AckablePacket ackable = sentAckablePackets[ackableSequence];
-                if (ackable.Equals(default)) { continue; }
 
-                // if we have already ackeds this, just remove it
-                if (ackable.IsReliable && ackable.reliablePacket.acked)
-                {
-                    // todo this should never happen, can we remove this?
-                    sentAckablePackets.RemoveAt(ackableSequence);
-                    continue;
-                }
-                int distance = (int)sentAckablePackets.Sequencer.Distance(sequence, ackableSequence);
-
-                // negative distance means next is sent after last ack, so nothing to ack yet
-                // no chance for it to be acked yet, so do nothing
-                if (distance < 0)
+                if (ackable.Equals(default))
                     continue;
 
+                if (alreadyAcked(ackable, ackableSequence))
+                    continue;
 
-                bool lost = OutsideOfMask(distance) || NotInMask(distance, mask);
+                CheckAckablePacket(sequence, mask, ackable, ackableSequence);
+            }
+        }
 
-                if (ackable.IsNotify)
+        private bool alreadyAcked(AckablePacket ackable, uint ackableSequence)
+        {
+            // if we have already ackeds this, just remove it
+            if (ackable.IsReliable && ackable.reliablePacket.acked)
+            {
+                // todo this should never happen, can we remove this?
+                sentAckablePackets.RemoveAt(ackableSequence);
+                return true;
+            }
+            return false;
+        }
+        private void CheckAckablePacket(ushort sequence, ulong mask, AckablePacket ackable, uint ackableSequence)
+        {
+            int distance = (int)sentAckablePackets.Sequencer.Distance(sequence, ackableSequence);
+
+            // negative distance means next is sent after last ack, so nothing to ack yet
+            // no chance for it to be acked yet, so do nothing
+            if (distance < 0)
+                return;
+
+
+            bool lost = OutsideOfMask(distance) || NotInMask(distance, mask);
+
+            if (ackable.IsNotify)
+            {
+                ackable.token.Notify(!lost);
+                sentAckablePackets.RemoveAt(ackableSequence);
+            }
+            else
+            {
+                ReliablePacket reliablePacket = ackable.reliablePacket;
+                if (lost)
                 {
-                    ackable.token.Notify(!lost);
-                    sentAckablePackets.RemoveAt(ackableSequence);
+                    reliableLost(sequence, reliablePacket);
                 }
                 else
                 {
-                    ReliablePacket reliablePacket = ackable.reliablePacket;
-                    if (lost)
-                    {
-                        reliableLost(sequence, reliablePacket);
-                    }
-                    else
-                    {
-                        reliableAcked(reliablePacket);
-                    }
+                    reliableAcked(reliablePacket);
                 }
             }
         }
