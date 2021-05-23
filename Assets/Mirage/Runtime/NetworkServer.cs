@@ -236,7 +236,7 @@ namespace Mirage
             peer.OnDisconnected += Peer_OnDisconnected;
             peer.Bind(endpoint);
 
-            TransportStarted();
+            PeerStarted();
         }
         private void Update()
         {
@@ -265,7 +265,7 @@ namespace Mirage
             }
         }
 
-        private void TransportStarted()
+        private void PeerStarted()
         {
             logger.Log("Server started listening");
             Active = true;
