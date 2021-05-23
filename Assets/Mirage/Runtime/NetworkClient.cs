@@ -213,6 +213,8 @@ namespace Mirage
         /// </summary>
         public void Disconnect()
         {
+            // todo exit early if not active/initilzed
+
             Player?.Connection?.Disconnect();
             _disconnected?.Invoke();
             Cleanup();

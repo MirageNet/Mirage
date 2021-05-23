@@ -145,6 +145,8 @@ namespace Mirage
         /// </summary>
         public void Stop()
         {
+            // todo exit early if not active/initilzed
+
             if (LocalClient != null)
             {
                 _onStopHost?.Invoke();
