@@ -15,7 +15,7 @@ namespace Mirage.SocketLayer
             return comparer.Equals(value, default(T));
         }
 
-        T[] buffer;
+        readonly T[] buffer;
         /// <summary>oldtest item</summary>
         uint read;
         /// <summary>newest item</summary>

@@ -66,24 +66,26 @@ namespace Mirage
 
         INotifyToken SocketLayer.IConnection.SendNotify(byte[] packet)
         {
-            logger.Assert(State == ConnectionState.Connected);
-            otherHandler.ReceiveMessage(otherConnection, new ArraySegment<byte>(packet));
+            receive(packet);
 
             return new PipeNotifyToken();
         }
 
-        void SocketLayer.IConnection.SendReliable(byte[] packet)
+        void SocketLayer.IConnection.SendReliable(byte[] message)
         {
-            logger.Assert(State == ConnectionState.Connected);
-            otherHandler.ReceiveMessage(otherConnection, new ArraySegment<byte>(packet));
+            receive(message);
         }
 
         void SocketLayer.IConnection.SendUnreliable(byte[] packet)
         {
+            receive(packet);
+        }
+
+        private void receive(byte[] packet)
+        {
             logger.Assert(State == ConnectionState.Connected);
             otherHandler.ReceiveMessage(otherConnection, new ArraySegment<byte>(packet));
         }
-
 
         public class PipeEndPoint : EndPoint
         {

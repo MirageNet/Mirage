@@ -436,7 +436,8 @@ namespace Mirage.SocketLayer
             // if we have already ackeds this, just remove it
             if (ackable.IsReliable && ackable.reliablePacket.acked)
             {
-                // todo this should never happen, can we remove this?
+                // this should never happen because packet should be removed when acked is set to true
+                // but remove it just incase we get here
                 sentAckablePackets.RemoveAt(ackableSequence);
                 return true;
             }

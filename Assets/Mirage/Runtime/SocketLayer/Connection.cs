@@ -15,7 +15,11 @@ namespace Mirage.SocketLayer
         void Disconnect();
 
         INotifyToken SendNotify(byte[] packet);
-        void SendReliable(byte[] packet);
+        /// <summary>
+        /// single message, batched by AckSystem
+        /// </summary>
+        /// <param name="message"></param>
+        void SendReliable(byte[] message);
         void SendUnreliable(byte[] packet);
     }
 
@@ -152,10 +156,14 @@ namespace Mirage.SocketLayer
             ThrowIfNotConnected();
             return ackSystem.SendNotify(packet);
         }
-        public void SendReliable(byte[] packet)
+        /// <summary>
+        /// single message, batched by AckSystem
+        /// </summary>
+        /// <param name="message"></param>
+        public void SendReliable(byte[] message)
         {
             ThrowIfNotConnected();
-            ackSystem.SendReliable(packet);
+            ackSystem.SendReliable(message);
         }
 
         void IRawConnection.SendRaw(byte[] packet, int length)
