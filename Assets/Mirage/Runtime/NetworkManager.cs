@@ -5,7 +5,8 @@ using UnityEngine.Serialization;
 namespace Mirage
 {
     [Flags]
-    public enum NetworkManagerMode {
+    public enum NetworkManagerMode
+    {
         None = 0,
         Server = 1,
         Client = 2,
