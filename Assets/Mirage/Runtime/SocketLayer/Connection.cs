@@ -202,24 +202,29 @@ namespace Mirage.SocketLayer
         {
             ackSystem.ReceiveReliable(packet.buffer.array, packet.length);
 
-            // gets imessage in order
+            // gets messages in order
             while (ackSystem.NextReliablePacket(out AckSystem.ReliableReceived received))
             {
-                byte[] array = received.buffer.array;
-                int packetLength = received.length;
-                int offset = 0;
-                while (offset < packetLength)
-                {
-                    ushort length = ByteUtils.ReadUShort(array, ref offset);
-                    var message = new ArraySegment<byte>(array, offset, length);
-                    offset += length;
-
-                    dataHandler.ReceiveMessage(this, message);
-                }
-
-                // release buffer after all its message have been handled
-                received.buffer.Release();
+                HandleAllMessageInPacket(received);
             }
+        }
+
+        private void HandleAllMessageInPacket(AckSystem.ReliableReceived received)
+        {
+            byte[] array = received.buffer.array;
+            int packetLength = received.length;
+            int offset = 0;
+            while (offset < packetLength)
+            {
+                ushort length = ByteUtils.ReadUShort(array, ref offset);
+                var message = new ArraySegment<byte>(array, offset, length);
+                offset += length;
+
+                dataHandler.ReceiveMessage(this, message);
+            }
+
+            // release buffer after all its message have been handled
+            received.buffer.Release();
         }
 
         internal void ReceiveNotifyPacket(Packet packet)

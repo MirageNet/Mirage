@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -587,7 +588,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 for (int i = processed; i < count1; i++)
                 {
                     byte[] packet = connection.packets[i];
-                    if (Random.value > dropChance)
+                    if (UnityEngine.Random.value > dropChance)
                     {
                         ToSend.Add(packet);
                     }
@@ -597,7 +598,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 var newPackets = new List<byte[]>();
                 for (int i = 0; i < ToSend.Count; i++)
                 {
-                    if (Random.value < skipChance) { continue; }
+                    if (UnityEngine.Random.value < skipChance) { continue; }
                     newPackets.AddRange(Receive(ackSystem, ToSend[i]));
                     ToSend.RemoveAt(i);
                     i--;
@@ -608,7 +609,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
             private static List<byte[]> Receive(AckSystem ackSystem, byte[] packet)
             {
-                var received = new List<byte[]>();
+                var messages = new List<byte[]>();
                 var type = (PacketType)packet[0];
                 switch (type)
                 {
@@ -626,11 +627,31 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                         break;
                 }
 
-                while (ackSystem.NextReliablePacket(out System.ArraySegment<byte> outBuffer))
+                while (ackSystem.NextReliablePacket(out AckSystem.ReliableReceived received))
                 {
-                    received.Add(outBuffer.ToArray());
+                    HandleAllMessageInPacket(messages, received);
                 }
-                return received;
+                return messages;
+            }
+
+            private static void HandleAllMessageInPacket(List<byte[]> messages, AckSystem.ReliableReceived received)
+            {
+                byte[] array = received.buffer.array;
+                int packetLength = received.length;
+                int offset = 0;
+                while (offset < packetLength)
+                {
+                    ushort length = ByteUtils.ReadUShort(array, ref offset);
+                    var message = new ArraySegment<byte>(array, offset, length);
+
+                    byte[] outBuffer = new byte[length];
+                    Buffer.BlockCopy(array, offset, outBuffer, 0, length);
+                    offset += length;
+                    messages.Add(outBuffer);
+                }
+
+                // release buffer after all its message have been handled
+                received.buffer.Release();
             }
         }
 
