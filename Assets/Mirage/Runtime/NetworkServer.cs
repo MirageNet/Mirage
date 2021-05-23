@@ -261,7 +261,7 @@ namespace Mirage
             else
             {
                 // todo remove or replace with assert
-                Debug.LogWarning("no handler found for connection");
+                if (logger.WarnEnabled()) logger.LogWarning($"No handler found for [{conn}]");
             }
         }
 
@@ -471,7 +471,7 @@ namespace Mirage
                 else
                 {
                     // todo remove or replace with assert
-                    logger.LogWarning($"No player found for {connection}");
+                    if (logger.WarnEnabled()) logger.LogWarning($"No player found for [{connection}]");
                 }
             }
         }
