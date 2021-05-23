@@ -42,7 +42,7 @@ jobs:
         run: docfx build --logLevel Warning --warningsAsErrors doc/docfx.json
 
       - name: Publish docs
-        uses: crazy-max/ghaction-github-pages@v2.3.0
+        uses: crazy-max/ghaction-github-pages@v2.4.1
         if: github.ref == 'refs/heads/master'
         with:
           # Create incremental commit instead of doing push force
