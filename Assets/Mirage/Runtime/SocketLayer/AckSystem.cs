@@ -15,8 +15,6 @@ namespace Mirage.SocketLayer
         /// <summary>PacketType, ack sequannce, mask</summary>
         public const int HEADER_SIZE_ACK = 3 + sizeof(ulong);
 
-        //public readonly Sequencer ackSequencer = new Sequencer(ACK_SEQUENCER_BITS);
-
         readonly RingBuffer<AckablePacket> sentAckablePackets;
         readonly Sequencer reliableOrder;
         readonly RingBuffer<ReliableReceived> reliableReceive;
