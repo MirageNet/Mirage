@@ -1,4 +1,3 @@
-using System.Reflection;
 using Mirage.Logging;
 using UnityEditor;
 using UnityEditorInternal;
@@ -19,8 +18,6 @@ namespace Mirage
                 if (_unityEventDrawer == null)
                 {
                     _unityEventDrawer = new UnityEventDrawer();
-                    // todo do we need to set fieldInfo for drawer to work correct?
-                    typeof(PropertyDrawer).GetField("m_FieldInfo", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(_unityEventDrawer, fieldInfo);
                 }
                 return _unityEventDrawer;
             }
