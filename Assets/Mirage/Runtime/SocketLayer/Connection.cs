@@ -74,6 +74,7 @@ namespace Mirage.SocketLayer
                 _state = value;
             }
         }
+        public bool Connected => State == ConnectionState.Connected;
 
         private readonly Peer peer;
         public readonly EndPoint EndPoint;
@@ -196,6 +197,7 @@ namespace Mirage.SocketLayer
             var segment = new ArraySegment<byte>(packet.buffer.array, offset, count);
             dataHandler.ReceivePacket(this, segment);
         }
+
         internal void ReceivReliablePacket(Packet packet)
         {
             ackSystem.ReceiveReliable(packet.buffer.array, packet.length);

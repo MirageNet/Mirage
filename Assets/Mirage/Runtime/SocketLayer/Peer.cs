@@ -266,56 +266,46 @@ namespace Mirage.SocketLayer
                 }
             }
 
-            // if not connected then we can only handle commands
-            if (connection.State != ConnectionState.Connected && false)
+            if (!connection.Connected)
             {
-                switch (packet.type)
+                // if not connected then we can only handle commands
+                if (packet.type == PacketType.Command)
                 {
-                    case PacketType.Command:
-                        HandleCommand(connection, packet);
-                        break;
-                    case PacketType.Unreliable:
-                    case PacketType.Notify:
-                    case PacketType.Reliable:
-                    case PacketType.Ack:
-                        if (logger.filterLogType == LogType.Warning) logger.Log(LogType.Warning, $"Receive from {connection} type: {packet.type} while not connected");
-                        break;
-                    case PacketType.KeepAlive:
-                        // do nothing
-                        break;
-                    default:
-                        // ignore invalid PacketType
-                        // return not break, so that receive time is not set for invalid packet
-                        return;
+                    HandleCommand(connection, packet);
+                    connection.SetReceiveTime();
+
                 }
+                else if (logger.filterLogType == LogType.Warning) logger.Log(LogType.Warning, $"Receive from {connection} type: {packet.type} while not connected");
+
+                // ignore other messages if not connected
+                return;
             }
-            else
+
+            // handle message when connected
+            switch (packet.type)
             {
-                switch (packet.type)
-                {
-                    case PacketType.Command:
-                        HandleCommand(connection, packet);
-                        break;
-                    case PacketType.Unreliable:
-                        connection.ReceiveUnreliablePacket(packet);
-                        break;
-                    case PacketType.Notify:
-                        connection.ReceiveNotifyPacket(packet);
-                        break;
-                    case PacketType.Reliable:
-                        connection.ReceivReliablePacket(packet);
-                        break;
-                    case PacketType.Ack:
-                        connection.ReceiveNotifyAck(packet);
-                        break;
-                    case PacketType.KeepAlive:
-                        // do nothing
-                        break;
-                    default:
-                        // ignore invalid PacketType
-                        // return not break, so that receive time is not set for invalid packet
-                        return;
-                }
+                case PacketType.Command:
+                    HandleCommand(connection, packet);
+                    break;
+                case PacketType.Unreliable:
+                    connection.ReceiveUnreliablePacket(packet);
+                    break;
+                case PacketType.Notify:
+                    connection.ReceiveNotifyPacket(packet);
+                    break;
+                case PacketType.Reliable:
+                    connection.ReceivReliablePacket(packet);
+                    break;
+                case PacketType.Ack:
+                    connection.ReceiveNotifyAck(packet);
+                    break;
+                case PacketType.KeepAlive:
+                    // do nothing
+                    break;
+                default:
+                    // ignore invalid PacketType
+                    // return not break, so that receive time is not set for invalid packet
+                    return;
             }
 
             connection.SetReceiveTime();
