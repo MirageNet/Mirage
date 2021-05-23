@@ -91,14 +91,6 @@ namespace Mirage.SocketLayer
             return reliableReceive.TryDequeue(out packet);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void OnSend()
-        {
-            emptyAckCount++;
-            lastSentAck = LatestAckSequence;
-            lastSentTime = time.Now;
-        }
-
         public void Update()
         {
             if (nextBatch != null)
@@ -146,6 +138,22 @@ namespace Mirage.SocketLayer
             return emptyAckCount < emptyAckLimit;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void Send(byte[] final, int length)
+        {
+            connection.SendRaw(final, length);
+            OnSend();
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void OnSend()
+        {
+            emptyAckCount++;
+            lastSentAck = LatestAckSequence;
+            lastSentTime = time.Now;
+        }
+
         private void SendAck()
         {
             using (ByteBuffer final = bufferPool.Take())
@@ -158,8 +166,8 @@ namespace Mirage.SocketLayer
                 ByteUtils.WriteULong(final.array, ref offset, AckMask);
 
                 connection.SendRaw(final.array, offset);
+                Send(final.array, offset);
             }
-            OnSend();
         }
 
         public INotifyToken SendNotify(byte[] packet)
@@ -191,9 +199,7 @@ namespace Mirage.SocketLayer
             ByteUtils.WriteUShort(final, ref offset, LatestAckSequence);
             ByteUtils.WriteULong(final, ref offset, AckMask);
 
-
-            connection.SendRaw(final, final.Length);
-            OnSend();
+            Send(final, final.Length);
 
             return token;
         }
@@ -271,8 +277,7 @@ namespace Mirage.SocketLayer
             ByteUtils.WriteUShort(final, ref offset, LatestAckSequence);
             ByteUtils.WriteULong(final, ref offset, AckMask);
 
-            connection.SendRaw(final, reliable.length);
-            OnSend();
+            Send(final, reliable.length);
         }
 
 
