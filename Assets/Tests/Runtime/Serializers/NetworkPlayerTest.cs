@@ -6,9 +6,9 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime
 {
-    public class NetworkConnectionTest
+    public class NetworkPlayerTest
     {
-        private NetworkPlayer connection;
+        private NetworkPlayer player;
         private byte[] serializedMessage;
         private IConnection mockTransportConnection;
 
@@ -42,16 +42,16 @@ namespace Mirage.Tests.Runtime
             mockTransportConnection.Send(
                 Arg.Do<ArraySegment<byte>>(ParsePacket), Channel.Unreliable);
 
-            connection = new NetworkPlayer(mockTransportConnection);
+            player = new NetworkPlayer(mockTransportConnection);
 
             serializedMessage = MessagePacker.Pack(new ReadyMessage());
-            connection.RegisterHandler<ReadyMessage>(message => { });
+            player.RegisterHandler<ReadyMessage>(message => { });
 
             delivered = Substitute.For<Action<INetworkPlayer, object>>();
             lost = Substitute.For<Action<INetworkPlayer, object>>();
 
-            connection.NotifyDelivered += delivered;
-            connection.NotifyLost += lost;
+            player.NotifyDelivered += delivered;
+            player.NotifyLost += lost;
 
         }
 
@@ -62,7 +62,7 @@ namespace Mirage.Tests.Runtime
             var reader = new NetworkReader(new byte[] { 1, 2, 3, 4 });
             InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
             {
-                connection.InvokeHandler(messageId, reader, 0);
+                player.InvokeHandler(messageId, reader, 0);
             });
 
             Assert.That(exception.Message, Does.StartWith("Unexpected message Mirage.SceneMessage received"));
@@ -76,7 +76,7 @@ namespace Mirage.Tests.Runtime
             InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
             {
                 // some random id with no message
-                connection.InvokeHandler(1234, reader, 0);
+                player.InvokeHandler(1234, reader, 0);
             });
 
             Assert.That(exception.Message, Does.StartWith("Unexpected message ID 1234 received"));
@@ -88,7 +88,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void SendsNotifyPacket()
         {
-            connection.SendNotify(data, 1);
+            player.SendNotify(data, 1);
 
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
@@ -101,7 +101,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void SendsNotifyPacketWithSequence()
         {
-            connection.SendNotify(data, 1);
+            player.SendNotify(data, 1);
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
                 Sequence = 0,
@@ -109,14 +109,14 @@ namespace Mirage.Tests.Runtime
                 AckMask = 0
             }));
 
-            connection.SendNotify(data, 1);
+            player.SendNotify(data, 1);
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
                 Sequence = 1,
                 ReceiveSequence = ushort.MaxValue,
                 AckMask = 0
             }));
-            connection.SendNotify(data, 1);
+            player.SendNotify(data, 1);
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
                 Sequence = 2,
@@ -128,9 +128,9 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void RaisePacketDelivered()
         {
-            connection.SendNotify(data, 1);
-            connection.SendNotify(data, 3);
-            connection.SendNotify(data, 5);
+            player.SendNotify(data, 1);
+            player.SendNotify(data, 3);
+            player.SendNotify(data, 5);
 
             delivered.DidNotReceiveWithAnyArgs().Invoke(default, default);
 
@@ -141,22 +141,22 @@ namespace Mirage.Tests.Runtime
                 AckMask = 0b111
             };
 
-            connection.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
+            player.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
 
             Received.InOrder(() =>
             {
-                delivered.Invoke(connection, 1);
-                delivered.Invoke(connection, 3);
-                delivered.Invoke(connection, 5);
+                delivered.Invoke(player, 1);
+                delivered.Invoke(player, 3);
+                delivered.Invoke(player, 5);
             });
         }
 
         [Test]
         public void RaisePacketNotDelivered()
         {
-            connection.SendNotify(data, 1);
-            connection.SendNotify(data, 3);
-            connection.SendNotify(data, 5);
+            player.SendNotify(data, 1);
+            player.SendNotify(data, 3);
+            player.SendNotify(data, 5);
 
             delivered.DidNotReceiveWithAnyArgs().Invoke(default, default);
 
@@ -167,20 +167,20 @@ namespace Mirage.Tests.Runtime
                 AckMask = 0b001
             };
 
-            connection.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
+            player.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
 
             Received.InOrder(() =>
             {
-                lost.Invoke(connection, 1);
-                lost.Invoke(connection, 3);
-                delivered.Invoke(connection, 5);
+                lost.Invoke(player, 1);
+                lost.Invoke(player, 3);
+                delivered.Invoke(player, 5);
             });
         }
 
         [Test]
         public void DropDuplicates()
         {
-            connection.SendNotify(data, 1);
+            player.SendNotify(data, 1);
 
             var reply = new NotifyPacket
             {
@@ -189,10 +189,10 @@ namespace Mirage.Tests.Runtime
                 AckMask = 0b001
             };
 
-            connection.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
-            connection.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
+            player.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
+            player.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
 
-            delivered.Received(1).Invoke(connection, 1);
+            delivered.Received(1).Invoke(player, 1);
         }
 
 
@@ -207,7 +207,7 @@ namespace Mirage.Tests.Runtime
                     ReceiveSequence = 100,
                     AckMask = ~0b0ul
                 };
-                connection.ReceiveNotify(packet, new NetworkReader(serializedMessage), Channel.Unreliable);
+                player.ReceiveNotify(packet, new NetworkReader(serializedMessage), Channel.Unreliable);
             }
 
             var reply = new NotifyPacket
@@ -216,9 +216,9 @@ namespace Mirage.Tests.Runtime
                 ReceiveSequence = 100,
                 AckMask = ~0b0ul
             };
-            connection.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
+            player.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
 
-            connection.SendNotify(data, 1);
+            player.SendNotify(data, 1);
 
             Assert.That(lastSent, Is.EqualTo(new NotifyPacket
             {
@@ -231,21 +231,21 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void SendAndReceive()
         {
-            connection.SendNotify(data, 1);
+            player.SendNotify(data, 1);
 
             Action<SceneMessage> mockHandler = Substitute.For<Action<SceneMessage>>();
-            connection.RegisterHandler(mockHandler);
+            player.RegisterHandler(mockHandler);
 
-            connection.TransportReceive(new ArraySegment<byte>(lastSerializedPacket), Channel.Unreliable);
+            player.TransportReceive(new ArraySegment<byte>(lastSerializedPacket), Channel.Unreliable);
             mockHandler.Received().Invoke(new SceneMessage());
         }
 
         [Test]
         public void NotAcknowledgedYet()
         {
-            connection.SendNotify(data, 1);
-            connection.SendNotify(data, 3);
-            connection.SendNotify(data, 5);
+            player.SendNotify(data, 1);
+            player.SendNotify(data, 3);
+            player.SendNotify(data, 5);
 
             var reply = new NotifyPacket
             {
@@ -254,7 +254,7 @@ namespace Mirage.Tests.Runtime
                 AckMask = 0b011
             };
 
-            connection.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
+            player.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
 
             delivered.DidNotReceive().Invoke(Arg.Any<INetworkPlayer>(), 5);
 
@@ -265,9 +265,9 @@ namespace Mirage.Tests.Runtime
                 AckMask = 0b111
             };
 
-            connection.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
+            player.ReceiveNotify(reply, new NetworkReader(serializedMessage), Channel.Unreliable);
 
-            delivered.Received().Invoke(connection, 5);
+            delivered.Received().Invoke(player, 5);
         }
 
         #endregion

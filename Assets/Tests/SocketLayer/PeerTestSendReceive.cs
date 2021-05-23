@@ -32,11 +32,6 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             for (int i = 0; i < ClientCount; i++)
             {
                 clients[i] = new PeerInstanceWithSocket();
-
-                // add remotes so they can send message to each other
-                server.socket.AddRemote(clients[i].socket);
-                clients[i].socket.AddRemote(server.socket);
-
                 clientConnections.Add(clients[i].peer.Connect(server.endPoint));
             }
 

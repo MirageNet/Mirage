@@ -1,3 +1,72 @@
+# [92.0.0](https://github.com/MirageNet/Mirage/compare/v91.2.0...v92.0.0) (2021-05-23)
+
+
+### Code Refactoring
+
+* moving networkmanager gui and hud to components folder ([#802](https://github.com/MirageNet/Mirage/issues/802)) ([7612bb6](https://github.com/MirageNet/Mirage/commit/7612bb6efe030ffa6e0baab8640bf9f1772dc780))
+
+
+### Features
+
+* adding weaver support for nullable types ([#800](https://github.com/MirageNet/Mirage/issues/800)) ([14af628](https://github.com/MirageNet/Mirage/commit/14af62854c1d0aa957e232bc43ae39609b010604))
+
+
+### BREAKING CHANGES
+
+* NetworkManagerHud is now in the Mirage.Components asmdef
+
+# [91.2.0](https://github.com/MirageNet/Mirage/compare/v91.1.0...v91.2.0) (2021-05-18)
+
+
+### Features
+
+* simplifying some checks in ServerObjectManager ([#801](https://github.com/MirageNet/Mirage/issues/801)) ([fe9a07a](https://github.com/MirageNet/Mirage/commit/fe9a07a9a2a24d03ac7d0a2239dbf51291dbe21d))
+
+# [91.1.0](https://github.com/MirageNet/Mirage/compare/v91.0.1...v91.1.0) (2021-05-17)
+
+
+### Bug Fixes
+
+* fixing compile in new gui ([d2800be](https://github.com/MirageNet/Mirage/commit/d2800be08fd355077e8be9fdf3195cdf9cbc3c83))
+
+
+### Features
+
+* add optional imgui support to network manager hud ([#789](https://github.com/MirageNet/Mirage/issues/789)) ([7841794](https://github.com/MirageNet/Mirage/commit/7841794df1d210b316f5d3a9fb9f8e268ddb0fc2))
+
+## [91.0.1](https://github.com/MirageNet/Mirage/compare/v91.0.0...v91.0.1) (2021-05-04)
+
+
+### Bug Fixes
+
+* unspawning all server object on server stop ([5041a06](https://github.com/MirageNet/Mirage/commit/5041a06de8506574add2795dc075b71245e39d88))
+
+# [91.0.0](https://github.com/MirageNet/Mirage/compare/v90.0.0...v91.0.0) (2021-05-01)
+
+
+### Code Refactoring
+
+* renaming listen to start and merging it with start host ([#795](https://github.com/MirageNet/Mirage/issues/795)) ([3d4e091](https://github.com/MirageNet/Mirage/commit/3d4e0916b14b3b1b494b9bfba366844f209f2414))
+
+
+### BREAKING CHANGES
+
+* - ListenAsync renamed to StartAsync
+- StartHost removed, use StartAsync with localClient parameter instead
+- OnStartHost is now always called after Started
+
+# [90.0.0](https://github.com/MirageNet/Mirage/compare/v89.0.0...v90.0.0) (2021-04-30)
+
+
+### Code Refactoring
+
+* removing stop host ([#794](https://github.com/MirageNet/Mirage/issues/794)) ([55536fc](https://github.com/MirageNet/Mirage/commit/55536fc6fb674b164bf599367022428df3b8ed63))
+
+
+### BREAKING CHANGES
+
+* NetworkServer.StopHost removed, use NetworkServer.Disconnect instead
+
 # [89.0.0](https://github.com/MirageNet/Mirage/compare/v88.1.3...v89.0.0) (2021-04-28)
 
 

@@ -29,14 +29,32 @@ namespace Mirage.Sockets.Udp
         {
             return new IPEndPoint(IPAddress.Any, port);
         }
+
         public override EndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
             string addressString = address ?? this.address;
-            var ipAddress = IPAddress.Parse(addressString);
+            IPAddress ipAddress = getAddress(addressString);
 
             ushort portIn = port ?? (ushort)this.port;
 
             return new IPEndPoint(ipAddress, portIn);
+        }
+
+        private IPAddress getAddress(string addressString)
+        {
+            if (IPAddress.TryParse(addressString, out IPAddress address))
+                return address;
+
+            IPAddress[] results = Dns.GetHostAddresses(addressString);
+            foreach (IPAddress result in results)
+            {
+                if (result.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return result;
+                }
+            }
+
+            throw new FormatException("Could not parse address");
         }
 
         void ThrowIfNotSupported()
@@ -59,6 +77,7 @@ namespace Mirage.Sockets.Udp
             // todo do we need to use AddressFamily from endpoint?
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             socket.Blocking = false;
+            socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.ReuseAddress, true);
         }
 
         public void Bind(EndPoint endPoint)
