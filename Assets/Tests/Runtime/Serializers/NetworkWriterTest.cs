@@ -1056,5 +1056,54 @@ namespace Mirage.Tests.Runtime
 
             Assert.That(writer.Position, Is.EqualTo(reader.Position));
         }
+
+        // use networkmessage to make sure writer is generated
+        [NetworkMessage]
+        public struct NullableIntMessage
+        {
+            public int? value1;
+            public bool? value2;
+            public ulong? value3;
+        }
+
+        [Test]
+        [TestCase(null)]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(1234)]
+        public void NullableInt(int? value)
+        {
+            writer.Write<int?>(value);
+            var reader = new NetworkReader(writer.ToArray());
+            int? unpacked = reader.Read<int?>();
+
+            Assert.That(unpacked, Is.EqualTo(value));
+        }
+
+        [Test]
+        [TestCase(null)]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void NullableBool(bool? value)
+        {
+            writer.Write<bool?>(value);
+            var reader = new NetworkReader(writer.ToArray());
+            bool? unpacked = reader.Read<bool?>();
+
+            Assert.That(unpacked, Is.EqualTo(value));
+        }
+
+        [Test]
+        [TestCase(null)]
+        [TestCase(0ul)]
+        [TestCase(20202020ul)]
+        public void NullableUlong(ulong? value)
+        {
+            writer.Write<ulong?>(value);
+            var reader = new NetworkReader(writer.ToArray());
+            ulong? unpacked = reader.Read<ulong?>();
+
+            Assert.That(unpacked, Is.EqualTo(value));
+        }
     }
 }
