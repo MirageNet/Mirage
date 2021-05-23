@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Mirage
@@ -74,7 +73,7 @@ namespace Mirage
             if (NetworkManager.Server.Active)
             {
                 GUILayout.Label("Server: active");
-                GUILayout.Label($"Transport: {NetworkManager.Server.Transport.GetType().Name}");
+                GUILayout.Label($"Socket: {NetworkManager.Server.SocketFactory.GetType().Name}");
 
                 if (NetworkManager.Client.IsConnected)
                 {
@@ -165,17 +164,17 @@ namespace Mirage
 
         private void ClickHost()
         {
-            NetworkManager.Server.StartAsync(NetworkManager.Client).Forget();
+            NetworkManager.Server.StartServer(NetworkManager.Client);
         }
 
         private void ClickServerOnly()
         {
-            NetworkManager.Server.StartAsync().Forget();
+            NetworkManager.Server.StartServer();
         }
 
         private void ClickClient()
         {
-            NetworkManager.Client.ConnectAsync(NetworkAddress);
+            NetworkManager.Client.Connect(NetworkAddress);
         }
     }
 }

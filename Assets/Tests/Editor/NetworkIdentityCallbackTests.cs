@@ -664,8 +664,8 @@ namespace Mirage
             identity.StartServer();
 
             // add some observers
-            identity.AddObserver(player1);
-            identity.AddObserver(player2);
+            identity.observers.Add(player1);
+            identity.observers.Add(player2);
 
             // call ClearObservers
             identity.ClearObservers();

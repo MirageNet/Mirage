@@ -30,7 +30,7 @@ namespace Mirage.Tests.Performance.Runtime
             // load host
             benchmarker = Object.FindObjectOfType<NetworkManager>();
 
-            benchmarker.Server.StartAsync(benchmarker.Client).Forget();
+            benchmarker.Server.StartServer(benchmarker.Client);
 
         });
 

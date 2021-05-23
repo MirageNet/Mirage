@@ -1,6 +1,6 @@
 using System;
-using Mirage.KCP;
 using Mirage.Logging;
+using Mirage.Sockets.Udp;
 using UnityEditor;
 using UnityEngine;
 
@@ -22,19 +22,19 @@ namespace Mirage
                 typeof(ServerObjectManager),
                 typeof(ClientObjectManager),
                 typeof(CharacterSpawner),
-                typeof(KcpTransport),
+                typeof(UdpSocketFactory),
                 typeof(LogSettings)
             };
             var go = new GameObject("NetworkManager", components);
 
-            KcpTransport transport = go.GetComponent<KcpTransport>();
+            UdpSocketFactory socketFactory = go.GetComponent<UdpSocketFactory>();
             NetworkSceneManager nsm = go.GetComponent<NetworkSceneManager>();
 
             NetworkClient networkClient = go.GetComponent<NetworkClient>();
-            networkClient.Transport = transport;
+            networkClient.SocketFactory = socketFactory;
 
             NetworkServer networkServer = go.GetComponent<NetworkServer>();
-            networkServer.Transport = transport;
+            networkServer.SocketFactory = socketFactory;
 
             ServerObjectManager serverObjectManager = go.GetComponent<ServerObjectManager>();
             serverObjectManager.Server = networkServer;

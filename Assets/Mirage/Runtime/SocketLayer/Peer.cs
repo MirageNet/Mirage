@@ -5,7 +5,11 @@ using UnityEngine;
 
 namespace Mirage.SocketLayer
 {
-    internal class Time
+    public interface ITime
+    {
+        float Now { get; }
+    }
+    internal class Time : ITime
     {
         public float Now => UnityEngine.Time.time;
     }
@@ -27,16 +31,16 @@ namespace Mirage.SocketLayer
     /// </summary>
     public sealed class Peer : IPeer
     {
-        void Assert(bool condition)
+        void Assert(bool condition, object msg = null)
         {
-            if (!condition) logger.Log(LogType.Assert, "Failed Assertion");
+            if (!condition) logger.Log(LogType.Assert, msg == null ? "Failed Assertion" : $"Failed Assertion: {msg}");
         }
         void Error(string error)
         {
             logger.Log(LogType.Error, error);
         }
         readonly ILogger logger;
-
+        readonly Metrics metrics;
         readonly ISocket socket;
         readonly IDataHandler dataHandler;
         readonly Config config;
@@ -57,11 +61,10 @@ namespace Mirage.SocketLayer
         /// </summary>
         bool active;
 
-        EndPoint receiveEndPoint = null;
-
-        public Peer(ISocket socket, IDataHandler dataHandler, Config config = null, ILogger logger = null)
+        public Peer(ISocket socket, IDataHandler dataHandler, Config config = null, ILogger logger = null, Metrics metrics = null)
         {
             this.logger = logger ?? Debug.unityLogger;
+            this.metrics = metrics;
             this.config = config ?? new Config();
 
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
@@ -115,10 +118,23 @@ namespace Mirage.SocketLayer
         {
             // connecting connections can send connect messages so is allowed
             // todo check connected before message are sent from high level
-            Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected);
+            Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected, connection.State);
 
             socket.Send(connection.EndPoint, data, length);
+            metrics?.OnSend(length);
             connection.SetSendTime();
+
+            if (logger.filterLogType == LogType.Log)
+            {
+                if ((PacketType)data[0] == PacketType.Command)
+                {
+                    logger.Log($"Send to {connection} type: Command, {(Commands)data[1]}");
+                }
+                else
+                {
+                    logger.Log($"Send to {connection} type: {(PacketType)data[0]}");
+                }
+            }
         }
 
         internal void SendUnreliable(Connection connection, byte[] packet)
@@ -138,7 +154,13 @@ namespace Mirage.SocketLayer
             using (ByteBuffer buffer = bufferPool.Take())
             {
                 int length = CreateCommandPacket(buffer, command, extra);
+
                 socket.Send(endPoint, buffer.array, length);
+                metrics?.OnSendUnconnected(length);
+                if (logger.filterLogType == LogType.Log)
+                {
+                    logger.Log($"Send to {endPoint} type: Command, {command}");
+                }
             }
         }
 
@@ -192,6 +214,7 @@ namespace Mirage.SocketLayer
         {
             ReceiveLoop();
             UpdateConnections();
+            metrics?.OnTick(connections.Count);
         }
 
 
@@ -201,7 +224,7 @@ namespace Mirage.SocketLayer
             {
                 while (socket.Poll())
                 {
-                    int length = socket.Receive(buffer.array, ref receiveEndPoint);
+                    int length = socket.Receive(buffer.array, out EndPoint receiveEndPoint);
 
                     // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
                     if (length > config.Mtu)
@@ -211,10 +234,12 @@ namespace Mirage.SocketLayer
 
                     if (connections.TryGetValue(receiveEndPoint, out Connection connection))
                     {
+                        metrics?.OnReceive(length);
                         HandleMessage(connection, packet);
                     }
                     else
                     {
+                        metrics?.OnReceiveUnconnected(length);
                         HandleNewConnection(receiveEndPoint, packet);
                     }
 
@@ -229,6 +254,34 @@ namespace Mirage.SocketLayer
             // ingore message of invalid size
             if (!packet.IsValidSize()) { return; }
 
+            if (logger.filterLogType == LogType.Log)
+            {
+                if (packet.type == PacketType.Command)
+                {
+                    logger.Log($"Receive from {connection} type: Command, {packet.command}");
+                }
+                else
+                {
+                    logger.Log($"Receive from {connection} type: {packet.type}");
+                }
+            }
+
+            if (!connection.Connected)
+            {
+                // if not connected then we can only handle commands
+                if (packet.type == PacketType.Command)
+                {
+                    HandleCommand(connection, packet);
+                    connection.SetReceiveTime();
+
+                }
+                else if (logger.filterLogType == LogType.Warning) logger.Log(LogType.Warning, $"Receive from {connection} type: {packet.type} while not connected");
+
+                // ignore other messages if not connected
+                return;
+            }
+
+            // handle message when connected
             switch (packet.type)
             {
                 case PacketType.Command:
@@ -240,7 +293,10 @@ namespace Mirage.SocketLayer
                 case PacketType.Notify:
                     connection.ReceiveNotifyPacket(packet);
                     break;
-                case PacketType.NotifyAck:
+                case PacketType.Reliable:
+                    connection.ReceivReliablePacket(packet);
+                    break;
+                case PacketType.Ack:
                     connection.ReceiveNotifyAck(packet);
                     break;
                 case PacketType.KeepAlive:
@@ -334,7 +390,7 @@ namespace Mirage.SocketLayer
 
         private Connection CreateNewConnection(EndPoint endPoint)
         {
-            var connection = new Connection(this, endPoint, dataHandler, config, time, logger);
+            var connection = new Connection(this, endPoint, dataHandler, config, time, bufferPool, logger, metrics);
             connection.SetReceiveTime();
             connections.Add(endPoint, connection);
             return connection;
@@ -345,8 +401,10 @@ namespace Mirage.SocketLayer
             switch (connection.State)
             {
                 case ConnectionState.Created:
-                    SetConnectionAsConnected(connection);
+                    // mark as connected, send message, then invoke event
+                    connection.State = ConnectionState.Connected;
                     SendCommand(connection, Commands.ConnectionAccepted);
+                    OnConnected?.Invoke(connection);
                     break;
 
                 case ConnectionState.Connected:
@@ -360,11 +418,6 @@ namespace Mirage.SocketLayer
             }
         }
 
-        private void SetConnectionAsConnected(Connection connection)
-        {
-            connection.State = ConnectionState.Connected;
-            OnConnected?.Invoke(connection);
-        }
 
         private void RejectConnectionWithReason(EndPoint endPoint, RejectReason reason)
         {
@@ -385,7 +438,8 @@ namespace Mirage.SocketLayer
                     break;
 
                 case ConnectionState.Connecting:
-                    SetConnectionAsConnected(connection);
+                    connection.State = ConnectionState.Connected;
+                    OnConnected?.Invoke(connection);
                     break;
             }
         }
@@ -449,6 +503,10 @@ namespace Mirage.SocketLayer
             foreach (Connection connection in connections.Values)
             {
                 connection.Update();
+
+                // was closed while in conn.Update
+                // dont continue loop,
+                if (!active) { return; }
             }
 
             RemoveConnections();

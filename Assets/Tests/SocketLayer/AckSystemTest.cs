@@ -1,6 +1,10 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Mirage.SocketLayer.Tests.AckSystemTests
 {
@@ -10,11 +14,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     public class AckSystemTestBase
     {
         System.Random rand = new System.Random();
+        protected BufferPool bufferPool = new BufferPool(1300, 100, 1000);
 
         protected byte[] createRandomData(int id)
         {
             // random size messages
-            byte[] buffer = new byte[rand.Next(10, 1000)];
+            byte[] buffer = new byte[rand.Next(2, 12)];
             // fill array with random
             rand.NextBytes(buffer);
 
@@ -23,30 +28,23 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             return buffer;
         }
 
-        protected void AssertIsSameFromOffset(byte[] expected, int expectedOffset, byte[] actual, int actualOffset, int length)
+        /// <summary>
+        /// more effecient that CollectionAssert
+        /// </summary>
+        protected static void AssertAreSameFromOffsets(byte[] expected, int expectedOffset, byte[] actual, int actualOffset, int length)
         {
-            CollectionAssert.AreEqual(
-                expected.Skip(expectedOffset).Take(length),
-                actual.Skip(actualOffset).Take(length)
-                );
-
-            //todo remove this
-            //return;
-            ////int length = maxLength ?? Mathf.Min(A.Length - offsetA, B.Length - offsetB);
-            //for (int i = 0; i < length; i++)
-            //{
-            //    int ia = i + expectedOffset;
-            //    int ib = i + actualOffset;
-
-            //    Assert.That(expected[ia], Is.EqualTo(actual[ib]),
-            //        $"Arrays not the same offsets:[A:{expectedOffset}, B:{actualOffset}]\n" +
-            //        $"  A[{ia}] = {expected[ia]}\n" +
-            //        $"  B[{ib}] = {actual[ib]}\n");
-
-
-            //}
+            for (int i = 0; i < length; i++)
+            {
+                if (expected[i + expectedOffset] != actual[i + actualOffset])
+                {
+                    byte e = expected[i + expectedOffset];
+                    byte a = actual[i + actualOffset];
+                    Assert.Fail($"Arrays are not the same\n  expected {e}\n  actual {a}");
+                }
+            }
         }
     }
+
     // NSubstitute doesn't work for this type because interface is internal
     class SubIRawConnection : IRawConnection
     {
@@ -54,15 +52,33 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
         public void SendRaw(byte[] packet, int length)
         {
-            packets.Add(packet);
+            byte[] clone = new byte[length];
+            System.Buffer.BlockCopy(packet, 0, clone, 0, length);
+            packets.Add(clone);
         }
+    }
+
+    internal class AckTestInstance
+    {
+        public SubIRawConnection connection;
+        public AckSystem ackSystem;
+
+        /// <summary>
+        /// Bytes given to ack system
+        /// </summary>
+        public List<byte[]> messages;
+
+        /// <summary>Sent messages</summary>
+        public byte[] message(int i) => messages[i];
+        /// <summary>received packet</summary>
+        public byte[] packet(int i) => connection.packets[i];
     }
 
     /// <summary>
     /// Send is done in setup, and then tests just valid that the sent data is correct
     /// </summary>
     [Category("SocketLayer")]
-    public class AckSystemTest_1stSend : AckSystemTestBase
+    public class AckSystemTest_Notify_1stSend : AckSystemTestBase
     {
         private SubIRawConnection connection;
         private AckSystem ackSystem;
@@ -80,10 +96,10 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         public void SetUp()
         {
             connection = new SubIRawConnection();
-            ackSystem = new AckSystem(connection, default, new Time());
+            ackSystem = new AckSystem(connection, new Config(), new Time(), bufferPool);
 
             message = createRandomData(1);
-            ackSystem.Send(message);
+            ackSystem.SendNotify(message);
 
             // should have got 1 packet
             Assert.That(connection.packets.Count, Is.EqualTo(1));
@@ -106,7 +122,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             int offset = 1;
             ushort sequance = ByteUtils.ReadUShort(packet, ref offset);
-            Assert.That(sequance, Is.EqualTo(1));
+            Assert.That(sequance, Is.EqualTo(0));
         }
 
         [Test]
@@ -127,30 +143,15 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void PacketShouldContainMessage()
         {
-            const int headerSize = 9;
-            AssertIsSameFromOffset(message, 0, packet, headerSize, message.Length);
+            AssertAreSameFromOffsets(message, 0, packet, AckSystem.HEADER_SIZE_NOTIFY, message.Length);
         }
-    }
-
-    internal class AckTestInstance
-    {
-        public SubIRawConnection connection;
-        public AckSystem ackSystem;
-
-        /// <summary>
-        /// Bytes given to ack system
-        /// </summary>
-        public List<byte[]> messages;
-
-        public byte[] message(int i) => messages[i];
-        public byte[] packet(int i) => connection.packets[i];
     }
 
     /// <summary>
     /// Send is done in setup, and then tests just valid that the sent data is correct
     /// </summary>
     [Category("SocketLayer")]
-    public class AckSystemTest_ManySends : AckSystemTestBase
+    public class AckSystemTest_Notify_ManySends : AckSystemTestBase
     {
         const int messageCount = 5;
 
@@ -161,14 +162,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             instance = new AckTestInstance();
             instance.connection = new SubIRawConnection();
-            instance.ackSystem = new AckSystem(instance.connection, default, new Time());
+            instance.ackSystem = new AckSystem(instance.connection, new Config(), new Time(), bufferPool);
 
             // create and send n messages
             instance.messages = new List<byte[]>();
             for (int i = 0; i < messageCount; i++)
             {
                 instance.messages.Add(createRandomData(i + 1));
-                instance.ackSystem.Send(instance.messages[i]);
+                instance.ackSystem.SendNotify(instance.messages[i]);
             }
 
 
@@ -197,7 +198,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             {
                 int offset = 1;
                 ushort sequance = ByteUtils.ReadUShort(instance.packet(i), ref offset);
-                Assert.That(sequance, Is.EqualTo(i + 1), "sequnce should start at 1 and increment for each message");
+                Assert.That(sequance, Is.EqualTo(i), "sequnce should start at 1 and increment for each message");
             }
         }
 
@@ -227,8 +228,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             for (int i = 0; i < messageCount; i++)
             {
-                const int headerSize = 9;
-                AssertIsSameFromOffset(instance.message(i), 0, instance.packet(i), headerSize, instance.message(i).Length);
+                AssertAreSameFromOffsets(instance.message(i), 0, instance.packet(i), AckSystem.HEADER_SIZE_NOTIFY, instance.message(i).Length);
             }
         }
     }
@@ -237,7 +237,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     /// Send is done in setup, and then tests just valid that the sent data is correct
     /// </summary>
     [Category("SocketLayer")]
-    public class AckSystemTest_NoDroppedSends : AckSystemTestBase
+    public class AckSystemTest_Notify_NoDroppedSends : AckSystemTestBase
     {
         const int messageCount = 5;
 
@@ -250,12 +250,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             instance1 = new AckTestInstance();
             instance1.connection = new SubIRawConnection();
-            instance1.ackSystem = new AckSystem(instance1.connection, default, new Time());
+            instance1.ackSystem = new AckSystem(instance1.connection, new Config(), new Time(), bufferPool);
 
 
             instance2 = new AckTestInstance();
             instance2.connection = new SubIRawConnection();
-            instance2.ackSystem = new AckSystem(instance2.connection, default, new Time());
+            instance2.ackSystem = new AckSystem(instance2.connection, new Config(), new Time(), bufferPool);
 
             // create and send n messages
             instance1.messages = new List<byte[]>();
@@ -268,14 +268,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 // send inside loop so message sending alternates between 1 and 2
 
                 // send to conn1
-                instance1.ackSystem.Send(instance1.messages[i]);
+                instance1.ackSystem.SendNotify(instance1.messages[i]);
                 // give to instance2 from conn1
-                instance2.ackSystem.Receive(instance1.connection.packets[i]);
+                instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i], instance1.connection.packets[i].Length);
 
                 // send to conn2
-                instance2.ackSystem.Send(instance2.messages[i]);
+                instance2.ackSystem.SendNotify(instance2.messages[i]);
                 // give to instance1 from conn2
-                instance1.ackSystem.Receive(instance2.connection.packets[i]);
+                instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i], instance2.connection.packets[i].Length);
             }
 
             // should have got 1 packet
@@ -285,7 +285,6 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             // should not have null data
             Assert.That(instance1.connection.packets, Does.Not.Contain(null));
             Assert.That(instance2.connection.packets, Does.Not.Contain(null));
-
         }
 
 
@@ -314,14 +313,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             {
                 int offset = 1;
                 ushort sequance = ByteUtils.ReadUShort(instance1.packet(i), ref offset);
-                Assert.That(sequance, Is.EqualTo(i + 1), "sequnce should start at 1 and increment for each message");
+                Assert.That(sequance, Is.EqualTo(i), "sequnce should start at 1 and increment for each message");
             }
 
             for (int i = 0; i < messageCount; i++)
             {
                 int offset = 1;
                 ushort sequance = ByteUtils.ReadUShort(instance2.packet(i), ref offset);
-                Assert.That(sequance, Is.EqualTo(i + 1), "sequnce should start at 1 and increment for each message");
+                Assert.That(sequance, Is.EqualTo(i), "sequnce should start at 1 and increment for each message");
             }
         }
 
@@ -332,14 +331,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             {
                 int offset = 3;
                 ushort received = ByteUtils.ReadUShort(instance1.packet(i), ref offset);
-                Assert.That(received, Is.EqualTo(i), "Received should start at 0 and increment each time");
+                Assert.That(received, Is.EqualTo(Mathf.Clamp(i - 1, 0, messageCount)), "Received should start at 0 and increment each time");
             }
 
             for (int i = 0; i < messageCount; i++)
             {
                 int offset = 3;
                 ushort received = ByteUtils.ReadUShort(instance2.packet(i), ref offset);
-                Assert.That(received, Is.EqualTo(i + 1), "Received should start at 1 (received first message before sending) and increment each time");
+                Assert.That(received, Is.EqualTo(i), "Received should start at 1 (received first message before sending) and increment each time");
             }
         }
         [Test]
@@ -385,14 +384,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             for (int i = 0; i < messageCount; i++)
             {
-                const int headerSize = 9;
-                AssertIsSameFromOffset(instance1.message(i), 0, instance1.packet(i), headerSize, instance1.message(i).Length);
+                AssertAreSameFromOffsets(instance1.message(i), 0, instance1.packet(i), AckSystem.HEADER_SIZE_NOTIFY, instance1.message(i).Length);
             }
 
             for (int i = 0; i < messageCount; i++)
             {
-                const int headerSize = 9;
-                AssertIsSameFromOffset(instance2.message(i), 0, instance2.packet(i), headerSize, instance2.message(i).Length);
+                AssertAreSameFromOffsets(instance2.message(i), 0, instance2.packet(i), AckSystem.HEADER_SIZE_NOTIFY, instance2.message(i).Length);
             }
         }
     }
@@ -401,7 +398,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     /// Send is done in setup, and then tests just valid that the sent data is correct
     /// </summary>
     [Category("SocketLayer")]
-    public class AckSystemTest_DroppedSends : AckSystemTestBase
+    public class AckSystemTest_Notify_DroppedSends : AckSystemTestBase
     {
         const int messageCount = 5;
 
@@ -429,12 +426,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             instance1 = new AckTestInstance();
             instance1.connection = new SubIRawConnection();
-            instance1.ackSystem = new AckSystem(instance1.connection, default, new Time());
+            instance1.ackSystem = new AckSystem(instance1.connection, new Config(), new Time(), bufferPool);
 
 
             instance2 = new AckTestInstance();
             instance2.connection = new SubIRawConnection();
-            instance2.ackSystem = new AckSystem(instance2.connection, default, new Time());
+            instance2.ackSystem = new AckSystem(instance2.connection, new Config(), new Time(), bufferPool);
 
             // create and send n messages
             instance1.messages = new List<byte[]>();
@@ -447,17 +444,17 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 // send inside loop so message sending alternates between 1 and 2
 
                 // send to conn1
-                instance1.ackSystem.Send(instance1.messages[i]);
+                instance1.ackSystem.SendNotify(instance1.messages[i]);
 
                 // give to instance2 if received
                 if (received2[i])
-                    instance2.ackSystem.Receive(instance1.connection.packets[i]);
+                    instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i], instance1.connection.packets[i].Length);
 
                 // send to conn2
-                instance2.ackSystem.Send(instance2.messages[i]);
+                instance2.ackSystem.SendNotify(instance2.messages[i]);
                 // give to instance1 if received
                 if (received1[i])
-                    instance1.ackSystem.Receive(instance2.connection.packets[i]);
+                    instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i], instance2.connection.packets[i].Length);
             }
 
             // should have got 1 packet
@@ -482,7 +479,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
                 // do at end becuase 1 is sending first
                 if (received1[i])
-                    nextReceive = (ushort)(i + 1);
+                    nextReceive = (ushort)(i);
             }
 
             nextReceive = 0;
@@ -490,7 +487,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             {
                 // do at start becuase 2 is sending second
                 if (received2[i])
-                    nextReceive = (ushort)(i + 1);
+                    nextReceive = (ushort)(i);
 
                 int offset = 3;
                 ushort received = ByteUtils.ReadUShort(instance2.packet(i), ref offset);
@@ -541,5 +538,343 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 Assert.That(mask[i], Is.EqualTo(expectedMask2[i]), $"Received should contain previous receives\n  instance 2, index{i}\n{string.Join(",", mask.Select(x => x.ToString()))}");
             }
         }
+    }
+
+    /// <summary>
+    /// Send is done in setup, and then tests just valid that the sent data is correct
+    /// </summary>
+    [Category("SocketLayer")]
+    public class AckSystemTest_Reliable : AckSystemTestBase
+    {
+        class Time : ITime
+        {
+            public float Now { get; set; }
+        }
+        class BadSocket
+        {
+            readonly AckSystem ackSystem1;
+            readonly AckSystem ackSystem2;
+
+            readonly SubIRawConnection connection1;
+            readonly SubIRawConnection connection2;
+
+            int processed1 = 0;
+            int processed2 = 0;
+
+            List<byte[]> ToSend1 = new List<byte[]>();
+            List<byte[]> ToSend2 = new List<byte[]>();
+
+            public BadSocket(AckTestInstance instance1, AckTestInstance instance2)
+            {
+                ackSystem1 = instance1.ackSystem;
+                ackSystem2 = instance2.ackSystem;
+                connection1 = instance1.connection;
+                connection2 = instance2.connection;
+            }
+
+            /// <summary>
+            /// Passes message from connection 1 to acksystem 2
+            /// </summary>
+            /// <param name="dropChance"></param>
+            public (List<byte[]>, List<byte[]>) Update(float dropChance, float skipChance)
+            {
+                List<byte[]> r2 = Update(ref processed1, ToSend1, connection1, ackSystem2, dropChance, skipChance);
+                List<byte[]> r1 = Update(ref processed2, ToSend2, connection2, ackSystem1, dropChance, skipChance);
+                return (r1, r2);
+            }
+            static List<byte[]> Update(ref int processed, List<byte[]> ToSend, SubIRawConnection connection, AckSystem ackSystem, float dropChance, float skipChance)
+            {
+                int count1 = connection.packets.Count;
+                for (int i = processed; i < count1; i++)
+                {
+                    byte[] packet = connection.packets[i];
+                    if (UnityEngine.Random.value > dropChance)
+                    {
+                        ToSend.Add(packet);
+                    }
+                }
+                processed = count1;
+
+                var newPackets = new List<byte[]>();
+                for (int i = 0; i < ToSend.Count; i++)
+                {
+                    if (UnityEngine.Random.value < skipChance) { continue; }
+                    newPackets.AddRange(Receive(ackSystem, ToSend[i]));
+                    ToSend.RemoveAt(i);
+                    i--;
+                }
+
+                return newPackets;
+            }
+
+            private static List<byte[]> Receive(AckSystem ackSystem, byte[] packet)
+            {
+                var messages = new List<byte[]>();
+                var type = (PacketType)packet[0];
+                switch (type)
+                {
+                    case PacketType.Reliable:
+                        ackSystem.ReceiveReliable(packet, packet.Length);
+                        break;
+                    case PacketType.Ack:
+                        ackSystem.ReceiveAck(packet);
+                        break;
+                    case PacketType.Command:
+                    case PacketType.Unreliable:
+                    case PacketType.Notify:
+                    case PacketType.KeepAlive:
+                    default:
+                        break;
+                }
+
+                while (ackSystem.NextReliablePacket(out AckSystem.ReliableReceived received))
+                {
+                    HandleAllMessageInPacket(messages, received);
+                }
+                return messages;
+            }
+
+            private static void HandleAllMessageInPacket(List<byte[]> messages, AckSystem.ReliableReceived received)
+            {
+                byte[] array = received.buffer.array;
+                int packetLength = received.length;
+                int offset = 0;
+                while (offset < packetLength)
+                {
+                    ushort length = ByteUtils.ReadUShort(array, ref offset);
+                    var message = new ArraySegment<byte>(array, offset, length);
+
+                    byte[] outBuffer = new byte[length];
+                    Buffer.BlockCopy(array, offset, outBuffer, 0, length);
+                    offset += length;
+                    messages.Add(outBuffer);
+                }
+
+                // release buffer after all its message have been handled
+                received.buffer.Release();
+            }
+        }
+
+        const float tick = 0.02f;
+
+        float timeout;
+        BadSocket badSocket;
+        Time time;
+        AckTestInstance instance1;
+        AckTestInstance instance2;
+
+        List<byte[]> receives1;
+        List<byte[]> receives2;
+
+        [SetUp]
+        public void SetUp()
+        {
+            time = new Time();
+            var config = new Config();
+            timeout = config.TimeBeforeEmptyAck;
+
+            instance1 = new AckTestInstance();
+            instance1.connection = new SubIRawConnection();
+            instance1.ackSystem = new AckSystem(instance1.connection, config, time, bufferPool);
+
+
+            instance2 = new AckTestInstance();
+            instance2.connection = new SubIRawConnection();
+            instance2.ackSystem = new AckSystem(instance2.connection, config, time, bufferPool);
+
+            badSocket = new BadSocket(instance1, instance2);
+
+            // create and send n messages
+            instance1.messages = new List<byte[]>();
+            instance2.messages = new List<byte[]>();
+
+            receives1 = new List<byte[]>();
+            receives2 = new List<byte[]>();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            time = null;
+            badSocket = null;
+            instance1 = null;
+            instance2 = null;
+            receives1 = null;
+            receives2 = null;
+            System.GC.Collect();
+        }
+
+        [UnityTest]
+        [TestCase(true, 100, 0f, 0f)]
+        [TestCase(true, 100, 0.2f, 0f)]
+        [TestCase(true, 100, 0.2f, 0.4f)]
+        [TestCase(true, 3000, 0.2f, 0f)]
+        [TestCase(true, 3000, 0.2f, 0.4f)]
+        [TestCase(false, 100, 0f, 0f)]
+        [TestCase(false, 100, 0.2f, 0f)]
+        [TestCase(false, 100, 0.2f, 0.4f)]
+        [TestCase(false, 3000, 0.2f, 0f)]
+        [TestCase(false, 3000, 0.2f, 0.4f)]
+        [Repeat(100)]
+        public void AllMessagesShouldHaveBeenReceivedInOrder(bool instance2Sends, int messageCount, float dropChance, float skipChance)
+        {
+            SendManyMessages(instance2Sends, messageCount, dropChance, skipChance);
+
+            // ---- asserts ---- // 
+            Assert.That(receives2, Has.Count.EqualTo(messageCount + 1));
+            Assert.That(receives1, Has.Count.EqualTo(instance2Sends ? messageCount + 1 : 0));
+
+            // check all message reached other side
+            for (int i = 0; i < messageCount; i++)
+            {
+                byte[] message = receives2[i];
+
+                byte[] expected = instance1.message(i);
+                AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
+            }
+
+
+            if (instance2Sends)
+            {
+                for (int i = 0; i < messageCount; i++)
+                {
+                    byte[] message = receives1[i];
+
+                    byte[] expected = instance2.message(i);
+                    AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
+                }
+            }
+        }
+
+        void SendManyMessages(bool instance2Sends, int messageCount, float dropChance, float skipChance)
+        {
+            // send all messages
+            for (int i = 0; i < messageCount; i++)
+            {
+                instance1.messages.Add(createRandomData(i + 1));
+                instance2.messages.Add(createRandomData(i + 1));
+
+                // send inside loop so message sending alternates between 1 and 2
+
+                // send to conn1
+                instance1.ackSystem.SendReliable(instance1.messages[i]);
+
+                if (instance2Sends)
+                {
+                    // send to conn2
+                    instance2.ackSystem.SendReliable(instance2.messages[i]);
+                }
+
+                // fake Update
+                Tick(dropChance, skipChance);
+            }
+
+            // send 1 more message so that other side will for sure get last message
+            // if we dont do then last message could be forgot and we receive 99/100
+            instance1.ackSystem.SendReliable(new byte[1] { 0 });
+            if (instance2Sends)
+            {
+                instance2.ackSystem.SendReliable(new byte[1] { 0 });
+            }
+            // run for enough updates that all message should be received
+            // wait more than timeout incase 
+            for (float t = 0; t < timeout * 2f; t += tick)
+            {
+                // fake Update
+                Tick(0, 0);
+            }
+
+            // should not have null data
+            Assert.That(instance1.connection.packets, Does.Not.Contain(null));
+            Assert.That(instance2.connection.packets, Does.Not.Contain(null));
+        }
+
+        private void Tick(float dropChance, float skipChance)
+        {
+            time.Now += tick;
+            instance1.ackSystem.Update();
+            instance2.ackSystem.Update();
+            (List<byte[]>, List<byte[]>) newMessages = badSocket.Update(dropChance, skipChance);
+            receives1.AddRange(newMessages.Item1);
+            receives2.AddRange(newMessages.Item2);
+        }
+
+
+        [UnityTest]
+        [Explicit("Explicit Test: this test takes about 50 seconds to run")]
+        public IEnumerator AllMessagesShouldHaveBeenReceivedInOrderFrames()
+        {
+            bool instance2Sends = false;
+            int messageCount = 3000;
+            float dropChance = 0.2f;
+            float skipChance = 0.4f;
+
+            // send all messages
+            for (int i = 0; i < messageCount; i++)
+            {
+                instance1.messages.Add(createRandomData(i + 1));
+                instance2.messages.Add(createRandomData(i + 1));
+
+                // send inside loop so message sending alternates between 1 and 2
+
+                // send to conn1
+                instance1.ackSystem.SendReliable(instance1.messages[i]);
+
+                if (instance2Sends)
+                {
+                    // send to conn2
+                    instance2.ackSystem.SendReliable(instance2.messages[i]);
+                }
+
+                // fake Update
+                Tick(dropChance, skipChance);
+                yield return null;
+            }
+
+            // send 1 more message so that other side will for sure get last message
+            // if we dont do then last message could be forgot and we receive 99/100
+            instance1.ackSystem.SendReliable(new byte[1] { 0 });
+            if (instance2Sends)
+            {
+                instance2.ackSystem.SendReliable(new byte[1] { 0 });
+            }
+            // run for enough updates that all message should be received
+            // wait more than timeout incase 
+            for (float t = 0; t < timeout * 2f; t += tick)
+            {
+                // fake Update
+                Tick(0, 0);
+            }
+
+            // should not have null data
+            Assert.That(instance1.connection.packets, Does.Not.Contain(null));
+            Assert.That(instance2.connection.packets, Does.Not.Contain(null));
+
+            // ---- asserts ---- // 
+            Assert.That(receives2, Has.Count.EqualTo(messageCount + 1));
+            Assert.That(receives1, Has.Count.EqualTo(instance2Sends ? messageCount + 1 : 0));
+
+            // check all message reached other side
+            for (int i = 0; i < messageCount; i++)
+            {
+                byte[] message = receives2[i];
+
+                byte[] expected = instance1.message(i);
+                AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
+            }
+
+
+            if (instance2Sends)
+            {
+                for (int i = 0; i < messageCount; i++)
+                {
+                    byte[] message = receives1[i];
+
+                    byte[] expected = instance2.message(i);
+                    AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
+                }
+            }
+        }
+
     }
 }

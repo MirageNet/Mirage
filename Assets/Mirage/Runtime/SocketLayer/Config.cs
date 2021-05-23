@@ -25,12 +25,12 @@ namespace Mirage.SocketLayer
         /// <para>Keep alive is to stop connection from timing out</para>
         /// <para>keep alive is sent over unreliable so this interval should be low enough so that <see cref="TimeoutDuration"/> does not timeout if some unreliable packets are missed </para>
         /// </summary>
-        public float KeepAliveInterval = 1;
+        public float KeepAliveInterval = 2;
 
         /// <summary>
         /// how long without a message before disconnecting connection
         /// </summary>
-        public float TimeoutDuration = 5;
+        public float TimeoutDuration = 10;
         #endregion
 
 
@@ -38,26 +38,65 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// How long after disconnect before connection is fully removed from Peer
         /// </summary>
-        public float DisconnectDuration = 2;
+        public float DisconnectDuration = 1;
 
+        // todo move these settings to socket
         /// <summary>
         /// Max size of a packet (excluding peer header)
         /// </summary>
-        public int Mtu = 1280 - 20 - 8;
+        public int Mtu => BufferSize - HEADER_SIZE;
+        /// <summary>
+        /// Peer+ udp socket size
+        /// </summary>
+        const int HEADER_SIZE = 20 + 8;
+        /// <summary>
+        /// Size of buffers, Should be Mtu + header size + header size for socket
+        /// <para>Udp Packet is 1280</para>
+        /// </summary>
+        public int BufferSize = 1280;
+
         /// <summary>
         /// How many buffers to create at start
         /// </summary>
-        public int BufferPoolStartSize = 10;
+        public int BufferPoolStartSize = 100;
+
         /// <summary>
         /// max number of buffers allowed to be stored in pool
         /// <para>buffers over this limit will be left for GC</para>
         /// </summary>
-        public int BufferPoolMaxSize = 100;
+        public int BufferPoolMaxSize = 5000;
 
         /// <summary>
         /// how long after last send to send ack without a message
         /// </summary>
-        public float AckTimeout = 1.5f / 60f;
+        public float TimeBeforeEmptyAck = 0.11f;
+
+        /// <summary>
+        /// How many receives before sending an empty ack
+        /// <para>this is so that acks are still sent even if receives many message before replying</para>
+        /// </summary>
+        public int ReceivesBeforeEmptyAck = 8;
+
+        /// <summary>
+        /// How many empty acks to send via <see cref="TimeBeforeEmptyAck"/>
+        /// <para>Send enough acks that there is a high chances that 1 of them reaches other size</para>
+        /// <para>Empty Ack count resets after receives new message</para>
+        /// </summary>
+        public int EmptyAckLimit = 8;
+
+        /// <summary>
+        /// How many packets can exist it ring buffers for Ack and Reliable system
+        /// <para>This value wont count null packets so can be set lower than <see cref="SequenceSize"/>'s value to limit actual number of packets waiting to be acked</para>
+        /// <para>Example: (max=2000) * (MTU=1200) * (connections=100) => 240MB</para>
+        /// </summary>
+        public int MaxReliablePacketsInSendBufferPerConnection = 2000;
+
+        /// <summary>
+        /// Bit size of sequence used for AckSystem
+        /// <para>this value also determines the size of ring buffers for Ack and Reliable system</para>
+        /// <para>Max of 16</para>
+        /// </summary>
+        public int SequenceSize = 12;
         #endregion
     }
 }

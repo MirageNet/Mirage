@@ -67,7 +67,7 @@ namespace Mirage.Authenticators
                 if (logger.LogEnabled()) logger.Log($"Authentication Timeout {player}");
 
                 pendingAuthentication.Remove(player);
-                player.Connection?.Disconnect();
+                player.Disconnect();
             }
         }
     }

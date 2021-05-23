@@ -5,7 +5,7 @@ using Cysharp.Threading.Tasks;
 
 namespace Mirage
 {
-
+    [System.Obsolete("Use peer instead", true)]
     public interface IConnection
     {
         void Send(ArraySegment<byte> data, int channel = Channel.Reliable);

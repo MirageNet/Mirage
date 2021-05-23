@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 namespace Mirage.Tests
 {
 
+    [System.Obsolete("Use peer instead", true)]
     public class LoopbackTransport : Transport
     {
         public readonly Channel<IConnection> AcceptConnections = Cysharp.Threading.Tasks.Channel.CreateSingleConsumerUnbounded<IConnection>();
@@ -16,9 +17,10 @@ namespace Mirage.Tests
 
         public override UniTask<IConnection> ConnectAsync(Uri uri)
         {
-            (IConnection c1, IConnection c2) = PipeConnection.CreatePipe();
-            Connected.Invoke(c2);
-            return UniTask.FromResult(c1);
+            throw new NotImplementedException();
+            //(IConnection c1, IConnection c2) = PipeConnection.CreatePipe();
+            //Connected.Invoke(c2);
+            //return UniTask.FromResult(c1);
         }
 
         UniTaskCompletionSource listenCompletionSource;

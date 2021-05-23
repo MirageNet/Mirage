@@ -66,12 +66,12 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
             this.config = config ?? new Config()
             {
-                MaxConnections = 5,
+                MaxConnections = PeerTestBase.maxConnections,
                 // 1 second before "failed to connect"
                 MaxConnectAttempts = 5,
                 ConnectAttemptInterval = 0.2f,
             };
-            logger = Substitute.For<ILogger>();
+            logger = Debug.unityLogger;
             peer = new Peer(this.socket, dataHandler, this.config, logger);
         }
     }
@@ -126,7 +126,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             socket.Poll().Returns(true, false);
             socket
                // when any call
-               .When(x => x.Receive(Arg.Any<byte[]>(), ref Arg.Any<EndPoint>()))
+               .When(x => x.Receive(Arg.Any<byte[]>(), out Arg.Any<EndPoint>()))
                // return the data from endpoint
                .Do(x =>
                {
@@ -137,7 +137,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                    }
                    x[1] = endPoint ?? Substitute.For<EndPoint>();
                });
-            socket.Receive(Arg.Any<byte[]>(), ref Arg.Any<EndPoint>()).Returns(length ?? data.Length);
+            socket.Receive(Arg.Any<byte[]>(), out Arg.Any<EndPoint>()).Returns(length ?? data.Length);
         }
     }
 }

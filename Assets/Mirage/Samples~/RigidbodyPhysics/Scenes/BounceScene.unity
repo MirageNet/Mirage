@@ -38,12 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
+  serializedVersion: 11
   m_GIWorkflowMode: 0
   m_GISettings:
     serializedVersion: 2
@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 4890085278179872738, guid: 5978dca3d94d7f341a8150995348e9d7, type: 2}
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -118,8 +118,6 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
-    maxJobWorkers: 0
-    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
@@ -171,7 +169,6 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -196,7 +193,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &368607350
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -233,10 +229,10 @@ GameObject:
   - component: {fileID: 492096640}
   - component: {fileID: 492096639}
   - component: {fileID: 492096634}
-  - component: {fileID: 492096638}
   - component: {fileID: 492096637}
   - component: {fileID: 492096642}
   - component: {fileID: 492096643}
+  - component: {fileID: 492096638}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -258,16 +254,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Client: {fileID: 492096641}
   Server: {fileID: 492096640}
-  ClientChangeScene:
+  DontDestroy: 1
+  _clientChangeScene:
     m_PersistentCalls:
       m_Calls: []
-  ClientSceneChanged:
+  _clientSceneChanged:
     m_PersistentCalls:
       m_Calls: []
-  ServerChangeScene:
+  _serverChangeScene:
     m_PersistentCalls:
       m_Calls: []
-  ServerSceneChanged:
+  _serverSceneChanged:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &492096635
@@ -284,7 +281,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 492096640}
   Client: {fileID: 492096641}
-  SceneManager: {fileID: 492096634}
+  NetworkSceneManager: {fileID: 492096634}
   ServerObjectManager: {fileID: 492096642}
   ClientObjectManager: {fileID: 492096637}
 --- !u!4 &492096636
@@ -326,17 +323,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 492096633}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3fbf0a5cb914b1c9bbb8a42e081f4bd, type: 3}
+  m_Script: {fileID: 11500000, guid: d9f46b2d67d7a054d8c13075473bd4a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Started:
-    m_PersistentCalls:
-      m_Calls: []
-  Port: 7777
-  HashCashBits: 18
-  SendWindowSize: 32
-  ReceiveWindowSize: 8192
-  delayMode: 0
+  address: localhost
+  port: 7777
 --- !u!114 &492096639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -354,7 +345,9 @@ MonoBehaviour:
   SceneManager: {fileID: 492096634}
   ClientObjectManager: {fileID: 492096637}
   ServerObjectManager: {fileID: 492096642}
-  PlayerPrefab: {fileID: 1287874831399521600, guid: 4ab0a427bdc13244499c6e044ad7eb40, type: 3}
+  PlayerPrefab: {fileID: 1287874831399521600, guid: 4ab0a427bdc13244499c6e044ad7eb40,
+    type: 3}
+  AutoSpawn: 1
   startPositionIndex: 0
   startPositions: []
   playerSpawnMethod: 0
@@ -370,31 +363,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5f5ec068f5604c32b160bc49ee97b75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EnablePeerMetrics: 0
   MaxConnections: 4
-  Started:
-    m_PersistentCalls:
-      m_Calls: []
-  Connected:
-    m_PersistentCalls:
-      m_Calls: []
-  Authenticated:
-    m_PersistentCalls:
-      m_Calls: []
-  Disconnected:
-    m_PersistentCalls:
-      m_Calls: []
-  Stopped:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartHost:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopHost:
-    m_PersistentCalls:
-      m_Calls: []
-  authenticator: {fileID: 0}
   Listening: 1
-  Transport: {fileID: 492096638}
+  SocketFactory: {fileID: 492096638}
+  authenticator: {fileID: 0}
+  _started:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _connected:
+    m_PersistentCalls:
+      m_Calls: []
+  _authenticated:
+    m_PersistentCalls:
+      m_Calls: []
+  _disconnected:
+    m_PersistentCalls:
+      m_Calls: []
+  _stopped:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartHost:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopHost:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!114 &492096641
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,17 +405,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abe6be14204d94224a3e7cd99dd2ea73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EnablePeerMetrics: 0
+  SocketFactory: {fileID: 492096638}
   authenticator: {fileID: 0}
-  Connected:
-    m_PersistentCalls:
-      m_Calls: []
-  Authenticated:
-    m_PersistentCalls:
-      m_Calls: []
-  Disconnected:
-    m_PersistentCalls:
-      m_Calls: []
-  Transport: {fileID: 492096638}
+  _connected:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _authenticated:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _disconnected:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!114 &492096642
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -449,31 +451,63 @@ MonoBehaviour:
     level: 2
   - Name: ClientObjectManager
     level: 2
-  - Name: NetworkIdentity
-    level: 2
-  - Name: NetworkSceneManager
-    level: 2
   - Name: NetworkServer
     level: 2
   - Name: NetworkTime
     level: 2
-  - Name: NetworkClient
-    level: 2
   - Name: ServerObjectManager
     level: 2
-  - Name: PlayerSpawner
+  - Name: NetworkClient
+    level: 2
+  - Name: NetworkIdentity
+    level: 2
+  - Name: CharacterSpawner
+    level: 2
+  - Name: NetworkSceneManager
     level: 2
   - Name: RemoteCallHelper
     level: 2
-  - Name: EnterPlayModeSettingsCheck
+  - Name: HeadlessFrameLimiter
+    level: 2
+  - Name: NetworkBehaviourInspector
+    level: 2
+  - Name: EchoChannelAndSettingsButton
+    level: 2
+  - Name: LoginManager
+    level: 2
+  - Name: NetworkAnimator
+    level: 2
+  - Name: NetworkPositionBehaviour
+    level: 0
+  - Name: UIManager
+    level: 2
+  - Name: PlayerVoiceBehaviour
+    level: 2
+  - Name: CapyCafeNetworkManager
+    level: 2
+  - Name: UIPanel_Chat
+    level: 2
+  - Name: FirebaseLoginManager
+    level: 2
+  - Name: PlayerSpawner
+    level: 2
+  - Name: SyncPositionBehaviour
+    level: 0
+  - Name: SnapshotBuffer
+    level: 0
+  - Name: NetworkProximityChecker
+    level: 2
+  - Name: ZoneHandler
+    level: 2
+  - Name: AdditiveNetworkManager
     level: 2
   - Name: NetworkScenePostProcess
+    level: 2
+  - Name: NetworkWriterPool
     level: 2
   - Name: NetworkConnection
     level: 2
   - Name: NetworkReaderExtensions
-    level: 2
-  - Name: NetworkWriterPool
     level: 2
   - Name: NetworkReaderPool
     level: 2
@@ -481,15 +515,15 @@ MonoBehaviour:
     level: 2
   - Name: NetworkRigidbody
     level: 2
-  - Name: NetworkProximityChecker
+  - Name: EnterPlayModeSettingsCheck
     level: 2
-  - Name: NetworkAnimator
+  - Name: SceneDrawer
     level: 2
+  - Name: InterpolationTime
+    level: 0
   - Name: NetworkSceneChecker
     level: 2
   - Name: Reward
-    level: 2
-  - Name: HeadlessFrameLimiter
     level: 2
   - Name: LogFactoryTests
     level: 2
@@ -497,15 +531,7 @@ MonoBehaviour:
     level: 2
   - Name: WeaverTests
     level: 4
-  - Name: NetworkBehaviourInspector
-    level: 2
   - Name: ChatWindow
-    level: 2
-  - Name: AdditiveNetworkManager
-    level: 2
-  - Name: ZoneHandler
-    level: 2
-  - Name: SceneDrawer
     level: 2
   - Name: NetworkDiscovery
     level: 2
@@ -515,6 +541,22 @@ MonoBehaviour:
     level: 2
   - Name: Tests
     level: 4
+  - Name: WelcomeWindow
+    level: 2
+  - Name: MessageBroker
+    level: 2
+  - Name: NetworkPlayer
+    level: 3
+  - Name: SyncVarReceiver
+    level: 2
+  - Name: NetworkWorld
+    level: 2
+  - Name: RosterUI
+    level: 2
+  - Name: Peer
+    level: 2
+  - Name: PipePeerConnection
+    level: 2
 --- !u!1 &746548597
 GameObject:
   m_ObjectHideFlags: 0
@@ -568,7 +610,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -663,27 +704,30 @@ MonoBehaviour:
   ServerObjectManager: {fileID: 0}
   ClientObjectManager: {fileID: 0}
   m_AssetId: 
-  OnStartServer:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartClient:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartLocalPlayer:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartAuthority:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopAuthority:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopClient:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopServer:
-    m_PersistentCalls:
-      m_Calls: []
+  _onStartServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartLocalPlayer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onAuthorityChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
   hasSpawned: 0
 --- !u!54 &1019217379
 Rigidbody:
@@ -729,7 +773,6 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -754,7 +797,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1019217382
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -964,27 +1006,30 @@ MonoBehaviour:
   ServerObjectManager: {fileID: 0}
   ClientObjectManager: {fileID: 0}
   m_AssetId: 
-  OnStartServer:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartClient:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartLocalPlayer:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartAuthority:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopAuthority:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopClient:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopServer:
-    m_PersistentCalls:
-      m_Calls: []
+  _onStartServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartLocalPlayer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onAuthorityChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
   hasSpawned: 0
 --- !u!54 &1200292995
 Rigidbody:
@@ -1030,7 +1075,6 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1055,7 +1099,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1200292998
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1131,7 +1174,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1272,7 +1314,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1351,7 +1392,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1615,7 +1655,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1697,7 +1736,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1780,7 +1818,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1877,7 +1914,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1940,7 +1976,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 695766754427749768}
-        m_TargetAssemblyTypeName: 
         m_MethodName: StartServerOnlyButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -1994,7 +2029,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2106,7 +2140,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 695766754427749768}
-        m_TargetAssemblyTypeName: 
         m_MethodName: OnNetworkAddressInputUpdate
         m_Mode: 1
         m_Arguments:
@@ -2147,7 +2180,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2204,7 +2236,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2282,7 +2313,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 695766754427749768}
-        m_TargetAssemblyTypeName: 
         m_MethodName: StartHostButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -2336,7 +2366,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2491,7 +2520,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2570,7 +2598,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2667,7 +2694,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2728,7 +2754,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 0.5}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2807,7 +2832,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.078431375}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2885,7 +2909,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2963,7 +2986,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 695766754427749768}
-        m_TargetAssemblyTypeName: 
         m_MethodName: StopButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -3038,7 +3060,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 695766754427749768}
-        m_TargetAssemblyTypeName: 
         m_MethodName: StartClientButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -3092,7 +3113,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:

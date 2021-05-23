@@ -1,5 +1,4 @@
 using System;
-using Cysharp.Threading.Tasks;
 
 namespace Mirage
 {
@@ -25,12 +24,6 @@ namespace Mirage
         void UnregisterHandler<T>();
 
         void ClearHandlers();
-
-        /// <summary>
-        /// ProcessMessages loop, should loop unitil object is closed
-        /// </summary>
-        /// <returns></returns>
-        UniTask ProcessMessagesAsync();
     }
 
     /// <summary>
@@ -68,7 +61,7 @@ namespace Mirage
     /// </summary>
     public interface IMessageHandler : IMessageSender, IMessageReceiver, INotifySender, INotifyReceiver
     {
-
+        void HandleMessage(ArraySegment<byte> packet);
     }
 
     /// <summary>
@@ -99,7 +92,9 @@ namespace Mirage
     /// </summary>
     public interface INetworkPlayer : IMessageHandler, IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
     {
-        IConnection Connection { get; }
+        SocketLayer.IConnection Connection { get; }
+        void Disconnect();
+        void MarkAsDisconnected();
     }
 
     public interface IAuthenticatedObject

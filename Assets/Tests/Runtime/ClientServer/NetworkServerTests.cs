@@ -37,7 +37,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             InvalidOperationException expection = Assert.Throws<InvalidOperationException>(() =>
             {
-                server.StartAsync().GetAwaiter().GetResult();
+                server.StartServer();
             });
             Assert.That(expection, Has.Message.EqualTo("Server is already active"));
         }
@@ -62,7 +62,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             server.SendToAll(message);
 
-            connectionToServer.ProcessMessagesAsync().Forget();
+            // todo assert correct message was sent using Substitute for socket or player
+            // connectionToServer.ProcessMessagesAsync().Forget();
 
             await AsyncUtil.WaitUntilWithTimeout(() => invoked);
         });
@@ -76,7 +77,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             serverIdentity.ConnectionToClient.Send(message);
 
-            connectionToServer.ProcessMessagesAsync().Forget();
+            // todo assert correct message was sent using Substitute for socket or player
+            // connectionToServer.ProcessMessagesAsync().Forget();
 
             await AsyncUtil.WaitUntilWithTimeout(() => invoked);
         });
