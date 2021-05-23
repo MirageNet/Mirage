@@ -71,6 +71,10 @@ jobs:
         with:
           node-version: '14'
   
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - name: Release
         uses: cycjimmy/semantic-release-action@v2
         id: semantic
