@@ -19,9 +19,17 @@ namespace Mirage
                 this.connection = connection;
             }
 
-            public void Send(byte[] data)
+            public void SendUnreliable(byte[] data)
             {
                 connection.SendUnreliable(data);
+            }
+            public void SendReliable(byte[] data)
+            {
+                connection.SendReliable(data);
+            }
+            public INotifyToken SendNotify(byte[] data)
+            {
+                return connection.SendNotify(data);
             }
             public void ExpectData(byte[] expected)
             {
@@ -45,18 +53,54 @@ namespace Mirage
         }
 
         [Test]
-        public void ReceivesSentData()
+        public void ReceivesUnreliableSentData()
         {
-            conn1.Send(new byte[] { 1, 2, 3, 4 });
+            conn1.SendUnreliable(new byte[] { 1, 2, 3, 4 });
 
             conn2.ExpectData(new byte[] { 1, 2, 3, 4 });
         }
 
         [Test]
-        public void ReceivesSentDataMultiple()
+        public void ReceivesUnreliableSentDataMultiple()
         {
-            conn1.Send(new byte[] { 1, 2, 3, 4 });
-            conn1.Send(new byte[] { 5, 6, 7, 8 });
+            conn1.SendUnreliable(new byte[] { 1, 2, 3, 4 });
+            conn1.SendUnreliable(new byte[] { 5, 6, 7, 8 });
+
+            conn2.ExpectData(new byte[] { 1, 2, 3, 4 });
+            conn2.ExpectData(new byte[] { 5, 6, 7, 8 });
+        }
+
+        [Test]
+        public void ReceivesReliableSentData()
+        {
+            conn1.SendReliable(new byte[] { 1, 2, 3, 4 });
+
+            conn2.ExpectData(new byte[] { 1, 2, 3, 4 });
+        }
+
+        [Test]
+        public void ReceivesReliableSentDataMultiple()
+        {
+            conn1.SendReliable(new byte[] { 1, 2, 3, 4 });
+            conn1.SendReliable(new byte[] { 5, 6, 7, 8 });
+
+            conn2.ExpectData(new byte[] { 1, 2, 3, 4 });
+            conn2.ExpectData(new byte[] { 5, 6, 7, 8 });
+        }
+
+        [Test]
+        public void ReceivesNotifySentData()
+        {
+            conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+
+            conn2.ExpectData(new byte[] { 1, 2, 3, 4 });
+        }
+
+        [Test]
+        public void ReceivesNotifySentDataMultiple()
+        {
+            conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+            conn1.SendNotify(new byte[] { 5, 6, 7, 8 });
 
             conn2.ExpectData(new byte[] { 1, 2, 3, 4 });
             conn2.ExpectData(new byte[] { 5, 6, 7, 8 });
@@ -103,6 +147,64 @@ namespace Mirage
         public void EndpointIsPipeEndPoint()
         {
             Assert.That(conn1.connection.EndPoint, Is.TypeOf<PipePeerConnection.PipeEndPoint>());
+        }
+
+        [Test]
+        public void NotifyTokenShouldInvokeHandlerImmediately()
+        {
+            INotifyToken token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+            Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
+
+            int invoked = 0;
+            token.Delivered += () => invoked++;
+            Assert.That(invoked, Is.EqualTo(1), "Delivered should be invoked 1 time Immediately when handler");
+        }
+
+        [Test]
+        public void NotifyTokenShouldNotSavePreviousHandler()
+        {
+            INotifyToken token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+            Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
+
+            int invoked1 = 0;
+            token.Delivered += () => invoked1++;
+            Assert.That(invoked1, Is.EqualTo(1), "Delivered should be invoked 1 time Immediately when handler");
+
+            int invoked2 = 0;
+            token.Delivered += () => invoked2++;
+            Assert.That(invoked1, Is.EqualTo(1), "invoked1 handler should not be called a second time");
+            Assert.That(invoked2, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void NotifyTokenRemoveDeliveredHandlerDoesNothing()
+        {
+            INotifyToken token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+            Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
+
+            int invoked1 = 0;
+            token.Delivered -= () => invoked1++;
+            Assert.That(invoked1, Is.EqualTo(0), "Does nothing");
+        }
+        [Test]
+        public void NotifyTokenAddLostHandlerDoesNothing()
+        {
+            INotifyToken token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+            Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
+
+            int invoked1 = 0;
+            token.Lost += () => invoked1++;
+            Assert.That(invoked1, Is.EqualTo(0), "Does nothing");
+        }
+        [Test]
+        public void NotifyTokenRemoveLostHandlerDoesNothing()
+        {
+            INotifyToken token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+            Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
+
+            int invoked1 = 0;
+            token.Lost -= () => invoked1++;
+            Assert.That(invoked1, Is.EqualTo(0), "Does nothing");
         }
     }
 }
