@@ -79,7 +79,7 @@ namespace Mirage
         public void Disconnect()
         {
             connection.Disconnect();
-            isDisconnect = true;
+            isDisconnected = true;
         }
 
         /// <summary>
@@ -88,10 +88,10 @@ namespace Mirage
         /// </summary>
         public void MarkAsDisconnected()
         {
-            isDisconnect = true;
+            isDisconnected = true;
         }
 
-        bool isDisconnect = false;
+        bool isDisconnected = false;
         /// <summary>
         /// The NetworkIdentity for this connection.
         /// </summary>
@@ -225,7 +225,7 @@ namespace Mirage
         // the client. they would be detected as a message. send messages instead.
         public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
-            if (isDisconnect) { return; }
+            if (isDisconnected) { return; }
 
             // todo use buffer pool
             byte[] packet = segment.ToArray();
