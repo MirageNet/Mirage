@@ -67,7 +67,7 @@ namespace Mirage
         INotifyToken SocketLayer.IConnection.SendNotify(byte[] packet)
         {
             logger.Assert(State == ConnectionState.Connected);
-            otherHandler.ReceivePacket(otherConnection, new ArraySegment<byte>(packet));
+            otherHandler.ReceiveMessage(otherConnection, new ArraySegment<byte>(packet));
 
             return new PipeNotifyToken();
         }
@@ -75,13 +75,13 @@ namespace Mirage
         void SocketLayer.IConnection.SendReliable(byte[] packet)
         {
             logger.Assert(State == ConnectionState.Connected);
-            otherHandler.ReceivePacket(otherConnection, new ArraySegment<byte>(packet));
+            otherHandler.ReceiveMessage(otherConnection, new ArraySegment<byte>(packet));
         }
 
         void SocketLayer.IConnection.SendUnreliable(byte[] packet)
         {
             logger.Assert(State == ConnectionState.Connected);
-            otherHandler.ReceivePacket(otherConnection, new ArraySegment<byte>(packet));
+            otherHandler.ReceiveMessage(otherConnection, new ArraySegment<byte>(packet));
         }
 
 

@@ -25,7 +25,7 @@ namespace Mirage
             }
             public void ExpectData(byte[] expected)
             {
-                handler.Received(1).ReceivePacket(connection, Arg.Is<ArraySegment<byte>>(x => x.SequenceEqual(expected)));
+                handler.Received(1).ReceiveMessage(connection, Arg.Is<ArraySegment<byte>>(x => x.SequenceEqual(expected)));
             }
         }
 

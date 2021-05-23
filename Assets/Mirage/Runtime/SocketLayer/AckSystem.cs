@@ -51,9 +51,6 @@ namespace Mirage.SocketLayer
         int emptyAckCount = 0;
         ReliablePacket nextBatch;
 
-        ReliableReceived nextReliable;
-        int nextReliableOffset;
-
         /// <summary>
         /// 
         /// </summary>
@@ -84,41 +81,14 @@ namespace Mirage.SocketLayer
         }
 
         /// <summary>
-        /// 
+        /// Gets next Reliable packet in order, packet consists for multiple messsages
+        /// <para>[length, message, length, message, ...]</para>
         /// </summary>
-        /// <param name="message"></param>
-        /// <returns>True if there is a new reliable message</returns>
-        public bool NextReliablePacket(out ArraySegment<byte> message)
+        /// <param name="packet"></param>
+        /// <returns>true if next packet is avaliable</returns>
+        public bool NextReliablePacket(out ReliableReceived packet)
         {
-            // todo return ReliableReceived (byte buffer and length) instead of segment and have consumer release buffer
-            // add static method that gets message from bytebuffer?
-
-            if (nextReliable.buffer == null)
-            {
-                if (reliableReceive.TryDequeue(out ReliableReceived byteBuffer))
-                {
-                    nextReliable = byteBuffer;
-                    nextReliableOffset = 0;
-                }
-                else
-                {
-                    message = default;
-                    return false;
-                }
-            }
-
-            ushort length = ByteUtils.ReadUShort(nextReliable.buffer.array, ref nextReliableOffset);
-            message = new ArraySegment<byte>(nextReliable.buffer.array, nextReliableOffset, length);
-            nextReliableOffset += length;
-
-            if (nextReliableOffset == nextReliable.length)
-            {
-                // todo dont release here, instead return bytebuffer
-                nextReliable.buffer.Release();
-                nextReliable = default;
-            }
-
-            return true;
+            return reliableReceive.TryDequeue(out packet);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -597,7 +567,7 @@ namespace Mirage.SocketLayer
                 return order;
             }
         }
-        struct ReliableReceived
+        public struct ReliableReceived
         {
             public readonly ByteBuffer buffer;
             public readonly int length;

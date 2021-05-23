@@ -462,11 +462,11 @@ namespace Mirage
                 players = connections;
             }
 
-            public void ReceivePacket(SocketLayer.IConnection connection, ArraySegment<byte> packet)
+            public void ReceiveMessage(SocketLayer.IConnection connection, ArraySegment<byte> message)
             {
                 if (players.TryGetValue(connection, out INetworkPlayer handler))
                 {
-                    handler.HandleMessage(packet);
+                    handler.HandleMessage(message);
                 }
                 else
                 {

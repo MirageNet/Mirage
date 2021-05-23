@@ -310,10 +310,10 @@ namespace Mirage
                 this.player = player;
             }
 
-            public void ReceivePacket(SocketLayer.IConnection connection, ArraySegment<byte> packet)
+            public void ReceiveMessage(SocketLayer.IConnection connection, ArraySegment<byte> message)
             {
                 logger.Assert(this.connection == connection);
-                player.HandleMessage(packet);
+                player.HandleMessage(message);
             }
         }
     }

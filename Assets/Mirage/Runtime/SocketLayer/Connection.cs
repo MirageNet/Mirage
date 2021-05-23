@@ -195,7 +195,7 @@ namespace Mirage.SocketLayer
             int offset = 1;
             int count = packet.length - offset;
             var segment = new ArraySegment<byte>(packet.buffer.array, offset, count);
-            dataHandler.ReceivePacket(this, segment);
+            dataHandler.ReceiveMessage(this, segment);
         }
 
         internal void ReceivReliablePacket(Packet packet)
@@ -203,9 +203,22 @@ namespace Mirage.SocketLayer
             ackSystem.ReceiveReliable(packet.buffer.array, packet.length);
 
             // gets imessage in order
-            while (ackSystem.NextReliablePacket(out ArraySegment<byte> message))
+            while (ackSystem.NextReliablePacket(out AckSystem.ReliableReceived received))
             {
-                dataHandler.ReceivePacket(this, message);
+                byte[] array = received.buffer.array;
+                int packetLength = received.length;
+                int offset = 0;
+                while (offset < packetLength)
+                {
+                    ushort length = ByteUtils.ReadUShort(array, ref offset);
+                    var message = new ArraySegment<byte>(array, offset, length);
+                    offset += length;
+
+                    dataHandler.ReceiveMessage(this, message);
+                }
+
+                // release buffer after all its message have been handled
+                received.buffer.Release();
             }
         }
 
@@ -214,7 +227,7 @@ namespace Mirage.SocketLayer
             ArraySegment<byte> segment = ackSystem.ReceiveNotify(packet.buffer.array, packet.length);
             if (segment != default)
             {
-                dataHandler.ReceivePacket(this, segment);
+                dataHandler.ReceiveMessage(this, segment);
             }
         }
 
