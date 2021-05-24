@@ -999,18 +999,6 @@ namespace Mirage.Tests.Runtime
         }
 
         [Test]
-        public void TestWritingUri()
-        {
-
-            var testUri = new Uri("https://www.mirror-networking.com?somthing=other");
-
-            writer.WriteUri(testUri);
-
-            var reader = new NetworkReader(writer.ToArray());
-            Assert.That(reader.ReadUri(), Is.EqualTo(testUri));
-        }
-
-        [Test]
         public void TestList()
         {
             var original = new List<int> { 1, 2, 3, 4, 5 };
