@@ -1,3 +1,10 @@
+## [93.0.1](https://github.com/MirageNet/Mirage/compare/v93.0.0...v93.0.1) (2021-05-23)
+
+
+### Bug Fixes
+
+* stopping null ref caused by hud stopping non-active server ([8aa561a](https://github.com/MirageNet/Mirage/commit/8aa561ace45fdc6df8df9238b13e3af5d3358e75))
+
 # [93.0.0](https://github.com/MirageNet/Mirage/compare/v92.0.0...v93.0.0) (2021-05-23)
 
 
