@@ -88,26 +88,35 @@ namespace Mirage.Sockets.Udp
 
         static Socket CreateSocket(EndPoint endPoint)
         {
-            var socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
+            try
             {
-                Blocking = false,
-            };
+                var socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
+                {
+                    Blocking = false,
+                };
 
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
 
-            // stops "SocketException: Connection reset by peer"
-            // this error seems to be caused by a failed send, resulting in the next polling being true, even those endpoint is closed
-            // see https://stackoverflow.com/a/15232187/8479976
+                // stops "SocketException: Connection reset by peer"
+                // this error seems to be caused by a failed send, resulting in the next polling being true, even those endpoint is closed
+                // see https://stackoverflow.com/a/15232187/8479976
 
-            // this IOControl sets the reporting of "unrealable" to false, stoping SocketException after a connection closes without sending disconnect message
-            const uint IOC_IN = 0x80000000;
-            const uint IOC_VENDOR = 0x18000000;
-            const uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
-            byte[] _false = new byte[] { 0, 0, 0, 0 };
+                // this IOControl sets the reporting of "unrealable" to false, stoping SocketException after a connection closes without sending disconnect message
+                const uint IOC_IN = 0x80000000;
+                const uint IOC_VENDOR = 0x18000000;
+                const uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+                byte[] _false = new byte[] { 0, 0, 0, 0 };
 
-            socket.IOControl(unchecked((int)SIO_UDP_CONNRESET), _false, null);
+                socket.IOControl(unchecked((int)SIO_UDP_CONNRESET), _false, null);
 
-            return socket;
+                return socket;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                Debug.LogError("Could not Create Udp Socket");
+                return null;
+            }
         }
 
         public void Connect(EndPoint endPoint)
