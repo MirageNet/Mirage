@@ -1,3 +1,20 @@
+# [94.0.0](https://github.com/MirageNet/Mirage/compare/v93.0.2...v94.0.0) (2021-05-24)
+
+
+### Bug Fixes
+
+* removing other uses of old Notify ([25a0503](https://github.com/MirageNet/Mirage/commit/25a0503619404b5a0f52dc374b9607199e4cc177))
+
+
+### Code Refactoring
+
+* removing Obsolete Notify code from networkplayer ([b2e5531](https://github.com/MirageNet/Mirage/commit/b2e5531f95ecaddc9ea23460a7e06bba201cbfc6))
+
+
+### BREAKING CHANGES
+
+* removing notify code from networkplayer, notify is now part of peer
+
 ## [93.0.2](https://github.com/MirageNet/Mirage/compare/v93.0.1...v93.0.2) (2021-05-24)
 
 
