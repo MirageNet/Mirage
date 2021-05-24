@@ -1,3 +1,14 @@
+## [93.0.2](https://github.com/MirageNet/Mirage/compare/v93.0.1...v93.0.2) (2021-05-24)
+
+
+### Bug Fixes
+
+* closing socket on application quit ([c37fe7d](https://github.com/MirageNet/Mirage/commit/c37fe7d28e74f0e3b771146542c98f669af43381))
+* fixing SocketException after closing remote applcation ([4ed12ba](https://github.com/MirageNet/Mirage/commit/4ed12badc104c53919b13d1465ce8e0832e86b39))
+* fixing udp socket exception on linux ([#809](https://github.com/MirageNet/Mirage/issues/809)) ([a4e8689](https://github.com/MirageNet/Mirage/commit/a4e8689cc15157ff83b045944e1f516937365134))
+* removing unnecessary check ([e8a93a4](https://github.com/MirageNet/Mirage/commit/e8a93a49d0b230c20434392d3ae506938ddc5b9b))
+* stopping null ref in disconnect ([4d0f092](https://github.com/MirageNet/Mirage/commit/4d0f0922ea1fec83b2d6b14148c039d6ebf9d024))
+
 ## [93.0.1](https://github.com/MirageNet/Mirage/compare/v93.0.0...v93.0.1) (2021-05-23)
 
 

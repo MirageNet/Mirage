@@ -153,7 +153,7 @@ namespace Mirage
         private void Peer_OnDisconnected(SocketLayer.IConnection conn, DisconnectReason reason)
         {
             if (logger.LogEnabled()) logger.Log($"Disconnected from {conn.EndPoint} with reason {reason}");
-            Player.MarkAsDisconnected();
+            Player?.MarkAsDisconnected();
             // todo add reason to disconnected event
             //     use different enum, so that:
             //     - user doesn't need to add reference to socket layer
