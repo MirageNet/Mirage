@@ -33,7 +33,7 @@ If you wish to use this funtionality, you will need to have a <xref:Mirage.Netwo
 
 ## Object Layer
 
-This layer is the highest level layer,  the classes in this layer are concerned about [synchcronizing state](../Guides/Sync/index.md) between objects, as well as sending [RPC calls](../Guides/Communications/RemoteActions.md).
+This layer is the highest level layer,  the classes in this layer are concerned about [synchronizing state](../Guides/Sync/index.md) between objects, as well as sending [RPC calls](../Guides/Communications/RemoteActions.md).
 
 The client needs a <xref:Mirage.ClientObjectManager>,  the server needs a <xref:Mirage.ServerObjectManager>. It will spawn and destroy objects and keep the objects in the client in sync with the objects in the server
 
