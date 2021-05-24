@@ -3,7 +3,6 @@ plugins:
   - '@semantic-release/release-notes-generator'
   - '@semantic-release/commit-analyzer'
   - - '@semantic-release/exec'
-# tip: use `find . -name AssemblyInfo.cs` to find all AssemblyInfo in project
     - prepareCmd: "sed -i -e '/AssemblyVersion/s/\".*\"/\"${nextRelease.version}\"/' 
         Assets/Mirage/Authenticators/AssemblyInfo.cs
         Assets/Mirage/Components/AssemblyInfo.cs
