@@ -131,7 +131,7 @@ namespace Mirage.Sockets.Udp
         /// <returns>true if data to read</returns>
         public bool Poll()
         {
-            return socket.Poll(0, SelectMode.SelectRead) && socket.Available > 0;
+            return socket.Poll(0, SelectMode.SelectRead);
         }
 
         public int Receive(byte[] buffer, out EndPoint endPoint)
