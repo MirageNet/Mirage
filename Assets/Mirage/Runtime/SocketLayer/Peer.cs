@@ -73,8 +73,17 @@ namespace Mirage.SocketLayer
 
             connectKeyValidator = new ConnectKeyValidator();
             bufferPool = new BufferPool(this.config.Mtu, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
+
+            Application.quitting += Application_quitting;
         }
 
+        private void Application_quitting()
+        {
+            // make sure peer closes itself when applications closes.
+            // this will make sure that disconnect Command is sent before applications closes
+            if (active)
+                Close();
+        }
 
         public void Bind(EndPoint endPoint)
         {
@@ -100,8 +109,13 @@ namespace Mirage.SocketLayer
 
         public void Close()
         {
-            if (!active) throw new InvalidOperationException("Peer is not active");
+            if (!active)
+            {
+                if (logger.IsLogTypeAllowed(LogType.Warning)) logger.Log(LogType.Warning, "Peer is not active");
+                return;
+            }
             active = false;
+            Application.quitting -= Application_quitting;
 
             // send disconnect messages
             foreach (Connection conn in connections.Values)
@@ -474,7 +488,7 @@ namespace Mirage.SocketLayer
 
         internal void FailedToConnect(Connection connection, RejectReason reason)
         {
-            if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log($"Connection Failed to connect: {reason}");
+            if (logger.IsLogTypeAllowed(LogType.Warning)) logger.Log(LogType.Warning, $"Connection Failed to connect: {reason}");
 
             RemoveConnection(connection);
 

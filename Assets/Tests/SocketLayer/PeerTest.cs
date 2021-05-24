@@ -3,6 +3,7 @@ using System.Net;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Mirage.SocketLayer.Tests.PeerTests
 {
@@ -49,11 +50,9 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void CloseShouldThrowIfNoActive()
         {
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
-            {
-                peer.Close();
-            });
-            Assert.That(exception, Has.Message.EqualTo("Peer is not active"));
+            LogAssert.Expect(LogType.Warning, "Peer is not active");
+            peer.Close();
+            LogAssert.NoUnexpectedReceived();
         }
 
         [Test]

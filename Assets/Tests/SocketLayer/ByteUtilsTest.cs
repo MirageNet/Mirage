@@ -101,7 +101,7 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         [Description("this test should fail")]
         [Explicit("c# only lets you bit shift by max of 63. It only takes first 6 bits, so will drop any extra bits and try to shift anyway")]
-        public void UlongShift2()
+        public void UlongShift_ShouldFail()
         {
             ulong value = 0xfUL;
             ulong shifted = value << 64;
