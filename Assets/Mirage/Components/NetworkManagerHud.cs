@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,7 +13,6 @@ namespace Mirage
         public GameObject OfflineGO;
         public GameObject OnlineGO;
         public Text StatusLabel;
-        string labelText;
 
         private void Start()
         {
@@ -22,9 +20,9 @@ namespace Mirage
             Application.runInBackground = true;
         }
 
-        private void Update()
+        void SetLabel(string value)
         {
-            if (StatusLabel) StatusLabel.text = labelText;
+            if (StatusLabel) StatusLabel.text = value;
         }
 
         internal void OnlineSetActive()
@@ -41,30 +39,33 @@ namespace Mirage
 
         public void StartHostButtonHandler()
         {
-            labelText = "Host Mode";
-            NetworkManager.Server.StartHost(NetworkManager.Client).Forget();
+            SetLabel("Host Mode");
+            NetworkManager.Server.StartServer(NetworkManager.Client);
             OnlineSetActive();
         }
 
         public void StartServerOnlyButtonHandler()
         {
-            labelText = "Server Mode";
-            NetworkManager.Server.ListenAsync().Forget();
+            SetLabel("Server Mode");
+            NetworkManager.Server.StartServer();
             OnlineSetActive();
         }
 
         public void StartClientButtonHandler()
         {
-            labelText = "Client Mode";
-            NetworkManager.Client.ConnectAsync(NetworkAddress).Forget();
+            SetLabel("Client Mode");
+            NetworkManager.Client.Connect(NetworkAddress);
             OnlineSetActive();
         }
 
         public void StopButtonHandler()
         {
-            labelText = string.Empty;
-            NetworkManager.Server.StopHost();
-            NetworkManager.Client.Disconnect();
+            SetLabel(string.Empty);
+
+            if (NetworkManager.Server.Active)
+                NetworkManager.Server.Stop();
+            if (NetworkManager.Client.Active)
+                NetworkManager.Client.Disconnect();
             OfflineSetActive();
         }
 

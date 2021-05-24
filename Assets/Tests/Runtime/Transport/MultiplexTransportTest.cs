@@ -11,6 +11,8 @@ using Object = UnityEngine.Object;
 namespace Mirage.Tests.Runtime
 {
     [Timeout(2000)]
+    [System.Obsolete("Use peer instead", true)]
+    [Ignore("Test for old code")]
     public class MultiplexTransportTest
     {
         #region SetUp

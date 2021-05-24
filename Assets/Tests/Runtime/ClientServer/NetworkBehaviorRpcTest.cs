@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
@@ -15,6 +15,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         public event Action<GameObject> onSendGameObjectCalled;
         public event Action<NetworkBehaviour> onSendNetworkBehaviourCalled;
         public event Action<SampleBehaviorWithRpc> onSendNetworkBehaviourDerivedCalled;
+        public event Action<Weaver.Extra.SomeData> onSendTypeFromAnotherAssemblyCalled;
 
         [ClientRpc]
         public void SendNetworkIdentity(NetworkIdentity value)
@@ -64,7 +65,11 @@ namespace Mirage.Tests.Runtime.ClientServer
             onSendNetworkBehaviourDerivedCalled?.Invoke(value);
         }
 
-
+        [ClientRpc]
+        public void SendTypeFromAnotherAssembly(Weaver.Extra.SomeData someData)
+        {
+            onSendTypeFromAnotherAssemblyCalled?.Invoke(someData);
+        }
     }
 
     public class NetworkBehaviorRPCTest : ClientServerSetup<SampleBehaviorWithRpc>
@@ -202,6 +207,18 @@ namespace Mirage.Tests.Runtime.ClientServer
             clientComponent.SendNetworkBehaviourDerivedToServer(clientComponent);
             await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
             callback.Received().Invoke(serverComponent);
+        });
+
+        [UnityTest]
+        public IEnumerator SendTypeFromAnotherAssembly() => UniTask.ToCoroutine(async () =>
+        {
+            Action<Weaver.Extra.SomeData> callback = Substitute.For<Action<Weaver.Extra.SomeData>>();
+            clientComponent.onSendTypeFromAnotherAssemblyCalled += callback;
+
+            var someData = new Weaver.Extra.SomeData { usefulNumber = 13 };
+            serverComponent.SendTypeFromAnotherAssembly(someData);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            callback.Received().Invoke(someData);
         });
 
         [UnityTest]

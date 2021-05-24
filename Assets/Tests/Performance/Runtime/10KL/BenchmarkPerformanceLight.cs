@@ -28,7 +28,7 @@ namespace Mirage.Tests.Performance.Runtime
             // load host
             benchmarker = Object.FindObjectOfType<NetworkManager>();
 
-            benchmarker.Server.StartHost(benchmarker.Client).Forget();
+            benchmarker.Server.StartServer(benchmarker.Client);
 
         });
 
@@ -36,7 +36,7 @@ namespace Mirage.Tests.Performance.Runtime
         public IEnumerator TearDown()
         {
             // shutdown
-            benchmarker.Server.StopHost();
+            benchmarker.Server.Stop();
             yield return null;
 
             // unload scene

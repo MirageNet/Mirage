@@ -1,3 +1,263 @@
+## [93.0.1](https://github.com/MirageNet/Mirage/compare/v93.0.0...v93.0.1) (2021-05-23)
+
+
+### Bug Fixes
+
+* stopping null ref caused by hud stopping non-active server ([8aa561a](https://github.com/MirageNet/Mirage/commit/8aa561ace45fdc6df8df9238b13e3af5d3358e75))
+
+# [93.0.0](https://github.com/MirageNet/Mirage/compare/v92.0.0...v93.0.0) (2021-05-23)
+
+
+### Features
+
+* foldout for events on network server ([#806](https://github.com/MirageNet/Mirage/issues/806)) ([cbb12d1](https://github.com/MirageNet/Mirage/commit/cbb12d13d295c048f0a913ddb91203f4ed9f66f5))
+* replacing transport with peer ([#780](https://github.com/MirageNet/Mirage/issues/780)) ([66b2315](https://github.com/MirageNet/Mirage/commit/66b231565c019be49f8da2af8b5e8e17822ecd8f))
+
+
+### BREAKING CHANGES
+
+* - All Transports are obsolete.
+- Transports Are replaced with ISocket. Custom Transports should now implement ISocket and SocketFactory instead
+- Message handlers are now invoked in Update instead of in an Async Coroutine
+- Send Notify moved to SocketLayer
+- Server.StartAsync is no longer Async
+- Server.StartAsync is now called Server.StartServer
+- Client.Connect is no longer async
+- Local message in host mode invoke handlers immediately instead of waiting till next update
+- NetworkPlayer now has a Disconnect method. This means user does not need a reference to SocketLayer asmdef.
+- Disconnected players are blocked from sending messages
+
+# [92.0.0](https://github.com/MirageNet/Mirage/compare/v91.2.0...v92.0.0) (2021-05-23)
+
+
+### Code Refactoring
+
+* moving networkmanager gui and hud to components folder ([#802](https://github.com/MirageNet/Mirage/issues/802)) ([7612bb6](https://github.com/MirageNet/Mirage/commit/7612bb6efe030ffa6e0baab8640bf9f1772dc780))
+
+
+### Features
+
+* adding weaver support for nullable types ([#800](https://github.com/MirageNet/Mirage/issues/800)) ([14af628](https://github.com/MirageNet/Mirage/commit/14af62854c1d0aa957e232bc43ae39609b010604))
+
+
+### BREAKING CHANGES
+
+* NetworkManagerHud is now in the Mirage.Components asmdef
+
+# [91.2.0](https://github.com/MirageNet/Mirage/compare/v91.1.0...v91.2.0) (2021-05-18)
+
+
+### Features
+
+* simplifying some checks in ServerObjectManager ([#801](https://github.com/MirageNet/Mirage/issues/801)) ([fe9a07a](https://github.com/MirageNet/Mirage/commit/fe9a07a9a2a24d03ac7d0a2239dbf51291dbe21d))
+
+# [91.1.0](https://github.com/MirageNet/Mirage/compare/v91.0.1...v91.1.0) (2021-05-17)
+
+
+### Bug Fixes
+
+* fixing compile in new gui ([d2800be](https://github.com/MirageNet/Mirage/commit/d2800be08fd355077e8be9fdf3195cdf9cbc3c83))
+
+
+### Features
+
+* add optional imgui support to network manager hud ([#789](https://github.com/MirageNet/Mirage/issues/789)) ([7841794](https://github.com/MirageNet/Mirage/commit/7841794df1d210b316f5d3a9fb9f8e268ddb0fc2))
+
+## [91.0.1](https://github.com/MirageNet/Mirage/compare/v91.0.0...v91.0.1) (2021-05-04)
+
+
+### Bug Fixes
+
+* unspawning all server object on server stop ([5041a06](https://github.com/MirageNet/Mirage/commit/5041a06de8506574add2795dc075b71245e39d88))
+
+# [91.0.0](https://github.com/MirageNet/Mirage/compare/v90.0.0...v91.0.0) (2021-05-01)
+
+
+### Code Refactoring
+
+* renaming listen to start and merging it with start host ([#795](https://github.com/MirageNet/Mirage/issues/795)) ([3d4e091](https://github.com/MirageNet/Mirage/commit/3d4e0916b14b3b1b494b9bfba366844f209f2414))
+
+
+### BREAKING CHANGES
+
+* - ListenAsync renamed to StartAsync
+- StartHost removed, use StartAsync with localClient parameter instead
+- OnStartHost is now always called after Started
+
+# [90.0.0](https://github.com/MirageNet/Mirage/compare/v89.0.0...v90.0.0) (2021-04-30)
+
+
+### Code Refactoring
+
+* removing stop host ([#794](https://github.com/MirageNet/Mirage/issues/794)) ([55536fc](https://github.com/MirageNet/Mirage/commit/55536fc6fb674b164bf599367022428df3b8ed63))
+
+
+### BREAKING CHANGES
+
+* NetworkServer.StopHost removed, use NetworkServer.Disconnect instead
+
+# [89.0.0](https://github.com/MirageNet/Mirage/compare/v88.1.3...v89.0.0) (2021-04-28)
+
+
+### Code Refactoring
+
+* renaming network server disconnect to stop ([#793](https://github.com/MirageNet/Mirage/issues/793)) ([634139c](https://github.com/MirageNet/Mirage/commit/634139c8a6dde8f6b83d72a54ef779631005050c))
+
+
+### BREAKING CHANGES
+
+* NetworkServer.Disconnect is now called Stop
+
+## [88.1.3](https://github.com/MirageNet/Mirage/compare/v88.1.2...v88.1.3) (2021-04-28)
+
+
+### Bug Fixes
+
+* removing quitting handler on cleanup ([1132d92](https://github.com/MirageNet/Mirage/commit/1132d9246e4640036acdb10bac4d2c8a2e426b78))
+* server offline does not need a specific object ([#788](https://github.com/MirageNet/Mirage/issues/788)) ([9ca7639](https://github.com/MirageNet/Mirage/commit/9ca7639818d311d72f56f035c58dd516cbe73c27))
+
+## [88.1.2](https://github.com/MirageNet/Mirage/compare/v88.1.1...v88.1.2) (2021-04-27)
+
+
+### Bug Fixes
+
+* using null propagation to stop null ref being throw ([5da2c6d](https://github.com/MirageNet/Mirage/commit/5da2c6dce2094db534da1b375036460bb37044c8))
+
+## [88.1.1](https://github.com/MirageNet/Mirage/compare/v88.1.0...v88.1.1) (2021-04-21)
+
+
+### Bug Fixes
+
+* class name did not match file name ([5eb58eb](https://github.com/MirageNet/Mirage/commit/5eb58eb9ba0a04e88ce348b7541364c7e17d9db1))
+* test was not correctly checking for offline server ([e913004](https://github.com/MirageNet/Mirage/commit/e913004986cf9e08618184f5066fadaf1d4af7bc))
+
+# [88.1.0](https://github.com/MirageNet/Mirage/compare/v88.0.0...v88.1.0) (2021-04-20)
+
+
+### Features
+
+* new socket layer ([#749](https://github.com/MirageNet/Mirage/issues/749)) ([fb84452](https://github.com/MirageNet/Mirage/commit/fb844522fc4974d09194af8f1cdac4b167e161d8))
+
+# [88.0.0](https://github.com/MirageNet/Mirage/compare/v87.2.4...v88.0.0) (2021-04-17)
+
+
+### Code Refactoring
+
+* remove unspawn as its redundant with destroy ([#760](https://github.com/MirageNet/Mirage/issues/760)) ([6a8497c](https://github.com/MirageNet/Mirage/commit/6a8497c309dfb71caf533dc35efc337745b324a4))
+* removing GetNewPlayer and sealing networkplayer ([#781](https://github.com/MirageNet/Mirage/issues/781)) ([16a6ba0](https://github.com/MirageNet/Mirage/commit/16a6ba00920423d07b75aa5054da1d6b8b41dce8))
+
+
+### BREAKING CHANGES
+
+* removed Unspawn method, use with Destroy with destroyServerObject flag instead
+* no longer possible to create custom INetworkPlayer to be used inside mirage
+
+## [87.2.4](https://github.com/MirageNet/Mirage/compare/v87.2.3...v87.2.4) (2021-04-16)
+
+
+### Bug Fixes
+
+* add some exception documentation ([829f10a](https://github.com/MirageNet/Mirage/commit/829f10a506f1ea9dcf7e664d672202538057a88b))
+
+## [87.2.3](https://github.com/MirageNet/Mirage/compare/v87.2.2...v87.2.3) (2021-04-16)
+
+
+### Bug Fixes
+
+* param no longer exists. updating summary ([c9a919f](https://github.com/MirageNet/Mirage/commit/c9a919f9d5e3a672793f6db228b8eb720abf5af6))
+
+## [87.2.2](https://github.com/MirageNet/Mirage/compare/v87.2.1...v87.2.2) (2021-04-16)
+
+
+### Bug Fixes
+
+* **WelcomeWindow:** re-adding logger and if 2020.1 or newer ([288ed0f](https://github.com/MirageNet/Mirage/commit/288ed0f62e9f0855995e623db0317b84948059bb))
+
+## [87.2.1](https://github.com/MirageNet/Mirage/compare/v87.2.0...v87.2.1) (2021-04-14)
+
+
+### Bug Fixes
+
+* clientchangedscene event called too early ([#776](https://github.com/MirageNet/Mirage/issues/776)) ([82dda04](https://github.com/MirageNet/Mirage/commit/82dda04882e80ed2e7e32f25c431ac5a6a1fbba8))
+
+# [87.2.0](https://github.com/MirageNet/Mirage/compare/v87.1.2...v87.2.0) (2021-04-12)
+
+
+### Features
+
+* adding change log parsing to welcome window. ([#771](https://github.com/MirageNet/Mirage/issues/771)) ([e5409ff](https://github.com/MirageNet/Mirage/commit/e5409ffac6f7494da78ee9e1a36165e5788e30e8))
+* dark mode ([#750](https://github.com/MirageNet/Mirage/issues/750)) ([e3f1d26](https://github.com/MirageNet/Mirage/commit/e3f1d26c2f2d783b0b26c911c3b37ce7988fffaf))
+
+## [87.1.2](https://github.com/MirageNet/Mirage/compare/v87.1.1...v87.1.2) (2021-04-12)
+
+
+### Bug Fixes
+
+* bug with scene object spawning ([#773](https://github.com/MirageNet/Mirage/issues/773)) ([b02c13d](https://github.com/MirageNet/Mirage/commit/b02c13d4115fac58905c5b8aeb3f41b790a0b4cc))
+
+## [87.1.1](https://github.com/MirageNet/Mirage/compare/v87.1.0...v87.1.1) (2021-04-10)
+
+
+### Bug Fixes
+
+* moving using out of #if ([00517bc](https://github.com/MirageNet/Mirage/commit/00517bc31091c89a56c614440ffd52ca0afbcf17))
+
+# [87.1.0](https://github.com/MirageNet/Mirage/compare/v87.0.1...v87.1.0) (2021-04-08)
+
+
+### Features
+
+* add NetworkManagerMode back to NetMan ([#756](https://github.com/MirageNet/Mirage/issues/756)) ([f1f8f57](https://github.com/MirageNet/Mirage/commit/f1f8f57b64e49a81225916db981f5ae1d6809e51))
+
+## [87.0.1](https://github.com/MirageNet/Mirage/compare/v87.0.0...v87.0.1) (2021-04-08)
+
+
+### Bug Fixes
+
+* add icons to all mirage monobehaviours ([#769](https://github.com/MirageNet/Mirage/issues/769)) ([3a9673f](https://github.com/MirageNet/Mirage/commit/3a9673ffb4b34d638817c008cec629316f381072))
+
+# [87.0.0](https://github.com/MirageNet/Mirage/compare/v86.0.2...v87.0.0) (2021-04-08)
+
+
+### Bug Fixes
+
+* using add late event for authority and combining start and stop events ([#767](https://github.com/MirageNet/Mirage/issues/767)) ([8903f00](https://github.com/MirageNet/Mirage/commit/8903f00653b1ba527eb87af4dba106ba0cd9544a))
+* using AddLateEvent to stop race condition for client events  ([#768](https://github.com/MirageNet/Mirage/issues/768)) ([681875b](https://github.com/MirageNet/Mirage/commit/681875b814e79bc17e4bdeb8e58a124ddab2fe72))
+* using AddLateEvent to stop race condition for network identity events ([#766](https://github.com/MirageNet/Mirage/issues/766)) ([4f8bf11](https://github.com/MirageNet/Mirage/commit/4f8bf110d4144d41da9a5d80aaba49d46a7f3b54))
+* using AddLateEvent to stop race condition for server events ([#765](https://github.com/MirageNet/Mirage/issues/765)) ([a1ec84c](https://github.com/MirageNet/Mirage/commit/a1ec84c714cefc63ce458733df464ab48f8c2913))
+
+
+### Features
+
+* adding RemoveListener and RemoveAllListeners to AddLateEvent ([#764](https://github.com/MirageNet/Mirage/issues/764)) ([d67c96c](https://github.com/MirageNet/Mirage/commit/d67c96cc5e8cfe9720cdd8909fe1533f27834f4d))
+* adding RemoveListener and RemoveAllListeners to AddLateEvent ([#764](https://github.com/MirageNet/Mirage/issues/764)) ([0ca2804](https://github.com/MirageNet/Mirage/commit/0ca2804b95287fcfa445d2148cc6263cc8f851f4))
+
+
+### BREAKING CHANGES
+
+* - NetworkClient.Connected event is now type of IAddLateEvent
+- NetworkClient.Authenticated event is now type of IAddLateEvent
+- NetworkClient.Disconnected event is now type of IAddLateEvent
+
+* refactor: removing NetworkConnectionEvent use NetworkPlayerEvent instead
+* NetworkConnectionEvent renamed to NetworkPlayerEvent
+
+* reverting clean up change
+* - Identity.OnStartAuthority and IdentityOnStopAuthority are now Identity.OnAuthorityChanged and are type of IAddLateEvent<bool>
+* - Server.Started event is now type of IAddLateEvent
+- Server.Stoped event is now type of IAddLateEvent
+- Server.OnStartHost event is now type of IAddLateEvent
+- Server.OnStopHost event is now type of IAddLateEvent
+- inspector values for changed events will need to be re-assigned
+* - Identity.OnStartServer event is now type of IAddLateEvent
+- Identity.OnStopServer event is now type of IAddLateEvent
+- Identity.OnStartClient event is now type of IAddLateEvent
+- Identity.OnStopClient event is now type of IAddLateEvent
+- Identity.OnStartLocalPlayer event is now type of IAddLateEvent
+- inspector values for changed events will need to be re-assigned
+* AddLateEvent Reset no longer removes listeners
+* AddLateEvent Reset no longer removes listeners
+
 ## [86.0.2](https://github.com/MirageNet/Mirage/compare/v86.0.1...v86.0.2) (2021-04-05)
 
 

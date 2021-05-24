@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 
 namespace Mirage.KCP
 {
+    [System.Obsolete("Use peer instead", true)]
     public class KcpServerConnection : KcpConnection
     {
         internal event Action<int> DataSent;

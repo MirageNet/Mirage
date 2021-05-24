@@ -1,5 +1,4 @@
 using System;
-using Cysharp.Threading.Tasks;
 
 namespace Mirage
 {
@@ -25,12 +24,6 @@ namespace Mirage
         void UnregisterHandler<T>();
 
         void ClearHandlers();
-
-        /// <summary>
-        /// ProcessMessages loop, should loop unitil object is closed
-        /// </summary>
-        /// <returns></returns>
-        UniTask ProcessMessagesAsync();
     }
 
     /// <summary>
@@ -68,7 +61,7 @@ namespace Mirage
     /// </summary>
     public interface IMessageHandler : IMessageSender, IMessageReceiver, INotifySender, INotifyReceiver
     {
-
+        void HandleMessage(ArraySegment<byte> packet);
     }
 
     /// <summary>
@@ -94,12 +87,14 @@ namespace Mirage
     }
 
     /// <summary>
-    /// A connection to a remote endpoint.
+    /// An object owned by a player that can: send/receive messages, have network visibility, be an object owner, authenticated permissions, and load scenes.
     /// May be from the server to client or from client to server
     /// </summary>
     public interface INetworkPlayer : IMessageHandler, IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
     {
-        IConnection Connection { get; }
+        SocketLayer.IConnection Connection { get; }
+        void Disconnect();
+        void MarkAsDisconnected();
     }
 
     public interface IAuthenticatedObject

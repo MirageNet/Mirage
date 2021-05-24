@@ -1,8 +1,9 @@
-﻿using Mirage.Serialization;
+using Mirage.Serialization;
 
 namespace Mirage
 {
     // header for notify packet
+    [System.Obsolete("Use Peer instead", true)]
     public struct NotifyPacket
     {
         public ushort Sequence;
@@ -11,6 +12,7 @@ namespace Mirage
     }
 
 
+    [System.Obsolete("Use Peer instead", true)]
     public static class NotifyPacketSerializer
     {
         public static void WriteNotifyPacket(this NetworkWriter writer, NotifyPacket packet)

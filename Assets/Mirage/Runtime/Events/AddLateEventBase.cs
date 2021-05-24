@@ -13,11 +13,19 @@ namespace Mirage.Events
         }
 
         /// <summary>
-        /// Resets event, removing all listens and allowing it to be invoked again
+        /// Resets invoked flag, meaning new handles wont be invoked untill invoke is called again
+        /// <para>Reset does not remove listeners</para>
         /// </summary>
         public void Reset()
         {
             hasInvoked = false;
+        }
+
+        /// <summary>
+        /// Remove all non-persisent (ie created from script) listeners from the event.
+        /// </summary>
+        public void RemoveAllListeners()
+        {
             baseEvent.RemoveAllListeners();
         }
     }

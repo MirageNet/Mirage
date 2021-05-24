@@ -72,7 +72,7 @@ Immediatelly after the object is instantiated, all the data is updated to match 
 
 # Client Start Authority
 
-If the object is owned by this client, then NetworkIdentity will invoke the <xref:Mirage.NetworkIdentity.OnStartAuthority>
+If the object is owned by this client, then NetworkIdentity will invoke the <xref:Mirage.NetworkIdentity.OnAuthorityChanged>
 Subscribe to this event either by using `AddListener`,  or adding your method to the event in the inspector.
 Note the Authority can be revoked, and granted again.  Every time the client gains authority, this event will be invoked again.
 
@@ -89,14 +89,14 @@ Subscribe to this event by using `AddListener` or adding your method in the even
 
 # Stop Authority
 
-If the object loses authority over the object, then NetworkIdentity will invoke the <xref:Mirage.NetworkIdentity.OnStopAuthority>
+If the object loses authority over the object, then NetworkIdentity will invoke the <xref:Mirage.NetworkIdentity.OnAuthorityChanged>
 Subscribe to this event either by using `AddListener`,  or adding your method to the event in the inspector.
 Note the Authority can be revoked, and granted again.  Every time the client loses authority, this event will be invoked again.
 
 # Server Stop
 
 Either because the client disconnected, the server stopped, 
-you called <xref:Mirage.ServerObjectManager.UnSpawn(UnityEngine.GameObject)>,  or you called <xref:Mirage.ServerObjectManager.Destroy(UnityEngine.GameObject)> the object may stop in the server.
+you called <xref:Mirage.ServerObjectManager.Destroy(UnityEngine.GameObject,System.Boolean)> the object may stop in the server.
 During this state, a message is sent to all the clients to unspawn the object.
 The event <xref:Mirage.NetworkIdentity.OnStopServer> will be invoked. 
 

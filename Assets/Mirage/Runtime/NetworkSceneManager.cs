@@ -140,9 +140,6 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log($"ClientSceneMessage: changing scenes from: {ActiveScenePath} to: {msg.scenePath}");
 
-            // Let client prepare for scene change
-            OnClientChangeScene(msg.scenePath, msg.sceneOperation);
-
             //Additive are scenes loaded on server and this client is not a host client
             if (msg.additiveScenes != null && msg.additiveScenes.Length > 0 && Client && !Client.IsLocalClient)
             {
@@ -151,6 +148,9 @@ namespace Mirage
                     pendingAdditiveSceneList.Add(scene);
                 }
             }
+
+            // Let client prepare for scene change
+            OnClientChangeScene(msg.scenePath, msg.sceneOperation);
 
             ApplyOperationAsync(msg.scenePath, msg.sceneOperation).Forget();
         }
@@ -190,8 +190,6 @@ namespace Mirage
         /// <param name="sceneOperation">Scene operation that was just  happen</param>
         internal void OnClientSceneChanged(string scenePath, SceneOperation sceneOperation)
         {
-            ClientSceneChanged?.Invoke(scenePath, sceneOperation);
-
             if (pendingAdditiveSceneList.Count > 0 && Client && !Client.IsLocalClient)
             {
                 ApplyOperationAsync(pendingAdditiveSceneList[0], SceneOperation.LoadAdditive).Forget();
@@ -202,12 +200,16 @@ namespace Mirage
             //set ready after scene change has completed
             if (!Client.Player.IsReady)
                 SetClientReady();
+
+            //Call event once all scene related actions (subscenes and ready) are done.
+            ClientSceneChanged?.Invoke(scenePath, sceneOperation);
         }
 
         /// <summary>
         /// Signal that the client connection is ready to enter the game.
         /// <para>This could be for example when a client enters an ongoing game and has finished loading the current scene. The server should respond to the message with an appropriate handler which instantiates the players object for example.</para>
         /// </summary>
+        /// <exception cref="InvalidOperationException">When called with an null or disconnected client</exception>
         public void SetClientReady()
         {
             if (!Client || !Client.Active)
@@ -242,6 +244,7 @@ namespace Mirage
         /// </summary>
         /// <param name="scenePath"></param>
         /// <param name="operation"></param>
+        /// <exception cref="ArgumentNullException">Scene path was not valid.</exception>
         public void ChangeServerScene(string scenePath, SceneOperation sceneOperation = SceneOperation.Normal)
         {
             if (string.IsNullOrEmpty(scenePath))

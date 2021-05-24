@@ -92,7 +92,7 @@ namespace Mirage.Weaver
 
                 try
                 {
-                    typeDefinition = typeDefinition.BaseType.Resolve();
+                    typeDefinition = typeDefinition.BaseType?.Resolve();
                 }
                 catch
                 {

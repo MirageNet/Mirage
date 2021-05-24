@@ -10,6 +10,7 @@ namespace Mirage
     /// Base transport class,  any transport should implement this class
     /// and it's abstract methods
     /// </summary>
+    [System.Obsolete("Use peer instead", true)]
     public abstract class Transport : MonoBehaviour
     {
         public class ConnectEvent : UnityEvent<IConnection> { }

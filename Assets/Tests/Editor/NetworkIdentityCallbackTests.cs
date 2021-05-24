@@ -129,8 +129,8 @@ namespace Mirage
         private ServerObjectManager serverObjectManager;
         private GameObject networkServerGameObject;
 
-        IConnection tconn42;
-        IConnection tconn43;
+        INetworkPlayer player1;
+        INetworkPlayer player2;
 
         [SetUp]
         public void SetUp()
@@ -146,8 +146,8 @@ namespace Mirage
             identity.Server = server;
             identity.ServerObjectManager = serverObjectManager;
 
-            tconn42 = Substitute.For<IConnection>();
-            tconn43 = Substitute.For<IConnection>();
+            player1 = Substitute.For<INetworkPlayer>();
+            player2 = Substitute.For<INetworkPlayer>();
         }
 
         [TearDown]
@@ -382,14 +382,14 @@ namespace Mirage
         }
 
         [Test]
-        public void OnStartAuthorityCallsComponentsAndCatchesExceptions()
+        public void OnAuthorityChangedCallsComponentsAndCatchesExceptions()
         {
             // add component
-            UnityAction func = Substitute.For<UnityAction>();
-            identity.OnStartAuthority.AddListener(func);
+            UnityAction<bool> func = Substitute.For<UnityAction<bool>>();
+            identity.OnAuthorityChanged.AddListener(func);
 
             func
-                .When(f => f.Invoke())
+                .When(f => f.Invoke(Arg.Any<bool>()))
                 .Do(f => { throw new Exception("Some exception"); });
 
             // make sure exceptions are not swallowed
@@ -397,37 +397,19 @@ namespace Mirage
             {
                 identity.StartAuthority();
             });
-            func.Received(1).Invoke();
-        }
-
-        [Test]
-        public void OnStopAuthorityCallsComponentsAndCatchesExceptions()
-        {
-            // add component
-            UnityAction func = Substitute.For<UnityAction>();
-            identity.OnStopAuthority.AddListener(func);
-
-            func
-                .When(f => f.Invoke())
-                .Do(f => { throw new Exception("Some exception"); });
-
-            // make sure exceptions are not swallowed
-            Assert.Throws<Exception>(() =>
-            {
-                identity.StopAuthority();
-            });
-            func.Received(1).Invoke();
+            func.Received(1).Invoke(Arg.Any<bool>());
         }
 
         [Test]
         public void NotifyAuthorityCallsOnStartStopAuthority()
         {
-            // add components
-            UnityAction startAuthFunc = Substitute.For<UnityAction>();
-            UnityAction stopAuthFunc = Substitute.For<UnityAction>();
-
-            identity.OnStartAuthority.AddListener(startAuthFunc);
-            identity.OnStopAuthority.AddListener(stopAuthFunc);
+            int startAuth = 0;
+            int stopAuth = 0;
+            identity.OnAuthorityChanged.AddListener(auth =>
+            {
+                if (auth) startAuth++;
+                else stopAuth++;
+            });
 
             // set authority from false to true, which should call OnStartAuthority
             identity.HasAuthority = true;
@@ -435,8 +417,8 @@ namespace Mirage
             // shouldn't be touched
             Assert.That(identity.HasAuthority, Is.True);
             // start should be called
-            startAuthFunc.Received(1).Invoke();
-            stopAuthFunc.Received(0).Invoke();
+            Assert.That(startAuth, Is.EqualTo(1));
+            Assert.That(stopAuth, Is.EqualTo(0));
 
             // set it to true again, should do nothing because already true
             identity.HasAuthority = true;
@@ -444,8 +426,8 @@ namespace Mirage
             // shouldn't be touched
             Assert.That(identity.HasAuthority, Is.True);
             // same as before
-            startAuthFunc.Received(1).Invoke();
-            stopAuthFunc.Received(0).Invoke();
+            Assert.That(startAuth, Is.EqualTo(1));
+            Assert.That(stopAuth, Is.EqualTo(0));
 
             // set it to false, should call OnStopAuthority
             identity.HasAuthority = false;
@@ -453,8 +435,8 @@ namespace Mirage
             // shouldn't be touched
             Assert.That(identity.HasAuthority, Is.False);
             // same as before
-            startAuthFunc.Received(1).Invoke();
-            stopAuthFunc.Received(1).Invoke();
+            Assert.That(startAuth, Is.EqualTo(1));
+            Assert.That(stopAuth, Is.EqualTo(1));
 
             // set it to false again, should do nothing because already false
             identity.HasAuthority = false;
@@ -462,8 +444,8 @@ namespace Mirage
             // shouldn't be touched
             Assert.That(identity.HasAuthority, Is.False);
             // same as before
-            startAuthFunc.Received(1).Invoke();
-            stopAuthFunc.Received(1).Invoke();
+            Assert.That(startAuth, Is.EqualTo(1));
+            Assert.That(stopAuth, Is.EqualTo(1));
         }
 
         [Test]
@@ -472,12 +454,10 @@ namespace Mirage
             // add component
             gameObject.AddComponent<CheckObserverExceptionNetworkBehaviour>();
 
-            var connection = new NetworkPlayer(tconn42);
-
             // should catch the exception internally and not throw it
             Assert.Throws<Exception>(() =>
             {
-                identity.OnCheckObserver(connection);
+                identity.OnCheckObserver(player1);
             });
         }
 
@@ -489,8 +469,7 @@ namespace Mirage
             var gameObjectTrue = new GameObject();
             NetworkIdentity identityTrue = gameObjectTrue.AddComponent<NetworkIdentity>();
             CheckObserverTrueNetworkBehaviour compTrue = gameObjectTrue.AddComponent<CheckObserverTrueNetworkBehaviour>();
-            var connection = new NetworkPlayer(tconn42);
-            Assert.That(identityTrue.OnCheckObserver(connection), Is.True);
+            Assert.That(identityTrue.OnCheckObserver(player1), Is.True);
             Assert.That(compTrue.called, Is.EqualTo(1));
         }
 
@@ -503,8 +482,7 @@ namespace Mirage
             var gameObjectFalse = new GameObject();
             NetworkIdentity identityFalse = gameObjectFalse.AddComponent<NetworkIdentity>();
             CheckObserverFalseNetworkBehaviour compFalse = gameObjectFalse.AddComponent<CheckObserverFalseNetworkBehaviour>();
-            var connection = new NetworkPlayer(tconn42);
-            Assert.That(identityFalse.OnCheckObserver(connection), Is.False);
+            Assert.That(identityFalse.OnCheckObserver(player1), Is.False);
             Assert.That(compFalse.called, Is.EqualTo(1));
         }
 
@@ -665,21 +643,18 @@ namespace Mirage
         public void AddObserver()
         {
             identity.Server = server;
-            // create some connections
-            var connection1 = new NetworkPlayer(tconn42);
-            var connection2 = new NetworkPlayer(tconn43);
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
 
             // call AddObservers
-            identity.AddObserver(connection1);
-            identity.AddObserver(connection2);
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { connection1, connection2 }));
+            identity.AddObserver(player1);
+            identity.AddObserver(player2);
+            Assert.That(identity.observers, Is.EquivalentTo(new[] { player1, player2 }));
 
             // adding a duplicate connectionId shouldn't overwrite the original
-            identity.AddObserver(connection1);
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { connection1, connection2 }));
+            identity.AddObserver(player1);
+            Assert.That(identity.observers, Is.EquivalentTo(new[] { player1, player2 }));
         }
 
         [Test]
@@ -689,8 +664,8 @@ namespace Mirage
             identity.StartServer();
 
             // add some observers
-            identity.observers.Add(new NetworkPlayer(tconn42));
-            identity.observers.Add(new NetworkPlayer(tconn43));
+            identity.observers.Add(player1);
+            identity.observers.Add(player2);
 
             // call ClearObservers
             identity.ClearObservers();
@@ -703,8 +678,8 @@ namespace Mirage
         {
             // creates .observers and generates a netId
             identity.StartServer();
-            identity.ConnectionToClient = new NetworkPlayer(tconn42);
-            identity.observers.Add(new NetworkPlayer(tconn42));
+            identity.ConnectionToClient = player1;
+            identity.observers.Add(player1);
 
             // mark for reset and reset
             identity.Reset();
@@ -717,7 +692,7 @@ namespace Mirage
         {
             // add components
             RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
-            comp.observer = new NetworkPlayer(tconn42);
+            comp.observer = player1;
 
             // get new observers
             var observers = new HashSet<INetworkPlayer>();
@@ -734,7 +709,7 @@ namespace Mirage
             // it and not do anything else
             var observers = new HashSet<INetworkPlayer>
             {
-                new NetworkPlayer(tconn42)
+                player1
             };
             identity.GetNewObservers(observers, true);
             Assert.That(observers.Count, Is.EqualTo(0));

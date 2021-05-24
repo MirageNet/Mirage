@@ -56,17 +56,14 @@
     padding-top: 0;
     flex: 3;
     white-space: normal;
-    flex-basis: auto;
-    flex-grow: 1;
 }
 
 #Spacer {
     display: flex;
     flex: 0.02;
-    flex-basis: auto;
 }
 
-.navButton {
+Button {
     padding: 2px;
     height: 35px;
 }
@@ -93,8 +90,6 @@
     flex: 1;
     flex-direction: column;
     padding-top: 3px;
-    flex-basis: 35%;
-    flex-shrink: 0;
 }
 
 #RightColumnBox {
@@ -102,8 +97,6 @@
     flex: 2;
     flex-direction: column;
     justify-content: space-between;
-    flex-basis: auto;
-    flex-grow: 1;
 }
 
 #Module {
@@ -128,14 +121,4 @@
     border-right-color: rgb(147, 147, 147);
     border-top-color: rgb(147, 147, 147);
     border-bottom-color: rgb(147, 147, 147);
-}
-
-.screen {
-    flex-grow: 1;
-    flex-basis: 100%;
-}
-
-.installButton {
-    height: initial;
-    flex-shrink: 1;
 }

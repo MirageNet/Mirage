@@ -32,7 +32,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         protected GameObject playerPrefab;
 
-        protected Transport testTransport;
+        protected TestSocketFactory socketFactory;
         protected INetworkPlayer connectionToServer;
         protected INetworkPlayer connectionToClient;
 
@@ -43,15 +43,15 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(NetworkServer));
             clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(ClientObjectManager), typeof(NetworkClient));
-            testTransport = serverGo.AddComponent<LoopbackTransport>();
+            socketFactory = serverGo.AddComponent<TestSocketFactory>();
 
             await UniTask.Delay(1);
 
             server = serverGo.GetComponent<NetworkServer>();
             client = clientGo.GetComponent<NetworkClient>();
 
-            server.Transport = testTransport;
-            client.Transport = testTransport;
+            server.SocketFactory = socketFactory;
+            client.SocketFactory = socketFactory;
 
             serverSceneManager = serverGo.GetComponent<NetworkSceneManager>();
             clientSceneManager = clientGo.GetComponent<NetworkSceneManager>();
@@ -84,12 +84,12 @@ namespace Mirage.Tests.Runtime.ClientServer
             // start the server
             var started = new UniTaskCompletionSource();
             server.Started.AddListener(() => started.TrySetResult());
-            server.ListenAsync().Forget();
+            server.StartServer();
 
             await started.Task;
 
             // now start the client
-            await client.ConnectAsync("localhost");
+            client.Connect("localhost");
 
             await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > 0);
 
@@ -117,7 +117,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator ShutdownHost() => UniTask.ToCoroutine(async () =>
         {
             client.Disconnect();
-            server.Disconnect();
+            server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !client.Active);
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);

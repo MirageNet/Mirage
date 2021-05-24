@@ -29,8 +29,6 @@ namespace Mirage.Tests.Runtime.Host
             spawner.PlayerPrefab = identity;
 
             spawner.AutoSpawn = false;
-
-            spawner.Start();
         }
 
         public override void ExtraTearDown()
@@ -53,15 +51,18 @@ namespace Mirage.Tests.Runtime.Host
 
         });
 
-        [Test]
-        public void ManualSpawnTest()
+        [UnityTest]
+        public IEnumerator ManualSpawnTest() => UniTask.ToCoroutine(async () =>
         {
             bool invokeAddPlayerMessage = false;
             server.LocalPlayer.RegisterHandler<AddCharacterMessage>(msg => invokeAddPlayerMessage = true);
 
             spawner.RequestServerSpawnPlayer();
 
-            Assert.That(invokeAddPlayerMessage, Is.False);
-        }
+            // wait for messages to be processed
+            await UniTask.Yield();
+
+            Assert.That(invokeAddPlayerMessage, Is.True);
+        });
     }
 }

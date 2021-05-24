@@ -32,6 +32,16 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(server.LocalClientActive, Is.False);
         }
 
+        [Test]
+        public void ThrowsIfListenIsCalledWhileAlreadyActive()
+        {
+            InvalidOperationException expection = Assert.Throws<InvalidOperationException>(() =>
+            {
+                server.StartServer();
+            });
+            Assert.That(expection, Has.Message.EqualTo("Server is already active"));
+        }
+
         [UnityTest]
         public IEnumerator ReadyMessageSetsClientReadyTest() => UniTask.ToCoroutine(async () =>
         {
@@ -52,7 +62,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             server.SendToAll(message);
 
-            connectionToServer.ProcessMessagesAsync().Forget();
+            // todo assert correct message was sent using Substitute for socket or player
+            // connectionToServer.ProcessMessagesAsync().Forget();
 
             await AsyncUtil.WaitUntilWithTimeout(() => invoked);
         });
@@ -66,7 +77,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             serverIdentity.ConnectionToClient.Send(message);
 
-            connectionToServer.ProcessMessagesAsync().Forget();
+            // todo assert correct message was sent using Substitute for socket or player
+            // connectionToServer.ProcessMessagesAsync().Forget();
 
             await AsyncUtil.WaitUntilWithTimeout(() => invoked);
         });
@@ -118,12 +130,6 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        public void GetNewConnectionTest()
-        {
-            Assert.That(server.GetNewPlayer(Substitute.For<IConnection>()), Is.Not.Null);
-        }
-
-        [Test]
         public void VariableTest()
         {
             Assert.That(server.MaxConnections, Is.EqualTo(4));
@@ -132,7 +138,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator DisconnectStateTest() => UniTask.ToCoroutine(async () =>
         {
-            server.Disconnect();
+            server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
         });
@@ -144,7 +150,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             UnityAction func1 = Substitute.For<UnityAction>();
             server.Stopped.AddListener(func1);
 
-            server.Disconnect();
+            server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
 

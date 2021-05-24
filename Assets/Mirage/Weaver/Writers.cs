@@ -81,6 +81,13 @@ namespace Mirage.Weaver
             }
 
             // check for collections
+            if (typeReference.Is(typeof(Nullable<>)))
+            {
+                var genericInstance = (GenericInstanceType)typeReference;
+                TypeReference elementType = genericInstance.GenericArguments[0];
+
+                return GenerateCollectionWriter(typeReference, elementType, () => NetworkWriterExtensions.WriteNullable<byte>(default, default), sequencePoint);
+            }
             if (typeReference.Is(typeof(ArraySegment<>)))
             {
                 var genericInstance = (GenericInstanceType)typeReference;

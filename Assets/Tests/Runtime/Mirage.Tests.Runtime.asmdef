@@ -2,13 +2,14 @@
     "name": "Mirage.Tests.Runtime",
     "references": [
         "Mirage",
+        "Mirage.SocketLayer",
         "Mirage.Tests.Common",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Mirage.Authenticators",
-        "MirageNG",
         "UniTask",
-        "Mirage.Components"
+        "Mirage.Components",
+        "WeaverTestExtraAssembly"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

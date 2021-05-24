@@ -1,6 +1,5 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
-using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
@@ -19,12 +18,6 @@ namespace Mirage.Tests.Runtime.Host
         public void ConnectionTest()
         {
             Assert.That(client.Player != null);
-        }
-
-        [Test]
-        public void GetNewConnectionTest()
-        {
-            Assert.That(client.GetNewPlayer(Substitute.For<IConnection>()), Is.Not.Null);
         }
 
         [UnityTest]

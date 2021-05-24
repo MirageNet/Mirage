@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -12,9 +13,9 @@ namespace Mirage.Tests.Runtime
         private GameObject serverGO;
         private NetworkServer server;
         private ServerObjectManager serverObjectManager;
-        private GameObject player1;
-        private GameObject player2;
-        private GameObject player3;
+        private GameObject character1;
+        private GameObject character2;
+        private GameObject character3;
         private NetworkMatchChecker player1MatchChecker;
         private NetworkMatchChecker player2MatchChecker;
         private NetworkPlayer player1Connection;
@@ -25,31 +26,33 @@ namespace Mirage.Tests.Runtime
         [SetUp]
         public void Setup()
         {
-            serverGO = new GameObject("Network Server", typeof(LoopbackTransport), typeof(NetworkServer), typeof(ServerObjectManager));
+            // todo use Substitute for interfaces instead of gameobjeccts for this test
+
+            serverGO = new GameObject("Network Server", typeof(TestSocketFactory), typeof(NetworkServer), typeof(ServerObjectManager));
 
             server = serverGO.GetComponent<NetworkServer>();
             serverObjectManager = serverGO.GetComponent<ServerObjectManager>();
             serverObjectManager.Server = server;
 
-            player1 = new GameObject("TestPlayer1", typeof(NetworkIdentity), typeof(NetworkMatchChecker));
-            player2 = new GameObject("TestPlayer2", typeof(NetworkIdentity), typeof(NetworkMatchChecker));
-            player3 = new GameObject("TestPlayer3", typeof(NetworkIdentity));
+            character1 = new GameObject("TestCharacter1", typeof(NetworkIdentity), typeof(NetworkMatchChecker));
+            character2 = new GameObject("TestCharacter2", typeof(NetworkIdentity), typeof(NetworkMatchChecker));
+            character3 = new GameObject("TestCharacter3", typeof(NetworkIdentity));
 
 
-            player1.GetComponent<NetworkIdentity>().Server = server;
-            player1.GetComponent<NetworkIdentity>().ServerObjectManager = serverObjectManager;
-            player2.GetComponent<NetworkIdentity>().Server = server;
-            player2.GetComponent<NetworkIdentity>().ServerObjectManager = serverObjectManager;
-            player3.GetComponent<NetworkIdentity>().Server = server;
-            player3.GetComponent<NetworkIdentity>().ServerObjectManager = serverObjectManager;
+            character1.GetComponent<NetworkIdentity>().Server = server;
+            character1.GetComponent<NetworkIdentity>().ServerObjectManager = serverObjectManager;
+            character2.GetComponent<NetworkIdentity>().Server = server;
+            character2.GetComponent<NetworkIdentity>().ServerObjectManager = serverObjectManager;
+            character3.GetComponent<NetworkIdentity>().Server = server;
+            character3.GetComponent<NetworkIdentity>().ServerObjectManager = serverObjectManager;
 
-            player1MatchChecker = player1.GetComponent<NetworkMatchChecker>();
-            player2MatchChecker = player2.GetComponent<NetworkMatchChecker>();
+            player1MatchChecker = character1.GetComponent<NetworkMatchChecker>();
+            player2MatchChecker = character2.GetComponent<NetworkMatchChecker>();
 
 
-            player1Connection = CreateNetworkConnection(player1);
-            player2Connection = CreateNetworkConnection(player2);
-            player3Connection = CreateNetworkConnection(player3);
+            player1Connection = CreatePlayer(character1);
+            player2Connection = CreatePlayer(character2);
+            player3Connection = CreatePlayer(character3);
             Dictionary<Guid, HashSet<NetworkIdentity>> g = GetMatchPlayersDictionary();
             matchPlayers = g;
         }
@@ -61,25 +64,23 @@ namespace Mirage.Tests.Runtime
             return (Dictionary<Guid, HashSet<NetworkIdentity>>)fieldInfo.GetValue(null);
         }
 
-        static NetworkPlayer CreateNetworkConnection(GameObject player)
+        static NetworkPlayer CreatePlayer(GameObject character)
         {
-            (IConnection conn1, IConnection _) = PipeConnection.CreatePipe();
-
-            var connection = new NetworkPlayer(conn1)
+            var player = new NetworkPlayer(Substitute.For<SocketLayer.IConnection>())
             {
-                Identity = player.GetComponent<NetworkIdentity>()
+                Identity = character.GetComponent<NetworkIdentity>()
             };
-            connection.Identity.ConnectionToClient = connection;
-            connection.IsReady = true;
-            return connection;
+            player.Identity.ConnectionToClient = player;
+            player.IsReady = true;
+            return player;
         }
 
         [TearDown]
         public void TearDown()
         {
-            Object.DestroyImmediate(player1);
-            Object.DestroyImmediate(player2);
-            Object.DestroyImmediate(player3);
+            Object.DestroyImmediate(character1);
+            Object.DestroyImmediate(character2);
+            Object.DestroyImmediate(character3);
 
             Object.DestroyImmediate(serverGO);
             matchPlayers.Clear();

@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 
 namespace Mirage
 {
+    [System.Obsolete("Use peer instead", true)]
     public class MultiplexTransport : Transport
     {
 

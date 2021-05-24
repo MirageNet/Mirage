@@ -26,11 +26,6 @@ namespace Mirage
         internal readonly Dictionary<Guid, SpawnHandlerDelegate> spawnHandlers = new Dictionary<Guid, SpawnHandlerDelegate>();
         internal readonly Dictionary<Guid, UnSpawnDelegate> unspawnHandlers = new Dictionary<Guid, UnSpawnDelegate>();
 
-        /// <summary>
-        /// NetworkIdentity of the localPlayer
-        /// </summary>
-        public NetworkIdentity LocalPlayer => Client.Player?.Identity;
-
         [Header("Prefabs")]
         /// <summary>
         /// List of prefabs that will be registered with the spawning system.
@@ -114,7 +109,7 @@ namespace Mirage
         bool ConsiderForSpawning(NetworkIdentity identity)
         {
             // not spawned yet, not hidden, etc.?
-            return !identity.gameObject.activeSelf &&
+            return identity.NetId == 0 &&
                    identity.gameObject.hideFlags != HideFlags.NotEditable &&
                    identity.gameObject.hideFlags != HideFlags.HideAndDontSave &&
                    identity.sceneId != 0;
@@ -335,15 +330,7 @@ namespace Mirage
                 identity.gameObject.SetActive(true);
             }
 
-            // apply local values for VR support
-            identity.transform.localPosition = msg.position;
-            identity.transform.localRotation = msg.rotation;
-            identity.transform.localScale = msg.scale;
-            identity.HasAuthority = msg.isOwner;
-            identity.NetId = msg.netId;
-            identity.Client = Client;
-            identity.ClientObjectManager = this;
-            identity.World = Client.World;
+            identity.SetClientValues(this, msg);
 
             if (msg.isLocalPlayer)
                 InternalAddPlayer(identity);
@@ -484,9 +471,8 @@ namespace Mirage
                 if (msg.isLocalPlayer)
                     InternalAddPlayer(localObject);
 
-                localObject.Client = Client;
-                localObject.ClientObjectManager = this;
-                localObject.HasAuthority = msg.isOwner;
+                localObject.SetClientValues(this, msg);
+
                 localObject.NotifyAuthority();
                 localObject.StartClient();
                 CheckForLocalPlayer(localObject);
@@ -515,7 +501,7 @@ namespace Mirage
 
         void CheckForLocalPlayer(NetworkIdentity identity)
         {
-            if (identity && identity == LocalPlayer)
+            if (identity && identity == Client.Player?.Identity)
             {
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
                 identity.StartLocalPlayer();

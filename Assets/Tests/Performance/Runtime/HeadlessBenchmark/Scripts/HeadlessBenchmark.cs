@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
-using Mirage.KCP;
+using Mirage.SocketLayer;
 using UnityEngine;
 #if IGNORANCE
 using Mirror.ENet;
@@ -16,7 +16,7 @@ namespace Mirage.HeadlessBenchmark
         public GameObject MonsterPrefab;
         public GameObject PlayerPrefab;
         public string editorArgs;
-        public Transport transport;
+        public SocketFactory socketFactory;
 
         string[] cachedArgs;
         string port;
@@ -42,10 +42,11 @@ namespace Mirage.HeadlessBenchmark
                 int frames = frameCount - previousFrameCount;
 
                 long messageCount = 0;
-                if (transport is KcpTransport kcpTransport)
-                {
-                    messageCount = kcpTransport.ReceivedMessageCount;
-                }
+                // todo use debug metrics from peer when they are added
+                //if (transport is KcpTransport kcpTransport)
+                //{
+                //    messageCount = kcpTransport.ReceivedMessageCount;
+                //}
 
                 long messages = messageCount - previousMessageCount;
 
@@ -102,7 +103,7 @@ namespace Mirage.HeadlessBenchmark
 
                 server = serverGo.GetComponent<NetworkServer>();
                 server.MaxConnections = 9999;
-                server.Transport = transport;
+                server.SocketFactory = socketFactory;
                 serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
 
                 NetworkSceneManager networkSceneManager = serverGo.GetComponent<NetworkSceneManager>();
@@ -119,7 +120,7 @@ namespace Mirage.HeadlessBenchmark
 
                 server.Started.AddListener(OnServerStarted);
                 server.Authenticated.AddListener(conn => serverObjectManager.SetClientReady(conn));
-                _ = server.ListenAsync();
+                server.StartServer();
                 Console.WriteLine("Starting Server Only Mode");
             }
         }
@@ -149,7 +150,7 @@ namespace Mirage.HeadlessBenchmark
                 // connect from a bunch of clients
                 for (int i = 0; i < clonesCount; i++)
                 {
-                    await StartClient(i, address);
+                    StartClient(i, address);
                     await UniTask.Delay(500);
 
                     Debug.LogFormat("Started {0} clients", i + 1);
@@ -157,7 +158,7 @@ namespace Mirage.HeadlessBenchmark
             }
         }
 
-        async UniTask StartClient(int i, string networkAddress)
+        void StartClient(int i, string networkAddress)
         {
             var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager), typeof(CharacterSpawner), typeof(NetworkSceneManager));
             NetworkClient client = clientGo.GetComponent<NetworkClient>();
@@ -177,11 +178,11 @@ namespace Mirage.HeadlessBenchmark
             spawner.ClientObjectManager = objectManager;
             spawner.SceneManager = networkSceneManager;
 
-            client.Transport = transport;
+            client.SocketFactory = socketFactory;
 
             try
             {
-                await client.ConnectAsync(networkAddress);
+                client.Connect(networkAddress);
             }
             catch (Exception ex)
             {
@@ -209,18 +210,20 @@ namespace Mirage.HeadlessBenchmark
 
         void ParseForTransport()
         {
-            string transport = GetArgValue("-transport");
-            if (string.IsNullOrEmpty(transport) || transport.Equals("kcp"))
-            {
-                KcpTransport newTransport = gameObject.AddComponent<KcpTransport>();
-                this.transport = newTransport;
+            // todo add socket options here
 
-                //Try to apply port if exists and needed by transport.
-                if (!string.IsNullOrEmpty(port))
-                {
-                    newTransport.Port = ushort.Parse(port);
-                }
-            }
+            //string transport = GetArgValue("-transport");
+            //if (string.IsNullOrEmpty(transport) || transport.Equals("kcp"))
+            //{
+            //    KcpTransport newTransport = gameObject.AddComponent<KcpTransport>();
+            //    socketFactory = newTransport;
+
+            //    //Try to apply port if exists and needed by transport.
+            //    if (!string.IsNullOrEmpty(port))
+            //    {
+            //        newTransport.Port = ushort.Parse(port);
+            //    }
+            //}
 
 #if IGNORANCE
             if (string.IsNullOrEmpty(transport) || transport.Equals("ignorance"))

@@ -124,8 +124,8 @@ Table below shows the Mirror's `NetworkBehaviour` override method names on the l
 | `OnStartClient`        | [NetIdentity.OnStartClient](xref:Mirage.NetworkIdentity.OnStartClient)            |
 | `OnStopClient`         | [NetIdentity.OnStopClient](xref:Mirage.NetworkIdentity.OnStopClient)              |
 | `OnStartLocalPlayer`   | [NetIdentity.OnStartLocalPlayer](xref:Mirage.NetworkIdentity.OnStartLocalPlayer)  |
-| `OnStartAuthority`     | [NetIdentity.OnStartAuthority](xref:Mirage.NetworkIdentity.OnStartAuthority)      |
-| `OnStopAuthority`      | [NetIdentity.OnStopAuthority](xref:Mirage.NetworkIdentity.OnStopAuthority)        |
+| `OnStartAuthority`     | [NetIdentity.OnAuthorityChanged](xref:Mirage.NetworkIdentity.OnAuthorityChanged)      |
+| `OnStopAuthority`      | [NetIdentity.OnAuthorityChanged](xref:Mirage.NetworkIdentity.OnAuthorityChanged)        |
 
 Let's take this `Player` class as an example. In Mirror, you would do:
 
@@ -181,7 +181,7 @@ These fields/properties have been renamed:
 
 | Mirror                                | Mirage                                                                                 |
 |:-------------------------------------:|:--------------------------------------------------------------------------------------:|
-| `ClientScene.localPlayer`             | [ClientObjectManager.LocalPlayer](xref:Mirage.ClientObjectManager.LocalPlayer)         |
+| `ClientScene.localPlayer`             | [NetworkPlayer.Identity](xref:Mirage.NetworkPlayer.Identity)             |
 | `ClientScene.ready`                   | [NetworkClient.Connection.IsReady](xref:Mirage.NetworkPlayer.IsReady)                  |
 | `NetworkIdentity.assetId`             | [NetworkIdentity.AssetId](xref:Mirage.NetworkIdentity.AssetId)                         |
 | `NetworkIdentity.netId`               | [NetworkIdentity.NetId](xref:Mirage.NetworkIdentity.NetId)                             |
@@ -210,4 +210,4 @@ Table below shows how to spawn objects in Mirage from `NetworkBehaviour`:
 | Mirror                  | Mirage                                                                                     |
 |:-----------------------:|:------------------------------------------------------------------------------------------:|
 | `NetworkServer.Spawn`   | [ServerObjectManager.Spawn](xref:Mirage.ServerObjectManager.Spawn(Mirage.NetworkIdentity)) |
-| `NetworkServer.Destroy` | [ServerObjectManager.Destroy](xref:Mirage.ServerObjectManager.Destroy(UnityEngine.GameObject))         |
+| `NetworkServer.Destroy` | [ServerObjectManager.Destroy](xref:Mirage.ServerObjectManager.Destroy(UnityEngine.GameObject, System.Boolean))         |

@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
@@ -18,7 +17,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator IsNetworkActiveStopTest() => UniTask.ToCoroutine(async () =>
         {
-            manager.Server.Disconnect();
+            manager.Server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !client.Active);
 
@@ -36,13 +35,19 @@ namespace Mirage.Tests.Runtime.Host
         });
 
         [Test]
-        public void StartHostException()
+        public void NetworkManagerModeHostTest()
         {
-            manager.Client = null;
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                manager.Server.StartHost(manager.Client).GetAwaiter().GetResult();
-            });
+            Assert.That(manager.NetworkMode == NetworkManagerMode.Host);
         }
+
+        [UnityTest]
+        public IEnumerator NetworkManagerModeOfflineHostTest() => UniTask.ToCoroutine(async () =>
+        {
+            server.Stop();
+
+            await AsyncUtil.WaitUntilWithTimeout(() => !server.Active && !client.Active);
+
+            Assert.That(manager.NetworkMode == NetworkManagerMode.None);
+        });
     }
 }

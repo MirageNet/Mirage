@@ -1,5 +1,6 @@
-using Mirage.KCP;
+using System;
 using Mirage.Logging;
+using Mirage.Sockets.Udp;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,16 +13,28 @@ namespace Mirage
         [MenuItem("GameObject/Network/NetworkManager", priority = 7)]
         public static GameObject CreateNetworkManager()
         {
-            var go = new GameObject("NetworkManager", typeof(NetworkManager), typeof(NetworkServer), typeof(NetworkClient), typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(ClientObjectManager), typeof(CharacterSpawner), typeof(KcpTransport), typeof(LogSettings));
+            var components = new Type[]
+            {
+                typeof(NetworkManager),
+                typeof(NetworkServer),
+                typeof(NetworkClient),
+                typeof(NetworkSceneManager),
+                typeof(ServerObjectManager),
+                typeof(ClientObjectManager),
+                typeof(CharacterSpawner),
+                typeof(UdpSocketFactory),
+                typeof(LogSettings)
+            };
+            var go = new GameObject("NetworkManager", components);
 
-            KcpTransport transport = go.GetComponent<KcpTransport>();
+            UdpSocketFactory socketFactory = go.GetComponent<UdpSocketFactory>();
             NetworkSceneManager nsm = go.GetComponent<NetworkSceneManager>();
 
             NetworkClient networkClient = go.GetComponent<NetworkClient>();
-            networkClient.Transport = transport;
+            networkClient.SocketFactory = socketFactory;
 
             NetworkServer networkServer = go.GetComponent<NetworkServer>();
-            networkServer.Transport = transport;
+            networkServer.SocketFactory = socketFactory;
 
             ServerObjectManager serverObjectManager = go.GetComponent<ServerObjectManager>();
             serverObjectManager.Server = networkServer;

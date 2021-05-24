@@ -540,5 +540,15 @@ namespace Mirage.Serialization
                 throw new InvalidOperationException($"Cannot send GameObject without a NetworkIdentity {value.name}");
             writer.WriteNetworkIdentity(identity);
         }
+
+        public static void WriteNullable<T>(this NetworkWriter writer, T? nullable) where T : struct
+        {
+            bool hasValue = nullable.HasValue;
+            writer.WriteBoolean(hasValue);
+            if (hasValue)
+            {
+                writer.Write(nullable.Value);
+            }
+        }
     }
 }

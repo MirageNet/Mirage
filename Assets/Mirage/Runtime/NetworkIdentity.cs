@@ -4,9 +4,9 @@ using System.Security.Cryptography;
 using Mirage.RemoteCalls;
 using UnityEngine;
 using UnityEngine.Serialization;
-using UnityEngine.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Mirage.Events;
 #if UNITY_EDITOR
 using UnityEditor;
 #if UNITY_2018_3_OR_NEWER
@@ -134,7 +134,7 @@ namespace Mirage
         /// This returns true if this object is the one that represents the player on the local machine.
         /// <para>This is set when the server has spawned an object for this particular client.</para>
         /// </summary>
-        public bool IsLocalPlayer => ClientObjectManager != null && ClientObjectManager.LocalPlayer == this;
+        public bool IsLocalPlayer => Client != null && Client.Player?.Identity == this;
 
         /// <summary>
         /// This returns true if this object is the authoritative player object on the client.
@@ -190,7 +190,7 @@ namespace Mirage
         INetworkPlayer _connectionToClient;
 
         /// <summary>
-        /// The NetworkConnection associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is valid for player and other owned objects in the server.
+        /// The INetworkPlayer associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is valid for player and other owned objects in the server.
         /// <para>Use it to return details such as the connection&apos;s identity, IP address and ready status.</para>
         /// </summary>
         public INetworkPlayer ConnectionToClient
@@ -311,51 +311,62 @@ namespace Mirage
         /// </summary>
         static readonly Dictionary<ulong, NetworkIdentity> sceneIds = new Dictionary<ulong, NetworkIdentity>();
 
+        [SerializeField] AddLateEvent _onStartServer = new AddLateEvent();
+        [SerializeField] AddLateEvent _onStartClient = new AddLateEvent();
+        [SerializeField] AddLateEvent _onStartLocalPlayer = new AddLateEvent();
+        [SerializeField] BoolAddLateEvent _onAuthorityChanged = new BoolAddLateEvent();
+        [SerializeField] AddLateEvent _onStopClient = new AddLateEvent();
+        [SerializeField] AddLateEvent _onStopServer = new AddLateEvent();
+
+        bool clientStarted;
+        bool localPlayerStarted;
+        bool hadAuthority;
+
         /// <summary>
         /// This is invoked for NetworkBehaviour objects when they become active on the server.
         /// <para>This could be triggered by NetworkServer.Listen() for objects in the scene, or by NetworkServer.Spawn() for objects that are dynamically created.</para>
         /// <para>This will be called for objects on a "host" as well as for object on a dedicated server.</para>
         /// <para>OnStartServer is invoked before this object is added to collection of spawned objects</para>
         /// </summary>
-        public UnityEvent OnStartServer = new UnityEvent();
+        public IAddLateEvent OnStartServer => _onStartServer;
 
         /// <summary>
         /// Called on every NetworkBehaviour when it is activated on a client.
         /// <para>Objects on the host have this function called, as there is a local client on the host. The values of SyncVars on object are guaranteed to be initialized correctly with the latest state from the server when this function is called on the client.</para>
         /// </summary>
-        public UnityEvent OnStartClient = new UnityEvent();
+        public IAddLateEvent OnStartClient => _onStartClient;
 
         /// <summary>
         /// Called when the local player object has been set up.
         /// <para>This happens after OnStartClient(), as it is triggered by an ownership message from the server. This is an appropriate place to activate components or functionality that should only be active for the local player, such as cameras and input.</para>
         /// </summary>
-        public UnityEvent OnStartLocalPlayer = new UnityEvent();
+        public IAddLateEvent OnStartLocalPlayer => _onStartLocalPlayer;
 
         /// <summary>
-        /// This is invoked on behaviours that have authority, based on context and <see cref="HasAuthority">NetworkIdentity.hasAuthority</see>.
+        /// This is invoked on behaviours that have authority given or removed, see <see cref="HasAuthority">NetworkIdentity.hasAuthority</see>
         /// <para>This is called after <see cref="OnStartServer">OnStartServer</see> and before <see cref="OnStartClient">OnStartClient.</see></para>
-        /// <para>When <see cref="AssignClientAuthority"/> is called on the server, this will be called on the client that owns the object. When an object is spawned with <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included, this will be called on the client that owns the object.</para>
+        /// <para>
+        /// When <see cref="AssignClientAuthority"/> or <see cref="RemoveClientAuthority"/> is called on the server, this will be called on the client that owns the object.
+        /// </para>
+        /// <para>
+        /// When an object is spawned with <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included,
+        /// this will be called on the client that owns the object.
+        /// </para>
         /// </summary>
-        public UnityEvent OnStartAuthority = new UnityEvent();
-
-        /// <summary>
-        /// This is invoked on behaviours when authority is removed.
-        /// <para>When NetworkIdentity.RemoveClientAuthority is called on the server, this will be called on the client that owns the object.</para>
-        /// </summary>
-        public UnityEvent OnStopAuthority = new UnityEvent();
+        public IAddLateEvent<bool> OnAuthorityChanged => _onAuthorityChanged;
 
         /// <summary>
         /// This is invoked on clients when the server has caused this object to be destroyed.
         /// <para>This can be used as a hook to invoke effects or do client specific cleanup.</para>
         /// </summary>
         ///<summary>Called on clients when the server destroys the GameObject.</summary>
-        public UnityEvent OnStopClient = new UnityEvent();
+        public IAddLateEvent OnStopClient => _onStopClient;
 
         /// <summary>
         /// This is called on the server when the object is unspawned
         /// </summary>
         /// <remarks>Can be used as hook to save player information</remarks>
-        public UnityEvent OnStopServer = new UnityEvent();
+        public IAddLateEvent OnStopServer => _onStopServer;
 
         /// <summary>
         /// Gets the NetworkIdentity from the sceneIds dictionary with the corresponding id
@@ -667,35 +678,33 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("OnStartServer " + this + " NetId:" + NetId + " SceneId:" + sceneId);
 
-            OnStartServer?.Invoke();
+            _onStartServer.Invoke();
         }
 
         internal void StopServer()
         {
-            OnStopServer?.Invoke();
+            _onStopServer.Invoke();
         }
 
-        bool clientStarted;
         internal void StartClient()
         {
             if (clientStarted)
                 return;
             clientStarted = true;
 
-            OnStartClient?.Invoke();
+            _onStartClient.Invoke();
         }
 
-        bool localPlayerStarted;
+
         internal void StartLocalPlayer()
         {
             if (localPlayerStarted)
                 return;
             localPlayerStarted = true;
 
-            OnStartLocalPlayer?.Invoke();
+            _onStartLocalPlayer.Invoke();
         }
 
-        bool hadAuthority;
         internal void NotifyAuthority()
         {
             if (!hadAuthority && HasAuthority)
@@ -707,12 +716,12 @@ namespace Mirage
 
         internal void StartAuthority()
         {
-            OnStartAuthority?.Invoke();
+            _onAuthorityChanged.Invoke(true);
         }
 
         internal void StopAuthority()
         {
-            OnStopAuthority?.Invoke();
+            _onAuthorityChanged.Invoke(false);
         }
 
         /// <summary>
@@ -739,7 +748,7 @@ namespace Mirage
 
         internal void StopClient()
         {
-            OnStopClient?.Invoke();
+            _onStopClient.Invoke();
         }
 
         // random number that is unlikely to appear in a regular data stream
@@ -915,6 +924,27 @@ namespace Mirage
             }
         }
 
+        internal void SetServerValues(NetworkServer networkServer, ServerObjectManager serverObjectManager)
+        {
+            Server = networkServer;
+            ServerObjectManager = serverObjectManager;
+            World = networkServer.World;
+            Client = networkServer.LocalClient;
+        }
+
+        internal void SetClientValues(ClientObjectManager clientObjectManager, SpawnMessage msg)
+        {
+            // apply local values for VR support
+            transform.localPosition = msg.position;
+            transform.localRotation = msg.rotation;
+            transform.localScale = msg.scale;
+            NetId = msg.netId;
+            World = clientObjectManager.Client.World;
+            Client = clientObjectManager.Client;
+            ClientObjectManager = clientObjectManager;
+            HasAuthority = msg.isOwner;
+        }
+
         /// <summary>
         /// Called when NetworkIdentity is destroyed
         /// </summary>
@@ -936,7 +966,7 @@ namespace Mirage
                 return;
             }
 
-            if (logger.LogEnabled()) logger.Log("Added observer " + player.Connection.GetEndPointAddress() + " added for " + gameObject);
+            if (logger.LogEnabled()) logger.Log($"Adding [{player.Connection.EndPoint}] as observer for {gameObject}");
             observers.Add(player);
             player.AddToVisList(this);
 
@@ -1166,6 +1196,18 @@ namespace Mirage
             networkBehavioursCache = null;
 
             ClearObservers();
+            ResetEvents();
+        }
+
+        private void ResetEvents()
+        {
+            // resets stored args and invoked flag
+            _onStartServer.Reset();
+            _onStartClient.Reset();
+            _onStartLocalPlayer.Reset();
+            _onAuthorityChanged.Reset();
+            _onStopClient.Reset();
+            _onStopServer.Reset();
         }
 
         internal void UpdateVars()

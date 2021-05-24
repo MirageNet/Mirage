@@ -141,7 +141,7 @@ namespace Mirage.Tests.Runtime.Host
             // another connection
             Assert.Throws<InvalidOperationException>(() =>
             {
-                testIdentity.AssignClientAuthority(new NetworkPlayer(Substitute.For<IConnection>()));
+                testIdentity.AssignClientAuthority(Substitute.For<INetworkPlayer>());
             });
         }
 
@@ -172,7 +172,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void RemoveClientAuthorityOfOwner()
         {
-            serverObjectManager.AddCharacter(server.LocalPlayer, gameObject);
+            serverObjectManager.ReplaceCharacter(server.LocalPlayer, gameObject);
 
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -197,7 +197,7 @@ namespace Mirage.Tests.Runtime.Host
             UnityAction mockHandler = Substitute.For<UnityAction>();
             testIdentity.OnStopServer.AddListener(mockHandler);
 
-            serverObjectManager.UnSpawn(gameObject);
+            serverObjectManager.Destroy(gameObject, false);
 
             await UniTask.Delay(1);
             mockHandler.Received().Invoke();

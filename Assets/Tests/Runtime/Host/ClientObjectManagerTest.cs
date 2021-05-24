@@ -159,7 +159,7 @@ namespace Mirage.Tests.Runtime.Host
             replacementIdentity.AssetId = Guid.NewGuid();
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            serverObjectManager.ReplaceCharacter(server.LocalPlayer, client, playerReplacement, true);
+            serverObjectManager.ReplaceCharacter(server.LocalPlayer, playerReplacement, true);
 
             Assert.That(server.LocalClient.Player.Identity, Is.EqualTo(replacementIdentity));
         }

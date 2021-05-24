@@ -1,10 +1,13 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using Mirage.Logging;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.UIElements;
+using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 /**
  * Docs used:
@@ -60,6 +63,17 @@ namespace Mirage
         private static string firstStartUpKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
 
+        /// <summary>
+        ///     Hard coded for source code version. If package version is found, this will
+        ///     be set later on to package version. through checking for packages anyways.
+        /// </summary>
+        private static string changeLogPath = "Assets/Mirage/CHANGELOG.md";
+
+        private static string GetVersion()
+        {
+            return typeof(NetworkIdentity).Assembly.GetName().Version.ToString();
+        }
+
         #region Handle visibility
 
         private static bool ShowChangeLog
@@ -88,7 +102,7 @@ namespace Mirage
         private static void ShowWindowOnFirstStart()
         {
             EditorApplication.update -= ShowWindowOnFirstStart;
-            firstStartUpKey = Version.Current;
+            firstStartUpKey = GetVersion();
 
             if ((!EditorPrefs.GetBool(firstTimeMirageKey, false) || !EditorPrefs.GetBool(firstStartUpKey, false)) && firstStartUpKey != "MirageUnknown")
             {
@@ -135,7 +149,9 @@ namespace Mirage
 
             //set the version text
             Label versionText = root.Q<Label>("VersionText");
-            versionText.text = "v" + Version.Current;
+            versionText.text = "v" + GetVersion();
+
+            DrawChangeLog(ParseChangeLog());
 
             #region Page buttons
 
@@ -184,7 +200,10 @@ namespace Mirage
             };
 
             Button redirectButton = rootVisualElement.Q<VisualElement>(tab).Q<Button>("Redirect");
-            redirectButton.clicked += () => Application.OpenURL(url);
+            if (redirectButton != null)
+            {
+                redirectButton.clicked += () => Application.OpenURL(url);
+            }
         }
 
         //switch between content
@@ -226,6 +245,72 @@ namespace Mirage
             else
             {
                 button.EnableInClassList("light-selected-tab", toggle);
+            }
+        }
+
+        //parse the change log file
+        private List<string> ParseChangeLog()
+        {
+            var content = new List<string>();
+
+            using (var reader = new StreamReader(changeLogPath))
+            {
+                string line;
+
+                while ((line = reader.ReadLine()) != null)
+                {
+                    //we dont need to parse an empty string
+                    if (line == string.Empty)
+                        continue;
+
+                    //always add the first line
+                    if (content.Count == 0)
+                    {
+                        content.Add(line);
+                        continue;
+                    }
+
+                    //if we havent reached the next version yet
+                    if (line.Contains("https://github.com/MirageNet/Mirage/compare/"))
+                        break;
+
+                    content.Add(line);
+                }
+            }
+
+            return content;
+        }
+
+        //draw the parsed information
+        private void DrawChangeLog(List<string> content)
+        {
+            Label changeLogText = rootVisualElement.Q<Label>("ChangeLogText");
+
+            for (int i = 0; i < content.Count; i++)
+            {
+                string item = content[i];
+
+                //if the item is a version
+                if (item.Contains("# [") || item.Contains("## ["))
+                {
+                    string version = GetVersion();
+                    rootVisualElement.Q<Label>("ChangeLogVersion").text = "Version " + version.Substring(0, version.Length - 2);
+                }
+                //if the item is a change title
+                else if (item.Contains("###"))
+                {
+                    //only add a space above the title if it isn't the first title
+                    if (i > 2) { changeLogText.text += "\n"; }
+
+                    changeLogText.text += item.Substring(4) + "\n";
+                }
+                //if the item is a change
+                else
+                {
+                    string change = item.Split(new string[] { "([" }, StringSplitOptions.None)[0];
+                    change = change.Replace("*", "-");
+                    changeLogText.text += change + "\n";
+                }
             }
         }
 
@@ -320,31 +405,45 @@ namespace Mirage
 
         private void ListPackageProgress()
         {
-            if (listRequest.IsCompleted)
+            if (!listRequest.IsCompleted)
             {
-                EditorApplication.update -= ListPackageProgress;
+                return;
+            }
 
-                if (listRequest.Status == StatusCode.Success)
-                {
-                    var installedPackages = new List<string>();
+            EditorApplication.update -= ListPackageProgress;
 
-                    //populate installedPackages
-                    foreach (UnityEditor.PackageManager.PackageInfo package in listRequest.Result)
+            switch (listRequest.Status)
+            {
+                //log error
+                case StatusCode.Success:
                     {
-                        Package? miragePackage = Packages.Find((x) => x.packageName == package.name);
-                        if (miragePackage != null)
+                        var installedPackages = new List<string>();
+
+                        //populate installedPackages
+                        foreach (PackageInfo package in listRequest.Result)
                         {
+                            Package? miragePackage = Packages.Find((x) => x.packageName == package.name);
+
+                            if (miragePackage?.packageName == null)
+                            {
+                                continue;
+                            }
+
+                            if (miragePackage.Value.packageName != null && miragePackage.Value.packageName.Equals("Mirage"))
+                            {
+                                // Found mirage package let's set up our change log path.
+                                changeLogPath = "Packages/com.miragenet.mirage/CHANGELOG.md";
+                            }
+
                             installedPackages.Add(miragePackage.Value.displayName);
                         }
-                    }
 
-                    ConfigureInstallButtons(installedPackages);
-                }
-                //log error
-                else if (listRequest.Status == StatusCode.Failure)
-                {
-                    if (logger.ErrorEnabled()) logger.LogError($"There was an issue finding packages. \n Error Code: {listRequest.Error.errorCode}\n Error Message: {listRequest.Error.message}");
-                }
+                        ConfigureInstallButtons(installedPackages);
+                        break;
+                    }
+                case StatusCode.Failure:
+                    if (logger.ErrorEnabled()) logger.LogError($"There was an issue finding packages. \n Error Code: {listRequest.Error.errorCode }\n Error Message: {listRequest.Error.message}");
+                    break;
             }
         }
 

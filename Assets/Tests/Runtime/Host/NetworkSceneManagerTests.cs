@@ -135,6 +135,16 @@ namespace Mirage.Tests.Runtime.Host
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         }
 
+        [Test]
+        public void ClientSceneReadyAfterChangedTest()
+        {
+            bool _readyAfterSceneChanged = false;
+            sceneManager.ClientSceneChanged.AddListener((string name, SceneOperation operation) => _readyAfterSceneChanged = client.Player.IsReady);
+            sceneManager.OnClientSceneChanged("test", SceneOperation.Normal);
+
+            Assert.That(_readyAfterSceneChanged, Is.True);
+        }
+
         [UnityTest]
         public IEnumerator ChangeSceneAdditiveLoadTest() => UniTask.ToCoroutine(async () =>
         {

@@ -2,6 +2,7 @@
     "name": "Mirage.Tests.Common",
     "references": [
         "Mirage",
+        "Mirage.SocketLayer",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "UniTask"

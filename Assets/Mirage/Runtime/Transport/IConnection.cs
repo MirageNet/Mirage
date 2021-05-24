@@ -5,16 +5,7 @@ using Cysharp.Threading.Tasks;
 
 namespace Mirage
 {
-
-    public static class Channel
-    {
-        // 2 well known channels
-        // transports can implement other channels
-        // to expose their features
-        public const int Reliable = 0;
-        public const int Unreliable = 1;
-    }
-
+    [System.Obsolete("Use peer instead", true)]
     public interface IConnection
     {
         void Send(ArraySegment<byte> data, int channel = Channel.Reliable);

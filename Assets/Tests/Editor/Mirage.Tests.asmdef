@@ -4,11 +4,13 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Mirage",
+        "Mirage.SocketLayer",
         "Mirage.Tests.Common",
         "Mirage.Components",
         "Mirage.Editor",
         "UniTask",
-        "Unity.Mirage.CodeGen"
+        "Unity.Mirage.CodeGen",
+        "Mirage.Sockets.Udp"
     ],
     "includePlatforms": [
         "Editor"
