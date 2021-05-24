@@ -72,10 +72,6 @@ namespace Mirage.Sockets.Udp
         Socket socket;
         IPEndPoint AnyEndpoint;
 
-        public UdpSocket()
-        {
-        }
-
         public void Bind(EndPoint endPoint)
         {
             AnyEndpoint = endPoint as IPEndPoint;
@@ -88,14 +84,27 @@ namespace Mirage.Sockets.Udp
 
         static Socket CreateSocket(EndPoint endPoint)
         {
+            var socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
+            {
+                Blocking = false,
+            };
+
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            TrySetIOControl(socket);
+
+            return socket;
+        }
+
+        private static void TrySetIOControl(Socket socket)
+        {
             try
             {
-                var socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
+                if (Application.platform != RuntimePlatform.WindowsPlayer && Application.platform != RuntimePlatform.WindowsEditor)
                 {
-                    Blocking = false,
-                };
-
-                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                    // IOControl only seems to work on windows
+                    // gives "SocketException: The descriptor is not a socket" when running on github action on Linux
+                    return;
+                }
 
                 // stops "SocketException: Connection reset by peer"
                 // this error seems to be caused by a failed send, resulting in the next polling being true, even those endpoint is closed
@@ -108,14 +117,11 @@ namespace Mirage.Sockets.Udp
                 byte[] _false = new byte[] { 0, 0, 0, 0 };
 
                 socket.IOControl(unchecked((int)SIO_UDP_CONNRESET), _false, null);
-
-                return socket;
             }
             catch (Exception e)
             {
+                Debug.LogError("Exception setting IOControl");
                 Debug.LogException(e);
-                Debug.LogError("Could not Create Udp Socket");
-                return null;
             }
         }
 
