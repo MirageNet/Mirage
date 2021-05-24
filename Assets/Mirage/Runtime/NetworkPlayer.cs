@@ -356,7 +356,7 @@ namespace Mirage
         const int ACK_MASK_BITS = sizeof(ulong) * 8;
         const int WINDOW_SIZE = 512;
         // packages will be acked no longer than this time
-        [System.Obsolete("Use Peer instead", true)]
+        [Obsolete("Use Peer instead", true)]
         public float NOTIFY_ACK_TIMEOUT = 0.3f;
 
         private Sequencer sequencer = new Sequencer(16);
@@ -377,7 +377,7 @@ namespace Mirage
         /// <typeparam name="T">type of message to send</typeparam>
         /// <param name="message">message to send</param>
         /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
-        [System.Obsolete("Use Peer instead", true)]
+        [Obsolete("Use Peer instead", true)]
         public void SendNotify<T>(T message, object token, int channelId = Channel.Unreliable)
         {
             if (sendWindow.Count == WINDOW_SIZE)
@@ -410,7 +410,7 @@ namespace Mirage
 
         }
 
-        [System.Obsolete("Use Peer instead", true)]
+        [Obsolete("Use Peer instead", true)]
         internal void ReceiveNotify(NotifyPacket notifyPacket, NetworkReader networkReader, int channelId)
         {
             int sequenceDistance = (int)sequencer.Distance(notifyPacket.Sequence, receiveSequence);
@@ -448,7 +448,7 @@ namespace Mirage
         // the other end just sent us a message
         // and it told us the latest message it got
         // and the ack mask
-        [System.Obsolete("Use Peer instead", true)]
+        [Obsolete("Use Peer instead", true)]
         private void AckPackets(ushort receiveSequence, ulong ackMask)
         {
             while (sendWindow.Count > 0)
@@ -477,13 +477,13 @@ namespace Mirage
         /// <summary>
         /// Raised when a message is delivered
         /// </summary>
-        [System.Obsolete("Use Peer instead", true)]
+        [Obsolete("Use Peer instead", true)]
         public event Action<INetworkPlayer, object> NotifyDelivered;
 
         /// <summary>
         /// Raised when a message is lost
         /// </summary>
-        [System.Obsolete("Use Peer instead", true)]
+        [Obsolete("Use Peer instead", true)]
         public event Action<INetworkPlayer, object> NotifyLost;
         #endregion
     }

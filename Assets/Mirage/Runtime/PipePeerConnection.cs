@@ -7,9 +7,9 @@ using UnityEngine;
 namespace Mirage
 {
     /// <summary>
-    /// A <see cref="SocketLayer.IConnection"/> that is directly sends data to a <see cref="IDataHandler"/>
+    /// A <see cref="IConnection"/> that is directly sends data to a <see cref="IDataHandler"/>
     /// </summary>
-    public class PipePeerConnection : SocketLayer.IConnection
+    public class PipePeerConnection : IConnection
     {
         static readonly ILogger logger = LogFactory.GetLogger<PipePeerConnection>();
 
@@ -20,7 +20,7 @@ namespace Mirage
         /// <summary>
         /// other connection that is passed to handler
         /// </summary>
-        SocketLayer.IConnection otherConnection;
+        IConnection otherConnection;
 
         /// <summary>
         /// Name used for debugging
@@ -29,7 +29,7 @@ namespace Mirage
 
         private PipePeerConnection() { }
 
-        public static (SocketLayer.IConnection clientConn, SocketLayer.IConnection serverConn) Create(IDataHandler clientHandler, IDataHandler serverHandler)
+        public static (IConnection clientConn, IConnection serverConn) Create(IDataHandler clientHandler, IDataHandler serverHandler)
         {
             var client = new PipePeerConnection();
             var server = new PipePeerConnection();
@@ -54,29 +54,29 @@ namespace Mirage
             return name;
         }
 
-        EndPoint SocketLayer.IConnection.EndPoint => new PipeEndPoint();
+        EndPoint IConnection.EndPoint => new PipeEndPoint();
 
 
         public ConnectionState State { get; private set; } = ConnectionState.Connected;
 
-        void SocketLayer.IConnection.Disconnect()
+        void IConnection.Disconnect()
         {
             State = ConnectionState.Disconnected;
         }
 
-        INotifyToken SocketLayer.IConnection.SendNotify(byte[] packet)
+        INotifyToken IConnection.SendNotify(byte[] packet)
         {
             receive(packet);
 
             return new PipeNotifyToken();
         }
 
-        void SocketLayer.IConnection.SendReliable(byte[] message)
+        void IConnection.SendReliable(byte[] message)
         {
             receive(message);
         }
 
-        void SocketLayer.IConnection.SendUnreliable(byte[] packet)
+        void IConnection.SendUnreliable(byte[] packet)
         {
             receive(packet);
         }

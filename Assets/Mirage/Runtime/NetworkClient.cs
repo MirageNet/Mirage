@@ -114,7 +114,7 @@ namespace Mirage
                 peer.OnConnected += Peer_OnConnected;
                 peer.OnConnectionFailed += Peer_OnConnectionFailed;
                 peer.OnDisconnected += Peer_OnDisconnected;
-                SocketLayer.IConnection connection = peer.Connect(endPoint);
+                IConnection connection = peer.Connect(endPoint);
 
                 // todo do we initialize now or after connected
                 World = new NetworkWorld();
@@ -134,14 +134,14 @@ namespace Mirage
             }
         }
 
-        private void Peer_OnConnected(SocketLayer.IConnection conn)
+        private void Peer_OnConnected(IConnection conn)
         {
             Time.UpdateClient(this);
             connectState = ConnectState.Connected;
             _connected.Invoke(Player);
         }
 
-        private void Peer_OnConnectionFailed(SocketLayer.IConnection conn, RejectReason reason)
+        private void Peer_OnConnectionFailed(IConnection conn, RejectReason reason)
         {
             if (logger.LogEnabled()) logger.Log($"Failed to connect to {conn.EndPoint} with reason {reason}");
             Player.MarkAsDisconnected();
@@ -150,7 +150,7 @@ namespace Mirage
             Cleanup();
         }
 
-        private void Peer_OnDisconnected(SocketLayer.IConnection conn, DisconnectReason reason)
+        private void Peer_OnDisconnected(IConnection conn, DisconnectReason reason)
         {
             if (logger.LogEnabled()) logger.Log($"Disconnected from {conn.EndPoint} with reason {reason}");
             Player?.MarkAsDisconnected();
@@ -172,7 +172,7 @@ namespace Mirage
 
             // create local connection objects and connect them
             var dataHandler = new DataHandler();
-            (SocketLayer.IConnection clientConn, SocketLayer.IConnection serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler);
+            (IConnection clientConn, IConnection serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler);
 
             // set up client before connecting to server, server could invoke handlers
             IsLocalClient = true;
@@ -303,16 +303,16 @@ namespace Mirage
 
         internal class DataHandler : IDataHandler
         {
-            SocketLayer.IConnection connection;
+            IConnection connection;
             INetworkPlayer player;
 
-            public void SetConnection(SocketLayer.IConnection connection, INetworkPlayer player)
+            public void SetConnection(IConnection connection, INetworkPlayer player)
             {
                 this.connection = connection;
                 this.player = player;
             }
 
-            public void ReceiveMessage(SocketLayer.IConnection connection, ArraySegment<byte> message)
+            public void ReceiveMessage(IConnection connection, ArraySegment<byte> message)
             {
                 logger.Assert(this.connection == connection);
                 player.HandleMessage(message);

@@ -122,6 +122,6 @@ namespace Mirage
     /// <summary>
     /// Draws UnityEvent as a foldout
     /// </summary>
-    [System.AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field)]
     public sealed class FoldoutEventAttribute : PropertyAttribute { }
 }

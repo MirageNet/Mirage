@@ -122,7 +122,7 @@ namespace Mirage
         /// A list of local connections on the server.
         /// </summary>
         public readonly HashSet<INetworkPlayer> Players = new HashSet<INetworkPlayer>();
-        readonly Dictionary<SocketLayer.IConnection, INetworkPlayer> connections = new Dictionary<SocketLayer.IConnection, INetworkPlayer>();
+        readonly Dictionary<IConnection, INetworkPlayer> connections = new Dictionary<IConnection, INetworkPlayer>();
 
         IReadOnlyCollection<INetworkPlayer> INetworkServer.Players => Players;
 
@@ -246,13 +246,13 @@ namespace Mirage
         }
 
 
-        private void Peer_OnConnected(SocketLayer.IConnection conn)
+        private void Peer_OnConnected(IConnection conn)
         {
             var networkConnectionToClient = new NetworkPlayer(conn);
             ConnectionAccepted(networkConnectionToClient);
         }
 
-        private void Peer_OnDisconnected(SocketLayer.IConnection conn, DisconnectReason reason)
+        private void Peer_OnDisconnected(IConnection conn, DisconnectReason reason)
         {
             if (logger.LogEnabled()) logger.Log($"[{conn}] discconnected with reason {reason}");
 
@@ -351,7 +351,7 @@ namespace Mirage
         /// </summary>
         /// <param name="client">The local client</param>
         /// <param name="connection">The connection to the client</param>
-        internal void SetLocalConnection(INetworkClient client, SocketLayer.IConnection connection)
+        internal void SetLocalConnection(INetworkClient client, IConnection connection)
         {
             if (LocalPlayer != null)
             {
@@ -457,14 +457,14 @@ namespace Mirage
         /// </summary>
         class DataHandler : IDataHandler
         {
-            readonly Dictionary<SocketLayer.IConnection, INetworkPlayer> players;
+            readonly Dictionary<IConnection, INetworkPlayer> players;
 
-            public DataHandler(Dictionary<SocketLayer.IConnection, INetworkPlayer> connections)
+            public DataHandler(Dictionary<IConnection, INetworkPlayer> connections)
             {
                 players = connections;
             }
 
-            public void ReceiveMessage(SocketLayer.IConnection connection, ArraySegment<byte> message)
+            public void ReceiveMessage(IConnection connection, ArraySegment<byte> message)
             {
                 if (players.TryGetValue(connection, out INetworkPlayer handler))
                 {

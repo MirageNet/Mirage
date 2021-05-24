@@ -11,9 +11,9 @@ namespace Mirage
         class ConnectionHandler
         {
             public IDataHandler handler;
-            public SocketLayer.IConnection connection;
+            public IConnection connection;
 
-            public ConnectionHandler(IDataHandler handler, SocketLayer.IConnection connection)
+            public ConnectionHandler(IDataHandler handler, IConnection connection)
             {
                 this.handler = handler;
                 this.connection = connection;
@@ -46,7 +46,7 @@ namespace Mirage
         {
             IDataHandler handler1 = Substitute.For<IDataHandler>();
             IDataHandler handler2 = Substitute.For<IDataHandler>();
-            (SocketLayer.IConnection connection1, SocketLayer.IConnection connection2) = PipePeerConnection.Create(handler1, handler2);
+            (IConnection connection1, IConnection connection2) = PipePeerConnection.Create(handler1, handler2);
 
             conn1 = new ConnectionHandler(handler1, connection1);
             conn2 = new ConnectionHandler(handler2, connection2);

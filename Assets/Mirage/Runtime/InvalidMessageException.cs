@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Mirage
 {
 
-    [System.Serializable]
+    [Serializable]
     public class InvalidMessageException : Exception
     {
         public InvalidMessageException()

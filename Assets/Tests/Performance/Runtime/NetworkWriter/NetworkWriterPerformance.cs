@@ -65,7 +65,7 @@ namespace Mirage.Tests.Performance
             {
                 for (int i = 0; i < 1000; i++)
                 {
-                    writer.Write<int>(i * 1000);
+                    writer.Write(i * 1000);
                 }
             }
         }
