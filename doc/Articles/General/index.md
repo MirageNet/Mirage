@@ -11,18 +11,19 @@ Mirage is made of 3 layers:
 <div class="mermaid">
 graph TD
     Obj[\Object Layer/] --> Msg
-    Msg[\Message Layer/] --> Transport
-    Transport[\Transport Layer/]
+    Msg[\Message Layer/] --> Socket
+    Socket[\Socket Layer/]
 </div>
 
 From the bottom up:
 
-## Transport Layer
+## Socket Layer
 
-The `Transport Layer` is concerned about sending and receiving bytes.  It has no knowledge of what it is sending.  There are several transport implementations.  The default transport in Mirage is KCP. 
+The `Socket Layer` is concerned about sending and receiving bytes.  It has no knowledge of what it is sending.  There are several socket factory implementations.  The default socket factory in Mirage is UDPSocketFactory. 
 
-If you want to implement a transport, create a class that extends <xref:Mirage.Transport>.  It's primary responsibility is accepting and opening connections.
-You will also need to create a class that represents a connection by implementing <xref:Mirage.IConnection>
+If you want to implement a socket factory, create a class that extends <xref:Mirage.SocketLayer.SocketFactory>.  It's primary responsibility is send and receive data.
+You will also need to create a class that represents a link between Mirage and the outside world by implementing `Mirage.SocketLayer.ISocket`.
+Reliability is handled on top of the factory by Mirage.
 
 ## Message Layer
 
@@ -32,7 +33,7 @@ If you wish to use this funtionality, you will need to have a <xref:Mirage.Netwo
 
 ## Object Layer
 
-This layer is the highest level layer,  the classes in this layer are concerned about [synchcronizing state](../Guides/Sync/index.md) between objects, as well as sending [RPC calls](../Guides/Communications/RemoteActions.md).
+This layer is the highest level layer,  the classes in this layer are concerned about [synchronizing state](../Guides/Sync/index.md) between objects, as well as sending [RPC calls](../Guides/Communications/RemoteActions.md).
 
 The client needs a <xref:Mirage.ClientObjectManager>,  the server needs a <xref:Mirage.ServerObjectManager>. It will spawn and destroy objects and keep the objects in the client in sync with the objects in the server
 
