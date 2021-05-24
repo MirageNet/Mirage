@@ -80,41 +80,42 @@ namespace Mirage.Sockets.Udp
         {
             AnyEndpoint = endPoint as IPEndPoint;
 
-            socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
+            socket = CreateSocket(endPoint);
+            socket.DualMode = true;
+
+            socket.Bind(endPoint);
+        }
+
+        static Socket CreateSocket(EndPoint endPoint)
+        {
+            var socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
             {
-                DualMode = true,
                 Blocking = false,
             };
 
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
 
-            socket.Bind(endPoint);
-            // todo check socket options
-            /*
-            // options from https://github.com/phodoval/Mirage/blob/SimplifyTransports/Assets/Mirage/Runtime/Transport/Udp/UdpSocket.cs#L27
-            socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.ReuseAddress, true);
+            // stops "SocketException: Connection reset by peer"
+            // this error seems to be caused by a failed send, resulting in the next polling being true, even those endpoint is closed
+            // see https://stackoverflow.com/a/15232187/8479976
 
+            // this IOControl sets the reporting of "unrealable" to false, stoping SocketException after a connection closes without sending disconnect message
             const uint IOC_IN = 0x80000000;
             const uint IOC_VENDOR = 0x18000000;
-            socket.IOControl(unchecked((int)(IOC_IN | IOC_VENDOR | 12)), new[] { Convert.ToByte(false) }, null);
-             */
+            const uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+            byte[] _false = new byte[] { 0, 0, 0, 0 };
 
+            socket.IOControl(unchecked((int)SIO_UDP_CONNRESET), _false, null);
 
-            // maybe fix for "Connection reset by peer" https://stackoverflow.com/a/10337850/8479976
-            // socket options https://flylib.com/books/en/1.398.1.49/1/
+            return socket;
         }
 
         public void Connect(EndPoint endPoint)
         {
             AnyEndpoint = endPoint as IPEndPoint;
 
-            socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
-            {
-                Blocking = false,
-            };
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            socket = CreateSocket(endPoint);
 
-            // todo check if connect should be called for udp or if it should be something else
             socket.Connect(endPoint);
         }
 
@@ -130,7 +131,7 @@ namespace Mirage.Sockets.Udp
         /// <returns>true if data to read</returns>
         public bool Poll()
         {
-            return socket.Poll(0, SelectMode.SelectRead);
+            return socket.Poll(0, SelectMode.SelectRead) && socket.Available > 0;
         }
 
         public int Receive(byte[] buffer, out EndPoint endPoint)
