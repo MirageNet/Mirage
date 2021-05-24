@@ -172,7 +172,7 @@ namespace Mirage.SocketLayer
 
         public INotifyToken SendNotify(byte[] packet)
         {
-            // todo batch nofity?
+            // todo batch Notify?
             if (packet.Length + HEADER_SIZE_NOTIFY > MTU)
             {
                 throw new IndexOutOfRangeException($"Message is bigger than MTU, max Notify message size is {MTU - HEADER_SIZE_NOTIFY}");
@@ -282,7 +282,7 @@ namespace Mirage.SocketLayer
 
 
         /// <summary>
-        /// Receives incoming nofity packet
+        /// Receives incoming Notify packet
         /// <para>Ignores duplicate or late packets</para>
         /// </summary>
         /// <param name="packet"></param>

@@ -100,7 +100,7 @@ namespace Mirage
 
         /// <summary>
         /// A list of the NetworkIdentity objects owned by this connection. This list is read-only.
-        /// <para>This includes the player object for the connection - if it has localPlayerAutority set, and any objects spawned with local authority or set with AssignLocalAuthority.</para>
+        /// <para>This includes the player object for the connection - if it has localPlayerAuthority set, and any objects spawned with local authority or set with AssignLocalAuthority.</para>
         /// <para>This list can be used to validate messages from clients, to ensure that clients are only trying to control objects that they own.</para>
         /// </summary>
         // IMPORTANT: this needs to be <NetworkIdentity>, not <uint netId>. fixes a bug where DestroyOwnedObjects wouldn't find

@@ -279,10 +279,10 @@ namespace Mirage
             internal set
             {
                 string newAssetIdString = value == Guid.Empty ? string.Empty : value.ToString("N");
-                string oldAssetIdSrting = m_AssetId;
+                string oldAssetIdString = m_AssetId;
 
                 // they are the same, do nothing
-                if (oldAssetIdSrting == newAssetIdString)
+                if (oldAssetIdString == newAssetIdString)
                 {
                     return;
                 }
@@ -290,13 +290,13 @@ namespace Mirage
                 // new is empty
                 if (string.IsNullOrEmpty(newAssetIdString))
                 {
-                    throw new ArgumentException($"Can not set AssetId to empty guid on NetworkIdentity '{name}', old assetId '{oldAssetIdSrting}'");
+                    throw new ArgumentException($"Can not set AssetId to empty guid on NetworkIdentity '{name}', old assetId '{oldAssetIdString}'");
                 }
 
                 // old not empty
-                if (!string.IsNullOrEmpty(oldAssetIdSrting))
+                if (!string.IsNullOrEmpty(oldAssetIdString))
                 {
-                    throw new InvalidOperationException($"Can not Set AssetId on NetworkIdentity '{name}' becasue it already had an assetId, current assetId '{oldAssetIdSrting}', attempted new assetId '{newAssetIdString}'");
+                    throw new InvalidOperationException($"Can not Set AssetId on NetworkIdentity '{name}' because it already had an assetId, current assetId '{oldAssetIdString}', attempted new assetId '{newAssetIdString}'");
                 }
 
                 // old is empty

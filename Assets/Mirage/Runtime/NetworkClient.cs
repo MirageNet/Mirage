@@ -47,7 +47,7 @@ namespace Mirage
         public IAddLateEvent<INetworkPlayer> Connected => _connected;
 
         /// <summary>
-        /// Event fires after the Client connection has sucessfully been authenticated with its Server.
+        /// Event fires after the Client connection has successfully been authenticated with its Server.
         /// </summary>
         public IAddLateEvent<INetworkPlayer> Authenticated => _authenticated;
 
@@ -213,7 +213,7 @@ namespace Mirage
         /// </summary>
         public void Disconnect()
         {
-            // todo exit early if not active/initilzed
+            // todo exit early if not active/initialized
 
             Player?.Connection?.Disconnect();
             _disconnected?.Invoke();

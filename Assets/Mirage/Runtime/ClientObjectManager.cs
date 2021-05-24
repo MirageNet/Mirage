@@ -436,7 +436,7 @@ namespace Mirage
                 spawnableObjects.Remove(sceneId);
                 return identity;
             }
-            logger.LogWarning("Could not find scene object with sceneid:" + sceneId.ToString("X"));
+            logger.LogWarning("Could not find scene object with sceneId:" + sceneId.ToString("X"));
             return null;
         }
 

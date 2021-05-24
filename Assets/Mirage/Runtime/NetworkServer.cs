@@ -145,7 +145,7 @@ namespace Mirage
         /// </summary>
         public void Stop()
         {
-            // todo exit early if not active/initilzed
+            // todo exit early if not active/initialized
 
             if (LocalClient != null)
             {
@@ -453,7 +453,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// This class will later be removed when we have a better implemenation for IDataHandler
+        /// This class will later be removed when we have a better implementation for IDataHandler
         /// </summary>
         class DataHandler : IDataHandler
         {

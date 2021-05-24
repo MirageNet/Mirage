@@ -100,11 +100,11 @@ namespace Mirage
 
             // padding
             var previewPadding = new RectOffset(-5, -5, -5, -5);
-            Rect paddedr = previewPadding.Add(r);
+            Rect paddedRect = previewPadding.Add(r);
 
             //Centering
-            float initialX = paddedr.x + 10;
-            float Y = paddedr.y + 10;
+            float initialX = paddedRect.x + 10;
+            float Y = paddedRect.y + 10;
 
             Y = DrawNetworkIdentityInfo(identity, initialX, Y);
 

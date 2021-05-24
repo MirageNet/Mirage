@@ -82,7 +82,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
 
         [Test]
-        public void ClientNofitySend()
+        public void ClientNotifySend()
         {
             Assert.Ignore("not implemented");
         }
@@ -94,7 +94,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
 
         [Test]
-        public void ClientNofityAck()
+        public void ClientNotifyAck()
         {
             Assert.Ignore("not implemented");
         }

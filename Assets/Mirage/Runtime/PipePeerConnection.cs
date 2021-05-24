@@ -14,7 +14,7 @@ namespace Mirage
         static readonly ILogger logger = LogFactory.GetLogger<PipePeerConnection>();
 
         /// <summary>
-        /// handler of other conection
+        /// handler of other connection
         /// </summary>
         IDataHandler otherHandler;
         /// <summary>

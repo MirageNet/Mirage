@@ -11,7 +11,7 @@ namespace Mirage
         IAddLateEvent<INetworkPlayer> Connected { get; }
 
         /// <summary>
-        /// Event fires after the Client connection has sucessfully been authenticated with its Server.
+        /// Event fires after the Client connection has successfully been authenticated with its Server.
         /// </summary>
         IAddLateEvent<INetworkPlayer> Authenticated { get; }
 
