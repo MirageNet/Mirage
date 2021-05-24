@@ -11,7 +11,7 @@ plugins:
         Assets/Mirage/Samples~/AssemblyInfo.cs
         Assets/Mirage/Samples~/RigidbodyPhysics/Scripts/AssemblyInfo.cs
         Assets/Mirage/Weaver/AssemblyInfo.cs
-        Assets/Tests/Performance/Runtime/HeadlessBenchmark/AssemblyInfo.cs
+        Assets/Tests/Performance/Runtime/HeadlessBenchmark/AssemblyInfo.cs"
   - - '@semantic-release/changelog'
     - changelogFile: 'Assets/Mirage/CHANGELOG.md'
   - - '@semantic-release/npm'
