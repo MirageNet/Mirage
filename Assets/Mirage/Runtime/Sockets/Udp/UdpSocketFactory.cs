@@ -103,6 +103,7 @@ namespace Mirage.Sockets.Udp
                 {
                     // IOControl only seems to work on windows
                     // gives "SocketException: The descriptor is not a socket" when running on github action on Linux
+                    // see https://github.com/mono/mono/blob/f74eed4b09790a0929889ad7fc2cf96c9b6e3757/mcs/class/System/System.Net.Sockets/Socket.cs#L2763-L2765
                     return;
                 }
 
