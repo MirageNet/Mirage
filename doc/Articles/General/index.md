@@ -22,7 +22,7 @@ From the bottom up:
 The `Socket Layer` is concerned about sending and receiving bytes.  It has no knowledge of what it is sending.  There are several socket factory implementations.  The default socket factory in Mirage is UDPSocketFactory. 
 
 If you want to implement a socket factory, create a class that extends <xref:Mirage.SocketLayer.SocketFactory>.  It's primary responsibility is send and receive data.
-You will also need to create a class that represents a link between Mirage and the outside world by implementing <xref:Mirage.SocketLayer.ISocket>
+You will also need to create a class that represents a link between Mirage and the outside world by implementing `Mirage.SocketLayer.ISocket`.
 Reliability is handled on top of the factory by Mirage.
 
 ## Message Layer
