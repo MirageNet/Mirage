@@ -11,14 +11,14 @@ namespace Mirage
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
 
-        readonly bool KickPlayerOnException;
+        readonly bool disconnectOnException;
 
         // message handlers for this connection
         internal readonly Dictionary<int, NetworkMessageDelegate> messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
 
-        public MessageHandler(bool kickPlayerOnException)
+        public MessageHandler(bool disconnectOnException)
         {
-            KickPlayerOnException = kickPlayerOnException;
+            this.disconnectOnException = disconnectOnException;
         }
 
         // Handles network messages on client and server
@@ -129,8 +129,12 @@ namespace Mirage
                 }
                 catch (Exception e)
                 {
-                    logger.LogError($"{e.GetType()} in Message handler (see stack below), Closed connection: {this}\n{e}");
-                    Connection?.Disconnect();
+                    string disconnectMessage = disconnectOnException ? ", Closed connection: {this}" : "";
+                    logger.LogError($"{e.GetType()} in Message handler (see stack below){disconnectMessage}\n{e}");                    
+                    if (disconnectOnException)
+                    {
+                        player.Disconnect();
+                    }
                 }
             }
         }

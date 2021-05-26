@@ -38,6 +38,8 @@ namespace Mirage
         [Min(1)]
         public int MaxConnections = 4;
 
+        public bool DisconnectOnException = true;
+
         /// <summary>
         /// <para>If you disable this, the server will not listen for incoming connections on the regular network port.</para>
         /// <para>This can be used if the game is running in host mode and does not want external players to be able to connect - making it like a single-player game.</para>
@@ -141,6 +143,7 @@ namespace Mirage
 
         public NetworkWorld World { get; private set; }
         public SyncVarSender SyncVarSender { get; private set; }
+        public MessageHandler MessageHandler { get; private set; }
 
 
         /// <summary>
@@ -204,12 +207,14 @@ namespace Mirage
             }
 
             LocalClient = localClient;
+            MessageHandler = new MessageHandler(DisconnectOnException);
+            MessageHandler.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
+
             World = new NetworkWorld();
             SyncVarSender = new SyncVarSender();
 
-
             ISocket socket = SocketFactory.CreateServerSocket();
-            var dataHandler = new DataHandler(connections);
+            var dataHandler = new DataHandler(MessageHandler, connections);
             Metrics = EnablePeerMetrics ? new Metrics() : null;
             Config config = PeerConfig ?? new Config
             {
@@ -332,7 +337,6 @@ namespace Mirage
                 // would throw NRE
                 Players.Add(player);
                 connections.Add(player.Connection, player);
-                player.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
             }
         }
 
@@ -471,18 +475,20 @@ namespace Mirage
         /// </summary>
         class DataHandler : IDataHandler
         {
+            readonly MessageHandler messageHandler;
             readonly Dictionary<IConnection, INetworkPlayer> players;
 
-            public DataHandler(Dictionary<IConnection, INetworkPlayer> connections)
+            public DataHandler(MessageHandler messageHandler, Dictionary<IConnection, INetworkPlayer> connections)
             {
+                this.messageHandler = messageHandler;
                 players = connections;
             }
 
             public void ReceiveMessage(IConnection connection, ArraySegment<byte> message)
             {
-                if (players.TryGetValue(connection, out INetworkPlayer handler))
+                if (players.TryGetValue(connection, out INetworkPlayer player))
                 {
-                    handler.HandleMessage(message);
+                    messageHandler.HandleMessage(player, message);
                 }
                 else
                 {
