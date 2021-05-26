@@ -24,14 +24,8 @@ namespace Mirage
         void UnregisterHandler<T>();
 
         void ClearHandlers();
-    }
 
-    /// <summary>
-    /// An object that can send and receive messages and notify messages
-    /// </summary>
-    public interface IMessageHandler : IMessageSender, IMessageReceiver
-    {
-        void HandleMessage(ArraySegment<byte> packet);
+        void HandleMessage(INetworkPlayer player, ArraySegment<byte> packet);
     }
 
     /// <summary>
@@ -60,7 +54,7 @@ namespace Mirage
     /// An object owned by a player that can: send/receive messages, have network visibility, be an object owner, authenticated permissions, and load scenes.
     /// May be from the server to client or from client to server
     /// </summary>
-    public interface INetworkPlayer : IMessageHandler, IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
+    public interface INetworkPlayer : IMessageSender, IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
     {
         SocketLayer.IConnection Connection { get; }
         void Disconnect();
