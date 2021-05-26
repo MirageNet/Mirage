@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using Mirage.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -22,8 +21,6 @@ namespace Mirage
     public class NetworkServer : MonoBehaviour, INetworkServer
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
-
-        bool initialized;
 
         public bool EnablePeerMetrics;
         public Metrics Metrics { get; private set; }
@@ -163,26 +160,24 @@ namespace Mirage
             Application.quitting -= Stop;
         }
 
-        void Initialize()
+        /// <summary>
+        /// Start the server
+        /// <para>If <paramref name="localClient"/> is given then will start in host mode</para>
+        /// </summary>
+        /// <param name="config">Config for <see cref="Peer"/></param>
+        /// <param name="localClient">if not null then start the server and client in hostmode</param>
+        // Has to be called "StartServer" to stop unity complaining about "Start" method
+        public void StartServer(NetworkClient localClient = null)
         {
-            if (initialized)
-                return;
-
-            initialized = true;
-            World = new NetworkWorld();
+            ThrowIfActive();
+            ThrowIfSocketIsMissing();
 
             Application.quitting += Stop;
             if (logger.LogEnabled()) logger.Log($"NetworkServer Created, Mirage version: {Version.Current}");
 
+            logger.Assert(Players.Count == 0, "Player could should have been reset since previous session");
+            logger.Assert(connections.Count == 0, "connections could should have been reset since previous session");
 
-            //Make sure connections are cleared in case any old connections references exist from previous sessions
-            Players.Clear();
-            connections.Clear();
-
-            if (SocketFactory is null)
-                SocketFactory = GetComponent<SocketFactory>();
-            if (SocketFactory == null)
-                throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for ${nameof(NetworkServer)}");
 
             if (authenticator != null)
             {
@@ -195,56 +190,58 @@ namespace Mirage
                 // if no authenticator, consider every connection as authenticated
                 Connected.AddListener(OnAuthenticated);
             }
-        }
-
-        /// <summary>
-        /// Start the server
-        /// <para>If <paramref name="localClient"/> is given then will start in host mode</para>
-        /// </summary>
-        /// <param name="localClient">if not null then start the server and client in hostmode</param>
-        // Has to be called "StartServer" to stop unity complaining about "Start" method
-        public void StartServer(NetworkClient localClient = null)
-        {
-            if (Active) throw new InvalidOperationException("Server is already active");
 
             LocalClient = localClient;
+            World = new NetworkWorld();
 
-            Initialize();
-
-            var dataHandler = new DataHandler(connections);
-            CreateAndBindSocket(dataHandler);
-
-            if (LocalClient != null)
-            {
-                localClient.ConnectHost(this, dataHandler);
-                logger.Log("NetworkServer StartHost");
-            }
-        }
-
-        void CreateAndBindSocket(DataHandler dataHandler)
-        {
             ISocket socket = SocketFactory.CreateServerSocket();
             ILogger peerLogger = LogFactory.GetLogger<Peer>();
-
+            var dataHandler = new DataHandler(connections);
+            Metrics = EnablePeerMetrics ? new Metrics() : null;
             var config = new Config
             {
                 MaxConnections = MaxConnections,
             };
-            Metrics = EnablePeerMetrics ? new Metrics() : null;
-            peer = new Peer(socket, dataHandler, logger: peerLogger, config: config, metrics: Metrics);
-            EndPoint endpoint = SocketFactory.GetBindEndPoint();
 
+            peer = new Peer(socket, dataHandler, logger: peerLogger, config: config, metrics: Metrics);
             peer.OnConnected += Peer_OnConnected;
             peer.OnDisconnected += Peer_OnDisconnected;
-            peer.Bind(endpoint);
 
-            PeerStarted();
+            peer.Bind(SocketFactory.GetBindEndPoint());
+
+            if (logger.LogEnabled()) logger.Log("Server started listening");
+
+            Active = true;
+            _started?.Invoke();
+
+            if (LocalClient != null)
+            {
+                // we should call onStartHost after transport is ready to be used
+                // this allows server methods like NetworkServer.Spawn to be called in there
+                _onStartHost?.Invoke();
+
+                localClient.ConnectHost(this, dataHandler);
+                if (logger.LogEnabled()) logger.Log("NetworkServer StartHost");
+            }
         }
+
+        void ThrowIfActive()
+        {
+            if (Active) throw new InvalidOperationException("Server is already active");
+        }
+
+        void ThrowIfSocketIsMissing()
+        {
+            if (SocketFactory is null)
+                SocketFactory = GetComponent<SocketFactory>();
+            if (SocketFactory == null)
+                throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for ${nameof(NetworkServer)}");
+        }
+
         private void Update()
         {
             peer?.Update();
         }
-
 
         private void Peer_OnConnected(IConnection conn)
         {
@@ -267,21 +264,6 @@ namespace Mirage
             }
         }
 
-        private void PeerStarted()
-        {
-            logger.Log("Server started listening");
-            Active = true;
-            // (useful for loading & spawning stuff from database etc.)
-            _started?.Invoke();
-
-            if (LocalClient != null)
-            {
-                // we should call onStartHost after transport is ready to be used
-                // this allows server methods like NetworkServer.Spawn to be called in there
-                _onStartHost?.Invoke();
-            }
-        }
-
         /// <summary>
         /// cleanup resources so that we can start again
         /// </summary>
@@ -299,7 +281,6 @@ namespace Mirage
             }
 
             _stopped?.Invoke();
-            initialized = false;
             Active = false;
 
             _started.Reset();
