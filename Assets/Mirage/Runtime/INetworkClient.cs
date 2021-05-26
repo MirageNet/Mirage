@@ -18,7 +18,7 @@ namespace Mirage
         /// <summary>
         /// Event fires after the Client has disconnected from its Server and Cleanup has been called.
         /// </summary>
-        IAddLateEvent Disconnected { get; }
+        IAddLateEvent<ClientStoppedReason> Disconnected { get; }
 
         /// <summary>
         /// The NetworkConnection object this client is using.

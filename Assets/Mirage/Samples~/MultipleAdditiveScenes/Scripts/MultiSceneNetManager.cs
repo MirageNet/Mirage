@@ -83,7 +83,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
             StartCoroutine(UnloadSubScenes());
         }
 
-        public void OnStopClient()
+        public void OnStopClient(ClientStoppedReason reason)
         {
             if (!Server.Active)
                 StartCoroutine(UnloadClientSubScenes());
