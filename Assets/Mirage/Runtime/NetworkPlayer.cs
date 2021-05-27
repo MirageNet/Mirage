@@ -25,7 +25,7 @@ namespace Mirage
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
         // Handles network messages on client and server
-        internal delegate void NetworkMessageDelegate(INetworkPlayer player, NetworkReader reader, int channelId);
+        internal delegate void NetworkMessageDelegate(INetworkPlayer player, NetworkReader reader);
 
         // internal so it can be tested
         private readonly HashSet<NetworkIdentity> visList = new HashSet<NetworkIdentity>();
@@ -120,7 +120,7 @@ namespace Mirage
 
         private static NetworkMessageDelegate MessageHandler<T>(Action<INetworkPlayer, T> handler)
         {
-            void AdapterFunction(INetworkPlayer player, NetworkReader reader, int channelId)
+            void AdapterFunction(INetworkPlayer player, NetworkReader reader)
             {
                 // protect against DOS attacks if attackers try to send invalid
                 // data packets to crash the server/client. there are a thousand
@@ -145,7 +145,7 @@ namespace Mirage
                 finally
                 {
                     int endPos = reader.Position;
-                    NetworkDiagnostics.OnReceive(message, channelId, endPos - startPos);
+                    NetworkDiagnostics.OnReceive(message, endPos - startPos);
                 }
 
                 handler(player, message);
@@ -213,7 +213,7 @@ namespace Mirage
             {
                 // pack message and send allocation free
                 MessagePacker.Pack(message, writer);
-                NetworkDiagnostics.OnSend(message, channelId, writer.Length, 1);
+                NetworkDiagnostics.OnSend(message, writer.Length, 1);
                 Send(writer.ToArraySegment(), channelId);
             }
         }
@@ -261,11 +261,11 @@ namespace Mirage
             visList.Clear();
         }
 
-        internal void InvokeHandler(int msgType, NetworkReader reader, int channelId)
+        internal void InvokeHandler(int msgType, NetworkReader reader)
         {
             if (messageHandlers.TryGetValue(msgType, out NetworkMessageDelegate msgDelegate))
             {
-                msgDelegate(this, reader, channelId);
+                msgDelegate(this, reader);
             }
             else
             {
@@ -289,10 +289,7 @@ namespace Mirage
                 try
                 {
                     int msgType = MessagePacker.UnpackId(networkReader);
-
-                    // todo remove channel from handler
-                    const int channelId = 0;
-                    InvokeHandler(msgType, networkReader, channelId);
+                    InvokeHandler(msgType, networkReader);
                 }
                 catch (InvalidDataException ex)
                 {

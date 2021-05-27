@@ -93,7 +93,7 @@ namespace Mirage.Tests.Runtime
             var reader = new NetworkReader(new byte[] { 1, 2, 3, 4 });
             InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
             {
-                player.InvokeHandler(messageId, reader, 0);
+                player.InvokeHandler(messageId, reader);
             });
 
             Assert.That(exception.Message, Does.StartWith("Unexpected message Mirage.SceneMessage received"));
@@ -107,7 +107,7 @@ namespace Mirage.Tests.Runtime
             InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
             {
                 // some random id with no message
-                player.InvokeHandler(1234, reader, 0);
+                player.InvokeHandler(1234, reader);
             });
 
             Assert.That(exception.Message, Does.StartWith("Unexpected message ID 1234 received"));

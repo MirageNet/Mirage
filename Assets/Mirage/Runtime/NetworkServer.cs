@@ -375,7 +375,7 @@ namespace Mirage
                     count++;
                 }
 
-                NetworkDiagnostics.OnSend(msg, channelId, segment.Count, count);
+                NetworkDiagnostics.OnSend(msg, segment.Count, count);
             }
         }
 
