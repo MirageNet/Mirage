@@ -136,7 +136,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [UnityTest]
-        public IEnumerator DisconnectStateTest() => UniTask.ToCoroutine(async () =>
+        public IEnumerator StopStateTest() => UniTask.ToCoroutine(async () =>
         {
             server.Stop();
 

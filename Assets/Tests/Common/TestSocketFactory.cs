@@ -15,7 +15,12 @@ namespace Mirage.Tests
         /// <summary>
         /// this static dictionary will act as the internet
         /// </summary>
-        static Dictionary<EndPoint, TestSocket> allSockets = new Dictionary<EndPoint, TestSocket>();
+        public static Dictionary<EndPoint, TestSocket> allSockets = new Dictionary<EndPoint, TestSocket>();
+
+        /// <summary>
+        /// Can be useful to fake timeouts or dropped messages
+        /// </summary>
+        public static bool StopAllMessages;
 
         public static bool EndpointInUse(EndPoint endPoint) => allSockets.ContainsKey(endPoint);
 
@@ -97,6 +102,11 @@ namespace Mirage.Tests
                 data = clone,
                 length = length
             });
+
+            // mark as sent, but not as received
+            if (StopAllMessages)
+                return;
+
             other.received.Enqueue(new Packet
             {
                 endPoint = endPoint,

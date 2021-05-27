@@ -210,8 +210,7 @@ namespace Mirage
         {
             if (!Active) return;
 
-            Player?.Connection?.Disconnect();
-            _disconnected?.Invoke(ClientStoppedReason.LocalConnectionClosed);
+            Player.Connection.Disconnect();
             Cleanup();
         }
 
