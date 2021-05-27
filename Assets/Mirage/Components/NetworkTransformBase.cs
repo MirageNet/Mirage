@@ -82,7 +82,7 @@ namespace Mirage
         public override bool OnSerialize(NetworkWriter writer, bool initialState)
         {
             // use local position/rotation/scale for VR support
-            SerializeIntoWriter(writer, TargetComponent.transform.localPosition, TargetComponent.transform.localRotation, TargetComponent.transform.localScale);
+            SerializeIntoWriter(writer, TargetComponent.localPosition, TargetComponent.localRotation, TargetComponent.localScale);
             return true;
         }
 
@@ -117,7 +117,7 @@ namespace Mirage
 
             // movement speed: based on how far it moved since last time
             // has to be calculated before 'start' is overwritten
-            temp.MovementSpeed = EstimateMovementSpeed(goal, temp, TargetComponent.transform, syncInterval);
+            temp.MovementSpeed = EstimateMovementSpeed(goal, temp, TargetComponent, syncInterval);
 
             // reassign start wisely
             // -> first ever data point? then make something up for previous one
@@ -128,9 +128,9 @@ namespace Mirage
                 {
                     TimeStamp = Time.time - syncInterval,
                     // local position/rotation for VR support
-                    LocalPosition = TargetComponent.transform.localPosition,
-                    LocalRotation = TargetComponent.transform.localRotation,
-                    LocalScale = TargetComponent.transform.localScale,
+                    LocalPosition = TargetComponent.localPosition,
+                    LocalRotation = TargetComponent.localRotation,
+                    LocalScale = TargetComponent.localScale,
                     MovementSpeed = temp.MovementSpeed
                 };
             }
@@ -175,11 +175,11 @@ namespace Mirage
                 //
                 // local position/rotation for VR support
                 //
-                if (Vector3.Distance(TargetComponent.transform.localPosition, start.LocalPosition) < oldDistance + newDistance)
+                if (Vector3.Distance(TargetComponent.localPosition, start.LocalPosition) < oldDistance + newDistance)
                 {
-                    start.LocalPosition = TargetComponent.transform.localPosition;
-                    start.LocalRotation = TargetComponent.transform.localRotation;
-                    start.LocalScale = TargetComponent.transform.localScale;
+                    start.LocalPosition = TargetComponent.localPosition;
+                    start.LocalRotation = TargetComponent.localRotation;
+                    start.LocalScale = TargetComponent.localScale;
                 }
             }
 
@@ -289,9 +289,9 @@ namespace Mirage
         {
             // moved or rotated or scaled?
             // local position/rotation/scale for VR support
-            bool moved = Vector3.Distance(lastPosition, TargetComponent.transform.localPosition) > LocalPositionSensitivity;
-            bool scaled = Vector3.Distance(lastScale, TargetComponent.transform.localScale) > LocalScaleSensitivity;
-            bool rotated = Quaternion.Angle(lastRotation, TargetComponent.transform.localRotation) > LocalRotationSensitivity;
+            bool moved = Vector3.Distance(lastPosition, TargetComponent.localPosition) > LocalPositionSensitivity;
+            bool scaled = Vector3.Distance(lastScale, TargetComponent.localScale) > LocalScaleSensitivity;
+            bool rotated = Quaternion.Angle(lastRotation, TargetComponent.localRotation) > LocalRotationSensitivity;
 
             // save last for next frame to compare
             // (only if change was detected. otherwise slow moving objects might
@@ -301,9 +301,9 @@ namespace Mirage
             if (change)
             {
                 // local position/rotation for VR support
-                lastPosition = TargetComponent.transform.localPosition;
-                lastRotation = TargetComponent.transform.localRotation;
-                lastScale = TargetComponent.transform.localScale;
+                lastPosition = TargetComponent.localPosition;
+                lastRotation = TargetComponent.localRotation;
+                lastScale = TargetComponent.localScale;
             }
             return change;
         }
@@ -312,9 +312,9 @@ namespace Mirage
         void ApplyPositionRotationScale(Vector3 position, Quaternion rotation, Vector3 scale)
         {
             // local position/rotation for VR support
-            TargetComponent.transform.localPosition = position;
-            TargetComponent.transform.localRotation = rotation;
-            TargetComponent.transform.localScale = scale;
+            TargetComponent.localPosition = position;
+            TargetComponent.localRotation = rotation;
+            TargetComponent.localScale = scale;
         }
 
         void Update()
@@ -352,7 +352,7 @@ namespace Mirage
                     // local position/rotation for VR support
                     using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
                     {
-                        SerializeIntoWriter(writer, TargetComponent.transform.localPosition, TargetComponent.transform.localRotation, TargetComponent.transform.localScale);
+                        SerializeIntoWriter(writer, TargetComponent.localPosition, TargetComponent.localRotation, TargetComponent.localScale);
 
                         // send to server
                         CmdClientToServerSync(writer.ToArray());
@@ -379,9 +379,9 @@ namespace Mirage
                 else
                 {
                     // local position/rotation for VR support
-                    ApplyPositionRotationScale(InterpolatePosition(start, goal, TargetComponent.transform.localPosition),
-                                                InterpolateRotation(start, goal, TargetComponent.transform.localRotation),
-                                                InterpolateScale(start, goal, TargetComponent.transform.localScale));
+                    ApplyPositionRotationScale(InterpolatePosition(start, goal, TargetComponent.localPosition),
+                                                InterpolateRotation(start, goal, TargetComponent.localRotation),
+                                                InterpolateScale(start, goal, TargetComponent.localScale));
                 }
             }
         }
