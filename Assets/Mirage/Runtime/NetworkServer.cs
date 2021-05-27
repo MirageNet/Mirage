@@ -152,6 +152,7 @@ namespace Mirage
 
             // just clear list, connections will be disconnected when peer is closed
             Players.Clear();
+            connections.Clear();
             LocalPlayer = null;
 
             Cleanup();
