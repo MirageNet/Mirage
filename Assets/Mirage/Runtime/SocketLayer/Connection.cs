@@ -176,7 +176,7 @@ namespace Mirage.SocketLayer
         /// </summary>
         public void Disconnect()
         {
-            Disconnect(DisconnectReason.RequestedByPeer);
+            Disconnect(DisconnectReason.RequestedByLocalPeer);
         }
         internal void Disconnect(DisconnectReason reason, bool sendToOther = true)
         {

@@ -120,7 +120,7 @@ namespace Mirage.SocketLayer
             // send disconnect messages
             foreach (Connection conn in connections.Values)
             {
-                conn.Disconnect(DisconnectReason.RequestedByPeer);
+                conn.Disconnect(DisconnectReason.RequestedByRemotePeer);
             }
             RemoveConnections();
 
@@ -479,7 +479,11 @@ namespace Mirage.SocketLayer
         {
             if (sendToOther)
             {
-                SendCommand(connection, Commands.Disconnect, (byte)reason);
+                // if reason is ByLocal, then change it to ByRemote for sending
+                byte byteReason = (byte)(reason == DisconnectReason.RequestedByLocalPeer
+                    ? DisconnectReason.RequestedByRemotePeer
+                    : reason);
+                SendCommand(connection, Commands.Disconnect, byteReason);
             }
 
             // tell high level

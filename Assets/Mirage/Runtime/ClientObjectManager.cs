@@ -76,7 +76,7 @@ namespace Mirage
             }
         }
 
-        void OnClientDisconnected()
+        void OnClientDisconnected(ClientStoppedReason reason)
         {
             ClearSpawners();
             DestroyAllClientObjects();

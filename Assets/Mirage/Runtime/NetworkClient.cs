@@ -39,7 +39,7 @@ namespace Mirage
         [Header("Events")]
         [SerializeField] NetworkPlayerAddLateEvent _connected = new NetworkPlayerAddLateEvent();
         [SerializeField] NetworkPlayerAddLateEvent _authenticated = new NetworkPlayerAddLateEvent();
-        [SerializeField] AddLateEvent _disconnected = new AddLateEvent();
+        [SerializeField] DisconnectAddLateEvent _disconnected = new DisconnectAddLateEvent();
 
         /// <summary>
         /// Event fires once the Client has connected its Server.
@@ -54,7 +54,7 @@ namespace Mirage
         /// <summary>
         /// Event fires after the Client has disconnected from its Server and Cleanup has been called.
         /// </summary>
-        public IAddLateEvent Disconnected => _disconnected;
+        public IAddLateEvent<ClientStoppedReason> Disconnected => _disconnected;
 
         /// <summary>
         /// The NetworkConnection object this client is using.
@@ -144,9 +144,8 @@ namespace Mirage
         private void Peer_OnConnectionFailed(IConnection conn, RejectReason reason)
         {
             if (logger.LogEnabled()) logger.Log($"Failed to connect to {conn.EndPoint} with reason {reason}");
-            Player.MarkAsDisconnected();
-            // todo add connection failed event
-            _disconnected?.Invoke();
+            Player?.MarkAsDisconnected();
+            _disconnected?.Invoke(reason.ToClientStoppedReason());
             Cleanup();
         }
 
@@ -154,11 +153,7 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log($"Disconnected from {conn.EndPoint} with reason {reason}");
             Player?.MarkAsDisconnected();
-            // todo add reason to disconnected event
-            //     use different enum, so that:
-            //     - user doesn't need to add reference to socket layer
-            //     - add high level reason so that they are easier to understand by user
-            _disconnected?.Invoke();
+            _disconnected?.Invoke(reason.ToClientStoppedReason());
             Cleanup();
         }
 
@@ -213,10 +208,9 @@ namespace Mirage
         /// </summary>
         public void Disconnect()
         {
-            // todo exit early if not active/initialized
+            if (!Active) return;
 
-            Player?.Connection?.Disconnect();
-            _disconnected?.Invoke();
+            Player.Connection.Disconnect();
             Cleanup();
         }
 

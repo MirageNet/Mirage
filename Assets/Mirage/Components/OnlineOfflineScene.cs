@@ -42,7 +42,7 @@ namespace Mirage
             }
         }
 
-        void OnClientDisconnected()
+        void OnClientDisconnected(ClientStoppedReason reason)
         {
             SceneManager.LoadSceneAsync(OfflineScene);
         }

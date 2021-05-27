@@ -44,7 +44,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             {
                 (byte)PacketType.Command,
                 (byte)Commands.Disconnect,
-                (byte)DisconnectReason.RequestedByPeer,
+                (byte)DisconnectReason.RequestedByRemotePeer,
             };
             for (int i = 0; i < maxConnections; i++)
             {
