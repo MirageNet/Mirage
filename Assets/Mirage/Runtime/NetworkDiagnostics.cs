@@ -19,10 +19,6 @@ namespace Mirage
             /// </summary>
             public readonly object message;
             /// <summary>
-            /// channel through which the message was sent
-            /// </summary>
-            public readonly int channel;
-            /// <summary>
             /// how big was the message (does not include transport headers)
             /// </summary>
             public readonly int bytes;
@@ -32,10 +28,9 @@ namespace Mirage
             /// </summary>
             public readonly int count;
 
-            internal MessageInfo(object message, int channel, int bytes, int count)
+            internal MessageInfo(object message, int bytes, int count)
             {
                 this.message = message;
-                this.channel = channel;
                 this.bytes = bytes;
                 this.count = count;
             }
@@ -48,11 +43,11 @@ namespace Mirage
         /// </summary>
         public static event Action<MessageInfo> OutMessageEvent;
 
-        internal static void OnSend<T>(T message, int channel, int bytes, int count)
+        internal static void OnSend<T>(T message, int bytes, int count)
         {
             if (count > 0 && OutMessageEvent != null)
             {
-                var outMessage = new MessageInfo(message, channel, bytes, count);
+                var outMessage = new MessageInfo(message, bytes, count);
                 OutMessageEvent.Invoke(outMessage);
             }
         }
@@ -66,11 +61,11 @@ namespace Mirage
         /// </summary>
         public static event Action<MessageInfo> InMessageEvent;
 
-        internal static void OnReceive<T>(T message, int channel, int bytes)
+        internal static void OnReceive<T>(T message, int bytes)
         {
             if (InMessageEvent != null)
             {
-                var inMessage = new MessageInfo(message, channel, bytes, 1);
+                var inMessage = new MessageInfo(message, bytes, 1);
                 InMessageEvent.Invoke(inMessage);
             }
         }
