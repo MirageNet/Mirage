@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -106,7 +107,7 @@ namespace Mirage
                 using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
                 {
                     WriteParameters(writer);
-                    SendAnimationMessage(stateHash, normalizedTime, i, layerWeight[i], writer.ToArray());
+                    SendAnimationMessage(stateHash, normalizedTime, i, layerWeight[i], writer.ToArraySegment());
                 }
             }
         }
@@ -164,12 +165,12 @@ namespace Mirage
                 using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
                 {
                     if (WriteParameters(writer))
-                        SendAnimationParametersMessage(writer.ToArray());
+                        SendAnimationParametersMessage(writer.ToArraySegment());
                 }
             }
         }
 
-        void SendAnimationMessage(int stateHash, float normalizedTime, int layerId, float weight, byte[] parameters)
+        void SendAnimationMessage(int stateHash, float normalizedTime, int layerId, float weight, ArraySegment<byte> parameters)
         {
             if (IsServer)
             {
@@ -181,7 +182,7 @@ namespace Mirage
             }
         }
 
-        void SendAnimationParametersMessage(byte[] parameters)
+        void SendAnimationParametersMessage(ArraySegment<byte> parameters)
         {
             if (IsServer)
             {
@@ -512,7 +513,7 @@ namespace Mirage
         #region server message handlers
 
         [ServerRpc]
-        void CmdOnAnimationServerMessage(int stateHash, float normalizedTime, int layerId, float weight, byte[] parameters)
+        void CmdOnAnimationServerMessage(int stateHash, float normalizedTime, int layerId, float weight, ArraySegment<byte> parameters)
         {
             // Ignore messages from client if not in client authority mode
             if (!ClientAuthority)
@@ -529,7 +530,7 @@ namespace Mirage
         }
 
         [ServerRpc]
-        void CmdOnAnimationParametersServerMessage(byte[] parameters)
+        void CmdOnAnimationParametersServerMessage(ArraySegment<byte> parameters)
         {
             // Ignore messages from client if not in client authority mode
             if (!ClientAuthority)
@@ -584,14 +585,14 @@ namespace Mirage
         #region client message handlers
 
         [ClientRpc]
-        void RpcOnAnimationClientMessage(int stateHash, float normalizedTime, int layerId, float weight, byte[] parameters)
+        void RpcOnAnimationClientMessage(int stateHash, float normalizedTime, int layerId, float weight, ArraySegment<byte> parameters)
         {
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters))
                 HandleAnimMsg(stateHash, normalizedTime, layerId, weight, networkReader);
         }
 
         [ClientRpc]
-        void RpcOnAnimationParametersClientMessage(byte[] parameters)
+        void RpcOnAnimationParametersClientMessage(ArraySegment<byte> parameters)
         {
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters))
                 HandleAnimParamsMsg(networkReader);
