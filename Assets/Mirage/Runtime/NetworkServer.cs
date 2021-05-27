@@ -26,8 +26,13 @@ namespace Mirage
         public Metrics Metrics { get; private set; }
 
         /// <summary>
+        /// Config for peer, if not set will use default settings
+        /// </summary>
+        public Config PeerConfig { get; set; }
+
+        /// <summary>
         /// The maximum number of concurrent network connections to support.
-        /// <para>This effects the memory usage of the network layer.</para>
+        /// <para>This field is only used if the <see cref="PeerConfig"/> property is null</para>
         /// </summary>
         [Tooltip("Maximum number of concurrent connections.")]
         [Min(1)]
@@ -196,15 +201,14 @@ namespace Mirage
             World = new NetworkWorld();
 
             ISocket socket = SocketFactory.CreateServerSocket();
-            ILogger peerLogger = LogFactory.GetLogger<Peer>();
             var dataHandler = new DataHandler(connections);
             Metrics = EnablePeerMetrics ? new Metrics() : null;
-            var config = new Config
+            Config config = PeerConfig ?? new Config
             {
                 MaxConnections = MaxConnections,
             };
 
-            peer = new Peer(socket, dataHandler, logger: peerLogger, config: config, metrics: Metrics);
+            peer = new Peer(socket, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
             peer.OnConnected += Peer_OnConnected;
             peer.OnDisconnected += Peer_OnDisconnected;
 

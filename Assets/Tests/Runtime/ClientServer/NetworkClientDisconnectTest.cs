@@ -4,16 +4,16 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Runtime.ClientServer
+namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
 {
     public class NetworkClientDisconnectTest : ClientServerSetup<MockComponent>
     {
-        Config config = new Config();
-
-        public override void ExtraSetup()
+        readonly Config config = new Config()
         {
-            // todo set config timeout here
-        }
+            // lower timeout so tests doesn't wait too long
+            TimeoutDuration = 2,
+        };
+        protected override Config ClientConfig => config;
 
         public override void ExtraTearDown()
         {
@@ -77,10 +77,32 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
     }
 
+    public class NetworkClientConnectFailedFullServerTest : ClientServerSetup<MockComponent>
+    {
+        protected override Config ServerConfig => new Config { MaxConnections = 0 };
+        protected override bool AutoConnectClient => false;
+
+        [UnityTest]
+        public IEnumerator DisconnectEventWhenFull()
+        {
+            client.Connect("localhost");
+
+            int called = 0;
+            client.Disconnected.AddListener((reason) =>
+            {
+                called++;
+                Assert.That(reason, Is.EqualTo(ClientStoppedReason.ServerFull));
+            });
+
+            // wait 2 frames so that messages can go from client->server->client
+            yield return null;
+            yield return null;
+
+            Assert.That(called, Is.EqualTo(1));
+        }
+    }
     public class NetworkClientConnectFailedTest : ClientServerSetup<MockComponent>
     {
-        Config config = new Config();
-
         protected override bool AutoConnectClient => false;
 
         public override void ExtraTearDown()
@@ -102,6 +124,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             });
 
             // wait longer than timeout
+            var config = new Config();
             float endTime = Time.time + (config.ConnectAttemptInterval * config.MaxConnectAttempts * 1.5f);
             while (Time.time < endTime)
             {
@@ -112,23 +135,6 @@ namespace Mirage.Tests.Runtime.ClientServer
                 }
                 yield return null;
             }
-
-            Assert.That(called, Is.EqualTo(1));
-        }
-
-        [UnityTest]
-        public IEnumerator DisconnectEventWhenFull()
-        {
-            // todo set server max connections to 0, then try to connect..
-            Assert.Ignore("not implemented");
-            int called = 0;
-            client.Disconnected.AddListener((reason) =>
-            {
-                called++;
-                Assert.That(reason, Is.EqualTo(ClientStoppedReason.ServerFull));
-            });
-
-            yield return null;
 
             Assert.That(called, Is.EqualTo(1));
         }

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.SocketLayer;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -38,6 +39,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         public virtual void ExtraSetup() { }
 
         protected virtual bool AutoConnectClient => true;
+        protected virtual Config ServerConfig => null;
+        protected virtual Config ClientConfig => null;
 
         [UnitySetUp]
         public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
@@ -50,6 +53,9 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             server = serverGo.GetComponent<NetworkServer>();
             client = clientGo.GetComponent<NetworkClient>();
+
+            if (ServerConfig != null) server.PeerConfig = ServerConfig;
+            if (ClientConfig != null) client.PeerConfig = ClientConfig;
 
             server.SocketFactory = socketFactory;
             client.SocketFactory = socketFactory;

@@ -28,6 +28,11 @@ namespace Mirage
         public bool EnablePeerMetrics;
         public Metrics Metrics { get; private set; }
 
+        /// <summary>
+        /// Config for peer, if not set will use default settings
+        /// </summary>
+        public Config PeerConfig { get; set; }
+
         [Tooltip("Creates Socket for Peer to use")]
         public SocketFactory SocketFactory;
 
@@ -109,7 +114,7 @@ namespace Mirage
                 ISocket socket = SocketFactory.CreateClientSocket();
                 var dataHandler = new DataHandler();
                 Metrics = EnablePeerMetrics ? new Metrics() : null;
-                peer = new Peer(socket, dataHandler, logger: LogFactory.GetLogger<Peer>(), metrics: Metrics);
+                peer = new Peer(socket, dataHandler, PeerConfig, LogFactory.GetLogger<Peer>(), Metrics);
 
                 peer.OnConnected += Peer_OnConnected;
                 peer.OnConnectionFailed += Peer_OnConnectionFailed;
