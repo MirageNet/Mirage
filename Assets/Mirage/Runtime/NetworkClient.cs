@@ -94,49 +94,51 @@ namespace Mirage
         /// <summary>
         /// Connect client to a NetworkServer instance.
         /// </summary>
-        /// <param name="uri">Address of the server to connect to</param>
+        /// <param name="address"></param>
+        /// <param name="port"></param>
         public void Connect(string address = null, ushort? port = null)
         {
-
-            if (SocketFactory is null)
-                SocketFactory = GetComponent<SocketFactory>();
-            if (SocketFactory == null)
-                throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for ${nameof(NetworkClient)}");
+            ThrowIfActive();
+            ThrowIfSocketIsMissing();
 
             connectState = ConnectState.Connecting;
 
-            EndPoint endPoint = SocketFactory.GetConnectEndPoint(address, port);
+            World = new NetworkWorld();
+            InitializeAuthEvents();
 
+            EndPoint endPoint = SocketFactory.GetConnectEndPoint(address, port);
             if (logger.LogEnabled()) logger.Log($"Client connecting to endpoint: {endPoint}");
 
-            try
-            {
-                ISocket socket = SocketFactory.CreateClientSocket();
-                var dataHandler = new DataHandler();
-                Metrics = EnablePeerMetrics ? new Metrics() : null;
-                peer = new Peer(socket, dataHandler, PeerConfig, LogFactory.GetLogger<Peer>(), Metrics);
+            ISocket socket = SocketFactory.CreateClientSocket();
+            var dataHandler = new DataHandler();
+            Metrics = EnablePeerMetrics ? new Metrics() : null;
 
-                peer.OnConnected += Peer_OnConnected;
-                peer.OnConnectionFailed += Peer_OnConnectionFailed;
-                peer.OnDisconnected += Peer_OnDisconnected;
-                IConnection connection = peer.Connect(endPoint);
+            peer = new Peer(socket, dataHandler, PeerConfig, LogFactory.GetLogger<Peer>(), Metrics);
+            peer.OnConnected += Peer_OnConnected;
+            peer.OnConnectionFailed += Peer_OnConnectionFailed;
+            peer.OnDisconnected += Peer_OnDisconnected;
 
-                // todo do we initialize now or after connected
-                World = new NetworkWorld();
-                InitializeAuthEvents();
+            IConnection connection = peer.Connect(endPoint);
 
-                // setup all the handlers
-                Player = new NetworkPlayer(connection);
-                dataHandler.SetConnection(connection, Player);
-                Time.Reset();
+            // setup all the handlers
+            Player = new NetworkPlayer(connection);
+            dataHandler.SetConnection(connection, Player);
+            Time.Reset();
 
-                RegisterMessageHandlers();
-            }
-            catch (Exception)
-            {
-                connectState = ConnectState.Disconnected;
-                throw;
-            }
+            RegisterMessageHandlers();
+        }
+
+        void ThrowIfActive()
+        {
+            if (Active) throw new InvalidOperationException("Server is already active");
+        }
+
+        void ThrowIfSocketIsMissing()
+        {
+            if (SocketFactory is null)
+                SocketFactory = GetComponent<SocketFactory>();
+            if (SocketFactory == null)
+                throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for ${nameof(NetworkServer)}");
         }
 
         private void Peer_OnConnected(IConnection conn)

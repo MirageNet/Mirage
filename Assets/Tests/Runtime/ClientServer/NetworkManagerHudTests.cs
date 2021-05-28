@@ -7,6 +7,7 @@ namespace Mirage.Tests.Runtime.ClientServer
     [TestFixture]
     public class NetworkManagerHudClientServerTest : ClientServerSetup<MockComponent>
     {
+        protected override bool AutoConnectClient => false;
         GameObject gameObject;
         NetworkManagerHud networkManagerHud;
         public override void ExtraSetup()
