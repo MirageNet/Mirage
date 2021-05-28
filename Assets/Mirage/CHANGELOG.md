@@ -1,3 +1,28 @@
+# [95.0.0](https://github.com/MirageNet/Mirage/compare/v94.0.0...v95.0.0) (2021-05-28)
+
+
+### Code Refactoring
+
+* remove channel from handler ([#824](https://github.com/MirageNet/Mirage/issues/824)) ([f11ef9a](https://github.com/MirageNet/Mirage/commit/f11ef9ac4db982334c889fd3fccf901fcc3de90f))
+
+
+### Features
+
+* adding disconnect reason to client disconnect ([#820](https://github.com/MirageNet/Mirage/issues/820)) ([e597570](https://github.com/MirageNet/Mirage/commit/e597570bab913c025a019ce82acf309a1be4f647))
+* adding Peer config properties ([9fd8a05](https://github.com/MirageNet/Mirage/commit/9fd8a0540cc04242820ea3cdc3d781ccb29ed1ad))
+
+
+### Performance Improvements
+
+* NetworkAnimator parameters use ArraySegment instead of Arrays ([#822](https://github.com/MirageNet/Mirage/issues/822)) ([00f4833](https://github.com/MirageNet/Mirage/commit/00f4833c121f13f0c5208bb23006fb58bcf294c5))
+* remove redundant transform calls on NT ([#823](https://github.com/MirageNet/Mirage/issues/823)) ([2d10305](https://github.com/MirageNet/Mirage/commit/2d10305c608c544a3fbf930af17b9651931d5ac1))
+
+
+### BREAKING CHANGES
+
+* NetworkDiagnostics no longer tracks channel
+* Client.Disconnected now has a Reason argument
+
 # [94.0.0](https://github.com/MirageNet/Mirage/compare/v93.0.2...v94.0.0) (2021-05-24)
 
 
