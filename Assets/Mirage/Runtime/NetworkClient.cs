@@ -91,12 +91,6 @@ namespace Mirage
         /// </summary>
         public bool IsLocalClient { get; private set; }
 
-        private void Awake()
-        {
-            if (SocketFactory is null)
-                SocketFactory = GetComponent<SocketFactory>();
-        }
-
         /// <summary>
         /// Connect client to a NetworkServer instance.
         /// </summary>
@@ -104,9 +98,8 @@ namespace Mirage
         /// <param name="port"></param>
         public void Connect(string address = null, ushort? port = null)
         {
-            if (Active) throw new InvalidOperationException("Client is already active");
-            if (SocketFactory == null)
-                throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for ${nameof(NetworkClient)}");
+            ThrowIfActive();
+            ThrowIfSocketIsMissing();
 
             connectState = ConnectState.Connecting;
 
@@ -133,6 +126,19 @@ namespace Mirage
             Time.Reset();
 
             RegisterMessageHandlers();
+        }
+
+        void ThrowIfActive()
+        {
+            if (Active) throw new InvalidOperationException("Server is already active");
+        }
+
+        void ThrowIfSocketIsMissing()
+        {
+            if (SocketFactory is null)
+                SocketFactory = GetComponent<SocketFactory>();
+            if (SocketFactory == null)
+                throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for ${nameof(NetworkServer)}");
         }
 
         private void Peer_OnConnected(IConnection conn)
