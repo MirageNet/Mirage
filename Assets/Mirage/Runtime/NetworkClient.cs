@@ -42,9 +42,15 @@ namespace Mirage
         public NetworkAuthenticator authenticator;
 
         [Header("Events")]
+        [SerializeField] AddLateEvent _started = new AddLateEvent();
         [SerializeField] NetworkPlayerAddLateEvent _connected = new NetworkPlayerAddLateEvent();
         [SerializeField] NetworkPlayerAddLateEvent _authenticated = new NetworkPlayerAddLateEvent();
         [SerializeField] DisconnectAddLateEvent _disconnected = new DisconnectAddLateEvent();
+
+        /// <summary>
+        /// Event fires when the client starts, before it has connected to the Server.
+        /// </summary>
+        public IAddLateEvent Started => _started;
 
         /// <summary>
         /// Event fires once the Client has connected its Server.
@@ -126,6 +132,8 @@ namespace Mirage
             Time.Reset();
 
             RegisterMessageHandlers();
+            // invoke started event after everything is set up, but before peer has connected
+            _started.Invoke();
         }
 
         void ThrowIfActive()
@@ -167,7 +175,8 @@ namespace Mirage
         internal void ConnectHost(NetworkServer server, IDataHandler serverDataHandler)
         {
             logger.Log("Client Connect Host to Server");
-            connectState = ConnectState.Connected;
+            // start connecting for setup, then "Peer_OnConnected" below will change to connected
+            connectState = ConnectState.Connecting;
 
             World = server.World;
             InitializeAuthEvents();
@@ -181,6 +190,8 @@ namespace Mirage
             Player = new NetworkPlayer(clientConn);
             dataHandler.SetConnection(clientConn, Player);
             RegisterHostHandlers();
+            // invoke started event after everything is set up, but before peer has connected
+            _started.Invoke();
 
             // client has to connect first or it will miss message in NetworkScenemanager
             Peer_OnConnected(clientConn);
