@@ -1,3 +1,10 @@
+# [95.1.0](https://github.com/MirageNet/Mirage/compare/v95.0.0...v95.1.0) (2021-05-29)
+
+
+### Features
+
+* adding started event to client ([#825](https://github.com/MirageNet/Mirage/issues/825)) ([3360b7c](https://github.com/MirageNet/Mirage/commit/3360b7c45cabef8677f831282f9d2a86fcfb8c58))
+
 # [95.0.0](https://github.com/MirageNet/Mirage/compare/v94.0.0...v95.0.0) (2021-05-28)
 
 
