@@ -1,3 +1,10 @@
+## [95.1.1](https://github.com/MirageNet/Mirage/compare/v95.1.0...v95.1.1) (2021-05-30)
+
+
+### Bug Fixes
+
+* fixing errors in tanks sample ([ed99d05](https://github.com/MirageNet/Mirage/commit/ed99d050fdd4af28d85d277704f4b9870bae394d))
+
 # [95.1.0](https://github.com/MirageNet/Mirage/compare/v95.0.0...v95.1.0) (2021-05-29)
 
 
