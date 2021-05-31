@@ -36,7 +36,6 @@ classDiagram
 
     class NetworkConnection {
         Send(T msg, int channel)
-        SendNotify(T msg, int channel, object token)
         RegisterHandler(handler(T))
     }
 

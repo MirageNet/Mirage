@@ -65,7 +65,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             {
                 IDataHandler handler = clients[i].dataHandler;
 
-                handler.Received(1).ReceivePacket(clientConnections[i], Arg.Is<ArraySegment<byte>>(x => x.SequenceEqual(packet)));
+                handler.Received(1).ReceiveMessage(clientConnections[i], Arg.Is<ArraySegment<byte>>(x => x.SequenceEqual(packet)));
             }
         }
 
@@ -82,7 +82,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
 
         [Test]
-        public void ClientNofitySend()
+        public void ClientNotifySend()
         {
             Assert.Ignore("not implemented");
         }
@@ -94,7 +94,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         }
 
         [Test]
-        public void ClientNofityAck()
+        public void ClientNotifyAck()
         {
             Assert.Ignore("not implemented");
         }

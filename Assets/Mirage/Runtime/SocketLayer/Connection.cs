@@ -15,6 +15,11 @@ namespace Mirage.SocketLayer
         void Disconnect();
 
         INotifyToken SendNotify(byte[] packet);
+        /// <summary>
+        /// single message, batched by AckSystem
+        /// </summary>
+        /// <param name="message"></param>
+        void SendReliable(byte[] message);
         void SendUnreliable(byte[] packet);
     }
 
@@ -37,9 +42,9 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal sealed class Connection : IConnection, IRawConnection
     {
-        void Assert(bool condition)
+        void Assert(bool condition, object msg = null)
         {
-            if (!condition) logger.Log(LogType.Assert, "Failed Assertion");
+            if (!condition) logger.Log(LogType.Assert, msg == null ? "Failed Assertion" : $"Failed Assertion: {msg}");
         }
         readonly ILogger logger;
 
@@ -73,6 +78,7 @@ namespace Mirage.SocketLayer
                 _state = value;
             }
         }
+        public bool Connected => State == ConnectionState.Connected;
 
         private readonly Peer peer;
         public readonly EndPoint EndPoint;
@@ -83,11 +89,11 @@ namespace Mirage.SocketLayer
         private readonly KeepAliveTracker keepAliveTracker;
         private readonly DisconnectedTracker disconnectedTracker;
 
-        private readonly NotifySystem notifySystem;
+        private readonly AckSystem ackSystem;
 
         EndPoint IConnection.EndPoint => EndPoint;
 
-        internal Connection(Peer peer, EndPoint endPoint, IDataHandler dataHandler, Config config, Time time, ILogger logger)
+        internal Connection(Peer peer, EndPoint endPoint, IDataHandler dataHandler, Config config, Time time, BufferPool bufferPool, ILogger logger, Metrics metrics)
         {
             this.peer = peer;
             this.logger = logger ?? Debug.unityLogger;
@@ -100,7 +106,12 @@ namespace Mirage.SocketLayer
             keepAliveTracker = new KeepAliveTracker(config, time);
             disconnectedTracker = new DisconnectedTracker(config, time);
 
-            notifySystem = new NotifySystem(this, config.AckTimeout, time);
+            ackSystem = new AckSystem(this, config, time, bufferPool, metrics);
+        }
+
+        public override string ToString()
+        {
+            return $"[{EndPoint}]";
         }
 
         public void Update()
@@ -143,7 +154,16 @@ namespace Mirage.SocketLayer
         public INotifyToken SendNotify(byte[] packet)
         {
             ThrowIfNotConnected();
-            return notifySystem.Send(packet);
+            return ackSystem.SendNotify(packet);
+        }
+        /// <summary>
+        /// single message, batched by AckSystem
+        /// </summary>
+        /// <param name="message"></param>
+        public void SendReliable(byte[] message)
+        {
+            ThrowIfNotConnected();
+            ackSystem.SendReliable(message);
         }
 
         void IRawConnection.SendRaw(byte[] packet, int length)
@@ -156,10 +176,11 @@ namespace Mirage.SocketLayer
         /// </summary>
         public void Disconnect()
         {
-            Disconnect(DisconnectReason.RequestedByPeer);
+            Disconnect(DisconnectReason.RequestedByLocalPeer);
         }
         internal void Disconnect(DisconnectReason reason, bool sendToOther = true)
         {
+            if (logger.filterLogType == LogType.Log) logger.Log($"Disconnect with reason: {reason}");
             switch (State)
             {
                 case ConnectionState.Connecting:
@@ -167,13 +188,12 @@ namespace Mirage.SocketLayer
                     break;
 
                 case ConnectionState.Connected:
-                    peer.OnConnectionDisconnected(this, reason, sendToOther);
                     State = ConnectionState.Disconnected;
                     disconnectedTracker.OnDisconnect();
+                    peer.OnConnectionDisconnected(this, reason, sendToOther);
                     break;
 
                 default:
-                    Assert(false);
                     break;
             }
         }
@@ -181,28 +201,52 @@ namespace Mirage.SocketLayer
         internal void ReceiveUnreliablePacket(Packet packet)
         {
             int offset = 1;
-            ReceivePacket(packet, offset);
+            int count = packet.length - offset;
+            var segment = new ArraySegment<byte>(packet.buffer.array, offset, count);
+            dataHandler.ReceiveMessage(this, segment);
+        }
+
+        internal void ReceivReliablePacket(Packet packet)
+        {
+            ackSystem.ReceiveReliable(packet.buffer.array, packet.length);
+
+            // gets messages in order
+            while (ackSystem.NextReliablePacket(out AckSystem.ReliableReceived received))
+            {
+                HandleAllMessageInPacket(received);
+            }
+        }
+
+        private void HandleAllMessageInPacket(AckSystem.ReliableReceived received)
+        {
+            byte[] array = received.buffer.array;
+            int packetLength = received.length;
+            int offset = 0;
+            while (offset < packetLength)
+            {
+                ushort length = ByteUtils.ReadUShort(array, ref offset);
+                var message = new ArraySegment<byte>(array, offset, length);
+                offset += length;
+
+                dataHandler.ReceiveMessage(this, message);
+            }
+
+            // release buffer after all its message have been handled
+            received.buffer.Release();
         }
 
         internal void ReceiveNotifyPacket(Packet packet)
         {
-            notifySystem.Receive(packet.buffer.array);
-
-            int offset = AckSystem.HEADER_SIZE;
-            ReceivePacket(packet, offset);
+            ArraySegment<byte> segment = ackSystem.ReceiveNotify(packet.buffer.array, packet.length);
+            if (segment != default)
+            {
+                dataHandler.ReceiveMessage(this, segment);
+            }
         }
 
         internal void ReceiveNotifyAck(Packet packet)
         {
-            notifySystem.ReceiveAck(packet.buffer.array);
-        }
-
-
-        void ReceivePacket(Packet packet, int offset)
-        {
-            int count = packet.length - offset;
-            var segment = new ArraySegment<byte>(packet.buffer.array, offset, count);
-            dataHandler.ReceivePacket(this, segment);
+            ackSystem.ReceiveAck(packet.buffer.array);
         }
 
 
@@ -246,7 +290,7 @@ namespace Mirage.SocketLayer
                 Disconnect(DisconnectReason.Timeout);
             }
 
-            notifySystem.Update();
+            ackSystem.Update();
 
             if (keepAliveTracker.TimeToSend())
             {

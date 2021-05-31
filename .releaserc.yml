@@ -4,13 +4,13 @@ plugins:
   - '@semantic-release/commit-analyzer'
   - - '@semantic-release/exec'
     - prepareCmd: "sed -i -e '/AssemblyVersion/s/\".*\"/\"${nextRelease.version}\"/' 
-        Assets/Mirage/Runtime/AssemblyInfo.cs
-        Assets/Mirage/Runtime/Transport/Kcp/AssemblyInfo.cs
-        Assets/Mirage/Weaver/AssemblyInfo.cs
+        Assets/Mirage/Authenticators/AssemblyInfo.cs
         Assets/Mirage/Components/AssemblyInfo.cs
+        Assets/Mirage/Runtime/AssemblyInfo.cs
+        Assets/Mirage/Runtime/SocketLayer/AssemblyInfo.cs
         Assets/Mirage/Samples~/AssemblyInfo.cs
         Assets/Mirage/Samples~/RigidbodyPhysics/Scripts/AssemblyInfo.cs
-        Assets/Mirage/Authenticators/AssemblyInfo.cs"
+        Assets/Mirage/Weaver/AssemblyInfo.cs"
   - - '@semantic-release/changelog'
     - changelogFile: 'Assets/Mirage/CHANGELOG.md'
   - - '@semantic-release/npm'
@@ -18,12 +18,12 @@ plugins:
       pkgRoot: "Assets/Mirage"
   - - '@semantic-release/git'
     - assets:
-        - 'Assets/Mirage/Runtime/AssemblyInfo.cs'
-        - 'Assets/Mirage/Runtime/Transport/Kcp/AssemblyInfo.cs'
-        - 'Assets/Mirage/Weaver/AssemblyInfo.cs'
+        - 'Assets/Mirage/Authenticators/AssemblyInfo.cs'
         - 'Assets/Mirage/Components/AssemblyInfo.cs'
+        - 'Assets/Mirage/Runtime/AssemblyInfo.cs'
+        - 'Assets/Mirage/Runtime/SocketLayer/AssemblyInfo.cs'
         - 'Assets/Mirage/Samples~/AssemblyInfo.cs'
         - 'Assets/Mirage/Samples~/RigidbodyPhysics/Scripts/AssemblyInfo.cs'
-        - 'Assets/Mirage/Authenticators/AssemblyInfo.cs'
+        - 'Assets/Mirage/Weaver/AssemblyInfo.cs'
         - 'Assets/Mirage/package.json'
         - 'Assets/Mirage/CHANGELOG.md'

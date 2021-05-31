@@ -104,6 +104,17 @@ namespace Mirage.SocketLayer
         }
 
         /// <summary>
+        /// returns a sequence value from the given value
+        /// wraps if necessary
+        /// </summary>
+        /// <param name="sequence">current sequence value</param>
+        /// <returns>the next sequence value</returns>
+        public ulong MoveInBounds(ulong sequence)
+        {
+            return (sequence) & mask;
+        }
+
+        /// <summary>
         /// Calculates the distance between 2 sequences, taking into account
         /// wrapping
         /// </summary>

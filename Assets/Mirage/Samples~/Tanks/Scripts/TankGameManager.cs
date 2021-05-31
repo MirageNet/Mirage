@@ -22,7 +22,6 @@ namespace Mirage.Examples.Tanks
         public List<Tank> players = new List<Tank>();
         public NetworkManager NetworkManager;
 
-
         void Update()
         {
             if (NetworkManager.IsNetworkActive)
@@ -30,14 +29,17 @@ namespace Mirage.Examples.Tanks
                 GameReadyCheck();
                 GameOverCheck();
 
-                if (LocalPlayer == null)
+                if (NetworkManager.Client.Active)
                 {
-                    FindLocalTank();
-                }
-                else
-                {
-                    ShowReadyMenu();
-                    UpdateStats();
+                    if (LocalPlayer == null)
+                    {
+                        FindLocalTank();
+                    }
+                    else
+                    {
+                        ShowReadyMenu();
+                        UpdateStats();
+                    }
                 }
             }
             else
@@ -84,7 +86,8 @@ namespace Mirage.Examples.Tanks
 
         void CheckPlayersNotInList()
         {
-            foreach (NetworkIdentity identity in NetworkManager.Client.World.SpawnedIdentities)
+            NetworkWorld world = NetworkManager.Server.Active ? NetworkManager.Server.World : NetworkManager.Client.World;
+            foreach (NetworkIdentity identity in world.SpawnedIdentities)
             {
                 Tank comp = identity.GetComponent<Tank>();
                 if (comp != null && !players.Contains(comp))
@@ -145,11 +148,13 @@ namespace Mirage.Examples.Tanks
 
         void FindLocalTank()
         {
-            //Check to see if the player is loaded in yet
-            if (NetworkManager.Client.Player == null)
+            INetworkPlayer player = NetworkManager.Client.Player;
+
+            // Check to see if the player object is loaded in yet
+            if (player.Identity == null)
                 return;
 
-            LocalPlayer = NetworkManager.Client.Player.Identity.GetComponent<Tank>();
+            LocalPlayer = player.Identity.GetComponent<Tank>();
         }
 
         void UpdateStats()

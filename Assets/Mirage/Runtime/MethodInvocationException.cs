@@ -6,7 +6,7 @@ namespace Mirage
     /// <summary>
     /// Exception thrown if a guarded method is invoked incorrectly
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class MethodInvocationException : Exception
     {
         /// <summary>

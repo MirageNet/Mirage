@@ -12,7 +12,7 @@ namespace Mirage.SocketLayer
         /// Receives a new Packet from low level
         /// </summary>
         /// <param name="connection">connection that sent data</param>
-        /// <param name="packet">packet that was sent from another peer</param>
-        void ReceivePacket(IConnection connection, ArraySegment<byte> packet);
+        /// <param name="message">Single message received by peer</param>
+        void ReceiveMessage(IConnection connection, ArraySegment<byte> message);
     }
 }

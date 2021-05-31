@@ -1,5 +1,4 @@
 using System;
-using Cysharp.Threading.Tasks;
 
 namespace Mirage
 {
@@ -25,50 +24,14 @@ namespace Mirage
         void UnregisterHandler<T>();
 
         void ClearHandlers();
-
-        /// <summary>
-        /// ProcessMessages loop, should loop unitil object is closed
-        /// </summary>
-        /// <returns></returns>
-        UniTask ProcessMessagesAsync();
-    }
-
-    /// <summary>
-    /// An object that can send notify messages
-    /// </summary>
-    public interface INotifySender
-    {
-        /// <summary>
-        /// Sends a message, but notify when it is delivered or lost
-        /// </summary>
-        /// <typeparam name="T">type of message to send</typeparam>
-        /// <param name="message">message to send</param>
-        /// <param name="token">a arbitrary object that the sender will receive with their notification</param>
-        void SendNotify<T>(T message, object token, int channelId = Channel.Unreliable);
-    }
-
-    /// <summary>
-    /// An object that can receive notify messages
-    /// </summary>
-    public interface INotifyReceiver
-    {
-        /// <summary>
-        /// Raised when a message is delivered
-        /// </summary>
-        event Action<INetworkPlayer, object> NotifyDelivered;
-
-        /// <summary>
-        /// Raised when a message is lost
-        /// </summary>
-        event Action<INetworkPlayer, object> NotifyLost;
     }
 
     /// <summary>
     /// An object that can send and receive messages and notify messages
     /// </summary>
-    public interface IMessageHandler : IMessageSender, IMessageReceiver, INotifySender, INotifyReceiver
+    public interface IMessageHandler : IMessageSender, IMessageReceiver
     {
-
+        void HandleMessage(ArraySegment<byte> packet);
     }
 
     /// <summary>
@@ -99,7 +62,9 @@ namespace Mirage
     /// </summary>
     public interface INetworkPlayer : IMessageHandler, IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
     {
-        IConnection Connection { get; }
+        SocketLayer.IConnection Connection { get; }
+        void Disconnect();
+        void MarkAsDisconnected();
     }
 
     public interface IAuthenticatedObject

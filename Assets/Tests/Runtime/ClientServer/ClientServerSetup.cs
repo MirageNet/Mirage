@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.SocketLayer;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -13,7 +14,6 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class ClientServerSetup<T> where T : NetworkBehaviour
     {
 
-        #region Setup
         protected GameObject serverGo;
         protected NetworkServer server;
         protected NetworkSceneManager serverSceneManager;
@@ -32,26 +32,33 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         protected GameObject playerPrefab;
 
-        protected Transport testTransport;
+        protected TestSocketFactory socketFactory;
         protected INetworkPlayer connectionToServer;
         protected INetworkPlayer connectionToClient;
 
         public virtual void ExtraSetup() { }
+
+        protected virtual bool AutoConnectClient => true;
+        protected virtual Config ServerConfig => null;
+        protected virtual Config ClientConfig => null;
 
         [UnitySetUp]
         public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
         {
             serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(NetworkServer));
             clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(ClientObjectManager), typeof(NetworkClient));
-            testTransport = serverGo.AddComponent<LoopbackTransport>();
+            socketFactory = serverGo.AddComponent<TestSocketFactory>();
 
             await UniTask.Delay(1);
 
             server = serverGo.GetComponent<NetworkServer>();
             client = clientGo.GetComponent<NetworkClient>();
 
-            server.Transport = testTransport;
-            client.Transport = testTransport;
+            if (ServerConfig != null) server.PeerConfig = ServerConfig;
+            if (ClientConfig != null) client.PeerConfig = ClientConfig;
+
+            server.SocketFactory = socketFactory;
+            client.SocketFactory = socketFactory;
 
             serverSceneManager = serverGo.GetComponent<NetworkSceneManager>();
             clientSceneManager = clientGo.GetComponent<NetworkSceneManager>();
@@ -84,31 +91,34 @@ namespace Mirage.Tests.Runtime.ClientServer
             // start the server
             var started = new UniTaskCompletionSource();
             server.Started.AddListener(() => started.TrySetResult());
-            server.StartAsync().Forget();
+            server.StartServer();
 
             await started.Task;
 
-            // now start the client
-            await client.ConnectAsync("localhost");
+            if (AutoConnectClient)
+            {
+                // now start the client
+                client.Connect("localhost");
 
-            await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > 0);
+                await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > 0);
 
-            // get the connections so that we can spawn players
-            connectionToClient = server.Players.First();
-            connectionToServer = client.Player;
+                // get the connections so that we can spawn players
+                connectionToClient = server.Players.First();
+                connectionToServer = client.Player;
 
-            // create a player object in the server
-            serverPlayerGO = Object.Instantiate(playerPrefab);
-            serverIdentity = serverPlayerGO.GetComponent<NetworkIdentity>();
-            serverComponent = serverPlayerGO.GetComponent<T>();
-            serverObjectManager.AddCharacter(connectionToClient, serverPlayerGO);
+                // create a player object in the server
+                serverPlayerGO = Object.Instantiate(playerPrefab);
+                serverIdentity = serverPlayerGO.GetComponent<NetworkIdentity>();
+                serverComponent = serverPlayerGO.GetComponent<T>();
+                serverObjectManager.AddCharacter(connectionToClient, serverPlayerGO);
 
-            // wait for client to spawn it
-            await AsyncUtil.WaitUntilWithTimeout(() => connectionToServer.Identity != null);
+                // wait for client to spawn it
+                await AsyncUtil.WaitUntilWithTimeout(() => connectionToServer.Identity != null);
 
-            clientIdentity = connectionToServer.Identity;
-            clientPlayerGO = clientIdentity.gameObject;
-            clientComponent = clientPlayerGO.GetComponent<T>();
+                clientIdentity = connectionToServer.Identity;
+                clientPlayerGO = clientIdentity.gameObject;
+                clientComponent = clientPlayerGO.GetComponent<T>();
+            }
         });
 
         public virtual void ExtraTearDown() { }
@@ -130,7 +140,5 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             ExtraTearDown();
         });
-
-        #endregion
     }
 }

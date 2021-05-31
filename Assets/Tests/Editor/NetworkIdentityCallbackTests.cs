@@ -200,7 +200,7 @@ namespace Mirage
                 identity.AssetId = guid2;
             });
 
-            Assert.That(exception.Message, Is.EqualTo($"Can not Set AssetId on NetworkIdentity '{identity.name}' becasue it already had an assetId, current assetId '{guid1:N}', attempted new assetId '{guid2:N}'"));
+            Assert.That(exception.Message, Is.EqualTo($"Can not Set AssetId on NetworkIdentity '{identity.name}' because it already had an assetId, current assetId '{guid1:N}', attempted new assetId '{guid2:N}'"));
             // guid was changed
             Assert.That(identity.AssetId, Is.EqualTo(guid1));
         }
@@ -664,8 +664,8 @@ namespace Mirage
             identity.StartServer();
 
             // add some observers
-            identity.AddObserver(player1);
-            identity.AddObserver(player2);
+            identity.observers.Add(player1);
+            identity.observers.Add(player2);
 
             // call ClearObservers
             identity.ClearObservers();

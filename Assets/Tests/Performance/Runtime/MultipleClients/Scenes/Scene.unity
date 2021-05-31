@@ -43,7 +43,7 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
+  serializedVersion: 11
   m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 0}
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -118,8 +118,6 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
-    maxJobWorkers: 0
-    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
@@ -226,9 +224,9 @@ GameObject:
   - component: {fileID: 1193428351}
   - component: {fileID: 1193428349}
   - component: {fileID: 1193428348}
-  - component: {fileID: 1193428350}
   - component: {fileID: 1193428352}
   - component: {fileID: 1193428353}
+  - component: {fileID: 1193428350}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -249,30 +247,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MaxConnections: 500
-  Started:
-    m_PersistentCalls:
-      m_Calls: []
-  Connected:
-    m_PersistentCalls:
-      m_Calls: []
-  Authenticated:
-    m_PersistentCalls:
-      m_Calls: []
-  Disconnected:
-    m_PersistentCalls:
-      m_Calls: []
-  Stopped:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartHost:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopHost:
-    m_PersistentCalls:
-      m_Calls: []
-  authenticator: {fileID: 0}
   Listening: 1
-  Transport: {fileID: 1193428350}
+  SocketFactory: {fileID: 1193428350}
+  authenticator: {fileID: 0}
+  _started:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _connected:
+    m_PersistentCalls:
+      m_Calls: []
+  _authenticated:
+    m_PersistentCalls:
+      m_Calls: []
+  _disconnected:
+    m_PersistentCalls:
+      m_Calls: []
+  _stopped:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartHost:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopHost:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!114 &1193428349
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -287,16 +289,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Client: {fileID: 0}
   Server: {fileID: 1193428348}
-  ClientChangeScene:
+  DontDestroy: 1
+  _clientChangeScene:
     m_PersistentCalls:
       m_Calls: []
-  ClientSceneChanged:
+  _clientSceneChanged:
     m_PersistentCalls:
       m_Calls: []
-  ServerChangeScene:
+  _serverChangeScene:
     m_PersistentCalls:
       m_Calls: []
-  ServerSceneChanged:
+  _serverSceneChanged:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &1193428350
@@ -308,12 +311,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1193428347}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3fbf0a5cb914b1c9bbb8a42e081f4bd, type: 3}
+  m_Script: {fileID: 11500000, guid: d9f46b2d67d7a054d8c13075473bd4a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Port: 7777
-  HashCashBits: 15
-  delayMode: 0
+  address: localhost
+  port: 7777
 --- !u!4 &1193428351
 Transform:
   m_ObjectHideFlags: 0

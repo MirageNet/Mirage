@@ -93,6 +93,7 @@ namespace Mirage
 
         void OnServerStopped()
         {
+            // todo dont send messages on server stop, only reset NI
             foreach (NetworkIdentity obj in Server.World.SpawnedIdentities.Reverse())
             {
                 // Unspawn all, but only destroy non-scene objects on server
@@ -130,7 +131,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Loops spawned collection for NetworkIdentieis that are not IsClient and calls StartClient().
+        /// Loops spawned collection for NetworkIdentities that are not IsClient and calls StartClient().
         /// </summary>
         void StartHostClientObjects()
         {
@@ -407,7 +408,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Spawns the <paramref name="identity"/> and setings its owner to the player that owns <paramref name="ownerObject"/>
+        /// Spawns the <paramref name="identity"/> and settings its owner to the player that owns <paramref name="ownerObject"/>
         /// </summary>
         /// <param name="ownerObject">An object owned by a player</param>
         public void Spawn(GameObject obj, GameObject ownerObject)
@@ -445,7 +446,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Spawns the <paramref name="identity"/> and setings its owner to <paramref name="owner"/>
+        /// Spawns the <paramref name="identity"/> and settings its owner to <paramref name="owner"/>
         /// </summary>
         public void Spawn(GameObject obj, INetworkPlayer owner = null)
         {
@@ -498,7 +499,7 @@ namespace Mirage
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
         {
             // for easier debugging
-            if (logger.LogEnabled()) logger.Log("Server SendSpawnMessage: name=" + identity.name + " sceneId=" + identity.sceneId.ToString("X") + " netid=" + identity.NetId);
+            if (logger.LogEnabled()) logger.Log("Server SendSpawnMessage: name=" + identity.name + " sceneId=" + identity.sceneId.ToString("X") + " netId=" + identity.NetId);
 
             // one writer for owner, one for observers
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
@@ -546,7 +547,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Prefabs are not allowed to be spawbned, they most be instantiated first
+        /// Prefabs are not allowed to be spawned, they most be instantiated first
         /// <para>This check does nothing in builds</para>
         /// </summary>
         /// <exception cref="InvalidOperationException">Throws in the editor if object is part of a prefab</exception>

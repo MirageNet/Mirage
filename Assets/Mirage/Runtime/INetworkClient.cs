@@ -11,14 +11,14 @@ namespace Mirage
         IAddLateEvent<INetworkPlayer> Connected { get; }
 
         /// <summary>
-        /// Event fires after the Client connection has sucessfully been authenticated with its Server.
+        /// Event fires after the Client connection has successfully been authenticated with its Server.
         /// </summary>
         IAddLateEvent<INetworkPlayer> Authenticated { get; }
 
         /// <summary>
         /// Event fires after the Client has disconnected from its Server and Cleanup has been called.
         /// </summary>
-        IAddLateEvent Disconnected { get; }
+        IAddLateEvent<ClientStoppedReason> Disconnected { get; }
 
         /// <summary>
         /// The NetworkConnection object this client is using.

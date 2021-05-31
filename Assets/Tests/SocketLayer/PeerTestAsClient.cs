@@ -163,7 +163,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             {
                 (byte)PacketType.Command,
                 (byte)Commands.Disconnect,
-                (byte)DisconnectReason.RequestedByPeer,
+                (byte)DisconnectReason.RequestedByRemotePeer,
             };
             socket.Received(1).Send(
                 Arg.Is(endPoint),

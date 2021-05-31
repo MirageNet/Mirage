@@ -160,7 +160,7 @@ namespace Mirage
                 // instead of calling unity's MonoBehaviour == operator
                 if (netIdentityCache is null)
                 {
-                    // GetComponentInParent doesn't works on disabled gameobjecs
+                    // GetComponentInParent doesn't works on disabled gameObject
                     // and GetComponentsInParent(false)[0] isn't allocation free, so
                     // we just drop child support in this specific case
                     if (gameObject.activeSelf)
@@ -486,7 +486,7 @@ namespace Mirage
         {
             return false;
 
-            // SyncVar are writen here in subclass
+            // SyncVar are written here in subclass
 
             // if initialState
             //   write all SyncVars

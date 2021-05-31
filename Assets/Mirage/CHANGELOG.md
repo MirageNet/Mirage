@@ -1,3 +1,99 @@
+## [95.1.1](https://github.com/MirageNet/Mirage/compare/v95.1.0...v95.1.1) (2021-05-30)
+
+
+### Bug Fixes
+
+* fixing errors in tanks sample ([ed99d05](https://github.com/MirageNet/Mirage/commit/ed99d050fdd4af28d85d277704f4b9870bae394d))
+
+# [95.1.0](https://github.com/MirageNet/Mirage/compare/v95.0.0...v95.1.0) (2021-05-29)
+
+
+### Features
+
+* adding started event to client ([#825](https://github.com/MirageNet/Mirage/issues/825)) ([3360b7c](https://github.com/MirageNet/Mirage/commit/3360b7c45cabef8677f831282f9d2a86fcfb8c58))
+
+# [95.0.0](https://github.com/MirageNet/Mirage/compare/v94.0.0...v95.0.0) (2021-05-28)
+
+
+### Code Refactoring
+
+* remove channel from handler ([#824](https://github.com/MirageNet/Mirage/issues/824)) ([f11ef9a](https://github.com/MirageNet/Mirage/commit/f11ef9ac4db982334c889fd3fccf901fcc3de90f))
+
+
+### Features
+
+* adding disconnect reason to client disconnect ([#820](https://github.com/MirageNet/Mirage/issues/820)) ([e597570](https://github.com/MirageNet/Mirage/commit/e597570bab913c025a019ce82acf309a1be4f647))
+* adding Peer config properties ([9fd8a05](https://github.com/MirageNet/Mirage/commit/9fd8a0540cc04242820ea3cdc3d781ccb29ed1ad))
+
+
+### Performance Improvements
+
+* NetworkAnimator parameters use ArraySegment instead of Arrays ([#822](https://github.com/MirageNet/Mirage/issues/822)) ([00f4833](https://github.com/MirageNet/Mirage/commit/00f4833c121f13f0c5208bb23006fb58bcf294c5))
+* remove redundant transform calls on NT ([#823](https://github.com/MirageNet/Mirage/issues/823)) ([2d10305](https://github.com/MirageNet/Mirage/commit/2d10305c608c544a3fbf930af17b9651931d5ac1))
+
+
+### BREAKING CHANGES
+
+* NetworkDiagnostics no longer tracks channel
+* Client.Disconnected now has a Reason argument
+
+# [94.0.0](https://github.com/MirageNet/Mirage/compare/v93.0.2...v94.0.0) (2021-05-24)
+
+
+### Bug Fixes
+
+* removing other uses of old Notify ([25a0503](https://github.com/MirageNet/Mirage/commit/25a0503619404b5a0f52dc374b9607199e4cc177))
+
+
+### Code Refactoring
+
+* removing Obsolete Notify code from networkplayer ([b2e5531](https://github.com/MirageNet/Mirage/commit/b2e5531f95ecaddc9ea23460a7e06bba201cbfc6))
+
+
+### BREAKING CHANGES
+
+* removing notify code from networkplayer, notify is now part of peer
+
+## [93.0.2](https://github.com/MirageNet/Mirage/compare/v93.0.1...v93.0.2) (2021-05-24)
+
+
+### Bug Fixes
+
+* closing socket on application quit ([c37fe7d](https://github.com/MirageNet/Mirage/commit/c37fe7d28e74f0e3b771146542c98f669af43381))
+* fixing SocketException after closing remote applcation ([4ed12ba](https://github.com/MirageNet/Mirage/commit/4ed12badc104c53919b13d1465ce8e0832e86b39))
+* fixing udp socket exception on linux ([#809](https://github.com/MirageNet/Mirage/issues/809)) ([a4e8689](https://github.com/MirageNet/Mirage/commit/a4e8689cc15157ff83b045944e1f516937365134))
+* removing unnecessary check ([e8a93a4](https://github.com/MirageNet/Mirage/commit/e8a93a49d0b230c20434392d3ae506938ddc5b9b))
+* stopping null ref in disconnect ([4d0f092](https://github.com/MirageNet/Mirage/commit/4d0f0922ea1fec83b2d6b14148c039d6ebf9d024))
+
+## [93.0.1](https://github.com/MirageNet/Mirage/compare/v93.0.0...v93.0.1) (2021-05-23)
+
+
+### Bug Fixes
+
+* stopping null ref caused by hud stopping non-active server ([8aa561a](https://github.com/MirageNet/Mirage/commit/8aa561ace45fdc6df8df9238b13e3af5d3358e75))
+
+# [93.0.0](https://github.com/MirageNet/Mirage/compare/v92.0.0...v93.0.0) (2021-05-23)
+
+
+### Features
+
+* foldout for events on network server ([#806](https://github.com/MirageNet/Mirage/issues/806)) ([cbb12d1](https://github.com/MirageNet/Mirage/commit/cbb12d13d295c048f0a913ddb91203f4ed9f66f5))
+* replacing transport with peer ([#780](https://github.com/MirageNet/Mirage/issues/780)) ([66b2315](https://github.com/MirageNet/Mirage/commit/66b231565c019be49f8da2af8b5e8e17822ecd8f))
+
+
+### BREAKING CHANGES
+
+* - All Transports are obsolete.
+- Transports Are replaced with ISocket. Custom Transports should now implement ISocket and SocketFactory instead
+- Message handlers are now invoked in Update instead of in an Async Coroutine
+- Send Notify moved to SocketLayer
+- Server.StartAsync is no longer Async
+- Server.StartAsync is now called Server.StartServer
+- Client.Connect is no longer async
+- Local message in host mode invoke handlers immediately instead of waiting till next update
+- NetworkPlayer now has a Disconnect method. This means user does not need a reference to SocketLayer asmdef.
+- Disconnected players are blocked from sending messages
+
 # [92.0.0](https://github.com/MirageNet/Mirage/compare/v91.2.0...v92.0.0) (2021-05-23)
 
 

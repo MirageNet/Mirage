@@ -999,18 +999,6 @@ namespace Mirage.Tests.Runtime
         }
 
         [Test]
-        public void TestWritingUri()
-        {
-
-            var testUri = new Uri("https://www.mirror-networking.com?somthing=other");
-
-            writer.WriteUri(testUri);
-
-            var reader = new NetworkReader(writer.ToArray());
-            Assert.That(reader.ReadUri(), Is.EqualTo(testUri));
-        }
-
-        [Test]
         public void TestList()
         {
             var original = new List<int> { 1, 2, 3, 4, 5 };
@@ -1073,7 +1061,7 @@ namespace Mirage.Tests.Runtime
         [TestCase(1234)]
         public void NullableInt(int? value)
         {
-            writer.Write<int?>(value);
+            writer.Write(value);
             var reader = new NetworkReader(writer.ToArray());
             int? unpacked = reader.Read<int?>();
 
@@ -1086,7 +1074,7 @@ namespace Mirage.Tests.Runtime
         [TestCase(false)]
         public void NullableBool(bool? value)
         {
-            writer.Write<bool?>(value);
+            writer.Write(value);
             var reader = new NetworkReader(writer.ToArray());
             bool? unpacked = reader.Read<bool?>();
 
@@ -1099,7 +1087,7 @@ namespace Mirage.Tests.Runtime
         [TestCase(20202020ul)]
         public void NullableUlong(ulong? value)
         {
-            writer.Write<ulong?>(value);
+            writer.Write(value);
             var reader = new NetworkReader(writer.ToArray());
             ulong? unpacked = reader.Read<ulong?>();
 

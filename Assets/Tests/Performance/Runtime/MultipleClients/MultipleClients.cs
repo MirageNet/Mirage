@@ -1,13 +1,13 @@
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.SocketLayer;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Performance.Runtime
@@ -24,12 +24,9 @@ namespace Mirage.Tests.Performance.Runtime
         const int ClientCount = 10;
         const int MonsterCount = 10;
 
-        [FormerlySerializedAs("server")]
         public NetworkServer Server;
-        [FormerlySerializedAs("serverObjectManager")]
         public ServerObjectManager ServerObjectManager;
-        [FormerlySerializedAs("transport")]
-        public Transport Transport;
+        public SocketFactory socketFactory;
 
         public NetworkIdentity MonsterPrefab;
 
@@ -54,15 +51,16 @@ namespace Mirage.Tests.Performance.Runtime
 
             // wait 1 frame before Starting server to give time for Unity to call "Start"
             await UniTask.Yield();
-            Server.StartAsync().Forget();
+            Server.StartServer();
 
             await started.Task;
 
-            Transport = Object.FindObjectOfType<Transport>();
+            socketFactory = Server.GetComponent<SocketFactory>();
+            Debug.Assert(socketFactory != null, "Could not find socket factory for test");
 
             // connect from a bunch of clients
             for (int i = 0; i < ClientCount; i++)
-                await StartClient(i, Transport);
+                await StartClient(i, socketFactory);
 
             // spawn a bunch of monsters
             for (int i = 0; i < MonsterCount; i++)
@@ -72,17 +70,17 @@ namespace Mirage.Tests.Performance.Runtime
                 await UniTask.Delay(10);
         });
 
-        private IEnumerator StartClient(int i, Transport transport)
+        private IEnumerator StartClient(int i, SocketFactory socketFactory)
         {
             var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager));
             NetworkClient client = clientGo.GetComponent<NetworkClient>();
             ClientObjectManager objectManager = clientGo.GetComponent<ClientObjectManager>();
             objectManager.Client = client;
             objectManager.Start();
-            client.Transport = transport;
+            client.SocketFactory = socketFactory;
 
             objectManager.RegisterPrefab(MonsterPrefab);
-            client.ConnectAsync("localhost");
+            client.Connect("localhost");
             while (!client.IsConnected)
                 yield return null;
         }

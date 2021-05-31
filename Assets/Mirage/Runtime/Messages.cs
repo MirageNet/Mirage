@@ -29,7 +29,7 @@ namespace Mirage
 
     #endregion
 
-    #region System Messages requried for code gen path
+    #region System Messages required for code gen path
     [NetworkMessage]
     public struct ServerRpcMessage
     {

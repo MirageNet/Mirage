@@ -151,7 +151,7 @@ namespace Mirage
             {
                 // paul: LocalTime is very expensive
                 // so cache the time for the duration of the frame
-                // if someone asks for .time serveral times in a frame this has significant impact
+                // if someone asks for .time several times in a frame this has significant impact
                 // this also makes it more consistent with Time.time
                 if (lastFrame != UnityEngine.Time.frameCount)
                 {

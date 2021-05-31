@@ -27,7 +27,7 @@ namespace Mirage.Sockets.Udp
 
         public override EndPoint GetBindEndPoint()
         {
-            return new IPEndPoint(IPAddress.Any, port);
+            return new IPEndPoint(IPAddress.IPv6Any, port);
         }
 
         public override EndPoint GetConnectEndPoint(string address = null, ushort? port = null)
@@ -46,15 +46,14 @@ namespace Mirage.Sockets.Udp
                 return address;
 
             IPAddress[] results = Dns.GetHostAddresses(addressString);
-            foreach (IPAddress result in results)
+            if (results.Length == 0)
             {
-                if (result.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return result;
-                }
+                throw new SocketException((int)SocketError.HostNotFound);
             }
-
-            throw new FormatException("Could not parse address");
+            else
+            {
+                return results[0];
+            }
         }
 
         void ThrowIfNotSupported()
@@ -70,33 +69,69 @@ namespace Mirage.Sockets.Udp
 
     public class UdpSocket : ISocket
     {
-        readonly Socket socket;
-
-        public UdpSocket()
-        {
-            // todo do we need to use AddressFamily from endpoint?
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            socket.Blocking = false;
-            socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.ReuseAddress, true);
-        }
+        Socket socket;
+        IPEndPoint AnyEndpoint;
 
         public void Bind(EndPoint endPoint)
         {
-            socket.Bind(endPoint);
-            // todo check socket options
-            /*
-            // options from https://github.com/phodoval/Mirage/blob/SimplifyTransports/Assets/Mirage/Runtime/Transport/Udp/UdpSocket.cs#L27
-            socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.ReuseAddress, true);
+            AnyEndpoint = endPoint as IPEndPoint;
 
-            const uint IOC_IN = 0x80000000;
-            const uint IOC_VENDOR = 0x18000000;
-            socket.IOControl(unchecked((int)(IOC_IN | IOC_VENDOR | 12)), new[] { Convert.ToByte(false) }, null);
-             */
+            socket = CreateSocket(endPoint);
+            socket.DualMode = true;
+
+            socket.Bind(endPoint);
+        }
+
+        static Socket CreateSocket(EndPoint endPoint)
+        {
+            var socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
+            {
+                Blocking = false,
+            };
+
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            TrySetIOControl(socket);
+
+            return socket;
+        }
+
+        private static void TrySetIOControl(Socket socket)
+        {
+            try
+            {
+                if (Application.platform != RuntimePlatform.WindowsPlayer && Application.platform != RuntimePlatform.WindowsEditor)
+                {
+                    // IOControl only seems to work on windows
+                    // gives "SocketException: The descriptor is not a socket" when running on github action on Linux
+                    // see https://github.com/mono/mono/blob/f74eed4b09790a0929889ad7fc2cf96c9b6e3757/mcs/class/System/System.Net.Sockets/Socket.cs#L2763-L2765
+                    return;
+                }
+
+                // stops "SocketException: Connection reset by peer"
+                // this error seems to be caused by a failed send, resulting in the next polling being true, even those endpoint is closed
+                // see https://stackoverflow.com/a/15232187/8479976
+
+                // this IOControl sets the reporting of "unrealable" to false, stoping SocketException after a connection closes without sending disconnect message
+                const uint IOC_IN = 0x80000000;
+                const uint IOC_VENDOR = 0x18000000;
+                const uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+                byte[] _false = new byte[] { 0, 0, 0, 0 };
+
+                socket.IOControl(unchecked((int)SIO_UDP_CONNRESET), _false, null);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Exception setting IOControl");
+                Debug.LogException(e);
+            }
         }
 
         public void Connect(EndPoint endPoint)
         {
-            // todo check if connect should be called for udp or if it should be something else
+            AnyEndpoint = endPoint as IPEndPoint;
+
+            socket = CreateSocket(endPoint);
+
             socket.Connect(endPoint);
         }
 
@@ -115,18 +150,18 @@ namespace Mirage.Sockets.Udp
             return socket.Poll(0, SelectMode.SelectRead);
         }
 
-        public int Receive(byte[] buffer, ref EndPoint endPoint)
+        public int Receive(byte[] buffer, out EndPoint endPoint)
         {
-            // todo do we need to set if null
-            endPoint = endPoint ?? new IPEndPoint(IPAddress.Any, 0);
-            return socket.ReceiveFrom(buffer, ref endPoint);
+            endPoint = AnyEndpoint;
+            int c = socket.ReceiveFrom(buffer, ref endPoint);
+            return c;
         }
 
         public void Send(EndPoint endPoint, byte[] packet, int length)
         {
             // todo check disconnected
             // todo what SocketFlags??
-            socket.SendTo(packet, length, SocketFlags.None, (IPEndPoint)endPoint);
+            socket.SendTo(packet, length, SocketFlags.None, endPoint);
         }
     }
 }

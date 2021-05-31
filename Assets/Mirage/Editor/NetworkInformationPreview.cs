@@ -100,11 +100,11 @@ namespace Mirage
 
             // padding
             var previewPadding = new RectOffset(-5, -5, -5, -5);
-            Rect paddedr = previewPadding.Add(r);
+            Rect paddedRect = previewPadding.Add(r);
 
             //Centering
-            float initialX = paddedr.x + 10;
-            float Y = paddedr.y + 10;
+            float initialX = paddedRect.x + 10;
+            float Y = paddedRect.y + 10;
 
             Y = DrawNetworkIdentityInfo(identity, initialX, Y);
 
@@ -183,7 +183,7 @@ namespace Mirage
 
                 foreach (INetworkPlayer player in identity.observers)
                 {
-                    GUI.Label(observerRect, player.Connection.GetEndPointAddress() + ":" + player, styles.ComponentName);
+                    GUI.Label(observerRect, player.Connection.EndPoint + ":" + player, styles.ComponentName);
                     observerRect.y += observerRect.height;
                     Y = observerRect.y;
                 }

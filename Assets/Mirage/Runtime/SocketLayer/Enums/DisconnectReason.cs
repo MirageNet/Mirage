@@ -19,6 +19,11 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// Disconnect called by higher level
         /// </summary>
-        RequestedByPeer = 2,
+        RequestedByRemotePeer = 2,
+
+        /// <summary>
+        /// Disconnect called by higher level
+        /// </summary>
+        RequestedByLocalPeer = 3,
     }
 }

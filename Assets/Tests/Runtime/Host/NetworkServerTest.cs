@@ -1,5 +1,4 @@
 using System;
-using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -15,11 +14,11 @@ namespace Mirage.Tests.Runtime.Host
         {
             var secondGO = new GameObject();
             NetworkClient secondClient = secondGO.AddComponent<NetworkClient>();
-            Transport secondTestTransport = secondGO.AddComponent<LoopbackTransport>();
+            TestSocketFactory socketFactory = networkManagerGo.GetComponent<TestSocketFactory>();
 
-            secondClient.Transport = secondTestTransport;
+            secondClient.SocketFactory = socketFactory;
 
-            secondClient.ConnectAsync("localhost").Forget();
+            secondClient.Connect("localhost");
 
             Assert.That(server.Players, Has.Count.EqualTo(1));
 
