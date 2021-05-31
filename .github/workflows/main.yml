@@ -41,7 +41,7 @@ jobs:
 
       - name: Install sonar scanner
         run: |
-          $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 4.7.1
+          $DOTNET_ROOT/dotnet tool install dotnet-sonarscanner --tool-path . --version 5.2.0
           apt update
           apt install -y openjdk-11-jre-headless=11.0.11+9-0ubuntu2~18.04
 
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
-  
+
       - name: Release
         uses: cycjimmy/semantic-release-action@v2
         id: semantic
