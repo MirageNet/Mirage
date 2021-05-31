@@ -30,7 +30,7 @@ jobs:
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
       
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v1
 
       - name: Cache Library
         id: cache-library
@@ -70,10 +70,6 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
-  
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - name: Release
         uses: cycjimmy/semantic-release-action@v2
