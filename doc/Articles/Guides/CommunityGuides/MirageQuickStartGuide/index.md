@@ -1,4 +1,8 @@
 # Mirage Quick Start Guide 
+
+> [!WARNING] 
+> This guide was written for mirror so some information might be out-of-date for mirage
+
 This guide currently shows you:
 - [Basic scene setup](#part-1)
 - [Player movement](#part-4)
@@ -9,7 +13,6 @@ This guide currently shows you:
 It is best to first make a mini practice game before converting your single player game, or creating your ideal brand new multiplayer.
 
 The Pre-made Mirage examples are great for using as reference, it is recommend to use them regarding connection setup, with ports and firewalls. This can be a huge topic that changes from person to person, and is not covered in this guide, here we will use localHost (multiple games on same PC).
-
 
 
 ## Part 1

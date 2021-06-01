@@ -66,7 +66,6 @@ Mirage has many new features
 * Server Rpcs can [return values](https://miragenet.github.io/Mirage/Articles/Guides/Communications/RemoteActions.html)
 * The default transport features DoS prevention
 * The default transport has CRC64 integrity check
-* Mirage provides unreliable channel out of the box
 
 If you look under the hood,  the code base has some significant differences based on the core values of each project
 * Mirage follows the [SOLID principles](https://en.wikipedia.org/wiki/SOLID).
@@ -93,22 +92,14 @@ If you want to contribute to  Mirage, follow these steps:
     If you don't enable symlinks, you will be able to work on Mirage but Unity will not see the examples.
 3) Open in unity 2019.4.x or later
 
-## Transports
-Here is a list of some transports supported by NG and how they compare to each other
+## Transport and Sockets
 
-|                |        Kcp         | [Websocket](https://github.com/MirageNet/WebsocketNG) | [Steam](https://github.com/dragonslaya84/FizzySteamyMirror) | [LiteNetLibNG](https://github.com/uweenukr/LiteNetLibNG) | [IgnoranceNG](https://github.com/dragonslaya84/IgnoranceNG) |
-| -------------- | :----------------: | :--------------------------------------------------: | :---------------------------------------------------------: | :------------------------------------------------------: | :---------------------------------------------------------: |
-| **CCU**        |       1000+        |                          ?                           |                              ?                              |                            ?                             |                              ?                              |
-| **Protocol**   |        UDP         |                         TCP                          |                             UDP                             |                           UDP                            |                             UDP                             |
-| **Unreliable** | :white_check_mark: |                                                      |                     :white_check_mark:                      |                    :white_check_mark:                    |                     :white_check_mark:                      |
-| **WebGL**      |                    |                  :white_check_mark:                  |                                                             |                                                          |                                                             |
-| **Mobile**     | :white_check_mark: |                                                      |                                                             |                            ?                             |                              ?                              |
-| **CPU**        |        LOW         |                         HIGH                         |                              ?                              |                            ?                             |                              ?                              |
-| **NAT Punch**  |                    |                                                      |                     :white_check_mark:                      |                                                          |                                                             |
-| **Encryption** |                    |                  :white_check_mark:                  |                     :white_check_mark:                      |                                                          |                                                             |
-| **IPV6**       | :white_check_mark: |                  :white_check_mark:                  |                              ?                              |                            ?                             |                              ?                              |
-| **Managed**    | :white_check_mark: |                  :white_check_mark:                  |                                                             |                    :white_check_mark:                    |                                                             |
-| **Based on**   |        KCP         |                      Websockets                      |                Steam Game Networking Sockets                |                        LiteNetLib                        |                            ENet                             |
+Mirage supports multiple ways of transporting data:
+- c# UDP Socket (default)
+- Native UDP socket (coming soon)
+- Websocket, to support webgl clients (coming soon)
+- Steam (coming soon)
+
 
 ## Contributing
 

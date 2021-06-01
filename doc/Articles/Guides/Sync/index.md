@@ -209,5 +209,3 @@ public override void DeserializeSyncVars(NetworkReader reader, bool initialState
 ```
 
 If a <xref:Mirage.NetworkBehaviour> has a base class that also has serialization functions, the base class functions should also be called.
-
-Note that the `UpdateVar` packets created for game object state updates may be aggregated in buffers before being sent to the client, so a single transport layer packet may contain updates for multiple game objects.
