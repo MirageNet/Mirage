@@ -14,8 +14,11 @@ namespace Mirage.Tests.Runtime.ClientServer
         Action<INetworkPlayer> clientMockMethod;
 
 
-        class NetworkAuthenticationImpl : NetworkAuthenticator { };
-
+        class NetworkAuthenticationImpl : NetworkAuthenticator
+        {
+            public override void ClientAuthenticate(INetworkPlayer player) => ClientAccept(player);
+            public override void ServerAuthenticate(INetworkPlayer player) => ServerAccept(player);
+        }
         public override void ExtraSetup()
         {
             serverAuthenticator = serverGo.AddComponent<NetworkAuthenticationImpl>();
@@ -33,15 +36,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void OnServerAuthenticateTest()
         {
-            serverAuthenticator.OnServerAuthenticate(Substitute.For<INetworkPlayer>());
-
-            serverMockMethod.Received().Invoke(Arg.Any<INetworkPlayer>());
-        }
-
-        [Test]
-        public void OnServerAuthenticateInternalTest()
-        {
-            serverAuthenticator.OnServerAuthenticateInternal(Substitute.For<INetworkPlayer>());
+            serverAuthenticator.ServerAuthenticate(Substitute.For<INetworkPlayer>());
 
             serverMockMethod.Received().Invoke(Arg.Any<INetworkPlayer>());
         }
@@ -49,15 +44,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void OnClientAuthenticateTest()
         {
-            clientAuthenticator.OnClientAuthenticate(Substitute.For<INetworkPlayer>());
-
-            clientMockMethod.Received().Invoke(Arg.Any<INetworkPlayer>());
-        }
-
-        [Test]
-        public void OnClientAuthenticateInternalTest()
-        {
-            clientAuthenticator.OnClientAuthenticateInternal(Substitute.For<INetworkPlayer>());
+            clientAuthenticator.ClientAuthenticate(Substitute.For<INetworkPlayer>());
 
             clientMockMethod.Received().Invoke(Arg.Any<INetworkPlayer>());
         }

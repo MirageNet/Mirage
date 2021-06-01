@@ -205,7 +205,7 @@ namespace Mirage
             {
                 authenticator.OnClientAuthenticated += OnAuthenticated;
 
-                Connected.AddListener(authenticator.OnClientAuthenticateInternal);
+                Connected.AddListener(authenticator.ClientAuthenticate);
             }
             else
             {
@@ -288,7 +288,7 @@ namespace Mirage
             if (authenticator != null)
             {
                 authenticator.OnClientAuthenticated -= OnAuthenticated;
-                Connected.RemoveListener(authenticator.OnClientAuthenticateInternal);
+                Connected.RemoveListener(authenticator.ClientAuthenticate);
             }
             else
             {
