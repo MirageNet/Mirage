@@ -140,6 +140,8 @@ namespace Mirage
         public NetworkTime Time { get; } = new NetworkTime();
 
         public NetworkWorld World { get; private set; }
+        public SyncVarSender SyncVarSender { get; private set; }
+
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.
@@ -199,6 +201,8 @@ namespace Mirage
 
             LocalClient = localClient;
             World = new NetworkWorld();
+            SyncVarSender = new SyncVarSender();
+
 
             ISocket socket = SocketFactory.CreateServerSocket();
             var dataHandler = new DataHandler(connections);
@@ -246,6 +250,7 @@ namespace Mirage
         private void Update()
         {
             peer?.Update();
+            SyncVarSender?.Update();
         }
 
         private void Peer_OnConnected(IConnection conn)
@@ -292,6 +297,9 @@ namespace Mirage
             _onStartHost.Reset();
             _onStopHost.Reset();
             _stopped.Reset();
+
+            World = null;
+            SyncVarSender = null;
 
             Application.quitting -= Stop;
 

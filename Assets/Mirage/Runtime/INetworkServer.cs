@@ -63,6 +63,8 @@ namespace Mirage
 
         NetworkWorld World { get; }
 
+        SyncVarSender SyncVarSender { get; }
+
         IReadOnlyCollection<INetworkPlayer> Players { get; }
 
         void Stop();

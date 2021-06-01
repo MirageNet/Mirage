@@ -49,8 +49,6 @@ namespace Mirage
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => checked(nextNetworkId++);
 
-        public SyncVarSender SyncVarSender { get; private set; }
-
         public void Start()
         {
             if (Server != null)
@@ -68,12 +66,6 @@ namespace Mirage
             }
         }
 
-        // The user should never need to pump the update loop manually
-        internal void Update()
-        {
-            SyncVarSender?.Update();
-        }
-
         internal void RegisterMessageHandlers(INetworkPlayer player)
         {
             player.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
@@ -87,7 +79,6 @@ namespace Mirage
 
         void OnServerStarted()
         {
-            SyncVarSender = new SyncVarSender();
             SpawnOrActivate();
         }
 
@@ -101,7 +92,6 @@ namespace Mirage
             }
 
             Server.World.ClearSpawnedObjects();
-            SyncVarSender = null;
             // reset so ids stay small in each session
             nextNetworkId = 1;
         }
