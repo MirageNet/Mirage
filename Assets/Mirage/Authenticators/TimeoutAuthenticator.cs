@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Mirage.Logging;
@@ -30,33 +31,33 @@ namespace Mirage.Authenticators
         private void HandleServerAuthenticated(INetworkPlayer player)
         {
             pendingAuthentication.Remove(player);
-            base.OnClientAuthenticate(player);
+            ServerAccept(player);
         }
 
         private void HandleClientAuthenticated(INetworkPlayer player)
         {
             pendingAuthentication.Remove(player);
-            base.OnServerAuthenticate(player);
+            ClientAccept(player);
         }
 
-        public override void OnClientAuthenticate(INetworkPlayer player)
+        public override void ClientAuthenticate(INetworkPlayer player)
         {
             pendingAuthentication.Add(player);
-            Authenticator.OnClientAuthenticate(player);
+            Authenticator.ClientAuthenticate(player);
 
             if (Timeout > 0)
-                StartCoroutine(BeginAuthentication(player));
+                StartCoroutine(BeginAuthentication(player, ClientReject));
         }
 
-        public override void OnServerAuthenticate(INetworkPlayer player)
+        public override void ServerAuthenticate(INetworkPlayer player)
         {
             pendingAuthentication.Add(player);
-            Authenticator.OnServerAuthenticate(player);
+            Authenticator.ServerAuthenticate(player);
             if (Timeout > 0)
-                StartCoroutine(BeginAuthentication(player));
+                StartCoroutine(BeginAuthentication(player, ServerReject));
         }
 
-        IEnumerator BeginAuthentication(INetworkPlayer player)
+        IEnumerator BeginAuthentication(INetworkPlayer player, Action<INetworkPlayer> reject)
         {
             if (logger.LogEnabled()) logger.Log($"Authentication countdown started {player} {Timeout}");
 
@@ -67,7 +68,7 @@ namespace Mirage.Authenticators
                 if (logger.LogEnabled()) logger.Log($"Authentication Timeout {player}");
 
                 pendingAuthentication.Remove(player);
-                player.Disconnect();
+                reject.Invoke(player);
             }
         }
     }

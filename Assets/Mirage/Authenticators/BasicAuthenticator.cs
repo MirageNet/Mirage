@@ -4,75 +4,91 @@ using UnityEngine;
 
 namespace Mirage.Authenticators
 {
+    /// <summary>
+    /// Basic Authenticator that lets the server/host set a "passcode" in order to connect.
+    /// <para>
+    /// This code could be a short string that can be used to host a private game.
+    /// The host would set the code and then give it to their friends allowing them to join.
+    /// </para>
+    /// </summary>
     [AddComponentMenu("Network/Authenticators/BasicAuthenticator")]
     public class BasicAuthenticator : NetworkAuthenticator
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(BasicAuthenticator));
 
-        // set these in the inspector
-        public string Username;
-        public string Password;
+        /// <summary>
+        /// Code given to clients so that they can connect to the server/host
+        /// <para>
+        /// Set this in inspector or at runtime when the server/host starts
+        /// </para>
+        /// </summary>
+        [Header("Custom Properties")]
+        public string serverCode;
 
-        public struct AuthRequestMessage
+
+        /// <summary>
+        /// Use whatever credentials make sense for your game.
+        /// <para>
+        ///     This example uses a code so that only players that know the code can join.
+        /// </para>
+        /// <para>
+        ///     You might want to use an accessToken or passwords. Be aware that the normal connection
+        ///     in mirror is not encrypted so sending secure information directly is not adviced
+        /// </para>
+        /// </summary>
+
+        [NetworkMessage]
+        struct AuthRequestMessage
         {
-            // use whatever credentials make sense for your game
-            // for example, you might want to pass the accessToken if using oauth
-            public string AuthUsername;
-            public string AuthPassword;
+            public string serverCode;
         }
 
-        public struct AuthResponseMessage
+        [NetworkMessage]
+        struct AuthResponseMessage
         {
-            public byte Code;
-            public string Message;
+            public bool success;
+            public string message;
         }
 
-        public override void OnServerAuthenticate(INetworkPlayer player)
+
+        #region Server Authenticate
+
+        /*
+            This region should is need to validate the client connection and auth messages sent by the client
+         */
+        public override void ServerAuthenticate(INetworkPlayer player)
         {
             // wait for AuthRequestMessage from client
             player.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage);
         }
 
-        public override void OnClientAuthenticate(INetworkPlayer player)
+
+        void OnAuthRequestMessage(INetworkPlayer player, AuthRequestMessage msg)
         {
-            player.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage);
+            if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Authentication Request: {0} {1}", msg.serverCode);
 
-            var authRequestMessage = new AuthRequestMessage
-            {
-                AuthUsername = Username,
-                AuthPassword = Password
-            };
-
-            player.Send(authRequestMessage);
-        }
-
-        public void OnAuthRequestMessage(INetworkPlayer player, AuthRequestMessage msg)
-        {
-            if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Authentication Request: {0} {1}", msg.AuthUsername, msg.AuthPassword);
-
-            // check the credentials by calling your web server, database table, playfab api, or any method appropriate.
-            if (msg.AuthUsername == Username && msg.AuthPassword == Password)
+            // check if client send the same code as the one stored in the server
+            if (msg.serverCode == serverCode)
             {
                 // create and send msg to client so it knows to proceed
-                var authResponseMessage = new AuthResponseMessage
+                player.Send(new AuthResponseMessage
                 {
-                    Code = 100,
-                    Message = "Success"
-                };
+                    success = true,
+                    message = "Success"
+                });
 
-                player.Send(authResponseMessage);
-
-                // Invoke the event to complete a successful authentication
-                base.OnServerAuthenticate(player);
+                ServerAccept(player);
             }
             else
             {
                 // create and send msg to client so it knows to disconnect
                 var authResponseMessage = new AuthResponseMessage
                 {
-                    Code = 200,
-                    Message = "Invalid Credentials"
+                    success = false,
+                    message = "Invalid code"
                 };
+
+                ServerReject(player);
 
                 player.Send(authResponseMessage);
 
@@ -81,28 +97,42 @@ namespace Mirage.Authenticators
             }
         }
 
-        public IEnumerator DelayedDisconnect(INetworkPlayer player, float waitTime)
+        IEnumerator DelayedDisconnect(INetworkPlayer player, float waitTime)
         {
             yield return new WaitForSeconds(waitTime);
-
             player.Disconnect();
         }
 
-        public void OnAuthResponseMessage(INetworkPlayer player, AuthResponseMessage msg)
-        {
-            if (msg.Code == 100)
-            {
-                if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Authentication Response: {0}", msg.Message);
+        #endregion
 
-                // Invoke the event to complete a successful authentication
-                base.OnClientAuthenticate(player);
+        #region Client Authenticate
+
+        public override void ClientAuthenticate(INetworkPlayer player)
+        {
+            player.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage);
+
+            // The serverCode should be set on the client before connection to the server.
+            // When the client connects it sends the code and the server checks that it is correct
+            player.Send(new AuthRequestMessage
+            {
+                serverCode = serverCode,
+            });
+        }
+
+        void OnAuthResponseMessage(INetworkPlayer player, AuthResponseMessage msg)
+        {
+            if (msg.success)
+            {
+                if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Authentication Success: {0}", msg.message);
+                ClientAccept(player);
             }
             else
             {
-                logger.LogFormat(LogType.Error, "Authentication Response: {0}", msg.Message);
-                // disconnect the client
-                player.Disconnect();
+                logger.LogFormat(LogType.Error, "Authentication Fail: {0}", msg.message);
+                ClientReject(player);
             }
         }
+
+        #endregion
     }
 }

@@ -21,39 +21,56 @@ namespace Mirage
 
         #region server
 
-        // This will get more code in the near future
-        internal void OnServerAuthenticateInternal(INetworkPlayer player)
-        {
-            OnServerAuthenticate(player);
-        }
-
         /// <summary>
-        /// Called on server from OnServerAuthenticateInternal when a client needs to authenticate
+        /// Call this when player has been accepted on the server
         /// </summary>
-        /// <param name="player">Connection to client.</param>
-        public virtual void OnServerAuthenticate(INetworkPlayer player)
+        /// <param name="player"></param>
+        protected void ServerAccept(INetworkPlayer player)
         {
             OnServerAuthenticated?.Invoke(player);
         }
+        /// <summary>
+        /// Call this when player has been rejected on the server. This will disconnect the player.
+        /// </summary>
+        /// <param name="player"></param>
+        protected void ServerReject(INetworkPlayer player)
+        {
+            player.Disconnect();
+        }
+
+        /// <summary>
+        /// Authenticate the player on the Server.
+        /// <para>Called by the server when new client connects</para>
+        /// </summary>
+        /// <param name="player"></param>
+        public abstract void ServerAuthenticate(INetworkPlayer player);
 
         #endregion
 
         #region client
-
-        // This will get more code in the near future
-        internal void OnClientAuthenticateInternal(INetworkPlayer player)
-        {
-            OnClientAuthenticate(player);
-        }
-
         /// <summary>
-        /// Called on client from OnClientAuthenticateInternal when a client needs to authenticate
+        /// Call this when player has been accepted on the client.
         /// </summary>
-        /// <param name="player">Connection of the client.</param>
-        public virtual void OnClientAuthenticate(INetworkPlayer player)
+        /// <param name="player"></param>
+        protected void ClientAccept(INetworkPlayer player)
         {
             OnClientAuthenticated?.Invoke(player);
         }
+        /// <summary>
+        /// Call this when player has been rejected on the client. This will disconnect the player.
+        /// </summary>
+        /// <param name="player"></param>
+        protected void ClientReject(INetworkPlayer player)
+        {
+            player.Disconnect();
+        }
+
+        /// <summary>
+        /// Authenticate the player on the Client.
+        /// <para>Called by the client after connected to the server</para>
+        /// </summary>
+        /// <param name="player"></param>
+        public abstract void ClientAuthenticate(INetworkPlayer player);
 
         #endregion
 

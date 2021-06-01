@@ -189,7 +189,7 @@ namespace Mirage
             {
                 authenticator.OnServerAuthenticated += OnAuthenticated;
 
-                Connected.AddListener(authenticator.OnServerAuthenticateInternal);
+                Connected.AddListener(authenticator.ServerAuthenticate);
             }
             else
             {
@@ -277,7 +277,7 @@ namespace Mirage
             if (authenticator != null)
             {
                 authenticator.OnServerAuthenticated -= OnAuthenticated;
-                Connected.RemoveListener(authenticator.OnServerAuthenticateInternal);
+                Connected.RemoveListener(authenticator.ServerAuthenticate);
             }
             else
             {
