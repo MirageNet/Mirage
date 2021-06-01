@@ -27,6 +27,7 @@ namespace Mirage
         /// <param name="player"></param>
         protected void ServerAccept(INetworkPlayer player)
         {
+            player.IsAuthenticated = true;
             OnServerAuthenticated?.Invoke(player);
         }
         /// <summary>
@@ -54,6 +55,7 @@ namespace Mirage
         /// <param name="player"></param>
         protected void ClientAccept(INetworkPlayer player)
         {
+            player.IsAuthenticated = true;
             OnClientAuthenticated?.Invoke(player);
         }
         /// <summary>
