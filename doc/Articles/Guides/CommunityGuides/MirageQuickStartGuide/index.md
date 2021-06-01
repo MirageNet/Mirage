@@ -1,6 +1,7 @@
+# Mirage Quick Start Guide 
+
 > [!WARNING] This guide was written for mirror so some information might be out-of-date for mirage
 
-# Mirage Quick Start Guide 
 This guide currently shows you:
 - [Basic scene setup](#part-1)
 - [Player movement](#part-4)
