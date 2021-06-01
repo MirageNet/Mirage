@@ -1,3 +1,17 @@
+# [96.0.0](https://github.com/MirageNet/Mirage/compare/v95.1.1...v96.0.0) (2021-06-01)
+
+
+### Features
+
+* reworking network authenticator ([#827](https://github.com/MirageNet/Mirage/issues/827)) ([a3c61d8](https://github.com/MirageNet/Mirage/commit/a3c61d87911aadcede7f789cf05455fbca5526e8))
+
+
+### BREAKING CHANGES
+
+* - BasicAuthenticator now uses single string field instead of 2
+- Renaming methods from OnServerAuthenticate to ServerAuthenticate
+- Renaming methods from OnClientAuthenticate to ClientAuthenticate
+
 ## [95.1.1](https://github.com/MirageNet/Mirage/compare/v95.1.0...v95.1.1) (2021-05-30)
 
 
