@@ -49,6 +49,10 @@ namespace Mirage
         /// </summary>
         bool isDisconnected = false;
 
+        /// <summary>
+        /// Marks if this player has been accepted by a <see cref="NetworkAuthenticator"/>
+        /// </summary>
+        public bool IsAuthenticated { get; set; }
 
         /// <summary>
         /// General purpose object to hold authentication data, character selection, tokens, etc.
