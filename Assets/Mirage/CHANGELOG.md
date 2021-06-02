@@ -1,3 +1,10 @@
+## [96.1.1](https://github.com/MirageNet/Mirage/compare/v96.1.0...v96.1.1) (2021-06-02)
+
+
+### Bug Fixes
+
+* closing socket should give by local peer as reason ([993933f](https://github.com/MirageNet/Mirage/commit/993933f5a2575a795250207ff5b1191b717e2a13))
+
 # [96.1.0](https://github.com/MirageNet/Mirage/compare/v96.0.0...v96.1.0) (2021-06-02)
 
 
