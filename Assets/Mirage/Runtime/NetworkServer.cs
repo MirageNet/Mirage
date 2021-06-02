@@ -149,7 +149,11 @@ namespace Mirage
         /// </summary>
         public void Stop()
         {
-            // todo exit early if not active/initialized
+            if (!Active)
+            {
+                logger.LogWarning("Can't stop server because it is not active");
+                return;
+            }
 
             if (LocalClient != null)
             {

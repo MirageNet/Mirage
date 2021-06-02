@@ -226,7 +226,11 @@ namespace Mirage
         /// </summary>
         public void Disconnect()
         {
-            if (!Active) return;
+            if (!Active)
+            {
+                logger.LogWarning("Can't disconnect client because it is not active");
+                return;
+            }
 
             Player.Connection.Disconnect();
             Cleanup();

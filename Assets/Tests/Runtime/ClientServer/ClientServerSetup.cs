@@ -126,8 +126,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTearDown]
         public IEnumerator ShutdownHost() => UniTask.ToCoroutine(async () =>
         {
-            client.Disconnect();
-            server.Stop();
+            // check active, it might have been stopped by tests
+            if (client.Active) client.Disconnect();
+            if (server.Active) server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !client.Active);
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
