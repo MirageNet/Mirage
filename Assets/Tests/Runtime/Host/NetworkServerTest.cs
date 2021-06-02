@@ -1,29 +1,37 @@
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
-using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.Host
 {
-
     [TestFixture]
     public class NetworkServerTest : HostSetup<MockComponent>
     {
-        [Test]
-        public void MaxConnectionsTest()
+        List<INetworkPlayer> serverConnectedCalls = new List<INetworkPlayer>();
+        List<INetworkPlayer> clientConnectedCalls = new List<INetworkPlayer>();
+
+        public override void ExtraSetup()
         {
-            var secondGO = new GameObject();
-            NetworkClient secondClient = secondGO.AddComponent<NetworkClient>();
-            TestSocketFactory socketFactory = networkManagerGo.GetComponent<TestSocketFactory>();
+            serverConnectedCalls.Clear();
+            clientConnectedCalls.Clear();
 
-            secondClient.SocketFactory = socketFactory;
-
-            secondClient.Connect("localhost");
-
-            Assert.That(server.Players, Has.Count.EqualTo(1));
-
-            Object.Destroy(secondGO);
+            server.Connected.AddListener(player => serverConnectedCalls.Add(player));
+            client.Connected.AddListener(player => clientConnectedCalls.Add(player));
         }
+
+        [Test]
+        public void ConnectedEventIsCalledOnceForServer()
+        {
+            Assert.That(serverConnectedCalls, Has.Count.EqualTo(1));
+            Assert.That(serverConnectedCalls[0].Connection, Is.TypeOf<PipePeerConnection>());
+        }
+        [Test]
+        public void ConnectedEventIsCalledOnceForClient()
+        {
+            Assert.That(clientConnectedCalls, Has.Count.EqualTo(1));
+            Assert.That(clientConnectedCalls[0].Connection, Is.TypeOf<PipePeerConnection>());
+        }
+
 
         [Test]
         public void LocalClientActiveTest()
@@ -32,13 +40,15 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         [Test]
-        public void SetLocalConnectionExceptionTest()
+        public void AddLocalConnectionExceptionTest()
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                server.SetLocalConnection(null, null);
+                server.AddLocalConnection(null, null);
             });
         }
+
+
 
         [Test]
         public void StartedNotNullTest()

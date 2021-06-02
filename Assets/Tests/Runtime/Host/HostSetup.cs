@@ -1,12 +1,12 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using Mirage.SocketLayer;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Host
 {
-    // set's up a host
     public class HostSetup<T> where T : NetworkBehaviour
     {
 
@@ -24,6 +24,8 @@ namespace Mirage.Tests.Runtime.Host
         protected T component;
 
         protected virtual bool AutoStartServer => true;
+        protected virtual Config ServerConfig => null;
+        protected virtual Config ClientConfig => null;
 
         public virtual void ExtraSetup() { }
 
@@ -43,6 +45,10 @@ namespace Mirage.Tests.Runtime.Host
             manager.Server = networkManagerGo.GetComponent<NetworkServer>();
             server = manager.Server;
             client = manager.Client;
+
+            if (ServerConfig != null) server.PeerConfig = ServerConfig;
+            if (ClientConfig != null) client.PeerConfig = ClientConfig;
+
             sceneManager.Client = client;
             sceneManager.Server = server;
             serverObjectManager.Server = server;
@@ -101,6 +107,15 @@ namespace Mirage.Tests.Runtime.Host
 
             ExtraTearDown();
         });
+
+        public void DoUpdate(int updateCount = 1)
+        {
+            for (int i = 0; i < updateCount; i++)
+            {
+                server.Update();
+                client.Update();
+            }
+        }
 
         #endregion
     }
