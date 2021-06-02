@@ -6,7 +6,7 @@
     ///     <see cref="PacketType"/> and Commands uses their own byte/enum to split up the flow and add struture to the code.
     /// </para>
     /// </summary>
-    internal enum Commands
+    public enum Commands
     {
         /// <summary>
         /// Sent from client to request to connect to server

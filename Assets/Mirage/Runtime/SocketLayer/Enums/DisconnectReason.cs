@@ -1,6 +1,5 @@
 namespace Mirage.SocketLayer
 {
-
     /// <summary>
     /// Reason why a connection was disconnected
     /// </summary>

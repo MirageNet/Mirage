@@ -1,6 +1,6 @@
 namespace Mirage.SocketLayer
 {
-    internal enum PacketType
+    public enum PacketType
     {
         /// <summary>
         /// see <see cref="Commands"/>
