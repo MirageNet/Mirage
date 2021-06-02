@@ -100,14 +100,21 @@ namespace Mirage.Tests.Runtime.Host
             var spawnTestObj = new GameObject("testObj", typeof(NetworkIdentity));
             serverObjectManager.Spawn(spawnTestObj);
 
+            // need to grab reference to world before Stop, becuase stop will clear reference
+            NetworkWorld world = server.World;
+
             //1 is the player. should be 2 at this point
-            Assert.That(server.World.SpawnedIdentities.Count, Is.GreaterThan(1));
+            Assert.That(world.SpawnedIdentities.Count, Is.GreaterThan(1));
+
 
             server.Stop();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
 
-            Assert.That(server.World.SpawnedIdentities.Count, Is.Zero);
+            Assert.That(world.SpawnedIdentities.Count, Is.Zero);
+            // checks that the object was destroyed
+            // use unity null check here
+            Assert.IsTrue(spawnTestObj == null);
         });
     }
 }
