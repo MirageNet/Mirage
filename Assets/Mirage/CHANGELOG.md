@@ -1,3 +1,16 @@
+# [96.1.0](https://github.com/MirageNet/Mirage/compare/v96.0.0...v96.1.0) (2021-06-02)
+
+
+### Bug Fixes
+
+* moving syncvar sender to networkserver so it gets intilized earlier ([8b2b828](https://github.com/MirageNet/Mirage/commit/8b2b828a6cfd0407ece01d707294cac8ef5ce94c))
+* stopping Server.Stop being called twice ([b950d39](https://github.com/MirageNet/Mirage/commit/b950d395717c69da778fb0702ddf35cd067ca1d8))
+
+
+### Features
+
+* adding is authenticated bool to network player ([#828](https://github.com/MirageNet/Mirage/issues/828)) ([372fd70](https://github.com/MirageNet/Mirage/commit/372fd709fe931ac5656ca7365310d65895c2b986))
+
 # [96.0.0](https://github.com/MirageNet/Mirage/compare/v95.1.1...v96.0.0) (2021-06-01)
 
 
