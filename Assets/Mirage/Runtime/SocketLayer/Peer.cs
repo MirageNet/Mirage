@@ -120,7 +120,7 @@ namespace Mirage.SocketLayer
             // send disconnect messages
             foreach (Connection conn in connections.Values)
             {
-                conn.Disconnect(DisconnectReason.RequestedByRemotePeer);
+                conn.Disconnect(DisconnectReason.RequestedByLocalPeer);
             }
             RemoveConnections();
 
