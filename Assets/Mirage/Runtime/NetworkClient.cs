@@ -193,10 +193,14 @@ namespace Mirage
             // invoke started event after everything is set up, but before peer has connected
             _started.Invoke();
 
-            // client has to connect first or it will miss message in NetworkScenemanager
-            Peer_OnConnected(clientConn);
 
-            server.SetLocalConnection(this, serverConn);
+            // we need add server connection to server's dictionary first
+            // then invoke connected event on client (client has to connect first or it will miss message in NetworkScenemanager)
+            // then invoke connected event on server
+
+            server.AddLocalConnection(this, serverConn);
+            Peer_OnConnected(clientConn);
+            server.InvokeLocalConnected();
         }
 
         void InitializeAuthEvents()

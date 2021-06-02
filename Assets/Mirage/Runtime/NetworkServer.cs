@@ -251,7 +251,7 @@ namespace Mirage
                 throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for ${nameof(NetworkServer)}");
         }
 
-        private void Update()
+        internal void Update()
         {
             peer?.Update();
             SyncVarSender?.Update();
@@ -345,11 +345,10 @@ namespace Mirage
         }
 
         /// <summary>
-        /// called by LocalClient to add itself. dont call directly.
+        /// Create Player on Server for hostmode and adds it to collections
+        /// <para>Does not invoke <see cref="Connected"/> event, use <see cref="InvokeLocalConnected"/> instead at the correct time</para>
         /// </summary>
-        /// <param name="client">The local client</param>
-        /// <param name="connection">The connection to the client</param>
-        internal void SetLocalConnection(INetworkClient client, IConnection connection)
+        internal void AddLocalConnection(INetworkClient client, IConnection connection)
         {
             if (LocalPlayer != null)
             {
@@ -360,7 +359,23 @@ namespace Mirage
             LocalPlayer = player;
             LocalClient = client;
 
-            ConnectionAccepted(player);
+            if (logger.LogEnabled()) logger.Log("Server accepted Local client:" + player);
+
+            // add connection
+            AddConnection(player);
+        }
+
+        /// <summary>
+        /// Invokes the Connected event using the local player
+        /// <para>this should be done after the clients version has been invoked</para>
+        /// </summary>
+        internal void InvokeLocalConnected()
+        {
+            if (LocalPlayer == null)
+            {
+                throw new InvalidOperationException("Local Connection does not exist");
+            }
+            Connected?.Invoke(LocalPlayer);
         }
 
         /// <summary>

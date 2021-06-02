@@ -10,7 +10,6 @@ using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
-    // set's up a client and a server
     public class ClientServerSetup<T> where T : NetworkBehaviour
     {
 

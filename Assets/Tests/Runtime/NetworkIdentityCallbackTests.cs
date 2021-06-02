@@ -68,7 +68,8 @@ namespace Mirage.Tests.Runtime
             server.Players.Add(player2);
 
             // add a host connection
-            server.SetLocalConnection(client, Substitute.For<SocketLayer.IConnection>());
+            server.AddLocalConnection(client, Substitute.For<SocketLayer.IConnection>());
+            server.InvokeLocalConnected();
             server.LocalPlayer.IsReady = true;
 
             // call OnStartServer so that observers dict is created

@@ -126,7 +126,7 @@ namespace Mirage.Tests
 
     public class TestSocketFactory : SocketFactory
     {
-        EndPoint serverEndpoint = Substitute.For<EndPoint>();
+        public EndPoint serverEndpoint = Substitute.For<EndPoint>();
 
         public override ISocket CreateClientSocket()
         {
