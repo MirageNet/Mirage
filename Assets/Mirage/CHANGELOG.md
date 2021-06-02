@@ -1,3 +1,10 @@
+# [96.2.0](https://github.com/MirageNet/Mirage/compare/v96.1.2...v96.2.0) (2021-06-02)
+
+
+### Features
+
+* making enums for socket layer public instead of internal ([bb9f209](https://github.com/MirageNet/Mirage/commit/bb9f2090f5c26e1a556d7ac6fb5a513067965572))
+
 ## [96.1.2](https://github.com/MirageNet/Mirage/compare/v96.1.1...v96.1.2) (2021-06-02)
 
 
