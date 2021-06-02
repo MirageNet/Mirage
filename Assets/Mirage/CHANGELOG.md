@@ -1,3 +1,10 @@
+## [96.1.2](https://github.com/MirageNet/Mirage/compare/v96.1.1...v96.1.2) (2021-06-02)
+
+
+### Bug Fixes
+
+* fixing order of host setup ([#832](https://github.com/MirageNet/Mirage/issues/832)) ([3951a40](https://github.com/MirageNet/Mirage/commit/3951a40f4a7a7b04cf66ea4b9c10d067a7e96782))
+
 ## [96.1.1](https://github.com/MirageNet/Mirage/compare/v96.1.0...v96.1.1) (2021-06-02)
 
 
