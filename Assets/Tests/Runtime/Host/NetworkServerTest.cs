@@ -7,8 +7,8 @@ namespace Mirage.Tests.Runtime.Host
     [TestFixture]
     public class NetworkServerTest : HostSetup<MockComponent>
     {
-        List<INetworkPlayer> serverConnectedCalls = new List<INetworkPlayer>();
-        List<INetworkPlayer> clientConnectedCalls = new List<INetworkPlayer>();
+        readonly List<INetworkPlayer> serverConnectedCalls = new List<INetworkPlayer>();
+        readonly List<INetworkPlayer> clientConnectedCalls = new List<INetworkPlayer>();
 
         public override void ExtraSetup()
         {
