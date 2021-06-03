@@ -4,6 +4,7 @@ using System.Linq;
 using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
+using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime
 {
@@ -63,6 +64,7 @@ namespace Mirage.Tests.Runtime
     public class NetworkPlayerMessageHandlingTest
     {
         private NetworkPlayer player;
+        private NetworkReader reader;
         private SocketLayer.IConnection connection;
 
         [SetUp]
@@ -70,27 +72,49 @@ namespace Mirage.Tests.Runtime
         {
             connection = Substitute.For<SocketLayer.IConnection>();
             player = new NetworkPlayer(connection);
+            // reader with some random data
+            reader = new NetworkReader(new byte[] { 1, 2, 3, 4 });
         }
 
+
+        [Test]
+        public void InvokesMessageHandler()
+        {
+            int invoked = 0;
+            player.RegisterHandler<ReadyMessage>((msg) => { invoked++; });
+
+            int messageId = MessagePacker.GetId<ReadyMessage>();
+            player.InvokeHandler(messageId, reader);
+
+            Assert.That(invoked, Is.EqualTo(1), "Should have been invoked");
+        }
 
         [Test]
         public void DisconnectsIfHandlerHasException()
         {
-            // todo add handler that throws, cause it to be invoked, and see if disconnect is called
-            Assert.Ignore("NotImplemented");
-        }
-        [Test]
-        public void InvokesMessageHandler()
-        {
-            // todo add handler, cause it to be invoked, check it was invoked
-            Assert.Ignore("NotImplemented");
+            int invoked = 0;
+            player.RegisterHandler<ReadyMessage>((msg) => { invoked++; throw new InvalidOperationException("Fun Exception"); });
+
+            int messageId = MessagePacker.GetId<ReadyMessage>();
+            byte[] bytes = MessagePacker.Pack(new ReadyMessage());
+            LogAssert.ignoreFailingMessages = true;
+            Assert.DoesNotThrow(() =>
+            {
+                ((IMessageHandler)player).HandleMessage(new ArraySegment<byte>(bytes));
+            });
+            LogAssert.ignoreFailingMessages = false;
+
+            Assert.That(invoked, Is.EqualTo(1), "Should have been invoked");
+
+            // should disconnect after catching the execption
+            connection.Received(1).Disconnect();
         }
 
         [Test]
         public void ThrowsWhenNoHandlerIsFound()
         {
             int messageId = MessagePacker.GetId<SceneMessage>();
-            var reader = new NetworkReader(new byte[] { 1, 2, 3, 4 });
+
             InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
             {
                 player.InvokeHandler(messageId, reader);
@@ -103,7 +127,6 @@ namespace Mirage.Tests.Runtime
         public void ThrowsWhenUnknownMessage()
         {
             _ = MessagePacker.GetId<SceneMessage>();
-            var reader = new NetworkReader(new byte[] { 1, 2, 3, 4 });
             InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
             {
                 // some random id with no message
