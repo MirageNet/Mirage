@@ -28,7 +28,7 @@ To install Mirage, follow these steps:
 2) Start a new project or open your existing one
 3) Add openupm registry.  Click on the menu Edit -> Project settings...,  and add a scoped registry like so: <br/>
     Name: `OpenUPM` <br/>
-    Url: https://package.openupm.com <br/>
+    Url: `https://package.openupm.com` <br/>
     Scopes:
     - `com.cysharp.unitask`
     - `com.openupm`
