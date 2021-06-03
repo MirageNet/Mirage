@@ -1,16 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Mirage.Serialization
 {
     public static class CollectionExtensions
     {
-
-        // for byte arrays with dynamic size, where the reader doesn't know how many will come
-        // (like an inventory with different items etc.)
+        /// <summary>
+        /// For byte arrays with dynamic size, where the reader doesn't know how many will come 
+        /// </summary>
+        /// <param name="buffer">array or null</param>
         public static void WriteBytesAndSize(this NetworkWriter writer, byte[] buffer, int offset, int count)
         {
-            // null is supported because [SyncVar]s might be structs with null byte[] arrays
+            // null is supported
             // write 0 for null array, increment normal size by 1 to save bandwith
             // (using size=-1 for null would limit max size to 32kb instead of 64kb)
             if (buffer == null)
@@ -22,8 +24,10 @@ namespace Mirage.Serialization
             writer.WriteBytes(buffer, offset, count);
         }
 
-        // Weaver needs a write function with just one byte[] parameter
-        // (we don't name it .Write(byte[]) because it's really a WriteBytesAndSize since we write size / null info too)
+        /// <summary>
+        /// Write method for weaver to use
+        /// </summary>
+        /// <param name="buffer">array or null</param>
         public static void WriteBytesAndSize(this NetworkWriter writer, byte[] buffer)
         {
             // buffer might be null, so we can't use .Length in that case
@@ -34,7 +38,6 @@ namespace Mirage.Serialization
         {
             writer.WriteBytesAndSize(buffer.Array, buffer.Offset, buffer.Count);
         }
-
 
 
         public static void WriteList<T>(this NetworkWriter writer, List<T> list)
@@ -71,5 +74,60 @@ namespace Mirage.Serialization
             }
         }
 
+
+
+        /// <returns>array or null</returns>
+        public static byte[] ReadBytesAndSize(this NetworkReader reader)
+        {
+            // count = 0 means the array was null
+            // otherwise count -1 is the length of the array
+            uint count = reader.ReadPackedUInt32();
+
+            // Use checked() to force it to throw OverflowException if data is invalid
+            return count == 0 ? null : reader.ReadBytes(checked((int)(count - 1u)));
+        }
+
+        public static ArraySegment<byte> ReadBytesAndSizeSegment(this NetworkReader reader)
+        {
+            // count = 0 means the array was null
+            // otherwise count - 1 is the length of the array
+            uint count = reader.ReadPackedUInt32();
+            return count == 0 ? default : reader.ReadBytesSegment(checked((int)(count - 1u)));
+        }
+
+        public static byte[] ReadBytes(this NetworkReader reader, int count)
+        {
+            byte[] bytes = new byte[count];
+            reader.ReadBytes(bytes, count);
+            return bytes;
+        }
+
+        public static List<T> ReadList<T>(this NetworkReader reader)
+        {
+            int length = reader.ReadPackedInt32();
+            if (length < 0)
+                return null;
+            var result = new List<T>(length);
+            for (int i = 0; i < length; i++)
+            {
+                result.Add(reader.Read<T>());
+            }
+            return result;
+        }
+
+        public static T[] ReadArray<T>(this NetworkReader reader)
+        {
+            int length = reader.ReadPackedInt32();
+            if (length < 0)
+                return null;
+            if (length > reader.Length - reader.Position)
+                throw new EndOfStreamException("Can't read " + length + " elements because it would read past the end of the stream. ");
+            var result = new T[length];
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = reader.Read<T>();
+            }
+            return result;
+        }
     }
 }

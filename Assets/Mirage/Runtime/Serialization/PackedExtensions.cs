@@ -1,4 +1,6 @@
-﻿namespace Mirage.Serialization
+using System;
+
+namespace Mirage.Serialization
 {
     /// <remarks>
     /// <see href="https://gist.github.com/mfuerstenau/ba870a29e16536fdbaba">zigzag encoding</see><br/>
@@ -14,8 +16,7 @@
 
         public static void WritePackedUInt32(this NetworkWriter writer, uint value)
         {
-            // for 32 bit values WritePackedUInt64 writes the
-            // same exact thing bit by bit
+            // we can use uint64 here because it will be same bits once packed
             writer.WritePackedUInt64(value);
         }
 
@@ -67,6 +68,83 @@
                 writer.WriteByte((byte)value);
                 value >>= 8;
             }
+        }
+
+
+
+
+        public static int ReadPackedInt32(this NetworkReader reader)
+        {
+            uint data = reader.ReadPackedUInt32();
+            return (int)((data >> 1) ^ -(data & 1));
+        }
+
+        /// <exception cref="OverflowException">throws if values overflows uint</exception>
+        public static uint ReadPackedUInt32(this NetworkReader reader) => checked((uint)reader.ReadPackedUInt64());
+
+        public static long ReadPackedInt64(this NetworkReader reader)
+        {
+            ulong data = reader.ReadPackedUInt64();
+            return ((long)(data >> 1)) ^ -((long)data & 1);
+        }
+
+        public static ulong ReadPackedUInt64(this NetworkReader reader)
+        {
+            byte a0 = reader.ReadByte();
+            if (a0 < 241)
+            {
+                return a0;
+            }
+
+            byte a1 = reader.ReadByte();
+            if (a0 >= 241 && a0 <= 248)
+            {
+                return 240 + ((a0 - (ulong)241) << 8) + a1;
+            }
+
+            byte a2 = reader.ReadByte();
+            if (a0 == 249)
+            {
+                return 2288 + ((ulong)a1 << 8) + a2;
+            }
+
+            byte a3 = reader.ReadByte();
+            if (a0 == 250)
+            {
+                return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16);
+            }
+
+            byte a4 = reader.ReadByte();
+            if (a0 == 251)
+            {
+                return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16) + (((ulong)a4) << 24);
+            }
+
+            byte a5 = reader.ReadByte();
+            if (a0 == 252)
+            {
+                return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16) + (((ulong)a4) << 24) + (((ulong)a5) << 32);
+            }
+
+            byte a6 = reader.ReadByte();
+            if (a0 == 253)
+            {
+                return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16) + (((ulong)a4) << 24) + (((ulong)a5) << 32) + (((ulong)a6) << 40);
+            }
+
+            byte a7 = reader.ReadByte();
+            if (a0 == 254)
+            {
+                return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16) + (((ulong)a4) << 24) + (((ulong)a5) << 32) + (((ulong)a6) << 40) + (((ulong)a7) << 48);
+            }
+
+            byte a8 = reader.ReadByte();
+            if (a0 == 255)
+            {
+                return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16) + (((ulong)a4) << 24) + (((ulong)a5) << 32) + (((ulong)a6) << 40) + (((ulong)a7) << 48) + (((ulong)a8) << 56);
+            }
+
+            throw new DataMisalignedException("ReadPackedUInt64() failure: " + a0);
         }
     }
 }

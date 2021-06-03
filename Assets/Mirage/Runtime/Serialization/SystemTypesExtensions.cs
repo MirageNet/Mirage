@@ -1,4 +1,6 @@
-﻿namespace Mirage.Serialization
+using System;
+
+namespace Mirage.Serialization
 {
     public static class SystemTypesExtensions
     {
@@ -49,6 +51,12 @@
             writer.WriteUInt64(converter.longValue2);
         }
 
+        public static void WriteGuid(this NetworkWriter writer, Guid value)
+        {
+            byte[] data = value.ToByteArray();
+            writer.WriteBytes(data, 0, data.Length);
+        }
+
         public static void WriteNullable<T>(this NetworkWriter writer, T? nullable) where T : struct
         {
             bool hasValue = nullable.HasValue;
@@ -56,6 +64,84 @@
             if (hasValue)
             {
                 writer.Write(nullable.Value);
+            }
+        }
+
+
+
+
+        public static byte ReadByte(this NetworkReader reader) => reader.ReadByte();
+        public static sbyte ReadSByte(this NetworkReader reader) => (sbyte)reader.ReadByte();
+        public static char ReadChar(this NetworkReader reader) => (char)reader.ReadUInt16();
+        public static bool ReadBoolean(this NetworkReader reader) => reader.ReadByte() != 0;
+        public static short ReadInt16(this NetworkReader reader) => (short)reader.ReadUInt16();
+        public static ushort ReadUInt16(this NetworkReader reader)
+        {
+            ushort value = 0;
+            value |= reader.ReadByte();
+            value |= (ushort)(reader.ReadByte() << 8);
+            return value;
+        }
+        public static int ReadInt32(this NetworkReader reader) => (int)reader.ReadUInt32();
+        public static uint ReadUInt32(this NetworkReader reader)
+        {
+            uint value = 0;
+            value |= reader.ReadByte();
+            value |= (uint)(reader.ReadByte() << 8);
+            value |= (uint)(reader.ReadByte() << 16);
+            value |= (uint)(reader.ReadByte() << 24);
+            return value;
+        }
+        public static long ReadInt64(this NetworkReader reader) => (long)reader.ReadUInt64();
+        public static ulong ReadUInt64(this NetworkReader reader)
+        {
+            ulong value = 0;
+            value |= reader.ReadByte();
+            value |= ((ulong)reader.ReadByte()) << 8;
+            value |= ((ulong)reader.ReadByte()) << 16;
+            value |= ((ulong)reader.ReadByte()) << 24;
+            value |= ((ulong)reader.ReadByte()) << 32;
+            value |= ((ulong)reader.ReadByte()) << 40;
+            value |= ((ulong)reader.ReadByte()) << 48;
+            value |= ((ulong)reader.ReadByte()) << 56;
+            return value;
+        }
+        public static float ReadSingle(this NetworkReader reader)
+        {
+            var converter = new UIntFloat
+            {
+                intValue = reader.ReadUInt32()
+            };
+            return converter.floatValue;
+        }
+        public static double ReadDouble(this NetworkReader reader)
+        {
+            var converter = new UIntDouble
+            {
+                longValue = reader.ReadUInt64()
+            };
+            return converter.doubleValue;
+        }
+        public static decimal ReadDecimal(this NetworkReader reader)
+        {
+            var converter = new UIntDecimal
+            {
+                longValue1 = reader.ReadUInt64(),
+                longValue2 = reader.ReadUInt64()
+            };
+            return converter.decimalValue;
+        }
+        public static Guid ReadGuid(this NetworkReader reader) => new Guid(reader.ReadBytes(16));
+        public static T? ReadNullable<T>(this NetworkReader reader) where T : struct
+        {
+            bool hasValue = reader.ReadBoolean();
+            if (hasValue)
+            {
+                return reader.Read<T>();
+            }
+            else
+            {
+                return null;
             }
         }
     }

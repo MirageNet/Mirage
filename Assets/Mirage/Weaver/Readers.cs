@@ -48,7 +48,7 @@ namespace Mirage.Weaver
 
             if (typeReference.IsArray)
             {
-                return GenerateReadCollection(typeReference, typeReference.GetElementType(), () => NetworkReaderExtensions.ReadArray<object>(default), sequencePoint);
+                return GenerateReadCollection(typeReference, typeReference.GetElementType(), () => CollectionExtensions.ReadArray<object>(default), sequencePoint);
             }
 
             TypeDefinition variableDefinition = typeReference.Resolve();
@@ -64,7 +64,7 @@ namespace Mirage.Weaver
                 var genericInstance = (GenericInstanceType)typeReference;
                 TypeReference elementType = genericInstance.GenericArguments[0];
 
-                return GenerateReadCollection(typeReference, elementType, () => NetworkReaderExtensions.ReadNullable<byte>(default), sequencePoint);
+                return GenerateReadCollection(typeReference, elementType, () => SystemTypesExtensions.ReadNullable<byte>(default), sequencePoint);
             }
             if (variableDefinition.Is(typeof(ArraySegment<>)))
             {
@@ -75,7 +75,7 @@ namespace Mirage.Weaver
                 var genericInstance = (GenericInstanceType)typeReference;
                 TypeReference elementType = genericInstance.GenericArguments[0];
 
-                return GenerateReadCollection(typeReference, elementType, () => NetworkReaderExtensions.ReadList<object>(default), sequencePoint);
+                return GenerateReadCollection(typeReference, elementType, () => CollectionExtensions.ReadList<object>(default), sequencePoint);
             }
             if (variableDefinition.IsEnum)
             {

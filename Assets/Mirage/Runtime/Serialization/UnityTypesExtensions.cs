@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 namespace Mirage.Serialization
@@ -103,10 +102,39 @@ namespace Mirage.Serialization
             writer.WriteSingle(value.m33);
         }
 
-        public static void WriteGuid(this NetworkWriter writer, Guid value)
+
+        public static Vector2 ReadVector2(this NetworkReader reader) => new Vector2(reader.ReadSingle(), reader.ReadSingle());
+        public static Vector3 ReadVector3(this NetworkReader reader) => new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        public static Vector4 ReadVector4(this NetworkReader reader) => new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        public static Vector2Int ReadVector2Int(this NetworkReader reader) => new Vector2Int(reader.ReadPackedInt32(), reader.ReadPackedInt32());
+        public static Vector3Int ReadVector3Int(this NetworkReader reader) => new Vector3Int(reader.ReadPackedInt32(), reader.ReadPackedInt32(), reader.ReadPackedInt32());
+        public static Color ReadColor(this NetworkReader reader) => new Color(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        public static Color32 ReadColor32(this NetworkReader reader) => new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+        public static Quaternion ReadQuaternion(this NetworkReader reader) => new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        public static Rect ReadRect(this NetworkReader reader) => new Rect(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        public static Plane ReadPlane(this NetworkReader reader) => new Plane(reader.ReadVector3(), reader.ReadSingle());
+        public static Ray ReadRay(this NetworkReader reader) => new Ray(reader.ReadVector3(), reader.ReadVector3());
+        public static Matrix4x4 ReadMatrix4x4(this NetworkReader reader)
         {
-            byte[] data = value.ToByteArray();
-            writer.WriteBytes(data, 0, data.Length);
+            return new Matrix4x4
+            {
+                m00 = reader.ReadSingle(),
+                m01 = reader.ReadSingle(),
+                m02 = reader.ReadSingle(),
+                m03 = reader.ReadSingle(),
+                m10 = reader.ReadSingle(),
+                m11 = reader.ReadSingle(),
+                m12 = reader.ReadSingle(),
+                m13 = reader.ReadSingle(),
+                m20 = reader.ReadSingle(),
+                m21 = reader.ReadSingle(),
+                m22 = reader.ReadSingle(),
+                m23 = reader.ReadSingle(),
+                m30 = reader.ReadSingle(),
+                m31 = reader.ReadSingle(),
+                m32 = reader.ReadSingle(),
+                m33 = reader.ReadSingle()
+            };
         }
     }
 }

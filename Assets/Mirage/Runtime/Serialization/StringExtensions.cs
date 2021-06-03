@@ -1,16 +1,15 @@
-﻿using System;
+using System;
+using System.IO;
 using System.Text;
 
 namespace Mirage.Serialization
 {
     public static class StringExtensions
     {
-        // cache encoding instead of creating it with BinaryWriter each time
-        // 1000 readers before:  1MB GC, 30ms
-        // 1000 readers after: 0.8MB GC, 18ms
         static readonly UTF8Encoding encoding = new UTF8Encoding(false, true);
         static readonly byte[] stringBuffer = new byte[NetworkWriter.MaxStringLength];
 
+        /// <param name="value">string or null</param>
         public static void WriteString(this NetworkWriter writer, string value)
         {
             // write 0 for null support, increment real size by 1
@@ -30,12 +29,38 @@ namespace Mirage.Serialization
             // check if within max size
             if (size >= NetworkWriter.MaxStringLength)
             {
-                throw new DataMisalignedException("NetworkWriter.Write(string) too long: " + size + ". Limit: " + NetworkWriter.MaxStringLength);
+                throw new DataMisalignedException($"NetworkWriter.Write(string) too long: {size}. Limit: {NetworkWriter.MaxStringLength}");
             }
 
             // write size and bytes
             writer.WriteUInt16(checked((ushort)(size + 1)));
             writer.WriteBytes(stringBuffer, 0, size);
         }
+
+
+        /// <returns>string or null</returns>
+        /// <exception cref="ArgumentException">Throws if invalid utf8 string is received</exception>
+        public static string ReadString(this NetworkReader reader)
+        {
+            // read number of bytes
+            ushort size = reader.ReadUInt16();
+
+            if (size == 0)
+                return null;
+
+            int realSize = size - 1;
+
+            // make sure it's within limits to avoid allocation attacks etc.
+            if (realSize >= NetworkWriter.MaxStringLength)
+            {
+                throw new EndOfStreamException("ReadString too long: {realSize}. Limit is: {NetworkWriter.MaxStringLength}");
+            }
+
+            ArraySegment<byte> data = reader.ReadBytesSegment(realSize);
+
+            // convert directly from buffer to string via encoding
+            return encoding.GetString(data.Array, data.Offset, data.Count);
+        }
+
     }
 }
