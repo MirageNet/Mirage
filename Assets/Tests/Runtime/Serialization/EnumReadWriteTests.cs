@@ -1,7 +1,7 @@
 using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage.Tests.Runtime
+namespace Mirage.Tests.Runtime.Serialization
 {
     public static class MyCustomEnumReadWrite
     {

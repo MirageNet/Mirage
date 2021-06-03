@@ -4,7 +4,7 @@ using System.IO;
 using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage.Tests.Runtime
+namespace Mirage.Tests.Runtime.Serialization
 {
     [TestFixture]
     public class MessagePackerTest

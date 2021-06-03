@@ -2,7 +2,7 @@ using System.IO;
 using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage
+namespace Mirage.Tests.Runtime.Serialization
 {
     // NetworkWriterTest already covers most cases for NetworkReader.
     // only a few are left

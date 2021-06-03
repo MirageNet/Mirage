@@ -1,8 +1,9 @@
 using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage.Tests.Runtime
+namespace Mirage.Tests.Runtime.Serialization
 {
+    // todo what is this testing? do we need it?
     [TestFixture]
     public class BasicAuthenticatorMessagesTest
     {

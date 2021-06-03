@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using RangeAttribute = NUnit.Framework.RangeAttribute;
 
-namespace Mirage
+namespace Mirage.Tests.Runtime.Serialization
 {
     public class CompressionTests
     {
