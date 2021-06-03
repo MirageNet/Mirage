@@ -19,6 +19,11 @@ namespace Mirage.Weaver
         private readonly Readers readers;
         private readonly Writers writers;
 
+        /// <summary>
+        /// Mirage's main module used to find built in extension methods and messages
+        /// </summary>
+        static Module MirageModule => typeof(NetworkWriter).Module;
+
         public ReaderWriterProcessor(ModuleDefinition module, Readers readers, Writers writers)
         {
             this.module = module;
@@ -41,18 +46,18 @@ namespace Mirage.Weaver
             return writers.Count != writeCount || readers.Count != readCount;
         }
 
-        private static bool IsExtension(MethodInfo method) => Attribute.IsDefined(method, typeof(System.Runtime.CompilerServices.ExtensionAttribute));
 
         #region Load Mirage built in readers and writers
         private void LoadBuiltinExtensions()
         {
             // find all extension methods
-            IEnumerable<Type> types = typeof(NetworkReaderExtensions).Module.GetTypes().Where(t => t.IsSealed && t.IsAbstract);
+            IEnumerable<Type> types = MirageModule.GetTypes().Where(IsStatic);
+
             foreach (Type type in types)
             {
                 IEnumerable<MethodInfo> methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public)
                     .Where(IsExtension)
-                    .Where(m => !m.IsGenericMethod);
+                    .Where(NotGeneric);
 
                 foreach (MethodInfo method in methods)
                 {
@@ -62,9 +67,19 @@ namespace Mirage.Weaver
             }
         }
 
+        /// <summary>
+        /// static classes are declared abstract and sealed at the IL level.
+        /// <see href="https://stackoverflow.com/a/1175901/8479976"/>
+        /// </summary>
+        private static bool IsStatic(Type t) => t.IsSealed && t.IsAbstract;
+
+        private static bool IsExtension(MethodInfo method) => Attribute.IsDefined(method, typeof(System.Runtime.CompilerServices.ExtensionAttribute));
+        private static bool NotGeneric(MethodInfo method) => !method.IsGenericMethod;
+
+
         private void LoadBuiltinMessages()
         {
-            IEnumerable<Type> types = typeof(NetworkReaderExtensions).Module.GetTypes().Where(t => t.GetCustomAttribute<NetworkMessageAttribute>() != null);
+            IEnumerable<Type> types = MirageModule.GetTypes().Where(t => t.GetCustomAttribute<NetworkMessageAttribute>() != null);
             foreach (Type type in types)
             {
                 TypeReference typeReference = module.ImportReference(type);
