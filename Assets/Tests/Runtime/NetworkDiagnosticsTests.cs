@@ -1,4 +1,5 @@
 using System;
+using Mirage.Tests.Runtime.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 

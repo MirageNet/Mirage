@@ -1,20 +1,20 @@
 using Mirage.Serialization;
 using NUnit.Framework;
 
-namespace Mirage.Tests.Runtime
+namespace Mirage.Tests.Runtime.Serialization
 {
+    // todo what is this testing? do we need it?
     [TestFixture]
     public class BasicAuthenticatorMessagesTest
     {
         public class AuthRequestMessage
         {
-            public string authUsername;
-            public string authPassword;
+            public string serverCode;
         }
 
         public class AuthResponseMessage
         {
-            public byte code;
+            public bool success;
             public string message;
         }
 
@@ -24,11 +24,9 @@ namespace Mirage.Tests.Runtime
             // try setting value with constructor
             var message = new AuthRequestMessage
             {
-                authUsername = "abc",
-                authPassword = "123"
+                serverCode = "abc",
             };
-            Assert.That(message.authUsername, Is.EqualTo("abc"));
-            Assert.That(message.authPassword, Is.EqualTo("123"));
+            Assert.That(message.serverCode, Is.EqualTo("abc"));
 
             // serialize
             var writer = new NetworkWriter();
@@ -38,8 +36,7 @@ namespace Mirage.Tests.Runtime
             // try deserialize
             var reader = new NetworkReader(writerData);
             AuthRequestMessage fresh = reader.Read<AuthRequestMessage>();
-            Assert.That(fresh.authUsername, Is.EqualTo("abc"));
-            Assert.That(fresh.authPassword, Is.EqualTo("123"));
+            Assert.That(fresh.serverCode, Is.EqualTo("abc"));
         }
 
         [Test]
@@ -48,10 +45,10 @@ namespace Mirage.Tests.Runtime
             // try setting value with constructor
             var message = new AuthResponseMessage
             {
-                code = 123,
+                success = true,
                 message = "abc"
             };
-            Assert.That(message.code, Is.EqualTo(123));
+            Assert.That(message.success, Is.EqualTo(true));
             Assert.That(message.message, Is.EqualTo("abc"));
 
             // serialize
@@ -62,7 +59,7 @@ namespace Mirage.Tests.Runtime
             // try deserialize
             var reader = new NetworkReader(writerData);
             AuthResponseMessage fresh = reader.Read<AuthResponseMessage>();
-            Assert.That(fresh.code, Is.EqualTo(123));
+            Assert.That(fresh.success, Is.EqualTo(true));
             Assert.That(fresh.message, Is.EqualTo("abc"));
         }
     }
