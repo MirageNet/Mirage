@@ -27,12 +27,16 @@ namespace Mirage
         /// </summary>
         string name;
 
+        Action OnDisconnect;
+
         private PipePeerConnection() { }
 
-        public static (IConnection clientConn, IConnection serverConn) Create(IDataHandler clientHandler, IDataHandler serverHandler)
+        public static (IConnection clientConn, IConnection serverConn) Create(IDataHandler clientHandler, IDataHandler serverHandler, Action ClientOnDisconnect, Action ServerOnDisconnect)
         {
             var client = new PipePeerConnection();
+            client.OnDisconnect = ClientOnDisconnect;
             var server = new PipePeerConnection();
+            server.OnDisconnect = ServerOnDisconnect;
 
             client.otherHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
             server.otherHandler = clientHandler ?? throw new ArgumentNullException(nameof(clientHandler));
@@ -61,11 +65,21 @@ namespace Mirage
 
         void IConnection.Disconnect()
         {
+            if (State == ConnectionState.Disconnected)
+                return;
+
             State = ConnectionState.Disconnected;
+            OnDisconnect?.Invoke();
+
+            // tell other connection to also disconnect
+            otherConnection.Disconnect();
         }
 
         INotifyToken IConnection.SendNotify(byte[] packet)
         {
+            if (State == ConnectionState.Disconnected)
+                return default;
+
             receive(packet);
 
             return new PipeNotifyToken();
@@ -73,11 +87,17 @@ namespace Mirage
 
         void IConnection.SendReliable(byte[] message)
         {
+            if (State == ConnectionState.Disconnected)
+                return;
+
             receive(message);
         }
 
         void IConnection.SendUnreliable(byte[] packet)
         {
+            if (State == ConnectionState.Disconnected)
+                return;
+
             receive(packet);
         }
 

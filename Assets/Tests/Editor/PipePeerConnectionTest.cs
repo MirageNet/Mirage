@@ -35,18 +35,26 @@ namespace Mirage
             {
                 handler.Received(1).ReceiveMessage(connection, Arg.Is<ArraySegment<byte>>(x => x.SequenceEqual(expected)));
             }
+            public void ExpectNoData()
+            {
+                handler.DidNotReceiveWithAnyArgs().ReceiveMessage(default, default);
+            }
         }
 
         ConnectionHandler conn1;
         ConnectionHandler conn2;
 
+        Action disconnect1;
+        Action disconnect2;
 
         [SetUp]
         public void Setup()
         {
             IDataHandler handler1 = Substitute.For<IDataHandler>();
             IDataHandler handler2 = Substitute.For<IDataHandler>();
-            (IConnection connection1, IConnection connection2) = PipePeerConnection.Create(handler1, handler2);
+            disconnect1 = Substitute.For<Action>();
+            disconnect2 = Substitute.For<Action>();
+            (IConnection connection1, IConnection connection2) = PipePeerConnection.Create(handler1, handler2, disconnect1, disconnect2);
 
             conn1 = new ConnectionHandler(handler1, connection1);
             conn2 = new ConnectionHandler(handler2, connection2);
@@ -107,40 +115,42 @@ namespace Mirage
         }
 
         [Test]
-        public void DisconnectShouldDoStuff()
+        public void DisconnectShouldBeCalledOnBothConnections()
         {
-            Assert.Ignore("NotImplemented");
-            // todo add disconnect actions
-            /*
-            When a pipe connection is disconnected it should:
-            - send state to disconnected
-            - tell its pair to disconnect
-            - invoke peer callbacks via an action so that server/client know about the disconnect
-             */
+            conn1.connection.Disconnect();
 
-            //// disconnecting c1 should disconnect both
-            //conn1.Disconnect();
+            Assert.That(conn1.connection.State, Is.EqualTo(ConnectionState.Disconnected));
+            Assert.That(conn2.connection.State, Is.EqualTo(ConnectionState.Disconnected));
 
-            //var memoryStream = new MemoryStream();
-            //try
-            //{
-            //    await conn1.ReceiveAsync(memoryStream);
-            //    Assert.Fail("Recive Async should have thrown EndOfStreamException");
-            //}
-            //catch (EndOfStreamException)
-            //{
-            //    // good to go
-            //}
+            disconnect1.Received(1).Invoke();
+            disconnect2.Received(1).Invoke();
+        }
 
-            //try
-            //{
-            //    await conn2.ReceiveAsync(memoryStream);
-            //    Assert.Fail("Recive Async should have thrown EndOfStreamException");
-            //}
-            //catch (EndOfStreamException)
-            //{
-            //    // good to go
-            //}
+        [Test]
+        public void NoReceivesUnreliableAfterDisconnect()
+        {
+            conn1.connection.Disconnect();
+            conn1.SendUnreliable(new byte[] { 1, 2, 3, 4 });
+
+            conn2.ExpectNoData();
+        }
+
+        [Test]
+        public void NoReceivesReliableAfterDisconnect()
+        {
+            conn1.connection.Disconnect();
+            conn1.SendReliable(new byte[] { 1, 2, 3, 4 });
+
+            conn2.ExpectNoData();
+        }
+
+        [Test]
+        public void NoReceivesNotifyAfterDisconnect()
+        {
+            conn1.connection.Disconnect();
+            _ = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+
+            conn2.ExpectNoData();
         }
 
         [Test]

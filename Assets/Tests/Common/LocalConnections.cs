@@ -9,7 +9,7 @@ namespace Mirage.Tests
             var clientHandler = new NetworkClient.DataHandler();
             var serverHandler = new NetworkClient.DataHandler();
 
-            (SocketLayer.IConnection clientConn, SocketLayer.IConnection serverConn) = PipePeerConnection.Create(clientHandler, serverHandler);
+            (SocketLayer.IConnection clientConn, SocketLayer.IConnection serverConn) = PipePeerConnection.Create(clientHandler, serverHandler, null, null);
 
             var clientPlayer = new NetworkPlayer(clientConn);
             var serverPlayer = new NetworkPlayer(serverConn);
