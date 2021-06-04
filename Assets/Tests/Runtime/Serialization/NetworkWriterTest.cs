@@ -811,7 +811,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test, TestCaseSource(nameof(weirdDecimals))]
         public void TestDecimals(decimal weird)
         {
-            writer.WriteDecimal(weird);
+            writer.WriteDecimalConverter(weird);
             var reader = new NetworkReader(writer.ToArray());
             decimal readDecimal = reader.ReadDecimal();
             Assert.That(readDecimal, Is.EqualTo(weird));
@@ -868,7 +868,7 @@ namespace Mirage.Tests.Runtime.Serialization
             };
             foreach (decimal weird in inputDecimals)
             {
-                writer.WriteDecimal(weird);
+                writer.WriteDecimalConverter(weird);
             }
             Assert.That(writer.ToArray(), Is.EqualTo(expected));
         }
@@ -950,7 +950,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteUInt64(9UL);
             writer.WriteSingle(10.0F);
             writer.WriteDouble(11.0D);
-            writer.WriteDecimal(12);
+            writer.WriteDecimalConverter(12);
             writer.WriteString(null);
             writer.WriteString("");
             writer.WriteString("13");

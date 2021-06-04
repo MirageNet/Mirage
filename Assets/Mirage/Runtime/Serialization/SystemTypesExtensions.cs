@@ -5,6 +5,7 @@ namespace Mirage.Serialization
 {
     public static class SystemTypesExtensions
     {
+        // todo benchmark converters 
         /// <summary>
         /// Converts between uint and float without allocations
         /// </summary>
@@ -63,7 +64,7 @@ namespace Mirage.Serialization
 
         public static void WriteInt16(this NetworkWriter writer, short value) => writer.WriteUInt16((ushort)value);
 
-        public static void WriteSingle(this NetworkWriter writer, float value)
+        public static void WriteSingleConverter(this NetworkWriter writer, float value)
         {
             var converter = new UIntFloat
             {
@@ -71,8 +72,7 @@ namespace Mirage.Serialization
             };
             writer.WriteUInt32(converter.intValue);
         }
-
-        public static void WriteDouble(this NetworkWriter writer, double value)
+        public static void WriteDoubleConverter(this NetworkWriter writer, double value)
         {
             var converter = new UIntDouble
             {
@@ -81,7 +81,7 @@ namespace Mirage.Serialization
             writer.WriteUInt64(converter.longValue);
         }
 
-        public static void WriteDecimal(this NetworkWriter writer, decimal value)
+        public static void WriteDecimalConverter(this NetworkWriter writer, decimal value)
         {
             // the only way to read it without allocations is to both read and
             // write it with the FloatConverter (which is not binary compatible
@@ -125,7 +125,7 @@ namespace Mirage.Serialization
             value |= (ushort)(reader.ReadByte() << 8);
             return value;
         }
-        public static float ReadSingle(this NetworkReader reader)
+        public static float ReadSingleConverter(this NetworkReader reader)
         {
             var converter = new UIntFloat
             {
@@ -133,7 +133,7 @@ namespace Mirage.Serialization
             };
             return converter.floatValue;
         }
-        public static double ReadDouble(this NetworkReader reader)
+        public static double ReadDoubleConverter(this NetworkReader reader)
         {
             var converter = new UIntDouble
             {
@@ -141,7 +141,7 @@ namespace Mirage.Serialization
             };
             return converter.doubleValue;
         }
-        public static decimal ReadDecimal(this NetworkReader reader)
+        public static decimal ReadDecimalConverter(this NetworkReader reader)
         {
             var converter = new UIntDecimal
             {
