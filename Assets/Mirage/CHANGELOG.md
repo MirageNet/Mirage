@@ -1,3 +1,15 @@
+# [96.3.0](https://github.com/MirageNet/Mirage/compare/v96.2.1...v96.3.0) (2021-06-04)
+
+
+### Bug Fixes
+
+* adding action to pipe connection so client events can be called on stop ([#838](https://github.com/MirageNet/Mirage/issues/838)) ([eebe63a](https://github.com/MirageNet/Mirage/commit/eebe63ada737ff5e4d15f0c5231ed192f9d76079)), closes [#837](https://github.com/MirageNet/Mirage/issues/837)
+
+
+### Features
+
+* adding host mode stopped as reason for client disconnect ([0054dd5](https://github.com/MirageNet/Mirage/commit/0054dd5fc36010f924a9bf5eb2fd98439d6eaddd))
+
 ## [96.2.1](https://github.com/MirageNet/Mirage/compare/v96.2.0...v96.2.1) (2021-06-04)
 
 
