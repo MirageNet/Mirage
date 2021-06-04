@@ -64,24 +64,33 @@ namespace Mirage.Tests.Runtime.Host
             Assert.That(component.rpcOwnerArg2, Is.EqualTo("hello"));
         });
 
-        [UnityTest]
-        public IEnumerator DisconnectHostTest() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void StopHostTest()
         {
-            // set local connection
-            Assert.That(server.LocalClientActive, Is.True);
-            Assert.That(server.Players, Has.Count.EqualTo(1));
-
             server.Stop();
-
-            // wait for messages to get dispatched
-            await AsyncUtil.WaitUntilWithTimeout(() => !server.LocalClientActive);
 
             // state cleared?
             Assert.That(server.Players, Is.Empty);
             Assert.That(server.Active, Is.False);
             Assert.That(server.LocalPlayer, Is.Null);
             Assert.That(server.LocalClientActive, Is.False);
-        });
+        }
+
+        [Test]
+        public void StoppingHostShouldCallDisconnectedOnLocalClient()
+        {
+            int invoked = 0;
+            client.Disconnected.AddListener((reason) =>
+            {
+                Assert.That(reason, Is.EqualTo(ClientStoppedReason.RemoteConnectionClosed));
+                invoked++;
+            });
+
+            server.Stop();
+
+            // state cleared?
+            Assert.That(invoked, Is.EqualTo(1));
+        }
 
         [UnityTest]
         public IEnumerator ClientSceneChangedOnReconnect() => UniTask.ToCoroutine(async () =>

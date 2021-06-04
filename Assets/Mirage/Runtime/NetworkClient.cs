@@ -172,6 +172,12 @@ namespace Mirage
             Cleanup();
         }
 
+        void OnHostDisconnected()
+        {
+            Player?.MarkAsDisconnected();
+            _disconnected?.Invoke(ClientStoppedReason.RemoteConnectionClosed);
+        }
+
         internal void ConnectHost(NetworkServer server, IDataHandler serverDataHandler)
         {
             logger.Log("Client Connect Host to Server");
@@ -183,7 +189,7 @@ namespace Mirage
 
             // create local connection objects and connect them
             var dataHandler = new DataHandler();
-            (IConnection clientConn, IConnection serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler);
+            (IConnection clientConn, IConnection serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler, OnHostDisconnected, null);
 
             // set up client before connecting to server, server could invoke handlers
             IsLocalClient = true;
