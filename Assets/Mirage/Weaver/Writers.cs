@@ -71,7 +71,7 @@ namespace Mirage.Weaver
                     logger.Error($"{typeReference.Name} is an unsupported type. Multidimensional arrays are not supported", typeReference, sequencePoint);
                 }
                 TypeReference elementType = typeReference.GetElementType();
-                return GenerateCollectionWriter(typeReference, elementType, () => NetworkWriterExtensions.WriteArray<byte>(default, default), sequencePoint);
+                return GenerateCollectionWriter(typeReference, elementType, () => CollectionExtensions.WriteArray<byte>(default, default), sequencePoint);
             }
 
             if (typeReference.Resolve()?.IsEnum ?? false)
@@ -86,21 +86,21 @@ namespace Mirage.Weaver
                 var genericInstance = (GenericInstanceType)typeReference;
                 TypeReference elementType = genericInstance.GenericArguments[0];
 
-                return GenerateCollectionWriter(typeReference, elementType, () => NetworkWriterExtensions.WriteNullable<byte>(default, default), sequencePoint);
+                return GenerateCollectionWriter(typeReference, elementType, () => SystemTypesExtensions.WriteNullable<byte>(default, default), sequencePoint);
             }
             if (typeReference.Is(typeof(ArraySegment<>)))
             {
                 var genericInstance = (GenericInstanceType)typeReference;
                 TypeReference elementType = genericInstance.GenericArguments[0];
 
-                return GenerateCollectionWriter(typeReference, elementType, () => NetworkWriterExtensions.WriteArraySegment<byte>(default, default), sequencePoint);
+                return GenerateCollectionWriter(typeReference, elementType, () => CollectionExtensions.WriteArraySegment<byte>(default, default), sequencePoint);
             }
             if (typeReference.Is(typeof(List<>)))
             {
                 var genericInstance = (GenericInstanceType)typeReference;
                 TypeReference elementType = genericInstance.GenericArguments[0];
 
-                return GenerateCollectionWriter(typeReference, elementType, () => NetworkWriterExtensions.WriteList<byte>(default, default), sequencePoint);
+                return GenerateCollectionWriter(typeReference, elementType, () => CollectionExtensions.WriteList<byte>(default, default), sequencePoint);
             }
 
             // check for invalid types
