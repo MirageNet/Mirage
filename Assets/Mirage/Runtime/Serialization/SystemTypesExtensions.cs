@@ -82,30 +82,6 @@ namespace Mirage.Serialization
             value |= (ushort)(reader.ReadByte() << 8);
             return value;
         }
-        public static int ReadInt32(this NetworkReader reader) => (int)reader.ReadUInt32();
-        public static uint ReadUInt32(this NetworkReader reader)
-        {
-            uint value = 0;
-            value |= reader.ReadByte();
-            value |= (uint)(reader.ReadByte() << 8);
-            value |= (uint)(reader.ReadByte() << 16);
-            value |= (uint)(reader.ReadByte() << 24);
-            return value;
-        }
-        public static long ReadInt64(this NetworkReader reader) => (long)reader.ReadUInt64();
-        public static ulong ReadUInt64(this NetworkReader reader)
-        {
-            ulong value = 0;
-            value |= reader.ReadByte();
-            value |= ((ulong)reader.ReadByte()) << 8;
-            value |= ((ulong)reader.ReadByte()) << 16;
-            value |= ((ulong)reader.ReadByte()) << 24;
-            value |= ((ulong)reader.ReadByte()) << 32;
-            value |= ((ulong)reader.ReadByte()) << 40;
-            value |= ((ulong)reader.ReadByte()) << 48;
-            value |= ((ulong)reader.ReadByte()) << 56;
-            return value;
-        }
         public static float ReadSingle(this NetworkReader reader)
         {
             var converter = new UIntFloat
