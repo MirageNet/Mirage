@@ -31,6 +31,9 @@ namespace Mirage
         ConnectingTimeout = 5,
         /// <summary>Disconnect called locally before server replies with connected</summary>
         ConnectingCancel = 6,
+
+        /// <summary>Disconnect called when server was stopped in host mode</summary>
+        HostModeStopped = 7,
     }
 
 

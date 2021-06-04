@@ -175,7 +175,7 @@ namespace Mirage
         void OnHostDisconnected()
         {
             Player?.MarkAsDisconnected();
-            _disconnected?.Invoke(ClientStoppedReason.RemoteConnectionClosed);
+            _disconnected?.Invoke(ClientStoppedReason.HostModeStopped);
         }
 
         internal void ConnectHost(NetworkServer server, IDataHandler serverDataHandler)

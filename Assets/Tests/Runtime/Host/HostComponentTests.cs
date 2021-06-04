@@ -82,7 +82,7 @@ namespace Mirage.Tests.Runtime.Host
             int invoked = 0;
             client.Disconnected.AddListener((reason) =>
             {
-                Assert.That(reason, Is.EqualTo(ClientStoppedReason.RemoteConnectionClosed));
+                Assert.That(reason, Is.EqualTo(ClientStoppedReason.HostModeStopped));
                 invoked++;
             });
 
