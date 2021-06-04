@@ -823,7 +823,7 @@ namespace Mirage
 
                     // remember start position in case we need to copy it into
                     // observers writer too
-                    int startPosition = ownerWriter.Position;
+                    int startBitPosition = ownerWriter.BitPosition;
 
                     // write index as byte [0..255]
                     ownerWriter.WriteByte((byte)i);
@@ -831,7 +831,7 @@ namespace Mirage
                     // serialize into ownerWriter first
                     // (owner always gets everything!)
                     OnSerialize(comp, ownerWriter, initialState);
-                    ++ownerWritten;
+                    ownerWritten++;
 
                     // copy into observersWriter too if SyncMode.Observers
                     // -> we copy instead of calling OnSerialize again because
@@ -845,9 +845,9 @@ namespace Mirage
                     if (comp.syncMode == SyncMode.Observers)
                     {
                         var segment = ownerWriter.ToArraySegment();
-                        int length = ownerWriter.Position - startPosition;
-                        observersWriter.WriteBytes(segment.Array, startPosition, length);
-                        ++observersWritten;
+                        int bitLength = ownerWriter.BitPosition - startBitPosition;
+                        observersWriter.CopyFromWriter(ownerWriter, startBitPosition, bitLength);
+                        observersWritten++;
                     }
                 }
             }
@@ -888,7 +888,7 @@ namespace Mirage
             reader.ObjectLocator = Client != null ? Client.World : null;
             // deserialize all components that were received
             NetworkBehaviour[] components = NetworkBehaviours;
-            while (reader.Position < reader.Length)
+            while (reader.CanRead())
             {
                 // read & check index [0..255]
                 byte index = reader.ReadByte();

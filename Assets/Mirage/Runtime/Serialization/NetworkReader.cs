@@ -1,145 +1,351 @@
-// Custom NetworkReader that doesn't use C#'s built in MemoryStream in order to
-// avoid allocations.
-//
-// Benchmark: 100kb byte[] passed to NetworkReader constructor 1000x
-//   before with MemoryStream
-//     0.8% CPU time, 250KB memory, 3.82ms
-//   now:
-//     0.0% CPU time,  32KB memory, 0.02ms
+/*
+MIT License
+
+Copyright (c) 2021 James Frowen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 using System;
-using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace Mirage.Serialization
 {
     /// <summary>
-    /// a class that holds readers for the different types
-    /// Note that c# creates a different static variable for each
-    /// type
-    /// This will be populated by the weaver
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public static class Reader<T>
-    {
-        public static Func<NetworkReader, T> Read { internal get; set; }
-    }
-
-    // Note: This class is intended to be extremely pedantic, and
-    // throw exceptions whenever stuff is going slightly wrong.
-    // The exceptions will be handled in NetworkServer/NetworkClient.
-    /// <summary>
     /// Binary stream Reader. Supports simple types, buffers, arrays, structs, and nested types
     /// <para>Use <see cref="NetworkReaderPool.GetReader">NetworkReaderPool.GetReader</see> to reduce memory allocation</para>
     /// </summary>
-    public class NetworkReader
+    public unsafe class NetworkReader : IDisposable
     {
-        // internal buffer
-        // byte[] pointer would work, but we use ArraySegment to also support
-        // the ArraySegment constructor
-        internal ArraySegment<byte> buffer;
+        byte[] managedBuffer;
+        GCHandle handle;
+        ulong* longPtr;
+        bool disposed;
 
-        // 'int' is the best type for .Position. 'short' is too small if we send >32kb which would result in negative .Position
-        // -> converting long to int is fine until 2GB of data (MAX_INT), so we don't have to worry about overflows here
-        public int Position;
-        public int Length => buffer.Count;
+
+        int bitPosition;
+        int bitLength;
+
+        public int BitLength
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => bitLength;
+        }
+
+        /// <summary>
+        /// Position to the nearest byte
+        /// </summary>
+        public int BytePosition
+        {
+            // rounds up to nearest 8
+            // add to 3 last bits,
+            //   if any are 1 then it will roll over 4th bit.
+            //   if all are 0, then nothing happens 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => (bitPosition + 0b111) >> 3;
+        }
 
         /// <summary>
         /// some service object that can find objects by net id
         /// </summary>
+        // todo try move this somewhere else
         public IObjectLocator ObjectLocator { get; internal set; }
 
-        public NetworkReader(byte[] bytes)
-        {
-            buffer = new ArraySegment<byte>(bytes);
-        }
 
-        public NetworkReader(ArraySegment<byte> segment)
+        public NetworkReader() { }
+        ~NetworkReader()
         {
-            buffer = segment;
+            Dispose(false);
         }
-
-        public byte ReadByte()
+        /// <param name="disposing">true if called from IDisposable</param>
+        protected virtual void Dispose(bool disposing)
         {
-            if (Position + 1 > buffer.Count)
+            if (disposed) return;
+
+            handle.Free();
+            longPtr = null;
+            disposed = true;
+
+            if (disposing)
             {
-                throw new EndOfStreamException("ReadByte out of range:" + ToString());
+                // clear manged stuff here because we no longer want reader to keep reference to buffer
+                bitLength = 0;
+                managedBuffer = null;
             }
-            return buffer.Array[buffer.Offset + Position++];
+        }
+        public void Dispose()
+        {
+            Dispose(true);
         }
 
-        public int ReadInt32() => (int)ReadUInt32();
-        public uint ReadUInt32()
+        public void Reset(ArraySegment<byte> segment)
         {
-            uint value = 0;
-            value |= ReadByte();
-            value |= (uint)(ReadByte() << 8);
-            value |= (uint)(ReadByte() << 16);
-            value |= (uint)(ReadByte() << 24);
-            return value;
+            Reset(segment.Array, segment.Offset, segment.Count);
         }
-        public long ReadInt64() => (long)ReadUInt64();
-        public ulong ReadUInt64()
+        public void Reset(byte[] array, int position, int length)
         {
-            ulong value = 0;
-            value |= ReadByte();
-            value |= ((ulong)ReadByte()) << 8;
-            value |= ((ulong)ReadByte()) << 16;
-            value |= ((ulong)ReadByte()) << 24;
-            value |= ((ulong)ReadByte()) << 32;
-            value |= ((ulong)ReadByte()) << 40;
-            value |= ((ulong)ReadByte()) << 48;
-            value |= ((ulong)ReadByte()) << 56;
-            return value;
-        }
-
-        // read bytes into the passed buffer
-        public byte[] ReadBytes(byte[] bytes, int count)
-        {
-            // check if passed byte array is big enough
-            if (count > bytes.Length)
+            if (!disposed)
             {
-                throw new EndOfStreamException("ReadBytes can't read " + count + " + bytes because the passed byte[] only has length " + bytes.Length);
+                // dispose old handler first
+                Dispose();
+
+                Debug.LogWarning("Calling reset on reader before disposing old handler");
             }
 
-            ArraySegment<byte> data = ReadBytesSegment(count);
-            Array.Copy(data.Array, data.Offset, bytes, 0, count);
-            return bytes;
-        }
+            // reset disposed bool, as it can be disposed again after reset
+            disposed = false;
 
-        // useful to parse payloads etc. without allocating
-        public ArraySegment<byte> ReadBytesSegment(int count)
-        {
-            // check if within buffer limits
-            if (Position + count > buffer.Count)
-            {
-                throw new EndOfStreamException("ReadBytesSegment can't read " + count + " bytes because it would read past the end of the stream. " + ToString());
-            }
-
-            // return the segment
-            var result = new ArraySegment<byte>(buffer.Array, buffer.Offset + Position, count);
-            Position += count;
-            return result;
-        }
-
-        public override string ToString()
-        {
-            return "NetworkReader pos=" + Position + " len=" + Length + " buffer=" + BitConverter.ToString(buffer.Array, buffer.Offset, buffer.Count);
+            int byteCapacity = length;
+            bitLength = byteCapacity * 8;
+            bitPosition = position * 8;
+            managedBuffer = array;
+            handle = GCHandle.Alloc(managedBuffer, GCHandleType.Pinned);
+            longPtr = (ulong*)handle.AddrOfPinnedObject();
         }
 
         /// <summary>
-        /// Reads any data type that mirror supports
+        /// Can read atleast 1 bit
+        /// </summary>
+        /// <returns></returns>
+        public bool CanRead()
+        {
+            return bitPosition < bitLength;
+        }
+
+        /// <summary>
+        /// Can atleast <paramref name="byteLength"/> bytes
+        /// </summary>
+        /// <param name="byteLength"></param>
+        /// <returns></returns>
+        public bool CanReadBytes(int byteLength)
+        {
+            return (bitPosition + byteLength * 8) < bitLength;
+
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void CheckNewLength(int newPosition)
+        {
+            if (newPosition > bitLength)
+            {
+                throw new IndexOutOfRangeException();
+            }
+        }
+
+        private void PadToByte()
+        {
+            // todo do we need to clear skipped bits?
+            bitPosition += bitPosition & 0b111;
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool ReadBoolean()
+        {
+            return ReadBooleanAsUlong() == 1UL;
+        }
+        /// <summary>
+        /// Writes first bit of <paramref name="value"/> to buffer
+        /// </summary>
+        /// <param name="value"></param>
+        public ulong ReadBooleanAsUlong()
+        {
+            int newPosition = bitPosition + 1;
+            CheckNewLength(newPosition);
+
+            ulong* ptr = (longPtr + (bitPosition >> 6));
+            ulong result = ((*ptr) >> bitPosition) & 0b1;
+
+            bitPosition = newPosition;
+            return result;
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public short ReadInt16()
+        {
+            return (short)ReadUInt16();
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ushort ReadUInt16()
+        {
+            return (ushort)ReadUnmasked(16);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ReadInt32()
+        {
+            return (int)ReadUInt32();
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public uint ReadUInt32()
+        {
+            return (uint)ReadUnmasked(32);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public long ReadInt64()
+        {
+            return (long)ReadUInt64();
+        }
+        public ulong ReadUInt64()
+        {
+            int newPosition = bitPosition + 64;
+            CheckNewLength(newPosition);
+
+            int bitsInLong = bitPosition & 0b11_1111;
+            int bitsLeft = 64 - bitsInLong;
+
+            ulong* ptr1 = (longPtr + (bitPosition >> 6));
+            ulong* ptr2 = (ptr1 + 1);
+
+            // eg use byte, read 6  =>bitPosition=5, bitsLeft=3, newPos=1
+            // r1 = aaab_bbbb => 0000_0aaa
+            // r2 = cccc_caaa => ccaa_a000
+            // r = r1|r2 => ccaa_aaaa
+            // we mask this result later
+
+            ulong r1 = (*ptr1) >> bitPosition;
+            ulong r2 = (*ptr2) << bitsLeft;
+            ulong result = r1 | r2;
+
+            bitPosition = newPosition;
+
+            // dont need to mask this result because should be reading all 64 bits
+            return result;
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float ReadSingle()
+        {
+            uint uValue = ReadUInt32();
+            return *(float*)&uValue;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public double ReadDouble()
+        {
+            ulong uValue = ReadUInt64();
+            return *(double*)&uValue;
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ulong Read(int bits)
+        {
+            // mask so we dont returns extra bits
+            return ReadUnmasked(bits) & (ulong.MaxValue >> (64 - bits));
+        }
+
+        private ulong ReadUnmasked(int bits)
+        {
+            int newPosition = bitPosition + bits;
+            CheckNewLength(newPosition);
+
+            int bitsInLong = bitPosition & 0b11_1111;
+            int bitsLeft = 64 - bitsInLong;
+
+            ulong result;
+            if (bitsLeft >= bits)
+            {
+                ulong* ptr = (longPtr + (bitPosition >> 6));
+                result = (*ptr) >> bitPosition;
+            }
+            else
+            {
+                ulong* ptr1 = (longPtr + (bitPosition >> 6));
+                ulong* ptr2 = (ptr1 + 1);
+
+                // eg use byte, read 6  =>bitPosition=5, bitsLeft=3, newPos=1
+                // r1 = aaab_bbbb => 0000_0aaa
+                // r2 = cccc_caaa => ccaa_a000
+                // r = r1|r2 => ccaa_aaaa
+                // we mask this result later
+
+                ulong r1 = (*ptr1) >> bitPosition;
+                ulong r2 = (*ptr2) << bitsLeft;
+                result = r1 | r2;
+            }
+            bitPosition = newPosition;
+
+            return result;
+        }
+
+        public void UnsafeCopy(ulong* targetPtr, int count)
+        {
+            // todo Implemented this, see NetworkWriter.UnsafeCopy
+            throw new NotImplementedException();
+        }
+
+
+        /// <summary>
+        /// <para>
+        ///    Moves poition to nearest byte then copies struct from that position
+        /// </para>
+        /// See <see href="https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.UnsafeUtility.CopyPtrToStructure.html">UnsafeUtility.CopyPtrToStructure</see>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public T Read<T>()
+        /// <param name="value"></param>
+        /// <param name="byteSize"></param>
+        public void PadAndCopy<T>(int byteSize, out T value) where T : struct
         {
-            if (Reader<T>.Read == null)
-                Debug.AssertFormat(
-                    Reader<T>.Read != null,
-                    @"No reader found for {0}. See https://miragenet.github.io/Mirage/Articles/General/Troubleshooting.html for details",
-                    typeof(T));
+            PadToByte();
+            int newPosition = bitPosition + 64 * byteSize;
+            CheckNewLength(newPosition);
 
-            return Reader<T>.Read(this);
+            byte* startPtr = ((byte*)longPtr) + (bitPosition >> 3);
+
+            UnsafeUtility.CopyPtrToStructure(startPtr, out value);
+            bitPosition = newPosition;
+        }
+
+        /// <summary>
+        /// <para>
+        ///    Moves poition to nearest byte then copies bytes from that position
+        /// </para>
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        public void ReadBytes(byte[] array, int offset, int length)
+        {
+            PadToByte();
+            int newPosition = bitPosition + 8 * length;
+            CheckNewLength(newPosition);
+
+            // todo benchmark this vs Marshal.Copy or for loop
+            Buffer.BlockCopy(array, offset, managedBuffer, BytePosition, length);
+            bitPosition = newPosition;
+        }
+
+        public ArraySegment<byte> ReadBytesSegment(int count)
+        {
+            PadToByte();
+            int newPosition = bitPosition + 8 * count;
+            CheckNewLength(newPosition);
+
+            var result = new ArraySegment<byte>(managedBuffer, BytePosition, count);
+            bitPosition = newPosition;
+            return result;
         }
     }
 }

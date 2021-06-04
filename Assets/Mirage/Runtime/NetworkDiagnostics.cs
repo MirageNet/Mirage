@@ -8,7 +8,7 @@ namespace Mirage
     /// A profiler can subscribe to these events and
     /// present the data in a friendly way to the user
     /// </summary>
-    // todo find a way to combime this with new peer metrics for more data
+    // todo find a way to combine this with new peer metrics for more data
     public static class NetworkDiagnostics
     {
         /// <summary>

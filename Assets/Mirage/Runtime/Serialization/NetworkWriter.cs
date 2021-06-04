@@ -1,184 +1,427 @@
+/*
+MIT License
+
+Copyright (c) 2021 James Frowen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace Mirage.Serialization
 {
-    /// <summary>
-    /// a class that holds writers for the different types
-    /// Note that c# creates a different static variable for each
-    /// type
-    /// This will be populated by the weaver
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public static class Writer<T>
-    {
-        public static Action<NetworkWriter, T> Write { internal get; set; }
-    }
+
 
     /// <summary>
     /// Binary stream Writer. Supports simple types, buffers, arrays, structs, and nested types
     /// <para>Use <see cref="NetworkWriterPool.GetWriter">NetworkWriter.GetWriter</see> to reduce memory allocation</para>
     /// </summary>
-    public class NetworkWriter
+    public unsafe class NetworkWriter
     {
-        public const int MaxStringLength = 1024 * 32;
+        byte[] managedBuffer;
+        GCHandle handle;
+        ulong* longPtr;
+        int bitCapacity;
+        bool disposed;
 
-        // create writer immediately with it's own buffer so no one can mess with it and so that we can resize it.
-        // note: BinaryWriter allocates too much, so we only use a MemoryStream
-        // => 1500 bytes by default because on average, most packets will be <= MTU
-        byte[] buffer = new byte[1500];
+        int bitPosition;
 
-        // 'int' is the best type for .Position. 'short' is too small if we send >32kb which would result in negative .Position
-        // -> converting long to int is fine until 2GB of data (MAX_INT), so we don't have to worry about overflows here
-        int position;
 
-        public int Length { get; private set; }
-
-        public int Position
+        public int ByteLength
         {
-            get => position;
-            set
-            {
-                position = value;
-                EnsureLength(value);
-            }
+            // rounds up to nearest 8
+            // add to 3 last bits,
+            //   if any are 1 then it will roll over 4th bit.
+            //   if all are 0, then nothing happens 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => (bitPosition + 0b111) >> 3;
         }
 
+        public int BitPosition
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => bitPosition;
+        }
+
+        public NetworkWriter(int minByteCapacity)
+        {
+            int ulongCapacity = Mathf.CeilToInt(minByteCapacity / (float)sizeof(ulong));
+            int byteCapacity = ulongCapacity * sizeof(ulong);
+            bitCapacity = byteCapacity * 8;
+            managedBuffer = new byte[byteCapacity];
+            handle = GCHandle.Alloc(managedBuffer, GCHandleType.Pinned);
+            longPtr = (ulong*)handle.AddrOfPinnedObject();
+        }
+        ~NetworkWriter()
+        {
+            FreeHandle();
+        }
         /// <summary>
-        /// Reset both the position and length of the stream
+        /// Frees the handle for the buffer
+        /// <para>In order for <see cref="PooledNetworkWriter"/> to work This class can not have <see cref="IDisposable"/>. Instead we call this method from Finalze</para>
         /// </summary>
-        /// <remarks>
-        /// Leaves the capacity the same so that we can reuse this writer without extra allocations
-        /// </remarks>
+        void FreeHandle()
+        {
+            if (disposed) return;
+
+            handle.Free();
+            longPtr = null;
+            disposed = true;
+        }
+
         public void Reset()
         {
-            position = 0;
-            Length = 0;
+            bitPosition = 0;
         }
 
         /// <summary>
-        /// Sets length, moves position if it is greater than new length
+        /// Copies internal buffer to new Array
         /// </summary>
-        /// <param name="newLength"></param>
-        /// <remarks>
-        /// Zeros out any extra length created by setlength
-        /// </remarks>
-        public void SetLength(int newLength)
-        {
-            int oldLength = Length;
-
-            // ensure length & capacity
-            EnsureLength(newLength);
-
-            // zero out new length
-            if (oldLength < newLength)
-            {
-                Array.Clear(buffer, oldLength, newLength - oldLength);
-            }
-
-            Length = newLength;
-            position = Mathf.Min(position, Length);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void EnsureLength(int value)
-        {
-            if (Length < value)
-            {
-                Length = value;
-                EnsureCapacity(value);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void EnsureCapacity(int value)
-        {
-            if (buffer.Length < value)
-            {
-                int capacity = Math.Max(value, buffer.Length * 2);
-                Array.Resize(ref buffer, capacity);
-            }
-        }
-
-        // MemoryStream has 3 values: Position, Length and Capacity.
-        // Position is used to indicate where we are writing
-        // Length is how much data we have written
-        // capacity is how much memory we have allocated
-        // ToArray returns all the data we have written,  regardless of the current position
+        /// <returns></returns>
         public byte[] ToArray()
         {
-            byte[] data = new byte[Length];
-            Array.ConstrainedCopy(buffer, 0, data, 0, Length);
+            byte[] data = new byte[ByteLength];
+            // todo benchmark and optimize (can we copy from ptr faster
+            Buffer.BlockCopy(managedBuffer, 0, data, 0, ByteLength);
             return data;
         }
-
-        // Gets the serialized data in an ArraySegment<byte>
-        // this is similar to ToArray(),  but it gets the data in O(1)
-        // and without allocations.
-        // Do not write anything else or modify the NetworkWriter
-        // while you are using the ArraySegment
         public ArraySegment<byte> ToArraySegment()
         {
-            return new ArraySegment<byte>(buffer, 0, Length);
+            // todo clear extra bits in byte (dont want last byte to have useless data)
+            return new ArraySegment<byte>(managedBuffer, 0, ByteLength);
         }
 
-        public void WriteByte(byte value)
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void CheckNewLength(int newLength)
         {
-            EnsureLength(position + 1);
-            buffer[position++] = value;
+            if (newLength > bitCapacity)
+            {
+                throw new IndexOutOfRangeException();
+            }
         }
 
-
-        // for byte arrays with consistent size, where the reader knows how many to read
-        // (like a packet opcode that's always the same)
-        public void WriteBytes(byte[] buffer, int offset, int count)
+        private void PadToByte()
         {
-            EnsureLength(position + count);
-            Array.ConstrainedCopy(buffer, offset, this.buffer, position, count);
-            position += count;
+            // todo do we need to clear skipped bits?
+            bitPosition += bitPosition & 0b111;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteBoolean(bool value)
+        {
+            WriteBoolean(value ? 1UL : 0UL);
+        }
+        /// <summary>
+        /// Writes first bit of <paramref name="value"/> to buffer
+        /// </summary>
+        /// <param name="value"></param>
+        public void WriteBoolean(ulong value)
+        {
+            int newPosition = bitPosition + 1;
+            CheckNewLength(newPosition);
+
+            int bitsInLong = bitPosition & 0b11_1111;
+
+            ulong* ptr = (longPtr + (bitPosition >> 6));
+            *ptr = (
+                *ptr & (
+                    // start with 0000_0001
+                    // shift by number in bit, eg 5 => 0010_0000
+                    // then not 1101_1111
+                    ~(1UL << bitsInLong)
+                )
+            ) | ((value & 0b1) << bitsInLong);
+
+            bitPosition = newPosition;
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteInt16(short value)
+        {
+            WriteUInt16((ushort)value);
+        }
+        public void WriteUInt16(ushort value)
+        {
+            int newPosition = bitPosition + 32;
+            CheckNewLength(newPosition);
+
+            ulong longValue = value;
+
+            int bitsInLong = bitPosition & 0b11_1111;
+            int bitsLeft = 64 - bitsInLong;
+
+            if (bitsLeft >= 16)
+            {
+                ulong* ptr = (longPtr + (bitPosition >> 6));
+                *ptr = (
+                    *ptr & (
+                        (ulong.MaxValue >> bitsLeft) | (ulong.MaxValue << newPosition)
+                    )
+                ) | (longValue << bitsInLong);
+            }
+            else
+            {
+                ulong* ptr1 = (longPtr + (bitPosition >> 6));
+                ulong* ptr2 = (ptr1 + 1);
+
+                *ptr1 = ((*ptr1 & (ulong.MaxValue >> bitsLeft)) | (longValue << bitsInLong));
+                *ptr2 = ((*ptr2 & (ulong.MaxValue << newPosition)) | (longValue >> bitsLeft));
+            }
+            bitPosition = newPosition;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteInt32(int value)
+        {
+            WriteUInt32((uint)value);
+        }
         public void WriteUInt32(uint value)
         {
-            EnsureLength(position + 4);
-            buffer[position++] = (byte)value;
-            buffer[position++] = (byte)(value >> 8);
-            buffer[position++] = (byte)(value >> 16);
-            buffer[position++] = (byte)(value >> 24);
+            int newPosition = bitPosition + 32;
+            CheckNewLength(newPosition);
+
+            ulong longValue = value;
+
+            int bitsInLong = bitPosition & 0b11_1111;
+            int bitsLeft = 64 - bitsInLong;
+
+            if (bitsLeft >= 32)
+            {
+                ulong* ptr = (longPtr + (bitPosition >> 6));
+                *ptr = (
+                    *ptr & (
+                        (ulong.MaxValue >> bitsLeft) | (ulong.MaxValue << newPosition)
+                    )
+                ) | (longValue << bitsInLong);
+            }
+            else
+            {
+                ulong* ptr1 = (longPtr + (bitPosition >> 6));
+                ulong* ptr2 = (ptr1 + 1);
+
+                *ptr1 = ((*ptr1 & (ulong.MaxValue >> bitsLeft)) | (longValue << bitsInLong));
+                *ptr2 = ((*ptr2 & (ulong.MaxValue << newPosition)) | (longValue >> bitsLeft));
+            }
+            bitPosition = newPosition;
         }
 
-        public void WriteInt32(int value) => WriteUInt32((uint)value);
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteInt64(long value)
+        {
+            WriteUInt64((ulong)value);
+        }
         public void WriteUInt64(ulong value)
         {
-            EnsureLength(position + 8);
-            buffer[position++] = (byte)value;
-            buffer[position++] = (byte)(value >> 8);
-            buffer[position++] = (byte)(value >> 16);
-            buffer[position++] = (byte)(value >> 24);
-            buffer[position++] = (byte)(value >> 32);
-            buffer[position++] = (byte)(value >> 40);
-            buffer[position++] = (byte)(value >> 48);
-            buffer[position++] = (byte)(value >> 56);
+            int newPosition = bitPosition + 32;
+            CheckNewLength(newPosition);
+
+            int bitsInLong = bitPosition & 0b11_1111;
+            int bitsLeft = 64 - bitsInLong;
+
+            ulong* ptr1 = (longPtr + (bitPosition >> 6));
+            ulong* ptr2 = (ptr1 + 1);
+
+            *ptr1 = ((*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong));
+            *ptr2 = ((*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft));
+
+            bitPosition = newPosition;
         }
 
-        public void WriteInt64(long value) => WriteUInt64((ulong)value);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteSingle(float value)
+        {
+            WriteUInt32(*(uint*)&value);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteDouble(double value)
+        {
+            WriteUInt64(*(ulong*)&value);
+        }
+
+        public void Write(ulong value, int bits)
+        {
+            int newPosition = bitPosition + bits;
+            CheckNewLength(newPosition);
+
+            // mask so we dont overwrite
+            value = value & (ulong.MaxValue >> (64 - bits));
+
+            int bitsInLong = bitPosition & 0b11_1111;
+            int bitsLeft = 64 - bitsInLong;
+            if (bitsLeft >= bits)
+            {
+                ulong* ptr = (longPtr + (bitPosition >> 6));
+                *ptr = (
+                    *ptr & (
+                        (ulong.MaxValue >> bitsLeft) | (ulong.MaxValue << (newPosition /*we can use full position here as c# will mask it to just 6 bits*/))
+                    )
+                ) | (value << bitsInLong);
+            }
+            else
+            {
+                ulong* ptr1 = (longPtr + (bitPosition >> 6));
+                ulong* ptr2 = (ptr1 + 1);
+
+                *ptr1 = ((*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong));
+                *ptr2 = ((*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft));
+            }
+            bitPosition = newPosition;
+        }
+
+        public void WriteAtPosition(ulong value, int bits, int position)
+        {
+            // careful with this method, dont set bitPosition
+
+            int newPosition = position + bits;
+            CheckNewLength(newPosition);
+
+            // mask so we dont overwrite
+            value = value & (ulong.MaxValue >> (64 - bits));
+
+            int bitsInLong = position & 0b11_1111;
+            int bitsLeft = 64 - bitsInLong;
+            if (bitsLeft >= bits)
+            {
+                ulong* ptr = (longPtr + (position >> 6));
+                *ptr = (
+                    *ptr & (
+                        (ulong.MaxValue >> bitsLeft) | (ulong.MaxValue << (newPosition /*we can use full position here as c# will mask it to just 6 bits*/))
+                    )
+                ) | (value << bitsInLong);
+            }
+            else
+            {
+                ulong* ptr1 = (longPtr + (position >> 6));
+                ulong* ptr2 = (ptr1 + 1);
+
+                *ptr1 = ((*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong));
+                *ptr2 = ((*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft));
+            }
+        }
 
         /// <summary>
-        /// Writes any type that mirror supports
+        /// 
+        /// </summary>
+        /// <param name="valuePtr"></param>
+        /// <param name="count">How many ulongs to copy, eg 64 bits</param>
+        public void UnsafeCopy(ulong* valuePtr, int count)
+        {
+            if (count == 0) { return; }
+
+            int newBit = bitPosition + 64 * count;
+            CheckNewLength(newBit);
+
+            ulong* startPtr = longPtr + (bitPosition >> 6);
+
+            int bitsInLong = bitPosition & 0b11_1111;
+            int bitsLeft = 64 - bitsInLong;
+
+            // write first part to end of current ulong
+            *startPtr = ((*startPtr & (ulong.MaxValue >> bitsLeft)) | (*(valuePtr) << bitsInLong));
+
+            // write middle parts to single ulong
+            for (int i = 1; i < count; i++)
+            {
+                *(startPtr + i) = (*(valuePtr + i - 1) >> (64 - bitsInLong)) | (*(valuePtr + i) << bitsInLong);
+            }
+
+            // write end part to start of next ulong
+            *(startPtr + count) = ((*(startPtr + count) & (ulong.MaxValue << bitPosition)) | (*(valuePtr + count - 1) >> bitsLeft));
+
+            bitPosition = newBit;
+        }
+
+        /// <summary>
+        /// <para>
+        ///    Moves poition to nearest byte then copies struct to that position
+        /// </para>
+        /// See <see href="https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.UnsafeUtility.CopyStructureToPtr.html">UnsafeUtility.CopyStructureToPtr</see>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
-        public void Write<T>(T value)
+        /// <param name="byteSize">size of stuct, in bytes</param>
+        public void PadAndCopy<T>(ref T value, int byteSize) where T : struct
         {
-            if (Writer<T>.Write == null)
-                Debug.AssertFormat(
-                    Writer<T>.Write != null,
-                    @"No writer found for {0}. See https://miragenet.github.io/Mirage/Articles/General/Troubleshooting.html for details",
-                    typeof(T));
+            PadToByte();
+            int newPosition = bitPosition + 8 * byteSize;
+            CheckNewLength(newPosition);
 
-            Writer<T>.Write(this, value);
+            byte* startPtr = ((byte*)longPtr) + (bitPosition >> 3);
+
+            UnsafeUtility.CopyStructureToPtr(ref value, startPtr);
+            bitPosition = newPosition;
+        }
+
+        /// <summary>
+        /// <para>
+        ///    Moves poition to nearest byte then writes bytes to that position
+        /// </para>
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        public void WriteBytes(byte[] array, int offset, int length)
+        {
+            PadToByte();
+            int newPosition = bitPosition + 8 * length;
+            CheckNewLength(newPosition);
+
+            // todo benchmark this vs Marshal.Copy or for loop
+            Buffer.BlockCopy(array, offset, managedBuffer, ByteLength, length);
+            bitPosition = newPosition;
+        }
+
+
+
+        public void CopyFromWriter(NetworkWriter other, int otherBitPosition, int bitLength)
+        {
+            int newBit = bitPosition + 64 * bitLength;
+            CheckNewLength(newBit);
+
+
+            int bitsToCopyFromOtherLong = Math.Min(64 - (otherBitPosition & 0b11_1111), bitLength);
+            int otherLongPosition = otherBitPosition >> 6;
+            ulong first = other.longPtr[otherLongPosition];
+            Write(first >> (64 - bitsToCopyFromOtherLong), bitsToCopyFromOtherLong);
+            // written all bits
+            if (bitsToCopyFromOtherLong == bitLength) { return; }
+
+
+            bitLength -= bitsToCopyFromOtherLong;
+            otherBitPosition += bitsToCopyFromOtherLong;
+            otherLongPosition++;
+            // other should now be aligned to ulong;
+
+            int ulongCount = bitLength >> 6;
+            UnsafeCopy(other.longPtr + otherBitPosition, ulongCount);
+
+            int leftOver = bitLength - (ulongCount * 64);
+            ulong last = other.longPtr[otherBitPosition + ulongCount];
+            Write(last, leftOver);
+
+            bitPosition = newBit;
         }
     }
 }
