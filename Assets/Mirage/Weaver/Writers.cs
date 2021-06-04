@@ -25,11 +25,20 @@ namespace Mirage.Weaver
 
         public void Register(TypeReference dataType, MethodReference methodReference)
         {
-            writeFuncs[dataType] = methodReference;
+            if (writeFuncs.ContainsKey(dataType))
+            {
+                logger.Warning($"Registering a Write method for {dataType.FullName} when one already exists\n  old:{writeFuncs[dataType].FullName}\n  new:{methodReference.FullName}", methodReference);
+            }
+
+            // we need to import type when we Initialize Writers so import here in case it is used anywhere else
+            TypeReference imported = module.ImportReference(dataType);
+            writeFuncs[imported] = methodReference;
         }
 
         void RegisterWriteFunc(TypeReference typeReference, MethodDefinition newWriterFunc)
         {
+            // todo can we remove this method? it was same as Register above
+            // see for static version https://github.com/vis2k/Mirror/blob/master/Assets/Mirror/Editor/Weaver/Writers.cs#L33-L38 
             writeFuncs[typeReference] = newWriterFunc;
         }
 

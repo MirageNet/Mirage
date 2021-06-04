@@ -26,7 +26,13 @@ namespace Mirage.Weaver
 
         internal void Register(TypeReference dataType, MethodReference methodReference)
         {
-            readFuncs[dataType] = methodReference;
+            if (readFuncs.ContainsKey(dataType))
+            {
+                logger.Warning($"Registering a Read method for {dataType.FullName} when one already exists, old:{readFuncs[dataType].FullName}, new:{methodReference.FullName}", methodReference);
+            }
+
+            TypeReference imported = module.ImportReference(dataType);
+            readFuncs[imported] = methodReference;
         }
 
         public MethodReference GetReadFunc<T>(SequencePoint sequencePoint) =>
