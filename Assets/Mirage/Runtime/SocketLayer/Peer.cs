@@ -46,7 +46,7 @@ namespace Mirage.SocketLayer
         readonly Time time;
 
         readonly ConnectKeyValidator connectKeyValidator;
-        readonly BufferPool bufferPool;
+        readonly Pool<ByteBuffer> bufferPool;
         readonly Dictionary<IEndPoint, Connection> connections = new Dictionary<IEndPoint, Connection>();
         // list so that remove can take place after foreach loops
         readonly List<Connection> connectionsToRemove = new List<Connection>();
@@ -71,8 +71,8 @@ namespace Mirage.SocketLayer
             time = new Time();
 
             connectKeyValidator = new ConnectKeyValidator();
-            bufferPool = new BufferPool(this.config.MaxPacketSize, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
-
+            
+            bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, this.config.MaxPacketSize, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
             Application.quitting += Application_quitting;
         }
 
