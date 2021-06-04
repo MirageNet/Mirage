@@ -1,3 +1,10 @@
+## [96.2.1](https://github.com/MirageNet/Mirage/compare/v96.2.0...v96.2.1) (2021-06-04)
+
+
+### Bug Fixes
+
+* adding warning if extension method is overwriting existing method ([#836](https://github.com/MirageNet/Mirage/issues/836)) ([aee89dc](https://github.com/MirageNet/Mirage/commit/aee89dced62c9dc1a944e9dc79f8629b863fd393))
+
 # [96.2.0](https://github.com/MirageNet/Mirage/compare/v96.1.2...v96.2.0) (2021-06-02)
 
 
