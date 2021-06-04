@@ -28,7 +28,7 @@ namespace Mirage.Weaver
         {
             if (readFuncs.ContainsKey(dataType))
             {
-                logger.Warning($"Registering a Read method for {dataType.FullName} when one already exists, old:{readFuncs[dataType].FullName}, new:{methodReference.FullName}", methodReference);
+                logger.Warning($"Registering a Read method for {dataType.FullName} when one already exists\n  old:{readFuncs[dataType].FullName}\n  new:{methodReference.FullName}", methodReference);
             }
 
             TypeReference imported = module.ImportReference(dataType);
