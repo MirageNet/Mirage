@@ -81,7 +81,7 @@ namespace Mirage.Tests.Runtime
         public void InvokesMessageHandler()
         {
             int invoked = 0;
-            player.RegisterHandler<ReadyMessage>((msg) => { invoked++; });
+            player.RegisterHandler<ReadyMessage>(_ => { invoked++; });
 
             int messageId = MessagePacker.GetId<ReadyMessage>();
             player.InvokeHandler(messageId, reader);
@@ -93,14 +93,13 @@ namespace Mirage.Tests.Runtime
         public void DisconnectsIfHandlerHasException()
         {
             int invoked = 0;
-            player.RegisterHandler<ReadyMessage>((msg) => { invoked++; throw new InvalidOperationException("Fun Exception"); });
+            player.RegisterHandler<ReadyMessage>(_ => { invoked++; throw new InvalidOperationException("Fun Exception"); });
 
-            int messageId = MessagePacker.GetId<ReadyMessage>();
-            byte[] bytes = MessagePacker.Pack(new ReadyMessage());
+            var packet = new ArraySegment<byte>(MessagePacker.Pack(new ReadyMessage()));
             LogAssert.ignoreFailingMessages = true;
             Assert.DoesNotThrow(() =>
             {
-                ((IMessageHandler)player).HandleMessage(new ArraySegment<byte>(bytes));
+                ((IMessageHandler)player).HandleMessage(packet);
             });
             LogAssert.ignoreFailingMessages = false;
 
