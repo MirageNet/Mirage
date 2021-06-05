@@ -11,10 +11,19 @@ namespace Mirage.Tests.Runtime.Serialization.StructMessages
     [TestFixture]
     public class StructMessagesTests
     {
+        NetworkWriter writer = new NetworkWriter(1300);
+        NetworkReader reader = new NetworkReader();
+
+        [TearDown]
+        public void TearDown()
+        {
+            reader.Dispose();
+        }
+
         [Test]
         public void SerializeAreAddedWhenEmptyInStruct()
         {
-            var writer = new NetworkWriter();
+            writer.Reset();
 
             const int someValue = 3;
             writer.Write(new SomeStructMessage
@@ -22,15 +31,13 @@ namespace Mirage.Tests.Runtime.Serialization.StructMessages
                 someValue = someValue,
             });
 
-            byte[] arr = writer.ToArray();
-
-            var reader = new NetworkReader(arr);
+            reader.Reset(writer.ToArraySegment());
             SomeStructMessage received = reader.Read<SomeStructMessage>();
 
             Assert.AreEqual(someValue, received.someValue);
 
-            int writeLength = writer.Length;
-            int readLength = reader.Position;
+            int writeLength = writer.ByteLength;
+            int readLength = reader.BytePosition;
             Assert.That(writeLength == readLength, $"OnSerializeAll and OnDeserializeAll calls write the same amount of data\n    writeLength={writeLength}\n    readLength={readLength}");
         }
     }

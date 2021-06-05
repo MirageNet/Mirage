@@ -21,6 +21,16 @@ namespace Mirage.Tests.Runtime.Serialization
 
     public class SyncVarTest
     {
+        NetworkWriter ownerWriter = new NetworkWriter(1300);
+        NetworkWriter observersWriter = new NetworkWriter(1300);
+        NetworkReader reader = new NetworkReader();
+
+        [TearDown]
+        public void TearDown()
+        {
+            reader.Dispose();
+        }
+
 
         [Test]
         public void TestSettingStruct()
@@ -122,9 +132,9 @@ namespace Mirage.Tests.Runtime.Serialization
             player1.guild = myGuild;
 
             // serialize all the data as we would for the network
-            var ownerWriter = new NetworkWriter();
+            ownerWriter.Reset();
             // not really used in this Test
-            var observersWriter = new NetworkWriter();
+            observersWriter.Reset();
             identity1.OnSerializeAll(true, ownerWriter, observersWriter);
 
             // set up a "client" object
@@ -133,7 +143,7 @@ namespace Mirage.Tests.Runtime.Serialization
             MockPlayer player2 = gameObject2.AddComponent<MockPlayer>();
 
             // apply all the data from the server object
-            var reader = new NetworkReader(ownerWriter.ToArray());
+            reader.Reset(ownerWriter.ToArray());
             identity2.OnDeserializeAll(reader, true);
 
             // check that the syncvars got updated

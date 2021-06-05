@@ -40,35 +40,39 @@ namespace Mirage.Tests.Runtime.Serialization
     [TestFixture]
     public class MessageInheritanceTest
     {
+        NetworkWriter writer = new NetworkWriter(1300);
+        NetworkReader reader = new NetworkReader();
+
+        [TearDown]
+        public void TearDown()
+        {
+            reader.Dispose();
+        }
+
+
         [Test]
         public void SendsVauesInParentAndChildClass()
         {
-            var writer = new NetworkWriter();
-
             writer.Write(new ChildMessage
             {
                 parentValue = 3,
                 childValue = 4
             });
 
-            byte[] arr = writer.ToArray();
-
-            var reader = new NetworkReader(arr);
+            reader.Reset(writer.ToArraySegment());
             ChildMessage received = reader.Read<ChildMessage>();
 
             Assert.AreEqual(3, received.parentValue);
             Assert.AreEqual(4, received.childValue);
 
-            int writeLength = writer.Length;
-            int readLength = reader.Position;
+            int writeLength = writer.ByteLength;
+            int readLength = reader.BytePosition;
             Assert.That(writeLength == readLength, $"OnSerializeAll and OnDeserializeAll calls write the same amount of data\n    writeLength={writeLength}\n    readLength={readLength}");
         }
 
         [Test]
         public void SendsVauesWhenUsingAbstractClass()
         {
-            var writer = new NetworkWriter();
-
             const int state = 2;
             const string message = "hello world";
             const int responseId = 5;
@@ -79,25 +83,22 @@ namespace Mirage.Tests.Runtime.Serialization
                 responseId = responseId,
             });
 
-            byte[] arr = writer.ToArray();
+            reader.Reset(writer.ToArraySegment());
 
-            var reader = new NetworkReader(arr);
             ResponseMessage received = reader.Read<ResponseMessage>();
 
             Assert.AreEqual(state, received.state);
             Assert.AreEqual(message, received.message);
             Assert.AreEqual(responseId, received.responseId);
 
-            int writeLength = writer.Length;
-            int readLength = reader.Position;
+            int writeLength = writer.ByteLength;
+            int readLength = reader.BytePosition;
             Assert.That(writeLength == readLength, $"OnSerializeAll and OnDeserializeAll calls write the same amount of data\n    writeLength={writeLength}\n    readLength={readLength}");
         }
 
         [Test]
         public void SendsVauesWhenUsingAbstractClassReverseDefineOrder()
         {
-            var writer = new NetworkWriter();
-
             const int state = 2;
             const string message = "hello world";
             const int responseId = 5;
@@ -108,17 +109,16 @@ namespace Mirage.Tests.Runtime.Serialization
                 responseId = responseId,
             });
 
-            byte[] arr = writer.ToArray();
+            reader.Reset(writer.ToArraySegment());
 
-            var reader = new NetworkReader(arr);
             ResponseMessageReverse received = reader.Read<ResponseMessageReverse>();
 
             Assert.AreEqual(state, received.state);
             Assert.AreEqual(message, received.message);
             Assert.AreEqual(responseId, received.responseId);
 
-            int writeLength = writer.Length;
-            int readLength = reader.Position;
+            int writeLength = writer.ByteLength;
+            int readLength = reader.BytePosition;
             Assert.That(writeLength == readLength, $"OnSerializeAll and OnDeserializeAll calls write the same amount of data\n    writeLength={writeLength}\n    readLength={readLength}");
         }
     }

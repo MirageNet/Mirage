@@ -39,16 +39,24 @@ namespace Mirage.Tests.Runtime.Serialization
             M, N, O, P
         }
 
+        NetworkWriter writer = new NetworkWriter(1300);
+        NetworkReader reader = new NetworkReader();
+
+        [TearDown]
+        public void TearDown()
+        {
+            reader.Dispose();
+        }
+
         [Test]
         public void ByteIsSentForByteEnum()
         {
             MyByte byteEnum = MyByte.B;
 
-            var writer = new NetworkWriter();
             writer.Write(byteEnum);
 
             // should only be 1 byte
-            Assert.That(writer.Length, Is.EqualTo(1));
+            Assert.That(writer.ByteLength, Is.EqualTo(1));
         }
 
         [Test]
@@ -56,11 +64,10 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             MyShort shortEnum = MyShort.G;
 
-            var writer = new NetworkWriter();
             writer.Write(shortEnum);
 
             // should only be 1 byte
-            Assert.That(writer.Length, Is.EqualTo(2));
+            Assert.That(writer.ByteLength, Is.EqualTo(2));
         }
 
         [Test]
@@ -75,10 +82,9 @@ namespace Mirage.Tests.Runtime.Serialization
 
         T SerializeAndDeserializeMessage<T>(T msg)
         {
-            var writer = new NetworkWriter();
             writer.Write(msg);
 
-            var reader = new NetworkReader(writer.ToArraySegment());
+            reader.Reset(writer.ToArraySegment());
             return reader.Read<T>();
         }
     }

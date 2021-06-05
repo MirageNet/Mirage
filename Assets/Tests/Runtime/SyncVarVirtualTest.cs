@@ -53,6 +53,10 @@ namespace Mirage.Tests.Runtime.Serialization
         private SyncVarHookTester clientTester;
         private NetworkIdentity netIdClient;
 
+        NetworkWriter ownerWriter = new NetworkWriter(1300);
+        NetworkWriter observersWriter = new NetworkWriter(1300);
+        NetworkReader reader = new NetworkReader();
+
         [SetUp]
         public void Setup()
         {
@@ -74,15 +78,14 @@ namespace Mirage.Tests.Runtime.Serialization
 
         private void SyncValuesWithClient()
         {
-            // serialize all the data as we would for the network
-            var ownerWriter = new NetworkWriter();
-            // not really used in this Test
-            var observersWriter = new NetworkWriter();
+            ownerWriter.Reset();
+            observersWriter.Reset();
 
             netIdServer.OnSerializeAll(true, ownerWriter, observersWriter);
 
             // apply all the data from the server object
-            var reader = new NetworkReader(ownerWriter.ToArray());
+
+            reader.Reset(ownerWriter.ToArraySegment());
             netIdClient.OnDeserializeAll(reader, true);
         }
 
@@ -91,6 +94,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             UnityEngine.Object.DestroyImmediate(serverTester.gameObject);
             UnityEngine.Object.DestroyImmediate(clientTester.gameObject);
+            reader.Dispose();
         }
         [Test]
         public void AbstractMethodOnChangeWorkWithHooks()

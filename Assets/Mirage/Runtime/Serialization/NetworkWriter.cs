@@ -290,21 +290,25 @@ namespace Mirage.Serialization
             bitPosition = newPosition;
         }
 
-        public void WriteAtPosition(ulong value, int bits, int position)
+        public void WriteAtBytePosition(ulong value, int bits, int bytePosition)
+        {
+            WriteAtPosition(value, bits, bytePosition * 8);
+        }
+        public void WriteAtPosition(ulong value, int bits, int bitPosition)
         {
             // careful with this method, dont set bitPosition
 
-            int newPosition = position + bits;
+            int newPosition = bitPosition + bits;
             CheckNewLength(newPosition);
 
             // mask so we dont overwrite
             value = value & (ulong.MaxValue >> (64 - bits));
 
-            int bitsInLong = position & 0b11_1111;
+            int bitsInLong = bitPosition & 0b11_1111;
             int bitsLeft = 64 - bitsInLong;
             if (bitsLeft >= bits)
             {
-                ulong* ptr = (longPtr + (position >> 6));
+                ulong* ptr = (longPtr + (bitPosition >> 6));
                 *ptr = (
                     *ptr & (
                         (ulong.MaxValue >> bitsLeft) | (ulong.MaxValue << (newPosition /*we can use full position here as c# will mask it to just 6 bits*/))
@@ -313,7 +317,7 @@ namespace Mirage.Serialization
             }
             else
             {
-                ulong* ptr1 = (longPtr + (position >> 6));
+                ulong* ptr1 = (longPtr + (bitPosition >> 6));
                 ulong* ptr2 = (ptr1 + 1);
 
                 *ptr1 = ((*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong));

@@ -29,14 +29,15 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(message.serverCode, Is.EqualTo("abc"));
 
             // serialize
-            var writer = new NetworkWriter();
+            var writer = new NetworkWriter(1300);
             writer.Write(message);
-            byte[] writerData = writer.ToArray();
 
             // try deserialize
-            var reader = new NetworkReader(writerData);
+            var reader = new NetworkReader();
+            reader.Reset(writer.ToArraySegment());
             AuthRequestMessage fresh = reader.Read<AuthRequestMessage>();
             Assert.That(fresh.serverCode, Is.EqualTo("abc"));
+            reader.Dispose();
         }
 
         [Test]
@@ -52,15 +53,17 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(message.message, Is.EqualTo("abc"));
 
             // serialize
-            var writer = new NetworkWriter();
+            var writer = new NetworkWriter(1300);
             writer.Write(message);
             byte[] writerData = writer.ToArray();
 
             // try deserialize
-            var reader = new NetworkReader(writerData);
+            var reader = new NetworkReader();
+            reader.Reset(writer.ToArraySegment());
             AuthResponseMessage fresh = reader.Read<AuthResponseMessage>();
             Assert.That(fresh.success, Is.EqualTo(true));
             Assert.That(fresh.message, Is.EqualTo("abc"));
+            reader.Dispose();
         }
     }
 }

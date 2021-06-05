@@ -9,6 +9,19 @@ namespace Mirage.Tests.Runtime.Serialization
     [TestFixture]
     public class MessagePackerTest
     {
+        NetworkReader reader;
+        [SetUp]
+        public void Setup()
+        {
+            reader = new NetworkReader();
+        }
+        [TearDown]
+        public void TearDown()
+        {
+            reader.Dispose();
+            reader = null;
+        }
+
 
         [Test]
         public void TestPacking()
@@ -76,7 +89,7 @@ namespace Mirage.Tests.Runtime.Serialization
             };
 
             byte[] data = MessagePacker.Pack(message);
-            var reader = new NetworkReader(data);
+            reader.Reset(data);
 
             int msgType = MessagePacker.UnpackId(reader);
             Assert.That(msgType, Is.EqualTo(BitConverter.ToUInt16(data, 0)));
@@ -88,8 +101,8 @@ namespace Mirage.Tests.Runtime.Serialization
             // try an invalid message
             Assert.Throws<EndOfStreamException>(() =>
             {
-                var reader2 = new NetworkReader(new byte[0]);
-                _ = MessagePacker.UnpackId(reader2);
+                reader.Reset(new byte[0]);
+                _ = MessagePacker.UnpackId(reader);
             });
         }
 

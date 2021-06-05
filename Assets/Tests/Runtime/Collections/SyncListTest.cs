@@ -7,37 +7,47 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime
 {
-    [TestFixture]
-    public class SyncListTest
+    public static class SerializeHelper
     {
-        SyncList<string> serverSyncList;
-        SyncList<string> clientSyncList;
+        static NetworkWriter writer = new NetworkWriter(1300);
+        static NetworkReader reader = new NetworkReader();
 
         public static void SerializeAllTo<T>(T fromList, T toList) where T : ISyncObject
         {
-            var writer = new NetworkWriter();
+            writer.Reset();
             fromList.OnSerializeAll(writer);
-            var reader = new NetworkReader(writer.ToArray());
+
+            reader.Reset(writer.ToArray());
             toList.OnDeserializeAll(reader);
 
-            int writeLength = writer.Length;
-            int readLength = reader.Position;
+            int writeLength = writer.ByteLength;
+            int readLength = reader.BytePosition;
             Assert.That(writeLength == readLength, $"OnSerializeAll and OnDeserializeAll calls write the same amount of data\n    writeLength={writeLength}\n    readLength={readLength}");
 
         }
 
         public static void SerializeDeltaTo<T>(T fromList, T toList) where T : ISyncObject
         {
-            var writer = new NetworkWriter();
+            writer.Reset();
+
             fromList.OnSerializeDelta(writer);
-            var reader = new NetworkReader(writer.ToArray());
+            reader.Reset(writer.ToArray());
+
             toList.OnDeserializeDelta(reader);
             fromList.Flush();
 
-            int writeLength = writer.Length;
-            int readLength = reader.Position;
+            int writeLength = writer.ByteLength;
+            int readLength = reader.BytePosition;
             Assert.That(writeLength == readLength, $"OnSerializeDelta and OnDeserializeDelta calls write the same amount of data\n    writeLength={writeLength}\n    readLength={readLength}");
         }
+    }
+    [TestFixture]
+    public class SyncListTest
+    {
+        SyncList<string> serverSyncList;
+        SyncList<string> clientSyncList;
+
+
 
         [SetUp]
         public void SetUp()
@@ -49,7 +59,7 @@ namespace Mirage.Tests.Runtime
             serverSyncList.Add("Hello");
             serverSyncList.Add("World");
             serverSyncList.Add("!");
-            SerializeAllTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeAllTo(serverSyncList, clientSyncList);
         }
 
         [Test]
@@ -63,7 +73,7 @@ namespace Mirage.Tests.Runtime
         {
             Action callback = Substitute.For<Action>();
             clientSyncList.OnClear += callback;
-            SerializeAllTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeAllTo(serverSyncList, clientSyncList);
             callback.Received().Invoke();
         }
 
@@ -72,7 +82,7 @@ namespace Mirage.Tests.Runtime
         {
             Action<int, string> callback = Substitute.For<Action<int, string>>();
             clientSyncList.OnInsert += callback;
-            SerializeAllTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeAllTo(serverSyncList, clientSyncList);
 
             Received.InOrder(() =>
             {
@@ -87,7 +97,7 @@ namespace Mirage.Tests.Runtime
         {
             Action callback = Substitute.For<Action>();
             clientSyncList.OnChange += callback;
-            SerializeAllTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeAllTo(serverSyncList, clientSyncList);
             callback.Received().Invoke();
         }
 
@@ -95,7 +105,7 @@ namespace Mirage.Tests.Runtime
         public void TestAdd()
         {
             serverSyncList.Add("yay");
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList, Is.EquivalentTo(new[] { "Hello", "World", "!", "yay" }));
         }
 
@@ -103,7 +113,7 @@ namespace Mirage.Tests.Runtime
         public void TestAddRange()
         {
             serverSyncList.AddRange(new[] { "One", "Two", "Three" });
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList, Is.EqualTo(new[] { "Hello", "World", "!", "One", "Two", "Three" }));
         }
 
@@ -111,7 +121,7 @@ namespace Mirage.Tests.Runtime
         public void TestClear()
         {
             serverSyncList.Clear();
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList, Is.EquivalentTo(new string[] { }));
         }
 
@@ -119,7 +129,7 @@ namespace Mirage.Tests.Runtime
         public void TestInsert()
         {
             serverSyncList.Insert(0, "yay");
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList, Is.EquivalentTo(new[] { "yay", "Hello", "World", "!" }));
         }
 
@@ -127,7 +137,7 @@ namespace Mirage.Tests.Runtime
         public void TestInsertRange()
         {
             serverSyncList.InsertRange(1, new[] { "One", "Two", "Three" });
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList, Is.EqualTo(new[] { "Hello", "One", "Two", "Three", "World", "!" }));
         }
 
@@ -135,7 +145,7 @@ namespace Mirage.Tests.Runtime
         public void TestSet()
         {
             serverSyncList[1] = "yay";
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList[1], Is.EqualTo("yay"));
             Assert.That(clientSyncList, Is.EquivalentTo(new[] { "Hello", "yay", "!" }));
         }
@@ -144,11 +154,11 @@ namespace Mirage.Tests.Runtime
         public void TestSetNull()
         {
             serverSyncList[1] = null;
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList[1], Is.EqualTo(null));
             Assert.That(clientSyncList, Is.EquivalentTo(new[] { "Hello", null, "!" }));
             serverSyncList[1] = "yay";
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList, Is.EquivalentTo(new[] { "Hello", "yay", "!" }));
         }
 
@@ -156,7 +166,7 @@ namespace Mirage.Tests.Runtime
         public void TestRemoveAll()
         {
             serverSyncList.RemoveAll(entry => entry.Contains("l"));
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList, Is.EquivalentTo(new[] { "!" }));
         }
 
@@ -164,7 +174,7 @@ namespace Mirage.Tests.Runtime
         public void TestRemoveAllNone()
         {
             serverSyncList.RemoveAll(entry => entry == "yay");
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList, Is.EquivalentTo(new[] { "Hello", "World", "!" }));
         }
 
@@ -172,7 +182,7 @@ namespace Mirage.Tests.Runtime
         public void TestRemoveAt()
         {
             serverSyncList.RemoveAt(1);
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList, Is.EquivalentTo(new[] { "Hello", "!" }));
         }
 
@@ -180,7 +190,7 @@ namespace Mirage.Tests.Runtime
         public void TestRemove()
         {
             serverSyncList.Remove("World");
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList, Is.EquivalentTo(new[] { "Hello", "!" }));
         }
 
@@ -223,10 +233,10 @@ namespace Mirage.Tests.Runtime
         public void TestMultSync()
         {
             serverSyncList.Add("1");
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             // add some delta and see if it applies
             serverSyncList.Add("2");
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             Assert.That(clientSyncList, Is.EquivalentTo(new[] { "Hello", "World", "!", "1", "2" }));
         }
 
@@ -239,7 +249,7 @@ namespace Mirage.Tests.Runtime
             serverList.Add(1);
             serverList.Add(2);
             serverList.Add(3);
-            SerializeDeltaTo(serverList, clientList);
+            SerializeHelper.SerializeDeltaTo(serverList, clientList);
 
             Assert.That(clientList, Is.EquivalentTo(new[] { 1, 2, 3 }));
         }
@@ -253,7 +263,7 @@ namespace Mirage.Tests.Runtime
             serverList.Add(true);
             serverList.Add(false);
             serverList.Add(true);
-            SerializeDeltaTo(serverList, clientList);
+            SerializeHelper.SerializeDeltaTo(serverList, clientList);
 
             Assert.That(clientList, Is.EquivalentTo(new[] { true, false, true }));
         }
@@ -267,7 +277,7 @@ namespace Mirage.Tests.Runtime
             serverList.Add(1U);
             serverList.Add(2U);
             serverList.Add(3U);
-            SerializeDeltaTo(serverList, clientList);
+            SerializeHelper.SerializeDeltaTo(serverList, clientList);
 
             Assert.That(clientList, Is.EquivalentTo(new[] { 1U, 2U, 3U }));
         }
@@ -281,7 +291,7 @@ namespace Mirage.Tests.Runtime
             serverList.Add(1.0F);
             serverList.Add(2.0F);
             serverList.Add(3.0F);
-            SerializeDeltaTo(serverList, clientList);
+            SerializeHelper.SerializeDeltaTo(serverList, clientList);
 
             Assert.That(clientList, Is.EquivalentTo(new[] { 1.0F, 2.0F, 3.0F }));
         }
@@ -292,7 +302,7 @@ namespace Mirage.Tests.Runtime
             Action<int, string> callback = Substitute.For<Action<int, string>>();
             clientSyncList.OnInsert += callback;
             serverSyncList.Add("yay");
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             callback.Received().Invoke(3, "yay");
         }
 
@@ -302,7 +312,7 @@ namespace Mirage.Tests.Runtime
             Action<int, string> callback = Substitute.For<Action<int, string>>();
             clientSyncList.OnInsert += callback;
             serverSyncList.Insert(1, "yay");
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             callback.Received().Invoke(1, "yay");
         }
 
@@ -312,7 +322,7 @@ namespace Mirage.Tests.Runtime
             Action<int, string> callback = Substitute.For<Action<int, string>>();
             clientSyncList.OnRemove += callback;
             serverSyncList.Remove("World");
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             callback.Received().Invoke(1, "World");
         }
 
@@ -322,7 +332,7 @@ namespace Mirage.Tests.Runtime
             Action callback = Substitute.For<Action>();
             clientSyncList.OnClear += callback;
             serverSyncList.Clear();
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             callback.Received().Invoke();
         }
 
@@ -332,7 +342,7 @@ namespace Mirage.Tests.Runtime
             Action<int, string, string> callback = Substitute.For<Action<int, string, string>>();
             clientSyncList.OnSet += callback;
             serverSyncList[1] = "yo mama";
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             callback.Received().Invoke(1, "World", "yo mama");
         }
 
@@ -343,7 +353,7 @@ namespace Mirage.Tests.Runtime
             clientSyncList.OnChange += callback;
             serverSyncList.Add("1");
             serverSyncList.Add("2");
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
             callback.Received(1).Invoke();
         }
 
@@ -427,7 +437,7 @@ namespace Mirage.Tests.Runtime
         public void DirtyTest()
         {
             // Sync Delta to clear dirty
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
 
             // nothing to send
             Assert.That(serverSyncList.IsDirty, Is.False);
@@ -435,7 +445,7 @@ namespace Mirage.Tests.Runtime
             // something has changed
             serverSyncList.Add("1");
             Assert.That(serverSyncList.IsDirty, Is.True);
-            SerializeDeltaTo(serverSyncList, clientSyncList);
+            SerializeHelper.SerializeDeltaTo(serverSyncList, clientSyncList);
 
             // data has been flushed,  should go back to clear
             Assert.That(serverSyncList.IsDirty, Is.False);
@@ -455,7 +465,7 @@ namespace Mirage.Tests.Runtime
             // Check Add and Sync without errors
             hostList.Add("hello");
             hostList.Add("world");
-            SerializeDeltaTo(hostList, clientList2);
+            SerializeHelper.SerializeDeltaTo(hostList, clientList2);
         }
 
         [Test]

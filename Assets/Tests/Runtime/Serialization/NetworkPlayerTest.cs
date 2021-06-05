@@ -73,7 +73,8 @@ namespace Mirage.Tests.Runtime
             connection = Substitute.For<SocketLayer.IConnection>();
             player = new NetworkPlayer(connection);
             // reader with some random data
-            reader = new NetworkReader(new byte[] { 1, 2, 3, 4 });
+            reader = new NetworkReader();
+            reader.Reset(new byte[] { 1, 2, 3, 4 });
         }
 
 

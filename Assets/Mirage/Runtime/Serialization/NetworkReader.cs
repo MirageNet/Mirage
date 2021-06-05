@@ -101,6 +101,10 @@ namespace Mirage.Serialization
         {
             Reset(segment.Array, segment.Offset, segment.Count);
         }
+        public void Reset(byte[] array)
+        {
+            Reset(array, 0, array.Length);
+        }
         public void Reset(byte[] array, int position, int length)
         {
             if (!disposed)
