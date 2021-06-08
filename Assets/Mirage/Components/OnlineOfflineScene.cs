@@ -14,6 +14,8 @@ namespace Mirage
         [FormerlySerializedAs("server")]
         public NetworkServer Server;
 
+        public NetworkSceneManager NetworkSceneManager;
+
         [Scene]
         [Tooltip("Assign the OnlineScene to load for this zone")]
         public string OnlineScene;
@@ -49,7 +51,8 @@ namespace Mirage
 
         void OnServerStarted()
         {
-            SceneManager.LoadSceneAsync(OnlineScene);
+            // use NetworkSceneManager so that server tell client to also load the scene
+            NetworkSceneManager.ChangeServerScene(OnlineScene);
         }
 
         void OnServerStopped()

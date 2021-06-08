@@ -88,7 +88,7 @@ namespace Mirage
         /// </summary>
         internal List<string> pendingAdditiveSceneList = new List<string>();
 
-        public void Start()
+        public void Awake()
         {
             if (DontDestroy)
                 DontDestroyOnLoad(gameObject);
