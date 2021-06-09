@@ -118,9 +118,8 @@ namespace Mirage.Serialization
             // reset disposed bool, as it can be disposed again after reset
             disposed = false;
 
-            int byteCapacity = length;
-            bitLength = byteCapacity * 8;
             bitPosition = position * 8;
+            bitLength = bitPosition + (length * 8);
             managedBuffer = array;
             handle = GCHandle.Alloc(managedBuffer, GCHandleType.Pinned);
             longPtr = (ulong*)handle.AddrOfPinnedObject();
@@ -151,7 +150,7 @@ namespace Mirage.Serialization
         {
             if (newPosition > bitLength)
             {
-                throw new IndexOutOfRangeException();
+                throw new IndexOutOfRangeException($"NewPosition:{newPosition} reader length:{bitLength}");
             }
         }
 
