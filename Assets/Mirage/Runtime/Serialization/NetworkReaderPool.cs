@@ -58,18 +58,20 @@ namespace Mirage.Serialization
         /// </summary>
         public void Release()
         {
-            pool.Put(this);
+            Dispose(true);
         }
 
         void IDisposable.Dispose() => Dispose(true);
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            Release();
-        }
-    }
 
-    public static class PooledNetworkReaderExtention
-    {
+            // only put back into the pool is Dispose was called
+            // => dont put it back for finalize
+            if (disposing)
+            {
+                pool.Put(this);
+            }
+        }
     }
 }
