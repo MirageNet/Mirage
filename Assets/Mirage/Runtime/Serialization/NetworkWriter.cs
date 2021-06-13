@@ -156,6 +156,41 @@ namespace Mirage.Serialization
             bitPosition = newPosition;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteSByte(sbyte value)
+        {
+            WriteUInt16((byte)value);
+        }
+        public void WriteByte(byte value)
+        {
+            int newPosition = bitPosition + 8;
+            CheckNewLength(newPosition);
+
+            ulong longValue = value;
+
+            int bitsInLong = bitPosition & 0b11_1111;
+            int bitsLeft = 64 - bitsInLong;
+
+            if (bitsLeft >= 8)
+            {
+                ulong* ptr = (longPtr + (bitPosition >> 6));
+                *ptr = (
+                    *ptr & (
+                        (ulong.MaxValue >> bitsLeft) | (ulong.MaxValue << newPosition)
+                    )
+                ) | (longValue << bitsInLong);
+            }
+            else
+            {
+                ulong* ptr1 = (longPtr + (bitPosition >> 6));
+                ulong* ptr2 = (ptr1 + 1);
+
+                *ptr1 = ((*ptr1 & (ulong.MaxValue >> bitsLeft)) | (longValue << bitsInLong));
+                *ptr2 = ((*ptr2 & (ulong.MaxValue << newPosition)) | (longValue >> bitsLeft));
+            }
+            bitPosition = newPosition;
+        }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteInt16(short value)
@@ -164,7 +199,7 @@ namespace Mirage.Serialization
         }
         public void WriteUInt16(ushort value)
         {
-            int newPosition = bitPosition + 32;
+            int newPosition = bitPosition + 16;
             CheckNewLength(newPosition);
 
             ulong longValue = value;

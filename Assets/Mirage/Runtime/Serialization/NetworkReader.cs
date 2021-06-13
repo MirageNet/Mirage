@@ -184,6 +184,17 @@ namespace Mirage.Serialization
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public sbyte ReadSByte()
+        {
+            return (sbyte)ReadByte();
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public byte ReadByte()
+        {
+            return (byte)ReadUnmasked(8);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public short ReadInt16()
         {
             return (short)ReadUInt16();
