@@ -39,7 +39,7 @@ namespace Mirage.Serialization
         byte[] managedBuffer;
         GCHandle handle;
         ulong* longPtr;
-        bool disposed;
+        bool needsDisposing;
 
 
         int bitPosition;
@@ -72,6 +72,7 @@ namespace Mirage.Serialization
 
 
         public NetworkReader() { }
+
         ~NetworkReader()
         {
             Dispose(false);
@@ -79,11 +80,11 @@ namespace Mirage.Serialization
         /// <param name="disposing">true if called from IDisposable</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed) return;
+            if (!needsDisposing) return;
 
             handle.Free();
             longPtr = null;
-            disposed = true;
+            needsDisposing = false;
 
             if (disposing)
             {
@@ -107,7 +108,7 @@ namespace Mirage.Serialization
         }
         public void Reset(byte[] array, int position, int length)
         {
-            if (!disposed)
+            if (needsDisposing)
             {
                 // dispose old handler first
                 Dispose();
@@ -116,7 +117,7 @@ namespace Mirage.Serialization
             }
 
             // reset disposed bool, as it can be disposed again after reset
-            disposed = false;
+            needsDisposing = true;
 
             bitPosition = position * 8;
             bitLength = bitPosition + (length * 8);
