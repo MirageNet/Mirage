@@ -6,7 +6,7 @@ namespace Mirage.SocketLayer
     /// <summary>
     /// Holds a collection of <see cref="ByteBuffer"/> so they can be re-used without allocations
     /// </summary>
-    public class Pool<T>
+    public class Pool<T> where T : class
     {
         const int PoolEmpty = -1;
 
@@ -61,7 +61,10 @@ namespace Mirage.SocketLayer
                 // todo is it a security risk to now clear buffer?
 
                 // take then decriment
-                return pool[next--];
+                T item = pool[next];
+                pool[next] = null;
+                next--;
+                return item;
             }
         }
 
