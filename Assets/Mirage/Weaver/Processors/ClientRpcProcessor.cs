@@ -4,6 +4,7 @@ using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+
 namespace Mirage.Weaver
 {
     public enum Client { Owner, Observers, Connection }
@@ -193,20 +194,11 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Callvirt, sendTargetRpcRef));
             }
 
-            CallWriterRelease(worker, writer);
+            NetworkWriterHelper.CallRelease(module, worker, writer);
 
             worker.Append(worker.Create(OpCodes.Ret));
 
             return rpc;
-        }
-
-        private static void CallWriterRelease(ILProcessor worker, VariableDefinition writer)
-        {
-            TypeDefinition writerType = writer.VariableType.Resolve();
-            MethodDefinition releaseMethod = writerType.GetMethod(nameof(PooledNetworkWriter.Release));
-
-            worker.Append(worker.Create(OpCodes.Ldloc, writer));
-            worker.Append(worker.Create(OpCodes.Call, releaseMethod));
         }
 
         public void IsClient(ILProcessor worker, Action body)

@@ -97,20 +97,11 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
             CallSendServerRpc(md, worker);
 
-            CallWriterRelease(worker, writer);
+            NetworkWriterHelper.CallRelease(module, worker, writer);
 
             worker.Append(worker.Create(OpCodes.Ret));
 
             return cmd;
-        }
-
-        private static void CallWriterRelease(ILProcessor worker, VariableDefinition writer)
-        {
-            TypeDefinition writerType = writer.VariableType.Resolve();
-            MethodDefinition releaseMethod = writerType.GetMethod(nameof(PooledNetworkWriter.Release));
-
-            worker.Append(worker.Create(OpCodes.Ldloc, writer));
-            worker.Append(worker.Create(OpCodes.Call, releaseMethod));
         }
 
         public void IsServer(ILProcessor worker, Action body)
