@@ -46,6 +46,7 @@ namespace Mirage.Serialization
         /// </summary>
         public void Release()
         {
+            Reset();
             pool.Put(this);
         }
 
