@@ -44,12 +44,15 @@ namespace Mirage.Tests.Runtime.Serialization
                 id = 10,
                 name = "Yo Gaba Gaba"
             };
-            var writer = new NetworkWriter();
+            var writer = new NetworkWriter(1300);
             writer.Write(data);
-            var reader = new NetworkReader(writer.ToArray());
+            var reader = new NetworkReader();
+            reader.Reset(writer.ToArraySegment());
             MyType copy = reader.Read<MyType>();
 
             Assert.That(copy, Is.EqualTo(data));
+
+            reader.Dispose();
         }
     }
 }
