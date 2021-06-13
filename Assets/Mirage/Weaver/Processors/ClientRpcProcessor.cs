@@ -67,8 +67,8 @@ namespace Mirage.Weaver
 
             if (hasNetworkConnection)
             {
-               // this is called in the skeleton (the client)
-               // the client should just get the connection to the server and pass that in
+                // this is called in the skeleton (the client)
+                // the client should just get the connection to the server and pass that in
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
                 worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
@@ -193,13 +193,20 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Callvirt, sendTargetRpcRef));
             }
 
-            // NetworkWriterPool.Recycle(writer);
-            worker.Append(worker.Create(OpCodes.Ldloc, writer));
-            worker.Append(worker.Create(OpCodes.Call, () => NetworkWriterPool.Recycle(default)));
+            CallWriterRelease(worker, writer);
 
             worker.Append(worker.Create(OpCodes.Ret));
 
             return rpc;
+        }
+
+        private static void CallWriterRelease(ILProcessor worker, VariableDefinition writer)
+        {
+            TypeDefinition writerType = writer.VariableType.Resolve();
+            MethodDefinition releaseMethod = writerType.GetMethod(nameof(PooledNetworkWriter.Release));
+
+            worker.Append(worker.Create(OpCodes.Ldloc, writer));
+            worker.Append(worker.Create(OpCodes.Call, releaseMethod));
         }
 
         public void IsClient(ILProcessor worker, Action body)
