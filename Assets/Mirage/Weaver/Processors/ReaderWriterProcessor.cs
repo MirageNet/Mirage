@@ -277,15 +277,12 @@ namespace Mirage.Weaver
         private ModuleDefinition module;
         private Readers readers;
         private Writers writers;
-        private TypeReference voidType;
 
         public SerailizeExtensionHelper(ModuleDefinition module, Readers readers, Writers writers)
         {
             this.module = module;
             this.readers = readers;
             this.writers = writers;
-
-            voidType = module.ImportReference(typeof(void));
         }
 
 
@@ -377,7 +374,7 @@ namespace Mirage.Weaver
             if (method.Parameters[0].ParameterType.FullName != typeof(NetworkWriter).FullName)
                 return false;
 
-            if (method.ReturnType != voidType)
+            if (!method.ReturnType.Is(typeof(void)))
                 return false;
 
             return true;
@@ -404,7 +401,7 @@ namespace Mirage.Weaver
             if (method.Parameters[0].ParameterType.FullName != typeof(NetworkReader).FullName)
                 return false;
 
-            if (method.ReturnType == voidType)
+            if (method.ReturnType.Is(typeof(void)))
                 return false;
 
             return true;
