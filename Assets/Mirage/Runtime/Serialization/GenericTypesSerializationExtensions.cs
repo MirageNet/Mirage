@@ -36,6 +36,7 @@ namespace Mirage.Serialization
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [WeaverIgnore]
         public static void Write<T>(this NetworkWriter writer, T value)
         {
             if (Writer<T>.Write == null)
@@ -50,6 +51,7 @@ namespace Mirage.Serialization
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [WeaverIgnore]
         public static T Read<T>(this NetworkReader reader)
         {
             if (Reader<T>.Read == null)
