@@ -36,6 +36,7 @@ namespace Mirage.Serialization
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // do not include these as serialize function because they are used directly by weaver
         [WeaverIgnore]
         public static void Write<T>(this NetworkWriter writer, T value)
         {
@@ -51,6 +52,7 @@ namespace Mirage.Serialization
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // do not include these as serialize function because they are used directly by weaver
         [WeaverIgnore]
         public static T Read<T>(this NetworkReader reader)
         {
