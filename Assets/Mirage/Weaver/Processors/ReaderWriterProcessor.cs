@@ -274,9 +274,9 @@ namespace Mirage.Weaver
     /// </summary>
     public class SerailizeExtensionHelper
     {
-        private ModuleDefinition module;
-        private Readers readers;
-        private Writers writers;
+        private readonly ModuleDefinition module;
+        private readonly Readers readers;
+        private readonly Writers writers;
 
         public SerailizeExtensionHelper(ModuleDefinition module, Readers readers, Writers writers)
         {
