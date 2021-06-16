@@ -24,7 +24,7 @@ namespace Mirage.Weaver
         [AssertionMethod]
         protected void IsSuccess()
         {
-            Assert.That(weaverLog.Diagnostics, Is.Empty);
+            Assert.That(weaverLog.Diagnostics, Is.Empty, $"Failed because there are Diagnostics message: \n  {string.Join("\n  ", weaverLog.Diagnostics.Select(x => x.MessageData))}\n");
         }
 
         [AssertionMethod]
