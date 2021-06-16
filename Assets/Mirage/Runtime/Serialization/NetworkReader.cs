@@ -142,7 +142,7 @@ namespace Mirage.Serialization
         /// <returns></returns>
         public bool CanReadBytes(int byteLength)
         {
-            return (bitPosition + byteLength * 8) < bitLength;
+            return (bitPosition + byteLength * 8) <= bitLength;
 
         }
 
@@ -228,20 +228,29 @@ namespace Mirage.Serialization
             CheckNewLength(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
-            int bitsLeft = 64 - bitsInLong;
+            ulong result;
+            if (bitsInLong == 0)
+            {
+                ulong* ptr1 = (longPtr + (bitPosition >> 6));
+                result = *ptr1;
+            }
+            else
+            {
+                int bitsLeft = 64 - bitsInLong;
 
-            ulong* ptr1 = (longPtr + (bitPosition >> 6));
-            ulong* ptr2 = (ptr1 + 1);
+                ulong* ptr1 = (longPtr + (bitPosition >> 6));
+                ulong* ptr2 = (ptr1 + 1);
 
-            // eg use byte, read 6  =>bitPosition=5, bitsLeft=3, newPos=1
-            // r1 = aaab_bbbb => 0000_0aaa
-            // r2 = cccc_caaa => ccaa_a000
-            // r = r1|r2 => ccaa_aaaa
-            // we mask this result later
+                // eg use byte, read 6  =>bitPosition=5, bitsLeft=3, newPos=1
+                // r1 = aaab_bbbb => 0000_0aaa
+                // r2 = cccc_caaa => ccaa_a000
+                // r = r1|r2 => ccaa_aaaa
+                // we mask this result later
 
-            ulong r1 = (*ptr1) >> bitPosition;
-            ulong r2 = (*ptr2) << bitsLeft;
-            ulong result = r1 | r2;
+                ulong r1 = (*ptr1) >> bitPosition;
+                ulong r2 = (*ptr2) << bitsLeft;
+                result = r1 | r2;
+            }
 
             bitPosition = newPosition;
 
@@ -348,7 +357,7 @@ namespace Mirage.Serialization
             CheckNewLength(newPosition);
 
             // todo benchmark this vs Marshal.Copy or for loop
-            Buffer.BlockCopy(array, offset, managedBuffer, BytePosition, length);
+            Buffer.BlockCopy(managedBuffer, BytePosition, array, offset, length);
             bitPosition = newPosition;
         }
 
