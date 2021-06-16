@@ -57,12 +57,13 @@ namespace Mirage.Weaver
             {
                 IEnumerable<MethodInfo> methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public)
                     .Where(IsExtension)
-                    .Where(NotGeneric);
+                    .Where(NotGeneric)
+                    .Where(NotIgnored);
 
                 foreach (MethodInfo method in methods)
                 {
-                    RegisterReader(method);
-                    RegisterWriter(method);
+                    TryRegisterReader(method);
+                    TryRegisterWriter(method);
                 }
             }
         }
@@ -75,7 +76,8 @@ namespace Mirage.Weaver
 
         private static bool IsExtension(MethodInfo method) => Attribute.IsDefined(method, typeof(System.Runtime.CompilerServices.ExtensionAttribute));
         private static bool NotGeneric(MethodInfo method) => !method.IsGenericMethod;
-
+        /// <returns>true if method does not have <see cref="WeaverIgnoreAttribute"/></returns>
+        private static bool NotIgnored(MethodInfo method) => method.GetCustomAttribute<WeaverIgnoreAttribute>() == null;
 
         private void LoadBuiltinMessages()
         {
@@ -90,7 +92,7 @@ namespace Mirage.Weaver
         }
 
 
-        private void RegisterReader(MethodInfo method)
+        private void TryRegisterReader(MethodInfo method)
         {
             if (method.GetParameters().Length != 1)
                 return;
@@ -103,7 +105,7 @@ namespace Mirage.Weaver
             readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
         }
 
-        private void RegisterWriter(MethodInfo method)
+        private void TryRegisterWriter(MethodInfo method)
         {
             if (method.GetParameters().Length != 2)
                 return;
