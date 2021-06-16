@@ -159,7 +159,7 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteSByte(sbyte value)
         {
-            WriteUInt16((byte)value);
+            WriteByte((byte)value);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteByte(byte value)

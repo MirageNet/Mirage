@@ -23,10 +23,10 @@ SOFTWARE.
 */
 
 using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine;
 
 namespace Mirage.Serialization
 {
@@ -112,8 +112,6 @@ namespace Mirage.Serialization
             {
                 // dispose old handler first
                 Dispose();
-
-                Debug.LogWarning("Calling reset on reader before disposing old handler");
             }
 
             // reset disposed bool, as it can be disposed again after reset
@@ -151,7 +149,7 @@ namespace Mirage.Serialization
         {
             if (newPosition > bitLength)
             {
-                throw new IndexOutOfRangeException($"NewPosition:{newPosition} reader length:{bitLength}");
+                throw new EndOfStreamException($"NewPosition:{newPosition} reader length:{bitLength}");
             }
         }
 

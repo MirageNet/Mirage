@@ -12,10 +12,17 @@ namespace Mirage.Tests.Runtime.Serialization
         private NetworkWriter writer = new NetworkWriter(1300);
         private NetworkReader reader = new NetworkReader();
 
+        [SetUp]
+        public void Setup()
+        {
+            Console.WriteLine(TestContext.CurrentContext.Test.Name);
+        }
+
         [TearDown]
         public void TearDown()
         {
             reader.Dispose();
+            writer.Reset();
         }
 
 
@@ -422,7 +429,8 @@ namespace Mirage.Tests.Runtime.Serialization
             const string str = "a string longer than 10 bytes";
             writer.WriteString(str);
             // change length value to longer than string
-            writer.WriteAtPosition((ushort)(str.Length + 1), 16, 0);
+            // +2 because length is already +1 to handle null
+            writer.WriteAtPosition((ushort)(str.Length + 2), 16, 0);
 
             reader.Reset(writer.ToArraySegment());
             Assert.Throws<System.IO.EndOfStreamException>(() => reader.ReadString());
@@ -1061,6 +1069,49 @@ namespace Mirage.Tests.Runtime.Serialization
             ulong? unpacked = reader.Read<ulong?>();
 
             Assert.That(unpacked, Is.EqualTo(value));
+        }
+
+        public void SByteLength()
+        {
+            writer.WriteSByte(14);
+            Assert.That(writer.BitPosition, Is.EqualTo(8));
+        }
+        public void Int16Length()
+        {
+            writer.WriteInt16(50);
+            Assert.That(writer.BitPosition, Is.EqualTo(16));
+        }
+        public void Int32Length()
+        {
+            writer.WriteInt32(20);
+            Assert.That(writer.BitPosition, Is.EqualTo(32));
+        }
+        public void Int64Length()
+        {
+            writer.WriteInt64(21);
+            Assert.That(writer.BitPosition, Is.EqualTo(64));
+        }
+
+
+        public void ByteLength()
+        {
+            writer.WriteByte(20);
+            Assert.That(writer.BitPosition, Is.EqualTo(8));
+        }
+        public void UInt16Length()
+        {
+            writer.WriteUInt16(263);
+            Assert.That(writer.BitPosition, Is.EqualTo(16));
+        }
+        public void UInt32Length()
+        {
+            writer.WriteUInt32(65);
+            Assert.That(writer.BitPosition, Is.EqualTo(32));
+        }
+        public void UInt64Length()
+        {
+            writer.WriteUInt64(22);
+            Assert.That(writer.BitPosition, Is.EqualTo(64));
         }
     }
 }
