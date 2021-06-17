@@ -94,6 +94,9 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             UnityEngine.Object.DestroyImmediate(serverTester.gameObject);
             UnityEngine.Object.DestroyImmediate(clientTester.gameObject);
+
+            ownerWriter.Reset();
+            observersWriter.Reset();
             reader.Dispose();
         }
         [Test]

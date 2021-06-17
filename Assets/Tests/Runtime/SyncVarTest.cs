@@ -28,6 +28,8 @@ namespace Mirage.Tests.Runtime.Serialization
         [TearDown]
         public void TearDown()
         {
+            ownerWriter.Reset();
+            observersWriter.Reset();
             reader.Dispose();
         }
 

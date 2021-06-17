@@ -45,6 +45,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [TearDown]
         public void TearDown()
         {
+            writer.Reset();
             reader.Dispose();
         }
 

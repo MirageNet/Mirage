@@ -12,12 +12,6 @@ namespace Mirage.Tests.Runtime.Serialization
         private NetworkWriter writer = new NetworkWriter(1300);
         private NetworkReader reader = new NetworkReader();
 
-        [SetUp]
-        public void Setup()
-        {
-            Console.WriteLine(TestContext.CurrentContext.Test.Name);
-        }
-
         [TearDown]
         public void TearDown()
         {

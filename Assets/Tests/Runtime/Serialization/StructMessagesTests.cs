@@ -17,6 +17,7 @@ namespace Mirage.Tests.Runtime.Serialization.StructMessages
         [TearDown]
         public void TearDown()
         {
+            writer.Reset();
             reader.Dispose();
         }
 

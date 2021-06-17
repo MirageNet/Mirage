@@ -10,15 +10,10 @@ namespace Mirage
         NetworkWriter writer = new NetworkWriter(1300);
         NetworkReader reader = new NetworkReader();
 
-        [SetUp]
-        public void Setup()
-        {
-            writer.Reset();
-        }
-
         [TearDown]
         public void TearDown()
         {
+            writer.Reset();
             reader.Dispose();
         }
 
