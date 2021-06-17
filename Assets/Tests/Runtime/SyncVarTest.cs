@@ -134,9 +134,6 @@ namespace Mirage.Tests.Runtime.Serialization
             player1.guild = myGuild;
 
             // serialize all the data as we would for the network
-            ownerWriter.Reset();
-            // not really used in this Test
-            observersWriter.Reset();
             identity1.OnSerializeAll(true, ownerWriter, observersWriter);
 
             // set up a "client" object

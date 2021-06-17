@@ -156,7 +156,7 @@ namespace Mirage.Serialization
         private void PadToByte()
         {
             // todo do we need to clear skipped bits?
-            bitPosition += bitPosition & 0b111;
+            bitPosition = BytePosition << 3;
         }
 
 

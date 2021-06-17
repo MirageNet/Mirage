@@ -123,8 +123,7 @@ namespace Mirage.Serialization
 
         private void PadToByte()
         {
-            // todo do we need to clear skipped bits?
-            bitPosition += bitPosition & 0b111;
+            bitPosition = ByteLength << 3;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -382,7 +381,7 @@ namespace Mirage.Serialization
 
         public void CopyFromWriter(NetworkWriter other, int otherBitPosition, int bitLength)
         {
-            int newBit = bitPosition + 64 * bitLength;
+            int newBit = bitPosition + bitLength;
             CheckNewLength(newBit);
 
 
