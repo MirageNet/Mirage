@@ -3,23 +3,23 @@ using NUnit.Framework;
 namespace Mirage
 {
     [TestFixture]
-    public class InvalidMessageExceptionTest
+    public class DeserializeFailedExceptionTest
     {
         [Test]
         public void InvalidMessageTest()
         {
-            Assert.Throws<InvalidMessageException>(() =>
+            Assert.Throws<DeserializeFailedException>(() =>
             {
-                throw new InvalidMessageException();
+                throw new DeserializeFailedException();
             });
         }
 
         [Test]
         public void InvalidMessageWithTextTest()
         {
-            InvalidMessageException ex = Assert.Throws<InvalidMessageException>(() =>
+            DeserializeFailedException ex = Assert.Throws<DeserializeFailedException>(() =>
             {
-                throw new InvalidMessageException("Test Message");
+                throw new DeserializeFailedException("Test Message");
             });
 
             Assert.That(ex.Message, Is.EqualTo("Test Message"));
@@ -28,9 +28,9 @@ namespace Mirage
         [Test]
         public void InvalidMessageWithTextAndInnerTest()
         {
-            InvalidMessageException ex = Assert.Throws<InvalidMessageException>(() =>
+            DeserializeFailedException ex = Assert.Throws<DeserializeFailedException>(() =>
             {
-                throw new InvalidMessageException("Test Message Too", new System.Exception());
+                throw new DeserializeFailedException("Test Message Too", new System.Exception());
             });
 
             Assert.That(ex.Message, Is.EqualTo("Test Message Too"));

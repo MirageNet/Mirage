@@ -557,7 +557,7 @@ namespace Mirage
 
             // deserialize all
             var reader = new NetworkReader(ownerWriter.ToArray());
-            Assert.Throws<InvalidMessageException>(() =>
+            Assert.Throws<DeserializeFailedException>(() =>
             {
                 identity.OnDeserializeAll(reader, true);
             });

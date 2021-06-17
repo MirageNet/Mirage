@@ -875,7 +875,7 @@ namespace Mirage
             byte barrierData = reader.ReadByte();
             if (barrierData != Barrier)
             {
-                throw new InvalidMessageException($"OnDeserialize failed for: object={name} component={comp.GetType()} sceneId={sceneId}. Possible Reasons:\n" +
+                throw new DeserializeFailedException($"Deserialize not aligned for object={name} netId={NetId} component={comp.GetType()} sceneId={sceneId}. Possible Reasons:\n" +
                     $"  * Do {comp.GetType()}'s OnSerialize and OnDeserialize calls write the same amount of data? \n" +
                     $"  * Are the server and client the exact same project?\n" +
                     $"  * Maybe this OnDeserialize call was meant for another GameObject? The sceneIds can easily get out of sync if the Hierarchy was modified only in the client OR the server. Try rebuilding both.\n\n");
