@@ -844,7 +844,6 @@ namespace Mirage
                     //    OnSerialize again
                     if (comp.syncMode == SyncMode.Observers)
                     {
-                        var segment = ownerWriter.ToArraySegment();
                         int bitLength = ownerWriter.BitPosition - startBitPosition;
                         observersWriter.CopyFromWriter(ownerWriter, startBitPosition, bitLength);
                         observersWritten++;
