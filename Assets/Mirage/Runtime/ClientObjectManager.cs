@@ -341,7 +341,7 @@ namespace Mirage
             {
                 using (PooledNetworkReader payloadReader = NetworkReaderPool.GetReader(msg.payload))
                 {
-                    identity.OnDeserializeAllSafely(payloadReader, true);
+                    identity.OnDeserializeAll(payloadReader, true);
                 }
             }
 
