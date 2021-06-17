@@ -46,7 +46,7 @@ namespace Mirage
             if (objectLocator.TryGetIdentity(msg.netId, out NetworkIdentity localObject))
             {
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
-                    localObject.OnDeserializeAllSafely(networkReader, false);
+                    localObject.OnDeserializeAll(networkReader, false);
             }
             else
             {

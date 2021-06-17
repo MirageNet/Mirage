@@ -125,7 +125,7 @@ namespace Mirage.Tests.Runtime.Serialization
             var ownerWriter = new NetworkWriter();
             // not really used in this Test
             var observersWriter = new NetworkWriter();
-            identity1.OnSerializeAllSafely(true, ownerWriter, observersWriter);
+            identity1.OnSerializeAll(true, ownerWriter, observersWriter);
 
             // set up a "client" object
             var gameObject2 = new GameObject();
@@ -134,7 +134,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             // apply all the data from the server object
             var reader = new NetworkReader(ownerWriter.ToArray());
-            identity2.OnDeserializeAllSafely(reader, true);
+            identity2.OnDeserializeAll(reader, true);
 
             // check that the syncvars got updated
             Assert.That(player2.guild.name, Is.EqualTo("Back street boys"), "Data should be synchronized");

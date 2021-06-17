@@ -79,11 +79,11 @@ namespace Mirage.Tests.Runtime.Serialization
             // not really used in this Test
             var observersWriter = new NetworkWriter();
 
-            netIdServer.OnSerializeAllSafely(true, ownerWriter, observersWriter);
+            netIdServer.OnSerializeAll(true, ownerWriter, observersWriter);
 
             // apply all the data from the server object
             var reader = new NetworkReader(ownerWriter.ToArray());
-            netIdClient.OnDeserializeAllSafely(reader, true);
+            netIdClient.OnDeserializeAll(reader, true);
         }
 
         [TearDown]

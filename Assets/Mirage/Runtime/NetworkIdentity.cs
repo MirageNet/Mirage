@@ -784,7 +784,7 @@ namespace Mirage
         ///     </description></item>
         /// </list>
         /// </remarks>
-        void OnSerializeSafely(NetworkBehaviour comp, NetworkWriter writer, bool initialState)
+        void OnSerialize(NetworkBehaviour comp, NetworkWriter writer, bool initialState)
         {
             comp.OnSerialize(writer, initialState);
             if (logger.LogEnabled()) logger.Log("OnSerializeSafely written for object=" + comp.name + " component=" + comp.GetType() + " sceneId=" + sceneId);
@@ -801,7 +801,7 @@ namespace Mirage
         /// <param name="initialState"></param>
         /// <param name="ownerWriter"></param>
         /// <param name="observersWriter"></param>
-        internal (int ownerWritten, int observersWritten) OnSerializeAllSafely(bool initialState, NetworkWriter ownerWriter, NetworkWriter observersWriter)
+        internal (int ownerWritten, int observersWritten) OnSerializeAll(bool initialState, NetworkWriter ownerWriter, NetworkWriter observersWriter)
         {
             int ownerWritten = 0;
             int observersWritten = 0;
@@ -830,7 +830,7 @@ namespace Mirage
 
                     // serialize into ownerWriter first
                     // (owner always gets everything!)
-                    OnSerializeSafely(comp, ownerWriter, initialState);
+                    OnSerialize(comp, ownerWriter, initialState);
                     ++ownerWritten;
 
                     // copy into observersWriter too if SyncMode.Observers
@@ -867,23 +867,22 @@ namespace Mirage
             return false;
         }
 
-        void OnDeserializeSafely(NetworkBehaviour comp, NetworkReader reader, bool initialState)
+        void OnDeserialize(NetworkBehaviour comp, NetworkReader reader, bool initialState)
         {
-            // call OnDeserialize with a temporary reader, so that the
-            // original one can't be messed with. we also wrap it in a
-            // try-catch block so there's no way to mess up another
-            // component's deserialization
-
             comp.OnDeserialize(reader, initialState);
 
+            // check if Barrier is at end of Deserialize, if it is then the Deserialize was likely a success
             byte barrierData = reader.ReadByte();
             if (barrierData != Barrier)
             {
-                throw new InvalidMessageException("OnDeserialize failed for: object=" + name + " component=" + comp.GetType() + " sceneId=" + sceneId + ". Possible Reasons:\n  * Do " + comp.GetType() + "'s OnSerialize and OnDeserialize calls write the same amount of data? \n  * Was there an exception in " + comp.GetType() + "'s OnSerialize/OnDeserialize code?\n  * Are the server and client the exact same project?\n  * Maybe this OnDeserialize call was meant for another GameObject? The sceneIds can easily get out of sync if the Hierarchy was modified only in the client OR the server. Try rebuilding both.\n\n");
+                throw new InvalidMessageException($"OnDeserialize failed for: object={name} component={comp.GetType()} sceneId={sceneId}. Possible Reasons:\n" +
+                    $"  * Do {comp.GetType()}'s OnSerialize and OnDeserialize calls write the same amount of data? \n" +
+                    $"  * Are the server and client the exact same project?\n" +
+                    $"  * Maybe this OnDeserialize call was meant for another GameObject? The sceneIds can easily get out of sync if the Hierarchy was modified only in the client OR the server. Try rebuilding both.\n\n");
             }
         }
 
-        internal void OnDeserializeAllSafely(NetworkReader reader, bool initialState)
+        internal void OnDeserializeAll(NetworkReader reader, bool initialState)
         {
             // needed so that we can deserialize gameobjects and NI
             reader.ObjectLocator = Client != null ? Client.World : null;
@@ -896,7 +895,7 @@ namespace Mirage
                 if (index < components.Length)
                 {
                     // deserialize this component
-                    OnDeserializeSafely(components[index], reader, initialState);
+                    OnDeserialize(components[index], reader, initialState);
                 }
             }
 
@@ -1230,7 +1229,7 @@ namespace Mirage
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
             {
                 // serialize all the dirty components and send
-                (int ownerWritten, int observersWritten) = OnSerializeAllSafely(false, ownerWriter, observersWriter);
+                (int ownerWritten, int observersWritten) = OnSerializeAll(false, ownerWriter, observersWriter);
                 if (ownerWritten > 0 || observersWritten > 0)
                 {
                     var varsMessage = new UpdateVarsMessage

@@ -508,7 +508,7 @@ namespace Mirage
             // serialize should propagate exceptions
             Assert.Throws<Exception>(() =>
             {
-                identity.OnSerializeAllSafely(true, ownerWriter, observersWriter);
+                identity.OnSerializeAll(true, ownerWriter, observersWriter);
             });
         }
 
@@ -549,7 +549,7 @@ namespace Mirage
             // serialize
             var ownerWriter = new NetworkWriter();
             var observersWriter = new NetworkWriter();
-            identity.OnSerializeAllSafely(true, ownerWriter, observersWriter);
+            identity.OnSerializeAll(true, ownerWriter, observersWriter);
 
             // reset component values
             comp1.value = 0;
@@ -559,7 +559,7 @@ namespace Mirage
             var reader = new NetworkReader(ownerWriter.ToArray());
             Assert.Throws<InvalidMessageException>(() =>
             {
-                identity.OnDeserializeAllSafely(reader, true);
+                identity.OnDeserializeAll(reader, true);
             });
         }
 
