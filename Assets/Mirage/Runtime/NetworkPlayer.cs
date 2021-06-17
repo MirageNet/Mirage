@@ -299,9 +299,9 @@ namespace Mirage
                 {
                     logger.Log(ex.ToString());
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    logger.LogError("Closed connection: " + this + ". Invalid message " + ex);
+                    logger.LogError($"{e.GetType()} in Message handler (see stack below), Closed connection: {this}\n{e}");
                     Connection?.Disconnect();
                 }
             }
