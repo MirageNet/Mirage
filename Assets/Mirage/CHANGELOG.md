@@ -1,3 +1,11 @@
+## [96.3.1](https://github.com/MirageNet/Mirage/compare/v96.3.0...v96.3.1) (2021-06-17)
+
+
+### Bug Fixes
+
+* improving error for failed deserialize ([2e1601b](https://github.com/MirageNet/Mirage/commit/2e1601bfccb94f734f80bb6bca3e483cf451436b))
+* improving error for message handler ([7ab73b6](https://github.com/MirageNet/Mirage/commit/7ab73b66e167c06edc2d94290f815b74549fc3de))
+
 # [96.3.0](https://github.com/MirageNet/Mirage/compare/v96.2.1...v96.3.0) (2021-06-04)
 
 
