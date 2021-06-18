@@ -72,13 +72,13 @@ namespace Mirage.Serialization
         }
         ~NetworkWriter()
         {
-            FreeHandle();
+            freeHandle();
         }
         /// <summary>
         /// Frees the handle for the buffer
         /// <para>In order for <see cref="PooledNetworkWriter"/> to work This class can not have <see cref="IDisposable"/>. Instead we call this method from Finalze</para>
         /// </summary>
-        void FreeHandle()
+        void freeHandle()
         {
             if (disposed) return;
 
@@ -111,7 +111,7 @@ namespace Mirage.Serialization
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void CheckNewLength(int newLength)
+        void checkNewLength(int newLength)
         {
             if (newLength > bitCapacity)
             {
@@ -119,7 +119,7 @@ namespace Mirage.Serialization
             }
         }
 
-        private void PadToByte()
+        private void padToByte()
         {
             bitPosition = ByteLength << 3;
         }
@@ -136,11 +136,11 @@ namespace Mirage.Serialization
         public void WriteBoolean(ulong value)
         {
             int newPosition = bitPosition + 1;
-            CheckNewLength(newPosition);
+            checkNewLength(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
 
-            ulong* ptr = (longPtr + (bitPosition >> 6));
+            ulong* ptr = longPtr + (bitPosition >> 6);
             *ptr = (
                 *ptr & (
                     // start with 0000_0001
@@ -154,100 +154,75 @@ namespace Mirage.Serialization
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteSByte(sbyte value)
-        {
-            WriteByte((byte)value);
-        }
+        public void WriteSByte(sbyte value) => WriteByte((byte)value);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteByte(byte value)
-        {
-            WriterUnmasked(value, 8);
-        }
+        public void WriteByte(byte value) => writerUnmasked(value, 8);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteInt16(short value)
-        {
-            WriteUInt16((ushort)value);
-        }
+        public void WriteInt16(short value) => WriteUInt16((ushort)value);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteUInt16(ushort value)
-        {
-            WriterUnmasked(value, 16);
-        }
+        public void WriteUInt16(ushort value) => writerUnmasked(value, 16);
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteInt32(int value)
-        {
-            WriteUInt32((uint)value);
-        }
+        public void WriteInt32(int value) => WriteUInt32((uint)value);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteUInt32(uint value)
-        {
-            WriterUnmasked(value, 32);
-        }
+        public void WriteUInt32(uint value) => writerUnmasked(value, 32);
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteInt64(long value)
-        {
-            WriteUInt64((ulong)value);
-        }
+        public void WriteInt64(long value) => WriteUInt64((ulong)value);
         public void WriteUInt64(ulong value)
         {
             int newPosition = bitPosition + 64;
-            CheckNewLength(newPosition);
+            checkNewLength(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
 
             if (bitsInLong == 0)
             {
-                ulong* ptr1 = (longPtr + (bitPosition >> 6));
+                ulong* ptr1 = longPtr + (bitPosition >> 6);
                 *ptr1 = value;
             }
             else
             {
                 int bitsLeft = 64 - bitsInLong;
 
-                ulong* ptr1 = (longPtr + (bitPosition >> 6));
-                ulong* ptr2 = (ptr1 + 1);
+                ulong* ptr1 = longPtr + (bitPosition >> 6);
+                ulong* ptr2 = ptr1 + 1;
 
-                *ptr1 = ((*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong));
-                *ptr2 = ((*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft));
+                *ptr1 = (*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong);
+                *ptr2 = (*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft);
 
             }
             bitPosition = newPosition;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteSingle(float value)
-        {
-            WriteUInt32(*(uint*)&value);
-        }
+        public void WriteSingle(float value) => WriteUInt32(*(uint*)&value);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteDouble(double value)
-        {
-            WriteUInt64(*(ulong*)&value);
-        }
+        public void WriteDouble(double value) => WriteUInt64(*(ulong*)&value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(ulong value, int bits)
         {
             // mask so we dont overwrite
-            WriterUnmasked(value & (ulong.MaxValue >> (64 - bits)), bits);
+            writerUnmasked(value & (ulong.MaxValue >> (64 - bits)), bits);
         }
-        private void WriterUnmasked(ulong value, int bits)
+        private void writerUnmasked(ulong value, int bits)
         {
             int newPosition = bitPosition + bits;
-            CheckNewLength(newPosition);
+            checkNewLength(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
             int bitsLeft = 64 - bitsInLong;
 
             if (bitsLeft >= bits)
             {
-                ulong* ptr = (longPtr + (bitPosition >> 6));
+                ulong* ptr = longPtr + (bitPosition >> 6);
 
-                // benchmark and optimize this new mask
+                // todo benchmark and optimize this new mask
                 ulong mask1 = bitsInLong == 0 ? 0ul : (ulong.MaxValue >> bitsLeft);
                 ulong mask2 = (newPosition & 0b11_1111) == 0 ? 0ul : (ulong.MaxValue << newPosition /*we can use full position here as c# will mask it to just 6 bits*/);
                 ulong mask = mask1 | mask2;
@@ -259,11 +234,11 @@ namespace Mirage.Serialization
             }
             else
             {
-                ulong* ptr1 = (longPtr + (bitPosition >> 6));
-                ulong* ptr2 = (ptr1 + 1);
+                ulong* ptr1 = longPtr + (bitPosition >> 6);
+                ulong* ptr2 = ptr1 + 1;
 
-                *ptr1 = ((*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong));
-                *ptr2 = ((*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft));
+                *ptr1 = (*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong);
+                *ptr2 = (*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft);
             }
             bitPosition = newPosition;
         }
@@ -277,16 +252,16 @@ namespace Mirage.Serialization
             // careful with this method, dont set bitPosition
 
             int newPosition = bitPosition + bits;
-            CheckNewLength(newPosition);
+            checkNewLength(newPosition);
 
             // mask so we dont overwrite
-            value = value & (ulong.MaxValue >> (64 - bits));
+            value &= ulong.MaxValue >> (64 - bits);
 
             int bitsInLong = bitPosition & 0b11_1111;
             int bitsLeft = 64 - bitsInLong;
             if (bitsLeft >= bits)
             {
-                ulong* ptr = (longPtr + (bitPosition >> 6));
+                ulong* ptr = longPtr + (bitPosition >> 6);
                 *ptr = (
                     *ptr & (
                         (ulong.MaxValue >> bitsLeft) | (ulong.MaxValue << (newPosition /*we can use full position here as c# will mask it to just 6 bits*/))
@@ -295,11 +270,11 @@ namespace Mirage.Serialization
             }
             else
             {
-                ulong* ptr1 = (longPtr + (bitPosition >> 6));
-                ulong* ptr2 = (ptr1 + 1);
+                ulong* ptr1 = longPtr + (bitPosition >> 6);
+                ulong* ptr2 = ptr1 + 1;
 
-                *ptr1 = ((*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong));
-                *ptr2 = ((*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft));
+                *ptr1 = (*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong);
+                *ptr2 = (*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft);
             }
         }
 
@@ -312,8 +287,8 @@ namespace Mirage.Serialization
         {
             if (count == 0) { return; }
 
-            int newBit = bitPosition + 64 * count;
-            CheckNewLength(newBit);
+            int newBit = bitPosition + (64 * count);
+            checkNewLength(newBit);
 
             ulong* startPtr = longPtr + (bitPosition >> 6);
 
@@ -321,7 +296,7 @@ namespace Mirage.Serialization
             int bitsLeft = 64 - bitsInLong;
 
             // write first part to end of current ulong
-            *startPtr = ((*startPtr & (ulong.MaxValue >> bitsLeft)) | (*(valuePtr) << bitsInLong));
+            *startPtr = (*startPtr & (ulong.MaxValue >> bitsLeft)) | (*valuePtr << bitsInLong);
 
             // write middle parts to single ulong
             for (int i = 1; i < count; i++)
@@ -330,7 +305,7 @@ namespace Mirage.Serialization
             }
 
             // write end part to start of next ulong
-            *(startPtr + count) = ((*(startPtr + count) & (ulong.MaxValue << bitPosition)) | (*(valuePtr + count - 1) >> bitsLeft));
+            *(startPtr + count) = (*(startPtr + count) & (ulong.MaxValue << bitPosition)) | (*(valuePtr + count - 1) >> bitsLeft);
 
             bitPosition = newBit;
         }
@@ -346,9 +321,9 @@ namespace Mirage.Serialization
         /// <param name="byteSize">size of stuct, in bytes</param>
         public void PadAndCopy<T>(ref T value, int byteSize) where T : struct
         {
-            PadToByte();
-            int newPosition = bitPosition + 8 * byteSize;
-            CheckNewLength(newPosition);
+            padToByte();
+            int newPosition = bitPosition + (8 * byteSize);
+            checkNewLength(newPosition);
 
             byte* startPtr = ((byte*)longPtr) + (bitPosition >> 3);
 
@@ -366,9 +341,9 @@ namespace Mirage.Serialization
         /// <param name="length"></param>
         public void WriteBytes(byte[] array, int offset, int length)
         {
-            PadToByte();
-            int newPosition = bitPosition + 8 * length;
-            CheckNewLength(newPosition);
+            padToByte();
+            int newPosition = bitPosition + (8 * length);
+            checkNewLength(newPosition);
 
             // todo benchmark this vs Marshal.Copy or for loop
             Buffer.BlockCopy(array, offset, managedBuffer, ByteLength, length);
@@ -376,11 +351,10 @@ namespace Mirage.Serialization
         }
 
 
-
         public void CopyFromWriter(NetworkWriter other, int otherBitPosition, int bitLength)
         {
             int newBit = bitPosition + bitLength;
-            CheckNewLength(newBit);
+            checkNewLength(newBit);
 
             // we copy in 3 steps,
             // first them bits from other, so that other is aligned with ulong
@@ -413,7 +387,7 @@ namespace Mirage.Serialization
         private int writeFirstFromWriter(NetworkWriter other, int otherBitPosition, int bitLength)
         {
             // how many bits to copy from the first ulong in other
-            int otherOffset = (otherBitPosition & 0b11_1111);
+            int otherOffset = otherBitPosition & 0b11_1111;
             int bitsToCopy = Math.Min(64 - otherOffset, bitLength);
 
             // start ulong

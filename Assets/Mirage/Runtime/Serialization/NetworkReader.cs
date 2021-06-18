@@ -140,12 +140,12 @@ namespace Mirage.Serialization
         /// <returns></returns>
         public bool CanReadBytes(int byteLength)
         {
-            return (bitPosition + byteLength * 8) <= bitLength;
+            return (bitPosition + (byteLength * 8)) <= bitLength;
 
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void CheckNewLength(int newPosition)
+        void checkNewLength(int newPosition)
         {
             if (newPosition > bitLength)
             {
@@ -153,7 +153,7 @@ namespace Mirage.Serialization
             }
         }
 
-        private void PadToByte()
+        private void padToByte()
         {
             // todo do we need to clear skipped bits?
             bitPosition = BytePosition << 3;
@@ -165,6 +165,7 @@ namespace Mirage.Serialization
         {
             return ReadBooleanAsUlong() == 1UL;
         }
+
         /// <summary>
         /// Writes first bit of <paramref name="value"/> to buffer
         /// </summary>
@@ -172,7 +173,7 @@ namespace Mirage.Serialization
         public ulong ReadBooleanAsUlong()
         {
             int newPosition = bitPosition + 1;
-            CheckNewLength(newPosition);
+            checkNewLength(newPosition);
 
             ulong* ptr = (longPtr + (bitPosition >> 6));
             ulong result = ((*ptr) >> bitPosition) & 0b1;
@@ -183,47 +184,29 @@ namespace Mirage.Serialization
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public sbyte ReadSByte()
-        {
-            return (sbyte)ReadByte();
-        }
+        public sbyte ReadSByte() => (sbyte)ReadByte();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public byte ReadByte()
-        {
-            return (byte)ReadUnmasked(8);
-        }
+        public byte ReadByte() => (byte)readUnmasked(8);
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public short ReadInt16()
-        {
-            return (short)ReadUInt16();
-        }
+        public short ReadInt16() => (short)ReadUInt16();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ushort ReadUInt16()
-        {
-            return (ushort)ReadUnmasked(16);
-        }
+        public ushort ReadUInt16() => (ushort)readUnmasked(16);
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int ReadInt32()
-        {
-            return (int)ReadUInt32();
-        }
+        public int ReadInt32() => (int)ReadUInt32();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint ReadUInt32()
-        {
-            return (uint)ReadUnmasked(32);
-        }
+        public uint ReadUInt32() => (uint)readUnmasked(32);
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public long ReadInt64()
-        {
-            return (long)ReadUInt64();
-        }
+        public long ReadInt64() => (long)ReadUInt64();
         public ulong ReadUInt64()
         {
             int newPosition = bitPosition + 64;
-            CheckNewLength(newPosition);
+            checkNewLength(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
             ulong result;
@@ -275,13 +258,13 @@ namespace Mirage.Serialization
         public ulong Read(int bits)
         {
             // mask so we dont returns extra bits
-            return ReadUnmasked(bits) & (ulong.MaxValue >> (64 - bits));
+            return readUnmasked(bits) & (ulong.MaxValue >> (64 - bits));
         }
 
-        private ulong ReadUnmasked(int bits)
+        private ulong readUnmasked(int bits)
         {
             int newPosition = bitPosition + bits;
-            CheckNewLength(newPosition);
+            checkNewLength(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
             int bitsLeft = 64 - bitsInLong;
@@ -289,13 +272,13 @@ namespace Mirage.Serialization
             ulong result;
             if (bitsLeft >= bits)
             {
-                ulong* ptr = (longPtr + (bitPosition >> 6));
+                ulong* ptr = longPtr + (bitPosition >> 6);
                 result = (*ptr) >> bitPosition;
             }
             else
             {
-                ulong* ptr1 = (longPtr + (bitPosition >> 6));
-                ulong* ptr2 = (ptr1 + 1);
+                ulong* ptr1 = longPtr + (bitPosition >> 6);
+                ulong* ptr2 = ptr1 + 1;
 
                 // eg use byte, read 6  =>bitPosition=5, bitsLeft=3, newPos=1
                 // r1 = aaab_bbbb => 0000_0aaa
@@ -330,9 +313,9 @@ namespace Mirage.Serialization
         /// <param name="byteSize"></param>
         public void PadAndCopy<T>(int byteSize, out T value) where T : struct
         {
-            PadToByte();
-            int newPosition = bitPosition + 64 * byteSize;
-            CheckNewLength(newPosition);
+            padToByte();
+            int newPosition = bitPosition + (64 * byteSize);
+            checkNewLength(newPosition);
 
             byte* startPtr = ((byte*)longPtr) + (bitPosition >> 3);
 
@@ -350,9 +333,9 @@ namespace Mirage.Serialization
         /// <param name="length"></param>
         public void ReadBytes(byte[] array, int offset, int length)
         {
-            PadToByte();
-            int newPosition = bitPosition + 8 * length;
-            CheckNewLength(newPosition);
+            padToByte();
+            int newPosition = bitPosition + (8 * length);
+            checkNewLength(newPosition);
 
             // todo benchmark this vs Marshal.Copy or for loop
             Buffer.BlockCopy(managedBuffer, BytePosition, array, offset, length);
@@ -361,9 +344,9 @@ namespace Mirage.Serialization
 
         public ArraySegment<byte> ReadBytesSegment(int count)
         {
-            PadToByte();
-            int newPosition = bitPosition + 8 * count;
-            CheckNewLength(newPosition);
+            padToByte();
+            int newPosition = bitPosition + (8 * count);
+            checkNewLength(newPosition);
 
             var result = new ArraySegment<byte>(managedBuffer, BytePosition, count);
             bitPosition = newPosition;
