@@ -92,6 +92,73 @@ namespace Mirage.Tests.Runtime.Serialization
         }
     }
 
+    public class BitPackingCopyTests
+    {
+        private NetworkWriter writer;
+        private NetworkWriter otherWriter;
+        private NetworkReader reader;
+
+        [SetUp]
+        public void Setup()
+        {
+            writer = new NetworkWriter(1300);
+            otherWriter = new NetworkWriter(1300);
+            reader = new NetworkReader();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            writer.Reset();
+            reader.Dispose();
+        }
+
+        [Test]
+        public void CopyFromOtherWriterAligned()
+        {
+            otherWriter.Write(1, 8);
+            otherWriter.Write(2, 8);
+            otherWriter.Write(3, 8);
+            otherWriter.Write(4, 8);
+            otherWriter.Write(5, 8);
+
+
+            writer.CopyFromWriter(otherWriter, 0, 5 * 8);
+
+            var segment = writer.ToArraySegment();
+            reader.Reset(segment);
+
+            Assert.That(reader.Read(8), Is.EqualTo(1));
+            Assert.That(reader.Read(8), Is.EqualTo(2));
+            Assert.That(reader.Read(8), Is.EqualTo(3));
+            Assert.That(reader.Read(8), Is.EqualTo(4));
+            Assert.That(reader.Read(8), Is.EqualTo(5));
+        }
+
+        [Test]
+        public void CopyFromOtherWriterUnAligned()
+        {
+            otherWriter.Write(1, 6);
+            otherWriter.Write(2, 7);
+            otherWriter.Write(3, 8);
+            otherWriter.Write(4, 9);
+            otherWriter.Write(5, 10);
+
+            writer.Write(1, 3);
+
+            writer.CopyFromWriter(otherWriter, 0, 40);
+
+            var segment = writer.ToArraySegment();
+            reader.Reset(segment);
+
+            Assert.That(reader.Read(3), Is.EqualTo(1));
+            Assert.That(reader.Read(6), Is.EqualTo(1));
+            Assert.That(reader.Read(7), Is.EqualTo(2));
+            Assert.That(reader.Read(8), Is.EqualTo(3));
+            Assert.That(reader.Read(9), Is.EqualTo(4));
+            Assert.That(reader.Read(10), Is.EqualTo(5));
+        }
+    }
     public class BitPackingTests
     {
         private NetworkWriter writer;

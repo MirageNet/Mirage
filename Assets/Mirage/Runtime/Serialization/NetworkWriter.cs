@@ -30,8 +30,6 @@ using UnityEngine;
 
 namespace Mirage.Serialization
 {
-
-
     /// <summary>
     /// Binary stream Writer. Supports simple types, buffers, arrays, structs, and nested types
     /// <para>Use <see cref="NetworkWriterPool.GetWriter">NetworkWriter.GetWriter</see> to reduce memory allocation</para>
@@ -384,28 +382,46 @@ namespace Mirage.Serialization
             int newBit = bitPosition + bitLength;
             CheckNewLength(newBit);
 
+            // we copy in 3 steps,
+            // first them bits from other, so that other is aligned with ulong
+            // then we copy middle as ulong to this
+            // then we write last ulong from other
 
-            int bitsToCopyFromOtherLong = Math.Min(64 - (otherBitPosition & 0b11_1111), bitLength);
-            int otherLongPosition = otherBitPosition >> 6;
-            ulong first = other.longPtr[otherLongPosition];
-            Write(first >> (64 - bitsToCopyFromOtherLong), bitsToCopyFromOtherLong);
+            /* write first */
+            int written = writeFirstFromWriter(other, otherBitPosition, bitLength);
+
             // written all bits
-            if (bitsToCopyFromOtherLong == bitLength) { return; }
+            if (written == bitLength) { return; }
 
-
-            bitLength -= bitsToCopyFromOtherLong;
-            otherBitPosition += bitsToCopyFromOtherLong;
-            otherLongPosition++;
+            /* write middle */
+            bitLength -= written;
+            otherBitPosition += written;
+            int otherLongPosition = otherBitPosition >> 6;
             // other should now be aligned to ulong;
 
             int ulongCount = bitLength >> 6;
-            UnsafeCopy(other.longPtr + otherBitPosition, ulongCount);
+            UnsafeCopy(other.longPtr + otherLongPosition, ulongCount);
 
+            /* write last */
             int leftOver = bitLength - (ulongCount * 64);
-            ulong last = other.longPtr[otherBitPosition + ulongCount];
+            ulong last = other.longPtr[otherLongPosition + ulongCount];
             Write(last, leftOver);
 
             bitPosition = newBit;
+        }
+
+        private int writeFirstFromWriter(NetworkWriter other, int otherBitPosition, int bitLength)
+        {
+            // how many bits to copy from the first ulong in other
+            int otherOffset = (otherBitPosition & 0b11_1111);
+            int bitsToCopy = Math.Min(64 - otherOffset, bitLength);
+
+            // start ulong
+            int otherLongPosition = otherBitPosition >> 6;
+            ulong first = other.longPtr[otherLongPosition];
+
+            Write(first >> otherOffset, bitsToCopy);
+            return bitsToCopy;
         }
     }
 }
