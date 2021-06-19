@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Mirage.Logging;
+using Newtonsoft.Json;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Object = System.Object;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 /**
@@ -62,6 +64,7 @@ namespace Mirage
         //editorprefs keys
         private static string firstStartUpKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
+        private const string packageName = "com.miragenet.mirage";
 
         /// <summary>
         ///     Hard coded for source code version. If package version is found, this will
@@ -108,7 +111,7 @@ namespace Mirage
             {
                 EditorPrefs.SetString(screenToOpenKey, ShowChangeLog ? "ChangeLog" : "Welcome");
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
                 OpenWindow();
 #else
                 if (logger.LogEnabled()) logger.Log($"WelcomeWindow not supported in {Application.unityVersion}, it is only supported in Unity 2020.1 or newer");
@@ -138,6 +141,8 @@ namespace Mirage
         //the code to handle display and button clicking
         private void OnEnable()
         {
+            CheckForPackageManager();
+
             //Load the UI
             //Each editor window contains a root VisualElement object
             VisualElement root = rootVisualElement;
@@ -204,6 +209,18 @@ namespace Mirage
             {
                 redirectButton.clicked += () => Application.OpenURL(url);
             }
+        }
+
+        private void CheckForPackageManager()
+        {
+            // we just check the manifest manually. It's JSON format, so it's easy to read.
+            string jsonText = File.ReadAllText("Packages/manifest.json");
+
+            var manifest = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonText);
+
+            var packages = JsonConvert.DeserializeObject<Dictionary<string, string>>(Convert.ToString(manifest["dependencies"]));
+
+            changeLogPath = packages.ContainsKey(packageName) ? "Packages/com.miragenet.mirage/CHANGELOG.md" : "Assets/Mirage/CHANGELOG.md";
         }
 
         //switch between content
@@ -427,12 +444,6 @@ namespace Mirage
                             if (miragePackage?.packageName == null)
                             {
                                 continue;
-                            }
-
-                            if (miragePackage.Value.packageName != null && miragePackage.Value.packageName.Equals("Mirage"))
-                            {
-                                // Found mirage package let's set up our change log path.
-                                changeLogPath = "Packages/com.miragenet.mirage/CHANGELOG.md";
                             }
 
                             installedPackages.Add(miragePackage.Value.displayName);
