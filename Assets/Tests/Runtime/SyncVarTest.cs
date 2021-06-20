@@ -21,9 +21,9 @@ namespace Mirage.Tests.Runtime.Serialization
 
     public class SyncVarTest
     {
-        NetworkWriter ownerWriter = new NetworkWriter(1300);
-        NetworkWriter observersWriter = new NetworkWriter(1300);
-        NetworkReader reader = new NetworkReader();
+        readonly NetworkWriter ownerWriter = new NetworkWriter(1300);
+        readonly NetworkWriter observersWriter = new NetworkWriter(1300);
+        readonly NetworkReader reader = new NetworkReader();
 
         [TearDown]
         public void TearDown()

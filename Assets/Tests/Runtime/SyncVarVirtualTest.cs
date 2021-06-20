@@ -53,9 +53,9 @@ namespace Mirage.Tests.Runtime.Serialization
         private SyncVarHookTester clientTester;
         private NetworkIdentity netIdClient;
 
-        NetworkWriter ownerWriter = new NetworkWriter(1300);
-        NetworkWriter observersWriter = new NetworkWriter(1300);
-        NetworkReader reader = new NetworkReader();
+        readonly NetworkWriter ownerWriter = new NetworkWriter(1300);
+        readonly NetworkWriter observersWriter = new NetworkWriter(1300);
+        readonly NetworkReader reader = new NetworkReader();
 
         [SetUp]
         public void Setup()

@@ -9,8 +9,8 @@ namespace Mirage.Tests.Runtime
 {
     public static class SerializeHelper
     {
-        static NetworkWriter writer = new NetworkWriter(1300);
-        static NetworkReader reader = new NetworkReader();
+        static readonly NetworkWriter writer = new NetworkWriter(1300);
+        static readonly NetworkReader reader = new NetworkReader();
 
         public static void SerializeAllTo<T>(T fromList, T toList) where T : ISyncObject
         {

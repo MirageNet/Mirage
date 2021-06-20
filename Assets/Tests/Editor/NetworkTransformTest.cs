@@ -7,8 +7,8 @@ namespace Mirage
     [TestFixture]
     public class NetworkTransformTest
     {
-        NetworkWriter writer = new NetworkWriter(1300);
-        NetworkReader reader = new NetworkReader();
+        readonly NetworkWriter writer = new NetworkWriter(1300);
+        readonly NetworkReader reader = new NetworkReader();
 
         [TearDown]
         public void TearDown()
