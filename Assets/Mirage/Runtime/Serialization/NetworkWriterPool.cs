@@ -7,23 +7,44 @@ namespace Mirage.Serialization
 {
     public static class NetworkWriterPool
     {
-        static readonly ILogger logger;
-        static readonly Pool<PooledNetworkWriter> pool;
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkWriterPool));
+        static Pool<PooledNetworkWriter> pool;
 
-        static NetworkWriterPool()
+        /// <summary>
+        /// Current Size of buffers, or null before Configure has been called
+        /// </summary>
+        public static int? BufferSize { get; private set; }
+
+        /// <summary>
+        /// Configures an exist pool or creates a new one
+        /// <para>Does not create a new pool if <paramref name="bufferSize"/> is less that current <see cref="BufferSize"/></para>
+        /// </summary>
+        /// <param name="bufferSize"></param>
+        /// <param name="startPoolSize"></param>
+        /// <param name="maxPoolSize"></param>
+        public static void Configure(int bufferSize, int startPoolSize = 5, int maxPoolSize = 100)
         {
-            logger = LogFactory.GetLogger(typeof(NetworkReaderPool));
-            // todo config
-            pool = new Pool<PooledNetworkWriter>(PooledNetworkWriter.CreateNew, 1300, 5, 100, logger);
+            // if new size is less, then just configure start/max
+            if (BufferSize.HasValue && bufferSize < BufferSize.Value)
+            {
+                pool.Configure(startPoolSize, maxPoolSize);
+            }
+            else
+            {
+                pool = new Pool<PooledNetworkWriter>(PooledNetworkWriter.CreateNew, bufferSize, startPoolSize, maxPoolSize, logger);
+                BufferSize = bufferSize;
+            }
         }
 
         public static PooledNetworkWriter GetWriter()
         {
+            if (pool == null) throw new InvalidOperationException("Configure must be called before ");
             PooledNetworkWriter writer = pool.Take();
             writer.Reset();
             return writer;
         }
     }
+
     /// <summary>
     /// NetworkWriter to be used with <see cref="NetworkWriterPool">NetworkWriterPool</see>
     /// </summary>

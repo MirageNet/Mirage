@@ -5,16 +5,24 @@ using UnityEngine;
 
 namespace Mirage.Serialization
 {
+    /// <summary>
+    /// Holds static reference to <see cref="Pool{T}"/> of <see cref="PooledNetworkReader"/>
+    /// </summary>
     public static class NetworkReaderPool
     {
-        static readonly ILogger logger;
-        static readonly Pool<PooledNetworkReader> pool;
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkReaderPool));
+        static Pool<PooledNetworkReader> pool = new Pool<PooledNetworkReader>(PooledNetworkReader.CreateNew, 0, 5, 100, logger);
 
-        static NetworkReaderPool()
+        public static void Configure(int startPoolSize = 5, int maxPoolSize = 100)
         {
-            logger = LogFactory.GetLogger(typeof(NetworkReaderPool));
-            // todo config
-            pool = new Pool<PooledNetworkReader>(PooledNetworkReader.CreateNew, 1300, 5, 100, logger);
+            if (pool != null)
+            {
+                pool.Configure(startPoolSize, maxPoolSize);
+            }
+            else
+            {
+                pool = new Pool<PooledNetworkReader>(PooledNetworkReader.CreateNew, 0, startPoolSize, maxPoolSize, logger);
+            }
         }
 
         public static PooledNetworkReader GetReader(ArraySegment<byte> packet)
@@ -36,6 +44,7 @@ namespace Mirage.Serialization
             return reader;
         }
     }
+
     /// <summary>
     /// NetworkReader to be used with <see cref="NetworkReaderPool">NetworkReaderPool</see>
     /// </summary>

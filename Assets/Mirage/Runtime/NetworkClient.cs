@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using Mirage.Events;
 using Mirage.Logging;
+using Mirage.Serialization;
 using Mirage.SocketLayer;
 using UnityEngine;
 
@@ -119,7 +120,11 @@ namespace Mirage
             var dataHandler = new DataHandler();
             Metrics = EnablePeerMetrics ? new Metrics() : null;
 
-            peer = new Peer(socket, dataHandler, PeerConfig, LogFactory.GetLogger<Peer>(), Metrics);
+            Config config = PeerConfig ?? new Config();
+
+            NetworkWriterPool.Configure(config.Mtu);
+
+            peer = new Peer(socket, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
             peer.OnConnected += Peer_OnConnected;
             peer.OnConnectionFailed += Peer_OnConnectionFailed;
             peer.OnDisconnected += Peer_OnDisconnected;

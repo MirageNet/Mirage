@@ -10,15 +10,38 @@ namespace Mirage.SocketLayer
     {
         const int PoolEmpty = -1;
 
+        int maxPoolSize;
         readonly int bufferSize;
-        readonly int maxPoolSize;
         readonly ILogger logger;
         readonly Func<int, Pool<T>, T> createNew;
 
 
-        readonly T[] pool;
+        T[] pool;
         int next = -1;
         int created = 0;
+
+        /// <summary>
+        /// sets max pool size and then creates writers up to new start size
+        /// </summary>
+        /// <param name="startPoolSize"></param>
+        /// <param name="maxPoolSize"></param>
+        public void Configure(int startPoolSize, int maxPoolSize)
+        {
+            if (startPoolSize > maxPoolSize) throw new ArgumentException("Start Size must be less than max size", nameof(startPoolSize));
+
+            if (this.maxPoolSize != maxPoolSize)
+            {
+                this.maxPoolSize = maxPoolSize;
+                Array.Resize(ref pool, maxPoolSize);
+            }
+
+            for (int i = created; i < startPoolSize; i++)
+            {
+                Put(CreateNewBuffer());
+            }
+
+            if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log(LogType.Log, $"Configuring buffer, start Size {startPoolSize}, max size {maxPoolSize}");
+        }
 
         /// <summary>
         /// 
