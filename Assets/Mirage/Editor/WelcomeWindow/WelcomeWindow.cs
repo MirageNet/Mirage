@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Mirage.Logging;
-using Newtonsoft.Json;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Object = System.Object;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 /**
@@ -149,8 +147,8 @@ namespace Mirage
             VisualTreeAsset uxml = Resources.Load<VisualTreeAsset>("WelcomeWindow");
             StyleSheet uss = Resources.Load<StyleSheet>("WelcomeWindow");
 
-            uxml.CloneTree(root);
             root.styleSheets.Add(uss);
+            uxml.CloneTree(root);
 
             //set the version text
             Label versionText = root.Q<Label>("VersionText");
@@ -213,14 +211,9 @@ namespace Mirage
 
         private void CheckForPackageManager()
         {
-            // we just check the manifest manually. It's JSON format, so it's easy to read.
-            string jsonText = File.ReadAllText("Packages/manifest.json");
-
-            var manifest = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonText);
-
-            var packages = JsonConvert.DeserializeObject<Dictionary<string, string>>(Convert.ToString(manifest["dependencies"]));
-
-            changeLogPath = packages.ContainsKey(packageName) ? "Packages/com.miragenet.mirage/CHANGELOG.md" : "Assets/Mirage/CHANGELOG.md";
+            changeLogPath = File.Exists(Application.dataPath + "/Mirage/CHANGELOG.md")
+                ? "Assets/Mirage/CHANGELOG.md"
+                : "Packages/com.miragenet.mirage/CHANGELOG.md";
         }
 
         //switch between content
