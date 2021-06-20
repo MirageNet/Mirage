@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using Mirage.Logging;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -62,13 +63,13 @@ namespace Mirage
         //editorprefs keys
         private static string firstStartUpKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
-        private const string packageName = "com.miragenet.mirage";
+        private const string miragePackageName = "com.miragenet.mirage";
 
         /// <summary>
         ///     Hard coded for source code version. If package version is found, this will
         ///     be set later on to package version. through checking for packages anyways.
         /// </summary>
-        private static string changeLogPath = "Assets/Mirage/CHANGELOG.md";
+        private string changeLogPath;
 
         private static string GetVersion()
         {
@@ -139,7 +140,7 @@ namespace Mirage
         //the code to handle display and button clicking
         private void OnEnable()
         {
-            CheckForPackageManager();
+            changeLogPath = AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this)) + "/../../../CHANGELOG.md";
 
             //Load the UI
             //Each editor window contains a root VisualElement object
@@ -207,13 +208,6 @@ namespace Mirage
             {
                 redirectButton.clicked += () => Application.OpenURL(url);
             }
-        }
-
-        private void CheckForPackageManager()
-        {
-            changeLogPath = File.Exists(Application.dataPath + "/Mirage/CHANGELOG.md")
-                ? "Assets/Mirage/CHANGELOG.md"
-                : "Packages/com.miragenet.mirage/CHANGELOG.md";
         }
 
         //switch between content
