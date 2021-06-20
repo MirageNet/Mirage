@@ -1,3 +1,10 @@
+# [96.4.0](https://github.com/MirageNet/Mirage/compare/v96.3.1...v96.4.0) (2021-06-20)
+
+
+### Features
+
+* adding attribute to ignore extension method for read writer ([#841](https://github.com/MirageNet/Mirage/issues/841)) ([9494500](https://github.com/MirageNet/Mirage/commit/94945006f48c486482a67a8c114a2fbe32c2aba4))
+
 ## [96.3.1](https://github.com/MirageNet/Mirage/compare/v96.3.0...v96.3.1) (2021-06-17)
 
 
