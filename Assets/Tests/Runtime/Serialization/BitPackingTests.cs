@@ -92,73 +92,7 @@ namespace Mirage.Tests.Runtime.Serialization
         }
     }
 
-    public class BitPackingCopyTests
-    {
-        private NetworkWriter writer;
-        private NetworkWriter otherWriter;
-        private NetworkReader reader;
 
-        [SetUp]
-        public void Setup()
-        {
-            writer = new NetworkWriter(1300);
-            otherWriter = new NetworkWriter(1300);
-            reader = new NetworkReader();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            writer.Reset();
-            reader.Dispose();
-        }
-
-        [Test]
-        public void CopyFromOtherWriterAligned()
-        {
-            otherWriter.Write(1, 8);
-            otherWriter.Write(2, 8);
-            otherWriter.Write(3, 8);
-            otherWriter.Write(4, 8);
-            otherWriter.Write(5, 8);
-
-
-            writer.CopyFromWriter(otherWriter, 0, 5 * 8);
-
-            var segment = writer.ToArraySegment();
-            reader.Reset(segment);
-
-            Assert.That(reader.Read(8), Is.EqualTo(1));
-            Assert.That(reader.Read(8), Is.EqualTo(2));
-            Assert.That(reader.Read(8), Is.EqualTo(3));
-            Assert.That(reader.Read(8), Is.EqualTo(4));
-            Assert.That(reader.Read(8), Is.EqualTo(5));
-        }
-
-        [Test]
-        public void CopyFromOtherWriterUnAligned()
-        {
-            otherWriter.Write(1, 6);
-            otherWriter.Write(2, 7);
-            otherWriter.Write(3, 8);
-            otherWriter.Write(4, 9);
-            otherWriter.Write(5, 10);
-
-            writer.Write(1, 3);
-
-            writer.CopyFromWriter(otherWriter, 0, 40);
-
-            var segment = writer.ToArraySegment();
-            reader.Reset(segment);
-
-            Assert.That(reader.Read(3), Is.EqualTo(1));
-            Assert.That(reader.Read(6), Is.EqualTo(1));
-            Assert.That(reader.Read(7), Is.EqualTo(2));
-            Assert.That(reader.Read(8), Is.EqualTo(3));
-            Assert.That(reader.Read(9), Is.EqualTo(4));
-            Assert.That(reader.Read(10), Is.EqualTo(5));
-        }
-    }
     public class BitPackingTests
     {
         private NetworkWriter writer;
@@ -257,6 +191,92 @@ namespace Mirage.Tests.Runtime.Serialization
                 writer.Write(0, 1);
             });
             Assert.That(exception, Has.Message.EqualTo("Index was outside the bounds of the array."));
+        }
+
+        [Test]
+        [Repeat(10)]
+        public void WritesAllValueSizesCorrectly([Range(0, 63)] int writerBits, [Range(0, 64)] int valueBits)
+        {
+            ulong randomValue = ULongRandom.Next();
+            writer.Write(0, writerBits);
+
+            ulong maskedValue = randomValue & BitMask.Mask(valueBits);
+
+            writer.Write(randomValue, valueBits);
+            reader.Reset(writer.ToArray());
+
+            _ = reader.Read(writerBits);
+            ulong result = reader.Read(valueBits);
+            Assert.That(result, Is.EqualTo(maskedValue));
+        }
+    }
+    public class BitMaskHelperTests
+    {
+        /// <summary>
+        /// slow way of creating correct mask
+        /// </summary>
+        static ulong slowMask(int bits)
+        {
+            ulong mask = 0;
+            for (int i = 0; i < bits; i++)
+            {
+                mask |= 1ul << i;
+            }
+
+            return mask;
+        }
+
+        [Test]
+        [Description("manually checking edge cases to be sure")]
+        public void MaskValueIsCorrect0()
+        {
+            ulong mask = BitMask.Mask(0);
+            Assert.That(mask, Is.EqualTo(0x0));
+        }
+
+        [Test]
+        [Description("manually checking edge cases to be sure")]
+        public void MaskValueIsCorrect63()
+        {
+            ulong mask = BitMask.Mask(63);
+            Assert.That(mask, Is.EqualTo(0x7FFF_FFFF_FFFF_FFFF));
+        }
+
+        [Test]
+        [Description("manually checking edge cases to be sure")]
+        public void MaskValueIsCorrect64()
+        {
+            ulong mask = BitMask.Mask(64);
+            Assert.That(mask, Is.EqualTo(0xFFFF_FFFF_FFFF_FFFF));
+        }
+
+        [Test]
+        public void MaskValueIsCorrect([Range(0, 64)] int bits)
+        {
+            ulong mask = BitMask.Mask(bits);
+            ulong expected = slowMask(bits);
+            Assert.That(mask, Is.EqualTo(expected), $"    mask:{mask:X}\nexpected:{expected:X}");
+        }
+    }
+
+    public static class ULongRandom
+    {
+        static Random rand;
+        static byte[] bytes;
+
+        public static unsafe ulong Next()
+        {
+            if (rand == null)
+            {
+                rand = new System.Random();
+                bytes = new byte[8];
+            }
+
+            rand.NextBytes(bytes);
+            fixed (byte* ptr = &bytes[0])
+            {
+                return *(ulong*)ptr;
+            }
         }
     }
 }

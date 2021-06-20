@@ -257,6 +257,7 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong Read(int bits)
         {
+            if (bits == 0) return 0;
             // mask so we dont returns extra bits
             return readUnmasked(bits) & (ulong.MaxValue >> (64 - bits));
         }
@@ -273,7 +274,7 @@ namespace Mirage.Serialization
             if (bitsLeft >= bits)
             {
                 ulong* ptr = longPtr + (bitPosition >> 6);
-                result = (*ptr) >> bitPosition;
+                result = (*ptr) >> bitsInLong;
             }
             else
             {
@@ -286,7 +287,7 @@ namespace Mirage.Serialization
                 // r = r1|r2 => ccaa_aaaa
                 // we mask this result later
 
-                ulong r1 = (*ptr1) >> bitPosition;
+                ulong r1 = (*ptr1) >> bitsInLong;
                 ulong r2 = (*ptr2) << bitsLeft;
                 result = r1 | r2;
             }
