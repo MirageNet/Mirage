@@ -27,7 +27,7 @@ namespace Mirage.Sockets.Udp
 
         public override EndPoint GetBindEndPoint()
         {
-            return new IPEndPoint(IPAddress.IPv6Any, port);
+            return new BetterIPEndPoint(IPAddress.IPv6Any, port);
         }
 
         public override EndPoint GetConnectEndPoint(string address = null, ushort? port = null)
@@ -37,7 +37,7 @@ namespace Mirage.Sockets.Udp
 
             ushort portIn = port ?? (ushort)this.port;
 
-            return new IPEndPoint(ipAddress, portIn);
+            return new BetterIPEndPoint(ipAddress, portIn);
         }
 
         private IPAddress getAddress(string addressString)
@@ -66,15 +66,66 @@ namespace Mirage.Sockets.Udp
 
         private static bool IsWebgl => Application.platform == RuntimePlatform.WebGLPlayer;
     }
+    public class BetterIPEndPoint : IPEndPoint
+    {
+        SocketAddress address;
+        private int port;
+        private IPAddress ipAddress;
+
+        public BetterIPEndPoint(long address, int port) : base(address, port)
+        {
+            this.port = port;
+            ipAddress = new IPAddress(address);
+        }
+        public BetterIPEndPoint(IPAddress address, int port) : base(address, port)
+        {
+            this.port = port;
+            ipAddress = address;
+        }
+
+        public override EndPoint Create(SocketAddress socketAddress)
+        {
+            if (socketAddress.Family != AddressFamily)
+            {
+                throw new ArgumentException("Incorrect address family", nameof(socketAddress));
+            }
+
+            unchecked
+            {
+                // need to change address to cause hashCode to be generated
+                // see https://github.com/Unity-Technologies/mono/blob/unity-2019.4-mbe/mcs/class/referencesource/System/net/System/Net/SocketAddress.cs#L255
+                byte v = socketAddress[0];
+                socketAddress[0] = (byte)(v + 1);
+                socketAddress[0] = v;
+            }
+
+            // return new so because this Endpoint is given to Connection
+            return new BetterIPEndPoint(ipAddress, port) { address = socketAddress };
+        }
+
+        public override SocketAddress Serialize()
+        {
+            if (address == null)
+            {
+                address = base.Serialize();
+            }
+
+            return address;
+        }
+        public override int GetHashCode()
+        {
+            return Serialize().GetHashCode();
+        }
+    }
 
     public class UdpSocket : ISocket
     {
         Socket socket;
-        IPEndPoint AnyEndpoint;
+        BetterIPEndPoint AnyEndpoint;
 
         public void Bind(EndPoint endPoint)
         {
-            AnyEndpoint = endPoint as IPEndPoint;
+            AnyEndpoint = endPoint as BetterIPEndPoint;
 
             socket = CreateSocket(endPoint);
             socket.DualMode = true;
@@ -128,7 +179,7 @@ namespace Mirage.Sockets.Udp
 
         public void Connect(EndPoint endPoint)
         {
-            AnyEndpoint = endPoint as IPEndPoint;
+            AnyEndpoint = endPoint as BetterIPEndPoint;
 
             socket = CreateSocket(endPoint);
 
