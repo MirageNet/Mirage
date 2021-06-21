@@ -55,7 +55,6 @@ namespace Mirage.Tests.Runtime.Serialization
             // serialize
             var writer = new NetworkWriter(1300);
             writer.Write(message);
-            byte[] writerData = writer.ToArray();
 
             // try deserialize
             var reader = new NetworkReader();

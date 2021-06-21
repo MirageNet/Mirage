@@ -122,7 +122,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void TestReadingTooMuch()
         {
-            void EnsureThrows(Action<NetworkReader> read, byte[] data = null)
+            void EnsureThrows(Action<NetworkReader> read)
             {
                 Assert.Throws<System.IO.EndOfStreamException>(() =>
                 {

@@ -81,7 +81,7 @@ namespace Mirage.SocketLayer
             }
             else
             {
-                // todo is it a security risk to now clear buffer?
+                // todo is it a security risk to not clear buffer?
 
                 // take then decriment
                 T item = pool[next];
