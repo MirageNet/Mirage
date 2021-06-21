@@ -100,6 +100,7 @@ namespace Mirage.Sockets.Udp
             }
 
             // return new so because this Endpoint is given to Connection
+            // todo ipAddress might not be correct address, we might need to decode address
             return new BetterIPEndPoint(ipAddress, port) { address = socketAddress };
         }
 
