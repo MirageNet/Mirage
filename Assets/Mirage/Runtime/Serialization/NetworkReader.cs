@@ -54,7 +54,7 @@ namespace Mirage.Serialization
         public int BitPosition
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => bitLength;
+            get => bitPosition;
         }
 
         /// <summary>
