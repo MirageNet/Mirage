@@ -97,11 +97,12 @@ namespace Mirage.Tests.Runtime.Serialization
                 writer.Write(0, 1);
             });
 
-            IndexOutOfRangeException exception = Assert.Throws<IndexOutOfRangeException>(() =>
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
             {
                 writer.Write(0, 1);
             });
-            Assert.That(exception, Has.Message.EqualTo("Index was outside the bounds of the array."));
+            const int max = 162 * 64 + 64;
+            Assert.That(exception, Has.Message.EqualTo($"Can not write over end of buffer, new length {max + 1}, capacity {max}"));
         }
 
         [Test]
