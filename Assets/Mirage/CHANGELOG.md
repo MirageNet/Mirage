@@ -1,3 +1,10 @@
+## [96.4.1](https://github.com/MirageNet/Mirage/compare/v96.4.0...v96.4.1) (2021-06-21)
+
+
+### Bug Fixes
+
+* welcome window fixes ([#845](https://github.com/MirageNet/Mirage/issues/845)) ([a187844](https://github.com/MirageNet/Mirage/commit/a18784451fb8b4711964ee9ef6c19c161a02059b))
+
 # [96.4.0](https://github.com/MirageNet/Mirage/compare/v96.3.1...v96.4.0) (2021-06-20)
 
 
