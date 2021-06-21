@@ -15,6 +15,13 @@ namespace Mirage.Serialization
         /// </summary>
         public static int? BufferSize { get; private set; }
 
+        static NetworkWriterPool()
+        {
+            // auto configure so that pool can be used without having to manually call it
+            var config = new Config();
+            Configure(config.Mtu);
+        }
+
         /// <summary>
         /// Configures an exist pool or creates a new one
         /// <para>Does not create a new pool if <paramref name="bufferSize"/> is less that current <see cref="BufferSize"/></para>
