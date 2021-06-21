@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using Mirage.Logging;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -62,12 +63,13 @@ namespace Mirage
         //editorprefs keys
         private static string firstStartUpKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
+        private const string miragePackageName = "com.miragenet.mirage";
 
         /// <summary>
         ///     Hard coded for source code version. If package version is found, this will
         ///     be set later on to package version. through checking for packages anyways.
         /// </summary>
-        private static string changeLogPath = "Assets/Mirage/CHANGELOG.md";
+        private string changeLogPath;
 
         private static string GetVersion()
         {
@@ -108,7 +110,7 @@ namespace Mirage
             {
                 EditorPrefs.SetString(screenToOpenKey, ShowChangeLog ? "ChangeLog" : "Welcome");
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
                 OpenWindow();
 #else
                 if (logger.LogEnabled()) logger.Log($"WelcomeWindow not supported in {Application.unityVersion}, it is only supported in Unity 2020.1 or newer");
@@ -138,14 +140,16 @@ namespace Mirage
         //the code to handle display and button clicking
         private void OnEnable()
         {
+            changeLogPath = AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this)) + "/../../../CHANGELOG.md";
+
             //Load the UI
             //Each editor window contains a root VisualElement object
             VisualElement root = rootVisualElement;
             VisualTreeAsset uxml = Resources.Load<VisualTreeAsset>("WelcomeWindow");
             StyleSheet uss = Resources.Load<StyleSheet>("WelcomeWindow");
 
-            uxml.CloneTree(root);
             root.styleSheets.Add(uss);
+            uxml.CloneTree(root);
 
             //set the version text
             Label versionText = root.Q<Label>("VersionText");
@@ -427,12 +431,6 @@ namespace Mirage
                             if (miragePackage?.packageName == null)
                             {
                                 continue;
-                            }
-
-                            if (miragePackage.Value.packageName != null && miragePackage.Value.packageName.Equals("Mirage"))
-                            {
-                                // Found mirage package let's set up our change log path.
-                                changeLogPath = "Packages/com.miragenet.mirage/CHANGELOG.md";
                             }
 
                             installedPackages.Add(miragePackage.Value.displayName);
