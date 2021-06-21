@@ -12,7 +12,11 @@ namespace Mirage.Weaver
     {
         public static MethodDefinition ResolveDefaultPublicCtor(TypeReference variable)
         {
-            foreach (MethodDefinition methodRef in variable.Resolve().Methods)
+            TypeDefinition td = variable.Resolve();
+            if (td == null)
+                return null;
+
+            foreach (MethodDefinition methodRef in td.Methods)
             {
                 if (methodRef.IsConstructor &&
                     methodRef.Resolve().IsPublic &&
@@ -26,7 +30,11 @@ namespace Mirage.Weaver
 
         public static MethodReference ResolveProperty(TypeReference tr, AssemblyDefinition scriptDef, string name)
         {
-            foreach (PropertyDefinition pd in tr.Resolve().Properties)
+            TypeDefinition td = tr.Resolve();
+            if (td == null)
+                return null;
+
+            foreach (PropertyDefinition pd in td.Properties)
             {
                 if (pd.Name == name)
                 {
