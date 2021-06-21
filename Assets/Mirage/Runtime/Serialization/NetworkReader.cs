@@ -151,7 +151,7 @@ namespace Mirage.Serialization
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void checkNewLength(int newPosition)
+        void CheckNewLength(int newPosition)
         {
             if (newPosition > bitLength)
             {
@@ -159,7 +159,7 @@ namespace Mirage.Serialization
             }
         }
 
-        private void padToByte()
+        private void PadToByte()
         {
             // todo do we need to clear skipped bits?
             bitPosition = BytePosition << 3;
@@ -179,7 +179,7 @@ namespace Mirage.Serialization
         public ulong ReadBooleanAsUlong()
         {
             int newPosition = bitPosition + 1;
-            checkNewLength(newPosition);
+            CheckNewLength(newPosition);
 
             ulong* ptr = (longPtr + (bitPosition >> 6));
             ulong result = ((*ptr) >> bitPosition) & 0b1;
@@ -192,19 +192,19 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public sbyte ReadSByte() => (sbyte)ReadByte();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public byte ReadByte() => (byte)readUnmasked(8);
+        public byte ReadByte() => (byte)ReadUnmasked(8);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public short ReadInt16() => (short)ReadUInt16();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ushort ReadUInt16() => (ushort)readUnmasked(16);
+        public ushort ReadUInt16() => (ushort)ReadUnmasked(16);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int ReadInt32() => (int)ReadUInt32();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint ReadUInt32() => (uint)readUnmasked(32);
+        public uint ReadUInt32() => (uint)ReadUnmasked(32);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -212,7 +212,7 @@ namespace Mirage.Serialization
         public ulong ReadUInt64()
         {
             int newPosition = bitPosition + 64;
-            checkNewLength(newPosition);
+            CheckNewLength(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
             ulong result;
@@ -265,13 +265,13 @@ namespace Mirage.Serialization
         {
             if (bits == 0) return 0;
             // mask so we dont returns extra bits
-            return readUnmasked(bits) & (ulong.MaxValue >> (64 - bits));
+            return ReadUnmasked(bits) & (ulong.MaxValue >> (64 - bits));
         }
 
-        private ulong readUnmasked(int bits)
+        private ulong ReadUnmasked(int bits)
         {
             int newPosition = bitPosition + bits;
-            checkNewLength(newPosition);
+            CheckNewLength(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
             int bitsLeft = 64 - bitsInLong;
@@ -320,9 +320,9 @@ namespace Mirage.Serialization
         /// <param name="byteSize"></param>
         public void PadAndCopy<T>(int byteSize, out T value) where T : struct
         {
-            padToByte();
+            PadToByte();
             int newPosition = bitPosition + (64 * byteSize);
-            checkNewLength(newPosition);
+            CheckNewLength(newPosition);
 
             byte* startPtr = ((byte*)longPtr) + (bitPosition >> 3);
 
@@ -340,9 +340,9 @@ namespace Mirage.Serialization
         /// <param name="length"></param>
         public void ReadBytes(byte[] array, int offset, int length)
         {
-            padToByte();
+            PadToByte();
             int newPosition = bitPosition + (8 * length);
-            checkNewLength(newPosition);
+            CheckNewLength(newPosition);
 
             // todo benchmark this vs Marshal.Copy or for loop
             Buffer.BlockCopy(managedBuffer, BytePosition, array, offset, length);
@@ -351,9 +351,9 @@ namespace Mirage.Serialization
 
         public ArraySegment<byte> ReadBytesSegment(int count)
         {
-            padToByte();
+            PadToByte();
             int newPosition = bitPosition + (8 * count);
-            checkNewLength(newPosition);
+            CheckNewLength(newPosition);
 
             var result = new ArraySegment<byte>(managedBuffer, BytePosition, count);
             bitPosition = newPosition;

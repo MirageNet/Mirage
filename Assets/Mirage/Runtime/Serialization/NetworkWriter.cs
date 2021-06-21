@@ -92,13 +92,13 @@ namespace Mirage.Serialization
         }
         ~NetworkWriter()
         {
-            freeHandle();
+            FreeHandle();
         }
         /// <summary>
         /// Frees the handle for the buffer
         /// <para>In order for <see cref="PooledNetworkWriter"/> to work This class can not have <see cref="IDisposable"/>. Instead we call this method from Finalze</para>
         /// </summary>
-        void freeHandle()
+        void FreeHandle()
         {
             if (disposed) return;
 
@@ -131,7 +131,7 @@ namespace Mirage.Serialization
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void checkNewLength(int newLength)
+        void CheckNewLength(int newLength)
         {
             if (newLength > bitCapacity)
             {
@@ -139,7 +139,7 @@ namespace Mirage.Serialization
             }
         }
 
-        private void padToByte()
+        private void PadToByte()
         {
             bitPosition = ByteLength << 3;
         }
@@ -156,7 +156,7 @@ namespace Mirage.Serialization
         public void WriteBoolean(ulong value)
         {
             int newPosition = bitPosition + 1;
-            checkNewLength(newPosition);
+            CheckNewLength(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
 
@@ -176,19 +176,19 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteSByte(sbyte value) => WriteByte((byte)value);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteByte(byte value) => writerUnmasked(value, 8);
+        public void WriteByte(byte value) => WriterUnmasked(value, 8);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteInt16(short value) => WriteUInt16((ushort)value);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteUInt16(ushort value) => writerUnmasked(value, 16);
+        public void WriteUInt16(ushort value) => WriterUnmasked(value, 16);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteInt32(int value) => WriteUInt32((uint)value);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteUInt32(uint value) => writerUnmasked(value, 32);
+        public void WriteUInt32(uint value) => WriterUnmasked(value, 32);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -196,7 +196,7 @@ namespace Mirage.Serialization
         public void WriteUInt64(ulong value)
         {
             int newPosition = bitPosition + 64;
-            checkNewLength(newPosition);
+            CheckNewLength(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
 
@@ -229,12 +229,12 @@ namespace Mirage.Serialization
         {
             if (bits == 0) return;
             // mask so we dont overwrite
-            writerUnmasked(value & BitMask.Mask(bits), bits);
+            WriterUnmasked(value & BitMask.Mask(bits), bits);
         }
-        private void writerUnmasked(ulong value, int bits)
+        private void WriterUnmasked(ulong value, int bits)
         {
             int newPosition = bitPosition + bits;
-            checkNewLength(newPosition);
+            CheckNewLength(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
             int bitsLeft = 64 - bitsInLong;
@@ -273,7 +273,7 @@ namespace Mirage.Serialization
             // careful with this method, dont set bitPosition
 
             int newPosition = bitPosition + bits;
-            checkNewLength(newPosition);
+            CheckNewLength(newPosition);
 
             // mask so we dont overwrite
             value &= ulong.MaxValue >> (64 - bits);
@@ -309,7 +309,7 @@ namespace Mirage.Serialization
             if (count == 0) { return; }
 
             int newBit = bitPosition + (64 * count);
-            checkNewLength(newBit);
+            CheckNewLength(newBit);
 
 
             ulong* startPtr = longPtr + (bitPosition >> 6);
@@ -349,9 +349,9 @@ namespace Mirage.Serialization
         /// <param name="byteSize">size of stuct, in bytes</param>
         public void PadAndCopy<T>(ref T value, int byteSize) where T : struct
         {
-            padToByte();
+            PadToByte();
             int newPosition = bitPosition + (8 * byteSize);
-            checkNewLength(newPosition);
+            CheckNewLength(newPosition);
 
             byte* startPtr = ((byte*)longPtr) + (bitPosition >> 3);
 
@@ -369,9 +369,9 @@ namespace Mirage.Serialization
         /// <param name="length"></param>
         public void WriteBytes(byte[] array, int offset, int length)
         {
-            padToByte();
+            PadToByte();
             int newPosition = bitPosition + (8 * length);
-            checkNewLength(newPosition);
+            CheckNewLength(newPosition);
 
             // todo benchmark this vs Marshal.Copy or for loop
             Buffer.BlockCopy(array, offset, managedBuffer, ByteLength, length);
@@ -381,7 +381,7 @@ namespace Mirage.Serialization
         public void CopyFromWriter(NetworkWriter other, int otherBitPosition, int bitLength)
         {
             int newBit = bitPosition + bitLength;
-            checkNewLength(newBit);
+            CheckNewLength(newBit);
 
             int ulongPos = otherBitPosition >> 6;
             ulong* otherPtr = other.longPtr + ulongPos;
