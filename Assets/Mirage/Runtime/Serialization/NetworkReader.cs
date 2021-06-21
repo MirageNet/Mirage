@@ -51,6 +51,12 @@ namespace Mirage.Serialization
             get => bitLength;
         }
 
+        public int BitPosition
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => bitLength;
+        }
+
         /// <summary>
         /// Position to the nearest byte
         /// </summary>
