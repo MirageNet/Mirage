@@ -27,6 +27,8 @@ namespace Mirage.Weaver
 
         public static bool IsDerivedFrom(this TypeDefinition td, Type baseClass)
         {
+            if (td == null)
+                return false;
 
             if (!td.IsClass)
                 return false;
@@ -86,6 +88,9 @@ namespace Mirage.Weaver
 
         public static bool ImplementsInterface<TInterface>(this TypeDefinition td)
         {
+            if (td == null)
+                return false;
+
             if (td.Is<TInterface>())
                 return true;
 
