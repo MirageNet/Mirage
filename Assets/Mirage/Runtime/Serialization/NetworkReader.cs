@@ -23,7 +23,6 @@ SOFTWARE.
 */
 
 using System;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Collections.LowLevel.Unsafe;
@@ -155,13 +154,12 @@ namespace Mirage.Serialization
         {
             if (newPosition > bitLength)
             {
-                throw new EndOfStreamException($"NewPosition:{newPosition} reader length:{bitLength}");
+                throw new InvalidOperationException($"Can not read over end of buffer, new position {newPosition}, length {bitLength} bits");
             }
         }
 
         private void PadToByte()
         {
-            // todo do we need to clear skipped bits?
             bitPosition = BytePosition << 3;
         }
 

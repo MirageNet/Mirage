@@ -56,10 +56,10 @@ namespace Mirage.Serialization
     /// </summary>
     public unsafe class NetworkWriter
     {
-        byte[] managedBuffer;
+        readonly byte[] managedBuffer;
+        readonly int bitCapacity;
         GCHandle handle;
         ulong* longPtr;
-        int bitCapacity;
         bool disposed;
 
         int bitPosition;
@@ -114,18 +114,17 @@ namespace Mirage.Serialization
 
         /// <summary>
         /// Copies internal buffer to new Array
+        /// <para>To reduce Allocations use <see cref="ToArraySegment"/> instead</para>
         /// </summary>
         /// <returns></returns>
         public byte[] ToArray()
         {
             byte[] data = new byte[ByteLength];
-            // todo benchmark and optimize (can we copy from ptr faster
             Buffer.BlockCopy(managedBuffer, 0, data, 0, ByteLength);
             return data;
         }
         public ArraySegment<byte> ToArraySegment()
         {
-            // todo clear extra bits in byte (dont want last byte to have useless data)
             return new ArraySegment<byte>(managedBuffer, 0, ByteLength);
         }
 
@@ -135,7 +134,7 @@ namespace Mirage.Serialization
         {
             if (newLength > bitCapacity)
             {
-                throw new IndexOutOfRangeException();
+                throw new InvalidOperationException($"Can not write over end of buffer, new length {newLength}, capacity {bitCapacity}");
             }
         }
 
@@ -317,21 +316,6 @@ namespace Mirage.Serialization
             {
                 WriteUInt64(startPtr[i]);
             }
-
-            //int bitsInLong = bitPosition & 0b11_1111;
-            //int bitsLeft = 64 - bitsInLong;
-
-            //// write first part to end of current ulong
-            //*startPtr = (*startPtr & (ulong.MaxValue >> bitsLeft)) | (*valuePtr << bitsInLong);
-
-            //// write middle parts to single ulong
-            //for (int i = 1; i < count; i++)
-            //{
-            //    *(startPtr + i) = (*(valuePtr + i - 1) >> (64 - bitsInLong)) | (*(valuePtr + i) << bitsInLong);
-            //}
-
-            //// write end part to start of next ulong
-            //*(startPtr + count) = (*(startPtr + count) & (ulong.MaxValue << bitPosition)) | (*(valuePtr + count - 1) >> bitsLeft);
 
             Debug.Assert(bitPosition == newBit, "bitPosition Shoudl already be equal to newBit because it would have incremented each WriteUInt64");
 
