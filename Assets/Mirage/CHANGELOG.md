@@ -1,3 +1,10 @@
+## [96.4.2](https://github.com/MirageNet/Mirage/compare/v96.4.1...v96.4.2) (2021-06-21)
+
+
+### Bug Fixes
+
+* null checks when types can't be resolved ([#848](https://github.com/MirageNet/Mirage/issues/848)) ([677c792](https://github.com/MirageNet/Mirage/commit/677c7924b85a890f159ee0abfef44363b266f49a))
+
 ## [96.4.1](https://github.com/MirageNet/Mirage/compare/v96.4.0...v96.4.1) (2021-06-21)
 
 
