@@ -15,12 +15,28 @@ namespace Mirage.SocketLayer
         void Disconnect();
 
         INotifyToken SendNotify(byte[] packet);
+        INotifyToken SendNotify(byte[] packet, int offset, int length);
+        INotifyToken SendNotify(ArraySegment<byte> packet);
+
         /// <summary>
         /// single message, batched by AckSystem
         /// </summary>
         /// <param name="message"></param>
         void SendReliable(byte[] message);
+        /// <summary>
+        /// single message, batched by AckSystem
+        /// </summary>
+        /// <param name="message"></param>
+        void SendReliable(byte[] message, int offset, int length);
+        /// <summary>
+        /// single message, batched by AckSystem
+        /// </summary>
+        /// <param name="message"></param>
+        void SendReliable(ArraySegment<byte> message);
+
         void SendUnreliable(byte[] packet);
+        void SendUnreliable(byte[] packet, int offset, int length);
+        void SendUnreliable(ArraySegment<byte> packet);
     }
 
     /// <summary>
@@ -145,26 +161,58 @@ namespace Mirage.SocketLayer
             if (_state != ConnectionState.Connected)
                 throw new InvalidOperationException("Connection is not connected");
         }
+
+
+        public void SendUnreliable(byte[] packet, int offset, int length)
+        {
+            ThrowIfNotConnected();
+            peer.SendUnreliable(this, packet, offset, length);
+        }
         public void SendUnreliable(byte[] packet)
         {
-            ThrowIfNotConnected();
-            peer.SendUnreliable(this, packet);
+            SendUnreliable(packet, 0, packet.Length);
+        }
+        public void SendUnreliable(ArraySegment<byte> packet)
+        {
+            SendUnreliable(packet.Array, packet.Offset, packet.Count);
         }
 
-        public INotifyToken SendNotify(byte[] packet)
+
+        public INotifyToken SendNotify(byte[] packet, int offset, int length)
         {
             ThrowIfNotConnected();
-            return ackSystem.SendNotify(packet);
+            return ackSystem.SendNotify(packet, offset, length);
         }
+        public INotifyToken SendNotify(byte[] packet)
+        {
+            return SendNotify(packet, 0, packet.Length);
+        }
+        public INotifyToken SendNotify(ArraySegment<byte> packet)
+        {
+            return SendNotify(packet.Array, packet.Offset, packet.Count);
+
+        }
+
+
         /// <summary>
         /// single message, batched by AckSystem
         /// </summary>
         /// <param name="message"></param>
-        public void SendReliable(byte[] message)
+        public void SendReliable(byte[] message, int offset, int length)
         {
             ThrowIfNotConnected();
-            ackSystem.SendReliable(message);
+            ackSystem.SendReliable(message, offset, length);
         }
+        public void SendReliable(byte[] packet)
+        {
+            SendReliable(packet, 0, packet.Length);
+        }
+        public void SendReliable(ArraySegment<byte> packet)
+        {
+            SendReliable(packet.Array, packet.Offset, packet.Count);
+
+        }
+
 
         void IRawConnection.SendRaw(byte[] packet, int length)
         {

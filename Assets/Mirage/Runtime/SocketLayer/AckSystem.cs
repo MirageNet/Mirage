@@ -170,10 +170,10 @@ namespace Mirage.SocketLayer
             }
         }
 
-        public INotifyToken SendNotify(byte[] packet)
+        public INotifyToken SendNotify(byte[] inPacket, int inOffset, int inLength)
         {
             // todo batch Notify?
-            if (packet.Length + HEADER_SIZE_NOTIFY > MTU)
+            if (inLength + HEADER_SIZE_NOTIFY > MTU)
             {
                 throw new IndexOutOfRangeException($"Message is bigger than MTU, max Notify message size is {MTU - HEADER_SIZE_NOTIFY}");
             }
@@ -188,26 +188,26 @@ namespace Mirage.SocketLayer
 
             // todo check packet size is within MTU
             // todo use pool to stop allocations
-            byte[] final = new byte[packet.Length + HEADER_SIZE_NOTIFY];
-            Buffer.BlockCopy(packet, 0, final, HEADER_SIZE_NOTIFY, packet.Length);
+            byte[] outPacket = new byte[inLength + HEADER_SIZE_NOTIFY];
+            Buffer.BlockCopy(inPacket, inOffset, outPacket, HEADER_SIZE_NOTIFY, inLength);
 
-            int offset = 0;
+            int outOffset = 0;
 
-            ByteUtils.WriteByte(final, ref offset, (byte)PacketType.Notify);
+            ByteUtils.WriteByte(outPacket, ref outOffset, (byte)PacketType.Notify);
 
-            ByteUtils.WriteUShort(final, ref offset, sequence);
-            ByteUtils.WriteUShort(final, ref offset, LatestAckSequence);
-            ByteUtils.WriteULong(final, ref offset, AckMask);
+            ByteUtils.WriteUShort(outPacket, ref outOffset, sequence);
+            ByteUtils.WriteUShort(outPacket, ref outOffset, LatestAckSequence);
+            ByteUtils.WriteULong(outPacket, ref outOffset, AckMask);
 
-            Send(final, final.Length);
+            Send(outPacket, outPacket.Length);
 
             return token;
         }
 
 
-        public void SendReliable(byte[] message)
+        public void SendReliable(byte[] message, int offset, int length)
         {
-            if (message.Length + HEADER_SIZE_RELIABLE + 2 > MTU)
+            if (length + HEADER_SIZE_RELIABLE + 2 > MTU)
             {
                 throw new IndexOutOfRangeException($"Message is bigger than MTU, max Reliable message size is {MTU - HEADER_SIZE_RELIABLE - 2}");
             }
@@ -222,7 +222,7 @@ namespace Mirage.SocketLayer
                 nextBatch = CreateReliableBuffer(order);
             }
 
-            int msgLength = message.Length + 2;
+            int msgLength = length + 2;
             int batchLength = nextBatch.length;
             if (batchLength + msgLength > MTU)
             {
@@ -233,7 +233,7 @@ namespace Mirage.SocketLayer
                 nextBatch = CreateReliableBuffer(order);
             }
 
-            AddToBatch(nextBatch, message);
+            AddToBatch(nextBatch, message, offset, length);
         }
 
         private ReliablePacket CreateReliableBuffer(ushort order)
@@ -249,17 +249,16 @@ namespace Mirage.SocketLayer
 
             return new ReliablePacket(final, HEADER_SIZE_RELIABLE, order);
         }
-        static void AddToBatch(ReliablePacket packet, byte[] message)
+        static void AddToBatch(ReliablePacket packet, byte[] message, int offset, int length)
         {
             byte[] array = packet.buffer.array;
-            int offset = packet.length;
+            int packetOffset = packet.length;
 
-            int msgLength = message.Length;
-            ByteUtils.WriteUShort(array, ref offset, (ushort)msgLength);
-            Buffer.BlockCopy(message, 0, array, offset, msgLength);
-            offset += msgLength;
+            ByteUtils.WriteUShort(array, ref packetOffset, (ushort)length);
+            Buffer.BlockCopy(message, offset, array, packetOffset, length);
+            packetOffset += length;
 
-            packet.length = offset;
+            packet.length = packetOffset;
         }
 
         void SendReliablePacket(ReliablePacket reliable)

@@ -8,6 +8,17 @@ using UnityEngine.TestTools;
 
 namespace Mirage.SocketLayer.Tests.AckSystemTests
 {
+    internal static class AckSystemTextExtensions
+    {
+        public static INotifyToken SendNotify(this AckSystem ackSystem, byte[] array)
+        {
+            return ackSystem.SendNotify(array, 0, array.Length);
+        }
+        public static void SendReliable(this AckSystem ackSystem, byte[] array)
+        {
+            ackSystem.SendReliable(array, 0, array.Length);
+        }
+    }
     /// <summary>
     /// helper methods for testing AckSystem
     /// </summary>

@@ -151,11 +151,11 @@ namespace Mirage.SocketLayer
             }
         }
 
-        internal void SendUnreliable(Connection connection, byte[] packet)
+        internal void SendUnreliable(Connection connection, byte[] packet, int offset, int length)
         {
             using (ByteBuffer buffer = bufferPool.Take())
             {
-                Buffer.BlockCopy(packet, 0, buffer.array, 1, packet.Length);
+                Buffer.BlockCopy(packet, offset, buffer.array, 1, length);
                 // set header
                 buffer.array[0] = (byte)PacketType.Unreliable;
 
