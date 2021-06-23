@@ -1,3 +1,10 @@
+## [96.4.3](https://github.com/MirageNet/Mirage/compare/v96.4.2...v96.4.3) (2021-06-23)
+
+
+### Bug Fixes
+
+* checking if disconnected before packing message ([a76caf1](https://github.com/MirageNet/Mirage/commit/a76caf148540a2c15cc5622362391acfe20b2388))
+
 ## [96.4.2](https://github.com/MirageNet/Mirage/compare/v96.4.1...v96.4.2) (2021-06-21)
 
 
