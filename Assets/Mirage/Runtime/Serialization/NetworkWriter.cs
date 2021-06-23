@@ -478,11 +478,6 @@ namespace Mirage.Serialization
             writer.WritePackedUInt32(value.NetId);
         }
 
-        public static void WriteUri(this NetworkWriter writer, Uri uri)
-        {
-            writer.WriteString(uri.ToString());
-        }
-
         public static void WriteList<T>(this NetworkWriter writer, List<T> list)
         {
             if (list is null)

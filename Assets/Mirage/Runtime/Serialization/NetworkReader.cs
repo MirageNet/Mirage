@@ -429,11 +429,6 @@ namespace Mirage.Serialization
             return result;
         }
 
-        public static Uri ReadUri(this NetworkReader reader)
-        {
-            return new Uri(reader.ReadString());
-        }
-
         public static NetworkBehaviour ReadNetworkBehaviour(this NetworkReader reader)
         {
             NetworkIdentity identity = reader.ReadNetworkIdentity();
