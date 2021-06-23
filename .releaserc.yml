@@ -1,3 +1,7 @@
+branches: 
+  - name: cubica
+    channel: cubica
+  - name: master
 plugins:
   - '@semantic-release/github'
   - '@semantic-release/release-notes-generator'
