@@ -1,8 +1,74 @@
-﻿using Mirage.Serialization;
+using Mirage.Serialization;
 using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime.Serialization
 {
+    public class BitPackingResizeTest
+    {
+        private NetworkWriter writer;
+        private NetworkReader reader;
+
+        [SetUp]
+        public void OneTimeSetUp()
+        {
+            writer = new NetworkWriter(1300, true);
+            reader = new NetworkReader();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            writer.Reset();
+            reader.Dispose();
+        }
+
+        [Test]
+        public void ResizesIfWritingOverCapacity()
+        {
+            int overCapacity = (1300 / 8) + 10;
+            Assert.That(writer.ByteCapacity, Is.EqualTo(1304), "is first multiple of 8 over 1300");
+            for (int i = 0; i < overCapacity; i++)
+            {
+                writer.WriteUInt64((ulong)i);
+            }
+
+            Assert.That(writer.ByteCapacity, Is.EqualTo(1304 * 2), "should double in size");
+        }
+
+
+        [Test]
+        public void WillResizeMultipleTimes()
+        {
+            int overCapacity = ((1300 / 8) + 10) * 10; // 1720 * 8 = 13760 bytes
+
+            Assert.That(writer.ByteCapacity, Is.EqualTo(1304), "is first multiple of 8 over 1300");
+            for (int i = 0; i < overCapacity; i++)
+            {
+                writer.WriteUInt64((ulong)i);
+            }
+
+
+            Assert.That(writer.ByteCapacity, Is.EqualTo(20_864), "should double each time it goes over capacity");
+        }
+
+        [Test]
+        public void ResizedArrayContainsAllData()
+        {
+            int overCapacity = (1300 / 8) + 10;
+            for (int i = 0; i < overCapacity; i++)
+            {
+                writer.WriteUInt64((ulong)i);
+            }
+
+
+            var segment = writer.ToArraySegment();
+            reader.Reset(segment);
+            for (int i = 0; i < overCapacity; i++)
+            {
+                Assert.That(reader.ReadUInt64(), Is.EqualTo((ulong)i));
+            }
+        }
+    }
     public class BitPackingReusingWriterTests
     {
         private NetworkWriter writer;

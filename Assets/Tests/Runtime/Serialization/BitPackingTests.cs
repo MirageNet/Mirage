@@ -12,7 +12,8 @@ namespace Mirage.Tests.Runtime.Serialization
         [SetUp]
         public void Setup()
         {
-            writer = new NetworkWriter(1300);
+            // dont allow resizing for this test, because we test throw
+            writer = new NetworkWriter(1300, false);
             reader = new NetworkReader();
         }
 

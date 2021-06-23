@@ -56,14 +56,23 @@ namespace Mirage.Serialization
     /// </summary>
     public unsafe class NetworkWriter
     {
-        readonly byte[] managedBuffer;
-        readonly int bitCapacity;
+        byte[] managedBuffer;
+        int bitCapacity;
+        /// <summary>Allow internal buffer to resize if capcity is reached</summary>
+        readonly bool allowResize;
+
         GCHandle handle;
         ulong* longPtr;
-        bool disposed;
+        bool needsDisposing;
 
         int bitPosition;
 
+        public int ByteCapacity
+        {
+            // see ByteLength for comment
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => (bitCapacity + 0b111) >> 3;
+        }
 
         public int ByteLength
         {
@@ -81,18 +90,48 @@ namespace Mirage.Serialization
             get => bitPosition;
         }
 
-        public NetworkWriter(int minByteCapacity)
+        public NetworkWriter(int minByteCapacity) : this(minByteCapacity, true) { }
+        public NetworkWriter(int minByteCapacity, bool allowResize)
         {
+            this.allowResize = allowResize;
+
+            // ensure capcacity is multiple of 8
             int ulongCapacity = Mathf.CeilToInt(minByteCapacity / (float)sizeof(ulong));
             int byteCapacity = ulongCapacity * sizeof(ulong);
+
             bitCapacity = byteCapacity * 8;
             managedBuffer = new byte[byteCapacity];
-            handle = GCHandle.Alloc(managedBuffer, GCHandleType.Pinned);
-            longPtr = (ulong*)handle.AddrOfPinnedObject();
+
+            CreateHandle();
         }
+
+
         ~NetworkWriter()
         {
             FreeHandle();
+        }
+
+
+        void ResizeBuffer()
+        {
+            int size = managedBuffer.Length * 2;
+
+            Debug.Log(handle.AddrOfPinnedObject());
+            FreeHandle();
+
+            Array.Resize(ref managedBuffer, size);
+            bitCapacity = size * 8;
+
+            CreateHandle();
+            Debug.Log(handle.AddrOfPinnedObject());
+        }
+        void CreateHandle()
+        {
+            if (needsDisposing) FreeHandle();
+
+            handle = GCHandle.Alloc(managedBuffer, GCHandleType.Pinned);
+            longPtr = (ulong*)handle.AddrOfPinnedObject();
+            needsDisposing = true;
         }
         /// <summary>
         /// Frees the handle for the buffer
@@ -100,11 +139,11 @@ namespace Mirage.Serialization
         /// </summary>
         void FreeHandle()
         {
-            if (disposed) return;
+            if (!needsDisposing) return;
 
             handle.Free();
             longPtr = null;
-            disposed = true;
+            needsDisposing = false;
         }
 
         public void Reset()
@@ -134,7 +173,14 @@ namespace Mirage.Serialization
         {
             if (newLength > bitCapacity)
             {
-                throw new InvalidOperationException($"Can not write over end of buffer, new length {newLength}, capacity {bitCapacity}");
+                if (allowResize)
+                {
+                    ResizeBuffer();
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Can not write over end of buffer, new length {newLength}, capacity {bitCapacity}");
+                }
             }
         }
 
@@ -213,7 +259,6 @@ namespace Mirage.Serialization
 
                 *ptr1 = (*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong);
                 *ptr2 = (*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft);
-
             }
             bitPosition = newPosition;
         }
