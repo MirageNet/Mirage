@@ -1,3 +1,21 @@
+# [96.5.0](https://github.com/MirageNet/Mirage/compare/v96.4.3...v96.5.0) (2021-06-23)
+
+
+### Bug Fixes
+
+* fixing length used for sending unreliable ([821e2d2](https://github.com/MirageNet/Mirage/commit/821e2d28b2a764f834b96696ed6a438af2535f60))
+
+
+### Features
+
+* adding send methods for array segment ([ea09c61](https://github.com/MirageNet/Mirage/commit/ea09c61e0c6c67990d05a58529a800a6948728c0))
+
+
+### Performance Improvements
+
+* using array segments for sending ([c990952](https://github.com/MirageNet/Mirage/commit/c990952246463282687c2968852dbe1ae36fdb6e))
+* using pool for send notify ([ac000eb](https://github.com/MirageNet/Mirage/commit/ac000eb6c2db50c81831d092c358f9e707954876))
+
 ## [96.4.3](https://github.com/MirageNet/Mirage/compare/v96.4.2...v96.4.3) (2021-06-23)
 
 
