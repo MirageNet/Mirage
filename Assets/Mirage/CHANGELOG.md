@@ -1,3 +1,11 @@
+## [92.0.1](https://github.com/MirageNet/Mirage/compare/v92.0.0...v92.0.1) (2021-06-23)
+
+
+### Bug Fixes
+
+* compatibility with 2021.1 ([27530b2](https://github.com/MirageNet/Mirage/commit/27530b20f6cab8e15f77498be37eec1d822eba31))
+* welcome window fixes ([#845](https://github.com/MirageNet/Mirage/issues/845)) ([39144aa](https://github.com/MirageNet/Mirage/commit/39144aaee103ff08a6df4482018313c7e4afa04d))
+
 # [92.0.0](https://github.com/MirageNet/Mirage/compare/v91.2.0...v92.0.0) (2021-05-23)
 
 
