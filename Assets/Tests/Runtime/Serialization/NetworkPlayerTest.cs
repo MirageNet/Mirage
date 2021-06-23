@@ -29,11 +29,11 @@ namespace Mirage.Tests.Runtime
             player.Send(new ArraySegment<byte>(message), channel);
             if (channel == Channel.Reliable)
             {
-                connection.Received(1).SendReliable(Arg.Is<byte[]>(arg => arg.SequenceEqual(message)));
+                connection.Received(1).SendReliable(Arg.Is<ArraySegment<byte>>(arg => arg.SequenceEqual(message)));
             }
             else if (channel == Channel.Unreliable)
             {
-                connection.Received(1).SendUnreliable(Arg.Is<byte[]>(arg => arg.SequenceEqual(message)));
+                connection.Received(1).SendUnreliable(Arg.Is<ArraySegment<byte>>(arg => arg.SequenceEqual(message)));
             }
         }
 
