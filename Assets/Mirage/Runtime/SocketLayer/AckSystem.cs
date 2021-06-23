@@ -186,20 +186,21 @@ namespace Mirage.SocketLayer
             var token = new NotifyToken();
             ushort sequence = (ushort)sentAckablePackets.Enqueue(new AckablePacket(token));
 
-            // todo check packet size is within MTU
-            // todo use pool to stop allocations
-            byte[] outPacket = new byte[inLength + HEADER_SIZE_NOTIFY];
-            Buffer.BlockCopy(inPacket, inOffset, outPacket, HEADER_SIZE_NOTIFY, inLength);
+            using (ByteBuffer buffer = bufferPool.Take())
+            {
+                byte[] outPacket = buffer.array;
+                Buffer.BlockCopy(inPacket, inOffset, outPacket, HEADER_SIZE_NOTIFY, inLength);
 
-            int outOffset = 0;
+                int outOffset = 0;
 
-            ByteUtils.WriteByte(outPacket, ref outOffset, (byte)PacketType.Notify);
+                ByteUtils.WriteByte(outPacket, ref outOffset, (byte)PacketType.Notify);
 
-            ByteUtils.WriteUShort(outPacket, ref outOffset, sequence);
-            ByteUtils.WriteUShort(outPacket, ref outOffset, LatestAckSequence);
-            ByteUtils.WriteULong(outPacket, ref outOffset, AckMask);
+                ByteUtils.WriteUShort(outPacket, ref outOffset, sequence);
+                ByteUtils.WriteUShort(outPacket, ref outOffset, LatestAckSequence);
+                ByteUtils.WriteULong(outPacket, ref outOffset, AckMask);
 
-            Send(outPacket, outPacket.Length);
+                Send(outPacket, outOffset + inLength);
+            }
 
             return token;
         }
