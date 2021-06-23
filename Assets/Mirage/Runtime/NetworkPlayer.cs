@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -217,28 +216,29 @@ namespace Mirage
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                // pack message and send allocation free
                 MessagePacker.Pack(message, writer);
                 NetworkDiagnostics.OnSend(message, writer.Length, 1);
                 Send(writer.ToArraySegment(), channelId);
             }
         }
 
-        // internal because no one except Mirage should send bytes directly to
-        // the client. they would be detected as a message. send messages instead.
+        /// <summary>
+        /// Sends a block of data
+        /// <para>Only use this method if data has message Id already included, other wise receives wont know how to handle it. Otherwise use <see cref="Send{T}(T, int)"/></para>
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="channelId"></param>
         public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
             if (isDisconnected) { return; }
 
-            // todo use buffer pool
-            byte[] packet = segment.ToArray();
             if (channelId == Channel.Reliable)
             {
-                connection.SendReliable(packet);
+                connection.SendReliable(segment);
             }
             else
             {
-                connection.SendUnreliable(packet);
+                connection.SendUnreliable(segment);
             }
         }
 
