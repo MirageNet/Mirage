@@ -79,16 +79,16 @@ namespace Mirage
             var message = default(T);
 
             // record start position for NetworkDiagnostics because reader might contain multiple messages if using batching
-            int startPos = reader.Position;
+            int startPos = reader.BitPosition;
             try
             {
                 message = reader.Read<T>();
             }
             finally
             {
-                int endPos = reader.Position;
-                int byteLength = (endPos - startPos);
-                OnReceive(message, byteLength);
+                int endPos = reader.BitPosition;
+                int byteLength = (endPos - startPos) >> 3;
+                NetworkDiagnostics.OnReceive(message, byteLength);
             }
 
             return message;

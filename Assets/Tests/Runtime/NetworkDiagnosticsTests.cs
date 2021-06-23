@@ -6,7 +6,6 @@ using NUnit.Framework;
 namespace Mirage.Tests.Runtime
 {
     [TestFixture(Category = "NetworkDiagnostics")]
-    [Obsolete("NetworkDiagnostics is Obsolete")]
     public class NetworkDiagnosticsTests
     {
         [Test]

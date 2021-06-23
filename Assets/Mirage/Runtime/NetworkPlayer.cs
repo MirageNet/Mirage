@@ -193,6 +193,7 @@ namespace Mirage
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 MessagePacker.Pack(message, writer);
+
                 var segment = writer.ToArraySegment();
                 NetworkDiagnostics.OnSend(message, segment.Count, 1);
                 Send(segment, channelId);
