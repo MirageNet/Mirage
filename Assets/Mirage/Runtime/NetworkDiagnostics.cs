@@ -1,4 +1,5 @@
 using System;
+using Mirage.Serialization;
 
 namespace Mirage
 {
@@ -7,6 +8,7 @@ namespace Mirage
     /// A profiler can subscribe to these events and
     /// present the data in a friendly way to the user
     /// </summary>
+    // todo find a way to combime this with new peer metrics for more data
     public static class NetworkDiagnostics
     {
         /// <summary>
@@ -71,5 +73,25 @@ namespace Mirage
         }
 
         #endregion
+
+        internal static T ReadWithDiagnostics<T>(NetworkReader reader)
+        {
+            var message = default(T);
+
+            // record start position for NetworkDiagnostics because reader might contain multiple messages if using batching
+            int startPos = reader.Position;
+            try
+            {
+                message = reader.Read<T>();
+            }
+            finally
+            {
+                int endPos = reader.Position;
+                int byteLength = (endPos - startPos);
+                OnReceive(message, byteLength);
+            }
+
+            return message;
+        }
     }
 }

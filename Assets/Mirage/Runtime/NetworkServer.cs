@@ -401,7 +401,6 @@ namespace Mirage
 
                 foreach (INetworkPlayer player in players)
                 {
-                    // send to all connections, but don't wait for them
                     player.Send(segment, channelId);
                     count++;
                 }

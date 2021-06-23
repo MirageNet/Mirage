@@ -125,33 +125,9 @@ namespace Mirage
         {
             void AdapterFunction(INetworkPlayer player, NetworkReader reader)
             {
-                // protect against DOS attacks if attackers try to send invalid
-                // data packets to crash the server/client. there are a thousand
-                // ways to cause an exception in data handling:
-                // - invalid headers
-                // - invalid message ids
-                // - invalid data causing exceptions
-                // - negative ReadBytesAndSize prefixes
-                // - invalid utf8 strings
-                // - etc.
-                //
-                // let's catch them all and then disconnect that connection to avoid
-                // further attacks.
-                var message = default(T);
+                T message = NetworkDiagnostics.ReadWithDiagnostics<T>(reader);
 
-                // record start position for NetworkDiagnostics because reader might contain multiple messages if using batching
-                int startPos = reader.Position;
-                try
-                {
-                    message = reader.Read<T>();
-                }
-                finally
-                {
-                    int endPos = reader.Position;
-                    NetworkDiagnostics.OnReceive(message, endPos - startPos);
-                }
-
-                handler(player, message);
+                handler.Invoke(player, message);
             }
             return AdapterFunction;
         }
@@ -217,8 +193,10 @@ namespace Mirage
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 MessagePacker.Pack(message, writer);
-                NetworkDiagnostics.OnSend(message, writer.Length, 1);
-                Send(writer.ToArraySegment(), channelId);
+
+                var segment = writer.ToArraySegment();
+                NetworkDiagnostics.OnSend(message, segment.Count, 1);
+                Send(segment, channelId);
             }
         }
 
@@ -271,7 +249,7 @@ namespace Mirage
         {
             if (messageHandlers.TryGetValue(msgType, out NetworkMessageDelegate msgDelegate))
             {
-                msgDelegate(this, reader);
+                msgDelegate.Invoke(this, reader);
             }
             else
             {
@@ -292,6 +270,17 @@ namespace Mirage
             // unpack message
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(packet))
             {
+                // protect against attackers trying to send invalid data packets
+                // exception could be throw if:
+                // - invalid headers
+                // - invalid message ids
+                // - invalid data causing exceptions
+                // - negative ReadBytesAndSize prefixes
+                // - invalid utf8 strings
+                // - etc.
+                //
+                // if exception is caught, disconnect the attacker to stop any further attacks
+
                 try
                 {
                     int msgType = MessagePacker.UnpackId(networkReader);
