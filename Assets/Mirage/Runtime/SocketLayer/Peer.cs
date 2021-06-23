@@ -159,7 +159,7 @@ namespace Mirage.SocketLayer
                 // set header
                 buffer.array[0] = (byte)PacketType.Unreliable;
 
-                Send(connection, buffer.array, packet.Length + 1);
+                Send(connection, buffer.array, length + 1);
             }
         }
 
