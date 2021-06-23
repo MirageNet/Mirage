@@ -33,7 +33,7 @@ namespace Mirage
         public bool AutoSpawn = true;
 
         // Start is called before the first frame update
-        public virtual void Start()
+        public virtual void Awake()
         {
             if (PlayerPrefab == null)
             {
