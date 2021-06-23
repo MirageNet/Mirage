@@ -1,9 +1,12 @@
+using Mirage.Serialization;
+using NUnit.Framework;
+using UnityEngine;
+using RangeAttribute = NUnit.Framework.RangeAttribute;
+
 namespace Mirage.Tests.Runtime.Serialization
 {
     public class CompressionTests
     {
-        // todo re-add with compression
-        /*
         [Test]
         [Repeat(100)]
         public void QuaternionCompression()
@@ -48,6 +51,5 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(Mathf.Abs(Quaternion.Dot(expected, decompressed)), Is.EqualTo(1).Within(0.001));
 
         }
-        */
     }
 }
