@@ -213,6 +213,8 @@ namespace Mirage
         /// <returns></returns>
         public void Send<T>(T message, int channelId = Channel.Reliable)
         {
+            if (isDisconnected) { return; }
+
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 // pack message and send allocation free
