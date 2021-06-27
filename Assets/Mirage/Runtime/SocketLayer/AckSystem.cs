@@ -90,6 +90,10 @@ namespace Mirage.SocketLayer
             reliableOrder = new Sequencer(size);
             reliableReceive = new RingBuffer<ReliableReceived>(size);
 
+            // set lastest to value before 0 so that first packet will be received
+            // max will be 1 less than 0
+            LatestAckSequence = (ushort)sentAckablePackets.Sequencer.MoveInBounds(ulong.MaxValue);
+
             OnSend();
         }
 
