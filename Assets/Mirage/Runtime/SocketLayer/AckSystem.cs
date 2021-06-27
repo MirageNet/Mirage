@@ -29,7 +29,7 @@ namespace Mirage.SocketLayer
 
         //todo implement this
         readonly int maxPacketsInSendBufferPerConnection;
-        readonly int MTU;
+        readonly int maxPacketSize;
         readonly float ackTimeout;
         /// <summary>how many empty acks to send</summary>
         readonly int emptyAckLimit;
@@ -69,7 +69,7 @@ namespace Mirage.SocketLayer
             ackTimeout = config.TimeBeforeEmptyAck;
             emptyAckLimit = config.EmptyAckLimit;
             receivesBeforeEmpty = config.ReceivesBeforeEmptyAck;
-            MTU = config.Mtu;
+            maxPacketSize = config.MaxPacketSize;
             maxPacketsInSendBufferPerConnection = config.MaxReliablePacketsInSendBufferPerConnection;
 
             int size = config.SequenceSize;
@@ -173,9 +173,9 @@ namespace Mirage.SocketLayer
         public INotifyToken SendNotify(byte[] inPacket, int inOffset, int inLength)
         {
             // todo batch Notify?
-            if (inLength + HEADER_SIZE_NOTIFY > MTU)
+            if (inLength + HEADER_SIZE_NOTIFY > maxPacketSize)
             {
-                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Notify message size is {MTU - HEADER_SIZE_NOTIFY}");
+                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Notify message size is {maxPacketSize - HEADER_SIZE_NOTIFY}");
             }
             if (sentAckablePackets.IsFull)
             {
@@ -208,9 +208,9 @@ namespace Mirage.SocketLayer
 
         public void SendReliable(byte[] message, int offset, int length)
         {
-            if (length + HEADER_SIZE_RELIABLE + 2 > MTU)
+            if (length + HEADER_SIZE_RELIABLE + 2 > maxPacketSize)
             {
-                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Reliable message size is {MTU - HEADER_SIZE_RELIABLE - 2}");
+                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Reliable message size is {maxPacketSize - HEADER_SIZE_RELIABLE - 2}");
             }
             if (sentAckablePackets.IsFull)
             {
@@ -225,7 +225,7 @@ namespace Mirage.SocketLayer
 
             int msgLength = length + 2;
             int batchLength = nextBatch.length;
-            if (batchLength + msgLength > MTU)
+            if (batchLength + msgLength > maxPacketSize)
             {
                 // if full, send and create new
                 SendReliablePacket(nextBatch);
