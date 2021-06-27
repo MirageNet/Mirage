@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
@@ -156,12 +156,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             for (int i = 0; i < messageCount; i++)
             {
-                AssertAreSameFromOffsets(instance1.message(i), 0, instance1.packet(i), AckSystem.HEADER_SIZE_NOTIFY, instance1.message(i).Length);
+                AssertAreSameFromOffsets(instance1.message(i), 0, instance1.packet(i), AckSystem.NOTIFY_HEADER_SIZE, instance1.message(i).Length);
             }
 
             for (int i = 0; i < messageCount; i++)
             {
-                AssertAreSameFromOffsets(instance2.message(i), 0, instance2.packet(i), AckSystem.HEADER_SIZE_NOTIFY, instance2.message(i).Length);
+                AssertAreSameFromOffsets(instance2.message(i), 0, instance2.packet(i), AckSystem.NOTIFY_HEADER_SIZE, instance2.message(i).Length);
             }
         }
     }

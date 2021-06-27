@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace Mirage.SocketLayer.Tests.AckSystemTests
@@ -84,7 +84,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             for (int i = 0; i < messageCount; i++)
             {
-                AssertAreSameFromOffsets(instance.message(i), 0, instance.packet(i), AckSystem.HEADER_SIZE_NOTIFY, instance.message(i).Length);
+                AssertAreSameFromOffsets(instance.message(i), 0, instance.packet(i), AckSystem.NOTIFY_HEADER_SIZE, instance.message(i).Length);
             }
         }
     }

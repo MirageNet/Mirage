@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 
 namespace Mirage.SocketLayer.Tests.AckSystemTests
 {
@@ -71,7 +71,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void PacketShouldContainMessage()
         {
-            AssertAreSameFromOffsets(message, 0, packet, AckSystem.HEADER_SIZE_NOTIFY, message.Length);
+            AssertAreSameFromOffsets(message, 0, packet, AckSystem.NOTIFY_HEADER_SIZE, message.Length);
         }
     }
 }

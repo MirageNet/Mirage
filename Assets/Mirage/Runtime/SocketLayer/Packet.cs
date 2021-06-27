@@ -24,22 +24,27 @@ namespace Mirage.SocketLayer
             if (length < MinPacketSize)
                 return false;
 
-
-            const int MinCommandSize = 2;
-            const int MinNotifySize = 1 + 2 + 2 + 4;
             // Min size of message given to Mirage
-            const int MinUnreliableSize = 3;
+            const int MIN_MESSAGE_SIZE = 2;
+
+
+            const int MIN_COMMAND_SIZE = 2;
+            const int MIN_UNRELIABLE_SIZE = 1 + MIN_MESSAGE_SIZE;
 
             switch (type)
             {
                 case PacketType.Command:
-                    return length >= MinCommandSize;
+                    return length >= MIN_COMMAND_SIZE;
 
                 case PacketType.Unreliable:
-                    return length >= MinUnreliableSize;
+                    return length >= MIN_UNRELIABLE_SIZE;
 
                 case PacketType.Notify:
-                    return length >= MinNotifySize;
+                    return length >= AckSystem.NOTIFY_HEADER_SIZE + MIN_MESSAGE_SIZE;
+                case PacketType.Reliable:
+                    return length >= AckSystem.MIN_RELIABLE_HEADER_SIZE + MIN_MESSAGE_SIZE;
+                case PacketType.Ack:
+                    return length >= AckSystem.ACK_HEADER_SIZE;
 
                 default:
                 case PacketType.KeepAlive:

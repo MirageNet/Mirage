@@ -266,7 +266,14 @@ namespace Mirage.SocketLayer
         private void HandleMessage(Connection connection, Packet packet)
         {
             // ingore message of invalid size
-            if (!packet.IsValidSize()) { return; }
+            if (!packet.IsValidSize())
+            {
+                if (logger.filterLogType == LogType.Log)
+                {
+                    logger.Log($"Receive from {connection} was too small");
+                }
+                return;
+            }
 
             if (logger.filterLogType == LogType.Log)
             {

@@ -8,12 +8,25 @@ namespace Mirage.SocketLayer
     {
         const int MASK_SIZE = sizeof(ulong) * 8;
 
-        /// <summary>PacketType, sequence, ack sequannce, mask</summary>
-        public const int HEADER_SIZE_NOTIFY = 5 + sizeof(ulong);
-        /// <summary>PacketType, sequence, ack sequannce, mask, order</summary>
-        public const int HEADER_SIZE_RELIABLE = 5 + sizeof(ulong) + 2;
-        /// <summary>PacketType, ack sequannce, mask</summary>
-        public const int HEADER_SIZE_ACK = 3 + sizeof(ulong);
+        public const int SEQUENCE_HEADER = sizeof(byte) + sizeof(ushort) + sizeof(ushort) + sizeof(ulong);
+
+        /// <summary>PacketType, sequence, ack sequence, mask</summary>
+        public const int NOTIFY_HEADER_SIZE = SEQUENCE_HEADER;
+        /// <summary>PacketType, sequence, ack sequence, mask, order</summary>
+        public const int RELIABLE_HEADER_SIZE = SEQUENCE_HEADER + sizeof(ushort);
+
+
+        /// <summary>PacketType, ack sequence, mask</summary>
+        public const int ACK_HEADER_SIZE = sizeof(byte) + sizeof(ushort) + sizeof(ulong);
+
+        public const int RELIABLE_MESSAGE_LENGTH_SIZE = sizeof(ushort);
+        public const int FRAGMENT_INDEX_SIZE = sizeof(byte);
+
+        /// <summary>Smallest size a header for reliable packet, <see cref="RELIABLE_HEADER_SIZE"/> + 2 bytes per message</summary>
+        public const int MIN_RELIABLE_HEADER_SIZE = RELIABLE_HEADER_SIZE + RELIABLE_MESSAGE_LENGTH_SIZE;
+
+        /// <summary>Smallest size a header for reliable packet, <see cref="RELIABLE_HEADER_SIZE"/> + 1 byte for fragment index</summary>
+        public const int MIN_RELIABLE_FRAGMENT_HEADER_SIZE = RELIABLE_HEADER_SIZE + FRAGMENT_INDEX_SIZE;
 
         readonly RingBuffer<AckablePacket> sentAckablePackets;
         readonly Sequencer reliableOrder;
@@ -173,9 +186,9 @@ namespace Mirage.SocketLayer
         public INotifyToken SendNotify(byte[] inPacket, int inOffset, int inLength)
         {
             // todo batch Notify?
-            if (inLength + HEADER_SIZE_NOTIFY > maxPacketSize)
+            if (inLength + NOTIFY_HEADER_SIZE > maxPacketSize)
             {
-                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Notify message size is {maxPacketSize - HEADER_SIZE_NOTIFY}");
+                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Notify message size is {maxPacketSize - NOTIFY_HEADER_SIZE}");
             }
             if (sentAckablePackets.IsFull)
             {
@@ -189,7 +202,7 @@ namespace Mirage.SocketLayer
             using (ByteBuffer buffer = bufferPool.Take())
             {
                 byte[] outPacket = buffer.array;
-                Buffer.BlockCopy(inPacket, inOffset, outPacket, HEADER_SIZE_NOTIFY, inLength);
+                Buffer.BlockCopy(inPacket, inOffset, outPacket, NOTIFY_HEADER_SIZE, inLength);
 
                 int outOffset = 0;
 
@@ -208,9 +221,9 @@ namespace Mirage.SocketLayer
 
         public void SendReliable(byte[] message, int offset, int length)
         {
-            if (length + HEADER_SIZE_RELIABLE + 2 > maxPacketSize)
+            if (length + RELIABLE_HEADER_SIZE + 2 > maxPacketSize)
             {
-                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Reliable message size is {maxPacketSize - HEADER_SIZE_RELIABLE - 2}");
+                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Reliable message size is {maxPacketSize - RELIABLE_HEADER_SIZE - 2}");
             }
             if (sentAckablePackets.IsFull)
             {
@@ -248,7 +261,7 @@ namespace Mirage.SocketLayer
             offset = 13;
             ByteUtils.WriteUShort(final.array, ref offset, order);
 
-            return new ReliablePacket(final, HEADER_SIZE_RELIABLE, order);
+            return new ReliablePacket(final, RELIABLE_HEADER_SIZE, order);
         }
         static void AddToBatch(ReliablePacket packet, byte[] message, int offset, int length)
         {
@@ -301,7 +314,7 @@ namespace Mirage.SocketLayer
             // duplicate or arrived late
             if (distance <= 0) { return default; }
 
-            var segment = new ArraySegment<byte>(packet, HEADER_SIZE_NOTIFY, length - HEADER_SIZE_NOTIFY);
+            var segment = new ArraySegment<byte>(packet, NOTIFY_HEADER_SIZE, length - NOTIFY_HEADER_SIZE);
             return segment;
         }
 
@@ -339,8 +352,8 @@ namespace Mirage.SocketLayer
             {
                 // new packet
                 ByteBuffer savedPacket = bufferPool.Take();
-                int bufferLength = length - HEADER_SIZE_RELIABLE;
-                Buffer.BlockCopy(packet, HEADER_SIZE_RELIABLE, savedPacket.array, 0, bufferLength);
+                int bufferLength = length - RELIABLE_HEADER_SIZE;
+                Buffer.BlockCopy(packet, RELIABLE_HEADER_SIZE, savedPacket.array, 0, bufferLength);
                 reliableReceive.InsertAt(reliableSequence, new ReliableReceived(savedPacket, bufferLength));
             }
         }
