@@ -13,6 +13,7 @@ namespace Mirage.Tests.Performance
         public void WritePackedInt32()
         {
             Measure.Method(WPackedInt32)
+                .IterationsPerMeasurement(1000)
                 .WarmupCount(10)
                 .MeasurementCount(100)
                 .Run();
@@ -22,7 +23,7 @@ namespace Mirage.Tests.Performance
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                for (int i = 0; i < 1000; i++)
+                for (int i = 0; i < 37; i++)
                 {
                     writer.WritePackedInt32(i * 1000);
                 }
@@ -34,6 +35,7 @@ namespace Mirage.Tests.Performance
         public void WriteInt32()
         {
             Measure.Method(WInt32)
+                .IterationsPerMeasurement(1000)
                 .WarmupCount(10)
                 .MeasurementCount(100)
                 .Run();
@@ -42,7 +44,7 @@ namespace Mirage.Tests.Performance
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                for (int i = 0; i < 1000; i++)
+                for (int i = 0; i < 37; i++)
                 {
                     writer.WriteInt32(i * 1000);
                 }
@@ -55,6 +57,7 @@ namespace Mirage.Tests.Performance
         public void WriteGenericInt32()
         {
             Measure.Method(WGenericInt32)
+                .IterationsPerMeasurement(1000)
                 .WarmupCount(10)
                 .MeasurementCount(100)
                 .Run();
@@ -63,7 +66,7 @@ namespace Mirage.Tests.Performance
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                for (int i = 0; i < 1000; i++)
+                for (int i = 0; i < 37; i++)
                 {
                     writer.Write(i * 1000);
                 }
@@ -71,4 +74,3 @@ namespace Mirage.Tests.Performance
         }
     }
 }
-
