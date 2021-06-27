@@ -1,3 +1,15 @@
+# [97.0.0](https://github.com/MirageNet/Mirage/compare/v96.5.2...v97.0.0) (2021-06-27)
+
+
+### Code Refactoring
+
+* simplifying packet size in config ([#852](https://github.com/MirageNet/Mirage/issues/852)) ([6bc5ab8](https://github.com/MirageNet/Mirage/commit/6bc5ab8e87c9ec6d2a35a836119a4c891a5a173c))
+
+
+### BREAKING CHANGES
+
+* BufferSize and MTU replaced by MaxPacketSize
+
 ## [96.5.2](https://github.com/MirageNet/Mirage/compare/v96.5.1...v96.5.2) (2021-06-27)
 
 
