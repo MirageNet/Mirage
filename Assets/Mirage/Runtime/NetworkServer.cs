@@ -248,7 +248,7 @@ namespace Mirage
             if (SocketFactory is null)
                 SocketFactory = GetComponent<SocketFactory>();
             if (SocketFactory == null)
-                throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for ${nameof(NetworkServer)}");
+                throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for {nameof(NetworkServer)}");
         }
 
         internal void Update()
