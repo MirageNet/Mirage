@@ -1,6 +1,6 @@
 namespace Mirage.SocketLayer
 {
-    internal static class ByteUtils
+    public static class ByteUtils
     {
         public static void WriteByte(byte[] buffer, ref int offset, byte value)
         {
