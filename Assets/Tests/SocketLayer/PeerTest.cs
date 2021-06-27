@@ -100,7 +100,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 peer.Update();
             });
 
-            Assert.That(exception, Has.Message.EqualTo($"Socket returned length above MTU: MTU:{config.Mtu} length:{aboveMTU}"));
+            Assert.That(exception, Has.Message.EqualTo($"Socket returned length above MTU. MaxPacketSize:{config.MaxPacketSize} length:{aboveMTU}"));
         }
 
         [Test]

@@ -72,7 +72,7 @@ namespace Mirage.SocketLayer
             time = new Time();
 
             connectKeyValidator = new ConnectKeyValidator();
-            bufferPool = new BufferPool(this.config.Mtu, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
+            bufferPool = new BufferPool(this.config.MaxPacketSize, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
 
             Application.quitting += Application_quitting;
         }
@@ -241,8 +241,8 @@ namespace Mirage.SocketLayer
                     int length = socket.Receive(buffer.array, out EndPoint receiveEndPoint);
 
                     // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
-                    if (length > config.Mtu)
-                        throw new IndexOutOfRangeException($"Socket returned length above MTU: MTU:{config.Mtu} length:{length}");
+                    if (length > config.MaxPacketSize)
+                        throw new IndexOutOfRangeException($"Socket returned length above MTU. MaxPacketSize:{config.MaxPacketSize} length:{length}");
 
                     var packet = new Packet(buffer, length);
 
