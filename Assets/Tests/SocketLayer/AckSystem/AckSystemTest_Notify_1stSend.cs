@@ -20,11 +20,16 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         /// </summary>
         byte[] packet;
 
+        ushort maxSequence;
+
         [SetUp]
         public void SetUp()
         {
+            var config = new Config();
+            maxSequence = (ushort)((1 << config.SequenceSize) - 1);
+
             connection = new SubIRawConnection();
-            ackSystem = new AckSystem(connection, new Config(), new Time(), bufferPool);
+            ackSystem = new AckSystem(connection, config, new Time(), bufferPool);
 
             message = createRandomData(1);
             ackSystem.SendNotify(message);
@@ -46,7 +51,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         }
 
         [Test]
-        public void PacketSequenceShouldBe1()
+        public void SentSequenceShouldBe1()
         {
             int offset = 1;
             ushort sequance = ByteUtils.ReadUShort(packet, ref offset);
@@ -54,14 +59,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         }
 
         [Test]
-        public void PacketReceivedShouldBe0()
+        public void LatestReceivedShouldBeMax()
         {
             int offset = 3;
             ushort received = ByteUtils.ReadUShort(packet, ref offset);
-            Assert.That(received, Is.EqualTo(0));
+            Assert.That(received, Is.EqualTo(maxSequence));
         }
         [Test]
-        public void PacketMaskShouldBe0()
+        public void ReceivedMaskShouldBe0()
         {
             int offset = 5;
             ushort mask = ByteUtils.ReadUShort(packet, ref offset);

@@ -12,10 +12,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         const int messageCount = 5;
 
         AckTestInstance instance;
+        ushort maxSequence;
 
         [SetUp]
         public void SetUp()
         {
+            var config = new Config();
+            maxSequence = (ushort)((1 << config.SequenceSize) - 1);
+
             instance = new AckTestInstance();
             instance.connection = new SubIRawConnection();
             instance.ackSystem = new AckSystem(instance.connection, new Config(), new Time(), bufferPool);
@@ -37,7 +41,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         }
 
         [Test]
-        public void AllPacketShouldBeNotify()
+        public void PacketsShouldBeNotify()
         {
             for (int i = 0; i < messageCount; i++)
             {
@@ -59,13 +63,13 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         }
 
         [Test]
-        public void PacketReceivedShouldBe0()
+        public void PacketReceivedShouldBeMax()
         {
             for (int i = 0; i < messageCount; i++)
             {
                 int offset = 3;
                 ushort received = ByteUtils.ReadUShort(instance.packet(i), ref offset);
-                Assert.That(received, Is.EqualTo(0), "Received should stay 0");
+                Assert.That(received, Is.EqualTo(maxSequence), $"Received should stay max, index:{i}");
             }
         }
         [Test]

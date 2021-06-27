@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Mirage.SocketLayer.Tests.AckSystemTests
 {
@@ -12,22 +12,30 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     public class AckSystemTest_Notify_NoDroppedSends : AckSystemTestBase
     {
         const int messageCount = 5;
+        private ushort maxSequence;
 
         AckTestInstance instance1;
         AckTestInstance instance2;
 
+        List<ArraySegment<byte>> received1;
+        List<ArraySegment<byte>> received2;
 
         [SetUp]
         public void SetUp()
         {
+            var config = new Config();
+            maxSequence = (ushort)((1 << config.SequenceSize) - 1);
+
             instance1 = new AckTestInstance();
             instance1.connection = new SubIRawConnection();
-            instance1.ackSystem = new AckSystem(instance1.connection, new Config(), new Time(), bufferPool);
+            instance1.ackSystem = new AckSystem(instance1.connection, config, new Time(), bufferPool);
+            received1 = new List<ArraySegment<byte>>();
 
 
             instance2 = new AckTestInstance();
             instance2.connection = new SubIRawConnection();
-            instance2.ackSystem = new AckSystem(instance2.connection, new Config(), new Time(), bufferPool);
+            instance2.ackSystem = new AckSystem(instance2.connection, config, new Time(), bufferPool);
+            received2 = new List<ArraySegment<byte>>();
 
             // create and send n messages
             instance1.messages = new List<byte[]>();
@@ -42,12 +50,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 // send to conn1
                 instance1.ackSystem.SendNotify(instance1.messages[i]);
                 // give to instance2 from conn1
-                instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i], instance1.connection.packets[i].Length);
+                ArraySegment<byte> segment2 = instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i], instance1.connection.packets[i].Length);
+                received2.Add(segment2);
 
                 // send to conn2
                 instance2.ackSystem.SendNotify(instance2.messages[i]);
                 // give to instance1 from conn2
-                instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i], instance2.connection.packets[i].Length);
+                ArraySegment<byte> segment1 = instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i], instance2.connection.packets[i].Length);
+                received1.Add(segment1);
             }
 
             // should have got 1 packet
@@ -103,7 +113,9 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             {
                 int offset = 3;
                 ushort received = ByteUtils.ReadUShort(instance1.packet(i), ref offset);
-                Assert.That(received, Is.EqualTo(Mathf.Clamp(i - 1, 0, messageCount)), "Received should start at 0 and increment each time");
+                int expected = i - 1;
+                if (expected == -1) expected = maxSequence;
+                Assert.That(received, Is.EqualTo(expected), "Received should start at 0 and increment each time");
             }
 
             for (int i = 0; i < messageCount; i++)
@@ -162,6 +174,20 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             for (int i = 0; i < messageCount; i++)
             {
                 AssertAreSameFromOffsets(instance2.message(i), 0, instance2.packet(i), AckSystem.NOTIFY_HEADER_SIZE, instance2.message(i).Length);
+            }
+        }
+
+        [Test]
+        public void AllSegmentsShouldHaveBeenReturned()
+        {
+            for (int i = 0; i < messageCount; i++)
+            {
+                AssertAreSameFromOffsets(instance1.message(i), 0, instance1.message(i).Length, received2[i]);
+            }
+
+            for (int i = 0; i < messageCount; i++)
+            {
+                AssertAreSameFromOffsets(instance2.message(i), 0, instance2.message(i).Length, received1[i]);
             }
         }
     }

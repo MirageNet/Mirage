@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 
@@ -48,6 +49,20 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                     Assert.Fail($"Arrays are not the same\n  expected {e}\n  actual {a}");
                 }
             }
+        }
+
+        protected static void AssertAreSameFromOffsets(byte[] expected, int expectedOffset, int length, ArraySegment<byte> segment)
+        {
+            if (segment == default)
+            {
+                Assert.Fail($"Segment should not be default");
+            }
+            if (segment.Count != length)
+            {
+                Assert.Fail($"Segment did not have same length as expected\n  expected {length}\n  actual {segment.Count}");
+            }
+
+            AssertAreSameFromOffsets(expected, expectedOffset, segment.Array, segment.Offset, length);
         }
     }
 
