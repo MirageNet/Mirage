@@ -49,6 +49,19 @@ namespace Mirage.Serialization
         {
             return bits == 0 ? 0 : ulong.MaxValue >> (64 - bits);
         }
+
+        /// <summary>
+        /// Creates Mask either side of start and end
+        /// <para>Note this mask is only valid for start [0..63] and end [0..64]4</para>
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong OuterMask(int start, int end)
+        {
+            return (ulong.MaxValue << start) ^ (ulong.MaxValue >> (64 - end));
+        }
     }
     /// <summary>
     /// Binary stream Writer. Supports simple types, buffers, arrays, structs, and nested types
@@ -275,6 +288,7 @@ namespace Mirage.Serialization
             // mask so we dont overwrite
             WriterUnmasked(value & BitMask.Mask(bits), bits);
         }
+
         private void WriterUnmasked(ulong value, int bits)
         {
             int newPosition = bitPosition + bits;
@@ -287,15 +301,7 @@ namespace Mirage.Serialization
             {
                 ulong* ptr = longPtr + (bitPosition >> 6);
 
-                // todo benchmark and optimize this new mask
-                ulong mask1 = bitsInLong == 0 ? 0ul : (ulong.MaxValue >> bitsLeft);
-                ulong mask2 = (newPosition & 0b11_1111) == 0 ? 0ul : (ulong.MaxValue << newPosition /*we can use full position here as c# will mask it to just 6 bits*/);
-                ulong mask = mask1 | mask2;
-
-                // old mask, doesn't work when bitposition before/after is multiple of 64
-                //ulong mask = (ulong.MaxValue >> bitsLeft) | (ulong.MaxValue << newPosition /*we can use full position here as c# will mask it to just 6 bits*/);
-
-                *ptr = (*ptr & mask) | (value << bitsInLong);
+                *ptr = (*ptr & BitMask.OuterMask(bitPosition, newPosition)) | (value << bitsInLong);
             }
             else
             {
