@@ -6,6 +6,11 @@ namespace Mirage.Examples.Light
     public class Health : NetworkBehaviour
     {
         [SyncVar] public int health = 10;
+        private void Awake()
+        {
+            NetIdentity.OnStartServer.AddListener(OnStartServer);
+            NetIdentity.OnStopServer.AddListener(OnStopServer);
+        }
 
         public void OnStartServer()
         {
