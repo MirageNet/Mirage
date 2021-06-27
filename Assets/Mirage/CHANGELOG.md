@@ -1,3 +1,10 @@
+# [97.1.0](https://github.com/MirageNet/Mirage/compare/v97.0.1...v97.1.0) (2021-06-27)
+
+
+### Features
+
+* **SocketLayer:** adding fragmentation to reliable sending ([#851](https://github.com/MirageNet/Mirage/issues/851)) ([4764294](https://github.com/MirageNet/Mirage/commit/4764294b18a6e20780fe05626bd001f8c63790f8))
+
 ## [97.0.1](https://github.com/MirageNet/Mirage/compare/v97.0.0...v97.0.1) (2021-06-27)
 
 
