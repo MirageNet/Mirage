@@ -1,3 +1,10 @@
+## [96.5.1](https://github.com/MirageNet/Mirage/compare/v96.5.0...v96.5.1) (2021-06-27)
+
+
+### Bug Fixes
+
+* fixing typo in error ([6195108](https://github.com/MirageNet/Mirage/commit/6195108dd84d5e83be3ac25d824d50125fa9510f))
+
 # [96.5.0](https://github.com/MirageNet/Mirage/compare/v96.4.3...v96.5.0) (2021-06-23)
 
 
