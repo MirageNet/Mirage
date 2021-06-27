@@ -1,3 +1,10 @@
+## [97.0.1](https://github.com/MirageNet/Mirage/compare/v97.0.0...v97.0.1) (2021-06-27)
+
+
+### Bug Fixes
+
+* fixing first notify not being returned ([#854](https://github.com/MirageNet/Mirage/issues/854)) ([84b7d2e](https://github.com/MirageNet/Mirage/commit/84b7d2e4cf938763772ebedbb5a55e2db0034ff4))
+
 # [97.0.0](https://github.com/MirageNet/Mirage/compare/v96.5.2...v97.0.0) (2021-06-27)
 
 
