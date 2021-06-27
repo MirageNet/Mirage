@@ -87,7 +87,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         /// </summary>
         public EndPoint endPoint;
 
-        public PeerInstanceWithSocket(Config config = null) : base(config, socket: new TestSocket())
+        public PeerInstanceWithSocket(Config config = null) : base(config, socket: new TestSocket("TestInstance"))
         {
             socket = (TestSocket)base.socket;
             endPoint = socket.endPoint;

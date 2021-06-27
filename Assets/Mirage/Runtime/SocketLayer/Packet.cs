@@ -43,6 +43,8 @@ namespace Mirage.SocketLayer
                     return length >= AckSystem.NOTIFY_HEADER_SIZE + MIN_MESSAGE_SIZE;
                 case PacketType.Reliable:
                     return length >= AckSystem.MIN_RELIABLE_HEADER_SIZE + MIN_MESSAGE_SIZE;
+                case PacketType.ReliableFragment:
+                    return length >= AckSystem.MIN_RELIABLE_FRAGMENT_HEADER_SIZE + 1;
                 case PacketType.Ack:
                     return length >= AckSystem.ACK_HEADER_SIZE;
 

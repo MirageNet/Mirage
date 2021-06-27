@@ -29,6 +29,7 @@ namespace Mirage.SocketLayer
 
         /// <summary>
         /// Number of non-null items in buffer
+        /// <para>NOTE: this is not distance from read to write</para>
         /// </summary>
         public int Count => count;
 
@@ -73,14 +74,65 @@ namespace Mirage.SocketLayer
             count++;
             return sequence;
         }
+
+        /// <summary>
+        /// Tries to read the item at read index
+        /// <para>same as <see cref="TryDequeue"/> but does not remove the item after reading it</para>
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns>true if item exists, or false if it is missing</returns>
+        public bool TryPeak(out T item)
+        {
+            item = buffer[read];
+            return !IsDefault(item);
+        }
+
+        /// <summary>
+        /// Does item exist at index
+        /// <para>Index will be moved into bounds</para>
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns>true if item exists, or false if it is missing</returns>
+        public bool Exists(uint index)
+        {
+            uint inBounds = (uint)Sequencer.MoveInBounds(index);
+            return !IsDefault(buffer[inBounds]);
+        }
+
+        /// <summary>
+        /// Removes the item at read index and increments read index
+        /// <para>can be used after <see cref="TryPeak"/> to do the same as <see cref="TryDequeue"/></para>
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RemoveNext()
+        {
+            buffer[read] = default;
+            read = (uint)Sequencer.NextAfter(read);
+            count--;
+        }
+
+        /// <summary>
+        /// Removes next item and increments read index
+        /// <para>Assumes next items exists, best to use this with <see cref="Exists"/></para>
+        /// </summary>
+        public T Dequeue()
+        {
+            T item = buffer[read];
+            RemoveNext();
+            return item;
+        }
+
+        /// <summary>
+        /// Tries to remove the item at read index
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns>true if item exists, or false if it is missing</returns>
         public bool TryDequeue(out T item)
         {
             item = buffer[read];
             if (!IsDefault(item))
             {
-                buffer[read] = default;
-                read = (uint)Sequencer.NextAfter(read);
-                count--;
+                RemoveNext();
 
                 return true;
             }
@@ -89,6 +141,7 @@ namespace Mirage.SocketLayer
                 return false;
             }
         }
+
 
         public void InsertAt(uint index, T item)
         {

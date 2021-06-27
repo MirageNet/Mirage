@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -6,9 +6,6 @@ using UnityEngine.TestTools;
 
 namespace Mirage.SocketLayer.Tests.AckSystemTests
 {
-    /// <summary>
-    /// Send is done in setup, and then tests just valid that the sent data is correct
-    /// </summary>
     [Category("SocketLayer")]
     public class AckSystemTest_Reliable : AckSystemTestBase
     {
@@ -80,7 +77,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 switch (type)
                 {
                     case PacketType.Reliable:
-                        ackSystem.ReceiveReliable(packet, packet.Length);
+                        ackSystem.ReceiveReliable(packet, packet.Length, false);
                         break;
                     case PacketType.Ack:
                         ackSystem.ReceiveAck(packet);

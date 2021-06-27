@@ -315,10 +315,13 @@ namespace Mirage.SocketLayer
                     connection.ReceiveNotifyPacket(packet);
                     break;
                 case PacketType.Reliable:
-                    connection.ReceivReliablePacket(packet);
+                    connection.ReceiveReliablePacket(packet);
                     break;
                 case PacketType.Ack:
                     connection.ReceiveNotifyAck(packet);
+                    break;
+                case PacketType.ReliableFragment:
+                    connection.ReceiveReliableFragment(packet);
                     break;
                 case PacketType.KeepAlive:
                     // do nothing

@@ -24,5 +24,10 @@ namespace Mirage.SocketLayer
         /// Disconnect called by higher level
         /// </summary>
         RequestedByLocalPeer = 3,
+
+        /// <summary>
+        /// Received packet was not allowed by config
+        /// </summary>
+        InvalidPacket = 4,
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using Mirage.SocketLayer;
 using NSubstitute;
+using UnityEngine;
 
 namespace Mirage.Tests
 {
@@ -48,8 +49,11 @@ namespace Mirage.Tests
         readonly Queue<Packet> received = new Queue<Packet>();
         public List<Packet> Sent = new List<Packet>();
 
-        public TestSocket(EndPoint endPoint = null)
+        public readonly string name;
+
+        public TestSocket(string name, EndPoint endPoint = null)
         {
+            this.name = name;
             this.endPoint = endPoint ?? Substitute.For<EndPoint>();
         }
 
@@ -95,7 +99,7 @@ namespace Mirage.Tests
             }
 
             // create copy because data is from buffer
-            byte[] clone = data.ToArray();
+            byte[] clone = data.Take(length).ToArray();
             Sent.Add(new Packet
             {
                 endPoint = remoteEndPoint,
@@ -128,9 +132,11 @@ namespace Mirage.Tests
     {
         public EndPoint serverEndpoint = Substitute.For<EndPoint>();
 
+        int clientNameIndex;
+        int serverNameIndex;
         public override ISocket CreateClientSocket()
         {
-            return new TestSocket();
+            return new TestSocket($"Client {clientNameIndex++}");
         }
 
         public override ISocket CreateServerSocket()
@@ -141,7 +147,7 @@ namespace Mirage.Tests
                 // Clients use Server endpoint to connect, so a 2nd server can't be started from the same TestSocketFactory
                 // if multiple server are needed then it would require multiple instances of TestSocketFactory
             }
-            return new TestSocket(serverEndpoint);
+            return new TestSocket($"Server {serverNameIndex++}", serverEndpoint);
         }
 
         public override EndPoint GetBindEndPoint()

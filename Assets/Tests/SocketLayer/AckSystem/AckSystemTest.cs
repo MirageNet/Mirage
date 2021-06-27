@@ -20,8 +20,8 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     /// </summary>
     public class AckSystemTestBase
     {
-        readonly System.Random rand = new System.Random();
-        protected BufferPool bufferPool = new BufferPool(1300, 100, 1000);
+        protected readonly System.Random rand = new System.Random();
+        protected readonly BufferPool bufferPool = new BufferPool(new Config().MaxPacketSize, 100, 1000);
 
         protected byte[] createRandomData(int id)
         {
