@@ -100,6 +100,12 @@ namespace Mirage.SocketLayer
         /// <para>Max of 16</para>
         /// </summary>
         public int SequenceSize = 12;
+
+        /// <summary>
+        /// How many fragments large reliable message can be split into
+        /// <para>if set to 0 then messages over <see cref="MaxPacketSize"/> will not be allowed to be sent</para>
+        /// </summary>
+        public int MaxReliableFragments = 5;
         #endregion
     }
 }
