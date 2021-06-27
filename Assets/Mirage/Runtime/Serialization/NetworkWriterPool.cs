@@ -19,14 +19,14 @@ namespace Mirage.Serialization
         {
             // auto configure so that pool can be used without having to manually call it
             var config = new Config();
-            Configure(config.Mtu);
+            Configure(config.MaxPacketSize);
         }
 
         /// <summary>
         /// Configures an exist pool or creates a new one
         /// <para>Does not create a new pool if <paramref name="bufferSize"/> is less that current <see cref="BufferSize"/></para>
         /// </summary>
-        /// <param name="bufferSize"></param>
+        /// <param name="bufferSize">starting capacity of buffer</param>
         /// <param name="startPoolSize"></param>
         /// <param name="maxPoolSize"></param>
         public static void Configure(int bufferSize, int startPoolSize = 5, int maxPoolSize = 100)

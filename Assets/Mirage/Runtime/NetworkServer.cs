@@ -216,7 +216,7 @@ namespace Mirage
                 MaxConnections = MaxConnections,
             };
 
-            NetworkWriterPool.Configure(config.Mtu);
+            NetworkWriterPool.Configure(config.MaxPacketSize);
 
             peer = new Peer(socket, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
             peer.OnConnected += Peer_OnConnected;
