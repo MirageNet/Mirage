@@ -138,7 +138,7 @@ namespace Mirage
 
         void ThrowIfActive()
         {
-            if (Active) throw new InvalidOperationException("Server is already active");
+            if (Active) throw new InvalidOperationException("Client is already active");
         }
 
         void ThrowIfSocketIsMissing()
