@@ -1,3 +1,11 @@
+## [97.1.1](https://github.com/MirageNet/Mirage/compare/v97.1.0...v97.1.1) (2021-06-28)
+
+
+### Bug Fixes
+
+* **NetworkManagerHud:** adding null check before using server or client ([e4200e0](https://github.com/MirageNet/Mirage/commit/e4200e07b9c424eccda9e8bfb75a743af753ad78))
+* **NetworkManagerHud:** returning to offline menu when server or client is stopped ([6b4c988](https://github.com/MirageNet/Mirage/commit/6b4c98889777cad31d27d8211f8858e4d81bde09))
+
 # [97.1.0](https://github.com/MirageNet/Mirage/compare/v97.0.1...v97.1.0) (2021-06-27)
 
 
