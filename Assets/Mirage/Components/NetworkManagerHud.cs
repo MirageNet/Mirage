@@ -20,8 +20,8 @@ namespace Mirage
             Application.runInBackground = true;
 
             // return to offset menu when server or client is stopped
-            NetworkManager.Server.Stopped.AddListener(OfflineSetActive);
-            NetworkManager.Client.Disconnected.AddListener(_ => OfflineSetActive());
+            NetworkManager.Server?.Stopped.AddListener(OfflineSetActive);
+            NetworkManager.Client?.Disconnected.AddListener(_ => OfflineSetActive());
         }
 
         void SetLabel(string value)
