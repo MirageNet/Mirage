@@ -1,5 +1,6 @@
 namespace Mirage.SocketLayer
 {
+    // todo add validation for this config
     public class Config
     {
         #region server 
@@ -104,6 +105,7 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// How many fragments large reliable message can be split into
         /// <para>if set to 0 then messages over <see cref="MaxPacketSize"/> will not be allowed to be sent</para>
+        /// <para>max value is 255</para>
         /// </summary>
         public int MaxReliableFragments = 5;
         #endregion
