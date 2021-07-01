@@ -67,7 +67,7 @@ namespace Mirage.Sockets.Udp
         private static bool IsWebgl => Application.platform == RuntimePlatform.WebGLPlayer;
     }
 
-    public struct EndPointWrapper : IEndPoint
+    public class EndPointWrapper : IEndPoint
     {
         public EndPoint inner;
 
@@ -93,6 +93,11 @@ namespace Mirage.Sockets.Udp
         public override string ToString()
         {
             return inner.ToString();
+        }
+
+        IEndPoint IEndPoint.CreateCopy()
+        {
+            return new EndPointWrapper(inner);
         }
     }
     public class UdpSocket : ISocket

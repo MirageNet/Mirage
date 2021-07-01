@@ -114,7 +114,8 @@ namespace Mirage.SocketLayer
             this.logger = logger ?? Debug.unityLogger;
 
             // todo stop boxing of struct?
-            EndPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
+            EndPoint = endPoint?.CreateCopy() ?? throw new ArgumentNullException(nameof(endPoint));
+
             this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
             State = ConnectionState.Created;
 

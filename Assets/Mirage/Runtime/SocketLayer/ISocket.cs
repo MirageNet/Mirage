@@ -61,6 +61,6 @@ namespace Mirage.SocketLayer
     /// </summary>
     public interface IEndPoint
     {
-
+        IEndPoint CreateCopy();
     }
 }

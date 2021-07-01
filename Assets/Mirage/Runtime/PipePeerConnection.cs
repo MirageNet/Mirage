@@ -118,6 +118,10 @@ namespace Mirage
 
         public class PipeEndPoint : IEndPoint
         {
+            IEndPoint IEndPoint.CreateCopy()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         /// <summary>
