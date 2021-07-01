@@ -97,32 +97,29 @@ namespace Mirage.Sockets.Udp
 
         IEndPoint IEndPoint.CreateCopy()
         {
-            return new EndPointWrapper(inner);
+            // copy the inner endpoint
+            EndPoint copy = inner.Create(inner.Serialize());
+            return new EndPointWrapper(copy);
         }
     }
 
     public class UdpSocket : ISocket
     {
         Socket socket;
-        IEndPoint Endpoint;
-        EndPoint NetEndpoint;
-
-        static EndPoint ToEndPoint(IEndPoint endPoint) => ((EndPointWrapper)endPoint).inner;
+        EndPointWrapper Endpoint;
 
         public void Bind(IEndPoint endPoint)
         {
-            Endpoint = endPoint;
+            Endpoint = (EndPointWrapper)endPoint;
 
-            NetEndpoint = ToEndPoint(endPoint);
-
-            socket = CreateSocket(NetEndpoint);
+            socket = CreateSocket(Endpoint.inner);
             socket.DualMode = true;
-            socket.Bind(NetEndpoint);
+            socket.Bind(Endpoint.inner);
         }
 
         static Socket CreateSocket(EndPoint endPoint)
         {
-            var ipEndPoint = endPoint as IPEndPoint;
+            var ipEndPoint = (IPEndPoint)endPoint;
             var socket = new Socket(ipEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
             {
                 Blocking = false,
@@ -167,12 +164,10 @@ namespace Mirage.Sockets.Udp
 
         public void Connect(IEndPoint endPoint)
         {
-            Endpoint = endPoint;
+            Endpoint = (EndPointWrapper)endPoint;
 
-            NetEndpoint = ToEndPoint(endPoint);
-
-            socket = CreateSocket(NetEndpoint);
-            socket.Connect(NetEndpoint);
+            socket = CreateSocket(Endpoint.inner);
+            socket.Connect(Endpoint.inner);
         }
 
         public void Close()
@@ -192,8 +187,7 @@ namespace Mirage.Sockets.Udp
 
         public int Receive(byte[] buffer, out IEndPoint endPoint)
         {
-            int c = socket.ReceiveFrom(buffer, ref NetEndpoint);
-            // NetEndpoint should be the field inside Endpoint
+            int c = socket.ReceiveFrom(buffer, ref Endpoint.inner);
             endPoint = Endpoint;
             return c;
         }
@@ -203,7 +197,7 @@ namespace Mirage.Sockets.Udp
             // todo check disconnected
             // todo what SocketFlags??
 
-            EndPoint netEndPoint = ToEndPoint(endPoint);
+            EndPoint netEndPoint = ((EndPointWrapper)endPoint).inner;
             socket.SendTo(packet, length, SocketFlags.None, netEndPoint);
         }
     }
