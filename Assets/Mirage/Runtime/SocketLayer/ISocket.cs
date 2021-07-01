@@ -55,12 +55,20 @@ namespace Mirage.SocketLayer
     /// <summary>
     /// Object that can be used as an endpoint for <see cref="Peer"/> and <see cref="ISocket"/>
     /// <para>
-    /// Should be a struct that overrides <see cref="object.GetHashCode"/> and <see cref="object.Equals(object)"/>
-    /// so instances returned from <see cref="ISocket.Receive(byte[], out IEndPoint)"/> will be unique and not change address of another <see cref="Connection"/>
+    /// Implementation of this should override <see cref="object.GetHashCode"/> and <see cref="object.Equals(object)"/> so that 2 instance wil be equal if they have the same address internally
+    /// </para>
+    /// <para>
+    /// When a new connection is received by Peer a copy of this endpoint will be created and given to that connection.
+    /// On future received the incoming endpoint will be compared to active connections inside a dictionary
     /// </para>
     /// </summary>
     public interface IEndPoint
     {
+        /// <summary>
+        /// Creates a new instance of <see cref="IEndPoint"/> with same connection data
+        /// <para>this is called when a new connection is created by <see cref="Peer"/></para>
+        /// </summary>
+        /// <returns></returns>
         IEndPoint CreateCopy();
     }
 }
