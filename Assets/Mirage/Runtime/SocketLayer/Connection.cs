@@ -113,9 +113,9 @@ namespace Mirage.SocketLayer
             this.peer = peer;
             this.logger = logger ?? Debug.unityLogger;
 
-            // todo stop boxing of struct?
+            // create copy of endpoint for this connection
+            // this is so that we can re-use the endpoint (reduces alloc) for receive and not worry about changing internal data needed for each connection
             EndPoint = endPoint?.CreateCopy() ?? throw new ArgumentNullException(nameof(endPoint));
-
             this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
             State = ConnectionState.Created;
 
