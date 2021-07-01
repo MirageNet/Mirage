@@ -1,3 +1,10 @@
+## [97.1.2](https://github.com/MirageNet/Mirage/compare/v97.1.1...v97.1.2) (2021-07-01)
+
+
+### Performance Improvements
+
+* **SocketLayer:** adding IEquatable to struct ([f935786](https://github.com/MirageNet/Mirage/commit/f93578641956c17d84f32ab6356887f45974b07d))
+
 ## [97.1.1](https://github.com/MirageNet/Mirage/compare/v97.1.0...v97.1.1) (2021-06-28)
 
 
