@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -68,7 +67,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void IgnoresMessageThatIsTooShort()
         {
-            peer.Bind(Substitute.For<EndPoint>());
+            peer.Bind(Substitute.For<IEndPoint>());
 
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
@@ -87,7 +86,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ThrowsIfSocketGivesLengthThatIsTooHigh()
         {
-            peer.Bind(Substitute.For<EndPoint>());
+            peer.Bind(Substitute.For<IEndPoint>());
 
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
@@ -107,12 +106,12 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Repeat(10)]
         public void IgnoresRandomData()
         {
-            peer.Bind(Substitute.For<EndPoint>());
+            peer.Bind(Substitute.For<IEndPoint>());
 
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
-            EndPoint endPoint = Substitute.For<EndPoint>();
+            IEndPoint endPoint = Substitute.For<IEndPoint>();
 
             // 2 is min length of a message
             byte[] randomData = new byte[UnityEngine.Random.Range(2, 20)];

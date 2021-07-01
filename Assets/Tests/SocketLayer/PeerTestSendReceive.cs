@@ -38,7 +38,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             Action<IConnection> serverConnect = (conn) => serverConnections.Add(conn);
             server.peer.OnConnected += serverConnect;
 
-            server.peer.Bind(Substitute.For<EndPoint>());
+            server.peer.Bind(Substitute.For<IEndPoint>());
             for (int i = 0; i < ClientCount; i++)
             {
                 clients[i] = new PeerInstanceWithSocket(config);
