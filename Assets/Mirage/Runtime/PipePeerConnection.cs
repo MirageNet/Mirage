@@ -120,7 +120,8 @@ namespace Mirage
         {
             IEndPoint IEndPoint.CreateCopy()
             {
-                throw new NotImplementedException();
+                // never need copy of pipeendpoint
+                throw new NotSupportedException();
             }
         }
 
