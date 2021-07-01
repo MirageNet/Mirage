@@ -718,7 +718,7 @@ namespace Mirage.SocketLayer
                 return order;
             }
         }
-        public struct ReliableReceived
+        public struct ReliableReceived : IEquatable<ReliableReceived>
         {
             public readonly ByteBuffer buffer;
             public readonly int length;
@@ -734,6 +734,11 @@ namespace Mirage.SocketLayer
                 this.buffer = buffer;
                 this.length = length;
                 this.isFragment = isFragment;
+            }
+
+            public bool Equals(ReliableReceived other)
+            {
+                return buffer == other.buffer;
             }
         }
     }
