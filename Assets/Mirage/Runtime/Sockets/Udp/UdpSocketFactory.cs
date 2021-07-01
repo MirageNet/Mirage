@@ -100,26 +100,29 @@ namespace Mirage.Sockets.Udp
             return new EndPointWrapper(inner);
         }
     }
+
     public class UdpSocket : ISocket
     {
         Socket socket;
-        IEndPoint AnyEndpoint;
+        IEndPoint Endpoint;
+        EndPoint NetEndpoint;
 
         static EndPoint ToEndPoint(IEndPoint endPoint) => ((EndPointWrapper)endPoint).inner;
 
         public void Bind(IEndPoint endPoint)
         {
-            AnyEndpoint = endPoint;
+            Endpoint = endPoint;
 
-            socket = CreateSocket(endPoint);
+            NetEndpoint = ToEndPoint(endPoint);
+
+            socket = CreateSocket(NetEndpoint);
             socket.DualMode = true;
-
-            socket.Bind(ToEndPoint(endPoint));
+            socket.Bind(NetEndpoint);
         }
 
-        static Socket CreateSocket(IEndPoint endPoint)
+        static Socket CreateSocket(EndPoint endPoint)
         {
-            var ipEndPoint = ToEndPoint(endPoint) as IPEndPoint;
+            var ipEndPoint = endPoint as IPEndPoint;
             var socket = new Socket(ipEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
             {
                 Blocking = false,
@@ -164,11 +167,12 @@ namespace Mirage.Sockets.Udp
 
         public void Connect(IEndPoint endPoint)
         {
-            AnyEndpoint = endPoint;
+            Endpoint = endPoint;
 
-            socket = CreateSocket(endPoint);
+            NetEndpoint = ToEndPoint(endPoint);
 
-            socket.Connect(ToEndPoint(endPoint));
+            socket = CreateSocket(NetEndpoint);
+            socket.Connect(NetEndpoint);
         }
 
         public void Close()
@@ -188,11 +192,9 @@ namespace Mirage.Sockets.Udp
 
         public int Receive(byte[] buffer, out IEndPoint endPoint)
         {
-            EndPoint netEndPoint = ToEndPoint(AnyEndpoint);
-
-            int c = socket.ReceiveFrom(buffer, ref netEndPoint);
-
-            endPoint = new EndPointWrapper(netEndPoint as IPEndPoint);
+            int c = socket.ReceiveFrom(buffer, ref NetEndpoint);
+            // NetEndpoint should be the field inside Endpoint
+            endPoint = Endpoint;
             return c;
         }
 
