@@ -29,7 +29,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ServerAcceptsAllClients()
         {
-            server.peer.Bind(Substitute.For<EndPoint>());
+            server.peer.Bind(Substitute.For<IEndPoint>());
 
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             server.peer.OnConnected += connectAction;
@@ -71,7 +71,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void EachServerConnectionIsANewInstance()
         {
-            server.peer.Bind(Substitute.For<EndPoint>());
+            server.peer.Bind(Substitute.For<IEndPoint>());
             var serverConnections = new List<IConnection>();
 
             Action<IConnection> connectAction = (conn) =>

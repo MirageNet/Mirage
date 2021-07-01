@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Linq;
-using System.Net;
 using Mirage.SocketLayer;
 using NUnit.Framework;
 using UnityEngine;
@@ -81,7 +80,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
         [UnityTest]
         public IEnumerator DisconnectEventWhenSentInvalidPacket()
         {
-            (ISocket clientSocket, EndPoint serverEndPoint) = GetSocketAndEndPoint();
+            (ISocket clientSocket, IEndPoint serverEndPoint) = GetSocketAndEndPoint();
             byte[] badMessage = CreateInvalidPacket();
 
             clientSocket.Send(serverEndPoint, badMessage, 20);
@@ -100,12 +99,12 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
             Assert.That(called, Is.EqualTo(1));
         }
 
-        private (ISocket clientSocket, EndPoint serverEndPoint) GetSocketAndEndPoint()
+        private (ISocket clientSocket, IEndPoint serverEndPoint) GetSocketAndEndPoint()
         {
-            EndPoint clientEndPoint = server.Players.First().Connection.EndPoint;
+            IEndPoint clientEndPoint = server.Players.First().Connection.EndPoint;
             TestSocket clientSocket = TestSocket.allSockets[clientEndPoint];
 
-            EndPoint serverEndPoint = ((TestSocketFactory)server.SocketFactory).serverEndpoint;
+            IEndPoint serverEndPoint = ((TestSocketFactory)server.SocketFactory).serverEndpoint;
 
             return (clientSocket, serverEndPoint);
         }

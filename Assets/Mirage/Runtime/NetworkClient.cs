@@ -112,7 +112,7 @@ namespace Mirage
             World = new NetworkWorld();
             InitializeAuthEvents();
 
-            EndPoint endPoint = SocketFactory.GetConnectEndPoint(address, port);
+            IEndPoint endPoint = SocketFactory.GetConnectEndPoint(address, port);
             if (logger.LogEnabled()) logger.Log($"Client connecting to endpoint: {endPoint}");
 
             ISocket socket = SocketFactory.CreateClientSocket();
