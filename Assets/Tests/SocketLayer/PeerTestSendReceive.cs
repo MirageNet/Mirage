@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using Mirage.Tests;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.TestTools;
@@ -38,7 +38,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             Action<IConnection> serverConnect = (conn) => serverConnections.Add(conn);
             server.peer.OnConnected += serverConnect;
 
-            server.peer.Bind(Substitute.For<IEndPoint>());
+            server.peer.Bind(TestEndPoint.CreateSubstitute());
             for (int i = 0; i < ClientCount; i++)
             {
                 clients[i] = new PeerInstanceWithSocket(config);

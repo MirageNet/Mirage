@@ -134,7 +134,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                    {
                        dataArg[i] = data[i];
                    }
-                   x[1] = endPoint ?? Substitute.For<IEndPoint>();
+                   x[1] = endPoint ?? TestEndPoint.CreateSubstitute();
                });
             socket.Receive(Arg.Any<byte[]>(), out Arg.Any<IEndPoint>()).Returns(length ?? data.Length);
         }

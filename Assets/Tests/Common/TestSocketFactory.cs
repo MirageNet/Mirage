@@ -52,7 +52,7 @@ namespace Mirage.Tests
         public TestSocket(string name, IEndPoint endPoint = null)
         {
             this.name = name;
-            this.endPoint = endPoint ?? Substitute.For<IEndPoint>();
+            this.endPoint = endPoint ?? TestEndPoint.CreateSubstitute();
         }
 
 
@@ -125,10 +125,19 @@ namespace Mirage.Tests
         }
     }
 
+    public static class TestEndPoint
+    {
+        public static IEndPoint CreateSubstitute()
+        {
+            IEndPoint endpoint = Substitute.For<IEndPoint>();
+            endpoint.CreateCopy().Returns(endpoint);
+            return endpoint;
+        }
+    }
 
     public class TestSocketFactory : SocketFactory
     {
-        public IEndPoint serverEndpoint = Substitute.For<IEndPoint>();
+        public IEndPoint serverEndpoint = TestEndPoint.CreateSubstitute();
 
         int clientNameIndex;
         int serverNameIndex;
