@@ -1,3 +1,10 @@
+## [98.0.1](https://github.com/MirageNet/Mirage/compare/v98.0.0...v98.0.1) (2021-07-02)
+
+
+### Performance Improvements
+
+* replacing network writer with a faster version that can do bit packing ([#805](https://github.com/MirageNet/Mirage/issues/805)) ([773c58f](https://github.com/MirageNet/Mirage/commit/773c58f75eb77be2a893398d1e27012ee9ba83e6))
+
 # [98.0.0](https://github.com/MirageNet/Mirage/compare/v97.1.2...v98.0.0) (2021-07-02)
 
 
