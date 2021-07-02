@@ -38,7 +38,7 @@ namespace Mirage.SocketLayer
 
         readonly IRawConnection connection;
         readonly ITime time;
-        readonly BufferPool bufferPool;
+        readonly Pool<ByteBuffer> bufferPool;
         readonly Metrics metrics;
 
         //todo implement this
@@ -77,7 +77,7 @@ namespace Mirage.SocketLayer
         /// <param name="connection"></param>
         /// <param name="ackTimeout">how long after last send before sending empty ack</param>
         /// <param name="time"></param>
-        public AckSystem(IRawConnection connection, Config config, ITime time, BufferPool bufferPool, Metrics metrics = null)
+        public AckSystem(IRawConnection connection, Config config, ITime time, Pool<ByteBuffer> bufferPool, Metrics metrics = null)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
 

@@ -202,8 +202,8 @@ namespace Mirage.Weaver
         private static bool IsReadWriteMethod(MethodReference method)
         {
             return
-                method.Is<NetworkWriter>(nameof(NetworkWriter.Write)) ||
-                method.Is<NetworkReader>(nameof(NetworkReader.Read));
+                method.Is(typeof(GenericTypesSerializationExtensions), nameof(GenericTypesSerializationExtensions.Write)) ||
+                method.Is(typeof(GenericTypesSerializationExtensions), nameof(GenericTypesSerializationExtensions.Read));
         }
 
 

@@ -4,6 +4,7 @@ using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+
 namespace Mirage.Weaver
 {
     public enum Client { Owner, Observers, Connection }
@@ -67,8 +68,8 @@ namespace Mirage.Weaver
 
             if (hasNetworkConnection)
             {
-               // this is called in the skeleton (the client)
-               // the client should just get the connection to the server and pass that in
+                // this is called in the skeleton (the client)
+                // the client should just get the connection to the server and pass that in
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
                 worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
@@ -193,9 +194,7 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Callvirt, sendTargetRpcRef));
             }
 
-            // NetworkWriterPool.Recycle(writer);
-            worker.Append(worker.Create(OpCodes.Ldloc, writer));
-            worker.Append(worker.Create(OpCodes.Call, () => NetworkWriterPool.Recycle(default)));
+            NetworkWriterHelper.CallRelease(module, worker, writer);
 
             worker.Append(worker.Create(OpCodes.Ret));
 

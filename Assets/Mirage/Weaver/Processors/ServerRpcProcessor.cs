@@ -97,9 +97,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
             CallSendServerRpc(md, worker);
 
-            // NetworkWriterPool.Recycle(writer);
-            worker.Append(worker.Create(OpCodes.Ldloc, writer));
-            worker.Append(worker.Create(OpCodes.Call, () => NetworkWriterPool.Recycle(default)));
+            NetworkWriterHelper.CallRelease(module, worker, writer);
 
             worker.Append(worker.Create(OpCodes.Ret));
 

@@ -502,8 +502,8 @@ namespace Mirage
             comp2.syncMode = SyncMode.Owner;
 
             // serialize all
-            var ownerWriter = new NetworkWriter();
-            var observersWriter = new NetworkWriter();
+            var ownerWriter = new NetworkWriter(1300);
+            var observersWriter = new NetworkWriter(1300);
 
             // serialize should propagate exceptions
             Assert.Throws<Exception>(() =>
@@ -547,8 +547,8 @@ namespace Mirage
             comp2.value = "67890";
 
             // serialize
-            var ownerWriter = new NetworkWriter();
-            var observersWriter = new NetworkWriter();
+            var ownerWriter = new NetworkWriter(1300);
+            var observersWriter = new NetworkWriter(1300);
             identity.OnSerializeAll(true, ownerWriter, observersWriter);
 
             // reset component values
@@ -556,11 +556,13 @@ namespace Mirage
             comp2.value = null;
 
             // deserialize all
-            var reader = new NetworkReader(ownerWriter.ToArray());
+            var reader = new NetworkReader();
+            reader.Reset(ownerWriter.ToArraySegment());
             Assert.Throws<DeserializeFailedException>(() =>
             {
                 identity.OnDeserializeAll(reader, true);
             });
+            reader.Dispose();
         }
 
         [Test]

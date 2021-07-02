@@ -1,26 +1,69 @@
 using System;
+using System.Runtime.InteropServices;
 
 namespace Mirage.Serialization
 {
     public static class SystemTypesExtensions
     {
-        public static void WriteByte(this NetworkWriter writer, byte value) => writer.WriteByte(value);
+        // todo benchmark converters 
+        /// <summary>
+        /// Converts between uint and float without allocations
+        /// </summary>
+        [StructLayout(LayoutKind.Explicit)]
+        internal struct UIntFloat
+        {
+            [FieldOffset(0)]
+            public float floatValue;
 
-        public static void WriteSByte(this NetworkWriter writer, sbyte value) => writer.WriteByte((byte)value);
+            [FieldOffset(0)]
+            public uint intValue;
+        }
+
+        /// <summary>
+        /// Converts between ulong and double without allocations
+        /// </summary>
+        [StructLayout(LayoutKind.Explicit)]
+        internal struct UIntDouble
+        {
+            [FieldOffset(0)]
+            public double doubleValue;
+
+            [FieldOffset(0)]
+            public ulong longValue;
+        }
+
+        /// <summary>
+        /// Converts between ulong and decimal without allocations
+        /// </summary>
+        [StructLayout(LayoutKind.Explicit)]
+        internal struct UIntDecimal
+        {
+            [FieldOffset(0)]
+            public ulong longValue1;
+
+            [FieldOffset(8)]
+            public ulong longValue2;
+
+            [FieldOffset(0)]
+            public decimal decimalValue;
+        }
+
+        public static void WriteByteExtension(this NetworkWriter writer, byte value) => writer.WriteByte(value);
+
+        public static void WriteSByteExtension(this NetworkWriter writer, sbyte value) => writer.WriteSByte(value);
 
         public static void WriteChar(this NetworkWriter writer, char value) => writer.WriteUInt16(value);
 
-        public static void WriteBoolean(this NetworkWriter writer, bool value) => writer.WriteByte((byte)(value ? 1 : 0));
+        public static void WriteBooleanExtension(this NetworkWriter writer, bool value) => writer.WriteBoolean(value);
 
-        public static void WriteUInt16(this NetworkWriter writer, ushort value)
+        public static void WriteUInt16Extension(this NetworkWriter writer, ushort value)
         {
-            writer.WriteByte((byte)value);
-            writer.WriteByte((byte)(value >> 8));
+            writer.WriteUInt16(value);
         }
 
-        public static void WriteInt16(this NetworkWriter writer, short value) => writer.WriteUInt16((ushort)value);
+        public static void WriteInt16Extension(this NetworkWriter writer, short value) => writer.WriteInt16(value);
 
-        public static void WriteSingle(this NetworkWriter writer, float value)
+        public static void WriteSingleConverter(this NetworkWriter writer, float value)
         {
             var converter = new UIntFloat
             {
@@ -28,8 +71,7 @@ namespace Mirage.Serialization
             };
             writer.WriteUInt32(converter.intValue);
         }
-
-        public static void WriteDouble(this NetworkWriter writer, double value)
+        public static void WriteDoubleConverter(this NetworkWriter writer, double value)
         {
             var converter = new UIntDouble
             {
@@ -37,8 +79,7 @@ namespace Mirage.Serialization
             };
             writer.WriteUInt64(converter.longValue);
         }
-
-        public static void WriteDecimal(this NetworkWriter writer, decimal value)
+        public static void WriteDecimalConverter(this NetworkWriter writer, decimal value)
         {
             // the only way to read it without allocations is to both read and
             // write it with the FloatConverter (which is not binary compatible
@@ -70,19 +111,13 @@ namespace Mirage.Serialization
 
 
 
-        public static byte ReadByte(this NetworkReader reader) => reader.ReadByte();
-        public static sbyte ReadSByte(this NetworkReader reader) => (sbyte)reader.ReadByte();
+        public static byte ReadByteExtension(this NetworkReader reader) => reader.ReadByte();
+        public static sbyte ReadSByteExtension(this NetworkReader reader) => reader.ReadSByte();
         public static char ReadChar(this NetworkReader reader) => (char)reader.ReadUInt16();
-        public static bool ReadBoolean(this NetworkReader reader) => reader.ReadByte() != 0;
-        public static short ReadInt16(this NetworkReader reader) => (short)reader.ReadUInt16();
-        public static ushort ReadUInt16(this NetworkReader reader)
-        {
-            ushort value = 0;
-            value |= reader.ReadByte();
-            value |= (ushort)(reader.ReadByte() << 8);
-            return value;
-        }
-        public static float ReadSingle(this NetworkReader reader)
+        public static bool ReadBooleanExtension(this NetworkReader reader) => reader.ReadBoolean();
+        public static short ReadInt16Extension(this NetworkReader reader) => reader.ReadInt16();
+        public static ushort ReadUInt16Extension(this NetworkReader reader) => reader.ReadUInt16();
+        public static float ReadSingleConverter(this NetworkReader reader)
         {
             var converter = new UIntFloat
             {
@@ -90,7 +125,7 @@ namespace Mirage.Serialization
             };
             return converter.floatValue;
         }
-        public static double ReadDouble(this NetworkReader reader)
+        public static double ReadDoubleConverter(this NetworkReader reader)
         {
             var converter = new UIntDouble
             {
@@ -98,7 +133,7 @@ namespace Mirage.Serialization
             };
             return converter.doubleValue;
         }
-        public static decimal ReadDecimal(this NetworkReader reader)
+        public static decimal ReadDecimalConverter(this NetworkReader reader)
         {
             var converter = new UIntDecimal
             {

@@ -20,8 +20,8 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     /// </summary>
     public class AckSystemTestBase
     {
-        protected readonly System.Random rand = new System.Random();
-        protected readonly BufferPool bufferPool = new BufferPool(new Config().MaxPacketSize, 100, 1000);
+        protected readonly Random rand = new Random();
+        protected Pool<ByteBuffer> bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, 1300, 100, 1000);
 
         protected byte[] createRandomData(int id)
         {
@@ -74,7 +74,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         public void SendRaw(byte[] packet, int length)
         {
             byte[] clone = new byte[length];
-            System.Buffer.BlockCopy(packet, 0, clone, 0, length);
+            Buffer.BlockCopy(packet, 0, clone, 0, length);
             packets.Add(clone);
         }
     }

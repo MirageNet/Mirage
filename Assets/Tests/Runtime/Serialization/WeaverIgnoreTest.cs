@@ -19,15 +19,17 @@ namespace Mirage.Tests.Runtime.Serialization
                 first = 10,
                 second = 20,
             };
-            var writer = new NetworkWriter();
+            var writer = new NetworkWriter(1300);
             writer.Write(data);
-            var reader = new NetworkReader(writer.ToArraySegment());
+            var reader = new NetworkReader();
+            reader.Reset(writer.ToArraySegment());
             MyCustomType copy = reader.Read<MyCustomType>();
 
             // should have copied both fields,
             // if it uses custom extension methods it will only write first
             Assert.That(copy.first, Is.EqualTo(data.first));
             Assert.That(copy.second, Is.EqualTo(data.second));
+            reader.Dispose();
         }
 
     }

@@ -202,7 +202,7 @@ namespace Mirage
 
         /// <summary>
         /// Sends a block of data
-        /// <para>Only use this method if data has message Id already included, other wise receives wont know how to handle it. Otherwise use <see cref="Send{T}(T, int)"/></para>
+        /// <para>Only use this method if data has message Id already included, otherwise receives wont know how to handle it. Otherwise use <see cref="Send{T}(T, int)"/></para>
         /// </summary>
         /// <param name="segment"></param>
         /// <param name="channelId"></param>

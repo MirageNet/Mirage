@@ -8,7 +8,7 @@ namespace Mirage
     /// A profiler can subscribe to these events and
     /// present the data in a friendly way to the user
     /// </summary>
-    // todo find a way to combime this with new peer metrics for more data
+    // todo find a way to combine this with new peer metrics for more data
     public static class NetworkDiagnostics
     {
         /// <summary>
@@ -79,16 +79,16 @@ namespace Mirage
             var message = default(T);
 
             // record start position for NetworkDiagnostics because reader might contain multiple messages if using batching
-            int startPos = reader.Position;
+            int startPos = reader.BitPosition;
             try
             {
                 message = reader.Read<T>();
             }
             finally
             {
-                int endPos = reader.Position;
-                int byteLength = (endPos - startPos);
-                OnReceive(message, byteLength);
+                int endPos = reader.BitPosition;
+                int byteLength = (endPos - startPos) >> 3;
+                NetworkDiagnostics.OnReceive(message, byteLength);
             }
 
             return message;

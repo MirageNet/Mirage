@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Mirage.Collections;
-using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -17,23 +16,6 @@ namespace Mirage.Tests.Runtime
         SyncDictionaryIntString serverSyncDictionary;
         SyncDictionaryIntString clientSyncDictionary;
 
-        void SerializeAllTo<T>(T fromList, T toList) where T : ISyncObject
-        {
-            var writer = new NetworkWriter();
-            fromList.OnSerializeAll(writer);
-            var reader = new NetworkReader(writer.ToArray());
-            toList.OnDeserializeAll(reader);
-        }
-
-        void SerializeDeltaTo<T>(T fromList, T toList) where T : ISyncObject
-        {
-            var writer = new NetworkWriter();
-            fromList.OnSerializeDelta(writer);
-            var reader = new NetworkReader(writer.ToArray());
-            toList.OnDeserializeDelta(reader);
-            fromList.Flush();
-        }
-
         [SetUp]
         public void SetUp()
         {
@@ -44,7 +26,7 @@ namespace Mirage.Tests.Runtime
             serverSyncDictionary.Add(0, "Hello");
             serverSyncDictionary.Add(1, "World");
             serverSyncDictionary.Add(2, "!");
-            SerializeAllTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeAllTo(serverSyncDictionary, clientSyncDictionary);
         }
 
         [Test]
@@ -65,7 +47,7 @@ namespace Mirage.Tests.Runtime
         {
             Action callback = Substitute.For<Action>();
             clientSyncDictionary.OnClear += callback;
-            SerializeAllTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeAllTo(serverSyncDictionary, clientSyncDictionary);
             callback.Received().Invoke();
         }
 
@@ -74,7 +56,7 @@ namespace Mirage.Tests.Runtime
         {
             Action<int, string> callback = Substitute.For<Action<int, string>>();
             clientSyncDictionary.OnInsert += callback;
-            SerializeAllTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeAllTo(serverSyncDictionary, clientSyncDictionary);
 
             callback.Received().Invoke(0, "Hello");
             callback.Received().Invoke(1, "World");
@@ -86,7 +68,7 @@ namespace Mirage.Tests.Runtime
         {
             Action callback = Substitute.For<Action>();
             clientSyncDictionary.OnChange += callback;
-            SerializeAllTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeAllTo(serverSyncDictionary, clientSyncDictionary);
             callback.Received().Invoke();
         }
 
@@ -94,7 +76,7 @@ namespace Mirage.Tests.Runtime
         public void TestAdd()
         {
             serverSyncDictionary.Add(4, "yay");
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             Assert.That(clientSyncDictionary.ContainsKey(4));
             Assert.That(clientSyncDictionary[4], Is.EqualTo("yay"));
         }
@@ -103,7 +85,7 @@ namespace Mirage.Tests.Runtime
         public void TestClear()
         {
             serverSyncDictionary.Clear();
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             Assert.That(serverSyncDictionary, Is.EquivalentTo(new SyncDictionaryIntString()));
         }
 
@@ -111,7 +93,7 @@ namespace Mirage.Tests.Runtime
         public void TestSet()
         {
             serverSyncDictionary[1] = "yay";
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             Assert.That(clientSyncDictionary.ContainsKey(1));
             Assert.That(clientSyncDictionary[1], Is.EqualTo("yay"));
         }
@@ -120,7 +102,7 @@ namespace Mirage.Tests.Runtime
         public void TestBareSet()
         {
             serverSyncDictionary[4] = "yay";
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             Assert.That(clientSyncDictionary.ContainsKey(4));
             Assert.That(clientSyncDictionary[4], Is.EqualTo("yay"));
         }
@@ -129,7 +111,7 @@ namespace Mirage.Tests.Runtime
         public void TestBareSetNull()
         {
             serverSyncDictionary[4] = null;
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             Assert.That(clientSyncDictionary[4], Is.Null);
             Assert.That(clientSyncDictionary.ContainsKey(4));
         }
@@ -139,7 +121,7 @@ namespace Mirage.Tests.Runtime
         {
             serverSyncDictionary[1] = "yay";
             serverSyncDictionary[1] = "world";
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             Assert.That(clientSyncDictionary[1], Is.EqualTo("world"));
         }
 
@@ -147,7 +129,7 @@ namespace Mirage.Tests.Runtime
         public void TestNullSet()
         {
             serverSyncDictionary[1] = null;
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             Assert.That(clientSyncDictionary.ContainsKey(1));
             Assert.That(clientSyncDictionary[1], Is.Null);
         }
@@ -156,7 +138,7 @@ namespace Mirage.Tests.Runtime
         public void TestRemove()
         {
             serverSyncDictionary.Remove(1);
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             Assert.That(!clientSyncDictionary.ContainsKey(1));
         }
 
@@ -164,10 +146,10 @@ namespace Mirage.Tests.Runtime
         public void TestMultSync()
         {
             serverSyncDictionary.Add(10, "1");
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             // add some delta and see if it applies
             serverSyncDictionary.Add(11, "2");
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             Assert.That(clientSyncDictionary.ContainsKey(10));
             Assert.That(clientSyncDictionary[10], Is.EqualTo("1"));
             Assert.That(clientSyncDictionary.ContainsKey(11));
@@ -179,7 +161,7 @@ namespace Mirage.Tests.Runtime
         {
             Assert.That(!clientSyncDictionary.Contains(new KeyValuePair<int, string>(2, "Hello")));
             serverSyncDictionary[2] = "Hello";
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             Assert.That(clientSyncDictionary.Contains(new KeyValuePair<int, string>(2, "Hello")));
         }
 
@@ -189,7 +171,7 @@ namespace Mirage.Tests.Runtime
             Action<int, string> callback = Substitute.For<Action<int, string>>();
             clientSyncDictionary.OnInsert += callback;
             serverSyncDictionary.Add(3, "yay");
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             callback.Received().Invoke(3, "yay");
         }
 
@@ -199,7 +181,7 @@ namespace Mirage.Tests.Runtime
             Action<int, string> callback = Substitute.For<Action<int, string>>();
             serverSyncDictionary.OnInsert += callback;
             serverSyncDictionary.Add(3, "yay");
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             callback.Received().Invoke(3, "yay");
         }
 
@@ -209,7 +191,7 @@ namespace Mirage.Tests.Runtime
             Action<int, string> callback = Substitute.For<Action<int, string>>();
             clientSyncDictionary.OnRemove += callback;
             serverSyncDictionary.Remove(1);
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             callback.Received().Invoke(1, "World");
         }
 
@@ -219,7 +201,7 @@ namespace Mirage.Tests.Runtime
             Action callback = Substitute.For<Action>();
             clientSyncDictionary.OnClear += callback;
             serverSyncDictionary.Clear();
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             callback.Received().Invoke();
         }
 
@@ -230,7 +212,7 @@ namespace Mirage.Tests.Runtime
             clientSyncDictionary.OnChange += callback;
             serverSyncDictionary.Add(3, "1");
             serverSyncDictionary.Add(4, "1");
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             callback.Received(1).Invoke();
         }
 
@@ -240,7 +222,7 @@ namespace Mirage.Tests.Runtime
             Action<int, string, string> callback = Substitute.For<Action<int, string, string>>();
             clientSyncDictionary.OnSet += callback;
             serverSyncDictionary[0] = "yay";
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
             callback.Received().Invoke(0, "Hello", "yay");
         }
 
@@ -320,7 +302,7 @@ namespace Mirage.Tests.Runtime
         public void DirtyTest()
         {
             // Sync Delta to clear dirty
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
 
             // nothing to send
             Assert.That(serverSyncDictionary.IsDirty, Is.False);
@@ -328,7 +310,7 @@ namespace Mirage.Tests.Runtime
             // something has changed
             serverSyncDictionary.Add(15, "yay");
             Assert.That(serverSyncDictionary.IsDirty, Is.True);
-            SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
+            SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
 
             // data has been flushed,  should go back to clear
             Assert.That(serverSyncDictionary.IsDirty, Is.False);
@@ -349,7 +331,7 @@ namespace Mirage.Tests.Runtime
             // Check Add and Sync without errors
             hostList.Add(30, "hello");
             hostList.Add(35, "world");
-            SerializeDeltaTo(hostList, clientList2);
+            SerializeHelper.SerializeDeltaTo(hostList, clientList2);
         }
 
         [Test]
