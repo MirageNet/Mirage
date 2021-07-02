@@ -1,3 +1,15 @@
+# [98.0.0](https://github.com/MirageNet/Mirage/compare/v97.1.2...v98.0.0) (2021-07-02)
+
+
+### Performance Improvements
+
+* improving how socketlayer handles endpoints ([#856](https://github.com/MirageNet/Mirage/issues/856)) ([59ce7e0](https://github.com/MirageNet/Mirage/commit/59ce7e097d46d7f2cb7eaa01736dde36066396c5))
+
+
+### BREAKING CHANGES
+
+* Socket functions now use an interface instead of the EndPoint class, Socket Implementations should create a custom Endpoint class for their socket.
+
 ## [97.1.2](https://github.com/MirageNet/Mirage/compare/v97.1.1...v97.1.2) (2021-07-01)
 
 
