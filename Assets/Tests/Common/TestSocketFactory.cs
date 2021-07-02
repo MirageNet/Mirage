@@ -76,17 +76,17 @@ namespace Mirage.Tests
             return received.Count > 0;
         }
 
-        int ISocket.Receive(byte[] data, out IEndPoint endPoint)
+        int ISocket.Receive(byte[] buffer, out IEndPoint endPoint)
         {
             Packet next = received.Dequeue();
             endPoint = next.endPoint;
             int length = next.length;
 
-            Buffer.BlockCopy(next.data, 0, data, 0, length);
+            Buffer.BlockCopy(next.data, 0, buffer, 0, length);
             return length;
         }
 
-        void ISocket.Send(IEndPoint remoteEndPoint, byte[] data, int length)
+        void ISocket.Send(IEndPoint remoteEndPoint, byte[] packet, int length)
         {
             AddThisSocket();
 
@@ -97,7 +97,7 @@ namespace Mirage.Tests
             }
 
             // create copy because data is from buffer
-            byte[] clone = data.Take(length).ToArray();
+            byte[] clone = packet.Take(length).ToArray();
             Sent.Add(new Packet
             {
                 endPoint = remoteEndPoint,
