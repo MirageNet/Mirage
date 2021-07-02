@@ -52,12 +52,12 @@ namespace Mirage.SocketLayer
         /// <param name="logger"></param>
         public Pool(Func<int, Pool<T>, T> createNew, int bufferSize, int startPoolSize, int maxPoolSize, ILogger logger = null)
         {
-            if (startPoolSize > maxPoolSize) throw new ArgumentException("Start Size must be less than max size", nameof(startPoolSize));
+            if (startPoolSize > maxPoolSize) throw new ArgumentException("Start size must be less than max size", nameof(startPoolSize));
+            this.createNew = createNew ?? throw new ArgumentNullException(nameof(createNew));
 
             this.bufferSize = bufferSize;
             this.maxPoolSize = maxPoolSize;
             this.logger = logger ?? Debug.unityLogger;
-            this.createNew = createNew;
 
             pool = new T[maxPoolSize];
             for (int i = 0; i < startPoolSize; i++)
@@ -68,7 +68,7 @@ namespace Mirage.SocketLayer
 
         private T CreateNewBuffer()
         {
-            if (created >= maxPoolSize && logger.IsLogTypeAllowed(LogType.Warning)) logger.Log(LogType.Warning, $"Buffer Max Size reached, created:{created} max:{maxPoolSize}");
+            if (created >= maxPoolSize && logger.IsLogTypeAllowed(LogType.Warning)) logger.Log(LogType.Warning, $"Buffer Max Size reached, created:{created + 1} max:{maxPoolSize}");
             created++;
             return createNew.Invoke(bufferSize, this);
         }
@@ -83,7 +83,7 @@ namespace Mirage.SocketLayer
             {
                 // todo is it a security risk to not clear buffer?
 
-                // take then decriment
+                // take then decrement
                 T item = pool[next];
                 pool[next] = null;
                 next--;
