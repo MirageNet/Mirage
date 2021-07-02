@@ -30,42 +30,9 @@ using UnityEngine;
 
 namespace Mirage.Serialization
 {
-    public static class BitMask
-    {
-        /// <summary>
-        /// Creates mask for <paramref name="bits"/>
-        /// <para>
-        /// (showing 32 bits for simplify, result is 64 bit)
-        /// <br/>
-        /// Example bits = 4 => mask = 00000000_00000000_00000000_00001111
-        /// <br/>
-        /// Example bits = 10 => mask = 00000000_00000000_00000011_11111111
-        /// </para>
-        /// </summary>
-        /// <param name="bits"></param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong Mask(int bits)
-        {
-            return bits == 0 ? 0 : ulong.MaxValue >> (64 - bits);
-        }
-
-        /// <summary>
-        /// Creates Mask either side of start and end
-        /// <para>Note this mask is only valid for start [0..63] and end [0..64]4</para>
-        /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong OuterMask(int start, int end)
-        {
-            return (ulong.MaxValue << start) ^ (ulong.MaxValue >> (64 - end));
-        }
-    }
     /// <summary>
-    /// Binary stream Writer. Supports simple types, buffers, arrays, structs, and nested types
-    /// <para>Use <see cref="NetworkWriterPool.GetWriter">NetworkWriter.GetWriter</see> to reduce memory allocation</para>
+    /// Bit writer, writes values to a buffer on a bit level
+    /// <para>Use <see cref="NetworkWriterPool.GetWriter"/> to reduce memory allocation</para>
     /// </summary>
     public unsafe class NetworkWriter
     {
@@ -108,7 +75,7 @@ namespace Mirage.Serialization
         {
             this.allowResize = allowResize;
 
-            // ensure capcacity is multiple of 8
+            // ensure capacity is multiple of 8
             int ulongCapacity = Mathf.CeilToInt(minByteCapacity / (float)sizeof(ulong));
             int byteCapacity = ulongCapacity * sizeof(ulong);
 
@@ -148,7 +115,7 @@ namespace Mirage.Serialization
         }
         /// <summary>
         /// Frees the handle for the buffer
-        /// <para>In order for <see cref="PooledNetworkWriter"/> to work This class can not have <see cref="IDisposable"/>. Instead we call this method from Finalze</para>
+        /// <para>In order for <see cref="PooledNetworkWriter"/> to work This class can not have <see cref="IDisposable"/>. Instead we call this method from finalize</para>
         /// </summary>
         void FreeHandle()
         {
@@ -351,13 +318,13 @@ namespace Mirage.Serialization
 
         /// <summary>
         /// <para>
-        ///    Moves poition to nearest byte then copies struct to that position
+        ///    Moves position to nearest byte then copies struct to that position
         /// </para>
         /// See <see href="https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.UnsafeUtility.CopyStructureToPtr.html">UnsafeUtility.CopyStructureToPtr</see>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
-        /// <param name="byteSize">size of stuct, in bytes</param>
+        /// <param name="byteSize">size of struct, in bytes</param>
         public void PadAndCopy<T>(ref T value, int byteSize) where T : struct
         {
             PadToByte();
@@ -427,7 +394,7 @@ namespace Mirage.Serialization
             //      if bitlength == 0 then write will return
             Write(*otherPtr, bitLength);
 
-            Debug.Assert(bitPosition == newBit, "bitPosition Shoudl already be equal to newBit because it would have incremented each WriteUInt64");
+            Debug.Assert(bitPosition == newBit, "bitPosition should already be equal to newBit because it would have incremented each WriteUInt64");
             bitPosition = newBit;
         }
     }

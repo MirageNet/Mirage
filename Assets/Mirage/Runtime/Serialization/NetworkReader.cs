@@ -31,8 +31,8 @@ using Unity.Collections.LowLevel.Unsafe;
 namespace Mirage.Serialization
 {
     /// <summary>
-    /// Binary stream Reader. Supports simple types, buffers, arrays, structs, and nested types
-    /// <para>Use <see cref="NetworkReaderPool.GetReader">NetworkReaderPool.GetReader</see> to reduce memory allocation</para>
+    /// Bit writer, writes values to a buffer on a bit level
+    /// <para>Use <see cref="NetworkReaderPool.GetReader"/> to reduce memory allocation</para>
     /// </summary>
     public unsafe class NetworkReader : IDisposable
     {
@@ -304,7 +304,7 @@ namespace Mirage.Serialization
 
         /// <summary>
         /// <para>
-        ///    Moves poition to nearest byte then copies struct from that position
+        ///    Moves position to nearest byte then copies struct from that position
         /// </para>
         /// See <see href="https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.UnsafeUtility.CopyPtrToStructure.html">UnsafeUtility.CopyPtrToStructure</see>
         /// </summary>
@@ -325,7 +325,7 @@ namespace Mirage.Serialization
 
         /// <summary>
         /// <para>
-        ///    Moves poition to nearest byte then copies bytes from that position
+        ///    Moves position to nearest byte then copies bytes from that position
         /// </para>
         /// </summary>
         /// <param name="array"></param>
