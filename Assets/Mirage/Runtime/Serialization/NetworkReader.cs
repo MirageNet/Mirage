@@ -301,12 +301,6 @@ namespace Mirage.Serialization
             return result;
         }
 
-        public void UnsafeCopy(ulong* targetPtr, int count)
-        {
-            // todo Implemented this, see NetworkWriter.UnsafeCopy
-            throw new NotImplementedException();
-        }
-
 
         /// <summary>
         /// <para>

@@ -350,30 +350,6 @@ namespace Mirage.Serialization
         }
 
         /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="valuePtr"></param>
-        /// <param name="count">How many ulongs to copy, eg 64 bits</param>
-        public void UnsafeCopy(ulong* valuePtr, int count)
-        {
-            if (count == 0) { return; }
-
-            int newBit = bitPosition + (64 * count);
-            CheckNewLength(newBit);
-
-
-            ulong* startPtr = longPtr + (bitPosition >> 6);
-            for (int i = 0; i < count; i++)
-            {
-                WriteUInt64(startPtr[i]);
-            }
-
-            Debug.Assert(bitPosition == newBit, "bitPosition Shoudl already be equal to newBit because it would have incremented each WriteUInt64");
-
-            bitPosition = newBit;
-        }
-
-        /// <summary>
         /// <para>
         ///    Moves poition to nearest byte then copies struct to that position
         /// </para>
