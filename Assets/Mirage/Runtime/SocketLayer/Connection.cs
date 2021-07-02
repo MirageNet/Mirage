@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using UnityEngine;
 
 namespace Mirage.SocketLayer
@@ -9,7 +8,7 @@ namespace Mirage.SocketLayer
     /// </summary>
     public interface IConnection
     {
-        EndPoint EndPoint { get; }
+        IEndPoint EndPoint { get; }
         ConnectionState State { get; }
 
         void Disconnect();
@@ -97,7 +96,7 @@ namespace Mirage.SocketLayer
         public bool Connected => State == ConnectionState.Connected;
 
         private readonly Peer peer;
-        public readonly EndPoint EndPoint;
+        public readonly IEndPoint EndPoint;
         private readonly IDataHandler dataHandler;
 
         private readonly ConnectingTracker connectingTracker;
@@ -107,13 +106,16 @@ namespace Mirage.SocketLayer
 
         private readonly AckSystem ackSystem;
 
-        EndPoint IConnection.EndPoint => EndPoint;
+        IEndPoint IConnection.EndPoint => EndPoint;
 
-        internal Connection(Peer peer, EndPoint endPoint, IDataHandler dataHandler, Config config, Time time, BufferPool bufferPool, ILogger logger, Metrics metrics)
+        internal Connection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, Time time, BufferPool bufferPool, ILogger logger, Metrics metrics)
         {
             this.peer = peer;
             this.logger = logger ?? Debug.unityLogger;
-            EndPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
+
+            // create copy of endpoint for this connection
+            // this is so that we can re-use the endpoint (reduces alloc) for receive and not worry about changing internal data needed for each connection
+            EndPoint = endPoint?.CreateCopy() ?? throw new ArgumentNullException(nameof(endPoint));
             this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
             State = ConnectionState.Created;
 

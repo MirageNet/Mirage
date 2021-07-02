@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using Mirage.Tests;
 using NSubstitute;
 using NUnit.Framework;
@@ -85,7 +84,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         /// <summary>
         /// endpoint that other sockets use to send to this
         /// </summary>
-        public EndPoint endPoint;
+        public IEndPoint endPoint;
 
         public PeerInstanceWithSocket(Config config = null) : base(config, socket: new TestSocket("TestInstance"))
         {
@@ -121,12 +120,12 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             return true;
         }
 
-        public static void SetupReceiveCall(this ISocket socket, byte[] data, EndPoint endPoint = null, int? length = null)
+        public static void SetupReceiveCall(this ISocket socket, byte[] data, IEndPoint endPoint = null, int? length = null)
         {
             socket.Poll().Returns(true, false);
             socket
                // when any call
-               .When(x => x.Receive(Arg.Any<byte[]>(), out Arg.Any<EndPoint>()))
+               .When(x => x.Receive(Arg.Any<byte[]>(), out Arg.Any<IEndPoint>()))
                // return the data from endpoint
                .Do(x =>
                {
@@ -135,9 +134,9 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                    {
                        dataArg[i] = data[i];
                    }
-                   x[1] = endPoint ?? Substitute.For<EndPoint>();
+                   x[1] = endPoint ?? TestEndPoint.CreateSubstitute();
                });
-            socket.Receive(Arg.Any<byte[]>(), out Arg.Any<EndPoint>()).Returns(length ?? data.Length);
+            socket.Receive(Arg.Any<byte[]>(), out Arg.Any<IEndPoint>()).Returns(length ?? data.Length);
         }
     }
 }

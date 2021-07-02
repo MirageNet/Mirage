@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using Mirage.Logging;
 using Mirage.SocketLayer;
 using UnityEngine;
@@ -58,7 +57,7 @@ namespace Mirage
             return name;
         }
 
-        EndPoint IConnection.EndPoint => new PipeEndPoint();
+        IEndPoint IConnection.EndPoint => new PipeEndPoint();
 
 
         public ConnectionState State { get; private set; } = ConnectionState.Connected;
@@ -117,8 +116,13 @@ namespace Mirage
             otherHandler.ReceiveMessage(otherConnection, new ArraySegment<byte>(packet, offset, length));
         }
 
-        public class PipeEndPoint : EndPoint
+        public class PipeEndPoint : IEndPoint
         {
+            IEndPoint IEndPoint.CreateCopy()
+            {
+                // never need copy of pipeendpoint
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>

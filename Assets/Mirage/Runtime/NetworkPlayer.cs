@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Mirage.SocketLayer;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -70,7 +70,7 @@ namespace Mirage
         /// The IP address / URL / FQDN associated with the connection.
         /// Can be useful for a game master to do IP Bans etc.
         /// </summary>
-        public EndPoint Address => connection.EndPoint;
+        public IEndPoint Address => connection.EndPoint;
 
         public SocketLayer.IConnection Connection => connection;
 

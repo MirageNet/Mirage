@@ -25,19 +25,19 @@ namespace Mirage.Sockets.Udp
             return new UdpSocket();
         }
 
-        public override EndPoint GetBindEndPoint()
+        public override IEndPoint GetBindEndPoint()
         {
-            return new IPEndPoint(IPAddress.IPv6Any, port);
+            return new EndPointWrapper(new IPEndPoint(IPAddress.IPv6Any, port));
         }
 
-        public override EndPoint GetConnectEndPoint(string address = null, ushort? port = null)
+        public override IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
             string addressString = address ?? this.address;
             IPAddress ipAddress = getAddress(addressString);
 
             ushort portIn = port ?? (ushort)this.port;
 
-            return new IPEndPoint(ipAddress, portIn);
+            return new EndPointWrapper(new IPEndPoint(ipAddress, portIn));
         }
 
         private IPAddress getAddress(string addressString)
@@ -67,24 +67,60 @@ namespace Mirage.Sockets.Udp
         private static bool IsWebgl => Application.platform == RuntimePlatform.WebGLPlayer;
     }
 
+    public class EndPointWrapper : IEndPoint
+    {
+        public EndPoint inner;
+
+        public EndPointWrapper(EndPoint endPoint)
+        {
+            inner = endPoint;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is EndPointWrapper other)
+            {
+                return inner.Equals(other.inner);
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return inner.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return inner.ToString();
+        }
+
+        IEndPoint IEndPoint.CreateCopy()
+        {
+            // copy the inner endpoint
+            EndPoint copy = inner.Create(inner.Serialize());
+            return new EndPointWrapper(copy);
+        }
+    }
+
     public class UdpSocket : ISocket
     {
         Socket socket;
-        IPEndPoint AnyEndpoint;
+        EndPointWrapper Endpoint;
 
-        public void Bind(EndPoint endPoint)
+        public void Bind(IEndPoint endPoint)
         {
-            AnyEndpoint = endPoint as IPEndPoint;
+            Endpoint = (EndPointWrapper)endPoint;
 
-            socket = CreateSocket(endPoint);
+            socket = CreateSocket(Endpoint.inner);
             socket.DualMode = true;
-
-            socket.Bind(endPoint);
+            socket.Bind(Endpoint.inner);
         }
 
         static Socket CreateSocket(EndPoint endPoint)
         {
-            var socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
+            var ipEndPoint = (IPEndPoint)endPoint;
+            var socket = new Socket(ipEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
             {
                 Blocking = false,
             };
@@ -126,13 +162,12 @@ namespace Mirage.Sockets.Udp
             }
         }
 
-        public void Connect(EndPoint endPoint)
+        public void Connect(IEndPoint endPoint)
         {
-            AnyEndpoint = endPoint as IPEndPoint;
+            Endpoint = (EndPointWrapper)endPoint;
 
-            socket = CreateSocket(endPoint);
-
-            socket.Connect(endPoint);
+            socket = CreateSocket(Endpoint.inner);
+            socket.Connect(Endpoint.inner);
         }
 
         public void Close()
@@ -150,18 +185,20 @@ namespace Mirage.Sockets.Udp
             return socket.Poll(0, SelectMode.SelectRead);
         }
 
-        public int Receive(byte[] buffer, out EndPoint endPoint)
+        public int Receive(byte[] buffer, out IEndPoint endPoint)
         {
-            endPoint = AnyEndpoint;
-            int c = socket.ReceiveFrom(buffer, ref endPoint);
+            int c = socket.ReceiveFrom(buffer, ref Endpoint.inner);
+            endPoint = Endpoint;
             return c;
         }
 
-        public void Send(EndPoint endPoint, byte[] packet, int length)
+        public void Send(IEndPoint endPoint, byte[] packet, int length)
         {
             // todo check disconnected
             // todo what SocketFlags??
-            socket.SendTo(packet, length, SocketFlags.None, endPoint);
+
+            EndPoint netEndPoint = ((EndPointWrapper)endPoint).inner;
+            socket.SendTo(packet, length, SocketFlags.None, netEndPoint);
         }
     }
 }

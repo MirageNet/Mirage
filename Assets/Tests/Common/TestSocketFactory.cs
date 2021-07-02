@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using Mirage.SocketLayer;
 using NSubstitute;
-using UnityEngine;
 
 namespace Mirage.Tests
 {
@@ -16,14 +14,14 @@ namespace Mirage.Tests
         /// <summary>
         /// this static dictionary will act as the internet
         /// </summary>
-        public static Dictionary<EndPoint, TestSocket> allSockets = new Dictionary<EndPoint, TestSocket>();
+        public static Dictionary<IEndPoint, TestSocket> allSockets = new Dictionary<IEndPoint, TestSocket>();
 
         /// <summary>
         /// Can be useful to fake timeouts or dropped messages
         /// </summary>
         public static bool StopAllMessages;
 
-        public static bool EndpointInUse(EndPoint endPoint) => allSockets.ContainsKey(endPoint);
+        public static bool EndpointInUse(IEndPoint endPoint) => allSockets.ContainsKey(endPoint);
 
         /// <summary>
         /// adds this socket as an option to receive data
@@ -44,26 +42,26 @@ namespace Mirage.Tests
         }
 
 
-        public readonly EndPoint endPoint;
+        public readonly IEndPoint endPoint;
 
         readonly Queue<Packet> received = new Queue<Packet>();
         public List<Packet> Sent = new List<Packet>();
 
         public readonly string name;
 
-        public TestSocket(string name, EndPoint endPoint = null)
+        public TestSocket(string name, IEndPoint endPoint = null)
         {
             this.name = name;
-            this.endPoint = endPoint ?? Substitute.For<EndPoint>();
+            this.endPoint = endPoint ?? TestEndPoint.CreateSubstitute();
         }
 
 
-        void ISocket.Bind(EndPoint endPoint)
+        void ISocket.Bind(IEndPoint endPoint)
         {
             AddThisSocket();
         }
 
-        void ISocket.Connect(EndPoint endPoint)
+        void ISocket.Connect(IEndPoint endPoint)
         {
             AddThisSocket();
         }
@@ -78,17 +76,17 @@ namespace Mirage.Tests
             return received.Count > 0;
         }
 
-        int ISocket.Receive(byte[] data, out EndPoint endPoint)
+        int ISocket.Receive(byte[] buffer, out IEndPoint endPoint)
         {
             Packet next = received.Dequeue();
             endPoint = next.endPoint;
             int length = next.length;
 
-            Buffer.BlockCopy(next.data, 0, data, 0, length);
+            Buffer.BlockCopy(next.data, 0, buffer, 0, length);
             return length;
         }
 
-        void ISocket.Send(EndPoint remoteEndPoint, byte[] data, int length)
+        void ISocket.Send(IEndPoint remoteEndPoint, byte[] packet, int length)
         {
             AddThisSocket();
 
@@ -99,7 +97,7 @@ namespace Mirage.Tests
             }
 
             // create copy because data is from buffer
-            byte[] clone = data.Take(length).ToArray();
+            byte[] clone = packet.Take(length).ToArray();
             Sent.Add(new Packet
             {
                 endPoint = remoteEndPoint,
@@ -121,16 +119,25 @@ namespace Mirage.Tests
 
         public struct Packet
         {
-            public EndPoint endPoint;
+            public IEndPoint endPoint;
             public byte[] data;
             public int length;
         }
     }
 
+    public static class TestEndPoint
+    {
+        public static IEndPoint CreateSubstitute()
+        {
+            IEndPoint endpoint = Substitute.For<IEndPoint>();
+            endpoint.CreateCopy().Returns(endpoint);
+            return endpoint;
+        }
+    }
 
     public class TestSocketFactory : SocketFactory
     {
-        public EndPoint serverEndpoint = Substitute.For<EndPoint>();
+        public IEndPoint serverEndpoint = TestEndPoint.CreateSubstitute();
 
         int clientNameIndex;
         int serverNameIndex;
@@ -150,12 +157,12 @@ namespace Mirage.Tests
             return new TestSocket($"Server {serverNameIndex++}", serverEndpoint);
         }
 
-        public override EndPoint GetBindEndPoint()
+        public override IEndPoint GetBindEndPoint()
         {
             return default;
         }
 
-        public override EndPoint GetConnectEndPoint(string address = null, ushort? port = null)
+        public override IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
             return serverEndpoint;
         }
