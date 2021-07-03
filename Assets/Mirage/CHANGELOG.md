@@ -1,3 +1,15 @@
+# [99.0.0](https://github.com/MirageNet/Mirage/compare/v98.0.1...v99.0.0) (2021-07-03)
+
+
+### Performance Improvements
+
+* replacing network writer with a faster version that can do bit packing ([#805](https://github.com/MirageNet/Mirage/issues/805)) ([3cffa66](https://github.com/MirageNet/Mirage/commit/3cffa662fee2b09fb54f549d42d820300c61ecda))
+
+
+### BREAKING CHANGES
+
+* NetworkWriter and NetworkReader have been completely re-written to support bitpacking
+
 ## [98.0.1](https://github.com/MirageNet/Mirage/compare/v98.0.0...v98.0.1) (2021-07-02)
 
 
