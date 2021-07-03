@@ -1,3 +1,15 @@
+## [99.0.1](https://github.com/MirageNet/Mirage/compare/v99.0.0...v99.0.1) (2021-07-03)
+
+
+### Bug Fixes
+
+* adding assembly version to editor asmdef ([5969236](https://github.com/MirageNet/Mirage/commit/5969236f7a0d6e57848e51cb084f824233e367a4))
+
+
+### Performance Improvements
+
+* **WelcomeWindow:** using string builder for change log ([4bc10d8](https://github.com/MirageNet/Mirage/commit/4bc10d840890345f79c24082d283b06302f86b82))
+
 # [99.0.0](https://github.com/MirageNet/Mirage/compare/v98.0.1...v99.0.0) (2021-07-03)
 
 
