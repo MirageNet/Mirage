@@ -685,13 +685,15 @@ namespace Mirage.SocketLayer
                     reliablePacket == other.reliablePacket;
             }
         }
+
         class ReliablePacket
         {
-            public List<ushort> sequences = new List<ushort>();
             public ushort lastSequence;
             public bool acked;
-            public readonly ByteBuffer buffer;
             public int length;
+
+            public readonly List<ushort> sequences = new List<ushort>();
+            public readonly ByteBuffer buffer;
             public readonly ushort order;
 
             public void OnSend(ushort sequence)
@@ -716,6 +718,16 @@ namespace Mirage.SocketLayer
             public override int GetHashCode()
             {
                 return order;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is ReliablePacket other)
+                {
+                    // use order as quick check, but use list to check if they are actually equal
+                    return order == other.order && sequences == other.sequences;
+                }
+                return false;
             }
         }
         public struct ReliableReceived : IEquatable<ReliableReceived>
