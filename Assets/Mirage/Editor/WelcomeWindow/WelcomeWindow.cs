@@ -50,9 +50,9 @@ namespace Mirage
         #endregion
 
         //request for the module install
-        private static AddRequest installRequest;
-        private static RemoveRequest uninstallRequest;
-        private static ListRequest listRequest;
+        private AddRequest installRequest;
+        private RemoveRequest uninstallRequest;
+        private ListRequest listRequest;
 
         private static WelcomeWindow currentWindow;
 
