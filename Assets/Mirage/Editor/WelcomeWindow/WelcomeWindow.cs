@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
+using System.Text;
 using Mirage.Logging;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -289,6 +289,7 @@ namespace Mirage
         private void DrawChangeLog(List<string> content)
         {
             Label changeLogText = rootVisualElement.Q<Label>("ChangeLogText");
+            var builder = new StringBuilder();
 
             for (int i = 0; i < content.Count; i++)
             {
@@ -304,18 +305,23 @@ namespace Mirage
                 else if (item.Contains("###"))
                 {
                     //only add a space above the title if it isn't the first title
-                    if (i > 2) { changeLogText.text += "\n"; }
+                    if (i > 2) { builder.Append("\n"); }
 
-                    changeLogText.text += item.Substring(4) + "\n";
+                    builder.Append(item.Substring(4));
+                    builder.Append("\n");
                 }
                 //if the item is a change
                 else
                 {
                     string change = item.Split(new string[] { "([" }, StringSplitOptions.None)[0];
                     change = change.Replace("*", "-");
-                    changeLogText.text += change + "\n";
+
+                    builder.Append(change);
+                    builder.Append("\n");
                 }
             }
+
+            changeLogText.text = builder.ToString();
         }
 
         #region Packages
