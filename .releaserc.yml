@@ -7,6 +7,7 @@ plugins:
         Assets/Mirage/Authenticators/AssemblyInfo.cs
         Assets/Mirage/Components/AssemblyInfo.cs
         Assets/Mirage/Runtime/AssemblyInfo.cs
+        Assets/Mirage/Editor/AssemblyInfo.cs
         Assets/Mirage/Runtime/SocketLayer/AssemblyInfo.cs
         Assets/Mirage/Samples~/AssemblyInfo.cs
         Assets/Mirage/Samples~/RigidbodyPhysics/Scripts/AssemblyInfo.cs
