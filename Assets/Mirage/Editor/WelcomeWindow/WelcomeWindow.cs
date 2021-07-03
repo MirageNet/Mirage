@@ -380,7 +380,7 @@ namespace Mirage
                 }
                 else if (installRequest.Status == StatusCode.Failure)
                 {
-                    if (logger.ErrorEnabled()) logger.LogError($"Package install was unsuccessful. \n Error Code: {installRequest.Error.errorCode}\n Error Message: {installRequest.Error.message}");
+                    logger.LogError($"Package install was unsuccessful. \n Error Code: {installRequest.Error.errorCode}\n Error Message: {installRequest.Error.message}");
                 }
 
                 EditorApplication.update -= InstallPackageProgress;
@@ -404,7 +404,7 @@ namespace Mirage
                 }
                 else if (uninstallRequest.Status == StatusCode.Failure)
                 {
-                    if (logger.ErrorEnabled()) logger.LogError($"Package uninstall was unsuccessful. \n Error Code: {uninstallRequest.Error.errorCode}\n Error Message: {uninstallRequest.Error.message}");
+                    logger.LogError($"Package uninstall was unsuccessful. \n Error Code: {uninstallRequest.Error.errorCode}\n Error Message: {uninstallRequest.Error.message}");
                 }
 
                 //refresh the package tab
