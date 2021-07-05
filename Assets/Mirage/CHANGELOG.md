@@ -1,3 +1,10 @@
+## [99.0.2](https://github.com/MirageNet/Mirage/compare/v99.0.1...v99.0.2) (2021-07-05)
+
+
+### Bug Fixes
+
+* fixing syncvar reading when using bools ([31aca8e](https://github.com/MirageNet/Mirage/commit/31aca8e95752628ed3ad0c6d8e415fcce296b817))
+
 ## [99.0.1](https://github.com/MirageNet/Mirage/compare/v99.0.0...v99.0.1) (2021-07-03)
 
 
