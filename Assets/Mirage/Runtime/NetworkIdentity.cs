@@ -887,8 +887,11 @@ namespace Mirage
             reader.ObjectLocator = Client != null ? Client.World : null;
             // deserialize all components that were received
             NetworkBehaviour[] components = NetworkBehaviours;
-            while (reader.CanRead())
+            // check if we can read atleast 1 byte
+            while (reader.CanReadBytes(1))
             {
+                // todo replace index with bool for if next component in order has changed or not
+                //      the index below was an alternative to a mask, but now we have bitpacking we can just use a bool for each NB index
                 // read & check index [0..255]
                 byte index = reader.ReadByte();
                 if (index < components.Length)
