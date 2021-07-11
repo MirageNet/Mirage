@@ -1,7 +1,6 @@
 using System;
 using Mirage.SocketLayer;
 using NanoSockets;
-using UnityEngine;
 
 namespace Mirage.Sockets.Udp {
     public struct NanoEndPoint : IEndPoint, IEquatable<NanoEndPoint>
@@ -56,26 +55,11 @@ namespace Mirage.Sockets.Udp {
 
         public void Bind(IEndPoint endPoint)
         {
-            UDP.Initialize();
-            socket = UDP.Create(256 * 1024, 256 * 1024);
             tmpEndPoint = (NanoEndPoint)endPoint;
 
-            Debug.Log("Binding to " + tmpEndPoint.address);
-
-            if (UDP.Bind(socket, ref tmpEndPoint.address) != 0)
-            {
-                Debug.LogError("Unable to bind socket.");
-            }
-
-            if (UDP.SetDontFragment(socket) != Status.OK)
-            {
-                Debug.LogError("Don't fragment option error!");
-            }
-
-            if (UDP.SetNonBlocking(socket) != Status.OK)
-            {
-               Debug.LogError("Non-blocking option error!");
-            }
+            InitSocket();
+            UDP.Bind(socket, ref tmpEndPoint.address);
+            SetSocketOptions();
         }
 
         public void Close()
@@ -86,24 +70,11 @@ namespace Mirage.Sockets.Udp {
 
         public void Connect(IEndPoint endPoint)
         {
-            UDP.Initialize();
-            socket = UDP.Create(256 * 1024, 256 * 1024);
             tmpEndPoint = (NanoEndPoint)endPoint;
-
-            if (UDP.Connect(socket, ref tmpEndPoint.address) != 0)
-            {
-                Debug.LogError("Socket connect failed!");
-            }
-
-            if (UDP.SetDontFragment(socket) != Status.OK)
-            {
-                Debug.LogError("Don't fragment option error!");
-            }
-
-            if (UDP.SetNonBlocking(socket) != Status.OK)
-            {
-                Debug.LogError("Non-blocking option error!");
-            }
+            
+            InitSocket();
+            UDP.Connect(socket, ref tmpEndPoint.address);
+            SetSocketOptions();
         }
 
         public bool Poll()
@@ -123,6 +94,18 @@ namespace Mirage.Sockets.Udp {
         {
             tmpEndPoint = (NanoEndPoint)endPoint;
             UDP.Send(socket, ref tmpEndPoint.address, packet, length);
+        }
+
+        void InitSocket()
+        {
+            UDP.Initialize();
+            socket = UDP.Create(256 * 1024, 256 * 1024);
+        }
+
+        void SetSocketOptions()
+        {
+            UDP.SetDontFragment(socket);
+            UDP.SetNonBlocking(socket);
         }
     }
 }
