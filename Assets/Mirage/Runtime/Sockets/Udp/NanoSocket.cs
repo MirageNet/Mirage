@@ -7,7 +7,8 @@ namespace Mirage.Sockets.Udp {
     {
         public Address address;
 
-        public NanoEndPoint(string host, ushort port) {
+        public NanoEndPoint(string host, ushort port)
+        {
             address = new Address();
             address.port = port;
             UDP.SetIP(ref address, host);
