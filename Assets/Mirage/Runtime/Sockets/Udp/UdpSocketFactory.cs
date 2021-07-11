@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using Mirage.SocketLayer;
+using NanoSockets;
 using UnityEngine;
 
 namespace Mirage.Sockets.Udp
@@ -10,6 +11,35 @@ namespace Mirage.Sockets.Udp
     {
         [SerializeField] string address = "localhost";
         [SerializeField] ushort port = 7777;
+
+        static int initCount;
+
+        [RuntimeInitializeOnLoadMethod]
+        static void ClearCounter() {
+            initCount = 0;
+        }
+
+        void Awake() {
+            if (!IsDesktop) return;
+
+            if (initCount == 0)
+            {
+                UDP.Initialize();
+            }
+
+            initCount++;
+        }
+
+        void OnDestroy() {
+            if (!IsDesktop) return;
+
+            initCount--;
+
+            if (initCount == 0)
+            {
+                UDP.Deinitialize();
+            }
+        }
 
         public override ISocket CreateClientSocket()
         {

@@ -60,13 +60,11 @@ namespace Mirage.Sockets.Udp {
 
             InitSocket();
             UDP.Bind(socket, ref tmpEndPoint.address);
-            SetSocketOptions();
         }
 
         public void Close()
         {
             UDP.Destroy(ref socket);
-            UDP.Deinitialize();
         }
 
         public void Connect(IEndPoint endPoint)
@@ -75,7 +73,6 @@ namespace Mirage.Sockets.Udp {
             
             InitSocket();
             UDP.Connect(socket, ref tmpEndPoint.address);
-            SetSocketOptions();
         }
 
         public bool Poll()
@@ -99,12 +96,7 @@ namespace Mirage.Sockets.Udp {
 
         void InitSocket()
         {
-            UDP.Initialize();
             socket = UDP.Create(256 * 1024, 256 * 1024);
-        }
-
-        void SetSocketOptions()
-        {
             UDP.SetDontFragment(socket);
             UDP.SetNonBlocking(socket);
         }
