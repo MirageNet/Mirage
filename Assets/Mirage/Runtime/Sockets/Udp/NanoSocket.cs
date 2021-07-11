@@ -3,7 +3,7 @@ using Mirage.SocketLayer;
 using NanoSockets;
 
 namespace Mirage.Sockets.Udp {
-    public struct NanoEndPoint : IEndPoint, IEquatable<NanoEndPoint>
+    public class NanoEndPoint : IEndPoint, IEquatable<NanoEndPoint>
     {
         public Address address;
 
