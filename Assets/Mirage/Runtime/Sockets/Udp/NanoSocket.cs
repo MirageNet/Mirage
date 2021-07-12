@@ -52,14 +52,14 @@ namespace Mirage.Sockets.Udp {
     public class NanoSocket : ISocket
     {
         Socket socket;
-        NanoEndPoint tmpEndPoint;
+        NanoEndPoint receiveEndPoint;
 
         public void Bind(IEndPoint endPoint)
         {
-            tmpEndPoint = (NanoEndPoint)endPoint;
+            receiveEndPoint = (NanoEndPoint)endPoint;
 
             InitSocket();
-            UDP.Bind(socket, ref tmpEndPoint.address);
+            UDP.Bind(socket, ref receiveEndPoint.address);
         }
 
         public void Close()
@@ -69,10 +69,10 @@ namespace Mirage.Sockets.Udp {
 
         public void Connect(IEndPoint endPoint)
         {
-            tmpEndPoint = (NanoEndPoint)endPoint;
+            receiveEndPoint = (NanoEndPoint)endPoint;
             
             InitSocket();
-            UDP.Connect(socket, ref tmpEndPoint.address);
+            UDP.Connect(socket, ref receiveEndPoint.address);
         }
 
         public bool Poll()
@@ -82,16 +82,16 @@ namespace Mirage.Sockets.Udp {
 
         public int Receive(byte[] buffer, out IEndPoint endPoint)
         {
-            int count = UDP.Receive(socket, ref tmpEndPoint.address, buffer, buffer.Length);
-            endPoint = tmpEndPoint;
+            int count = UDP.Receive(socket, ref receiveEndPoint.address, buffer, buffer.Length);
+            endPoint = receiveEndPoint;
 
             return count;
         }
 
         public void Send(IEndPoint endPoint, byte[] packet, int length)
         {
-            tmpEndPoint = (NanoEndPoint)endPoint;
-            UDP.Send(socket, ref tmpEndPoint.address, packet, length);
+            var nanoEndPoint = (NanoEndPoint)endPoint;
+            UDP.Send(socket, ref nanoEndPoint.address, packet, length);
         }
 
         void InitSocket()
