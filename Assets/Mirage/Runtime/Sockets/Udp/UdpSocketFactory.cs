@@ -14,7 +14,7 @@ namespace Mirage.Sockets.Udp
 
         static int initCount;
 
-        [RuntimeInitializeOnLoadMethod]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void ClearCounter() {
             initCount = 0;
         }
