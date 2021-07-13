@@ -47,23 +47,34 @@ namespace Mirage.Serialization
 
         int bitPosition;
 
+        /// <summary>
+        /// Size limit of buffer
+        /// </summary>
         public int ByteCapacity
         {
-            // see ByteLength for comment
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            // see ByteLength for comment on math
             get => (bitCapacity + 0b111) >> 3;
         }
 
+        /// <summary>
+        /// Gets the current <see cref="BitPosition"/> rounded up to nearest multiple of 8
+        /// <para>To set byte position use <see cref="MoveBitPosition"/> multiple by 8</para>
+        /// </summary>
         public int ByteLength
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             // rounds up to nearest 8
             // add to 3 last bits,
             //   if any are 1 then it will roll over 4th bit.
             //   if all are 0, then nothing happens 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => (bitPosition + 0b111) >> 3;
         }
 
+        /// <summary>
+        /// Gets the current bit position
+        /// <para>To set bit position use <see cref="MoveBitPosition"/></para>
+        /// </summary>
         public int BitPosition
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -149,7 +160,7 @@ namespace Mirage.Serialization
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void CheckNewLength(int newLength)
+        void CheckCapacity(int newLength)
         {
             if (newLength > bitCapacity)
             {
@@ -181,7 +192,7 @@ namespace Mirage.Serialization
         public void WriteBoolean(ulong value)
         {
             int newPosition = bitPosition + 1;
-            CheckNewLength(newPosition);
+            CheckCapacity(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
 
@@ -221,7 +232,7 @@ namespace Mirage.Serialization
         public void WriteUInt64(ulong value)
         {
             int newPosition = bitPosition + 64;
-            CheckNewLength(newPosition);
+            CheckCapacity(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
 
@@ -259,7 +270,7 @@ namespace Mirage.Serialization
         private void WriterUnmasked(ulong value, int bits)
         {
             int newPosition = bitPosition + bits;
-            CheckNewLength(newPosition);
+            CheckCapacity(newPosition);
 
             int bitsInLong = bitPosition & 0b11_1111;
             int bitsLeft = 64 - bitsInLong;
@@ -281,16 +292,32 @@ namespace Mirage.Serialization
             bitPosition = newPosition;
         }
 
+        /// <summary>
+        /// Same as <see cref="WriteAtPosition"/> expect position given is in bytes instead of bits
+        /// <para>WARNING: When writing to bytes instead of bits make sure you are able to read at the right position when deserializing as it might cause data to be misaligned</para>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="bits"></param>
+        /// <param name="bytePosition"></param>
         public void WriteAtBytePosition(ulong value, int bits, int bytePosition)
         {
             WriteAtPosition(value, bits, bytePosition * 8);
         }
+
+        /// <summary>
+        /// Writes n <paramref name="bits"/> from <paramref name="value"/> to <paramref name="bitPosition"/>
+        /// <para>This methods can be used to go back to a previous position to write length or other flags to the buffer after other data has been written</para>
+        /// <para>WARNING: This method does not change the internal position so will not change the overall length if writing past internal position</para>
+        /// </summary>
+        /// <param name="value">value to write</param>
+        /// <param name="bits">number of bits in value to write</param>
+        /// <param name="bitPosition">where to write bits</param>
         public void WriteAtPosition(ulong value, int bits, int bitPosition)
         {
             // careful with this method, dont set bitPosition
 
             int newPosition = bitPosition + bits;
-            CheckNewLength(newPosition);
+            CheckCapacity(newPosition);
 
             // mask so we dont overwrite
             value &= ulong.MaxValue >> (64 - bits);
@@ -316,6 +343,19 @@ namespace Mirage.Serialization
             }
         }
 
+
+        /// <summary>
+        /// Moves the internal bit position
+        /// <para>For most usecases it is safer to use <see cref="WriteAtPosition"/></para>
+        /// <para>WARNING: When writing to earlier position make sure to move position back to end of buffer after writing because position is also used as length</para>
+        /// </summary>
+        /// <param name="newPosition"></param>
+        public void MoveBitPosition(int newPosition)
+        {
+            CheckCapacity(newPosition);
+            bitPosition = newPosition;
+        }
+
         /// <summary>
         /// <para>
         ///    Moves position to nearest byte then copies struct to that position
@@ -329,7 +369,7 @@ namespace Mirage.Serialization
         {
             PadToByte();
             int newPosition = bitPosition + (8 * byteSize);
-            CheckNewLength(newPosition);
+            CheckCapacity(newPosition);
 
             byte* startPtr = ((byte*)longPtr) + (bitPosition >> 3);
 
@@ -349,7 +389,7 @@ namespace Mirage.Serialization
         {
             PadToByte();
             int newPosition = bitPosition + (8 * length);
-            CheckNewLength(newPosition);
+            CheckCapacity(newPosition);
 
             // todo benchmark this vs Marshal.Copy or for loop
             Buffer.BlockCopy(array, offset, managedBuffer, ByteLength, length);
@@ -359,7 +399,7 @@ namespace Mirage.Serialization
         public void CopyFromWriter(NetworkWriter other, int otherBitPosition, int bitLength)
         {
             int newBit = bitPosition + bitLength;
-            CheckNewLength(newBit);
+            CheckCapacity(newBit);
 
             int ulongPos = otherBitPosition >> 6;
             ulong* otherPtr = other.longPtr + ulongPos;
