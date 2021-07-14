@@ -9,8 +9,8 @@ namespace Mirage.Sockets.Udp
 {
     public sealed class UdpSocketFactory : SocketFactory
     {
-        [SerializeField] string address = "localhost";
-        [SerializeField] ushort port = 7777;
+        public string Address = "localhost";
+        public ushort Port = 7777;
 
         static int initCount;
 
@@ -61,17 +61,17 @@ namespace Mirage.Sockets.Udp
 
         public override IEndPoint GetBindEndPoint()
         {
-            if (IsDesktop) return new NanoEndPoint("::0", port);
+            if (IsDesktop) return new NanoEndPoint("::0", Port);
 
-            return new EndPointWrapper(new IPEndPoint(IPAddress.IPv6Any, port));
+            return new EndPointWrapper(new IPEndPoint(IPAddress.IPv6Any, Port));
         }
 
         public override IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
-            string addressString = address ?? this.address;
+            string addressString = address ?? Address;
             IPAddress ipAddress = getAddress(addressString);
 
-            ushort portIn = port ?? this.port;
+            ushort portIn = port ?? Port;
 
             if (IsDesktop) return new NanoEndPoint(addressString, portIn);
 
