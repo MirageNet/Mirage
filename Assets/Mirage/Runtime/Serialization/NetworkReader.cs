@@ -45,28 +45,33 @@ namespace Mirage.Serialization
         int bitPosition;
         int bitLength;
 
+        /// <summary>
+        /// Size of buffer that is being read from
+        /// </summary>
         public int BitLength
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => bitLength;
         }
 
+        /// <summary>
+        /// Current bit position for reading from buffer
+        /// </summary>
         public int BitPosition
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => bitPosition;
         }
-
         /// <summary>
-        /// Position to the nearest byte
+        /// Current <see cref="BitPosition"/> rounded up to nearest multiple of 8
         /// </summary>
         public int BytePosition
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             // rounds up to nearest 8
             // add to 3 last bits,
             //   if any are 1 then it will roll over 4th bit.
             //   if all are 0, then nothing happens 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => (bitPosition + 0b111) >> 3;
         }
 
@@ -299,6 +304,60 @@ namespace Mirage.Serialization
             bitPosition = newPosition;
 
             return result;
+        }
+
+        /// <summary>
+        /// Reads n <paramref name="bits"/> from buffer at <paramref name="bitPosition"/>
+        /// </summary>
+        /// <param name="bits">number of bits in value to write</param>
+        /// <param name="bitPosition">where to write bits</param>
+        public ulong ReadAtPosition(int bits, int bitPosition)
+        {
+            // careful with this method, dont get bitPosition
+
+            int newPosition = bitPosition + bits;
+            CheckNewLength(newPosition);
+
+            int bitsInLong = bitPosition & 0b11_1111;
+            int bitsLeft = 64 - bitsInLong;
+
+            ulong result;
+            if (bitsLeft >= bits)
+            {
+                ulong* ptr = longPtr + (bitPosition >> 6);
+                result = (*ptr) >> bitsInLong;
+            }
+            else
+            {
+                ulong* ptr1 = longPtr + (bitPosition >> 6);
+                ulong* ptr2 = ptr1 + 1;
+
+                // eg use byte, read 6  =>bitPosition=5, bitsLeft=3, newPos=1
+                // r1 = aaab_bbbb => 0000_0aaa
+                // r2 = cccc_caaa => ccaa_a000
+                // r = r1|r2 => ccaa_aaaa
+                // we mask this result later
+
+                ulong r1 = (*ptr1) >> bitsInLong;
+                ulong r2 = (*ptr2) << bitsLeft;
+                result = r1 | r2;
+            }
+            bitPosition = newPosition;
+
+            return result;
+        }
+
+
+        /// <summary>
+        /// Moves the internal bit position
+        /// <para>For most usecases it is safer to use <see cref="ReadAtPosition"/></para>
+        /// <para>WARNING: When reading from earlier position make sure to move position back to end of buffer after reading</para>
+        /// </summary>
+        /// <param name="newPosition"></param>
+        public void MoveBitPosition(int newPosition)
+        {
+            CheckNewLength(newPosition);
+            bitPosition = newPosition;
         }
 
 

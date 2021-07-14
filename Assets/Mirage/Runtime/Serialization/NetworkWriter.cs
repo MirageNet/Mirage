@@ -58,7 +58,7 @@ namespace Mirage.Serialization
         }
 
         /// <summary>
-        /// Gets the current <see cref="BitPosition"/> rounded up to nearest multiple of 8
+        /// Current <see cref="BitPosition"/> rounded up to nearest multiple of 8
         /// <para>To set byte position use <see cref="MoveBitPosition"/> multiple by 8</para>
         /// </summary>
         public int ByteLength
@@ -72,7 +72,7 @@ namespace Mirage.Serialization
         }
 
         /// <summary>
-        /// Gets the current bit position
+        /// Current bit position for writing to buffer
         /// <para>To set bit position use <see cref="MoveBitPosition"/></para>
         /// </summary>
         public int BitPosition
@@ -324,14 +324,12 @@ namespace Mirage.Serialization
 
             int bitsInLong = bitPosition & 0b11_1111;
             int bitsLeft = 64 - bitsInLong;
+
             if (bitsLeft >= bits)
             {
                 ulong* ptr = longPtr + (bitPosition >> 6);
-                *ptr = (
-                    *ptr & (
-                        (ulong.MaxValue >> bitsLeft) | (ulong.MaxValue << (newPosition /*we can use full position here as c# will mask it to just 6 bits*/))
-                    )
-                ) | (value << bitsInLong);
+
+                *ptr = (*ptr & BitMask.OuterMask(bitPosition, newPosition)) | (value << bitsInLong);
             }
             else
             {
