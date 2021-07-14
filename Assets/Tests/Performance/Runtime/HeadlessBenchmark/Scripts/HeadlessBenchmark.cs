@@ -2,15 +2,15 @@ using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using Mirage.SocketLayer;
+using Mirage.Sockets.Udp;
 using UnityEngine;
-#if IGNORANCE
-using Mirror.ENet;
-#endif
 
 namespace Mirage.HeadlessBenchmark
 {
     public class HeadlessBenchmark : MonoBehaviour
     {
+        public GameObject ServerPrefab;
+        public GameObject ClientPrefab;
         public NetworkServer server;
         public ServerObjectManager serverObjectManager;
         public GameObject MonsterPrefab;
@@ -64,8 +64,8 @@ namespace Mirage.HeadlessBenchmark
             //Try to find port
             port = GetArgValue("-port");
 
-            //Try to find Transport
-            ParseForTransport();
+            //Try to find Socket
+            ParseForSocket();
 
             //Server mode?
             ParseForServerMode();
@@ -97,32 +97,30 @@ namespace Mirage.HeadlessBenchmark
 
         void ParseForServerMode()
         {
-            if (!string.IsNullOrEmpty(GetArg("-server")))
-            {
-                var serverGo = new GameObject($"Server", typeof(NetworkServer), typeof(ServerObjectManager), typeof(NetworkSceneManager), typeof(CharacterSpawner));
+            if (string.IsNullOrEmpty(GetArg("-server"))) return;
 
-                server = serverGo.GetComponent<NetworkServer>();
-                server.MaxConnections = 9999;
-                server.SocketFactory = socketFactory;
-                serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
+            var serverGo = Instantiate(ServerPrefab);
+            serverGo.name = "Server";
+            server = serverGo.GetComponent<NetworkServer>();
+            server.MaxConnections = 9999;
+            server.SocketFactory = socketFactory;
+            serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
 
-                NetworkSceneManager networkSceneManager = serverGo.GetComponent<NetworkSceneManager>();
-                networkSceneManager.Server = server;
+            NetworkSceneManager networkSceneManager = serverGo.GetComponent<NetworkSceneManager>();
+            networkSceneManager.Server = server;
 
-                serverObjectManager.Server = server;
-                serverObjectManager.NetworkSceneManager = networkSceneManager;
-                serverObjectManager.Start();
+            serverObjectManager.Server = server;
+            serverObjectManager.NetworkSceneManager = networkSceneManager;
+            serverObjectManager.Start();
 
-                CharacterSpawner spawner = serverGo.GetComponent<CharacterSpawner>();
-                spawner.PlayerPrefab = PlayerPrefab.GetComponent<NetworkIdentity>();
-                spawner.ServerObjectManager = serverObjectManager;
-                spawner.Server = server;
+            CharacterSpawner spawner = serverGo.GetComponent<CharacterSpawner>();
+            spawner.ServerObjectManager = serverObjectManager;
+            spawner.Server = server;
 
-                server.Started.AddListener(OnServerStarted);
-                server.Authenticated.AddListener(conn => serverObjectManager.SetClientReady(conn));
-                server.StartServer();
-                Console.WriteLine("Starting Server Only Mode");
-            }
+            server.Started.AddListener(OnServerStarted);
+            server.Authenticated.AddListener(conn => serverObjectManager.SetClientReady(conn));
+            server.StartServer();
+            Console.WriteLine("Starting Server Only Mode");
         }
 
         async UniTaskVoid StartClients()
@@ -160,7 +158,8 @@ namespace Mirage.HeadlessBenchmark
 
         void StartClient(int i, string networkAddress)
         {
-            var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager), typeof(CharacterSpawner), typeof(NetworkSceneManager));
+            var clientGo = Instantiate(ClientPrefab);
+            clientGo.name = $"Client {i}";
             NetworkClient client = clientGo.GetComponent<NetworkClient>();
             ClientObjectManager objectManager = clientGo.GetComponent<ClientObjectManager>();
             CharacterSpawner spawner = clientGo.GetComponent<CharacterSpawner>();
@@ -208,39 +207,23 @@ namespace Mirage.HeadlessBenchmark
             }
         }
 
-        void ParseForTransport()
+        void ParseForSocket()
         {
-            // todo add socket options here
-
-            //string transport = GetArgValue("-transport");
-            //if (string.IsNullOrEmpty(transport) || transport.Equals("kcp"))
-            //{
-            //    KcpTransport newTransport = gameObject.AddComponent<KcpTransport>();
-            //    socketFactory = newTransport;
-
-            //    //Try to apply port if exists and needed by transport.
-            //    if (!string.IsNullOrEmpty(port))
-            //    {
-            //        newTransport.Port = ushort.Parse(port);
-            //    }
-            //}
-
-#if IGNORANCE
-            if (string.IsNullOrEmpty(transport) || transport.Equals("ignorance"))
+            string socket = GetArgValue("-socket");
+            if (string.IsNullOrEmpty(socket) || socket.Equals("udp"))
             {
-                IgnoranceNG newTransport = networkManager.gameObject.AddComponent<IgnoranceNG>();
+                UdpSocketFactory newSocket = gameObject.AddComponent<UdpSocketFactory>();
+                socketFactory = newSocket;
 
                 //Try to apply port if exists and needed by transport.
-                if (!string.IsNullOrEmpty(port))
-                {
-                    newTransport.Config.CommunicationPort = ushort.Parse(port);
-                }
-                networkManager.server.Transport = newTransport;
-                networkManager.client.Transport = newTransport;
 
-                this.transport = newTransport;
+                //TODO: Uncomment this after the port is made public
+                /*if (!string.IsNullOrEmpty(port))
+                {
+                    newSocket.port = ushort.Parse(port);
+                    newSocket.
+                }*/
             }
-#endif
         }
 
         string GetArgValue(string name)
