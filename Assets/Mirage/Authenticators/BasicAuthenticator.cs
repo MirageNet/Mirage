@@ -33,7 +33,7 @@ namespace Mirage.Authenticators
         /// </para>
         /// <para>
         ///     You might want to use an accessToken or passwords. Be aware that the normal connection
-        ///     in mirror is not encrypted so sending secure information directly is not adviced
+        ///     in Mirage is not encrypted so sending secure information directly is not adviced
         /// </para>
         /// </summary>
 
