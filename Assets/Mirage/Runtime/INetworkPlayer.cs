@@ -12,14 +12,18 @@ namespace Mirage
         void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable);
     }
 
+    // delegates to give names to variables in handles
+    public delegate void MessageDelegate<T>(T message);
+    public delegate void MessageDelegateWithPlayer<T>(INetworkPlayer player, T message);
+
     /// <summary>
     /// An object that can receive messages
     /// </summary>
     public interface IMessageReceiver
     {
-        void RegisterHandler<T>(Action<INetworkPlayer, T> handler);
+        void RegisterHandler<T>(MessageDelegateWithPlayer<T> handler);
 
-        void RegisterHandler<T>(Action<T> handler);
+        void RegisterHandler<T>(MessageDelegate<T> handler);
 
         void UnregisterHandler<T>();
 

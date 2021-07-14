@@ -7,11 +7,16 @@ using UnityEngine;
 
 namespace Mirage
 {
+
+
     public class MessageHandler : IMessageReceiver
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
 
         readonly bool disconnectOnException;
+
+        // Handles network messages on client and server
+        internal delegate void NetworkMessageDelegate(INetworkPlayer player, NetworkReader reader);
 
         // message handlers for this connection
         internal readonly Dictionary<int, NetworkMessageDelegate> messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
@@ -21,10 +26,7 @@ namespace Mirage
             this.disconnectOnException = disconnectOnException;
         }
 
-        // Handles network messages on client and server
-        internal delegate void NetworkMessageDelegate(INetworkPlayer player, NetworkReader reader);
-
-        private static NetworkMessageDelegate MessageWrapper<T>(Action<INetworkPlayer, T> handler)
+        private static NetworkMessageDelegate MessageWrapper<T>(MessageDelegateWithPlayer<T> handler)
         {
             void AdapterFunction(INetworkPlayer player, NetworkReader reader)
             {
@@ -42,7 +44,7 @@ namespace Mirage
         /// <typeparam name="T">Message type</typeparam>
         /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
         /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
-        public void RegisterHandler<T>(Action<INetworkPlayer, T> handler)
+        public void RegisterHandler<T>(MessageDelegateWithPlayer<T> handler)
         {
             int msgType = MessagePacker.GetId<T>();
             if (logger.filterLogType == LogType.Log && messageHandlers.ContainsKey(msgType))
@@ -59,7 +61,7 @@ namespace Mirage
         /// <typeparam name="T">Message type</typeparam>
         /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
         /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
-        public void RegisterHandler<T>(Action<T> handler)
+        public void RegisterHandler<T>(MessageDelegate<T> handler)
         {
             RegisterHandler<T>((_, value) => { handler(value); });
         }

@@ -74,6 +74,12 @@ namespace Mirage
 
         #endregion
 
+        /// <summary>
+        /// Calls <see cref="Reader{T}.Read"/> and measures number of bytes read
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="reader"></param>
+        /// <returns></returns>
         internal static T ReadWithDiagnostics<T>(NetworkReader reader)
         {
             var message = default(T);
@@ -87,7 +93,7 @@ namespace Mirage
             finally
             {
                 int endPos = reader.BitPosition;
-                int byteLength = (endPos - startPos) >> 3;
+                int byteLength = (endPos - startPos) / 8;
                 NetworkDiagnostics.OnReceive(message, byteLength);
             }
 
