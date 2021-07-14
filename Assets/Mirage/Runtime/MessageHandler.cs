@@ -23,7 +23,7 @@ namespace Mirage
 
         // Handles network messages on client and server
         internal delegate void NetworkMessageDelegate(INetworkPlayer player, NetworkReader reader);
-        
+
         private static NetworkMessageDelegate MessageWrapper<T>(Action<INetworkPlayer, T> handler)
         {
             void AdapterFunction(INetworkPlayer player, NetworkReader reader)
@@ -121,7 +121,7 @@ namespace Mirage
                 try
                 {
                     int msgType = MessagePacker.UnpackId(networkReader);
-                    InvokeHandler(msgType, networkReader);
+                    InvokeHandler(player, msgType, networkReader);
                 }
                 catch (InvalidDataException ex)
                 {
@@ -130,7 +130,7 @@ namespace Mirage
                 catch (Exception e)
                 {
                     string disconnectMessage = disconnectOnException ? ", Closed connection: {this}" : "";
-                    logger.LogError($"{e.GetType()} in Message handler (see stack below){disconnectMessage}\n{e}");                    
+                    logger.LogError($"{e.GetType()} in Message handler (see stack below){disconnectMessage}\n{e}");
                     if (disconnectOnException)
                     {
                         player.Disconnect();
