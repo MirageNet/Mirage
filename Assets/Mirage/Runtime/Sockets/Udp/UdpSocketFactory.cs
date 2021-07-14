@@ -7,10 +7,17 @@ using UnityEngine;
 
 namespace Mirage.Sockets.Udp
 {
+    public enum SocketLib { Automatic, NanoSockets, Net };
+
     public sealed class UdpSocketFactory : SocketFactory
     {
         public string Address = "localhost";
         public ushort Port = 7777;
+
+        [Tooltip("Allows you to set which Socket implementation you want to use.\nAutomatic will use NanoSockets on supported platforms (Windows, Mac & Linux).")]
+        public SocketLib SocketLib;
+
+        bool useNanoSocket => SocketLib == SocketLib.NanoSockets || (SocketLib == SocketLib.Automatic && IsDesktop);
 
         static int initCount;
 
@@ -20,7 +27,7 @@ namespace Mirage.Sockets.Udp
         }
 
         void Awake() {
-            if (!IsDesktop) return;
+            if (!useNanoSocket) return;
 
             if (initCount == 0)
             {
@@ -31,7 +38,7 @@ namespace Mirage.Sockets.Udp
         }
 
         void OnDestroy() {
-            if (!IsDesktop) return;
+            if (!useNanoSocket) return;
 
             initCount--;
 
@@ -45,7 +52,7 @@ namespace Mirage.Sockets.Udp
         {
             ThrowIfNotSupported();
 
-            if (IsDesktop) return new NanoSocket();
+            if (useNanoSocket) return new NanoSocket();
 
             return new UdpSocket();
         }
@@ -54,14 +61,14 @@ namespace Mirage.Sockets.Udp
         {
             ThrowIfNotSupported();
 
-            if (IsDesktop) return new NanoSocket();
+            if (useNanoSocket) return new NanoSocket();
 
             return new UdpSocket();
         }
 
         public override IEndPoint GetBindEndPoint()
         {
-            if (IsDesktop) return new NanoEndPoint("::0", Port);
+            if (useNanoSocket) return new NanoEndPoint("::0", Port);
 
             return new EndPointWrapper(new IPEndPoint(IPAddress.IPv6Any, Port));
         }
@@ -73,7 +80,7 @@ namespace Mirage.Sockets.Udp
 
             ushort portIn = port ?? Port;
 
-            if (IsDesktop) return new NanoEndPoint(addressString, portIn);
+            if (useNanoSocket) return new NanoEndPoint(addressString, portIn);
 
             return new EndPointWrapper(new IPEndPoint(ipAddress, portIn));
         }
