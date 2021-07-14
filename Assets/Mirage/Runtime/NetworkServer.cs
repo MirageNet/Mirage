@@ -196,6 +196,8 @@ namespace Mirage
 
             if (authenticator != null)
             {
+                Debug.Assert(authenticator.Server == null || authenticator.Server == this, "authenticator had a reference to a different server");
+                authenticator.Server = this;
                 authenticator.OnServerAuthenticated += OnAuthenticated;
 
                 Connected.AddListener(authenticator.ServerAuthenticate);

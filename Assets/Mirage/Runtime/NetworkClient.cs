@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using Mirage.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -224,6 +223,9 @@ namespace Mirage
         {
             if (authenticator != null)
             {
+                Debug.Assert(authenticator.Client == null || authenticator.Client == this, "authenticator had a reference to a different client");
+                authenticator.Client = this;
+
                 authenticator.OnClientAuthenticated += OnAuthenticated;
 
                 Connected.AddListener(authenticator.ClientAuthenticate);
