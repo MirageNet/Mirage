@@ -50,16 +50,26 @@ namespace Mirage.Authenticators
             public string message;
         }
 
+        private void Awake()
+        {
+            // register messsage for Auth when server or client starts
+            // this will ensure the handlers are ready when client connects (even in host mode)
+            Server.Started.AddListener(() =>
+            {
+                Server.MessageHandler.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage);
+            });
+
+            Client.Started.AddListener(() =>
+            {
+                Client.MessageHandler.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage);
+            });
+        }
 
         #region Server Authenticate
 
-        /*
-            This region should is need to validate the client connection and auth messages sent by the client
-         */
         public override void ServerAuthenticate(INetworkPlayer player)
         {
             // wait for AuthRequestMessage from client
-            player.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage);
         }
 
 
@@ -93,6 +103,7 @@ namespace Mirage.Authenticators
                 player.Send(authResponseMessage);
 
                 // disconnect the client after 1 second so that response message gets delivered
+                // todo do we still need this delay? message should arrive in order
                 StartCoroutine(DelayedDisconnect(player, 1));
             }
         }
@@ -109,8 +120,6 @@ namespace Mirage.Authenticators
 
         public override void ClientAuthenticate(INetworkPlayer player)
         {
-            player.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage);
-
             // The serverCode should be set on the client before connection to the server.
             // When the client connects it sends the code and the server checks that it is correct
             player.Send(new AuthRequestMessage

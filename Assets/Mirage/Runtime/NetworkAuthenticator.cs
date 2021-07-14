@@ -9,6 +9,9 @@ namespace Mirage
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/Authenticators/index.html")]
     public abstract class NetworkAuthenticator : MonoBehaviour
     {
+        public NetworkServer Server;
+        public NetworkClient Client;
+
         /// <summary>
         /// Notify subscribers on the server when a client is authenticated
         /// </summary>
