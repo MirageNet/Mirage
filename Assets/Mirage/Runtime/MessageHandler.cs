@@ -66,6 +66,7 @@ namespace Mirage
 
         /// <summary>
         /// Unregister a handler for a particular message type.
+        /// <para>Note: Messages dont need to be unregister when server or client stops as MessageHandler will be re-created next time server or client starts</para>
         /// </summary>
         /// <typeparam name="T">Message type</typeparam>
         public void UnregisterHandler<T>()
