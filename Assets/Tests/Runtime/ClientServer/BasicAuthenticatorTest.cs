@@ -12,8 +12,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         public void CheckConnected()
         {
             // Should have connected
-            Assert.That(connectionToServer, Is.Not.Null);
-            Assert.That(connectionToClient, Is.Not.Null);
+            Assert.That(clientPlayer, Is.Not.Null);
+            Assert.That(serverPlayer, Is.Not.Null);
         }
 
         public override void ExtraSetup()

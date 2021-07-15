@@ -16,7 +16,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void SetClientReadyAndNotReadyTest()
         {
-            (_, NetworkPlayer connection) = PipedConnections();
+            (_, NetworkPlayer connection) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
             Assert.That(connection.IsReady, Is.False);
 
             serverObjectManager.SetClientReady(connection);
@@ -30,12 +30,12 @@ namespace Mirage.Tests.Runtime.Host
         public void SetAllClientsNotReadyTest()
         {
             // add first ready client
-            (_, NetworkPlayer first) = PipedConnections();
+            (_, NetworkPlayer first) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
             first.IsReady = true;
             server.Players.Add(first);
 
             // add second ready client
-            (_, NetworkPlayer second) = PipedConnections();
+            (_, NetworkPlayer second) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
             second.IsReady = true;
             server.Players.Add(second);
 

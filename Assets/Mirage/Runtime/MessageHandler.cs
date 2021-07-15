@@ -7,8 +7,6 @@ using UnityEngine;
 
 namespace Mirage
 {
-
-
     public class MessageHandler : IMessageReceiver
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));

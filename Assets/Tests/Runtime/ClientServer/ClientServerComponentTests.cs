@@ -64,11 +64,11 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ClientConnRpc() => UniTask.ToCoroutine(async () =>
         {
-            serverComponent.ClientConnRpcTest(connectionToClient, 1, "hello");
+            serverComponent.ClientConnRpcTest(serverPlayer, 1, "hello");
             // process spawn message from server
             await AsyncUtil.WaitUntilWithTimeout(() => clientComponent.targetRpcArg1 != 0);
 
-            Assert.That(clientComponent.targetRpcPlayer, Is.EqualTo(connectionToServer));
+            Assert.That(clientComponent.targetRpcPlayer, Is.EqualTo(clientPlayer));
             Assert.That(clientComponent.targetRpcArg1, Is.EqualTo(1));
             Assert.That(clientComponent.targetRpcArg2, Is.EqualTo("hello"));
         });
@@ -96,7 +96,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             clientObjectManager.RegisterSpawnHandler(guid, SpawnDelegateTest, go => { });
             clientObjectManager.RegisterPrefab(identity, guid);
-            serverObjectManager.SendSpawnMessage(identity, connectionToClient);
+            serverObjectManager.SendSpawnMessage(identity, serverPlayer);
 
             await AsyncUtil.WaitUntilWithTimeout(() => spawnDelegateTestCalled != 0);
 
@@ -117,7 +117,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             clientObjectManager.RegisterSpawnHandler(guid, SpawnDelegateTest, unspawnDelegate);
             clientObjectManager.RegisterPrefab(identity, guid);
-            serverObjectManager.SendSpawnMessage(identity, connectionToClient);
+            serverObjectManager.SendSpawnMessage(identity, serverPlayer);
 
             await AsyncUtil.WaitUntilWithTimeout(() => spawnDelegateTestCalled != 0);
 

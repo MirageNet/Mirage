@@ -32,8 +32,10 @@ namespace Mirage.Tests.Runtime.ClientServer
         protected GameObject playerPrefab;
 
         protected TestSocketFactory socketFactory;
-        protected INetworkPlayer connectionToServer;
-        protected INetworkPlayer connectionToClient;
+        protected INetworkPlayer clientPlayer;
+        protected INetworkPlayer serverPlayer;
+        protected MessageHandler ClientMessageHandler => client.MessageHandler;
+        protected MessageHandler ServerMessageHandler => server.MessageHandler;
 
         public virtual void ExtraSetup() { }
 
@@ -102,19 +104,19 @@ namespace Mirage.Tests.Runtime.ClientServer
                 await AsyncUtil.WaitUntilWithTimeout(() => server.Players.Count > 0);
 
                 // get the connections so that we can spawn players
-                connectionToClient = server.Players.First();
-                connectionToServer = client.Player;
+                serverPlayer = server.Players.First();
+                clientPlayer = client.Player;
 
                 // create a player object in the server
                 serverPlayerGO = Object.Instantiate(playerPrefab);
                 serverIdentity = serverPlayerGO.GetComponent<NetworkIdentity>();
                 serverComponent = serverPlayerGO.GetComponent<T>();
-                serverObjectManager.AddCharacter(connectionToClient, serverPlayerGO);
+                serverObjectManager.AddCharacter(serverPlayer, serverPlayerGO);
 
                 // wait for client to spawn it
-                await AsyncUtil.WaitUntilWithTimeout(() => connectionToServer.Identity != null);
+                await AsyncUtil.WaitUntilWithTimeout(() => clientPlayer.Identity != null);
 
-                clientIdentity = connectionToServer.Identity;
+                clientIdentity = clientPlayer.Identity;
                 clientPlayerGO = clientIdentity.gameObject;
                 clientComponent = clientPlayerGO.GetComponent<T>();
             }

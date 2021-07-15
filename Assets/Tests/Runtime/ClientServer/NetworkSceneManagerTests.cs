@@ -76,7 +76,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(startInvoked == 1, "Start should only be called once");
             Assert.That(endInvoked == 0, "Should wait for ready before end is called");
 
-            clientSceneManager.ClientSceneReadyMessage(connectionToServer, new SceneReadyMessage());
+            clientSceneManager.ClientSceneReadyMessage(clientPlayer, new SceneReadyMessage());
 
             await AsyncUtil.WaitUntilWithTimeout(() => endInvoked == 1);
 

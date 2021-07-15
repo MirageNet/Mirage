@@ -477,10 +477,10 @@ namespace Mirage
         /// </summary>
         class DataHandler : IDataHandler
         {
-            readonly MessageHandler messageHandler;
+            readonly IMessageReceiver messageHandler;
             readonly Dictionary<IConnection, INetworkPlayer> players;
 
-            public DataHandler(MessageHandler messageHandler, Dictionary<IConnection, INetworkPlayer> connections)
+            public DataHandler(IMessageReceiver messageHandler, Dictionary<IConnection, INetworkPlayer> connections)
             {
                 this.messageHandler = messageHandler;
                 players = connections;

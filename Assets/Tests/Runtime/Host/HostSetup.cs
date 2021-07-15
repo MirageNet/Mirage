@@ -23,6 +23,9 @@ namespace Mirage.Tests.Runtime.Host
         protected NetworkIdentity identity;
         protected T component;
 
+        protected MessageHandler ClientMessageHandler => client.MessageHandler;
+        protected MessageHandler ServerMessageHandler => server.MessageHandler;
+
         protected virtual bool AutoStartServer => true;
         protected virtual Config ServerConfig => null;
         protected virtual Config ClientConfig => null;

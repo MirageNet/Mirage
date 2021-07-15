@@ -239,7 +239,7 @@ namespace Mirage
         public void SetClientOwner()
         {
             // SetClientOwner
-            (_, NetworkPlayer original) = PipedConnections();
+            (_, NetworkPlayer original) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             identity.SetClientOwner(original);
             Assert.That(identity.ConnectionToClient, Is.EqualTo(original));
         }
@@ -248,11 +248,11 @@ namespace Mirage
         public void SetOverrideClientOwner()
         {
             // SetClientOwner
-            (_, NetworkPlayer original) = PipedConnections();
+            (_, NetworkPlayer original) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             identity.SetClientOwner(original);
 
             // setting it when it's already set shouldn't overwrite the original
-            (_, NetworkPlayer overwrite) = PipedConnections();
+            (_, NetworkPlayer overwrite) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             // will log a warning
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -736,7 +736,7 @@ namespace Mirage
             gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection that isn't ready
-            (_, NetworkPlayer connection) = PipedConnections();
+            (_, NetworkPlayer connection) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             identity.ConnectionToClient = connection;
 
             // call OnStartServer so that observers dict is created

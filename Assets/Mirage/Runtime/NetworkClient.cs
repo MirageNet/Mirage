@@ -344,9 +344,9 @@ namespace Mirage
         {
             IConnection connection;
             INetworkPlayer player;
-            readonly MessageHandler messageHandler;
+            readonly IMessageReceiver messageHandler;
 
-            public DataHandler(MessageHandler messageHandler)
+            public DataHandler(IMessageReceiver messageHandler)
             {
                 this.messageHandler = messageHandler;
             }
