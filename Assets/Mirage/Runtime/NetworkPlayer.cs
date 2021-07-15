@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Mirage.Logging;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
@@ -19,18 +18,11 @@ namespace Mirage
     /// <para>NetworkConnection objects also act as observers for networked objects. When a connection is an observer of a networked object with a NetworkIdentity, then the object will be visible to corresponding client for the connection, and incremental state changes will be sent to the client.</para>
     /// <para>There are many virtual functions on NetworkConnection that allow its behaviour to be customized. NetworkClient and NetworkServer can both be made to instantiate custom classes derived from NetworkConnection by setting their networkConnectionClass member variable.</para>
     /// </remarks>
-    public sealed class NetworkPlayer : INetworkPlayer
+    public sealed class NetworkPlayer : INetworkPlayer, IMessageSender
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
-        // Handles network messages on client and server
-        internal delegate void NetworkMessageDelegate(INetworkPlayer player, NetworkReader reader);
-
-        // internal so it can be tested
         private readonly HashSet<NetworkIdentity> visList = new HashSet<NetworkIdentity>();
-
-        // message handlers for this connection
-        internal readonly Dictionary<int, NetworkMessageDelegate> messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
 
         /// <summary>
         /// Transport level connection
@@ -40,7 +32,7 @@ namespace Mirage
         /// <para>Transport layers connections begin at one. So on a client with a single connection to a server, the connectionId of that connection will be one. In NetworkServer, the connectionId of the local connection is zero.</para>
         /// <para>Clients do not know their connectionId on the server, and do not know the connectionId of other clients on the server.</para>
         /// </remarks>
-        private readonly SocketLayer.IConnection connection;
+        private readonly IConnection connection;
 
         /// <summary>
         /// Has this player been marked as disconnected
@@ -72,7 +64,7 @@ namespace Mirage
         /// </summary>
         public IEndPoint Address => connection.EndPoint;
 
-        public SocketLayer.IConnection Connection => connection;
+        public IConnection Connection => connection;
 
         /// <summary>
         /// Disconnects the player.
@@ -114,70 +106,12 @@ namespace Mirage
         /// Creates a new NetworkConnection with the specified address and connectionId
         /// </summary>
         /// <param name="networkConnectionId"></param>
-        public NetworkPlayer(SocketLayer.IConnection connection)
+        public NetworkPlayer(IConnection connection)
         {
             Assert.IsNotNull(connection);
             this.connection = connection;
         }
 
-
-        private static NetworkMessageDelegate MessageHandler<T>(Action<INetworkPlayer, T> handler)
-        {
-            void AdapterFunction(INetworkPlayer player, NetworkReader reader)
-            {
-                T message = NetworkDiagnostics.ReadWithDiagnostics<T>(reader);
-
-                handler.Invoke(player, message);
-            }
-            return AdapterFunction;
-        }
-
-        /// <summary>
-        /// Register a handler for a particular message type.
-        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
-        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
-        public void RegisterHandler<T>(Action<INetworkPlayer, T> handler)
-        {
-            int msgType = MessagePacker.GetId<T>();
-            if (logger.filterLogType == LogType.Log && messageHandlers.ContainsKey(msgType))
-            {
-                logger.Log("NetworkServer.RegisterHandler replacing " + msgType);
-            }
-            messageHandlers[msgType] = MessageHandler(handler);
-        }
-
-        /// <summary>
-        /// Register a handler for a particular message type.
-        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
-        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
-        public void RegisterHandler<T>(Action<T> handler)
-        {
-            RegisterHandler<T>((_, value) => { handler(value); });
-        }
-
-        /// <summary>
-        /// Unregisters a handler for a particular message type.
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        public void UnregisterHandler<T>()
-        {
-            int msgType = MessagePacker.GetId<T>();
-            messageHandlers.Remove(msgType);
-        }
-
-        /// <summary>
-        /// Clear all registered callback handlers.
-        /// </summary>
-        public void ClearHandlers()
-        {
-            messageHandlers.Clear();
-        }
 
         /// <summary>
         /// This sends a network message to the connection.
@@ -220,7 +154,6 @@ namespace Mirage
             }
         }
 
-
         public override string ToString()
         {
             return $"connection({Address})";
@@ -243,59 +176,6 @@ namespace Mirage
                 identity.RemoveObserverInternal(this);
             }
             visList.Clear();
-        }
-
-        internal void InvokeHandler(int msgType, NetworkReader reader)
-        {
-            if (messageHandlers.TryGetValue(msgType, out NetworkMessageDelegate msgDelegate))
-            {
-                msgDelegate.Invoke(this, reader);
-            }
-            else
-            {
-                try
-                {
-                    Type type = MessagePacker.GetMessageType(msgType);
-                    throw new InvalidDataException($"Unexpected message {type} received in {this}. Did you register a handler for it?");
-                }
-                catch (KeyNotFoundException)
-                {
-                    throw new InvalidDataException($"Unexpected message ID {msgType} received in {this}. May be due to no existing RegisterHandler for this message.");
-                }
-            }
-        }
-
-        void IMessageHandler.HandleMessage(ArraySegment<byte> packet)
-        {
-            // unpack message
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(packet))
-            {
-                // protect against attackers trying to send invalid data packets
-                // exception could be throw if:
-                // - invalid headers
-                // - invalid message ids
-                // - invalid data causing exceptions
-                // - negative ReadBytesAndSize prefixes
-                // - invalid utf8 strings
-                // - etc.
-                //
-                // if exception is caught, disconnect the attacker to stop any further attacks
-
-                try
-                {
-                    int msgType = MessagePacker.UnpackId(networkReader);
-                    InvokeHandler(msgType, networkReader);
-                }
-                catch (InvalidDataException ex)
-                {
-                    logger.Log(ex.ToString());
-                }
-                catch (Exception e)
-                {
-                    logger.LogError($"{e.GetType()} in Message handler (see stack below), Closed connection: {this}\n{e}");
-                    Connection?.Disconnect();
-                }
-            }
         }
 
         public void AddOwnedObject(NetworkIdentity networkIdentity)

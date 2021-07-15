@@ -38,6 +38,8 @@ namespace Mirage
         [Min(1)]
         public int MaxConnections = 4;
 
+        public bool DisconnectOnException = true;
+
         /// <summary>
         /// <para>If you disable this, the server will not listen for incoming connections on the regular network port.</para>
         /// <para>This can be used if the game is running in host mode and does not want external players to be able to connect - making it like a single-player game.</para>
@@ -141,6 +143,7 @@ namespace Mirage
 
         public NetworkWorld World { get; private set; }
         public SyncVarSender SyncVarSender { get; private set; }
+        public MessageHandler MessageHandler { get; private set; }
 
 
         /// <summary>
@@ -190,26 +193,16 @@ namespace Mirage
             logger.Assert(Players.Count == 0, "Player could should have been reset since previous session");
             logger.Assert(connections.Count == 0, "connections could should have been reset since previous session");
 
-
-            if (authenticator != null)
-            {
-                authenticator.OnServerAuthenticated += OnAuthenticated;
-
-                Connected.AddListener(authenticator.ServerAuthenticate);
-            }
-            else
-            {
-                // if no authenticator, consider every connection as authenticated
-                Connected.AddListener(OnAuthenticated);
-            }
-
             LocalClient = localClient;
+            MessageHandler = new MessageHandler(DisconnectOnException);
+            MessageHandler.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
+
             World = new NetworkWorld();
             SyncVarSender = new SyncVarSender();
 
 
             ISocket socket = SocketFactory.CreateServerSocket();
-            var dataHandler = new DataHandler(connections);
+            var dataHandler = new DataHandler(MessageHandler, connections);
             Metrics = EnablePeerMetrics ? new Metrics() : null;
             Config config = PeerConfig ?? new Config
             {
@@ -226,6 +219,7 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log("Server started listening");
 
+            InitializeAuthEvents();
             Active = true;
             _started?.Invoke();
 
@@ -251,6 +245,22 @@ namespace Mirage
                 SocketFactory = GetComponent<SocketFactory>();
             if (SocketFactory == null)
                 throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for {nameof(NetworkServer)}");
+        }
+
+        void InitializeAuthEvents()
+        {
+            if (authenticator != null)
+            {
+                authenticator.OnServerAuthenticated += OnAuthenticated;
+                authenticator.ServerSetup(this);
+
+                Connected.AddListener(authenticator.ServerAuthenticate);
+            }
+            else
+            {
+                // if no authenticator, consider every connection as authenticated
+                Connected.AddListener(OnAuthenticated);
+            }
         }
 
         internal void Update()
@@ -332,7 +342,6 @@ namespace Mirage
                 // would throw NRE
                 Players.Add(player);
                 connections.Add(player.Connection, player);
-                player.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
             }
         }
 
@@ -471,18 +480,20 @@ namespace Mirage
         /// </summary>
         class DataHandler : IDataHandler
         {
+            readonly IMessageReceiver messageHandler;
             readonly Dictionary<IConnection, INetworkPlayer> players;
 
-            public DataHandler(Dictionary<IConnection, INetworkPlayer> connections)
+            public DataHandler(IMessageReceiver messageHandler, Dictionary<IConnection, INetworkPlayer> connections)
             {
+                this.messageHandler = messageHandler;
                 players = connections;
             }
 
             public void ReceiveMessage(IConnection connection, ArraySegment<byte> message)
             {
-                if (players.TryGetValue(connection, out INetworkPlayer handler))
+                if (players.TryGetValue(connection, out INetworkPlayer player))
                 {
-                    handler.HandleMessage(message);
+                    messageHandler.HandleMessage(player, message);
                 }
                 else
                 {

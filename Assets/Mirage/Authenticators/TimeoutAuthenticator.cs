@@ -40,6 +40,14 @@ namespace Mirage.Authenticators
             ClientAccept(player);
         }
 
+        public override void ServerAuthenticate(INetworkPlayer player)
+        {
+            pendingAuthentication.Add(player);
+            Authenticator.ServerAuthenticate(player);
+            if (Timeout > 0)
+                StartCoroutine(BeginAuthentication(player, ServerReject));
+        }
+
         public override void ClientAuthenticate(INetworkPlayer player)
         {
             pendingAuthentication.Add(player);
@@ -49,12 +57,14 @@ namespace Mirage.Authenticators
                 StartCoroutine(BeginAuthentication(player, ClientReject));
         }
 
-        public override void ServerAuthenticate(INetworkPlayer player)
+        public override void ServerSetup(NetworkServer server)
         {
-            pendingAuthentication.Add(player);
-            Authenticator.ServerAuthenticate(player);
-            if (Timeout > 0)
-                StartCoroutine(BeginAuthentication(player, ServerReject));
+            Authenticator.ServerSetup(server);
+        }
+
+        public override void ClientSetup(NetworkClient client)
+        {
+            Authenticator.ClientSetup(client);
         }
 
         IEnumerator BeginAuthentication(INetworkPlayer player, Action<INetworkPlayer> reject)

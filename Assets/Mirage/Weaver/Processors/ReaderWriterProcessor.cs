@@ -188,11 +188,11 @@ namespace Mirage.Weaver
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.GetId)) ||
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.Unpack)) ||
                 method.Is<IMessageSender>(nameof(IMessageSender.Send)) ||
-                method.Is<IMessageSender>(nameof(IMessageReceiver.RegisterHandler)) ||
-                method.Is<IMessageSender>(nameof(IMessageReceiver.UnregisterHandler)) ||
+                method.Is<IMessageReceiver>(nameof(IMessageReceiver.RegisterHandler)) ||
+                method.Is<IMessageReceiver>(nameof(IMessageReceiver.UnregisterHandler)) ||
                 method.Is<NetworkPlayer>(nameof(NetworkPlayer.Send)) ||
-                method.Is<NetworkPlayer>(nameof(NetworkPlayer.RegisterHandler)) ||
-                method.Is<NetworkPlayer>(nameof(NetworkPlayer.UnregisterHandler)) ||
+                method.Is<MessageHandler>(nameof(MessageHandler.RegisterHandler)) ||
+                method.Is<MessageHandler>(nameof(MessageHandler.UnregisterHandler)) ||
                 method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
                 method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
                 method.Is<NetworkServer>(nameof(NetworkServer.SendToMany)) ||

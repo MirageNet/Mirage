@@ -55,7 +55,6 @@ namespace Mirage
             {
                 Server.Started.AddListener(OnServerStarted);
                 Server.OnStartHost.AddListener(StartedHost);
-                Server.Authenticated.AddListener(OnAuthenticated);
                 Server.Stopped.AddListener(OnServerStopped);
 
                 if (NetworkSceneManager != null)
@@ -66,19 +65,15 @@ namespace Mirage
             }
         }
 
-        internal void RegisterMessageHandlers(INetworkPlayer player)
+        internal void RegisterMessageHandlers()
         {
-            player.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
-            player.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
-        }
-
-        void OnAuthenticated(INetworkPlayer player)
-        {
-            RegisterMessageHandlers(player);
+            Server.MessageHandler.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
+            Server.MessageHandler.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
         }
 
         void OnServerStarted()
         {
+            RegisterMessageHandlers();
             SpawnOrActivate();
         }
 

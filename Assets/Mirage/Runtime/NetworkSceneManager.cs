@@ -95,7 +95,7 @@ namespace Mirage
 
             if (Client != null)
             {
-                Client.Authenticated.AddListener(OnClientAuthenticated);
+                Client.Started.AddListener(RegisterClientMessages);
             }
             if (Server != null)
             {
@@ -103,28 +103,22 @@ namespace Mirage
             }
         }
 
-        #region Client
-
-        void RegisterClientMessages(INetworkPlayer player)
-        {
-            player.RegisterHandler<SceneMessage>(ClientSceneMessage);
-            if (!Client.IsLocalClient)
-            {
-                player.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
-                player.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
-            }
-        }
-
-        void OnClientAuthenticated(INetworkPlayer player)
-        {
-            logger.Log("NetworkSceneManager.OnClientAuthenticated");
-            RegisterClientMessages(player);
-        }
-
         void OnDestroy()
         {
             if (Client != null)
-                Client.Authenticated?.RemoveListener(OnClientAuthenticated);
+                Client.Started.RemoveListener(RegisterClientMessages);
+        }
+
+        #region Client
+
+        void RegisterClientMessages()
+        {
+            Client.MessageHandler.RegisterHandler<SceneMessage>(ClientSceneMessage);
+            if (!Client.IsLocalClient)
+            {
+                Client.MessageHandler.RegisterHandler<SceneReadyMessage>(ClientSceneReadyMessage);
+                Client.MessageHandler.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
+            }
         }
 
         internal void ClientSceneMessage(INetworkPlayer player, SceneMessage msg)

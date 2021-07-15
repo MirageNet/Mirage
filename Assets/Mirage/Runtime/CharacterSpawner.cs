@@ -61,7 +61,7 @@ namespace Mirage
             }
             if (Server != null)
             {
-                Server.Authenticated.AddListener(OnServerAuthenticated);
+                Server.Started.AddListener(OnServerStarted);
                 if (ServerObjectManager == null)
                 {
                     throw new InvalidOperationException("Assign a ServerObjectManager");
@@ -78,14 +78,13 @@ namespace Mirage
             }
             if (Server != null)
             {
-                Server.Authenticated.RemoveListener(OnServerAuthenticated);
+                Server.Started.RemoveListener(OnServerStarted);
             }
         }
 
-        private void OnServerAuthenticated(INetworkPlayer player)
+        private void OnServerStarted()
         {
-            // wait for client to send us an AddPlayerMessage
-            player.RegisterHandler<AddCharacterMessage>(OnServerAddPlayerInternal);
+            Server.MessageHandler.RegisterHandler<AddCharacterMessage>(OnServerAddPlayerInternal);
         }
 
         /// <summary>

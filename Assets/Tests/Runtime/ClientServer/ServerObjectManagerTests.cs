@@ -27,7 +27,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                serverObjectManager.Spawn(new GameObject().AddComponent<NetworkIdentity>(), connectionToClient);
+                serverObjectManager.Spawn(new GameObject().AddComponent<NetworkIdentity>(), serverPlayer);
             });
 
             Assert.That(ex.Message, Is.EqualTo("NetworkServer is not active. Cannot spawn objects without an active server."));
@@ -73,12 +73,12 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             bool invoked = false;
 
-            connectionToServer.RegisterHandler<SpawnMessage>(msg => invoked = true);
+            ClientMessageHandler.RegisterHandler<SpawnMessage>(msg => invoked = true);
 
-            connectionToClient.IsReady = true;
+            serverPlayer.IsReady = true;
 
             // call ShowForConnection
-            serverObjectManager.ShowForConnection(serverIdentity, connectionToClient);
+            serverObjectManager.ShowForConnection(serverIdentity, serverPlayer);
 
             // todo assert correct message was sent using Substitute for socket or player
 
@@ -163,9 +163,9 @@ namespace Mirage.Tests.Runtime.ClientServer
             replacementIdentity.AssetId = Guid.NewGuid();
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            serverObjectManager.ReplaceCharacter(connectionToClient, playerReplacement);
+            serverObjectManager.ReplaceCharacter(serverPlayer, playerReplacement);
 
-            Assert.That(connectionToClient.Identity, Is.EqualTo(replacementIdentity));
+            Assert.That(serverPlayer.Identity, Is.EqualTo(replacementIdentity));
         }
 
         [Test]
@@ -176,7 +176,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             replacementIdentity.AssetId = Guid.NewGuid();
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            serverObjectManager.ReplaceCharacter(connectionToClient, playerReplacement, true);
+            serverObjectManager.ReplaceCharacter(serverPlayer, playerReplacement, true);
 
             Assert.That(clientIdentity.ConnectionToClient, Is.EqualTo(null));
         }
@@ -190,9 +190,9 @@ namespace Mirage.Tests.Runtime.ClientServer
             replacementIdentity.AssetId = replacementGuid;
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            serverObjectManager.ReplaceCharacter(connectionToClient, playerReplacement, replacementGuid);
+            serverObjectManager.ReplaceCharacter(serverPlayer, playerReplacement, replacementGuid);
 
-            Assert.That(connectionToClient.Identity.AssetId, Is.EqualTo(replacementGuid));
+            Assert.That(serverPlayer.Identity.AssetId, Is.EqualTo(replacementGuid));
         }
 
         [Test]
@@ -204,17 +204,17 @@ namespace Mirage.Tests.Runtime.ClientServer
             replacementIdentity.AssetId = replacementGuid;
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            connectionToClient.Identity = null;
+            serverPlayer.Identity = null;
 
-            serverObjectManager.AddCharacter(connectionToClient, playerReplacement, replacementGuid);
+            serverObjectManager.AddCharacter(serverPlayer, playerReplacement, replacementGuid);
 
-            Assert.That(replacementIdentity == connectionToClient.Identity);
+            Assert.That(replacementIdentity == serverPlayer.Identity);
         }
 
         [UnityTest]
         public IEnumerator RemovePlayerForConnectionTest() => UniTask.ToCoroutine(async () =>
         {
-            serverObjectManager.RemovePlayerForConnection(connectionToClient);
+            serverObjectManager.RemovePlayerForConnection(serverPlayer);
 
             await AsyncUtil.WaitUntilWithTimeout(() => !clientIdentity);
 
@@ -224,20 +224,20 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator RemovePlayerForConnectionExceptionTest() => UniTask.ToCoroutine(async () =>
         {
-            serverObjectManager.RemovePlayerForConnection(connectionToClient);
+            serverObjectManager.RemovePlayerForConnection(serverPlayer);
 
             await AsyncUtil.WaitUntilWithTimeout(() => !clientIdentity);
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                serverObjectManager.RemovePlayerForConnection(connectionToClient);
+                serverObjectManager.RemovePlayerForConnection(serverPlayer);
             });
         });
 
         [UnityTest]
         public IEnumerator RemovePlayerForConnectionDestroyTest() => UniTask.ToCoroutine(async () =>
         {
-            serverObjectManager.RemovePlayerForConnection(connectionToClient, true);
+            serverObjectManager.RemovePlayerForConnection(serverPlayer, true);
 
             await AsyncUtil.WaitUntilWithTimeout(() => !clientIdentity);
 
@@ -249,7 +249,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                serverObjectManager.Spawn(new GameObject(), connectionToServer);
+                serverObjectManager.Spawn(new GameObject(), clientPlayer);
             });
 
             AssertNoIdentityMessage(ex);
@@ -261,7 +261,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                serverObjectManager.AddCharacter(connectionToClient, new GameObject());
+                serverObjectManager.AddCharacter(serverPlayer, new GameObject());
             });
             AssertNoIdentityMessage(ex);
 
@@ -272,7 +272,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
             {
-                serverObjectManager.ReplaceCharacter(connectionToClient, new GameObject(), true);
+                serverObjectManager.ReplaceCharacter(serverPlayer, new GameObject(), true);
             });
             AssertNoIdentityMessage(ex);
         }

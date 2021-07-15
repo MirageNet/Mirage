@@ -51,7 +51,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
             });
 
             // server's object
-            connectionToClient.Disconnect();
+            serverPlayer.Disconnect();
 
             // wait 2 frames so that messages can go from client->server->client
             yield return null;

@@ -13,8 +13,8 @@ namespace Mirage.Examples.Chat
 
         void Awake()
         {
-            Server.Authenticated.AddListener(OnServerAuthenticated);
-            Client.Authenticated.AddListener(OnClientAuthenticated);
+            Server.Started.AddListener(OnServerStarted);
+            Client.Connected.AddListener(OnClientAuthenticated);
         }
 
         public struct CreateCharacterMessage
@@ -22,9 +22,9 @@ namespace Mirage.Examples.Chat
             public string name;
         }
 
-        public void OnServerAuthenticated(INetworkPlayer player)
+        public void OnServerStarted()
         {
-            player.RegisterHandler<CreateCharacterMessage>(OnCreatePlayer);
+            Server.MessageHandler.RegisterHandler<CreateCharacterMessage>(OnCreatePlayer);
         }
 
         public void OnClientAuthenticated(INetworkPlayer player)
