@@ -1,3 +1,16 @@
+# [100.0.0](https://github.com/MirageNet/Mirage/compare/v99.1.0...v100.0.0) (2021-07-15)
+
+
+### Code Refactoring
+
+* moving message handling out of networkplayer ([#818](https://github.com/MirageNet/Mirage/issues/818)) ([b2e9d96](https://github.com/MirageNet/Mirage/commit/b2e9d9693471097ac86fabd725bad8aa6b444983))
+
+
+### BREAKING CHANGES
+
+* RegisterHandler functions now exist on MessageHandler On Server and Client
+* NetworkAuthenticator now use Setup methods that should be used to register messages
+
 # [99.1.0](https://github.com/MirageNet/Mirage/compare/v99.0.2...v99.1.0) (2021-07-15)
 
 
