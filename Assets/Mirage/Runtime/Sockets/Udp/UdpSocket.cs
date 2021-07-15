@@ -22,15 +22,15 @@ namespace Mirage.Sockets.Udp {
         static Socket CreateSocket(EndPoint endPoint)
         {
             var ipEndPoint = (IPEndPoint)endPoint;
-            var socket = new Socket(ipEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
+            var newSocket = new Socket(ipEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
             {
                 Blocking = false,
             };
 
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            TrySetIOControl(socket);
+            newSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            TrySetIOControl(newSocket);
 
-            return socket;
+            return newSocket;
         }
 
         private static void TrySetIOControl(Socket socket)
@@ -96,9 +96,6 @@ namespace Mirage.Sockets.Udp {
 
         public void Send(IEndPoint endPoint, byte[] packet, int length)
         {
-            // todo check disconnected
-            // todo what SocketFlags??
-
             EndPoint netEndPoint = ((EndPointWrapper)endPoint).inner;
             socket.SendTo(packet, length, SocketFlags.None, netEndPoint);
         }
