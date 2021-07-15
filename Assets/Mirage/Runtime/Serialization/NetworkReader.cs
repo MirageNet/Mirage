@@ -45,28 +45,33 @@ namespace Mirage.Serialization
         int bitPosition;
         int bitLength;
 
+        /// <summary>
+        /// Size of buffer that is being read from
+        /// </summary>
         public int BitLength
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => bitLength;
         }
 
+        /// <summary>
+        /// Current bit position for reading from buffer
+        /// </summary>
         public int BitPosition
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => bitPosition;
         }
-
         /// <summary>
-        /// Position to the nearest byte
+        /// Current <see cref="BitPosition"/> rounded up to nearest multiple of 8
         /// </summary>
         public int BytePosition
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             // rounds up to nearest 8
             // add to 3 last bits,
             //   if any are 1 then it will roll over 4th bit.
             //   if all are 0, then nothing happens 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => (bitPosition + 0b111) >> 3;
         }
 
@@ -299,6 +304,37 @@ namespace Mirage.Serialization
             bitPosition = newPosition;
 
             return result;
+        }
+
+        /// <summary>
+        /// Reads n <paramref name="bits"/> from buffer at <paramref name="bitPosition"/>
+        /// </summary>
+        /// <param name="bits">number of bits in value to write</param>
+        /// <param name="bitPosition">where to write bits</param>
+        public ulong ReadAtPosition(int bits, int bitPosition)
+        {
+            // check length here so this methods throws instead of the read below
+            CheckNewLength(bitPosition + bits);
+
+            int currentPosition = this.bitPosition;
+            this.bitPosition = bitPosition;
+            ulong result = Read(bits);
+            this.bitPosition = currentPosition;
+
+            return result;
+        }
+
+
+        /// <summary>
+        /// Moves the internal bit position
+        /// <para>For most usecases it is safer to use <see cref="ReadAtPosition"/></para>
+        /// <para>WARNING: When reading from earlier position make sure to move position back to end of buffer after reading</para>
+        /// </summary>
+        /// <param name="newPosition"></param>
+        public void MoveBitPosition(int newPosition)
+        {
+            CheckNewLength(newPosition);
+            bitPosition = newPosition;
         }
 
 

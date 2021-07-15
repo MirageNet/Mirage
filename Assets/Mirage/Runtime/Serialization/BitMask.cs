@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2021 James Frowen
@@ -48,7 +48,7 @@ namespace Mirage.Serialization
 
         /// <summary>
         /// Creates Mask either side of start and end
-        /// <para>Note this mask is only valid for start [0..63] and end [0..64]4</para>
+        /// <para>Note this mask is only valid for start [0..63] and end [0..64]</para>
         /// </summary>
         /// <param name="start"></param>
         /// <param name="end"></param>
