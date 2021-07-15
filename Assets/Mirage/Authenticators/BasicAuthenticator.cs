@@ -97,7 +97,6 @@ namespace Mirage.Authenticators
                 player.Send(authResponseMessage);
 
                 // disconnect the client after 1 second so that response message gets delivered
-                // todo do we still need this delay? message should arrive in order
                 StartCoroutine(DelayedDisconnect(player, 1));
             }
         }

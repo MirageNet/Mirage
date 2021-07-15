@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using Mirage.Logging;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
@@ -34,7 +32,7 @@ namespace Mirage
         /// <para>Transport layers connections begin at one. So on a client with a single connection to a server, the connectionId of that connection will be one. In NetworkServer, the connectionId of the local connection is zero.</para>
         /// <para>Clients do not know their connectionId on the server, and do not know the connectionId of other clients on the server.</para>
         /// </remarks>
-        private readonly SocketLayer.IConnection connection;
+        private readonly IConnection connection;
 
         /// <summary>
         /// Has this player been marked as disconnected
@@ -66,7 +64,7 @@ namespace Mirage
         /// </summary>
         public IEndPoint Address => connection.EndPoint;
 
-        public SocketLayer.IConnection Connection => connection;
+        public IConnection Connection => connection;
 
         /// <summary>
         /// Disconnects the player.
@@ -108,7 +106,7 @@ namespace Mirage
         /// Creates a new NetworkConnection with the specified address and connectionId
         /// </summary>
         /// <param name="networkConnectionId"></param>
-        public NetworkPlayer(SocketLayer.IConnection connection)
+        public NetworkPlayer(IConnection connection)
         {
             Assert.IsNotNull(connection);
             this.connection = connection;

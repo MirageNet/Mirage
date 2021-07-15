@@ -13,8 +13,8 @@ namespace Mirage
     }
 
     // delegates to give names to variables in handles
-    public delegate void MessageDelegate<T>(T message);
-    public delegate void MessageDelegateWithPlayer<T>(INetworkPlayer player, T message);
+    public delegate void MessageDelegate<in T>(T message);
+    public delegate void MessageDelegateWithPlayer<in T>(INetworkPlayer player, T message);
 
     /// <summary>
     /// An object that can receive messages
