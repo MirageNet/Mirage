@@ -314,31 +314,15 @@ namespace Mirage.Serialization
         /// <param name="bitPosition">where to write bits</param>
         public void WriteAtPosition(ulong value, int bits, int bitPosition)
         {
-            // careful with this method, dont set bitPosition
+            // check length here so this methods throws instead of the read below
+            // this is so that it is more obvious that the position arg for this method is invalid
+            CheckCapacity(bitPosition + bits);
 
-            int newPosition = bitPosition + bits;
-            CheckCapacity(newPosition);
-
-            // mask so we dont overwrite
-            value &= ulong.MaxValue >> (64 - bits);
-
-            int bitsInLong = bitPosition & 0b11_1111;
-            int bitsLeft = 64 - bitsInLong;
-
-            if (bitsLeft >= bits)
-            {
-                ulong* ptr = longPtr + (bitPosition >> 6);
-
-                *ptr = (*ptr & BitMask.OuterMask(bitPosition, newPosition)) | (value << bitsInLong);
-            }
-            else
-            {
-                ulong* ptr1 = longPtr + (bitPosition >> 6);
-                ulong* ptr2 = ptr1 + 1;
-
-                *ptr1 = (*ptr1 & (ulong.MaxValue >> bitsLeft)) | (value << bitsInLong);
-                *ptr2 = (*ptr2 & (ulong.MaxValue << newPosition)) | (value >> bitsLeft);
-            }
+            // moves position to arg, then write, then reset position
+            int currentPosition = this.bitPosition;
+            this.bitPosition = bitPosition;
+            Write(value, bits);
+            this.bitPosition = currentPosition;
         }
 
 

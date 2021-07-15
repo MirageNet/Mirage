@@ -313,36 +313,13 @@ namespace Mirage.Serialization
         /// <param name="bitPosition">where to write bits</param>
         public ulong ReadAtPosition(int bits, int bitPosition)
         {
-            // careful with this method, dont get bitPosition
+            // check length here so this methods throws instead of the read below
+            CheckNewLength(bitPosition + bits);
 
-            int newPosition = bitPosition + bits;
-            CheckNewLength(newPosition);
-
-            int bitsInLong = bitPosition & 0b11_1111;
-            int bitsLeft = 64 - bitsInLong;
-
-            ulong result;
-            if (bitsLeft >= bits)
-            {
-                ulong* ptr = longPtr + (bitPosition >> 6);
-                result = (*ptr) >> bitsInLong;
-            }
-            else
-            {
-                ulong* ptr1 = longPtr + (bitPosition >> 6);
-                ulong* ptr2 = ptr1 + 1;
-
-                // eg use byte, read 6  =>bitPosition=5, bitsLeft=3, newPos=1
-                // r1 = aaab_bbbb => 0000_0aaa
-                // r2 = cccc_caaa => ccaa_a000
-                // r = r1|r2 => ccaa_aaaa
-                // we mask this result later
-
-                ulong r1 = (*ptr1) >> bitsInLong;
-                ulong r2 = (*ptr2) << bitsLeft;
-                result = r1 | r2;
-            }
-            bitPosition = newPosition;
+            int currentPosition = this.bitPosition;
+            this.bitPosition = bitPosition;
+            ulong result = Read(bits);
+            this.bitPosition = currentPosition;
 
             return result;
         }
