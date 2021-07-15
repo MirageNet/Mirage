@@ -7,17 +7,18 @@ using UnityEngine;
 
 namespace Mirage.Sockets.Udp
 {
-    public enum SocketLib { Automatic, NanoSockets, Net };
+    public enum SocketLib { Automatic, Native, Managed };
 
     public sealed class UdpSocketFactory : SocketFactory
     {
         public string Address = "localhost";
         public ushort Port = 7777;
+        public int BufferSize = 256 * 1024;
 
-        [Tooltip("Allows you to set which Socket implementation you want to use.\nAutomatic will use NanoSockets on supported platforms (Windows, Mac & Linux).")]
+        [Tooltip("Allows you to set which Socket implementation you want to use.\nAutomatic will use native (NanoSockets) on supported platforms (Windows, Mac & Linux).")]
         public SocketLib SocketLib;
 
-        bool useNanoSocket => SocketLib == SocketLib.NanoSockets || (SocketLib == SocketLib.Automatic && IsDesktop);
+        bool useNanoSocket => SocketLib == SocketLib.Native || (SocketLib == SocketLib.Automatic && IsDesktop);
 
         static int initCount;
 
@@ -52,7 +53,7 @@ namespace Mirage.Sockets.Udp
         {
             ThrowIfNotSupported();
 
-            if (useNanoSocket) return new NanoSocket();
+            if (useNanoSocket) return new NanoSocket(this);
 
             return new UdpSocket();
         }
@@ -61,7 +62,7 @@ namespace Mirage.Sockets.Udp
         {
             ThrowIfNotSupported();
 
-            if (useNanoSocket) return new NanoSocket();
+            if (useNanoSocket) return new NanoSocket(this);
 
             return new UdpSocket();
         }
