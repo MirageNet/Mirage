@@ -114,7 +114,6 @@ namespace Mirage
             connectState = ConnectState.Connecting;
 
             World = new NetworkWorld();
-            InitializeAuthEvents();
 
             IEndPoint endPoint = SocketFactory.GetConnectEndPoint(address, port);
             if (logger.LogEnabled()) logger.Log($"Client connecting to endpoint: {endPoint}");
@@ -141,6 +140,7 @@ namespace Mirage
             Time.Reset();
 
             RegisterMessageHandlers();
+            InitializeAuthEvents();
             // invoke started event after everything is set up, but before peer has connected
             _started.Invoke();
         }
@@ -194,7 +194,6 @@ namespace Mirage
             connectState = ConnectState.Connecting;
 
             World = server.World;
-            InitializeAuthEvents();
 
             // create local connection objects and connect them
             MessageHandler = new MessageHandler(DisconnectOnException);
@@ -206,6 +205,7 @@ namespace Mirage
             Player = new NetworkPlayer(clientConn);
             dataHandler.SetConnection(clientConn, Player);
             RegisterHostHandlers();
+            InitializeAuthEvents();
             // invoke started event after everything is set up, but before peer has connected
             _started.Invoke();
 
@@ -223,10 +223,8 @@ namespace Mirage
         {
             if (authenticator != null)
             {
-                Debug.Assert(authenticator.Client == null || authenticator.Client == this, "authenticator had a reference to a different client");
-                authenticator.Client = this;
-
                 authenticator.OnClientAuthenticated += OnAuthenticated;
+                authenticator.ClientSetup(this);
 
                 Connected.AddListener(authenticator.ClientAuthenticate);
             }

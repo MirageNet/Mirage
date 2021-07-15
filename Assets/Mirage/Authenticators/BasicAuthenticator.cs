@@ -50,22 +50,16 @@ namespace Mirage.Authenticators
             public string message;
         }
 
-        private void Awake()
-        {
-            // register messsage for Auth when server or client starts
-            // this will ensure the handlers are ready when client connects (even in host mode)
-            Server.Started.AddListener(() =>
-            {
-                Server.MessageHandler.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage);
-            });
-
-            Client.Started.AddListener(() =>
-            {
-                Client.MessageHandler.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage);
-            });
-        }
 
         #region Server Authenticate
+
+        public override void ServerSetup(NetworkServer server)
+        {
+            // register messsage for Auth when server starts
+            // this will ensure the handlers are ready when client connects (even in host mode)
+
+            server.MessageHandler.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage);
+        }
 
         public override void ServerAuthenticate(INetworkPlayer player)
         {
@@ -117,6 +111,14 @@ namespace Mirage.Authenticators
         #endregion
 
         #region Client Authenticate
+
+        public override void ClientSetup(NetworkClient client)
+        {
+            // register messsage for Auth when client starts
+            // this will ensure the handlers are ready when client connects (even in host mode)
+
+            client.MessageHandler.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage);
+        }
 
         public override void ClientAuthenticate(INetworkPlayer player)
         {

@@ -193,27 +193,13 @@ namespace Mirage
             logger.Assert(Players.Count == 0, "Player could should have been reset since previous session");
             logger.Assert(connections.Count == 0, "connections could should have been reset since previous session");
 
-
-            if (authenticator != null)
-            {
-                Debug.Assert(authenticator.Server == null || authenticator.Server == this, "authenticator had a reference to a different server");
-                authenticator.Server = this;
-                authenticator.OnServerAuthenticated += OnAuthenticated;
-
-                Connected.AddListener(authenticator.ServerAuthenticate);
-            }
-            else
-            {
-                // if no authenticator, consider every connection as authenticated
-                Connected.AddListener(OnAuthenticated);
-            }
-
             LocalClient = localClient;
             MessageHandler = new MessageHandler(DisconnectOnException);
             MessageHandler.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
 
             World = new NetworkWorld();
             SyncVarSender = new SyncVarSender();
+
 
             ISocket socket = SocketFactory.CreateServerSocket();
             var dataHandler = new DataHandler(MessageHandler, connections);
@@ -233,6 +219,7 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log("Server started listening");
 
+            InitializeAuthEvents();
             Active = true;
             _started?.Invoke();
 
@@ -258,6 +245,22 @@ namespace Mirage
                 SocketFactory = GetComponent<SocketFactory>();
             if (SocketFactory == null)
                 throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for {nameof(NetworkServer)}");
+        }
+
+        void InitializeAuthEvents()
+        {
+            if (authenticator != null)
+            {
+                authenticator.OnServerAuthenticated += OnAuthenticated;
+                authenticator.ServerSetup(this);
+
+                Connected.AddListener(authenticator.ServerAuthenticate);
+            }
+            else
+            {
+                // if no authenticator, consider every connection as authenticated
+                Connected.AddListener(OnAuthenticated);
+            }
         }
 
         internal void Update()
