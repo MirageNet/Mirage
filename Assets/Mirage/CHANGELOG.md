@@ -1,3 +1,10 @@
+# [99.1.0](https://github.com/MirageNet/Mirage/compare/v99.0.2...v99.1.0) (2021-07-15)
+
+
+### Features
+
+* **NetworkWriter:** adding method to move position and docs comments ([#861](https://github.com/MirageNet/Mirage/issues/861)) ([35cf3ec](https://github.com/MirageNet/Mirage/commit/35cf3ecbffbb582bad3022b93b6d5c09ab266f48))
+
 ## [99.0.2](https://github.com/MirageNet/Mirage/compare/v99.0.1...v99.0.2) (2021-07-05)
 
 
