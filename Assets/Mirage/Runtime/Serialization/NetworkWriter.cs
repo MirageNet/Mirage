@@ -314,7 +314,7 @@ namespace Mirage.Serialization
         /// <param name="bitPosition">where to write bits</param>
         public void WriteAtPosition(ulong value, int bits, int bitPosition)
         {
-            // check length here so this methods throws instead of the read below
+            // check length here so this methods throws instead of the write below
             // this is so that it is more obvious that the position arg for this method is invalid
             CheckCapacity(bitPosition + bits);
 
