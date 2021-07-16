@@ -59,15 +59,15 @@ namespace Mirage
 
                 if (NetworkSceneManager != null)
                 {
-                    NetworkSceneManager.ServerChangeScene.AddListener(OnServerChangeScene);
-                    NetworkSceneManager.ServerSceneChanged.AddListener(OnServerSceneChanged);
+                    NetworkSceneManager.ServerStartedSceneChange.AddListener(OnServerChangeScene);
+                    NetworkSceneManager.ServerFinishedSceneChange.AddListener(OnServerSceneChanged);
                 }
             }
         }
 
         internal void RegisterMessageHandlers()
         {
-            Server.MessageHandler.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
+            Server.MessageHandler.RegisterHandler<PlayerReadyMessage>(OnClientReadyMessage);
             Server.MessageHandler.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
         }
 
@@ -220,7 +220,7 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("Spawning " + Server.World.SpawnedIdentities.Count + " objects for conn " + player);
 
-            if (!player.IsReady)
+            if (!player.SceneIsReady)
             {
                 // client needs to finish initializing before we can spawn objects
                 // otherwise it would not find them.
@@ -327,7 +327,7 @@ namespace Mirage
 
         internal void ShowForConnection(NetworkIdentity identity, INetworkPlayer player)
         {
-            if (player.IsReady)
+            if (player.SceneIsReady)
                 SendSpawnMessage(identity, player);
         }
 
@@ -649,7 +649,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + player);
 
             // set ready
-            player.IsReady = true;
+            player.SceneIsReady = true;
 
             // client is ready to start spawning objects
             if (player.Identity != null)
@@ -675,13 +675,13 @@ namespace Mirage
         /// <param name="player">The connection of the client to make not ready.</param>
         public void SetClientNotReady(INetworkPlayer player)
         {
-            if (player.IsReady)
+            if (player.SceneIsReady)
             {
                 if (logger.LogEnabled()) logger.Log("PlayerNotReady " + player);
-                player.IsReady = false;
+                player.SceneIsReady = false;
                 player.RemoveObservers();
 
-                player.Send(new NotReadyMessage());
+                player.Send(new PlayerNotReadyMessage());
             }
         }
 
@@ -690,7 +690,7 @@ namespace Mirage
         /// </summary>
         /// <param name="player"></param>
         /// <param name="msg"></param>
-        void OnClientReadyMessage(INetworkPlayer player, ReadyMessage msg)
+        void OnClientReadyMessage(INetworkPlayer player, PlayerReadyMessage msg)
         {
             if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + player);
             SetClientReady(player);

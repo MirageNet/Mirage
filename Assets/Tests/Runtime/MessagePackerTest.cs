@@ -26,24 +26,24 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void TestPacking()
         {
-            var message = new SceneMessage
+            var message = new SceneLoadStartedMessage
             {
-                scenePath = "Hello world",
-                sceneOperation = SceneOperation.LoadAdditive
+                MainActivateScene = "Hello world",
+                SceneOperation = SceneOperation.LoadAdditive
             };
 
             byte[] data = MessagePacker.Pack(message);
 
-            SceneMessage unpacked = MessagePacker.Unpack<SceneMessage>(data);
+            SceneLoadStartedMessage unpacked = MessagePacker.Unpack<SceneLoadStartedMessage>(data);
 
-            Assert.That(unpacked.scenePath, Is.EqualTo("Hello world"));
-            Assert.That(unpacked.sceneOperation, Is.EqualTo(SceneOperation.LoadAdditive));
+            Assert.That(unpacked.MainActivateScene, Is.EqualTo("Hello world"));
+            Assert.That(unpacked.SceneOperation, Is.EqualTo(SceneOperation.LoadAdditive));
         }
 
         [Test]
         public void UnpackWrongMessage()
         {
-            var message = new ReadyMessage();
+            var message = new PlayerReadyMessage();
 
             byte[] data = MessagePacker.Pack(message);
 
@@ -59,10 +59,10 @@ namespace Mirage.Tests.Runtime.Serialization
             // Unpack<T> has a id != msgType case that throws a FormatException.
             // let's try to trigger it.
 
-            var message = new SceneMessage
+            var message = new SceneLoadStartedMessage
             {
-                scenePath = "Hello world",
-                sceneOperation = SceneOperation.LoadAdditive
+                MainActivateScene = "Hello world",
+                SceneOperation = SceneOperation.LoadAdditive
             };
 
             byte[] data = MessagePacker.Pack(message);
@@ -73,7 +73,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             Assert.Throws<FormatException>(delegate
             {
-                _ = MessagePacker.Unpack<SceneMessage>(data);
+                _ = MessagePacker.Unpack<SceneLoadStartedMessage>(data);
 
             });
         }
@@ -82,10 +82,10 @@ namespace Mirage.Tests.Runtime.Serialization
         public void TestUnpackMessageNonGeneric()
         {
             // try a regular message
-            var message = new SceneMessage
+            var message = new SceneLoadStartedMessage
             {
-                scenePath = "Hello world",
-                sceneOperation = SceneOperation.LoadAdditive
+                MainActivateScene = "Hello world",
+                SceneOperation = SceneOperation.LoadAdditive
             };
 
             byte[] data = MessagePacker.Pack(message);
@@ -137,9 +137,9 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void FindSystemMessage()
         {
-            int id = MessagePacker.GetId<SceneMessage>();
+            int id = MessagePacker.GetId<SceneLoadStartedMessage>();
             Type type = MessagePacker.GetMessageType(id);
-            Assert.That(type, Is.EqualTo(typeof(SceneMessage)));
+            Assert.That(type, Is.EqualTo(typeof(SceneLoadStartedMessage)));
         }
 
         struct SomeRandomMessageNotRegistered { };

@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine.Events;
 
 namespace Mirage
@@ -22,23 +23,53 @@ namespace Mirage
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
-        SceneChangeEvent ClientChangeScene { get; }
+        SceneChangeEvent ClientStartedSceneChange { get; }
 
         /// <summary>
         /// Event fires after the Client has completed its scene change.
         /// </summary>
-        SceneChangeEvent ClientSceneChanged { get; }
+        SceneChangeEvent ClientFinishedSceneChange { get; }
 
         /// <summary>
         /// Event fires before Server changes scene.
         /// </summary>
-        SceneChangeEvent ServerChangeScene { get; }
+        SceneChangeEvent ServerStartedSceneChange { get; }
 
         /// <summary>
         /// Event fires after Server has completed scene change.
         /// </summary>
-        SceneChangeEvent ServerSceneChanged { get; }
+        SceneChangeEvent ServerFinishedSceneChange { get; }
 
+        /// <summary>
+        ///     Allows server to fully load new scene or additive load in another scene.
+        /// </summary>
+        /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
+
+        /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
         void ChangeServerScene(string scenePath, SceneOperation sceneOperation = SceneOperation.Normal);
+
+        /// <summary>
+        ///     Load our scene up in a normal unity fashion.
+        /// </summary>
+        /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
+        /// <param name="movePlayer">Whether or not we should move the player.</param>
+        /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
+        UniTask LoadSceneNormalAsync(string scenePath, bool movePlayer, SceneOperation sceneOperation = SceneOperation.Normal);
+
+        /// <summary>
+        ///     Load our scene additively.
+        /// </summary>
+        /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
+        /// <param name="movePlayer">Whether or not we should move the player.</param>
+        /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
+        UniTask LoadSceneAdditiveAsync(string scenePath, bool movePlayer, SceneOperation sceneOperation = SceneOperation.Normal);
+
+        /// <summary>
+        ///     Unload our scene additively.
+        /// </summary>
+        /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
+        /// <param name="movePlayer">Whether or not we should move the player.</param>
+        /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
+        UniTask UnLoadSceneAdditiveAsync(string scenePath, bool movePlayer, SceneOperation sceneOperation = SceneOperation.Normal);
     }
 }

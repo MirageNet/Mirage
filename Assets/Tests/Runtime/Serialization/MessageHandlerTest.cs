@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Mirage.Serialization;
 using NSubstitute;
@@ -31,9 +31,9 @@ namespace Mirage.Tests.Runtime
         public void InvokesMessageHandler()
         {
             int invoked = 0;
-            messageHandler.RegisterHandler<ReadyMessage>(_ => { invoked++; });
+            messageHandler.RegisterHandler<PlayerReadyMessage>(_ => { invoked++; });
 
-            int messageId = MessagePacker.GetId<ReadyMessage>();
+            int messageId = MessagePacker.GetId<PlayerReadyMessage>();
             messageHandler.InvokeHandler(player, messageId, reader);
 
             Assert.That(invoked, Is.EqualTo(1), "Should have been invoked");
@@ -47,9 +47,9 @@ namespace Mirage.Tests.Runtime
             messageHandler = new MessageHandler(disconnectOnThrow);
 
             int invoked = 0;
-            messageHandler.RegisterHandler<ReadyMessage>(_ => { invoked++; throw new InvalidOperationException("Fun Exception"); });
+            messageHandler.RegisterHandler<PlayerReadyMessage>(_ => { invoked++; throw new InvalidOperationException("Fun Exception"); });
 
-            var packet = new ArraySegment<byte>(MessagePacker.Pack(new ReadyMessage()));
+            var packet = new ArraySegment<byte>(MessagePacker.Pack(new PlayerReadyMessage()));
             LogAssert.ignoreFailingMessages = true;
             Assert.DoesNotThrow(() =>
             {
@@ -72,20 +72,20 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ThrowsWhenNoHandlerIsFound()
         {
-            int messageId = MessagePacker.GetId<SceneMessage>();
+            int messageId = MessagePacker.GetId<SceneLoadStartedMessage>();
 
             InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
             {
                 messageHandler.InvokeHandler(player, messageId, reader);
             });
 
-            Assert.That(exception.Message, Does.StartWith("Unexpected message Mirage.SceneMessage received"));
+            Assert.That(exception.Message, Does.StartWith("Unexpected message Mirage.SceneLoadStartedMessage received"));
         }
 
         [Test]
         public void ThrowsWhenUnknownMessage()
         {
-            _ = MessagePacker.GetId<SceneMessage>();
+            _ = MessagePacker.GetId<SceneLoadStartedMessage>();
             InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
             {
                 // some random id with no message

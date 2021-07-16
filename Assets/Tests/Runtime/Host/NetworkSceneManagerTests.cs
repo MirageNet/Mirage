@@ -21,7 +21,7 @@ namespace Mirage.Tests.Runtime.Host
             bundle = AssetBundle.LoadFromFile("Assets/Tests/Runtime/TestScene/testscene");
 
             sceneEventFunction = Substitute.For<UnityAction<string, SceneOperation>>();
-            sceneManager.ServerSceneChanged.AddListener(sceneEventFunction);
+            sceneManager.ServerFinishedSceneChange.AddListener(sceneEventFunction);
         }
 
         public override void ExtraTearDown()
@@ -35,10 +35,10 @@ namespace Mirage.Tests.Runtime.Host
             UnityAction<string, SceneOperation> func2 = Substitute.For<UnityAction<string, SceneOperation>>();
             UnityAction<string, SceneOperation> func3 = Substitute.For<UnityAction<string, SceneOperation>>();
 
-            sceneManager.ServerSceneChanged.AddListener(func2);
-            sceneManager.ClientSceneChanged.AddListener(func3);
+            sceneManager.ServerFinishedSceneChange.AddListener(func2);
+            sceneManager.ClientFinishedSceneChange.AddListener(func3);
 
-            sceneManager.FinishLoadScene("test", sceneManager.Client.Player, SceneOperation.Normal);
+            sceneManager.CompleteLoadingScene("test", false, SceneOperation.Normal);
 
             func2.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
             func3.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
@@ -53,9 +53,9 @@ namespace Mirage.Tests.Runtime.Host
 
             await AsyncUtil.WaitUntilWithTimeout(() => !client.Active);
 
-            sceneManager.ServerSceneChanged.AddListener(func1);
+            sceneManager.ServerFinishedSceneChange.AddListener(func1);
 
-            sceneManager.FinishLoadScene("test", null, SceneOperation.Normal);
+            sceneManager.CompleteLoadingScene("test", false, SceneOperation.Normal);
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         });
@@ -66,9 +66,9 @@ namespace Mirage.Tests.Runtime.Host
             bool invokeClientSceneMessage = false;
             bool invokeNotReadyMessage = false;
             UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
-            ClientMessageHandler.RegisterHandler<SceneMessage>(msg => invokeClientSceneMessage = true);
-            ClientMessageHandler.RegisterHandler<NotReadyMessage>(msg => invokeNotReadyMessage = true);
-            sceneManager.ServerChangeScene.AddListener(func1);
+            ClientMessageHandler.RegisterHandler<SceneLoadStartedMessage>(msg => invokeClientSceneMessage = true);
+            ClientMessageHandler.RegisterHandler<PlayerNotReadyMessage>(msg => invokeNotReadyMessage = true);
+            sceneManager.ServerStartedSceneChange.AddListener(func1);
 
             sceneManager.ChangeServerScene("Assets/Mirror/Tests/Runtime/testScene.unity");
 
@@ -98,8 +98,8 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ReadyTest()
         {
-            sceneManager.SetClientReady();
-            Assert.That(client.Player.IsReady);
+            sceneManager.SetSceneIsReady();
+            Assert.That(client.Player.SceneIsReady);
         }
 
         [UnityTest]
@@ -111,7 +111,7 @@ namespace Mirage.Tests.Runtime.Host
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                sceneManager.SetClientReady();
+                sceneManager.SetSceneIsReady();
             });
         });
 
@@ -119,9 +119,9 @@ namespace Mirage.Tests.Runtime.Host
         public void ClientChangeSceneTest()
         {
             UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
-            sceneManager.ClientChangeScene.AddListener(func1);
+            sceneManager.ClientStartedSceneChange.AddListener(func1);
 
-            sceneManager.OnClientChangeScene("", SceneOperation.Normal);
+            sceneManager.ClientStartedSceneChange.Invoke("", SceneOperation.Normal);
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         }
@@ -130,8 +130,8 @@ namespace Mirage.Tests.Runtime.Host
         public void ClientSceneChangedTest()
         {
             UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
-            sceneManager.ClientSceneChanged.AddListener(func1);
-            sceneManager.OnClientSceneChanged("test", SceneOperation.Normal);
+            sceneManager.ClientFinishedSceneChange.AddListener(func1);
+            sceneManager.ClientFinishedSceneChange.Invoke("test", SceneOperation.Normal);
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         }
 
@@ -139,8 +139,8 @@ namespace Mirage.Tests.Runtime.Host
         public void ClientSceneReadyAfterChangedTest()
         {
             bool _readyAfterSceneChanged = false;
-            sceneManager.ClientSceneChanged.AddListener((string name, SceneOperation operation) => _readyAfterSceneChanged = client.Player.IsReady);
-            sceneManager.OnClientSceneChanged("test", SceneOperation.Normal);
+            sceneManager.ClientFinishedSceneChange.AddListener((string name, SceneOperation operation) => _readyAfterSceneChanged = client.Player.SceneIsReady);
+            sceneManager.ClientFinishedSceneChange.Invoke("test", SceneOperation.Normal);
 
             Assert.That(_readyAfterSceneChanged, Is.True);
         }
@@ -158,25 +158,25 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ClientChangeSceneNotNullTest()
         {
-            Assert.That(sceneManager.ClientChangeScene, Is.Not.Null);
+            Assert.That(sceneManager.ClientStartedSceneChange, Is.Not.Null);
         }
 
         [Test]
         public void ClientSceneChangedNotNullTest()
         {
-            Assert.That(sceneManager.ClientSceneChanged, Is.Not.Null);
+            Assert.That(sceneManager.ClientFinishedSceneChange, Is.Not.Null);
         }
 
         [Test]
         public void ServerChangeSceneNotNullTest()
         {
-            Assert.That(sceneManager.ServerChangeScene, Is.Not.Null);
+            Assert.That(sceneManager.ServerStartedSceneChange, Is.Not.Null);
         }
 
         [Test]
         public void ServerSceneChangedNotNullTest()
         {
-            Assert.That(sceneManager.ServerSceneChanged, Is.Not.Null);
+            Assert.That(sceneManager.ServerFinishedSceneChange, Is.Not.Null);
         }
     }
 }

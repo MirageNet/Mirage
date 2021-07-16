@@ -64,7 +64,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void NotReadyMessageTest()
         {
-            TestSerializeDeserialize(new NotReadyMessage());
+            TestSerializeDeserialize(new PlayerNotReadyMessage());
         }
 
         [Test]
@@ -88,13 +88,13 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void ReadyMessageTest()
         {
-            TestSerializeDeserialize(new ReadyMessage());
+            TestSerializeDeserialize(new PlayerReadyMessage());
         }
 
         [Test]
         public void SceneReadyMessageTest()
         {
-            TestSerializeDeserialize(new SceneReadyMessage());
+            TestSerializeDeserialize(new SceneLoadFinishedMessage());
         }
 
         [Test]

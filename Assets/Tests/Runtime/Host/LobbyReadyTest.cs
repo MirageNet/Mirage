@@ -43,8 +43,8 @@ namespace Mirage.Tests.Runtime.Host
             readyComp.IsReady = true;
 
             bool invokeWovenTestMessage = false;
-            ClientMessageHandler.RegisterHandler<SceneMessage>(msg => invokeWovenTestMessage = true);
-            lobby.SendToReady(identity, new SceneMessage(), true, Channel.Reliable);
+            ClientMessageHandler.RegisterHandler<SceneLoadStartedMessage>(msg => invokeWovenTestMessage = true);
+            lobby.SendToReady(identity, new SceneLoadStartedMessage(), true, Channel.Reliable);
 
             await AsyncUtil.WaitUntilWithTimeout(() => invokeWovenTestMessage);
         });

@@ -43,7 +43,7 @@ namespace Mirage
             {
                 if (SceneManager != null)
                 {
-                    SceneManager.ClientSceneChanged.AddListener(OnClientSceneChanged);
+                    SceneManager.ClientFinishedSceneChange.AddListener(OnClientSceneChanged);
                 }
                 else
                 {
@@ -73,7 +73,7 @@ namespace Mirage
         {
             if (Client != null && SceneManager != null)
             {
-                SceneManager.ClientSceneChanged.RemoveListener(OnClientSceneChanged);
+                SceneManager.ClientFinishedSceneChange.RemoveListener(OnClientSceneChanged);
                 Client.Authenticated.RemoveListener(c => Client.Send(new AddCharacterMessage()));
             }
             if (Server != null)
@@ -91,8 +91,9 @@ namespace Mirage
         /// Called on the client when a normal scene change happens.
         /// <para>The default implementation of this function sets the client as ready and adds a player. Override the function to dictate what happens when the client connects.</para>
         /// </summary>
-        /// <param name="conn">Connection to the server.</param>
-        private void OnClientSceneChanged(string sceneName, SceneOperation sceneOperation)
+        /// <param name="scenePath"></param>
+        /// <param name="sceneOperation">The type of scene load that happened.</param>
+        public virtual void OnClientSceneChanged(string scenePath, SceneOperation sceneOperation)
         {
             if (AutoSpawn && sceneOperation == SceneOperation.Normal)
                 RequestServerSpawnPlayer();

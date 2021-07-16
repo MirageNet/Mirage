@@ -17,13 +17,13 @@ namespace Mirage.Tests.Runtime.Host
         public void SetClientReadyAndNotReadyTest()
         {
             (_, NetworkPlayer connection) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
-            Assert.That(connection.IsReady, Is.False);
+            Assert.That(connection.SceneIsReady, Is.False);
 
             serverObjectManager.SetClientReady(connection);
-            Assert.That(connection.IsReady, Is.True);
+            Assert.That(connection.SceneIsReady, Is.True);
 
             serverObjectManager.SetClientNotReady(connection);
-            Assert.That(connection.IsReady, Is.False);
+            Assert.That(connection.SceneIsReady, Is.False);
         }
 
         [Test]
@@ -31,18 +31,18 @@ namespace Mirage.Tests.Runtime.Host
         {
             // add first ready client
             (_, NetworkPlayer first) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
-            first.IsReady = true;
+            first.SceneIsReady = true;
             server.Players.Add(first);
 
             // add second ready client
             (_, NetworkPlayer second) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
-            second.IsReady = true;
+            second.SceneIsReady = true;
             server.Players.Add(second);
 
             // set all not ready
             serverObjectManager.SetAllClientsNotReady();
-            Assert.That(first.IsReady, Is.False);
-            Assert.That(second.IsReady, Is.False);
+            Assert.That(first.SceneIsReady, Is.False);
+            Assert.That(second.SceneIsReady, Is.False);
         }
 
 

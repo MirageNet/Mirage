@@ -7,25 +7,39 @@ namespace Mirage
     #region Public System Messages
 
     [NetworkMessage]
-    public struct ReadyMessage { }
+    public struct PlayerReadyMessage { }
 
     [NetworkMessage]
-    public struct NotReadyMessage { }
+    public struct PlayerNotReadyMessage { }
 
     [NetworkMessage]
     public struct AddCharacterMessage { }
 
     [NetworkMessage]
-    public struct SceneMessage
+    public struct SceneLoadStartedMessage
     {
-        public string scenePath;
+        /// <summary>
+        ///     Scene to activate as main and place player in.
+        /// </summary>
+        public string MainActivateScene;
         // Normal = 0, LoadAdditive = 1, UnloadAdditive = 2
-        public SceneOperation sceneOperation;
-        public string[] additiveScenes;
+        public SceneOperation SceneOperation;
+
+        /// <summary>
+        ///     Full path to scenes file or scene names to load.
+        /// </summary>
+        public string[] AdditiveScenes;
+
+        public bool MovePlayer;
     }
 
     [NetworkMessage]
-    public struct SceneReadyMessage { }
+    public struct SceneLoadFinishedMessage
+    {
+        public string ScenePath;
+
+        public SceneOperation SceneOperation;
+    }
 
     #endregion
 
