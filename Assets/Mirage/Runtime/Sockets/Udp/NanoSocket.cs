@@ -1,14 +1,22 @@
+using System;
 using Mirage.SocketLayer;
 using NanoSockets;
 
-namespace Mirage.Sockets.Udp {
+namespace Mirage.Sockets.Udp
+{
+    // todo Create an Exception in mirage that can be re-used by multiple sockets (makes it easier for user to catch)
+    public class NanoSocketException : Exception
+    {
+        public NanoSocketException(string message) : base(message) { }
+    }
     public class NanoSocket : ISocket
     {
         Socket socket;
         NanoEndPoint receiveEndPoint;
         readonly int bufferSize;
 
-        public NanoSocket(UdpSocketFactory factory) {
+        public NanoSocket(UdpSocketFactory factory)
+        {
             bufferSize = factory.BufferSize;
         }
 
@@ -17,7 +25,11 @@ namespace Mirage.Sockets.Udp {
             receiveEndPoint = (NanoEndPoint)endPoint;
 
             InitSocket();
-            UDP.Bind(socket, ref receiveEndPoint.address);
+            int result = UDP.Bind(socket, ref receiveEndPoint.address);
+            if (result != 0)
+            {
+                throw new NanoSocketException("Socket Bind failed: address or port might already be in use");
+            }
         }
 
         public void Close()
@@ -28,9 +40,13 @@ namespace Mirage.Sockets.Udp {
         public void Connect(IEndPoint endPoint)
         {
             receiveEndPoint = (NanoEndPoint)endPoint;
-            
+
             InitSocket();
-            UDP.Connect(socket, ref receiveEndPoint.address);
+            int result = UDP.Connect(socket, ref receiveEndPoint.address);
+            if (result != 0)
+            {
+                throw new NanoSocketException("Socket Connect failed");
+            }
         }
 
         public bool Poll()
