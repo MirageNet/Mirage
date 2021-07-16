@@ -41,7 +41,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             UnityAction<string, SceneOperation> func2 = Substitute.For<UnityAction<string, SceneOperation>>();
             clientSceneManager.ClientSceneChanged.AddListener(func2);
-            clientSceneManager.FinishLoadScene("Assets/Mirror/Tests/Runtime/testScene.unity", SceneOperation.Normal);
+            clientSceneManager.FinishLoadScene("Assets/Mirror/Tests/Runtime/testScene.unity", clientPlayer, SceneOperation.Normal);
 
             func2.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         }
@@ -136,9 +136,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void OnClientSceneChangedAdditiveListTest()
         {
-            clientSceneManager.pendingAdditiveSceneList.Add("Assets/Mirror/Tests/Runtime/testScene.unity");
+            clientSceneManager.ClientPendingAdditiveSceneLoadingList.Add("Assets/Mirror/Tests/Runtime/testScene.unity");
             clientSceneManager.OnClientSceneChanged(null, SceneOperation.Normal);
-            Assert.That(clientSceneManager.pendingAdditiveSceneList.Count == 0);
+            Assert.That(clientSceneManager.ClientPendingAdditiveSceneLoadingList.Count == 0);
         }
 
         [Test]
@@ -154,7 +154,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         bool additiveSceneWasFound;
         void CheckForAdditiveScene(string scenePath, SceneOperation sceneOperation)
         {
-            if (clientSceneManager.pendingAdditiveSceneList.Contains("Assets/Mirror/Tests/Runtime/testScene.unity"))
+            if (clientSceneManager.ClientPendingAdditiveSceneLoadingList.Contains("Assets/Mirror/Tests/Runtime/testScene.unity"))
             {
                 additiveSceneWasFound = true;
             }
