@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Mirage.Examples.InterestManagement
 {
@@ -20,13 +18,13 @@ namespace Mirage.Examples.InterestManagement
 
         public void SpawnPrefab()
         {
-            Vector3 position = new Vector3(
+            var position = new Vector3(
                 (Random.value - 0.5f) * bounds.size.x + bounds.center.x,
                 (Random.value - 0.5f) * bounds.size.y + bounds.center.y,
                 (Random.value - 0.5f) * bounds.size.z + bounds.center.z
             );
 
-            var newLoot = GameObject.Instantiate(prefab, position, Quaternion.identity, transform);
+            NetworkIdentity newLoot = GameObject.Instantiate(prefab, position, Quaternion.identity, transform);
 
             serverObjectManager.Spawn(newLoot);
         }

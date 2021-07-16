@@ -23,11 +23,13 @@ namespace Mirage.Sockets.Udp
         static int initCount;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        static void ClearCounter() {
+        static void ClearCounter()
+        {
             initCount = 0;
         }
 
-        void Awake() {
+        void Awake()
+        {
             if (!useNanoSocket) return;
 
             if (initCount == 0)
@@ -38,7 +40,8 @@ namespace Mirage.Sockets.Udp
             initCount++;
         }
 
-        void OnDestroy() {
+        void OnDestroy()
+        {
             if (!useNanoSocket) return;
 
             initCount--;

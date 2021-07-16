@@ -4,7 +4,8 @@ using System.Net.Sockets;
 using Mirage.SocketLayer;
 using UnityEngine;
 
-namespace Mirage.Sockets.Udp {
+namespace Mirage.Sockets.Udp
+{
     public class UdpSocket : ISocket
     {
         Socket socket;

@@ -71,7 +71,7 @@ namespace Mirage.SocketLayer
             time = new Time();
 
             connectKeyValidator = new ConnectKeyValidator();
-            
+
             bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, this.config.MaxPacketSize, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
             Application.quitting += Application_quitting;
         }
