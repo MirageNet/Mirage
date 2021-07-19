@@ -1,3 +1,16 @@
+## [100.0.1](https://github.com/MirageNet/Mirage/compare/v100.0.0...v100.0.1) (2021-07-19)
+
+
+### Bug Fixes
+
+* **NanoSocket:** adding Exception when nanosocket bind fails ([a3028ec](https://github.com/MirageNet/Mirage/commit/a3028ecb06084574cbbb0b10bbd33394d44d94d2))
+
+
+### Performance Improvements
+
+* adding native UDP socket (NanoSockets) for supported platforms ([#860](https://github.com/MirageNet/Mirage/issues/860)) ([3f34863](https://github.com/MirageNet/Mirage/commit/3f34863b65325a54d6a4542c7b767fedc1abf406))
+* removing allocations from assert ([5c216de](https://github.com/MirageNet/Mirage/commit/5c216de5411f6ae9e8a7bb14e52323e214be2793))
+
 # [100.0.0](https://github.com/MirageNet/Mirage/compare/v99.1.0...v100.0.0) (2021-07-15)
 
 
