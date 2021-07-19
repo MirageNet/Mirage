@@ -56,7 +56,7 @@ namespace Mirage
         /// <para>This property is read-only. It is set by the system on the client when ClientScene.Ready() is called, and set by the system on the server when a ready message is received from a client.</para>
         /// <para>A client that is ready is sent spawned objects by the server and updates to the state of spawned objects. A client that is not ready is not sent spawned objects.</para>
         /// </summary>
-        public bool IsReady { get; set; }
+        public bool SceneIsReady { get; set; }
 
         /// <summary>
         /// The IP address / URL / FQDN associated with the connection.

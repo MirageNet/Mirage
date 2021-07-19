@@ -43,7 +43,7 @@ namespace Mirage
             {
                 if (SceneManager != null)
                 {
-                    SceneManager.ClientSceneChanged.AddListener(OnClientSceneChanged);
+                    SceneManager.ClientFinishedSceneChange.AddListener(OnClientSceneChanged);
                 }
                 else
                 {
@@ -73,7 +73,7 @@ namespace Mirage
         {
             if (Client != null && SceneManager != null)
             {
-                SceneManager.ClientSceneChanged.RemoveListener(OnClientSceneChanged);
+                SceneManager.ClientFinishedSceneChange.RemoveListener(OnClientSceneChanged);
                 Client.Authenticated.RemoveListener(c => Client.Send(new AddCharacterMessage()));
             }
             if (Server != null)

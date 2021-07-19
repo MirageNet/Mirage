@@ -47,10 +47,10 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             clientPlayer.Send(new ReadyMessage());
 
-            await AsyncUtil.WaitUntilWithTimeout(() => serverPlayer.IsReady);
+            await AsyncUtil.WaitUntilWithTimeout(() => serverPlayer.SceneIsReady);
 
             // ready?
-            Assert.That(serverPlayer.IsReady, Is.True);
+            Assert.That(serverPlayer.SceneIsReady, Is.True);
         });
 
         [UnityTest]

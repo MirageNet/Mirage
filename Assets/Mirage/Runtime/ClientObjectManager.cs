@@ -57,7 +57,7 @@ namespace Mirage
                 Client.Disconnected.AddListener(OnClientDisconnected);
 
                 if (NetworkSceneManager != null)
-                    NetworkSceneManager.ClientSceneChanged.AddListener(OnClientSceneChanged);
+                    NetworkSceneManager.ClientFinishedSceneChange.AddListener(OnClientSceneChanged);
             }
         }
 
