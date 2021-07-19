@@ -52,21 +52,18 @@ namespace Mirage
         ///     Load our scene up in a normal unity fashion.
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
-        /// <param name="player">Whether or not we should move the player.</param>
-        UniTask LoadSceneNormalAsync(string scenePath, INetworkPlayer player);
+        UniTask LoadSceneNormalAsync(string scenePath);
 
         /// <summary>
         ///     Load our scene additively.
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
-        /// <param name="player">Whether or not we should move the player.</param>
-        UniTask LoadSceneAdditiveAsync(string scenePath, INetworkPlayer player);
+        UniTask LoadSceneAdditiveAsync(string scenePath);
 
         /// <summary>
         ///     Unload our scene additively.
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
-        /// <param name="player">Whether or not we should move the player.</param>
-        UniTask UnLoadSceneAdditiveAsync(string scenePath, INetworkPlayer player);
+        UniTask UnLoadSceneAdditiveAsync(string scenePath);
     }
 }

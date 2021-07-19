@@ -41,7 +41,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             UnityAction<string, SceneOperation> func2 = Substitute.For<UnityAction<string, SceneOperation>>();
             clientSceneManager.ClientFinishedSceneChange.AddListener(func2);
-            clientSceneManager.CompleteLoadingScene("Assets/Mirror/Tests/Runtime/testScene.unity", null,SceneOperation.Normal);
+            clientSceneManager.CompleteLoadingScene("Assets/Mirror/Tests/Runtime/testScene.unity",SceneOperation.Normal);
 
             func2.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         }

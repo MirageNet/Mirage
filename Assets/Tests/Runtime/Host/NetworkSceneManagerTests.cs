@@ -38,7 +38,7 @@ namespace Mirage.Tests.Runtime.Host
             sceneManager.ServerFinishedSceneChange.AddListener(func2);
             sceneManager.ClientFinishedSceneChange.AddListener(func3);
 
-            sceneManager.CompleteLoadingScene("test", null, SceneOperation.Normal);
+            sceneManager.CompleteLoadingScene("test", SceneOperation.Normal);
 
             func2.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
             func3.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
@@ -55,7 +55,7 @@ namespace Mirage.Tests.Runtime.Host
 
             sceneManager.ServerFinishedSceneChange.AddListener(func1);
 
-            sceneManager.CompleteLoadingScene("test", null, SceneOperation.Normal);
+            sceneManager.CompleteLoadingScene("test", SceneOperation.Normal);
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         });
