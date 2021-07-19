@@ -13,21 +13,23 @@
     </div>
     <div class="collapse navbar-collapse" id="navbar">
       <form class="navbar-form navbar-right" role="search" id="search">
-		<div class="toggle-mode">
-			<div class="icon">
-			<i aria-hidden="true">🌕</i>
-		</div>
-		<label class="switch">
-			<input type="checkbox" id="switch-style">
-			<span class="slider round"></span>
-		</label>
-		<div class="icon">
-			<i aria-hidden="true">🌙</i>
-		</div>
-			<script type="text/javascript" src="{{_rel}}styles/toggle-theme.js"></script>
-		</div>
-        <div class="form-group">
-          <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+        <div class="navbar-form-flex">
+          <div class="toggle-mode">
+            <div class="icon">
+            <i aria-hidden="true">🌕</i>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="switch-style">
+            <span class="slider round"></span>
+          </label>
+          <div class="icon">
+            <i aria-hidden="true">🌙</i>
+          </div>
+            <script type="text/javascript" src="{{_rel}}styles/toggle-theme.js"></script>
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+          </div>
         </div>
       </form>
     </div>
