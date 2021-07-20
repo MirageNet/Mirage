@@ -93,12 +93,11 @@ If you want to contribute to  Mirage, follow these steps:
 3) Open in unity 2019.4.x or later
 
 ## Transport and Sockets
-
 Mirage supports multiple ways of transporting data:
-- C# UDP Socket (default)
-- Native UDP socket (coming soon)
-- Websocket, to support webgl clients (coming soon)
+- Native UDP socket (default on Windows, Mac and Linux)
+- C# UDP Socket (default on other platforms)
 - Steam ([Facepunch Steamworks](https://github.com/MirageNet/SteamyFaceNG))
+- Websocket, to support webgl clients (coming soon)
 
 
 ## Contributing
