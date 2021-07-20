@@ -85,7 +85,7 @@ namespace Mirage.SocketLayer
             this.connection = connection;
             this.time = time;
             this.bufferPool = bufferPool;
-            this.reliablePool = new Pool<ReliablePacket>(ReliablePacket.CreateNew, default, 5, maxPacketsInSendBufferPerConnection);
+            this.reliablePool = new Pool<ReliablePacket>(ReliablePacket.CreateNew, default, 0, config.MaxReliablePacketsInSendBufferPerConnection);
             this.metrics = metrics;
 
             ackTimeout = config.TimeBeforeEmptyAck;
@@ -722,20 +722,19 @@ namespace Mirage.SocketLayer
             {
                 acked = true;
                 buffer.Release();
-                Release();
+                pool.Put(this);
             }
 
             public void Setup(ushort order, ByteBuffer buffer, int length)
             {
+                // reset old data
+                lastSequence = 0;
+                sequences.Clear();
+                acked = false;
+
                 this.order = order;
                 this.buffer = buffer;
                 this.length = length;
-            }
-
-            public void Release()
-            {
-                sequences.Clear();
-                pool.Put(this);
             }
 
             private ReliablePacket(Pool<ReliablePacket> pool)

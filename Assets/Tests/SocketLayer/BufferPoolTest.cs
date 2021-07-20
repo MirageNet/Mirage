@@ -25,7 +25,7 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void CallsCreateStartCountTimesWithCorrectArgs()
         {
-            Func<int, Pool<TestBuffer>, TestBuffer> create = Substitute.For<Func<int, Pool<TestBuffer>, TestBuffer>>();
+            var create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
 
             const int startCount = 5;
             const int bufferSize = 100;
@@ -37,7 +37,7 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void TakeDoesntCreateTillEmpty()
         {
-            Func<int, Pool<TestBuffer>, TestBuffer> create = Substitute.For<Func<int, Pool<TestBuffer>, TestBuffer>>();
+            var create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
             create.Invoke(default, default).Returns((args) => TestBuffer.Create((int)args[0], (Pool<TestBuffer>)args[0]));
 
             const int startCount = 5;
@@ -62,7 +62,7 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void CanTakeMoreAfterPuttingSomeBackWithoutCreatingNew()
         {
-            Func<int, Pool<TestBuffer>, TestBuffer> create = Substitute.For<Func<int, Pool<TestBuffer>, TestBuffer>>();
+            var create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
             create.Invoke(default, default).Returns((args) => TestBuffer.Create((int)args[0], (Pool<TestBuffer>)args[1]));
 
             const int startCount = 5;
