@@ -13,7 +13,8 @@ namespace Mirage.SocketLayer
         int maxPoolSize;
         readonly int bufferSize;
         readonly ILogger logger;
-        readonly Func<int, Pool<T>, T> createNew;
+        public delegate T CreateNewItem(int bufferSize, Pool<T> pool);
+        readonly CreateNewItem createNew;
 
 
         T[] pool;
@@ -50,7 +51,7 @@ namespace Mirage.SocketLayer
         /// <param name="startPoolSize">how many buffers to create at start</param>
         /// <param name="maxPoolSize">max number of buffers in pool</param>
         /// <param name="logger"></param>
-        public Pool(Func<int, Pool<T>, T> createNew, int bufferSize, int startPoolSize, int maxPoolSize, ILogger logger = null)
+        public Pool(CreateNewItem createNew, int bufferSize, int startPoolSize, int maxPoolSize, ILogger logger = null)
         {
             if (startPoolSize > maxPoolSize) throw new ArgumentException("Start size must be less than max size", nameof(startPoolSize));
             this.createNew = createNew ?? throw new ArgumentNullException(nameof(createNew));
