@@ -541,7 +541,10 @@ namespace Mirage.SocketLayer
                 connection.State = ConnectionState.Destroyed;
 
                 // value should be removed from dictionary
-                logger.Assert(removed);
+                if (!removed)
+                {
+                    logger.Error($"Failed to remove {connection} from connection set");
+                }
             }
             connectionsToRemove.Clear();
         }
