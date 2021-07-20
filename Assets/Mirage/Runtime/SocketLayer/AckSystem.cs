@@ -85,7 +85,7 @@ namespace Mirage.SocketLayer
             this.connection = connection;
             this.time = time;
             this.bufferPool = bufferPool;
-            this.reliablePool = new Pool<ReliablePacket>(ReliablePacket.CreateNew, default, 0, config.MaxReliablePacketsInSendBufferPerConnection);
+            reliablePool = new Pool<ReliablePacket>(ReliablePacket.CreateNew, default, 0, config.MaxReliablePacketsInSendBufferPerConnection);
             this.metrics = metrics;
 
             ackTimeout = config.TimeBeforeEmptyAck;
@@ -380,8 +380,6 @@ namespace Mirage.SocketLayer
 
         void SendReliablePacket(ReliablePacket reliable)
         {
-            if (reliable.acked) { return; }
-
             ushort sequence = (ushort)sentAckablePackets.Enqueue(new AckablePacket(reliable));
 
             byte[] final = reliable.buffer.array;
@@ -566,26 +564,10 @@ namespace Mirage.SocketLayer
                 if (ackable.IsNotValid())
                     continue;
 
-                if (alreadyAcked(ackable, ackableSequence))
-                    continue;
-
                 CheckAckablePacket(sequence, mask, ackable, ackableSequence);
             }
         }
 
-        private bool alreadyAcked(AckablePacket ackable, uint ackableSequence)
-        {
-            // if we have already ackeds this, just remove it
-            if (ackable.IsReliable && ackable.reliablePacket.acked)
-            {
-                Debug.Assert(false, "We should never see an already ackked packet, it should have been removed");
-                // this should never happen because packet should be removed when acked is set to true
-                // but remove it just incase we get here
-                sentAckablePackets.RemoveAt(ackableSequence);
-                return true;
-            }
-            return false;
-        }
         private void CheckAckablePacket(ushort sequence, ulong mask, AckablePacket ackable, uint ackableSequence)
         {
             int distance = (int)sentAckablePackets.Sequencer.Distance(sequence, ackableSequence);
@@ -623,6 +605,10 @@ namespace Mirage.SocketLayer
             {
                 sentAckablePackets.RemoveAt(seq);
             }
+
+            // remove from toResend incase it was added in previous loop
+            toResend.Remove(reliablePacket);
+
             reliablePacket.OnAck();
         }
 
@@ -703,7 +689,6 @@ namespace Mirage.SocketLayer
         class ReliablePacket
         {
             public ushort lastSequence;
-            public bool acked;
             public int length;
 
             public ByteBuffer buffer;
@@ -720,7 +705,6 @@ namespace Mirage.SocketLayer
 
             public void OnAck()
             {
-                acked = true;
                 buffer.Release();
                 pool.Put(this);
             }
@@ -730,7 +714,6 @@ namespace Mirage.SocketLayer
                 // reset old data
                 lastSequence = 0;
                 sequences.Clear();
-                acked = false;
 
                 this.order = order;
                 this.buffer = buffer;
