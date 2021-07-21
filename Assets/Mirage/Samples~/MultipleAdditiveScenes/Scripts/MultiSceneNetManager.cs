@@ -46,7 +46,13 @@ namespace Mirage.Examples.MultipleAdditiveScenes
         IEnumerator AddPlayerDelayed(INetworkPlayer player)
         {
             yield return new WaitForSeconds(.5f);
-            player.Send(new SceneMessage { MainActivateScene = gameScene, SceneOperation = SceneOperation.LoadAdditive });
+
+            var players = new INetworkPlayer[Server.Players.Count];
+            Server.Players.CopyTo(players);
+
+            ServerObjectManager.NetworkSceneManager.ServerLoadSceneAdditively(gameScene, players);
+
+            //player.Send(new SceneMessage { MainActivateScene = gameScene, SceneOperation = SceneOperation.LoadAdditive });
 
             PlayerScore playerScore = player.Identity.GetComponent<PlayerScore>();
             playerScore.playerNumber = playerId;

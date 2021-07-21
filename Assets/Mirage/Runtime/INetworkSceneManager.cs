@@ -1,6 +1,6 @@
 using System;
-using Cysharp.Threading.Tasks;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace Mirage
 {
@@ -41,29 +41,25 @@ namespace Mirage
         SceneChangeEvent ServerFinishedSceneChange { get; }
 
         /// <summary>
-        ///     Allows server to fully load new scene or additive load in another scene.
+        ///     Allows server to fully load in a new scene and override current active scene.
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
-
-        /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
-        void ChangeServerScene(string scenePath, SceneOperation sceneOperation = SceneOperation.Normal);
+        void ServerLoadSceneNormal(string scenePath);
 
         /// <summary>
-        ///     Load our scene up in a normal unity fashion.
+        ///     Allows server to fully load in another scene on top of current active scene.
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
-        UniTask LoadSceneNormalAsync(string scenePath);
+        /// <param name="players">List of player's that are receiving the new scene load.</param>
+        /// <param name="shouldClientLoadNormally">Should the clients load this additively too or load it full normal scene change.</param>
+        void ServerLoadSceneAdditively(string scenePath, INetworkPlayer[] players, bool shouldClientLoadNormally = false);
 
         /// <summary>
-        ///     Load our scene additively.
+        ///     Allows server to fully unload a scene additively.
         /// </summary>
-        /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
-        UniTask LoadSceneAdditiveAsync(string scenePath);
-
-        /// <summary>
-        ///     Unload our scene additively.
-        /// </summary>
-        /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
-        UniTask UnLoadSceneAdditiveAsync(string scenePath);
+        /// <param name="scene">The scene handle which we want to unload additively.</param>
+        /// <param name="players">List of player's that are receiving the new scene unload.</param>
+        /// <param name="shouldClientUnloadNormally">Should the clients unload this additively too or unload it full normal scene change.</param>
+        void ServerUnloadSceneAdditively(Scene scene, INetworkPlayer[] players, bool shouldClientUnloadNormally = false);
     }
 }

@@ -70,7 +70,7 @@ namespace Mirage.Tests.Runtime.Host
             ClientMessageHandler.RegisterHandler<NotReadyMessage>(msg => invokeNotReadyMessage = true);
             sceneManager.ServerStartedSceneChange.AddListener(func1);
 
-            sceneManager.ChangeServerScene("Assets/Mirror/Tests/Runtime/testScene.unity");
+            sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ActiveScenePath.Equals("Assets/Mirror/Tests/Runtime/testScene.unity"));
 
@@ -91,7 +91,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                sceneManager.ChangeServerScene(string.Empty);
+                sceneManager.ServerLoadSceneNormal(string.Empty);
             });
         }
 
@@ -148,7 +148,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ChangeSceneAdditiveLoadTest() => UniTask.ToCoroutine(async () =>
         {
-            sceneManager.ChangeServerScene("Assets/Mirror/Tests/Runtime/testScene.unity", SceneOperation.LoadAdditive);
+            sceneManager.ServerLoadSceneAdditively("Assets/Mirror/Tests/Runtime/testScene.unity", null);
 
             await AsyncUtil.WaitUntilWithTimeout(() => SceneManager.GetSceneByName("testScene") != null);
 
