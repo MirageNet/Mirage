@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Mirage.Experimental
 {
-    public  class StateTranfer
+    public class StateTransfer
     {
         NetworkServer server;
         NetworkClient client;
@@ -17,20 +17,21 @@ namespace Mirage.Experimental
         Sequencer sequencer = new Sequencer(8);
         Dictionary<NetworkPlayer, ulong> ackedSnapshot = new Dictionary<NetworkPlayer, ulong>();
 
-        private StateTranfer() {
+        private StateTransfer()
+        {
             DeltaWriters.Init();
         }
-        public static StateTranfer Create(NetworkServer server,  List<DemoNetworkIdentity> all)
+        public static StateTransfer Create(NetworkServer server, List<DemoNetworkIdentity> all)
         {
-            return new StateTranfer()
+            return new StateTransfer()
             {
                 server = server,
                 serverObjects = all
             };
         }
-        public static StateTranfer Create(NetworkClient client)
+        public static StateTransfer Create(NetworkClient client)
         {
-            var stateTranfer = new StateTranfer()
+            var stateTranfer = new StateTransfer()
             {
                 client = client
             };
@@ -51,7 +52,7 @@ namespace Mirage.Experimental
             CreateSnapshot(sequence);
             foreach (var kvp in ackedSnapshot)
             {
-            SendUpdate(kvp, sequence);
+                SendUpdate(kvp, sequence);
             }
         }
 
@@ -66,7 +67,8 @@ namespace Mirage.Experimental
 
                 var player = kvp.Key;
                 var token = SendNotify(player, writer.ToArraySegment());
-                token.Delivered += () => {
+                token.Delivered += () =>
+                {
                     ackedSnapshot[player] = sequence;
                 };
             }
@@ -108,7 +110,7 @@ namespace Mirage.Experimental
                 var aobj = a.objects[ai];
                 var bobj = b.objects[bi];
 
-                if(aobj.id == bobj.id)
+                if (aobj.id == bobj.id)
                 {
                     WriteObjectDelta(writer, aobj, bobj);
                     ai++;
@@ -239,7 +241,7 @@ namespace Mirage.Experimental
             public abstract void WriteWhole(NetworkWriter writer);
             public abstract void WriteDelta(NetworkWriter writer, FieldSnapshot oldField);
 
-            class FieldSnapshotGeneric<T>: FieldSnapshot
+            class FieldSnapshotGeneric<T> : FieldSnapshot
             {
                 public T value;
 
@@ -406,7 +408,7 @@ namespace Mirage.Experimental
 
 
 
-    public class DemoNetworkIdentity : MonoBehaviour 
+    public class DemoNetworkIdentity : MonoBehaviour
     {
         private uint _id;
         public uint Id => _id;
