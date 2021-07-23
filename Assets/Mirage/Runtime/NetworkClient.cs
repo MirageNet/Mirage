@@ -34,7 +34,7 @@ namespace Mirage
         public Config PeerConfig { get; set; }
 
         [Tooltip("Creates Socket for Peer to use")]
-        public SocketFactory SocketFactory;
+        public ISocketFactory SocketFactory;
 
         public bool DisconnectOnException = true;
 
@@ -153,7 +153,7 @@ namespace Mirage
         void ThrowIfSocketIsMissing()
         {
             if (SocketFactory is null)
-                SocketFactory = GetComponent<SocketFactory>();
+                SocketFactory = GetComponent<ISocketFactory>();
             if (SocketFactory == null)
                 throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for ${nameof(NetworkServer)}");
         }

@@ -16,7 +16,7 @@ namespace Mirage.HeadlessBenchmark
         public GameObject MonsterPrefab;
         public GameObject PlayerPrefab;
         public string editorArgs;
-        public SocketFactory socketFactory;
+        public ISocketFactory socketFactory;
 
         string[] cachedArgs;
         string port;

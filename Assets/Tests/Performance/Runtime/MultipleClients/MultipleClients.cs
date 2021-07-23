@@ -26,7 +26,7 @@ namespace Mirage.Tests.Performance.Runtime
 
         public NetworkServer Server;
         public ServerObjectManager ServerObjectManager;
-        public SocketFactory socketFactory;
+        public ISocketFactory socketFactory;
 
         public NetworkIdentity MonsterPrefab;
 
@@ -55,7 +55,7 @@ namespace Mirage.Tests.Performance.Runtime
 
             await started.Task;
 
-            socketFactory = Server.GetComponent<SocketFactory>();
+            socketFactory = Server.GetComponent<ISocketFactory>();
             Debug.Assert(socketFactory != null, "Could not find socket factory for test");
 
             // connect from a bunch of clients
@@ -70,7 +70,7 @@ namespace Mirage.Tests.Performance.Runtime
                 await UniTask.Delay(10);
         });
 
-        private IEnumerator StartClient(int i, SocketFactory socketFactory)
+        private IEnumerator StartClient(int i, ISocketFactory socketFactory)
         {
             var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager));
             NetworkClient client = clientGo.GetComponent<NetworkClient>();

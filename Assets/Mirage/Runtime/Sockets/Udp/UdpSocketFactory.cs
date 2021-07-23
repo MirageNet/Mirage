@@ -9,7 +9,7 @@ namespace Mirage.Sockets.Udp
 {
     public enum SocketLib { Automatic, Native, Managed };
 
-    public sealed class UdpSocketFactory : SocketFactory
+    public sealed class UdpSocketFactory : MonoBehaviour, ISocketFactory
     {
         public string Address = "localhost";
         public ushort Port = 7777;
@@ -52,7 +52,7 @@ namespace Mirage.Sockets.Udp
             }
         }
 
-        public override ISocket CreateClientSocket()
+        public ISocket CreateClientSocket()
         {
             ThrowIfNotSupported();
 
@@ -61,7 +61,7 @@ namespace Mirage.Sockets.Udp
             return new UdpSocket();
         }
 
-        public override ISocket CreateServerSocket()
+        public ISocket CreateServerSocket()
         {
             ThrowIfNotSupported();
 
@@ -70,14 +70,14 @@ namespace Mirage.Sockets.Udp
             return new UdpSocket();
         }
 
-        public override IEndPoint GetBindEndPoint()
+        public IEndPoint GetBindEndPoint()
         {
             if (useNanoSocket) return new NanoEndPoint("::0", Port);
 
             return new EndPointWrapper(new IPEndPoint(IPAddress.IPv6Any, Port));
         }
 
-        public override IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
+        public IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
             string addressString = address ?? Address;
             IPAddress ipAddress = getAddress(addressString);
