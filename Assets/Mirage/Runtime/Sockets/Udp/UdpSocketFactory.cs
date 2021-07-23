@@ -6,31 +6,31 @@ using UnityEngine;
 
 namespace Mirage.Sockets.Udp
 {
-    public sealed class UdpSocketFactory : SocketFactory
+    public sealed class UdpSocketFactory : MonoBehaviour, ISocketFactory
     {
         [SerializeField] string address = "localhost";
         [SerializeField] int port = 7777;
 
-        public override ISocket CreateClientSocket()
+        public ISocket CreateClientSocket()
         {
             ThrowIfNotSupported();
 
             return new UdpSocket();
         }
 
-        public override ISocket CreateServerSocket()
+        public ISocket CreateServerSocket()
         {
             ThrowIfNotSupported();
 
             return new UdpSocket();
         }
 
-        public override IEndPoint GetBindEndPoint()
+        public IEndPoint GetBindEndPoint()
         {
             return new EndPointWrapper(new IPEndPoint(IPAddress.IPv6Any, port));
         }
 
-        public override IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
+        public IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
             string addressString = address ?? this.address;
             IPAddress ipAddress = getAddress(addressString);

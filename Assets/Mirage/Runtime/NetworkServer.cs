@@ -47,7 +47,7 @@ namespace Mirage
         public bool Listening = true;
 
         [Tooltip("Creates Socket for Peer to use")]
-        public SocketFactory SocketFactory;
+        public ISocketFactory SocketFactory;
 
         Peer peer;
 
@@ -242,7 +242,7 @@ namespace Mirage
         void ThrowIfSocketIsMissing()
         {
             if (SocketFactory is null)
-                SocketFactory = GetComponent<SocketFactory>();
+                SocketFactory = GetComponent<ISocketFactory>();
             if (SocketFactory == null)
                 throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for {nameof(NetworkServer)}");
         }

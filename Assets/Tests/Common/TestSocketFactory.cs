@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Mirage.SocketLayer;
 using NSubstitute;
+using UnityEngine;
 
 namespace Mirage.Tests
 {
@@ -135,18 +136,18 @@ namespace Mirage.Tests
         }
     }
 
-    public class TestSocketFactory : SocketFactory
+    public class TestSocketFactory : MonoBehaviour, ISocketFactory
     {
         public IEndPoint serverEndpoint = TestEndPoint.CreateSubstitute();
 
         int clientNameIndex;
         int serverNameIndex;
-        public override ISocket CreateClientSocket()
+        public ISocket CreateClientSocket()
         {
             return new TestSocket($"Client {clientNameIndex++}");
         }
 
-        public override ISocket CreateServerSocket()
+        public ISocket CreateServerSocket()
         {
             if (TestSocket.EndpointInUse(serverEndpoint))
             {
@@ -157,12 +158,12 @@ namespace Mirage.Tests
             return new TestSocket($"Server {serverNameIndex++}", serverEndpoint);
         }
 
-        public override IEndPoint GetBindEndPoint()
+        public IEndPoint GetBindEndPoint()
         {
             return default;
         }
 
-        public override IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
+        public IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
             return serverEndpoint;
         }
