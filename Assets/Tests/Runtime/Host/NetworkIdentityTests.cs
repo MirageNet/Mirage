@@ -257,7 +257,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ClientNotNullAfterSpawnInStarted() => UniTask.ToCoroutine(async () =>
         {
-            await AsyncUtil.WaitUntilWithTimeout(() => testIdentity.Client == (client as INetworkClient));
+            await AsyncUtil.WaitUntilWithTimeout(() => (testIdentity.Client as NetworkClient) == client);
         });
     }
 }

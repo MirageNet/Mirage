@@ -13,10 +13,13 @@ namespace Mirage
 
         readonly bool disconnectOnException;
 
-        // Handles network messages on client and server
+        /// <summary>
+        /// Handles network messages on client and server
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="reader"></param>
         internal delegate void NetworkMessageDelegate(INetworkPlayer player, NetworkReader reader);
 
-        // message handlers for this connection
         internal readonly Dictionary<int, NetworkMessageDelegate> messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
 
         public MessageHandler(bool disconnectOnException)
@@ -41,7 +44,6 @@ namespace Mirage
         /// </summary>
         /// <typeparam name="T">Message type</typeparam>
         /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
-        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
         public void RegisterHandler<T>(MessageDelegateWithPlayer<T> handler)
         {
             int msgType = MessagePacker.GetId<T>();
@@ -58,7 +60,6 @@ namespace Mirage
         /// </summary>
         /// <typeparam name="T">Message type</typeparam>
         /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
-        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
         public void RegisterHandler<T>(MessageDelegate<T> handler)
         {
             RegisterHandler<T>((_, value) => { handler(value); });

@@ -2,18 +2,60 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using Mirage.SocketLayer;
+using NanoSockets;
 using UnityEngine;
 
 namespace Mirage.Sockets.Udp
 {
+    public enum SocketLib { Automatic, Native, Managed };
     public sealed class UdpSocketFactory : MonoBehaviour, ISocketFactory
     {
-        [SerializeField] string address = "localhost";
-        [SerializeField] int port = 7777;
+        public string Address = "localhost";
+        public ushort Port = 7777;
+        public int BufferSize = 256 * 1024;
+
+        [Tooltip("Allows you to set which Socket implementation you want to use.\nAutomatic will use native (NanoSockets) on supported platforms (Windows, Mac & Linux).")]
+        public SocketLib SocketLib;
+
+        bool useNanoSocket => SocketLib == SocketLib.Native || (SocketLib == SocketLib.Automatic && IsDesktop);
+
+        static int initCount;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        static void ClearCounter()
+        {
+            initCount = 0;
+        }
+
+        void Awake()
+        {
+            if (!useNanoSocket) return;
+
+            if (initCount == 0)
+            {
+                UDP.Initialize();
+            }
+
+            initCount++;
+        }
+
+        void OnDestroy()
+        {
+            if (!useNanoSocket) return;
+
+            initCount--;
+
+            if (initCount == 0)
+            {
+                UDP.Deinitialize();
+            }
+        }
 
         public ISocket CreateClientSocket()
         {
             ThrowIfNotSupported();
+
+            if (useNanoSocket) return new NanoSocket(this);
 
             return new UdpSocket();
         }
@@ -22,20 +64,26 @@ namespace Mirage.Sockets.Udp
         {
             ThrowIfNotSupported();
 
+            if (useNanoSocket) return new NanoSocket(this);
+
             return new UdpSocket();
         }
 
         public IEndPoint GetBindEndPoint()
         {
-            return new EndPointWrapper(new IPEndPoint(IPAddress.IPv6Any, port));
+            if (useNanoSocket) return new NanoEndPoint("::0", Port);
+
+            return new EndPointWrapper(new IPEndPoint(IPAddress.IPv6Any, Port));
         }
 
         public IEndPoint GetConnectEndPoint(string address = null, ushort? port = null)
         {
-            string addressString = address ?? this.address;
+            string addressString = address ?? Address;
             IPAddress ipAddress = getAddress(addressString);
 
-            ushort portIn = port ?? (ushort)this.port;
+            ushort portIn = port ?? Port;
+
+            if (useNanoSocket) return new NanoEndPoint(addressString, portIn);
 
             return new EndPointWrapper(new IPEndPoint(ipAddress, portIn));
         }
@@ -65,6 +113,11 @@ namespace Mirage.Sockets.Udp
         }
 
         private static bool IsWebgl => Application.platform == RuntimePlatform.WebGLPlayer;
+        private static bool IsDesktop =>
+            Application.platform == RuntimePlatform.LinuxPlayer
+            || Application.platform == RuntimePlatform.OSXPlayer
+            || Application.platform == RuntimePlatform.WindowsPlayer
+            || Application.isEditor;
     }
 
     public class EndPointWrapper : IEndPoint
@@ -100,105 +153,6 @@ namespace Mirage.Sockets.Udp
             // copy the inner endpoint
             EndPoint copy = inner.Create(inner.Serialize());
             return new EndPointWrapper(copy);
-        }
-    }
-
-    public class UdpSocket : ISocket
-    {
-        Socket socket;
-        EndPointWrapper Endpoint;
-
-        public void Bind(IEndPoint endPoint)
-        {
-            Endpoint = (EndPointWrapper)endPoint;
-
-            socket = CreateSocket(Endpoint.inner);
-            socket.DualMode = true;
-            socket.Bind(Endpoint.inner);
-        }
-
-        static Socket CreateSocket(EndPoint endPoint)
-        {
-            var ipEndPoint = (IPEndPoint)endPoint;
-            var socket = new Socket(ipEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)
-            {
-                Blocking = false,
-            };
-
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            TrySetIOControl(socket);
-
-            return socket;
-        }
-
-        private static void TrySetIOControl(Socket socket)
-        {
-            try
-            {
-                if (Application.platform != RuntimePlatform.WindowsPlayer && Application.platform != RuntimePlatform.WindowsEditor)
-                {
-                    // IOControl only seems to work on windows
-                    // gives "SocketException: The descriptor is not a socket" when running on github action on Linux
-                    // see https://github.com/mono/mono/blob/f74eed4b09790a0929889ad7fc2cf96c9b6e3757/mcs/class/System/System.Net.Sockets/Socket.cs#L2763-L2765
-                    return;
-                }
-
-                // stops "SocketException: Connection reset by peer"
-                // this error seems to be caused by a failed send, resulting in the next polling being true, even those endpoint is closed
-                // see https://stackoverflow.com/a/15232187/8479976
-
-                // this IOControl sets the reporting of "unrealable" to false, stoping SocketException after a connection closes without sending disconnect message
-                const uint IOC_IN = 0x80000000;
-                const uint IOC_VENDOR = 0x18000000;
-                const uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
-                byte[] _false = new byte[] { 0, 0, 0, 0 };
-
-                socket.IOControl(unchecked((int)SIO_UDP_CONNRESET), _false, null);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("Exception setting IOControl");
-                Debug.LogException(e);
-            }
-        }
-
-        public void Connect(IEndPoint endPoint)
-        {
-            Endpoint = (EndPointWrapper)endPoint;
-
-            socket = CreateSocket(Endpoint.inner);
-            socket.Connect(Endpoint.inner);
-        }
-
-        public void Close()
-        {
-            socket.Close();
-            socket.Dispose();
-        }
-
-        /// <summary>
-        /// Is message avaliable
-        /// </summary>
-        /// <returns>true if data to read</returns>
-        public bool Poll()
-        {
-            return socket.Poll(0, SelectMode.SelectRead);
-        }
-
-        public int Receive(byte[] buffer, out IEndPoint endPoint)
-        {
-            int c = socket.ReceiveFrom(buffer, ref Endpoint.inner);
-            endPoint = Endpoint;
-            return c;
-        }
-
-        public void Send(IEndPoint endPoint, byte[] packet, int length)
-        {
-            // todo check disconnected
-            // todo what SocketFlags??
-
-            EndPoint netEndPoint = ((EndPointWrapper)endPoint).inner;
-            socket.SendTo(packet, length, SocketFlags.None, netEndPoint);
         }
     }
 }

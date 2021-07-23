@@ -57,10 +57,6 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal sealed class Connection : IConnection, IRawConnection
     {
-        void Assert(bool condition, object msg = null)
-        {
-            if (!condition) logger.Log(LogType.Assert, msg == null ? "Failed Assertion" : $"Failed Assertion: {msg}");
-        }
         readonly ILogger logger;
 
         ConnectionState _state;
@@ -73,19 +69,19 @@ namespace Mirage.SocketLayer
                 switch (value)
                 {
                     case ConnectionState.Connected:
-                        Assert(_state == ConnectionState.Created || _state == ConnectionState.Connecting);
+                        logger.Assert(_state == ConnectionState.Created || _state == ConnectionState.Connecting);
                         break;
 
                     case ConnectionState.Connecting:
-                        Assert(_state == ConnectionState.Created);
+                        logger.Assert(_state == ConnectionState.Created);
                         break;
 
                     case ConnectionState.Disconnected:
-                        Assert(_state == ConnectionState.Connected);
+                        logger.Assert(_state == ConnectionState.Connected);
                         break;
 
                     case ConnectionState.Destroyed:
-                        Assert(_state == ConnectionState.Removing);
+                        logger.Assert(_state == ConnectionState.Removing);
                         break;
                 }
 
@@ -303,7 +299,7 @@ namespace Mirage.SocketLayer
 
             // copy first
             int copyLength = received.length - 1;
-            Assert(copyLength == ackSystem.SizePerFragment, "First should be max size");
+            logger.Assert(copyLength == ackSystem.SizePerFragment, "First should be max size");
             Buffer.BlockCopy(firstArray, 1, message, 0, copyLength);
             received.buffer.Release();
 
@@ -314,7 +310,7 @@ namespace Mirage.SocketLayer
                 AckSystem.ReliableReceived next = ackSystem.GetNextFragment();
                 byte[] nextArray = next.buffer.array;
 
-                Assert(i == (fragmentLength - 1 - nextArray[0]), "fragment index should decrement each time");
+                logger.Assert(i == (fragmentLength - 1 - nextArray[0]), "fragment index should decrement each time");
 
                 // +1 because first is copied above
                 copyLength = next.length - 1;

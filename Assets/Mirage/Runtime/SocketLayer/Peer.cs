@@ -30,14 +30,6 @@ namespace Mirage.SocketLayer
     /// </summary>
     public sealed class Peer : IPeer
     {
-        void Assert(bool condition, object msg = null)
-        {
-            if (!condition) logger.Log(LogType.Assert, msg == null ? "Failed Assertion" : $"Failed Assertion: {msg}");
-        }
-        void Error(string error)
-        {
-            logger.Log(LogType.Error, error);
-        }
         readonly ILogger logger;
         readonly Metrics metrics;
         readonly ISocket socket;
@@ -71,7 +63,7 @@ namespace Mirage.SocketLayer
             time = new Time();
 
             connectKeyValidator = new ConnectKeyValidator();
-            
+
             bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, this.config.MaxPacketSize, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
             Application.quitting += Application_quitting;
         }
@@ -131,7 +123,7 @@ namespace Mirage.SocketLayer
         {
             // connecting connections can send connect messages so is allowed
             // todo check connected before message are sent from high level
-            Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected, connection.State);
+            logger.Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected, connection.State);
 
             socket.Send(connection.EndPoint, data, length);
             metrics?.OnSend(length);
@@ -436,7 +428,7 @@ namespace Mirage.SocketLayer
                     break;
 
                 case ConnectionState.Connecting:
-                    Error($"Server connections should not be in {nameof(ConnectionState.Connecting)} state");
+                    logger.Error($"Server connections should not be in {nameof(ConnectionState.Connecting)} state");
                     break;
             }
         }
@@ -453,7 +445,7 @@ namespace Mirage.SocketLayer
             switch (connection.State)
             {
                 case ConnectionState.Created:
-                    Error($"Accepted Connections should not be in {nameof(ConnectionState.Created)} state");
+                    logger.Error($"Accepted Connections should not be in {nameof(ConnectionState.Created)} state");
                     break;
 
                 case ConnectionState.Connected:
@@ -476,7 +468,7 @@ namespace Mirage.SocketLayer
                     break;
 
                 default:
-                    Error($"Rejected Connections should not be in {nameof(ConnectionState.Created)} state");
+                    logger.Error($"Rejected Connections should not be in {nameof(ConnectionState.Created)} state");
                     break;
             }
         }
@@ -512,8 +504,7 @@ namespace Mirage.SocketLayer
         internal void RemoveConnection(Connection connection)
         {
             // shouldn't be trying to removed a destroyed connected
-            Assert(connection.State != ConnectionState.Destroyed);
-            Assert(connection.State != ConnectionState.Removing);
+            logger.Assert(connection.State != ConnectionState.Destroyed && connection.State != ConnectionState.Removing);
 
             connection.State = ConnectionState.Removing;
             connectionsToRemove.Add(connection);
@@ -550,7 +541,10 @@ namespace Mirage.SocketLayer
                 connection.State = ConnectionState.Destroyed;
 
                 // value should be removed from dictionary
-                Assert(removed);
+                if (!removed)
+                {
+                    logger.Error($"Failed to remove {connection} from connection set");
+                }
             }
             connectionsToRemove.Clear();
         }

@@ -99,7 +99,7 @@ namespace Mirage.HeadlessBenchmark
         {
             if (string.IsNullOrEmpty(GetArg("-server"))) return;
 
-            var serverGo = Instantiate(ServerPrefab);
+            GameObject serverGo = Instantiate(ServerPrefab);
             serverGo.name = "Server";
             server = serverGo.GetComponent<NetworkServer>();
             server.MaxConnections = 9999;
@@ -158,7 +158,7 @@ namespace Mirage.HeadlessBenchmark
 
         void StartClient(int i, string networkAddress)
         {
-            var clientGo = Instantiate(ClientPrefab);
+            GameObject clientGo = Instantiate(ClientPrefab);
             clientGo.name = $"Client {i}";
             NetworkClient client = clientGo.GetComponent<NetworkClient>();
             ClientObjectManager objectManager = clientGo.GetComponent<ClientObjectManager>();
