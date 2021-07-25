@@ -1,3 +1,5 @@
+using System;
+
 namespace Mirage
 {
     public interface IEncryption

@@ -3,11 +3,11 @@ using Mirage.Serialization;
 
 namespace Mirage
 {
-    public class Encryption : IEncryption
+    public abstract class Encryption : IEncryption
     {
         private readonly MessageHandler _messageHandler;
 
-        public Encryption(MessageHandler messageHandler)
+        protected Encryption(MessageHandler messageHandler)
         {
             _messageHandler = messageHandler;
             messageHandler.RegisterHandler<EncryptedMessage>(HandleEncryptedMessage);
@@ -36,15 +36,19 @@ namespace Mirage
             }
         }
 
-        private ArraySegment<byte> EncryptMessage(ArraySegment<byte> payload)
-        {
-            throw new NotImplementedException();
-        }
+        /// <summary>
+        ///     Encrypt a message before we send it out through mirage.
+        /// </summary>
+        /// <param name="payload">The data we want to encrypt.</param>
+        /// <returns>Will return a new data that has been encrypted.</returns>
+        protected abstract ArraySegment<byte> EncryptMessage(ArraySegment<byte> payload);
 
-        private ArraySegment<byte> DecryptMessage(ArraySegment<byte> payload)
-        {
-            throw new NotImplementedException();
-        }
+        /// <summary>
+        ///     Decrypt an incoming message sent out by mirage.
+        /// </summary>
+        /// <param name="payload">The data we want to encrypt.</param>
+        /// <returns>Will return data that has been decrypted.</returns>
+        protected abstract ArraySegment<byte> DecryptMessage(ArraySegment<byte> payload);
     }
 
     [NetworkMessage]
