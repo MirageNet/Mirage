@@ -401,6 +401,13 @@ namespace Mirage
             SendToMany(Players, msg, channelId);
         }
 
+        /// <summary>
+        /// Sends a message to many connections
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="players"></param>
+        /// <param name="msg"></param>
+        /// <param name="channelId"></param>
         public static void SendToMany<T>(IEnumerable<INetworkPlayer> players, T msg, int channelId = Channel.Reliable)
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -414,6 +421,33 @@ namespace Mirage
                 {
                     player.Send(segment, channelId);
                     count++;
+                }
+
+                NetworkDiagnostics.OnSend(msg, segment.Count, count);
+            }
+        }
+
+        /// <summary>
+        /// Sends a message to many connections
+        /// <para>
+        /// Same as <see cref="SendToMany{T}(IEnumerable{INetworkPlayer}, T, int)"/> but uses for loop to avoid allocations
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// Using list in foreach loop causes Unity's mono version to box the struct which causes allocations, <see href="https://docs.unity3d.com/2019.4/Documentation/Manual/BestPracticeUnderstandingPerformanceInUnity4-1.html">Understanding the managed heap</see>
+        /// </remarks>
+        public static void SendToMany<T>(IReadOnlyList<INetworkPlayer> players, T msg, int channelId = Channel.Reliable)
+        {
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                // pack message into byte[] once
+                MessagePacker.Pack(msg, writer);
+                var segment = writer.ToArraySegment();
+                int count = players.Count;
+
+                for (int i = 0; i < count; i++)
+                {
+                    players[i].Send(segment, channelId);
                 }
 
                 NetworkDiagnostics.OnSend(msg, segment.Count, count);
