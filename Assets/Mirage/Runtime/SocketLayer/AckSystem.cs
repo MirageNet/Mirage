@@ -39,6 +39,7 @@ namespace Mirage.SocketLayer
         readonly IRawConnection connection;
         readonly ITime time;
         readonly Pool<ByteBuffer> bufferPool;
+        readonly Pool<ReliablePacket> reliablePool;
         readonly Metrics metrics;
 
         //todo implement this
@@ -84,6 +85,7 @@ namespace Mirage.SocketLayer
             this.connection = connection;
             this.time = time;
             this.bufferPool = bufferPool;
+            reliablePool = new Pool<ReliablePacket>(ReliablePacket.CreateNew, default, 0, config.MaxReliablePacketsInSendBufferPerConnection);
             this.metrics = metrics;
 
             ackTimeout = config.TimeBeforeEmptyAck;
@@ -351,15 +353,17 @@ namespace Mirage.SocketLayer
         {
             ushort order = (ushort)reliableOrder.Next();
 
-            ByteBuffer final = bufferPool.Take();
+            ReliablePacket packet = reliablePool.Take();
+            ByteBuffer buffer = bufferPool.Take();
 
             int offset = 0;
-            ByteUtils.WriteByte(final.array, ref offset, (byte)packetType);
+            ByteUtils.WriteByte(buffer.array, ref offset, (byte)packetType);
 
             offset = SEQUENCE_HEADER;
-            ByteUtils.WriteUShort(final.array, ref offset, order);
+            ByteUtils.WriteUShort(buffer.array, ref offset, order);
 
-            return new ReliablePacket(final, RELIABLE_HEADER_SIZE, order);
+            packet.Setup(order, buffer, RELIABLE_HEADER_SIZE);
+            return packet;
         }
 
         static void AddToBatch(ReliablePacket packet, byte[] message, int offset, int length)
@@ -376,8 +380,6 @@ namespace Mirage.SocketLayer
 
         void SendReliablePacket(ReliablePacket reliable)
         {
-            if (reliable.acked) { return; }
-
             ushort sequence = (ushort)sentAckablePackets.Enqueue(new AckablePacket(reliable));
 
             byte[] final = reliable.buffer.array;
@@ -559,28 +561,13 @@ namespace Mirage.SocketLayer
                 uint ackableSequence = (uint)sequencer.MoveInBounds(start + i);
                 AckablePacket ackable = sentAckablePackets[ackableSequence];
 
-                if (ackable.Equals(default))
-                    continue;
-
-                if (alreadyAcked(ackable, ackableSequence))
+                if (ackable.IsNotValid())
                     continue;
 
                 CheckAckablePacket(sequence, mask, ackable, ackableSequence);
             }
         }
 
-        private bool alreadyAcked(AckablePacket ackable, uint ackableSequence)
-        {
-            // if we have already ackeds this, just remove it
-            if (ackable.IsReliable && ackable.reliablePacket.acked)
-            {
-                // this should never happen because packet should be removed when acked is set to true
-                // but remove it just incase we get here
-                sentAckablePackets.RemoveAt(ackableSequence);
-                return true;
-            }
-            return false;
-        }
         private void CheckAckablePacket(ushort sequence, ulong mask, AckablePacket ackable, uint ackableSequence)
         {
             int distance = (int)sentAckablePackets.Sequencer.Distance(sequence, ackableSequence);
@@ -614,11 +601,15 @@ namespace Mirage.SocketLayer
 
         private void reliableAcked(ReliablePacket reliablePacket)
         {
-            reliablePacket.OnAck();
             foreach (ushort seq in reliablePacket.sequences)
             {
                 sentAckablePackets.RemoveAt(seq);
             }
+
+            // remove from toResend incase it was added in previous loop
+            toResend.Remove(reliablePacket);
+
+            reliablePacket.OnAck();
         }
 
         private void reliableLost(ushort sequence, ReliablePacket reliablePacket)
@@ -684,17 +675,27 @@ namespace Mirage.SocketLayer
                 return token == other.token &&
                     reliablePacket == other.reliablePacket;
             }
+
+            /// <summary>
+            /// returns true if this is default value of struct
+            /// </summary>
+            /// <returns></returns>
+            public bool IsNotValid()
+            {
+                return token == null && reliablePacket == null;
+            }
         }
 
         class ReliablePacket
         {
             public ushort lastSequence;
-            public bool acked;
             public int length;
 
-            public readonly List<ushort> sequences = new List<ushort>();
-            public readonly ByteBuffer buffer;
-            public readonly ushort order;
+            public ByteBuffer buffer;
+            public ushort order;
+
+            public readonly List<ushort> sequences = new List<ushort>(4);
+            private readonly Pool<ReliablePacket> pool;
 
             public void OnSend(ushort sequence)
             {
@@ -704,15 +705,24 @@ namespace Mirage.SocketLayer
 
             public void OnAck()
             {
-                acked = true;
                 buffer.Release();
+                pool.Put(this);
             }
 
-            public ReliablePacket(ByteBuffer packet, int length, ushort order)
+            public void Setup(ushort order, ByteBuffer buffer, int length)
             {
-                buffer = packet;
-                this.length = length;
+                // reset old data
+                lastSequence = 0;
+                sequences.Clear();
+
                 this.order = order;
+                this.buffer = buffer;
+                this.length = length;
+            }
+
+            private ReliablePacket(Pool<ReliablePacket> pool)
+            {
+                this.pool = pool;
             }
 
             public override int GetHashCode()
@@ -728,6 +738,11 @@ namespace Mirage.SocketLayer
                     return order == other.order && sequences == other.sequences;
                 }
                 return false;
+            }
+
+            public static ReliablePacket CreateNew(int _size, Pool<ReliablePacket> pool)
+            {
+                return new ReliablePacket(pool);
             }
         }
         public struct ReliableReceived : IEquatable<ReliableReceived>
