@@ -1,3 +1,11 @@
+## [100.0.2](https://github.com/MirageNet/Mirage/compare/v100.0.1...v100.0.2) (2021-07-25)
+
+
+### Performance Improvements
+
+* removing alloc from reliable sends ([00945f3](https://github.com/MirageNet/Mirage/commit/00945f3f310453f5e57e1b6495be125282d3b8c3))
+* removing allocations from SendToMany ([c57f64d](https://github.com/MirageNet/Mirage/commit/c57f64d7695e1bddefb39fa151ac21b5d2176f35))
+
 ## [100.0.1](https://github.com/MirageNet/Mirage/compare/v100.0.0...v100.0.1) (2021-07-19)
 
 
