@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using JamesFrowen.NetworkingBenchmark;
 using Mirage.Sockets.Udp;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,14 +12,16 @@ namespace Mirage.Experimental
     {
         [SerializeField] int playerCount = 20;
         [SerializeField] int monsterCount = 100;
-
+        private GameObject serverInstance;
         private NetworkServer server;
-        private ServerObjectManager som;
+        private GameObject clientInstance;
         private NetworkClient client;
-        private ClientObjectManager com;
-        private UdpSocketFactory socketFactory;
+
         private Scene serverScene;
         private Scene clientScene;
+
+        private PhysicsScene? serverPhysicsScene;
+
         private StateTransfer serverStateTranfer;
         private StateTransfer clientStateTranfer;
 
@@ -33,17 +36,30 @@ namespace Mirage.Experimental
 
         IEnumerator Start()
         {
-            server = gameObject.AddComponent<NetworkServer>();
-            som = gameObject.AddComponent<ServerObjectManager>();
-            client = gameObject.AddComponent<NetworkClient>();
-            com = gameObject.AddComponent<ClientObjectManager>();
+            {
+                serverInstance = new GameObject("Server");
+                serverInstance.transform.parent = transform;
+                server = serverInstance.AddComponent<NetworkServer>();
+                server.SocketFactory = serverInstance.AddComponent<UdpSocketFactory>();
+                server.EnablePeerMetrics = true;
 
-            socketFactory = gameObject.AddComponent<UdpSocketFactory>();
-            server.SocketFactory = socketFactory;
-            client.SocketFactory = socketFactory;
 
-            server.EnablePeerMetrics = true;
-            client.EnablePeerMetrics = true;
+                DisplayMetrics_AverageGui display = serverInstance.AddComponent<DisplayMetrics_AverageGui>();
+                server.Started.AddListener(() => display.Metrics = server.Metrics);
+            }
+
+            {
+                clientInstance = new GameObject("Client");
+                clientInstance.transform.parent = transform;
+                client = clientInstance.AddComponent<NetworkClient>();
+                client.SocketFactory = clientInstance.AddComponent<UdpSocketFactory>();
+                client.EnablePeerMetrics = true;
+
+                //DisplayMetrics_AverageGui display = clientInstance.AddComponent<DisplayMetrics_AverageGui>();
+                //client.Connected.AddListener((_) => display.Metrics = client.Metrics);
+            }
+
+
 
             yield return null;
             playerSpawnId = GetRandomSpawnId();
@@ -53,18 +69,18 @@ namespace Mirage.Experimental
             clientSpawnDictionary.Add(monsterSpawnId, CreateMonster);
 
 
+            serverStateTranfer = StateTransfer.Create(server, serverObjects);
             server.StartServer();
             spawnServerObjects();
 
             yield return null;
 
+            createClientScene();
+            clientStateTranfer = StateTransfer.Create(client, clientScene, clientObjects, clientSpawnDictionary);
             client.Connect();
-            spawnClientObjects();
 
             yield return null;
 
-            serverStateTranfer = StateTransfer.Create(server, serverObjects);
-            clientStateTranfer = StateTransfer.Create(client, clientObjects, clientSpawnDictionary);
 
             while (true)
             {
@@ -82,11 +98,20 @@ namespace Mirage.Experimental
             }
         }
 
+        private void Update()
+        {
+            serverStateTranfer?.Update();
+        }
+
+        private void FixedUpdate()
+        {
+            serverPhysicsScene?.Simulate(Time.fixedDeltaTime);
+        }
 
         private void spawnServerObjects()
         {
             serverScene = SceneManager.CreateScene("ServerScene", new CreateSceneParameters { localPhysicsMode = LocalPhysicsMode.Physics3D });
-
+            serverPhysicsScene = serverScene.GetPhysicsScene();
             serverObjects.Clear();
 
             for (int i = 0; i < playerCount; i++)
@@ -99,7 +124,7 @@ namespace Mirage.Experimental
                 SpawnServerMonster(ref serverNetId, monsterSpawnId);
             }
         }
-        private void spawnClientObjects()
+        private void createClientScene()
         {
             clientScene = SceneManager.CreateScene("ClientScene", new CreateSceneParameters { localPhysicsMode = LocalPhysicsMode.Physics3D });
         }
@@ -111,12 +136,15 @@ namespace Mirage.Experimental
         }
         private GameObject CreatePlayer()
         {
-            var clone = new GameObject($"Player (unspawned)");
+            var clone = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            clone.name = $"Player (unspawned)";
+            Renderer renderer = clone.GetComponent<Renderer>();
+            renderer.material.color = Color.blue;
+
             DemoNetworkIdentity identity = clone.AddComponent<DemoNetworkIdentity>();
             DemoPlayer player = clone.AddComponent<DemoPlayer>();
             DemoNetworkTransform netTransform = clone.AddComponent<DemoNetworkTransform>();
             DemoHealth health = clone.AddComponent<DemoHealth>();
-            SphereCollider collider = clone.AddComponent<SphereCollider>();
             Rigidbody rb = clone.AddComponent<Rigidbody>();
 
             identity.health = health;
@@ -127,11 +155,14 @@ namespace Mirage.Experimental
         }
         private GameObject CreateMonster()
         {
-            var clone = new GameObject($"Monster (unspawned)");
+            var clone = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            clone.name = $"Monster (unspawned)";
+            Renderer renderer = clone.GetComponent<Renderer>();
+            renderer.material.color = Color.blue;
+
             DemoNetworkIdentity identity = clone.AddComponent<DemoNetworkIdentity>();
             DemoNetworkTransform netTransform = clone.AddComponent<DemoNetworkTransform>();
             DemoHealth health = clone.AddComponent<DemoHealth>();
-            SphereCollider collider = clone.AddComponent<SphereCollider>();
             Rigidbody rb = clone.AddComponent<Rigidbody>();
             DemoMonster monster = clone.AddComponent<DemoMonster>();
 
@@ -152,6 +183,9 @@ namespace Mirage.Experimental
             netid++;
             identity.Init(netid, spawnId);
 
+            Renderer renderer = clone.GetComponent<Renderer>();
+            renderer.material.color = Color.red;
+
             DemoPlayer player = clone.GetComponent<DemoPlayer>();
             DemoNetworkTransform netTransform = clone.GetComponent<DemoNetworkTransform>();
             DemoHealth health = clone.GetComponent<DemoHealth>();
@@ -165,14 +199,14 @@ namespace Mirage.Experimental
             player.Damage = 1;
             player.Money = 0;
 
-            SphereCollider collider = clone.GetComponent<SphereCollider>();
-            Rigidbody rb = clone.GetComponent<Rigidbody>();
+            SphereCollider collider = clone.AddComponent<SphereCollider>();
             collider.isTrigger = true;
             collider.radius = 2;
+            Rigidbody rb = clone.GetComponent<Rigidbody>();
 
             rb.isKinematic = true;
 
-            netTransform.StartAutoMove(50);
+            netTransform.StartAutoMove(25);
         }
 
         private void SpawnServerMonster(ref uint netid, uint spawnId)
@@ -180,27 +214,26 @@ namespace Mirage.Experimental
             GameObject clone = CreateMonster();
             SceneManager.MoveGameObjectToScene(clone, serverScene);
             clone.name = $"Monster {monsterNameIndex++}";
-            DemoNetworkIdentity identity = clone.AddComponent<DemoNetworkIdentity>();
+            DemoNetworkIdentity identity = clone.GetComponent<DemoNetworkIdentity>();
             serverObjects.Add(identity);
             netid++;
             identity.Init(netid, spawnId);
 
-            DemoNetworkTransform netTransform = clone.AddComponent<DemoNetworkTransform>();
-            DemoHealth health = clone.AddComponent<DemoHealth>();
+            Renderer renderer = clone.GetComponent<Renderer>();
+            renderer.material.color = Color.red;
+
+            DemoNetworkTransform netTransform = clone.GetComponent<DemoNetworkTransform>();
+            DemoHealth health = clone.GetComponent<DemoHealth>();
 
             identity.health = health;
             identity.networkTransform = netTransform;
 
             health.Health = 20;
 
-            SphereCollider collider = clone.AddComponent<SphereCollider>();
-            Rigidbody rb = clone.AddComponent<Rigidbody>();
-            collider.isTrigger = true;
-            collider.radius = 2;
-
+            Rigidbody rb = clone.GetComponent<Rigidbody>();
             rb.isKinematic = true;
 
-            netTransform.StartAutoMove(50, 1.5f);
+            netTransform.StartAutoMove(25, 1.5f);
         }
     }
     public class DemoMonster : MonoBehaviour

@@ -7,10 +7,10 @@ namespace Mirage.Experimental
         DemoNetworkIdentity _id;
         DemoNetworkIdentity Identity => _id ?? (_id = GetComponent<DemoNetworkIdentity>());
 
-        private float _health;
+        private int _health;
         public DemoMonster monster;
 
-        public float Health { get => _health; set => _health = value; }
+        public int Health { get => _health; set => _health = value; }
 
         public bool Harm(int damage)
         {

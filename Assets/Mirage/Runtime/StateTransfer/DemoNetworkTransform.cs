@@ -5,17 +5,15 @@ namespace Mirage.Experimental
 {
     public class DemoNetworkTransform : MonoBehaviour
     {
-        private Vector3 _position;
-        public Vector3 Position { get => _position; set => _position = value; }
+        public Vector3 Position { get => transform.position; set => transform.position = value; }
 
-        private Quaternion _rotation;
-        public Quaternion Rotation { get => _rotation; set => _rotation = value; }
+        public Quaternion Rotation { get => transform.rotation; set => transform.rotation = value; }
 
         private float speed;
-        int moveRadius;
+        float moveRadius;
         Vector3 current;
         Vector3 target;
-        internal void StartAutoMove(int radius, float speed = 2)
+        internal void StartAutoMove(float radius, float speed = 2)
         {
             this.speed = speed;
             moveRadius = radius;
@@ -38,12 +36,6 @@ namespace Mirage.Experimental
                 transform.forward = (target - current).normalized;
                 yield return null;
             }
-        }
-
-        private void Update()
-        {
-            Position = transform.position;
-            Rotation = transform.rotation;
         }
     }
 }

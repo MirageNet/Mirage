@@ -4,6 +4,7 @@ using System.Linq;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Mirage.Experimental
 {
@@ -12,17 +13,17 @@ namespace Mirage.Experimental
         NetworkServer server;
         NetworkClient client;
 
-        WorldSnapshot[] snapshots = new WorldSnapshot[255];
-        Sequencer sequencer = new Sequencer(8);
+        WorldSnapshot[] snapshots = new WorldSnapshot[256];
+        Mirage.SocketLayer.Sequencer sequencer = new Mirage.SocketLayer.Sequencer(8);
 
         //server
         List<DemoNetworkIdentity> serverObjects;
-        Dictionary<NetworkPlayer, ulong> ackedSnapshot = new Dictionary<NetworkPlayer, ulong>();
+        Dictionary<INetworkPlayer, ulong> ackedSnapshot = new Dictionary<INetworkPlayer, ulong>();
 
         //client
-        ulong lastReceived;
         Dictionary<uint, DemoNetworkIdentity> clientObjects;
         private Dictionary<uint, Func<GameObject>> clientSpawnDictionary;
+        private Scene clientScene;
 
         private StateTransfer()
         {
@@ -30,38 +31,52 @@ namespace Mirage.Experimental
         }
         public static StateTransfer Create(NetworkServer server, List<DemoNetworkIdentity> serverObjects)
         {
-            return new StateTransfer()
+            var stateTranfer = new StateTransfer()
             {
                 server = server,
                 serverObjects = serverObjects
             };
+            server.Connected.AddListener(player =>
+            {
+                stateTranfer.ackedSnapshot.Add(player, stateTranfer.sequencer.MoveInBounds(ulong.MaxValue));
+            });
+            server.Disconnected.AddListener(player =>
+            {
+                stateTranfer.ackedSnapshot.Remove(player);
+            });
+            return stateTranfer;
         }
-        public static StateTransfer Create(NetworkClient client, Dictionary<uint, DemoNetworkIdentity> clientObjects, Dictionary<uint, Func<GameObject>> clientSpawnDictionary)
+        public static StateTransfer Create(NetworkClient client, UnityEngine.SceneManagement.Scene clientScene, Dictionary<uint, DemoNetworkIdentity> clientObjects, Dictionary<uint, Func<GameObject>> clientSpawnDictionary)
         {
             var stateTranfer = new StateTransfer()
             {
                 client = client,
+                clientScene = clientScene,
                 clientObjects = clientObjects,
                 clientSpawnDictionary = clientSpawnDictionary,
             };
-            client.MessageHandler.RegisterHandler<StateMessage>(stateTranfer.ReceiveState);
+            client.Connected.AddListener(_ =>
+            {
+                client.MessageHandler.RegisterHandler<StateMessage>(stateTranfer.ReceiveState);
+            });
             return stateTranfer;
         }
 
         private void ReceiveState(INetworkPlayer player, StateMessage message)
         {
-            WorldSnapshot previous = snapshots[lastReceived];
             using (PooledNetworkReader reader = NetworkReaderPool.GetReader(message.segment))
             {
-                float deltaTime = reader.ReadSingle();
-                float time = previous.time + deltaTime;
+                ulong seq1 = reader.Read(8);
+                ulong deltaSeq = reader.Read(6);
+                ulong seq = sequencer.MoveInBounds(seq1 + deltaSeq);
 
-                ulong deltaSeq = reader.ReadByte();
-                ulong seq = previous.sequence + deltaSeq;
+                WorldSnapshot previous = snapshots[seq1];
+
+                float time = DeltaValue<float>.Read(reader, previous.time);
 
                 var newSnapshot = new Dictionary<uint, ObjectSnapshot>();
                 // add all objects from previous snapshot
-                for (int i = 0; i < previous.objects.Length; i++)
+                for (int i = 0; i < previous.objects?.Length; i++)
                 {
                     newSnapshot.Add(previous.objects[i].id, previous.objects[i]);
                 }
@@ -82,23 +97,28 @@ namespace Mirage.Experimental
             while (reader.CanReadBytes(1))
             {
                 uint nextId = reader.ReadPackedUInt32();
+                Debug.Assert(nextId != 0);
                 bool destroyed = reader.ReadBoolean();
                 if (destroyed)
                 {
+                    //Debug.Log($"Read id:{nextId} state:Destroyed");
+
                     objects.Remove(nextId);
                     DestroyObject(nextId);
                 }
                 else
                 {
-                    // if Exist
+                    // if Exist, Delta
                     if (objects.TryGetValue(nextId, out ObjectSnapshot previousObj))
                     {
+                        //Debug.Log($"Read id:{nextId} state:Delta");
                         objects[nextId] = ApplyDeltaFields(reader, nextId, previousObj);
                     }
-                    // else spawend
+                    // else, Whole
                     else
                     {
-                        objects.Add(nextId, SpawnObject(reader, nextId));
+                        //Debug.Log($"Read id:{nextId} state:New");
+                        objects.Add(nextId, FindOrSpawnObject(reader, nextId));
                     }
                 }
             }
@@ -111,6 +131,16 @@ namespace Mirage.Experimental
 
             var fields = new FieldSnapshot[previousObj.fields.Length];
             int fieldIndex = 0;
+
+            {
+                if (FieldSnapshot.ReadDelta(reader, previousObj.fields[fieldIndex], out FieldSnapshot newSnapshot, out string value))
+                {
+                    obj.name = value;
+                }
+                fields[fieldIndex] = newSnapshot;
+                fieldIndex++;
+            }
+
             if (obj.networkTransform != null)
             {
                 {
@@ -171,23 +201,40 @@ namespace Mirage.Experimental
             };
         }
 
-        private ObjectSnapshot SpawnObject(NetworkReader reader, uint id)
+        private ObjectSnapshot FindOrSpawnObject(NetworkReader reader, uint id)
         {
             // because spawned next read will be spawn id
             uint spawnId = reader.ReadUInt32();
-            DemoNetworkIdentity clone = clientSpawnDictionary[spawnId].Invoke().GetComponent<DemoNetworkIdentity>();
-            clone.Init(id, spawnId);
-            return ReadWholeObjects(reader, clone);
+            // object might exist on client, even if it isn't in previous snapshot
+            //     in that case we dont spawn it, but find exist, but we still read whole state
+            //     This can happen when server sends 2 snapshots before client acks
+            if (!clientObjects.TryGetValue(id, out DemoNetworkIdentity obj))
+            {
+                obj = clientSpawnDictionary[spawnId].Invoke().GetComponent<DemoNetworkIdentity>();
+                SceneManager.MoveGameObjectToScene(obj.gameObject, clientScene);
+                obj.Init(id, spawnId);
+                clientObjects[id] = obj;
+            }
+
+            return ReadWholeObjects(reader, obj);
         }
 
         private ObjectSnapshot ReadWholeObjects(NetworkReader reader, DemoNetworkIdentity obj)
         {
-            var fields = new FieldSnapshot[
+            var fields = new FieldSnapshot[1 +
                 (obj.networkTransform != null ? 2 : 0) +
                 (obj.health != null ? 1 : 0) +
                 (obj.player != null ? 2 : 0)
             ];
             int fieldIndex = 0;
+
+            {
+                FieldSnapshot.ReadWhole(reader, out FieldSnapshot newSnapshot, out string value);
+                obj.name = value;
+                fields[fieldIndex] = newSnapshot;
+                fieldIndex++;
+            }
+
             if (obj.networkTransform != null)
             {
                 {
@@ -250,21 +297,28 @@ namespace Mirage.Experimental
 
             ulong sequence = sequencer.Next();
             CreateSnapshot(sequence);
-            foreach (KeyValuePair<NetworkPlayer, ulong> kvp in ackedSnapshot)
+            foreach (KeyValuePair<INetworkPlayer, ulong> kvp in ackedSnapshot)
             {
                 SendUpdate(kvp.Key, kvp.Value, sequence);
             }
         }
 
 
-        private void SendUpdate(NetworkPlayer player, ulong previousSequence, ulong sequence)
+        private void SendUpdate(INetworkPlayer player, ulong previousSequence, ulong sequence)
         {
             WorldSnapshot a = snapshots[previousSequence];
             WorldSnapshot b = snapshots[sequence];
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
+                // write previous, and delta
+                //   reader will then know sequence of both snapshots
+                writer.Write(previousSequence, 8);
+                long deltaSeq = sequencer.Distance(sequence, previousSequence);
+                Debug.Assert(deltaSeq > 0);
+                writer.Write((ulong)deltaSeq, 6);
                 CreateDelta(writer, a, b);
 
+                Debug.Log($"Snapshot Size: {writer.ByteLength}");
                 INotifyToken token = SendNotify(player, new StateMessage
                 {
                     segment = writer.ToArraySegment(),
@@ -276,7 +330,7 @@ namespace Mirage.Experimental
             }
         }
 
-        private INotifyToken SendNotify<T>(NetworkPlayer player, T msg) where T : struct
+        private INotifyToken SendNotify<T>(INetworkPlayer player, T msg) where T : struct
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -289,27 +343,31 @@ namespace Mirage.Experimental
 
         private void CreateDelta(PooledNetworkWriter writer, WorldSnapshot a, WorldSnapshot b)
         {
-            float deltaTime = b.time - a.time;
-            writer.WriteSingle(deltaTime);
-
-            ulong deltaSeq = b.sequence - a.sequence;
-            writer.WriteByte((byte)deltaSeq);
+            DeltaValue<float>.Write(writer, a.time, b.time);
 
             // assume arrays are not null here.....we can handle special case where a array is null later
             int ai = 0;
             int bi = 0;
             int loopCount = 0;
             // safety numbers to stop infinite loop
-            while (loopCount < 100_000)
+            while (loopCount < 100)
             {
                 loopCount++;
 
-                // arrays should always be in order of netid
-                ObjectSnapshot aobj = a.objects[ai];
-                ObjectSnapshot bobj = b.objects[bi];
-
-                if (aobj.id == bobj.id)
+                // if both over, then break
+                if ((a.objects == null || ai >= a.objects.Length) && (b.objects == null || bi >= b.objects.Length))
                 {
+                    break;
+                }
+
+                // arrays should always be in order of netid
+                ObjectSnapshot aobj = ai < a.objects?.Length ? a.objects[ai] : default;
+                ObjectSnapshot bobj = bi < b.objects?.Length ? b.objects[bi] : default;
+
+
+                if (aobj.Valid() && aobj.id == bobj.id)
+                {
+                    //Debug.Log($"Write a:{aobj.id} b:{bobj.id} state:Delta");
                     WriteObjectDelta(writer, aobj, bobj);
                     ai++;
                     bi++;
@@ -317,8 +375,9 @@ namespace Mirage.Experimental
                 }
                 else
                 {
-                    if (aobj.id > bobj.id)
+                    if (!aobj.Valid() || aobj.id > bobj.id)
                     {
+                        //Debug.Log($"Write a:{aobj.id} b:{bobj.id} state:New");
                         // b is new object
                         WriteWholeObject(writer, bobj);
                         bi++;
@@ -326,6 +385,7 @@ namespace Mirage.Experimental
                     }
                     else
                     {
+                        //Debug.Log($"Write a:{aobj.id} b:{bobj.id} state:Destroyed");
                         // a is destroyed object
                         WriteDestroyed(writer, aobj);
                         ai++;
@@ -368,7 +428,7 @@ namespace Mirage.Experimental
         {
             var worldSnapshot = new WorldSnapshot()
             {
-                time = Time.time,
+                time = FloatPacking.Quantize(Time.time),
                 sequence = sequence,
                 objects = new ObjectSnapshot[serverObjects.Count],
             };
@@ -379,16 +439,20 @@ namespace Mirage.Experimental
                 {
                     id = obj.Id,
                     spawnId = obj.SpawnId,
-                    fields = new FieldSnapshot[
+                    fields = new FieldSnapshot[1 +
                         (obj.networkTransform != null ? 2 : 0) +
                         (obj.health != null ? 1 : 0) +
                         (obj.player != null ? 2 : 0)
                     ],
                 };
                 int fieldIndex = 0;
+
+                worldSnapshot.objects[i].fields[fieldIndex] = FieldSnapshot.Create(obj.name);
+                fieldIndex++;
+
                 if (obj.networkTransform != null)
                 {
-                    worldSnapshot.objects[i].fields[fieldIndex] = FieldSnapshot.Create(obj.networkTransform.Position);
+                    worldSnapshot.objects[i].fields[fieldIndex] = FieldSnapshot.Create(FloatPacking.Quantize(obj.networkTransform.Position));
                     fieldIndex++;
                     worldSnapshot.objects[i].fields[fieldIndex] = FieldSnapshot.Create(obj.networkTransform.Rotation);
                     fieldIndex++;
@@ -429,6 +493,8 @@ namespace Mirage.Experimental
             public uint id;
             public uint spawnId;
             public FieldSnapshot[] fields;
+
+            public bool Valid() => id > 0;
         }
         abstract class FieldSnapshot
         {
@@ -451,7 +517,8 @@ namespace Mirage.Experimental
             }
             public static void ReadWhole<T>(NetworkReader reader, out FieldSnapshot newSnapshot, out T value)
             {
-                throw new NotImplementedException();
+                value = reader.Read<T>();
+                newSnapshot = Create(value);
             }
 
 
@@ -498,7 +565,7 @@ namespace Mirage.Experimental
                     {
                         value = readAction.Invoke(reader, this.value);
                         // return true if value has changed
-                        return EqualityComparer<T>.Default.Equals(this.value, value);
+                        return !EqualityComparer<T>.Default.Equals(this.value, value);
                     }
                     // no delta found, just write full value
                     else
@@ -532,8 +599,12 @@ namespace Mirage.Experimental
         {
             DeltaValue<int>.Write = WriteDeltaInt;
             DeltaValue<int>.Read = ReadDeltaInt;
+
             DeltaValue<Vector3>.Write = WriteDeltaVector3;
             DeltaValue<Vector3>.Read = ReadDeltaVector3;
+
+            DeltaValue<float>.Write = WriteDeltaFloat;
+            DeltaValue<float>.Read = ReadDeltaFloat;
         }
 
         public static void WriteDeltaInt(NetworkWriter writer, int oldValue, int newValue)
@@ -561,9 +632,10 @@ namespace Mirage.Experimental
                 return oldValue;
             }
         }
-        public static unsafe void WriteDeltaVector3(NetworkWriter writer, Vector3 oldValue, Vector3 newValue)
+        public static void WriteDeltaVector3(NetworkWriter writer, Vector3 oldValue, Vector3 newValue)
         {
-            Vector3 delta = oldValue - newValue;
+            int p1 = writer.BitPosition;
+            Vector3 delta = newValue - oldValue;
             if (delta == Vector3.zero)
             {
                 writer.WriteBoolean(0);
@@ -571,32 +643,172 @@ namespace Mirage.Experimental
             else
             {
                 writer.WriteBoolean(1);
-                //todo is this correct??
-                int* ptr = (int*)&delta;
-                writer.WritePackedInt32(ptr[0]);
-                writer.WritePackedInt32(ptr[1]);
-                writer.WritePackedInt32(ptr[2]);
+                WriteDeltaFloat(writer, oldValue.x, newValue.x);
+                WriteDeltaFloat(writer, oldValue.y, newValue.y);
+                WriteDeltaFloat(writer, oldValue.z, newValue.z);
             }
+            //Debug.Log($"WriteDeltaVector3 bits:{writer.BitPosition - p1}");
         }
-        public static unsafe Vector3 ReadDeltaVector3(NetworkReader reader, Vector3 oldValue)
+        public static Vector3 ReadDeltaVector3(NetworkReader reader, Vector3 oldValue)
         {
+            int p1 = reader.BitPosition;
+
+            Vector3 result;
             if (reader.ReadBoolean())
             {
-                Vector3 newValue;
-                //todo is this correct??
-                int* ptr = (int*)&newValue;
-                ptr[0] = reader.ReadPackedInt32();
-                ptr[1] = reader.ReadPackedInt32();
-                ptr[2] = reader.ReadPackedInt32();
-
-                return newValue;
+                result.x = oldValue.x + FloatPacking.UnPackFloat(reader);
+                result.y = oldValue.y + FloatPacking.UnPackFloat(reader);
+                result.z = oldValue.z + FloatPacking.UnPackFloat(reader);
             }
             else
             {
-                return oldValue;
+                result = oldValue;
+            }
+            //Debug.Log($"ReadDeltaVector3 bits:{reader.BitPosition - p1}");
+
+            return result;
+        }
+        public static void WriteDeltaFloat(NetworkWriter writer, float oldValue, float newValue)
+        {
+            float delta = newValue - oldValue;
+            FloatPacking.PackFloat(writer, delta);
+        }
+        public static float ReadDeltaFloat(NetworkReader reader, float oldValue)
+        {
+            return oldValue + FloatPacking.UnPackFloat(reader);
+        }
+
+
+    }
+    public static class IntPacking
+    {
+
+    }
+    public static class FloatPacking
+    {
+        const float resolution = 64f;
+
+        public static Vector3 Quantize(Vector3 value)
+        {
+            value.x = Quantize(value.x);
+            value.y = Quantize(value.y);
+            value.z = Quantize(value.z);
+            return value;
+        }
+        public static float Quantize(float value)
+        {
+            // todo add or subtract 0.5 to reduce rounding error
+            //   use -0.5 if negative
+            //   because sign is written as its own bit
+            return ((int)(value * resolution)) / resolution;
+        }
+
+        public static void PackFloat(NetworkWriter writer, float value)
+        {
+            if (value == 0)
+            {
+                // 1 bit
+                writer.WriteBoolean(0);
+            }
+            else
+            {
+                writer.WriteBoolean(1);
+                // resolution 0.015625
+                int scaledInt = (int)(value * resolution);
+                uint scaled;
+                if (scaledInt < 0)
+                {
+                    writer.WriteBoolean(1);
+                    scaled = (uint)(-scaledInt);
+                }
+                else
+                {
+                    writer.WriteBoolean(0);
+                    scaled = (uint)(scaledInt);
+
+                }
+
+                if (scaled < (1 << 4))
+                {
+                    // 6 bits
+                    writer.WriteBoolean(0);
+                    writer.Write(scaled, 4);
+                }
+                else
+                {
+                    writer.WriteBoolean(1);
+                    if (scaled < (1 << 8))
+                    {
+                        // 11 bits
+                        writer.WriteBoolean(0);
+                        writer.Write(scaled, 8);
+                    }
+                    else
+                    {
+                        writer.WriteBoolean(1);
+
+                        if (scaled < (1 << 12))
+                        {
+                            // 16 bits
+                            writer.WriteBoolean(0);
+                            writer.Write(scaled, 12);
+                        }
+                        else
+                        {
+                            // out of bounds
+                            // 36 bits
+                            writer.WriteBoolean(1);
+                            writer.WriteSingle(value);
+                        }
+                    }
+                }
+            }
+        }
+        public static float UnPackFloat(NetworkReader reader)
+        {
+            if (reader.ReadBoolean())
+            {
+                ulong result;
+                bool negative = reader.ReadBoolean();
+                if (reader.ReadBoolean())
+                {
+                    if (reader.ReadBoolean())
+                    {
+                        if (reader.ReadBoolean())
+                        {
+                            return reader.ReadSingle();
+                        }
+                        else
+                        {
+                            result = reader.Read(12);
+                        }
+                    }
+                    else
+                    {
+                        result = reader.Read(8);
+                    }
+                }
+                else
+                {
+                    result = reader.Read(4);
+                }
+
+                if (negative)
+                {
+                    return result / (-resolution);
+                }
+                else
+                {
+                    return result / resolution;
+                }
+            }
+            else
+            {
+                return 0;
             }
         }
     }
+
     public static class NetworkStreamSerializeExtensions
     {
         public static void WriteNetworkStream(this NetworkWriter writer, NetworkStream stream)
