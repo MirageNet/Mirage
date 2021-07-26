@@ -7,7 +7,7 @@ namespace Mirage
     {
         private readonly MessageHandler _messageHandler;
 
-        protected Encryption(MessageHandler messageHandler)
+        public Encryption(MessageHandler messageHandler)
         {
             _messageHandler = messageHandler;
             messageHandler.RegisterHandler<EncryptedMessage>(HandleEncryptedMessage);
