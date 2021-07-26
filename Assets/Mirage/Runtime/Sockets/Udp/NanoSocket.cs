@@ -20,6 +20,19 @@ namespace Mirage.Sockets.Udp
             bufferSize = factory.BufferSize;
         }
 
+
+#if UNITY_EDITOR
+        void EDITOR_unbind(object _)
+        {
+            UnityEditor.Compilation.CompilationPipeline.compilationStarted += EDITOR_unbind;
+            // if compiling close socket to avoid being unable to unbind
+            if (UnityEngine.Application.isPlaying)
+            {
+                Close();
+            }
+        }
+#endif
+
         public void Bind(IEndPoint endPoint)
         {
             receiveEndPoint = (NanoEndPoint)endPoint;
@@ -30,11 +43,18 @@ namespace Mirage.Sockets.Udp
             {
                 throw new NanoSocketException("Socket Bind failed: address or port might already be in use");
             }
+#if UNITY_EDITOR
+            UnityEditor.Compilation.CompilationPipeline.compilationStarted += EDITOR_unbind;
+#endif
+
         }
 
         public void Close()
         {
             UDP.Destroy(ref socket);
+#if UNITY_EDITOR
+            UnityEditor.Compilation.CompilationPipeline.compilationStarted -= EDITOR_unbind;
+#endif
         }
 
         public void Connect(IEndPoint endPoint)
