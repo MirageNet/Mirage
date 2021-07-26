@@ -20,7 +20,7 @@ namespace Mirage.SocketLayer
         public void OnTick(int connectionCount)
         {
             tick = (uint)Sequencer.NextAfter(tick);
-            buffer[tick].Clear();
+            buffer[tick].Init();
             buffer[tick].connectionCount = connectionCount;
         }
 
@@ -63,6 +63,7 @@ namespace Mirage.SocketLayer
 
         public class Frame
         {
+            public bool init;
             public int connectionCount;
 
             public int sendCount;
@@ -83,8 +84,13 @@ namespace Mirage.SocketLayer
             //public int receiveMessagesCount;
             //public int receiveMessagesBytes;
 
-            internal void Clear()
+            /// <summary>
+            /// Clears frame ready to be used
+            /// </summary>
+            internal void Init()
             {
+                init = true;
+
                 sendCount = 0;
                 sendBytes = 0;
 

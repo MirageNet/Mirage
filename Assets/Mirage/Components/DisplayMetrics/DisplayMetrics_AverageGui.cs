@@ -12,6 +12,7 @@ namespace JamesFrowen.NetworkingBenchmark
         GUIStyle style;
 
 
+
         private void Start()
         {
             style = new GUIStyle();
@@ -50,8 +51,15 @@ namespace JamesFrowen.NetworkingBenchmark
             double receiveUnconnectedCount = 0;
 
             Metrics.Frame[] array = Metrics.buffer;
+            int count = 0;
             for (int i = 0; i < array.Length; i++)
             {
+                if (!array[i].init)
+                {
+                    continue;
+                }
+
+                count++;
                 connectionCount += array[i].connectionCount;
 
                 sendCount += array[i].sendCount;
@@ -70,22 +78,22 @@ namespace JamesFrowen.NetworkingBenchmark
                 receiveUnconnectedCount += array[i].receiveUnconnectedCount;
             }
 
-            GUILayout.Label($"connectionCount: {connectionCount / array.Length:0.0}");
+            GUILayout.Label($"connectionCount: {connectionCount / count:0.0}");
             GUILayout.Space(8);
-            GUILayout.Label($"sendCount: {sendCount / array.Length:0.0}");
-            GUILayout.Label($"sendBytes: {sendBytes / array.Length:0.00}");
+            GUILayout.Label($"sendCount: {sendCount / count:0.0}");
+            GUILayout.Label($"sendBytes: {sendBytes / count:0.00}");
             GUILayout.Space(8);
-            GUILayout.Label($"sendUnconnectedCount: {sendUnconnectedCount / array.Length:0.0}");
-            GUILayout.Label($"sendUnconnectedBytes: {sendUnconnectedBytes / array.Length:0.00}");
+            GUILayout.Label($"sendUnconnectedCount: {sendUnconnectedCount / count:0.0}");
+            GUILayout.Label($"sendUnconnectedBytes: {sendUnconnectedBytes / count:0.00}");
             GUILayout.Space(8);
-            GUILayout.Label($"resendCount: {resendCount / array.Length:0.0}");
-            GUILayout.Label($"resendBytes: {resendBytes / array.Length:0.00}");
+            GUILayout.Label($"resendCount: {resendCount / count:0.0}");
+            GUILayout.Label($"resendBytes: {resendBytes / count:0.00}");
             GUILayout.Space(8);
-            GUILayout.Label($"receiveCount: {receiveCount / array.Length:0.0}");
-            GUILayout.Label($"receiveBytes: {receiveBytes / array.Length:0.00}");
+            GUILayout.Label($"receiveCount: {receiveCount / count:0.0}");
+            GUILayout.Label($"receiveBytes: {receiveBytes / count:0.00}");
             GUILayout.Space(8);
-            GUILayout.Label($"receiveUnconnectedCount: {receiveUnconnectedCount / array.Length:0.0}");
-            GUILayout.Label($"receiveUnconnectedBytes: {receiveUnconnectedBytes / array.Length:0.00}");
+            GUILayout.Label($"receiveUnconnectedCount: {receiveUnconnectedCount / count:0.0}");
+            GUILayout.Label($"receiveUnconnectedBytes: {receiveUnconnectedBytes / count:0.00}");
 
         }
     }
