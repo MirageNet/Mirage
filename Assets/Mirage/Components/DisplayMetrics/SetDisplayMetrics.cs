@@ -11,8 +11,10 @@ namespace JamesFrowen.NetworkingBenchmark
 
         private void Start()
         {
-            server.Started.AddListener(ServerStarted);
-            client.Connected.AddListener(ClientConnected);
+            if (server != null)
+                server.Started.AddListener(ServerStarted);
+            if (client != null)
+                client.Connected.AddListener(ClientConnected);
         }
 
         private void ServerStarted()
