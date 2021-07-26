@@ -130,4 +130,14 @@ namespace Mirage
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class WeaverIgnoreAttribute : PropertyAttribute { }
+
+    /// <summary>
+    /// Tells weaver how many bits to sue for field
+    /// <para>Only works with interager fields (byte, int, ulong, etc)</para>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
+    public class SerializeConfigAttribute : Attribute
+    {
+        public int BitCount { get; set; }
+    }
 }
