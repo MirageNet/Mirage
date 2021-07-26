@@ -1,4 +1,4 @@
-﻿/*
+/*
 The MIT License (MIT)
 
 Copyright (c) 2020 Fredrik Holmstrom
@@ -48,6 +48,7 @@ namespace Mirage
     /// int d = sequencer.Distance(a, b);
     /// </code>
     /// </example>
+    [System.Obsolete("Use Sequencer from Socket Layer instead", true)]
     public struct Sequencer
     {
         readonly int shift;

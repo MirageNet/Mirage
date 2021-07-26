@@ -2,6 +2,7 @@ using NUnit.Framework;
 
 namespace Mirage
 {
+    [System.Obsolete("Use Sequencer from Socket Layer instead", true)]
     public class SequencerTest
     {
         [Test]
