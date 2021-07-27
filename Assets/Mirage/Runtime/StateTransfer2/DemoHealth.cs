@@ -7,6 +7,7 @@ namespace Mirage.Experimental.State2
     {
         public struct Snapshot
         {
+            public ushort previousSnapshot;
             public int health;
         }
 
