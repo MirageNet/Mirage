@@ -6,8 +6,12 @@ using Mirage.SocketLayer;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Mirage.Experimental
+namespace Mirage.Experimental.State2
 {
+    public class SnapshotState
+    {
+        public ulong Sequence;
+    }
     public class StateTransfer
     {
         NetworkServer server;
@@ -133,12 +137,12 @@ namespace Mirage.Experimental
             int fieldIndex = 0;
 
             {
-                //if (FieldSnapshot.ReadDelta(reader, previousObj.fields[fieldIndex], out FieldSnapshot newSnapshot, out string value))
-                //{
-                //    obj.name = value;
-                //}
-                //fields[fieldIndex] = newSnapshot;
-                //fieldIndex++;
+                if (FieldSnapshot.ReadDelta(reader, previousObj.fields[fieldIndex], out FieldSnapshot newSnapshot, out string value))
+                {
+                    obj.name = value;
+                }
+                fields[fieldIndex] = newSnapshot;
+                fieldIndex++;
             }
 
             if (obj.networkTransform != null)
@@ -221,7 +225,7 @@ namespace Mirage.Experimental
 
         private ObjectSnapshot ReadWholeObjects(NetworkReader reader, DemoNetworkIdentity obj)
         {
-            var fields = new FieldSnapshot[//1 +
+            var fields = new FieldSnapshot[1 +
                 (obj.networkTransform != null ? 2 : 0) +
                 (obj.health != null ? 1 : 0) +
                 (obj.player != null ? 2 : 0)
@@ -229,10 +233,10 @@ namespace Mirage.Experimental
             int fieldIndex = 0;
 
             {
-                //FieldSnapshot.ReadWhole(reader, out FieldSnapshot newSnapshot, out string value);
-                //obj.name = value;
-                //fields[fieldIndex] = newSnapshot;
-                //fieldIndex++;
+                FieldSnapshot.ReadWhole(reader, out FieldSnapshot newSnapshot, out string value);
+                obj.name = value;
+                fields[fieldIndex] = newSnapshot;
+                fieldIndex++;
             }
 
             if (obj.networkTransform != null)
@@ -318,7 +322,7 @@ namespace Mirage.Experimental
                 writer.Write((ulong)deltaSeq, 6);
                 CreateDelta(writer, a, b);
 
-                //Debug.Log($"Snapshot Size: {writer.ByteLength}");
+                Debug.Log($"Snapshot Size: {writer.ByteLength}");
                 INotifyToken token = SendNotify(player, new StateMessage
                 {
                     segment = writer.ToArraySegment(),
@@ -439,7 +443,7 @@ namespace Mirage.Experimental
                 {
                     id = obj.Id,
                     spawnId = obj.SpawnId,
-                    fields = new FieldSnapshot[// 1 +
+                    fields = new FieldSnapshot[1 +
                         (obj.networkTransform != null ? 2 : 0) +
                         (obj.health != null ? 1 : 0) +
                         (obj.player != null ? 2 : 0)
@@ -447,8 +451,8 @@ namespace Mirage.Experimental
                 };
                 int fieldIndex = 0;
 
-                //worldSnapshot.objects[i].fields[fieldIndex] = FieldSnapshot.Create(obj.name);
-                //fieldIndex++;
+                worldSnapshot.objects[i].fields[fieldIndex] = FieldSnapshot.Create(obj.name);
+                fieldIndex++;
 
                 if (obj.networkTransform != null)
                 {
@@ -595,6 +599,20 @@ namespace Mirage.Experimental
     }
     public static class DeltaWriters
     {
+        public static void WriteDelta<T>(this NetworkWriter writer, T oldValue, T newValue)
+        {
+            if (DeltaValue<T>.Write == null)
+                throw new KeyNotFoundException($"No delta found for {typeof(T)}. See https://miragenet.github.io/Mirage/Articles/General/Troubleshooting.html for details");
+
+            DeltaValue<T>.Write(writer, oldValue, newValue);
+        }
+        public static T ReadDelta<T>(this NetworkReader reader, T oldValue)
+        {
+            if (DeltaValue<T>.Read == null)
+                throw new KeyNotFoundException($"No delta reader found for {typeof(T)}. See https://miragenet.github.io/Mirage/Articles/General/Troubleshooting.html for details");
+
+            return DeltaValue<T>.Read(reader, oldValue);
+        }
         public static void Init()
         {
             DeltaValue<int>.Write = WriteDeltaInt;

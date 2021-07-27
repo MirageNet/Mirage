@@ -6,7 +6,7 @@ using Mirage.Sockets.Udp;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Mirage.Experimental
+namespace Mirage.Experimental.State2
 {
     public class DemoStateTransferManager : MonoBehaviour
     {
@@ -45,8 +45,6 @@ namespace Mirage.Experimental
 
 
                 DisplayMetrics_AverageGui display = serverInstance.AddComponent<DisplayMetrics_AverageGui>();
-                display.offset = new Rect(10, 10, 250, 330);
-                display.background = new Color(0.2f, 0.2f, 0.2f, 0.8f);
                 server.Started.AddListener(() => display.Metrics = server.Metrics);
             }
 
@@ -88,25 +86,20 @@ namespace Mirage.Experimental
             {
                 yield return new WaitForSeconds(1);
 
-                for (int i = serverObjects.Count; i < playerCount + monsterCount; i++)
+                for (int i = serverObjects.Count - 1; i >= 0; i--)
                 {
-                    SpawnServerMonster(ref serverNetId, monsterSpawnId);
+                    if (serverObjects[i] == null)
+                    {
+                        // remove and respawn monster
+                        serverObjects.RemoveAt(i);
+                        SpawnServerMonster(ref serverNetId, monsterSpawnId);
+                    }
                 }
             }
         }
 
         private void Update()
         {
-            // remove destroyed objects
-            for (int i = serverObjects.Count - 1; i >= 0; i--)
-            {
-                if (serverObjects[i] == null)
-                {
-                    // remove and respawn monster
-                    serverObjects.RemoveAt(i);
-                }
-            }
-
             serverStateTranfer?.Update();
         }
 
@@ -242,5 +235,9 @@ namespace Mirage.Experimental
 
             netTransform.StartAutoMove(25, 1.5f);
         }
+    }
+    public class DemoMonster : MonoBehaviour
+    {
+
     }
 }
