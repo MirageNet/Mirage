@@ -1,3 +1,15 @@
+# [101.0.0](https://github.com/MirageNet/Mirage/compare/v100.0.2...v101.0.0) (2021-07-29)
+
+
+### Code Refactoring
+
+* removing old version of sequencer ([0efe4ba](https://github.com/MirageNet/Mirage/commit/0efe4babede7726a9dc10590b27194924e4ad7b5))
+
+
+### BREAKING CHANGES
+
+* removing old version of Sequencer, use version in socket layer instead
+
 ## [100.0.2](https://github.com/MirageNet/Mirage/compare/v100.0.1...v100.0.2) (2021-07-25)
 
 
