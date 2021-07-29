@@ -1,3 +1,10 @@
+## [101.0.1](https://github.com/MirageNet/Mirage/compare/v101.0.0...v101.0.1) (2021-07-29)
+
+
+### Bug Fixes
+
+* making weaver generate serialize functions for nested messages ([#873](https://github.com/MirageNet/Mirage/issues/873)) ([a351222](https://github.com/MirageNet/Mirage/commit/a351222a3a7d2f75404bfebda049ea270f2f4e63))
+
 # [101.0.0](https://github.com/MirageNet/Mirage/compare/v100.0.2...v101.0.0) (2021-07-29)
 
 
