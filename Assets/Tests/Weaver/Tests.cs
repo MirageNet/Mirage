@@ -24,7 +24,23 @@ namespace Mirage.Weaver
         [AssertionMethod]
         protected void IsSuccess()
         {
-            Assert.That(weaverLog.Diagnostics, Is.Empty, $"Failed because there are Diagnostics message: \n  {string.Join("\n  ", weaverLog.Diagnostics.Select(x => x.MessageData))}\n");
+            Assert.That(weaverLog.Diagnostics, Is.Empty, $"Failed because there are Diagnostics messages: \n  {string.Join("\n  ", weaverLog.Diagnostics.Select(x => x.MessageData))}\n");
+        }
+
+        /// <summary>
+        /// Like <see cref="IsSuccess"/> but doesn't fail if there are warnings
+        /// </summary>
+        [AssertionMethod]
+        protected void NoErrors()
+        {
+            DiagnosticMessage[] errors = weaverLog.Diagnostics.Where(x => x.DiagnosticType == DiagnosticType.Error).ToArray();
+            Assert.That(errors, Is.Empty, $"Failed because there are Error messages: \n  {string.Join("\n  ", weaverLog.Diagnostics.Select(x => x.MessageData))}\n");
+        }
+
+        [AssertionMethod]
+        protected void HasErrorCount(int count)
+        {
+            Assert.That(weaverLog.Diagnostics.Count, Is.EqualTo(count));
         }
 
         [AssertionMethod]
