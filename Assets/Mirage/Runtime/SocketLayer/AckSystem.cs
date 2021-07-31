@@ -242,35 +242,8 @@ namespace Mirage.SocketLayer
         /// </summary>
         public INotifyToken SendNotify(byte[] inPacket, int inOffset, int inLength)
         {
-            // todo batch Notify?
-            if (inLength + NOTIFY_HEADER_SIZE > maxPacketSize)
-            {
-                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Notify message size is {maxPacketSize - NOTIFY_HEADER_SIZE}");
-            }
-            if (sentAckablePackets.IsFull)
-            {
-                throw new InvalidOperationException("Sent queue is full");
-            }
-
             var token = new NotifyToken();
-            ushort sequence = (ushort)sentAckablePackets.Enqueue(new AckablePacket(token));
-
-            using (ByteBuffer buffer = bufferPool.Take())
-            {
-                byte[] outPacket = buffer.array;
-                Buffer.BlockCopy(inPacket, inOffset, outPacket, NOTIFY_HEADER_SIZE, inLength);
-
-                int outOffset = 0;
-
-                ByteUtils.WriteByte(outPacket, ref outOffset, (byte)PacketType.Notify);
-
-                ByteUtils.WriteUShort(outPacket, ref outOffset, sequence);
-                ByteUtils.WriteUShort(outPacket, ref outOffset, LatestAckSequence);
-                ByteUtils.WriteULong(outPacket, ref outOffset, AckMask);
-
-                Send(outPacket, outOffset + inLength);
-            }
-
+            SendNotify(inPacket, inOffset, inLength, token);
             return token;
         }
 
