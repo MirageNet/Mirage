@@ -249,7 +249,6 @@ namespace Mirage.SocketLayer
 
         public void SendNotify(byte[] inPacket, int inOffset, int inLength, INotifyCallBack callBacks)
         {
-            // todo batch Notify?
             if (inLength + NOTIFY_HEADER_SIZE > maxPacketSize)
             {
                 throw new IndexOutOfRangeException($"Message is bigger than MTU, max Notify message size is {maxPacketSize - NOTIFY_HEADER_SIZE}");
