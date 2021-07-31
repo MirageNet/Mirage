@@ -106,15 +106,14 @@ namespace Mirage.Serialization
         void ResizeBuffer()
         {
             int size = managedBuffer.Length * 2;
+            Debug.LogWarning($"Resizing buffer, new size:{size}");
 
-            Debug.Log(handle.AddrOfPinnedObject());
             FreeHandle();
 
             Array.Resize(ref managedBuffer, size);
             bitCapacity = size * 8;
 
             CreateHandle();
-            Debug.Log(handle.AddrOfPinnedObject());
         }
         void CreateHandle()
         {
