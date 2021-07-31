@@ -13,10 +13,12 @@ namespace Mirage.Sockets.Udp
     {
         public string Address = "localhost";
         public ushort Port = 7777;
-        public int BufferSize = 256 * 1024;
 
         [Tooltip("Allows you to set which Socket implementation you want to use.\nAutomatic will use native (NanoSockets) on supported platforms (Windows, Mac & Linux).")]
         public SocketLib SocketLib;
+
+        [Header("NanoSocket options")]
+        public int BufferSize = 256 * 1024;
 
         bool useNanoSocket => SocketLib == SocketLib.Native || (SocketLib == SocketLib.Automatic && IsDesktop);
 
