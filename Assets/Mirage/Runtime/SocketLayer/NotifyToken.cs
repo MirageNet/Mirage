@@ -53,6 +53,9 @@ namespace Mirage.SocketLayer
 
     /// <summary>
     /// Can be passed into <see cref="AckSystem.SendNotify(byte[], int, int, INotifyCallBack)"/> and methods will be invoked when notify is delivered or lost
+    /// <para>
+    /// See the Notify Example on how to use this interface
+    /// </para>
     /// </summary>
     public interface INotifyCallBack
     {
