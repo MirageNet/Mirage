@@ -6,9 +6,7 @@ This guide covers the following topics:
 - [Player Movement](#player-movement)
 - [Initiate Server By Scripting](#initiate-server-by-scripting)
 - [Network Manager Hud](#understanding-network-hud)
-- [Server And Host Or Host Only](#server-and-host-or-host-only)
 - [Names And Colours](#names-and-colours)
-- [Scene Script With Canvas Buttons](#scene-script-with-canvas-buttons)
 - [Weapon Switching](#weapon-switching)
 
 It is best to first make a mini practice game before converting your single player game, or creating your ideal brand new multiplayer.
@@ -16,7 +14,7 @@ It is best to first make a mini practice game before converting your single play
 The Pre-made Mirage examples are great for using as reference, it is recommend to use them regarding connection setup, with ports and firewalls. This can be a huge topic that changes from person to person, and is not covered in this guide, here we will use localHost (multiple games on same PC).
 To achieve this, let's first create a new blank project on Unity Hub, after the editor opened up, we can move forward.
 
-# Installation
+## Installation
 
 Before everything, to install Mirage we need to add a new package manager into our project. To do this, we can go into `Edit menu` then `Project Settings`.
 This will open a new Editor Window with multiple tabs. The one we are looking for is `Package Manager`, so click there.
