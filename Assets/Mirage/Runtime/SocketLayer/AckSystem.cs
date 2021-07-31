@@ -237,6 +237,9 @@ namespace Mirage.SocketLayer
             }
         }
 
+        /// <summary>
+        /// Use <see cref="SendNotify(byte[], int, int, INotifyCallBack)"/> for non-alloc version
+        /// </summary>
         public INotifyToken SendNotify(byte[] inPacket, int inOffset, int inLength)
         {
             // todo batch Notify?
@@ -249,7 +252,6 @@ namespace Mirage.SocketLayer
                 throw new InvalidOperationException("Sent queue is full");
             }
 
-            // todo use pool to stop allocations
             var token = new NotifyToken();
             ushort sequence = (ushort)sentAckablePackets.Enqueue(new AckablePacket(token));
 
@@ -271,6 +273,39 @@ namespace Mirage.SocketLayer
 
             return token;
         }
+
+        public void SendNotify(byte[] inPacket, int inOffset, int inLength, INotifyCallBack callBacks)
+        {
+            // todo batch Notify?
+            if (inLength + NOTIFY_HEADER_SIZE > maxPacketSize)
+            {
+                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Notify message size is {maxPacketSize - NOTIFY_HEADER_SIZE}");
+            }
+            if (sentAckablePackets.IsFull)
+            {
+                throw new InvalidOperationException("Sent queue is full");
+            }
+
+            ushort sequence = (ushort)sentAckablePackets.Enqueue(new AckablePacket(callBacks));
+
+            using (ByteBuffer buffer = bufferPool.Take())
+            {
+                byte[] outPacket = buffer.array;
+                Buffer.BlockCopy(inPacket, inOffset, outPacket, NOTIFY_HEADER_SIZE, inLength);
+
+                int outOffset = 0;
+
+                ByteUtils.WriteByte(outPacket, ref outOffset, (byte)PacketType.Notify);
+
+                ByteUtils.WriteUShort(outPacket, ref outOffset, sequence);
+                ByteUtils.WriteUShort(outPacket, ref outOffset, LatestAckSequence);
+                ByteUtils.WriteULong(outPacket, ref outOffset, AckMask);
+
+                Send(outPacket, outOffset + inLength);
+            }
+        }
+
+
 
         public void SendReliable(byte[] message, int offset, int length)
         {
@@ -652,13 +687,13 @@ namespace Mirage.SocketLayer
 
         struct AckablePacket : IEquatable<AckablePacket>
         {
-            public NotifyToken token;
+            public INotifyCallBack token;
             public ReliablePacket reliablePacket;
 
             public bool IsNotify => token != null;
             public bool IsReliable => reliablePacket != null;
 
-            public AckablePacket(NotifyToken token)
+            public AckablePacket(INotifyCallBack token)
             {
                 this.token = token;
                 reliablePacket = null;

@@ -17,6 +17,10 @@ namespace Mirage.SocketLayer
         INotifyToken SendNotify(byte[] packet, int offset, int length);
         INotifyToken SendNotify(ArraySegment<byte> packet);
 
+        void SendNotify(byte[] packet, INotifyCallBack callBacks);
+        void SendNotify(byte[] packet, int offset, int length, INotifyCallBack callBacks);
+        void SendNotify(ArraySegment<byte> packet, INotifyCallBack callBacks);
+
         /// <summary>
         /// single message, batched by AckSystem
         /// </summary>
@@ -175,20 +179,50 @@ namespace Mirage.SocketLayer
             SendUnreliable(packet.Array, packet.Offset, packet.Count);
         }
 
-
+        /// <summary>
+        /// Use <see cref="INotifyCallBack"/> version for non-alloc
+        /// </summary>
         public INotifyToken SendNotify(byte[] packet, int offset, int length)
         {
             ThrowIfNotConnected();
             return ackSystem.SendNotify(packet, offset, length);
         }
+        /// <summary>
+        /// Use <see cref="INotifyCallBack"/> version for non-alloc
+        /// </summary>
         public INotifyToken SendNotify(byte[] packet)
         {
             return SendNotify(packet, 0, packet.Length);
         }
+        /// <summary>
+        /// Use <see cref="INotifyCallBack"/> version for non-alloc
+        /// </summary>
         public INotifyToken SendNotify(ArraySegment<byte> packet)
         {
             return SendNotify(packet.Array, packet.Offset, packet.Count);
+        }
 
+        /// <summary>
+        /// Use <see cref="INotifyCallBack"/> version for non-alloc
+        /// </summary>
+        public void SendNotify(byte[] packet, int offset, int length, INotifyCallBack callBacks)
+        {
+            ThrowIfNotConnected();
+            ackSystem.SendNotify(packet, offset, length, callBacks);
+        }
+        /// <summary>
+        /// Use <see cref="INotifyCallBack"/> version for non-alloc
+        /// </summary>
+        public void SendNotify(byte[] packet, INotifyCallBack callBacks)
+        {
+            SendNotify(packet, 0, packet.Length, callBacks);
+        }
+        /// <summary>
+        /// Use <see cref="INotifyCallBack"/> version for non-alloc
+        /// </summary>
+        public void SendNotify(ArraySegment<byte> packet, INotifyCallBack callBackscallBacks)
+        {
+            SendNotify(packet.Array, packet.Offset, packet.Count, callBackscallBacks);
         }
 
 
