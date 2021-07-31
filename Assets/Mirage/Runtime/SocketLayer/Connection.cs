@@ -220,9 +220,9 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// Use <see cref="INotifyCallBack"/> version for non-alloc
         /// </summary>
-        public void SendNotify(ArraySegment<byte> packet, INotifyCallBack callBackscallBacks)
+        public void SendNotify(ArraySegment<byte> packet, INotifyCallBack callBacks)
         {
-            SendNotify(packet.Array, packet.Offset, packet.Count, callBackscallBacks);
+            SendNotify(packet.Array, packet.Offset, packet.Count, callBacks);
         }
 
 
