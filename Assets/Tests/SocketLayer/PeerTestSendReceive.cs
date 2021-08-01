@@ -207,6 +207,59 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             }
         }
 
+        [UnityTest]
+        public IEnumerator ServerNotifySendCallbacksMarkedAsReceived()
+        {
+            byte[] message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
+
+            var callBacks = new INotifyCallBack[ClientCount];
+            // send 1 message to each client
+            for (int i = 0; i < ClientCount; i++)
+            {
+                callBacks[i] = Substitute.For<INotifyCallBack>();
+                serverConnections[i].SendNotify(message, callBacks[i]);
+            }
+
+            float end = UnityEngine.Time.time + NotifyWaitTime;
+            while (end > UnityEngine.Time.time)
+            {
+                UpdateAll();
+                yield return null;
+            }
+
+            for (int i = 0; i < ClientCount; i++)
+            {
+                callBacks[i].Received(1).OnDelivered();
+                callBacks[i].DidNotReceive().OnLost();
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ClientNotifySendCallbacksMarkedAsReceived()
+        {
+            byte[] message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
+
+            var callBacks = new INotifyCallBack[ClientCount];
+            // send 1 message from each client
+            for (int i = 0; i < ClientCount; i++)
+            {
+                callBacks[i] = Substitute.For<INotifyCallBack>();
+                clientConnections[i].SendNotify(message, callBacks[i]);
+            }
+
+            float end = UnityEngine.Time.time + NotifyWaitTime;
+            while (end > UnityEngine.Time.time)
+            {
+                UpdateAll();
+                yield return null;
+            }
+
+            for (int i = 0; i < ClientCount; i++)
+            {
+                callBacks[i].Received(1).OnDelivered();
+                callBacks[i].DidNotReceive().OnLost();
+            }
+        }
 
         [Test]
         public void ServerReliableSend()
