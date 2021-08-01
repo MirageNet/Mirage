@@ -1,3 +1,13 @@
+## [101.0.2](https://github.com/MirageNet/Mirage/compare/v101.0.1...v101.0.2) (2021-08-01)
+
+
+### Bug Fixes
+
+* fixing error message for disconnect ([0b603fe](https://github.com/MirageNet/Mirage/commit/0b603fe9e15fe2d333c869c8ff9cc51a4c27a823))
+* fixing resize buffer so that it uses byte capacity ([927fe95](https://github.com/MirageNet/Mirage/commit/927fe9574e6a28aac15e90bf4ecc8d3172d423b4))
+* fixing resize buffer when new size is greater than double ([972b6d2](https://github.com/MirageNet/Mirage/commit/972b6d2b811e8082504d9da26b1dd36f377c05eb))
+* removing debug logs from resize buffer ([5f3524c](https://github.com/MirageNet/Mirage/commit/5f3524cf92fcc975928288e31bd456b608ca67f1))
+
 ## [101.0.1](https://github.com/MirageNet/Mirage/compare/v101.0.0...v101.0.1) (2021-07-29)
 
 
