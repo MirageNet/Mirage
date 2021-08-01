@@ -108,19 +108,20 @@ namespace Mirage.Serialization
         }
 
 
-        void ResizeBuffer(int minCapacity)
+        void ResizeBuffer(int minBitCapacity)
         {
+            int minByteCapacity = minBitCapacity / 8;
             int size = managedBuffer.Length;
-            while (size < minCapacity)
+            while (size < minByteCapacity)
             {
                 size *= 2;
                 if (size > MaxBufferSize)
                 {
-                    throw new InvalidOperationException($"Can not resize buffer to {size} because it is above max value of {MaxBufferSize}");
+                    throw new InvalidOperationException($"Can not resize buffer to {size} bytes because it is above max value of {MaxBufferSize}");
                 }
             }
 
-            Debug.LogWarning($"Resizing buffer, new size:{size}");
+            Debug.LogWarning($"Resizing buffer, new size:{size} bytes");
 
             FreeHandle();
 
