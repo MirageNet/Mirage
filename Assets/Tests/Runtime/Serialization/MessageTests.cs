@@ -181,5 +181,20 @@ namespace Mirage.Tests.Runtime.Serialization
                 Assert.That(fresh.payload.Array[fresh.payload.Offset + i],
                     Is.EqualTo(message.payload.Array[message.payload.Offset + i]));
         }
+
+        [NetworkMessage]
+        struct NestedMessageWithAttr { }
+        struct NestedMessageWithoutAttr { }
+
+        [Test]
+        public void CreatesWriterForUnusedMessageWithAttribute()
+        {
+            Assert.That(Writer<NestedMessageWithAttr>.Write, Is.Not.Null);
+            Assert.That(Reader<NestedMessageWithAttr>.Read, Is.Not.Null);
+
+            // should not create for *unused* struct without attribute
+            Assert.That(Writer<NestedMessageWithoutAttr>.Write, Is.Null);
+            Assert.That(Reader<NestedMessageWithoutAttr>.Read, Is.Null);
+        }
     }
 }

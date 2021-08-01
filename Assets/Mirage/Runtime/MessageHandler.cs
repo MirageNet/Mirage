@@ -131,7 +131,7 @@ namespace Mirage
                 }
                 catch (Exception e)
                 {
-                    string disconnectMessage = disconnectOnException ? ", Closed connection: {this}" : "";
+                    string disconnectMessage = disconnectOnException ? $", Closed connection: {this}" : "";
                     logger.LogError($"{e.GetType()} in Message handler (see stack below){disconnectMessage}\n{e}");
                     if (disconnectOnException)
                     {

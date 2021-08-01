@@ -81,22 +81,33 @@ namespace Mirage.Weaver
 
             foreach (TypeDefinition klass in types)
             {
-                // extension methods only live in static classes
-                // static classes are represented as sealed and abstract
-                extensionHelper.RegisterExtensionMethodsInType(klass);
-
-                if (klass.GetCustomAttribute<NetworkMessageAttribute>() != null)
-                {
-                    readers.GetReadFunc(klass, null);
-                    writers.GetWriteFunc(klass, null);
-                    messages.Add(klass);
-                }
+                ProcessClass(klass);
             }
 
             // Generate readers and writers
             // find all the Send<> and Register<> calls and generate
             // readers and writers for them.
             CodePass.ForEachInstruction(module, (md, instr, sequencePoint) => GenerateReadersWriters(instr, sequencePoint));
+        }
+
+        private void ProcessClass(TypeDefinition klass)
+        {
+            // extension methods only live in static classes
+            // static classes are represented as sealed and abstract
+            extensionHelper.RegisterExtensionMethodsInType(klass);
+
+
+            if (klass.HasCustomAttribute<NetworkMessageAttribute>())
+            {
+                readers.GetReadFunc(klass, null);
+                writers.GetWriteFunc(klass, null);
+                messages.Add(klass);
+            }
+
+            foreach (TypeDefinition nestedClass in klass.NestedTypes)
+            {
+                ProcessClass(nestedClass);
+            }
         }
 
         private Instruction GenerateReadersWriters(Instruction instruction, SequencePoint sequencePoint)

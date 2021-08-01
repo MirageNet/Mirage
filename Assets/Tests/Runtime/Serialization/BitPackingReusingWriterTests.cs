@@ -9,7 +9,7 @@ namespace Mirage.Tests.Runtime.Serialization
         private NetworkReader reader;
 
         [SetUp]
-        public void OneTimeSetUp()
+        public void SetUp()
         {
             writer = new NetworkWriter(1300, true);
             reader = new NetworkReader();
@@ -18,8 +18,11 @@ namespace Mirage.Tests.Runtime.Serialization
         [TearDown]
         public void TearDown()
         {
+            // we have to clear these each time so that capactity doesn't effect other tests
             writer.Reset();
+            writer = null;
             reader.Dispose();
+            reader = null;
         }
 
         [Test]

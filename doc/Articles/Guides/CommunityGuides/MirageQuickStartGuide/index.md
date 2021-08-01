@@ -1,99 +1,124 @@
-# Mirage Quick Start Guide 
+# Mirage Quick Start Guide V0.1
 
-> [!WARNING] 
-> This guide was written for mirror so some information might be out-of-date for mirage
-
-This guide currently shows you:
-- [Basic scene setup](#part-1)
-- [Player movement](#part-4)
-- [Names and colours](#part-8)
-- [Scene script with canvas buttons](#part-11)
-- [Weapon switching](#part-12)
+This guide covers the following topics:
+- [Installation](#installation)
+- [Network Manager GameObject](#creating-a-network-manager)
+- [Player Movement](#player-movement)
+- [Initiate Server By Scripting](#initiate-server-by-scripting)
+- [Network Manager Hud](#understanding-network-hud)
+- [Names And Colours](#names-and-colours)
+- [Weapon Switching](#weapon-switching)
 
 It is best to first make a mini practice game before converting your single player game, or creating your ideal brand new multiplayer.
 
 The Pre-made Mirage examples are great for using as reference, it is recommend to use them regarding connection setup, with ports and firewalls. This can be a huge topic that changes from person to person, and is not covered in this guide, here we will use localHost (multiple games on same PC).
+To achieve this, let's first create a new blank project on Unity Hub, after the editor opened up, we can move forward.
 
+## Installation
 
-## Part 1
+Before everything, to install Mirage we need to add a new package manager into our project. To do this, we can go into `Edit menu` then `Project Settings`.
+This will open a new Editor Window with multiple tabs. The one we are looking for is `Package Manager`, so click there.
+Once you click there, you should add a new Package Manager, so complete the fields as we show next and click apply
 
-Blank Project, import UniTask and Mirage using Unity package manager.
+```
+Name: OpenUPM
+Url: https://package.openupm.com
+Scopes:
+- com.cysharp.unitask
+- com.openupm
+- com.miragenet
+```
 
+![](/doc/images/Scoped%20Registry.png)
 
-## Part 2
+Once everything is ready, the next step is to close the Project Settings window, and jump into the `Package Manager`. So for this we click on `Window menu` then `Package Manager`. 
+At this window, we will click on a small button that says (probably, at today date on Unity Editor 2021.13f) `Packages: In Project`, here we have to select `My registries`.
+Once, you've done that, we should be able to see Mirage and a few transport and also plugins in that list.
+After select, you can choose the version on the list below the name, otherwise you can just click install on the bottom right part of the window and after a loading bar, that's it. You already have Mirage API on your code, congrats!
 
-- Create new scene, save it, and add it to build settings
-- Create a new GameObject, name it NetworkManager in the scene, and add these 3 components
-    - NetworkManager
-    - KcpTransport
-    - NetworkManagerHUD
-- On the NetworkManager component, drag your Offline and Online scene into the slots, we have only one scene
-for now, so put your scene in both
-    - The scene must be in the build settings before dragging it to the field
+![Install Mirage](/doc/images/Install%20Mirage.png)
 
-![](./image--000.jpg)
+NOTE: Mirage already includes a UDP transport, so for this guide is not necessary download anything else than Mirage.
 
-![](./image--001.jpg)
+## Creating A Network Manager
 
+Here we will be following a couple of steps, so it is easier to follow me.
 
+- Right click on your Scenes folder, then click on Create new scene, save it as `Main Scene`, and add it to build settings
+- Mirage already have a menu for creating a base network manager, so right click on your Scene hierarchy then go to `Create => Network => NetworkManager`
+- Now you will see a pre configured GameObject called `NetworkManager`
 
-## Part 3
+![Network Manager](./network-manager.jpg)
 
-Setup the scene
+Important stuff about this objects
+```
+    CharacterSpawner is the one will be in charge of spawning your player later, so this is very important object
+    Since we are not changing scenes between server open or close, we could disable the NetworkSceneManager, but we can leave it as it is.
+    UdpSocketFactory is the one that does the connection, so you can change the IP and port if necessary there.
+```
+
+Now let's setup a few things on the scene, to make it look more like a game
 - Add a simple Plane floor with: 
     - positions (0, -1, 0)
     - scale (2, 2, 2)
-- (optional) add a material to this, I added one called dirt that is used one of mirrors examples
-- Next we add a GameObject, name does not matter
-- Add `NetworkStartPosition` component to this GameObject
-- Duplicate the GameObject a few times, and scatter around your scene floor so that you have multiple spawn points. I did 4, one near each corner
+- Next we add a GameObject, name with name `StartPosition1` 
+    - set position (1, 1, 1)
+- We go back to our `NetworkManager GO`, over `Character Spawner` component we will change the `Player Spawn Method` from Random to Round Robin.
+    - As a second step, we will add into the `Start Positions` list the one we created on the previous step.
+- (Optional) you can create more positions if you want, and you can add them into the list, is not necessary but maybe looks nice.
 
-![](./image--002.jpg)
+## Player Movement
 
+So after we configure the basics, we need to create our player prefab in order to be able to spawn ourself in the network.
+As before, we will follow a couple of easy steps.
 
-## Part 4
-
-Creating the player
-- Create a capsule using the menus as shown in the image
-- Attached a NetworkTransform component, this will auto add a Network Identity
+- Create a capsule in the scene hierarchy and name it Player
+- Attached a `NetworkIdentity` and `NetworkTransform` component into the capsule.
 - Tick Client Authority on the NetworkTransform
 
-![](./image--003.jpg)
+This is how our Player GO components should look right now
 
-- Rename that object Player
-- Add an empty PlayerScript
-- Drag into Project to create a prefab
+![Player Components](./player-components.jpg)
+
+NOTE: Is not needed to set anything else here, `Server Object Manager` and `Client Object Manager` will be set dynamically by Mirage later.
+
+Next steps:
+- Add a new Script, call it `PlayerScript`
+- Then drag this GO with the mouse into the assets folder (You should probably create a Prefabs folder later as a good practice) and release the mouse there. That will create a Prefab for us. (You can notice this was successful because your GO icon in the scene hierarchy will be blue now)
 - Then delete Player from scene
 
-![](./image--004.jpg)
+At this stage, our player is done, so right now we need to tell Mirage who is our player in order to spawn it.
+So this is very easy, just go to your `NetworkManager` GO and open (if it is not) Character Spawner, then drag the player prefab we created before in the `Player Prefab` field.
 
-- Drag your player prefab into Network manager,
-- Set spawn method to Round Robin.
+![](./spawn-player.jpg)
 
-![](./image--005.jpg)
+The last step we will need to do, is simple go to our script we created before (you can go into the assets folder and it will be there) and double click it and it will open your IDE. So what we will need to do is simple tell how we are moving the user, and also to set the camera as child of the player.
 
-
-
-## Part 5
-
-Add the following to your PlayerScript.
+We can do that simply like this:
 ```cs
 using Mirage;
 using UnityEngine;
 
-namespace QuickStart
+namespace GettingStarted
 {
     public class PlayerScript : NetworkBehaviour
     {
-        public override void OnStartLocalPlayer()
+        private void Awake() {
+            // This one is for clients only
+            NetIdentity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
+            // This one is for server and clients only (hosts)
+            NetIdentity.OnStartServer.AddListener(OnStartLocalPlayer);
+        }
+
+        private void OnStartLocalPlayer()
         {
             Camera.main.transform.SetParent(transform);
             Camera.main.transform.localPosition = new Vector3(0, 0, 0);
         }
 
-        void Update()
+        private void Update()
         {
-            if (!isLocalPlayer) { return; }
+            if (!NetIdentity.IsLocalPlayer) { return; }
 
             float moveX = Input.GetAxis("Horizontal") * Time.deltaTime * 110.0f;
             float moveZ = Input.GetAxis("Vertical") * Time.deltaTime * 4f;
@@ -105,24 +130,64 @@ namespace QuickStart
 }
 ```
 
+Press play in Unity editor and... what happen? Why is our player don't spawning? 
+Well, the question is very simple. You need to start the server somehow, and that's what comming next, but before...
 
-## Part 6
+### Types of servers
 
-Press play in Unity editor, and then Host (server + client) button in the game window. You should be able to move around with a first person view capsule.
+On Mirage has two types of server:
+- You can create a server only game, which runs as an Authoritative kind, and takes decision for every player and you must join always as a client ([For more info you can click here](https://www.gabrielgambetta.com/client-server-game-architecture.html)).
+- You can create a host server. Which will work as client + server and will take decisions for every other clients in the network
 
-![](./image--006.jpg)
+Which one is the best? That depends on your game, we can't know certainly in this guide.
 
+### Why are you telling me this now?
 
+Because in this guide we will be working on Server + Client type, so we want you to know that there are other ways to connect into the Server besides this guide.
 
-## Part 7
+### Continuing with the guide
 
-Build and run your scene, open it, host on one, and press the Client button on the other. Congrats you made a mini multiplayer game!
+Now, we need to connect into our server, so for this we have two roads, write down a script and make the server start or just using the HUD
 
-![](./image--007.jpg)
+## Initiate Server By Scripting
 
+This one is pretty simple, we just need to go to our `NetworkManager` GO then
 
+- Create a new script, we can call it `StartServer`
+- Then server starts should look like this:
 
-## Part 8
+```cs
+using Mirage;
+using UnityEngine;
+
+namespace GettingStarted
+{
+    public class StartServer : MonoBehaviour
+    {
+        [SerializeField] private NetworkManager networkManager;
+
+        private void Start() 
+        {
+            if (!networkManager) { return; }
+            
+            networkManager.Server.StartServer(networkManager.Client);
+        }
+    }
+}
+```
+
+After we save the file, we go back into our `NetworkManager` GO, and assign the NetworkManager field into the script.
+
+![](./start-server-script.jpg)
+
+## Understanding Network Hud
+
+TODO
+
+> [!WARNING] 
+> From here: This guide was written for mirror so some information might be out-of-date for mirage
+
+## Names And Colours
 
 Player name above heads
 - Inside your player Prefab, create an empty GameObject
@@ -133,10 +198,6 @@ Player name above heads
 - Set it up as shown in the picture below
 
 ![](./image--008.jpg)
-
-
-
-## Part 9
 
 Update your PlayerScript.cs with this:
 ```cs
@@ -158,20 +219,19 @@ namespace QuickStart
         [SyncVar(hook = nameof(OnColorChanged))]
         public Color playerColor = Color.white;
 
-        void OnNameChanged(string _Old, string _New)
+        [Command]
+        public void CmdSetupPlayer(string _name, Color _col)
         {
-            playerNameText.text = playerName;
+            // player info sent to server, then server updates sync vars which handles it on all clients
+            playerName = _name;
+            playerColor = _col;
         }
 
-        void OnColorChanged(Color _Old, Color _New)
-        {
-            playerNameText.color = _New;
-            playerMaterialClone = new Material(GetComponent<Renderer>().material);
-            playerMaterialClone.color = _New;
-            GetComponent<Renderer>().material = playerMaterialClone;
+        private void Awake() {
+            NetIdentity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
         }
 
-        public override void OnStartLocalPlayer()
+        private void OnStartLocalPlayer()
         {
             Camera.main.transform.SetParent(transform);
             Camera.main.transform.localPosition = new Vector3(0, 0, 0);
@@ -184,17 +244,22 @@ namespace QuickStart
             CmdSetupPlayer(name, color);
         }
 
-        [Command]
-        public void CmdSetupPlayer(string _name, Color _col)
+        private void OnNameChanged(string _Old, string _New)
         {
-            // player info sent to server, then server updates sync vars which handles it on all clients
-            playerName = _name;
-            playerColor = _col;
+            playerNameText.text = playerName;
         }
 
-        void Update()
+        private void OnColorChanged(Color _Old, Color _New)
         {
-            if (!isLocalPlayer)
+            playerNameText.color = _New;
+            playerMaterialClone = new Material(GetComponent<Renderer>().material);
+            playerMaterialClone.color = _New;
+            GetComponent<Renderer>().material = playerMaterialClone;
+        }
+
+        private void Update()
+        {
+            if (!NetIdentity.isLocalPlayer)
             {
                 // make non-local players run this
                 floatingInfo.transform.LookAt(Camera.main.transform);
@@ -210,10 +275,6 @@ namespace QuickStart
     }
 }
 ```
-
-
-
-## Part 10
 
 Add the `PlayerNameText` and `FloatingInfo` objects into the script on the player prefab, as shown below.
 
@@ -323,7 +384,7 @@ Experiment and adjust, have fun!
 ![](./image--016.jpg)
 
 
-## Part 12
+## Weapon Switching
 
 Weapon switching! The code bits.
 
@@ -400,10 +461,6 @@ void Update()
     }
 }
 ```
-
-
-
-## Part 13
 
 Weapon models
 

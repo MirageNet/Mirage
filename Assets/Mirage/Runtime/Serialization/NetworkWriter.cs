@@ -36,6 +36,11 @@ namespace Mirage.Serialization
     /// </summary>
     public unsafe class NetworkWriter
     {
+        /// <summary>
+        /// Max buffer size = 0.5MB
+        /// </summary>
+        const int MaxBufferSize = 524_288;
+
         byte[] managedBuffer;
         int bitCapacity;
         /// <summary>Allow internal buffer to resize if capcity is reached</summary>
@@ -103,18 +108,27 @@ namespace Mirage.Serialization
         }
 
 
-        void ResizeBuffer()
+        void ResizeBuffer(int minBitCapacity)
         {
-            int size = managedBuffer.Length * 2;
+            int minByteCapacity = minBitCapacity / 8;
+            int size = managedBuffer.Length;
+            while (size < minByteCapacity)
+            {
+                size *= 2;
+                if (size > MaxBufferSize)
+                {
+                    throw new InvalidOperationException($"Can not resize buffer to {size} bytes because it is above max value of {MaxBufferSize}");
+                }
+            }
 
-            Debug.Log(handle.AddrOfPinnedObject());
+            Debug.LogWarning($"Resizing buffer, new size:{size} bytes");
+
             FreeHandle();
 
             Array.Resize(ref managedBuffer, size);
             bitCapacity = size * 8;
 
             CreateHandle();
-            Debug.Log(handle.AddrOfPinnedObject());
         }
         void CreateHandle()
         {
@@ -166,7 +180,7 @@ namespace Mirage.Serialization
             {
                 if (allowResize)
                 {
-                    ResizeBuffer();
+                    ResizeBuffer(newLength);
                 }
                 else
                 {
