@@ -40,15 +40,17 @@ namespace Mirage
         ///     Encrypt a message before we send it out through mirage.
         /// </summary>
         /// <param name="payload">The data we want to encrypt.</param>
+        /// <param name="player">The player we want to send encrypted data to.</param>
         /// <returns>Will return a new data that has been encrypted.</returns>
-        protected abstract ArraySegment<byte> EncryptMessage(ArraySegment<byte> payload);
+        protected abstract ArraySegment<byte> EncryptMessage(INetworkPlayer player, ArraySegment<byte> payload);
 
         /// <summary>
         ///     Decrypt an incoming message sent out by mirage.
         /// </summary>
         /// <param name="payload">The data we want to encrypt.</param>
+        /// <param name="player">The player we want to send decrypted data to.</param>
         /// <returns>Will return data that has been decrypted.</returns>
-        protected abstract ArraySegment<byte> DecryptMessage(ArraySegment<byte> payload);
+        protected abstract ArraySegment<byte> DecryptMessage(INetworkPlayer player, ArraySegment<byte> payload);
     }
 
     [NetworkMessage]
