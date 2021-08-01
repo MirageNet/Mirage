@@ -15,7 +15,7 @@ namespace Mirage
 
         private void HandleEncryptedMessage(INetworkPlayer player, EncryptedMessage message)
         {
-            ArraySegment<byte> decryptedBytes = DecryptMessage(message.Payload);
+            ArraySegment<byte> decryptedBytes = DecryptMessage(player, message.Payload);
             _messageHandler.HandleMessage(player, decryptedBytes);
         }
 
