@@ -27,7 +27,7 @@ namespace Mirage
 
                 var packed = writer.ToArraySegment();
 
-                ArraySegment<byte> encryptedBytes = EncryptMessage(packed);
+                ArraySegment<byte> encryptedBytes = EncryptMessage(player, packed);
 
                 player.Send(new EncryptedMessage
                 {
