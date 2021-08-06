@@ -38,6 +38,11 @@ namespace Mirage.Weaver
             return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), logger.Diagnostics);
         }
 
+        /// <summary>
+        /// Process when assembly that references Mirage
+        /// </summary>
+        /// <param name="compiledAssembly"></param>
+        /// <returns></returns>
         public override bool WillProcess(ICompiledAssembly compiledAssembly) =>
             compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RuntimeAssemblyName);
     }
