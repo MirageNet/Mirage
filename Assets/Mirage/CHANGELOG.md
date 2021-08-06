@@ -1,3 +1,11 @@
+# [101.1.0](https://github.com/MirageNet/Mirage/compare/v101.0.2...v101.1.0) (2021-08-06)
+
+
+### Features
+
+* **peer:** adding scripts to display metrics from peer ([#872](https://github.com/MirageNet/Mirage/issues/872)) ([e7ac06f](https://github.com/MirageNet/Mirage/commit/e7ac06f972e089f53adc4a90ab90ade1fb309f05))
+* adding way to call SendNotify without allocations and example ([#875](https://github.com/MirageNet/Mirage/issues/875)) ([16b3000](https://github.com/MirageNet/Mirage/commit/16b300002a28eff27bbc2d880993fd61271a4ab6))
+
 ## [101.0.2](https://github.com/MirageNet/Mirage/compare/v101.0.1...v101.0.2) (2021-08-01)
 
 
