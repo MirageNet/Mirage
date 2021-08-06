@@ -237,21 +237,28 @@ namespace Mirage.SocketLayer
             }
         }
 
+        /// <summary>
+        /// Use <see cref="SendNotify(byte[], int, int, INotifyCallBack)"/> for non-alloc version
+        /// </summary>
         public INotifyToken SendNotify(byte[] inPacket, int inOffset, int inLength)
         {
-            // todo batch Notify?
+            var token = new NotifyToken();
+            SendNotify(inPacket, inOffset, inLength, token);
+            return token;
+        }
+
+        public void SendNotify(byte[] inPacket, int inOffset, int inLength, INotifyCallBack callBacks)
+        {
             if (inLength + NOTIFY_HEADER_SIZE > maxPacketSize)
             {
-                throw new IndexOutOfRangeException($"Message is bigger than MTU, max Notify message size is {maxPacketSize - NOTIFY_HEADER_SIZE}");
+                throw new ArgumentException($"Message is bigger than MTU, max Notify message size is {maxPacketSize - NOTIFY_HEADER_SIZE}");
             }
             if (sentAckablePackets.IsFull)
             {
                 throw new InvalidOperationException("Sent queue is full");
             }
 
-            // todo use pool to stop allocations
-            var token = new NotifyToken();
-            ushort sequence = (ushort)sentAckablePackets.Enqueue(new AckablePacket(token));
+            ushort sequence = (ushort)sentAckablePackets.Enqueue(new AckablePacket(callBacks));
 
             using (ByteBuffer buffer = bufferPool.Take())
             {
@@ -268,9 +275,9 @@ namespace Mirage.SocketLayer
 
                 Send(outPacket, outOffset + inLength);
             }
-
-            return token;
         }
+
+
 
         public void SendReliable(byte[] message, int offset, int length)
         {
@@ -652,13 +659,13 @@ namespace Mirage.SocketLayer
 
         struct AckablePacket : IEquatable<AckablePacket>
         {
-            public NotifyToken token;
+            public INotifyCallBack token;
             public ReliablePacket reliablePacket;
 
             public bool IsNotify => token != null;
             public bool IsReliable => reliablePacket != null;
 
-            public AckablePacket(NotifyToken token)
+            public AckablePacket(INotifyCallBack token)
             {
                 this.token = token;
                 reliablePacket = null;

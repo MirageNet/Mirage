@@ -86,7 +86,17 @@ namespace Mirage
         public INotifyToken SendNotify(ArraySegment<byte> packet) => SendNotify(packet.Array, packet.Offset, packet.Count);
         public INotifyToken SendNotify(byte[] packet) => SendNotify(packet, 0, packet.Length);
 
+        public void SendNotify(byte[] packet, int offset, int length, INotifyCallBack callBacks)
+        {
+            if (State == ConnectionState.Disconnected)
+                return;
 
+            receive(packet, offset, length);
+
+            callBacks.OnDelivered();
+        }
+        public void SendNotify(ArraySegment<byte> packet, INotifyCallBack callBacks) => SendNotify(packet.Array, packet.Offset, packet.Count, callBacks);
+        public void SendNotify(byte[] packet, INotifyCallBack callBacks) => SendNotify(packet, 0, packet.Length, callBacks);
 
 
         public void SendReliable(byte[] message, int offset, int length)
