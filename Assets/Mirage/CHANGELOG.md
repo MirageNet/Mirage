@@ -1,3 +1,16 @@
+# [101.2.0](https://github.com/MirageNet/Mirage/compare/v101.1.0...v101.2.0) (2021-08-10)
+
+
+### Bug Fixes
+
+* only invoking unspawn even if item was removed from dictionary ([259e8d0](https://github.com/MirageNet/Mirage/commit/259e8d0dc736bf262fd6bde552618bb37daba31e))
+* **NetworkReader:** checking offset when moving bit position ([641b2b0](https://github.com/MirageNet/Mirage/commit/641b2b005ea7fae6afaba98393344e067f530abf))
+
+
+### Features
+
+* adding destroy function that takes network identity ([e91f6d3](https://github.com/MirageNet/Mirage/commit/e91f6d34189159cb8d632949d7fceb7071c950f2))
+
 # [101.1.0](https://github.com/MirageNet/Mirage/compare/v101.0.2...v101.1.0) (2021-08-06)
 
 
