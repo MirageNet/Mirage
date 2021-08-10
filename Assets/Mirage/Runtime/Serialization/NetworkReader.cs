@@ -41,8 +41,11 @@ namespace Mirage.Serialization
         ulong* longPtr;
         bool needsDisposing;
 
-
+        /// <summary>Current read position</summary>
         int bitPosition;
+        /// <summary>Offset of given buffer</summary>
+        int bitOffset;
+        /// <summary>Length of given buffer</summary>
         int bitLength;
 
         /// <summary>
@@ -129,6 +132,7 @@ namespace Mirage.Serialization
             needsDisposing = true;
 
             bitPosition = position * 8;
+            bitOffset = position * 8;
             bitLength = bitPosition + (length * 8);
             managedBuffer = array;
             handle = GCHandle.Alloc(managedBuffer, GCHandleType.Pinned);
@@ -331,8 +335,13 @@ namespace Mirage.Serialization
         /// <para>WARNING: When reading from earlier position make sure to move position back to end of buffer after reading</para>
         /// </summary>
         /// <param name="newPosition"></param>
+        /// <exception cref="ArgumentOutOfRangeException">throws when <paramref name="newPosition"/> is less than <see cref="bitOffset"/></exception>
         public void MoveBitPosition(int newPosition)
         {
+            if (newPosition < bitOffset)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newPosition), newPosition, $"New position can not be less than buffer offset, Buffer offset: {bitOffset}");
+            }
             CheckNewLength(newPosition);
             bitPosition = newPosition;
         }
