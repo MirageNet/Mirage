@@ -1,4 +1,4 @@
-/*
+﻿/*
 MIT License
 
 Copyright (c) 2021 James Frowen
@@ -26,32 +26,28 @@ using UnityEngine;
 
 namespace Mirage.Serialization
 {
-    public sealed class Vector3Packer
+    public sealed class Vector2Packer
     {
         readonly FloatPacker xPacker;
         readonly FloatPacker yPacker;
-        readonly FloatPacker zPacker;
 
-        public Vector3Packer(Vector3 max, Vector3 precision)
+        public Vector2Packer(Vector2 max, Vector2 precision)
         {
             xPacker = new FloatPacker(max.x, precision.x);
             yPacker = new FloatPacker(max.y, precision.y);
-            zPacker = new FloatPacker(max.z, precision.z);
         }
 
-        public void Pack(NetworkWriter writer, Vector3 value)
+        public void Pack(NetworkWriter writer, Vector2 value)
         {
             xPacker.Pack(writer, value.x);
             yPacker.Pack(writer, value.y);
-            zPacker.Pack(writer, value.z);
         }
 
-        public Vector3 Unpack(NetworkReader reader)
+        public Vector2 Unpack(NetworkReader reader)
         {
-            Vector3 value = default;
+            Vector2 value = default;
             value.x = xPacker.Unpack(reader);
             value.y = yPacker.Unpack(reader);
-            value.z = zPacker.Unpack(reader);
             return value;
         }
     }
