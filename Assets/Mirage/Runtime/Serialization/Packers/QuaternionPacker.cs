@@ -84,10 +84,12 @@ namespace Mirage.Serialization
                 c = -c;
             }
 
+            // todo, should we be rounding down for abc? because if they are rounded up their sum may be greater than largest
+
             writer.Write(
-                 index << bitCountPerElement * 3 |
-                 floatPacker.PackNoClamp(a) << bitCountPerElement * 2 |
-                 floatPacker.PackNoClamp(b) << bitCountPerElement |
+                 (ulong)index << bitCountPerElement * 3 |
+                 (ulong)floatPacker.PackNoClamp(a) << bitCountPerElement * 2 |
+                 (ulong)floatPacker.PackNoClamp(b) << bitCountPerElement |
                  floatPacker.PackNoClamp(c),
                  totalBitCount);
         }
@@ -129,7 +131,7 @@ namespace Mirage.Serialization
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void FindLargestIndex(ref Quaternion quaternion, out uint index)
+        internal static void FindLargestIndex(ref Quaternion quaternion, out uint index)
         {
             float x2 = quaternion.x * quaternion.x;
             float y2 = quaternion.y * quaternion.y;
