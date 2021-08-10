@@ -546,6 +546,39 @@ namespace Mirage
 #endif
         }
 
+        /// <summary>
+        /// Destroys this object and corresponding objects on all clients.
+        /// <param name="gameObject">Game object to destroy.</param>
+        /// <param name="destroyServerObject">Sets if server object will also be destroyed</param>
+        /// </summary>
+        public void Destroy(GameObject gameObject, bool destroyServerObject = true)
+        {
+            if (gameObject == null)
+            {
+                logger.Log("NetworkServer DestroyObject is null");
+                return;
+            }
+
+            NetworkIdentity identity = gameObject.GetNetworkIdentity();
+            DestroyObject(identity, destroyServerObject);
+        }
+
+        /// <summary>
+        /// Destroys this object and corresponding objects on all clients.
+        /// <param name="identity">Game object to destroy.</param>
+        /// <param name="destroyServerObject">Sets if server object will also be destroyed</param>
+        /// </summary>
+        public void Destroy(NetworkIdentity identity, bool destroyServerObject = true)
+        {
+            if (identity == null)
+            {
+                logger.Log("NetworkServer DestroyObject is null");
+                return;
+            }
+
+            DestroyObject(identity, destroyServerObject);
+        }
+
         void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
         {
             if (logger.LogEnabled()) logger.Log("DestroyObject instance:" + identity.NetId);
@@ -569,23 +602,6 @@ namespace Mirage
             {
                 UnityEngine.Object.Destroy(identity.gameObject);
             }
-        }
-
-        /// <summary>
-        /// Destroys this object and corresponding objects on all clients.
-        /// <param name="obj">Game object to destroy.</param>
-        /// <param name="persistServerObject">In some cases it is useful to remove an object but not delete it on the server.</param>
-        /// </summary>
-        public void Destroy(GameObject obj, bool destroyServerObject = true)
-        {
-            if (obj == null)
-            {
-                logger.Log("NetworkServer DestroyObject is null");
-                return;
-            }
-
-            NetworkIdentity identity = obj.GetNetworkIdentity();
-            DestroyObject(identity, destroyServerObject);
         }
 
         internal bool ValidateSceneObject(NetworkIdentity identity)

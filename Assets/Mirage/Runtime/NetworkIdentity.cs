@@ -670,7 +670,7 @@ namespace Mirage
             // if it is still true, then we need to unspawn it
             if (IsServer)
             {
-                ServerObjectManager.Destroy(gameObject);
+                ServerObjectManager.Destroy(this);
             }
         }
 
