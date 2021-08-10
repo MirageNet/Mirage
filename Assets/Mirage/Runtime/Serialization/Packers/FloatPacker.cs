@@ -31,12 +31,12 @@ namespace Mirage.Serialization
     /// <summary>
     /// Helps compresses a float into a reduced number of bits
     /// </summary>
-    public class FloatPacker
+    public sealed class FloatPacker
     {
         readonly int bitCount;
-        readonly float multiplier_pack;
+        public readonly float multiplier_pack;
         readonly float multiplier_unpack;
-        readonly uint mask;
+        public readonly uint mask;
         readonly int toNegative;
 
         /// <summary>max positive value, any uint value over this will be negative</summary>
@@ -46,19 +46,7 @@ namespace Mirage.Serialization
 
         /// <param name="max"></param>
         /// <param name="lowestPrecision">lowest precision, actual precision will be caculated from number of bits used</param>
-        public FloatPacker(float max, float lowestPrecision)
-        {
-            bitCount = (int)Math.Ceiling(Math.Log(2 * max / lowestPrecision, 2));
-            //todo validate bitcount between 1->32? (is 32 valid?)
-            midPoint = (1u << (bitCount - 1)) - 1u;
-            multiplier_pack = midPoint / max;
-            multiplier_unpack = 1 / multiplier_pack;
-            mask = (1u << bitCount) - 1u;
-            toNegative = (int)(mask + 1u);
-
-            positiveMax = max;
-            negativeMax = -max;
-        }
+        public FloatPacker(float max, float lowestPrecision) : this(max, BitHelper.BitCount(max, lowestPrecision)) { }
 
         /// <summary>
         /// Create a new instance using bit count
@@ -76,12 +64,23 @@ namespace Mirage.Serialization
         /// <param name="lowestPrecision">lowest precision, actual precision will be caculated from number of bits used</param>
         private FloatPacker(float max, int bitCount)
         {
-            multiplier_pack = 1 / max * ((1 << (bitCount - 1)));
+            this.bitCount = bitCount;
+            // not sure what max bit count should be,
+            // but 30 seems reasonable since an unpacked float is already 32
+            if (bitCount < 1) throw new ArgumentException("Bit count is too low, bit count should be between 1 and 30", nameof(bitCount));
+            if (bitCount > 30) throw new ArgumentException("Bit count is too high, bit count should be between 1 and 30", nameof(bitCount));
+            if (max == 0) throw new ArgumentException("Max can not be 0", nameof(max));
+
+            midPoint = (1u << (bitCount - 1)) - 1u;
+            multiplier_pack = midPoint / max;
+            multiplier_unpack = 1 / multiplier_pack;
             mask = (1u << bitCount) - 1u;
+            toNegative = (int)(mask + 1u);
 
             positiveMax = max;
             negativeMax = -max;
         }
+
 
         /// <summary>
         /// Packs a float value into a uint
@@ -126,11 +125,12 @@ namespace Mirage.Serialization
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void PackNoClamp(NetworkWriter writer, float value)
+        public void PackNoClamp(NetworkWriter writer, float value)
         {
             // dont need to mask value here because the Write function will mask it
             writer.Write((uint)Mathf.RoundToInt(value * multiplier_pack), bitCount);
         }
+
 
         /// <summary>
         /// Unpacks uint value to float
