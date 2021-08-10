@@ -139,7 +139,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         }
 
         [Test]
-        [Repeat(10000)]
+        [Repeat(1000)]
 #if !UNITY_EDITOR
         [Ignore("Quaternion.Euler Requires unity engine to run")]
 #endif
