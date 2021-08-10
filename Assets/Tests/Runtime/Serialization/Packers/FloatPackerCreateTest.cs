@@ -1,27 +1,12 @@
 using System;
 using Mirage.Serialization;
 using NUnit.Framework;
+using UnityEngine;
+using Range = NUnit.Framework.RangeAttribute;
 
 namespace Mirage.Tests.Runtime.Serialization.Packers
 {
-    public class PackerTestBase
-    {
-        public readonly NetworkWriter writer = new NetworkWriter(1300);
-        NetworkReader reader = new NetworkReader();
 
-        [SetUp]
-        public virtual void Setup()
-        {
-            writer.Reset();
-        }
-
-        public NetworkReader GetReader()
-        {
-            reader.Reset(writer.ToArraySegment());
-            return reader;
-        }
-
-    }
     public class FloatPackerCreateTest : PackerTestBase
     {
         [Test]
@@ -76,7 +61,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
                 FloatPacker.FromBitCount(0, 1);
             });
 
-            var expected = new ArgumentException("Max value can not be 0", "max");
+            var expected = new ArgumentException("Max can not be 0", "max");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
     }

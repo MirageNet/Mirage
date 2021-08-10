@@ -34,9 +34,9 @@ namespace Mirage.Serialization
     public sealed class FloatPacker
     {
         readonly int bitCount;
-        public readonly float multiplier_pack;
+        readonly float multiplier_pack;
         readonly float multiplier_unpack;
-        public readonly uint mask;
+        readonly uint mask;
         readonly int toNegative;
 
         /// <summary>max positive value, any uint value over this will be negative</summary>
