@@ -1,4 +1,4 @@
-﻿using Mirage.Serialization;
+using Mirage.Serialization;
 using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime.Serialization.Packers
@@ -8,10 +8,11 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         public readonly NetworkWriter writer = new NetworkWriter(1300);
         NetworkReader reader = new NetworkReader();
 
-        [SetUp]
-        public virtual void Setup()
+        [TearDown]
+        public virtual void TearDown()
         {
             writer.Reset();
+            reader.Dispose();
         }
 
         /// <summary>

@@ -6,7 +6,6 @@ using Range = NUnit.Framework.RangeAttribute;
 
 namespace Mirage.Tests.Runtime.Serialization.Packers
 {
-
     public class FloatPackerCreateTest : PackerTestBase
     {
         [Test]
@@ -21,6 +20,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
 
             Assert.That(writer.BitPosition, Is.EqualTo(expectedBitCount));
         }
+
         [Test]
         public void PackFromBitCountPacksToCorrectCount([Range(1, 30)] int bitCount)
         {
@@ -42,6 +42,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             var expected = new ArgumentException("Bit count is too low, bit count should be between 1 and 30", "bitCount");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
+
         [Test]
         public void ThrowsIfBitCountIsGreaterThan30([Range(31, 40)] int bitCount)
         {
@@ -53,6 +54,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             var expected = new ArgumentException("Bit count is too high, bit count should be between 1 and 30", "bitCount");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
+
         [Test]
         public void ThrowsIfMaxIsZero()
         {
