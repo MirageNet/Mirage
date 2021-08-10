@@ -102,6 +102,8 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             // precision for 1 element
             float max = (1 / Mathf.Sqrt(2));
             float precision = (float)(2 * max / ((1 << bits) - 1));
+            // allow extra precision because largest is caculated using the other 3 values so may be out side of precision
+            precision *= 2;
 
             var packer = new QuaternionPacker(bits);
 
@@ -150,6 +152,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             // precision for 1 element
             float max = (1 / Mathf.Sqrt(2));
             float precision = (float)(2 * max / ((1 << bits) - 1));
+            // allow extra precision because largest is caculated using the other 3 values so may be out side of precision
             precision *= 2;
 
             var packer = new QuaternionPacker(bits);
