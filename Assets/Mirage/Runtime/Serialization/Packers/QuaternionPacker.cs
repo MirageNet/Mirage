@@ -95,7 +95,7 @@ namespace Mirage.Serialization
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void QuickNormalize(ref Quaternion quaternion)
+        internal static void QuickNormalize(ref Quaternion quaternion)
         {
             float dot =
                 (quaternion.x * quaternion.x) +

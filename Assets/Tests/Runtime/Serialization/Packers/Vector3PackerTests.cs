@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Mirage.Serialization;
@@ -43,8 +43,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         {
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                var packer = new Vector3Packer(max, precision);
-                FloatPacker.FromBitCount(0, 1);
+                _ = new Vector3Packer(max, precision);
             });
 
             var expected = new ArgumentException("Max can not be 0", "max");
