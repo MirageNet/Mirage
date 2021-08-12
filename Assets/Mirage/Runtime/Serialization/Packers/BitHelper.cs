@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2021 James Frowen
@@ -37,6 +37,17 @@ namespace Mirage.Serialization
         public static int BitCount(float max, float precision)
         {
             return Mathf.CeilToInt(Mathf.Log(2 * max / precision, 2));
+        }
+
+        /// <summary>
+        /// Gets the number of bits need for <paramref name="max"/>
+        /// </summary>
+        /// <param name="max"></param>
+        /// <param name="precision">lowest precision required, bit count will round up so real precision might be higher</param>
+        /// <returns></returns>
+        public static int BitCount(ulong max)
+        {
+            return Mathf.CeilToInt(Mathf.Log(max, 2));
         }
     }
 }

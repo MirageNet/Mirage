@@ -28,6 +28,85 @@ using UnityEngine;
 
 namespace Mirage.Serialization
 {
+    public sealed class VariableSizeIntPacker
+    {
+        private int bitCount;
+
+        public VariableSizeIntPacker(ulong smallValue) : this(BitHelper.BitCount(smallValue));
+
+        public VariableSizeIntPacker(int bitCount)
+        {
+            this.bitCount = bitCount;
+        }
+    }
+    public sealed class VariableBlockSizeIntPacker
+    {
+        public static void Pack(NetworkWriter writer, ulong value, int blockSize)
+        {
+            while (true)
+            {
+                writer.Write(value, blockSize);
+                value >>= blockSize;
+                if (value == 0)
+                {
+                    writer.WriteBoolean(0);
+                    break;
+                }
+                else
+                {
+                    writer.WriteBoolean(1);
+                }
+            }
+        }
+        public static ulong UnPack(NetworkReader reader, int blockSize)
+        {
+            ulong value = 0;
+            int shift = 0;
+            while (true)
+            {
+                value |= reader.Read(blockSize) << shift;
+                if (reader.ReadBoolean())
+                {
+                    shift += blockSize;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return value;
+        }
+        public static void PackAlt(NetworkWriter writer, ulong value, int blockSize)
+        {
+            int blocks = 1;
+            while (true)
+            {
+                value >>= blockSize;
+                if (value == 0)
+                {
+                    break;
+                }
+                else
+                {
+                    blocks++;
+                }
+            }
+            writer.Write(ulong.MaxValue, blocks - 1);
+            writer.WriteBoolean(0);
+            writer.Write(value, blockSize * (blocks + 1));
+        }
+
+        public static ulong UnPackAlt(NetworkReader reader, int blockSize)
+        {
+            int blocks = 1;
+            while (reader.ReadBoolean())
+            {
+                blocks++;
+            }
+
+            return reader.Read(blocks * blockSize);
+        }
+    }
     /// <summary>
     /// Helps compresses a float into a reduced number of bits
     /// </summary>
