@@ -170,5 +170,29 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             func1.Received(1).Invoke();
         });
+
+        [UnityTest]
+        public IEnumerator DisconnectCalledBeforePlayerIsDestroyed()
+        {
+            INetworkPlayer serverPlayer = base.serverPlayer;
+            int disconnectCalled = 0;
+            server.Disconnected.AddListener(player =>
+            {
+                disconnectCalled++;
+                Assert.That(player, Is.EqualTo(serverPlayer));
+                // use unity null check
+                Assert.That(player.Identity != null);
+            });
+
+
+            client.Disconnect();
+            // wait a tick for messages to be processed
+            yield return null;
+
+            Assert.That(disconnectCalled, Is.EqualTo(1));
+            // use unity null check
+            Assert.That(serverPlayer.Identity == null);
+
+        }
     }
 }
