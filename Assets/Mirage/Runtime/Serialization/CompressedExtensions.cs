@@ -24,7 +24,7 @@ namespace Mirage.Serialization
         /// <returns></returns>
         [WeaverIgnore]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Quaternion UnPackRotation(this NetworkReader reader)
+        public static Quaternion UnpackRotation(this NetworkReader reader)
         {
             return QuaternionPacker.Default9.Unpack(reader);
         }

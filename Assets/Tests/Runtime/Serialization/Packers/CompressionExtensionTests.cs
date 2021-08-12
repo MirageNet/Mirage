@@ -1,4 +1,4 @@
-﻿using Mirage.Serialization;
+using Mirage.Serialization;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -11,6 +11,17 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         {
             writer.PackRotation(Quaternion.identity);
             Assert.That(writer.BitPosition, Is.EqualTo(29));
+        }
+
+        [Test]
+        public void UnpackRotationUsesDefault9()
+        {
+            writer.Write(0, 29);
+            NetworkReader reader = GetReader();
+            Assert.That(reader.BitPosition, Is.EqualTo(0), "Check it starts at 0");
+            Quaternion value = reader.UnpackRotation();
+            Assert.That(reader.BitPosition, Is.EqualTo(29));
+            Assert.That(value, Is.EqualTo(Quaternion.identity));
         }
     }
 }
