@@ -9,16 +9,15 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
     public class FloatPackerCreateTest : PackerTestBase
     {
         [Test]
-        [TestCase(1, 8)]
-        [TestCase(0.1f, 11)]
-        [TestCase(0.01f, 15)]
-        public void CreateUsingPrecsion(float precision, int expectedBitCount)
+        [TestCase(1, ExpectedResult = 8)]
+        [TestCase(0.1f, ExpectedResult = 11)]
+        [TestCase(0.01f, ExpectedResult = 15)]
+        public int CreateUsingPrecsion(float precision)
         {
             var packer = new FloatPacker(100, precision);
 
             packer.Pack(writer, 1f);
-
-            Assert.That(writer.BitPosition, Is.EqualTo(expectedBitCount));
+            return writer.BitPosition;
         }
 
         [Test]

@@ -67,9 +67,9 @@ namespace Mirage.Serialization
             this.bitCount = bitCount;
             // not sure what max bit count should be,
             // but 30 seems reasonable since an unpacked float is already 32
+            if (max == 0) throw new ArgumentException("Max can not be 0", nameof(max));
             if (bitCount < 1) throw new ArgumentException("Bit count is too low, bit count should be between 1 and 30", nameof(bitCount));
             if (bitCount > 30) throw new ArgumentException("Bit count is too high, bit count should be between 1 and 30", nameof(bitCount));
-            if (max == 0) throw new ArgumentException("Max can not be 0", nameof(max));
 
             midPoint = (1u << (bitCount - 1)) - 1u;
             multiplier_pack = midPoint / max;
