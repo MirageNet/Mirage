@@ -30,7 +30,7 @@ namespace Mirage.Serialization
     public sealed class VariableIntPacker
     {
         // todo needs doc comments
-        // todo neeeds tests
+        // todo need attribute to validate large bits based on pack type (eg if packing ushort, make sure largebits is 16 or less)
 
         readonly int smallBitCount;
         readonly int mediumBitsCount;
@@ -49,19 +49,18 @@ namespace Mirage.Serialization
 
         public static VariableIntPacker FromBitCount(int smallBits, int mediumBits)
             => FromBitCount(smallBits, mediumBits, 64, false);
-        public static VariableIntPacker FromBitCount(int smallBits, int mediumBits, int largeBits, bool throwIfOverLarge)
+        public static VariableIntPacker FromBitCount(int smallBits, int mediumBits, int largeBits, bool throwIfOverLarge = true)
             => new VariableIntPacker(smallBits, mediumBits, largeBits, throwIfOverLarge);
 
         private VariableIntPacker(int smallBits, int mediumBits, int largeBits, bool throwIfOverLarge)
         {
             this.throwIfOverLarge = throwIfOverLarge;
-            if (smallBits == 0) throw new ArgumentException();
-            if (smallBits >= mediumBits) throw new ArgumentException();
-            if (mediumBits >= largeBits) throw new ArgumentException();
-            if (largeBits > 64) throw new ArgumentException();
+            if (smallBits == 0) throw new ArgumentException("Small value can not be zero", nameof(smallBits));
+            if (smallBits >= mediumBits) throw new ArgumentException("Medium value must be greater than small value", nameof(mediumBits));
+            if (mediumBits >= largeBits) throw new ArgumentException("Large value must be greater than medium value", nameof(largeBits));
+            if (largeBits > 64) throw new ArgumentException("Large bits must be 64 or less", nameof(largeBits));
             // force medium to also be 62 or less so we can use 1 write call (2 bits to say its medium + 62 value bits
-            if (mediumBits > 62) throw new ArgumentException();
-            if (smallBits > 62) throw new ArgumentException();
+            if (mediumBits > 62) throw new ArgumentException("Medium bits must be 62 or less", nameof(mediumBits));
 
             smallBitCount = smallBits;
             mediumBitsCount = mediumBits;
@@ -75,6 +74,20 @@ namespace Mirage.Serialization
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PackUlong(NetworkWriter writer, ulong value)
+        {
+            pack(writer, value, 64);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PackUint(NetworkWriter writer, uint value)
+        {
+            pack(writer, value, 32);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PackUshort(NetworkWriter writer, ushort value)
+        {
+            pack(writer, value, 16);
+        }
+        void pack(NetworkWriter writer, ulong value, int maxBits)
         {
             if (value <= smallValue)
             {
@@ -91,7 +104,7 @@ namespace Mirage.Serialization
                 // start with b11 to say large, then value
                 // use 2 write calls here because bitCount could be 64
                 writer.Write(0b11, 2);
-                writer.Write(value, largeBitsCount);
+                writer.Write(value, Math.Min(maxBits, largeBitsCount));
             }
             else
             {
@@ -105,13 +118,27 @@ namespace Mirage.Serialization
                     // we dont want to write value here because it will be masked and lose some high bits
                     // need 2 write calls here because max is 64+2 bits
                     writer.Write(0b11, 2);
-                    writer.Write(ulong.MaxValue, largeBitsCount);
+                    writer.Write(ulong.MaxValue, Math.Min(maxBits, largeBitsCount));
                 }
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong UnpackUlong(NetworkReader reader)
+        {
+            return unpack(reader, 64);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public uint UnpackUint(NetworkReader reader)
+        {
+            return (uint)unpack(reader, 32);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ushort UnpackUshort(NetworkReader reader)
+        {
+            return (ushort)unpack(reader, 16);
+        }
+        ulong unpack(NetworkReader reader, int maxBits)
         {
             if (!reader.ReadBoolean())
             {
@@ -125,62 +152,9 @@ namespace Mirage.Serialization
                 }
                 else
                 {
-                    return reader.Read(largeBitsCount);
+                    return reader.Read(Math.Min(largeBitsCount, maxBits));
                 }
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PackUint(NetworkWriter writer, uint value)
-        {
-            // todo do we need to check that bitcount are less than 32, because uint has max of 32 (maybe we can validate this with attribute?)
-            if (value <= smallValue)
-            {
-                // start with b0 to say small, then value
-                writer.Write(value << 1, smallBitCount + 1);
-            }
-            else if (value <= mediumValue)
-            {
-                // start with b01 to say medium, then value
-                writer.Write(value << 2 | 0b01, mediumBitsCount + 2);
-            }
-            else if (value <= largeValue)
-            {
-                // start with b11 to say large, then value
-                // can use 1 write call here because value less be at most 32 bits
-                writer.Write(((ulong)value) << 1 | 0b11, largeBitsCount);
-            }
-            else
-            {
-                if (throwIfOverLarge)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, $"Value is over max of {largeValue}");
-                }
-                else
-                {
-                    // if no throw write MaxValue
-                    // we dont want to write value here because it will be masked and lose some high bits
-                    // can do 1 write call here because max is 32+2 bits
-                    writer.Write(uint.MaxValue, largeBitsCount + 2);
-                }
-            }
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint UnpackUint(NetworkReader reader)
-        {
-            return (uint)UnpackUlong(reader);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PackUshort(NetworkWriter writer, ushort value)
-        {
-            // todo do we need to check bitcount here?, comment same as uint
-            PackUint(writer, value);
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ushort UnpackUshort(NetworkReader reader)
-        {
-            return (ushort)UnpackUlong(reader);
         }
     }
 }
