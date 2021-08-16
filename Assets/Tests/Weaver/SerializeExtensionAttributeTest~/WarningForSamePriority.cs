@@ -22,13 +22,13 @@ namespace SerializeExtensionAttributeTest.WarningForSamePriority
 
 
         [SerializeExtension(Priority = 2)]
-        public static MyPriorityType MyPriorityTypeRead1(this NetworkReader reader, MyPriorityType value) 
+        public static MyPriorityType MyPriorityTypeRead1(this NetworkReader reader) 
         {
             return new MyPriorityType { value = reader.ReadInt32() };
         }
 
         [SerializeExtension(Priority = 2)]
-        public static MyPriorityType MyPriorityTypeRead2(this NetworkReader reader, MyPriorityType value) 
+        public static MyPriorityType MyPriorityTypeRead2(this NetworkReader reader) 
         {
             return new MyPriorityType { value = reader.ReadInt32() + 10 };
         }
