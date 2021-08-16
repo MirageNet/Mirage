@@ -403,8 +403,12 @@ namespace Mirage.SocketLayer
             HandleConnectionRequest(connection);
         }
 
-        private Connection CreateNewConnection(IEndPoint endPoint)
+        private Connection CreateNewConnection(IEndPoint _newEndPoint)
         {
+            // create copy of endpoint for this connection
+            // this is so that we can re-use the endpoint (reduces alloc) for receive and not worry about changing internal data needed for each connection
+            IEndPoint endPoint = _newEndPoint?.CreateCopy();
+
             var connection = new Connection(this, endPoint, dataHandler, config, time, bufferPool, logger, metrics);
             connection.SetReceiveTime();
             connections.Add(endPoint, connection);
