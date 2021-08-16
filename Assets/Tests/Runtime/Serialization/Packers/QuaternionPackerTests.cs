@@ -206,13 +206,5 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             float assertSign = inSign == outSign ? 1 : -1;
             return assertSign;
         }
-
-        static bool FloatAlmostEqual(float actual, float expected, float precision)
-        {
-            float minAllowed = expected - precision;
-            float maxnAllowed = expected + precision;
-
-            return minAllowed < actual && actual < maxnAllowed;
-        }
     }
 }
