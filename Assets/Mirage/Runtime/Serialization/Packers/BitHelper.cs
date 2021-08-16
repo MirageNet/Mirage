@@ -30,6 +30,9 @@ namespace Mirage.Serialization
     {
         /// <summary>
         /// Gets the number of bits need for <paramref name="precision"/> in range negative to positive <paramref name="max"/>
+        /// <para>
+        /// WARNING: these methods are not fast, dont use in hotpath
+        /// </para>
         /// </summary>
         /// <param name="max"></param>
         /// <param name="precision">lowest precision required, bit count will round up so real precision might be higher</param>
@@ -41,6 +44,9 @@ namespace Mirage.Serialization
 
         /// <summary>
         /// Gets the number of bits need for <paramref name="max"/>
+        /// <para>
+        /// WARNING: these methods are not fast, dont use in hotpath
+        /// </para>
         /// </summary>
         /// <param name="max"></param>
         /// <param name="precision">lowest precision required, bit count will round up so real precision might be higher</param>
