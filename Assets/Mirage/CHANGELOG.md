@@ -1,3 +1,16 @@
+# [101.3.0](https://github.com/MirageNet/Mirage/compare/v101.2.0...v101.3.0) (2021-08-16)
+
+
+### Bug Fixes
+
+* preparing client objects on connect ([#876](https://github.com/MirageNet/Mirage/issues/876)) ([9789c0b](https://github.com/MirageNet/Mirage/commit/9789c0b5851c8377e13f799f4a437197e801ecac))
+* **SocketLayer:** moving endpoint copy outside of connection ([c19929f](https://github.com/MirageNet/Mirage/commit/c19929f19b110406b85ac11b6c49a365f5d7da39))
+
+
+### Features
+
+* adding helper classes for packing float, vector and quaternion ([#847](https://github.com/MirageNet/Mirage/issues/847)) ([410bcd6](https://github.com/MirageNet/Mirage/commit/410bcd6475e851dfd0a63944051f6522662f8e85))
+
 # [101.2.0](https://github.com/MirageNet/Mirage/compare/v101.1.0...v101.2.0) (2021-08-10)
 
 
