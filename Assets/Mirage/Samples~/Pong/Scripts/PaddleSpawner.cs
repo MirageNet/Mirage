@@ -25,7 +25,7 @@ namespace Mirage.Examples.Pong
             }
         }
 
-
+        // todo should this method be called somewhere?
         public void OnServerDisconnect(INetworkPlayer player)
         {
             // destroy ball
