@@ -62,8 +62,8 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Repeat(1000)]
         public void UnpacksCorrectUintValue()
         {
-            ulong start = GetRandonUintBias();
-            packer.PackUint(writer, (uint)start);
+            uint start = GetRandonUintBias();
+            packer.PackUint(writer, start);
             uint unpacked = packer.UnpackUint(GetReader());
 
             Assert.That(unpacked, Is.EqualTo(start));
@@ -73,8 +73,8 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Repeat(1000)]
         public void UnpacksCorrectUshortValue()
         {
-            ulong start = GetRandonUshortBias();
-            packer.PackUshort(writer, (ushort)start);
+            ushort start = GetRandonUshortBias();
+            packer.PackUshort(writer, start);
             ushort unpacked = packer.UnpackUshort(GetReader());
 
             Assert.That(unpacked, Is.EqualTo(start));

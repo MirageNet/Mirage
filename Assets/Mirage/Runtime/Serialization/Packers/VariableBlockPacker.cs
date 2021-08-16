@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2021 James Frowen
@@ -22,31 +22,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System;
 using System.Runtime.CompilerServices;
 
 namespace Mirage.Serialization
 {
-    public static class VariableBlockIntPacker
+    public static class VariableBlockPacker
     {
         // todo needs doc comments
         // todo neeeds tests
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Pack(NetworkWriter writer, uint value, int size)
+        public static void Pack(NetworkWriter writer, ulong value, int blockSize)
         {
             // always writes atleast 1 block
             int count = 1;
-            uint checkValue = value >> size;
+            ulong checkValue = value >> blockSize;
             while (checkValue != 0)
             {
                 count++;
-                checkValue >>= size;
+                checkValue >>= blockSize;
             }
             // count = 1, write = b0, (1<<(1-1) -1 => 1<<0 -1) => 1 -1 => 0)
             // count = 2, write = b01
             // count = 3, write = b011, (1<<(3-1) -1 => 1<<2 -1) => 100 - 1 => 011)
             writer.Write((1ul << (count - 1)) - 1, count);
-            writer.Write(value, size * count);
+            writer.Write(value, Math.Min(64, blockSize * count));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -59,7 +60,7 @@ namespace Mirage.Serialization
                 blocks++;
             }
 
-            return reader.Read(blocks * blockSize);
+            return reader.Read(Math.Min(64, blocks * blockSize));
         }
     }
 }
