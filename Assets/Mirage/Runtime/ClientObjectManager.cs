@@ -66,6 +66,10 @@ namespace Mirage
             syncVarReceiver = new SyncVarReceiver(Client, Client.World);
             RegisterSpawnPrefabs();
 
+            // prepare objects right away so objects in first scene can be spawned
+            // if user changes scenes without NetworkSceneManager then they will need to manually call it again
+            PrepareToSpawnSceneObjects();
+
             if (Client.IsLocalClient)
             {
                 RegisterHostHandlers();
