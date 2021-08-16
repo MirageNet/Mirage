@@ -10,6 +10,12 @@ namespace Mirage.Weaver
         static string read(int i) => $"MyPriorityTypeExtension::MyPriorityTypeRead{i}";
 
         [Test]
+        public void NoWarningWhenDifferentPriority()
+        {
+            IsSuccess();
+        }
+
+        [Test]
         public void WarningForSamePriority()
         {
             NoErrors();
