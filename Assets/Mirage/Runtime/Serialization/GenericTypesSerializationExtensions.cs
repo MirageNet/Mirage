@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using Mirage.Logging;
+using UnityEngine;
 
 namespace Mirage.Serialization
 {
@@ -13,7 +16,36 @@ namespace Mirage.Serialization
     /// <typeparam name="T"></typeparam>
     public static class Writer<T>
     {
-        public static Action<NetworkWriter, T> Write { internal get; set; }
+        /// <summary>
+        /// Priority of current write function <see cref="SerializeExtensionAttribute"/>
+        /// </summary>
+        private static int currentPriority;
+
+        public static Action<NetworkWriter, T> Write { get; private set; }
+
+        public static void SetWriter(Action<NetworkWriter, T> method, int newPriority)
+        {
+            // if first writer or higher priority
+            if (Write == null || newPriority > currentPriority)
+            {
+                Write = method;
+                currentPriority = newPriority;
+            }
+            else if (newPriority == currentPriority
+                // todo remove this hack
+                // check names because current weaver outputs SetWriter to multiple assemblies for same method
+                && fullName(method.Method) != fullName(Write.Method))
+            {
+                if (GenericTypesSerializationExtensions.Logger.WarnEnabled())
+                    GenericTypesSerializationExtensions.Logger.LogWarning($"Can now add new writer because it has same priority as current one: " +
+                        $"priority={newPriority}, new={fullName(method.Method)}, old={fullName(Write.Method)}");
+            }
+
+        }
+        static string fullName(MethodInfo info)
+        {
+            return $"{info.DeclaringType.FullName}::{info.Name}";
+        }
     }
 
     /// <summary>
@@ -25,11 +57,34 @@ namespace Mirage.Serialization
     /// <typeparam name="T"></typeparam>
     public static class Reader<T>
     {
-        public static Func<NetworkReader, T> Read { internal get; set; }
+        /// <summary>
+        /// Priority of current write function <see cref="SerializeExtensionAttribute"/>
+        /// </summary>
+        private static int currentPriority;
+
+        public static Func<NetworkReader, T> Read { get; set; }
+
+        public static void SetReader(Func<NetworkReader, T> method, int newPriority)
+        {
+            // if first writer or higher priority
+            if (Read == null || newPriority > currentPriority)
+            {
+                Read = method;
+                currentPriority = newPriority;
+            }
+            else if (newPriority == currentPriority)
+            {
+                if (GenericTypesSerializationExtensions.Logger.WarnEnabled())
+                    GenericTypesSerializationExtensions.Logger.LogWarning($"Can now add new read because it has same priority as current one: priority={newPriority}, new={method.Method.Name}, old={Read.Method.Name}");
+            }
+        }
     }
 
     public static class GenericTypesSerializationExtensions
     {
+        // make this public so it can be shared by the static generic classes Write<T> and Reader<T>
+        public static readonly ILogger Logger = LogFactory.GetLogger("Mirage.Serialization");
+
         /// <summary>
         /// Writes any type that mirror supports
         /// </summary>

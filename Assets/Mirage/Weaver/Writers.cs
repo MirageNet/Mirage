@@ -8,9 +8,20 @@ using Mono.Cecil.Rocks;
 
 namespace Mirage.Weaver
 {
+    internal class SerializeMethod
+    {
+        public readonly MethodReference reference;
+        public readonly int priority;
+
+        public SerializeMethod(MethodReference reference, int priority)
+        {
+            this.reference = reference ?? throw new ArgumentNullException(nameof(reference));
+            this.priority = priority;
+        }
+    }
     public class Writers
     {
-        readonly Dictionary<TypeReference, MethodReference> writeFuncs = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
+        readonly Dictionary<TypeReference, SerializeMethod> writeFuncs = new Dictionary<TypeReference, SerializeMethod>(new TypeReferenceComparer());
 
         public int Count => writeFuncs.Count;
 
@@ -25,21 +36,44 @@ namespace Mirage.Weaver
 
         public void Register(TypeReference dataType, MethodReference methodReference)
         {
+            int newPriority = getSerializePriority(methodReference);
             if (writeFuncs.ContainsKey(dataType))
             {
-                logger.Warning($"Registering a Write method for {dataType.FullName} when one already exists\n  old:{writeFuncs[dataType].FullName}\n  new:{methodReference.FullName}", methodReference);
+                SerializeMethod oldWriter = writeFuncs[dataType];
+
+                // if old is higher, just return
+                if (oldWriter.priority > newPriority) { return; }
+
+                // if same, then warn
+                if (oldWriter.priority == newPriority)
+                {
+                    logger.Warning(
+                        $"Registering a Write method for {dataType.FullName} when one already exists\n" +
+                        $"  old:{oldWriter.reference.FullName}\n" +
+                        $"  new:{methodReference.FullName}",
+                        methodReference);
+                }
+
+                // if new is higher, then add new
             }
 
             // we need to import type when we Initialize Writers so import here in case it is used anywhere else
             TypeReference imported = module.ImportReference(dataType);
-            writeFuncs[imported] = methodReference;
+            writeFuncs[imported] = new SerializeMethod(methodReference, newPriority);
         }
 
-        void RegisterWriteFunc(TypeReference typeReference, MethodDefinition newWriterFunc)
+        static int getSerializePriority(MethodReference methodReference)
         {
-            // todo can we remove this method? it was same as Register above
-            // see for static version https://github.com/vis2k/Mirror/blob/master/Assets/Mirror/Editor/Weaver/Writers.cs#L33-L38 
-            writeFuncs[typeReference] = newWriterFunc;
+            CustomAttribute attribute = methodReference.Resolve().GetCustomAttribute<SerializeExtensionAttribute>();
+
+            int priority = 0;
+
+            if (attribute != null)
+            {
+                priority = attribute.GetField<int>(nameof(SerializeExtensionAttribute.Priority), 0);
+            }
+
+            return priority;
         }
 
         public MethodReference GetWriteFunc<T>(SequencePoint sequencePoint) =>
@@ -54,9 +88,9 @@ namespace Mirage.Weaver
         /// <returns>Returns <see cref="MethodReference"/> or null</returns>
         public MethodReference GetWriteFunc(TypeReference typeReference, SequencePoint sequencePoint)
         {
-            if (writeFuncs.TryGetValue(typeReference, out MethodReference foundFunc))
+            if (writeFuncs.TryGetValue(typeReference, out SerializeMethod foundFunc))
             {
-                return foundFunc;
+                return foundFunc.reference;
             }
             return GenerateWriter(module.ImportReference(typeReference), sequencePoint);
         }
@@ -194,7 +228,7 @@ namespace Mirage.Weaver
             _ = writerFunc.AddParam(typeReference, "value");
             writerFunc.Body.InitLocals = true;
 
-            RegisterWriteFunc(typeReference, writerFunc);
+            Register(typeReference, writerFunc);
             return writerFunc;
         }
 
@@ -304,31 +338,57 @@ namespace Mirage.Weaver
         /// <param name="worker"></param>
         internal void InitializeWriters(ILProcessor worker)
         {
-            TypeReference genericWriterClassRef = module.ImportReference(typeof(Writer<>));
+            var initializer = new WriterInitializer(module, worker);
 
-            System.Reflection.PropertyInfo writerProperty = typeof(Writer<>).GetProperty(nameof(Writer<int>.Write));
-            MethodReference fieldRef = module.ImportReference(writerProperty.GetSetMethod());
-            TypeReference networkWriterRef = module.ImportReference(typeof(NetworkWriter));
-            TypeReference actionRef = module.ImportReference(typeof(Action<,>));
-            MethodReference actionConstructorRef = module.ImportReference(typeof(Action<,>).GetConstructors()[0]);
-
-            foreach (MethodReference writerMethod in writeFuncs.Values)
+            foreach (SerializeMethod serializeMethod in writeFuncs.Values)
             {
-
-                TypeReference dataType = writerMethod.Parameters[1].ParameterType;
-
-                // create a Action<NetworkWriter, T> delegate
-                worker.Append(worker.Create(OpCodes.Ldnull));
-                worker.Append(worker.Create(OpCodes.Ldftn, writerMethod));
-                GenericInstanceType actionGenericInstance = actionRef.MakeGenericInstanceType(networkWriterRef, dataType);
-                MethodReference actionRefInstance = actionConstructorRef.MakeHostInstanceGeneric(actionGenericInstance);
-                worker.Append(worker.Create(OpCodes.Newobj, actionRefInstance));
-
-                // save it in Writer<T>.write
-                GenericInstanceType genericInstance = genericWriterClassRef.MakeGenericInstanceType(dataType);
-                MethodReference specializedField = fieldRef.MakeHostInstanceGeneric(genericInstance);
-                worker.Append(worker.Create(OpCodes.Call, specializedField));
+                initializer.SetWriter(serializeMethod.reference, serializeMethod.priority);
             }
         }
     }
+
+    public sealed class WriterInitializer
+    {
+        readonly ILProcessor worker;
+
+        readonly TypeReference genericWriterClassRef;
+        readonly MethodReference setWriterRef;
+
+        readonly TypeReference networkWriterRef;
+        readonly TypeReference actionRef;
+        readonly MethodReference actionConstructorRef;
+
+        public WriterInitializer(ModuleDefinition module, ILProcessor worker)
+        {
+            this.worker = worker;
+
+            genericWriterClassRef = module.ImportReference(typeof(Writer<>));
+            System.Reflection.MethodInfo setWriterMethod = typeof(Writer<>).GetMethod(nameof(Writer<int>.SetWriter));
+            setWriterRef = module.ImportReference(setWriterMethod);
+
+            networkWriterRef = module.ImportReference(typeof(NetworkWriter));
+            actionRef = module.ImportReference(typeof(Action<,>));
+            actionConstructorRef = module.ImportReference(typeof(Action<,>).GetConstructors()[0]);
+        }
+
+        public void SetWriter(MethodReference methodReference, int priority)
+        {
+            TypeReference dataType = methodReference.Parameters[1].ParameterType;
+
+            // create a Action<NetworkWriter, T> delegate
+            worker.Append(worker.Create(OpCodes.Ldnull));
+            worker.Append(worker.Create(OpCodes.Ldftn, methodReference));
+            GenericInstanceType actionGenericInstance = actionRef.MakeGenericInstanceType(networkWriterRef, dataType);
+            MethodReference actionRefInstance = actionConstructorRef.MakeHostInstanceGeneric(actionGenericInstance);
+            worker.Append(worker.Create(OpCodes.Newobj, actionRefInstance));
+
+            // call Write<T>.SetWriter(Action, int) to save it
+            GenericInstanceType genericInstance = genericWriterClassRef.MakeGenericInstanceType(dataType);
+            MethodReference specializedField = setWriterRef.MakeHostInstanceGeneric(genericInstance);
+
+            worker.Append(worker.Create(OpCodes.Ldc_I4, priority));
+            worker.Append(worker.Create(OpCodes.Call, specializedField));
+        }
+    }
+
 }

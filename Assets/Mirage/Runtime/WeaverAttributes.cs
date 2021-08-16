@@ -15,9 +15,9 @@ namespace Mirage.Serialization
     /// If 1 method has no attribute, and another has Priority=-1 then the method with no attribute will be picked
     /// </para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public sealed class SerializeExtensionAttribute : Attribute
     {
-        public int Priority { get; set; }
+        public int Priority;
     }
 }
