@@ -246,9 +246,9 @@ namespace Mirage
                     "[NetworkSceneManager] - ServerChangeScene: " + nameof(scenePath) + " cannot be empty or null");
             }
 
-            if(players == null || players.Length == 0)
-                throw new ArgumentNullException(nameof(scenePath),
-                    "[NetworkSceneManager] - list of player's cannot be null or no players.");
+            //if(players == null || players.Length == 0)
+            //    throw new ArgumentNullException(nameof(scenePath),
+            //        "[NetworkSceneManager] - list of player's cannot be null or no players.");
 
 
             if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - ServerChangeScene " + scenePath);
@@ -364,9 +364,9 @@ namespace Mirage
 
                 Scene scene = SceneManager.GetSceneAt(sceneIndex);
 
-                if (scene.Equals(SceneManager.GetActiveScene())) continue;
+                if (scene.name.Equals(SceneManager.GetActiveScene().name)) continue;
 
-                scenesPaths[sceneIndex - 1] = scene.path;
+                scenesPaths[sceneIndex == 0 ? sceneIndex : sceneIndex - 1] = scene.path;
             }
 
             player.Send(new SceneMessage { MainActivateScene = ActiveScenePath, AdditiveScenes = scenesPaths });

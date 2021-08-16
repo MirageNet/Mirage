@@ -148,7 +148,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ChangeSceneAdditiveLoadTest() => UniTask.ToCoroutine(async () =>
         {
-            sceneManager.ServerLoadSceneAdditively("Assets/Mirror/Tests/Runtime/testScene.unity", null);
+            sceneManager.ServerLoadSceneAdditively("Assets/Mirror/Tests/Runtime/testScene.unity", new[] {client.Player});
 
             await AsyncUtil.WaitUntilWithTimeout(() => SceneManager.GetSceneByName("testScene") != null);
 
