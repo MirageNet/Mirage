@@ -124,10 +124,4 @@ namespace Mirage
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class FoldoutEventAttribute : PropertyAttribute { }
-
-    /// <summary>
-    /// Tells Weaver to ignore an Extension method
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
-    public sealed class WeaverIgnoreAttribute : PropertyAttribute { }
 }
