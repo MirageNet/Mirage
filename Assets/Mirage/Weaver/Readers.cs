@@ -344,9 +344,9 @@ namespace Mirage.Weaver
         internal void InitializeReaders(ILProcessor worker)
         {
             TypeReference genericReaderClassRef = module.ImportReference(typeof(Reader<>));
+            System.Reflection.MethodInfo setReaderMethod = typeof(Reader<>).GetMethod(nameof(Reader<object>.SetReader));
+            MethodReference setReaderRef = module.ImportReference(setReaderMethod);
 
-            System.Reflection.PropertyInfo readProperty = typeof(Reader<>).GetProperty(nameof(Reader<object>.Read));
-            MethodReference fieldRef = module.ImportReference(readProperty.GetSetMethod());
             TypeReference networkReaderRef = module.ImportReference(typeof(NetworkReader));
             TypeReference funcRef = module.ImportReference(typeof(Func<,>));
             MethodReference funcConstructorRef = module.ImportReference(typeof(Func<,>).GetConstructors()[0]);
@@ -364,7 +364,7 @@ namespace Mirage.Weaver
 
                 // save it in Reader<T>.Read
                 GenericInstanceType genericInstance = genericReaderClassRef.MakeGenericInstanceType(dataType);
-                MethodReference specializedField = fieldRef.MakeHostInstanceGeneric(genericInstance);
+                MethodReference specializedField = setReaderRef.MakeHostInstanceGeneric(genericInstance);
 
                 worker.Append(worker.Create(OpCodes.Ldc_I4, readFunc.priority));
                 worker.Append(worker.Create(OpCodes.Call, specializedField));
