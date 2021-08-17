@@ -388,7 +388,7 @@ namespace Mirage
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
             {
                 networkReader.ObjectLocator = Server.World;
-                identity.HandleRemoteCall(skeleton, msg.componentIndex, networkReader, player, msg.replyId);
+                identity.HandleRemoteCall(skeleton, msg.componentIndex, networkReader, player, msg.replyId.GetValueOrDefault());
             }
         }
 
