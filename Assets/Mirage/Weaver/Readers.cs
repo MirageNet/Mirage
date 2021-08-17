@@ -9,43 +9,14 @@ using UnityEngine;
 
 namespace Mirage.Weaver
 {
-    public class Readers
+    public class Readers : SerializeFunctionBase
     {
-        readonly Dictionary<TypeReference, MethodReference> readFuncs = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
+        public Readers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
 
-        private readonly ModuleDefinition module;
-        private readonly IWeaverLogger logger;
+        protected override string FunctionTypeLog => "Read";
 
-        public int Count => readFuncs.Count;
-
-        public Readers(ModuleDefinition module, IWeaverLogger logger)
+        protected override MethodReference GenerateFunction(TypeReference typeReference, SequencePoint sequencePoint)
         {
-            this.module = module;
-            this.logger = logger;
-        }
-
-        internal void Register(TypeReference dataType, MethodReference methodReference)
-        {
-            if (readFuncs.ContainsKey(dataType))
-            {
-                logger.Warning($"Registering a Read method for {dataType.FullName} when one already exists\n  old:{readFuncs[dataType].FullName}\n  new:{methodReference.FullName}", methodReference);
-            }
-
-            TypeReference imported = module.ImportReference(dataType);
-            readFuncs[imported] = methodReference;
-        }
-
-        public MethodReference GetReadFunc<T>(SequencePoint sequencePoint) =>
-            GetReadFunc(module.ImportReference<T>(), sequencePoint);
-
-        public MethodReference GetReadFunc(TypeReference typeReference, SequencePoint sequencePoint)
-        {
-            if (readFuncs.TryGetValue(typeReference, out MethodReference foundFunc))
-            {
-                return foundFunc;
-            }
-
-            typeReference = module.ImportReference(typeReference);
             if (typeReference.IsMultidimensionalArray())
             {
                 logger.Error($"{typeReference.Name} is an unsupported type. Multidimensional arrays are not supported", typeReference, sequencePoint);
@@ -143,11 +114,6 @@ namespace Mirage.Weaver
             return readerFunc;
         }
 
-        void RegisterReadFunc(TypeReference typeReference, MethodDefinition newReaderFunc)
-        {
-            readFuncs[typeReference] = newReaderFunc;
-        }
-
         MethodDefinition GenerateEnumReadFunc(TypeReference variable, SequencePoint sequencePoint)
         {
             MethodDefinition readerFunc = GenerateReaderFunction(variable);
@@ -157,7 +123,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
             TypeReference underlyingType = variable.Resolve().GetEnumUnderlyingType();
-            MethodReference underlyingFunc = GetReadFunc(underlyingType, sequencePoint);
+            MethodReference underlyingFunc = GetFunction(underlyingType, sequencePoint);
 
             worker.Append(worker.Create(OpCodes.Call, underlyingFunc));
             worker.Append(worker.Create(OpCodes.Ret));
@@ -176,7 +142,7 @@ namespace Mirage.Weaver
             // $array = reader.Read<[T]>()
             ArrayType arrayType = elementType.MakeArrayType();
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, GetReadFunc(arrayType, sequencePoint)));
+            worker.Append(worker.Create(OpCodes.Call, GetFunction(arrayType, sequencePoint)));
 
             // return new ArraySegment<T>($array);
             MethodReference arraySegmentConstructor = module.ImportReference(() => new ArraySegment<object>());
@@ -198,7 +164,7 @@ namespace Mirage.Weaver
 
             _ = readerFunc.AddParam<NetworkReader>("reader");
             readerFunc.Body.InitLocals = true;
-            RegisterReadFunc(variable, readerFunc);
+            Register(variable, readerFunc);
 
             return readerFunc;
         }
@@ -207,7 +173,7 @@ namespace Mirage.Weaver
         {
             MethodDefinition readerFunc = GenerateReaderFunction(variable);
             // generate readers for the element
-            GetReadFunc(elementType, sequencePoint);
+            GetFunction(elementType, sequencePoint);
 
             MethodReference listReader = module.ImportReference(readerFunction);
 
@@ -255,7 +221,7 @@ namespace Mirage.Weaver
             //   return null;
             // }
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, GetReadFunc<bool>(sequencePoint)));
+            worker.Append(worker.Create(OpCodes.Call, GetFunction<bool>(sequencePoint)));
 
             Instruction labelEmptyArray = worker.Create(OpCodes.Nop);
             worker.Append(worker.Create(OpCodes.Brtrue, labelEmptyArray));
@@ -309,7 +275,7 @@ namespace Mirage.Weaver
                 OpCode opcode = variable.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc;
                 worker.Append(worker.Create(opcode, 0));
 
-                MethodReference readFunc = GetReadFunc(field.FieldType, sequencePoint);
+                MethodReference readFunc = GetFunction(field.FieldType, sequencePoint);
                 if (readFunc != null)
                 {
                     worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -340,7 +306,7 @@ namespace Mirage.Weaver
             TypeReference funcRef = module.ImportReference(typeof(Func<,>));
             MethodReference funcConstructorRef = module.ImportReference(typeof(Func<,>).GetConstructors()[0]);
 
-            foreach (MethodReference readFunc in readFuncs.Values)
+            foreach (MethodReference readFunc in funcs.Values)
             {
                 TypeReference dataType = readFunc.ReturnType;
 

@@ -67,8 +67,8 @@ namespace Mirage.Weaver
             foreach (Type type in types)
             {
                 TypeReference typeReference = module.ImportReference(type);
-                writers.GetWriteFunc(typeReference, null);
-                readers.GetReadFunc(typeReference, null);
+                writers.GetFunction(typeReference, null);
+                readers.GetFunction(typeReference, null);
                 messages.Add(typeReference);
             }
         }
@@ -99,8 +99,8 @@ namespace Mirage.Weaver
 
             if (klass.HasCustomAttribute<NetworkMessageAttribute>())
             {
-                readers.GetReadFunc(klass, null);
-                writers.GetWriteFunc(klass, null);
+                readers.GetFunction(klass, null);
+                writers.GetFunction(klass, null);
                 messages.Add(klass);
             }
 
@@ -182,8 +182,8 @@ namespace Mirage.Weaver
                         return;
                 }
 
-                writers.GetWriteFunc(parameterType, sequencePoint);
-                readers.GetReadFunc(parameterType, sequencePoint);
+                writers.GetFunction(parameterType, sequencePoint);
+                readers.GetFunction(parameterType, sequencePoint);
             }
         }
 

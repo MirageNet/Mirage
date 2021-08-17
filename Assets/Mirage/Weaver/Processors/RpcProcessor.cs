@@ -69,7 +69,7 @@ namespace Mirage.Weaver
                     continue;
                 }
 
-                MethodReference writeFunc = writers.GetWriteFunc(param.ParameterType, method.DebugInformation.SequencePoints.FirstOrDefault());
+                MethodReference writeFunc = writers.GetFunction(param.ParameterType, method.DebugInformation.SequencePoints.FirstOrDefault());
                 if (writeFunc == null)
                 {
                     logger.Error($"{method.Name} has invalid parameter {param}", method, method.DebugInformation.SequencePoints.FirstOrDefault());
@@ -116,7 +116,7 @@ namespace Mirage.Weaver
                 }
 
                 SequencePoint sequencePoint = method.DebugInformation.SequencePoints.ElementAtOrDefault(0);
-                MethodReference readFunc = readers.GetReadFunc(param.ParameterType, sequencePoint);
+                MethodReference readFunc = readers.GetFunction(param.ParameterType, sequencePoint);
 
                 if (readFunc == null)
                 {
