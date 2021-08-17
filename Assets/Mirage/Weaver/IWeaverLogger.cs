@@ -15,4 +15,12 @@ namespace Mirage.Weaver
         void Warning(string message, MemberReference mr, SequencePoint sequencePoint);
         void Warning(string message, MethodDefinition md);
     }
+
+    public static class WeaverLoggerExtensions
+    {
+        public static void Error(this IWeaverLogger logger, WeaverException exception)
+        {
+            logger.Error(exception.Message, exception.MemberReference, exception.SequencePoint);
+        }
+    }
 }
