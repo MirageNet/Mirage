@@ -504,7 +504,7 @@ namespace Mirage.Weaver
             // base
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.SyncVarDirtyBits));
-            MethodReference writeUint64Func = writers.GetWriteFunc<ulong>(null);
+            MethodReference writeUint64Func = writers.GetFunction<ulong>(null);
             worker.Append(worker.Create(OpCodes.Call, writeUint64Func));
 
             // generate a writer call for any dirty variable in this class
@@ -549,7 +549,7 @@ namespace Mirage.Weaver
             // this
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldfld, syncVar.MakeHostGenericIfNeeded()));
-            MethodReference writeFunc = writers.GetWriteFunc(syncVar.FieldType, null);
+            MethodReference writeFunc = writers.GetFunction(syncVar.FieldType, null);
             if (writeFunc != null)
             {
                 worker.Append(worker.Create(OpCodes.Call, writeFunc));
@@ -614,7 +614,7 @@ namespace Mirage.Weaver
 
             // get dirty bits
             serWorker.Append(serWorker.Create(OpCodes.Ldarg, readerParam));
-            serWorker.Append(serWorker.Create(OpCodes.Call, readers.GetReadFunc<ulong>(null)));
+            serWorker.Append(serWorker.Create(OpCodes.Call, readers.GetFunction<ulong>(null)));
             serWorker.Append(serWorker.Create(OpCodes.Stloc, dirtyBitsLocal));
 
             // conditionally read each syncvar
@@ -662,7 +662,7 @@ namespace Mirage.Weaver
                     OnSetA(oldValue, Networka);
                 }
              */
-            MethodReference readFunc = readers.GetReadFunc(syncVar.FieldType, null);
+            MethodReference readFunc = readers.GetFunction(syncVar.FieldType, null);
             if (readFunc == null)
             {
                 logger.Error($"{syncVar.Name} has unsupported type. Use a supported Mirage type instead", syncVar);

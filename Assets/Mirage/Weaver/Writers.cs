@@ -8,61 +8,15 @@ using Mono.Cecil.Rocks;
 
 namespace Mirage.Weaver
 {
-    public class Writers
+
+    public class Writers : SerializeFunctionBase
     {
-        readonly Dictionary<TypeReference, MethodReference> writeFuncs = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
+        public Writers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
 
-        public int Count => writeFuncs.Count;
-
-        private readonly IWeaverLogger logger;
-        private readonly ModuleDefinition module;
-
-        public Writers(ModuleDefinition module, IWeaverLogger logger)
-        {
-            this.logger = logger;
-            this.module = module;
-        }
-
-        public void Register(TypeReference dataType, MethodReference methodReference)
-        {
-            if (writeFuncs.ContainsKey(dataType))
-            {
-                logger.Warning($"Registering a Write method for {dataType.FullName} when one already exists\n  old:{writeFuncs[dataType].FullName}\n  new:{methodReference.FullName}", methodReference);
-            }
-
-            // we need to import type when we Initialize Writers so import here in case it is used anywhere else
-            TypeReference imported = module.ImportReference(dataType);
-            writeFuncs[imported] = methodReference;
-        }
-
-        void RegisterWriteFunc(TypeReference typeReference, MethodDefinition newWriterFunc)
-        {
-            // todo can we remove this method? it was same as Register above
-            // see for static version https://github.com/vis2k/Mirror/blob/master/Assets/Mirror/Editor/Weaver/Writers.cs#L33-L38 
-            writeFuncs[typeReference] = newWriterFunc;
-        }
-
-        public MethodReference GetWriteFunc<T>(SequencePoint sequencePoint) =>
-            GetWriteFunc(module.ImportReference<T>(), sequencePoint);
-
-        /// <summary>
-        /// Finds existing writer for type, if non exists trys to create one
-        /// <para>This method is recursive</para>
-        /// </summary>
-        /// <param name="typeReference"></param>
-        /// <param name="recursionCount"></param>
-        /// <returns>Returns <see cref="MethodReference"/> or null</returns>
-        public MethodReference GetWriteFunc(TypeReference typeReference, SequencePoint sequencePoint)
-        {
-            if (writeFuncs.TryGetValue(typeReference, out MethodReference foundFunc))
-            {
-                return foundFunc;
-            }
-            return GenerateWriter(module.ImportReference(typeReference), sequencePoint);
-        }
+        protected override string FunctionTypeLog => "Write";
 
         /// <exception cref="GenerateWriterException">Throws when writer could not be generated for type</exception>
-        MethodReference GenerateWriter(TypeReference typeReference, SequencePoint sequencePoint)
+        protected override MethodReference GenerateFunction(TypeReference typeReference, SequencePoint sequencePoint)
         {
             if (typeReference.IsByReference)
             {
@@ -171,7 +125,7 @@ namespace Mirage.Weaver
 
             ILProcessor worker = writerFunc.Body.GetILProcessor();
 
-            MethodReference underlyingWriter = GetWriteFunc(typeReference.Resolve().GetEnumUnderlyingType(), sequencePoint);
+            MethodReference underlyingWriter = GetFunction(typeReference.Resolve().GetEnumUnderlyingType(), sequencePoint);
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldarg_1));
@@ -194,7 +148,7 @@ namespace Mirage.Weaver
             _ = writerFunc.AddParam(typeReference, "value");
             writerFunc.Body.InitLocals = true;
 
-            RegisterWriteFunc(typeReference, writerFunc);
+            Register(typeReference, writerFunc);
             return writerFunc;
         }
 
@@ -228,14 +182,14 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Brtrue, labelNotNull));
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldc_I4_0));
-            worker.Append(worker.Create(OpCodes.Call, GetWriteFunc<bool>(sequencePoint)));
+            worker.Append(worker.Create(OpCodes.Call, GetFunction<bool>(sequencePoint)));
             worker.Append(worker.Create(OpCodes.Ret));
             worker.Append(labelNotNull);
 
             // write.WriteBoolean(true);
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldc_I4_1));
-            worker.Append(worker.Create(OpCodes.Call, GetWriteFunc<bool>(sequencePoint)));
+            worker.Append(worker.Create(OpCodes.Call, GetFunction<bool>(sequencePoint)));
         }
 
         /// <summary>
@@ -249,7 +203,7 @@ namespace Mirage.Weaver
             uint fields = 0;
             foreach (FieldDefinition field in variable.FindAllPublicFields())
             {
-                MethodReference writeFunc = GetWriteFunc(field.FieldType, sequencePoint);
+                MethodReference writeFunc = GetFunction(field.FieldType, sequencePoint);
                 // need this null check till later PR when GetWriteFunc throws exception instead
                 if (writeFunc == null) { return false; }
 
@@ -270,7 +224,7 @@ namespace Mirage.Weaver
 
             MethodDefinition writerFunc = GenerateWriterFunc(variable);
 
-            MethodReference elementWriteFunc = GetWriteFunc(elementType, sequencePoint);
+            MethodReference elementWriteFunc = GetFunction(elementType, sequencePoint);
 
             // need this null check till later PR when GetWriteFunc throws exception instead
             if (elementWriteFunc == null)
@@ -312,7 +266,7 @@ namespace Mirage.Weaver
             TypeReference actionRef = module.ImportReference(typeof(Action<,>));
             MethodReference actionConstructorRef = module.ImportReference(typeof(Action<,>).GetConstructors()[0]);
 
-            foreach (MethodReference writerMethod in writeFuncs.Values)
+            foreach (MethodReference writerMethod in funcs.Values)
             {
 
                 TypeReference dataType = writerMethod.Parameters[1].ParameterType;
