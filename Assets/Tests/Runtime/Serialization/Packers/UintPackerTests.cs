@@ -13,9 +13,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
     [TestFixture(500ul, 100_000ul, 10_000_000ul)]
     public class UintPackerTests : PackerTestBase
     {
-        Random random = new Random();
+        readonly Random random = new Random();
         readonly VariableIntPacker packer;
-        ulong max;
+        readonly ulong max;
 
         public UintPackerTests(ulong smallValue, ulong mediumValue, ulong? largeValue)
         {

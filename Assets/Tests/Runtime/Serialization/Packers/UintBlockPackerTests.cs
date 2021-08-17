@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Mirage.Serialization;
 using NUnit.Framework;
 using Random = System.Random;
@@ -12,8 +12,8 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
     [TestFixture(16)]
     public class UintBlockPackerTests : PackerTestBase
     {
-        Random random = new Random();
-        private int blockSize;
+        readonly Random random = new Random();
+        readonly int blockSize;
 
         public UintBlockPackerTests(int blockSize)
         {
