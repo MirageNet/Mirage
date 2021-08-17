@@ -15,7 +15,7 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong Encode(long v)
         {
-            return (uint)((v >> 63) ^ (v << 1));
+            return (ulong)((v >> 63) ^ (v << 1));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Decode(uint v)
