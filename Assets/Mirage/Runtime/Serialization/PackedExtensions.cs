@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Mirage.Serialization
 {
@@ -8,21 +9,24 @@ namespace Mirage.Serialization
     /// </remarks>
     public static class PackedExtensions
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WritePackedInt32(this NetworkWriter writer, int i)
         {
-            uint zigzagged = (uint)((i >> 31) ^ (i << 1));
+            uint zigzagged = ZigZag.Encode(i);
             writer.WritePackedUInt32(zigzagged);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WritePackedUInt32(this NetworkWriter writer, uint value)
         {
             // we can use uint64 here because it will be same bits once packed
             writer.WritePackedUInt64(value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WritePackedInt64(this NetworkWriter writer, long i)
         {
-            ulong zigzagged = (ulong)((i >> 63) ^ (i << 1));
+            ulong zigzagged = ZigZag.Encode(i);
             writer.WritePackedUInt64(zigzagged);
         }
 
@@ -76,7 +80,7 @@ namespace Mirage.Serialization
         public static int ReadPackedInt32(this NetworkReader reader)
         {
             uint data = reader.ReadPackedUInt32();
-            return (int)((data >> 1) ^ -(data & 1));
+            return ZigZag.Decode(data);
         }
 
         /// <exception cref="OverflowException">throws if values overflows uint</exception>
@@ -85,7 +89,7 @@ namespace Mirage.Serialization
         public static long ReadPackedInt64(this NetworkReader reader)
         {
             ulong data = reader.ReadPackedUInt64();
-            return ((long)(data >> 1)) ^ -((long)data & 1);
+            return ZigZag.Decode(data);
         }
 
         public static ulong ReadPackedUInt64(this NetworkReader reader)
