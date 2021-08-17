@@ -11,7 +11,7 @@ namespace Mirage.Weaver
 {
     public class Readers
     {
-        readonly Dictionary<TypeReference, MethodReference> readFuncs = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
+        readonly Dictionary<TypeReference, SerializeMethod> readFuncs = new Dictionary<TypeReference, SerializeMethod>(new TypeReferenceComparer());
 
         private readonly ModuleDefinition module;
         private readonly IWeaverLogger logger;
@@ -26,13 +26,29 @@ namespace Mirage.Weaver
 
         internal void Register(TypeReference dataType, MethodReference methodReference)
         {
+            int newPriority = Writers.GetSerializePriority(methodReference);
             if (readFuncs.ContainsKey(dataType))
             {
-                logger.Warning($"Registering a Read method for {dataType.FullName} when one already exists\n  old:{readFuncs[dataType].FullName}\n  new:{methodReference.FullName}", methodReference);
+                SerializeMethod oldWriter = readFuncs[dataType];
+
+                // if old is higher, just return
+                if (oldWriter.priority > newPriority) { return; }
+
+                // if same, then warn
+                if (oldWriter.priority == newPriority)
+                {
+                    logger.Warning(
+                        $"Registering a Read method for {dataType.FullName} when one already exists\n" +
+                        $"  old:{oldWriter.reference.FullName}\n" +
+                        $"  new:{methodReference.FullName}",
+                        methodReference);
+                }
+
+                // if new is higher, then add new
             }
 
             TypeReference imported = module.ImportReference(dataType);
-            readFuncs[imported] = methodReference;
+            readFuncs[imported] = new SerializeMethod(methodReference, newPriority);
         }
 
         public MethodReference GetReadFunc<T>(SequencePoint sequencePoint) =>
@@ -40,9 +56,9 @@ namespace Mirage.Weaver
 
         public MethodReference GetReadFunc(TypeReference typeReference, SequencePoint sequencePoint)
         {
-            if (readFuncs.TryGetValue(typeReference, out MethodReference foundFunc))
+            if (readFuncs.TryGetValue(typeReference, out SerializeMethod foundFunc))
             {
-                return foundFunc;
+                return foundFunc.reference;
             }
 
             typeReference = module.ImportReference(typeReference);
@@ -143,11 +159,6 @@ namespace Mirage.Weaver
             return readerFunc;
         }
 
-        void RegisterReadFunc(TypeReference typeReference, MethodDefinition newReaderFunc)
-        {
-            readFuncs[typeReference] = newReaderFunc;
-        }
-
         MethodDefinition GenerateEnumReadFunc(TypeReference variable, SequencePoint sequencePoint)
         {
             MethodDefinition readerFunc = GenerateReaderFunction(variable);
@@ -198,7 +209,7 @@ namespace Mirage.Weaver
 
             _ = readerFunc.AddParam<NetworkReader>("reader");
             readerFunc.Body.InitLocals = true;
-            RegisterReadFunc(variable, readerFunc);
+            Register(variable, readerFunc);
 
             return readerFunc;
         }
@@ -340,13 +351,13 @@ namespace Mirage.Weaver
             TypeReference funcRef = module.ImportReference(typeof(Func<,>));
             MethodReference funcConstructorRef = module.ImportReference(typeof(Func<,>).GetConstructors()[0]);
 
-            foreach (MethodReference readFunc in readFuncs.Values)
+            foreach (SerializeMethod readFunc in readFuncs.Values)
             {
-                TypeReference dataType = readFunc.ReturnType;
+                TypeReference dataType = readFunc.reference.ReturnType;
 
                 // create a Func<NetworkReader, T> delegate
                 worker.Append(worker.Create(OpCodes.Ldnull));
-                worker.Append(worker.Create(OpCodes.Ldftn, readFunc));
+                worker.Append(worker.Create(OpCodes.Ldftn, readFunc.reference));
                 GenericInstanceType funcGenericInstance = funcRef.MakeGenericInstanceType(networkReaderRef, dataType);
                 MethodReference funcConstructorInstance = funcConstructorRef.MakeHostInstanceGeneric(funcGenericInstance);
                 worker.Append(worker.Create(OpCodes.Newobj, funcConstructorInstance));
@@ -354,6 +365,8 @@ namespace Mirage.Weaver
                 // save it in Reader<T>.Read
                 GenericInstanceType genericInstance = genericReaderClassRef.MakeGenericInstanceType(dataType);
                 MethodReference specializedField = fieldRef.MakeHostInstanceGeneric(genericInstance);
+
+                worker.Append(worker.Create(OpCodes.Ldc_I4, readFunc.priority));
                 worker.Append(worker.Create(OpCodes.Call, specializedField));
             }
 

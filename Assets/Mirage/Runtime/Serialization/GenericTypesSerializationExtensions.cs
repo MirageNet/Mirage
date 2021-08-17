@@ -40,8 +40,8 @@ namespace Mirage.Serialization
                     GenericTypesSerializationExtensions.Logger.LogWarning($"Can now add new writer because it has same priority as current one: " +
                         $"priority={newPriority}, new={fullName(method.Method)}, old={fullName(Write.Method)}");
             }
-
         }
+
         static string fullName(MethodInfo info)
         {
             return $"{info.DeclaringType.FullName}::{info.Name}";
@@ -72,11 +72,19 @@ namespace Mirage.Serialization
                 Read = method;
                 currentPriority = newPriority;
             }
-            else if (newPriority == currentPriority)
+            else if (newPriority == currentPriority
+                // todo remove this hack
+                // check names because current weaver outputs SetWriter to multiple assemblies for same method
+                && fullName(method.Method) != fullName(Read.Method))
             {
                 if (GenericTypesSerializationExtensions.Logger.WarnEnabled())
                     GenericTypesSerializationExtensions.Logger.LogWarning($"Can now add new read because it has same priority as current one: priority={newPriority}, new={method.Method.Name}, old={Read.Method.Name}");
             }
+        }
+
+        static string fullName(MethodInfo info)
+        {
+            return $"{info.DeclaringType.FullName}::{info.Name}";
         }
     }
 

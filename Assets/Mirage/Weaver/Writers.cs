@@ -23,20 +23,20 @@ namespace Mirage.Weaver
     {
         readonly Dictionary<TypeReference, SerializeMethod> writeFuncs = new Dictionary<TypeReference, SerializeMethod>(new TypeReferenceComparer());
 
-        public int Count => writeFuncs.Count;
-
         private readonly IWeaverLogger logger;
         private readonly ModuleDefinition module;
 
+        public int Count => writeFuncs.Count;
+
         public Writers(ModuleDefinition module, IWeaverLogger logger)
         {
-            this.logger = logger;
             this.module = module;
+            this.logger = logger;
         }
 
         public void Register(TypeReference dataType, MethodReference methodReference)
         {
-            int newPriority = getSerializePriority(methodReference);
+            int newPriority = GetSerializePriority(methodReference);
             if (writeFuncs.ContainsKey(dataType))
             {
                 SerializeMethod oldWriter = writeFuncs[dataType];
@@ -62,7 +62,7 @@ namespace Mirage.Weaver
             writeFuncs[imported] = new SerializeMethod(methodReference, newPriority);
         }
 
-        static int getSerializePriority(MethodReference methodReference)
+        public static int GetSerializePriority(MethodReference methodReference)
         {
             CustomAttribute attribute = methodReference.Resolve().GetCustomAttribute<SerializeExtensionAttribute>();
 
