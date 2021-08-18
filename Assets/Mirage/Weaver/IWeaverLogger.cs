@@ -22,5 +22,10 @@ namespace Mirage.Weaver
         {
             logger.Error(exception.Message, exception.MemberReference, exception.SequencePoint);
         }
+
+        public static void Error(this IWeaverLogger logger, WeaverException exception, SequencePoint sequencePoint)
+        {
+            logger.Error(exception.Message, exception.MemberReference, sequencePoint);
+        }
     }
 }
