@@ -17,9 +17,9 @@ namespace Mirage.Weaver
 
         private AssemblyDefinition CurrentAssembly { get; set; }
 
-        public static void DLog(TypeDefinition td, string fmt, params object[] args)
+        public static void DebugLog(TypeDefinition td, string message)
         {
-            Console.WriteLine("[" + td.Name + "] " + string.Format(fmt, args));
+            Console.WriteLine($"Weaver[{td.Name}]{message}");
         }
 
         public Weaver(IWeaverLogger logger)

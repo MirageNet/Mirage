@@ -86,7 +86,7 @@ namespace Mirage.Weaver
 
         void RegisterSyncObjects(TypeDefinition netBehaviourSubclass)
         {
-            Weaver.DLog(netBehaviourSubclass, "  GenerateConstants ");
+            Weaver.DebugLog(netBehaviourSubclass, "  GenerateConstants ");
 
             // find instance constructor
             MethodDefinition ctor = netBehaviourSubclass.GetMethod(".ctor");

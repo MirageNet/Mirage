@@ -124,7 +124,7 @@ namespace Mirage.Weaver
         void ProcessSyncVar(FieldDefinition fd, long dirtyBit)
         {
             string originalName = fd.Name;
-            Weaver.DLog(fd.DeclaringType, "Sync Var " + fd.Name + " " + fd.FieldType);
+            Weaver.DebugLog(fd.DeclaringType, $"Sync Var {fd.Name} {fd.FieldType}");
 
             TypeReference originalType = fd.FieldType;
             fd.FieldType = WrapType(fd);
@@ -461,7 +461,7 @@ namespace Mirage.Weaver
 
         void GenerateSerialization(TypeDefinition netBehaviourSubclass)
         {
-            Weaver.DLog(netBehaviourSubclass, "  GenerateSerialization");
+            Weaver.DebugLog(netBehaviourSubclass, "  GenerateSerialization");
 
             const string SerializeMethodName = nameof(NetworkBehaviour.SerializeSyncVars);
             if (netBehaviourSubclass.GetMethod(SerializeMethodName) != null)
@@ -585,7 +585,7 @@ namespace Mirage.Weaver
 
         void GenerateDeSerialization(TypeDefinition netBehaviourSubclass)
         {
-            Weaver.DLog(netBehaviourSubclass, "  GenerateDeSerialization");
+            Weaver.DebugLog(netBehaviourSubclass, "  GenerateDeSerialization");
 
             const string DeserializeMethodName = nameof(NetworkBehaviour.DeserializeSyncVars);
             if (netBehaviourSubclass.GetMethod(DeserializeMethodName) != null)
