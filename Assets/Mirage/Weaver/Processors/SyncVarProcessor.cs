@@ -10,12 +10,22 @@ using PropertyAttributes = Mono.Cecil.PropertyAttributes;
 
 namespace Mirage.Weaver
 {
+
     /// <summary>
     /// Processes [SyncVar] in NetworkBehaviour
     /// </summary>
     public class SyncVarProcessor
     {
-        private readonly List<FieldDefinition> syncVars = new List<FieldDefinition>();
+        private class FoundSyncVar
+        {
+            public readonly FieldDefinition fieldDefinition;
+
+            public FoundSyncVar(FieldDefinition fieldDefinition)
+            {
+                this.fieldDefinition = fieldDefinition;
+            }
+        }
+        private readonly List<FoundSyncVar> syncVars = new List<FoundSyncVar>();
 
         // store the unwrapped types for every field
         private readonly Dictionary<FieldDefinition, TypeReference> originalTypes = new Dictionary<FieldDefinition, TypeReference>();
@@ -342,7 +352,7 @@ namespace Mirage.Weaver
                     logger.Warning($"{fd.Name} has [SyncVar] attribute. SyncLists should not be marked with SyncVar", fd);
                     continue;
                 }
-                syncVars.Add(fd);
+                syncVars.Add(new FoundSyncVar(fd));
 
                 ProcessSyncVar(fd, 1L << dirtyBitCounter);
                 dirtyBitCounter += 1;
@@ -483,9 +493,9 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg, initializeParameter));
             worker.Append(worker.Create(OpCodes.Brfalse, initialStateLabel));
 
-            foreach (FieldDefinition syncVar in syncVars)
+            foreach (FoundSyncVar syncVar in syncVars)
             {
-                WriteVariable(worker, writerParameter, syncVar);
+                WriteVariable(worker, writerParameter, syncVar.fieldDefinition);
             }
 
             // always return true if forceAll
@@ -511,7 +521,7 @@ namespace Mirage.Weaver
 
             // start at number of syncvars in parent
             int dirtyBit = netBehaviourSubclass.BaseType.Resolve().GetConst<int>(SyncVarCount);
-            foreach (FieldDefinition syncVar in syncVars)
+            foreach (FoundSyncVar syncVar in syncVars)
             {
                 Instruction varLabel = worker.Create(OpCodes.Nop);
 
@@ -525,7 +535,7 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Brfalse, varLabel));
 
                 // Generates a call to the writer for that field
-                WriteVariable(worker, writerParameter, syncVar);
+                WriteVariable(worker, writerParameter, syncVar.fieldDefinition);
 
                 // something was dirty
                 worker.Append(worker.Create(OpCodes.Ldc_I4_1));
@@ -602,9 +612,9 @@ namespace Mirage.Weaver
             serWorker.Append(serWorker.Create(OpCodes.Ldarg, initializeParam));
             serWorker.Append(serWorker.Create(OpCodes.Brfalse, initialStateLabel));
 
-            foreach (FieldDefinition syncVar in syncVars)
+            foreach (FoundSyncVar syncVar in syncVars)
             {
-                DeserializeField(syncVar, serWorker, serialize);
+                DeserializeField(syncVar.fieldDefinition, serWorker, serialize);
             }
 
             serWorker.Append(serWorker.Create(OpCodes.Ret));
@@ -620,7 +630,7 @@ namespace Mirage.Weaver
             // conditionally read each syncvar
             // start at number of syncvars in parent
             int dirtyBit = netBehaviourSubclass.BaseType.Resolve().GetConst<int>(SyncVarCount);
-            foreach (FieldDefinition syncVar in syncVars)
+            foreach (FoundSyncVar syncVar in syncVars)
             {
                 Instruction varLabel = serWorker.Create(OpCodes.Nop);
 
@@ -630,7 +640,7 @@ namespace Mirage.Weaver
                 serWorker.Append(serWorker.Create(OpCodes.And));
                 serWorker.Append(serWorker.Create(OpCodes.Brfalse, varLabel));
 
-                DeserializeField(syncVar, serWorker, serialize);
+                DeserializeField(syncVar.fieldDefinition, serWorker, serialize);
 
                 serWorker.Append(varLabel);
                 dirtyBit += 1;
