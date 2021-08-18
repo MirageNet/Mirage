@@ -112,15 +112,15 @@ namespace Mirage.Serialization
             Dispose(true);
         }
 
-        public void Reset(ArraySegment<byte> segment)
+        public void Reset(BitSegment segment)
         {
-            Reset(segment.Array, segment.Offset, segment.Count);
+            Reset(segment.Array, segment.BitOffset, segment.BitLength);
         }
         public void Reset(byte[] array)
         {
             Reset(array, 0, array.Length);
         }
-        public void Reset(byte[] array, int position, int length)
+        public void Reset(byte[] array, int bitPosition, int bitLength)
         {
             if (needsDisposing)
             {
@@ -131,9 +131,9 @@ namespace Mirage.Serialization
             // reset disposed bool, as it can be disposed again after reset
             needsDisposing = true;
 
-            bitPosition = position * 8;
-            bitOffset = position * 8;
-            bitLength = bitPosition + (length * 8);
+            this.bitPosition = bitPosition;
+            bitOffset = bitPosition;
+            this.bitLength = this.bitPosition + bitLength;
             managedBuffer = array;
             handle = GCHandle.Alloc(managedBuffer, GCHandleType.Pinned);
             longPtr = (ulong*)handle.AddrOfPinnedObject();
@@ -394,6 +394,16 @@ namespace Mirage.Serialization
             CheckNewLength(newPosition);
 
             var result = new ArraySegment<byte>(managedBuffer, BytePosition, count);
+            bitPosition = newPosition;
+            return result;
+        }
+
+        public BitSegment ReadBitSegment(int bitCount)
+        {
+            int newPosition = bitPosition + bitCount;
+            CheckNewLength(newPosition);
+
+            var result = new BitSegment(managedBuffer, BitPosition, bitCount);
             bitPosition = newPosition;
             return result;
         }

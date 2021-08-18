@@ -1246,7 +1246,7 @@ namespace Mirage
                     //  below too)
                     if (ownerWritten > 0)
                     {
-                        varsMessage.payload = ownerWriter.ToArraySegment();
+                        varsMessage.payload = ownerWriter.ToBitSegment();
                         if (ConnectionToClient != null && ConnectionToClient.IsReady)
                             ConnectionToClient.Send(varsMessage);
                     }

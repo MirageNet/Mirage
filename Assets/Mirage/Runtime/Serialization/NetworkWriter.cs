@@ -31,6 +31,23 @@ using UnityEngine;
 namespace Mirage.Serialization
 {
     /// <summary>
+    /// Same as <see cref="ArraySegment{T}"/> but uses bits instead of bytes
+    /// </summary>
+    public struct BitSegment
+    {
+        public readonly byte[] Array;
+        public readonly int BitOffset;
+        public readonly int BitLength;
+
+        public BitSegment(byte[] array, int bitOffset, int bitLength)
+        {
+            Array = array;
+            BitOffset = bitOffset;
+            BitLength = bitLength;
+        }
+    }
+
+    /// <summary>
     /// Bit writer, writes values to a buffer on a bit level
     /// <para>Use <see cref="NetworkWriterPool.GetWriter"/> to reduce memory allocation</para>
     /// </summary>
@@ -158,7 +175,7 @@ namespace Mirage.Serialization
 
         /// <summary>
         /// Copies internal buffer to new Array
-        /// <para>To reduce Allocations use <see cref="ToArraySegment"/> instead</para>
+        /// <para>To reduce Allocations use <see cref="ToBitSegment"/> instead</para>
         /// </summary>
         /// <returns></returns>
         public byte[] ToArray()
@@ -167,9 +184,9 @@ namespace Mirage.Serialization
             Buffer.BlockCopy(managedBuffer, 0, data, 0, ByteLength);
             return data;
         }
-        public ArraySegment<byte> ToArraySegment()
+        public BitSegment ToBitSegment()
         {
-            return new ArraySegment<byte>(managedBuffer, 0, ByteLength);
+            return new BitSegment(managedBuffer, 0, bitPosition);
         }
 
 
@@ -392,13 +409,29 @@ namespace Mirage.Serialization
             bitPosition = newPosition;
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyFromSegment(BitSegment segment)
+        {
+            fixed (byte* ptr = segment.Array)
+            {
+                CopyFromPtr((ulong*)ptr, segment.BitOffset, segment.BitLength);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyFromWriter(NetworkWriter other, int otherBitPosition, int bitLength)
+        {
+            CopyFromPtr(other.longPtr, otherBitPosition, bitLength);
+        }
+
+        public void CopyFromPtr(ulong* otherLongPtr, int otherBitPosition, int bitLength)
         {
             int newBit = bitPosition + bitLength;
             CheckCapacity(newBit);
 
             int ulongPos = otherBitPosition >> 6;
-            ulong* otherPtr = other.longPtr + ulongPos;
+            ulong* otherPtr = otherLongPtr + ulongPos;
 
 
             int firstBitOffset = otherBitPosition & 0b11_1111;
@@ -433,5 +466,6 @@ namespace Mirage.Serialization
             Debug.Assert(bitPosition == newBit, "bitPosition should already be equal to newBit because it would have incremented each WriteUInt64");
             bitPosition = newBit;
         }
+
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using Mirage.Serialization;
 using UnityEngine;
 
 namespace Mirage
@@ -40,16 +41,18 @@ namespace Mirage
         // if the server Rpc can return values
         // this then a ServerRpcReply will be sent with this id
         public int replyId;
-        // the parameters for the Cmd function
-        // -> ArraySegment to avoid unnecessary allocations
-        public ArraySegment<byte> payload;
+
+        // the parameters for the Rpc function
+        public BitSegment payload;
     }
 
     [NetworkMessage]
     public struct ServerRpcReply
     {
         public int replyId;
-        public ArraySegment<byte> payload;
+
+        // the return value for the RPC
+        public BitSegment payload;
     }
 
     [NetworkMessage]
@@ -58,9 +61,8 @@ namespace Mirage
         public uint netId;
         public int componentIndex;
         public int functionHash;
-        // the parameters for the Cmd function
-        // -> ArraySegment to avoid unnecessary allocations
-        public ArraySegment<byte> payload;
+        // the parameters for the Rpc function
+        public BitSegment payload;
     }
     #endregion
 
@@ -105,7 +107,7 @@ namespace Mirage
         /// The serialized component data
         /// <remark>ArraySegment to avoid unnecessary allocations</remark>
         /// </summary>
-        public ArraySegment<byte> payload;
+        public BitSegment payload;
     }
 
     [NetworkMessage]
@@ -126,7 +128,7 @@ namespace Mirage
         public uint netId;
         // the serialized component data
         // -> ArraySegment to avoid unnecessary allocations
-        public ArraySegment<byte> payload;
+        public BitSegment payload;
     }
 
     // A client sends this message to the server

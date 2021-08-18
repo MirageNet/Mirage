@@ -8,6 +8,30 @@ namespace Mirage.Serialization
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(MirageTypesExtensions));
 
+        public static void WriterBitSegment(this NetworkWriter writer, BitSegment segment)
+        {
+            // null is supported
+            if (segment.Array == null)
+            {
+                writer.WriteBoolean(false);
+                return;
+            }
+            writer.WriteBoolean(true);
+            writer.WritePackedUInt32(checked((uint)segment.BitLength));
+            writer.CopyFromSegment(segment);
+        }
+        public static BitSegment ReadBitSegment(this NetworkReader reader)
+        {
+            // if null
+            if (!reader.ReadBoolean())
+            {
+                return default;
+            }
+
+            int bitLength = (int)reader.ReadPackedUInt32();
+            return reader.ReadBitSegment(bitLength);
+        }
+
         public static void WriteNetworkIdentity(this NetworkWriter writer, NetworkIdentity value)
         {
             if (value == null)
