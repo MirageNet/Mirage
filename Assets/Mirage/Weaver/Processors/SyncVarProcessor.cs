@@ -56,45 +56,18 @@ namespace Mirage.Weaver
             // the mapping of dirtybits to sync-vars is implicit in the order of the fields here. this order is recorded in m_replacementProperties.
             // start assigning syncvars at the place the base class stopped, if any
 
+            // get numbers of syncvars in parent class, it will be added to syncvars in this class for total
             int dirtyBitCounter = td.BaseType.Resolve().GetConst<int>(SyncVarCount);
 
-            var fields = new List<FieldDefinition>(td.Fields);
-
             // find syncvars
-            foreach (FieldDefinition fd in fields)
+            foreach (FieldDefinition fd in td.Fields)
             {
-                if (!fd.HasCustomAttribute<SyncVarAttribute>())
+                if (IsValidSyncVar(fd))
                 {
-                    continue;
-                }
+                    syncVars.Add(new FoundSyncVar(fd));
 
-                if (fd.FieldType.IsGenericParameter)
-                {
-                    logger.Error($"{fd.Name} cannot be synced since it's a generic parameter", fd);
-                    continue;
+                    dirtyBitCounter++;
                 }
-
-                if ((fd.Attributes & FieldAttributes.Static) != 0)
-                {
-                    logger.Error($"{fd.Name} cannot be static", fd);
-                    continue;
-                }
-
-                if (fd.FieldType.IsArray)
-                {
-                    logger.Error($"{fd.Name} has invalid type. Use SyncLists instead of arrays", fd);
-                    continue;
-                }
-
-                if (SyncObjectProcessor.ImplementsSyncObject(fd.FieldType))
-                {
-                    logger.Warning($"{fd.Name} has [SyncVar] attribute. SyncLists should not be marked with SyncVar", fd);
-                    continue;
-                }
-                syncVars.Add(new FoundSyncVar(fd));
-
-                ProcessSyncVar(fd, 1L << dirtyBitCounter);
-                dirtyBitCounter += 1;
             }
 
             if (dirtyBitCounter >= SyncVarLimit)
@@ -104,8 +77,48 @@ namespace Mirage.Weaver
 
             td.SetConst(SyncVarCount, syncVars.Count);
 
+            foreach (FoundSyncVar syncvar in syncVars)
+            {
+                ProcessSyncVar(syncvar.fieldDefinition, 1L << dirtyBitCounter);
+            }
+
             GenerateSerialization(td);
             GenerateDeSerialization(td);
+        }
+
+        bool IsValidSyncVar(FieldDefinition field)
+        {
+            if (!field.HasCustomAttribute<SyncVarAttribute>())
+            {
+                return false;
+            }
+
+            if (field.FieldType.IsGenericParameter)
+            {
+                logger.Error($"{field.Name} cannot be synced since it's a generic parameter", field);
+                return false;
+            }
+
+            if ((field.Attributes & FieldAttributes.Static) != 0)
+            {
+                logger.Error($"{field.Name} cannot be static", field);
+                return false;
+            }
+
+            if (field.FieldType.IsArray)
+            {
+                // todo should arrays really be blocked?
+                logger.Error($"{field.Name} has invalid type. Use SyncLists instead of arrays", field);
+                return false;
+            }
+
+            if (SyncObjectProcessor.ImplementsSyncObject(field.FieldType))
+            {
+                logger.Warning($"{field.Name} has [SyncVar] attribute. ISyncObject should not be marked with SyncVar", field);
+                return false;
+            }
+
+            return true;
         }
 
         void ProcessSyncVar(FieldDefinition fd, long dirtyBit)
