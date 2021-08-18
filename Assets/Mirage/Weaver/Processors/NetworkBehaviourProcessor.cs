@@ -26,7 +26,7 @@ namespace Mirage.Weaver
 
         public NetworkBehaviourProcessor(TypeDefinition td, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor, IWeaverLogger logger)
         {
-            Weaver.DLog(td, "NetworkBehaviourProcessor");
+            Weaver.DebugLog(td, "NetworkBehaviourProcessor");
             netBehaviourSubclass = td;
             this.logger = logger;
             serverRpcProcessor = new ServerRpcProcessor(netBehaviourSubclass.Module, readers, writers, logger);
@@ -43,9 +43,9 @@ namespace Mirage.Weaver
             {
                 return false;
             }
-            Weaver.DLog(netBehaviourSubclass, "Found NetworkBehaviour " + netBehaviourSubclass.FullName);
+            Weaver.DebugLog(netBehaviourSubclass, $"Found NetworkBehaviour {netBehaviourSubclass.FullName}");
 
-            Weaver.DLog(netBehaviourSubclass, "Process Start");
+            Weaver.DebugLog(netBehaviourSubclass, "Process Start");
             MarkAsProcessed(netBehaviourSubclass);
 
             syncVarProcessor.ProcessSyncVars(netBehaviourSubclass);
@@ -54,7 +54,7 @@ namespace Mirage.Weaver
 
             ProcessRpcs();
 
-            Weaver.DLog(netBehaviourSubclass, "Process Done");
+            Weaver.DebugLog(netBehaviourSubclass, "Process Done");
             return true;
         }
 
@@ -80,7 +80,7 @@ namespace Mirage.Weaver
 
         void RegisterRpcs()
         {
-            Weaver.DLog(netBehaviourSubclass, "  GenerateConstants ");
+            Weaver.DebugLog(netBehaviourSubclass, "  GenerateConstants ");
 
             // find static constructor
             MethodDefinition cctor = netBehaviourSubclass.GetMethod(".cctor");
