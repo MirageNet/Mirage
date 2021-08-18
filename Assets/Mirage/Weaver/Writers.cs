@@ -122,20 +122,20 @@ namespace Mirage.Weaver
             return true;
         }
 
-        protected override MethodReference GenerateSegmentFunction(TypeReference variable, TypeReference elementType)
+        protected override MethodReference GenerateSegmentFunction(TypeReference typeReference, TypeReference elementType)
         {
             Expression<Action> segmentExpression = () => CollectionExtensions.WriteArraySegment<byte>(default, default);
-            return GenerateCollectionFunction(variable, elementType, segmentExpression);
+            return GenerateCollectionFunction(typeReference, elementType, segmentExpression);
         }
-        protected override MethodReference GenerateCollectionFunction(TypeReference variable, TypeReference elementType, Expression<Action> writerFunction)
+        protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, Expression<Action> genericExpression)
         {
             // make sure element has a writer
             // collection writers use the generic writer, so this will make sure one exists
             _ = GetFunction_Thorws(elementType);
 
-            MethodDefinition writerFunc = GenerateWriterFunc(variable);
+            MethodDefinition writerFunc = GenerateWriterFunc(typeReference);
 
-            MethodReference collectionWriter = module.ImportReference(writerFunction).GetElementMethod();
+            MethodReference collectionWriter = module.ImportReference(genericExpression).GetElementMethod();
 
             var methodRef = new GenericInstanceMethod(collectionWriter);
             methodRef.GenericArguments.Add(elementType);
