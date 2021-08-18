@@ -178,7 +178,7 @@ namespace Mirage.Weaver
             }
             if (typeDefinition.IsAbstract)
             {
-                ThrowCantGenerate(typeReference, "cabstract class");
+                ThrowCantGenerate(typeReference, "abstract class");
             }
 
             // generate writer for class/struct
