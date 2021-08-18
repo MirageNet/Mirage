@@ -12,6 +12,7 @@ namespace Mirage.Weaver
     {
         public List<DiagnosticMessage> Diagnostics = new List<DiagnosticMessage>();
 
+
         public void Error(string message)
         {
             AddMessage(message, null, DiagnosticType.Error);
@@ -22,14 +23,20 @@ namespace Mirage.Weaver
             Error($"{message} (at {mr})");
         }
 
-        public void Error(string message, MethodDefinition md)
-        {
-            AddMessage($"{message} (at {md})", md.DebugInformation.SequencePoints.FirstOrDefault(), DiagnosticType.Error);
-        }
-
         public void Error(string message, MemberReference mr, SequencePoint sequencePoint)
         {
             AddMessage($"{message} (at {mr})", sequencePoint, DiagnosticType.Error);
+        }
+
+        public void Error(string message, MethodDefinition md)
+        {
+            Error(message, md, md.DebugInformation.SequencePoints.FirstOrDefault());
+        }
+
+
+        public void Warning(string message)
+        {
+            AddMessage($"{message}", null, DiagnosticType.Warning);
         }
 
         public void Warning(string message, MemberReference mr)
@@ -37,10 +44,16 @@ namespace Mirage.Weaver
             Warning($"{message} (at {mr})");
         }
 
-        public void Warning(string message)
+        public void Warning(string message, MemberReference mr, SequencePoint sequencePoint)
         {
-            AddMessage($"{message}", null, DiagnosticType.Warning);
+            AddMessage($"{message} (at {mr})", sequencePoint, DiagnosticType.Warning);
         }
+
+        public void Warning(string message, MethodDefinition md)
+        {
+            Warning(message, md, md.DebugInformation.SequencePoints.FirstOrDefault());
+        }
+
 
         private void AddMessage(string message, SequencePoint sequencePoint, DiagnosticType diagnosticType)
         {

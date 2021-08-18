@@ -72,8 +72,8 @@ namespace Mirage.Weaver
                 {
                     if (!argument.IsGenericParameter)
                     {
-                        readers.GetReadFunc(argument, null);
-                        writers.GetWriteFunc(argument, null);
+                        readers.TryGetFunction(argument, null);
+                        writers.TryGetFunction(argument, null);
                     }
                 }
             }

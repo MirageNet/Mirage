@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using Mirage.Serialization;
 using Mono.Cecil;
@@ -9,129 +8,17 @@ using UnityEngine;
 
 namespace Mirage.Weaver
 {
-    public class Readers
+    public class Readers : SerializeFunctionBase
     {
-        readonly Dictionary<TypeReference, MethodReference> readFuncs = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
+        public Readers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
 
-        private readonly ModuleDefinition module;
-        private readonly IWeaverLogger logger;
+        protected override string FunctionTypeLog => "read function";
 
-        public int Count => readFuncs.Count;
+        protected override Expression<Action> ArrayExpression => () => CollectionExtensions.ReadArray<byte>(default);
+        protected override Expression<Action> ListExpression => () => CollectionExtensions.ReadList<byte>(default);
+        protected override Expression<Action> NullableExpression => () => SystemTypesExtensions.ReadNullable<byte>(default);
 
-        public Readers(ModuleDefinition module, IWeaverLogger logger)
-        {
-            this.module = module;
-            this.logger = logger;
-        }
-
-        internal void Register(TypeReference dataType, MethodReference methodReference)
-        {
-            if (readFuncs.ContainsKey(dataType))
-            {
-                logger.Warning($"Registering a Read method for {dataType.FullName} when one already exists\n  old:{readFuncs[dataType].FullName}\n  new:{methodReference.FullName}", methodReference);
-            }
-
-            TypeReference imported = module.ImportReference(dataType);
-            readFuncs[imported] = methodReference;
-        }
-
-        public MethodReference GetReadFunc<T>(SequencePoint sequencePoint) =>
-            GetReadFunc(module.ImportReference<T>(), sequencePoint);
-
-        public MethodReference GetReadFunc(TypeReference typeReference, SequencePoint sequencePoint)
-        {
-            if (readFuncs.TryGetValue(typeReference, out MethodReference foundFunc))
-            {
-                return foundFunc;
-            }
-
-            typeReference = module.ImportReference(typeReference);
-            if (typeReference.IsMultidimensionalArray())
-            {
-                logger.Error($"{typeReference.Name} is an unsupported type. Multidimensional arrays are not supported", typeReference, sequencePoint);
-                return null;
-            }
-
-            if (typeReference.IsArray)
-            {
-                return GenerateReadCollection(typeReference, typeReference.GetElementType(), () => CollectionExtensions.ReadArray<object>(default), sequencePoint);
-            }
-
-            TypeDefinition variableDefinition = typeReference.Resolve();
-
-            if (variableDefinition == null)
-            {
-                logger.Error($"{typeReference.Name} is not a supported type", typeReference, sequencePoint);
-                return null;
-            }
-
-            if (typeReference.Is(typeof(Nullable<>)))
-            {
-                var genericInstance = (GenericInstanceType)typeReference;
-                TypeReference elementType = genericInstance.GenericArguments[0];
-
-                return GenerateReadCollection(typeReference, elementType, () => SystemTypesExtensions.ReadNullable<byte>(default), sequencePoint);
-            }
-            if (variableDefinition.Is(typeof(ArraySegment<>)))
-            {
-                return GenerateArraySegmentReadFunc(typeReference, sequencePoint);
-            }
-            if (variableDefinition.Is(typeof(List<>)))
-            {
-                var genericInstance = (GenericInstanceType)typeReference;
-                TypeReference elementType = genericInstance.GenericArguments[0];
-
-                return GenerateReadCollection(typeReference, elementType, () => CollectionExtensions.ReadList<object>(default), sequencePoint);
-            }
-            if (variableDefinition.IsEnum)
-            {
-                return GenerateEnumReadFunc(typeReference, sequencePoint);
-            }
-            if (variableDefinition.IsDerivedFrom<NetworkBehaviour>())
-            {
-                return GetNetworkBehaviourReader(typeReference);
-            }
-            if (variableDefinition.IsDerivedFrom<Component>())
-            {
-                logger.Error($"Cannot generate reader for component type {typeReference.Name}. Use a supported type or provide a custom reader", typeReference, sequencePoint);
-                return null;
-            }
-            if (typeReference.Is<UnityEngine.Object>())
-            {
-                logger.Error($"Cannot generate reader for {typeReference.Name}. Use a supported type or provide a custom reader", typeReference, sequencePoint);
-                return null;
-            }
-            if (typeReference.Is<ScriptableObject>())
-            {
-                logger.Error($"Cannot generate reader for {typeReference.Name}. Use a supported type or provide a custom reader", typeReference, sequencePoint);
-                return null;
-            }
-            if (typeReference.IsByReference)
-            {
-                // error??
-                logger.Error($"Cannot pass type {typeReference.Name} by reference", typeReference, sequencePoint);
-                return null;
-            }
-            if (variableDefinition.HasGenericParameters)
-            {
-                logger.Error($"Cannot generate reader for generic variable {typeReference.Name}. Use a supported type or provide a custom reader", typeReference, sequencePoint);
-                return null;
-            }
-            if (variableDefinition.IsInterface)
-            {
-                logger.Error($"Cannot generate reader for interface {typeReference.Name}. Use a supported type or provide a custom reader", typeReference, sequencePoint);
-                return null;
-            }
-            if (variableDefinition.IsAbstract)
-            {
-                logger.Error($"Cannot generate reader for abstract class {typeReference.Name}. Use a supported type or provide a custom reader", typeReference, sequencePoint);
-                return null;
-            }
-
-            return GenerateClassOrStructReadFunction(typeReference, sequencePoint);
-        }
-
-        private MethodReference GetNetworkBehaviourReader(TypeReference typeReference)
+        protected override MethodReference GetNetworkBehaviourFunction(TypeReference typeReference)
         {
             MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
             ILProcessor worker = readerFunc.Body.GetILProcessor();
@@ -143,40 +30,34 @@ namespace Mirage.Weaver
             return readerFunc;
         }
 
-        void RegisterReadFunc(TypeReference typeReference, MethodDefinition newReaderFunc)
+        protected override MethodReference GenerateEnumFunction(TypeReference typeReference)
         {
-            readFuncs[typeReference] = newReaderFunc;
-        }
-
-        MethodDefinition GenerateEnumReadFunc(TypeReference variable, SequencePoint sequencePoint)
-        {
-            MethodDefinition readerFunc = GenerateReaderFunction(variable);
+            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
 
             ILProcessor worker = readerFunc.Body.GetILProcessor();
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            TypeReference underlyingType = variable.Resolve().GetEnumUnderlyingType();
-            MethodReference underlyingFunc = GetReadFunc(underlyingType, sequencePoint);
+            TypeReference underlyingType = typeReference.Resolve().GetEnumUnderlyingType();
+            MethodReference underlyingFunc = TryGetFunction(underlyingType, null);
 
             worker.Append(worker.Create(OpCodes.Call, underlyingFunc));
             worker.Append(worker.Create(OpCodes.Ret));
             return readerFunc;
         }
 
-        MethodDefinition GenerateArraySegmentReadFunc(TypeReference variable, SequencePoint sequencePoint)
+        protected override MethodReference GenerateSegmentFunction(TypeReference typeReference, TypeReference elementType)
         {
-            var genericInstance = (GenericInstanceType)variable;
-            TypeReference elementType = genericInstance.GenericArguments[0];
+            var genericInstance = (GenericInstanceType)typeReference;
 
-            MethodDefinition readerFunc = GenerateReaderFunction(variable);
+            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
 
             ILProcessor worker = readerFunc.Body.GetILProcessor();
 
             // $array = reader.Read<[T]>()
             ArrayType arrayType = elementType.MakeArrayType();
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, GetReadFunc(arrayType, sequencePoint)));
+            worker.Append(worker.Create(OpCodes.Call, GetFunction_Thorws(arrayType)));
 
             // return new ArraySegment<T>($array);
             MethodReference arraySegmentConstructor = module.ImportReference(() => new ArraySegment<object>());
@@ -198,18 +79,19 @@ namespace Mirage.Weaver
 
             _ = readerFunc.AddParam<NetworkReader>("reader");
             readerFunc.Body.InitLocals = true;
-            RegisterReadFunc(variable, readerFunc);
+            Register(variable, readerFunc);
 
             return readerFunc;
         }
 
-        MethodDefinition GenerateReadCollection(TypeReference variable, TypeReference elementType, Expression<Action> readerFunction, SequencePoint sequencePoint)
+        protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, Expression<Action> genericExpression)
         {
-            MethodDefinition readerFunc = GenerateReaderFunction(variable);
             // generate readers for the element
-            GetReadFunc(elementType, sequencePoint);
+            _ = GetFunction_Thorws(elementType);
 
-            MethodReference listReader = module.ImportReference(readerFunction);
+            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
+
+            MethodReference listReader = module.ImportReference(genericExpression);
 
             var methodRef = new GenericInstanceMethod(listReader.GetElementMethod());
             methodRef.GenericArguments.Add(elementType);
@@ -226,36 +108,36 @@ namespace Mirage.Weaver
             return readerFunc;
         }
 
-        MethodDefinition GenerateClassOrStructReadFunction(TypeReference type, SequencePoint sequencePoint)
+        protected override MethodReference GenerateClassOrStructFunction(TypeReference typeReference)
         {
-            MethodDefinition readerFunc = GenerateReaderFunction(type);
+            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
 
             // create local for return value
-            VariableDefinition variable = readerFunc.AddLocal(type);
+            VariableDefinition variable = readerFunc.AddLocal(typeReference);
 
             ILProcessor worker = readerFunc.Body.GetILProcessor();
 
 
-            TypeDefinition td = type.Resolve();
+            TypeDefinition td = typeReference.Resolve();
 
             if (!td.IsValueType)
-                GenerateNullCheck(worker, sequencePoint);
+                GenerateNullCheck(worker);
 
-            CreateNew(variable, worker, td, sequencePoint);
-            ReadAllFields(type, worker, sequencePoint);
+            CreateNew(variable, worker, td);
+            ReadAllFields(typeReference, worker);
 
             worker.Append(worker.Create(OpCodes.Ldloc, variable));
             worker.Append(worker.Create(OpCodes.Ret));
             return readerFunc;
         }
 
-        private void GenerateNullCheck(ILProcessor worker, SequencePoint sequencePoint)
+        private void GenerateNullCheck(ILProcessor worker)
         {
             // if (!reader.ReadBoolean()) {
             //   return null;
             // }
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, GetReadFunc<bool>(sequencePoint)));
+            worker.Append(worker.Create(OpCodes.Call, TryGetFunction<bool>(null)));
 
             Instruction labelEmptyArray = worker.Create(OpCodes.Nop);
             worker.Append(worker.Create(OpCodes.Brtrue, labelEmptyArray));
@@ -266,7 +148,7 @@ namespace Mirage.Weaver
         }
 
         // Initialize the local variable with a new instance
-        void CreateNew(VariableDefinition variable, ILProcessor worker, TypeDefinition td, SequencePoint sequencePoint)
+        void CreateNew(VariableDefinition variable, ILProcessor worker, TypeDefinition td)
         {
             TypeReference type = variable.VariableType;
             if (type.IsValueType)
@@ -289,8 +171,7 @@ namespace Mirage.Weaver
                 MethodDefinition ctor = Resolvers.ResolveDefaultPublicCtor(type);
                 if (ctor == null)
                 {
-                    logger.Error($"{type.Name} can't be deserialized because it has no default constructor", type, sequencePoint);
-                    return;
+                    throw new SerializeFunctionException($"{type.Name} can't be deserialized because it has no default constructor", type);
                 }
 
                 MethodReference ctorRef = worker.Body.Method.Module.ImportReference(ctor);
@@ -300,7 +181,7 @@ namespace Mirage.Weaver
             }
         }
 
-        void ReadAllFields(TypeReference variable, ILProcessor worker, SequencePoint sequencePoint)
+        void ReadAllFields(TypeReference variable, ILProcessor worker)
         {
             uint fields = 0;
             foreach (FieldDefinition field in variable.FindAllPublicFields())
@@ -309,16 +190,10 @@ namespace Mirage.Weaver
                 OpCode opcode = variable.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc;
                 worker.Append(worker.Create(opcode, 0));
 
-                MethodReference readFunc = GetReadFunc(field.FieldType, sequencePoint);
-                if (readFunc != null)
-                {
-                    worker.Append(worker.Create(OpCodes.Ldarg_0));
-                    worker.Append(worker.Create(OpCodes.Call, readFunc));
-                }
-                else
-                {
-                    logger.Error($"{field.Name} has an unsupported type", field, sequencePoint);
-                }
+                MethodReference readFunc = GetFunction_Thorws(field.FieldType);
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Call, readFunc));
+
                 FieldReference fieldRef = module.ImportReference(field);
 
                 worker.Append(worker.Create(OpCodes.Stfld, fieldRef));
@@ -340,7 +215,7 @@ namespace Mirage.Weaver
             TypeReference funcRef = module.ImportReference(typeof(Func<,>));
             MethodReference funcConstructorRef = module.ImportReference(typeof(Func<,>).GetConstructors()[0]);
 
-            foreach (MethodReference readFunc in readFuncs.Values)
+            foreach (MethodReference readFunc in funcs.Values)
             {
                 TypeReference dataType = readFunc.ReturnType;
 

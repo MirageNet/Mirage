@@ -1,25 +1,23 @@
 using System;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver
 {
-    [Serializable]
-    public abstract class WeaverException : Exception
+    internal abstract class WeaverException : Exception
     {
-        public MemberReference MemberReference { get; }
+        public readonly SequencePoint SequencePoint;
+        public readonly MemberReference MemberReference;
 
-        protected WeaverException(string message, MemberReference member) : base(message)
+        protected WeaverException(string message, MemberReference memberReference, SequencePoint sequencePoint) : base(message)
         {
-            MemberReference = member;
+            SequencePoint = sequencePoint;
+            MemberReference = memberReference;
         }
-
-        protected WeaverException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) : base(serializationInfo, streamingContext) { }
     }
 
-    [Serializable]
-    public class GenerateWriterException : WeaverException
+    internal class SerializeFunctionException : WeaverException
     {
-        public GenerateWriterException(string message, MemberReference member) : base(message, member) { }
-        protected GenerateWriterException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) : base(serializationInfo, streamingContext) { }
+        public SerializeFunctionException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
     }
 }
