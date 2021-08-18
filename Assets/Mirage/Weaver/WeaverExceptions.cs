@@ -18,6 +18,6 @@ namespace Mirage.Weaver
 
     public class SerializeFunctionException : WeaverException
     {
-        public SerializeFunctionException(string message, MemberReference memberReference, SequencePoint sequencePoint) : base(message, memberReference, sequencePoint) { }
+        public SerializeFunctionException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
     }
 }
