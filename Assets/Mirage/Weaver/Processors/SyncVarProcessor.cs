@@ -35,6 +35,13 @@ namespace Mirage.Weaver
         private readonly PropertySiteProcessor propertySiteProcessor;
         private readonly IWeaverLogger logger;
 
+        // ulong = 64 bytes
+        const int SyncVarLimit = 64;
+        private const string SyncVarCount = "SYNC_VAR_COUNT";
+
+        static string HookParameterMessage(string hookName, TypeReference ValueType)
+            => string.Format("void {0}({1} oldValue, {1} newValue)", hookName, ValueType);
+
         public SyncVarProcessor(ModuleDefinition module, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor, IWeaverLogger logger)
         {
             this.module = module;
@@ -44,64 +51,91 @@ namespace Mirage.Weaver
             this.logger = logger;
         }
 
-        // ulong = 64 bytes
-        const int SyncVarLimit = 64;
-        private const string SyncVarCount = "SYNC_VAR_COUNT";
-
-        static string HookParameterMessage(string hookName, TypeReference ValueType)
-            => string.Format("void {0}({1} oldValue, {1} newValue)", hookName, ValueType);
-
-        // Get hook method if any
-        MethodDefinition GetHookMethod(FieldDefinition syncVar, TypeReference originalType)
+        public void ProcessSyncVars(TypeDefinition td)
         {
-            CustomAttribute syncVarAttr = syncVar.GetCustomAttribute<SyncVarAttribute>();
+            // the mapping of dirtybits to sync-vars is implicit in the order of the fields here. this order is recorded in m_replacementProperties.
+            // start assigning syncvars at the place the base class stopped, if any
 
-            if (syncVarAttr == null)
-                return null;
+            int dirtyBitCounter = td.BaseType.Resolve().GetConst<int>(SyncVarCount);
 
-            string hookFunctionName = syncVarAttr.GetField<string>("hook", null);
+            var fields = new List<FieldDefinition>(td.Fields);
 
-            if (hookFunctionName == null)
-                return null;
-
-            return FindHookMethod(syncVar, hookFunctionName, originalType);
-        }
-
-        MethodDefinition FindHookMethod(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
-        {
-            List<MethodDefinition> methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
-
-            var methodsWith2Param = new List<MethodDefinition>(methods.Where(m => m.Parameters.Count == 2));
-
-            if (methodsWith2Param.Count == 0)
+            // find syncvars
+            foreach (FieldDefinition fd in fields)
             {
-                logger.Error($"Could not find hook for '{syncVar.Name}', hook name '{hookFunctionName}'. " +
-                    $"Method signature should be {HookParameterMessage(hookFunctionName, originalType)}",
-                    syncVar);
-
-                return null;
-            }
-
-            foreach (MethodDefinition method in methodsWith2Param)
-            {
-                if (MatchesParameters(method, originalType))
+                if (!fd.HasCustomAttribute<SyncVarAttribute>())
                 {
-                    return method;
+                    continue;
                 }
+
+                if (fd.FieldType.IsGenericParameter)
+                {
+                    logger.Error($"{fd.Name} cannot be synced since it's a generic parameter", fd);
+                    continue;
+                }
+
+                if ((fd.Attributes & FieldAttributes.Static) != 0)
+                {
+                    logger.Error($"{fd.Name} cannot be static", fd);
+                    continue;
+                }
+
+                if (fd.FieldType.IsArray)
+                {
+                    logger.Error($"{fd.Name} has invalid type. Use SyncLists instead of arrays", fd);
+                    continue;
+                }
+
+                if (SyncObjectProcessor.ImplementsSyncObject(fd.FieldType))
+                {
+                    logger.Warning($"{fd.Name} has [SyncVar] attribute. SyncLists should not be marked with SyncVar", fd);
+                    continue;
+                }
+                syncVars.Add(new FoundSyncVar(fd));
+
+                ProcessSyncVar(fd, 1L << dirtyBitCounter);
+                dirtyBitCounter += 1;
             }
 
-            logger.Error($"Wrong type for Parameter in hook for '{syncVar.Name}', hook name '{hookFunctionName}'. " +
-                     $"Method signature should be {HookParameterMessage(hookFunctionName, originalType)}",
-                   syncVar);
+            if (dirtyBitCounter >= SyncVarLimit)
+            {
+                logger.Error($"{td.Name} has too many SyncVars. Consider refactoring your class into multiple components", td);
+            }
 
-            return null;
+            td.SetConst(SyncVarCount, syncVars.Count);
+
+            GenerateSerialization(td);
+            GenerateDeSerialization(td);
         }
 
-        static bool MatchesParameters(MethodDefinition method, TypeReference originalType)
+        void ProcessSyncVar(FieldDefinition fd, long dirtyBit)
         {
-            // matches void onValueChange(T oldValue, T newValue)
-            return method.Parameters[0].ParameterType.FullName == originalType.FullName &&
-                   method.Parameters[1].ParameterType.FullName == originalType.FullName;
+            string originalName = fd.Name;
+            Weaver.DLog(fd.DeclaringType, "Sync Var " + fd.Name + " " + fd.FieldType);
+
+            TypeReference originalType = fd.FieldType;
+            fd.FieldType = WrapType(fd);
+
+            MethodDefinition get = GenerateSyncVarGetter(fd, originalName, originalType);
+            MethodDefinition set = GenerateSyncVarSetter(fd, originalName, dirtyBit, originalType);
+
+            //NOTE: is property even needed? Could just use a setter function?
+            //create the property
+            var propertyDefinition = new PropertyDefinition("Network" + originalName, PropertyAttributes.None, originalType)
+            {
+                GetMethod = get,
+                SetMethod = set
+            };
+
+            propertyDefinition.DeclaringType = fd.DeclaringType;
+            //add the methods and property to the type.
+            fd.DeclaringType.Properties.Add(propertyDefinition);
+            propertySiteProcessor.Setters[fd] = set;
+
+            if (IsWrapped(fd.FieldType))
+            {
+                propertySiteProcessor.Getters[fd] = get;
+            }
         }
 
         MethodDefinition GenerateSyncVarGetter(FieldDefinition fd, string originalName, TypeReference originalType)
@@ -206,26 +240,6 @@ namespace Mirage.Weaver
             return set;
         }
 
-        private void StoreField(FieldDefinition fd, ParameterDefinition valueParam, ILProcessor worker)
-        {
-            if (IsWrapped(fd.FieldType))
-            {
-                // there is a wrapper struct, call the setter
-                MethodReference setter = module.ImportReference(fd.FieldType.Resolve().GetMethod("set_Value"));
-
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
-                worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
-                worker.Append(worker.Create(OpCodes.Call, setter));
-            }
-            else
-            {
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
-                worker.Append(worker.Create(OpCodes.Stfld, fd.MakeHostGenericIfNeeded()));
-            }
-        }
-
         private void LoadField(FieldDefinition fd, TypeReference originalType, ILProcessor worker)
         {
             worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -251,34 +265,84 @@ namespace Mirage.Weaver
             }
         }
 
-        void ProcessSyncVar(FieldDefinition fd, long dirtyBit)
+        private void StoreField(FieldDefinition fd, ParameterDefinition valueParam, ILProcessor worker)
         {
-            string originalName = fd.Name;
-            Weaver.DLog(fd.DeclaringType, "Sync Var " + fd.Name + " " + fd.FieldType);
-
-            TypeReference originalType = fd.FieldType;
-            fd.FieldType = WrapType(fd);
-
-            MethodDefinition get = GenerateSyncVarGetter(fd, originalName, originalType);
-            MethodDefinition set = GenerateSyncVarSetter(fd, originalName, dirtyBit, originalType);
-
-            //NOTE: is property even needed? Could just use a setter function?
-            //create the property
-            var propertyDefinition = new PropertyDefinition("Network" + originalName, PropertyAttributes.None, originalType)
-            {
-                GetMethod = get,
-                SetMethod = set
-            };
-
-            propertyDefinition.DeclaringType = fd.DeclaringType;
-            //add the methods and property to the type.
-            fd.DeclaringType.Properties.Add(propertyDefinition);
-            propertySiteProcessor.Setters[fd] = set;
-
             if (IsWrapped(fd.FieldType))
             {
-                propertySiteProcessor.Getters[fd] = get;
+                // there is a wrapper struct, call the setter
+                MethodReference setter = module.ImportReference(fd.FieldType.Resolve().GetMethod("set_Value"));
+
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
+                worker.Append(worker.Create(OpCodes.Call, setter));
             }
+            else
+            {
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
+                worker.Append(worker.Create(OpCodes.Stfld, fd.MakeHostGenericIfNeeded()));
+            }
+        }
+
+        // Get hook method if any
+        MethodDefinition GetHookMethod(FieldDefinition syncVar, TypeReference originalType)
+        {
+            CustomAttribute syncVarAttr = syncVar.GetCustomAttribute<SyncVarAttribute>();
+
+            if (syncVarAttr == null)
+                return null;
+
+            string hookFunctionName = syncVarAttr.GetField<string>("hook", null);
+
+            if (hookFunctionName == null)
+                return null;
+
+            return FindHookMethod(syncVar, hookFunctionName, originalType);
+        }
+
+        MethodDefinition FindHookMethod(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
+        {
+            List<MethodDefinition> methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
+
+            var methodsWith2Param = new List<MethodDefinition>(methods.Where(m => m.Parameters.Count == 2));
+
+            if (methodsWith2Param.Count == 0)
+            {
+                logger.Error($"Could not find hook for '{syncVar.Name}', hook name '{hookFunctionName}'. " +
+                    $"Method signature should be {HookParameterMessage(hookFunctionName, originalType)}",
+                    syncVar);
+
+                return null;
+            }
+
+            foreach (MethodDefinition method in methodsWith2Param)
+            {
+                if (MatchesParameters(method, originalType))
+                {
+                    return method;
+                }
+            }
+
+            logger.Error($"Wrong type for Parameter in hook for '{syncVar.Name}', hook name '{hookFunctionName}'. " +
+                     $"Method signature should be {HookParameterMessage(hookFunctionName, originalType)}",
+                   syncVar);
+
+            return null;
+        }
+
+        static bool MatchesParameters(MethodDefinition method, TypeReference originalType)
+        {
+            // matches void onValueChange(T oldValue, T newValue)
+            return method.Parameters[0].ParameterType.FullName == originalType.FullName &&
+                   method.Parameters[1].ParameterType.FullName == originalType.FullName;
+        }
+
+        private static bool IsWrapped(TypeReference typeReference)
+        {
+            return typeReference.Is<NetworkIdentitySyncvar>() ||
+                typeReference.Is<GameObjectSyncvar>() ||
+                typeReference.Is<NetworkBehaviorSyncvar>();
         }
 
         private TypeReference WrapType(FieldDefinition syncvar)
@@ -303,70 +367,6 @@ namespace Mirage.Weaver
         private TypeReference UnwrapType(FieldDefinition syncvar)
         {
             return originalTypes[syncvar];
-        }
-
-        private static bool IsWrapped(TypeReference typeReference)
-        {
-            return typeReference.Is<NetworkIdentitySyncvar>() ||
-                typeReference.Is<GameObjectSyncvar>() ||
-                typeReference.Is<NetworkBehaviorSyncvar>();
-        }
-
-        public void ProcessSyncVars(TypeDefinition td)
-        {
-            // the mapping of dirtybits to sync-vars is implicit in the order of the fields here. this order is recorded in m_replacementProperties.
-            // start assigning syncvars at the place the base class stopped, if any
-
-            int dirtyBitCounter = td.BaseType.Resolve().GetConst<int>(SyncVarCount);
-
-            var fields = new List<FieldDefinition>(td.Fields);
-
-            // find syncvars
-            foreach (FieldDefinition fd in fields)
-            {
-                if (!fd.HasCustomAttribute<SyncVarAttribute>())
-                {
-                    continue;
-                }
-
-                if (fd.FieldType.IsGenericParameter)
-                {
-                    logger.Error($"{fd.Name} cannot be synced since it's a generic parameter", fd);
-                    continue;
-                }
-
-                if ((fd.Attributes & FieldAttributes.Static) != 0)
-                {
-                    logger.Error($"{fd.Name} cannot be static", fd);
-                    continue;
-                }
-
-                if (fd.FieldType.IsArray)
-                {
-                    logger.Error($"{fd.Name} has invalid type. Use SyncLists instead of arrays", fd);
-                    continue;
-                }
-
-                if (SyncObjectProcessor.ImplementsSyncObject(fd.FieldType))
-                {
-                    logger.Warning($"{fd.Name} has [SyncVar] attribute. SyncLists should not be marked with SyncVar", fd);
-                    continue;
-                }
-                syncVars.Add(new FoundSyncVar(fd));
-
-                ProcessSyncVar(fd, 1L << dirtyBitCounter);
-                dirtyBitCounter += 1;
-            }
-
-            if (dirtyBitCounter >= SyncVarLimit)
-            {
-                logger.Error($"{td.Name} has too many SyncVars. Consider refactoring your class into multiple components", td);
-            }
-
-            td.SetConst(SyncVarCount, syncVars.Count);
-
-            GenerateSerialization(td);
-            GenerateDeSerialization(td);
         }
 
         void WriteCallHookMethodUsingArgument(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue)
