@@ -16,7 +16,7 @@ namespace Mirage.Weaver
         void Warning(string message, MethodDefinition md);
     }
 
-    public static class WeaverLoggerExtensions
+    internal static class WeaverLoggerExtensions
     {
         public static void Error(this IWeaverLogger logger, WeaverException exception)
         {
