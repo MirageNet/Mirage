@@ -4,7 +4,7 @@ using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver
 {
-    public abstract class WeaverException : Exception
+    internal abstract class WeaverException : Exception
     {
         public readonly SequencePoint SequencePoint;
         public readonly MemberReference MemberReference;
@@ -16,7 +16,7 @@ namespace Mirage.Weaver
         }
     }
 
-    public class SerializeFunctionException : WeaverException
+    internal class SerializeFunctionException : WeaverException
     {
         public SerializeFunctionException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
     }
