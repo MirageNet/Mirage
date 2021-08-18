@@ -20,4 +20,9 @@ namespace Mirage.Weaver
     {
         public SerializeFunctionException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
     }
+
+    internal class SyncVarException : WeaverException
+    {
+        public SyncVarException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
+    }
 }
