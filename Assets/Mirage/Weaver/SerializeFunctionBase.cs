@@ -65,7 +65,6 @@ namespace Mirage.Weaver
             }
             catch (SerializeFunctionException e)
             {
-                // todo remove Sequencepoint from SerializeFunctionException, and use from parameter instead
                 logger.Error(e, sequencePoint);
                 return null;
             }
@@ -78,7 +77,7 @@ namespace Mirage.Weaver
         /// <param name="sequencePoint"></param>
         /// <returns></returns>
         /// <exception cref="SerializeFunctionException">Throws if unable to find or create function</exception>
-        // todo rename this to GetFunction once other classes are able to catch Exceptio
+        // todo rename this to GetFunction once other classes are able to catch Exception
         public MethodReference GetFunction_Thorws(TypeReference typeReference)
         {
             if (funcs.TryGetValue(typeReference, out MethodReference foundFunc))
@@ -139,7 +138,7 @@ namespace Mirage.Weaver
             TypeDefinition typeDefinition = typeReference.Resolve();
             if (typeDefinition == null)
             {
-                ThrowCantGenerate(typeReference);
+                throw ThrowCantGenerate(typeReference);
             }
 
             if (typeDefinition.IsEnum)
@@ -156,47 +155,47 @@ namespace Mirage.Weaver
             // unity base types are invalid
             if (typeDefinition.IsDerivedFrom<UnityEngine.Component>())
             {
-                ThrowCantGenerate(typeReference, "component type");
+                throw ThrowCantGenerate(typeReference, "component type");
             }
             if (typeReference.Is<UnityEngine.Object>())
             {
-                ThrowCantGenerate(typeReference);
+                throw ThrowCantGenerate(typeReference);
             }
             if (typeReference.Is<UnityEngine.ScriptableObject>())
             {
-                ThrowCantGenerate(typeReference);
+                throw ThrowCantGenerate(typeReference);
             }
 
 
             if (typeDefinition.HasGenericParameters)
             {
-                ThrowCantGenerate(typeReference, "generic type");
+                throw ThrowCantGenerate(typeReference, "generic type");
             }
             if (typeDefinition.IsInterface)
             {
-                ThrowCantGenerate(typeReference, "interface");
+                throw ThrowCantGenerate(typeReference, "interface");
             }
             if (typeDefinition.IsAbstract)
             {
-                ThrowCantGenerate(typeReference, "abstract class");
+                throw ThrowCantGenerate(typeReference, "abstract class");
             }
 
             // generate writer for class/struct
             return GenerateClassOrStructFunction(typeReference);
         }
 
-        void ThrowCantGenerate(TypeReference typeReference, string typeDescription = null)
+        SerializeFunctionException ThrowCantGenerate(TypeReference typeReference, string typeDescription = null)
         {
             string reasonStr = string.IsNullOrEmpty(typeDescription) ? string.Empty : $"{typeDescription} ";
-            throw new SerializeFunctionException($"Cannot generate {FunctionTypeLog} for {reasonStr}{typeReference.Name}. Use a supported type or provide a custom {FunctionTypeLog}", typeReference);
+            return new SerializeFunctionException($"Cannot generate {FunctionTypeLog} for {reasonStr}{typeReference.Name}. Use a supported type or provide a custom {FunctionTypeLog}", typeReference);
         }
 
         protected abstract MethodReference GetNetworkBehaviourFunction(TypeReference typeReference);
 
 
         protected abstract MethodReference GenerateEnumFunction(TypeReference typeReference);
-        protected abstract MethodReference GenerateCollectionFunction(TypeReference variable, TypeReference elementType, Expression<Action> writerFunction);
-        protected abstract MethodReference GenerateSegmentFunction(TypeReference variable, TypeReference elementType);
+        protected abstract MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, Expression<Action> genericExpression);
+        protected abstract MethodReference GenerateSegmentFunction(TypeReference typeReference, TypeReference elementType);
 
         protected abstract Expression<Action> ArrayExpression { get; }
         protected abstract Expression<Action> ListExpression { get; }

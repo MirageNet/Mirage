@@ -30,15 +30,15 @@ namespace Mirage.Weaver
             return readerFunc;
         }
 
-        protected override MethodReference GenerateEnumFunction(TypeReference variable)
+        protected override MethodReference GenerateEnumFunction(TypeReference typeReference)
         {
-            MethodDefinition readerFunc = GenerateReaderFunction(variable);
+            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
 
             ILProcessor worker = readerFunc.Body.GetILProcessor();
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            TypeReference underlyingType = variable.Resolve().GetEnumUnderlyingType();
+            TypeReference underlyingType = typeReference.Resolve().GetEnumUnderlyingType();
             MethodReference underlyingFunc = TryGetFunction(underlyingType, null);
 
             worker.Append(worker.Create(OpCodes.Call, underlyingFunc));
@@ -46,11 +46,11 @@ namespace Mirage.Weaver
             return readerFunc;
         }
 
-        protected override MethodReference GenerateSegmentFunction(TypeReference variable, TypeReference elementType)
+        protected override MethodReference GenerateSegmentFunction(TypeReference typeReference, TypeReference elementType)
         {
-            var genericInstance = (GenericInstanceType)variable;
+            var genericInstance = (GenericInstanceType)typeReference;
 
-            MethodDefinition readerFunc = GenerateReaderFunction(variable);
+            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
 
             ILProcessor worker = readerFunc.Body.GetILProcessor();
 
@@ -84,14 +84,14 @@ namespace Mirage.Weaver
             return readerFunc;
         }
 
-        protected override MethodReference GenerateCollectionFunction(TypeReference variable, TypeReference elementType, Expression<Action> readerFunction)
+        protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, Expression<Action> genericExpression)
         {
             // generate readers for the element
             _ = GetFunction_Thorws(elementType);
 
-            MethodDefinition readerFunc = GenerateReaderFunction(variable);
+            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
 
-            MethodReference listReader = module.ImportReference(readerFunction);
+            MethodReference listReader = module.ImportReference(genericExpression);
 
             var methodRef = new GenericInstanceMethod(listReader.GetElementMethod());
             methodRef.GenericArguments.Add(elementType);
@@ -108,23 +108,23 @@ namespace Mirage.Weaver
             return readerFunc;
         }
 
-        protected override MethodReference GenerateClassOrStructFunction(TypeReference type)
+        protected override MethodReference GenerateClassOrStructFunction(TypeReference typeReference)
         {
-            MethodDefinition readerFunc = GenerateReaderFunction(type);
+            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
 
             // create local for return value
-            VariableDefinition variable = readerFunc.AddLocal(type);
+            VariableDefinition variable = readerFunc.AddLocal(typeReference);
 
             ILProcessor worker = readerFunc.Body.GetILProcessor();
 
 
-            TypeDefinition td = type.Resolve();
+            TypeDefinition td = typeReference.Resolve();
 
             if (!td.IsValueType)
                 GenerateNullCheck(worker);
 
             CreateNew(variable, worker, td);
-            ReadAllFields(type, worker);
+            ReadAllFields(typeReference, worker);
 
             worker.Append(worker.Create(OpCodes.Ldloc, variable));
             worker.Append(worker.Create(OpCodes.Ret));
