@@ -39,7 +39,7 @@ namespace Mirage.Weaver
         [Test]
         public void SyncVarsGenericParam()
         {
-            HasError("Cannot generate writer for generic type MySyncVar`1. Use a supported type or provide a custom writer",
+            HasError("Cannot generate write function for generic type MySyncVar`1. Use a supported type or provide a custom write function",
                 "SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam/MySyncVar`1<System.Int32>");
             HasError("invalidVar has unsupported type. Use a supported Mirage type instead",
                 "SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam/MySyncVar`1<System.Int32> SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam::invalidVar");
@@ -48,7 +48,7 @@ namespace Mirage.Weaver
         [Test]
         public void SyncVarsInterface()
         {
-            HasError("Cannot generate writer for interface IMySyncVar. Use a supported type or provide a custom writer",
+            HasError("Cannot generate write function for interface IMySyncVar. Use a supported type or provide a custom write function",
                 "SyncVarTests.SyncVarsInterface.SyncVarsInterface/IMySyncVar");
             HasError("invalidVar has unsupported type. Use a supported Mirage type instead",
                 "SyncVarTests.SyncVarsInterface.SyncVarsInterface/IMySyncVar SyncVarTests.SyncVarsInterface.SyncVarsInterface::invalidVar");
@@ -57,7 +57,7 @@ namespace Mirage.Weaver
         [Test]
         public void SyncVarsUnityComponent()
         {
-            HasError("Cannot generate writer for component type TextMesh. Use a supported type or provide a custom writer",
+            HasError("Cannot generate write function for component type TextMesh. Use a supported type or provide a custom write function",
                 "UnityEngine.TextMesh");
             HasError("invalidVar has unsupported type. Use a supported Mirage type instead",
                 "UnityEngine.TextMesh SyncVarTests.SyncVarsUnityComponent.SyncVarsUnityComponent::invalidVar");
