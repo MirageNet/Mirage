@@ -10,7 +10,6 @@ using PropertyAttributes = Mono.Cecil.PropertyAttributes;
 
 namespace Mirage.Weaver
 {
-
     /// <summary>
     /// Processes [SyncVar] in NetworkBehaviour
     /// </summary>
@@ -37,7 +36,7 @@ namespace Mirage.Weaver
 
         // ulong = 64 bytes
         const int SyncVarLimit = 64;
-        private const string SyncVarCount = "SYNC_VAR_COUNT";
+        private const string SyncVarCountField = "SYNC_VAR_COUNT";
 
         static string HookParameterMessage(string hookName, TypeReference ValueType)
             => string.Format("void {0}({1} oldValue, {1} newValue)", hookName, ValueType);
@@ -57,7 +56,7 @@ namespace Mirage.Weaver
             // start assigning syncvars at the place the base class stopped, if any
 
             // get numbers of syncvars in parent class, it will be added to syncvars in this class for total
-            int dirtyBitCounter = td.BaseType.Resolve().GetConst<int>(SyncVarCount);
+            int baseSyncVarCount = td.BaseType.Resolve().GetConst<int>(SyncVarCountField);
 
             // find syncvars
             foreach (FieldDefinition fd in td.Fields)
@@ -65,21 +64,19 @@ namespace Mirage.Weaver
                 if (IsValidSyncVar(fd))
                 {
                     syncVars.Add(new FoundSyncVar(fd));
-
-                    dirtyBitCounter++;
                 }
             }
 
-            if (dirtyBitCounter >= SyncVarLimit)
+            if ((baseSyncVarCount + syncVars.Count) >= SyncVarLimit)
             {
                 logger.Error($"{td.Name} has too many SyncVars. Consider refactoring your class into multiple components", td);
             }
 
-            td.SetConst(SyncVarCount, syncVars.Count);
+            td.SetConst(SyncVarCountField, baseSyncVarCount + syncVars.Count);
 
-            foreach (FoundSyncVar syncvar in syncVars)
+            for (int i = 0; i < syncVars.Count; i++)
             {
-                ProcessSyncVar(syncvar.fieldDefinition, 1L << dirtyBitCounter);
+                ProcessSyncVar(syncVars[i].fieldDefinition, 1L << (baseSyncVarCount + i));
             }
 
             GenerateSerialization(td);
@@ -533,7 +530,7 @@ namespace Mirage.Weaver
             // generate a writer call for any dirty variable in this class
 
             // start at number of syncvars in parent
-            int dirtyBit = netBehaviourSubclass.BaseType.Resolve().GetConst<int>(SyncVarCount);
+            int dirtyBit = netBehaviourSubclass.BaseType.Resolve().GetConst<int>(SyncVarCountField);
             foreach (FoundSyncVar syncVar in syncVars)
             {
                 Instruction varLabel = worker.Create(OpCodes.Nop);
@@ -642,7 +639,7 @@ namespace Mirage.Weaver
 
             // conditionally read each syncvar
             // start at number of syncvars in parent
-            int dirtyBit = netBehaviourSubclass.BaseType.Resolve().GetConst<int>(SyncVarCount);
+            int dirtyBit = netBehaviourSubclass.BaseType.Resolve().GetConst<int>(SyncVarCountField);
             foreach (FoundSyncVar syncVar in syncVars)
             {
                 Instruction varLabel = serWorker.Create(OpCodes.Nop);
