@@ -1,3 +1,10 @@
+## [101.4.1](https://github.com/MirageNet/Mirage/compare/v101.4.0...v101.4.1) (2021-08-19)
+
+
+### Bug Fixes
+
+* **weaver:** fixing dirty bit for syncvar ([b4a837d](https://github.com/MirageNet/Mirage/commit/b4a837dde40da17ce7947b835da7e6b747d14e32))
+
 # [101.4.0](https://github.com/MirageNet/Mirage/compare/v101.3.0...v101.4.0) (2021-08-17)
 
 
