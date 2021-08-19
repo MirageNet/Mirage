@@ -5,6 +5,7 @@ using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver
 {
+    // todo add docs for what this type does
     public class PropertySiteProcessor
     {
         // setter functions that replace [SyncVar] member variable references. dict<field, replacement>

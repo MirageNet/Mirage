@@ -26,3 +26,12 @@ namespace Mirage.Weaver
         public SyncVarException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
     }
 }
+
+
+namespace Mirage.Weaver.SyncVars
+{
+    internal class HookMethodException : WeaverException
+    {
+        public HookMethodException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
+    }
+}
