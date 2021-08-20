@@ -22,6 +22,8 @@ namespace Mirage.Weaver.SyncVars
 
         public bool HasHookMethod { get; private set; }
         public MethodDefinition HookMethod { get; private set; }
+        public MethodReference WriteFunction { get; private set; }
+        public MethodReference ReadFunction { get; private set; }
 
         /// <summary>
         /// Changing the type of the field to the wrapper type, if one exists
@@ -74,5 +76,19 @@ namespace Mirage.Weaver.SyncVars
             HookMethod = HookMethodFinder.GetHookMethod(FieldDefinition, OriginalType);
             HasHookMethod = HookMethod != null;
         }
+
+        public void FindSerializeFunctions(Writers writers, Readers readers)
+        {
+            try
+            {
+                WriteFunction = writers.GetFunction_Thorws(FieldDefinition.FieldType);
+                ReadFunction = readers.GetFunction_Thorws(FieldDefinition.FieldType);
+            }
+            catch (SerializeFunctionException e)
+            {
+                throw new SyncVarException($"{FieldDefinition.Name} is an unsupported type. {e.Message}", FieldDefinition);
+            }
+        }
+
     }
 }
