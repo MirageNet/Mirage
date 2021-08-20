@@ -23,22 +23,22 @@ namespace Mirage
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
-        SceneChangeEvent ClientStartedSceneChange { get; }
+        SceneChangeEvent OnClientStartedSceneChange { get; }
 
         /// <summary>
         /// Event fires after the Client has completed its scene change.
         /// </summary>
-        SceneChangeEvent ClientFinishedSceneChange { get; }
+        SceneChangeEvent OnClientFinishedSceneChange { get; }
 
         /// <summary>
         /// Event fires before Server changes scene.
         /// </summary>
-        SceneChangeEvent ServerStartedSceneChange { get; }
+        SceneChangeEvent OnServerStartedSceneChange { get; }
 
         /// <summary>
         /// Event fires after Server has completed scene change.
         /// </summary>
-        SceneChangeEvent ServerFinishedSceneChange { get; }
+        SceneChangeEvent OnServerFinishedSceneChange { get; }
 
         /// <summary>
         ///     Allows server to fully load in a new scene and override current active scene.

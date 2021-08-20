@@ -59,8 +59,8 @@ namespace Mirage
 
                 if (NetworkSceneManager != null)
                 {
-                    NetworkSceneManager.ServerStartedSceneChange.AddListener(OnServerChangeScene);
-                    NetworkSceneManager.ServerFinishedSceneChange.AddListener(OnServerSceneChanged);
+                    NetworkSceneManager.OnServerStartedSceneChange.AddListener(OnServerChangeScene);
+                    NetworkSceneManager.OnServerFinishedSceneChange.AddListener(OnServerSceneChanged);
                 }
             }
         }

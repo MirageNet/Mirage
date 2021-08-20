@@ -36,7 +36,7 @@ namespace Mirage
         /// </summary>
         public bool DontDestroy = true;
 
-        public readonly Dictionary<Scene, List<INetworkPlayer>> ServerSceneData = new Dictionary<Scene, List<INetworkPlayer>>();
+        private readonly Dictionary<Scene, HashSet<INetworkPlayer>> _serverSceneData = new Dictionary<Scene, HashSet<INetworkPlayer>>();
 
         /// <summary>
         /// The path of the current active scene.
@@ -59,6 +59,49 @@ namespace Mirage
         /// </summary>
         public AsyncOperation SceneLoadingAsyncOperationInfo;
 
+
+        /// <summary>
+        ///     Collection of scenes and which player's are in those scenes.
+        /// </summary>
+        public Dictionary<Scene, HashSet<INetworkPlayer>> ServerSceneData
+        {
+            get { return _serverSceneData; }
+        }
+
+        #endregion
+
+        #region Scene Data Methods
+
+        /// <summary>
+        ///     Check whether or not the player is in a specific scene or not.
+        /// </summary>
+        /// <param name="scene">The scene we want to check in.</param>
+        /// <param name="player">The player we want to check for.</param>
+        /// <returns>Returns true or false if the player is in the scene specified.</returns>
+        public bool IsPlayerInScene(Scene scene, INetworkPlayer player)
+        {
+            return _serverSceneData[scene].Contains(player);
+        }
+
+        /// <summary>
+        ///     What scene is this specific player currently in.
+        /// </summary>
+        /// <param name="player">The player we want to check against.</param>
+        /// <returns>Returns back a array of scene's the player is currently in.</returns>
+        public Scene[] ScenesPlayerIsIn(INetworkPlayer player)
+        {
+            var data = new List<Scene>();
+
+            foreach (KeyValuePair<Scene, HashSet<INetworkPlayer>> scene in _serverSceneData)
+            {
+                if(!scene.Value.Contains(player)) continue;
+
+                data.Add(scene.Key);
+            }
+
+            return data.ToArray();
+        }
+
         #endregion
 
         #region Events
@@ -66,36 +109,64 @@ namespace Mirage
         [Header("Events")]
 
         [FormerlySerializedAs("ClientChangeScene")]
-        [SerializeField] SceneChangeEvent _clientStartedSceneChange = new SceneChangeEvent();
+        [SerializeField] SceneChangeEvent _onClientStartedSceneChange = new SceneChangeEvent();
 
         [FormerlySerializedAs("ClientSceneChanged")]
-        [SerializeField] SceneChangeEvent _clientFinishedSceneChange = new SceneChangeEvent();
+        [SerializeField] SceneChangeEvent _onClientFinishedSceneChange = new SceneChangeEvent();
 
         [FormerlySerializedAs("ServerChangeScene")]
-        [SerializeField] SceneChangeEvent _serverStartedSceneChange = new SceneChangeEvent();
+        [SerializeField] SceneChangeEvent _onServerStartedSceneChange = new SceneChangeEvent();
 
         [FormerlySerializedAs("ServerSceneChanged")]
-        [SerializeField] SceneChangeEvent _serverFinishedSceneChange = new SceneChangeEvent();
+        [SerializeField] SceneChangeEvent _onServerFinishedSceneChange = new SceneChangeEvent();
 
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
-        public SceneChangeEvent ClientStartedSceneChange => _clientStartedSceneChange;
+        public SceneChangeEvent OnClientStartedSceneChange => _onClientStartedSceneChange;
 
         /// <summary>
         /// Event fires after the Client has completed its scene change.
         /// </summary>
-        public SceneChangeEvent ClientFinishedSceneChange => _clientFinishedSceneChange;
+        public SceneChangeEvent OnClientFinishedSceneChange => _onClientFinishedSceneChange;
 
         /// <summary>
         /// Event fires before Server changes scene.
         /// </summary>
-        public SceneChangeEvent ServerStartedSceneChange => _serverStartedSceneChange;
+        public SceneChangeEvent OnServerStartedSceneChange => _onServerStartedSceneChange;
 
         /// <summary>
         /// Event fires after Server has completed scene change.
         /// </summary>
-        public SceneChangeEvent ServerFinishedSceneChange => _serverFinishedSceneChange;
+        public SceneChangeEvent OnServerFinishedSceneChange => _onServerFinishedSceneChange;
+
+        #endregion
+
+        #region Unity Methods
+
+        public virtual void Start()
+        {
+            if (DontDestroy)
+                DontDestroyOnLoad(gameObject);
+
+            if (Client != null)
+                Client.Started.AddListener(RegisterClientMessages);
+
+            if (Server != null)
+            {
+                Server.Authenticated.AddListener(OnServerAuthenticated);
+                Server.Disconnected.AddListener(OnServerPlayerDisconnected);
+            }
+        }
+
+        public virtual void OnDestroy()
+        {
+            if (Client != null)
+                Client.Started.RemoveListener(RegisterClientMessages);
+
+            if (Server != null)
+                Server.Authenticated.RemoveListener(OnServerAuthenticated);
+        }
 
         #endregion
 
@@ -129,23 +200,18 @@ namespace Mirage
                 throw new InvalidOperationException("[NetworkSceneManager] - SceneLoadStartedMessage: cannot change network scene while client is disconnected");
 
             if (string.IsNullOrEmpty(message.MainActivateScene))
-                throw new ArgumentNullException(nameof(message.MainActivateScene), $"[NetworkSceneManager] - SceneLoadStartedMessage: {nameof(message.MainActivateScene)} cannot be empty or null");
+                throw new ArgumentNullException($"[NetworkSceneManager] - SceneLoadStartedMessage: {nameof(message.MainActivateScene)} cannot be empty or null");
 
             if (logger.LogEnabled()) logger.Log($"[NetworkSceneManager] - SceneLoadStartedMessage: changing scenes from: {ActiveScenePath} to: {message.MainActivateScene}");
 
             //Additive are scenes loaded on server and this client is not a host client
             if (message.AdditiveScenes != null && message.AdditiveScenes.Length > 0 && Client && !Client.IsLocalClient)
             {
-                for (int index = message.AdditiveScenes.Length - 1; index >= 0; index--)
-                {
-                    string scene = message.AdditiveScenes[index];
-
-                    ClientPendingAdditiveSceneLoadingList.Add(scene);
-                }
+                ClientPendingAdditiveSceneLoadingList.AddRange(message.AdditiveScenes);
             }
 
             // Notify others that client has started to change scenes.
-            ClientStartedSceneChange?.Invoke(message.MainActivateScene, message.SceneOperation);
+            OnClientStartedSceneChange?.Invoke(message.MainActivateScene, message.SceneOperation);
 
             LoadSceneAsync(message.MainActivateScene, new[] {player}, message.SceneOperation).Forget();
         }
@@ -189,7 +255,7 @@ namespace Mirage
                 SetSceneIsReady();
 
             //Call event once all scene related actions (subscenes and ready) are done.
-            ClientFinishedSceneChange?.Invoke(scenePath, sceneOperation);
+            OnClientFinishedSceneChange?.Invoke(scenePath, sceneOperation);
         }
 
         /// <summary>
@@ -214,9 +280,9 @@ namespace Mirage
         public void SetSceneIsReady()
         {
             if (!Client || !Client.Active)
-                throw new InvalidOperationException("[NetworkSceneManager] - Ready() called with an null or disconnected client");
+                throw new InvalidOperationException("[NetworkSceneManager] - Scene ready called with an null or disconnected client");
 
-            if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - ClientScene.Ready() called.");
+            if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - Scene is loaded and ready has been called.");
 
             // Set these before sending the ReadyMessage, otherwise host client
             // will fail in InternalAddPlayer with null readyConnection.
@@ -237,7 +303,7 @@ namespace Mirage
         /// <param name="players">List of player's we want to send the new scene loading or unloading to.</param>
         /// <param name="shouldClientLoadOrUnloadNormally">Should client load or unload the scene in normal non additive way</param>
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
-        private void ServerSceneLoading(string scenePath, INetworkPlayer[] players,
+        private void ServerSceneLoading(string scenePath, IEnumerable<INetworkPlayer> players,
             bool shouldClientLoadOrUnloadNormally, SceneOperation sceneOperation = SceneOperation.Normal)
         {
             if (string.IsNullOrEmpty(scenePath))
@@ -246,23 +312,18 @@ namespace Mirage
                     "[NetworkSceneManager] - ServerChangeScene: " + nameof(scenePath) + " cannot be empty or null");
             }
 
-            //if(players == null || players.Length == 0)
-            //    throw new ArgumentNullException(nameof(scenePath),
-            //        "[NetworkSceneManager] - list of player's cannot be null or no players.");
-
-
             if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - ServerChangeScene " + scenePath);
 
             // Let server prepare for scene change
             logger.Log("[NetworkSceneManager] - OnServerChangeScene");
 
-            ServerStartedSceneChange?.Invoke(scenePath, sceneOperation);
+            OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation);
 
             if (!Server.LocalClientActive)
                 LoadSceneAsync(scenePath, players, sceneOperation).Forget();
 
             // notify all clients about the new scene
-            if (players.Length > 0 && shouldClientLoadOrUnloadNormally)
+            if (players != null && shouldClientLoadOrUnloadNormally)
                 NetworkServer.SendToMany(players,
                     new SceneMessage {MainActivateScene = scenePath, SceneOperation = SceneOperation.Normal});
             else
@@ -277,8 +338,7 @@ namespace Mirage
         /// </summary>
         /// <param name="scene"></param>
         /// <param name="players"></param>
-        /// <param name="sceneOperation"></param>
-        private void ServerSceneUnLoading(Scene scene, INetworkPlayer[] players, SceneOperation sceneOperation)
+        private void ServerSceneUnLoading(Scene scene, INetworkPlayer[] players)
         {
             if(scene.handle == 0)
                 throw new ArgumentNullException(nameof(scene),
@@ -293,15 +353,15 @@ namespace Mirage
             // Let server prepare for scene change
             logger.Log("[NetworkSceneManager] - OnServerChangeScene");
 
-            ServerStartedSceneChange?.Invoke(scene.path, sceneOperation);
+            OnServerStartedSceneChange?.Invoke(scene.path, SceneOperation.UnloadAdditive);
 
             if (!Server.LocalClientActive)
-                UnLoadSceneAsync(scene, sceneOperation).Forget();
+                UnLoadSceneAsync(scene, SceneOperation.UnloadAdditive).Forget();
 
             // notify all clients about the new scene
             if (players.Length > 0)
                 NetworkServer.SendToMany(players,
-                    new SceneMessage { MainActivateScene = scene.path, SceneOperation = sceneOperation });
+                    new SceneMessage { MainActivateScene = scene.path, SceneOperation = SceneOperation.UnloadAdditive });
         }
 
         /// <summary>
@@ -310,10 +370,9 @@ namespace Mirage
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         public void ServerLoadSceneNormal(string scenePath)
         {
-            if(!Server && !Server.Active) return;
+            if(!Server && !Server.Active) throw new InvalidOperationException("[NetworkSceneManager] - Server is null or server is currently not active.");
 
-            var players = new INetworkPlayer[Server.Players.Count];
-            Server.Players.CopyTo(players);
+            IEnumerable<INetworkPlayer> players = new INetworkPlayer[Server.Players.Count];
 
             ServerSceneLoading(scenePath, players, true);
         }
@@ -341,7 +400,7 @@ namespace Mirage
         {
             if (!Server && !Server.Active) return;
 
-            ServerSceneUnLoading(scene, players, SceneOperation.UnloadAdditive);
+            ServerSceneUnLoading(scene, players);
         }
 
         /// <summary>
@@ -384,7 +443,7 @@ namespace Mirage
 
             Server.SendToAll(new SceneReadyMessage());
 
-            ServerFinishedSceneChange?.Invoke(scenePath, operation);
+            OnServerFinishedSceneChange?.Invoke(scenePath, operation);
         }
 
         /// <summary>
@@ -394,47 +453,17 @@ namespace Mirage
         /// <param name="disconnectedPlayer"></param>
         protected virtual void OnServerPlayerDisconnected(INetworkPlayer disconnectedPlayer)
         {
-            foreach (KeyValuePair<Scene, List<INetworkPlayer>> scene in ServerSceneData)
+            foreach (KeyValuePair<Scene, HashSet<INetworkPlayer>> scene in _serverSceneData)
             {
-                for (int index = 0; index < scene.Value.Count; index++)
+                foreach (INetworkPlayer player in scene.Value)
                 {
-                    INetworkPlayer player = scene.Value[index];
-
-                    if (player.Identity.NetId != disconnectedPlayer.Identity.NetId) continue;
+                    if (disconnectedPlayer.Equals(player)) continue;
 
                     scene.Value.Remove(disconnectedPlayer);
 
                     break;
                 }
             }
-        }
-
-        #endregion
-
-        #region Unity Methods
-
-        public virtual void Start()
-        {
-            if (DontDestroy)
-                DontDestroyOnLoad(gameObject);
-
-            if (Client != null)
-                Client.Started.AddListener(RegisterClientMessages);
-
-            if (Server != null)
-            {
-                Server.Authenticated.AddListener(OnServerAuthenticated);
-                Server.Disconnected.AddListener(OnServerPlayerDisconnected);
-            }
-        }
-
-        public virtual void OnDestroy()
-        {
-            if (Client != null)
-                Client.Started.RemoveListener(RegisterClientMessages);
-
-            if (Server != null)
-                Server.Authenticated.RemoveListener(OnServerAuthenticated);
         }
 
         #endregion
@@ -493,7 +522,7 @@ namespace Mirage
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         /// <param name="players">List of player's we want to track which scene they are in.</param>
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
-        private UniTask LoadSceneAsync(string scenePath, INetworkPlayer[] players, SceneOperation sceneOperation = SceneOperation.Normal)
+        private UniTask LoadSceneAsync(string scenePath, IEnumerable<INetworkPlayer> players, SceneOperation sceneOperation = SceneOperation.Normal)
         {
             switch (sceneOperation)
             {
@@ -531,17 +560,14 @@ namespace Mirage
                 {
                     SceneLoadingAsyncOperationInfo.allowSceneActivation = false;
                 }
-                else if (Server && Server.Active)
+                else if (Server && Server.Active && _serverSceneData.ContainsKey(scene))
                 {
                     // Check to make sure this scene was not already loaded. If it was let's clear old data on it.
-                    if (ServerSceneData.ContainsKey(scene))
-                    {
-                        logger.Log($"[NetworkSceneManager] - Scene load operation: {SceneOperation.Normal}. Scene was already loaded once before. Clearing scene related data in {ServerSceneData}.");
+                    logger.Log($"[NetworkSceneManager] - Scene load operation: {SceneOperation.Normal}. Scene was already loaded once before. Clearing scene related data in {_serverSceneData}.");
 
-                        ServerSceneData.Remove(scene);
+                    _serverSceneData.Remove(scene);
 
-                        ServerSceneData.Add(scene, new List<INetworkPlayer>(Server.Players));
-                    }
+                    _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(Server.Players));
                 }
 
                 await SceneLoadingAsyncOperationInfo;
@@ -557,7 +583,7 @@ namespace Mirage
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         /// <param name="players">The list of players we want to track to know what scene they are on.</param>
-        private async UniTask LoadSceneAdditiveAsync(string scenePath, INetworkPlayer[] players)
+        private async UniTask LoadSceneAdditiveAsync(string scenePath, IEnumerable<INetworkPlayer> players)
         {
             // Ensure additive scene is not already loaded
             if (SceneManager.GetSceneByPath(GetSceneByPathOrName(scenePath).path).IsValid())
@@ -572,7 +598,7 @@ namespace Mirage
 
                 if (Server && Server.Active)
                 {
-                    ServerSceneData.Add(scene, new List<INetworkPlayer>(players));
+                    _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players));
                 }
 
                 CompleteLoadingScene(scenePath, SceneOperation.LoadAdditive);
@@ -619,7 +645,7 @@ namespace Mirage
 
             if (Server && Server.Active)
             {
-                ServerSceneData.Remove(scene);
+                _serverSceneData.Remove(scene);
             }
         }
 
