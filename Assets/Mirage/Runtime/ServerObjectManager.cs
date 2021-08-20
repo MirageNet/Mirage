@@ -218,9 +218,9 @@ namespace Mirage
 
         void SpawnObserversForConnection(INetworkPlayer player)
         {
-            if (logger.LogEnabled()) logger.Log("Spawning " + Server.World.SpawnedIdentities.Count + " objects for conn " + player);
+            if (logger.LogEnabled()) logger.Log($"Checking Observers on {Server.World.SpawnedIdentities.Count} objects for player: {player}");
 
-            if (!player.IsReady)
+            if (!player.SceneIsReady)
             {
                 // client needs to finish initializing before we can spawn objects
                 // otherwise it would not find them.
@@ -233,7 +233,7 @@ namespace Mirage
             {
                 if (identity.gameObject.activeSelf)
                 {
-                    if (logger.LogEnabled()) logger.Log("Sending spawn message for current server objects name='" + identity.name + "' netId=" + identity.NetId + " sceneId=" + identity.sceneId);
+                    if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.sceneId}");
 
                     bool visible = identity.OnCheckObserver(player);
                     if (visible)
