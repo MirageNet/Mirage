@@ -477,12 +477,14 @@ namespace Mirage
         /// <returns></returns>
         private UniTask UnLoadSceneAsync(Scene scenePath, SceneOperation sceneOperation)
         {
-            return sceneOperation switch
+            switch (sceneOperation)
             {
-                SceneOperation.UnloadAdditive => UnLoadSceneAdditiveAsync(scenePath),
-                _ => throw new InvalidEnumArgumentException(nameof(sceneOperation), (int)sceneOperation,
-                    typeof(SceneOperation))
-            };
+                case SceneOperation.UnloadAdditive:
+                    return UnLoadSceneAdditiveAsync(scenePath);
+                default:
+                    throw new InvalidEnumArgumentException(nameof(sceneOperation), (int)sceneOperation,
+                        typeof(SceneOperation));
+            }
         }
 
         /// <summary>
