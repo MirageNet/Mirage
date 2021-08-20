@@ -28,16 +28,16 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             var message = new SceneMessage
             {
-                scenePath = "Hello world",
-                sceneOperation = SceneOperation.LoadAdditive
+                MainActivateScene = "Hello world",
+                SceneOperation = SceneOperation.LoadAdditive
             };
 
             byte[] data = MessagePacker.Pack(message);
 
             SceneMessage unpacked = MessagePacker.Unpack<SceneMessage>(data);
 
-            Assert.That(unpacked.scenePath, Is.EqualTo("Hello world"));
-            Assert.That(unpacked.sceneOperation, Is.EqualTo(SceneOperation.LoadAdditive));
+            Assert.That(unpacked.MainActivateScene, Is.EqualTo("Hello world"));
+            Assert.That(unpacked.SceneOperation, Is.EqualTo(SceneOperation.LoadAdditive));
         }
 
         [Test]
@@ -61,8 +61,8 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var message = new SceneMessage
             {
-                scenePath = "Hello world",
-                sceneOperation = SceneOperation.LoadAdditive
+                MainActivateScene = "Hello world",
+                SceneOperation = SceneOperation.LoadAdditive
             };
 
             byte[] data = MessagePacker.Pack(message);
@@ -84,8 +84,8 @@ namespace Mirage.Tests.Runtime.Serialization
             // try a regular message
             var message = new SceneMessage
             {
-                scenePath = "Hello world",
-                sceneOperation = SceneOperation.LoadAdditive
+                MainActivateScene = "Hello world",
+                SceneOperation = SceneOperation.LoadAdditive
             };
 
             byte[] data = MessagePacker.Pack(message);

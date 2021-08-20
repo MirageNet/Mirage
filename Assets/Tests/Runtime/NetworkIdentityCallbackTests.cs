@@ -50,8 +50,8 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void AddAllReadyServerConnectionsToObservers()
         {
-            player1.IsReady.Returns(true);
-            player2.IsReady.Returns(false);
+            player1.SceneIsReady.Returns(true);
+            player2.SceneIsReady.Returns(false);
 
             // add some server connections
             server.Players.Add(player1);
@@ -60,7 +60,7 @@ namespace Mirage.Tests.Runtime
             // add a host connection
             server.AddLocalConnection(client, Substitute.For<SocketLayer.IConnection>());
             server.InvokeLocalConnected();
-            server.LocalPlayer.IsReady = true;
+            server.LocalPlayer.SceneIsReady = true;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
@@ -84,7 +84,7 @@ namespace Mirage.Tests.Runtime
 
             // add own player connection
             (NetworkPlayer serverPlayer, NetworkPlayer _) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
-            serverPlayer.IsReady = true;
+            serverPlayer.SceneIsReady = true;
             identity.ConnectionToClient = serverPlayer;
 
             // call OnStartServer so that observers dict is created

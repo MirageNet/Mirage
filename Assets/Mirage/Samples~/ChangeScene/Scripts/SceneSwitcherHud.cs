@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Mirage.Examples.SceneChange
@@ -8,6 +10,7 @@ namespace Mirage.Examples.SceneChange
         public NetworkSceneManager sceneManager;
         public Text AdditiveButtonText;
         bool additiveLoaded;
+        private Scene _additiveLoadedScene;
 
         public void Update()
         {
@@ -23,27 +26,31 @@ namespace Mirage.Examples.SceneChange
 
         public void Room1ButtonHandler()
         {
-            sceneManager.ChangeServerScene("Room1");
+            sceneManager.ServerLoadSceneNormal("Room1");
             additiveLoaded = false;
         }
 
         public void Room2ButtonHandler()
         {
-            sceneManager.ChangeServerScene("Room2");
+            sceneManager.ServerLoadSceneNormal("Room2");
             additiveLoaded = false;
         }
 
         public void AdditiveButtonHandler()
         {
+            HashSet<INetworkPlayer> players = sceneManager.Server.Players;
+
             if (additiveLoaded)
             {
                 additiveLoaded = false;
-                sceneManager.ChangeServerScene("Additive", SceneOperation.UnloadAdditive);
+
+                sceneManager.ServerUnloadSceneAdditively(_additiveLoadedScene, players);
             }
             else
             {
                 additiveLoaded = true;
-                sceneManager.ChangeServerScene("Additive", SceneOperation.LoadAdditive);
+                sceneManager.ServerLoadSceneAdditively("Additive", players);
+                _additiveLoadedScene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
             }
         }
     }
