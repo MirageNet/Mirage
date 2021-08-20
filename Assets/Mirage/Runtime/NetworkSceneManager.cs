@@ -477,14 +477,12 @@ namespace Mirage
         /// <returns></returns>
         private UniTask UnLoadSceneAsync(Scene scenePath, SceneOperation sceneOperation)
         {
-            switch (sceneOperation)
+            return sceneOperation switch
             {
-                case SceneOperation.UnloadAdditive:
-                    return UnLoadSceneAdditiveAsync(scenePath);
-                default:
-                    throw new InvalidEnumArgumentException(nameof(sceneOperation), (int)sceneOperation,
-                        typeof(SceneOperation));
-            }
+                SceneOperation.UnloadAdditive => UnLoadSceneAdditiveAsync(scenePath),
+                _ => throw new InvalidEnumArgumentException(nameof(sceneOperation), (int)sceneOperation,
+                    typeof(SceneOperation))
+            };
         }
 
         /// <summary>
@@ -495,18 +493,14 @@ namespace Mirage
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
         private UniTask LoadSceneAsync(string scenePath, INetworkPlayer[] players, SceneOperation sceneOperation = SceneOperation.Normal)
         {
-            switch (sceneOperation)
+            return sceneOperation switch
             {
-                case SceneOperation.Normal:
-                    return LoadSceneNormalAsync(scenePath);
-                case SceneOperation.LoadAdditive:
-                    return LoadSceneAdditiveAsync(scenePath, players);
-                case SceneOperation.UnloadAdditive:
-                    return UnLoadSceneAdditiveAsync(scenePath);
-                default:
-                    throw new InvalidEnumArgumentException(nameof(sceneOperation), (int)sceneOperation,
-                        typeof(SceneOperation));
-            }
+                SceneOperation.Normal => LoadSceneNormalAsync(scenePath),
+                SceneOperation.LoadAdditive => LoadSceneAdditiveAsync(scenePath, players),
+                SceneOperation.UnloadAdditive => UnLoadSceneAdditiveAsync(scenePath),
+                _ => throw new InvalidEnumArgumentException(nameof(sceneOperation), (int)sceneOperation,
+                    typeof(SceneOperation))
+            };
         }
 
         /// <summary>
