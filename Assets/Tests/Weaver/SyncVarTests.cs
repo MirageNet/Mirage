@@ -39,27 +39,21 @@ namespace Mirage.Weaver
         [Test]
         public void SyncVarsGenericParam()
         {
-            HasError("Cannot generate write function for generic type MySyncVar`1. Use a supported type or provide a custom write function",
-                "SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam/MySyncVar`1<System.Int32>");
-            HasError("invalidVar has unsupported type. Use a supported Mirage type instead",
+            HasError("invalidVar is an unsupported type. Cannot generate write function for generic type MySyncVar`1. Use a supported type or provide a custom write function",
                 "SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam/MySyncVar`1<System.Int32> SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam::invalidVar");
         }
 
         [Test]
         public void SyncVarsInterface()
         {
-            HasError("Cannot generate write function for interface IMySyncVar. Use a supported type or provide a custom write function",
-                "SyncVarTests.SyncVarsInterface.SyncVarsInterface/IMySyncVar");
-            HasError("invalidVar has unsupported type. Use a supported Mirage type instead",
+            HasError("invalidVar is an unsupported type. Cannot generate write function for interface IMySyncVar. Use a supported type or provide a custom write function",
                 "SyncVarTests.SyncVarsInterface.SyncVarsInterface/IMySyncVar SyncVarTests.SyncVarsInterface.SyncVarsInterface::invalidVar");
         }
 
         [Test]
         public void SyncVarsUnityComponent()
         {
-            HasError("Cannot generate write function for component type TextMesh. Use a supported type or provide a custom write function",
-                "UnityEngine.TextMesh");
-            HasError("invalidVar has unsupported type. Use a supported Mirage type instead",
+            HasError("invalidVar is an unsupported type. Cannot generate write function for component type TextMesh. Use a supported type or provide a custom write function",
                 "UnityEngine.TextMesh SyncVarTests.SyncVarsUnityComponent.SyncVarsUnityComponent::invalidVar");
         }
 
@@ -73,7 +67,7 @@ namespace Mirage.Weaver
         [Test]
         public void SyncVarsSyncList()
         {
-            HasWarning("syncints has [SyncVar] attribute. ISyncObject should not be marked with SyncVar",
+            HasError("syncints has [SyncVar] attribute. ISyncObject should not be marked with SyncVar",
                 "Mirage.Collections.SyncList`1<System.Int32> SyncVarTests.SyncVarsSyncList.SyncVarsSyncList::syncints");
         }
 
