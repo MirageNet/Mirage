@@ -57,7 +57,7 @@ namespace Mirage
                 Client.Disconnected.AddListener(OnClientDisconnected);
 
                 if (NetworkSceneManager != null)
-                    NetworkSceneManager.ClientSceneChanged.AddListener(OnClientSceneChanged);
+                    NetworkSceneManager.ClientFinishedSceneChange.AddListener(OnClientSceneChanged);
             }
         }
 
@@ -355,7 +355,7 @@ namespace Mirage
         {
             if (msg.assetId == Guid.Empty && msg.sceneId == 0)
             {
-                throw new InvalidOperationException("OnObjSpawn netId: " + msg.netId + " has invalid asset Id");
+                throw new InvalidOperationException($"OnSpawn has empty assetId and scene Id for netId: {msg.netId}");
             }
             if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} assetID={msg.assetId} sceneId={msg.sceneId} pos={msg.position}");
 

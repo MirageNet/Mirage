@@ -81,6 +81,6 @@ namespace Mirage
 
     public interface ISceneLoader
     {
-        bool IsReady { get; set; }
+        bool SceneIsReady { get; set; }
     }
 }

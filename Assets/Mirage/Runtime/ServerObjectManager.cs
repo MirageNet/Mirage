@@ -59,8 +59,8 @@ namespace Mirage
 
                 if (NetworkSceneManager != null)
                 {
-                    NetworkSceneManager.ServerChangeScene.AddListener(OnServerChangeScene);
-                    NetworkSceneManager.ServerSceneChanged.AddListener(OnServerSceneChanged);
+                    NetworkSceneManager.ServerStartedSceneChange.AddListener(OnServerChangeScene);
+                    NetworkSceneManager.ServerFinishedSceneChange.AddListener(OnServerSceneChanged);
                 }
             }
         }
@@ -220,7 +220,7 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("Spawning " + Server.World.SpawnedIdentities.Count + " objects for conn " + player);
 
-            if (!player.IsReady)
+            if (!player.SceneIsReady)
             {
                 // client needs to finish initializing before we can spawn objects
                 // otherwise it would not find them.
@@ -327,7 +327,7 @@ namespace Mirage
 
         internal void ShowForConnection(NetworkIdentity identity, INetworkPlayer player)
         {
-            if (player.IsReady)
+            if (player.SceneIsReady)
                 SendSpawnMessage(identity, player);
         }
 
@@ -546,6 +546,39 @@ namespace Mirage
 #endif
         }
 
+        /// <summary>
+        /// Destroys this object and corresponding objects on all clients.
+        /// <param name="gameObject">Game object to destroy.</param>
+        /// <param name="destroyServerObject">Sets if server object will also be destroyed</param>
+        /// </summary>
+        public void Destroy(GameObject gameObject, bool destroyServerObject = true)
+        {
+            if (gameObject == null)
+            {
+                logger.Log("NetworkServer DestroyObject is null");
+                return;
+            }
+
+            NetworkIdentity identity = gameObject.GetNetworkIdentity();
+            DestroyObject(identity, destroyServerObject);
+        }
+
+        /// <summary>
+        /// Destroys this object and corresponding objects on all clients.
+        /// <param name="identity">Game object to destroy.</param>
+        /// <param name="destroyServerObject">Sets if server object will also be destroyed</param>
+        /// </summary>
+        public void Destroy(NetworkIdentity identity, bool destroyServerObject = true)
+        {
+            if (identity == null)
+            {
+                logger.Log("NetworkServer DestroyObject is null");
+                return;
+            }
+
+            DestroyObject(identity, destroyServerObject);
+        }
+
         void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
         {
             if (logger.LogEnabled()) logger.Log("DestroyObject instance:" + identity.NetId);
@@ -569,23 +602,6 @@ namespace Mirage
             {
                 UnityEngine.Object.Destroy(identity.gameObject);
             }
-        }
-
-        /// <summary>
-        /// Destroys this object and corresponding objects on all clients.
-        /// <param name="obj">Game object to destroy.</param>
-        /// <param name="persistServerObject">In some cases it is useful to remove an object but not delete it on the server.</param>
-        /// </summary>
-        public void Destroy(GameObject obj, bool destroyServerObject = true)
-        {
-            if (obj == null)
-            {
-                logger.Log("NetworkServer DestroyObject is null");
-                return;
-            }
-
-            NetworkIdentity identity = obj.GetNetworkIdentity();
-            DestroyObject(identity, destroyServerObject);
         }
 
         internal bool ValidateSceneObject(NetworkIdentity identity)
@@ -649,7 +665,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + player);
 
             // set ready
-            player.IsReady = true;
+            player.SceneIsReady = true;
 
             // client is ready to start spawning objects
             if (player.Identity != null)
@@ -675,10 +691,10 @@ namespace Mirage
         /// <param name="player">The connection of the client to make not ready.</param>
         public void SetClientNotReady(INetworkPlayer player)
         {
-            if (player.IsReady)
+            if (player.SceneIsReady)
             {
                 if (logger.LogEnabled()) logger.Log("PlayerNotReady " + player);
-                player.IsReady = false;
+                player.SceneIsReady = false;
                 player.RemoveObservers();
 
                 player.Send(new NotReadyMessage());

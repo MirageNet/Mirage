@@ -75,7 +75,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             ClientMessageHandler.RegisterHandler<SpawnMessage>(msg => invoked = true);
 
-            serverPlayer.IsReady = true;
+            serverPlayer.SceneIsReady = true;
 
             // call ShowForConnection
             serverObjectManager.ShowForConnection(serverIdentity, serverPlayer);

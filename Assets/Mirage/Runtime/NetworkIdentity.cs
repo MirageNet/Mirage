@@ -670,7 +670,7 @@ namespace Mirage
             // if it is still true, then we need to unspawn it
             if (IsServer)
             {
-                ServerObjectManager.Destroy(gameObject);
+                ServerObjectManager.Destroy(this);
             }
         }
 
@@ -1009,12 +1009,12 @@ namespace Mirage
             // add all server connections
             foreach (INetworkPlayer player in Server.Players)
             {
-                if (player.IsReady)
+                if (player.SceneIsReady)
                     AddObserver(player);
             }
 
             // add local host connection (if any)
-            if (Server.LocalPlayer != null && Server.LocalPlayer.IsReady)
+            if (Server.LocalPlayer != null && Server.LocalPlayer.SceneIsReady)
             {
                 AddObserver(Server.LocalPlayer);
             }
@@ -1038,7 +1038,7 @@ namespace Mirage
             // -> fixes https://github.com/vis2k/Mirror/issues/692 where a
             //    player might teleport out of the ProximityChecker's cast,
             //    losing the own connection as observer.
-            if (ConnectionToClient != null && ConnectionToClient.IsReady)
+            if (ConnectionToClient != null && ConnectionToClient.SceneIsReady)
             {
                 newObservers.Add(ConnectionToClient);
             }
@@ -1064,7 +1064,7 @@ namespace Mirage
                 observers.Clear();
                 foreach (INetworkPlayer player in newObservers)
                 {
-                    if (player != null && player.IsReady)
+                    if (player != null && player.SceneIsReady)
                         observers.Add(player);
                 }
             }
@@ -1096,7 +1096,7 @@ namespace Mirage
             {
                 // only add ready connections.
                 // otherwise the player might not be in the world yet or anymore
-                if (player != null && player.IsReady && (initialize || !observers.Contains(player)))
+                if (player != null && player.SceneIsReady && (initialize || !observers.Contains(player)))
                 {
                     // new observer
                     player.AddToVisList(this);
@@ -1247,7 +1247,7 @@ namespace Mirage
                     if (ownerWritten > 0)
                     {
                         varsMessage.payload = ownerWriter.ToArraySegment();
-                        if (ConnectionToClient != null && ConnectionToClient.IsReady)
+                        if (ConnectionToClient != null && ConnectionToClient.SceneIsReady)
                             ConnectionToClient.Send(varsMessage);
                     }
 
