@@ -31,7 +31,7 @@ namespace Mirage.Weaver
             this.logger = logger;
             serverRpcProcessor = new ServerRpcProcessor(netBehaviourSubclass.Module, readers, writers, logger);
             clientRpcProcessor = new ClientRpcProcessor(netBehaviourSubclass.Module, readers, writers, logger);
-            syncVarProcessor = new SyncVarProcessor(netBehaviourSubclass.Module, readers, writers, propertySiteProcessor, logger);
+            syncVarProcessor = new SyncVarProcessor(netBehaviourSubclass.Module, readers, writers, propertySiteProcessor);
             syncObjectProcessor = new SyncObjectProcessor(readers, writers, logger);
         }
 
@@ -48,7 +48,14 @@ namespace Mirage.Weaver
             Weaver.DebugLog(netBehaviourSubclass, "Process Start");
             MarkAsProcessed(netBehaviourSubclass);
 
-            syncVarProcessor.ProcessSyncVars(netBehaviourSubclass);
+            try
+            {
+                syncVarProcessor.ProcessSyncVars(netBehaviourSubclass, logger);
+            }
+            catch (NetworkBehaviourException e)
+            {
+                logger.Error(e);
+            }
 
             syncObjectProcessor.ProcessSyncObjects(netBehaviourSubclass);
 

@@ -21,6 +21,11 @@ namespace Mirage.Weaver
         public SerializeFunctionException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
     }
 
+    internal class NetworkBehaviourException : WeaverException
+    {
+        public NetworkBehaviourException(string message, TypeDefinition type) : base(message, type, null) { }
+    }
+
     internal class SyncVarException : WeaverException
     {
         public SyncVarException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
@@ -30,8 +35,8 @@ namespace Mirage.Weaver
 
 namespace Mirage.Weaver.SyncVars
 {
-    internal class HookMethodException : WeaverException
+    internal class HookMethodException : SyncVarException
     {
-        public HookMethodException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
+        public HookMethodException(string message, MemberReference memberReference) : base(message, memberReference) { }
     }
 }
