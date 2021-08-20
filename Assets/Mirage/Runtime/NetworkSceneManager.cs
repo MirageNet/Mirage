@@ -495,14 +495,18 @@ namespace Mirage
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
         private UniTask LoadSceneAsync(string scenePath, INetworkPlayer[] players, SceneOperation sceneOperation = SceneOperation.Normal)
         {
-            return sceneOperation switch
+            switch (sceneOperation)
             {
-                SceneOperation.Normal => LoadSceneNormalAsync(scenePath),
-                SceneOperation.LoadAdditive => LoadSceneAdditiveAsync(scenePath, players),
-                SceneOperation.UnloadAdditive => UnLoadSceneAdditiveAsync(scenePath),
-                _ => throw new InvalidEnumArgumentException(nameof(sceneOperation), (int)sceneOperation,
-                    typeof(SceneOperation))
-            };
+                case SceneOperation.Normal:
+                    return LoadSceneNormalAsync(scenePath);
+                case SceneOperation.LoadAdditive:
+                    return LoadSceneAdditiveAsync(scenePath, players);
+                case SceneOperation.UnloadAdditive:
+                    return UnLoadSceneAdditiveAsync(scenePath);
+                default:
+                    throw new InvalidEnumArgumentException(nameof(sceneOperation), (int)sceneOperation,
+                        typeof(SceneOperation));
+            }
         }
 
         /// <summary>
