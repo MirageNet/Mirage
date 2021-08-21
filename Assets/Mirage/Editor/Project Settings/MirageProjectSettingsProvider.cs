@@ -10,7 +10,7 @@ namespace Mirage.Settings
 {
     public class MirageProjectSettingsProvider : SettingsProvider
     {
-        private MirageProjectSettings settings;
+        private LogSettings settings;
 
         public MirageProjectSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords) { }
 
@@ -48,11 +48,11 @@ namespace Mirage.Settings
 
                 EditorGUILayout.Space();
 
-                foreach (IGrouping<string, MirageProjectSettings.LoggerType> group in settings.logLevels.GroupBy(x => x.Namespace))
+                foreach (IGrouping<string, LogSettings.LoggerType> group in settings.logLevels.GroupBy(x => x.Namespace))
                 {
                     EditorGUILayout.LabelField(group.Key, EditorStyles.boldLabel);
 
-                    foreach (MirageProjectSettings.LoggerType loggerType in group)
+                    foreach (LogSettings.LoggerType loggerType in group)
                     {
                         using (var scope = new EditorGUI.ChangeCheckScope())
                         {
@@ -110,7 +110,7 @@ namespace Mirage.Settings
 
         private void SetAllLogLevels(LogType allLogType)
         {
-            foreach (MirageProjectSettings.LoggerType loggerType in settings.logLevels)
+            foreach (LogSettings.LoggerType loggerType in settings.logLevels)
             {
                 loggerType.level = allLogType;
                 ILogger logger = LogFactory.GetLogger(loggerType.FullName);
@@ -121,12 +121,12 @@ namespace Mirage.Settings
 
         private LogType GetAllLogLevel()
         {
-            List<MirageProjectSettings.LoggerType> levels = settings.logLevels;
+            List<LogSettings.LoggerType> levels = settings.logLevels;
             if (levels.Count == 0) { return LogType.Warning; }
 
             bool allSame = true;
             LogType firstLevel = levels[0].level;
-            foreach (MirageProjectSettings.LoggerType level in levels)
+            foreach (LogSettings.LoggerType level in levels)
             {
                 if (level.level != firstLevel)
                 {

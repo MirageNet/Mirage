@@ -12,7 +12,7 @@ namespace Mirage.Settings
     {
         public const string PACKAGE_NAME = "com.miragenet.mirage";
 
-        public static readonly string SettingName = typeof(MirageProjectSettings).FullName;
+        public static readonly string SettingName = typeof(LogSettings).FullName;
 
 #if UNITY_EDITOR
         public static readonly string SettingsFolder = $"ProjectSettings/Packages/{PACKAGE_NAME}";
@@ -22,16 +22,16 @@ namespace Mirage.Settings
 #endif
 
         // only 1 instance of settings should exist
-        private static MirageProjectSettings settingsInstance;
+        private static LogSettings settingsInstance;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void InitializeLoggers()
         {
-            MirageProjectSettings settings = Load();
+            LogSettings settings = Load();
             settings.ApplyLogLevels();
         }
 
-        public static MirageProjectSettings Load()
+        public static LogSettings Load()
         {
             if (settingsInstance != null)
             {
@@ -54,25 +54,25 @@ namespace Mirage.Settings
         }
 
 
-        static MirageProjectSettings PlayerLoad()
+        static LogSettings PlayerLoad()
         {
-            settingsInstance = Resources.Load<MirageProjectSettings>(SettingsPath);
+            settingsInstance = Resources.Load<LogSettings>(SettingsPath);
             return settingsInstance;
         }
 
 #if UNITY_EDITOR
-        static MirageProjectSettings EditorLoad()
+        static LogSettings EditorLoad()
         {
             string path = SettingsPath;
 
             if (!File.Exists(path))
             {
-                settingsInstance = ScriptableObject.CreateInstance<MirageProjectSettings>();
+                settingsInstance = ScriptableObject.CreateInstance<LogSettings>();
                 EditorSave(settingsInstance, path);
             }
             else
             {
-                settingsInstance = EditorLoadExisting<MirageProjectSettings>(path);
+                settingsInstance = EditorLoadExisting<LogSettings>(path);
             }
 
             settingsInstance.hideFlags = HideFlags.HideAndDontSave;
@@ -137,9 +137,9 @@ namespace Mirage.Settings
 
         internal static void AddLogLevelsFromFactory()
         {
-            var newLevels = new List<MirageProjectSettings.LoggerType>();
+            var newLevels = new List<LogSettings.LoggerType>();
 
-            newLevels.AddRange(LogFactory.loggers.Select(kvp => new MirageProjectSettings.LoggerType(kvp.Key, kvp.Value.filterLogType)));
+            newLevels.AddRange(LogFactory.loggers.Select(kvp => new LogSettings.LoggerType(kvp.Key, kvp.Value.filterLogType)));
 
             if (settingsInstance.logLevels == null || settingsInstance.logLevels.Count == 0)
             {
@@ -150,11 +150,11 @@ namespace Mirage.Settings
             else
             {
                 bool dirty = false;
-                foreach (MirageProjectSettings.LoggerType newLevel in newLevels)
+                foreach (LogSettings.LoggerType newLevel in newLevels)
                 {
                     bool contains = false;
 
-                    foreach (MirageProjectSettings.LoggerType oldLevel in settingsInstance.logLevels)
+                    foreach (LogSettings.LoggerType oldLevel in settingsInstance.logLevels)
                     {
                         if (oldLevel.name == newLevel.name)
                         {
@@ -182,29 +182,11 @@ namespace Mirage.Settings
 #endif
     }
 
-#if UNITY_EDITOR
-    /// <summary>
-    /// Adds <see cref="MirageProjectSettings"/> to projects settings on build
-    /// </summary>
-    public static class SettingsBuilder
-    {
-        static SettingsBuilder()
-        {
-            ProjectSettingsBuildProcessor.OnBuild += OnProjectSettingsBuild;
-        }
-        private static void OnProjectSettingsBuild(List<ScriptableObject> list, List<string> names)
-        {
-            list.Add(SettingsLoader.Load());
-            names.Add(SettingsLoader.SettingName);
-        }
-    }
-#endif
-
     /// <summary>
     /// Mirage Settings
     /// <para>Current just saves Log levels</para>
     /// </summary>
-    public class MirageProjectSettings : ScriptableObject
+    public class LogSettings : ScriptableObject
     {
         public List<LoggerType> logLevels = null;
 
@@ -225,25 +207,22 @@ namespace Mirage.Settings
             logLevels = logLevels.OrderBy(x => x.Namespace, StringComparer.Ordinal).ThenBy(x => x.name, StringComparer.Ordinal).ToList();
         }
 
-        private static string GetNameFromFullname(string fullname)
+        private static (string name, string @namespace) GetNameAndNameSapceFromFullname(string fullname)
         {
             string[] parts = fullname.Split('.');
-            return parts.Last();
-        }
-        private static string GetNamespaceFromFullname(string fullname)
-        {
-            string[] parts = fullname.Split('.');
-            string space;
+            string name = parts.Last();
+
+            string @namespace;
             if (parts.Length == 1)
             {
-                space = string.Empty;
+                @namespace = string.Empty;
             }
             else
             {
-                space = string.Join(".", parts.Take(parts.Length - 1));
+                @namespace = string.Join(".", parts.Take(parts.Length - 1));
             }
 
-            return space;
+            return (name, @namespace);
         }
 
         [Serializable]
@@ -263,8 +242,7 @@ namespace Mirage.Settings
             }
             public LoggerType(string fullname, LogType level)
             {
-                Namespace = GetNamespaceFromFullname(fullname);
-                name = GetNameFromFullname(fullname);
+                (name, Namespace) = GetNameAndNameSapceFromFullname(fullname);
                 this.level = level;
             }
 
