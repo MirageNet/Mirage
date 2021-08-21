@@ -1,3 +1,11 @@
+## [101.4.2](https://github.com/MirageNet/Mirage/compare/v101.4.1...v101.4.2) (2021-08-21)
+
+
+### Bug Fixes
+
+* fixing log message for checking observers for connected player ([99c31c8](https://github.com/MirageNet/Mirage/commit/99c31c8df337c363a2b4a0be9843dcf8fe24913c))
+* fixing mistake in log change ([b090fa2](https://github.com/MirageNet/Mirage/commit/b090fa2f619ec87de4bc1534343e977247de12f5))
+
 ## [101.4.1](https://github.com/MirageNet/Mirage/compare/v101.4.0...v101.4.1) (2021-08-19)
 
 
