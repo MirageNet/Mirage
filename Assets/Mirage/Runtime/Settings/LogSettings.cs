@@ -54,14 +54,13 @@ namespace Mirage.Settings
         }
 
 
-        static LogSettings PlayerLoad()
+        static void PlayerLoad()
         {
             settingsInstance = Resources.Load<LogSettings>(SettingsPath);
-            return settingsInstance;
         }
 
 #if UNITY_EDITOR
-        static LogSettings EditorLoad()
+        static void EditorLoad()
         {
             string path = SettingsPath;
 
@@ -76,7 +75,6 @@ namespace Mirage.Settings
             }
 
             settingsInstance.hideFlags = HideFlags.HideAndDontSave;
-            return settingsInstance;
         }
         public static void EditorSave() => EditorSave(settingsInstance, SettingsPath);
         public static void EditorSave<T>(T settings, string path) where T : ScriptableObject

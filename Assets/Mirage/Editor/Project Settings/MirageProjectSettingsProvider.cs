@@ -20,6 +20,8 @@ namespace Mirage.Settings
             return new MirageProjectSettingsProvider("Mirage/Logging", SettingsScope.Project) { label = "Logging" };
         }
 
+        Dictionary<string, bool> folderOutState = new Dictionary<string, bool>();
+
         public override void OnGUI(string searchContext)
         {
             if (settings == null)
@@ -50,22 +52,30 @@ namespace Mirage.Settings
 
                 foreach (IGrouping<string, LogSettings.LoggerType> group in settings.logLevels.GroupBy(x => x.Namespace))
                 {
-                    EditorGUILayout.LabelField(group.Key, EditorStyles.boldLabel);
+                    if (!folderOutState.ContainsKey(group.Key))
+                        folderOutState[group.Key] = false;
 
-                    foreach (LogSettings.LoggerType loggerType in group)
+                    folderOutState[group.Key] = EditorGUILayout.Foldout(folderOutState[group.Key], group.Key, EditorStyles.foldoutHeader);
+
+                    if (folderOutState[group.Key])
                     {
-                        using (var scope = new EditorGUI.ChangeCheckScope())
+                        EditorGUI.indentLevel++;
+                        foreach (LogSettings.LoggerType loggerType in group)
                         {
-                            var level = (LogType)EditorGUILayout.EnumPopup(loggerType.name, loggerType.level);
-
-                            if (scope.changed)
+                            using (var scope = new EditorGUI.ChangeCheckScope())
                             {
-                                loggerType.level = level;
-                                ILogger logger = LogFactory.GetLogger(loggerType.FullName);
-                                logger.filterLogType = level;
-                                SettingsLoader.EditorSave();
+                                var level = (LogType)EditorGUILayout.EnumPopup(loggerType.name, loggerType.level);
+
+                                if (scope.changed)
+                                {
+                                    loggerType.level = level;
+                                    ILogger logger = LogFactory.GetLogger(loggerType.FullName);
+                                    logger.filterLogType = level;
+                                    SettingsLoader.EditorSave();
+                                }
                             }
                         }
+                        EditorGUI.indentLevel--;
                     }
 
                     EditorGUILayout.Space();
