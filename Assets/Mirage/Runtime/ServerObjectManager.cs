@@ -220,7 +220,7 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log($"Checking Observers on {Server.World.SpawnedIdentities.Count} objects for player: {player}");
 
-            if (!player.SceneIsReady)
+            if (!player.IsReady)
             {
                 // client needs to finish initializing before we can spawn objects
                 // otherwise it would not find them.
