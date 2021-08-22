@@ -184,9 +184,13 @@ namespace Mirage.Serialization
                 }
                 else
                 {
-                    throw new InvalidOperationException($"Can not write over end of buffer, new length {newLength}, capacity {bitCapacity}");
+                    ThrowLengthOverCapacity(newLength);
                 }
             }
+        }
+        void ThrowLengthOverCapacity(int newLength)
+        {
+            throw new InvalidOperationException($"Can not write over end of buffer, new length {newLength}, capacity {bitCapacity}");
         }
 
         private void PadToByte()

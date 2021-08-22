@@ -183,9 +183,12 @@ namespace Mirage.Serialization
                     c = quaternion.z;
                     return;
                 default:
-                    throw new IndexOutOfRangeException("Invalid Quaternion index!");
+                    ThrowIfOutOfRange();
+                    a = b = c = default;
+                    return;
             }
         }
+        static void ThrowIfOutOfRange() => throw new IndexOutOfRangeException("Invalid Quaternion index!");
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -213,7 +216,8 @@ namespace Mirage.Serialization
                 case 3:
                     return new Quaternion(a, b, c, largest);
                 default:
-                    throw new IndexOutOfRangeException("Invalid Quaternion index!");
+                    ThrowIfOutOfRange();
+                    return default;
             }
         }
     }
