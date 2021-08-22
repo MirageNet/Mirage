@@ -21,11 +21,6 @@ namespace Mirage
         IAddLateEvent<ClientStoppedReason> Disconnected { get; }
 
         /// <summary>
-        /// The NetworkConnection object this client is using.
-        /// </summary>
-        INetworkPlayer Player { get; }
-
-        /// <summary>
         /// active is true while a client is connecting/connected
         /// (= while the network is active)
         /// </summary>

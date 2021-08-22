@@ -69,11 +69,6 @@ namespace Mirage
         /// </summary>
         public IAddLateEvent<ClientStoppedReason> Disconnected => _disconnected;
 
-        /// <summary>
-        /// The NetworkConnection object this client is using.
-        /// </summary>
-        public INetworkPlayer Player { get; internal set; }
-
         internal ConnectState connectState = ConnectState.Disconnected;
 
         /// <summary>
