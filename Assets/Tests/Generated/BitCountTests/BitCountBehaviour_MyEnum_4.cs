@@ -9,32 +9,40 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
 {
-    
-    public class BitCountBehaviour_int_32 : NetworkBehaviour
+    [System.Flags]
+    public enum MyEnum
     {
-        [BitCount(32)]
-        [SyncVar] public int myIntValue;
+        None = 0,
+        HasHealth = 1,
+        HasArmor = 2,
+        HasGun = 4,
+        HasAmmo = 8,
+    }
+    public class BitCountBehaviour_MyEnum_4 : NetworkBehaviour
+    {
+        [BitCount(4)]
+        [SyncVar] public MyEnum myIntValue;
 
-        public event Action<int> onRpc;
+        public event Action<MyEnum> onRpc;
 
         [ClientRpc]
-        public void RpcSomeFunction([BitCount(32)] int myParam)
+        public void RpcSomeFunction([BitCount(4)] MyEnum myParam)
         {
             onRpc?.Invoke(myParam);
         }
     }
-    public class BitCountTest_int_32 : ClientServerSetup<BitCountBehaviour_int_32>
+    public class BitCountTest_MyEnum_4 : ClientServerSetup<BitCountBehaviour_MyEnum_4>
     {
         [Test]
         public void SyncVarIsBitPacked()
         {
-            var behaviour = new BitCountBehaviour_int_32();
+            var behaviour = new BitCountBehaviour_MyEnum_4();
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 behaviour.SerializeSyncVars(writer, true);
 
-                Assert.That(writer.BitPosition, Is.EqualTo(32));
+                Assert.That(writer.BitPosition, Is.EqualTo(4));
             }
         }
 
@@ -42,7 +50,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
         // [Ignore("Rpc not supported yet")]
         public IEnumerator RpcIsBitPacked()
         {
-            const int value = 20;
+            const MyEnum value = (MyEnum)3;
 
             int called = 0;
             clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };
@@ -60,7 +68,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
             serverComponent.RpcSomeFunction(value);
             yield return null;
             Assert.That(called, Is.EqualTo(1));
-            Assert.That(payloadSize, Is.EqualTo(4), $"32 bits is 4 bytes in payload");
+            Assert.That(payloadSize, Is.EqualTo(1), $"4 bits is 1 bytes in payload");
         }
     }
 }
