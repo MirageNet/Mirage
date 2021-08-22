@@ -1,3 +1,10 @@
+# [101.6.0](https://github.com/MirageNet/Mirage/compare/v101.5.1...v101.6.0) (2021-08-22)
+
+
+### Features
+
+* **serialization:** attribute to set bit size for ints base syncvars ([#882](https://github.com/MirageNet/Mirage/issues/882)) ([1660ca6](https://github.com/MirageNet/Mirage/commit/1660ca690bee0ef58e398d36511233ebd9975188))
+
 ## [101.5.1](https://github.com/MirageNet/Mirage/compare/v101.5.0...v101.5.1) (2021-08-22)
 
 
