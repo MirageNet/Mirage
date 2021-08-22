@@ -25,6 +25,7 @@ namespace Mirage.Tests.Runtime
         private ServerObjectManager serverObjectManager;
         private NetworkClient client;
         private GameObject networkServerGameObject;
+        private NetworkWorld world;
 
         INetworkPlayer player1;
         INetworkPlayer player2;
@@ -37,6 +38,7 @@ namespace Mirage.Tests.Runtime
             serverObjectManager = networkServerGameObject.AddComponent<ServerObjectManager>();
             serverObjectManager.Server = server;
             client = networkServerGameObject.AddComponent<NetworkClient>();
+            world = new NetworkWorld();
 
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
@@ -70,14 +72,14 @@ namespace Mirage.Tests.Runtime
             // add a host connection
             server.AddLocalConnection(client, Substitute.For<SocketLayer.IConnection>());
             server.InvokeLocalConnected();
-            server.LocalPlayer.IsReady = true;
+            world.LocalPlayer.IsReady = true;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
 
             // add all to observers. should have the two ready connections then.
             identity.AddAllReadyServerConnectionsToObservers();
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { player1, server.LocalPlayer }));
+            Assert.That(identity.observers, Is.EquivalentTo(new[] { player1, world.LocalPlayer }));
 
             // clean up
             server.Stop();

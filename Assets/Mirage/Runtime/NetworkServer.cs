@@ -99,14 +99,6 @@ namespace Mirage
         public IAddLateEvent OnStopHost => _onStopHost;
 
         /// <summary>
-        /// The connection to the host mode client (if any).
-        /// </summary>
-        // original HLAPI has .localConnections list with only m_LocalConnection in it
-        // (for backwards compatibility because they removed the real localConnections list a while ago)
-        // => removed it for easier code. use .localConnection now!
-        public INetworkPlayer LocalPlayer { get; private set; }
-
-        /// <summary>
         /// The host client for this server 
         /// </summary>
         public INetworkClient LocalClient { get; private set; }
@@ -167,7 +159,7 @@ namespace Mirage
             // just clear list, connections will be disconnected when peer is closed
             Players.Clear();
             connections.Clear();
-            LocalPlayer = null;
+            World.LocalPlayer = null;
 
             Cleanup();
 
@@ -361,13 +353,13 @@ namespace Mirage
         /// </summary>
         internal void AddLocalConnection(INetworkClient client, IConnection connection)
         {
-            if (LocalPlayer != null)
+            if (World.LocalPlayer != null)
             {
                 throw new InvalidOperationException("Local Connection already exists");
             }
 
             var player = new NetworkPlayer(connection);
-            LocalPlayer = player;
+            World.LocalPlayer = player;
             LocalClient = client;
 
             if (logger.LogEnabled()) logger.Log("Server accepted Local client:" + player);
@@ -382,11 +374,11 @@ namespace Mirage
         /// </summary>
         internal void InvokeLocalConnected()
         {
-            if (LocalPlayer == null)
+            if (World.LocalPlayer == null)
             {
                 throw new InvalidOperationException("Local Connection does not exist");
             }
-            Connected?.Invoke(LocalPlayer);
+            Connected?.Invoke(World.LocalPlayer);
         }
 
         /// <summary>
@@ -459,7 +451,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("Server accepted client:" + player);
 
             //Only allow host client to connect when not Listening for new connections
-            if (!Listening && player != LocalPlayer)
+            if (!Listening && player != World.LocalPlayer)
             {
                 return;
             }
@@ -498,8 +490,8 @@ namespace Mirage
             player.DestroyOwnedObjects();
             player.Identity = null;
 
-            if (player == LocalPlayer)
-                LocalPlayer = null;
+            if (player == World.LocalPlayer)
+                World.LocalPlayer = null;
         }
 
         internal void OnAuthenticated(INetworkPlayer player)

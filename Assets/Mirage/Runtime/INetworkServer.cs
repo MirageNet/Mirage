@@ -39,11 +39,6 @@ namespace Mirage
         IAddLateEvent OnStopHost { get; }
 
         /// <summary>
-        /// The connection to the host mode client (if any).
-        /// </summary>
-        INetworkPlayer LocalPlayer { get; }
-
-        /// <summary>
         /// The host client for this server 
         /// </summary> 
         INetworkClient LocalClient { get; }

@@ -44,7 +44,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ClientConnRpc() => UniTask.ToCoroutine(async () =>
         {
-            component.ClientConnRpcTest(manager.Server.LocalPlayer, 1, "hello");
+            component.ClientConnRpcTest(world.LocalPlayer, 1, "hello");
             // process spawn message from server
             await AsyncUtil.WaitUntilWithTimeout(() => component.targetRpcArg1 != 0);
 
@@ -72,7 +72,7 @@ namespace Mirage.Tests.Runtime.Host
             // state cleared?
             Assert.That(server.Players, Is.Empty);
             Assert.That(server.Active, Is.False);
-            Assert.That(server.LocalPlayer, Is.Null);
+            Assert.That(world.LocalPlayer, Is.Null);
             Assert.That(server.LocalClientActive, Is.False);
         }
 
