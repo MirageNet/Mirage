@@ -1,4 +1,5 @@
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using UnityEngine;
 
 namespace Mirage.Weaver.SyncVars
@@ -22,6 +23,10 @@ namespace Mirage.Weaver.SyncVars
 
         public bool HasHookMethod { get; private set; }
         public MethodDefinition HookMethod { get; private set; }
+
+        public int? BitCount { get; private set; }
+        public OpCode? BitCountConvert { get; internal set; }
+
         public MethodReference WriteFunction { get; private set; }
         public MethodReference ReadFunction { get; private set; }
 
@@ -75,6 +80,8 @@ namespace Mirage.Weaver.SyncVars
         {
             HookMethod = HookMethodFinder.GetHookMethod(FieldDefinition, OriginalType);
             HasHookMethod = HookMethod != null;
+
+            (BitCount, BitCountConvert) = BitCountFinder.GetBitCount(FieldDefinition);
         }
 
         public void FindSerializeFunctions(Writers writers, Readers readers)
@@ -89,6 +96,5 @@ namespace Mirage.Weaver.SyncVars
                 throw new SyncVarException($"{FieldDefinition.Name} is an unsupported type. {e.Message}", FieldDefinition);
             }
         }
-
     }
 }

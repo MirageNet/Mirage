@@ -39,4 +39,8 @@ namespace Mirage.Weaver.SyncVars
     {
         public HookMethodException(string message, MemberReference memberReference) : base(message, memberReference) { }
     }
+    internal class BitCountException : SyncVarException
+    {
+        public BitCountException(string message, MemberReference memberReference) : base(message, memberReference) { }
+    }
 }

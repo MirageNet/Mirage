@@ -1,0 +1,1 @@
+These scripts create tests file from template files. This allows many tests that have similar logic to be created and maintained more easily.

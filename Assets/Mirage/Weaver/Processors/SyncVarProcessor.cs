@@ -1,4 +1,5 @@
 using System;
+using Mirage.Serialization;
 using Mirage.Weaver.NetworkBehaviours;
 using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
@@ -398,7 +399,7 @@ namespace Mirage.Weaver
             {
                 foreach (FoundSyncVar syncVar in behaviour.SyncVars)
                 {
-                    WriteVariable(worker, helper.WriterParameter, syncVar);
+                    WriteFromField(worker, helper.WriterParameter, syncVar);
                 }
             });
 
@@ -413,7 +414,7 @@ namespace Mirage.Weaver
                 helper.WriteIfSyncVarDirty(syncVar, () =>
                 {
                     // Generates a call to the writer for that field
-                    WriteVariable(worker, helper.WriterParameter, syncVar);
+                    WriteFromField(worker, helper.WriterParameter, syncVar);
                 });
             }
 
@@ -421,19 +422,46 @@ namespace Mirage.Weaver
             helper.WriteReturnDirty();
         }
 
-        static void WriteVariable(ILProcessor worker, ParameterDefinition writerParameter, FoundSyncVar syncVar)
+        void WriteFromField(ILProcessor worker, ParameterDefinition writerParameter, FoundSyncVar syncVar)
         {
-            // if WriteFunction is null it means there was an error earlier, so we dont need to do anything here
-            if (syncVar.WriteFunction == null) { return; }
+            if (syncVar.BitCount.HasValue)
+            {
+                WriteWithBitCount();
+            }
+            else
+            {
+                WriteDefault();
+            }
 
-            // Generates a writer call for each sync variable
-            // writer
-            worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
-            // this
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
-            worker.Append(worker.Create(OpCodes.Call, syncVar.WriteFunction));
+            // Local Functions
+
+            void WriteDefault()
+            {
+                // if WriteFunction is null it means there was an error earlier, so we dont need to do anything here
+                if (syncVar.WriteFunction == null) { return; }
+
+                // Generates a writer call for each sync variable
+                // writer
+                worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
+                // this
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Call, syncVar.WriteFunction));
+            }
+
+            void WriteWithBitCount()
+            {
+                MethodReference writeWithBitCount = module.ImportReference(writerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkWriter.Write)));
+
+                worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Conv_U8));
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCount.Value));
+                worker.Append(worker.Create(OpCodes.Call, writeWithBitCount));
+            }
         }
+
 
         void GenerateDeserialization()
         {
@@ -458,7 +486,7 @@ namespace Mirage.Weaver
             {
                 foreach (FoundSyncVar syncVar in behaviour.SyncVars)
                 {
-                    DeserializeField(worker, helper.Method, syncVar);
+                    DeserializeField(worker, helper.Method, helper.ReaderParameter, syncVar);
                 }
             });
 
@@ -469,7 +497,7 @@ namespace Mirage.Weaver
             {
                 helper.WriteIfSyncVarDirty(syncVar, () =>
                 {
-                    DeserializeField(worker, helper.Method, syncVar);
+                    DeserializeField(worker, helper.Method, helper.ReaderParameter, syncVar);
                 });
             }
 
@@ -484,12 +512,8 @@ namespace Mirage.Weaver
         /// <param name="deserialize"></param>
         /// <param name="initialState"></param>
         /// <param name="hookResult"></param>
-        void DeserializeField(ILProcessor worker, MethodDefinition deserialize, FoundSyncVar syncVar)
+        void DeserializeField(ILProcessor worker, MethodDefinition deserialize, ParameterDefinition readerParameter, FoundSyncVar syncVar)
         {
-            // if ReadFunction is null it means there was an error earlier, so we dont need to do anything here
-            if (syncVar.ReadFunction == null) { return; }
-
-            FieldDefinition fd = syncVar.FieldDefinition;
             TypeReference originalType = syncVar.OriginalType;
 
             /*
@@ -501,6 +525,7 @@ namespace Mirage.Weaver
                     OnSetA(oldValue, Networka)
              */
 
+            // Store old value in local variable, we need it for Hook
             // T oldValue = value
             VariableDefinition oldValue = null;
             if (syncVar.HasHookMethod)
@@ -512,22 +537,7 @@ namespace Mirage.Weaver
             }
 
             // read value and store in syncvar BEFORE calling the hook
-            // -> this makes way more sense. by definition, the hook is
-            //    supposed to be called after it was changed. not before.
-            // -> setting it BEFORE calling the hook fixes the following bug:
-            //    https://github.com/vis2k/Mirror/issues/1151 in host mode
-            //    where the value during the Hook call would call Cmds on
-            //    the host server, and they would all happen and compare
-            //    values BEFORE the hook even returned and hence BEFORE the
-            //    actual value was even set.
-            // put 'this.' onto stack for 'this.syncvar' below
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            // reader. for 'reader.Read()' below
-            worker.Append(worker.Create(OpCodes.Ldarg_1));
-            // reader.Read()
-            worker.Append(worker.Create(OpCodes.Call, syncVar.ReadFunction));
-            // syncvar
-            worker.Append(worker.Create(OpCodes.Stfld, fd.MakeHostGenericIfNeeded()));
+            ReadToField(worker, readerParameter, syncVar);
 
             if (syncVar.HasHookMethod)
             {
@@ -559,6 +569,60 @@ namespace Mirage.Weaver
 
                 // Generates: end if (!SyncVarEqual)
                 worker.Append(syncVarEqualLabel);
+            }
+        }
+
+        void ReadToField(ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)
+        {
+            if (syncVar.BitCount.HasValue)
+            {
+                ReadWithBitCount();
+            }
+            else
+            {
+                ReadDefault();
+            }
+
+            // Local Functions
+
+            void ReadDefault()
+            {
+                // if ReadFunction is null it means there was an error earlier, so we dont need to do anything here
+                if (syncVar.ReadFunction == null) { return; }
+
+                // put `this` on stack, for Stfld later
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+
+                // add `reader` to stack
+                worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
+                // call read function
+                worker.Append(worker.Create(OpCodes.Call, syncVar.ReadFunction));
+
+                // store result of read to `this.syncvar`
+                worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+            }
+            void ReadWithBitCount()
+            {
+                MethodReference readWithBitCount = module.ImportReference(readerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkReader.Read)));
+
+
+                // put `this` on stack, for Stfld later
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+
+                // add `reader` to stack
+                worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
+                // add `bitCount` to stack
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCount.Value));
+                // call `reader.read(bitCount)` function
+                worker.Append(worker.Create(OpCodes.Call, readWithBitCount));
+
+                // convert result to correct size if needed
+                if (syncVar.BitCountConvert.HasValue)
+                {
+                    worker.Append(worker.Create(syncVar.BitCountConvert.Value));
+                }
+
+                worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
             }
         }
     }
