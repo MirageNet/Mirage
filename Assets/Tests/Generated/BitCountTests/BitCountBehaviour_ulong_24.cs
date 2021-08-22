@@ -1,0 +1,63 @@
+using System;
+using System.Collections;
+using Mirage.Serialization;
+using Mirage.Tests.Runtime.ClientServer;
+using NUnit.Framework;
+using UnityEngine.TestTools;
+
+namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
+{
+    public class BitCountBehaviour_ulong_24 : NetworkBehaviour
+    {
+        [BitCount(24)]
+        [SyncVar] public ulong myIntValue;
+
+        public event Action<ulong> onRpc;
+
+        [ClientRpc]
+        public void RpcSomeFunction([BitCount(24)] ulong myParam)
+        {
+            onRpc?.Invoke(myParam);
+        }
+    }
+    public class BitCountTest_ulong_24 : ClientServerSetup<BitCountBehaviour_ulong_24>
+    {
+        [Test]
+        public void SyncVarIsBitPacked()
+        {
+            var behaviour = new BitCountBehaviour_ulong_24();
+
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                behaviour.SerializeSyncVars(writer, true);
+
+                Assert.That(writer.BitPosition, Is.EqualTo(24));
+            }
+        }
+
+        // [UnityTest]
+        // [Ignore("Rpc not supported yet")]
+        public IEnumerator RpcIsBitPacked()
+        {
+            const ulong value = 20;
+
+            int called = 0;
+            clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };
+
+            client.MessageHandler.UnregisterHandler<RpcMessage>();
+            int payloadSize = 0;
+            client.MessageHandler.RegisterHandler<RpcMessage>((player, msg) =>
+            {
+                // store value in variable because assert will throw and be catch by message wrapper
+                payloadSize = msg.payload.Count;
+                clientObjectManager.OnRpcMessage(msg);
+            });
+
+
+            serverComponent.RpcSomeFunction(value);
+            yield return null;
+            Assert.That(called, Is.EqualTo(1));
+            Assert.That(payloadSize, Is.EqualTo(3), $"24 bits is 3 bytes in payload");
+        }
+    }
+}
