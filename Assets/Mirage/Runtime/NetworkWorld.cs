@@ -19,6 +19,14 @@ namespace Mirage
         /// </summary>
         public event Action<NetworkIdentity> onUnspawn;
 
+        /// <summary>
+        /// The connection to the host mode client (if any).
+        /// </summary>
+        // original HLAPI has .localConnections list with only m_LocalConnection in it
+        // (for backwards compatibility because they removed the real localConnections list a while ago)
+        // => removed it for easier code. use .localConnection now!
+        public NetworkPlayer LocalPlayer;
+
         private readonly Dictionary<uint, NetworkIdentity> SpawnedObjects = new Dictionary<uint, NetworkIdentity>();
 
         public IReadOnlyCollection<NetworkIdentity> SpawnedIdentities => SpawnedObjects.Values;
