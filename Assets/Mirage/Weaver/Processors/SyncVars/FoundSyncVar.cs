@@ -116,7 +116,7 @@ namespace Mirage.Weaver.SyncVars
             if (bitCount > maxSize)
                 throw new BitCountException("BitCountAttribute bitcount should be less than or equal to type size", syncVar);
 
-            return (bitCount, GetConvertType(syncVar));
+            return (bitCount, GetConvertType(syncVar.FieldType));
         }
 
         static int GetTypeMaxSize(FieldDefinition syncVar)
@@ -130,6 +130,12 @@ namespace Mirage.Weaver.SyncVars
             if (type.Is<ulong>()) return 64;
             if (type.Is<long>()) return 64;
 
+            if (type.Resolve().IsEnum)
+            {
+                // max for enum is 32, because unity gives an "unsupported base type for enum" when using ulong
+                return 32;
+            }
+
             throw new BitCountException($"{type.FullName} is not a supported type for [BitCount]", syncVar);
         }
 
@@ -138,15 +144,21 @@ namespace Mirage.Weaver.SyncVars
         /// </summary>
         /// <param name="syncVar"></param>
         /// <returns></returns>
-        static OpCode? GetConvertType(FieldDefinition syncVar)
+        static OpCode? GetConvertType(TypeReference type)
         {
-            TypeReference type = syncVar.FieldType;
             // todo convert we can use Conv_I4 for all these types, or do we need Conv_I2, Conv_I1 instead?
             if (type.Is<byte>()) return OpCodes.Conv_I4;
             if (type.Is<ushort>()) return OpCodes.Conv_I4;
             if (type.Is<short>()) return OpCodes.Conv_I4;
             if (type.Is<uint>()) return OpCodes.Conv_I4;
             if (type.Is<int>()) return OpCodes.Conv_I4;
+
+            if (type.Resolve().IsEnum)
+            {
+                // use underlying enum type for cast
+                TypeReference enumType = type.Resolve().GetEnumUnderlyingType();
+                return GetConvertType(enumType);
+            }
 
             return default;
         }

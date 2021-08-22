@@ -19,8 +19,19 @@ namespace Mirage.Tests.CodeGenerators
             Create(fromTemplate, "ulong", 24);
             Create(fromTemplate, "ulong", 64);
             Create(fromTemplate, "MyEnum", 4, "(MyEnum)3",
-    @"[System.Flags]
+    @"[System.Flags, System.Serializable]
     public enum MyEnum
+    {
+        None = 0,
+        HasHealth = 1,
+        HasArmor = 2,
+        HasGun = 4,
+        HasAmmo = 8,
+    }");
+
+            Create(fromTemplate, "MyByteEnum", 4, "(MyByteEnum)3",
+    @"[System.Flags, System.Serializable]
+    public enum MyByteEnum : byte
     {
         None = 0,
         HasHealth = 1,

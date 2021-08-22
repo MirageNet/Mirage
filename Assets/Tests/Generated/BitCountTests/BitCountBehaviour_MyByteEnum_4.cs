@@ -10,7 +10,7 @@ using UnityEngine.TestTools;
 namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
 {
     [System.Flags, System.Serializable]
-    public enum MyEnum
+    public enum MyByteEnum : byte
     {
         None = 0,
         HasHealth = 1,
@@ -18,25 +18,25 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
         HasGun = 4,
         HasAmmo = 8,
     }
-    public class BitCountBehaviour_MyEnum_4 : NetworkBehaviour
+    public class BitCountBehaviour_MyByteEnum_4 : NetworkBehaviour
     {
         [BitCount(4)]
-        [SyncVar] public MyEnum myIntValue;
+        [SyncVar] public MyByteEnum myIntValue;
 
-        public event Action<MyEnum> onRpc;
+        public event Action<MyByteEnum> onRpc;
 
         [ClientRpc]
-        public void RpcSomeFunction([BitCount(4)] MyEnum myParam)
+        public void RpcSomeFunction([BitCount(4)] MyByteEnum myParam)
         {
             onRpc?.Invoke(myParam);
         }
     }
-    public class BitCountTest_MyEnum_4 : ClientServerSetup<BitCountBehaviour_MyEnum_4>
+    public class BitCountTest_MyByteEnum_4 : ClientServerSetup<BitCountBehaviour_MyByteEnum_4>
     {
         [Test]
         public void SyncVarIsBitPacked()
         {
-            var behaviour = new BitCountBehaviour_MyEnum_4();
+            var behaviour = new BitCountBehaviour_MyByteEnum_4();
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -50,7 +50,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
         // [Ignore("Rpc not supported yet")]
         public IEnumerator RpcIsBitPacked()
         {
-            const MyEnum value = (MyEnum)3;
+            const MyByteEnum value = (MyByteEnum)3;
 
             int called = 0;
             clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };
