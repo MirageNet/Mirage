@@ -1014,9 +1014,9 @@ namespace Mirage
             }
 
             // add local host connection (if any)
-            if (Server.LocalPlayer != null && Server.LocalPlayer.IsReady)
+            if (World != null && World.LocalPlayer != null && World.LocalPlayer.IsReady)
             {
-                AddObserver(Server.LocalPlayer);
+                AddObserver(World.LocalPlayer);
             }
         }
 
@@ -1290,7 +1290,7 @@ namespace Mirage
             connectionsExcludeSelf.Clear();
             foreach (INetworkPlayer player in observers)
             {
-                if (player == Server.LocalPlayer)
+                if (player == World.LocalPlayer)
                     continue;
 
                 if (includeOwner || ConnectionToClient != player)
