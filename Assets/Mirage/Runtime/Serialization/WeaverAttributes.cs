@@ -47,4 +47,58 @@ namespace Mirage.Serialization
     {
         public ZigZagEncodeAttribute() { }
     }
+
+    /// <summary>
+    /// Tells weaver how to pack a float field
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    public class PackFloatAttribute : Attribute
+    {
+        /// <summary>
+        /// Number of bits to pack value as
+        /// </summary>
+        public int BitCount { get; }
+
+        /// <summary>
+        /// Smallest value
+        /// <para><b>Example:</b> Resolution of 0.1 means values will be rounded to that: 1.53 will be sent as 1.5</para>
+        /// <para>Values will be rounded to nearest value, so 1.58 will around up to 1.6</para>
+        /// </summary>
+        /// <remarks>
+        /// Resolution will be used to caculate BitCount, so real resolution may be lower than resolution given by user
+        /// </remarks>
+        public float Resolution { get; }
+
+        /// <summary>
+        /// Max value of the float
+        /// </summary>
+        public float Max { get; }
+
+        /// <summary>
+        /// If Bitcount or Resolution constructor should be used
+        /// </summary>
+        public bool UseBitCount { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="max">Max value of the float</param>
+        /// <param name="resolution">Smallest value, <see cref="Resolution"/></param>
+        public PackFloatAttribute(float max, float resolution)
+        {
+            UseBitCount = false;
+            Max = max;
+            Resolution = resolution;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="max">Max value of the float</param>
+        /// <param name="bitCount"></param>
+        public PackFloatAttribute(float max, int bitCount)
+        {
+            UseBitCount = true;
+            Max = max;
+            BitCount = bitCount;
+        }
 }
