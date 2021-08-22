@@ -5,6 +5,12 @@ namespace Mirage.Weaver
     public class BitAttributeTests : TestsBuildFromTestName
     {
         [Test]
+        public void BitCount()
+        {
+            IsSuccess();
+        }
+
+        [Test]
         public void BitCountOverTypeSize()
         {
             HasErrorCount(13);
