@@ -36,7 +36,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                testIdentity.AssignClientAuthority(world.LocalPlayer);
+                testIdentity.AssignClientAuthority(server.World.LocalPlayer);
             });
         }
 
@@ -89,7 +89,7 @@ namespace Mirage.Tests.Runtime.Host
             NetworkIdentity.clientAuthorityCallback += Callback;
 
             // assign authority
-            testIdentity.AssignClientAuthority(world.LocalPlayer);
+            testIdentity.AssignClientAuthority(server.World.LocalPlayer);
 
             Assert.That(callbackCalled, Is.EqualTo(1));
 
@@ -109,23 +109,23 @@ namespace Mirage.Tests.Runtime.Host
         {
             // create a networkidentity with our test component
             serverObjectManager.Spawn(gameObject);
-            testIdentity.AssignClientAuthority(world.LocalPlayer);
+            testIdentity.AssignClientAuthority(server.World.LocalPlayer);
 
-            Assert.That(testIdentity.ConnectionToClient, Is.SameAs(world.LocalPlayer));
+            Assert.That(testIdentity.ConnectionToClient, Is.SameAs(server.World.LocalPlayer));
         }
 
         [Test]
         public void SpawnWithAuthority()
         {
-            serverObjectManager.Spawn(gameObject, world.LocalPlayer);
-            Assert.That(testIdentity.ConnectionToClient, Is.SameAs(world.LocalPlayer));
+            serverObjectManager.Spawn(gameObject, server.World.LocalPlayer);
+            Assert.That(testIdentity.ConnectionToClient, Is.SameAs(server.World.LocalPlayer));
         }
 
         [Test]
         public void SpawnWithAssetId()
         {
             var replacementGuid = Guid.NewGuid();
-            serverObjectManager.Spawn(gameObject, replacementGuid, world.LocalPlayer);
+            serverObjectManager.Spawn(gameObject, replacementGuid, server.World.LocalPlayer);
             Assert.That(testIdentity.AssetId, Is.EqualTo(replacementGuid));
         }
 
@@ -135,7 +135,7 @@ namespace Mirage.Tests.Runtime.Host
             // create a networkidentity with our test component
             serverObjectManager.Spawn(gameObject);
             // assign authority
-            testIdentity.AssignClientAuthority(world.LocalPlayer);
+            testIdentity.AssignClientAuthority(server.World.LocalPlayer);
 
             // shouldn't be able to assign authority while already owned by
             // another connection
@@ -172,7 +172,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void RemoveClientAuthorityOfOwner()
         {
-            serverObjectManager.ReplaceCharacter(world.LocalPlayer, gameObject);
+            serverObjectManager.ReplaceCharacter(server.World.LocalPlayer, gameObject);
 
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -184,7 +184,7 @@ namespace Mirage.Tests.Runtime.Host
         public void RemoveClientAuthority()
         {
             serverObjectManager.Spawn(gameObject);
-            testIdentity.AssignClientAuthority(world.LocalPlayer);
+            testIdentity.AssignClientAuthority(server.World.LocalPlayer);
             testIdentity.RemoveClientAuthority();
             Assert.That(testIdentity.ConnectionToClient, Is.Null);
         }
@@ -222,10 +222,10 @@ namespace Mirage.Tests.Runtime.Host
             var testObj2 = new GameObject();
             var testObj3 = new GameObject();
 
-            world.LocalPlayer.AddOwnedObject(testObj1.AddComponent<NetworkIdentity>());
-            world.LocalPlayer.AddOwnedObject(testObj2.AddComponent<NetworkIdentity>());
-            world.LocalPlayer.AddOwnedObject(testObj3.AddComponent<NetworkIdentity>());
-            world.LocalPlayer.DestroyOwnedObjects();
+            server.World.LocalPlayer.AddOwnedObject(testObj1.AddComponent<NetworkIdentity>());
+            server.World.LocalPlayer.AddOwnedObject(testObj2.AddComponent<NetworkIdentity>());
+            server.World.LocalPlayer.AddOwnedObject(testObj3.AddComponent<NetworkIdentity>());
+            server.World.LocalPlayer.DestroyOwnedObjects();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !testObj1);
             await AsyncUtil.WaitUntilWithTimeout(() => !testObj2);

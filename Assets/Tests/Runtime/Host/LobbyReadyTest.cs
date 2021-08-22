@@ -84,7 +84,7 @@ namespace Mirage.Tests.Runtime.Host
             readyPlayer.AddComponent<NetworkIdentity>();
             readyComp = readyPlayer.AddComponent<ObjectReady>();
 
-            serverObjectManager.Spawn(readyPlayer, world.LocalPlayer);
+            serverObjectManager.Spawn(readyPlayer, server.World.LocalPlayer);
             readyComp.Ready();
 
             await AsyncUtil.WaitUntilWithTimeout(() => readyComp.IsReady);
