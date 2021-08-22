@@ -1,3 +1,15 @@
+# [101.5.0](https://github.com/MirageNet/Mirage/compare/v101.4.2...v101.5.0) (2021-08-22)
+
+
+### Features
+
+* **NetworkVisibility:** adding default implementation for OnRebuildObservers ([2bcf22f](https://github.com/MirageNet/Mirage/commit/2bcf22f26c1e76f0ed28a066a8c8384f8396077a))
+
+
+### Performance Improvements
+
+* sending reply id as nullable ([a756389](https://github.com/MirageNet/Mirage/commit/a7563890c49ca0958332f8fb9fedcca5111ed85f))
+
 ## [101.4.2](https://github.com/MirageNet/Mirage/compare/v101.4.1...v101.4.2) (2021-08-21)
 
 
