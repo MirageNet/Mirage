@@ -34,29 +34,47 @@ namespace Mirage.Weaver
         protected void NoErrors()
         {
             DiagnosticMessage[] errors = weaverLog.Diagnostics.Where(x => x.DiagnosticType == DiagnosticType.Error).ToArray();
-            Assert.That(errors, Is.Empty, $"Failed because there are Error messages: \n  {string.Join("\n  ", weaverLog.Diagnostics.Select(x => x.MessageData))}\n");
+            Assert.That(errors, Is.Empty, $"Failed because there are Error messages: \n  {string.Join("\n  ", errors.Select(d => d.MessageData))}\n");
         }
 
         [AssertionMethod]
         protected void HasErrorCount(int count)
         {
-            Assert.That(weaverLog.Diagnostics.Count, Is.EqualTo(count));
+            string[] errorMessages = weaverLog.Diagnostics
+                .Where(d => d.DiagnosticType == DiagnosticType.Error)
+                .Select(d => d.MessageData).ToArray();
+
+            Assert.That(errorMessages.Length, Is.EqualTo(count), $"Error messages: \n  {string.Join("\n  ", errorMessages)}\n");
         }
 
         [AssertionMethod]
         protected void HasError(string messsage, string atType)
         {
-            Assert.That(weaverLog.Diagnostics
+            string fullMessage = $"{messsage} (at {atType})";
+            string[] errorMessages = weaverLog.Diagnostics
                 .Where(d => d.DiagnosticType == DiagnosticType.Error)
-                .Select(d => d.MessageData), Contains.Item($"{messsage} (at {atType})"));
+                .Select(d => d.MessageData).ToArray();
+
+            Assert.That(errorMessages, Contains.Item(fullMessage),
+                $"Could not find error message in list\n" +
+                $"  Message: \n    {fullMessage}\n" +
+                $"  Errors: \n    {string.Join("\n    ", errorMessages)}\n"
+                );
         }
 
         [AssertionMethod]
         protected void HasWarning(string messsage, string atType)
         {
-            Assert.That(weaverLog.Diagnostics
+            string fullMessage = $"{messsage} (at {atType})";
+            string[] warningMessages = weaverLog.Diagnostics
                 .Where(d => d.DiagnosticType == DiagnosticType.Warning)
-                .Select(d => d.MessageData), Contains.Item($"{messsage} (at {atType})"));
+                .Select(d => d.MessageData).ToArray();
+
+            Assert.That(warningMessages, Contains.Item(fullMessage),
+                $"Could not find warning message in list\n" +
+                $"  Message: \n    {fullMessage}\n" +
+                $"  Warings: \n    {string.Join("\n    ", warningMessages)}\n"
+                );
         }
     }
 
