@@ -176,7 +176,7 @@ namespace Mirage
             {
                 RpcOnAnimationClientMessage(stateHash, normalizedTime, layerId, weight, parameters);
             }
-            else if (Client.Player != null)
+            else if (Client.World.LocalPlayer != null)
             {
                 CmdOnAnimationServerMessage(stateHash, normalizedTime, layerId, weight, parameters);
             }
@@ -188,7 +188,7 @@ namespace Mirage
             {
                 RpcOnAnimationParametersClientMessage(parameters);
             }
-            else if (Client.Player != null)
+            else if (Client.World.LocalPlayer != null)
             {
                 CmdOnAnimationParametersServerMessage(parameters);
             }
@@ -442,7 +442,7 @@ namespace Mirage
                     return;
                 }
 
-                if (Client.Player != null)
+                if (Client.World.LocalPlayer != null)
                     CmdOnAnimationTriggerServerMessage(hash);
 
                 // call on client right away
@@ -491,7 +491,7 @@ namespace Mirage
                     return;
                 }
 
-                if (Client.Player != null)
+                if (Client.World.LocalPlayer != null)
                     CmdOnAnimationResetTriggerServerMessage(hash);
 
                 // call on client right away

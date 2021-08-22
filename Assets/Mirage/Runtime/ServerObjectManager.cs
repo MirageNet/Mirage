@@ -200,7 +200,7 @@ namespace Mirage
             if (player == World.LocalPlayer)
             {
                 identity.HasAuthority = true;
-                Server.LocalClient.Player.Identity = identity;
+                World.LocalPlayer.Identity = identity;
             }
 
             // add connection to observers AFTER the playerController was set.
@@ -302,7 +302,7 @@ namespace Mirage
             if (player == World.LocalPlayer)
             {
                 identity.HasAuthority = true;
-                Server.LocalClient.Player.Identity = identity;
+                World.LocalPlayer.Identity = identity;
             }
 
             // set ready if not set yet

@@ -135,8 +135,8 @@ namespace Mirage
             IConnection connection = peer.Connect(endPoint);
 
             // setup all the handlers
-            Player = new NetworkPlayer(connection);
-            dataHandler.SetConnection(connection, Player);
+            World.LocalPlayer = new NetworkPlayer(connection);
+            dataHandler.SetConnection(connection, World.LocalPlayer);
             Time.Reset();
 
             RegisterMessageHandlers();
@@ -162,13 +162,13 @@ namespace Mirage
         {
             Time.UpdateClient(this);
             connectState = ConnectState.Connected;
-            _connected.Invoke(Player);
+            _connected.Invoke(World.LocalPlayer);
         }
 
         private void Peer_OnConnectionFailed(IConnection conn, RejectReason reason)
         {
             if (logger.LogEnabled()) logger.Log($"Failed to connect to {conn.EndPoint} with reason {reason}");
-            Player?.MarkAsDisconnected();
+            World.LocalPlayer?.MarkAsDisconnected();
             _disconnected?.Invoke(reason.ToClientStoppedReason());
             Cleanup();
         }
@@ -176,14 +176,14 @@ namespace Mirage
         private void Peer_OnDisconnected(IConnection conn, DisconnectReason reason)
         {
             if (logger.LogEnabled()) logger.Log($"Disconnected from {conn.EndPoint} with reason {reason}");
-            Player?.MarkAsDisconnected();
+            World.LocalPlayer?.MarkAsDisconnected();
             _disconnected?.Invoke(reason.ToClientStoppedReason());
             Cleanup();
         }
 
         void OnHostDisconnected()
         {
-            Player?.MarkAsDisconnected();
+            World.LocalPlayer?.MarkAsDisconnected();
             _disconnected?.Invoke(ClientStoppedReason.HostModeStopped);
         }
 
@@ -202,8 +202,8 @@ namespace Mirage
 
             // set up client before connecting to server, server could invoke handlers
             IsLocalClient = true;
-            Player = new NetworkPlayer(clientConn);
-            dataHandler.SetConnection(clientConn, Player);
+            World.LocalPlayer = new NetworkPlayer(clientConn);
+            dataHandler.SetConnection(clientConn, World.LocalPlayer);
             RegisterHostHandlers();
             InitializeAuthEvents();
             // invoke started event after everything is set up, but before peer has connected
@@ -253,7 +253,7 @@ namespace Mirage
                 return;
             }
 
-            Player.Connection.Disconnect();
+            World.LocalPlayer.Connection.Disconnect();
             Cleanup();
         }
 
@@ -268,12 +268,12 @@ namespace Mirage
         /// <returns>True if message was sent.</returns>
         public void Send<T>(T message, int channelId = Channel.Reliable)
         {
-            Player.Send(message, channelId);
+            World.LocalPlayer.Send(message, channelId);
         }
 
         public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
-            Player.Send(segment, channelId);
+            World.LocalPlayer.Send(segment, channelId);
         }
 
         internal void Update()
@@ -321,7 +321,7 @@ namespace Mirage
                 Connected.RemoveListener(OnAuthenticated);
             }
 
-            Player = null;
+            World.LocalPlayer = null;
             _connected.Reset();
             _authenticated.Reset();
             _disconnected.Reset();

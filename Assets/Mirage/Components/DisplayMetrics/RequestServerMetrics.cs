@@ -53,7 +53,7 @@ namespace JamesFrowen.NetworkingBenchmark
         private void sendRequest()
         {
             client.MessageHandler.RegisterHandler<SendMetricsMessage>(OnSendMetricsMessage);
-            client.Player.Send(new RequestMetricsMessage());
+            client.World.LocalPlayer.Send(new RequestMetricsMessage());
             metrics = new Metrics();
             displayMetrics.Metrics = metrics;
         }

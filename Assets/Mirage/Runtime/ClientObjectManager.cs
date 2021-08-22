@@ -122,9 +122,9 @@ namespace Mirage
         // this is called from message handler for Owner message
         internal void InternalAddPlayer(NetworkIdentity identity)
         {
-            if (Client.Player != null)
+            if (Client.World.LocalPlayer != null)
             {
-                Client.Player.Identity = identity;
+                Client.World.LocalPlayer.Identity = identity;
             }
             else
             {
@@ -505,7 +505,7 @@ namespace Mirage
 
         void CheckForLocalPlayer(NetworkIdentity identity)
         {
-            if (identity && identity == Client.Player?.Identity)
+            if (identity && identity == Client.World.LocalPlayer?.Identity)
             {
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
                 identity.StartLocalPlayer();
