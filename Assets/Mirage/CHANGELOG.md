@@ -1,3 +1,10 @@
+## [101.5.1](https://github.com/MirageNet/Mirage/compare/v101.5.0...v101.5.1) (2021-08-22)
+
+
+### Performance Improvements
+
+* adding throw helper methods so that AggressiveInlining works ([#894](https://github.com/MirageNet/Mirage/issues/894)) ([de12166](https://github.com/MirageNet/Mirage/commit/de1216690a1823724fbb6c717d55a80e44784fa5))
+
 # [101.5.0](https://github.com/MirageNet/Mirage/compare/v101.4.2...v101.5.0) (2021-08-22)
 
 
