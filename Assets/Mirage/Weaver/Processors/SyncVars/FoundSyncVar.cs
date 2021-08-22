@@ -109,19 +109,18 @@ namespace Mirage.Weaver.SyncVars
             int bitCount = (int)attribute.ConstructorArguments[0].Value;
 
             if (bitCount <= 0)
-                throw new BitCountException("BitCountAttribute bitcount should be above 0", syncVar);
+                throw new BitCountException("BitCount should be above 0", syncVar);
 
-            int maxSize = GetTypeMaxSize(syncVar);
+            int maxSize = GetTypeMaxSize(syncVar.FieldType, syncVar);
 
             if (bitCount > maxSize)
-                throw new BitCountException("BitCountAttribute bitcount should be less than or equal to type size", syncVar);
+                throw new BitCountException($"BitCount can not be above target type size, bitCount:{bitCount}, type:{syncVar.FieldType.Name}, max size:{maxSize}", syncVar);
 
             return (bitCount, GetConvertType(syncVar.FieldType));
         }
 
-        static int GetTypeMaxSize(FieldDefinition syncVar)
+        static int GetTypeMaxSize(TypeReference type, FieldDefinition syncVar)
         {
-            TypeReference type = syncVar.FieldType;
             if (type.Is<byte>()) return 8;
             if (type.Is<ushort>()) return 16;
             if (type.Is<short>()) return 16;
@@ -132,8 +131,9 @@ namespace Mirage.Weaver.SyncVars
 
             if (type.Resolve().IsEnum)
             {
-                // max for enum is 32, because unity gives an "unsupported base type for enum" when using ulong
-                return 32;
+                // use underlying enum type for max size
+                TypeReference enumType = type.Resolve().GetEnumUnderlyingType();
+                return GetTypeMaxSize(enumType, syncVar);
             }
 
             throw new BitCountException($"{type.FullName} is not a supported type for [BitCount]", syncVar);
