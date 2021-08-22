@@ -18,6 +18,7 @@ namespace Mirage.Tests.Runtime.Host
         protected NetworkSceneManager sceneManager;
         protected ServerObjectManager serverObjectManager;
         protected ClientObjectManager clientObjectManager;
+        protected NetworkWorld world;
 
         protected GameObject playerGO;
         protected NetworkIdentity identity;
@@ -49,6 +50,8 @@ namespace Mirage.Tests.Runtime.Host
             server = manager.Server;
             client = manager.Client;
 
+            world = new NetworkWorld();
+
             if (ServerConfig != null) server.PeerConfig = ServerConfig;
             if (ClientConfig != null) client.PeerConfig = ClientConfig;
 
@@ -72,7 +75,7 @@ namespace Mirage.Tests.Runtime.Host
                 identity = playerGO.AddComponent<NetworkIdentity>();
                 component = playerGO.AddComponent<T>();
 
-                serverObjectManager.AddCharacter(server.LocalPlayer, playerGO);
+                serverObjectManager.AddCharacter(world.LocalPlayer, playerGO);
 
                 // wait for client to spawn it
                 await AsyncUtil.WaitUntilWithTimeout(() => client.Player.Identity != null);
