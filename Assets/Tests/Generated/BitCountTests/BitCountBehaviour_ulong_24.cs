@@ -13,7 +13,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
     public class BitCountBehaviour_ulong_24 : NetworkBehaviour
     {
         [BitCount(24)]
-        [SyncVar] public ulong myIntValue;
+        [SyncVar] public ulong myValue;
 
         public event Action<ulong> onRpc;
 

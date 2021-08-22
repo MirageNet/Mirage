@@ -13,7 +13,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
     public class BitCountBehaviour_short_4 : NetworkBehaviour
     {
         [BitCount(4)]
-        [SyncVar] public short myIntValue;
+        [SyncVar] public short myValue;
 
         public event Action<short> onRpc;
 

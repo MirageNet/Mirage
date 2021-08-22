@@ -21,7 +21,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
     public class BitCountBehaviour_MyByteEnum_4 : NetworkBehaviour
     {
         [BitCount(4)]
-        [SyncVar] public MyByteEnum myIntValue;
+        [SyncVar] public MyByteEnum myValue;
 
         public event Action<MyByteEnum> onRpc;
 

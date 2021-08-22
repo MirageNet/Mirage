@@ -13,7 +13,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
     public class BitCountBehaviour_%%TYPE%%_%%BIT_COUNT%% : NetworkBehaviour
     {
         [BitCount(%%BIT_COUNT%%)]
-        [SyncVar] public %%TYPE%% myIntValue;
+        [SyncVar] public %%TYPE%% myValue;
 
         public event Action<%%TYPE%%> onRpc;
 
