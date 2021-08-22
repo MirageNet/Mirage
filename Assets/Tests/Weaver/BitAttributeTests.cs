@@ -45,15 +45,15 @@ namespace Mirage.Weaver
             HasError("BitCount can not be above target type size, bitCount:33, type:MyIntEnum, max size:32",
                 "BitAttributeTests.BitCountOverTypeSize.MyIntEnum BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value10");
 
-            // todo add errors for other fields
 
             HasError("UnityEngine.Vector3 is not a supported type for [BitCount]",
                 "UnityEngine.Vector3 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value11");
+
             HasError("BitCount should be above 0",
                 "System.Int32 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value12");
+
             HasError("BitCount should be above 0",
                 "System.Int32 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value13");
-
         }
     }
 }

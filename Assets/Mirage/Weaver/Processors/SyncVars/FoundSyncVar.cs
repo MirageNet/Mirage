@@ -146,7 +146,6 @@ namespace Mirage.Weaver.SyncVars
         /// <returns></returns>
         static OpCode? GetConvertType(TypeReference type)
         {
-            // todo convert we can use Conv_I4 for all these types, or do we need Conv_I2, Conv_I1 instead?
             if (type.Is<byte>()) return OpCodes.Conv_I4;
             if (type.Is<ushort>()) return OpCodes.Conv_I4;
             if (type.Is<short>()) return OpCodes.Conv_I4;
