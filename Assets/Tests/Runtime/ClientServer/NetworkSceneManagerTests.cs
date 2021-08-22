@@ -146,7 +146,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             //Check for the additive scene in the pending list at the time of ClientChangeScene before its removed as part of it being loaded.
             clientSceneManager.ClientChangeScene.AddListener(CheckForAdditiveScene);
-            clientSceneManager.ClientSceneMessage(client.Player, new SceneMessage { scenePath = "Assets/Mirror/Tests/Runtime/testScene.unity", additiveScenes = new[] { "Assets/Mirror/Tests/Runtime/testScene.unity" } });
+            clientSceneManager.ClientSceneMessage(client.World.LocalPlayer, new SceneMessage { scenePath = "Assets/Mirror/Tests/Runtime/testScene.unity", additiveScenes = new[] { "Assets/Mirror/Tests/Runtime/testScene.unity" } });
 
             Assert.That(additiveSceneWasFound);
         }

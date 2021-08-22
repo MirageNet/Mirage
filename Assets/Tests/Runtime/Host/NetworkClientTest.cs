@@ -17,7 +17,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ConnectionTest()
         {
-            Assert.That(client.Player != null);
+            Assert.That(client.World.LocalPlayer != null);
         }
 
         [UnityTest]

@@ -148,7 +148,7 @@ namespace Mirage.Examples.Tanks
 
         void FindLocalTank()
         {
-            INetworkPlayer player = NetworkManager.Client.Player;
+            INetworkPlayer player = NetworkManager.Client.World.LocalPlayer;
 
             // Check to see if the player object is loaded in yet
             if (player.Identity == null)

@@ -99,7 +99,7 @@ namespace Mirage.Tests.Runtime.Host
         public void ReadyTest()
         {
             sceneManager.SetClientReady();
-            Assert.That(client.Player.IsReady);
+            Assert.That(client.World.LocalPlayer.IsReady);
         }
 
         [UnityTest]
@@ -139,7 +139,7 @@ namespace Mirage.Tests.Runtime.Host
         public void ClientSceneReadyAfterChangedTest()
         {
             bool _readyAfterSceneChanged = false;
-            sceneManager.ClientSceneChanged.AddListener((string name, SceneOperation operation) => _readyAfterSceneChanged = client.Player.IsReady);
+            sceneManager.ClientSceneChanged.AddListener((string name, SceneOperation operation) => _readyAfterSceneChanged = client.World.LocalPlayer.IsReady);
             sceneManager.OnClientSceneChanged("test", SceneOperation.Normal);
 
             Assert.That(_readyAfterSceneChanged, Is.True);

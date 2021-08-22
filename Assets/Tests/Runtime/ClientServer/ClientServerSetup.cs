@@ -105,7 +105,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
                 // get the connections so that we can spawn players
                 serverPlayer = server.Players.First();
-                clientPlayer = client.Player;
+                clientPlayer = client.World.LocalPlayer;
 
                 // create a player object in the server
                 serverPlayerGO = Object.Instantiate(playerPrefab);

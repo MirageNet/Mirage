@@ -161,7 +161,7 @@ namespace Mirage.Tests.Runtime.Host
 
             serverObjectManager.ReplaceCharacter(world.LocalPlayer, playerReplacement, true);
 
-            Assert.That(server.LocalClient.Player.Identity, Is.EqualTo(replacementIdentity));
+            Assert.That(server.LocalClient.World.LocalPlayer.Identity, Is.EqualTo(replacementIdentity));
         }
 
         [UnityTest]
