@@ -72,7 +72,6 @@ namespace Mirage.Weaver
                 // the client should just get the connection to the server and pass that in
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
-                worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
             }
 
             if (!ReadArguments(md, worker, hasNetworkConnection))
@@ -239,7 +238,6 @@ namespace Mirage.Weaver
                     // local connection to the server
                     worker.Append(worker.Create(OpCodes.Ldarg_0));
                     worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
-                    worker.Append(worker.Create(OpCodes.Call, (NetworkClient nc) => nc.Player));
                 }
                 else
                 {
