@@ -46,8 +46,6 @@ namespace Mirage
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
-        public NetworkWorld World;
-
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => checked(nextNetworkId++);
 
@@ -197,7 +195,7 @@ namespace Mirage
             identity.SetClientOwner(player);
 
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
-            if (player == World.LocalPlayer)
+            if (player == Server.World.LocalPlayer)
             {
                 identity.HasAuthority = true;
                 Server.LocalClient.Player.Identity = identity;
@@ -299,7 +297,7 @@ namespace Mirage
             identity.SetClientOwner(player);
 
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
-            if (player == World.LocalPlayer)
+            if (player == Server.World.LocalPlayer)
             {
                 identity.HasAuthority = true;
                 Server.LocalClient.Player.Identity = identity;
@@ -467,7 +465,7 @@ namespace Mirage
 
             // special case to make sure hasAuthority is set
             // on start server in host mode
-            if (owner == World.LocalPlayer)
+            if (owner == Server.World.LocalPlayer)
                 identity.HasAuthority = true;
 
             if (identity.NetId == 0)
