@@ -34,9 +34,7 @@ namespace Mirage.Serialization
     }
 
     /// <summary>
-    /// Encodes a interager value using <see cref="ZigZag"/>
-    /// <para>Useful when value could be positive or negative</para>
-    /// <para>Applies before <see cref="BitCountAttribute"/></para>
+    /// Used along size <see cref="BitCountAttribute"/> to encodes a interager value using <see cref="ZigZag"/> so that both positive and negative values can be sent
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class ZigZagEncodeAttribute : Attribute

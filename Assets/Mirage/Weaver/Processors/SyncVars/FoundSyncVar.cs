@@ -25,7 +25,9 @@ namespace Mirage.Weaver.SyncVars
         public MethodDefinition HookMethod { get; private set; }
 
         public int? BitCount { get; private set; }
-        public OpCode? BitCountConvert { get; internal set; }
+        public OpCode? BitCountConvert { get; private set; }
+
+        public bool UseZigZagEncoding { get; private set; }
 
         public MethodReference WriteFunction { get; private set; }
         public MethodReference ReadFunction { get; private set; }
@@ -82,6 +84,7 @@ namespace Mirage.Weaver.SyncVars
             HasHookMethod = HookMethod != null;
 
             (BitCount, BitCountConvert) = BitCountFinder.GetBitCount(FieldDefinition);
+            UseZigZagEncoding = ZigZagFinder.HasZigZag(FieldDefinition, BitCount.HasValue);
         }
 
         public void FindSerializeFunctions(Writers writers, Readers readers)

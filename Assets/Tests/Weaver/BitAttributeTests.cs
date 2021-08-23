@@ -55,5 +55,26 @@ namespace Mirage.Weaver
             HasError("BitCount should be above 0",
                 "System.Int32 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value13");
         }
+
+        [Test]
+        public void ZigZag()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void ZigZagNoBitCount()
+        {
+            HasErrorCount(3);
+
+            HasError("[ZigZag] can only be used with [BitCount]",
+                "System.Byte BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value1");
+
+            HasError("[ZigZag] can only be used on a signed type",
+                "System.Int16 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value2");
+
+            HasError("[ZigZag] can only be used on a signed type",
+                "System.UInt16 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value3");
+        }
     }
 }
