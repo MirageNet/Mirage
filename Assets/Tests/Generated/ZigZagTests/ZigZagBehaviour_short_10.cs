@@ -5,6 +5,7 @@ using System.Collections;
 using Mirage.Serialization;
 using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests
@@ -25,25 +26,40 @@ namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests
     }
     public class ZigZagTest_short_10 : ClientServerSetup<ZigZagBehaviour_short_10>
     {
+        const short value = 15;
+
         [Test]
         public void SyncVarIsBitPacked()
         {
-            var behaviour = new ZigZagBehaviour_short_10();
+            // need to have access to NetworkIdentity in order to set syncvar
+            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_short_10>();
+            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_short_10>();
+
+            server.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                behaviour.SerializeSyncVars(writer, true);
+                server.SerializeSyncVars(writer, true);
 
                 Assert.That(writer.BitPosition, Is.EqualTo(10));
+
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
+                {
+                    client.DeserializeSyncVars(reader, true);
+                    Assert.That(reader.BitPosition, Is.EqualTo(10));
+
+                    Assert.That(client.myValue, Is.EqualTo(value));
+                }
             }
+
+            GameObject.Destroy(server);
+            GameObject.Destroy(client);
         }
 
         // [UnityTest]
         // [Ignore("Rpc not supported yet")]
         public IEnumerator RpcIsBitPacked()
         {
-            const short value = -20;
-
             int called = 0;
             clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };
 

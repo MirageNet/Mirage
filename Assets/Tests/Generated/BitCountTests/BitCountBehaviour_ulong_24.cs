@@ -5,6 +5,7 @@ using System.Collections;
 using Mirage.Serialization;
 using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
@@ -25,24 +26,40 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
     }
     public class BitCountTest_ulong_24 : ClientServerSetup<BitCountBehaviour_ulong_24>
     {
+        const ulong value = 20;
+
         [Test]
         public void SyncVarIsBitPacked()
         {
-            var behaviour = new BitCountBehaviour_ulong_24();
+            // need to have access to NetworkIdentity in order to set syncvar
+            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<BitCountBehaviour_ulong_24>();
+            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<BitCountBehaviour_ulong_24>();
+
+            server.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                behaviour.SerializeSyncVars(writer, true);
+                server.SerializeSyncVars(writer, true);
 
                 Assert.That(writer.BitPosition, Is.EqualTo(24));
+
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
+                {
+                    client.DeserializeSyncVars(reader, true);
+                    Assert.That(reader.BitPosition, Is.EqualTo(24));
+
+                    Assert.That(client.myValue, Is.EqualTo(value));
+                }
             }
+
+            GameObject.Destroy(server);
+            GameObject.Destroy(client);
         }
 
         // [UnityTest]
         // [Ignore("Rpc not supported yet")]
         public IEnumerator RpcIsBitPacked()
         {
-            const ulong value = 20;
 
             int called = 0;
             clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };

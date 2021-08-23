@@ -11,7 +11,7 @@ using UnityEngine.TestTools;
 namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests
 {
     
-    public class ZigZagBehaviour_int_10 : NetworkBehaviour
+    public class ZigZagBehaviour_int_10_negative : NetworkBehaviour
     {
         [BitCount(10), ZigZagEncode]
         [SyncVar] public int myValue;
@@ -24,16 +24,16 @@ namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests
             onRpc?.Invoke(myParam);
         }
     }
-    public class ZigZagTest_int_10 : ClientServerSetup<ZigZagBehaviour_int_10>
+    public class ZigZagTest_int_10_negative : ClientServerSetup<ZigZagBehaviour_int_10_negative>
     {
-        const int value = 100;
+        const int value = -25;
 
         [Test]
         public void SyncVarIsBitPacked()
         {
             // need to have access to NetworkIdentity in order to set syncvar
-            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_int_10>();
-            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_int_10>();
+            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_int_10_negative>();
+            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_int_10_negative>();
 
             server.myValue = value;
 

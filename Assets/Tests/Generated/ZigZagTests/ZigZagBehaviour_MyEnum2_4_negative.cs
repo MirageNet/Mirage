@@ -10,30 +10,36 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests
 {
-    
-    public class ZigZagBehaviour_int_10 : NetworkBehaviour
+    [System.Serializable]
+    public enum MyEnum2
     {
-        [BitCount(10), ZigZagEncode]
-        [SyncVar] public int myValue;
+        Negative = -1,
+        Zero = 0,
+        Positive = 1,
+    }
+    public class ZigZagBehaviour_MyEnum2_4_negative : NetworkBehaviour
+    {
+        [BitCount(4), ZigZagEncode]
+        [SyncVar] public MyEnum2 myValue;
 
-        public event Action<int> onRpc;
+        public event Action<MyEnum2> onRpc;
 
         [ClientRpc]
-        public void RpcSomeFunction([BitCount(10), ZigZagEncode] int myParam)
+        public void RpcSomeFunction([BitCount(4), ZigZagEncode] MyEnum2 myParam)
         {
             onRpc?.Invoke(myParam);
         }
     }
-    public class ZigZagTest_int_10 : ClientServerSetup<ZigZagBehaviour_int_10>
+    public class ZigZagTest_MyEnum2_4_negative : ClientServerSetup<ZigZagBehaviour_MyEnum2_4_negative>
     {
-        const int value = 100;
+        const MyEnum2 value = (MyEnum2)(-1);
 
         [Test]
         public void SyncVarIsBitPacked()
         {
             // need to have access to NetworkIdentity in order to set syncvar
-            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_int_10>();
-            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_int_10>();
+            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_MyEnum2_4_negative>();
+            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_MyEnum2_4_negative>();
 
             server.myValue = value;
 
@@ -41,12 +47,12 @@ namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests
             {
                 server.SerializeSyncVars(writer, true);
 
-                Assert.That(writer.BitPosition, Is.EqualTo(10));
+                Assert.That(writer.BitPosition, Is.EqualTo(4));
 
                 using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
                 {
                     client.DeserializeSyncVars(reader, true);
-                    Assert.That(reader.BitPosition, Is.EqualTo(10));
+                    Assert.That(reader.BitPosition, Is.EqualTo(4));
 
                     Assert.That(client.myValue, Is.EqualTo(value));
                 }
@@ -76,7 +82,7 @@ namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests
             serverComponent.RpcSomeFunction(value);
             yield return null;
             Assert.That(called, Is.EqualTo(1));
-            Assert.That(payloadSize, Is.EqualTo(2), $"10 bits is 2 bytes in payload");
+            Assert.That(payloadSize, Is.EqualTo(1), $"4 bits is 1 bytes in payload");
         }
     }
 }

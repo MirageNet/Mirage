@@ -5,6 +5,7 @@ using System.Collections;
 using Mirage.Serialization;
 using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
@@ -33,24 +34,40 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
     }
     public class BitCountTest_MyByteEnum_4 : ClientServerSetup<BitCountBehaviour_MyByteEnum_4>
     {
+        const MyByteEnum value = (MyByteEnum)3;
+
         [Test]
         public void SyncVarIsBitPacked()
         {
-            var behaviour = new BitCountBehaviour_MyByteEnum_4();
+            // need to have access to NetworkIdentity in order to set syncvar
+            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<BitCountBehaviour_MyByteEnum_4>();
+            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<BitCountBehaviour_MyByteEnum_4>();
+
+            server.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                behaviour.SerializeSyncVars(writer, true);
+                server.SerializeSyncVars(writer, true);
 
                 Assert.That(writer.BitPosition, Is.EqualTo(4));
+
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
+                {
+                    client.DeserializeSyncVars(reader, true);
+                    Assert.That(reader.BitPosition, Is.EqualTo(4));
+
+                    Assert.That(client.myValue, Is.EqualTo(value));
+                }
             }
+
+            GameObject.Destroy(server);
+            GameObject.Destroy(client);
         }
 
         // [UnityTest]
         // [Ignore("Rpc not supported yet")]
         public IEnumerator RpcIsBitPacked()
         {
-            const MyByteEnum value = (MyByteEnum)3;
 
             int called = 0;
             clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };

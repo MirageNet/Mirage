@@ -13,7 +13,7 @@ namespace Mirage.Tests.CodeGenerators
             Create(fromTemplate, "int", 10);
             Create(fromTemplate, "int", 17);
             Create(fromTemplate, "int", 32);
-            Create(fromTemplate, "short", 4);
+            Create(fromTemplate, "short", 4, "3");
             Create(fromTemplate, "short", 12);
             Create(fromTemplate, "ulong", 5);
             Create(fromTemplate, "ulong", 24);

@@ -5,12 +5,13 @@ using System.Collections;
 using Mirage.Serialization;
 using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests
 {
     %%EXTRA_TYPE%%
-    public class ZigZagBehaviour_%%TYPE%%_%%BIT_COUNT%% : NetworkBehaviour
+    public class ZigZagBehaviour_%%TYPE%%_%%BIT_COUNT%%%%EXTRA_NAME%% : NetworkBehaviour
     {
         [BitCount(%%BIT_COUNT%%), ZigZagEncode]
         [SyncVar] public %%TYPE%% myValue;
@@ -23,27 +24,42 @@ namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests
             onRpc?.Invoke(myParam);
         }
     }
-    public class ZigZagTest_%%TYPE%%_%%BIT_COUNT%% : ClientServerSetup<ZigZagBehaviour_%%TYPE%%_%%BIT_COUNT%%>
+    public class ZigZagTest_%%TYPE%%_%%BIT_COUNT%%%%EXTRA_NAME%% : ClientServerSetup<ZigZagBehaviour_%%TYPE%%_%%BIT_COUNT%%%%EXTRA_NAME%%>
     {
+        const %%TYPE%% value = %%EXTRA_VALUE%%;
+
         [Test]
         public void SyncVarIsBitPacked()
         {
-            var behaviour = new ZigZagBehaviour_%%TYPE%%_%%BIT_COUNT%%();
+            // need to have access to NetworkIdentity in order to set syncvar
+            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_%%TYPE%%_%%BIT_COUNT%%%%EXTRA_NAME%%>();
+            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_%%TYPE%%_%%BIT_COUNT%%%%EXTRA_NAME%%>();
+
+            server.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                behaviour.SerializeSyncVars(writer, true);
+                server.SerializeSyncVars(writer, true);
 
                 Assert.That(writer.BitPosition, Is.EqualTo(%%BIT_COUNT%%));
+
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
+                {
+                    client.DeserializeSyncVars(reader, true);
+                    Assert.That(reader.BitPosition, Is.EqualTo(%%BIT_COUNT%%));
+
+                    Assert.That(client.myValue, Is.EqualTo(value));
+                }
             }
+
+            GameObject.Destroy(server);
+            GameObject.Destroy(client);
         }
 
         // [UnityTest]
         // [Ignore("Rpc not supported yet")]
         public IEnumerator RpcIsBitPacked()
         {
-            const %%TYPE%% value = %%EXTRA_VALUE%%;
-
             int called = 0;
             clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };
 
