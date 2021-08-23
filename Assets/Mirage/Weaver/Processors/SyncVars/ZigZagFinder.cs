@@ -1,4 +1,4 @@
-﻿using Mirage.Serialization;
+using Mirage.Serialization;
 using Mono.Cecil;
 
 namespace Mirage.Weaver.SyncVars
@@ -12,7 +12,7 @@ namespace Mirage.Weaver.SyncVars
                 return false;
 
             if (!hasBitCount)
-                throw new ZigZagException($"[ZigZag] can only be used with [BitCount]", syncVar);
+                throw new ZigZagException($"[ZigZagEncode] can only be used with [BitCount]", syncVar);
 
             ThrowIfUnsignedType(syncVar.FieldType, syncVar);
             return true;
@@ -30,7 +30,7 @@ namespace Mirage.Weaver.SyncVars
              || type.Is<ushort>()
              || type.Is<uint>()
              || type.Is<ulong>())
-                throw new ZigZagException($"[ZigZag] can only be used on a signed type", syncVar);
+                throw new ZigZagException($"[ZigZagEncode] can only be used on a signed type", syncVar);
 
             if (type.Resolve().IsEnum)
             {

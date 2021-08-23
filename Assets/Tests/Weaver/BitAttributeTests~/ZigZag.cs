@@ -15,4 +15,16 @@ namespace BitAttributeTests.ZigZag
         [BitCount(4), ZigZagEncode]
         [SyncVar] public MyShortEnum value3;
     }
+
+    public enum MyIntEnum
+    {
+        none = 0,
+        value = 1,
+    }
+
+    public enum MyShortEnum : short
+    {
+        none = 0,
+        value = 1,
+    }
 }
