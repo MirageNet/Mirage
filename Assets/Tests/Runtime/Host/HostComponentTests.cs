@@ -72,7 +72,7 @@ namespace Mirage.Tests.Runtime.Host
             // state cleared?
             Assert.That(server.Players, Is.Empty);
             Assert.That(server.Active, Is.False);
-            Assert.That(server.World.LocalPlayer, Is.Null);
+            Assert.That(server.World == null);
             Assert.That(server.LocalClientActive, Is.False);
         }
 

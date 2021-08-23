@@ -353,7 +353,7 @@ namespace Mirage
         /// </summary>
         internal void AddLocalConnection(INetworkClient client, IConnection connection)
         {
-            if (World.LocalPlayer != null)
+            if (World == null || World.LocalPlayer != null)
             {
                 throw new InvalidOperationException("Local Connection already exists");
             }
@@ -374,7 +374,7 @@ namespace Mirage
         /// </summary>
         internal void InvokeLocalConnected()
         {
-            if (World.LocalPlayer == null)
+            if (World == null || World.LocalPlayer == null)
             {
                 throw new InvalidOperationException("Local Connection does not exist");
             }
