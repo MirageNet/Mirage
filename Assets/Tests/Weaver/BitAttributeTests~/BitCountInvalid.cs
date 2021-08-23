@@ -1,7 +1,7 @@
 using Mirage;
 using Mirage.Serialization;
 
-namespace BitAttributeTests.BitCountOverTypeSize
+namespace BitAttributeTests.BitCountInvalid
 {
     // should expect 1 error per field
     public class MyBehaviour : NetworkBehaviour
