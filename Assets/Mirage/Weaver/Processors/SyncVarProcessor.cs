@@ -456,9 +456,24 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+
+                if (syncVar.UseZigZagEncoding)
+                {
+                    WriteZigZag();
+                }
+
                 worker.Append(worker.Create(OpCodes.Conv_U8));
                 worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCount.Value));
                 worker.Append(worker.Create(OpCodes.Call, writeWithBitCount));
+            }
+            void WriteZigZag()
+            {
+                bool useLong = syncVar.FieldDefinition.FieldType.Is<long>();
+                MethodReference encode = useLong
+                    ? module.ImportReference((long v) => ZigZag.Encode(v))
+                    : module.ImportReference((int v) => ZigZag.Encode(v));
+
+                worker.Append(worker.Create(OpCodes.Call, encode));
             }
         }
 
@@ -622,7 +637,21 @@ namespace Mirage.Weaver
                     worker.Append(worker.Create(syncVar.BitCountConvert.Value));
                 }
 
+                if (syncVar.UseZigZagEncoding)
+                {
+                    ReadZigZag();
+                }
+
                 worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+            }
+            void ReadZigZag()
+            {
+                bool useLong = syncVar.FieldDefinition.FieldType.Is<long>();
+                MethodReference encode = useLong
+                    ? module.ImportReference((ulong v) => ZigZag.Decode(v))
+                    : module.ImportReference((uint v) => ZigZag.Decode(v));
+
+                worker.Append(worker.Create(OpCodes.Call, encode));
             }
         }
     }
