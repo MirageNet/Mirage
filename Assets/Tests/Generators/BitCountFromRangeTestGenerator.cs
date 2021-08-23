@@ -1,0 +1,83 @@
+using JamesFrowen.SimpleCodeGen;
+using UnityEditor;
+using UnityEngine;
+
+namespace Mirage.Tests.CodeGenerators
+{
+    public static class BitCountFromRangeTestGenerator
+    {
+        [MenuItem("Tests Generators/BitCountFromRange")]
+        public static void CreateAll()
+        {
+            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.BitCountFromRangeTestTemplate.txt");
+            Create(fromTemplate, "int", -10, 10, 5, "-3");
+            Create(fromTemplate, "int", -20_000, 20_000, 16);
+            Create(fromTemplate, "int", -1_000, 0, 10, "-3");
+            Create(fromTemplate, "int", -2000, -1000, 10, "-1400");
+            Create(fromTemplate, "int", int.MinValue, int.MaxValue, 32);
+            Create(fromTemplate, "int", int.MinValue, int.MaxValue, 32, int.MinValue.ToString(), extraName: "min");
+            Create(fromTemplate, "int", int.MinValue, int.MaxValue, 32, int.MaxValue.ToString(), extraName: "max");
+            Create(fromTemplate, "short", -10, 10, 5, "3");
+            Create(fromTemplate, "short", -1000, 1000, 11);
+            Create(fromTemplate, "short", short.MinValue, short.MaxValue, 16);
+            Create(fromTemplate, "ushort", ushort.MinValue, ushort.MaxValue, 16);
+            Create(fromTemplate, "ulong", 0, 1_000_000, 20);
+            Create(fromTemplate, "long", -50_000_000, 50_000_000, 27);
+            Create(fromTemplate, "long", long.MinValue, long.MaxValue, 64);
+            Create(fromTemplate, "ulong", 0, ulong.MaxValue, 64);
+            Create(fromTemplate, "MyEnum", 0, 3, 2, "(MyEnum)3",
+    @"[System.Serializable]
+    public enum MyEnum
+    {
+        None = 0,
+        Slow = 1,
+        Fast = 2,
+        ReallyFast = 3,
+    }");
+
+            Create(fromTemplate, "MyByteEnum", 0, 3, 2, "(MyByteEnum)3",
+    @"[System.Flags, System.Serializable]
+    public enum MyByteEnum : byte
+    {
+        None = 0,
+        Slow = 1,
+        Fast = 2,
+        ReallyFast = 3,
+    }");
+
+            AssetDatabase.Refresh();
+        }
+
+        private static void Create(CreateFromTemplate fromTemplate, string type, long min, long max, int expectedBitCount, string extraValue = "20", string extraType = "", string extraName = "")
+        {
+            fromTemplate.Replace("%%MIN%%", min);
+            fromTemplate.Replace("%%MAX%%", max);
+            string minString = min.ToString().Replace('-', 'N');
+            string maxString = max.ToString().Replace('-', 'N');
+            string name = $"{type}_{minString}_{maxString}{extraName}";
+            CreateShared(fromTemplate, type, expectedBitCount, extraValue, extraType, name);
+        }
+
+        private static void Create(CreateFromTemplate fromTemplate, string type, ulong min, ulong max, int expectedBitCount, string extraValue = "20", string extraType = "", string extraName = "")
+        {
+            fromTemplate.Replace("%%MIN%%", min);
+            fromTemplate.Replace("%%MAX%%", max);
+            string minString = min.ToString().Replace('-', 'N');
+            string maxString = max.ToString().Replace('-', 'N');
+            string name = $"{type}_{minString}_{maxString}{extraName}";
+            CreateShared(fromTemplate, type, expectedBitCount, extraValue, extraType, name);
+        }
+
+        private static void CreateShared(CreateFromTemplate fromTemplate, string type, int expectedBitCount, string extraValue, string extraType, string name)
+        {
+            fromTemplate.Replace("%%EXPECTED_BIT_COUNT%%", expectedBitCount);
+            fromTemplate.Replace("%%TYPE%%", type);
+            fromTemplate.Replace("%%PAYLOAD_SIZE%%", Mathf.CeilToInt(expectedBitCount / 8f));
+            fromTemplate.Replace("%%EXTRA_TYPE%%", extraType);
+            fromTemplate.Replace("%%EXTRA_VALUE%%", extraValue);
+            fromTemplate.Replace("%%NAME%%", name);
+
+            fromTemplate.WriteToFile($"./Assets/Tests/Generated/BitCountFromRangeTests/BitCountBehaviour_{name}.cs");
+        }
+    }
+}
