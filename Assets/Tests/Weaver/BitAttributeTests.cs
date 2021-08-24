@@ -86,7 +86,7 @@ namespace Mirage.Weaver
         [Test]
         public void BitCountFromRangeInvalid()
         {
-            HasErrorCount(7);
+            HasErrorCount(8);
 
             HasError("Max must be greater than min",
                 "System.Int32 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value1");
@@ -100,14 +100,17 @@ namespace Mirage.Weaver
             HasError($"Max must be greater than types max value, max:{300}, max allowed:{byte.MaxValue}, type:Byte",
                 "System.Byte BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value4");
 
-            HasError($"Max must be greater than types max value, max:{uint.MaxValue}, max allowed:{int.MaxValue}, type:Int32",
-                "System.Int32 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value5");
+            HasError($"Max must be greater than types max value, max:{int.MaxValue}, max allowed:{short.MaxValue}, type:Int16",
+                "System.Int16 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value5");
 
             HasError($"Min must be less than types min value, min:{-50}, min allowed:{uint.MinValue}, type:UInt32",
                 "System.UInt32 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value6");
 
             HasError("UnityEngine.Vector3 is not a supported type for [BitCountFromRange]",
                "UnityEngine.Vector3 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value7");
+
+            HasError("System.Int64 is not a supported type for [BitCountFromRange]",
+               "System.Int64 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value8");
         }
     }
 }

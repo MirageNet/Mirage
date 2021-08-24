@@ -33,7 +33,7 @@ namespace Mirage.Weaver.SyncVars
             long range = checked((long)max - min);
             int bitCount = (int)Math.Floor(Math.Log(range, 2)) + 1;
             if (bitCount < 0 || bitCount > 32)
-                throw new OverflowException($"Bit Count could not be calcualted, min:{min}, max{max}, bitCount:{bitCount}");
+                throw new OverflowException($"Bit Count could not be calcualted, min:{min}, max:{max}, bitCount:{bitCount}");
 
             int? minResult;
             if (min == 0) minResult = null;

@@ -23,8 +23,8 @@ namespace BitAttributeTests.BitCountFromRangeInvalid
         [SyncVar] public byte value4;
 
         // error, max is above type max
-        [BitCountFromRange(0, uint.MaxValue)]
-        [SyncVar] public int value5;
+        [BitCountFromRange(0, int.MaxValue)]
+        [SyncVar] public short value5;
 
         // error, min is below type max
         [BitCountFromRange(-50, 50)]
@@ -33,5 +33,9 @@ namespace BitAttributeTests.BitCountFromRangeInvalid
         // error, unsupported type
         [BitCountFromRange(-50, 50)]
         [SyncVar] public UnityEngine.Vector3 value7;
+
+        // error, unsupported type
+        [BitCountFromRange(-50, 50)]
+        [SyncVar] public long value8;
     }
 }
