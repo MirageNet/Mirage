@@ -37,8 +37,6 @@ namespace Mirage.Serialization
     public class BitCountFromRangeAttribute : Attribute
     {
         public BitCountFromRangeAttribute(int min, int max) { }
-        public BitCountFromRangeAttribute(long min, long max) { }
-        public BitCountFromRangeAttribute(ulong min, ulong max) { }
     }
 
     /// <summary>
@@ -47,8 +45,6 @@ namespace Mirage.Serialization
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class ZigZagEncodeAttribute : Attribute
     {
-        int a;
-
         public ZigZagEncodeAttribute() { }
     }
 }

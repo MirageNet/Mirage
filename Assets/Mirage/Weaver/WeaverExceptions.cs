@@ -47,4 +47,8 @@ namespace Mirage.Weaver.SyncVars
     {
         public ZigZagException(string message, MemberReference memberReference) : base(message, memberReference) { }
     }
+    internal class BitCountFromRangeException : SyncVarException
+    {
+        public BitCountFromRangeException(string message, MemberReference memberReference) : base(message, memberReference) { }
+    }
 }

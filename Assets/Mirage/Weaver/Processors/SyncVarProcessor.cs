@@ -461,6 +461,10 @@ namespace Mirage.Weaver
                 {
                     WriteZigZag();
                 }
+                if (syncVar.BitCountMinValue.HasValue)
+                {
+                    WriteSubtractMinValue();
+                }
 
                 worker.Append(worker.Create(OpCodes.Conv_U8));
                 worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCount.Value));
@@ -474,6 +478,11 @@ namespace Mirage.Weaver
                     : module.ImportReference((int v) => ZigZag.Encode(v));
 
                 worker.Append(worker.Create(OpCodes.Call, encode));
+            }
+            void WriteSubtractMinValue()
+            {
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCountMinValue.Value));
+                worker.Append(worker.Create(OpCodes.Sub));
             }
         }
 
@@ -641,6 +650,10 @@ namespace Mirage.Weaver
                 {
                     ReadZigZag();
                 }
+                if (syncVar.BitCountMinValue.HasValue)
+                {
+                    ReadAddMinValue();
+                }
 
                 worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
             }
@@ -652,6 +665,11 @@ namespace Mirage.Weaver
                     : module.ImportReference((uint v) => ZigZag.Decode(v));
 
                 worker.Append(worker.Create(OpCodes.Call, encode));
+            }
+            void ReadAddMinValue()
+            {
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCountMinValue.Value));
+                worker.Append(worker.Create(OpCodes.Add));
             }
         }
     }

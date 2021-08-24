@@ -31,36 +31,28 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests
         [Test]
         public void SyncVarIsBitPacked()
         {
-            // need to have access to NetworkIdentity in order to set syncvar
-            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<BitCountRangeBehaviour_ushort_0_65535>();
-            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<BitCountRangeBehaviour_ushort_0_65535>();
-
-            server.myValue = value;
+            serverComponent.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                server.SerializeSyncVars(writer, true);
+                serverComponent.SerializeSyncVars(writer, true);
 
                 Assert.That(writer.BitPosition, Is.EqualTo(16));
 
                 using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
                 {
-                    client.DeserializeSyncVars(reader, true);
+                    clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(16));
 
-                    Assert.That(client.myValue, Is.EqualTo(value));
+                    Assert.That(clientComponent.myValue, Is.EqualTo(value));
                 }
             }
-
-            GameObject.Destroy(server);
-            GameObject.Destroy(client);
         }
 
         // [UnityTest]
         // [Ignore("Rpc not supported yet")]
         public IEnumerator RpcIsBitPacked()
         {
-
             int called = 0;
             clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };
 

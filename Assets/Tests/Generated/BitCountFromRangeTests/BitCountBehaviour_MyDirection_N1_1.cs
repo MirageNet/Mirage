@@ -10,57 +10,55 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests
 {
-    
-    public class BitCountRangeBehaviour_long_N9223372036854775808_9223372036854775807 : NetworkBehaviour
+    [System.Serializable]
+    public enum MyDirection
     {
-        [BitCountFromRange(-9223372036854775808, 9223372036854775807)]
-        [SyncVar] public long myValue;
+        Left = -1,
+        None = 0,
+        Right = 1,
+    }
+    public class BitCountRangeBehaviour_MyDirection_N1_1 : NetworkBehaviour
+    {
+        [BitCountFromRange(-1, 1)]
+        [SyncVar] public MyDirection myValue;
 
-        public event Action<long> onRpc;
+        public event Action<MyDirection> onRpc;
 
         [ClientRpc]
-        public void RpcSomeFunction([BitCountFromRange(-9223372036854775808, 9223372036854775807)] long myParam)
+        public void RpcSomeFunction([BitCountFromRange(-1, 1)] MyDirection myParam)
         {
             onRpc?.Invoke(myParam);
         }
     }
-    public class BitCountRangeTest_long_N9223372036854775808_9223372036854775807 : ClientServerSetup<BitCountRangeBehaviour_long_N9223372036854775808_9223372036854775807>
+    public class BitCountRangeTest_MyDirection_N1_1 : ClientServerSetup<BitCountRangeBehaviour_MyDirection_N1_1>
     {
-        const long value = 20;
+        const MyDirection value = (MyDirection)1;
 
         [Test]
         public void SyncVarIsBitPacked()
         {
-            // need to have access to NetworkIdentity in order to set syncvar
-            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<BitCountRangeBehaviour_long_N9223372036854775808_9223372036854775807>();
-            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<BitCountRangeBehaviour_long_N9223372036854775808_9223372036854775807>();
-
-            server.myValue = value;
+            serverComponent.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                server.SerializeSyncVars(writer, true);
+                serverComponent.SerializeSyncVars(writer, true);
 
-                Assert.That(writer.BitPosition, Is.EqualTo(64));
+                Assert.That(writer.BitPosition, Is.EqualTo(2));
 
                 using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
                 {
-                    client.DeserializeSyncVars(reader, true);
-                    Assert.That(reader.BitPosition, Is.EqualTo(64));
+                    clientComponent.DeserializeSyncVars(reader, true);
+                    Assert.That(reader.BitPosition, Is.EqualTo(2));
 
-                    Assert.That(client.myValue, Is.EqualTo(value));
+                    Assert.That(clientComponent.myValue, Is.EqualTo(value));
                 }
             }
-
-            GameObject.Destroy(server);
-            GameObject.Destroy(client);
         }
 
         // [UnityTest]
         // [Ignore("Rpc not supported yet")]
         public IEnumerator RpcIsBitPacked()
         {
-
             int called = 0;
             clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };
 
@@ -77,7 +75,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests
             serverComponent.RpcSomeFunction(value);
             yield return null;
             Assert.That(called, Is.EqualTo(1));
-            Assert.That(payloadSize, Is.EqualTo(8), $"%%BIT_COUNT%% bits is 8 bytes in payload");
+            Assert.That(payloadSize, Is.EqualTo(1), $"%%BIT_COUNT%% bits is 1 bytes in payload");
         }
     }
 }

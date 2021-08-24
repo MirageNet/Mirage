@@ -11,56 +11,48 @@ using UnityEngine.TestTools;
 namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests
 {
     
-    public class BitCountRangeBehaviour_long_N50000000_50000000 : NetworkBehaviour
+    public class BitCountRangeBehaviour_uint_0_5000 : NetworkBehaviour
     {
-        [BitCountFromRange(-50000000, 50000000)]
-        [SyncVar] public long myValue;
+        [BitCountFromRange(0, 5000)]
+        [SyncVar] public uint myValue;
 
-        public event Action<long> onRpc;
+        public event Action<uint> onRpc;
 
         [ClientRpc]
-        public void RpcSomeFunction([BitCountFromRange(-50000000, 50000000)] long myParam)
+        public void RpcSomeFunction([BitCountFromRange(0, 5000)] uint myParam)
         {
             onRpc?.Invoke(myParam);
         }
     }
-    public class BitCountRangeTest_long_N50000000_50000000 : ClientServerSetup<BitCountRangeBehaviour_long_N50000000_50000000>
+    public class BitCountRangeTest_uint_0_5000 : ClientServerSetup<BitCountRangeBehaviour_uint_0_5000>
     {
-        const long value = 20;
+        const uint value = 20;
 
         [Test]
         public void SyncVarIsBitPacked()
         {
-            // need to have access to NetworkIdentity in order to set syncvar
-            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<BitCountRangeBehaviour_long_N50000000_50000000>();
-            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<BitCountRangeBehaviour_long_N50000000_50000000>();
-
-            server.myValue = value;
+            serverComponent.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                server.SerializeSyncVars(writer, true);
+                serverComponent.SerializeSyncVars(writer, true);
 
-                Assert.That(writer.BitPosition, Is.EqualTo(27));
+                Assert.That(writer.BitPosition, Is.EqualTo(13));
 
                 using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
                 {
-                    client.DeserializeSyncVars(reader, true);
-                    Assert.That(reader.BitPosition, Is.EqualTo(27));
+                    clientComponent.DeserializeSyncVars(reader, true);
+                    Assert.That(reader.BitPosition, Is.EqualTo(13));
 
-                    Assert.That(client.myValue, Is.EqualTo(value));
+                    Assert.That(clientComponent.myValue, Is.EqualTo(value));
                 }
             }
-
-            GameObject.Destroy(server);
-            GameObject.Destroy(client);
         }
 
         // [UnityTest]
         // [Ignore("Rpc not supported yet")]
         public IEnumerator RpcIsBitPacked()
         {
-
             int called = 0;
             clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };
 
@@ -77,7 +69,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests
             serverComponent.RpcSomeFunction(value);
             yield return null;
             Assert.That(called, Is.EqualTo(1));
-            Assert.That(payloadSize, Is.EqualTo(4), $"%%BIT_COUNT%% bits is 4 bytes in payload");
+            Assert.That(payloadSize, Is.EqualTo(2), $"%%BIT_COUNT%% bits is 2 bytes in payload");
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Mirage.Weaver.SyncVars
             int maxSize = GetTypeMaxSize(syncVar.FieldType, syncVar);
 
             if (bitCount > maxSize)
-                throw new BitCountException($"BitCount can not be above target type size, bitCount:{bitCount}, type:{syncVar.FieldType.Name}, max size:{maxSize}", syncVar);
+                throw new BitCountException($"BitCount can not be above target type size, bitCount:{bitCount}, max size: {maxSize}, type: {syncVar.FieldType.Name}", syncVar);
 
             return (bitCount, GetConvertType(syncVar.FieldType));
         }
@@ -50,7 +50,7 @@ namespace Mirage.Weaver.SyncVars
         /// </summary>
         /// <param name="syncVar"></param>
         /// <returns></returns>
-        static OpCode? GetConvertType(TypeReference type)
+        public static OpCode? GetConvertType(TypeReference type)
         {
             if (type.Is<byte>()) return OpCodes.Conv_I4;
             if (type.Is<ushort>()) return OpCodes.Conv_I4;

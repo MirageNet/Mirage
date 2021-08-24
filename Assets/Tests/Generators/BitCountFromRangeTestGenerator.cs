@@ -17,26 +17,22 @@ namespace Mirage.Tests.CodeGenerators
             Create(fromTemplate, "int", int.MinValue, int.MaxValue, 32);
             Create(fromTemplate, "int", int.MinValue, int.MaxValue, 32, int.MinValue.ToString(), extraName: "min");
             Create(fromTemplate, "int", int.MinValue, int.MaxValue, 32, int.MaxValue.ToString(), extraName: "max");
+            Create(fromTemplate, "uint", 0, 5000, 13);
             Create(fromTemplate, "short", -10, 10, 5, "3");
             Create(fromTemplate, "short", -1000, 1000, 11);
             Create(fromTemplate, "short", short.MinValue, short.MaxValue, 16);
             Create(fromTemplate, "ushort", ushort.MinValue, ushort.MaxValue, 16);
-            Create(fromTemplate, "ulong", 0, 1_000_000, 20);
-            Create(fromTemplate, "long", -50_000_000, 50_000_000, 27);
-            Create(fromTemplate, "long", long.MinValue, long.MaxValue, 64);
-            Create(fromTemplate, "ulong", 0, ulong.MaxValue, 64);
-            Create(fromTemplate, "MyEnum", 0, 3, 2, "(MyEnum)3",
+            Create(fromTemplate, "MyDirection", -1, 1, 2, "(MyDirection)1",
     @"[System.Serializable]
-    public enum MyEnum
+    public enum MyDirection
     {
+        Left = -1,
         None = 0,
-        Slow = 1,
-        Fast = 2,
-        ReallyFast = 3,
+        Right = 1,
     }");
 
             Create(fromTemplate, "MyByteEnum", 0, 3, 2, "(MyByteEnum)3",
-    @"[System.Flags, System.Serializable]
+    @"[System.Serializable]
     public enum MyByteEnum : byte
     {
         None = 0,
@@ -48,33 +44,19 @@ namespace Mirage.Tests.CodeGenerators
             AssetDatabase.Refresh();
         }
 
-        private static void Create(CreateFromTemplate fromTemplate, string type, long min, long max, int expectedBitCount, string extraValue = "20", string extraType = "", string extraName = "")
+        private static void Create(CreateFromTemplate fromTemplate, string type, int min, int max, int expectedBitCount, string extraValue = "20", string extraType = "", string extraName = "")
         {
             fromTemplate.Replace("%%MIN%%", min);
             fromTemplate.Replace("%%MAX%%", max);
-            string minString = min.ToString().Replace('-', 'N');
-            string maxString = max.ToString().Replace('-', 'N');
-            string name = $"{type}_{minString}_{maxString}{extraName}";
-            CreateShared(fromTemplate, type, expectedBitCount, extraValue, extraType, name);
-        }
-
-        private static void Create(CreateFromTemplate fromTemplate, string type, ulong min, ulong max, int expectedBitCount, string extraValue = "20", string extraType = "", string extraName = "")
-        {
-            fromTemplate.Replace("%%MIN%%", min);
-            fromTemplate.Replace("%%MAX%%", max);
-            string minString = min.ToString().Replace('-', 'N');
-            string maxString = max.ToString().Replace('-', 'N');
-            string name = $"{type}_{minString}_{maxString}{extraName}";
-            CreateShared(fromTemplate, type, expectedBitCount, extraValue, extraType, name);
-        }
-
-        private static void CreateShared(CreateFromTemplate fromTemplate, string type, int expectedBitCount, string extraValue, string extraType, string name)
-        {
             fromTemplate.Replace("%%EXPECTED_BIT_COUNT%%", expectedBitCount);
             fromTemplate.Replace("%%TYPE%%", type);
             fromTemplate.Replace("%%PAYLOAD_SIZE%%", Mathf.CeilToInt(expectedBitCount / 8f));
             fromTemplate.Replace("%%EXTRA_TYPE%%", extraType);
             fromTemplate.Replace("%%EXTRA_VALUE%%", extraValue);
+
+            string minString = min.ToString().Replace('-', 'N');
+            string maxString = max.ToString().Replace('-', 'N');
+            string name = $"{type}_{minString}_{maxString}{extraName}";
             fromTemplate.Replace("%%NAME%%", name);
 
             fromTemplate.WriteToFile($"./Assets/Tests/Generated/BitCountFromRangeTests/BitCountBehaviour_{name}.cs");
