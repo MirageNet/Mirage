@@ -1,3 +1,10 @@
+# [101.8.0](https://github.com/MirageNet/Mirage/compare/v101.7.0...v101.8.0) (2021-08-24)
+
+
+### Features
+
+* attributes to calculate bit count of a given range ([#902](https://github.com/MirageNet/Mirage/issues/902)) ([1c22ea6](https://github.com/MirageNet/Mirage/commit/1c22ea63217a3206cb0eb41174135e8fc0133138))
+
 # [101.7.0](https://github.com/MirageNet/Mirage/compare/v101.6.0...v101.7.0) (2021-08-24)
 
 
