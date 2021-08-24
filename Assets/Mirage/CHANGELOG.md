@@ -1,3 +1,10 @@
+# [101.7.0](https://github.com/MirageNet/Mirage/compare/v101.6.0...v101.7.0) (2021-08-24)
+
+
+### Features
+
+* attributes to use zig zag encoding ([#897](https://github.com/MirageNet/Mirage/issues/897)) ([ccef5fb](https://github.com/MirageNet/Mirage/commit/ccef5fb0302ff97d897f17698e53967e014a9a95))
+
 # [101.6.0](https://github.com/MirageNet/Mirage/compare/v101.5.1...v101.6.0) (2021-08-22)
 
 
