@@ -31,29 +31,22 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
         [Test]
         public void SyncVarIsBitPacked()
         {
-            // need to have access to NetworkIdentity in order to set syncvar
-            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<BitCountBehaviour_ulong_24>();
-            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<BitCountBehaviour_ulong_24>();
-
-            server.myValue = value;
+            serverComponent.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                server.SerializeSyncVars(writer, true);
+                serverComponent.SerializeSyncVars(writer, true);
 
                 Assert.That(writer.BitPosition, Is.EqualTo(24));
 
                 using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
                 {
-                    client.DeserializeSyncVars(reader, true);
+                    clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(24));
 
-                    Assert.That(client.myValue, Is.EqualTo(value));
+                    Assert.That(clientComponent.myValue, Is.EqualTo(value));
                 }
             }
-
-            GameObject.Destroy(server);
-            GameObject.Destroy(client);
         }
 
         // [UnityTest]
