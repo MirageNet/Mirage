@@ -43,7 +43,7 @@ namespace Mirage.Serialization
         readonly bool throwIfOverLarge;
 
         public VariableIntPacker(ulong smallValue, ulong mediumValue)
-            : this(smallValue, mediumValue, ulong.MaxValue, false) { }
+            : this(BitHelper.BitCount(smallValue), BitHelper.BitCount(mediumValue), 64, false) { }
         public VariableIntPacker(ulong smallValue, ulong mediumValue, ulong largeValue, bool throwIfOverLarge = true)
             : this(BitHelper.BitCount(smallValue), BitHelper.BitCount(mediumValue), BitHelper.BitCount(largeValue), throwIfOverLarge) { }
 
