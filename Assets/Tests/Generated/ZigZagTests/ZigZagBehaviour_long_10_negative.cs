@@ -31,29 +31,22 @@ namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests
         [Test]
         public void SyncVarIsBitPacked()
         {
-            // need to have access to NetworkIdentity in order to set syncvar
-            var server = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_long_10_negative>();
-            var client = new GameObject("a", typeof(NetworkIdentity)).AddComponent<ZigZagBehaviour_long_10_negative>();
-
-            server.myValue = value;
+            serverComponent.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                server.SerializeSyncVars(writer, true);
+                serverComponent.SerializeSyncVars(writer, true);
 
                 Assert.That(writer.BitPosition, Is.EqualTo(10));
 
                 using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
                 {
-                    client.DeserializeSyncVars(reader, true);
+                    clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(10));
 
-                    Assert.That(client.myValue, Is.EqualTo(value));
+                    Assert.That(clientComponent.myValue, Is.EqualTo(value));
                 }
             }
-
-            GameObject.Destroy(server);
-            GameObject.Destroy(client);
         }
 
         // [UnityTest]
