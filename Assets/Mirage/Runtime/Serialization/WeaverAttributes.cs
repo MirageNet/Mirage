@@ -12,7 +12,7 @@ namespace Mirage.Serialization
     /// Tells weaver how many bits to sue for field
     /// <para>Only works with interager fields (byte, int, ulong, enums etc)</para>
     /// <para>
-    /// NOTE: bits are truncated when using this, so signed values will lose their sign.
+    /// NOTE: bits are truncated when using this, so signed values will lose their sign. Use <see cref="ZigZagEncodeAttribute"/> as well if value might be negative
     /// </para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
@@ -31,5 +31,14 @@ namespace Mirage.Serialization
         {
             BitCount = bitCount;
         }
+    }
+
+    /// <summary>
+    /// Used along size <see cref="BitCountAttribute"/> to encodes a interager value using <see cref="ZigZag"/> so that both positive and negative values can be sent
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    public class ZigZagEncodeAttribute : Attribute
+    {
+        public ZigZagEncodeAttribute() { }
     }
 }

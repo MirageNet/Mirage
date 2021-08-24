@@ -5,6 +5,7 @@ using System.Collections;
 using Mirage.Serialization;
 using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
@@ -25,16 +26,26 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
     }
     public class BitCountTest_short_4 : ClientServerSetup<BitCountBehaviour_short_4>
     {
+        const short value = 3;
+
         [Test]
         public void SyncVarIsBitPacked()
         {
-            var behaviour = new BitCountBehaviour_short_4();
+            serverComponent.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                behaviour.SerializeSyncVars(writer, true);
+                serverComponent.SerializeSyncVars(writer, true);
 
                 Assert.That(writer.BitPosition, Is.EqualTo(4));
+
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
+                {
+                    clientComponent.DeserializeSyncVars(reader, true);
+                    Assert.That(reader.BitPosition, Is.EqualTo(4));
+
+                    Assert.That(clientComponent.myValue, Is.EqualTo(value));
+                }
             }
         }
 
@@ -42,7 +53,6 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
         // [Ignore("Rpc not supported yet")]
         public IEnumerator RpcIsBitPacked()
         {
-            const short value = 20;
 
             int called = 0;
             clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };
