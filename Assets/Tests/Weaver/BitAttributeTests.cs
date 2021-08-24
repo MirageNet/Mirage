@@ -11,49 +11,49 @@ namespace Mirage.Weaver
         }
 
         [Test]
-        public void BitCountOverTypeSize()
+        public void BitCountInvalid()
         {
             HasErrorCount(13);
 
-            HasError("BitCount can not be above target type size, bitCount:9, type:Byte, max size:8",
-                "System.Byte BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value1");
+            HasError("BitCount can not be above target type size, bitCount:9, max size:8, type:Byte",
+                "System.Byte BitAttributeTests.BitCountInvalid.MyBehaviour::value1");
 
-            HasError("BitCount can not be above target type size, bitCount:17, type:Int16, max size:16",
-                "System.Int16 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value2");
+            HasError("BitCount can not be above target type size, bitCount:17, max size:16, type:Int16",
+                "System.Int16 BitAttributeTests.BitCountInvalid.MyBehaviour::value2");
 
-            HasError("BitCount can not be above target type size, bitCount:17, type:UInt16, max size:16",
-                "System.UInt16 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value3");
+            HasError("BitCount can not be above target type size, bitCount:17, max size:16, type:UInt16",
+                "System.UInt16 BitAttributeTests.BitCountInvalid.MyBehaviour::value3");
 
-            HasError("BitCount can not be above target type size, bitCount:33, type:Int32, max size:32",
-                "System.Int32 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value4");
+            HasError("BitCount can not be above target type size, bitCount:33, max size:32, type:Int32",
+                "System.Int32 BitAttributeTests.BitCountInvalid.MyBehaviour::value4");
 
-            HasError("BitCount can not be above target type size, bitCount:33, type:UInt32, max size:32",
-                "System.UInt32 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value5");
+            HasError("BitCount can not be above target type size, bitCount:33, max size:32, type:UInt32",
+                "System.UInt32 BitAttributeTests.BitCountInvalid.MyBehaviour::value5");
 
-            HasError("BitCount can not be above target type size, bitCount:65, type:Int64, max size:64",
-                "System.Int64 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value6");
+            HasError("BitCount can not be above target type size, bitCount:65, max size:64, type:Int64",
+                "System.Int64 BitAttributeTests.BitCountInvalid.MyBehaviour::value6");
 
-            HasError("BitCount can not be above target type size, bitCount:65, type:UInt64, max size:64",
-                "System.UInt64 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value7");
+            HasError("BitCount can not be above target type size, bitCount:65, max size:64, type:UInt64",
+                "System.UInt64 BitAttributeTests.BitCountInvalid.MyBehaviour::value7");
 
-            HasError("BitCount can not be above target type size, bitCount:9, type:MyByteEnum, max size:8",
-                "BitAttributeTests.BitCountOverTypeSize.MyByteEnum BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value8");
+            HasError("BitCount can not be above target type size, bitCount:9, max size:8, type:MyByteEnum",
+                "BitAttributeTests.BitCountInvalid.MyByteEnum BitAttributeTests.BitCountInvalid.MyBehaviour::value8");
 
-            HasError("BitCount can not be above target type size, bitCount:17, type:MyShortEnum, max size:16",
-                "BitAttributeTests.BitCountOverTypeSize.MyShortEnum BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value9");
+            HasError("BitCount can not be above target type size, bitCount:17, max size:16, type:MyShortEnum",
+                "BitAttributeTests.BitCountInvalid.MyShortEnum BitAttributeTests.BitCountInvalid.MyBehaviour::value9");
 
-            HasError("BitCount can not be above target type size, bitCount:33, type:MyIntEnum, max size:32",
-                "BitAttributeTests.BitCountOverTypeSize.MyIntEnum BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value10");
+            HasError("BitCount can not be above target type size, bitCount:33, max size:32, type:MyIntEnum",
+                "BitAttributeTests.BitCountInvalid.MyIntEnum BitAttributeTests.BitCountInvalid.MyBehaviour::value10");
 
 
             HasError("UnityEngine.Vector3 is not a supported type for [BitCount]",
-                "UnityEngine.Vector3 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value11");
+                "UnityEngine.Vector3 BitAttributeTests.BitCountInvalid.MyBehaviour::value11");
 
             HasError("BitCount should be above 0",
-                "System.Int32 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value12");
+                "System.Int32 BitAttributeTests.BitCountInvalid.MyBehaviour::value12");
 
             HasError("BitCount should be above 0",
-                "System.Int32 BitAttributeTests.BitCountOverTypeSize.MyBehaviour::value13");
+                "System.Int32 BitAttributeTests.BitCountInvalid.MyBehaviour::value13");
         }
 
         [Test]
@@ -63,18 +63,54 @@ namespace Mirage.Weaver
         }
 
         [Test]
-        public void ZigZagNoBitCount()
+        public void ZigZagInvalid()
         {
             HasErrorCount(3);
 
             HasError("[ZigZagEncode] can only be used with [BitCount]",
-                "System.Int32 BitAttributeTests.ZigZagNoBitCount.MyBehaviour::value1");
+                "System.Int32 BitAttributeTests.ZigZagInvalid.MyBehaviour::value1");
 
             HasError("[ZigZagEncode] can only be used on a signed type",
-                "System.UInt32 BitAttributeTests.ZigZagNoBitCount.MyBehaviour::value2");
+                "System.UInt32 BitAttributeTests.ZigZagInvalid.MyBehaviour::value2");
 
             HasError("[ZigZagEncode] can only be used on a signed type",
-                "BitAttributeTests.ZigZagNoBitCount.MyShortEnum BitAttributeTests.ZigZagNoBitCount.MyBehaviour::value3");
+                "BitAttributeTests.ZigZagInvalid.MyShortEnum BitAttributeTests.ZigZagInvalid.MyBehaviour::value3");
+        }
+
+        [Test]
+        public void BitCountFromRange()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void BitCountFromRangeInvalid()
+        {
+            HasErrorCount(8);
+
+            HasError("Max must be greater than min",
+                "System.Int32 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value1");
+
+            HasError("Max must be greater than min",
+                "System.Int32 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value2");
+
+            HasError("[BitCountFromRange] can't be used with [BitCount]",
+                "System.Int32 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value3");
+
+            HasError($"Max must be greater than types max value, max:{300}, max allowed:{byte.MaxValue}, type:Byte",
+                "System.Byte BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value4");
+
+            HasError($"Max must be greater than types max value, max:{int.MaxValue}, max allowed:{short.MaxValue}, type:Int16",
+                "System.Int16 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value5");
+
+            HasError($"Min must be less than types min value, min:{-50}, min allowed:{uint.MinValue}, type:UInt32",
+                "System.UInt32 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value6");
+
+            HasError("UnityEngine.Vector3 is not a supported type for [BitCountFromRange]",
+               "UnityEngine.Vector3 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value7");
+
+            HasError("System.Int64 is not a supported type for [BitCountFromRange]",
+               "System.Int64 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value8");
         }
     }
 }

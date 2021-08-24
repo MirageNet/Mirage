@@ -33,6 +33,12 @@ namespace Mirage.Serialization
         }
     }
 
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    public class BitCountFromRangeAttribute : Attribute
+    {
+        public BitCountFromRangeAttribute(int min, int max) { }
+    }
+
     /// <summary>
     /// Used along size <see cref="BitCountAttribute"/> to encodes a interager value using <see cref="ZigZag"/> so that both positive and negative values can be sent
     /// </summary>

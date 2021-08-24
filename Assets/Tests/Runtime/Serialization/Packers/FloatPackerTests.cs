@@ -1,4 +1,4 @@
-﻿using Mirage.Serialization;
+using Mirage.Serialization;
 using NUnit.Framework;
 using Random = UnityEngine.Random;
 

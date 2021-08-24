@@ -1,7 +1,7 @@
 using Mirage;
 using Mirage.Serialization;
 
-namespace BitAttributeTests.ZigZagNoBitCount
+namespace BitAttributeTests.ZigZagInvalid
 {
     // should expect 1 error per field
     public class MyBehaviour : NetworkBehaviour

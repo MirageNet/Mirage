@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using UnityEngine;
@@ -28,6 +30,7 @@ namespace Mirage.Weaver.SyncVars
         public OpCode? BitCountConvert { get; private set; }
 
         public bool UseZigZagEncoding { get; private set; }
+        public int? BitCountMinValue { get; private set; }
 
         public MethodReference WriteFunction { get; private set; }
         public MethodReference ReadFunction { get; private set; }
@@ -78,6 +81,7 @@ namespace Mirage.Weaver.SyncVars
         /// Finds any attribute values needed for this syncvar
         /// </summary>
         /// <param name="module"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ProcessAttributes()
         {
             HookMethod = HookMethodFinder.GetHookMethod(FieldDefinition, OriginalType);
@@ -85,6 +89,10 @@ namespace Mirage.Weaver.SyncVars
 
             (BitCount, BitCountConvert) = BitCountFinder.GetBitCount(FieldDefinition);
             UseZigZagEncoding = ZigZagFinder.HasZigZag(FieldDefinition, BitCount.HasValue);
+
+            // do this if check here so it doesn't override fields unless attribute exists
+            if (FieldDefinition.HasCustomAttribute<BitCountFromRangeAttribute>())
+                (BitCount, BitCountConvert, BitCountMinValue) = BitCountFromRangeFinder.GetBitFoundFromRange(FieldDefinition, BitCount.HasValue);
         }
 
         public void FindSerializeFunctions(Writers writers, Readers readers)

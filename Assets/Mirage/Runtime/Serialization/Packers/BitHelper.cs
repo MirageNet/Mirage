@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System;
 using UnityEngine;
 
 namespace Mirage.Serialization
@@ -39,7 +40,7 @@ namespace Mirage.Serialization
         /// <returns></returns>
         public static int BitCount(float max, float precision)
         {
-            return Mathf.CeilToInt(Mathf.Log(2 * max / precision, 2));
+            return Mathf.FloorToInt(Mathf.Log(2 * max / precision, 2)) + 1;
         }
 
         /// <summary>
@@ -53,7 +54,7 @@ namespace Mirage.Serialization
         /// <returns></returns>
         public static int BitCount(ulong max)
         {
-            return Mathf.CeilToInt(Mathf.Log(max, 2));
+            return (int)Math.Floor(Math.Log(max, 2)) + 1;
         }
     }
 }
