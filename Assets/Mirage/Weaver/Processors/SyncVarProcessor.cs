@@ -40,7 +40,8 @@ namespace Mirage.Weaver
             behaviour.GetSyncVarCountFromBase();
 
             // find syncvars
-            foreach (FieldDefinition fd in td.Fields)
+            // use ToArray to create copy, ProcessSyncVar might add new fields
+            foreach (FieldDefinition fd in td.Fields.ToArray())
             {
                 // try/catch for each field, and log once
                 // we dont want to spam multiple logs for a single field
@@ -127,6 +128,20 @@ namespace Mirage.Weaver
 
             syncVar.ProcessAttributes();
             syncVar.FindSerializeFunctions(writers, readers);
+
+            if (syncVar.FloatPackerSettings.HasValue)
+            {
+                createFloatPackerField(syncVar);
+            }
+        }
+
+        private void createFloatPackerField(FoundSyncVar syncVar)
+        {
+            TypeReference packerRer = module.ImportReference(typeof(FloatPacker));
+            var packerField = new FieldDefinition($"{syncVar.FieldDefinition.Name}__Packer", FieldAttributes.Private | FieldAttributes.Static, packerRer);
+            packerField.DeclaringType = syncVar.FieldDefinition.DeclaringType;
+            syncVar.FieldDefinition.DeclaringType.Fields.Add(packerField);
+            syncVar.PackerField = packerField;
         }
 
         MethodDefinition GenerateSyncVarGetter(FoundSyncVar syncVar)
@@ -428,6 +443,10 @@ namespace Mirage.Weaver
             {
                 WriteWithBitCount();
             }
+            else if (syncVar.FloatPackerSettings.HasValue)
+            {
+                WriteFloatPacker();
+            }
             else
             {
                 WriteDefault();
@@ -483,6 +502,18 @@ namespace Mirage.Weaver
             {
                 worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCountMinValue.Value));
                 worker.Append(worker.Create(OpCodes.Sub));
+            }
+            void WriteFloatPacker()
+            {
+                MethodReference packMethod = module.ImportReference((FloatPacker p) => p.Pack(default, default));
+
+                // Generates: packer.pack(writer, field)
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.PackerField.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Call, packMethod));
             }
         }
 
@@ -598,14 +629,22 @@ namespace Mirage.Weaver
 
         void ReadToField(ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)
         {
+            // all methods 
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
             if (syncVar.BitCount.HasValue)
             {
                 ReadWithBitCount();
+            }
+            else if (syncVar.FloatPackerSettings.HasValue)
+            {
+                ReadFloatPacker();
             }
             else
             {
                 ReadDefault();
             }
+            worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+
 
             // Local Functions
 
@@ -614,24 +653,14 @@ namespace Mirage.Weaver
                 // if ReadFunction is null it means there was an error earlier, so we dont need to do anything here
                 if (syncVar.ReadFunction == null) { return; }
 
-                // put `this` on stack, for Stfld later
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-
                 // add `reader` to stack
                 worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
                 // call read function
                 worker.Append(worker.Create(OpCodes.Call, syncVar.ReadFunction));
-
-                // store result of read to `this.syncvar`
-                worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
             }
             void ReadWithBitCount()
             {
                 MethodReference readWithBitCount = module.ImportReference(readerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkReader.Read)));
-
-
-                // put `this` on stack, for Stfld later
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
 
                 // add `reader` to stack
                 worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
@@ -654,8 +683,6 @@ namespace Mirage.Weaver
                 {
                     ReadAddMinValue();
                 }
-
-                worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
             }
             void ReadZigZag()
             {
@@ -670,6 +697,16 @@ namespace Mirage.Weaver
             {
                 worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCountMinValue.Value));
                 worker.Append(worker.Create(OpCodes.Add));
+            }
+            void ReadFloatPacker()
+            {
+                MethodReference unpackMethod = module.ImportReference((FloatPacker p) => p.Unpack(default(NetworkReader)));
+
+                // Generates: ... = packer.unpack(reader)
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.PackerField.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
+                worker.Append(worker.Create(OpCodes.Call, unpackMethod));
             }
         }
     }

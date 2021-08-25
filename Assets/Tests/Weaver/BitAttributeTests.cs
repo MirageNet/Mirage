@@ -112,5 +112,37 @@ namespace Mirage.Weaver
             HasError("System.Int64 is not a supported type for [BitCountFromRange]",
                "System.Int64 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value8");
         }
+
+        [Test]
+        public void FloatPacker()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void FloatPackerInvalid()
+        {
+            HasErrorCount(8);
+
+            HasError("Unsupproted type",
+                "System.Double BitAttributeTests.FloatPackerInvalid.MyBehaviour::value1");
+
+            HasError("Unsupproted type",
+                "System.Int32 BitAttributeTests.FloatPackerInvalid.MyBehaviour::value2");
+
+            HasError("Unsupproted type",
+                "UnityEngine.Vector3 BitAttributeTests.FloatPackerInvalid.MyBehaviour::value3");
+
+            HasError("Max must be greater than min",
+                "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value4");
+            HasError("Max must be greater than min",
+                "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value5");
+            HasError("Max must be greater than min",
+                "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value6");
+            HasError("Max must be greater than min",
+                "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value7");
+            HasError("Max must be greater than min",
+                "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value8");
+        }
     }
 }

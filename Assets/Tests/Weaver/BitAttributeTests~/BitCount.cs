@@ -3,7 +3,6 @@ using Mirage.Serialization;
 
 namespace BitAttributeTests.BitCount
 {
-    // should expect 1 error per field
     public class MyBehaviour : NetworkBehaviour
     {
         [BitCount(5)]
