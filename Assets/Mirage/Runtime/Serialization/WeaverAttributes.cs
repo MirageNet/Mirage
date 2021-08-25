@@ -52,7 +52,7 @@ namespace Mirage.Serialization
     /// Tells weaver how to pack a float field
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
-    public class PackFloatAttribute : Attribute
+    public class FloatPackAttribute : Attribute
     {
         /// <summary>
         /// Number of bits to pack value as
@@ -84,7 +84,7 @@ namespace Mirage.Serialization
         /// </summary>
         /// <param name="max">Max value of the float</param>
         /// <param name="resolution">Smallest value, <see cref="Resolution"/></param>
-        public PackFloatAttribute(float max, float resolution)
+        public FloatPackAttribute(float max, float resolution)
         {
             UseBitCount = false;
             Max = max;
@@ -95,10 +95,11 @@ namespace Mirage.Serialization
         /// </summary>
         /// <param name="max">Max value of the float</param>
         /// <param name="bitCount"></param>
-        public PackFloatAttribute(float max, int bitCount)
+        public FloatPackAttribute(float max, int bitCount)
         {
             UseBitCount = true;
             Max = max;
             BitCount = bitCount;
         }
+    }
 }
