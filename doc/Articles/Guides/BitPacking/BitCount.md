@@ -110,4 +110,4 @@ public override void DeserializeSyncVars(NetworkReader reader, bool initialState
 }
 ```
 
-*last updated for Mirage v101.6.0*
+*last updated for Mirage v101.8.0*
