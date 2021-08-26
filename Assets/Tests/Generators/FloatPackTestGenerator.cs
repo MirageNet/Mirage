@@ -3,12 +3,12 @@ using UnityEditor;
 
 namespace Mirage.Tests.CodeGenerators
 {
-    public static class FloatPackerTestGenerator
+    public static class FloatPackTestGenerator
     {
-        [MenuItem("Tests Generators/FloatPacker")]
+        [MenuItem("Tests Generators/FloatPack")]
         public static void CreateAll()
         {
-            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.FloatPackerTestTemplate.txt");
+            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.FloatPackTestTemplate.txt");
             Create(fromTemplate, 100f, "0.2f", 5.2f, 0.196f, 10);
             Create(fromTemplate, 100f, "0.02f", 5.2f, 0.0123f, 14);
 
@@ -30,7 +30,7 @@ namespace Mirage.Tests.CodeGenerators
             fromTemplate.Replace("%%WITHIN%%", $"{within}f");
             fromTemplate.Replace("%%BIT_COUNT%%", bitcount);
 
-            fromTemplate.WriteToFile($"./Assets/Tests/Generated/FloatPackerTests/FloatPackerBehaviour_{name}.cs");
+            fromTemplate.WriteToFile($"./Assets/Tests/Generated/FloatPackTests/FloatPackBehaviour_{name}.cs");
         }
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.CompilerServices;
 using Mirage.Serialization;
 using Mono.Cecil;
@@ -7,7 +6,7 @@ using UnityEngine;
 
 namespace Mirage.Weaver.SyncVars
 {
-    internal struct FloatPackerSettings
+    internal struct FloatPackSettings
     {
         public float max;
         public float? precision;
@@ -39,7 +38,7 @@ namespace Mirage.Weaver.SyncVars
         public bool UseZigZagEncoding { get; private set; }
         public int? BitCountMinValue { get; private set; }
 
-        public FloatPackerSettings? FloatPackerSettings { get; private set; }
+        public FloatPackSettings? FloatPackSettings { get; private set; }
         public FieldDefinition PackerField { get; internal set; }
 
         public MethodReference WriteFunction { get; private set; }
@@ -104,7 +103,7 @@ namespace Mirage.Weaver.SyncVars
             if (FieldDefinition.HasCustomAttribute<BitCountFromRangeAttribute>())
                 (BitCount, BitCountConvert, BitCountMinValue) = BitCountFromRangeFinder.GetBitFoundFromRange(FieldDefinition, BitCount.HasValue);
 
-            FloatPackerSettings = FloatPackerFinder.GetPackerSettings(FieldDefinition);
+            FloatPackSettings = FloatPackFinder.GetPackerSettings(FieldDefinition);
         }
 
         public void FindSerializeFunctions(Writers writers, Readers readers)
@@ -118,60 +117,6 @@ namespace Mirage.Weaver.SyncVars
             {
                 throw new SyncVarException($"{FieldDefinition.Name} is an unsupported type. {e.Message}", FieldDefinition);
             }
-        }
-    }
-
-    internal static class FloatPackerFinder
-    {
-        public static FloatPackerSettings? GetPackerSettings(FieldDefinition syncVar)
-        {
-            CustomAttribute attribute = syncVar.GetCustomAttribute<FloatPackerAttribute>();
-            if (attribute == null)
-                return default;
-
-            if (!syncVar.FieldType.Is<float>())
-            {
-                throw new FloatPackerException($"{syncVar.FieldType} is not a supported type for [FloatPacker]", syncVar);
-            }
-
-            var settings = new FloatPackerSettings();
-            settings.max = (float)attribute.ConstructorArguments[0].Value;
-            if (settings.max <= 0)
-            {
-                throw new FloatPackerException($"Max must be above 0, max:{settings.max}", syncVar);
-            }
-
-            CustomAttributeArgument arg1 = attribute.ConstructorArguments[1];
-            if (arg1.Type.Is<float>())
-            {
-                float precision = (float)arg1.Value;
-                if (precision < 0)
-                {
-                    throw new FloatPackerException($"Precsion must be positive, precision:{precision}", syncVar);
-                }
-                // todo is there a better way to check if Precsion is too small?
-                double expectedBitCount = Math.Floor(Math.Log(2 * settings.max / precision, 2)) + 1;
-                if (expectedBitCount > 30)
-                {
-                    throw new FloatPackerException($"Precsion is too small, precision:{precision}", syncVar);
-                }
-                settings.precision = precision;
-            }
-            else
-            {
-                int bitCount = (int)arg1.Value;
-                if (bitCount > 30)
-                {
-                    throw new FloatPackerException($"BitCount must be between 1 and 30 (inclusive), bitCount:{bitCount}", syncVar);
-                }
-                if (bitCount < 1)
-                {
-                    throw new FloatPackerException($"BitCount must be between 1 and 30 (inclusive), bitCount:{bitCount}", syncVar);
-                }
-                settings.bitCount = bitCount;
-            }
-
-            return settings;
         }
     }
 }

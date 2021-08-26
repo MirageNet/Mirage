@@ -9,7 +9,7 @@
 - name: Variable Sized Int Block packer
   href: VarIntBlock.md
 - name: Float Packer
-  href: FloatPacker.md
+  href: FloatPack.md
 - name: Vector Packer
   href: VectorPacker.md
 - name: Quaternion Packer

@@ -11,4 +11,4 @@ Mirage has many attributes that can be applied to SyncVars and Rpc parameters
 - [BitCount](./BitCount.md) Sets the number of bits on an integer
 - [BitCountFromRange](./BitCountFromRange.md) Sets the number of bits from a given range, rounding up.
 - [ZigZagEncode](./ZigZagEncode.md) Encodes a value using [ZigZag Encoding](https://gist.github.com/mfuerstenau/ba870a29e16536fdbaba). Only useable with [BitCount](./BitCount.md) or [VarIntBlock](./VarIntBlock.md)
-- [FloatPacker](./FloatPacker.md) Compresses a float value.
+- [FloatPack](./FloatPack.md) Compresses a float value.

@@ -8,17 +8,17 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Runtime.Generated.FloatPackerAttributeTests
+namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests
 {
-    public class FloatPackerBehaviour_1_8 : NetworkBehaviour
+    public class FloatPackerBehaviour_500_17 : NetworkBehaviour
     {
-        [FloatPacker(1, 8)]
+        [FloatPack(500, 0.01f)]
         [SyncVar] public float myValue;
     }
-    public class FloatPackerTest_1_8 : ClientServerSetup<FloatPackerBehaviour_1_8>
+    public class FloatPackerTest_500_17 : ClientServerSetup<FloatPackerBehaviour_500_17>
     {
-        const float value = 0.2f;
-        const float within = 0.00785f;
+        const float value = 5.2f;
+        const float within = 0.00763f;
 
         [Test]
         public void SyncVarIsBitPacked()
@@ -29,12 +29,12 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackerAttributeTests
             {
                 serverComponent.SerializeSyncVars(writer, true);
 
-                Assert.That(writer.BitPosition, Is.EqualTo(8));
+                Assert.That(writer.BitPosition, Is.EqualTo(17));
 
                 using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
                 {
                     clientComponent.DeserializeSyncVars(reader, true);
-                    Assert.That(reader.BitPosition, Is.EqualTo(8));
+                    Assert.That(reader.BitPosition, Is.EqualTo(17));
 
                     Assert.That(clientComponent.myValue, Is.EqualTo(value).Within(within));
                 }

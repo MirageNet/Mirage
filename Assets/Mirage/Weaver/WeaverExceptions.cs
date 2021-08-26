@@ -51,8 +51,8 @@ namespace Mirage.Weaver.SyncVars
     {
         public BitCountFromRangeException(string message, MemberReference memberReference) : base(message, memberReference) { }
     }
-    internal class FloatPackerException : SyncVarException
+    internal class FloatPackException : SyncVarException
     {
-        public FloatPackerException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public FloatPackException(string message, MemberReference memberReference) : base(message, memberReference) { }
     }
 }

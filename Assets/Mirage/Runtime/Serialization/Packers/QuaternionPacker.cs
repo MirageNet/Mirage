@@ -62,7 +62,7 @@ namespace Mirage.Serialization
             // (this.BitLength - 1) because pack sign by itself
             bitCountPerElement = quaternionBitLength;
             totalBitCount = 2 + (quaternionBitLength * 3);
-            floatPacker = FloatPacker.FromBitCount(MaxValue, quaternionBitLength);
+            floatPacker = new FloatPacker(MaxValue, quaternionBitLength);
             readMask = (uint)BitMask.Mask(bitCountPerElement);
         }
 

@@ -114,40 +114,40 @@ namespace Mirage.Weaver
         }
 
         [Test]
-        public void FloatPacker()
+        public void FloatPack()
         {
             IsSuccess();
         }
 
         [Test]
-        public void FloatPackerInvalid()
+        public void FloatPackInvalid()
         {
             HasErrorCount(9);
 
-            HasError("System.Double is not a supported type for [FloatPacker]",
-                "System.Double BitAttributeTests.FloatPackerInvalid.MyBehaviour::value1");
+            HasError("System.Double is not a supported type for [FloatPack]",
+                "System.Double BitAttributeTests.FloatPackInvalid.MyBehaviour::value1");
 
-            HasError("System.Int32 is not a supported type for [FloatPacker]",
-                "System.Int32 BitAttributeTests.FloatPackerInvalid.MyBehaviour::value2");
+            HasError("System.Int32 is not a supported type for [FloatPack]",
+                "System.Int32 BitAttributeTests.FloatPackInvalid.MyBehaviour::value2");
 
-            HasError("UnityEngine.Vector3 is not a supported type for [FloatPacker]",
-                "UnityEngine.Vector3 BitAttributeTests.FloatPackerInvalid.MyBehaviour::value3");
+            HasError("UnityEngine.Vector3 is not a supported type for [FloatPack]",
+                "UnityEngine.Vector3 BitAttributeTests.FloatPackInvalid.MyBehaviour::value3");
 
             HasError("BitCount must be between 1 and 30 (inclusive), bitCount:31",
-                "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value4");
+                "System.Single BitAttributeTests.FloatPackInvalid.MyBehaviour::value4");
             HasError("BitCount must be between 1 and 30 (inclusive), bitCount:0",
-                "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value5");
+                "System.Single BitAttributeTests.FloatPackInvalid.MyBehaviour::value5");
 
             HasError("Max must be above 0, max:0",
-                "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value6");
+                "System.Single BitAttributeTests.FloatPackInvalid.MyBehaviour::value6");
             HasError("Max must be above 0, max:-5",
-                "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value7");
+                "System.Single BitAttributeTests.FloatPackInvalid.MyBehaviour::value7");
 
             HasError($"Precsion is too small, precision:{float.Epsilon}",
-                "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value8");
+                "System.Single BitAttributeTests.FloatPackInvalid.MyBehaviour::value8");
 
             HasError("Precsion must be positive, precision:-0.1",
-                "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value9");
+                "System.Single BitAttributeTests.FloatPackInvalid.MyBehaviour::value9");
         }
     }
 }
