@@ -2,6 +2,9 @@ using System;
 
 namespace Mirage.Serialization
 {
+    // weaver doesn't need constructor parameters to be used, so we can have constructor without fields/properties
+#pragma warning disable IDE0060 // Remove unused parameter
+
     /// <summary>
     /// Tells Weaver to ignore an Extension method
     /// </summary>
@@ -14,33 +17,30 @@ namespace Mirage.Serialization
     /// <para>
     /// NOTE: bits are truncated when using this, so signed values will lose their sign. Use <see cref="ZigZagEncodeAttribute"/> as well if value might be negative
     /// </para>
+    /// <para>Also See: <see href="https://miragenet.github.io/Mirage/Articles/Guides/BitPacking/BitCount.html">Bit Packing Documentation</see></para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class BitCountAttribute : Attribute
     {
-        /// <summary>
-        /// Value should be between 1 and 64
-        /// </summary>
-        public int BitCount { get; private set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="bitCount">Value should be between 1 and 64</param>
-        public BitCountAttribute(int bitCount)
-        {
-            BitCount = bitCount;
-        }
+        public BitCountAttribute(int bitCount) { }
     }
 
+    /// <summary>
+    /// Calculates bitcount from then given min/max values and then packs using <see cref="BitCountAttribute"/>
+    /// <para>Also See: <see href="https://miragenet.github.io/Mirage/Articles/Guides/BitPacking/BitCountFromRange.html">Bit Packing Documentation</see></para>
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class BitCountFromRangeAttribute : Attribute
     {
+        /// <param name="min">minimum possible int value</param>
+        /// <param name="max">minimum possible max value</param>
         public BitCountFromRangeAttribute(int min, int max) { }
     }
 
     /// <summary>
     /// Used along size <see cref="BitCountAttribute"/> to encodes a interager value using <see cref="ZigZag"/> so that both positive and negative values can be sent
+    /// <para>Also See: <see href="https://miragenet.github.io/Mirage/Articles/Guides/BitPacking/BitCountFromRange.html">Bit Packing Documentation</see></para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class ZigZagEncodeAttribute : Attribute
@@ -49,57 +49,19 @@ namespace Mirage.Serialization
     }
 
     /// <summary>
-    /// Tells weaver how to pack a float field
+    /// Packs a float field, clamped from -max to +max, with 
+    /// <para>Also See: <see href="https://miragenet.github.io/Mirage/Articles/Guides/BitPacking/BitCountFromRange.html">Bit Packing Documentation</see></para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class FloatPackAttribute : Attribute
     {
-        /// <summary>
-        /// Number of bits to pack value as
-        /// </summary>
-        public int BitCount { get; }
-
-        /// <summary>
-        /// Smallest value
-        /// <para><b>Example:</b> Resolution of 0.1 means values will be rounded to that: 1.53 will be sent as 1.5</para>
-        /// <para>Values will be rounded to nearest value, so 1.58 will around up to 1.6</para>
-        /// </summary>
-        /// <remarks>
-        /// Resolution will be used to caculate BitCount, so real resolution may be lower than resolution given by user
-        /// </remarks>
-        public float Resolution { get; }
-
-        /// <summary>
-        /// Max value of the float
-        /// </summary>
-        public float Max { get; }
-
-        /// <summary>
-        /// If Bitcount or Resolution constructor should be used
-        /// </summary>
-        public bool UseBitCount { get; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="max">Max value of the float</param>
-        /// <param name="resolution">Smallest value, <see cref="Resolution"/></param>
-        public FloatPackAttribute(float max, float resolution)
-        {
-            UseBitCount = false;
-            Max = max;
-            Resolution = resolution;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <param name="precision">Smallest possible value of the field. Real precision woll be caculated using bitcount but will always be lower than this parameter</param>
+        public FloatPackAttribute(float max, float precision) { }
+
         /// <param name="max">Max value of the float</param>
-        /// <param name="bitCount"></param>
-        public FloatPackAttribute(float max, int bitCount)
-        {
-            UseBitCount = true;
-            Max = max;
-            BitCount = bitCount;
-        }
+        /// <param name="bitCount">number of bits to pack the field into.</param>
+        public FloatPackAttribute(float max, int bitCount) { }
     }
+#pragma warning restore IDE0060 // Remove unused parameter
 }
