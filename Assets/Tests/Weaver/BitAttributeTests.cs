@@ -122,27 +122,32 @@ namespace Mirage.Weaver
         [Test]
         public void FloatPackerInvalid()
         {
-            HasErrorCount(8);
+            HasErrorCount(9);
 
-            HasError("Unsupproted type",
+            HasError("System.Double is not a supported type for [FloatPacker]",
                 "System.Double BitAttributeTests.FloatPackerInvalid.MyBehaviour::value1");
 
-            HasError("Unsupproted type",
+            HasError("System.Int32 is not a supported type for [FloatPacker]",
                 "System.Int32 BitAttributeTests.FloatPackerInvalid.MyBehaviour::value2");
 
-            HasError("Unsupproted type",
+            HasError("UnityEngine.Vector3 is not a supported type for [FloatPacker]",
                 "UnityEngine.Vector3 BitAttributeTests.FloatPackerInvalid.MyBehaviour::value3");
 
-            HasError("Max must be greater than min",
+            HasError("BitCount must be between 1 and 30 (inclusive), bitCount:31",
                 "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value4");
-            HasError("Max must be greater than min",
+            HasError("BitCount must be between 1 and 30 (inclusive), bitCount:0",
                 "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value5");
-            HasError("Max must be greater than min",
+
+            HasError("Max must be above 0, max:0",
                 "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value6");
-            HasError("Max must be greater than min",
+            HasError("Max must be above 0, max:-5",
                 "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value7");
-            HasError("Max must be greater than min",
+
+            HasError($"Precsion is too small, precision:{float.Epsilon}",
                 "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value8");
+
+            HasError("Precsion must be positive, precision:-0.1",
+                "System.Single BitAttributeTests.FloatPackerInvalid.MyBehaviour::value9");
         }
     }
 }

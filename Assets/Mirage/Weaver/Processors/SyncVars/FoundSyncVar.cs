@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using Mirage.Serialization;
 using Mono.Cecil;
@@ -130,19 +131,44 @@ namespace Mirage.Weaver.SyncVars
 
             if (!syncVar.FieldType.Is<float>())
             {
-                throw new FloatPackerException("Invalid Type", syncVar);
+                throw new FloatPackerException($"{syncVar.FieldType} is not a supported type for [FloatPacker]", syncVar);
             }
 
             var settings = new FloatPackerSettings();
             settings.max = (float)attribute.ConstructorArguments[0].Value;
+            if (settings.max <= 0)
+            {
+                throw new FloatPackerException($"Max must be above 0, max:{settings.max}", syncVar);
+            }
+
             CustomAttributeArgument arg1 = attribute.ConstructorArguments[1];
             if (arg1.Type.Is<float>())
             {
-                settings.precision = (float)arg1.Value;
+                float precision = (float)arg1.Value;
+                if (precision < 0)
+                {
+                    throw new FloatPackerException($"Precsion must be positive, precision:{precision}", syncVar);
+                }
+                // todo is there a better way to check if Precsion is too small?
+                double expectedBitCount = Math.Floor(Math.Log(2 * settings.max / precision, 2)) + 1;
+                if (expectedBitCount > 30)
+                {
+                    throw new FloatPackerException($"Precsion is too small, precision:{precision}", syncVar);
+                }
+                settings.precision = precision;
             }
             else
             {
-                settings.bitCount = (int)arg1.Value;
+                int bitCount = (int)arg1.Value;
+                if (bitCount > 30)
+                {
+                    throw new FloatPackerException($"BitCount must be between 1 and 30 (inclusive), bitCount:{bitCount}", syncVar);
+                }
+                if (bitCount < 1)
+                {
+                    throw new FloatPackerException($"BitCount must be between 1 and 30 (inclusive), bitCount:{bitCount}", syncVar);
+                }
+                settings.bitCount = bitCount;
             }
 
 

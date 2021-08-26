@@ -15,7 +15,7 @@ namespace BitAttributeTests.FloatPackerInvalid
 
         // error, unsupported type
         [FloatPacker(10000f, 8)]
-        [SyncVar] public Vector3 value3;
+        [SyncVar] public UnityEngine.Vector3 value3;
 
         // error, bit count out of range
         [FloatPacker(1f, 31)]
@@ -29,12 +29,16 @@ namespace BitAttributeTests.FloatPackerInvalid
         [FloatPacker(0, 10)]
         [SyncVar] public float value6;
 
+        // error, max can't be zero
+        [FloatPacker(-5, 10)]
+        [SyncVar] public float value7;
+
         // error, precision too low
         [FloatPacker(1f, float.Epsilon)]
-        [SyncVar] public float value7;
+        [SyncVar] public float value8;
 
         // error, precision negative
         [FloatPacker(1f, -0.1f)]
-        [SyncVar] public float value8;
+        [SyncVar] public float value9;
     }
 }
