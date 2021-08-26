@@ -6,6 +6,12 @@ using UnityEngine;
 
 namespace Mirage.Weaver.SyncVars
 {
+    internal struct FloatPackSettings
+    {
+        public float max;
+        public float? precision;
+        public int? bitCount;
+    }
     internal class FoundSyncVar
     {
         public readonly FieldDefinition FieldDefinition;
@@ -31,6 +37,9 @@ namespace Mirage.Weaver.SyncVars
 
         public bool UseZigZagEncoding { get; private set; }
         public int? BitCountMinValue { get; private set; }
+
+        public FloatPackSettings? FloatPackSettings { get; private set; }
+        public FieldDefinition PackerField { get; internal set; }
 
         public MethodReference WriteFunction { get; private set; }
         public MethodReference ReadFunction { get; private set; }
@@ -93,6 +102,8 @@ namespace Mirage.Weaver.SyncVars
             // do this if check here so it doesn't override fields unless attribute exists
             if (FieldDefinition.HasCustomAttribute<BitCountFromRangeAttribute>())
                 (BitCount, BitCountConvert, BitCountMinValue) = BitCountFromRangeFinder.GetBitFoundFromRange(FieldDefinition, BitCount.HasValue);
+
+            FloatPackSettings = FloatPackFinder.GetPackerSettings(FieldDefinition);
         }
 
         public void FindSerializeFunctions(Writers writers, Readers readers)

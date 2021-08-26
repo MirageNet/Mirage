@@ -5,9 +5,9 @@ using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver.SyncVars
 {
-    public static class BitCountFromRangeFinder
+    internal static class BitCountFromRangeFinder
     {
-        internal static (int? BitCount, OpCode? BitCountConvert, int? MinValue) GetBitFoundFromRange(FieldDefinition syncVar, bool hasBitCount)
+        public static (int? BitCount, OpCode? BitCountConvert, int? MinValue) GetBitFoundFromRange(FieldDefinition syncVar, bool hasBitCount)
         {
             CustomAttribute attribute = syncVar.GetCustomAttribute<BitCountFromRangeAttribute>();
 

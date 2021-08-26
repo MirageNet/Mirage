@@ -3,7 +3,6 @@ using Mirage.Serialization;
 
 namespace BitAttributeTests.ZigZag
 {
-    // should expect 1 error per field
     public class MyBehaviour : NetworkBehaviour
     {
         [BitCount(10), ZigZagEncode]

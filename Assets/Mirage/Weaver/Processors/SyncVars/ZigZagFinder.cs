@@ -3,7 +3,7 @@ using Mono.Cecil;
 
 namespace Mirage.Weaver.SyncVars
 {
-    public static class ZigZagFinder
+    internal static class ZigZagFinder
     {
         public static bool HasZigZag(FieldDefinition syncVar, bool hasBitCount)
         {

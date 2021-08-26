@@ -50,20 +50,11 @@ namespace Mirage.Serialization
         public FloatPacker(float max, float lowestPrecision) : this(max, BitHelper.BitCount(max, lowestPrecision)) { }
 
         /// <summary>
-        /// Create a new instance using bit count
-        /// </summary>
-        /// <param name="max"></param>
-        /// <param name="lowestPrecision">lowest precision, actual precision will be caculated from number of bits used</param>
-        public static FloatPacker FromBitCount(float max, int bitCount)
-        {
-            return new FloatPacker(max, bitCount);
-        }
-        /// <summary>
         /// 
         /// </summary>
         /// <param name="max"></param>
         /// <param name="lowestPrecision">lowest precision, actual precision will be caculated from number of bits used</param>
-        private FloatPacker(float max, int bitCount)
+        public FloatPacker(float max, int bitCount)
         {
             this.bitCount = bitCount;
             // not sure what max bit count should be,

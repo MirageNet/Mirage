@@ -4,7 +4,7 @@ using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver.SyncVars
 {
-    public static class BitCountFinder
+    internal static class BitCountFinder
     {
         public static (int? bitCount, OpCode? ConvertCode) GetBitCount(FieldDefinition syncVar)
         {

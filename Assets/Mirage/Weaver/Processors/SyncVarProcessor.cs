@@ -1,9 +1,11 @@
 using System;
+using System.Linq;
 using Mirage.Serialization;
 using Mirage.Weaver.NetworkBehaviours;
 using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using PropertyAttributes = Mono.Cecil.PropertyAttributes;
@@ -40,7 +42,8 @@ namespace Mirage.Weaver
             behaviour.GetSyncVarCountFromBase();
 
             // find syncvars
-            foreach (FieldDefinition fd in td.Fields)
+            // use ToArray to create copy, ProcessSyncVar might add new fields
+            foreach (FieldDefinition fd in td.Fields.ToArray())
             {
                 // try/catch for each field, and log once
                 // we dont want to spam multiple logs for a single field
@@ -127,6 +130,73 @@ namespace Mirage.Weaver
 
             syncVar.ProcessAttributes();
             syncVar.FindSerializeFunctions(writers, readers);
+
+            if (syncVar.FloatPackSettings.HasValue)
+            {
+                createFloatPackField(syncVar);
+            }
+        }
+
+        private void createFloatPackField(FoundSyncVar syncVar)
+        {
+            TypeReference packerRer = module.ImportReference(typeof(FloatPacker));
+            var packerField = new FieldDefinition($"{syncVar.FieldDefinition.Name}__Packer", FieldAttributes.Private | FieldAttributes.Static, packerRer);
+            packerField.DeclaringType = syncVar.FieldDefinition.DeclaringType;
+            syncVar.FieldDefinition.DeclaringType.Fields.Add(packerField);
+            syncVar.PackerField = packerField;
+
+
+            // todo move this
+            MethodDefinition cctor = behaviour.TypeDefinition.GetMethod(".cctor");
+            if (cctor != null)
+            {
+                // remove the return opcode from end of function. will add our own later.
+                if (cctor.Body.Instructions.Count != 0)
+                {
+                    Instruction retInstr = cctor.Body.Instructions[cctor.Body.Instructions.Count - 1];
+                    if (retInstr.OpCode == OpCodes.Ret)
+                    {
+                        cctor.Body.Instructions.RemoveAt(cctor.Body.Instructions.Count - 1);
+                    }
+                    else
+                    {
+                        throw new FloatPackException($"{behaviour.TypeDefinition.Name} has invalid class constructor", cctor);
+                    }
+                }
+            }
+            else
+            {
+                // make one!
+                cctor = behaviour.TypeDefinition.AddMethod(".cctor", MethodAttributes.Private |
+                        MethodAttributes.HideBySig |
+                        MethodAttributes.SpecialName |
+                        MethodAttributes.RTSpecialName |
+                        MethodAttributes.Static);
+            }
+
+            ILProcessor worker = cctor.Body.GetILProcessor();
+
+            worker.Append(worker.Create(OpCodes.Ldc_R4, syncVar.FloatPackSettings.Value.max));
+
+            // floatPacker has 2 constructors, get the one that matches the attribute type
+            MethodReference packerCtor = null;
+            if (syncVar.FloatPackSettings.Value.precision.HasValue)
+            {
+                worker.Append(worker.Create(OpCodes.Ldc_R4, syncVar.FloatPackSettings.Value.precision.Value));
+                packerCtor = module.ImportReference(packerRer.Resolve().GetConstructors().First(x => x.Parameters[1].ParameterType.Is<float>()));
+            }
+            else if (syncVar.FloatPackSettings.Value.bitCount.HasValue)
+            {
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.FloatPackSettings.Value.bitCount.Value));
+                packerCtor = module.ImportReference(packerRer.Resolve().GetConstructors().First(x => x.Parameters[1].ParameterType.Is<int>()));
+            }
+            else
+            {
+                throw new InvalidOperationException($"Invalid FloatPackSettings");
+            }
+            worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+            worker.Append(worker.Create(OpCodes.Stsfld, packerField));
+            worker.Append(worker.Create(OpCodes.Ret));
         }
 
         MethodDefinition GenerateSyncVarGetter(FoundSyncVar syncVar)
@@ -428,6 +498,10 @@ namespace Mirage.Weaver
             {
                 WriteWithBitCount();
             }
+            else if (syncVar.FloatPackSettings.HasValue)
+            {
+                WriteFloatPack();
+            }
             else
             {
                 WriteDefault();
@@ -483,6 +557,18 @@ namespace Mirage.Weaver
             {
                 worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCountMinValue.Value));
                 worker.Append(worker.Create(OpCodes.Sub));
+            }
+            void WriteFloatPack()
+            {
+                MethodReference packMethod = module.ImportReference((FloatPacker p) => p.Pack(default, default));
+
+                // Generates: packer.pack(writer, field)
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.PackerField.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Call, packMethod));
             }
         }
 
@@ -598,14 +684,22 @@ namespace Mirage.Weaver
 
         void ReadToField(ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)
         {
+            // all methods 
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
             if (syncVar.BitCount.HasValue)
             {
                 ReadWithBitCount();
+            }
+            else if (syncVar.FloatPackSettings.HasValue)
+            {
+                ReadFloatPack();
             }
             else
             {
                 ReadDefault();
             }
+            worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+
 
             // Local Functions
 
@@ -614,24 +708,14 @@ namespace Mirage.Weaver
                 // if ReadFunction is null it means there was an error earlier, so we dont need to do anything here
                 if (syncVar.ReadFunction == null) { return; }
 
-                // put `this` on stack, for Stfld later
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-
                 // add `reader` to stack
                 worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
                 // call read function
                 worker.Append(worker.Create(OpCodes.Call, syncVar.ReadFunction));
-
-                // store result of read to `this.syncvar`
-                worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
             }
             void ReadWithBitCount()
             {
                 MethodReference readWithBitCount = module.ImportReference(readerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkReader.Read)));
-
-
-                // put `this` on stack, for Stfld later
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
 
                 // add `reader` to stack
                 worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
@@ -654,8 +738,6 @@ namespace Mirage.Weaver
                 {
                     ReadAddMinValue();
                 }
-
-                worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
             }
             void ReadZigZag()
             {
@@ -670,6 +752,16 @@ namespace Mirage.Weaver
             {
                 worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCountMinValue.Value));
                 worker.Append(worker.Create(OpCodes.Add));
+            }
+            void ReadFloatPack()
+            {
+                MethodReference unpackMethod = module.ImportReference((FloatPacker p) => p.Unpack(default(NetworkReader)));
+
+                // Generates: ... = packer.unpack(reader)
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.PackerField.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
+                worker.Append(worker.Create(OpCodes.Call, unpackMethod));
             }
         }
     }

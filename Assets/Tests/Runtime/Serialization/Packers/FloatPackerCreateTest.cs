@@ -23,7 +23,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void PackFromBitCountPacksToCorrectCount([Range(1, 30)] int bitCount)
         {
-            var packer = FloatPacker.FromBitCount(100, bitCount);
+            var packer = new FloatPacker(100, bitCount);
 
             packer.Pack(writer, 1f);
 
@@ -35,7 +35,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         {
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                FloatPacker.FromBitCount(10, bitCount);
+                _ = new FloatPacker(10, bitCount);
             });
 
             var expected = new ArgumentException("Bit count is too low, bit count should be between 1 and 30", "bitCount");
@@ -47,7 +47,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         {
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                FloatPacker.FromBitCount(10, bitCount);
+                _ = new FloatPacker(10, bitCount);
             });
 
             var expected = new ArgumentException("Bit count is too high, bit count should be between 1 and 30", "bitCount");
@@ -59,7 +59,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         {
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                FloatPacker.FromBitCount(0, 1);
+                _ = new FloatPacker(0, 1);
             });
 
             var expected = new ArgumentException("Max can not be 0", "max");
