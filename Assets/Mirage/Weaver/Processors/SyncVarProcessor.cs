@@ -1,9 +1,11 @@
 using System;
+using System.Linq;
 using Mirage.Serialization;
 using Mirage.Weaver.NetworkBehaviours;
 using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using PropertyAttributes = Mono.Cecil.PropertyAttributes;
@@ -142,6 +144,58 @@ namespace Mirage.Weaver
             packerField.DeclaringType = syncVar.FieldDefinition.DeclaringType;
             syncVar.FieldDefinition.DeclaringType.Fields.Add(packerField);
             syncVar.PackerField = packerField;
+
+
+            // todo move this
+            MethodDefinition cctor = behaviour.TypeDefinition.GetMethod(".cctor");
+            if (cctor != null)
+            {
+                // remove the return opcode from end of function. will add our own later.
+                if (cctor.Body.Instructions.Count != 0)
+                {
+                    Instruction retInstr = cctor.Body.Instructions[cctor.Body.Instructions.Count - 1];
+                    if (retInstr.OpCode == OpCodes.Ret)
+                    {
+                        cctor.Body.Instructions.RemoveAt(cctor.Body.Instructions.Count - 1);
+                    }
+                    else
+                    {
+                        throw new FloatPackerException($"{behaviour.TypeDefinition.Name} has invalid class constructor", cctor);
+                    }
+                }
+            }
+            else
+            {
+                // make one!
+                cctor = behaviour.TypeDefinition.AddMethod(".cctor", MethodAttributes.Private |
+                        MethodAttributes.HideBySig |
+                        MethodAttributes.SpecialName |
+                        MethodAttributes.RTSpecialName |
+                        MethodAttributes.Static);
+            }
+
+            ILProcessor worker = cctor.Body.GetILProcessor();
+
+            worker.Append(worker.Create(OpCodes.Ldc_R4, syncVar.FloatPackerSettings.Value.max));
+
+            if (syncVar.FloatPackerSettings.Value.precision.HasValue)
+            {
+                worker.Append(worker.Create(OpCodes.Ldc_R4, syncVar.FloatPackerSettings.Value.precision.Value));
+                MethodReference packerCtor = module.ImportReference(packerRer.Resolve().GetConstructors().First(x => x.Parameters[1].ParameterType.Is<float>()));
+                worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+            }
+            else if (syncVar.FloatPackerSettings.Value.bitCount.HasValue)
+            {
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.FloatPackerSettings.Value.bitCount.Value));
+                MethodReference packerCtor = module.ImportReference(() => FloatPacker.FromBitCount(default, default));
+                worker.Append(worker.Create(OpCodes.Call, packerCtor));
+            }
+            else
+            {
+                throw new FloatPackerException($"Invalid FloatPackerSettings", syncVar.FieldDefinition);
+            }
+            worker.Append(worker.Create(OpCodes.Stsfld, packerField));
+            worker.Append(worker.Create(OpCodes.Ret));
         }
 
         MethodDefinition GenerateSyncVarGetter(FoundSyncVar syncVar)

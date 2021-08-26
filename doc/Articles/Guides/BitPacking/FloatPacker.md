@@ -16,14 +16,7 @@ Values are clamped so values out of range will be packed as min/max value instea
 
 ### Supported Types
 
-- Byte
-- Short
-- UShort
-- Int
-- Uint
-- Long
-- ULong
-- Enum
+- Float
 
 ### Example 1
 
@@ -32,16 +25,10 @@ Health which is between 0 and 100
 ```cs
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
-    [SyncVar, FloatPack(100, 0.02f)]
+    [SyncVar, FloatPack(100f, 0.02f)]
     public int Health;
 }
 ```
-
-mid = 8191
-pack = mid/100 = 81.91
-
-57.2 * 81.91 = 4,685.25
-
 
 `Max = 100`, `resolution = 0.02f` so bit count is 14
 
@@ -50,6 +37,21 @@ pack = mid/100 = 81.91
 `health = -13.5f` will serialize to `11_1011_1010_1110` and deserialize to `-13.503f`
 
 `health = 120f` will be clamped to `100f`
+
+
+### Example 2
+
+A Percent that where you only want to send 8 bits
+
+```cs
+public class MyNetworkBehaviour : NetworkBehaviour 
+{
+    [SyncVar, FloatPack(1f, 8)]
+    public int Percent;
+}
+```
+
+`Max = 1f`, `bitCount = 8` so resolution will be `0.00787f`
 
 ### Generated Code
 

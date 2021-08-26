@@ -135,7 +135,7 @@ namespace Mirage.Weaver.SyncVars
 
             var settings = new FloatPackerSettings();
             settings.max = (float)attribute.ConstructorArguments[0].Value;
-            CustomAttributeArgument arg1 = attribute.ConstructorArguments[0];
+            CustomAttributeArgument arg1 = attribute.ConstructorArguments[1];
             if (arg1.Type.Is<float>())
             {
                 settings.precision = (float)arg1.Value;
