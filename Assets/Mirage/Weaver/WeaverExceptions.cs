@@ -68,4 +68,16 @@ namespace Mirage.Weaver.SyncVars
     {
         public FloatPackException(string message, MemberReference memberReference) : base(message, memberReference) { }
     }
+    internal class Vector3PackException : SyncVarException
+    {
+        public Vector3PackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+    }
+    internal class Vector2PackException : SyncVarException
+    {
+        public Vector2PackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+    }
+    internal class QuaternionPackException : SyncVarException
+    {
+        public QuaternionPackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+    }
 }
