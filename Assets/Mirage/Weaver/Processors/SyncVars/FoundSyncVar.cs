@@ -171,10 +171,6 @@ namespace Mirage.Weaver.SyncVars
                 settings.bitCount = bitCount;
             }
 
-
-            // validate bitcount, and other settings
-            // 
-
             return settings;
         }
     }
