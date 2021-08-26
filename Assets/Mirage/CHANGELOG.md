@@ -1,3 +1,15 @@
+# [101.9.0](https://github.com/MirageNet/Mirage/compare/v101.8.0...v101.9.0) (2021-08-26)
+
+
+### Bug Fixes
+
+* **NanoSocket:** adding dispose and finalize ([#904](https://github.com/MirageNet/Mirage/issues/904)) ([ca949ea](https://github.com/MirageNet/Mirage/commit/ca949ea15b900ee7d35d180b73e44103ed54d064))
+
+
+### Features
+
+* attributes to use new float bit packers ([#896](https://github.com/MirageNet/Mirage/issues/896)) ([273d27c](https://github.com/MirageNet/Mirage/commit/273d27ce03efee81f507def913ce9a906b1a38f2))
+
 # [101.8.0](https://github.com/MirageNet/Mirage/compare/v101.7.0...v101.8.0) (2021-08-24)
 
 

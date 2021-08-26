@@ -1,6 +1,6 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-[assembly: AssemblyVersion("101.8.0")]
+[assembly: AssemblyVersion("101.9.0")]
 
 [assembly: InternalsVisibleTo("Mirage.Tests.Runtime")]
