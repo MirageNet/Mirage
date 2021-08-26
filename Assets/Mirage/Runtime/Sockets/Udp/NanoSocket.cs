@@ -9,15 +9,29 @@ namespace Mirage.Sockets.Udp
     {
         public NanoSocketException(string message) : base(message) { }
     }
-    public class NanoSocket : ISocket
+    public sealed class NanoSocket : ISocket, IDisposable
     {
         Socket socket;
         NanoEndPoint receiveEndPoint;
         readonly int bufferSize;
 
+        bool needsDisposing;
+
         public NanoSocket(UdpSocketFactory factory)
         {
             bufferSize = factory.BufferSize;
+        }
+        ~NanoSocket()
+        {
+            Dispose();
+        }
+
+        void InitSocket()
+        {
+            socket = UDP.Create(bufferSize, bufferSize);
+            UDP.SetDontFragment(socket);
+            UDP.SetNonBlocking(socket);
+            needsDisposing = true;
         }
 
         public void Bind(IEndPoint endPoint)
@@ -32,9 +46,16 @@ namespace Mirage.Sockets.Udp
             }
         }
 
+        public void Dispose()
+        {
+            if (!needsDisposing) return;
+            UDP.Destroy(ref socket);
+            needsDisposing = false;
+        }
+
         public void Close()
         {
-            UDP.Destroy(ref socket);
+            Dispose();
         }
 
         public void Connect(IEndPoint endPoint)
@@ -66,13 +87,6 @@ namespace Mirage.Sockets.Udp
         {
             var nanoEndPoint = (NanoEndPoint)endPoint;
             UDP.Send(socket, ref nanoEndPoint.address, packet, length);
-        }
-
-        void InitSocket()
-        {
-            socket = UDP.Create(bufferSize, bufferSize);
-            UDP.SetDontFragment(socket);
-            UDP.SetNonBlocking(socket);
         }
     }
 }
