@@ -36,7 +36,8 @@ namespace Mirage.Weaver
 
     internal class NetworkBehaviourException : WeaverException
     {
-        public NetworkBehaviourException(string message, TypeDefinition type) : base(message, type, null) { }
+        public NetworkBehaviourException(string message, TypeDefinition type, SequencePoint sequencePoint = null) : base(message, type, sequencePoint) { }
+        public NetworkBehaviourException(string message, MemberReference memberReference, SequencePoint sequencePoint = null) : base(message, memberReference, sequencePoint) { }
     }
 
     internal class SyncVarException : WeaverException
