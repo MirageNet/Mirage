@@ -149,5 +149,41 @@ namespace Mirage.Weaver
             HasError("Precsion must be positive, precision:-0.1",
                 "System.Single BitAttributeTests.FloatPackInvalid.MyBehaviour::value9");
         }
+
+        [Test]
+        public void Vector3Pack()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void Vector3PackInvalid()
+        {
+            HasErrorCount(1);
+        }
+
+        [Test]
+        public void Vector2Pack()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void Vector2PackInvalid()
+        {
+            HasErrorCount(1);
+        }
+
+        [Test]
+        public void QuaternionPack()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void QuaternionPackInvalid()
+        {
+            HasErrorCount(1);
+        }
     }
 }
