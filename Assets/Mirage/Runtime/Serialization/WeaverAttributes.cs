@@ -60,8 +60,40 @@ namespace Mirage.Serialization
         public FloatPackAttribute(float max, float precision) { }
 
         /// <param name="max">Max value of the float</param>
-        /// <param name="bitCount">number of bits to pack the field into.</param>
+        /// <param name="bitCount">number of bits to pack the field into</param>
         public FloatPackAttribute(float max, int bitCount) { }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class Vector3PackAttribute : Attribute
+    {
+        public Vector3PackAttribute(float xMax, float yMax, float zMax, float xPrecision, float yPrecision, float zPrecision) { }
+        public Vector3PackAttribute(float xMax, float yMax, float zMax, float precision) { }
+
+        public Vector3PackAttribute(float xMax, float yMax, float zMax, int xBitCount, int yBitCount, int ZBitCount) { }
+        public Vector3PackAttribute(float xMax, float yMax, float zMax, int bitCount) { }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class Vector2PackAttribute : Attribute
+    {
+        public Vector2PackAttribute(float xMax, float yMax, float xPrecision, float yPrecision) { }
+        public Vector2PackAttribute(float xMax, float yMax, float precision) { }
+
+        public Vector2PackAttribute(float xMax, float yMax, int xBitCount, int yBitCount) { }
+        public Vector2PackAttribute(float xMax, float yMax, int bitCount) { }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class QuaternionPackAttribute : Attribute
+    {
+        public QuaternionPackAttribute(int bitPerElement) { }
     }
 #pragma warning restore IDE0060 // Remove unused parameter
 }
