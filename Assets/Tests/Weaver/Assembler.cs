@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Mono.Cecil;
+using System.Text.RegularExpressions;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEditor.Compilation;
 using UnityEngine;
@@ -65,9 +65,8 @@ namespace Mirage.Tests.Weaver
         public bool CompilerErrors { get; private set; }
 
         readonly HashSet<string> sourceFiles = new HashSet<string>();
-        private List<WeaverMessages> messages;
+        private List<WeaverMessages> messages = new List<WeaverMessages>();
         private AssemblyBuilder assemblyBuilder;
-        private AssemblyDefinition assembly;
 
         public Assembler()
         {
@@ -114,12 +113,12 @@ namespace Mirage.Tests.Weaver
             catch { /* Do Nothing */ }
         }
 
-        public AssemblyDefinition Build(List<WeaverMessages> messages)
+        public List<WeaverMessages> Build()
         {
             // the way things are build changes in 2020
 #if UNITY_2020_3_OR_NEWER
             // in 2020 assemblyBuilder automaitcally calls ILPP
-            return Build2020(messages);
+            return Build2020();
 #else
             // in 2019 assemblyBuilder does not call ILPP
             // this means we have to check for compile errors and then run weaver manually
@@ -134,15 +133,16 @@ namespace Mirage.Tests.Weaver
         ///     NOTE: Does not write the weaved assemble to disk
         /// </para>
         /// </summary>
-        public AssemblyDefinition Build2020(List<WeaverMessages> messages)
+        public List<WeaverMessages> Build2020()
         {
-            this.messages = messages;
+            messages = messages;
 
             // This will compile scripts with the same references as files in the asset folder.
             // This means that the dll will get references to all asmdef just as if it was the default "Assembly-CSharp.dll"
             assemblyBuilder = new AssemblyBuilder(ProjectPathFile, sourceFiles.ToArray())
             {
-                referencesOptions = ReferencesOptions.UseEngineModules
+                referencesOptions = ReferencesOptions.UseEngineModules,
+
             };
 
             assemblyBuilder.buildFinished += BuildFinished2020;
@@ -152,7 +152,7 @@ namespace Mirage.Tests.Weaver
             if (!assemblyBuilder.Build())
             {
                 Debug.LogErrorFormat("Failed to start build of assembly {0}", assemblyBuilder.assemblyPath);
-                return assembly;
+                return messages;
             }
 
             while (assemblyBuilder.status != AssemblyBuilderStatus.Finished)
@@ -160,7 +160,7 @@ namespace Mirage.Tests.Weaver
                 System.Threading.Thread.Sleep(10);
             }
 
-            return assembly;
+            return messages;
         }
 
         void BuildFinished2020(string assemblyPath, CompilerMessage[] compilerMessages)
@@ -192,6 +192,12 @@ namespace Mirage.Tests.Weaver
                 }
 
                 string realMessage = item.message.Substring(item.message.IndexOf(trim) + trim.Length);
+
+                // is warning, and starts with `CS1234:` the ignore it because it is c# warning
+                if (item.type == CompilerMessageType.Warning && Regex.IsMatch(realMessage, "^(CS[0-9]{4}:)"))
+                {
+                    continue;
+                }
                 messages.Add(new WeaverMessages(item.type, realMessage));
             }
 
