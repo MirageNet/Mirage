@@ -231,22 +231,26 @@ namespace Mirage.Tests.Weaver
             NoErrors();
 
             HasWarning(
-                $"Registering a write function for System.Int32 when one already exists\n" +
-                $"  old:{1}\n" +
-                $"  new:{2}", "");
+                "Registering a write function for System.Int32 when one already exists. " +
+                "old:System.Void Mirage.Serialization.PackedExtensions::WritePackedInt32(Mirage.Serialization.NetworkWriter,System.Int32) " +
+                "new:System.Void GeneratedReaderWriter.MultipleMethodsForSameType.MyExtensions::WriteMyInt10(Mirage.Serialization.NetworkWriter,System.Int32)",
+                "System.Void GeneratedReaderWriter.MultipleMethodsForSameType.MyExtensions::WriteMyInt10(Mirage.Serialization.NetworkWriter,System.Int32)");
             HasWarning(
-               $"Registering a write function for System.Int32 when one already exists\n" +
-               $"  old:{1}\n" +
-               $"  new:{2}", "");
+               $"Registering a write function for System.Int32 when one already exists. " +
+                "old:System.Void GeneratedReaderWriter.MultipleMethodsForSameType.MyExtensions::WriteMyInt10(Mirage.Serialization.NetworkWriter,System.Int32) " +
+                "new:System.Void GeneratedReaderWriter.MultipleMethodsForSameType.MyExtensions::WriteMyInt20(Mirage.Serialization.NetworkWriter,System.Int32)",
+               "System.Void GeneratedReaderWriter.MultipleMethodsForSameType.MyExtensions::WriteMyInt20(Mirage.Serialization.NetworkWriter,System.Int32)");
 
             HasWarning(
-               $"Registering a read function for System.Int32 when one already exists\n" +
-               $"  old:{1}\n" +
-               $"  new:{2}", "");
+               $"Registering a read function for System.Int32 when one already exists. " +
+                "old:System.Int32 Mirage.Serialization.PackedExtensions::ReadPackedInt32(Mirage.Serialization.NetworkReader) " +
+                "new:System.Int32 GeneratedReaderWriter.MultipleMethodsForSameType.MyExtensions::ReadMyInt10(Mirage.Serialization.NetworkReader)",
+               "System.Int32 GeneratedReaderWriter.MultipleMethodsForSameType.MyExtensions::ReadMyInt10(Mirage.Serialization.NetworkReader)");
             HasWarning(
-               $"Registering a read function for System.Int32 when one already exists\n" +
-               $"  old:{1}\n" +
-               $"  new:{2}", "");
+               $"Registering a read function for System.Int32 when one already exists. " +
+                "old:System.Int32 GeneratedReaderWriter.MultipleMethodsForSameType.MyExtensions::ReadMyInt10(Mirage.Serialization.NetworkReader) " +
+                "new:System.Int32 GeneratedReaderWriter.MultipleMethodsForSameType.MyExtensions::ReadMyInt20(Mirage.Serialization.NetworkReader)",
+               "System.Int32 GeneratedReaderWriter.MultipleMethodsForSameType.MyExtensions::ReadMyInt20(Mirage.Serialization.NetworkReader)");
         }
     }
 }

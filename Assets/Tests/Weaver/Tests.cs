@@ -1,12 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Mirage.Logging;
 using Mono.Cecil;
 using NUnit.Framework;
-using Unity.CompilationPipeline.Common.Diagnostics;
-using UnityEngine;
-using WeaverLogger = Mirage.Weaver.WeaverLogger;
+using UnityEditor.Compilation;
 
 namespace Mirage.Tests.Weaver
 {
@@ -25,7 +23,7 @@ namespace Mirage.Tests.Weaver
         [AssertionMethod]
         protected void IsSuccess()
         {
-            Assert.That(weaverLog.Diagnostics, Is.Empty, $"Failed because there are Diagnostics messages: \n  {string.Join("\n  ", weaverLog.Diagnostics.Select(x => x.MessageData))}\n");
+            Assert.That(compileMessages, Is.Empty, $"Failed because there are Diagnostics messages: \n  {string.Join("\n  ", compileMessages.Select(x => x.message))}\n");
         }
 
         /// <summary>
@@ -34,16 +32,16 @@ namespace Mirage.Tests.Weaver
         [AssertionMethod]
         protected void NoErrors()
         {
-            DiagnosticMessage[] errors = weaverLog.Diagnostics.Where(x => x.DiagnosticType == DiagnosticType.Error).ToArray();
-            Assert.That(errors, Is.Empty, $"Failed because there are Error messages: \n  {string.Join("\n  ", errors.Select(d => d.MessageData))}\n");
+            WeaverMessages[] errors = compileMessages.Where(x => x.type == CompilerMessageType.Error).ToArray();
+            Assert.That(errors, Is.Empty, $"Failed because there are Error messages: \n  {string.Join("\n  ", errors.Select(d => d.message))}\n");
         }
 
         [AssertionMethod]
         protected void HasErrorCount(int count)
         {
-            string[] errorMessages = weaverLog.Diagnostics
-                .Where(d => d.DiagnosticType == DiagnosticType.Error)
-                .Select(d => d.MessageData).ToArray();
+            string[] errorMessages = compileMessages
+                .Where(d => d.type == CompilerMessageType.Error)
+                .Select(d => d.message).ToArray();
 
             Assert.That(errorMessages.Length, Is.EqualTo(count), $"Error messages: \n  {string.Join("\n  ", errorMessages)}\n");
         }
@@ -52,9 +50,9 @@ namespace Mirage.Tests.Weaver
         protected void HasError(string messsage, string atType)
         {
             string fullMessage = $"{messsage} (at {atType})";
-            string[] errorMessages = weaverLog.Diagnostics
-                .Where(d => d.DiagnosticType == DiagnosticType.Error)
-                .Select(d => d.MessageData).ToArray();
+            string[] errorMessages = compileMessages
+                .Where(d => d.type == CompilerMessageType.Error)
+                .Select(d => d.message).ToArray();
 
             Assert.That(errorMessages, Contains.Item(fullMessage),
                 $"Could not find error message in list\n" +
@@ -67,24 +65,24 @@ namespace Mirage.Tests.Weaver
         protected void HasWarning(string messsage, string atType)
         {
             string fullMessage = $"{messsage} (at {atType})";
-            string[] warningMessages = weaverLog.Diagnostics
-                .Where(d => d.DiagnosticType == DiagnosticType.Warning)
-                .Select(d => d.MessageData).ToArray();
+            string[] warningMessages = compileMessages
+                .Where(d => d.type == CompilerMessageType.Warning)
+                .Select(d => d.message).ToArray();
 
             Assert.That(warningMessages, Contains.Item(fullMessage),
                 $"Could not find warning message in list\n" +
                 $"  Message: \n    {fullMessage}\n" +
-                $"  Warings: \n    {string.Join("\n    ", warningMessages)}\n"
+                $"  Warnings: \n    {string.Join("\n    ", warningMessages)}\n"
                 );
         }
     }
 
+
     [TestFixture]
     public abstract class Tests
     {
-        public static readonly ILogger logger = LogFactory.GetLogger<Tests>(LogType.Exception);
 
-        protected WeaverLogger weaverLog = new WeaverLogger();
+        protected List<WeaverMessages> compileMessages = new List<WeaverMessages>();
 
         protected AssemblyDefinition assembly;
 
@@ -92,19 +90,21 @@ namespace Mirage.Tests.Weaver
 
         protected void BuildAndWeaveTestAssembly(string className, string testName)
         {
-            weaverLog.Diagnostics.Clear();
+            Console.WriteLine($"[WeaverTests] Test {className}.{testName}");
+
+            compileMessages.Clear();
             assembler = new Assembler();
 
             string testSourceDirectory = className + "~";
             assembler.OutputFile = Path.Combine(testSourceDirectory, testName + ".dll");
             assembler.AddSourceFile(Path.Combine(testSourceDirectory, testName + ".cs"));
-            assembly = assembler.Build(weaverLog);
+            assembly = assembler.Build(compileMessages);
 
-            Assert.That(assembler.CompilerErrors, Is.False);
-            foreach (DiagnosticMessage error in weaverLog.Diagnostics)
+            Assert.That(assembler.CompilerErrors, Is.False, "Failed to compile C# code");
+            foreach (WeaverMessages error in compileMessages)
             {
                 // ensure all errors have a location
-                Assert.That(error.MessageData, Does.Match(@"\(at .*\)$"));
+                Assert.That(error.message, Does.Match(@"\(at .*\)$"));
             }
         }
 

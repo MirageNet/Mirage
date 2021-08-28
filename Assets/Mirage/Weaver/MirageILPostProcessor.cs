@@ -1,8 +1,10 @@
+using System;
 using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
+using DiagnosticType = Unity.CompilationPipeline.Common.Diagnostics.DiagnosticType;
 
 namespace Mirage.Weaver
 {
@@ -35,6 +37,8 @@ namespace Mirage.Weaver
 
             assemblyDefinition?.Write(pe, writerParameters);
 
+            Console.WriteLine($"[MirageILPostProcessor] Weaver Warnings: {logger.Diagnostics.Count(x => x.DiagnosticType == DiagnosticType.Warning)}");
+            Console.WriteLine($"[MirageILPostProcessor] Weaver Errors: {logger.Diagnostics.Count(x => x.DiagnosticType == DiagnosticType.Error)}");
             return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), logger.Diagnostics);
         }
 

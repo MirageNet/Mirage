@@ -142,6 +142,7 @@ namespace Mirage.Weaver
 
         public AssemblyDefinition Weave(ICompiledAssembly compiledAssembly)
         {
+            Console.WriteLine($"Weaver.Weave started");
             try
             {
                 CurrentAssembly = AssemblyDefinitionFor(compiledAssembly);

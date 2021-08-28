@@ -31,9 +31,7 @@ namespace Mirage.Weaver
             if (funcs.ContainsKey(dataType))
             {
                 logger.Warning(
-                    $"Registering a {FunctionTypeLog} for {dataType.FullName} when one already exists\n" +
-                    $"  old:{funcs[dataType].FullName}\n" +
-                    $"  new:{methodReference.FullName}",
+                    $"Registering a {FunctionTypeLog} for {dataType.FullName} when one already exists. old:{funcs[dataType].FullName} new:{methodReference.FullName}",
                     methodReference.Resolve());
             }
 
