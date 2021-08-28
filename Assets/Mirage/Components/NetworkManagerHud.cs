@@ -7,6 +7,7 @@ namespace Mirage
     {
         public NetworkManager NetworkManager;
         public string NetworkAddress = "localhost";
+        public bool DontDestroy = true;
 
         [Header("Prefab Canvas Elements")]
         public InputField NetworkAddressInput;
@@ -14,9 +15,12 @@ namespace Mirage
         public GameObject OnlineGO;
         public Text StatusLabel;
 
+
         private void Start()
         {
-            DontDestroyOnLoad(transform.root.gameObject);
+            if (DontDestroy)
+                DontDestroyOnLoad(transform.root.gameObject);
+
             Application.runInBackground = true;
 
             // return to offset menu when server or client is stopped
