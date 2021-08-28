@@ -2,10 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Mirage.Weaver;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEditor.Compilation;
 using UnityEngine;
+#if UNITY_2020_3_OR_NEWER
+using System.Text.RegularExpressions;
+#else
+using Mirage.Weaver;
+#endif
 
 namespace Mirage.Tests.Weaver
 {
@@ -166,36 +170,50 @@ namespace Mirage.Tests.Weaver
                 DebugLog(item);
 
                 // the ILPP runs by itself so we dont have access to its logger, so instead we copy the compiler message into the test logger
-                const string ERROR_TAG = "): error ";
-                const string WARNING_TAG = "): warning ";
 
-                string trim;
-                switch (item.type)
-                {
-                    case CompilerMessageType.Error:
-                        trim = ERROR_TAG;
-                        break;
-                    case CompilerMessageType.Warning:
-                        trim = WARNING_TAG;
-                        break;
-                    default:
-                        trim = "";
-                        break;
-                }
+                // we want to remove the tag from the start of it so we just get the message
+                string realMessage = RemoveMessageTag(item);
 
-                string realMessage = item.message.Substring(item.message.IndexOf(trim) + trim.Length);
-
-                // is warning, and starts with `CS1234:` the ignore it because it is c# warning
-                if (item.type == CompilerMessageType.Warning && Regex.IsMatch(realMessage, "^(CS[0-9]{4}:)"))
-                {
+                if (IsCsharpWarning(item, realMessage))
                     continue;
-                }
+
                 messages.Add(new WeaverMessages(item.type, realMessage));
             }
 
-            
+
         }
+
+        private static string RemoveMessageTag(CompilerMessage item)
+        {
+            const string ERROR_TAG = "): error ";
+            const string WARNING_TAG = "): warning ";
+
+            string trim;
+            switch (item.type)
+            {
+                case CompilerMessageType.Error:
+                    trim = ERROR_TAG;
+                    break;
+                case CompilerMessageType.Warning:
+                    trim = WARNING_TAG;
+                    break;
+                default:
+                    trim = "";
+                    break;
+            }
+
+            string realMessage = item.message.Substring(item.message.IndexOf(trim) + trim.Length);
+            return realMessage;
+        }
+
+        private static bool IsCsharpWarning(CompilerMessage item, string realMessage)
+        {
+            // is warning, and starts with `CS1234:` the ignore it because it is c# warning
+            return item.type == CompilerMessageType.Warning && Regex.IsMatch(realMessage, "^(CS[0-9]{4}:)");
+        }
+
 #else
+
         /// <summary>
         /// Builds and Weaves an Assembly with references to unity engine and other asmdefs.
         /// <para>
