@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using Mirage.Weaver;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using NUnit.Framework;

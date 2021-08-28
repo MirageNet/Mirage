@@ -6,6 +6,7 @@ using Mono.Cecil;
 using NUnit.Framework;
 using Unity.CompilationPipeline.Common.Diagnostics;
 using UnityEngine;
+using WeaverLogger = Mirage.Weaver.WeaverLogger;
 
 namespace Mirage.Tests.Weaver
 {
@@ -83,7 +84,7 @@ namespace Mirage.Tests.Weaver
     {
         public static readonly ILogger logger = LogFactory.GetLogger<Tests>(LogType.Exception);
 
-        protected Logger weaverLog = new Logger();
+        protected WeaverLogger weaverLog = new WeaverLogger();
 
         protected AssemblyDefinition assembly;
 

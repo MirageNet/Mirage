@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Mirage.Weaver;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEditor.Compilation;
@@ -58,7 +59,10 @@ namespace Mirage.Tests.Weaver
             CompilerMessages = new List<CompilerMessage>();
         }
 
-        // Add a range of source files to compile
+        public void AddSourceFile(string sourceFile)
+        {
+            sourceFiles.Add(Path.Combine(WeaverTestLocator.OutputDirectory, sourceFile));
+        }
         public void AddSourceFiles(string[] sourceFiles)
         {
             foreach (string src in sourceFiles)
@@ -133,7 +137,7 @@ namespace Mirage.Tests.Weaver
                     References = assemblyBuilder.defaultReferences
                 };
 
-                var weaver = new Weaver(logger);
+                var weaver = new Mirage.Weaver.Weaver(logger);
 
                 assembly = weaver.Weave(compiledAssembly);
             };
