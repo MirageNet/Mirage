@@ -224,5 +224,29 @@ namespace Mirage.Tests.Weaver
         {
             IsSuccess();
         }
+
+        [Test]
+        public void GivesWarningForMultipleMethodsForSameType()
+        {
+            NoErrors();
+
+            HasWarning(
+                $"Registering a write function for System.Int32 when one already exists\n" +
+                $"  old:{1}\n" +
+                $"  new:{2}", "");
+            HasWarning(
+               $"Registering a write function for System.Int32 when one already exists\n" +
+               $"  old:{1}\n" +
+               $"  new:{2}", "");
+
+            HasWarning(
+               $"Registering a read function for System.Int32 when one already exists\n" +
+               $"  old:{1}\n" +
+               $"  new:{2}", "");
+            HasWarning(
+               $"Registering a read function for System.Int32 when one already exists\n" +
+               $"  old:{1}\n" +
+               $"  new:{2}", "");
+        }
     }
 }
