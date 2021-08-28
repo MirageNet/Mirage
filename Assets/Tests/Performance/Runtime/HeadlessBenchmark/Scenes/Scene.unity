@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.3731193, g: 0.38073996, b: 0.35872698, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -276,74 +276,84 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Levels:
-  - Name: HeadlessFrameLimiter
-    level: 2
-  - Name: RemoteCallHelper
-    level: 2
-  - Name: NetworkBehaviour
-    level: 2
-  - Name: NetworkIdentity
+  - Name: NetworkSceneManager
     level: 2
   - Name: ClientObjectManager
     level: 2
-  - Name: NetworkClient
+  - Name: NetworkServer
     level: 2
   - Name: NetworkTime
     level: 2
-  - Name: NetworkSceneManager
+  - Name: NetworkBehaviour
     level: 2
   - Name: CharacterSpawner
     level: 2
   - Name: ServerObjectManager
     level: 2
-  - Name: NetworkServer
+  - Name: NetworkClient
+    level: 2
+  - Name: NetworkIdentity
+    level: 2
+  - Name: RemoteCallHelper
     level: 2
   - Name: NetworkBehaviourInspector
     level: 2
-  - Name: SteamyFaceTransport
-    level: 2
   - Name: WelcomeWindow
     level: 2
-  - Name: EnterPlayModeSettingsCheck
+  - Name: HeadlessFrameLimiter
+    level: 2
+  - Name: OnlineOfflineScene
+    level: 2
+  - Name: EchoChannelAndSettingsButton
+    level: 2
+  - Name: LoginManager
+    level: 2
+  - Name: NetworkAnimator
+    level: 2
+  - Name: NetworkPositionBehaviour
+    level: 0
+  - Name: UIManager
+    level: 2
+  - Name: PlayerVoiceBehaviour
+    level: 2
+  - Name: CapyCafeNetworkManager
+    level: 2
+  - Name: UIPanel_Chat
+    level: 2
+  - Name: FirebaseLoginManager
+    level: 2
+  - Name: PlayerSpawner
+    level: 2
+  - Name: SyncPositionBehaviour
+    level: 0
+  - Name: SnapshotBuffer
+    level: 0
+  - Name: NetworkProximityChecker
+    level: 2
+  - Name: ZoneHandler
+    level: 2
+  - Name: AdditiveNetworkManager
     level: 2
   - Name: NetworkScenePostProcess
     level: 2
-  - Name: SteamServer
-    level: 3
-  - Name: SteamCommon
-    level: 3
-  - Name: NetworkConnection
-    level: 2
   - Name: NetworkWriterPool
+    level: 2
+  - Name: NetworkConnection
     level: 2
   - Name: NetworkReaderExtensions
     level: 2
   - Name: NetworkReaderPool
     level: 2
-  - Name: SteamConnection
-    level: 3
-  - Name: KcpConnection
-    level: 2
-  - Name: NetworkPlayer
-    level: 2
-  - Name: NetworkWorld
-    level: 2
-  - Name: Peer
-    level: 2
-  - Name: PipePeerConnection
-    level: 2
-  - Name: SyncVarReceiver
-    level: 2
-  - Name: PlayerSpawner
-    level: 2
   - Name: BasicAuthenticator
     level: 2
   - Name: NetworkRigidbody
     level: 2
-  - Name: NetworkProximityChecker
+  - Name: EnterPlayModeSettingsCheck
     level: 2
-  - Name: NetworkAnimator
+  - Name: SceneDrawer
     level: 2
+  - Name: InterpolationTime
+    level: 0
   - Name: NetworkSceneChecker
     level: 2
   - Name: Reward
@@ -356,19 +366,41 @@ MonoBehaviour:
     level: 4
   - Name: ChatWindow
     level: 2
-  - Name: AdditiveNetworkManager
-    level: 2
-  - Name: ZoneHandler
-    level: 2
-  - Name: SceneDrawer
-    level: 2
   - Name: NetworkDiscovery
     level: 2
   - Name: NetworkDiscoveryBase`2
     level: 2
+  - Name: KcpConnection
+    level: 2
   - Name: Tests
     level: 4
-  - Name: SteamSocketManager
+  - Name: MessageBroker
+    level: 2
+  - Name: NetworkPlayer
+    level: 2
+  - Name: SyncVarReceiver
+    level: 2
+  - Name: NetworkWorld
+    level: 2
+  - Name: RosterUI
+    level: 2
+  - Name: Peer
+    level: 2
+  - Name: PipePeerConnection
     level: 2
   - Name: MirageTypesExtensions
+    level: 2
+  - Name: MessageHandler
+    level: 2
+  - Name: Mirage.Serialization
+    level: 2
+  - Name: SteamyFaceTransport
+    level: 2
+  - Name: SteamServer
+    level: 3
+  - Name: SteamCommon
+    level: 3
+  - Name: SteamConnection
+    level: 3
+  - Name: SteamSocketManager
     level: 2
