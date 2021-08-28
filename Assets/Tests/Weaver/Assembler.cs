@@ -6,7 +6,7 @@ using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEditor.Compilation;
 using UnityEngine;
 
-namespace Mirage.Weaver
+namespace Mirage.Tests.Weaver
 {
     public class CompiledAssembly : ICompiledAssembly
     {

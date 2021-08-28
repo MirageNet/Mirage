@@ -7,7 +7,7 @@ using NUnit.Framework;
 using Unity.CompilationPipeline.Common.Diagnostics;
 using UnityEngine;
 
-namespace Mirage.Weaver
+namespace Mirage.Tests.Weaver
 {
     public class AssertionMethodAttribute : Attribute { }
 
@@ -96,7 +96,7 @@ namespace Mirage.Weaver
 
             string testSourceDirectory = className + "~";
             assembler.OutputFile = Path.Combine(testSourceDirectory, testName + ".dll");
-            assembler.AddSourceFiles(new string[] { Path.Combine(testSourceDirectory, testName + ".cs") });
+            assembler.AddSourceFile(Path.Combine(testSourceDirectory, testName + ".cs"));
             assembly = assembler.Build(weaverLog);
 
             Assert.That(assembler.CompilerErrors, Is.False);
