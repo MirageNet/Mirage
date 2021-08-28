@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using Mirage.Weaver;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEditor.Compilation;
 using UnityEngine;
@@ -61,17 +61,11 @@ namespace Mirage.Tests.Weaver
     {
         public string OutputFile { get; set; }
         public string ProjectPathFile => Path.Combine(WeaverTestLocator.OutputDirectory, OutputFile);
-        public List<CompilerMessage> CompilerMessages { get; private set; }
         public bool CompilerErrors { get; private set; }
 
         readonly HashSet<string> sourceFiles = new HashSet<string>();
-        private List<WeaverMessages> messages = new List<WeaverMessages>();
-        private AssemblyBuilder assemblyBuilder;
-
-        public Assembler()
-        {
-            CompilerMessages = new List<CompilerMessage>();
-        }
+        readonly List<WeaverMessages> messages = new List<WeaverMessages>();
+        AssemblyBuilder assemblyBuilder;
 
         public void AddSourceFile(string sourceFile)
         {
@@ -118,12 +112,13 @@ namespace Mirage.Tests.Weaver
             // the way things are build changes in 2020
 #if UNITY_2020_3_OR_NEWER
             // in 2020 assemblyBuilder automaitcally calls ILPP
-            return Build2020();
+            Build2020();
 #else
             // in 2019 assemblyBuilder does not call ILPP
             // this means we have to check for compile errors and then run weaver manually
-            return Build2019(logger);
+            Build2019();
 #endif
+            return messages;
         }
 
 #if UNITY_2020_3_OR_NEWER
@@ -133,10 +128,8 @@ namespace Mirage.Tests.Weaver
         ///     NOTE: Does not write the weaved assemble to disk
         /// </para>
         /// </summary>
-        public List<WeaverMessages> Build2020()
+        void Build2020()
         {
-            messages = messages;
-
             // This will compile scripts with the same references as files in the asset folder.
             // This means that the dll will get references to all asmdef just as if it was the default "Assembly-CSharp.dll"
             assemblyBuilder = new AssemblyBuilder(ProjectPathFile, sourceFiles.ToArray())
@@ -152,15 +145,14 @@ namespace Mirage.Tests.Weaver
             if (!assemblyBuilder.Build())
             {
                 Debug.LogErrorFormat("Failed to start build of assembly {0}", assemblyBuilder.assemblyPath);
-                return messages;
+                return;
             }
 
+            // wait for finish before returning
             while (assemblyBuilder.status != AssemblyBuilderStatus.Finished)
             {
                 System.Threading.Thread.Sleep(10);
             }
-
-            return messages;
         }
 
         void BuildFinished2020(string assemblyPath, CompilerMessage[] compilerMessages)
@@ -201,86 +193,51 @@ namespace Mirage.Tests.Weaver
                 messages.Add(new WeaverMessages(item.type, realMessage));
             }
 
-            void DebugLog(CompilerMessage item)
-            {
-                switch (item.type)
-                {
-                    case CompilerMessageType.Error:
-                        Console.WriteLine($"[WeaverTests:Error] {item.message}");
-                        break;
-                    case CompilerMessageType.Warning:
-                        Console.WriteLine($"[WeaverTests:Warn] {item.message}");
-                        break;
-                    default:
-                        break;
-                }
-            }
+            
         }
 #else
-            /// <summary>
-            /// Builds and Weaves an Assembly with references to unity engine and other asmdefs.
-            /// <para>
-            ///     NOTE: Does not write the weaved assemble to disk
-            /// </para>
-            /// </summary>
-            public AssemblyDefinition Build2019(IWeaverLogger logger)
+        /// <summary>
+        /// Builds and Weaves an Assembly with references to unity engine and other asmdefs.
+        /// <para>
+        ///     NOTE: Does not write the weaved assemble to disk
+        /// </para>
+        /// </summary>
+        void Build2019()
+        {
+            // This will compile scripts with the same references as files in the asset folder.
+            // This means that the dll will get references to all asmdef just as if it was the default "Assembly-CSharp.dll"
+            assemblyBuilder = new AssemblyBuilder(ProjectPathFile, sourceFiles.ToArray())
             {
-                this.logger = logger;
-                assembly = null;
+                referencesOptions = ReferencesOptions.UseEngineModules
+            };
 
-                // This will compile scripts with the same references as files in the asset folder.
-                // This means that the dll will get references to all asmdef just as if it was the default "Assembly-CSharp.dll"
-                assemblyBuilder = new AssemblyBuilder(ProjectPathFile, sourceFiles.ToArray())
-                {
-                    referencesOptions = ReferencesOptions.UseEngineModules
-                };
+            assemblyBuilder.buildFinished += BuildFinished2019;
 
-                assemblyBuilder.buildFinished += BuildFinished2019;
-
-                Console.WriteLine($"[WeaverTests] Build {ProjectPathFile}");
-                // Start build of assembly
-                if (!assemblyBuilder.Build())
-                {
-                    Debug.LogErrorFormat("Failed to start build of assembly {0}", assemblyBuilder.assemblyPath);
-                    return assembly;
-                }
-
-                while (assemblyBuilder.status != AssemblyBuilderStatus.Finished)
-                {
-                    System.Threading.Thread.Sleep(10);
-                }
-
-                return assembly;
+            Console.WriteLine($"[WeaverTests] Build {ProjectPathFile}");
+            // Start build of assembly
+            if (!assemblyBuilder.Build())
+            {
+                Debug.LogErrorFormat("Failed to start build of assembly {0}", assemblyBuilder.assemblyPath);
+                return;
             }
 
-            void BuildFinished2019(string assemblyPath, CompilerMessage[] compilerMessages)
+            // wait for finish before returning
+            while (assemblyBuilder.status != AssemblyBuilderStatus.Finished)
             {
-                Console.WriteLine($"[WeaverTests] buildFinished {assemblyPath}");
-                foreach (CompilerMessage item in compilerMessages)
+                System.Threading.Thread.Sleep(10);
+            }
+        }
+
+        void BuildFinished2019(string assemblyPath, CompilerMessage[] compilerMessages)
+        {
+            foreach (CompilerMessage cm in compilerMessages)
+            {
+                DebugLog(cm);
+                if (cm.type == CompilerMessageType.Error)
                 {
-                    switch (item.type)
-                    {
-                        case CompilerMessageType.Error:
-                            Console.WriteLine($"[WeaverTests:Error] {assemblyPath}");
-                            break;
-                        case CompilerMessageType.Warning:
-                            Console.WriteLine($"[WeaverTests:Warn] {assemblyPath}");
-                            break;
-                        default:
-                            break;
-                    }
+                    CompilerErrors = true;
                 }
-#if !UNITY_2020_2_OR_NEWER
-                    CompilerMessages.AddRange(compilerMessages);
-                    foreach (CompilerMessage cm in compilerMessages)
-                    {
-                        if (cm.type == CompilerMessageType.Error)
-                        {
-                            Debug.LogErrorFormat("{0}:{1} -- {2}", cm.file, cm.line, cm.message);
-                            CompilerErrors = true;
-                        }
-                    }
-#endif
+            }
 
             // assembly builder does not call ILPostProcessor (WTF Unity?),  so we must invoke it ourselves.
             var compiledAssembly = new CompiledAssembly(assemblyPath)
@@ -289,11 +246,34 @@ namespace Mirage.Tests.Weaver
                 References = assemblyBuilder.defaultReferences
             };
 
+            var logger = new WeaverLogger();
             var weaver = new Mirage.Weaver.Weaver(logger);
 
-            assembly = weaver.Weave(compiledAssembly);
+            _ = weaver.Weave(compiledAssembly);
+
+            foreach (Unity.CompilationPipeline.Common.Diagnostics.DiagnosticMessage item in logger.Diagnostics)
+            {
+                messages.Add(new WeaverMessages(
+                    item.DiagnosticType == Unity.CompilationPipeline.Common.Diagnostics.DiagnosticType.Error ? CompilerMessageType.Error : CompilerMessageType.Warning,
+                    item.MessageData
+                ));
+            }
         }
 #endif
 
+        void DebugLog(CompilerMessage item)
+        {
+            switch (item.type)
+            {
+                case CompilerMessageType.Error:
+                    Console.WriteLine($"[WeaverTests:Error] {item.message}");
+                    break;
+                case CompilerMessageType.Warning:
+                    Console.WriteLine($"[WeaverTests:Warn] {item.message}");
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
