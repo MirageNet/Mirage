@@ -8,14 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
+    container: unityci/editor:ubuntu-2020.3.17f1-base-0.15.0
 
     steps:
       - name: Activate unity
         # exit code is 1 for manual activation
         continue-on-error: true
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE2 }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_2020_3_17 }}
         run: |          
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit
@@ -27,7 +27,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: Library
-          key: Library-2020.1.17
+          key: Library-Library-2020.3.17
 
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod  UnityEditor.SyncVS.SyncSolution -quit
