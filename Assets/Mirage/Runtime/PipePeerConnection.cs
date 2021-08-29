@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Mirage
 {
     /// <summary>
-    /// A <see cref="IConnection"/> that is directly sends data to a <see cref="IDataHandler"/>
+    /// A <see cref="Mirage.SocketLayer.IConnection"/> that is directly sends data to a <see cref="Mirage.SocketLayer.IDataHandler"/>
     /// </summary>
     public class PipePeerConnection : IConnection
     {
@@ -136,7 +136,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Token that invokes <see cref="INotifyToken.Delivered"/> immediately
+        /// Token that invokes <see cref="Mirage.SocketLayer.INotifyToken.Delivered"/> immediately
         /// </summary>
         public struct PipeNotifyToken : INotifyToken
         {
