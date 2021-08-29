@@ -35,7 +35,10 @@ jobs:
       - name: Install docfx
         uses: MirageNet/setup-docfx@v1
 
-      - name: Generate API
+      - name: Generate API 1
+        run: docfx metadata Mirage.SocketLayer.csproj --logLevel Verbose --warningsAsErrors --output doc/api/ --disableDefaultFilter
+        
+      - name: Generate API 2
         run: docfx metadata --logLevel Verbose --warningsAsErrors doc/docfx.json
 
       - name: Build Docs
