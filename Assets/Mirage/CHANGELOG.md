@@ -1,3 +1,10 @@
+## [101.9.2](https://github.com/MirageNet/Mirage/compare/v101.9.1...v101.9.2) (2021-08-29)
+
+
+### Bug Fixes
+
+* fixing namespace for display metrics ([9d3f056](https://github.com/MirageNet/Mirage/commit/9d3f0568943e531474f56852453233e173e3508f))
+
 ## [101.9.1](https://github.com/MirageNet/Mirage/compare/v101.9.0...v101.9.1) (2021-08-29)
 
 
