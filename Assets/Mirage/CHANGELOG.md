@@ -1,3 +1,10 @@
+## [101.9.1](https://github.com/MirageNet/Mirage/compare/v101.9.0...v101.9.1) (2021-08-29)
+
+
+### Bug Fixes
+
+* improving warning message for taking too many objects from pool ([2bc42c5](https://github.com/MirageNet/Mirage/commit/2bc42c512432ece82bf1eabc53ccf65d27e54556))
+
 # [101.9.0](https://github.com/MirageNet/Mirage/compare/v101.8.0...v101.9.0) (2021-08-26)
 
 
