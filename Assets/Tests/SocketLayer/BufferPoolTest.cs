@@ -25,7 +25,7 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void CallsCreateStartCountTimesWithCorrectArgs()
         {
-            var create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
+            Pool<TestBuffer>.CreateNewItem create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
 
             const int startCount = 5;
             const int bufferSize = 100;
@@ -37,7 +37,7 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void TakeDoesntCreateTillEmpty()
         {
-            var create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
+            Pool<TestBuffer>.CreateNewItem create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
             create.Invoke(default, default).Returns((args) => TestBuffer.Create((int)args[0], (Pool<TestBuffer>)args[0]));
 
             const int startCount = 5;
@@ -62,7 +62,7 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void CanTakeMoreAfterPuttingSomeBackWithoutCreatingNew()
         {
-            var create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
+            Pool<TestBuffer>.CreateNewItem create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
             create.Invoke(default, default).Returns((args) => TestBuffer.Create((int)args[0], (Pool<TestBuffer>)args[1]));
 
             const int startCount = 5;
@@ -131,7 +131,7 @@ namespace Mirage.SocketLayer.Tests
 
             LogAssert.NoUnexpectedReceived();
 
-            LogAssert.Expect(UnityEngine.LogType.Warning, $"Buffer Max Size reached, created:{maxCount + 1} max:{maxCount}");
+            LogAssert.Expect(UnityEngine.LogType.Warning, $"Pool Max Size reached, type:{typeof(TestBuffer).Name} created:{maxCount + 1} max:{maxCount}");
             temp[maxCount] = pool.Take();
             LogAssert.NoUnexpectedReceived();
 
@@ -152,7 +152,7 @@ namespace Mirage.SocketLayer.Tests
             }
 
             // have to expect this so that noUnexpected doesn't fail below
-            LogAssert.Expect(UnityEngine.LogType.Warning, $"Buffer Max Size reached, created:{maxCount + 1} max:{maxCount}");
+            LogAssert.Expect(UnityEngine.LogType.Warning, $"Pool Max Size reached, type:{typeof(TestBuffer).Name} created:{maxCount + 1} max:{maxCount}");
 
             for (int i = 0; i < maxCount; i++)
             {

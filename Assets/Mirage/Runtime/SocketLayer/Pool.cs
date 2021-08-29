@@ -69,7 +69,7 @@ namespace Mirage.SocketLayer
 
         private T CreateNewBuffer()
         {
-            if (created >= maxPoolSize && logger.IsLogTypeAllowed(LogType.Warning)) logger.Log(LogType.Warning, $"Buffer Max Size reached, created:{created + 1} max:{maxPoolSize}");
+            if (created >= maxPoolSize && logger.IsLogTypeAllowed(LogType.Warning)) logger.Log(LogType.Warning, $"Pool Max Size reached, type:{typeof(T).Name} created:{created + 1} max:{maxPoolSize}");
             created++;
             return createNew.Invoke(bufferSize, this);
         }
