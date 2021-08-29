@@ -8,7 +8,7 @@ using Unity.CompilationPipeline.Common.Diagnostics;
 
 namespace Mirage.Weaver
 {
-    public class Logger : IWeaverLogger
+    public class WeaverLogger : IWeaverLogger
     {
         public List<DiagnosticMessage> Diagnostics = new List<DiagnosticMessage>();
 
