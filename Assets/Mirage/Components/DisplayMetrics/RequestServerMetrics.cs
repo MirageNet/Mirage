@@ -1,11 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Mirage;
 using Mirage.SocketLayer;
 using UnityEngine;
 
-namespace JamesFrowen.NetworkingBenchmark
+namespace Mirage.DisplayMetrics
 {
     public class RequestServerMetrics : MonoBehaviour
     {
