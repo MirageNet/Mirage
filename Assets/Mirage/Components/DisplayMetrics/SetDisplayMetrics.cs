@@ -1,7 +1,6 @@
-using Mirage;
 using UnityEngine;
 
-namespace JamesFrowen.NetworkingBenchmark
+namespace Mirage.Profiling
 {
     public class SetDisplayMetrics : MonoBehaviour
     {

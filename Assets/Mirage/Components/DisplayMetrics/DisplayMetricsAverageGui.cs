@@ -1,7 +1,7 @@
 using Mirage.SocketLayer;
 using UnityEngine;
 
-namespace JamesFrowen.NetworkingBenchmark
+namespace Mirage.Profiling
 {
     public class DisplayMetricsAverageGui : MonoBehaviour
     {
