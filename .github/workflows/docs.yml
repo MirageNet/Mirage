@@ -36,10 +36,10 @@ jobs:
         uses: MirageNet/setup-docfx@v1
 
       - name: Generate API
-        run: docfx metadata --logLevel Warning --warningsAsErrors doc/docfx.json
+        run: docfx metadata --logLevel Verbose --warningsAsErrors doc/docfx.json
 
       - name: Build Docs
-        run: docfx build --logLevel Warning --warningsAsErrors doc/docfx.json
+        run: docfx build --logLevel Verbose --warningsAsErrors doc/docfx.json
 
       - name: Publish docs
         uses: crazy-max/ghaction-github-pages@v2.5.0
