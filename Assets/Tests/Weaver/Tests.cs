@@ -6,8 +6,9 @@ using Mono.Cecil;
 using NUnit.Framework;
 using Unity.CompilationPipeline.Common.Diagnostics;
 using UnityEngine;
+using Logger = Mirage.Weaver.Logger;
 
-namespace Mirage.Weaver
+namespace Mirage.Tests.Weaver
 {
     public class AssertionMethodAttribute : Attribute { }
 

@@ -2,7 +2,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mirage.Weaver
+namespace Mirage.Tests.Weaver
 {
     /// <summary>
     /// This class is used by weaver tests to find the current directory used for weaver outputs
