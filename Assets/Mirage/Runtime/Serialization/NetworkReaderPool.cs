@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Mirage.Serialization
 {
     /// <summary>
-    /// Holds static reference to <see cref="Mirage.SocketLayer.Pool{T}"/> of <see cref="PooledNetworkReader"/>
+    /// Holds static reference to <see cref="Pool{T}"/> of <see cref="PooledNetworkReader"/>
     /// </summary>
     public static class NetworkReaderPool
     {
