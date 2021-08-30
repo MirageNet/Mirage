@@ -35,11 +35,14 @@ jobs:
       - name: Install docfx
         uses: MirageNet/setup-docfx@v1
 
+      # Unity2020.3+Linux seems to check for meta data in wrong order, No idea why
+      #   So for metadata we have to run twice so that it correctly finds references to other c# projects
+      #   First run we do without warningsAsErrors, (it will give warning for cref not found)
+      #   Second run we do it with warningsAsErrors, (it should find cref and not give warning)
       - name: Generate API 1
-        run: docfx metadata --logLevel Verbose doc/docfx.json
+        run: docfx metadata --logLevel Warning doc/docfx.json
 
       - name: Generate API 2
-      # do 2 passes so that metadata can fine socketlayer scripts
         run: docfx metadata --logLevel Verbose --warningsAsErrors doc/docfx.json
 
       - name: Build Docs
