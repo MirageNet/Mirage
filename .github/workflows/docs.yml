@@ -11,10 +11,6 @@ jobs:
     container: unityci/editor:ubuntu-2020.3.17f1-base-0.15.0
 
     steps:
-      # install docfx first, incase unity need c# stuff for generate solution
-      - name: Install docfx
-        uses: MirageNet/setup-docfx@v1
-
       - name: Activate unity
         # exit code is 1 for manual activation
         continue-on-error: true
@@ -37,19 +33,17 @@ jobs:
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod UnityEditor.SyncVS.SyncSolution -quit
 
+      # unity 2020.3 outputs <ReferenceOutputAssembly>false</ReferenceOutputAssembly> on linux
+      # this breaks references to other csproj for docfx and sonar.
+      # This step is a work around for this so docfx runs in correctly
       # replacing false with true in ReferenceOutputAssembly
-      # this is needed so that docfx generate in correct order 
       - name: Fix Csproj
         run: sed -i 's/<ReferenceOutputAssembly>false<\/ReferenceOutputAssembly>/<ReferenceOutputAssembly>true<\/ReferenceOutputAssembly>/g' *.csproj
 
-      # Unity2020.3+Linux seems to check for meta data in wrong order, No idea why
-      #   So for metadata we have to run twice so that it correctly finds references to other c# projects
-      #   First run we do without warningsAsErrors, (it will give warning for cref not found)
-      #   Second run we do it with warningsAsErrors, (it should find cref and not give warning)
-      - name: Generate API 1
-        run: docfx metadata --logLevel Warning doc/docfx.json
+      - name: Install docfx
+        uses: MirageNet/setup-docfx@v1
 
-      - name: Generate API 2
+      - name: Generate API 
         run: docfx metadata --logLevel Warning --warningsAsErrors doc/docfx.json
 
       - name: Build Docs
