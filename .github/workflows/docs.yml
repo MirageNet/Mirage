@@ -35,7 +35,11 @@ jobs:
       - name: Install docfx
         uses: MirageNet/setup-docfx@v1
 
-      - name: Generate API
+      - name: Generate API 1
+        run: docfx metadata --logLevel Verbose doc/docfx.json
+
+      - name: Generate API 2
+      # do 2 passes so that metadata can fine socketlayer scripts
         run: docfx metadata --logLevel Verbose --warningsAsErrors doc/docfx.json
 
       - name: Build Docs
