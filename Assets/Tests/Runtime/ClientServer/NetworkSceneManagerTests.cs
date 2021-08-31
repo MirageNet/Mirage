@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
@@ -151,9 +152,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator OnClientSceneChangedAdditiveListTest() => UniTask.ToCoroutine(async () =>
         {
             clientSceneManager.OnClientFinishedSceneChange.AddListener(CheckForPendingAdditiveSceneList);
-            clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = "Assets/Mirror/Tests/Runtime/testScene.unity", AdditiveScenes = new[] { "Assets/Mirror/Tests/Runtime/testScene.unity" } });
+            clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = "Assets/Mirror/Tests/Runtime/testScene.unity", AdditiveScenes = new List<string> { "Assets/Mirror/Tests/Runtime/testScene.unity" } });
 
-            await AsyncUtil.WaitUntilWithTimeout(()=>noAdditiveScenesFound);
+            await AsyncUtil.WaitUntilWithTimeout(() => noAdditiveScenesFound);
 
             Assert.That(noAdditiveScenesFound);
         });
@@ -172,7 +173,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             //Check for the additive scene in the pending list at the time of ClientChangeScene before its removed as part of it being loaded.
             clientSceneManager.OnClientStartedSceneChange.AddListener(CheckForAdditiveScene);
-            clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = "Assets/Mirror/Tests/Runtime/testScene.unity", AdditiveScenes = new[] { "Assets/Mirror/Tests/Runtime/testScene.unity" } });
+            clientSceneManager.ClientStartSceneMessage(client.Player, new SceneMessage { MainActivateScene = "Assets/Mirror/Tests/Runtime/testScene.unity", AdditiveScenes = new List<string> { "Assets/Mirror/Tests/Runtime/testScene.unity" } });
 
             Assert.That(additiveSceneWasFound);
         }

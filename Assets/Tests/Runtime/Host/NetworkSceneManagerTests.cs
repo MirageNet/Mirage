@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using NSubstitute;
@@ -156,7 +157,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ChangeSceneAdditiveLoadTest() => UniTask.ToCoroutine(async () =>
         {
-            sceneManager.ServerLoadSceneAdditively("Assets/Mirror/Tests/Runtime/testScene.unity", new[] {client.Player});
+            sceneManager.ServerLoadSceneAdditively("Assets/Mirror/Tests/Runtime/testScene.unity", new[] { client.Player });
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ActiveScenePath != null);
 
@@ -192,7 +193,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
 
-            int[] scenes = sceneManager.ScenesPlayerIsIn(server.LocalPlayer);
+            Scene[] scenes = sceneManager.ScenesPlayerIsIn(server.LocalPlayer);
 
             Assert.That(scenes, Is.Not.Null);
         }
@@ -214,12 +215,12 @@ namespace Mirage.Tests.Runtime.Host
 
             sceneManager.Server = null;
 
-            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
             {
                 sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), new[] { server.LocalPlayer });
             });
 
-            string message = new ArgumentNullException("Server", "Server is not active or is null").Message;
+            string message = new InvalidOperationException("Server is not active or is null").Message;
             Assert.That(exception, Has.Message.EqualTo(message));
         }
 
@@ -263,7 +264,7 @@ namespace Mirage.Tests.Runtime.Host
 
             sceneManager.OnServerStartedSceneChange.AddListener((arg0, operation) => _invokedOnServerStartedSceneChange = true);
 
-            sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), new[] {server.LocalPlayer});
+            sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), new[] { server.LocalPlayer });
 
             await AsyncUtil.WaitUntilWithTimeout(() => _invokedOnServerStartedSceneChange);
 
@@ -283,16 +284,32 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         [Test]
-        public void IsPlayerInSceneThrowNullTest()
+        public void IsPlayerInSceneThrowForInvalidScene()
         {
-            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                sceneManager.IsPlayerInScene(-1234, server.LocalPlayer);
+                sceneManager.IsPlayerInScene(default, server.LocalPlayer);
             });
 
-            string message = new ArgumentNullException("sceneHandler", "Cannot find scene in list. Please check scene is correct.").Message;
+            string message = new ArgumentException("Scene is not valid", "scene").Message;
             Assert.That(exception, Has.Message.EqualTo(message));
         }
+        [Test]
+        public void IsPlayerInSceneThrowForNotFoundScene()
+        {
+            Scene scene = SceneManager.CreateScene("Not Found Scene");
+            KeyNotFoundException exception = Assert.Throws<KeyNotFoundException>(() =>
+            {
+                sceneManager.IsPlayerInScene(scene, server.LocalPlayer);
+            });
+
+            string message = new KeyNotFoundException($"Could not find player list for scene:{scene}").Message;
+            Assert.That(exception, Has.Message.EqualTo(message));
+
+            // cleanup
+            SceneManager.UnloadSceneAsync(scene);
+        }
+
 
         [UnityTest]
         public IEnumerator OnServerDisconnectPlayerTest() => UniTask.ToCoroutine(async () =>
