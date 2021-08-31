@@ -1,11 +1,9 @@
 using System;
-using System.Linq;
 using Mirage.Serialization;
 using Mirage.Weaver.NetworkBehaviours;
 using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using PropertyAttributes = Mono.Cecil.PropertyAttributes;
@@ -135,68 +133,133 @@ namespace Mirage.Weaver
             {
                 createFloatPackField(syncVar);
             }
+            if (syncVar.Vector3PackSettings.HasValue)
+            {
+                createVector3PackField(syncVar);
+            }
+            if (syncVar.Vector2PackSettings.HasValue)
+            {
+                createVector2PackField(syncVar);
+            }
+            if (syncVar.QuaternionBitCount.HasValue)
+            {
+                createQuaternionPackField(syncVar);
+            }
         }
 
         private void createFloatPackField(FoundSyncVar syncVar)
         {
-            TypeReference packerRer = module.ImportReference(typeof(FloatPacker));
-            var packerField = new FieldDefinition($"{syncVar.FieldDefinition.Name}__Packer", FieldAttributes.Private | FieldAttributes.Static, packerRer);
-            packerField.DeclaringType = syncVar.FieldDefinition.DeclaringType;
-            syncVar.FieldDefinition.DeclaringType.Fields.Add(packerField);
-            syncVar.PackerField = packerField;
+            syncVar.PackerField = behaviour.TypeDefinition.AddField<FloatPacker>($"{syncVar.FieldDefinition.Name}__Packer", FieldAttributes.Private | FieldAttributes.Static);
 
-
-            // todo move this
-            MethodDefinition cctor = behaviour.TypeDefinition.GetMethod(".cctor");
-            if (cctor != null)
+            NetworkBehaviourProcessor.AddToStaticConstructor(behaviour.TypeDefinition, (worker) =>
             {
-                // remove the return opcode from end of function. will add our own later.
-                if (cctor.Body.Instructions.Count != 0)
+                FloatPackSettings settings = syncVar.FloatPackSettings.Value;
+
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max));
+
+                // packer has 2 constructors, get the one that matches the attribute type
+                MethodReference packerCtor = null;
+                if (settings.precision.HasValue)
                 {
-                    Instruction retInstr = cctor.Body.Instructions[cctor.Body.Instructions.Count - 1];
-                    if (retInstr.OpCode == OpCodes.Ret)
-                    {
-                        cctor.Body.Instructions.RemoveAt(cctor.Body.Instructions.Count - 1);
-                    }
-                    else
-                    {
-                        throw new FloatPackException($"{behaviour.TypeDefinition.Name} has invalid class constructor", cctor);
-                    }
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value));
+                    packerCtor = module.ImportReference(() => new FloatPacker(default, default(float)));
                 }
-            }
-            else
-            {
-                // make one!
-                cctor = behaviour.TypeDefinition.AddMethod(".cctor", MethodAttributes.Private |
-                        MethodAttributes.HideBySig |
-                        MethodAttributes.SpecialName |
-                        MethodAttributes.RTSpecialName |
-                        MethodAttributes.Static);
-            }
+                else if (settings.bitCount.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value));
+                    packerCtor = module.ImportReference(() => new FloatPacker(default, default(int)));
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Invalid FloatPackSettings");
+                }
+                worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+                worker.Append(worker.Create(OpCodes.Stsfld, syncVar.PackerField));
+            });
+        }
 
-            ILProcessor worker = cctor.Body.GetILProcessor();
+        private void createVector3PackField(FoundSyncVar syncVar)
+        {
+            syncVar.PackerField = behaviour.TypeDefinition.AddField<Vector3Packer>($"{syncVar.FieldDefinition.Name}__Packer", FieldAttributes.Private | FieldAttributes.Static);
 
-            worker.Append(worker.Create(OpCodes.Ldc_R4, syncVar.FloatPackSettings.Value.max));
+            NetworkBehaviourProcessor.AddToStaticConstructor(behaviour.TypeDefinition, (worker) =>
+            {
+                Vector3PackSettings settings = syncVar.Vector3PackSettings.Value;
 
-            // floatPacker has 2 constructors, get the one that matches the attribute type
-            MethodReference packerCtor = null;
-            if (syncVar.FloatPackSettings.Value.precision.HasValue)
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.x));
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.y));
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.z));
+
+                // packer has 2 constructors, get the one that matches the attribute type
+                MethodReference packerCtor = null;
+                if (settings.precision.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.x));
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.y));
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.z));
+                    packerCtor = module.ImportReference(() => new Vector3Packer(default(float), default(float), default(float), default(float), default(float), default(float)));
+                }
+                else if (settings.bitCount.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.x));
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.y));
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.z));
+                    packerCtor = module.ImportReference(() => new Vector3Packer(default(float), default(float), default(float), default(int), default(int), default(int)));
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Invalid Vector3PackSettings");
+                }
+                worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+                worker.Append(worker.Create(OpCodes.Stsfld, syncVar.PackerField));
+            });
+        }
+        private void createVector2PackField(FoundSyncVar syncVar)
+        {
+            syncVar.PackerField = behaviour.TypeDefinition.AddField<Vector2Packer>($"{syncVar.FieldDefinition.Name}__Packer", FieldAttributes.Private | FieldAttributes.Static);
+
+            NetworkBehaviourProcessor.AddToStaticConstructor(behaviour.TypeDefinition, (worker) =>
             {
-                worker.Append(worker.Create(OpCodes.Ldc_R4, syncVar.FloatPackSettings.Value.precision.Value));
-                packerCtor = module.ImportReference(packerRer.Resolve().GetConstructors().First(x => x.Parameters[1].ParameterType.Is<float>()));
-            }
-            else if (syncVar.FloatPackSettings.Value.bitCount.HasValue)
+                Vector2PackSettings settings = syncVar.Vector2PackSettings.Value;
+
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.x));
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.y));
+
+                // packer has 2 constructors, get the one that matches the attribute type
+                MethodReference packerCtor = null;
+                if (settings.precision.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.x));
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.y));
+                    packerCtor = module.ImportReference(() => new Vector2Packer(default(float), default(float), default(float), default(float)));
+                }
+                else if (settings.bitCount.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.x));
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.y));
+                    packerCtor = module.ImportReference(() => new Vector2Packer(default(float), default(float), default(int), default(int)));
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Invalid Vector2PackSettings");
+                }
+                worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+                worker.Append(worker.Create(OpCodes.Stsfld, syncVar.PackerField));
+            });
+        }
+        private void createQuaternionPackField(FoundSyncVar syncVar)
+        {
+            syncVar.PackerField = behaviour.TypeDefinition.AddField<QuaternionPacker>($"{syncVar.FieldDefinition.Name}__Packer", FieldAttributes.Private | FieldAttributes.Static);
+
+            NetworkBehaviourProcessor.AddToStaticConstructor(behaviour.TypeDefinition, (worker) =>
             {
-                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.FloatPackSettings.Value.bitCount.Value));
-                packerCtor = module.ImportReference(packerRer.Resolve().GetConstructors().First(x => x.Parameters[1].ParameterType.Is<int>()));
-            }
-            else
-            {
-                throw new InvalidOperationException($"Invalid FloatPackSettings");
-            }
-            worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
-            worker.Append(worker.Create(OpCodes.Stsfld, packerField));
-            worker.Append(worker.Create(OpCodes.Ret));
+                int bitCount = syncVar.QuaternionBitCount.Value;
+
+                worker.Append(worker.Create(OpCodes.Ldc_I4, bitCount));
+                MethodReference packerCtor = module.ImportReference(() => new QuaternionPacker(default(int)));
+                worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+                worker.Append(worker.Create(OpCodes.Stsfld, syncVar.PackerField));
+            });
         }
 
         MethodDefinition GenerateSyncVarGetter(FoundSyncVar syncVar)
@@ -500,7 +563,19 @@ namespace Mirage.Weaver
             }
             else if (syncVar.FloatPackSettings.HasValue)
             {
-                WriteFloatPack();
+                WritePacker(module.ImportReference((FloatPacker p) => p.Pack(default, default)));
+            }
+            else if (syncVar.Vector2PackSettings.HasValue)
+            {
+                WritePacker(module.ImportReference((Vector2Packer p) => p.Pack(default, default)));
+            }
+            else if (syncVar.Vector3PackSettings.HasValue)
+            {
+                WritePacker(module.ImportReference((Vector3Packer p) => p.Pack(default, default)));
+            }
+            else if (syncVar.QuaternionBitCount.HasValue)
+            {
+                WritePacker(module.ImportReference((QuaternionPacker p) => p.Pack(default, default)));
             }
             else
             {
@@ -558,10 +633,8 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCountMinValue.Value));
                 worker.Append(worker.Create(OpCodes.Sub));
             }
-            void WriteFloatPack()
+            void WritePacker(MethodReference packMethod)
             {
-                MethodReference packMethod = module.ImportReference((FloatPacker p) => p.Pack(default, default));
-
                 // Generates: packer.pack(writer, field)
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldfld, syncVar.PackerField.MakeHostGenericIfNeeded()));
@@ -692,7 +765,20 @@ namespace Mirage.Weaver
             }
             else if (syncVar.FloatPackSettings.HasValue)
             {
-                ReadFloatPack();
+                ReadPacker(module.ImportReference((FloatPacker p) => p.Unpack(default(NetworkReader))));
+            }
+            else if (syncVar.Vector2PackSettings.HasValue)
+            {
+                ReadPacker(module.ImportReference((Vector2Packer p) => p.Unpack(default(NetworkReader))));
+            }
+            else if (syncVar.Vector3PackSettings.HasValue)
+            {
+                ReadPacker(module.ImportReference((Vector3Packer p) => p.Unpack(default(NetworkReader))));
+            }
+
+            else if (syncVar.QuaternionBitCount.HasValue)
+            {
+                ReadPacker(module.ImportReference((QuaternionPacker p) => p.Unpack(default(NetworkReader))));
             }
             else
             {
@@ -753,10 +839,8 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCountMinValue.Value));
                 worker.Append(worker.Create(OpCodes.Add));
             }
-            void ReadFloatPack()
+            void ReadPacker(MethodReference unpackMethod)
             {
-                MethodReference unpackMethod = module.ImportReference((FloatPacker p) => p.Unpack(default(NetworkReader)));
-
                 // Generates: ... = packer.unpack(reader)
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldfld, syncVar.PackerField.MakeHostGenericIfNeeded()));

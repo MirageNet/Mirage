@@ -149,5 +149,95 @@ namespace Mirage.Tests.Weaver
             HasError("Precsion must be positive, precision:-0.1",
                 "System.Single BitAttributeTests.FloatPackInvalid.MyBehaviour::value9");
         }
+
+        [Test]
+        public void Vector3Pack()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void Vector3PackInvalid()
+        {
+            HasErrorCount(11);
+            HasError("System.Single is not a supported type for [Vector3Pack]",
+               "System.Single BitAttributeTests.Vector3PackInvalid.MyBehaviour::value1");
+            HasError("UnityEngine.Vector2 is not a supported type for [Vector3Pack]",
+               "UnityEngine.Vector2 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value2");
+
+            HasError("BitCount must be between 1 and 30 (inclusive), bitCount:31",
+               "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value3");
+            HasError("BitCount must be between 1 and 30 (inclusive), bitCount:31",
+               "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value4");
+
+            HasError("BitCount must be between 1 and 30 (inclusive), bitCount:0",
+               "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value5");
+            HasError("BitCount must be between 1 and 30 (inclusive), bitCount:0",
+               "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value6");
+            HasError("BitCount must be between 1 and 30 (inclusive), bitCount:0",
+               "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value7");
+
+            HasError("Max must be above 0, max:(-1.0, 0.0, 0.0)",
+               "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value8");
+            HasError("Max must be above 0, max:(1.0, -1.0, 0.0)",
+               "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value9");
+            HasError("Max must be above 0, max:(1.0, 1.0, -1.0)",
+               "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value10");
+            HasError("Max must be above 0, max:(-1.0, 0.0, 0.0)",
+               "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value11");
+        }
+
+        [Test]
+        public void Vector2Pack()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void Vector2PackInvalid()
+        {
+            HasErrorCount(9);
+            HasError("System.Single is not a supported type for [Vector2Pack]",
+               "System.Single BitAttributeTests.Vector2PackInvalid.MyBehaviour::value1");
+            HasError("UnityEngine.Vector3 is not a supported type for [Vector2Pack]",
+               "UnityEngine.Vector3 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value2");
+
+            HasError("BitCount must be between 1 and 30 (inclusive), bitCount:31",
+               "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value3");
+            HasError("BitCount must be between 1 and 30 (inclusive), bitCount:31",
+               "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value4");
+            HasError("BitCount must be between 1 and 30 (inclusive), bitCount:0",
+               "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value5");
+            HasError("BitCount must be between 1 and 30 (inclusive), bitCount:0",
+               "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value6");
+            HasError("Max must be above 0, max:(-1.0, 0.0)",
+               "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value7");
+            HasError("Max must be above 0, max:(1.0, -1.0)",
+               "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value8");
+            HasError("Max must be above 0, max:(-1.0, 0.0)",
+               "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value9");
+        }
+
+        [Test]
+        public void QuaternionPack()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void QuaternionPackInvalid()
+        {
+            HasErrorCount(4);
+
+            HasError("System.Single is not a supported type for [QuaternionPack]",
+               "System.Single BitAttributeTests.QuaternionPackInvalid.MyBehaviour::value1");
+            HasError("UnityEngine.Vector3 is not a supported type for [QuaternionPack]",
+               "UnityEngine.Vector3 BitAttributeTests.QuaternionPackInvalid.MyBehaviour::value2");
+
+            HasError("BitCount should be above 0",
+               "UnityEngine.Quaternion BitAttributeTests.QuaternionPackInvalid.MyBehaviour::value3");
+            HasError("BitCount should be below 20",
+               "UnityEngine.Quaternion BitAttributeTests.QuaternionPackInvalid.MyBehaviour::value4");
+        }
     }
 }

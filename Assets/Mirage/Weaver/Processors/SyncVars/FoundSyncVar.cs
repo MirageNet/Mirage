@@ -12,6 +12,19 @@ namespace Mirage.Weaver.SyncVars
         public float? precision;
         public int? bitCount;
     }
+    internal struct Vector2PackSettings
+    {
+        public Vector2 max;
+        public Vector2? precision;
+        public Vector2Int? bitCount;
+    }
+    internal struct Vector3PackSettings
+    {
+        public Vector3 max;
+        public Vector3? precision;
+        public Vector3Int? bitCount;
+    }
+
     internal class FoundSyncVar
     {
         public readonly FieldDefinition FieldDefinition;
@@ -39,7 +52,13 @@ namespace Mirage.Weaver.SyncVars
         public int? BitCountMinValue { get; private set; }
 
         public FloatPackSettings? FloatPackSettings { get; private set; }
+        public Vector2PackSettings? Vector2PackSettings { get; private set; }
+        public Vector3PackSettings? Vector3PackSettings { get; private set; }
+        public int? QuaternionBitCount { get; private set; }
+
         public FieldDefinition PackerField { get; internal set; }
+
+
 
         public MethodReference WriteFunction { get; private set; }
         public MethodReference ReadFunction { get; private set; }
@@ -104,6 +123,9 @@ namespace Mirage.Weaver.SyncVars
                 (BitCount, BitCountConvert, BitCountMinValue) = BitCountFromRangeFinder.GetBitFoundFromRange(FieldDefinition, BitCount.HasValue);
 
             FloatPackSettings = FloatPackFinder.GetPackerSettings(FieldDefinition);
+            Vector2PackSettings = Vector2Finder.GetPackerSettings(FieldDefinition);
+            Vector3PackSettings = Vector3Finder.GetPackerSettings(FieldDefinition);
+            QuaternionBitCount = QuaternionFinder.GetBitCount(FieldDefinition);
         }
 
         public void FindSerializeFunctions(Writers writers, Readers readers)

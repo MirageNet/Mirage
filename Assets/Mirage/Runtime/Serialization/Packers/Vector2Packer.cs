@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2021 James Frowen
@@ -31,6 +31,16 @@ namespace Mirage.Serialization
         readonly FloatPacker xPacker;
         readonly FloatPacker yPacker;
 
+        public Vector2Packer(float xMax, float yMax, int xBitCount, int yBitCount)
+        {
+            xPacker = new FloatPacker(xMax, xBitCount);
+            yPacker = new FloatPacker(yMax, yBitCount);
+        }
+        public Vector2Packer(float xMax, float yMax, float xPrecision, float yPrecision)
+        {
+            xPacker = new FloatPacker(xMax, xPrecision);
+            yPacker = new FloatPacker(yMax, yPrecision);
+        }
         public Vector2Packer(Vector2 max, Vector2 precision)
         {
             xPacker = new FloatPacker(max.x, precision.x);
