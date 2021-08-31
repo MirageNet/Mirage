@@ -8,9 +8,9 @@
   href: ZigZagEncode.md
 - name: Variable Sized Int Block packer
   href: VarIntBlock.md
-- name: Float Packer
+- name: Float Pack
   href: FloatPack.md
-- name: Vector Packer
-  href: VectorPacker.md
-- name: Quaternion Packer
-  href: QuaternionPacker.md
+- name: Vector Pack
+  href: VectorPack.md
+- name: Quaternion Pack
+  href: QuaternionPack.md

@@ -15,51 +15,56 @@ This attributes work in the same way as [FloatPack](./FloatPack.md) expect on 2 
 
 ### Example 1
 
-Health which is between 0 and 100
+A Position in bounds +-100 in all xyz with 0.05 precision for all axis 
 
 ```cs
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
-    [SyncVar, FloatPack(100f, 0.02f)]
-    public int Health;
+    [SyncVar, Vector3Pack(100f, 100f, 100f, 0.05f)]
+    public Vector3 Position;
 }
 ```
-
-`Max = 100`, `resolution = 0.02f` so bit count is 14
-
-`health = 57.2f` will serialize to `01_0010_0100_1101` and deserialize to `57.197f`
-
-`health = -13.5f` will serialize to `11_1011_1010_1110` and deserialize to `-13.503f`
-
-`health = 120f` will be clamped to `100f`
-
 
 ### Example 2
 
-A Percent that where you only want to send 8 bits
+A Position in bounds +-100 in all xz with 0.05 precision, but with +-20 and precision 0.1 in y axis
 
 ```cs
 public class MyNetworkBehaviour : NetworkBehaviour 
 {
-    [SyncVar, FloatPack(1f, 8)]
-    public int Percent;
+    [SyncVar, Vector3Pack(100f, 20f, 100f, 0.05f, 0.1f, 0.05f)]
+    public Vector3 Position;
 }
 ```
 
-`Max = 1f`, `bitCount = 8` so resolution will be `0.00787f`
+### Example 3
+
+A Position in for a long 2d map
+
+```cs
+public class MyNetworkBehaviour : NetworkBehaviour 
+{
+    [SyncVar, Vector2Pack(1000f, 80f, 0.05f)]
+    public Vector2 Position;
+}
+```
 
 ### Generated Code
 
 Source:
 ```cs 
-[SyncVar, FloatPack(100f, 0.02f)]
-public int myValue;
+[SyncVar, Vector3Pack(100f, 20f, 100f, 0.05f, 0.1f, 0.05f)]
+public int myValue1;
+
+[SyncVar, Vector2Pack(1000f, 80f, 0.05f)]
+public int myValue2;
 ```
 
 Generated:
 ```cs
 
-private FloatPacker myValue__Packer = new FloatPacker(100f, 0.02f);
+private Vector3Packer myValue1__Packer = new Vector3Packer(1100f, 20f, 100f, 0.05f, 0.1f, 0.05f);
+private Vector2Packer myValue2__Packer = new Vector2Packer(1000f, 80f, 0.05f, 0.05f);
 
 public override bool SerializeSyncVars(NetworkWriter writer, bool initialState)
 {
@@ -68,14 +73,20 @@ public override bool SerializeSyncVars(NetworkWriter writer, bool initialState)
 
     if (initialState) 
     {
-        myValue__Packer.Pack(writer, this.myValue);
+        myValue1__Packer.Pack(writer, this.myValue1);
+        myValue2__Packer.Pack(writer, this.myValue2);
         return true;
     }
 
-    writer.Write(syncVarDirtyBits, 1);
+    writer.Write(syncVarDirtyBits, 2);
     if ((syncVarDirtyBits & 1UL) != 0UL)
     {
-        myValue__Packer.Pack(writer, this.myValue);
+        myValue1__Packer.Pack(writer, this.myValue1);
+        result = true;
+    }
+    if ((syncVarDirtyBits & 2UL) != 0UL)
+    {
+        myValue2__Packer.Pack(writer, this.myValue2);
         result = true;
     }
 
@@ -88,14 +99,19 @@ public override void DeserializeSyncVars(NetworkReader reader, bool initialState
 
     if (initialState)
     {
-        this.myValue = myValue__Packer.Unpack(reader);
+        this.myValue1 = myValue1__Packer.Unpack(reader);
+        this.myValue2 = myValue2__Packer.Unpack(reader);
         return;
     }
 
-    ulong dirtyMask = reader.Read(1);
+    ulong dirtyMask = reader.Read(2);
     if ((dirtyMask & 1UL) != 0UL)
     {
-        this.myValue = myValue__Packer.Unpack(reader);
+        this.myValue1 = myValue1__Packer.Unpack(reader);
+    }
+    if ((dirtyMask & 2UL) != 0UL)
+    {
+        this.myValue2 = myValue2__Packer.Unpack(reader);
     }
 }
 ```
