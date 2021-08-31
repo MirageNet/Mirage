@@ -1,3 +1,10 @@
+# [101.10.0](https://github.com/MirageNet/Mirage/compare/v101.9.2...v101.10.0) (2021-08-31)
+
+
+### Features
+
+* attributes to use new vector bit packers ([#905](https://github.com/MirageNet/Mirage/issues/905)) ([149bf5a](https://github.com/MirageNet/Mirage/commit/149bf5adc44f60ad810c2233afceea32c5af2e2a))
+
 ## [101.9.2](https://github.com/MirageNet/Mirage/compare/v101.9.1...v101.9.2) (2021-08-29)
 
 
