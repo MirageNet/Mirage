@@ -37,7 +37,7 @@ namespace Mirage
         /// </summary>
         public bool DontDestroy = true;
 
-        private readonly Dictionary<int, HashSet<INetworkPlayer>> _serverSceneData = new Dictionary<int, HashSet<INetworkPlayer>>();
+        private readonly Dictionary<Scene, HashSet<INetworkPlayer>> _serverSceneData = new Dictionary<Scene, HashSet<INetworkPlayer>>();
 
         /// <summary>
         /// The path of the current active scene.
@@ -64,7 +64,7 @@ namespace Mirage
         /// <summary>
         ///     Collection of scenes and which player's are in those scenes.
         /// </summary>
-        public IReadOnlyDictionary<int, HashSet<INetworkPlayer>> ServerSceneData => _serverSceneData;
+        public IReadOnlyDictionary<Scene, HashSet<INetworkPlayer>> ServerSceneData => _serverSceneData;
 
         #endregion
 
@@ -142,13 +142,15 @@ namespace Mirage
         /// <param name="sceneHandler">The scene handler id we want to check in.</param>
         /// <param name="player">The player we want to check for.</param>
         /// <returns>Returns true or false if the player is in the scene specified.</returns>
-        public bool IsPlayerInScene(int sceneHandler, INetworkPlayer player)
+        public bool IsPlayerInScene(Scene scene, INetworkPlayer player)
         {
-            ServerSceneData.TryGetValue(sceneHandler, out HashSet<INetworkPlayer> players);
+            if (!scene.IsValid())
+                throw new ArgumentException("Scene is not valid", nameof(scene));
 
-            if (players == null)
-                throw new ArgumentNullException(nameof(sceneHandler),
-                    "Cannot find scene in list. Please check scene is correct.");
+            if (!ServerSceneData.TryGetValue(scene, out HashSet<INetworkPlayer> players))
+            {
+                throw new KeyNotFoundException($"Could not find player list for scene:{scene}");
+            }
 
             foreach (INetworkPlayer networkPlayer in players)
             {
@@ -165,18 +167,19 @@ namespace Mirage
         /// </summary>
         /// <param name="player">The player we want to check against.</param>
         /// <returns>Returns back a array of scene's the player is currently in.</returns>
-        public int[] ScenesPlayerIsIn(INetworkPlayer player)
+        public Scene[] ScenesPlayerIsIn(INetworkPlayer player)
         {
-            var data = new List<int>();
-
-            foreach (KeyValuePair<int, HashSet<INetworkPlayer>> scene in _serverSceneData)
-            {
-                if (!scene.Value.Contains(player)) continue;
-
-                data.Add(scene.Key);
-            }
-
+            var data = new List<Scene>();
+            ScenesPlayerIsInNonAlloc(player, data);
             return data.ToArray();
+        }
+        public void ScenesPlayerIsInNonAlloc(INetworkPlayer player, List<Scene> scenes)
+        {
+            foreach (KeyValuePair<Scene, HashSet<INetworkPlayer>> scene in _serverSceneData)
+            {
+                if (scene.Value.Contains(player))
+                    scenes.Add(scene.Key);
+            }
         }
 
         #endregion
@@ -473,7 +476,7 @@ namespace Mirage
         /// <param name="disconnectedPlayer"></param>
         protected internal virtual void OnServerPlayerDisconnected(INetworkPlayer disconnectedPlayer)
         {
-            foreach (KeyValuePair<int, HashSet<INetworkPlayer>> scene in _serverSceneData)
+            foreach (KeyValuePair<Scene, HashSet<INetworkPlayer>> scene in _serverSceneData)
             {
                 foreach (INetworkPlayer player in scene.Value)
                 {
@@ -509,16 +512,16 @@ namespace Mirage
 
                 Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
 
-                if (_serverSceneData.ContainsKey(scene.handle))
+                if (_serverSceneData.ContainsKey(scene))
                 {
                     // Check to make sure this scene was not already loaded. If it was let's clear old data on it.
                     logger.Log(
                         $"[NetworkSceneManager] - Scene load operation: {SceneOperation.Normal}. Scene was already loaded once before. Clearing scene related data in {_serverSceneData}.");
 
-                    _serverSceneData.Remove(scene.handle);
+                    _serverSceneData.Remove(scene);
                 }
 
-                _serverSceneData.Add(scene.handle, new HashSet<INetworkPlayer>(Server.Players));
+                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(Server.Players));
             }
 
             // If client let's call this to finish client scene loading too
@@ -614,7 +617,7 @@ namespace Mirage
 
             if (Server && Server.Active)
             {
-                _serverSceneData.Add(scene.handle, new HashSet<INetworkPlayer>(players));
+                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players));
             }
 
             CompleteLoadingScene(scenePath, SceneOperation.LoadAdditive);
@@ -660,7 +663,7 @@ namespace Mirage
 
             if (Server && Server.Active)
             {
-                _serverSceneData.Remove(scene.handle);
+                _serverSceneData.Remove(scene);
             }
         }
 
