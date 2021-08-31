@@ -64,10 +64,7 @@ namespace Mirage
         /// <summary>
         ///     Collection of scenes and which player's are in those scenes.
         /// </summary>
-        public Dictionary<int, HashSet<INetworkPlayer>> ServerSceneData
-        {
-            get { return _serverSceneData; }
-        }
+        public IReadOnlyDictionary<int, HashSet<INetworkPlayer>> ServerSceneData => _serverSceneData;
 
         #endregion
 
