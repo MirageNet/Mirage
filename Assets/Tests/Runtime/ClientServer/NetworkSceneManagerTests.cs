@@ -31,7 +31,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ClientSceneMessageExceptionTest()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 clientSceneManager.ClientStartSceneMessage(null, new SceneMessage());
             });
