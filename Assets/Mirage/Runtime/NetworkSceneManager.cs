@@ -214,14 +214,14 @@ namespace Mirage
                 throw new InvalidOperationException("[NetworkSceneManager] - SceneLoadStartedMessage: cannot change network scene while client is disconnected");
 
             if (string.IsNullOrEmpty(message.MainActivateScene))
-                throw new ArgumentNullException($"[NetworkSceneManager] - SceneLoadStartedMessage: {nameof(message.MainActivateScene)} cannot be empty or null");
+                throw new ArgumentException($"[NetworkSceneManager] - SceneLoadStartedMessage: {nameof(message.MainActivateScene)} cannot be empty or null", nameof(message));
 
             if (logger.LogEnabled()) logger.Log($"[NetworkSceneManager] - SceneLoadStartedMessage: changing scenes from: {ActiveScenePath} to: {message.MainActivateScene}");
 
             //Additive are scenes loaded on server and this client is not a host client
-            if (message.AdditiveScenes != null && message.AdditiveScenes.Length > 0 && Client && !Client.IsLocalClient)
+            if (message.AdditiveScenes != null && message.AdditiveScenes.Count > 0 && Client && !Client.IsLocalClient)
             {
-                for (int sceneIndex = 0; sceneIndex < message.AdditiveScenes.Length; sceneIndex++)
+                for (int sceneIndex = 0; sceneIndex < message.AdditiveScenes.Count; sceneIndex++)
                 {
                     if (string.IsNullOrEmpty(message.AdditiveScenes[sceneIndex])) continue;
 
@@ -437,22 +437,28 @@ namespace Mirage
         {
             logger.Log("[NetworkSceneManager] - OnServerAuthenticated");
 
-            string[] scenesPaths = new string[SceneManager.sceneCount - 1];
+            List<string> additiveScenes = GetAdditiveScenes();
 
+            player.Send(new SceneMessage { MainActivateScene = ActiveScenePath, AdditiveScenes = additiveScenes });
+            player.Send(new SceneReadyMessage());
+
+        }
+        static List<string> GetAdditiveScenes()
+        {
+            var additiveScenes = new List<string>(SceneManager.sceneCount - 1);
+
+            // add all scenes exect active to additive list
+            Scene activeScene = SceneManager.GetActiveScene();
             for (int sceneIndex = 0; sceneIndex < SceneManager.sceneCount; sceneIndex++)
             {
-                // todo fix this, buildIndex and sceneIndex arn't the same number so shouldn't be compared
-                if (SceneManager.GetActiveScene().buildIndex == sceneIndex) continue;
-
                 Scene scene = SceneManager.GetSceneAt(sceneIndex);
-
-                if (scene.name.Equals(SceneManager.GetActiveScene().name)) continue;
-
-                scenesPaths[sceneIndex == 0 ? sceneIndex : sceneIndex - 1] = scene.path;
+                if (scene != activeScene)
+                {
+                    additiveScenes.Add(scene.path);
+                }
             }
 
-            player.Send(new SceneMessage { MainActivateScene = ActiveScenePath, AdditiveScenes = scenesPaths });
-            player.Send(new SceneReadyMessage());
+            return additiveScenes;
         }
 
         /// <summary>

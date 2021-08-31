@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mirage
@@ -21,7 +22,7 @@ namespace Mirage
         public string MainActivateScene;
         // Normal = 0, LoadAdditive = 1, UnloadAdditive = 2
         public SceneOperation SceneOperation;
-        public string[] AdditiveScenes;
+        public List<string> AdditiveScenes;
     }
 
     [NetworkMessage]
