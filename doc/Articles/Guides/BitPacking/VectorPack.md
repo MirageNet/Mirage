@@ -1,7 +1,4 @@
-
-*work in progress*
-
-# Bit Count
+# Vector Pack
 
 A Vector2 or Vector3 can be compressed using <xref:Mirage.Serialization.Vector2PackAttribute> or <xref:Mirage.Serialization.Vector3PackAttribute> 
 

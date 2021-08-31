@@ -1,4 +1,4 @@
-# Bit Count
+# Float Pack
 
 A float value can be compressed using <xref:Mirage.Serialization.FloatPackAttribute> 
 
