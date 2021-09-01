@@ -1,4 +1,4 @@
-﻿using JamesFrowen.SimpleCodeGen;
+using JamesFrowen.SimpleCodeGen;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,20 +10,20 @@ namespace Mirage.Tests.CodeGenerators
         public static void CreateAll()
         {
             var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.Vector2PackTestTemplate.txt");
-            Create(fromTemplate, "100_28f3", new Vector2(100, 20), "0.2f, 0.2f", new Vector2(10.3f, 0.2f), 0.2f, 18);
-            Create(fromTemplate, "100_28f", new Vector2(100, 20), "0.2f", new Vector2(10.3f, 0.2f), 0.2f, 18);
-            Create(fromTemplate, "100_28b3", new Vector2(100, 20), "10, 8", new Vector2(-10.3f, 0.2f), 0.2f, 18);
-            Create(fromTemplate, "100_30f", new Vector2(100, 100), "10", new Vector2(-10.3f, 0.2f), 0.2f, 20);
+            Create(fromTemplate, "100_18f2", new Vector2(100, 20), "0.2f, 0.2f", new Vector2(10.3f, 0.2f), 0.2f, 18);
+            Create(fromTemplate, "100_18f", new Vector2(100, 20), "0.2f", new Vector2(10.3f, 0.2f), 0.2f, 18);
+            Create(fromTemplate, "100_18b2", new Vector2(100, 20), "10, 8", new Vector2(-10.3f, 0.2f), 0.2f, 18);
+            Create(fromTemplate, "100_20b", new Vector2(100, 100), "10", new Vector2(-10.3f, 0.2f), 0.2f, 20);
 
-            Create(fromTemplate, "1000_42f3", new Vector2(1000, 200), "0.1f, 0.1f", new Vector2(-10.3f, 0.2f), 0.1f, 27);
-            Create(fromTemplate, "1000_42f", new Vector2(1000, 200), "0.1f", new Vector2(-10.3f, 0.2f), 0.1f, 27);
-            Create(fromTemplate, "1000_42b3", new Vector2(1000, 200), "15, 12", new Vector2(10.3f, 0.2f), 0.2f, 27);
-            Create(fromTemplate, "1000_45f", new Vector2(1000, 200), "15", new Vector2(10.3f, 0.2f), 0.2f, 30);
+            Create(fromTemplate, "1000_27f2", new Vector2(1000, 200), "0.1f, 0.1f", new Vector2(-10.3f, 0.2f), 0.1f, 27);
+            Create(fromTemplate, "1000_27f", new Vector2(1000, 200), "0.1f", new Vector2(-10.3f, 0.2f), 0.1f, 27);
+            Create(fromTemplate, "1000_27b2", new Vector2(1000, 200), "15, 12", new Vector2(10.3f, 0.2f), 0.2f, 27);
+            Create(fromTemplate, "1000_30b", new Vector2(1000, 200), "15", new Vector2(10.3f, 0.2f), 0.2f, 30);
 
-            Create(fromTemplate, "200_39f3", new Vector2(200, 200), "0.05f, 0.05f", new Vector2(-10.3f, 0.2f), 0.1f, 26);
-            Create(fromTemplate, "200_39f", new Vector2(200, 200), "0.05f", new Vector2(-10.3f, 0.2f), 0.1f, 26);
-            Create(fromTemplate, "200_39b3", new Vector2(200, 200), "13, 13", new Vector2(10.3f, 0.2f), 0.2f, 26);
-            Create(fromTemplate, "200_39f", new Vector2(200, 200), "13", new Vector2(10.3f, 0.2f), 0.2f, 26);
+            Create(fromTemplate, "200_26f2", new Vector2(200, 200), "0.05f, 0.05f", new Vector2(-10.3f, 0.2f), 0.1f, 26);
+            Create(fromTemplate, "200_26f", new Vector2(200, 200), "0.05f", new Vector2(-10.3f, 0.2f), 0.1f, 26);
+            Create(fromTemplate, "200_26b2", new Vector2(200, 200), "13, 13", new Vector2(10.3f, 0.2f), 0.2f, 26);
+            Create(fromTemplate, "200_26b", new Vector2(200, 200), "13", new Vector2(10.3f, 0.2f), 0.2f, 26);
 
             AssetDatabase.Refresh();
         }

@@ -10,15 +10,15 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests
 {
-    public class Vector3PackBehaviour_200_39f : NetworkBehaviour
+    public class Vector3PackBehaviour_200_39b : NetworkBehaviour
     {
-        [Vector3Pack(200f, 200f, 200f, 0.05f)]
+        [Vector3Pack(200f, 200f, 200f, 13)]
         [SyncVar] public Vector3 myValue;
     }
-    public class Vector3PackTest_200_39f : ClientServerSetup<Vector3PackBehaviour_200_39f>
+    public class Vector3PackTest_200_39b : ClientServerSetup<Vector3PackBehaviour_200_39b>
     {
-        static readonly Vector3 value = new Vector3(-10.3f, 0.2f, -20f);
-        const float within = 0.1f;
+        static readonly Vector3 value = new Vector3(10.3f, 0.2f, 20f);
+        const float within = 0.2f;
 
         [Test]
         public void SyncVarIsBitPacked()
