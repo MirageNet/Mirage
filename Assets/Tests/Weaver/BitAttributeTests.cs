@@ -239,5 +239,35 @@ namespace Mirage.Tests.Weaver
             HasError("BitCount should be below 20",
                "UnityEngine.Quaternion BitAttributeTests.QuaternionPackInvalid.MyBehaviour::value4");
         }
+
+        [Test]
+        public void VarInt()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void VarIntInvalid()
+        {
+            HasErrorCount(1);
+
+            HasError("BitCount can not be above target type size, bitCount:9, max size:8, type:Byte",
+                "System.Byte BitAttributeTests.VarIntInvalid.MyBehaviour::value1");
+        }
+
+        [Test]
+        public void VarIntBlocks()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void VarIntBlocksInvalid()
+        {
+            HasErrorCount(1);
+
+            HasError("BitCount can not be above target type size, bitCount:9, max size:8, type:Byte",
+                "System.Byte BitAttributeTests.VarIntBlocksInvalid.MyBehaviour::value1");
+        }
     }
 }

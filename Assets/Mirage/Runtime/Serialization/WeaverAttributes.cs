@@ -101,15 +101,10 @@ namespace Mirage.Serialization
     /// <para>Only works with interager fields (byte, int, ulong, enums etc)</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
-    public class VariableIntAttribute : Attribute
+    public class VarIntAttribute : Attribute
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="smallBits"></param>
-        /// <param name="mediumBits"></param>
-        /// <param name="largeBits"></param>
-        public VariableIntAttribute(int smallBits, int mediumBits, int? largeBits) { }
+        public VarIntAttribute(int smallMax, int mediumMax) { }
+        public VarIntAttribute(int smallMax, int mediumMax, int largeMax) { }
     }
 
 
@@ -119,7 +114,7 @@ namespace Mirage.Serialization
     /// <para>Only works with interager fields (byte, int, ulong, enums etc)</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
-    public class VariableIntBlocksAttribute : Attribute
+    public class VarIntBlocksAttribute : Attribute
     {
         /// <summary>
         /// Bit size of each block
@@ -131,7 +126,7 @@ namespace Mirage.Serialization
         /// 
         /// </summary>
         /// <param name="blockSize">Value should be between 1 and 64</param>
-        public VariableIntBlocksAttribute(int blockSize) { }
+        public VarIntBlocksAttribute(int blockSize) { }
     }
 #pragma warning restore IDE0060 // Remove unused parameter
 }
