@@ -1,5 +1,5 @@
 *work in progress*
-# Quaternion PacK
+# Quaternion Pack
 
 ### Quaternion Rules
 
