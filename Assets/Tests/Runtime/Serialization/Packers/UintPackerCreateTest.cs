@@ -16,7 +16,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [TestCase(5_000_000ul, 500ul, 100000ul, ExpectedResult = 64 + 2)]
         public int CreatesUsing2Values(ulong inValue, ulong smallValue, ulong mediumValue)
         {
-            var packer = new VariableIntPacker(smallValue, mediumValue);
+            var packer = new VarIntPacker(smallValue, mediumValue);
             packer.PackUlong(writer, inValue);
             return writer.BitPosition;
         }
@@ -33,7 +33,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [TestCase(5_000_000ul, 500ul, 100_000ul, 50_000_000ul, ExpectedResult = 26 + 2)]
         public int CreatesUsing3Values(ulong inValue, ulong smallValue, ulong mediumValue, ulong largeValue)
         {
-            var packer = new VariableIntPacker(smallValue, mediumValue, largeValue);
+            var packer = new VarIntPacker(smallValue, mediumValue, largeValue);
             packer.PackUlong(writer, inValue);
             return writer.BitPosition;
         }
@@ -44,7 +44,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         {
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                _ = VariableIntPacker.FromBitCount(0, 10);
+                _ = VarIntPacker.FromBitCount(0, 10);
             });
             var expected = new ArgumentException("Small value can not be zero", "smallBits");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
@@ -54,7 +54,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         {
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                _ = VariableIntPacker.FromBitCount(6, 5);
+                _ = VarIntPacker.FromBitCount(6, 5);
             });
             var expected = new ArgumentException("Medium value must be greater than small value", "mediumBits");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
@@ -64,7 +64,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         {
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                _ = VariableIntPacker.FromBitCount(4, 10, 8);
+                _ = VarIntPacker.FromBitCount(4, 10, 8);
             });
             var expected = new ArgumentException("Large value must be greater than medium value", "largeBits");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
@@ -74,7 +74,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         {
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                _ = VariableIntPacker.FromBitCount(5, 10, 65);
+                _ = VarIntPacker.FromBitCount(5, 10, 65);
             });
             var expected = new ArgumentException("Large bits must be 64 or less", "largeBits");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
@@ -84,7 +84,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         {
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                _ = VariableIntPacker.FromBitCount(5, 63);
+                _ = VarIntPacker.FromBitCount(5, 63);
             });
             var expected = new ArgumentException("Medium bits must be 62 or less", "mediumBits");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
@@ -93,7 +93,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ThrowsWhenValueIsOverLargeValue()
         {
-            var packer = VariableIntPacker.FromBitCount(1, 2, 3, true);
+            var packer = VarIntPacker.FromBitCount(1, 2, 3, true);
             ArgumentOutOfRangeException exception1 = Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 packer.PackUlong(writer, 20);
@@ -119,7 +119,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         public void WritesMaxIfOverLargeValue(ulong inValue, int largeBits)
         {
             ulong max = BitMask.Mask(largeBits);
-            var packer = VariableIntPacker.FromBitCount(1, 2, largeBits, false);
+            var packer = VarIntPacker.FromBitCount(1, 2, largeBits, false);
             Assert.DoesNotThrow(() =>
             {
                 packer.PackUlong(writer, inValue);

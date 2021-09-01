@@ -27,7 +27,7 @@ using System.Runtime.CompilerServices;
 
 namespace Mirage.Serialization
 {
-    public sealed class VariableIntPacker
+    public sealed class VarIntPacker
     {
         // todo needs doc comments
         // todo need attribute to validate large bits based on pack type (eg if packing ushort, make sure largebits is 16 or less)
@@ -42,17 +42,17 @@ namespace Mirage.Serialization
 
         readonly bool throwIfOverLarge;
 
-        public VariableIntPacker(ulong smallValue, ulong mediumValue)
+        public VarIntPacker(ulong smallValue, ulong mediumValue)
             : this(BitHelper.BitCount(smallValue), BitHelper.BitCount(mediumValue), 64, false) { }
-        public VariableIntPacker(ulong smallValue, ulong mediumValue, ulong largeValue, bool throwIfOverLarge = true)
+        public VarIntPacker(ulong smallValue, ulong mediumValue, ulong largeValue, bool throwIfOverLarge = true)
             : this(BitHelper.BitCount(smallValue), BitHelper.BitCount(mediumValue), BitHelper.BitCount(largeValue), throwIfOverLarge) { }
 
-        public static VariableIntPacker FromBitCount(int smallBits, int mediumBits)
+        public static VarIntPacker FromBitCount(int smallBits, int mediumBits)
             => FromBitCount(smallBits, mediumBits, 64, false);
-        public static VariableIntPacker FromBitCount(int smallBits, int mediumBits, int largeBits, bool throwIfOverLarge = true)
-            => new VariableIntPacker(smallBits, mediumBits, largeBits, throwIfOverLarge);
+        public static VarIntPacker FromBitCount(int smallBits, int mediumBits, int largeBits, bool throwIfOverLarge = true)
+            => new VarIntPacker(smallBits, mediumBits, largeBits, throwIfOverLarge);
 
-        private VariableIntPacker(int smallBits, int mediumBits, int largeBits, bool throwIfOverLarge)
+        private VarIntPacker(int smallBits, int mediumBits, int largeBits, bool throwIfOverLarge)
         {
             this.throwIfOverLarge = throwIfOverLarge;
             if (smallBits == 0) throw new ArgumentException("Small value can not be zero", nameof(smallBits));
