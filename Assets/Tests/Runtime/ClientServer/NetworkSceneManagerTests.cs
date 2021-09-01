@@ -25,7 +25,20 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         public override void ExtraTearDown()
         {
+            UnloadAdditiveScenes();
+
             bundle.Unload(true);
+        }
+
+        private static void UnloadAdditiveScenes()
+        {
+            Scene active = SceneManager.GetActiveScene();
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+                if (active == scene) { continue; }
+                SceneManager.UnloadSceneAsync(scene);
+            }
         }
 
         [Test]
