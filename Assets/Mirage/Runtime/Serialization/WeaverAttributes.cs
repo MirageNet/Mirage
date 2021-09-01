@@ -101,24 +101,37 @@ namespace Mirage.Serialization
     /// <para>Only works with interager fields (byte, int, ulong, enums etc)</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
-    // todo update this
-    public class VariableIntSizeAttribute : Attribute
+    public class VariableIntAttribute : Attribute
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="smallBits"></param>
+        /// <param name="mediumBits"></param>
+        /// <param name="largeBits"></param>
+        public VariableIntAttribute(int smallBits, int mediumBits, int? largeBits) { }
+    }
+
+
+
+    /// <summary>
+    /// Tells weaver how many bits to sue for field
+    /// <para>Only works with interager fields (byte, int, ulong, enums etc)</para>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    public class VariableIntBlocksAttribute : Attribute
     {
         /// <summary>
         /// Bit size of each block
         /// <para>how many bits per size bits,</para>
         /// <para>eg if size = 6 then values under 2^6 will be sent at 7 bits, values under 2^12 sent as 14 bits, etc</para>
         /// </summary>
-        public int BlockSize { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="blockSize">Value should be between 1 and 64</param>
-        public VariableIntSizeAttribute(int blockSize)
-        {
-            BlockSize = blockSize;
-        }
+        public VariableIntBlocksAttribute(int blockSize) { }
     }
 #pragma warning restore IDE0060 // Remove unused parameter
 }
