@@ -1,3 +1,15 @@
+# [102.0.0](https://github.com/MirageNet/Mirage/compare/v101.10.0...v102.0.0) (2021-09-02)
+
+
+### Features
+
+* new improved scene manager  ([#892](https://github.com/MirageNet/Mirage/issues/892)) ([2a9bdec](https://github.com/MirageNet/Mirage/commit/2a9bdec6887bc67e7f53bb46f13592607b5c72b8))
+
+
+### BREAKING CHANGES
+
+* NetworkSceneManager has been re-written, many events and methods now have new names.
+
 # [101.10.0](https://github.com/MirageNet/Mirage/compare/v101.9.2...v101.10.0) (2021-08-31)
 
 
