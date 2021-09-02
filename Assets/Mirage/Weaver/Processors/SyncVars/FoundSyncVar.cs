@@ -116,6 +116,7 @@ namespace Mirage.Weaver.SyncVars
             return false;
         }
 
+        bool HasIntAttribute => BitCount.HasValue || VarIntSettings.HasValue || BlockCount.HasValue || BitCountMinValue.HasValue;
 
         /// <summary>
         /// Finds any attribute values needed for this syncvar
@@ -128,16 +129,31 @@ namespace Mirage.Weaver.SyncVars
             HasHookMethod = HookMethod != null;
 
             (BitCount, BitCountConvert) = BitCountFinder.GetBitCount(FieldDefinition);
-            VarIntSettings = VarIntFinder.GetBitCount(FieldDefinition);
+            if (FieldDefinition.HasCustomAttribute<VarIntAttribute>())
+            {
+                if (HasIntAttribute)
+                    throw new VarIntException($"[VarInt] can't be used with [BitCount], [VarIntBlocks] or [BitCountFromRange]", FieldDefinition);
+
+                VarIntSettings = VarIntFinder.GetBitCount(FieldDefinition);
+            }
 
             if (FieldDefinition.HasCustomAttribute<VarIntBlocksAttribute>())
+            {
+                if (HasIntAttribute)
+                    throw new VarIntBlocksException($"[VarIntBlocks] can't be used with [BitCount], [VarInt] or [BitCountFromRange]", FieldDefinition);
+
                 (BlockCount, BitCountConvert) = VarIntBlocksFinder.GetBitCount(FieldDefinition);
+            }
+
+            if (FieldDefinition.HasCustomAttribute<BitCountFromRangeAttribute>())
+            {
+                if (HasIntAttribute)
+                    throw new BitCountFromRangeException($"[BitCountFromRange] can't be used with [BitCount], [VarInt] or [VarIntBlocks]", FieldDefinition);
+
+                (BitCount, BitCountConvert, BitCountMinValue) = BitCountFromRangeFinder.GetBitFoundFromRange(FieldDefinition);
+            }
 
             UseZigZagEncoding = ZigZagFinder.HasZigZag(FieldDefinition, BitCount.HasValue);
-
-            // do this if check here so it doesn't override fields unless attribute exists
-            if (FieldDefinition.HasCustomAttribute<BitCountFromRangeAttribute>())
-                (BitCount, BitCountConvert, BitCountMinValue) = BitCountFromRangeFinder.GetBitFoundFromRange(FieldDefinition, BitCount.HasValue);
 
             FloatPackSettings = FloatPackFinder.GetPackerSettings(FieldDefinition);
             Vector2PackSettings = Vector2Finder.GetPackerSettings(FieldDefinition);

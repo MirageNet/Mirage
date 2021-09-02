@@ -17,7 +17,7 @@ namespace Mirage.Weaver.SyncVars
             if (bitCount <= 0)
                 throw new BitCountException("BitCount should be above 0", syncVar);
 
-            int maxSize = BitPackHelper.GetTypeMaxSize(syncVar.FieldType, syncVar);
+            int maxSize = BitPackHelper.GetTypeMaxSize(syncVar.FieldType, syncVar, "BitCount");
 
             if (bitCount > maxSize)
                 throw new BitCountException($"BitCount can not be above target type size, bitCount:{bitCount}, max size:{maxSize}, type:{syncVar.FieldType.Name}", syncVar);

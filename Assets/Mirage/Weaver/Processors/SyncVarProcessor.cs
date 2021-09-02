@@ -687,6 +687,9 @@ namespace Mirage.Weaver
             }
             void WritePacker(MethodReference packMethod)
             {
+                // if PackerField is null it means there was an error earlier, so we dont need to do anything here
+                if (syncVar.PackerField == null) { return; }
+
                 // Generates: packer.pack(writer, field)
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldfld, syncVar.PackerField.MakeHostGenericIfNeeded()));
@@ -914,6 +917,9 @@ namespace Mirage.Weaver
             }
             void ReadPacker(MethodReference unpackMethod)
             {
+                // if PackerField is null it means there was an error earlier, so we dont need to do anything here
+                if (syncVar.PackerField == null) { return; }
+
                 // Generates: ... = packer.unpack(reader)
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldfld, syncVar.PackerField.MakeHostGenericIfNeeded()));

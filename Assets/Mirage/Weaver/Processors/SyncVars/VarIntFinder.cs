@@ -29,21 +29,21 @@ namespace Mirage.Weaver.SyncVars
 
             if (settings.small <= 0)
                 throw new VarIntException("Small value should be greater than 0", syncVar);
-            if (settings.medium <= 1)
-                throw new VarIntException("Medium value should be greater than 1", syncVar);
-            if (settings.large.HasValue && settings.large.Value <= 2)
-                throw new VarIntException("Medium value should be greater than 2", syncVar);
+            if (settings.medium <= 0)
+                throw new VarIntException("Medium value should be greater than 0", syncVar);
+            if (settings.large.HasValue && settings.large.Value <= 0)
+                throw new VarIntException("Large value should be greater than 0", syncVar);
 
             int smallBits = BitPackHelper.GetBitCount(settings.small, 64);
             int mediumBits = BitPackHelper.GetBitCount(settings.medium, 64);
             int? largeBits = settings.large.HasValue ? BitPackHelper.GetBitCount(settings.large.Value, 64) : default(int?);
 
-            if (smallBits > mediumBits)
+            if (smallBits >= mediumBits)
                 throw new VarIntException("The small bit count should be less than medium bit count", syncVar);
-            if (largeBits.HasValue && mediumBits > largeBits.Value)
+            if (largeBits.HasValue && mediumBits >= largeBits.Value)
                 throw new VarIntException("The medium bit count should be less than large bit count", syncVar);
 
-            int maxBits = BitPackHelper.GetTypeMaxSize(syncVar.FieldType, syncVar);
+            int maxBits = BitPackHelper.GetTypeMaxSize(syncVar.FieldType, syncVar, "VarInt");
 
             if (smallBits > maxBits)
                 throw new VarIntException($"Small bit count can not be above target type size, bitCount:{smallBits}, max size:{maxBits}, type:{syncVar.FieldType.Name}", syncVar);

@@ -94,7 +94,7 @@ namespace Mirage.Tests.Weaver
             HasError("Max must be greater than min",
                 "System.Int32 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value2");
 
-            HasError("[BitCountFromRange] can't be used with [BitCount]",
+            HasError("[BitCountFromRange] can't be used with [BitCount], [VarInt] or [VarIntBlocks]",
                 "System.Int32 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value3");
 
             HasError($"Max must be greater than types max value, max:{300}, max allowed:{byte.MaxValue}, type:Byte",
@@ -249,10 +249,39 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void VarIntInvalid()
         {
-            HasErrorCount(1);
+            HasErrorCount(13);
 
-            HasError("BitCount can not be above target type size, bitCount:9, max size:8, type:Byte",
-                "System.Byte BitAttributeTests.VarIntInvalid.MyBehaviour::value1");
+            HasError("System.Single is not a supported type for [VarInt]",
+                "System.Single BitAttributeTests.VarIntInvalid.MyBehaviour::value1");
+            HasError("UnityEngine.Vector3 is not a supported type for [VarInt]",
+                "UnityEngine.Vector3 BitAttributeTests.VarIntInvalid.MyBehaviour::value2");
+
+            HasError("Small value should be greater than 0",
+                "System.Int32 BitAttributeTests.VarIntInvalid.MyBehaviour::value3");
+            HasError("Medium value should be greater than 0",
+                "System.Int32 BitAttributeTests.VarIntInvalid.MyBehaviour::value4");
+            HasError("Large value should be greater than 0",
+                "System.Int32 BitAttributeTests.VarIntInvalid.MyBehaviour::value5");
+
+            HasError("The small bit count should be less than medium bit count",
+                "System.Int32 BitAttributeTests.VarIntInvalid.MyBehaviour::value6");
+            HasError("The medium bit count should be less than large bit count",
+                "System.Int32 BitAttributeTests.VarIntInvalid.MyBehaviour::value7");
+            HasError("The small bit count should be less than medium bit count",
+                "System.Int32 BitAttributeTests.VarIntInvalid.MyBehaviour::value8");
+
+            HasError("Small bit count can not be above target type size, bitCount:9, max size:8, type:Byte",
+                "System.Byte BitAttributeTests.VarIntInvalid.MyBehaviour::value9");
+            HasError("Medium bit count can not be above target type size, bitCount:10, max size:8, type:Byte",
+                "System.Byte BitAttributeTests.VarIntInvalid.MyBehaviour::value10");
+            HasError("Large bit count can not be above target type size, bitCount:10, max size:8, type:Byte",
+                "System.Byte BitAttributeTests.VarIntInvalid.MyBehaviour::value11");
+
+
+            HasError("[VarInt] can't be used with [BitCount], [VarIntBlocks] or [BitCountFromRange]",
+                "System.Int32 BitAttributeTests.VarIntInvalid.MyBehaviour::value12");
+            HasError("[BitCountFromRange] can't be used with [BitCount], [VarInt] or [VarIntBlocks]",
+                "System.Int32 BitAttributeTests.VarIntInvalid.MyBehaviour::value13");
         }
 
         [Test]
@@ -264,10 +293,18 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void VarIntBlocksInvalid()
         {
-            HasErrorCount(1);
+            HasErrorCount(5);
 
-            HasError("BitCount can not be above target type size, bitCount:9, max size:8, type:Byte",
-                "System.Byte BitAttributeTests.VarIntBlocksInvalid.MyBehaviour::value1");
+            HasError("Blocksize should be above 0",
+                "System.Int32 BitAttributeTests.VarIntBlocksInValid.MyBehaviour::value1");
+            HasError("Blocksize should be above 0",
+                "System.Int32 BitAttributeTests.VarIntBlocksInValid.MyBehaviour::value2");
+            HasError("Blocksize should be below 32",
+                "System.Int32 BitAttributeTests.VarIntBlocksInValid.MyBehaviour::value3");
+            HasError("System.Single is not supported for [VarIntBlocks]",
+                "System.Single BitAttributeTests.VarIntBlocksInValid.MyBehaviour::value4");
+            HasError("UnityEngine.Vector3 is not supported for [VarIntBlocks]",
+                "UnityEngine.Vector3 BitAttributeTests.VarIntBlocksInValid.MyBehaviour::value5");
         }
     }
 }

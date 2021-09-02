@@ -21,7 +21,7 @@ namespace Mirage.Weaver.SyncVars
             return bitCount;
         }
 
-        public static int GetTypeMax(TypeReference type, FieldDefinition syncVar)
+        public static int GetTypeMax(TypeReference type, FieldDefinition syncVar, string attributeName)
         {
             if (type.Is<byte>()) return byte.MaxValue;
             if (type.Is<ushort>()) return ushort.MaxValue;
@@ -33,7 +33,7 @@ namespace Mirage.Weaver.SyncVars
             {
                 // use underlying enum type for max size
                 TypeReference enumType = type.Resolve().GetEnumUnderlyingType();
-                return GetTypeMax(enumType, syncVar);
+                return GetTypeMax(enumType, syncVar, attributeName);
             }
 
             // long is not a support type because it is not commonly used and
@@ -44,10 +44,10 @@ namespace Mirage.Weaver.SyncVars
             // we would need a type bigger than long in order to easily handle
             // both of these, and that is before dealing with IL stuff
 
-            throw new BitCountFromRangeException($"{type.FullName} is not a supported type for [BitCountFromRange]", syncVar);
+            throw new BitCountFromRangeException($"{type.FullName} is not a supported type for [{attributeName}]", syncVar);
         }
 
-        public static int GetTypeMin(TypeReference type, FieldDefinition syncVar)
+        public static int GetTypeMin(TypeReference type, FieldDefinition syncVar, string attributeName)
         {
             if (type.Is<byte>()) return byte.MinValue;
             if (type.Is<ushort>()) return ushort.MinValue;
@@ -59,13 +59,13 @@ namespace Mirage.Weaver.SyncVars
             {
                 // use underlying enum type for max size
                 TypeReference enumType = type.Resolve().GetEnumUnderlyingType();
-                return GetTypeMin(enumType, syncVar);
+                return GetTypeMin(enumType, syncVar, attributeName);
             }
 
-            throw new BitCountFromRangeException($"{type.FullName} is not a supported type for [BitCountFromRange]", syncVar);
+            throw new BitCountFromRangeException($"{type.FullName} is not a supported type for [{attributeName}]", syncVar);
         }
 
-        public static int GetTypeMaxSize(TypeReference type, FieldDefinition syncVar)
+        public static int GetTypeMaxSize(TypeReference type, FieldDefinition syncVar, string attributeName)
         {
             if (type.Is<byte>()) return 8;
             if (type.Is<ushort>()) return 16;
@@ -79,10 +79,10 @@ namespace Mirage.Weaver.SyncVars
             {
                 // use underlying enum type for max size
                 TypeReference enumType = type.Resolve().GetEnumUnderlyingType();
-                return GetTypeMaxSize(enumType, syncVar);
+                return GetTypeMaxSize(enumType, syncVar, attributeName);
             }
 
-            throw new BitCountException($"{type.FullName} is not a supported type for [BitCount]", syncVar);
+            throw new BitCountException($"{type.FullName} is not a supported type for [{attributeName}]", syncVar);
         }
 
         /// <summary>
