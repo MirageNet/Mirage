@@ -755,7 +755,7 @@ namespace Mirage
             // one with a ready connection, one with no ready connection, one with null connection
             RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
             comp.observer = Substitute.For<INetworkPlayer>();
-            comp.observer.IsReady.Returns(true);
+            comp.observer.SceneIsReady.Returns(true);
 
             // rebuild observers should add all component's ready observers
             identity.RebuildObservers(true);
@@ -770,7 +770,7 @@ namespace Mirage
             // one with a ready connection, one with no ready connection, one with null connection
             RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
             comp.observer = Substitute.For<INetworkPlayer>();
-            comp.observer.IsReady.Returns(false);
+            comp.observer.SceneIsReady.Returns(false);
 
             // rebuild observers should add all component's ready observers
             identity.RebuildObservers(true);
@@ -781,9 +781,9 @@ namespace Mirage
         public void RebuildObserversAddsReadyServerConnectionsIfNotImplemented()
         {
             INetworkPlayer readyConnection = Substitute.For<INetworkPlayer>();
-            readyConnection.IsReady.Returns(true);
+            readyConnection.SceneIsReady.Returns(true);
             INetworkPlayer notReadyConnection = Substitute.For<INetworkPlayer>();
-            notReadyConnection.IsReady.Returns(false);
+            notReadyConnection.SceneIsReady.Returns(false);
 
             // add some server connections
             server.Players.Add(readyConnection);

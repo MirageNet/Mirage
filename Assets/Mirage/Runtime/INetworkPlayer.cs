@@ -81,6 +81,9 @@ namespace Mirage
 
     public interface ISceneLoader
     {
-        bool IsReady { get; set; }
+        /// <summary>
+        ///     Scene is fully loaded and we now can do things with player.
+        /// </summary>
+        bool SceneIsReady { get; set; }
     }
 }
