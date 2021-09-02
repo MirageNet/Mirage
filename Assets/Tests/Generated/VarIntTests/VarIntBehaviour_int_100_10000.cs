@@ -21,7 +21,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests
         [Test]
         [TestCase(10, 8)]
         [TestCase(100, 8)]
-        [TestCase(1000, 15)]
+        [TestCase(1000, 16)]
 
         public void SyncVarIsBitPacked(int value, int expectedBitCount)
         {

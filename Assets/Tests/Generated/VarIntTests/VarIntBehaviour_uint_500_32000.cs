@@ -19,11 +19,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests
     public class VarIntTest_uint_500_32000 : ClientServerSetup<VarIntBehaviour_uint_500_32000>
     {
         [Test]
-        [TestCase(170, 10)]
-        [TestCase(500, 10)]
-        [TestCase(15000, 17)]
-        [TestCase(50000, 23)]
-        [TestCase(400000, 23)]
+        [TestCase(170U, 10)]
+        [TestCase(500U, 10)]
+        [TestCase(15000U, 17)]
+        [TestCase(50000U, 23)]
+        [TestCase(400000U, 23)]
 
         public void SyncVarIsBitPacked(uint value, int expectedBitCount)
         {

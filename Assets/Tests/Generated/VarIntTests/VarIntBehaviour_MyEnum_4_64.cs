@@ -30,10 +30,10 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests
     public class VarIntTest_MyEnum_4_64 : ClientServerSetup<VarIntBehaviour_MyEnum_4_64>
     {
         [Test]
-        [TestCase((MyEnum)0, 5)]
-        [TestCase((MyEnum)4, 5)]
-        [TestCase((MyEnum)16, 7)]
-        [TestCase((MyEnum)64, 7)]
+        [TestCase((MyEnum)0, 4)]
+        [TestCase((MyEnum)4, 4)]
+        [TestCase((MyEnum)16, 9)]
+        [TestCase((MyEnum)64, 9)]
 
         public void SyncVarIsBitPacked(MyEnum value, int expectedBitCount)
         {

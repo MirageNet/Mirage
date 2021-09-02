@@ -11,18 +11,18 @@ using UnityEngine.TestTools;
 namespace Mirage.Tests.Runtime.Generated.VarIntTests
 {
     
-    public class VarIntBehaviour_uint_256_64000 : NetworkBehaviour
+    public class VarIntBehaviour_uint_255_64000 : NetworkBehaviour
     {
-        [VarInt(256, 64000)]
+        [VarInt(255, 64000)]
         [SyncVar] public uint myValue;
     }
-    public class VarIntTest_uint_256_64000 : ClientServerSetup<VarIntBehaviour_uint_256_64000>
+    public class VarIntTest_uint_255_64000 : ClientServerSetup<VarIntBehaviour_uint_255_64000>
     {
         [Test]
-        [TestCase(170, 9)]
-        [TestCase(500, 17)]
-        [TestCase(15000, 17)]
-        [TestCase(50000, 17)]
+        [TestCase(170U, 9)]
+        [TestCase(500U, 18)]
+        [TestCase(15000U, 18)]
+        [TestCase(50000U, 18)]
 
         public void SyncVarIsBitPacked(uint value, int expectedBitCount)
         {
