@@ -103,8 +103,8 @@ namespace Mirage.Serialization
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
     public class VarIntAttribute : Attribute
     {
-        public VarIntAttribute(int smallMax, int mediumMax) { }
-        public VarIntAttribute(int smallMax, int mediumMax, int largeMax) { }
+        public VarIntAttribute(ulong smallMax, ulong mediumMax) { }
+        public VarIntAttribute(ulong smallMax, ulong mediumMax, ulong largeMax, bool throwIfOverLarge = true) { }
     }
 
 

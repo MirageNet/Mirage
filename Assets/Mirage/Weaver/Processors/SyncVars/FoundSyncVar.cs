@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using Mirage.Serialization;
 using Mono.Cecil;
@@ -6,6 +7,15 @@ using UnityEngine;
 
 namespace Mirage.Weaver.SyncVars
 {
+    internal struct VarIntSettings
+    {
+        public ulong small;
+        public ulong medium;
+        public ulong? large;
+        public bool throwIfOverLarge;
+        public LambdaExpression packMethod;
+        public LambdaExpression unpackMethod;
+    }
     internal struct FloatPackSettings
     {
         public float max;
@@ -46,6 +56,8 @@ namespace Mirage.Weaver.SyncVars
         public MethodDefinition HookMethod { get; private set; }
 
         public int? BitCount { get; private set; }
+        public VarIntSettings? VarIntSettings { get; private set; }
+        public int? BlockCount { get; private set; }
         public OpCode? BitCountConvert { get; private set; }
 
         public bool UseZigZagEncoding { get; private set; }
@@ -116,6 +128,11 @@ namespace Mirage.Weaver.SyncVars
             HasHookMethod = HookMethod != null;
 
             (BitCount, BitCountConvert) = BitCountFinder.GetBitCount(FieldDefinition);
+            VarIntSettings = VarIntFinder.GetBitCount(FieldDefinition);
+
+            if (FieldDefinition.HasCustomAttribute<VarIntBlocksAttribute>())
+                (BlockCount, BitCountConvert) = VarIntBlocksFinder.GetBitCount(FieldDefinition);
+
             UseZigZagEncoding = ZigZagFinder.HasZigZag(FieldDefinition, BitCount.HasValue);
 
             // do this if check here so it doesn't override fields unless attribute exists
