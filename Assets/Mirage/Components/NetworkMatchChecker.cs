@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Mirage.InterestManagement;
 using UnityEngine;
 
 namespace Mirage
@@ -20,10 +21,7 @@ namespace Mirage
         Guid currentMatch = Guid.Empty;
 
         [Header("Diagnostics")]
-        [SyncVar]
         public string currentMatchDebug;
-
-        public NetworkIdentity Identity => GetComponent<NetworkIdentity>();
 
         /// <summary>
         /// Set this to the same value on all networked objects that belong to a given match
@@ -46,10 +44,9 @@ namespace Mirage
                 if (previousMatch != Guid.Empty)
                 {
                     // Remove this object from the hashset of the match it just left
-                    matchPlayers[previousMatch].Remove(Identity);
+                    //TODO Implement.
 
                     // RebuildObservers of all NetworkIdentity's in the match this object just left
-                    RebuildMatchObservers(previousMatch);
                 }
 
                 if (currentMatch != Guid.Empty)
@@ -59,79 +56,47 @@ namespace Mirage
                         matchPlayers.Add(currentMatch, new HashSet<NetworkIdentity>());
 
                     // Add this object to the hashset of the new match
-                    matchPlayers[currentMatch].Add(Identity);
+                    //TODO Implement.
 
                     // RebuildObservers of all NetworkIdentity's in the match this object just entered
-                    RebuildMatchObservers(currentMatch);
-                }
-                else
-                {
-                    // Not in any match now...RebuildObservers will clear and add self
-                    Identity.RebuildObservers(false);
+                    //TODO Implement.
                 }
             }
         }
 
-        public void Awake()
-        {
-            Identity.OnStartServer.AddListener(OnStartServer);
-        }
-
-        public void OnStartServer()
-        {
-            if (currentMatch == Guid.Empty) return;
-
-            if (!matchPlayers.ContainsKey(currentMatch))
-                matchPlayers.Add(currentMatch, new HashSet<NetworkIdentity>());
-
-            matchPlayers[currentMatch].Add(Identity);
-
-            // No need to rebuild anything here.
-            // identity.RebuildObservers is called right after this from NetworkServer.SpawnObject
-        }
-
-        void RebuildMatchObservers(Guid specificMatch)
-        {
-            foreach (NetworkIdentity networkIdentity in matchPlayers[specificMatch])
-                if (networkIdentity != null)
-                    networkIdentity.RebuildObservers(false);
-        }
-
-        #region Observers
+        #region Overrides of BaseNetworkVisibility
 
         /// <summary>
-        /// Callback used by the visibility system to determine if an observer (player) can see this object.
-        /// <para>If this function returns true, the network connection will be added as an observer.</para>
+        ///    Invoke when an object spawns on server.
         /// </summary>
-        /// <param name="player">Network connection of a player.</param>
-        /// <returns>True if the player can see this object.</returns>
-        public override bool OnCheckObserver(INetworkPlayer player)
+        /// <param name="identity">The identity of the object that has spawned in.</param>
+        public override void OnSpawned(NetworkIdentity identity)
         {
-            // Not Visible if not in a match
-            if (MatchId == Guid.Empty)
-                return false;
+            foreach (INetworkPlayer player in InterestManager.ServerObjectManager.Server.Players)
+            {
+                NetworkMatchChecker networkMatchChecker = player.Identity.GetComponent<NetworkMatchChecker>();
 
-            NetworkMatchChecker networkMatchChecker = player.Identity.GetComponent<NetworkMatchChecker>();
+                if (networkMatchChecker == null)
+                    continue;
 
-            if (networkMatchChecker == null)
-                return false;
+                if (networkMatchChecker.MatchId == MatchId) continue;
 
-            return networkMatchChecker.MatchId == MatchId;
+                if (!matchPlayers.ContainsKey(currentMatch))
+                    matchPlayers.Add(currentMatch, new HashSet<NetworkIdentity>());
+
+                matchPlayers[currentMatch].Add(identity);
+            }
         }
 
         /// <summary>
-        /// Callback used by the visibility system to (re)construct the set of observers that can see this object.
-        /// <para>Implementations of this callback should add network connections of players that can see this object to the observers set.</para>
+        ///     
         /// </summary>
-        /// <param name="observers">The new set of observers for this object.</param>
-        /// <param name="initialize">True if the set of observers is being built for the first time.</param>
-        public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
+        /// <param name="identity"></param>
+        /// <param name="position"></param>
+        /// <param name="players"></param>
+        public override void CheckForObservers(NetworkIdentity identity, Vector3 position, out HashSet<INetworkPlayer> players)
         {
-            if (currentMatch == Guid.Empty) return;
-
-            foreach (NetworkIdentity networkIdentity in matchPlayers[currentMatch])
-                if (networkIdentity != null && networkIdentity.ConnectionToClient != null)
-                    observers.Add(networkIdentity.ConnectionToClient);
+            throw new NotImplementedException();
         }
 
         #endregion

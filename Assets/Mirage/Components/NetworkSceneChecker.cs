@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Mirage.InterestManagement;
 using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -23,96 +24,74 @@ namespace Mirage
         /// <para>If this object is a player object, it will not be hidden for that client.</para>
         /// </summary>
         [Tooltip("Enable to force this object to be hidden from all observers.")]
-        public bool forceHidden;
+        public bool ForceHidden;
 
         // Use Scene instead of string scene.name because when additively loading multiples of a subscene the name won't be unique
-        static readonly Dictionary<Scene, HashSet<NetworkIdentity>> sceneCheckerObjects = new Dictionary<Scene, HashSet<NetworkIdentity>>();
+        static readonly Dictionary<Scene, HashSet<NetworkIdentity>> SceneCheckerObjects = new Dictionary<Scene, HashSet<NetworkIdentity>>();
 
-        Scene currentScene;
+        #region Overrides of BaseNetworkVisibility
 
-        [Server(error = false)]
-        void Awake()
+        /// <summary>
+        ///    Invoke when an object spawns on server.
+        /// </summary>
+        /// <param name="identity">The identity of the object that has spawned in.</param>
+        public override void OnSpawned(NetworkIdentity identity)
         {
-            currentScene = gameObject.scene;
-            if (logger.LogEnabled()) logger.Log($"NetworkSceneChecker.Awake currentScene: {currentScene}");
+            foreach (INetworkPlayer player in InterestManager.ServerObjectManager.Server.Players)
+            {
+                if(player.Identity.gameObject.scene != identity.gameObject.scene) continue;
 
-            OnStartServer();
-        }
+                if (!SceneCheckerObjects.ContainsKey(identity.gameObject.scene))
+                    SceneCheckerObjects.Add(identity.gameObject.scene, new HashSet<NetworkIdentity>());
 
-        public void OnStartServer()
-        {
-            if (!sceneCheckerObjects.ContainsKey(currentScene))
-                sceneCheckerObjects.Add(currentScene, new HashSet<NetworkIdentity>());
+                SceneCheckerObjects[identity.gameObject.scene].Add(identity);
 
-            sceneCheckerObjects[currentScene].Add(NetIdentity);
-        }
-
-        [Server(error = false)]
-        void Update()
-        {
-            if (currentScene == gameObject.scene)
-                return;
-
-            // This object is in a new scene so observers in the prior scene
-            // and the new scene need to rebuild their respective observers lists.
-
-            // Remove this object from the hashset of the scene it just left
-            sceneCheckerObjects[currentScene].Remove(NetIdentity);
-
-            // RebuildObservers of all NetworkIdentity's in the scene this object just left
-            RebuildSceneObservers();
-
-            // Set this to the new scene this object just entered
-            currentScene = gameObject.scene;
-
-            // Make sure this new scene is in the dictionary
-            if (!sceneCheckerObjects.ContainsKey(currentScene))
-                sceneCheckerObjects.Add(currentScene, new HashSet<NetworkIdentity>());
-
-            // Add this object to the hashset of the new scene
-            sceneCheckerObjects[currentScene].Add(NetIdentity);
-
-            // RebuildObservers of all NetworkIdentity's in the scene this object just entered
-            RebuildSceneObservers();
-        }
-
-        void RebuildSceneObservers()
-        {
-            foreach (NetworkIdentity networkIdentity in sceneCheckerObjects[currentScene])
-                if (networkIdentity != null)
-                    networkIdentity.RebuildObservers(false);
+                InterestManager.ServerObjectManager.ShowForConnection(identity, player);
+            }
         }
 
         /// <summary>
-        /// Callback used by the visibility system to determine if an observer (player) can see this object.
-        /// <para>If this function returns true, the network connection will be added as an observer.</para>
+        ///     
         /// </summary>
-        /// <param name="player">Network connection of a player.</param>
-        /// <returns>True if the player can see this object.</returns>
-        public override bool OnCheckObserver(INetworkPlayer player)
+        /// <param name="identity"></param>
+        /// <param name="position"></param>
+        /// <param name="players"></param>
+        public override void CheckForObservers(NetworkIdentity identity, Vector3 position, out HashSet<INetworkPlayer> players)
         {
-            if (forceHidden)
-                return false;
+            players = new HashSet<INetworkPlayer>();
 
-            return player.Identity.gameObject.scene == gameObject.scene;
-        }
-
-        /// <summary>
-        /// Callback used by the visibility system to (re)construct the set of observers that can see this object.
-        /// <para>Implementations of this callback should add network connections of players that can see this object to the observers set.</para>
-        /// </summary>
-        /// <param name="observers">The new set of observers for this object.</param>
-        /// <param name="initialize">True if the set of observers is being built for the first time.</param>
-        public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
-        {
-            // If forceHidden then return without adding any observers.
-            if (forceHidden)
+            // if force hidden then return without adding any observers.
+            if (ForceHidden)
                 return;
 
-            // Add everything in the hashset for this object's current scene
-            foreach (NetworkIdentity networkIdentity in sceneCheckerObjects[currentScene])
-                if (networkIdentity != null && networkIdentity.ConnectionToClient != null)
-                    observers.Add(networkIdentity.ConnectionToClient);
+            foreach (INetworkPlayer player in InterestManager.ServerObjectManager.Server.Players)
+            {
+                if (player.Identity.gameObject.scene == identity.gameObject.scene)
+                {
+                    if (!SceneCheckerObjects.ContainsKey(identity.gameObject.scene)) continue;
+
+                    if (SceneCheckerObjects[identity.gameObject.scene].Contains(player.Identity))
+                    {
+                        players.Add(player);
+                    }
+                    else
+                    {
+                        SceneCheckerObjects[identity.gameObject.scene].Add(player.Identity);
+                        players.Add(player);
+                    }
+                }
+                else
+                {
+                    if (SceneCheckerObjects.ContainsKey(identity.gameObject.scene))
+                    {
+                        SceneCheckerObjects[identity.gameObject.scene].Remove(identity);
+                    }
+
+                    InterestManager.ServerObjectManager.HideForConnection(identity, player);
+                }
+            }
         }
+
+        #endregion
     }
 }

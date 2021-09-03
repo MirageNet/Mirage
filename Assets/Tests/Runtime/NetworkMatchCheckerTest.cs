@@ -102,11 +102,11 @@ namespace Mirage.Tests.Runtime
             SetMatchId(player1MatchChecker, new Guid(guid));
             SetMatchId(player2MatchChecker, new Guid(guid));
 
-            bool player1Visable = player1MatchChecker.OnCheckObserver(player1Connection);
-            Assert.IsTrue(player1Visable);
+            player1MatchChecker.CheckForObservers(player1Connection.Identity, Vector3.zero, out var players1);
+            Assert.IsTrue(players1 != null);
 
-            bool player2Visable = player1MatchChecker.OnCheckObserver(player2Connection);
-            Assert.IsTrue(player2Visable);
+            player1MatchChecker.CheckForObservers(player2Connection.Identity, Vector3.zero, out var players2);
+            Assert.IsTrue(players2 != null);
         }
 
         [Test]
@@ -118,18 +118,18 @@ namespace Mirage.Tests.Runtime
             SetMatchId(player1MatchChecker, new Guid(guid1));
             SetMatchId(player2MatchChecker, new Guid(guid2));
 
-            bool player1VisableToPlayer1 = player1MatchChecker.OnCheckObserver(player1Connection);
-            Assert.IsTrue(player1VisableToPlayer1);
+            player1MatchChecker.CheckForObservers(player1Connection.Identity, Vector3.zero,  out var players1);
+            Assert.IsTrue(players1 != null);
 
-            bool player2VisableToPlayer1 = player1MatchChecker.OnCheckObserver(player2Connection);
-            Assert.IsFalse(player2VisableToPlayer1);
+            player1MatchChecker.CheckForObservers(player2Connection.Identity, Vector3.zero, out var players2);
+            Assert.IsFalse(players2 == null);
 
 
-            bool player1VisableToPlayer2 = player2MatchChecker.OnCheckObserver(player1Connection);
-            Assert.IsFalse(player1VisableToPlayer2);
+            player2MatchChecker.CheckForObservers(player1Connection.Identity, Vector3.zero, out var players3);
+            Assert.IsFalse(players3 == null);
 
-            bool player2VisableToPlayer2 = player2MatchChecker.OnCheckObserver(player2Connection);
-            Assert.IsTrue(player2VisableToPlayer2);
+            player2MatchChecker.CheckForObservers(player2Connection.Identity, Vector3.zero, out var players4);
+            Assert.IsTrue(players4 != null);
         }
 
         [Test]
@@ -139,8 +139,8 @@ namespace Mirage.Tests.Runtime
 
             SetMatchId(player1MatchChecker, new Guid(guid));
 
-            bool player3Visable = player1MatchChecker.OnCheckObserver(player3Connection);
-            Assert.IsFalse(player3Visable);
+            player1MatchChecker.CheckForObservers(player3Connection.Identity, Vector3.zero, out var players);
+            Assert.IsFalse(players == null);
         }
 
         [Test]
@@ -151,63 +151,11 @@ namespace Mirage.Tests.Runtime
             SetMatchId(player1MatchChecker, new Guid(guid));
             SetMatchId(player2MatchChecker, new Guid(guid));
 
-            bool player1Visable = player1MatchChecker.OnCheckObserver(player1Connection);
-            Assert.IsFalse(player1Visable);
+            player1MatchChecker.CheckForObservers(player1Connection.Identity, Vector3.zero, out var players1);
+            Assert.IsFalse(players1 == null);
 
-            bool player2Visable = player1MatchChecker.OnCheckObserver(player2Connection);
-            Assert.IsFalse(player2Visable);
-        }
-
-        [Test]
-        public void SettingMatchIdShouldRebuildObservers()
-        {
-            string guidMatch1 = Guid.NewGuid().ToString();
-
-            // make players join same match
-            player1MatchChecker.MatchId = new Guid(guidMatch1);
-            player2MatchChecker.MatchId = new Guid(guidMatch1);
-
-            // check player1's observers contains player 2
-            Assert.That(player1MatchChecker.Identity.observers, Contains.Item(player2MatchChecker.ConnectionToClient));
-            // check player2's observers contains player 1
-            Assert.That(player2MatchChecker.Identity.observers, Contains.Item(player1MatchChecker.ConnectionToClient));
-        }
-
-        [Test]
-        public void ChangingMatchIdShouldRebuildObservers()
-        {
-            string guidMatch1 = Guid.NewGuid().ToString();
-            string guidMatch2 = Guid.NewGuid().ToString();
-
-            // make players join same match
-            player1MatchChecker.MatchId = new Guid(guidMatch1);
-            player2MatchChecker.MatchId = new Guid(guidMatch1);
-
-            // make player2 join different match
-            player2MatchChecker.MatchId = new Guid(guidMatch2);
-
-            // check player1's observers does NOT contain player 2
-            Assert.That(player1MatchChecker.Identity.observers, !Contains.Item(player2MatchChecker.ConnectionToClient));
-            // check player2's observers does NOT contain player 1
-            Assert.That(player2MatchChecker.Identity.observers, !Contains.Item(player1MatchChecker.ConnectionToClient));
-        }
-
-        [Test]
-        public void ClearingMatchIdShouldRebuildObservers()
-        {
-            string guidMatch1 = Guid.NewGuid().ToString();
-
-            // make players join same match
-            player1MatchChecker.MatchId = new Guid(guidMatch1);
-            player2MatchChecker.MatchId = new Guid(guidMatch1);
-
-            // make player 2 leave match
-            player2MatchChecker.MatchId = Guid.Empty;
-
-            // check player1's observers does NOT contain player 2
-            Assert.That(player1MatchChecker.Identity.observers, !Contains.Item(player2MatchChecker.ConnectionToClient));
-            // check player2's observers does NOT contain player 1
-            Assert.That(player2MatchChecker.Identity.observers, !Contains.Item(player1MatchChecker.ConnectionToClient));
+            player1MatchChecker.CheckForObservers(player2Connection.Identity, Vector3.zero, out var players2);
+            Assert.IsFalse(players2 == null);
         }
     }
 }

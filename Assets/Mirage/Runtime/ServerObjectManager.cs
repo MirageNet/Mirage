@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Mirage.InterestManagement;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
@@ -49,6 +50,8 @@ namespace Mirage
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => checked(nextNetworkId++);
 
+        public InterestManager InterestManager { get; private set; }
+
         public void Start()
         {
             if (Server != null)
@@ -75,6 +78,8 @@ namespace Mirage
         {
             RegisterMessageHandlers();
             SpawnOrActivate();
+
+            InterestManager = new InterestManager(this);
         }
 
         void OnServerStopped()
@@ -89,6 +94,8 @@ namespace Mirage
             Server.World.ClearSpawnedObjects();
             // reset so ids stay small in each session
             nextNetworkId = 1;
+
+            InterestManager = null;
         }
 
         void OnServerChangeScene(string scenePath, SceneOperation sceneOperation)
@@ -201,47 +208,12 @@ namespace Mirage
                 Server.LocalClient.Player.Identity = identity;
             }
 
-            // add connection to observers AFTER the playerController was set.
-            // by definition, there is nothing to observe if there is no player
-            // controller.
-            //
-            // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
-            SpawnObserversForConnection(player);
-
             if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.AssetId}");
 
             Respawn(identity);
 
             if (!keepAuthority)
                 previousPlayer.RemoveClientAuthority();
-        }
-
-        void SpawnObserversForConnection(INetworkPlayer player)
-        {
-            if (logger.LogEnabled()) logger.Log($"Checking Observers on {Server.World.SpawnedIdentities.Count} objects for player: {player}");
-
-            if (!player.IsReady)
-            {
-                // client needs to finish initializing before we can spawn objects
-                // otherwise it would not find them.
-                return;
-            }
-
-            // add connection to each nearby NetworkIdentity's observers, which
-            // internally sends a spawn message for each one to the connection.
-            foreach (NetworkIdentity identity in Server.World.SpawnedIdentities)
-            {
-                if (identity.gameObject.activeSelf)
-                {
-                    if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.sceneId}");
-
-                    bool visible = identity.OnCheckObserver(player);
-                    if (visible)
-                    {
-                        identity.AddObserver(player);
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -325,13 +297,12 @@ namespace Mirage
             }
         }
 
-        internal void ShowForConnection(NetworkIdentity identity, INetworkPlayer player)
+        public void ShowForConnection(NetworkIdentity identity, INetworkPlayer player)
         {
-            if (player.IsReady)
-                SendSpawnMessage(identity, player);
+            SendSpawnMessage(identity, player);
         }
 
-        internal void HideForConnection(NetworkIdentity identity, INetworkPlayer player)
+        public void HideForConnection(NetworkIdentity identity, INetworkPlayer player)
         {
             player.Send(new ObjectHideMessage { netId = identity.NetId });
         }
@@ -477,8 +448,6 @@ namespace Mirage
             }
 
             if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.NetId + " asset ID " + identity.AssetId);
-
-            identity.RebuildObservers(true);
         }
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
@@ -586,9 +555,13 @@ namespace Mirage
             Server.World.RemoveIdentity(identity);
             identity.ConnectionToClient?.RemoveOwnedObject(identity);
 
-            identity.SendToRemoteObservers(new ObjectDestroyMessage { netId = identity.NetId });
+            if (InterestManager == null)
+                Server.SendToAll(new ObjectDestroyMessage { netId = identity.NetId });
+            else
+            {
+                InterestManager.Send(identity, new ObjectDestroyMessage { netId = identity.NetId });
+            }
 
-            identity.ClearObservers();
             if (Server.LocalClientActive)
             {
                 identity.StopClient();
@@ -666,10 +639,6 @@ namespace Mirage
 
             // set ready
             player.IsReady = true;
-
-            // client is ready to start spawning objects
-            if (player.Identity != null)
-                SpawnObserversForConnection(player);
         }
 
         /// <summary>
@@ -695,7 +664,6 @@ namespace Mirage
             {
                 if (logger.LogEnabled()) logger.Log("PlayerNotReady " + player);
                 player.IsReady = false;
-                player.RemoveObservers();
 
                 player.Send(new NotReadyMessage());
             }
