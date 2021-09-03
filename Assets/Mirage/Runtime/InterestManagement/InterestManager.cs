@@ -161,6 +161,9 @@ namespace Mirage.InterestManagement
         {
             var observers = new IReadOnlyCollection<INetworkPlayer>[_visibilitySystems.Count];
 
+            if (observers.Length == 0)
+                return new IReadOnlyCollection<INetworkPlayer>[] {ServerObjectManager.Server.Players};
+
             for (int i = 0; i < _visibilitySystems.Count; i++)
             {
                 _visibilitySystems[i].CheckForObservers(identity, identity.transform.localPosition, out HashSet<INetworkPlayer> players);

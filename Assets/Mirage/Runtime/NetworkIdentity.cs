@@ -161,16 +161,7 @@ namespace Mirage
         {
             get
             {
-                if (ServerObjectManager == null)
-                    return EmptyList;
-
-                InterestManager interestManager = ServerObjectManager.InterestManager;
-
-                // If we do not have a interest manager then we are expecting this to just send all data to all player's.
-                // This make's it simpler to do since we do not need to make a global system to do this.
-                return interestManager == null
-                    ? new[] {ServerObjectManager.Server.Players}
-                    : interestManager.Observers(this);
+                return ServerObjectManager == null ? EmptyList : ServerObjectManager.InterestManager.Observers(this);
             }
         }
 
