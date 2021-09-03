@@ -10,7 +10,7 @@ namespace Mirage.InterestManagement
         /// It should show that object to all relevant players
         /// </summary>
         /// <param name="identity">The object just spawned</param>
-        abstract void OnSpawned(NetworkIdentity identity);
+        void OnSpawned(NetworkIdentity identity);
 
         /// <summary>
         ///     
