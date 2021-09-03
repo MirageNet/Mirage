@@ -55,6 +55,7 @@ namespace Mirage
         private static ListRequest listRequest;
 
         private static WelcomeWindow currentWindow;
+        private static VisualTreeAsset _changeLogTemplate;
 
         //window size of the welcome screen
         private static Vector2 windowSize = new Vector2(500, 415);
@@ -64,6 +65,7 @@ namespace Mirage
         private static string firstStartUpKey = string.Empty;
         private const string firstTimeMirageKey = "MirageWelcome";
         private const string miragePackageName = "com.miragenet.mirage";
+        private const int _numberOfChangeLogs = 3;
 
         /// <summary>
         ///     Hard coded for source code version. If package version is found, this will
@@ -147,6 +149,8 @@ namespace Mirage
             VisualElement root = rootVisualElement;
             VisualTreeAsset uxml = Resources.Load<VisualTreeAsset>("WelcomeWindow");
             StyleSheet uss = Resources.Load<StyleSheet>("WelcomeWindow");
+
+            _changeLogTemplate = Resources.Load<VisualTreeAsset>("Changelog");
 
             root.styleSheets.Add(uss);
             uxml.CloneTree(root);
@@ -257,6 +261,8 @@ namespace Mirage
         {
             var content = new List<string>();
 
+            int currentChangeLogs = 0;
+
             using (var reader = new StreamReader(changeLogPath))
             {
                 string line;
@@ -276,7 +282,12 @@ namespace Mirage
 
                     //if we havent reached the next version yet
                     if (line.Contains("https://github.com/MirageNet/Mirage/compare/"))
-                        break;
+                    {
+                        if (currentChangeLogs == _numberOfChangeLogs)
+                            break;
+
+                        currentChangeLogs++;
+                    }
 
                     content.Add(line);
                 }
@@ -288,7 +299,7 @@ namespace Mirage
         //draw the parsed information
         private void DrawChangeLog(List<string> content)
         {
-            Label changeLogText = rootVisualElement.Q<Label>("ChangeLogText");
+            int currentVersionCount = -1;
 
             for (int i = 0; i < content.Count; i++)
             {
@@ -297,23 +308,28 @@ namespace Mirage
                 //if the item is a version
                 if (item.Contains("# [") || item.Contains("## ["))
                 {
-                    string version = GetVersion();
-                    rootVisualElement.Q<Label>("ChangeLogVersion").text = "Version " + version.Substring(0, version.Length - 2);
+                    currentVersionCount++;
+
+                    TemplateContainer newLog = _changeLogTemplate.CloneTree();
+                    newLog.Q<Label>("ChangeLogVersion").text =
+                        $"Version {item.Split(new[] {"["}, StringSplitOptions.RemoveEmptyEntries)[1].Split(new[] {"]"}, StringSplitOptions.RemoveEmptyEntries)[0]}";
+
+                        rootVisualElement.Q<VisualElement>("ChangelogData").Add(newLog);
                 }
                 //if the item is a change title
                 else if (item.Contains("###"))
                 {
                     //only add a space above the title if it isn't the first title
-                    if (i > 2) { changeLogText.text += "\n"; }
+                    if (i > 2) { rootVisualElement.Q<VisualElement>("ChangelogData").ElementAt(currentVersionCount).Q<Label>("ChangeLogText").text += "\n"; }
 
-                    changeLogText.text += item.Substring(4) + "\n";
+                    rootVisualElement.Q<VisualElement>("ChangelogData").ElementAt(currentVersionCount).Q<Label>("ChangeLogText").text += item.Substring(4) + "\n";
                 }
                 //if the item is a change
                 else
                 {
-                    string change = item.Split(new string[] { "([" }, StringSplitOptions.None)[0];
+                    string change = item.Split(new[] { "([" }, StringSplitOptions.None)[0];
                     change = change.Replace("*", "-");
-                    changeLogText.text += change + "\n";
+                    rootVisualElement.Q<VisualElement>("ChangelogData").ElementAt(currentVersionCount).Q<Label>("ChangeLogText").text += change + "\n";
                 }
             }
         }

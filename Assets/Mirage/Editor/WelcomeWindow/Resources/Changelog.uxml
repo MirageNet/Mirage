@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="Header">
+        <ui:Label text="Version" display-tooltip-when-elided="true" name="ChangeLogVersion" style="font-size: 20px; -unity-font-style: bold;" />
+        <ui:Label display-tooltip-when-elided="true" name="ChangeLogText" style="-unity-font-style: normal; font-size: 12px;" />
+    </ui:VisualElement>
+</ui:UXML>
