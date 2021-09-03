@@ -8,3 +8,5 @@
   href: NetworkBehaviourCallbacks.md
 - name: Network Messages
   href: NetworkMessages.md
+- name: Rpc Examples
+  href: RpcExamples.md

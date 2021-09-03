@@ -57,7 +57,7 @@ namespace Mirage
                 Client.Disconnected.AddListener(OnClientDisconnected);
 
                 if (NetworkSceneManager != null)
-                    NetworkSceneManager.ClientSceneChanged.AddListener(OnClientSceneChanged);
+                    NetworkSceneManager.OnClientFinishedSceneChange.AddListener(OnFinishedSceneChange);
             }
         }
 
@@ -87,7 +87,7 @@ namespace Mirage
             syncVarReceiver = null;
         }
 
-        void OnClientSceneChanged(string scenePath, SceneOperation sceneOperation)
+        void OnFinishedSceneChange(string scenePath, SceneOperation sceneOperation)
         {
             PrepareToSpawnSceneObjects();
         }

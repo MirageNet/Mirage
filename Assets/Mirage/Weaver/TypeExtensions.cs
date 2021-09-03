@@ -121,6 +121,17 @@ namespace Mirage.Weaver
         public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes) =>
             AddMethod(typeDefinition, name, attributes, typeDefinition.Module.ImportReference(typeof(void)));
 
+        public static FieldDefinition AddField<T>(this TypeDefinition typeDefinition, string name, FieldAttributes attributes) =>
+            AddField(typeDefinition, typeDefinition.Module.ImportReference(typeof(T)), name, attributes);
+
+        public static FieldDefinition AddField(this TypeDefinition typeDefinition, TypeReference fieldType, string name, FieldAttributes attributes)
+        {
+            var field = new FieldDefinition(name, attributes, fieldType);
+            field.DeclaringType = typeDefinition;
+            typeDefinition.Fields.Add(field);
+            return field;
+        }
+
         /// <summary>
         /// Creates a generic type out of another type, if needed.
         /// </summary>

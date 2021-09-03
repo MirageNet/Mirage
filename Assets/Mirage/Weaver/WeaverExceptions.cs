@@ -36,7 +36,8 @@ namespace Mirage.Weaver
 
     internal class NetworkBehaviourException : WeaverException
     {
-        public NetworkBehaviourException(string message, TypeDefinition type) : base(message, type, null) { }
+        public NetworkBehaviourException(string message, TypeDefinition type, SequencePoint sequencePoint = null) : base(message, type, sequencePoint) { }
+        public NetworkBehaviourException(string message, MemberReference memberReference, SequencePoint sequencePoint = null) : base(message, memberReference, sequencePoint) { }
     }
 
     internal class SyncVarException : WeaverException
@@ -67,5 +68,17 @@ namespace Mirage.Weaver.SyncVars
     internal class FloatPackException : SyncVarException
     {
         public FloatPackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+    }
+    internal class Vector3PackException : SyncVarException
+    {
+        public Vector3PackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+    }
+    internal class Vector2PackException : SyncVarException
+    {
+        public Vector2PackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+    }
+    internal class QuaternionPackException : SyncVarException
+    {
+        public QuaternionPackException(string message, MemberReference memberReference) : base(message, memberReference) { }
     }
 }

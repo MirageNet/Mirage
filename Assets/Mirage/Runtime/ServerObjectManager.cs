@@ -62,8 +62,8 @@ namespace Mirage
 
                 if (NetworkSceneManager != null)
                 {
-                    NetworkSceneManager.ServerChangeScene.AddListener(OnServerChangeScene);
-                    NetworkSceneManager.ServerSceneChanged.AddListener(OnServerSceneChanged);
+                    NetworkSceneManager.OnServerStartedSceneChange.AddListener(OnStartedSceneChange);
+                    NetworkSceneManager.OnServerFinishedSceneChange.AddListener(OnFinishedSceneChange);
                 }
             }
         }
@@ -98,12 +98,12 @@ namespace Mirage
             InterestManager = null;
         }
 
-        void OnServerChangeScene(string scenePath, SceneOperation sceneOperation)
+        void OnStartedSceneChange(string scenePath, SceneOperation sceneOperation)
         {
             SetAllClientsNotReady();
         }
 
-        void OnServerSceneChanged(string scenePath, SceneOperation sceneOperation)
+        void OnFinishedSceneChange(string scenePath, SceneOperation sceneOperation)
         {
             SpawnOrActivate();
         }
@@ -638,7 +638,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + player);
 
             // set ready
-            player.IsReady = true;
+            player.SceneIsReady = true;
         }
 
         /// <summary>
@@ -660,10 +660,10 @@ namespace Mirage
         /// <param name="player">The connection of the client to make not ready.</param>
         public void SetClientNotReady(INetworkPlayer player)
         {
-            if (player.IsReady)
+            if (player.SceneIsReady)
             {
                 if (logger.LogEnabled()) logger.Log("PlayerNotReady " + player);
-                player.IsReady = false;
+                player.SceneIsReady = false;
 
                 player.Send(new NotReadyMessage());
             }

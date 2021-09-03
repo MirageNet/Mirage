@@ -32,6 +32,18 @@ namespace Mirage.Serialization
         readonly FloatPacker yPacker;
         readonly FloatPacker zPacker;
 
+        public Vector3Packer(float xMax, float yMax, float zMax, int xBitCount, int yBitCount, int zBitCount)
+        {
+            xPacker = new FloatPacker(xMax, xBitCount);
+            yPacker = new FloatPacker(yMax, yBitCount);
+            zPacker = new FloatPacker(zMax, zBitCount);
+        }
+        public Vector3Packer(float xMax, float yMax, float zMax, float xPrecision, float yPrecision, float zPrecision)
+        {
+            xPacker = new FloatPacker(xMax, xPrecision);
+            yPacker = new FloatPacker(yMax, yPrecision);
+            zPacker = new FloatPacker(zMax, zPrecision);
+        }
         public Vector3Packer(Vector3 max, Vector3 precision)
         {
             xPacker = new FloatPacker(max.x, precision.x);

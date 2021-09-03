@@ -71,7 +71,7 @@ namespace Mirage.Tests.Runtime
                 Identity = character.GetComponent<NetworkIdentity>()
             };
             player.Identity.ConnectionToClient = player;
-            player.IsReady = true;
+            player.SceneIsReady = true;
             return player;
         }
 
