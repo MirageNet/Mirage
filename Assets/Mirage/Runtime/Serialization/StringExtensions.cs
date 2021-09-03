@@ -6,8 +6,14 @@ namespace Mirage.Serialization
 {
     public static class StringExtensions
     {
+        /// <summary>
+        /// Defaults MTU, 1300
+        /// <para>Can be changed by user if they need to</para>
+        /// </summary>
+        public static int MaxStringLength = 1300;
+
         static readonly UTF8Encoding encoding = new UTF8Encoding(false, true);
-        static readonly byte[] stringBuffer = new byte[NetworkWriter.MaxStringLength];
+        static readonly byte[] stringBuffer = new byte[MaxStringLength];
 
         /// <param name="value">string or null</param>
         public static void WriteString(this NetworkWriter writer, string value)
@@ -27,9 +33,9 @@ namespace Mirage.Serialization
             int size = encoding.GetBytes(value, 0, value.Length, stringBuffer, 0);
 
             // check if within max size
-            if (size >= NetworkWriter.MaxStringLength)
+            if (size >= MaxStringLength)
             {
-                throw new DataMisalignedException($"NetworkWriter.Write(string) too long: {size}. Limit: {NetworkWriter.MaxStringLength}");
+                throw new DataMisalignedException($"NetworkWriter.Write(string) too long: {size}. Limit: {MaxStringLength}");
             }
 
             // write size and bytes
@@ -51,9 +57,9 @@ namespace Mirage.Serialization
             int realSize = size - 1;
 
             // make sure it's within limits to avoid allocation attacks etc.
-            if (realSize >= NetworkWriter.MaxStringLength)
+            if (realSize >= MaxStringLength)
             {
-                throw new EndOfStreamException("ReadString too long: {realSize}. Limit is: {NetworkWriter.MaxStringLength}");
+                throw new EndOfStreamException($"ReadString too long: {realSize}. Limit is: {MaxStringLength}");
             }
 
             ArraySegment<byte> data = reader.ReadBytesSegment(realSize);

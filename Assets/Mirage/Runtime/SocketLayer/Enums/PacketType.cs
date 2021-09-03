@@ -26,6 +26,11 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// packet with just acks
         /// </summary>
+        ReliableFragment = 6,
+
+        /// <summary>
+        /// packet with just acks
+        /// </summary>
         Ack = 5,
 
         /// <summary>

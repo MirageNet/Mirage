@@ -1,5 +1,6 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="WelcomeWindow.uss" />
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">    
+    <ui:VisualElement>
+            <Style src="WelcomeWindow.uss" />
     <ui:VisualElement>
         <ui:VisualElement name="Banner">
             <ui:Label name="VersionText" text="Placeholder" />
@@ -74,5 +75,6 @@
                 </ui:ScrollView>
             </ui:VisualElement>
         </ui:Box>
+    </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

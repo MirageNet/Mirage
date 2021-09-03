@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
+using System.Text;
 using Mirage.Logging;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -50,9 +50,9 @@ namespace Mirage
         #endregion
 
         //request for the module install
-        private static AddRequest installRequest;
-        private static RemoveRequest uninstallRequest;
-        private static ListRequest listRequest;
+        private AddRequest installRequest;
+        private RemoveRequest uninstallRequest;
+        private ListRequest listRequest;
 
         private static WelcomeWindow currentWindow;
         private static VisualTreeAsset _changeLogTemplate;
@@ -301,6 +301,8 @@ namespace Mirage
         {
             int currentVersionCount = -1;
 
+            var builder = new StringBuilder();
+
             for (int i = 0; i < content.Count; i++)
             {
                 string item = content[i];
@@ -311,26 +313,33 @@ namespace Mirage
                     currentVersionCount++;
 
                     TemplateContainer newLog = _changeLogTemplate.CloneTree();
-                    newLog.Q<Label>("ChangeLogVersion").text =
-                        $"Version {item.Split(new[] {"["}, StringSplitOptions.RemoveEmptyEntries)[1].Split(new[] {"]"}, StringSplitOptions.RemoveEmptyEntries)[0]}";
 
-                        rootVisualElement.Q<VisualElement>("ChangelogData").Add(newLog);
+                    newLog.Q<Label>("ChangeLogVersion").text =
+                        $"Version {item.Split(new[] { "[" }, StringSplitOptions.RemoveEmptyEntries)[1].Split(new[] { "]" }, StringSplitOptions.RemoveEmptyEntries)[0]}";
+
+                    rootVisualElement.Q<VisualElement>("ChangelogData").Add(newLog);
+
+                    builder = new StringBuilder();
                 }
                 //if the item is a change title
                 else if (item.Contains("###"))
                 {
                     //only add a space above the title if it isn't the first title
-                    if (i > 2) { rootVisualElement.Q<VisualElement>("ChangelogData").ElementAt(currentVersionCount).Q<Label>("ChangeLogText").text += "\n"; }
+                    if (i > 2) { builder.Append("\n"); }
 
-                    rootVisualElement.Q<VisualElement>("ChangelogData").ElementAt(currentVersionCount).Q<Label>("ChangeLogText").text += item.Substring(4) + "\n";
+                    builder.Append(item.Substring(4));
+                    builder.Append("\n");
                 }
                 //if the item is a change
                 else
                 {
-                    string change = item.Split(new[] { "([" }, StringSplitOptions.None)[0];
+                    string change = item.Split(new string[] { "([" }, StringSplitOptions.None)[0];
                     change = change.Replace("*", "-");
-                    rootVisualElement.Q<VisualElement>("ChangelogData").ElementAt(currentVersionCount).Q<Label>("ChangeLogText").text += change + "\n";
+
+                    builder.Append(change);
                 }
+
+                rootVisualElement.Q<VisualElement>("ChangelogData").ElementAt(currentVersionCount).Q<Label>("ChangeLogText").text = builder.ToString();
             }
         }
 
@@ -390,7 +399,7 @@ namespace Mirage
                 }
                 else if (installRequest.Status == StatusCode.Failure)
                 {
-                    if (logger.ErrorEnabled()) logger.LogError($"Package install was unsuccessful. \n Error Code: {installRequest.Error.errorCode}\n Error Message: {installRequest.Error.message}");
+                    logger.LogError($"Package install was unsuccessful. \n Error Code: {installRequest.Error.errorCode}\n Error Message: {installRequest.Error.message}");
                 }
 
                 EditorApplication.update -= InstallPackageProgress;
@@ -414,7 +423,7 @@ namespace Mirage
                 }
                 else if (uninstallRequest.Status == StatusCode.Failure)
                 {
-                    if (logger.ErrorEnabled()) logger.LogError($"Package uninstall was unsuccessful. \n Error Code: {uninstallRequest.Error.errorCode}\n Error Message: {uninstallRequest.Error.message}");
+                    logger.LogError($"Package uninstall was unsuccessful. \n Error Code: {uninstallRequest.Error.errorCode}\n Error Message: {uninstallRequest.Error.message}");
                 }
 
                 //refresh the package tab

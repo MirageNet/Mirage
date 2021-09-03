@@ -31,6 +31,10 @@ namespace Mirage
             {
                 return connection.SendNotify(data);
             }
+            public void SendNotify(byte[] data, INotifyCallBack callbacks)
+            {
+                connection.SendNotify(data, callbacks);
+            }
             public void ExpectData(byte[] expected)
             {
                 handler.Received(1).ReceiveMessage(connection, Arg.Is<ArraySegment<byte>>(x => x.SequenceEqual(expected)));
@@ -109,6 +113,24 @@ namespace Mirage
         {
             conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
             conn1.SendNotify(new byte[] { 5, 6, 7, 8 });
+
+            conn2.ExpectData(new byte[] { 1, 2, 3, 4 });
+            conn2.ExpectData(new byte[] { 5, 6, 7, 8 });
+        }
+
+        [Test]
+        public void ReceivesNotifyCallbacksSentData()
+        {
+            conn1.SendNotify(new byte[] { 1, 2, 3, 4 }, Substitute.For<INotifyCallBack>());
+
+            conn2.ExpectData(new byte[] { 1, 2, 3, 4 });
+        }
+
+        [Test]
+        public void ReceivesNotifyCallbacksSentDataMultiple()
+        {
+            conn1.SendNotify(new byte[] { 1, 2, 3, 4 }, Substitute.For<INotifyCallBack>());
+            conn1.SendNotify(new byte[] { 5, 6, 7, 8 }, Substitute.For<INotifyCallBack>());
 
             conn2.ExpectData(new byte[] { 1, 2, 3, 4 });
             conn2.ExpectData(new byte[] { 5, 6, 7, 8 });
@@ -196,6 +218,7 @@ namespace Mirage
             token.Delivered -= () => invoked1++;
             Assert.That(invoked1, Is.EqualTo(0), "Does nothing");
         }
+
         [Test]
         public void NotifyTokenAddLostHandlerDoesNothing()
         {
@@ -206,6 +229,7 @@ namespace Mirage
             token.Lost += () => invoked1++;
             Assert.That(invoked1, Is.EqualTo(0), "Does nothing");
         }
+
         [Test]
         public void NotifyTokenRemoveLostHandlerDoesNothing()
         {
@@ -215,6 +239,16 @@ namespace Mirage
             int invoked1 = 0;
             token.Lost -= () => invoked1++;
             Assert.That(invoked1, Is.EqualTo(0), "Does nothing");
+        }
+
+        [Test]
+        public void NotifyCallbackShouldBeInvokedImmediately()
+        {
+            INotifyCallBack callbacks = Substitute.For<INotifyCallBack>();
+            conn1.SendNotify(new byte[] { 1, 2, 3, 4 }, callbacks);
+
+            callbacks.Received(1).OnDelivered();
+            callbacks.DidNotReceive().OnLost();
         }
     }
 }

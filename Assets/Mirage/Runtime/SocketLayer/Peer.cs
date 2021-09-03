@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net;
 using UnityEngine;
 
 namespace Mirage.SocketLayer
@@ -20,8 +19,8 @@ namespace Mirage.SocketLayer
         event Action<IConnection, RejectReason> OnConnectionFailed;
         event Action<IConnection, DisconnectReason> OnDisconnected;
 
-        void Bind(EndPoint endPoint);
-        IConnection Connect(EndPoint endPoint);
+        void Bind(IEndPoint endPoint);
+        IConnection Connect(IEndPoint endPoint);
         void Close();
         void Update();
     }
@@ -31,14 +30,6 @@ namespace Mirage.SocketLayer
     /// </summary>
     public sealed class Peer : IPeer
     {
-        void Assert(bool condition, object msg = null)
-        {
-            if (!condition) logger.Log(LogType.Assert, msg == null ? "Failed Assertion" : $"Failed Assertion: {msg}");
-        }
-        void Error(string error)
-        {
-            logger.Log(LogType.Error, error);
-        }
         readonly ILogger logger;
         readonly Metrics metrics;
         readonly ISocket socket;
@@ -47,8 +38,8 @@ namespace Mirage.SocketLayer
         readonly Time time;
 
         readonly ConnectKeyValidator connectKeyValidator;
-        readonly BufferPool bufferPool;
-        readonly Dictionary<EndPoint, Connection> connections = new Dictionary<EndPoint, Connection>();
+        readonly Pool<ByteBuffer> bufferPool;
+        readonly Dictionary<IEndPoint, Connection> connections = new Dictionary<IEndPoint, Connection>();
         // list so that remove can take place after foreach loops
         readonly List<Connection> connectionsToRemove = new List<Connection>();
 
@@ -72,8 +63,8 @@ namespace Mirage.SocketLayer
             time = new Time();
 
             connectKeyValidator = new ConnectKeyValidator();
-            bufferPool = new BufferPool(this.config.Mtu, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
 
+            bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, this.config.MaxPacketSize, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
             Application.quitting += Application_quitting;
         }
 
@@ -85,14 +76,14 @@ namespace Mirage.SocketLayer
                 Close();
         }
 
-        public void Bind(EndPoint endPoint)
+        public void Bind(IEndPoint endPoint)
         {
             if (active) throw new InvalidOperationException("Peer is already active");
             active = true;
             socket.Bind(endPoint);
         }
 
-        public IConnection Connect(EndPoint endPoint)
+        public IConnection Connect(IEndPoint endPoint)
         {
             if (active) throw new InvalidOperationException("Peer is already active");
 
@@ -132,7 +123,7 @@ namespace Mirage.SocketLayer
         {
             // connecting connections can send connect messages so is allowed
             // todo check connected before message are sent from high level
-            Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected, connection.State);
+            logger.Assert(connection.State == ConnectionState.Connected || connection.State == ConnectionState.Connecting || connection.State == ConnectionState.Disconnected, connection.State);
 
             socket.Send(connection.EndPoint, data, length);
             metrics?.OnSend(length);
@@ -151,19 +142,19 @@ namespace Mirage.SocketLayer
             }
         }
 
-        internal void SendUnreliable(Connection connection, byte[] packet)
+        internal void SendUnreliable(Connection connection, byte[] packet, int offset, int length)
         {
             using (ByteBuffer buffer = bufferPool.Take())
             {
-                Buffer.BlockCopy(packet, 0, buffer.array, 1, packet.Length);
+                Buffer.BlockCopy(packet, offset, buffer.array, 1, length);
                 // set header
                 buffer.array[0] = (byte)PacketType.Unreliable;
 
-                Send(connection, buffer.array, packet.Length + 1);
+                Send(connection, buffer.array, length + 1);
             }
         }
 
-        internal void SendCommandUnconnected(EndPoint endPoint, Commands command, byte? extra = null)
+        internal void SendCommandUnconnected(IEndPoint endPoint, Commands command, byte? extra = null)
         {
             using (ByteBuffer buffer = bufferPool.Take())
             {
@@ -238,11 +229,11 @@ namespace Mirage.SocketLayer
             {
                 while (socket.Poll())
                 {
-                    int length = socket.Receive(buffer.array, out EndPoint receiveEndPoint);
+                    int length = socket.Receive(buffer.array, out IEndPoint receiveEndPoint);
 
                     // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
-                    if (length > config.Mtu)
-                        throw new IndexOutOfRangeException($"Socket returned length above MTU: MTU:{config.Mtu} length:{length}");
+                    if (length > config.MaxPacketSize)
+                        throw new IndexOutOfRangeException($"Socket returned length above MTU. MaxPacketSize:{config.MaxPacketSize} length:{length}");
 
                     var packet = new Packet(buffer, length);
 
@@ -266,7 +257,14 @@ namespace Mirage.SocketLayer
         private void HandleMessage(Connection connection, Packet packet)
         {
             // ingore message of invalid size
-            if (!packet.IsValidSize()) { return; }
+            if (!packet.IsValidSize())
+            {
+                if (logger.filterLogType == LogType.Log)
+                {
+                    logger.Log($"Receive from {connection} was too small");
+                }
+                return;
+            }
 
             if (logger.filterLogType == LogType.Log)
             {
@@ -308,10 +306,13 @@ namespace Mirage.SocketLayer
                     connection.ReceiveNotifyPacket(packet);
                     break;
                 case PacketType.Reliable:
-                    connection.ReceivReliablePacket(packet);
+                    connection.ReceiveReliablePacket(packet);
                     break;
                 case PacketType.Ack:
                     connection.ReceiveNotifyAck(packet);
+                    break;
+                case PacketType.ReliableFragment:
+                    connection.ReceiveReliableFragment(packet);
                     break;
                 case PacketType.KeepAlive:
                     // do nothing
@@ -347,7 +348,7 @@ namespace Mirage.SocketLayer
             }
         }
 
-        private void HandleNewConnection(EndPoint endPoint, Packet packet)
+        private void HandleNewConnection(IEndPoint endPoint, Packet packet)
         {
             // if invalid, then reject without reason
             if (!Validate(packet)) { return; }
@@ -393,7 +394,7 @@ namespace Mirage.SocketLayer
         {
             return connections.Count >= config.MaxConnections;
         }
-        private void AcceptNewConnection(EndPoint endPoint)
+        private void AcceptNewConnection(IEndPoint endPoint)
         {
             if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log($"Accepting new connection from:{endPoint}");
 
@@ -402,8 +403,12 @@ namespace Mirage.SocketLayer
             HandleConnectionRequest(connection);
         }
 
-        private Connection CreateNewConnection(EndPoint endPoint)
+        private Connection CreateNewConnection(IEndPoint _newEndPoint)
         {
+            // create copy of endpoint for this connection
+            // this is so that we can re-use the endpoint (reduces alloc) for receive and not worry about changing internal data needed for each connection
+            IEndPoint endPoint = _newEndPoint?.CreateCopy();
+
             var connection = new Connection(this, endPoint, dataHandler, config, time, bufferPool, logger, metrics);
             connection.SetReceiveTime();
             connections.Add(endPoint, connection);
@@ -427,13 +432,13 @@ namespace Mirage.SocketLayer
                     break;
 
                 case ConnectionState.Connecting:
-                    Error($"Server connections should not be in {nameof(ConnectionState.Connecting)} state");
+                    logger.Error($"Server connections should not be in {nameof(ConnectionState.Connecting)} state");
                     break;
             }
         }
 
 
-        private void RejectConnectionWithReason(EndPoint endPoint, RejectReason reason)
+        private void RejectConnectionWithReason(IEndPoint endPoint, RejectReason reason)
         {
             SendCommandUnconnected(endPoint, Commands.ConnectionRejected, (byte)reason);
         }
@@ -444,7 +449,7 @@ namespace Mirage.SocketLayer
             switch (connection.State)
             {
                 case ConnectionState.Created:
-                    Error($"Accepted Connections should not be in {nameof(ConnectionState.Created)} state");
+                    logger.Error($"Accepted Connections should not be in {nameof(ConnectionState.Created)} state");
                     break;
 
                 case ConnectionState.Connected:
@@ -467,7 +472,7 @@ namespace Mirage.SocketLayer
                     break;
 
                 default:
-                    Error($"Rejected Connections should not be in {nameof(ConnectionState.Created)} state");
+                    logger.Error($"Rejected Connections should not be in {nameof(ConnectionState.Created)} state");
                     break;
             }
         }
@@ -503,8 +508,7 @@ namespace Mirage.SocketLayer
         internal void RemoveConnection(Connection connection)
         {
             // shouldn't be trying to removed a destroyed connected
-            Assert(connection.State != ConnectionState.Destroyed);
-            Assert(connection.State != ConnectionState.Removing);
+            logger.Assert(connection.State != ConnectionState.Destroyed && connection.State != ConnectionState.Removing);
 
             connection.State = ConnectionState.Removing;
             connectionsToRemove.Add(connection);
@@ -541,7 +545,10 @@ namespace Mirage.SocketLayer
                 connection.State = ConnectionState.Destroyed;
 
                 // value should be removed from dictionary
-                Assert(removed);
+                if (!removed)
+                {
+                    logger.Error($"Failed to remove {connection} from connection set");
+                }
             }
             connectionsToRemove.Clear();
         }

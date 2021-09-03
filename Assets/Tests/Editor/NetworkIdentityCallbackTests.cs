@@ -239,7 +239,7 @@ namespace Mirage
         public void SetClientOwner()
         {
             // SetClientOwner
-            (_, NetworkPlayer original) = PipedConnections();
+            (_, NetworkPlayer original) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             identity.SetClientOwner(original);
             Assert.That(identity.ConnectionToClient, Is.EqualTo(original));
         }
@@ -248,11 +248,11 @@ namespace Mirage
         public void SetOverrideClientOwner()
         {
             // SetClientOwner
-            (_, NetworkPlayer original) = PipedConnections();
+            (_, NetworkPlayer original) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             identity.SetClientOwner(original);
 
             // setting it when it's already set shouldn't overwrite the original
-            (_, NetworkPlayer overwrite) = PipedConnections();
+            (_, NetworkPlayer overwrite) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             // will log a warning
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -502,8 +502,8 @@ namespace Mirage
             comp2.syncMode = SyncMode.Owner;
 
             // serialize all
-            var ownerWriter = new NetworkWriter();
-            var observersWriter = new NetworkWriter();
+            var ownerWriter = new NetworkWriter(1300);
+            var observersWriter = new NetworkWriter(1300);
 
             // serialize should propagate exceptions
             Assert.Throws<Exception>(() =>
@@ -547,8 +547,8 @@ namespace Mirage
             comp2.value = "67890";
 
             // serialize
-            var ownerWriter = new NetworkWriter();
-            var observersWriter = new NetworkWriter();
+            var ownerWriter = new NetworkWriter(1300);
+            var observersWriter = new NetworkWriter(1300);
             identity.OnSerializeAll(true, ownerWriter, observersWriter);
 
             // reset component values
@@ -556,11 +556,13 @@ namespace Mirage
             comp2.value = null;
 
             // deserialize all
-            var reader = new NetworkReader(ownerWriter.ToArray());
+            var reader = new NetworkReader();
+            reader.Reset(ownerWriter.ToArraySegment());
             Assert.Throws<DeserializeFailedException>(() =>
             {
                 identity.OnDeserializeAll(reader, true);
             });
+            reader.Dispose();
         }
 
         [Test]
@@ -734,7 +736,7 @@ namespace Mirage
             gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection that isn't ready
-            (_, NetworkPlayer connection) = PipedConnections();
+            (_, NetworkPlayer connection) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             identity.ConnectionToClient = connection;
 
             // call OnStartServer so that observers dict is created
@@ -753,7 +755,7 @@ namespace Mirage
             // one with a ready connection, one with no ready connection, one with null connection
             RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
             comp.observer = Substitute.For<INetworkPlayer>();
-            comp.observer.IsReady.Returns(true);
+            comp.observer.SceneIsReady.Returns(true);
 
             // rebuild observers should add all component's ready observers
             identity.RebuildObservers(true);
@@ -768,7 +770,7 @@ namespace Mirage
             // one with a ready connection, one with no ready connection, one with null connection
             RebuildObserversNetworkBehaviour comp = gameObject.AddComponent<RebuildObserversNetworkBehaviour>();
             comp.observer = Substitute.For<INetworkPlayer>();
-            comp.observer.IsReady.Returns(false);
+            comp.observer.SceneIsReady.Returns(false);
 
             // rebuild observers should add all component's ready observers
             identity.RebuildObservers(true);
@@ -779,9 +781,9 @@ namespace Mirage
         public void RebuildObserversAddsReadyServerConnectionsIfNotImplemented()
         {
             INetworkPlayer readyConnection = Substitute.For<INetworkPlayer>();
-            readyConnection.IsReady.Returns(true);
+            readyConnection.SceneIsReady.Returns(true);
             INetworkPlayer notReadyConnection = Substitute.For<INetworkPlayer>();
-            notReadyConnection.IsReady.Returns(false);
+            notReadyConnection.SceneIsReady.Returns(false);
 
             // add some server connections
             server.Players.Add(readyConnection);

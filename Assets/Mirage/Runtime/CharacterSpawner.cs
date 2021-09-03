@@ -33,7 +33,7 @@ namespace Mirage
         public bool AutoSpawn = true;
 
         // Start is called before the first frame update
-        public virtual void Start()
+        public virtual void Awake()
         {
             if (PlayerPrefab == null)
             {
@@ -43,11 +43,11 @@ namespace Mirage
             {
                 if (SceneManager != null)
                 {
-                    SceneManager.ClientSceneChanged.AddListener(OnClientSceneChanged);
+                    SceneManager.OnClientFinishedSceneChange.AddListener(OnClientFinishedSceneChange);
                 }
                 else
                 {
-                    Client.Authenticated.AddListener(c => Client.Send(new AddCharacterMessage()));
+                    Client.Authenticated.AddListener(OnClientAuthenticated);
                 }
 
                 if (ClientObjectManager != null)
@@ -61,7 +61,7 @@ namespace Mirage
             }
             if (Server != null)
             {
-                Server.Authenticated.AddListener(OnServerAuthenticated);
+                Server.Started.AddListener(OnServerStarted);
                 if (ServerObjectManager == null)
                 {
                     throw new InvalidOperationException("Assign a ServerObjectManager");
@@ -73,27 +73,32 @@ namespace Mirage
         {
             if (Client != null && SceneManager != null)
             {
-                SceneManager.ClientSceneChanged.RemoveListener(OnClientSceneChanged);
-                Client.Authenticated.RemoveListener(c => Client.Send(new AddCharacterMessage()));
+                SceneManager.OnClientFinishedSceneChange.RemoveListener(OnClientFinishedSceneChange);
+                Client.Authenticated.RemoveListener(OnClientAuthenticated);
             }
             if (Server != null)
             {
-                Server.Authenticated.RemoveListener(OnServerAuthenticated);
+                Server.Started.RemoveListener(OnServerStarted);
             }
         }
 
-        private void OnServerAuthenticated(INetworkPlayer player)
+        private void OnClientAuthenticated(INetworkPlayer _)
         {
-            // wait for client to send us an AddPlayerMessage
-            player.RegisterHandler<AddCharacterMessage>(OnServerAddPlayerInternal);
+            Client.Send(new AddCharacterMessage());
+        }
+
+        private void OnServerStarted()
+        {
+            Server.MessageHandler.RegisterHandler<AddCharacterMessage>(OnServerAddPlayerInternal);
         }
 
         /// <summary>
         /// Called on the client when a normal scene change happens.
         /// <para>The default implementation of this function sets the client as ready and adds a player. Override the function to dictate what happens when the client connects.</para>
         /// </summary>
-        /// <param name="conn">Connection to the server.</param>
-        private void OnClientSceneChanged(string sceneName, SceneOperation sceneOperation)
+        /// <param name="scenePath"></param>
+        /// <param name="sceneOperation">The type of scene load that happened.</param>
+        public virtual void OnClientFinishedSceneChange(string scenePath, SceneOperation sceneOperation)
         {
             if (AutoSpawn && sceneOperation == SceneOperation.Normal)
                 RequestServerSpawnPlayer();

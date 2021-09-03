@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Mirage.Weaver;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using UnityEditor.Compilation;
 using UnityEngine;
 
-namespace Mirage.Weaver
+namespace Mirage.Tests.Weaver
 {
     public class CompiledAssembly : ICompiledAssembly
     {
@@ -133,7 +134,7 @@ namespace Mirage.Weaver
                     References = assemblyBuilder.defaultReferences
                 };
 
-                var weaver = new Weaver(logger);
+                var weaver = new Mirage.Weaver.Weaver(logger);
 
                 assembly = weaver.Weave(compiledAssembly);
             };

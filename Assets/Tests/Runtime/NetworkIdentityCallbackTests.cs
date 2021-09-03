@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Mirage.Tests.Runtime.ClientServer;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -7,7 +8,7 @@ using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime
 {
-    public class NetworkIdentityCallbackTests
+    public class NetworkIdentityCallbackTests : ClientServerSetup<MockComponent>
     {
         #region test components
         class RebuildEmptyObserversNetworkBehaviour : NetworkVisibility
@@ -21,23 +22,13 @@ namespace Mirage.Tests.Runtime
 
         GameObject gameObject;
         NetworkIdentity identity;
-        private NetworkServer server;
-        private ServerObjectManager serverObjectManager;
-        private NetworkClient client;
-        private GameObject networkServerGameObject;
 
         INetworkPlayer player1;
         INetworkPlayer player2;
 
         [SetUp]
-        public void SetUp()
+        public override void ExtraSetup()
         {
-            networkServerGameObject = new GameObject();
-            server = networkServerGameObject.AddComponent<NetworkServer>();
-            serverObjectManager = networkServerGameObject.AddComponent<ServerObjectManager>();
-            serverObjectManager.Server = server;
-            client = networkServerGameObject.AddComponent<NetworkClient>();
-
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
             identity.Server = server;
@@ -48,20 +39,19 @@ namespace Mirage.Tests.Runtime
         }
 
         [TearDown]
-        public void TearDown()
+        public override void ExtraTearDown()
         {
             // set isServer is false. otherwise Destroy instead of
             // DestroyImmediate is called internally, giving an error in Editor
             Object.DestroyImmediate(gameObject);
-            Object.DestroyImmediate(networkServerGameObject);
         }
 
 
         [Test]
         public void AddAllReadyServerConnectionsToObservers()
         {
-            player1.IsReady.Returns(true);
-            player2.IsReady.Returns(false);
+            player1.SceneIsReady.Returns(true);
+            player2.SceneIsReady.Returns(false);
 
             // add some server connections
             server.Players.Add(player1);
@@ -70,14 +60,14 @@ namespace Mirage.Tests.Runtime
             // add a host connection
             server.AddLocalConnection(client, Substitute.For<SocketLayer.IConnection>());
             server.InvokeLocalConnected();
-            server.LocalPlayer.IsReady = true;
+            server.LocalPlayer.SceneIsReady = true;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
 
             // add all to observers. should have the two ready connections then.
             identity.AddAllReadyServerConnectionsToObservers();
-            Assert.That(identity.observers, Is.EquivalentTo(new[] { player1, server.LocalPlayer }));
+            Assert.That(identity.observers, Is.EquivalentTo(new[] { player1, server.LocalPlayer, serverPlayer }));
 
             // clean up
             server.Stop();
@@ -93,8 +83,8 @@ namespace Mirage.Tests.Runtime
             gameObject.AddComponent<RebuildEmptyObserversNetworkBehaviour>();
 
             // add own player connection
-            (NetworkPlayer serverPlayer, NetworkPlayer _) = PipedConnections();
-            serverPlayer.IsReady = true;
+            (NetworkPlayer serverPlayer, NetworkPlayer _) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
+            serverPlayer.SceneIsReady = true;
             identity.ConnectionToClient = serverPlayer;
 
             // call OnStartServer so that observers dict is created

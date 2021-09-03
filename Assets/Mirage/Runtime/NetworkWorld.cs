@@ -45,17 +45,20 @@ namespace Mirage
         internal void RemoveIdentity(NetworkIdentity identity)
         {
             uint netId = identity.NetId;
-            SpawnedObjects.Remove(netId);
-            onUnspawn?.Invoke(identity);
+            bool removed = SpawnedObjects.Remove(netId);
+            // only invoke event if values was successfully removed
+            if (removed)
+                onUnspawn?.Invoke(identity);
         }
         internal void RemoveIdentity(uint netId)
         {
             if (netId == 0) throw new ArgumentException("id can not be zero", nameof(netId));
 
-
             SpawnedObjects.TryGetValue(netId, out NetworkIdentity identity);
-            SpawnedObjects.Remove(netId);
-            onUnspawn?.Invoke(identity);
+            bool removed = SpawnedObjects.Remove(netId);
+            // only invoke event if values was successfully removed
+            if (removed)
+                onUnspawn?.Invoke(identity);
         }
 
 

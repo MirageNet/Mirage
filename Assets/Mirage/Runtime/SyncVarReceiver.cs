@@ -18,24 +18,24 @@ namespace Mirage
             this.objectLocator = objectLocator;
             if (client.IsConnected)
             {
-                AddHandlers(client, client.Player);
+                AddHandlers(client);
             }
             else
             {
                 // todo replace this with RunOnceEvent
-                client.Connected.AddListener(player => AddHandlers(client, player));
+                client.Connected.AddListener(_ => AddHandlers(client));
             }
         }
 
-        private void AddHandlers(NetworkClient client, INetworkPlayer player)
+        private void AddHandlers(NetworkClient client)
         {
             if (client.IsLocalClient)
             {
-                player.RegisterHandler<UpdateVarsMessage>(_ => { });
+                client.MessageHandler.RegisterHandler<UpdateVarsMessage>(_ => { });
             }
             else
             {
-                player.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
+                client.MessageHandler.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
             }
         }
 

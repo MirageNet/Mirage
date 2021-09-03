@@ -72,8 +72,8 @@ namespace Mirage.Weaver
                 {
                     if (!argument.IsGenericParameter)
                     {
-                        readers.GetReadFunc(argument, null);
-                        writers.GetWriteFunc(argument, null);
+                        readers.TryGetFunction(argument, null);
+                        writers.TryGetFunction(argument, null);
                     }
                 }
             }
@@ -86,7 +86,7 @@ namespace Mirage.Weaver
 
         void RegisterSyncObjects(TypeDefinition netBehaviourSubclass)
         {
-            Weaver.DLog(netBehaviourSubclass, "  GenerateConstants ");
+            Weaver.DebugLog(netBehaviourSubclass, "  GenerateConstants ");
 
             // find instance constructor
             MethodDefinition ctor = netBehaviourSubclass.GetMethod(".ctor");

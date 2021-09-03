@@ -18,7 +18,10 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             public override void ClientAuthenticate(INetworkPlayer player) => ClientAccept(player);
             public override void ServerAuthenticate(INetworkPlayer player) => ServerAccept(player);
+            public override void ClientSetup(NetworkClient client) { }
+            public override void ServerSetup(NetworkServer server) { }
         }
+
         public override void ExtraSetup()
         {
             serverAuthenticator = serverGo.AddComponent<NetworkAuthenticationImpl>();

@@ -98,7 +98,7 @@ namespace Mirage.Serialization
         public static byte[] ReadBytes(this NetworkReader reader, int count)
         {
             byte[] bytes = new byte[count];
-            reader.ReadBytes(bytes, count);
+            reader.ReadBytes(bytes, 0, count);
             return bytes;
         }
 
@@ -120,8 +120,8 @@ namespace Mirage.Serialization
             int length = reader.ReadPackedInt32();
             if (length < 0)
                 return null;
-            if (length > reader.Length - reader.Position)
-                throw new EndOfStreamException("Can't read " + length + " elements because it would read past the end of the stream. ");
+            if (!reader.CanReadBytes(length))
+                throw new EndOfStreamException($"Can't read {length} elements because it would read past the end of the stream.");
             var result = new T[length];
             for (int i = 0; i < length; i++)
             {

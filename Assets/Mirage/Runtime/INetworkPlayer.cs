@@ -12,26 +12,24 @@ namespace Mirage
         void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable);
     }
 
+    // delegates to give names to variables in handles
+    public delegate void MessageDelegate<in T>(T message);
+    public delegate void MessageDelegateWithPlayer<in T>(INetworkPlayer player, T message);
+
     /// <summary>
     /// An object that can receive messages
     /// </summary>
     public interface IMessageReceiver
     {
-        void RegisterHandler<T>(Action<INetworkPlayer, T> handler);
+        void RegisterHandler<T>(MessageDelegateWithPlayer<T> handler);
 
-        void RegisterHandler<T>(Action<T> handler);
+        void RegisterHandler<T>(MessageDelegate<T> handler);
 
         void UnregisterHandler<T>();
 
         void ClearHandlers();
-    }
 
-    /// <summary>
-    /// An object that can send and receive messages and notify messages
-    /// </summary>
-    public interface IMessageHandler : IMessageSender, IMessageReceiver
-    {
-        void HandleMessage(ArraySegment<byte> packet);
+        void HandleMessage(INetworkPlayer player, ArraySegment<byte> packet);
     }
 
     /// <summary>
@@ -60,7 +58,7 @@ namespace Mirage
     /// An object owned by a player that can: send/receive messages, have network visibility, be an object owner, authenticated permissions, and load scenes.
     /// May be from the server to client or from client to server
     /// </summary>
-    public interface INetworkPlayer : IMessageHandler, IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
+    public interface INetworkPlayer : IMessageSender, IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
     {
         SocketLayer.IConnection Connection { get; }
         void Disconnect();
@@ -83,6 +81,9 @@ namespace Mirage
 
     public interface ISceneLoader
     {
-        bool IsReady { get; set; }
+        /// <summary>
+        ///     Scene is fully loaded and we now can do things with player.
+        /// </summary>
+        bool SceneIsReady { get; set; }
     }
 }

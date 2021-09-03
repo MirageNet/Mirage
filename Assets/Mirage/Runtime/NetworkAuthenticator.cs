@@ -40,6 +40,12 @@ namespace Mirage
         }
 
         /// <summary>
+        /// Used to set up authenticator on server
+        /// <para>Can be used to register message handlers before any players connect</para>
+        /// </summary>
+        public abstract void ServerSetup(NetworkServer server);
+
+        /// <summary>
         /// Authenticate the player on the Server.
         /// <para>Called by the server when new client connects</para>
         /// </summary>
@@ -66,6 +72,12 @@ namespace Mirage
         {
             player.Disconnect();
         }
+
+        /// <summary>
+        /// Used to set up authenticator on client
+        /// <para>Can be used to register message handlers before any player connects</para>
+        /// </summary>
+        public abstract void ClientSetup(NetworkClient client);
 
         /// <summary>
         /// Authenticate the player on the Client.

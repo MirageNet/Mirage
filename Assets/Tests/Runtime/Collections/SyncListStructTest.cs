@@ -6,18 +6,22 @@ namespace Mirage.Tests.Runtime
 {
     public class SyncListStructTest
     {
+        [SetUp]
+        public void Setup()
+        {
+            // let the weaver know to generate a reader and writer for TestPlayer
+            var writer = new NetworkWriter(1300);
+            writer.Write<TestPlayer>(default);
+        }
+
         [Test]
         public void ListIsDirtyWhenModifingAndSettingStruct()
         {
-            // let the weaver know to generate a reader and writer for TestPlayer
-            var writer = new NetworkWriter();
-            writer.Write<TestPlayer>(default);
-
             var serverList = new SyncList<TestPlayer>();
             var clientList = new SyncList<TestPlayer>();
-            SyncListTest.SerializeAllTo(serverList, clientList);
+            SerializeHelper.SerializeAllTo(serverList, clientList);
             serverList.Add(new TestPlayer { item = new TestItem { price = 10 } });
-            SyncListTest.SerializeDeltaTo(serverList, clientList);
+            SerializeHelper.SerializeDeltaTo(serverList, clientList);
             Assert.That(serverList.IsDirty, Is.False);
 
             TestPlayer player = serverList[0];

@@ -46,15 +46,15 @@ jobs:
           apt install -y openjdk-11-jre-headless=11.0.11+9-0ubuntu2~18.04
 
       - name: Run editor Tests
-        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
         timeout-minutes: 20
         
       - name: Run play Tests
-        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
         timeout-minutes: 20
 
       - name: Archive test results
-        uses: actions/upload-artifact@v2.2.3
+        uses: actions/upload-artifact@v2.2.4
         if: always()
         with:
           name: Test results
@@ -100,6 +100,7 @@ jobs:
             /d:sonar.verbose=false \
             /d:sonar.login=$SONAR_TOKEN \
             /d:sonar.host.url=https://sonarcloud.io \
+            /d:sonar.exclusions=Assets/Mirage/Runtime/Sockets/Udp/NanoSockets/** \
             /d:sonar.cpd.exclusions=Assets/Tests/** \
             /d:sonar.coverage.exclusions=Assets/Tests/** \
             ${{ steps.semantic.outputs.new_release_published == 'true' && format('/v:{0}',steps.semantic.outputs.new_release_version) || '' }} \

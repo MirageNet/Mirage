@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -18,6 +19,7 @@ namespace Mirage.Weaver
         private readonly ModuleDefinition module;
         private readonly Readers readers;
         private readonly Writers writers;
+        private readonly SerailizeExtensionHelper extensionHelper;
 
         /// <summary>
         /// Mirage's main module used to find built in extension methods and messages
@@ -29,6 +31,7 @@ namespace Mirage.Weaver
             this.module = module;
             this.readers = readers;
             this.writers = writers;
+            extensionHelper = new SerailizeExtensionHelper(module, readers, writers);
         }
 
         public bool Process()
@@ -46,36 +49,17 @@ namespace Mirage.Weaver
             return writers.Count != writeCount || readers.Count != readCount;
         }
 
-
         #region Load Mirage built in readers and writers
         private void LoadBuiltinExtensions()
         {
             // find all extension methods
-            IEnumerable<Type> types = MirageModule.GetTypes().Where(IsStatic);
+            IEnumerable<Type> types = MirageModule.GetTypes();
 
             foreach (Type type in types)
             {
-                IEnumerable<MethodInfo> methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public)
-                    .Where(IsExtension)
-                    .Where(NotGeneric);
-
-                foreach (MethodInfo method in methods)
-                {
-                    RegisterReader(method);
-                    RegisterWriter(method);
-                }
+                extensionHelper.RegisterExtensionMethodsInType(type);
             }
         }
-
-        /// <summary>
-        /// static classes are declared abstract and sealed at the IL level.
-        /// <see href="https://stackoverflow.com/a/1175901/8479976"/>
-        /// </summary>
-        private static bool IsStatic(Type t) => t.IsSealed && t.IsAbstract;
-
-        private static bool IsExtension(MethodInfo method) => Attribute.IsDefined(method, typeof(System.Runtime.CompilerServices.ExtensionAttribute));
-        private static bool NotGeneric(MethodInfo method) => !method.IsGenericMethod;
-
 
         private void LoadBuiltinMessages()
         {
@@ -83,39 +67,10 @@ namespace Mirage.Weaver
             foreach (Type type in types)
             {
                 TypeReference typeReference = module.ImportReference(type);
-                writers.GetWriteFunc(typeReference, null);
-                readers.GetReadFunc(typeReference, null);
+                writers.TryGetFunction(typeReference, null);
+                readers.TryGetFunction(typeReference, null);
                 messages.Add(typeReference);
             }
-        }
-
-
-        private void RegisterReader(MethodInfo method)
-        {
-            if (method.GetParameters().Length != 1)
-                return;
-
-            if (method.GetParameters()[0].ParameterType.FullName != typeof(NetworkReader).FullName)
-                return;
-
-            if (method.ReturnType == typeof(void))
-                return;
-            readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
-        }
-
-        private void RegisterWriter(MethodInfo method)
-        {
-            if (method.GetParameters().Length != 2)
-                return;
-
-            if (method.GetParameters()[0].ParameterType.FullName != typeof(NetworkWriter).FullName)
-                return;
-
-            if (method.ReturnType != typeof(void))
-                return;
-
-            Type dataType = method.GetParameters()[1].ParameterType;
-            writers.Register(module.ImportReference(dataType), module.ImportReference(method));
         }
         #endregion
 
@@ -126,26 +81,33 @@ namespace Mirage.Weaver
 
             foreach (TypeDefinition klass in types)
             {
-                // extension methods only live in static classes
-                // static classes are represented as sealed and abstract
-                if (klass.IsAbstract && klass.IsSealed)
-                {
-                    LoadDeclaredWriters(klass);
-                    LoadDeclaredReaders(klass);
-                }
-
-                if (klass.GetCustomAttribute<NetworkMessageAttribute>() != null)
-                {
-                    readers.GetReadFunc(klass, null);
-                    writers.GetWriteFunc(klass, null);
-                    messages.Add(klass);
-                }
+                ProcessClass(klass);
             }
 
             // Generate readers and writers
             // find all the Send<> and Register<> calls and generate
             // readers and writers for them.
             CodePass.ForEachInstruction(module, (md, instr, sequencePoint) => GenerateReadersWriters(instr, sequencePoint));
+        }
+
+        private void ProcessClass(TypeDefinition klass)
+        {
+            // extension methods only live in static classes
+            // static classes are represented as sealed and abstract
+            extensionHelper.RegisterExtensionMethodsInType(klass);
+
+
+            if (klass.HasCustomAttribute<NetworkMessageAttribute>())
+            {
+                readers.TryGetFunction(klass, null);
+                writers.TryGetFunction(klass, null);
+                messages.Add(klass);
+            }
+
+            foreach (TypeDefinition nestedClass in klass.NestedTypes)
+            {
+                ProcessClass(nestedClass);
+            }
         }
 
         private Instruction GenerateReadersWriters(Instruction instruction, SequencePoint sequencePoint)
@@ -220,8 +182,8 @@ namespace Mirage.Weaver
                         return;
                 }
 
-                writers.GetWriteFunc(parameterType, sequencePoint);
-                readers.GetReadFunc(parameterType, sequencePoint);
+                writers.TryGetFunction(parameterType, sequencePoint);
+                readers.TryGetFunction(parameterType, sequencePoint);
             }
         }
 
@@ -237,11 +199,11 @@ namespace Mirage.Weaver
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.GetId)) ||
                 method.Is(typeof(MessagePacker), nameof(MessagePacker.Unpack)) ||
                 method.Is<IMessageSender>(nameof(IMessageSender.Send)) ||
-                method.Is<IMessageSender>(nameof(IMessageReceiver.RegisterHandler)) ||
-                method.Is<IMessageSender>(nameof(IMessageReceiver.UnregisterHandler)) ||
+                method.Is<IMessageReceiver>(nameof(IMessageReceiver.RegisterHandler)) ||
+                method.Is<IMessageReceiver>(nameof(IMessageReceiver.UnregisterHandler)) ||
                 method.Is<NetworkPlayer>(nameof(NetworkPlayer.Send)) ||
-                method.Is<NetworkPlayer>(nameof(NetworkPlayer.RegisterHandler)) ||
-                method.Is<NetworkPlayer>(nameof(NetworkPlayer.UnregisterHandler)) ||
+                method.Is<MessageHandler>(nameof(MessageHandler.RegisterHandler)) ||
+                method.Is<MessageHandler>(nameof(MessageHandler.UnregisterHandler)) ||
                 method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
                 method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
                 method.Is<NetworkServer>(nameof(NetworkServer.SendToMany)) ||
@@ -251,58 +213,11 @@ namespace Mirage.Weaver
         private static bool IsReadWriteMethod(MethodReference method)
         {
             return
-                method.Is<NetworkWriter>(nameof(NetworkWriter.Write)) ||
-                method.Is<NetworkReader>(nameof(NetworkReader.Read));
+                method.Is(typeof(GenericTypesSerializationExtensions), nameof(GenericTypesSerializationExtensions.Write)) ||
+                method.Is(typeof(GenericTypesSerializationExtensions), nameof(GenericTypesSerializationExtensions.Read));
         }
 
-        void LoadDeclaredWriters(TypeDefinition klass)
-        {
-            // register all the writers in this class.  Skip the ones with wrong signature
-            foreach (MethodDefinition method in klass.Methods)
-            {
-                if (method.Parameters.Count != 2)
-                    continue;
 
-                if (!method.Parameters[0].ParameterType.Is<NetworkWriter>())
-                    continue;
-
-                if (!method.ReturnType.Is(typeof(void)))
-                    continue;
-
-                if (!method.HasCustomAttribute<System.Runtime.CompilerServices.ExtensionAttribute>())
-                    continue;
-
-                if (method.HasGenericParameters)
-                    continue;
-
-                TypeReference dataType = method.Parameters[1].ParameterType;
-                writers.Register(dataType, module.ImportReference(method));
-            }
-        }
-
-        void LoadDeclaredReaders(TypeDefinition klass)
-        {
-            // register all the reader in this class.  Skip the ones with wrong signature
-            foreach (MethodDefinition method in klass.Methods)
-            {
-                if (method.Parameters.Count != 1)
-                    continue;
-
-                if (!method.Parameters[0].ParameterType.Is<NetworkReader>())
-                    continue;
-
-                if (method.ReturnType.Is(typeof(void)))
-                    continue;
-
-                if (!method.HasCustomAttribute<System.Runtime.CompilerServices.ExtensionAttribute>())
-                    continue;
-
-                if (method.HasGenericParameters)
-                    continue;
-
-                readers.Register(method.ReturnType, module.ImportReference(method));
-            }
-        }
 
         private static bool IsEditorAssembly(ModuleDefinition module)
         {
@@ -363,5 +278,165 @@ namespace Mirage.Weaver
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// Helps get Extension methods using either reflection or cecil
+    /// </summary>
+    public class SerailizeExtensionHelper
+    {
+        private readonly ModuleDefinition module;
+        private readonly Readers readers;
+        private readonly Writers writers;
+
+        public SerailizeExtensionHelper(ModuleDefinition module, Readers readers, Writers writers)
+        {
+            this.module = module;
+            this.readers = readers;
+            this.writers = writers;
+        }
+
+
+        public void RegisterExtensionMethodsInType(Type type)
+        {
+            // only check static types
+            if (!IsStatic(type))
+                return;
+
+            IEnumerable<MethodInfo> methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public)
+                   .Where(IsExtension)
+                   .Where(NotGeneric)
+                   .Where(NotIgnored);
+
+            foreach (MethodInfo method in methods)
+            {
+                if (IsWriterMethod(method))
+                {
+                    RegisterWriter(method);
+                }
+
+                if (IsReaderMethod(method))
+                {
+                    RegisterReader(method);
+                }
+            }
+        }
+        public void RegisterExtensionMethodsInType(TypeDefinition type)
+        {
+            // only check static types
+            if (!IsStatic(type))
+                return;
+
+            IEnumerable<MethodDefinition> methods = type.Methods
+                   .Where(IsExtension)
+                   .Where(NotGeneric)
+                   .Where(NotIgnored);
+
+            foreach (MethodDefinition method in methods)
+            {
+                if (IsWriterMethod(method))
+                {
+                    RegisterWriter(method);
+                }
+
+                if (IsReaderMethod(method))
+                {
+                    RegisterReader(method);
+                }
+            }
+        }
+
+        /// <summary>
+        /// static classes are declared abstract and sealed at the IL level.
+        /// <see href="https://stackoverflow.com/a/1175901/8479976"/>
+        /// </summary>
+        private static bool IsStatic(Type t) => t.IsSealed && t.IsAbstract;
+        private static bool IsStatic(TypeDefinition t) => t.IsSealed && t.IsAbstract;
+
+        private static bool IsExtension(MethodInfo method) => Attribute.IsDefined(method, typeof(ExtensionAttribute));
+        private static bool IsExtension(MethodDefinition method) => method.HasCustomAttribute<ExtensionAttribute>();
+        private static bool NotGeneric(MethodInfo method) => !method.IsGenericMethod;
+        private static bool NotGeneric(MethodDefinition method) => !method.IsGenericInstance;
+
+        /// <returns>true if method does not have <see cref="WeaverIgnoreAttribute"/></returns>
+        private static bool NotIgnored(MethodInfo method) => !Attribute.IsDefined(method, typeof(WeaverIgnoreAttribute));
+        /// <returns>true if method does not have <see cref="WeaverIgnoreAttribute"/></returns>
+        private static bool NotIgnored(MethodDefinition method) => !method.HasCustomAttribute<WeaverIgnoreAttribute>();
+
+
+        private static bool IsWriterMethod(MethodInfo method)
+        {
+            if (method.GetParameters().Length != 2)
+                return false;
+
+            if (method.GetParameters()[0].ParameterType.FullName != typeof(NetworkWriter).FullName)
+                return false;
+
+            if (method.ReturnType != typeof(void))
+                return false;
+
+            return true;
+        }
+        private bool IsWriterMethod(MethodDefinition method)
+        {
+            if (method.Parameters.Count != 2)
+                return false;
+
+            if (method.Parameters[0].ParameterType.FullName != typeof(NetworkWriter).FullName)
+                return false;
+
+            if (!method.ReturnType.Is(typeof(void)))
+                return false;
+
+            return true;
+        }
+
+        private static bool IsReaderMethod(MethodInfo method)
+        {
+            if (method.GetParameters().Length != 1)
+                return false;
+
+            if (method.GetParameters()[0].ParameterType.FullName != typeof(NetworkReader).FullName)
+                return false;
+
+            if (method.ReturnType == typeof(void))
+                return false;
+
+            return true;
+        }
+        private bool IsReaderMethod(MethodDefinition method)
+        {
+            if (method.Parameters.Count != 1)
+                return false;
+
+            if (method.Parameters[0].ParameterType.FullName != typeof(NetworkReader).FullName)
+                return false;
+
+            if (method.ReturnType.Is(typeof(void)))
+                return false;
+
+            return true;
+        }
+
+        private void RegisterWriter(MethodInfo method)
+        {
+            Type dataType = method.GetParameters()[1].ParameterType;
+            writers.Register(module.ImportReference(dataType), module.ImportReference(method));
+        }
+        private void RegisterWriter(MethodDefinition method)
+        {
+            TypeReference dataType = method.Parameters[1].ParameterType;
+            writers.Register(module.ImportReference(dataType), module.ImportReference(method));
+        }
+
+
+        private void RegisterReader(MethodInfo method)
+        {
+            readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
+        }
+        private void RegisterReader(MethodDefinition method)
+        {
+            readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
+        }
     }
 }

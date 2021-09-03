@@ -1,1 +1,4 @@
-github: vis2k
+github: [James-Frowen, dragonslaya84]
+
+# add multiple people using array:
+# github: [user1, user2]

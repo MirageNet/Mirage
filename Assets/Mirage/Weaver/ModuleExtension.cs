@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using Mono.Cecil;
@@ -9,6 +9,17 @@ namespace Mirage.Weaver
     public static class ModuleExtension
     {
         public static MethodReference ImportReference(this ModuleDefinition module, Expression<Action> expression) => ImportReference(module, (LambdaExpression)expression);
+
+        /// <summary>
+        /// this can be used to import reference to a non-static method
+        /// <para>
+        /// for example, <code>(NetworkWriter writer) => writer.Write(default, default)</code>
+        /// </para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="module"></param>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         public static MethodReference ImportReference<T>(this ModuleDefinition module, Expression<Action<T>> expression) => ImportReference(module, (LambdaExpression)expression);
 
         public static TypeReference ImportReference<T>(this ModuleDefinition module) => module.ImportReference(typeof(T));

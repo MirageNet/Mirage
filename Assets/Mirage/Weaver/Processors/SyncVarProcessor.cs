@@ -1,9 +1,9 @@
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using Mirage.Serialization;
+using Mirage.Weaver.NetworkBehaviours;
+using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using UnityEngine;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using PropertyAttributes = Mono.Cecil.PropertyAttributes;
@@ -15,87 +15,259 @@ namespace Mirage.Weaver
     /// </summary>
     public class SyncVarProcessor
     {
-        private readonly List<FieldDefinition> syncVars = new List<FieldDefinition>();
-
-        // store the unwrapped types for every field
-        private readonly Dictionary<FieldDefinition, TypeReference> originalTypes = new Dictionary<FieldDefinition, TypeReference>();
         private readonly ModuleDefinition module;
         private readonly Readers readers;
         private readonly Writers writers;
         private readonly PropertySiteProcessor propertySiteProcessor;
-        private readonly IWeaverLogger logger;
 
-        public SyncVarProcessor(ModuleDefinition module, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor, IWeaverLogger logger)
+        private FoundNetworkBehaviour behaviour;
+
+        public SyncVarProcessor(ModuleDefinition module, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor)
         {
             this.module = module;
             this.readers = readers;
             this.writers = writers;
             this.propertySiteProcessor = propertySiteProcessor;
-            this.logger = logger;
         }
 
-        // ulong = 64 bytes
-        const int SyncVarLimit = 64;
-        private const string SyncVarCount = "SYNC_VAR_COUNT";
-
-        static string HookParameterMessage(string hookName, TypeReference ValueType)
-            => string.Format("void {0}({1} oldValue, {1} newValue)", hookName, ValueType);
-
-        // Get hook method if any
-        MethodDefinition GetHookMethod(FieldDefinition syncVar, TypeReference originalType)
+        public void ProcessSyncVars(TypeDefinition td, IWeaverLogger logger)
         {
-            CustomAttribute syncVarAttr = syncVar.GetCustomAttribute<SyncVarAttribute>();
+            behaviour = new FoundNetworkBehaviour(td);
+            // the mapping of dirtybits to sync-vars is implicit in the order of the fields here. this order is recorded in m_replacementProperties.
+            // start assigning syncvars at the place the base class stopped, if any
 
-            if (syncVarAttr == null)
-                return null;
+            // get numbers of syncvars in parent class, it will be added to syncvars in this class for total
+            behaviour.GetSyncVarCountFromBase();
 
-            string hookFunctionName = syncVarAttr.GetField<string>("hook", null);
-
-            if (hookFunctionName == null)
-                return null;
-
-            return FindHookMethod(syncVar, hookFunctionName, originalType);
-        }
-
-        MethodDefinition FindHookMethod(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
-        {
-            List<MethodDefinition> methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
-
-            var methodsWith2Param = new List<MethodDefinition>(methods.Where(m => m.Parameters.Count == 2));
-
-            if (methodsWith2Param.Count == 0)
+            // find syncvars
+            // use ToArray to create copy, ProcessSyncVar might add new fields
+            foreach (FieldDefinition fd in td.Fields.ToArray())
             {
-                logger.Error($"Could not find hook for '{syncVar.Name}', hook name '{hookFunctionName}'. " +
-                    $"Method signature should be {HookParameterMessage(hookFunctionName, originalType)}",
-                    syncVar);
-
-                return null;
-            }
-
-            foreach (MethodDefinition method in methodsWith2Param)
-            {
-                if (MatchesParameters(method, originalType))
+                // try/catch for each field, and log once
+                // we dont want to spam multiple logs for a single field
+                try
                 {
-                    return method;
+                    if (IsValidSyncVar(fd))
+                    {
+                        FoundSyncVar syncVar = behaviour.AddSyncVar(fd);
+                        ProcessSyncVar(syncVar);
+                    }
+                }
+                catch (SyncVarException e)
+                {
+                    logger.Error(e);
                 }
             }
 
-            logger.Error($"Wrong type for Parameter in hook for '{syncVar.Name}', hook name '{hookFunctionName}'. " +
-                     $"Method signature should be {HookParameterMessage(hookFunctionName, originalType)}",
-                   syncVar);
+            behaviour.SetSyncVarCount();
 
-            return null;
+            GenerateSerialization();
+            GenerateDeserialization();
         }
 
-        static bool MatchesParameters(MethodDefinition method, TypeReference originalType)
+        bool IsValidSyncVar(FieldDefinition field)
         {
-            // matches void onValueChange(T oldValue, T newValue)
-            return method.Parameters[0].ParameterType.FullName == originalType.FullName &&
-                   method.Parameters[1].ParameterType.FullName == originalType.FullName;
+            if (!field.HasCustomAttribute<SyncVarAttribute>())
+            {
+                return false;
+            }
+
+            if (field.FieldType.IsGenericParameter)
+            {
+                throw new SyncVarException($"{field.Name} cannot be synced since it's a generic parameter", field);
+            }
+
+            if ((field.Attributes & FieldAttributes.Static) != 0)
+            {
+                throw new SyncVarException($"{field.Name} cannot be static", field);
+            }
+
+            if (field.FieldType.IsArray)
+            {
+                // todo should arrays really be blocked?
+                throw new SyncVarException($"{field.Name} has invalid type. Use SyncLists instead of arrays", field);
+            }
+
+            if (SyncObjectProcessor.ImplementsSyncObject(field.FieldType))
+            {
+                throw new SyncVarException($"{field.Name} has [SyncVar] attribute. ISyncObject should not be marked with SyncVar", field);
+            }
+
+            return true;
         }
 
-        MethodDefinition GenerateSyncVarGetter(FieldDefinition fd, string originalName, TypeReference originalType)
+        void ProcessSyncVar(FoundSyncVar syncVar)
         {
+            FieldDefinition fd = syncVar.FieldDefinition;
+
+            string originalName = fd.Name;
+            Weaver.DebugLog(fd.DeclaringType, $"Sync Var {fd.Name} {fd.FieldType}");
+
+            syncVar.SetWrapType(module);
+
+            MethodDefinition get = GenerateSyncVarGetter(syncVar);
+            MethodDefinition set = GenerateSyncVarSetter(syncVar);
+
+            //NOTE: is property even needed? Could just use a setter function?
+            //create the property
+            var propertyDefinition = new PropertyDefinition("Network" + originalName, PropertyAttributes.None, syncVar.OriginalType)
+            {
+                GetMethod = get,
+                SetMethod = set
+            };
+
+            propertyDefinition.DeclaringType = fd.DeclaringType;
+            //add the methods and property to the type.
+            fd.DeclaringType.Properties.Add(propertyDefinition);
+            propertySiteProcessor.Setters[fd] = set;
+
+            if (syncVar.IsWrapped)
+            {
+                propertySiteProcessor.Getters[fd] = get;
+            }
+
+            syncVar.ProcessAttributes();
+            syncVar.FindSerializeFunctions(writers, readers);
+
+            if (syncVar.FloatPackSettings.HasValue)
+            {
+                createFloatPackField(syncVar);
+            }
+            if (syncVar.Vector3PackSettings.HasValue)
+            {
+                createVector3PackField(syncVar);
+            }
+            if (syncVar.Vector2PackSettings.HasValue)
+            {
+                createVector2PackField(syncVar);
+            }
+            if (syncVar.QuaternionBitCount.HasValue)
+            {
+                createQuaternionPackField(syncVar);
+            }
+        }
+
+        private void createFloatPackField(FoundSyncVar syncVar)
+        {
+            syncVar.PackerField = behaviour.TypeDefinition.AddField<FloatPacker>($"{syncVar.FieldDefinition.Name}__Packer", FieldAttributes.Private | FieldAttributes.Static);
+
+            NetworkBehaviourProcessor.AddToStaticConstructor(behaviour.TypeDefinition, (worker) =>
+            {
+                FloatPackSettings settings = syncVar.FloatPackSettings.Value;
+
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max));
+
+                // packer has 2 constructors, get the one that matches the attribute type
+                MethodReference packerCtor = null;
+                if (settings.precision.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value));
+                    packerCtor = module.ImportReference(() => new FloatPacker(default, default(float)));
+                }
+                else if (settings.bitCount.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value));
+                    packerCtor = module.ImportReference(() => new FloatPacker(default, default(int)));
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Invalid FloatPackSettings");
+                }
+                worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+                worker.Append(worker.Create(OpCodes.Stsfld, syncVar.PackerField));
+            });
+        }
+
+        private void createVector3PackField(FoundSyncVar syncVar)
+        {
+            syncVar.PackerField = behaviour.TypeDefinition.AddField<Vector3Packer>($"{syncVar.FieldDefinition.Name}__Packer", FieldAttributes.Private | FieldAttributes.Static);
+
+            NetworkBehaviourProcessor.AddToStaticConstructor(behaviour.TypeDefinition, (worker) =>
+            {
+                Vector3PackSettings settings = syncVar.Vector3PackSettings.Value;
+
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.x));
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.y));
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.z));
+
+                // packer has 2 constructors, get the one that matches the attribute type
+                MethodReference packerCtor = null;
+                if (settings.precision.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.x));
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.y));
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.z));
+                    packerCtor = module.ImportReference(() => new Vector3Packer(default(float), default(float), default(float), default(float), default(float), default(float)));
+                }
+                else if (settings.bitCount.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.x));
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.y));
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.z));
+                    packerCtor = module.ImportReference(() => new Vector3Packer(default(float), default(float), default(float), default(int), default(int), default(int)));
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Invalid Vector3PackSettings");
+                }
+                worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+                worker.Append(worker.Create(OpCodes.Stsfld, syncVar.PackerField));
+            });
+        }
+        private void createVector2PackField(FoundSyncVar syncVar)
+        {
+            syncVar.PackerField = behaviour.TypeDefinition.AddField<Vector2Packer>($"{syncVar.FieldDefinition.Name}__Packer", FieldAttributes.Private | FieldAttributes.Static);
+
+            NetworkBehaviourProcessor.AddToStaticConstructor(behaviour.TypeDefinition, (worker) =>
+            {
+                Vector2PackSettings settings = syncVar.Vector2PackSettings.Value;
+
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.x));
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.y));
+
+                // packer has 2 constructors, get the one that matches the attribute type
+                MethodReference packerCtor = null;
+                if (settings.precision.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.x));
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.y));
+                    packerCtor = module.ImportReference(() => new Vector2Packer(default(float), default(float), default(float), default(float)));
+                }
+                else if (settings.bitCount.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.x));
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.y));
+                    packerCtor = module.ImportReference(() => new Vector2Packer(default(float), default(float), default(int), default(int)));
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Invalid Vector2PackSettings");
+                }
+                worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+                worker.Append(worker.Create(OpCodes.Stsfld, syncVar.PackerField));
+            });
+        }
+        private void createQuaternionPackField(FoundSyncVar syncVar)
+        {
+            syncVar.PackerField = behaviour.TypeDefinition.AddField<QuaternionPacker>($"{syncVar.FieldDefinition.Name}__Packer", FieldAttributes.Private | FieldAttributes.Static);
+
+            NetworkBehaviourProcessor.AddToStaticConstructor(behaviour.TypeDefinition, (worker) =>
+            {
+                int bitCount = syncVar.QuaternionBitCount.Value;
+
+                worker.Append(worker.Create(OpCodes.Ldc_I4, bitCount));
+                MethodReference packerCtor = module.ImportReference(() => new QuaternionPacker(default(int)));
+                worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+                worker.Append(worker.Create(OpCodes.Stsfld, syncVar.PackerField));
+            });
+        }
+
+        MethodDefinition GenerateSyncVarGetter(FoundSyncVar syncVar)
+        {
+            FieldDefinition fd = syncVar.FieldDefinition;
+            TypeReference originalType = syncVar.OriginalType;
+            string originalName = syncVar.OriginalName;
+
             //Create the get method
             MethodDefinition get = fd.DeclaringType.AddMethod(
                     "get_Network" + originalName, MethodAttributes.Public |
@@ -104,7 +276,7 @@ namespace Mirage.Weaver
                     originalType);
 
             ILProcessor worker = get.Body.GetILProcessor();
-            LoadField(fd, originalType, worker);
+            WriteLoadField(worker, syncVar);
 
             worker.Append(worker.Create(OpCodes.Ret));
 
@@ -113,8 +285,11 @@ namespace Mirage.Weaver
             return get;
         }
 
-        MethodDefinition GenerateSyncVarSetter(FieldDefinition fd, string originalName, long dirtyBit, TypeReference originalType)
+        MethodDefinition GenerateSyncVarSetter(FoundSyncVar syncVar)
         {
+            FieldDefinition fd = syncVar.FieldDefinition;
+            TypeReference originalType = syncVar.OriginalType;
+            string originalName = syncVar.OriginalName;
 
             //Create the set method
             MethodDefinition set = fd.DeclaringType.AddMethod("set_Network" + originalName, MethodAttributes.Public |
@@ -134,7 +309,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
             // reference to field to set
             // make generic version of SetSyncVar with field type
-            LoadField(fd, originalType, worker);
+            WriteLoadField(worker, syncVar);
 
             MethodReference syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
             var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
@@ -143,22 +318,20 @@ namespace Mirage.Weaver
 
             worker.Append(worker.Create(OpCodes.Brtrue, endOfMethod));
 
-            // T oldValue = value;
+            // T oldValue = value
             VariableDefinition oldValue = set.AddLocal(originalType);
-            LoadField(fd, originalType, worker);
+            WriteLoadField(worker, syncVar);
             worker.Append(worker.Create(OpCodes.Stloc, oldValue));
 
-            // fieldValue = value;
-            StoreField(fd, valueParam, worker);
+            // fieldValue = value
+            WriteStoreField(worker, valueParam, syncVar);
 
             // this.SetDirtyBit(dirtyBit)
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldc_I8, dirtyBit));
+            worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
             worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.SetDirtyBit(default)));
 
-            MethodDefinition hookMethod = GetHookMethod(fd, originalType);
-
-            if (hookMethod != null)
+            if (syncVar.HasHookMethod)
             {
                 //if (base.isLocalClient && !getSyncVarHookGuard(dirtyBit))
                 Instruction label = worker.Create(OpCodes.Nop);
@@ -166,23 +339,23 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalClient));
                 worker.Append(worker.Create(OpCodes.Brfalse, label));
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Ldc_I8, dirtyBit));
+                worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
                 worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.GetSyncVarHookGuard(default)));
                 worker.Append(worker.Create(OpCodes.Brtrue, label));
 
-                // setSyncVarHookGuard(dirtyBit, true);
+                // setSyncVarHookGuard(dirtyBit, true)
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Ldc_I8, dirtyBit));
+                worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
                 worker.Append(worker.Create(OpCodes.Ldc_I4_1));
                 worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.SetSyncVarHookGuard(default, default)));
 
                 // call hook (oldValue, newValue)
-                // Generates: OnValueChanged(oldValue, value);
-                WriteCallHookMethodUsingArgument(worker, hookMethod, oldValue);
+                // Generates: OnValueChanged(oldValue, value)
+                WriteCallHookMethodUsingArgument(worker, syncVar.HookMethod, oldValue);
 
-                // setSyncVarHookGuard(dirtyBit, false);
+                // setSyncVarHookGuard(dirtyBit, false)
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Ldc_I8, dirtyBit));
+                worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
                 worker.Append(worker.Create(OpCodes.Ldc_I4_0));
                 worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.SetSyncVarHookGuard(default, default)));
 
@@ -196,31 +369,20 @@ namespace Mirage.Weaver
             return set;
         }
 
-        private void StoreField(FieldDefinition fd, ParameterDefinition valueParam, ILProcessor worker)
+        /// <summary>
+        /// Writes Load field to IL worker, eg `this.field`
+        /// <para>If syncvar is wrapped will use get_Value method instead</para>
+        /// </summary>
+        /// <param name="worker"></param>
+        /// <param name="syncVar"></param>
+        void WriteLoadField(ILProcessor worker, FoundSyncVar syncVar)
         {
-            if (IsWrapped(fd.FieldType))
-            {
-                // there is a wrapper struct, call the setter
-                MethodReference setter = module.ImportReference(fd.FieldType.Resolve().GetMethod("set_Value"));
+            FieldDefinition fd = syncVar.FieldDefinition;
+            TypeReference originalType = syncVar.OriginalType;
 
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
-                worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
-                worker.Append(worker.Create(OpCodes.Call, setter));
-            }
-            else
-            {
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
-                worker.Append(worker.Create(OpCodes.Stfld, fd.MakeHostGenericIfNeeded()));
-            }
-        }
-
-        private void LoadField(FieldDefinition fd, TypeReference originalType, ILProcessor worker)
-        {
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            if (IsWrapped(fd.FieldType))
+            if (syncVar.IsWrapped)
             {
                 worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
                 MethodReference getter = module.ImportReference(fd.FieldType.Resolve().GetMethod("get_Value"));
@@ -241,140 +403,52 @@ namespace Mirage.Weaver
             }
         }
 
-        void ProcessSyncVar(FieldDefinition fd, long dirtyBit)
+        /// <summary>
+        /// Writes Store field to IL worker, eg `this.field = `
+        /// <para>If syncvar is wrapped will use set_Value method instead</para>
+        /// </summary>
+        /// <param name="worker"></param>
+        /// <param name="valueParam"></param>
+        /// <param name="syncVar"></param>
+        void WriteStoreField(ILProcessor worker, ParameterDefinition valueParam, FoundSyncVar syncVar)
         {
-            string originalName = fd.Name;
-            Weaver.DLog(fd.DeclaringType, "Sync Var " + fd.Name + " " + fd.FieldType);
+            FieldDefinition fd = syncVar.FieldDefinition;
 
-            TypeReference originalType = fd.FieldType;
-            fd.FieldType = WrapType(fd);
-
-            MethodDefinition get = GenerateSyncVarGetter(fd, originalName, originalType);
-            MethodDefinition set = GenerateSyncVarSetter(fd, originalName, dirtyBit, originalType);
-
-            //NOTE: is property even needed? Could just use a setter function?
-            //create the property
-            var propertyDefinition = new PropertyDefinition("Network" + originalName, PropertyAttributes.None, originalType)
+            if (syncVar.IsWrapped)
             {
-                GetMethod = get,
-                SetMethod = set
-            };
+                // there is a wrapper struct, call the setter
+                MethodReference setter = module.ImportReference(fd.FieldType.Resolve().GetMethod("set_Value"));
 
-            propertyDefinition.DeclaringType = fd.DeclaringType;
-            //add the methods and property to the type.
-            fd.DeclaringType.Properties.Add(propertyDefinition);
-            propertySiteProcessor.Setters[fd] = set;
-
-            if (IsWrapped(fd.FieldType))
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
+                worker.Append(worker.Create(OpCodes.Call, setter));
+            }
+            else
             {
-                propertySiteProcessor.Getters[fd] = get;
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldarg, valueParam));
+                worker.Append(worker.Create(OpCodes.Stfld, fd.MakeHostGenericIfNeeded()));
             }
         }
 
-        private TypeReference WrapType(FieldDefinition syncvar)
-        {
-            TypeReference typeReference = syncvar.FieldType;
-
-            originalTypes[syncvar] = typeReference;
-            if (typeReference.Is<NetworkIdentity>())
-            {
-                // change the type of the field to a wrapper NetworkIDentitySyncvar
-                return module.ImportReference<NetworkIdentitySyncvar>();
-            }
-            if (typeReference.Is<GameObject>())
-                return module.ImportReference<GameObjectSyncvar>();
-
-            if (typeReference.Resolve().IsDerivedFrom<NetworkBehaviour>())
-                return module.ImportReference<NetworkBehaviorSyncvar>();
-
-            return typeReference;
-        }
-
-        private TypeReference UnwrapType(FieldDefinition syncvar)
-        {
-            return originalTypes[syncvar];
-        }
-
-        private static bool IsWrapped(TypeReference typeReference)
-        {
-            return typeReference.Is<NetworkIdentitySyncvar>() ||
-                typeReference.Is<GameObjectSyncvar>() ||
-                typeReference.Is<NetworkBehaviorSyncvar>();
-        }
-
-        public void ProcessSyncVars(TypeDefinition td)
-        {
-            // the mapping of dirtybits to sync-vars is implicit in the order of the fields here. this order is recorded in m_replacementProperties.
-            // start assigning syncvars at the place the base class stopped, if any
-
-            int dirtyBitCounter = td.BaseType.Resolve().GetConst<int>(SyncVarCount);
-
-            var fields = new List<FieldDefinition>(td.Fields);
-
-            // find syncvars
-            foreach (FieldDefinition fd in fields)
-            {
-                if (!fd.HasCustomAttribute<SyncVarAttribute>())
-                {
-                    continue;
-                }
-
-                if (fd.FieldType.IsGenericParameter)
-                {
-                    logger.Error($"{fd.Name} cannot be synced since it's a generic parameter", fd);
-                    continue;
-                }
-
-                if ((fd.Attributes & FieldAttributes.Static) != 0)
-                {
-                    logger.Error($"{fd.Name} cannot be static", fd);
-                    continue;
-                }
-
-                if (fd.FieldType.IsArray)
-                {
-                    logger.Error($"{fd.Name} has invalid type. Use SyncLists instead of arrays", fd);
-                    continue;
-                }
-
-                if (SyncObjectProcessor.ImplementsSyncObject(fd.FieldType))
-                {
-                    logger.Warning($"{fd.Name} has [SyncVar] attribute. SyncLists should not be marked with SyncVar", fd);
-                    continue;
-                }
-                syncVars.Add(fd);
-
-                ProcessSyncVar(fd, 1L << dirtyBitCounter);
-                dirtyBitCounter += 1;
-            }
-
-            if (dirtyBitCounter >= SyncVarLimit)
-            {
-                logger.Error($"{td.Name} has too many SyncVars. Consider refactoring your class into multiple components", td);
-            }
-
-            td.SetConst(SyncVarCount, syncVars.Count);
-
-            GenerateSerialization(td);
-            GenerateDeSerialization(td);
-        }
 
         void WriteCallHookMethodUsingArgument(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue)
         {
             WriteCallHookMethod(worker, hookMethod, oldValue, null);
         }
 
-        void WriteCallHookMethodUsingField(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue, FieldDefinition newValue)
+        void WriteCallHookMethodUsingField(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
-            if (newValue == null)
+            if (syncVarField == null)
             {
-                logger.Error("NewValue field was null when writing SyncVar hook");
+                throw new ArgumentNullException(nameof(syncVarField));
             }
 
-            WriteCallHookMethod(worker, hookMethod, oldValue, newValue);
+            WriteCallHookMethod(worker, hookMethod, oldValue, syncVarField);
         }
 
-        void WriteCallHookMethod(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue, FieldDefinition newValue)
+        void WriteCallHookMethod(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
             WriteStartFunctionCall();
 
@@ -396,13 +470,13 @@ namespace Mirage.Weaver
             void WriteNewValue()
             {
                 // write arg1 or this.field
-                if (newValue == null)
+                if (syncVarField == null)
                 {
                     worker.Append(worker.Create(OpCodes.Ldarg_1));
                 }
                 else
                 {
-                    LoadField(newValue, oldValue.VariableType, worker);
+                    WriteLoadField(worker, syncVarField);
                 }
             }
 
@@ -422,7 +496,7 @@ namespace Mirage.Weaver
             void WriteEndFunctionCall()
             {
                 // only use Callvirt when not static
-                OpCode opcode = hookMethod.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
+                OpCode OpCall = hookMethod.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
                 MethodReference hookMethodReference = hookMethod;
 
                 if (hookMethodReference.DeclaringType.HasGenericParameters)
@@ -432,268 +506,223 @@ namespace Mirage.Weaver
                     hookMethodReference = hookMethod.MakeHostInstanceGeneric(genericType);
                 }
 
-                worker.Append(worker.Create(opcode, module.ImportReference(hookMethodReference)));
+                worker.Append(worker.Create(OpCall, module.ImportReference(hookMethodReference)));
             }
         }
 
-        void GenerateSerialization(TypeDefinition netBehaviourSubclass)
+        void GenerateSerialization()
         {
-            Weaver.DLog(netBehaviourSubclass, "  GenerateSerialization");
+            Weaver.DebugLog(behaviour.TypeDefinition, "  GenerateSerialization");
 
-            const string SerializeMethodName = nameof(NetworkBehaviour.SerializeSyncVars);
-            if (netBehaviourSubclass.GetMethod(SerializeMethodName) != null)
+            // Dont create method if users has manually overridden it
+            if (behaviour.HasManualSerializeOverride())
                 return;
 
-            if (syncVars.Count == 0)
-            {
-                // no synvars,  no need for custom OnSerialize
+            // dont create if there are no syncvars
+            if (behaviour.SyncVars.Count == 0)
                 return;
-            }
 
-            MethodDefinition serialize = netBehaviourSubclass.AddMethod(SerializeMethodName,
-                    MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
-                    module.ImportReference<bool>());
+            var helper = new SerializeHelper(module, behaviour);
+            ILProcessor worker = helper.AddMethod();
 
-            ParameterDefinition writerParameter = serialize.AddParam<NetworkWriter>("writer");
-            ParameterDefinition initializeParameter = serialize.AddParam<bool>("initialize");
-            ILProcessor worker = serialize.Body.GetILProcessor();
+            helper.AddLocals();
+            helper.WriteBaseCall();
 
-            serialize.Body.InitLocals = true;
-
-            // loc_0,  this local variable is to determine if any variable was dirty
-            VariableDefinition dirtyLocal = serialize.AddLocal<bool>();
-
-            MethodReference baseSerialize = netBehaviourSubclass.BaseType.GetMethodInBaseType(SerializeMethodName);
-            if (baseSerialize != null)
+            helper.WriteIfInitial(() =>
             {
-                // base
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                // writer
-                worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
-                // forceAll
-                worker.Append(worker.Create(OpCodes.Ldarg, initializeParameter));
-                worker.Append(worker.Create(OpCodes.Call, module.ImportReference(baseSerialize)));
-                // set dirtyLocal to result of base.OnSerialize()
-                worker.Append(worker.Create(OpCodes.Stloc, dirtyLocal));
-            }
-
-            // Generates: if (forceAll);
-            Instruction initialStateLabel = worker.Create(OpCodes.Nop);
-            // forceAll
-            worker.Append(worker.Create(OpCodes.Ldarg, initializeParameter));
-            worker.Append(worker.Create(OpCodes.Brfalse, initialStateLabel));
-
-            foreach (FieldDefinition syncVar in syncVars)
-            {
-                WriteVariable(worker, writerParameter, syncVar);
-            }
-
-            // always return true if forceAll
-
-            // Generates: return true
-            worker.Append(worker.Create(OpCodes.Ldc_I4_1));
-            worker.Append(worker.Create(OpCodes.Ret));
-
-            // Generates: end if (forceAll);
-            worker.Append(initialStateLabel);
+                foreach (FoundSyncVar syncVar in behaviour.SyncVars)
+                {
+                    WriteFromField(worker, helper.WriterParameter, syncVar);
+                }
+            });
 
             // write dirty bits before the data fields
-            // Generates: writer.WritePackedUInt64 (base.get_syncVarDirtyBits ());
-            // writer
-            worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
-            // base
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.SyncVarDirtyBits));
-            MethodReference writeUint64Func = writers.GetWriteFunc<ulong>(null);
-            worker.Append(worker.Create(OpCodes.Call, writeUint64Func));
+            helper.WriteDirtyBitMask();
 
             // generate a writer call for any dirty variable in this class
 
             // start at number of syncvars in parent
-            int dirtyBit = netBehaviourSubclass.BaseType.Resolve().GetConst<int>(SyncVarCount);
-            foreach (FieldDefinition syncVar in syncVars)
+            foreach (FoundSyncVar syncVar in behaviour.SyncVars)
             {
-                Instruction varLabel = worker.Create(OpCodes.Nop);
-
-                // Generates: if ((base.get_syncVarDirtyBits() & 1uL) != 0uL)
-                // base
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.SyncVarDirtyBits));
-                // 8 bytes = long
-                worker.Append(worker.Create(OpCodes.Ldc_I8, 1L << dirtyBit));
-                worker.Append(worker.Create(OpCodes.And));
-                worker.Append(worker.Create(OpCodes.Brfalse, varLabel));
-
-                // Generates a call to the writer for that field
-                WriteVariable(worker, writerParameter, syncVar);
-
-                // something was dirty
-                worker.Append(worker.Create(OpCodes.Ldc_I4_1));
-                // set dirtyLocal to true
-                worker.Append(worker.Create(OpCodes.Stloc, dirtyLocal));
-
-                worker.Append(varLabel);
-                dirtyBit += 1;
+                helper.WriteIfSyncVarDirty(syncVar, () =>
+                {
+                    // Generates a call to the writer for that field
+                    WriteFromField(worker, helper.WriterParameter, syncVar);
+                });
             }
 
             // generate: return dirtyLocal
-            worker.Append(worker.Create(OpCodes.Ldloc, dirtyLocal));
-            worker.Append(worker.Create(OpCodes.Ret));
+            helper.WriteReturnDirty();
         }
 
-        private void WriteVariable(ILProcessor worker, ParameterDefinition writerParameter, FieldDefinition syncVar)
+        void WriteFromField(ILProcessor worker, ParameterDefinition writerParameter, FoundSyncVar syncVar)
         {
-            // Generates a writer call for each sync variable
-            // writer
-            worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
-            // this
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldfld, syncVar.MakeHostGenericIfNeeded()));
-            MethodReference writeFunc = writers.GetWriteFunc(syncVar.FieldType, null);
-            if (writeFunc != null)
+            if (syncVar.BitCount.HasValue)
             {
-                worker.Append(worker.Create(OpCodes.Call, writeFunc));
+                WriteWithBitCount();
+            }
+            else if (syncVar.FloatPackSettings.HasValue)
+            {
+                WritePacker(module.ImportReference((FloatPacker p) => p.Pack(default, default)));
+            }
+            else if (syncVar.Vector2PackSettings.HasValue)
+            {
+                WritePacker(module.ImportReference((Vector2Packer p) => p.Pack(default, default)));
+            }
+            else if (syncVar.Vector3PackSettings.HasValue)
+            {
+                WritePacker(module.ImportReference((Vector3Packer p) => p.Pack(default, default)));
+            }
+            else if (syncVar.QuaternionBitCount.HasValue)
+            {
+                WritePacker(module.ImportReference((QuaternionPacker p) => p.Pack(default, default)));
             }
             else
             {
-                logger.Error($"{syncVar.Name} has unsupported type. Use a supported Mirage type instead", syncVar);
+                WriteDefault();
+            }
+
+            // Local Functions
+
+            void WriteDefault()
+            {
+                // if WriteFunction is null it means there was an error earlier, so we dont need to do anything here
+                if (syncVar.WriteFunction == null) { return; }
+
+                // Generates a writer call for each sync variable
+                // writer
+                worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
+                // this
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Call, syncVar.WriteFunction));
+            }
+
+            void WriteWithBitCount()
+            {
+                MethodReference writeWithBitCount = module.ImportReference(writerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkWriter.Write)));
+
+                worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+
+                if (syncVar.UseZigZagEncoding)
+                {
+                    WriteZigZag();
+                }
+                if (syncVar.BitCountMinValue.HasValue)
+                {
+                    WriteSubtractMinValue();
+                }
+
+                worker.Append(worker.Create(OpCodes.Conv_U8));
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCount.Value));
+                worker.Append(worker.Create(OpCodes.Call, writeWithBitCount));
+            }
+            void WriteZigZag()
+            {
+                bool useLong = syncVar.FieldDefinition.FieldType.Is<long>();
+                MethodReference encode = useLong
+                    ? module.ImportReference((long v) => ZigZag.Encode(v))
+                    : module.ImportReference((int v) => ZigZag.Encode(v));
+
+                worker.Append(worker.Create(OpCodes.Call, encode));
+            }
+            void WriteSubtractMinValue()
+            {
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCountMinValue.Value));
+                worker.Append(worker.Create(OpCodes.Sub));
+            }
+            void WritePacker(MethodReference packMethod)
+            {
+                // Generates: packer.pack(writer, field)
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.PackerField.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Call, packMethod));
             }
         }
 
-        void GenerateDeSerialization(TypeDefinition netBehaviourSubclass)
+
+        void GenerateDeserialization()
         {
-            Weaver.DLog(netBehaviourSubclass, "  GenerateDeSerialization");
+            Weaver.DebugLog(behaviour.TypeDefinition, "  GenerateDeSerialization");
 
-            const string DeserializeMethodName = nameof(NetworkBehaviour.DeserializeSyncVars);
-            if (netBehaviourSubclass.GetMethod(DeserializeMethodName) != null)
+            // Dont create method if users has manually overridden it
+            if (behaviour.HasManualDeserializeOverride())
                 return;
 
-            if (syncVars.Count == 0)
-            {
-                // no synvars,  no need for custom OnDeserialize
+            // dont create if there are no syncvars
+            if (behaviour.SyncVars.Count == 0)
                 return;
-            }
 
-            MethodDefinition serialize = netBehaviourSubclass.AddMethod(DeserializeMethodName,
-                    MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig);
 
-            ParameterDefinition readerParam = serialize.AddParam<NetworkReader>("reader");
-            ParameterDefinition initializeParam = serialize.AddParam<bool>("initialState");
-            ILProcessor serWorker = serialize.Body.GetILProcessor();
-            // setup local for dirty bits
-            serialize.Body.InitLocals = true;
-            VariableDefinition dirtyBitsLocal = serialize.AddLocal<long>();
+            var helper = new DeserializeHelper(module, behaviour);
+            ILProcessor worker = helper.AddMethod();
 
-            MethodReference baseDeserialize = netBehaviourSubclass.BaseType.GetMethodInBaseType(DeserializeMethodName);
-            if (baseDeserialize != null)
+            helper.AddLocals();
+            helper.WriteBaseCall();
+
+            helper.WriteIfInitial(() =>
             {
-                // base
-                serWorker.Append(serWorker.Create(OpCodes.Ldarg_0));
-                // reader
-                serWorker.Append(serWorker.Create(OpCodes.Ldarg, readerParam));
-                // initialState
-                serWorker.Append(serWorker.Create(OpCodes.Ldarg, initializeParam));
-                serWorker.Append(serWorker.Create(OpCodes.Call, module.ImportReference(baseDeserialize)));
-            }
+                foreach (FoundSyncVar syncVar in behaviour.SyncVars)
+                {
+                    DeserializeField(worker, helper.Method, helper.ReaderParameter, syncVar);
+                }
+            });
 
-            // Generates: if (initialState);
-            Instruction initialStateLabel = serWorker.Create(OpCodes.Nop);
-
-            serWorker.Append(serWorker.Create(OpCodes.Ldarg, initializeParam));
-            serWorker.Append(serWorker.Create(OpCodes.Brfalse, initialStateLabel));
-
-            foreach (FieldDefinition syncVar in syncVars)
-            {
-                DeserializeField(syncVar, serWorker, serialize);
-            }
-
-            serWorker.Append(serWorker.Create(OpCodes.Ret));
-
-            // Generates: end if (initialState);
-            serWorker.Append(initialStateLabel);
-
-            // get dirty bits
-            serWorker.Append(serWorker.Create(OpCodes.Ldarg, readerParam));
-            serWorker.Append(serWorker.Create(OpCodes.Call, readers.GetReadFunc<ulong>(null)));
-            serWorker.Append(serWorker.Create(OpCodes.Stloc, dirtyBitsLocal));
+            helper.ReadDirtyBitMask();
 
             // conditionally read each syncvar
-            // start at number of syncvars in parent
-            int dirtyBit = netBehaviourSubclass.BaseType.Resolve().GetConst<int>(SyncVarCount);
-            foreach (FieldDefinition syncVar in syncVars)
+            foreach (FoundSyncVar syncVar in behaviour.SyncVars)
             {
-                Instruction varLabel = serWorker.Create(OpCodes.Nop);
-
-                // check if dirty bit is set
-                serWorker.Append(serWorker.Create(OpCodes.Ldloc, dirtyBitsLocal));
-                serWorker.Append(serWorker.Create(OpCodes.Ldc_I8, 1L << dirtyBit));
-                serWorker.Append(serWorker.Create(OpCodes.And));
-                serWorker.Append(serWorker.Create(OpCodes.Brfalse, varLabel));
-
-                DeserializeField(syncVar, serWorker, serialize);
-
-                serWorker.Append(varLabel);
-                dirtyBit += 1;
+                helper.WriteIfSyncVarDirty(syncVar, () =>
+                {
+                    DeserializeField(worker, helper.Method, helper.ReaderParameter, syncVar);
+                });
             }
 
-            serWorker.Append(serWorker.Create(OpCodes.Ret));
+            worker.Append(worker.Create(OpCodes.Ret));
         }
 
         /// <summary>
         /// [SyncVar] int/float/struct/etc.?
         /// </summary>
-        /// <param name="syncVar"></param>
-        /// <param name="serWorker"></param>
+        /// <param name="fd"></param>
+        /// <param name="worker"></param>
         /// <param name="deserialize"></param>
         /// <param name="initialState"></param>
         /// <param name="hookResult"></param>
-        void DeserializeField(FieldDefinition syncVar, ILProcessor serWorker, MethodDefinition deserialize)
+        void DeserializeField(ILProcessor worker, MethodDefinition deserialize, ParameterDefinition readerParameter, FoundSyncVar syncVar)
         {
-            TypeReference originalType = UnwrapType(syncVar);
-            MethodDefinition hookMethod = GetHookMethod(syncVar, originalType);
+            TypeReference originalType = syncVar.OriginalType;
 
             /*
              Generates code like:
                 // for hook
-                int oldValue = a;
-                Networka = reader.ReadPackedInt32();
+                int oldValue = a
+                Networka = reader.ReadPackedInt32()
                 if (!SyncVarEqual(oldValue, ref a))
-                {
-                    OnSetA(oldValue, Networka);
-                }
+                    OnSetA(oldValue, Networka)
              */
-            MethodReference readFunc = readers.GetReadFunc(syncVar.FieldType, null);
-            if (readFunc == null)
+
+            // Store old value in local variable, we need it for Hook
+            // T oldValue = value
+            VariableDefinition oldValue = null;
+            if (syncVar.HasHookMethod)
             {
-                logger.Error($"{syncVar.Name} has unsupported type. Use a supported Mirage type instead", syncVar);
-                return;
+                oldValue = deserialize.AddLocal(originalType);
+                WriteLoadField(worker, syncVar);
+
+                worker.Append(worker.Create(OpCodes.Stloc, oldValue));
             }
 
-            // T oldValue = value;
-            VariableDefinition oldValue = deserialize.AddLocal(originalType);
-            LoadField(syncVar, originalType, serWorker);
-
-            serWorker.Append(serWorker.Create(OpCodes.Stloc, oldValue));
-
             // read value and store in syncvar BEFORE calling the hook
-            // -> this makes way more sense. by definition, the hook is
-            //    supposed to be called after it was changed. not before.
-            // -> setting it BEFORE calling the hook fixes the following bug:
-            //    https://github.com/vis2k/Mirror/issues/1151 in host mode
-            //    where the value during the Hook call would call Cmds on
-            //    the host server, and they would all happen and compare
-            //    values BEFORE the hook even returned and hence BEFORE the
-            //    actual value was even set.
-            // put 'this.' onto stack for 'this.syncvar' below
-            serWorker.Append(serWorker.Create(OpCodes.Ldarg_0));
-            // reader. for 'reader.Read()' below
-            serWorker.Append(serWorker.Create(OpCodes.Ldarg_1));
-            // reader.Read()
-            serWorker.Append(serWorker.Create(OpCodes.Call, readFunc));
-            // syncvar
-            serWorker.Append(serWorker.Create(OpCodes.Stfld, syncVar.MakeHostGenericIfNeeded()));
+            ReadToField(worker, readerParameter, syncVar);
 
-            if (hookMethod != null)
+            if (syncVar.HasHookMethod)
             {
                 // call hook
                 // but only if SyncVar changed. otherwise a client would
@@ -701,28 +730,122 @@ namespace Mirage.Weaver
                 // didn't change from the default values on the client.
                 // see also: https://github.com/vis2k/Mirror/issues/1278
 
-                // Generates: if (!SyncVarEqual);
-                Instruction syncVarEqualLabel = serWorker.Create(OpCodes.Nop);
+                // Generates: if (!SyncVarEqual)
+                Instruction syncVarEqualLabel = worker.Create(OpCodes.Nop);
 
                 // 'this.' for 'this.SyncVarEqual'
-                serWorker.Append(serWorker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
                 // 'oldValue'
-                serWorker.Append(serWorker.Create(OpCodes.Ldloc, oldValue));
+                worker.Append(worker.Create(OpCodes.Ldloc, oldValue));
                 // 'newValue'
-                LoadField(syncVar, originalType, serWorker);
+                WriteLoadField(worker, syncVar);
                 // call the function
                 MethodReference syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
                 var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
                 syncVarEqualGm.GenericArguments.Add(originalType);
-                serWorker.Append(serWorker.Create(OpCodes.Call, syncVarEqualGm));
-                serWorker.Append(serWorker.Create(OpCodes.Brtrue, syncVarEqualLabel));
+                worker.Append(worker.Create(OpCodes.Call, syncVarEqualGm));
+                worker.Append(worker.Create(OpCodes.Brtrue, syncVarEqualLabel));
 
                 // call the hook
-                // Generates: OnValueChanged(oldValue, this.syncVar);
-                WriteCallHookMethodUsingField(serWorker, hookMethod, oldValue, syncVar);
+                // Generates: OnValueChanged(oldValue, this.syncVar)
+                WriteCallHookMethodUsingField(worker, syncVar.HookMethod, oldValue, syncVar);
 
-                // Generates: end if (!SyncVarEqual);
-                serWorker.Append(syncVarEqualLabel);
+                // Generates: end if (!SyncVarEqual)
+                worker.Append(syncVarEqualLabel);
+            }
+        }
+
+        void ReadToField(ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)
+        {
+            // all methods 
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            if (syncVar.BitCount.HasValue)
+            {
+                ReadWithBitCount();
+            }
+            else if (syncVar.FloatPackSettings.HasValue)
+            {
+                ReadPacker(module.ImportReference((FloatPacker p) => p.Unpack(default(NetworkReader))));
+            }
+            else if (syncVar.Vector2PackSettings.HasValue)
+            {
+                ReadPacker(module.ImportReference((Vector2Packer p) => p.Unpack(default(NetworkReader))));
+            }
+            else if (syncVar.Vector3PackSettings.HasValue)
+            {
+                ReadPacker(module.ImportReference((Vector3Packer p) => p.Unpack(default(NetworkReader))));
+            }
+
+            else if (syncVar.QuaternionBitCount.HasValue)
+            {
+                ReadPacker(module.ImportReference((QuaternionPacker p) => p.Unpack(default(NetworkReader))));
+            }
+            else
+            {
+                ReadDefault();
+            }
+            worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+
+
+            // Local Functions
+
+            void ReadDefault()
+            {
+                // if ReadFunction is null it means there was an error earlier, so we dont need to do anything here
+                if (syncVar.ReadFunction == null) { return; }
+
+                // add `reader` to stack
+                worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
+                // call read function
+                worker.Append(worker.Create(OpCodes.Call, syncVar.ReadFunction));
+            }
+            void ReadWithBitCount()
+            {
+                MethodReference readWithBitCount = module.ImportReference(readerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkReader.Read)));
+
+                // add `reader` to stack
+                worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
+                // add `bitCount` to stack
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCount.Value));
+                // call `reader.read(bitCount)` function
+                worker.Append(worker.Create(OpCodes.Call, readWithBitCount));
+
+                // convert result to correct size if needed
+                if (syncVar.BitCountConvert.HasValue)
+                {
+                    worker.Append(worker.Create(syncVar.BitCountConvert.Value));
+                }
+
+                if (syncVar.UseZigZagEncoding)
+                {
+                    ReadZigZag();
+                }
+                if (syncVar.BitCountMinValue.HasValue)
+                {
+                    ReadAddMinValue();
+                }
+            }
+            void ReadZigZag()
+            {
+                bool useLong = syncVar.FieldDefinition.FieldType.Is<long>();
+                MethodReference encode = useLong
+                    ? module.ImportReference((ulong v) => ZigZag.Decode(v))
+                    : module.ImportReference((uint v) => ZigZag.Decode(v));
+
+                worker.Append(worker.Create(OpCodes.Call, encode));
+            }
+            void ReadAddMinValue()
+            {
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCountMinValue.Value));
+                worker.Append(worker.Create(OpCodes.Add));
+            }
+            void ReadPacker(MethodReference unpackMethod)
+            {
+                // Generates: ... = packer.unpack(reader)
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.PackerField.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
+                worker.Append(worker.Create(OpCodes.Call, unpackMethod));
             }
         }
     }

@@ -1,5 +1,6 @@
 namespace Mirage.SocketLayer
 {
+    // todo add validation for this config
     public class Config
     {
         #region server 
@@ -40,20 +41,23 @@ namespace Mirage.SocketLayer
         /// </summary>
         public float DisconnectDuration = 1;
 
-        // todo move these settings to socket
         /// <summary>
-        /// Max size of a packet (excluding peer header)
-        /// </summary>
-        public int Mtu => BufferSize - HEADER_SIZE;
-        /// <summary>
-        /// Peer+ udp socket size
+        /// IP + UDP Header
         /// </summary>
         const int HEADER_SIZE = 20 + 8;
+
         /// <summary>
-        /// Size of buffers, Should be Mtu + header size + header size for socket
-        /// <para>Udp Packet is 1280</para>
+        /// MTU is expected to be atleast this number
         /// </summary>
-        public int BufferSize = 1280;
+        const int MIN_MTU = 1280;
+
+        /// <summary>
+        /// Max size of array that will be sent to or can be received from <see cref="ISocket"/>
+        /// <para>This will also be the size of all buffers used by <see cref="Peer"/></para>
+        /// <para>This is not max message size because this size includes packets header added by <see cref="Peer"/></para>
+        /// </summary>
+        // todo move these settings to socket
+        public int MaxPacketSize = MIN_MTU - HEADER_SIZE;
 
         /// <summary>
         /// How many buffers to create at start
@@ -97,6 +101,13 @@ namespace Mirage.SocketLayer
         /// <para>Max of 16</para>
         /// </summary>
         public int SequenceSize = 12;
+
+        /// <summary>
+        /// How many fragments large reliable message can be split into
+        /// <para>if set to 0 then messages over <see cref="MaxPacketSize"/> will not be allowed to be sent</para>
+        /// <para>max value is 255</para>
+        /// </summary>
+        public int MaxReliableFragments = 5;
         #endregion
     }
 }

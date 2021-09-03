@@ -109,7 +109,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void HasIdentitysConnectionToClient()
         {
-            (_, identity.ConnectionToClient) = PipedConnections();
+            (_, identity.ConnectionToClient) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
             Assert.That(component.ConnectionToClient, Is.EqualTo(identity.ConnectionToClient));
         }
 

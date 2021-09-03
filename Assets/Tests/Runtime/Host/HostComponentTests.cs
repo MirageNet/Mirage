@@ -101,7 +101,7 @@ namespace Mirage.Tests.Runtime.Host
             await UniTask.WaitUntil(() => !server.Active);
 
             UnityAction<string, SceneOperation> mockListener = Substitute.For<UnityAction<string, SceneOperation>>();
-            sceneManager.ClientChangeScene.AddListener(mockListener);
+            sceneManager.OnClientStartedSceneChange.AddListener(mockListener);
             await StartHost();
 
             client.Update();

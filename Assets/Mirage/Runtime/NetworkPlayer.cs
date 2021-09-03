@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
 using Mirage.Logging;
 using Mirage.Serialization;
+using Mirage.SocketLayer;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -20,18 +18,11 @@ namespace Mirage
     /// <para>NetworkConnection objects also act as observers for networked objects. When a connection is an observer of a networked object with a NetworkIdentity, then the object will be visible to corresponding client for the connection, and incremental state changes will be sent to the client.</para>
     /// <para>There are many virtual functions on NetworkConnection that allow its behaviour to be customized. NetworkClient and NetworkServer can both be made to instantiate custom classes derived from NetworkConnection by setting their networkConnectionClass member variable.</para>
     /// </remarks>
-    public sealed class NetworkPlayer : INetworkPlayer
+    public sealed class NetworkPlayer : INetworkPlayer, IMessageSender
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
-        // Handles network messages on client and server
-        internal delegate void NetworkMessageDelegate(INetworkPlayer player, NetworkReader reader);
-
-        // internal so it can be tested
         private readonly HashSet<NetworkIdentity> visList = new HashSet<NetworkIdentity>();
-
-        // message handlers for this connection
-        internal readonly Dictionary<int, NetworkMessageDelegate> messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
 
         /// <summary>
         /// Transport level connection
@@ -41,7 +32,7 @@ namespace Mirage
         /// <para>Transport layers connections begin at one. So on a client with a single connection to a server, the connectionId of that connection will be one. In NetworkServer, the connectionId of the local connection is zero.</para>
         /// <para>Clients do not know their connectionId on the server, and do not know the connectionId of other clients on the server.</para>
         /// </remarks>
-        private readonly SocketLayer.IConnection connection;
+        private readonly IConnection connection;
 
         /// <summary>
         /// Has this player been marked as disconnected
@@ -61,19 +52,19 @@ namespace Mirage
         public object AuthenticationData { get; set; }
 
         /// <summary>
-        /// Flag that tells if the connection has been marked as "ready" by a client calling ClientScene.Ready().
-        /// <para>This property is read-only. It is set by the system on the client when ClientScene.Ready() is called, and set by the system on the server when a ready message is received from a client.</para>
+        /// Flag that tells us if the scene has fully loaded in for player.
+        /// <para>This property is read-only. It is set by the system on the client when the scene has fully loaded, and set by the system on the server when a ready message is received from a client.</para>
         /// <para>A client that is ready is sent spawned objects by the server and updates to the state of spawned objects. A client that is not ready is not sent spawned objects.</para>
         /// </summary>
-        public bool IsReady { get; set; }
+        public bool SceneIsReady { get; set; }
 
         /// <summary>
         /// The IP address / URL / FQDN associated with the connection.
         /// Can be useful for a game master to do IP Bans etc.
         /// </summary>
-        public EndPoint Address => connection.EndPoint;
+        public IEndPoint Address => connection.EndPoint;
 
-        public SocketLayer.IConnection Connection => connection;
+        public IConnection Connection => connection;
 
         /// <summary>
         /// Disconnects the player.
@@ -115,94 +106,12 @@ namespace Mirage
         /// Creates a new NetworkConnection with the specified address and connectionId
         /// </summary>
         /// <param name="networkConnectionId"></param>
-        public NetworkPlayer(SocketLayer.IConnection connection)
+        public NetworkPlayer(IConnection connection)
         {
             Assert.IsNotNull(connection);
             this.connection = connection;
         }
 
-
-        private static NetworkMessageDelegate MessageHandler<T>(Action<INetworkPlayer, T> handler)
-        {
-            void AdapterFunction(INetworkPlayer player, NetworkReader reader)
-            {
-                // protect against DOS attacks if attackers try to send invalid
-                // data packets to crash the server/client. there are a thousand
-                // ways to cause an exception in data handling:
-                // - invalid headers
-                // - invalid message ids
-                // - invalid data causing exceptions
-                // - negative ReadBytesAndSize prefixes
-                // - invalid utf8 strings
-                // - etc.
-                //
-                // let's catch them all and then disconnect that connection to avoid
-                // further attacks.
-                var message = default(T);
-
-                // record start position for NetworkDiagnostics because reader might contain multiple messages if using batching
-                int startPos = reader.Position;
-                try
-                {
-                    message = reader.Read<T>();
-                }
-                finally
-                {
-                    int endPos = reader.Position;
-                    NetworkDiagnostics.OnReceive(message, endPos - startPos);
-                }
-
-                handler(player, message);
-            }
-            return AdapterFunction;
-        }
-
-        /// <summary>
-        /// Register a handler for a particular message type.
-        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
-        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
-        public void RegisterHandler<T>(Action<INetworkPlayer, T> handler)
-        {
-            int msgType = MessagePacker.GetId<T>();
-            if (logger.filterLogType == LogType.Log && messageHandlers.ContainsKey(msgType))
-            {
-                logger.Log("NetworkServer.RegisterHandler replacing " + msgType);
-            }
-            messageHandlers[msgType] = MessageHandler(handler);
-        }
-
-        /// <summary>
-        /// Register a handler for a particular message type.
-        /// <para>There are several system message types which you can add handlers for. You can also add your own message types.</para>
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        /// <param name="handler">Function handler which will be invoked for when this message type is received.</param>
-        /// <param name="requireAuthentication">True if the message requires an authenticated connection</param>
-        public void RegisterHandler<T>(Action<T> handler)
-        {
-            RegisterHandler<T>((_, value) => { handler(value); });
-        }
-
-        /// <summary>
-        /// Unregisters a handler for a particular message type.
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        public void UnregisterHandler<T>()
-        {
-            int msgType = MessagePacker.GetId<T>();
-            messageHandlers.Remove(msgType);
-        }
-
-        /// <summary>
-        /// Clear all registered callback handlers.
-        /// </summary>
-        public void ClearHandlers()
-        {
-            messageHandlers.Clear();
-        }
 
         /// <summary>
         /// This sends a network message to the connection.
@@ -213,33 +122,37 @@ namespace Mirage
         /// <returns></returns>
         public void Send<T>(T message, int channelId = Channel.Reliable)
         {
+            if (isDisconnected) { return; }
+
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                // pack message and send allocation free
                 MessagePacker.Pack(message, writer);
-                NetworkDiagnostics.OnSend(message, writer.Length, 1);
-                Send(writer.ToArraySegment(), channelId);
+
+                var segment = writer.ToArraySegment();
+                NetworkDiagnostics.OnSend(message, segment.Count, 1);
+                Send(segment, channelId);
             }
         }
 
-        // internal because no one except Mirage should send bytes directly to
-        // the client. they would be detected as a message. send messages instead.
+        /// <summary>
+        /// Sends a block of data
+        /// <para>Only use this method if data has message Id already included, otherwise receives wont know how to handle it. Otherwise use <see cref="Send{T}(T, int)"/></para>
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="channelId"></param>
         public void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable)
         {
             if (isDisconnected) { return; }
 
-            // todo use buffer pool
-            byte[] packet = segment.ToArray();
             if (channelId == Channel.Reliable)
             {
-                connection.SendReliable(packet);
+                connection.SendReliable(segment);
             }
             else
             {
-                connection.SendUnreliable(packet);
+                connection.SendUnreliable(segment);
             }
         }
-
 
         public override string ToString()
         {
@@ -263,48 +176,6 @@ namespace Mirage
                 identity.RemoveObserverInternal(this);
             }
             visList.Clear();
-        }
-
-        internal void InvokeHandler(int msgType, NetworkReader reader)
-        {
-            if (messageHandlers.TryGetValue(msgType, out NetworkMessageDelegate msgDelegate))
-            {
-                msgDelegate(this, reader);
-            }
-            else
-            {
-                try
-                {
-                    Type type = MessagePacker.GetMessageType(msgType);
-                    throw new InvalidDataException($"Unexpected message {type} received in {this}. Did you register a handler for it?");
-                }
-                catch (KeyNotFoundException)
-                {
-                    throw new InvalidDataException($"Unexpected message ID {msgType} received in {this}. May be due to no existing RegisterHandler for this message.");
-                }
-            }
-        }
-
-        void IMessageHandler.HandleMessage(ArraySegment<byte> packet)
-        {
-            // unpack message
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(packet))
-            {
-                try
-                {
-                    int msgType = MessagePacker.UnpackId(networkReader);
-                    InvokeHandler(msgType, networkReader);
-                }
-                catch (InvalidDataException ex)
-                {
-                    logger.Log(ex.ToString());
-                }
-                catch (Exception e)
-                {
-                    logger.LogError($"{e.GetType()} in Message handler (see stack below), Closed connection: {this}\n{e}");
-                    Connection?.Disconnect();
-                }
-            }
         }
 
         public void AddOwnedObject(NetworkIdentity networkIdentity)

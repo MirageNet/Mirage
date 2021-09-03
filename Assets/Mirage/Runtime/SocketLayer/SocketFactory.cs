@@ -20,7 +20,7 @@ namespace Mirage.SocketLayer
         public abstract ISocket CreateServerSocket();
 
         /// <summary>Creates the <see cref="EndPoint"/> that the Server Socket will bind to</summary>
-        public abstract EndPoint GetBindEndPoint();
+        public abstract IEndPoint GetBindEndPoint();
 
 
         /// <summary>Creates a <see cref="ISocket"/> to be used by <see cref="Peer"/> on the client</summary>
@@ -28,6 +28,6 @@ namespace Mirage.SocketLayer
         public abstract ISocket CreateClientSocket();
 
         /// <summary>Creates the <see cref="EndPoint"/> that the Client Socket will connect to using the parameter given</summary>
-        public abstract EndPoint GetConnectEndPoint(string address = null, ushort? port = null);
+        public abstract IEndPoint GetConnectEndPoint(string address = null, ushort? port = null);
     }
 }

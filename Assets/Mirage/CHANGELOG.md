@@ -1,3 +1,370 @@
+# [102.0.0](https://github.com/MirageNet/Mirage/compare/v101.10.0...v102.0.0) (2021-09-02)
+
+
+### Features
+
+* new improved scene manager  ([#892](https://github.com/MirageNet/Mirage/issues/892)) ([2a9bdec](https://github.com/MirageNet/Mirage/commit/2a9bdec6887bc67e7f53bb46f13592607b5c72b8))
+
+
+### BREAKING CHANGES
+
+* NetworkSceneManager has been re-written, many events and methods now have new names.
+
+# [101.10.0](https://github.com/MirageNet/Mirage/compare/v101.9.2...v101.10.0) (2021-08-31)
+
+
+### Features
+
+* attributes to use new vector bit packers ([#905](https://github.com/MirageNet/Mirage/issues/905)) ([149bf5a](https://github.com/MirageNet/Mirage/commit/149bf5adc44f60ad810c2233afceea32c5af2e2a))
+
+## [101.9.2](https://github.com/MirageNet/Mirage/compare/v101.9.1...v101.9.2) (2021-08-29)
+
+
+### Bug Fixes
+
+* fixing namespace for display metrics ([9d3f056](https://github.com/MirageNet/Mirage/commit/9d3f0568943e531474f56852453233e173e3508f))
+
+## [101.9.1](https://github.com/MirageNet/Mirage/compare/v101.9.0...v101.9.1) (2021-08-29)
+
+
+### Bug Fixes
+
+* improving warning message for taking too many objects from pool ([2bc42c5](https://github.com/MirageNet/Mirage/commit/2bc42c512432ece82bf1eabc53ccf65d27e54556))
+
+# [101.9.0](https://github.com/MirageNet/Mirage/compare/v101.8.0...v101.9.0) (2021-08-26)
+
+
+### Bug Fixes
+
+* **NanoSocket:** adding dispose and finalize ([#904](https://github.com/MirageNet/Mirage/issues/904)) ([ca949ea](https://github.com/MirageNet/Mirage/commit/ca949ea15b900ee7d35d180b73e44103ed54d064))
+
+
+### Features
+
+* attributes to use new float bit packers ([#896](https://github.com/MirageNet/Mirage/issues/896)) ([273d27c](https://github.com/MirageNet/Mirage/commit/273d27ce03efee81f507def913ce9a906b1a38f2))
+
+# [101.8.0](https://github.com/MirageNet/Mirage/compare/v101.7.0...v101.8.0) (2021-08-24)
+
+
+### Features
+
+* attributes to calculate bit count of a given range ([#902](https://github.com/MirageNet/Mirage/issues/902)) ([1c22ea6](https://github.com/MirageNet/Mirage/commit/1c22ea63217a3206cb0eb41174135e8fc0133138))
+
+# [101.7.0](https://github.com/MirageNet/Mirage/compare/v101.6.0...v101.7.0) (2021-08-24)
+
+
+### Features
+
+* attributes to use zig zag encoding ([#897](https://github.com/MirageNet/Mirage/issues/897)) ([ccef5fb](https://github.com/MirageNet/Mirage/commit/ccef5fb0302ff97d897f17698e53967e014a9a95))
+
+# [101.6.0](https://github.com/MirageNet/Mirage/compare/v101.5.1...v101.6.0) (2021-08-22)
+
+
+### Features
+
+* **serialization:** attribute to set bit size for ints base syncvars ([#882](https://github.com/MirageNet/Mirage/issues/882)) ([1660ca6](https://github.com/MirageNet/Mirage/commit/1660ca690bee0ef58e398d36511233ebd9975188))
+
+## [101.5.1](https://github.com/MirageNet/Mirage/compare/v101.5.0...v101.5.1) (2021-08-22)
+
+
+### Performance Improvements
+
+* adding throw helper methods so that AggressiveInlining works ([#894](https://github.com/MirageNet/Mirage/issues/894)) ([de12166](https://github.com/MirageNet/Mirage/commit/de1216690a1823724fbb6c717d55a80e44784fa5))
+
+# [101.5.0](https://github.com/MirageNet/Mirage/compare/v101.4.2...v101.5.0) (2021-08-22)
+
+
+### Features
+
+* **NetworkVisibility:** adding default implementation for OnRebuildObservers ([2bcf22f](https://github.com/MirageNet/Mirage/commit/2bcf22f26c1e76f0ed28a066a8c8384f8396077a))
+
+
+### Performance Improvements
+
+* sending reply id as nullable ([a756389](https://github.com/MirageNet/Mirage/commit/a7563890c49ca0958332f8fb9fedcca5111ed85f))
+
+## [101.4.2](https://github.com/MirageNet/Mirage/compare/v101.4.1...v101.4.2) (2021-08-21)
+
+
+### Bug Fixes
+
+* fixing log message for checking observers for connected player ([99c31c8](https://github.com/MirageNet/Mirage/commit/99c31c8df337c363a2b4a0be9843dcf8fe24913c))
+* fixing mistake in log change ([b090fa2](https://github.com/MirageNet/Mirage/commit/b090fa2f619ec87de4bc1534343e977247de12f5))
+
+## [101.4.1](https://github.com/MirageNet/Mirage/compare/v101.4.0...v101.4.1) (2021-08-19)
+
+
+### Bug Fixes
+
+* **weaver:** fixing dirty bit for syncvar ([b4a837d](https://github.com/MirageNet/Mirage/commit/b4a837dde40da17ce7947b835da7e6b747d14e32))
+
+# [101.4.0](https://github.com/MirageNet/Mirage/compare/v101.3.0...v101.4.0) (2021-08-17)
+
+
+### Bug Fixes
+
+* fixing pong example ([5ccb42e](https://github.com/MirageNet/Mirage/commit/5ccb42e2c9fdc94bc0e2edec7f669a075f89b604))
+
+
+### Features
+
+* adding helper classes for packing uint values ([#878](https://github.com/MirageNet/Mirage/issues/878)) ([3c24f67](https://github.com/MirageNet/Mirage/commit/3c24f67dc6140c9c711b26837ea5b9c8220c1cc1))
+
+# [101.3.0](https://github.com/MirageNet/Mirage/compare/v101.2.0...v101.3.0) (2021-08-16)
+
+
+### Bug Fixes
+
+* preparing client objects on connect ([#876](https://github.com/MirageNet/Mirage/issues/876)) ([9789c0b](https://github.com/MirageNet/Mirage/commit/9789c0b5851c8377e13f799f4a437197e801ecac))
+* **SocketLayer:** moving endpoint copy outside of connection ([c19929f](https://github.com/MirageNet/Mirage/commit/c19929f19b110406b85ac11b6c49a365f5d7da39))
+
+
+### Features
+
+* adding helper classes for packing float, vector and quaternion ([#847](https://github.com/MirageNet/Mirage/issues/847)) ([410bcd6](https://github.com/MirageNet/Mirage/commit/410bcd6475e851dfd0a63944051f6522662f8e85))
+
+# [101.2.0](https://github.com/MirageNet/Mirage/compare/v101.1.0...v101.2.0) (2021-08-10)
+
+
+### Bug Fixes
+
+* only invoking unspawn even if item was removed from dictionary ([259e8d0](https://github.com/MirageNet/Mirage/commit/259e8d0dc736bf262fd6bde552618bb37daba31e))
+* **NetworkReader:** checking offset when moving bit position ([641b2b0](https://github.com/MirageNet/Mirage/commit/641b2b005ea7fae6afaba98393344e067f530abf))
+
+
+### Features
+
+* adding destroy function that takes network identity ([e91f6d3](https://github.com/MirageNet/Mirage/commit/e91f6d34189159cb8d632949d7fceb7071c950f2))
+
+# [101.1.0](https://github.com/MirageNet/Mirage/compare/v101.0.2...v101.1.0) (2021-08-06)
+
+
+### Features
+
+* **peer:** adding scripts to display metrics from peer ([#872](https://github.com/MirageNet/Mirage/issues/872)) ([e7ac06f](https://github.com/MirageNet/Mirage/commit/e7ac06f972e089f53adc4a90ab90ade1fb309f05))
+* adding way to call SendNotify without allocations and example ([#875](https://github.com/MirageNet/Mirage/issues/875)) ([16b3000](https://github.com/MirageNet/Mirage/commit/16b300002a28eff27bbc2d880993fd61271a4ab6))
+
+## [101.0.2](https://github.com/MirageNet/Mirage/compare/v101.0.1...v101.0.2) (2021-08-01)
+
+
+### Bug Fixes
+
+* fixing error message for disconnect ([0b603fe](https://github.com/MirageNet/Mirage/commit/0b603fe9e15fe2d333c869c8ff9cc51a4c27a823))
+* fixing resize buffer so that it uses byte capacity ([927fe95](https://github.com/MirageNet/Mirage/commit/927fe9574e6a28aac15e90bf4ecc8d3172d423b4))
+* fixing resize buffer when new size is greater than double ([972b6d2](https://github.com/MirageNet/Mirage/commit/972b6d2b811e8082504d9da26b1dd36f377c05eb))
+* removing debug logs from resize buffer ([5f3524c](https://github.com/MirageNet/Mirage/commit/5f3524cf92fcc975928288e31bd456b608ca67f1))
+
+## [101.0.1](https://github.com/MirageNet/Mirage/compare/v101.0.0...v101.0.1) (2021-07-29)
+
+
+### Bug Fixes
+
+* making weaver generate serialize functions for nested messages ([#873](https://github.com/MirageNet/Mirage/issues/873)) ([a351222](https://github.com/MirageNet/Mirage/commit/a351222a3a7d2f75404bfebda049ea270f2f4e63))
+
+# [101.0.0](https://github.com/MirageNet/Mirage/compare/v100.0.2...v101.0.0) (2021-07-29)
+
+
+### Code Refactoring
+
+* removing old version of sequencer ([0efe4ba](https://github.com/MirageNet/Mirage/commit/0efe4babede7726a9dc10590b27194924e4ad7b5))
+
+
+### BREAKING CHANGES
+
+* removing old version of Sequencer, use version in socket layer instead
+
+## [100.0.2](https://github.com/MirageNet/Mirage/compare/v100.0.1...v100.0.2) (2021-07-25)
+
+
+### Performance Improvements
+
+* removing alloc from reliable sends ([00945f3](https://github.com/MirageNet/Mirage/commit/00945f3f310453f5e57e1b6495be125282d3b8c3))
+* removing allocations from SendToMany ([c57f64d](https://github.com/MirageNet/Mirage/commit/c57f64d7695e1bddefb39fa151ac21b5d2176f35))
+
+## [100.0.1](https://github.com/MirageNet/Mirage/compare/v100.0.0...v100.0.1) (2021-07-19)
+
+
+### Bug Fixes
+
+* **NanoSocket:** adding Exception when nanosocket bind fails ([a3028ec](https://github.com/MirageNet/Mirage/commit/a3028ecb06084574cbbb0b10bbd33394d44d94d2))
+
+
+### Performance Improvements
+
+* adding native UDP socket (NanoSockets) for supported platforms ([#860](https://github.com/MirageNet/Mirage/issues/860)) ([3f34863](https://github.com/MirageNet/Mirage/commit/3f34863b65325a54d6a4542c7b767fedc1abf406))
+* removing allocations from assert ([5c216de](https://github.com/MirageNet/Mirage/commit/5c216de5411f6ae9e8a7bb14e52323e214be2793))
+
+# [100.0.0](https://github.com/MirageNet/Mirage/compare/v99.1.0...v100.0.0) (2021-07-15)
+
+
+### Code Refactoring
+
+* moving message handling out of networkplayer ([#818](https://github.com/MirageNet/Mirage/issues/818)) ([b2e9d96](https://github.com/MirageNet/Mirage/commit/b2e9d9693471097ac86fabd725bad8aa6b444983))
+
+
+### BREAKING CHANGES
+
+* RegisterHandler functions now exist on MessageHandler On Server and Client
+* NetworkAuthenticator now use Setup methods that should be used to register messages
+
+# [99.1.0](https://github.com/MirageNet/Mirage/compare/v99.0.2...v99.1.0) (2021-07-15)
+
+
+### Features
+
+* **NetworkWriter:** adding method to move position and docs comments ([#861](https://github.com/MirageNet/Mirage/issues/861)) ([35cf3ec](https://github.com/MirageNet/Mirage/commit/35cf3ecbffbb582bad3022b93b6d5c09ab266f48))
+
+## [99.0.2](https://github.com/MirageNet/Mirage/compare/v99.0.1...v99.0.2) (2021-07-05)
+
+
+### Bug Fixes
+
+* fixing syncvar reading when using bools ([31aca8e](https://github.com/MirageNet/Mirage/commit/31aca8e95752628ed3ad0c6d8e415fcce296b817))
+
+## [99.0.1](https://github.com/MirageNet/Mirage/compare/v99.0.0...v99.0.1) (2021-07-03)
+
+
+### Bug Fixes
+
+* adding assembly version to editor asmdef ([5969236](https://github.com/MirageNet/Mirage/commit/5969236f7a0d6e57848e51cb084f824233e367a4))
+
+
+### Performance Improvements
+
+* **WelcomeWindow:** using string builder for change log ([4bc10d8](https://github.com/MirageNet/Mirage/commit/4bc10d840890345f79c24082d283b06302f86b82))
+
+# [99.0.0](https://github.com/MirageNet/Mirage/compare/v98.0.1...v99.0.0) (2021-07-03)
+
+
+### Performance Improvements
+
+* replacing network writer with a faster version that can do bit packing ([#805](https://github.com/MirageNet/Mirage/issues/805)) ([3cffa66](https://github.com/MirageNet/Mirage/commit/3cffa662fee2b09fb54f549d42d820300c61ecda))
+
+
+### BREAKING CHANGES
+
+* NetworkWriter and NetworkReader have been completely re-written to support bitpacking
+
+## [98.0.1](https://github.com/MirageNet/Mirage/compare/v98.0.0...v98.0.1) (2021-07-02)
+
+
+### Performance Improvements
+
+* replacing network writer with a faster version that can do bit packing ([#805](https://github.com/MirageNet/Mirage/issues/805)) ([773c58f](https://github.com/MirageNet/Mirage/commit/773c58f75eb77be2a893398d1e27012ee9ba83e6))
+
+# [98.0.0](https://github.com/MirageNet/Mirage/compare/v97.1.2...v98.0.0) (2021-07-02)
+
+
+### Performance Improvements
+
+* improving how socketlayer handles endpoints ([#856](https://github.com/MirageNet/Mirage/issues/856)) ([59ce7e0](https://github.com/MirageNet/Mirage/commit/59ce7e097d46d7f2cb7eaa01736dde36066396c5))
+
+
+### BREAKING CHANGES
+
+* Socket functions now use an interface instead of the EndPoint class, Socket Implementations should create a custom Endpoint class for their socket.
+
+## [97.1.2](https://github.com/MirageNet/Mirage/compare/v97.1.1...v97.1.2) (2021-07-01)
+
+
+### Performance Improvements
+
+* **SocketLayer:** adding IEquatable to struct ([f935786](https://github.com/MirageNet/Mirage/commit/f93578641956c17d84f32ab6356887f45974b07d))
+
+## [97.1.1](https://github.com/MirageNet/Mirage/compare/v97.1.0...v97.1.1) (2021-06-28)
+
+
+### Bug Fixes
+
+* **NetworkManagerHud:** adding null check before using server or client ([e4200e0](https://github.com/MirageNet/Mirage/commit/e4200e07b9c424eccda9e8bfb75a743af753ad78))
+* **NetworkManagerHud:** returning to offline menu when server or client is stopped ([6b4c988](https://github.com/MirageNet/Mirage/commit/6b4c98889777cad31d27d8211f8858e4d81bde09))
+
+# [97.1.0](https://github.com/MirageNet/Mirage/compare/v97.0.1...v97.1.0) (2021-06-27)
+
+
+### Features
+
+* **SocketLayer:** adding fragmentation to reliable sending ([#851](https://github.com/MirageNet/Mirage/issues/851)) ([4764294](https://github.com/MirageNet/Mirage/commit/4764294b18a6e20780fe05626bd001f8c63790f8))
+
+## [97.0.1](https://github.com/MirageNet/Mirage/compare/v97.0.0...v97.0.1) (2021-06-27)
+
+
+### Bug Fixes
+
+* fixing first notify not being returned ([#854](https://github.com/MirageNet/Mirage/issues/854)) ([84b7d2e](https://github.com/MirageNet/Mirage/commit/84b7d2e4cf938763772ebedbb5a55e2db0034ff4))
+
+# [97.0.0](https://github.com/MirageNet/Mirage/compare/v96.5.2...v97.0.0) (2021-06-27)
+
+
+### Code Refactoring
+
+* simplifying packet size in config ([#852](https://github.com/MirageNet/Mirage/issues/852)) ([6bc5ab8](https://github.com/MirageNet/Mirage/commit/6bc5ab8e87c9ec6d2a35a836119a4c891a5a173c))
+
+
+### BREAKING CHANGES
+
+* BufferSize and MTU replaced by MaxPacketSize
+
+## [96.5.2](https://github.com/MirageNet/Mirage/compare/v96.5.1...v96.5.2) (2021-06-27)
+
+
+### Bug Fixes
+
+* fixing typo in error ([063e3b4](https://github.com/MirageNet/Mirage/commit/063e3b472af003eda400b1fcbbe863f63b3de422))
+
+## [96.5.1](https://github.com/MirageNet/Mirage/compare/v96.5.0...v96.5.1) (2021-06-27)
+
+
+### Bug Fixes
+
+* fixing typo in error ([6195108](https://github.com/MirageNet/Mirage/commit/6195108dd84d5e83be3ac25d824d50125fa9510f))
+
+# [96.5.0](https://github.com/MirageNet/Mirage/compare/v96.4.3...v96.5.0) (2021-06-23)
+
+
+### Bug Fixes
+
+* fixing length used for sending unreliable ([821e2d2](https://github.com/MirageNet/Mirage/commit/821e2d28b2a764f834b96696ed6a438af2535f60))
+
+
+### Features
+
+* adding send methods for array segment ([ea09c61](https://github.com/MirageNet/Mirage/commit/ea09c61e0c6c67990d05a58529a800a6948728c0))
+
+
+### Performance Improvements
+
+* using array segments for sending ([c990952](https://github.com/MirageNet/Mirage/commit/c990952246463282687c2968852dbe1ae36fdb6e))
+* using pool for send notify ([ac000eb](https://github.com/MirageNet/Mirage/commit/ac000eb6c2db50c81831d092c358f9e707954876))
+
+## [96.4.3](https://github.com/MirageNet/Mirage/compare/v96.4.2...v96.4.3) (2021-06-23)
+
+
+### Bug Fixes
+
+* checking if disconnected before packing message ([a76caf1](https://github.com/MirageNet/Mirage/commit/a76caf148540a2c15cc5622362391acfe20b2388))
+
+## [96.4.2](https://github.com/MirageNet/Mirage/compare/v96.4.1...v96.4.2) (2021-06-21)
+
+
+### Bug Fixes
+
+* null checks when types can't be resolved ([#848](https://github.com/MirageNet/Mirage/issues/848)) ([677c792](https://github.com/MirageNet/Mirage/commit/677c7924b85a890f159ee0abfef44363b266f49a))
+
+## [96.4.1](https://github.com/MirageNet/Mirage/compare/v96.4.0...v96.4.1) (2021-06-21)
+
+
+### Bug Fixes
+
+* welcome window fixes ([#845](https://github.com/MirageNet/Mirage/issues/845)) ([a187844](https://github.com/MirageNet/Mirage/commit/a18784451fb8b4711964ee9ef6c19c161a02059b))
+
+# [96.4.0](https://github.com/MirageNet/Mirage/compare/v96.3.1...v96.4.0) (2021-06-20)
+
+
+### Features
+
+* adding attribute to ignore extension method for read writer ([#841](https://github.com/MirageNet/Mirage/issues/841)) ([9494500](https://github.com/MirageNet/Mirage/commit/94945006f48c486482a67a8c114a2fbe32c2aba4))
+
 ## [96.3.1](https://github.com/MirageNet/Mirage/compare/v96.3.0...v96.3.1) (2021-06-17)
 
 

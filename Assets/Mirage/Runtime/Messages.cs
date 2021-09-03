@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mirage
@@ -18,10 +19,10 @@ namespace Mirage
     [NetworkMessage]
     public struct SceneMessage
     {
-        public string scenePath;
+        public string MainActivateScene;
         // Normal = 0, LoadAdditive = 1, UnloadAdditive = 2
-        public SceneOperation sceneOperation;
-        public string[] additiveScenes;
+        public SceneOperation SceneOperation;
+        public List<string> AdditiveScenes;
     }
 
     [NetworkMessage]
@@ -39,7 +40,8 @@ namespace Mirage
 
         // if the server Rpc can return values
         // this then a ServerRpcReply will be sent with this id
-        public int replyId;
+        // use nullable for syncing so sent as 1 bit if null, but 0 for no id else where in the code
+        public int? replyId;
         // the parameters for the Cmd function
         // -> ArraySegment to avoid unnecessary allocations
         public ArraySegment<byte> payload;

@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Mirage.Weaver
+namespace Mirage.Tests.Weaver
 {
     // Some tests for SyncObjects are in SyncListTests and apply to SyncDictionary too
     public class SyncDictionaryTests : TestsBuildFromTestName
@@ -44,9 +44,9 @@ namespace Mirage.Weaver
         [Test]
         public void SyncDictionaryErrorForGenericStructKey()
         {
-            HasError("Cannot generate reader for generic variable MyGenericStruct`1. Use a supported type or provide a custom reader",
+            HasError("Cannot generate read function for generic type MyGenericStruct`1. Use a supported type or provide a custom read function",
                 "SyncDictionaryTests.SyncDictionaryErrorForGenericStructKey.SyncDictionaryErrorForGenericStructKey/MyGenericStruct`1<System.Single>");
-            HasError("Cannot generate writer for generic type MyGenericStruct`1. Use a supported type or provide a custom writer",
+            HasError("Cannot generate write function for generic type MyGenericStruct`1. Use a supported type or provide a custom write function",
                 "SyncDictionaryTests.SyncDictionaryErrorForGenericStructKey.SyncDictionaryErrorForGenericStructKey/MyGenericStruct`1<System.Single>");
 
         }
@@ -54,9 +54,9 @@ namespace Mirage.Weaver
         [Test]
         public void SyncDictionaryErrorForGenericStructItem()
         {
-            HasError("Cannot generate reader for generic variable MyGenericStruct`1. Use a supported type or provide a custom reader",
+            HasError("Cannot generate write function for generic type MyGenericStruct`1. Use a supported type or provide a custom write function",
                 "SyncDictionaryTests.SyncDictionaryErrorForGenericStructItem.SyncDictionaryErrorForGenericStructItem/MyGenericStruct`1<System.Single>");
-            HasError("Cannot generate writer for generic type MyGenericStruct`1. Use a supported type or provide a custom writer",
+            HasError("Cannot generate read function for generic type MyGenericStruct`1. Use a supported type or provide a custom read function",
                 "SyncDictionaryTests.SyncDictionaryErrorForGenericStructItem.SyncDictionaryErrorForGenericStructItem/MyGenericStruct`1<System.Single>");
         }
 

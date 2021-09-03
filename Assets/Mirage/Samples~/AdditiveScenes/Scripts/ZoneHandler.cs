@@ -22,7 +22,7 @@ namespace Mirage.Examples.Additive
             if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Loading {0}", subScene);
 
             NetworkIdentity networkIdentity = other.gameObject.GetComponent<NetworkIdentity>();
-            networkIdentity.ConnectionToClient.Send(new SceneMessage { scenePath = subScene, sceneOperation = SceneOperation.LoadAdditive });
+            networkIdentity.ConnectionToClient.Send(new SceneMessage { MainActivateScene = subScene, SceneOperation = SceneOperation.LoadAdditive });
         }
 
         [Server]
@@ -31,7 +31,7 @@ namespace Mirage.Examples.Additive
             if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Unloading {0}", subScene);
 
             NetworkIdentity networkIdentity = other.gameObject.GetComponent<NetworkIdentity>();
-            networkIdentity.ConnectionToClient.Send(new SceneMessage { scenePath = subScene, sceneOperation = SceneOperation.UnloadAdditive });
+            networkIdentity.ConnectionToClient.Send(new SceneMessage { MainActivateScene = subScene, SceneOperation = SceneOperation.UnloadAdditive });
         }
     }
 }

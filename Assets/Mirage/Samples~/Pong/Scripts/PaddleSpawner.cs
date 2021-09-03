@@ -10,6 +10,16 @@ namespace Mirage.Examples.Pong
 
         GameObject ball;
 
+        public override void Awake()
+        {
+            base.Awake();
+
+            if (Server != null)
+            {
+                Server.Disconnected.AddListener(OnServerAddPlayer);
+            }
+        }
+
         public override void OnServerAddPlayer(INetworkPlayer player)
         {
             // add player at correct spawn position
@@ -25,10 +35,9 @@ namespace Mirage.Examples.Pong
             }
         }
 
-
-        public void OnServerDisconnect(INetworkPlayer player)
+        public void OnServerDisconnect(INetworkPlayer _)
         {
-            // destroy ball
+            // after 1 player disconnects then destroy the balll
             if (ball != null)
                 ServerObjectManager.Destroy(ball);
         }

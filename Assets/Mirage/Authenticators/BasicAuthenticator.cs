@@ -33,7 +33,7 @@ namespace Mirage.Authenticators
         /// </para>
         /// <para>
         ///     You might want to use an accessToken or passwords. Be aware that the normal connection
-        ///     in mirror is not encrypted so sending secure information directly is not adviced
+        ///     in Mirage is not encrypted so sending secure information directly is not adviced
         /// </para>
         /// </summary>
 
@@ -53,13 +53,17 @@ namespace Mirage.Authenticators
 
         #region Server Authenticate
 
-        /*
-            This region should is need to validate the client connection and auth messages sent by the client
-         */
+        public override void ServerSetup(NetworkServer server)
+        {
+            // register messsage for Auth when server starts
+            // this will ensure the handlers are ready when client connects (even in host mode)
+
+            server.MessageHandler.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage);
+        }
+
         public override void ServerAuthenticate(INetworkPlayer player)
         {
             // wait for AuthRequestMessage from client
-            player.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage);
         }
 
 
@@ -107,10 +111,16 @@ namespace Mirage.Authenticators
 
         #region Client Authenticate
 
+        public override void ClientSetup(NetworkClient client)
+        {
+            // register messsage for Auth when client starts
+            // this will ensure the handlers are ready when client connects (even in host mode)
+
+            client.MessageHandler.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage);
+        }
+
         public override void ClientAuthenticate(INetworkPlayer player)
         {
-            player.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage);
-
             // The serverCode should be set on the client before connection to the server.
             // When the client connects it sends the code and the server checks that it is correct
             player.Send(new AuthRequestMessage

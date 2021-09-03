@@ -74,6 +74,27 @@ Before creating enhancement suggestions, please check the list of enhancements s
 
 ### Creating Pull Requests
 
+#### Pull Request titles
+
+A Pull Request title should follow [these rules](https://www.npmjs.com/package/@commitlint/config-conventional).
+
+The title must start with one of the following:
+- build
+- chore
+- ci
+- docs
+- feat
+- fix
+- perf
+- refactor
+- revert
+- style
+- test
+
+If a Pull request to a certain part of the project its scope can be put after the type, For example `fix(WelcomeWindow): ...` for a Pull request fixing something in the welcome window.
+
+For a full list of rules check the [conventional config](https://www.npmjs.com/package/@commitlint/config-conventional).
+
 #### How Do I Submit A (Good) Pull Request?
 
 Please send a [GitHub Pull Request](https://github.com/MirageNet/Mirage/compare) with a clear list of what you've done (read more about [pull requests](http://help.github.com/pull-requests/)). 

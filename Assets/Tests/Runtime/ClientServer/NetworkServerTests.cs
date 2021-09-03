@@ -45,12 +45,12 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ReadyMessageSetsClientReadyTest() => UniTask.ToCoroutine(async () =>
         {
-            connectionToServer.Send(new ReadyMessage());
+            clientPlayer.Send(new ReadyMessage());
 
-            await AsyncUtil.WaitUntilWithTimeout(() => connectionToClient.IsReady);
+            await AsyncUtil.WaitUntilWithTimeout(() => serverPlayer.SceneIsReady);
 
             // ready?
-            Assert.That(connectionToClient.IsReady, Is.True);
+            Assert.That(serverPlayer.SceneIsReady, Is.True);
         });
 
         [UnityTest]
@@ -58,7 +58,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             bool invoked = false;
 
-            connectionToServer.RegisterHandler<WovenTestMessage>(msg => invoked = true);
+            ClientMessageHandler.RegisterHandler<WovenTestMessage>(msg => invoked = true);
 
             server.SendToAll(message);
 
@@ -73,7 +73,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             bool invoked = false;
 
-            connectionToServer.RegisterHandler<WovenTestMessage>(msg => invoked = true);
+            ClientMessageHandler.RegisterHandler<WovenTestMessage>(msg => invoked = true);
 
             serverIdentity.ConnectionToClient.Send(message);
 
@@ -88,8 +88,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             bool invoked = false;
 
-            connectionToClient.RegisterHandler<WovenTestMessage>(msg => invoked = true);
-            connectionToServer.Send(message);
+            ServerMessageHandler.RegisterHandler<WovenTestMessage>(msg => invoked = true);
+            clientPlayer.Send(message);
 
             await AsyncUtil.WaitUntilWithTimeout(() => invoked);
 
@@ -100,9 +100,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             bool invoked = false;
 
-            connectionToClient.RegisterHandler<WovenTestMessage>((conn, msg) => invoked = true);
+            ServerMessageHandler.RegisterHandler<WovenTestMessage>((conn, msg) => invoked = true);
 
-            connectionToServer.Send(message);
+            clientPlayer.Send(message);
 
             await AsyncUtil.WaitUntilWithTimeout(() => invoked);
         });
@@ -110,12 +110,12 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator UnRegisterMessage1() => UniTask.ToCoroutine(async () =>
         {
-            Action<WovenTestMessage> func = Substitute.For<Action<WovenTestMessage>>();
+            MessageDelegate<WovenTestMessage> func = Substitute.For<MessageDelegate<WovenTestMessage>>();
 
-            connectionToClient.RegisterHandler(func);
-            connectionToClient.UnregisterHandler<WovenTestMessage>();
+            ServerMessageHandler.RegisterHandler(func);
+            ServerMessageHandler.UnregisterHandler<WovenTestMessage>();
 
-            connectionToServer.Send(message);
+            clientPlayer.Send(message);
 
             await UniTask.Delay(1);
 
@@ -170,5 +170,29 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             func1.Received(1).Invoke();
         });
+
+        [UnityTest]
+        public IEnumerator DisconnectCalledBeforePlayerIsDestroyed()
+        {
+            INetworkPlayer serverPlayer = base.serverPlayer;
+            int disconnectCalled = 0;
+            server.Disconnected.AddListener(player =>
+            {
+                disconnectCalled++;
+                Assert.That(player, Is.EqualTo(serverPlayer));
+                // use unity null check
+                Assert.That(player.Identity != null);
+            });
+
+
+            client.Disconnect();
+            // wait a tick for messages to be processed
+            yield return null;
+
+            Assert.That(disconnectCalled, Is.EqualTo(1));
+            // use unity null check
+            Assert.That(serverPlayer.Identity == null);
+
+        }
     }
 }

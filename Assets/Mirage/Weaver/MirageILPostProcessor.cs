@@ -17,7 +17,7 @@ namespace Mirage.Weaver
             if (!WillProcess(compiledAssembly))
                 return null;
 
-            var logger = new Logger();
+            var logger = new WeaverLogger();
             var weaver = new Weaver(logger);
 
             AssemblyDefinition assemblyDefinition = weaver.Weave(compiledAssembly);
@@ -38,6 +38,11 @@ namespace Mirage.Weaver
             return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), logger.Diagnostics);
         }
 
+        /// <summary>
+        /// Process when assembly that references Mirage
+        /// </summary>
+        /// <param name="compiledAssembly"></param>
+        /// <returns></returns>
         public override bool WillProcess(ICompiledAssembly compiledAssembly) =>
             compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RuntimeAssemblyName);
     }

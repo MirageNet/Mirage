@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -26,12 +27,12 @@ namespace Mirage.Weaver
 
         public NetworkBehaviourProcessor(TypeDefinition td, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor, IWeaverLogger logger)
         {
-            Weaver.DLog(td, "NetworkBehaviourProcessor");
+            Weaver.DebugLog(td, "NetworkBehaviourProcessor");
             netBehaviourSubclass = td;
             this.logger = logger;
             serverRpcProcessor = new ServerRpcProcessor(netBehaviourSubclass.Module, readers, writers, logger);
             clientRpcProcessor = new ClientRpcProcessor(netBehaviourSubclass.Module, readers, writers, logger);
-            syncVarProcessor = new SyncVarProcessor(netBehaviourSubclass.Module, readers, writers, propertySiteProcessor, logger);
+            syncVarProcessor = new SyncVarProcessor(netBehaviourSubclass.Module, readers, writers, propertySiteProcessor);
             syncObjectProcessor = new SyncObjectProcessor(readers, writers, logger);
         }
 
@@ -43,18 +44,25 @@ namespace Mirage.Weaver
             {
                 return false;
             }
-            Weaver.DLog(netBehaviourSubclass, "Found NetworkBehaviour " + netBehaviourSubclass.FullName);
+            Weaver.DebugLog(netBehaviourSubclass, $"Found NetworkBehaviour {netBehaviourSubclass.FullName}");
 
-            Weaver.DLog(netBehaviourSubclass, "Process Start");
+            Weaver.DebugLog(netBehaviourSubclass, "Process Start");
             MarkAsProcessed(netBehaviourSubclass);
 
-            syncVarProcessor.ProcessSyncVars(netBehaviourSubclass);
+            try
+            {
+                syncVarProcessor.ProcessSyncVars(netBehaviourSubclass, logger);
+            }
+            catch (NetworkBehaviourException e)
+            {
+                logger.Error(e);
+            }
 
             syncObjectProcessor.ProcessSyncObjects(netBehaviourSubclass);
 
             ProcessRpcs();
 
-            Weaver.DLog(netBehaviourSubclass, "Process Done");
+            Weaver.DebugLog(netBehaviourSubclass, "Process Done");
             return true;
         }
 
@@ -80,47 +88,13 @@ namespace Mirage.Weaver
 
         void RegisterRpcs()
         {
-            Weaver.DLog(netBehaviourSubclass, "  GenerateConstants ");
+            Weaver.DebugLog(netBehaviourSubclass, "  GenerateConstants ");
 
-            // find static constructor
-            MethodDefinition cctor = netBehaviourSubclass.GetMethod(".cctor");
-            if (cctor != null)
+            AddToStaticConstructor(netBehaviourSubclass, (worker) =>
             {
-                // remove the return opcode from end of function. will add our own later.
-                if (cctor.Body.Instructions.Count != 0)
-                {
-                    Instruction retInstr = cctor.Body.Instructions[cctor.Body.Instructions.Count - 1];
-                    if (retInstr.OpCode == OpCodes.Ret)
-                    {
-                        cctor.Body.Instructions.RemoveAt(cctor.Body.Instructions.Count - 1);
-                    }
-                    else
-                    {
-                        logger.Error($"{netBehaviourSubclass.Name} has invalid class constructor", cctor);
-                        return;
-                    }
-                }
-            }
-            else
-            {
-                // make one!
-                cctor = netBehaviourSubclass.AddMethod(".cctor", MethodAttributes.Private |
-                        MethodAttributes.HideBySig |
-                        MethodAttributes.SpecialName |
-                        MethodAttributes.RTSpecialName |
-                        MethodAttributes.Static);
-            }
-
-            ILProcessor cctorWorker = cctor.Body.GetILProcessor();
-
-            serverRpcProcessor.RegisterServerRpcs(cctorWorker);
-
-            clientRpcProcessor.RegisterClientRpcs(cctorWorker);
-
-            cctorWorker.Append(cctorWorker.Create(OpCodes.Ret));
-
-            // in case class had no cctor, it might have BeforeFieldInit, so injected cctor would be called too late
-            netBehaviourSubclass.Attributes &= ~TypeAttributes.BeforeFieldInit;
+                serverRpcProcessor.RegisterServerRpcs(worker);
+                clientRpcProcessor.RegisterClientRpcs(worker);
+            });
         }
 
         void ProcessRpcs()
@@ -161,6 +135,55 @@ namespace Mirage.Weaver
             }
 
             RegisterRpcs();
+        }
+
+        /// <summary>
+        /// Adds code to static Constructor
+        /// <para>
+        /// If Constructor is missing a new one will be created
+        /// </para>
+        /// </summary>
+        /// <param name="body">code to write</param>
+        public static void AddToStaticConstructor(TypeDefinition typeDefinition, Action<ILProcessor> body)
+        {
+            MethodDefinition cctor = typeDefinition.GetMethod(".cctor");
+            if (cctor != null)
+            {
+                // remove the return opcode from end of function. will add our own later.
+                if (cctor.Body.Instructions.Count != 0)
+                {
+                    Instruction retInstr = cctor.Body.Instructions[cctor.Body.Instructions.Count - 1];
+                    if (retInstr.OpCode == OpCodes.Ret)
+                    {
+                        cctor.Body.Instructions.RemoveAt(cctor.Body.Instructions.Count - 1);
+                    }
+                    else
+                    {
+                        throw new NetworkBehaviourException($"{typeDefinition.Name} has invalid static constructor", cctor, cctor.GetSequencePoint(retInstr));
+                    }
+                }
+            }
+            else
+            {
+                // make one!
+                cctor = typeDefinition.AddMethod(".cctor", MethodAttributes.Private |
+                        MethodAttributes.HideBySig |
+                        MethodAttributes.SpecialName |
+                        MethodAttributes.RTSpecialName |
+                        MethodAttributes.Static);
+            }
+
+            ILProcessor worker = cctor.Body.GetILProcessor();
+
+            // add new code to bottom of constructor
+            // todo should we be adding new code to top of function instead? incase user has early return in custom constructor?
+            body.Invoke(worker);
+
+            // re-add return bececause we removed it earlier
+            worker.Append(worker.Create(OpCodes.Ret));
+
+            // in case class had no cctor, it might have BeforeFieldInit, so injected cctor would be called too late
+            typeDefinition.Attributes &= ~TypeAttributes.BeforeFieldInit;
         }
     }
 }

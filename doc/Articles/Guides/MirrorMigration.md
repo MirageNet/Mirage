@@ -182,7 +182,7 @@ These fields/properties have been renamed:
 | Mirror                                | Mirage                                                                                 |
 |:-------------------------------------:|:--------------------------------------------------------------------------------------:|
 | `ClientScene.localPlayer`             | [NetworkPlayer.Identity](xref:Mirage.NetworkPlayer.Identity)             |
-| `ClientScene.ready`                   | [NetworkClient.Connection.IsReady](xref:Mirage.NetworkPlayer.IsReady)                  |
+| `ClientScene.ready`                   | [NetworkClient.Connection.SceneIsReady](xref:Mirage.NetworkPlayer.SceneIsReady)                  |
 | `NetworkIdentity.assetId`             | [NetworkIdentity.AssetId](xref:Mirage.NetworkIdentity.AssetId)                         |
 | `NetworkIdentity.netId`               | [NetworkIdentity.NetId](xref:Mirage.NetworkIdentity.NetId)                             |
 | `NetworkIdentity.connectionToClient`  | [NetworkIdentity.ConnectionToClient](xref:Mirage.NetworkIdentity.ConnectionToClient)   |
@@ -194,7 +194,7 @@ These fields/properties have been renamed:
 | `NetworkBehaviour.netId`              | [NetworkBehaviour.NetId](xref:Mirage.NetworkBehaviour.NetId)                           |
 | `NetworkBehaviour.isClientOnly`       | [NetworkBehaviour.IsClientOnly](xref:Mirage.NetworkBehaviour.IsClientOnly)             |
 | `NetworkBehaviour.islocalPlayer`      | [NetworkBehaviour.IsLocalPlayer](xref:Mirage.NetworkBehaviour.IsLocalPlayer)           |
-| `NetworkConnection.isReady`           | [NetworkPlayer.IsReady](xref:Mirage.NetworkPlayer.IsReady)                             |
+| `NetworkConnection.isReady`           | [NetworkPlayer.SceneIsReady](xref:Mirage.NetworkPlayer.SceneIsReady)                             |
 | `NetworkConnection.identity`          | [NetworkPlayer.Identity](xref:Mirage.NetworkPlayer.Identity)                           |
 | `NetworkServer.active`                | [NetworkServer.Active](xref:Mirage.NetworkServer.Active)                               |
 | `NetworkServer.localConnection`       | [NetworkServer.LocalPlayer](xref:Mirage.NetworkServer.LocalPlayer)                     |

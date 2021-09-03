@@ -57,7 +57,7 @@ namespace Mirage
                 Client.Disconnected.AddListener(OnClientDisconnected);
 
                 if (NetworkSceneManager != null)
-                    NetworkSceneManager.ClientSceneChanged.AddListener(OnClientSceneChanged);
+                    NetworkSceneManager.OnClientFinishedSceneChange.AddListener(OnFinishedSceneChange);
             }
         }
 
@@ -65,6 +65,10 @@ namespace Mirage
         {
             syncVarReceiver = new SyncVarReceiver(Client, Client.World);
             RegisterSpawnPrefabs();
+
+            // prepare objects right away so objects in first scene can be spawned
+            // if user changes scenes without NetworkSceneManager then they will need to manually call it again
+            PrepareToSpawnSceneObjects();
 
             if (Client.IsLocalClient)
             {
@@ -83,27 +87,27 @@ namespace Mirage
             syncVarReceiver = null;
         }
 
-        void OnClientSceneChanged(string scenePath, SceneOperation sceneOperation)
+        void OnFinishedSceneChange(string scenePath, SceneOperation sceneOperation)
         {
             PrepareToSpawnSceneObjects();
         }
 
         internal void RegisterHostHandlers()
         {
-            Client.Player.RegisterHandler<ObjectDestroyMessage>(msg => { });
-            Client.Player.RegisterHandler<ObjectHideMessage>(msg => { });
-            Client.Player.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
-            Client.Player.RegisterHandler<ServerRpcReply>(msg => { });
-            Client.Player.RegisterHandler<RpcMessage>(msg => { });
+            Client.MessageHandler.RegisterHandler<ObjectDestroyMessage>(msg => { });
+            Client.MessageHandler.RegisterHandler<ObjectHideMessage>(msg => { });
+            Client.MessageHandler.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
+            Client.MessageHandler.RegisterHandler<ServerRpcReply>(msg => { });
+            Client.MessageHandler.RegisterHandler<RpcMessage>(msg => { });
         }
 
         internal void RegisterMessageHandlers()
         {
-            Client.Player.RegisterHandler<ObjectDestroyMessage>(OnObjectDestroy);
-            Client.Player.RegisterHandler<ObjectHideMessage>(OnObjectHide);
-            Client.Player.RegisterHandler<SpawnMessage>(OnSpawn);
-            Client.Player.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
-            Client.Player.RegisterHandler<RpcMessage>(OnRpcMessage);
+            Client.MessageHandler.RegisterHandler<ObjectDestroyMessage>(OnObjectDestroy);
+            Client.MessageHandler.RegisterHandler<ObjectHideMessage>(OnObjectHide);
+            Client.MessageHandler.RegisterHandler<SpawnMessage>(OnSpawn);
+            Client.MessageHandler.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
+            Client.MessageHandler.RegisterHandler<RpcMessage>(OnRpcMessage);
         }
 
         bool ConsiderForSpawning(NetworkIdentity identity)
@@ -355,7 +359,7 @@ namespace Mirage
         {
             if (msg.assetId == Guid.Empty && msg.sceneId == 0)
             {
-                throw new InvalidOperationException("OnObjSpawn netId: " + msg.netId + " has invalid asset Id");
+                throw new InvalidOperationException($"OnSpawn has empty assetId and scene Id for netId: {msg.netId}");
             }
             if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} assetID={msg.assetId} sceneId={msg.sceneId} pos={msg.position}");
 

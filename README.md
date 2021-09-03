@@ -1,5 +1,4 @@
 [![Documentation](https://img.shields.io/badge/documentation-brightgreen.svg)](https://miragenet.github.io/Mirage/)
-[![Forum](https://img.shields.io/badge/forum-brightgreen.svg)](https://forum.unity.com/threads/mirror-networking-for-unity-aka-hlapi-community-edition.425437/)
 [![Discord](https://img.shields.io/discord/809535064551456888.svg)](https://discordapp.com/invite/DTBPBYvexy)
 [![release](https://img.shields.io/github/release/MirageNet/Mirage.svg)](https://github.com/MirageNet/Mirage/releases/latest)
 [![openupm](https://img.shields.io/npm/v/com.miragenet.mirage?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.miragenet.mirage/)
@@ -42,19 +41,20 @@ To install Mirage, follow these steps:
 ## Comparison with Mirror
 When migrating a project from Mirror to Mirage, these will be the most notable differences.
 
-| Mirage                                      | Mirror                                 |
-| --------------------------------------------- | -------------------------------------- |
-| Install via Unity Package Manager             | Install from Asset Store               |
-| Errors are thrown as exceptions               | Errors are logged                      |
-| `[ServerRpc]`                                 | `[Command]`                            |
-| `[ClientRpc(target=Client.Owner)]`            | `[TargetRpc]`                          |
-| Subscribe to events in `NetworkServer`        | Override methods in `NetworkManager`   |
-| Subscribe to events in `NetworkClient`        | Override methods in `NetworkManager`   |
-| Subscribe to events in `NetworkIdentity`      | Override methods in `NetworkBehaviour` |
-| Methods use PascalCase (C# guidelines)        | No consistency                         |
-| `NetworkTime` available in `NetworkBehaviour` | `NetworkTime` is global static         |
-| Send any data as messages                     | Messages must implement NetworkMessage |
-| Supports Unity 2019.3 or later                | Supports Unity 2018.4 or later         |
+| Mirage                                              | Mirror                                 |
+| --------------------------------------------------- | -------------------------------------- |
+| Install via Unity Package Manager                   | Install from Asset Store               |
+| Errors are thrown as exceptions                     | Errors are logged                      |
+| `[ServerRpc]`                                       | `[Command]`                            |
+| `[ClientRpc(target=Client.Owner)]`                  | `[TargetRpc]`                          |
+| Subscribe to events in `NetworkServer`              | Override methods in `NetworkManager`   |
+| Subscribe to events in `NetworkClient`              | Override methods in `NetworkManager`   |
+| Subscribe to events in `NetworkIdentity`            | Override methods in `NetworkBehaviour` |
+| Methods use PascalCase (C# guidelines)              | No consistency                         |
+| `NetworkTime` available in `NetworkBehaviour`       | `NetworkTime` is global static         |
+| Send any data as messages                           | Messages must implement NetworkMessage |
+| Supports Unity 2019.3 or later                      | Supports Unity 2018.4 or later         |
+| Offers simple Socket API to implement new protocols | Each protocol requires a new transport |
 
 Mirage has many new features
 * Mirage supports [fast domain reload](https://blogs.unity3d.com/2019/11/05/enter-play-mode-faster-in-unity-2019-3/)
@@ -93,12 +93,11 @@ If you want to contribute to  Mirage, follow these steps:
 3) Open in unity 2019.4.x or later
 
 ## Transport and Sockets
-
 Mirage supports multiple ways of transporting data:
-- c# UDP Socket (default)
-- Native UDP socket (coming soon)
+- Native UDP socket (default on Windows, Mac and Linux)
+- C# UDP Socket (default on other platforms)
+- Steam ([Facepunch Steamworks](https://github.com/MirageNet/SteamyFaceNG))
 - Websocket, to support webgl clients (coming soon)
-- Steam (coming soon)
 
 
 ## Contributing

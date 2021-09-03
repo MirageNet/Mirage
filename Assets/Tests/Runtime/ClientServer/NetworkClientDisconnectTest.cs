@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using Mirage.SocketLayer;
 using NUnit.Framework;
 using UnityEngine;
@@ -50,7 +51,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
             });
 
             // server's object
-            connectionToClient.Disconnect();
+            serverPlayer.Disconnect();
 
             // wait 2 frames so that messages can go from client->server->client
             yield return null;
@@ -74,6 +75,55 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
             yield return new WaitForSeconds(config.TimeoutDuration * 1.5f);
 
             Assert.That(called, Is.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator DisconnectEventWhenSentInvalidPacket()
+        {
+            (ISocket clientSocket, IEndPoint serverEndPoint) = GetSocketAndEndPoint();
+            byte[] badMessage = CreateInvalidPacket();
+
+            clientSocket.Send(serverEndPoint, badMessage, 20);
+
+            int called = 0;
+            client.Disconnected.AddListener((reason) =>
+            {
+                called++;
+                Assert.That(reason, Is.EqualTo(ClientStoppedReason.InvalidPacket));
+            });
+
+            // wait 2 frames so that messages can go from client->server->client
+            yield return null;
+            yield return null;
+
+            Assert.That(called, Is.EqualTo(1));
+        }
+
+        private (ISocket clientSocket, IEndPoint serverEndPoint) GetSocketAndEndPoint()
+        {
+            IEndPoint clientEndPoint = server.Players.First().Connection.EndPoint;
+            TestSocket clientSocket = TestSocket.allSockets[clientEndPoint];
+
+            IEndPoint serverEndPoint = ((TestSocketFactory)server.SocketFactory).serverEndpoint;
+
+            return (clientSocket, serverEndPoint);
+        }
+
+        private static byte[] CreateInvalidPacket()
+        {
+            byte[] packet = new byte[20];
+            int offset = 0;
+            ByteUtils.WriteByte(packet, ref offset, (byte)PacketType.ReliableFragment);
+            // reliable order header
+            offset += 2;
+            offset += 2;
+            offset += 8;
+            offset += 2;
+
+            // byte fragment index over limit in config
+            ByteUtils.WriteByte(packet, ref offset, 200);
+
+            return packet;
         }
     }
 

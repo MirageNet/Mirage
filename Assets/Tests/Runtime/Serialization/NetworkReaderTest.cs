@@ -18,16 +18,10 @@ namespace Mirage.Tests.Runtime.Serialization
 
             using (PooledNetworkReader reader = NetworkReaderPool.GetReader(bytes))
             {
-                try
+                Assert.Throws<EndOfStreamException>(() =>
                 {
-                    reader.ReadBytes(bytes, bytes.Length + 1);
-                    // BAD: IF WE GOT HERE, THEN NO EXCEPTION WAS THROWN
-                    Assert.Fail();
-                }
-                catch (EndOfStreamException)
-                {
-                    // GOOD
-                }
+                    reader.ReadBytes(bytes, 0, bytes.Length + 1);
+                });
             }
         }
     }

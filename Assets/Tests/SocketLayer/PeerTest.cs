@@ -1,5 +1,5 @@
 using System;
-using System.Net;
+using Mirage.Tests;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -15,7 +15,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                new Peer(null, Substitute.For<IDataHandler>(), new Config(), Substitute.For<ILogger>());
+                _ = new Peer(null, Substitute.For<IDataHandler>(), new Config(), Substitute.For<ILogger>());
             });
             var expected = new ArgumentNullException("socket");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
@@ -25,7 +25,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                new Peer(Substitute.For<ISocket>(), null, new Config(), Substitute.For<ILogger>());
+                _ = new Peer(Substitute.For<ISocket>(), null, new Config(), Substitute.For<ILogger>());
             });
             var expected = new ArgumentNullException("dataHandler");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
@@ -35,7 +35,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             Assert.DoesNotThrow(() =>
             {
-                new Peer(Substitute.For<ISocket>(), Substitute.For<IDataHandler>(), null, Substitute.For<ILogger>());
+                _ = new Peer(Substitute.For<ISocket>(), Substitute.For<IDataHandler>(), null, Substitute.For<ILogger>());
             });
         }
         [Test]
@@ -43,7 +43,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             Assert.DoesNotThrow(() =>
             {
-                new Peer(Substitute.For<ISocket>(), Substitute.For<IDataHandler>(), new Config(), null);
+                _ = new Peer(Substitute.For<ISocket>(), Substitute.For<IDataHandler>(), new Config(), null);
             });
         }
 
@@ -68,7 +68,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void IgnoresMessageThatIsTooShort()
         {
-            peer.Bind(Substitute.For<EndPoint>());
+            peer.Bind(TestEndPoint.CreateSubstitute());
 
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
@@ -87,7 +87,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ThrowsIfSocketGivesLengthThatIsTooHigh()
         {
-            peer.Bind(Substitute.For<EndPoint>());
+            peer.Bind(TestEndPoint.CreateSubstitute());
 
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
@@ -100,19 +100,19 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 peer.Update();
             });
 
-            Assert.That(exception, Has.Message.EqualTo($"Socket returned length above MTU: MTU:{config.Mtu} length:{aboveMTU}"));
+            Assert.That(exception, Has.Message.EqualTo($"Socket returned length above MTU. MaxPacketSize:{config.MaxPacketSize} length:{aboveMTU}"));
         }
 
         [Test]
         [Repeat(10)]
         public void IgnoresRandomData()
         {
-            peer.Bind(Substitute.For<EndPoint>());
+            peer.Bind(TestEndPoint.CreateSubstitute());
 
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
-            EndPoint endPoint = Substitute.For<EndPoint>();
+            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
 
             // 2 is min length of a message
             byte[] randomData = new byte[UnityEngine.Random.Range(2, 20)];

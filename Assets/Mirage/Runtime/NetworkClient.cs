@@ -1,7 +1,7 @@
 using System;
-using System.Net;
 using Mirage.Events;
 using Mirage.Logging;
+using Mirage.Serialization;
 using Mirage.SocketLayer;
 using UnityEngine;
 
@@ -35,6 +35,8 @@ namespace Mirage
 
         [Tooltip("Creates Socket for Peer to use")]
         public SocketFactory SocketFactory;
+
+        public bool DisconnectOnException = true;
 
         Peer peer;
 
@@ -91,6 +93,8 @@ namespace Mirage
         public NetworkTime Time { get; } = new NetworkTime();
 
         public NetworkWorld World { get; private set; }
+        public MessageHandler MessageHandler { get; private set; }
+
 
         /// <summary>
         /// NetworkClient can connect to local server in host mode too
@@ -110,16 +114,20 @@ namespace Mirage
             connectState = ConnectState.Connecting;
 
             World = new NetworkWorld();
-            InitializeAuthEvents();
 
-            EndPoint endPoint = SocketFactory.GetConnectEndPoint(address, port);
+            IEndPoint endPoint = SocketFactory.GetConnectEndPoint(address, port);
             if (logger.LogEnabled()) logger.Log($"Client connecting to endpoint: {endPoint}");
 
             ISocket socket = SocketFactory.CreateClientSocket();
-            var dataHandler = new DataHandler();
+            MessageHandler = new MessageHandler(DisconnectOnException);
+            var dataHandler = new DataHandler(MessageHandler);
             Metrics = EnablePeerMetrics ? new Metrics() : null;
 
-            peer = new Peer(socket, dataHandler, PeerConfig, LogFactory.GetLogger<Peer>(), Metrics);
+            Config config = PeerConfig ?? new Config();
+
+            NetworkWriterPool.Configure(config.MaxPacketSize);
+
+            peer = new Peer(socket, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
             peer.OnConnected += Peer_OnConnected;
             peer.OnConnectionFailed += Peer_OnConnectionFailed;
             peer.OnDisconnected += Peer_OnDisconnected;
@@ -132,13 +140,14 @@ namespace Mirage
             Time.Reset();
 
             RegisterMessageHandlers();
+            InitializeAuthEvents();
             // invoke started event after everything is set up, but before peer has connected
             _started.Invoke();
         }
 
         void ThrowIfActive()
         {
-            if (Active) throw new InvalidOperationException("Server is already active");
+            if (Active) throw new InvalidOperationException("Client is already active");
         }
 
         void ThrowIfSocketIsMissing()
@@ -185,10 +194,10 @@ namespace Mirage
             connectState = ConnectState.Connecting;
 
             World = server.World;
-            InitializeAuthEvents();
 
             // create local connection objects and connect them
-            var dataHandler = new DataHandler();
+            MessageHandler = new MessageHandler(DisconnectOnException);
+            var dataHandler = new DataHandler(MessageHandler);
             (IConnection clientConn, IConnection serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler, OnHostDisconnected, null);
 
             // set up client before connecting to server, server could invoke handlers
@@ -196,6 +205,7 @@ namespace Mirage
             Player = new NetworkPlayer(clientConn);
             dataHandler.SetConnection(clientConn, Player);
             RegisterHostHandlers();
+            InitializeAuthEvents();
             // invoke started event after everything is set up, but before peer has connected
             _started.Invoke();
 
@@ -214,6 +224,7 @@ namespace Mirage
             if (authenticator != null)
             {
                 authenticator.OnClientAuthenticated += OnAuthenticated;
+                authenticator.ClientSetup(this);
 
                 Connected.AddListener(authenticator.ClientAuthenticate);
             }
@@ -278,12 +289,12 @@ namespace Mirage
 
         internal void RegisterHostHandlers()
         {
-            Player.RegisterHandler<NetworkPongMessage>(msg => { });
+            MessageHandler.RegisterHandler<NetworkPongMessage>(msg => { });
         }
 
         internal void RegisterMessageHandlers()
         {
-            Player.RegisterHandler<NetworkPongMessage>(Time.OnClientPong);
+            MessageHandler.RegisterHandler<NetworkPongMessage>(Time.OnClientPong);
         }
 
 
@@ -331,6 +342,12 @@ namespace Mirage
         {
             IConnection connection;
             INetworkPlayer player;
+            readonly IMessageReceiver messageHandler;
+
+            public DataHandler(IMessageReceiver messageHandler)
+            {
+                this.messageHandler = messageHandler;
+            }
 
             public void SetConnection(IConnection connection, INetworkPlayer player)
             {
@@ -341,7 +358,7 @@ namespace Mirage
             public void ReceiveMessage(IConnection connection, ArraySegment<byte> message)
             {
                 logger.Assert(this.connection == connection);
-                player.HandleMessage(message);
+                messageHandler.HandleMessage(player, message);
             }
         }
     }

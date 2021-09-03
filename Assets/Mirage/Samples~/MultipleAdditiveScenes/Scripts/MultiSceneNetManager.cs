@@ -46,7 +46,8 @@ namespace Mirage.Examples.MultipleAdditiveScenes
         IEnumerator AddPlayerDelayed(INetworkPlayer player)
         {
             yield return new WaitForSeconds(.5f);
-            player.Send(new SceneMessage { scenePath = gameScene, sceneOperation = SceneOperation.LoadAdditive });
+
+            ServerObjectManager.NetworkSceneManager.ServerLoadSceneAdditively(gameScene, Server.Players);
 
             PlayerScore playerScore = player.Identity.GetComponent<PlayerScore>();
             playerScore.playerNumber = playerId;
@@ -79,7 +80,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
         /// </summary>
         public void OnStopServer()
         {
-            Server.SendToAll(new SceneMessage { scenePath = gameScene, sceneOperation = SceneOperation.UnloadAdditive });
+            Server.SendToAll(new SceneMessage { MainActivateScene = gameScene, SceneOperation = SceneOperation.UnloadAdditive });
             StartCoroutine(UnloadSubScenes());
         }
 

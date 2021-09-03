@@ -27,7 +27,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             serverComponent.target = serverPlayerGO;
 
-            await UniTask.WaitUntil(() => clientComponent.target != null);
+            await AsyncUtil.WaitUntilWithTimeout(() => clientComponent.target != null);
 
             Assert.That(clientComponent.target, Is.SameAs(clientPlayerGO));
         });

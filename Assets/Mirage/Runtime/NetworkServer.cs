@@ -38,6 +38,8 @@ namespace Mirage
         [Min(1)]
         public int MaxConnections = 4;
 
+        public bool DisconnectOnException = true;
+
         /// <summary>
         /// <para>If you disable this, the server will not listen for incoming connections on the regular network port.</para>
         /// <para>This can be used if the game is running in host mode and does not want external players to be able to connect - making it like a single-player game.</para>
@@ -141,6 +143,7 @@ namespace Mirage
 
         public NetworkWorld World { get; private set; }
         public SyncVarSender SyncVarSender { get; private set; }
+        public MessageHandler MessageHandler { get; private set; }
 
 
         /// <summary>
@@ -190,31 +193,23 @@ namespace Mirage
             logger.Assert(Players.Count == 0, "Player could should have been reset since previous session");
             logger.Assert(connections.Count == 0, "connections could should have been reset since previous session");
 
-
-            if (authenticator != null)
-            {
-                authenticator.OnServerAuthenticated += OnAuthenticated;
-
-                Connected.AddListener(authenticator.ServerAuthenticate);
-            }
-            else
-            {
-                // if no authenticator, consider every connection as authenticated
-                Connected.AddListener(OnAuthenticated);
-            }
-
             LocalClient = localClient;
+            MessageHandler = new MessageHandler(DisconnectOnException);
+            MessageHandler.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
+
             World = new NetworkWorld();
             SyncVarSender = new SyncVarSender();
 
 
             ISocket socket = SocketFactory.CreateServerSocket();
-            var dataHandler = new DataHandler(connections);
+            var dataHandler = new DataHandler(MessageHandler, connections);
             Metrics = EnablePeerMetrics ? new Metrics() : null;
             Config config = PeerConfig ?? new Config
             {
                 MaxConnections = MaxConnections,
             };
+
+            NetworkWriterPool.Configure(config.MaxPacketSize);
 
             peer = new Peer(socket, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
             peer.OnConnected += Peer_OnConnected;
@@ -224,6 +219,7 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log("Server started listening");
 
+            InitializeAuthEvents();
             Active = true;
             _started?.Invoke();
 
@@ -248,7 +244,23 @@ namespace Mirage
             if (SocketFactory is null)
                 SocketFactory = GetComponent<SocketFactory>();
             if (SocketFactory == null)
-                throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for ${nameof(NetworkServer)}");
+                throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for {nameof(NetworkServer)}");
+        }
+
+        void InitializeAuthEvents()
+        {
+            if (authenticator != null)
+            {
+                authenticator.OnServerAuthenticated += OnAuthenticated;
+                authenticator.ServerSetup(this);
+
+                Connected.AddListener(authenticator.ServerAuthenticate);
+            }
+            else
+            {
+                // if no authenticator, consider every connection as authenticated
+                Connected.AddListener(OnAuthenticated);
+            }
         }
 
         internal void Update()
@@ -330,7 +342,6 @@ namespace Mirage
                 // would throw NRE
                 Players.Add(player);
                 connections.Add(player.Connection, player);
-                player.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
             }
         }
 
@@ -390,6 +401,13 @@ namespace Mirage
             SendToMany(Players, msg, channelId);
         }
 
+        /// <summary>
+        /// Sends a message to many connections
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="players"></param>
+        /// <param name="msg"></param>
+        /// <param name="channelId"></param>
         public static void SendToMany<T>(IEnumerable<INetworkPlayer> players, T msg, int channelId = Channel.Reliable)
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -401,9 +419,35 @@ namespace Mirage
 
                 foreach (INetworkPlayer player in players)
                 {
-                    // send to all connections, but don't wait for them
                     player.Send(segment, channelId);
                     count++;
+                }
+
+                NetworkDiagnostics.OnSend(msg, segment.Count, count);
+            }
+        }
+
+        /// <summary>
+        /// Sends a message to many connections
+        /// <para>
+        /// Same as <see cref="SendToMany{T}(IEnumerable{INetworkPlayer}, T, int)"/> but uses for loop to avoid allocations
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// Using list in foreach loop causes Unity's mono version to box the struct which causes allocations, <see href="https://docs.unity3d.com/2019.4/Documentation/Manual/BestPracticeUnderstandingPerformanceInUnity4-1.html">Understanding the managed heap</see>
+        /// </remarks>
+        public static void SendToMany<T>(IReadOnlyList<INetworkPlayer> players, T msg, int channelId = Channel.Reliable)
+        {
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                // pack message into byte[] once
+                MessagePacker.Pack(msg, writer);
+                var segment = writer.ToArraySegment();
+                int count = players.Count;
+
+                for (int i = 0; i < count; i++)
+                {
+                    players[i].Send(segment, channelId);
                 }
 
                 NetworkDiagnostics.OnSend(msg, segment.Count, count);
@@ -470,18 +514,20 @@ namespace Mirage
         /// </summary>
         class DataHandler : IDataHandler
         {
+            readonly IMessageReceiver messageHandler;
             readonly Dictionary<IConnection, INetworkPlayer> players;
 
-            public DataHandler(Dictionary<IConnection, INetworkPlayer> connections)
+            public DataHandler(IMessageReceiver messageHandler, Dictionary<IConnection, INetworkPlayer> connections)
             {
+                this.messageHandler = messageHandler;
                 players = connections;
             }
 
             public void ReceiveMessage(IConnection connection, ArraySegment<byte> message)
             {
-                if (players.TryGetValue(connection, out INetworkPlayer handler))
+                if (players.TryGetValue(connection, out INetworkPlayer player))
                 {
-                    handler.HandleMessage(message);
+                    messageHandler.HandleMessage(player, message);
                 }
                 else
                 {

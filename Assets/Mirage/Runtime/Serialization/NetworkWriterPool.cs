@@ -1,99 +1,83 @@
 using System;
 using Mirage.Logging;
+using Mirage.SocketLayer;
 using UnityEngine;
 
 namespace Mirage.Serialization
 {
+    public static class NetworkWriterPool
+    {
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkWriterPool));
+        static Pool<PooledNetworkWriter> pool;
+
+        /// <summary>
+        /// Current Size of buffers, or null before Configure has been called
+        /// </summary>
+        public static int? BufferSize { get; private set; }
+
+        static NetworkWriterPool()
+        {
+            // auto configure so that pool can be used without having to manually call it
+            var config = new Config();
+            Configure(config.MaxPacketSize);
+        }
+
+        /// <summary>
+        /// Configures an exist pool or creates a new one
+        /// <para>Does not create a new pool if <paramref name="bufferSize"/> is less that current <see cref="BufferSize"/></para>
+        /// </summary>
+        /// <param name="bufferSize">starting capacity of buffer</param>
+        /// <param name="startPoolSize"></param>
+        /// <param name="maxPoolSize"></param>
+        public static void Configure(int bufferSize, int startPoolSize = 5, int maxPoolSize = 100)
+        {
+            // if new size is less, then just configure start/max
+            if (BufferSize.HasValue && bufferSize < BufferSize.Value)
+            {
+                pool.Configure(startPoolSize, maxPoolSize);
+            }
+            else
+            {
+                pool = new Pool<PooledNetworkWriter>(PooledNetworkWriter.CreateNew, bufferSize, startPoolSize, maxPoolSize, logger);
+                BufferSize = bufferSize;
+            }
+        }
+
+        public static PooledNetworkWriter GetWriter()
+        {
+            if (pool == null) throw new InvalidOperationException("Configure must be called before ");
+            PooledNetworkWriter writer = pool.Take();
+            writer.Reset();
+            return writer;
+        }
+    }
+
     /// <summary>
     /// NetworkWriter to be used with <see cref="NetworkWriterPool">NetworkWriterPool</see>
     /// </summary>
     public sealed class PooledNetworkWriter : NetworkWriter, IDisposable
     {
-        public void Dispose()
+        private readonly Pool<PooledNetworkWriter> pool;
+
+        private PooledNetworkWriter(int bufferSize, Pool<PooledNetworkWriter> pool) : base(bufferSize)
         {
-            NetworkWriterPool.Recycle(this);
+            this.pool = pool ?? throw new ArgumentNullException(nameof(pool));
         }
-    }
 
-    /// <summary>
-    /// Pool of NetworkWriters
-    /// <para>Use this pool instead of <see cref="NetworkWriter">NetworkWriter</see> to reduce memory allocation</para>
-    /// <para>Use <see cref="Capacity">Capacity</see> to change size of pool</para>
-    /// </summary>
-    public static class NetworkWriterPool
-    {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkWriterPool));
-
-        /// <summary>
-        /// Size of the pool
-        /// <para>If pool is too small getting writers will causes memory allocation</para>
-        /// <para>Default value: 100 </para>
-        /// </summary>
-        public static int Capacity
+        public static PooledNetworkWriter CreateNew(int bufferSize, Pool<PooledNetworkWriter> pool)
         {
-            get => pool.Length;
-            set
-            {
-                // resize the array
-                Array.Resize(ref pool, value);
-
-                // if capacity is smaller than before, then we need to adjust
-                // 'next' so it doesn't point to an index out of range
-                // -> if we set '0' then next = min(_, 0-1) => -1
-                // -> if we set '2' then next = min(_, 2-1) =>  1
-                next = Mathf.Min(next, pool.Length - 1);
-            }
+            return new PooledNetworkWriter(bufferSize, pool);
         }
 
         /// <summary>
-        /// Mirage usually only uses up to 4 writes in nested usings,
-        /// 100 is a good margin for edge cases when users need a lot writers at
-        /// the same time.
-        ///
-        /// <para>keep in mind, most entries of the pool will be null in most cases</para>
+        /// Puts object back in Pool
         /// </summary>
-        ///
-        /// Note: we use an Array instead of a Stack because it's significantly
-        ///       faster: https://github.com/vis2k/Mirror/issues/1614
-        static PooledNetworkWriter[] pool = new PooledNetworkWriter[10];
-
-        static int next = -1;
-
-        /// <summary>
-        /// Get the next writer in the pool
-        /// <para>If pool is empty, creates a new Writer</para>
-        /// </summary>
-        public static PooledNetworkWriter GetWriter()
+        public void Release()
         {
-            if (next == -1)
-            {
-                return new PooledNetworkWriter();
-            }
-
-            PooledNetworkWriter writer = pool[next];
-            pool[next] = null;
-            next--;
-
-            // reset cached writer length and position
-            writer.Reset();
-            return writer;
+            Reset();
+            pool.Put(this);
         }
 
-        /// <summary>
-        /// Puts writer back into pool
-        /// <para>When pool is full, the extra writer is left for the GC</para>
-        /// </summary>
-        public static void Recycle(PooledNetworkWriter writer)
-        {
-            if (next < pool.Length - 1)
-            {
-                next++;
-                pool[next] = writer;
-            }
-            else
-            {
-                logger.LogWarning("NetworkWriterPool.Recycle, Pool was full leaving extra writer for GC");
-            }
-        }
+        void IDisposable.Dispose() => Release();
     }
 }

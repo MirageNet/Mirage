@@ -1,5 +1,5 @@
 using System;
-using System.Net;
+using Mirage.Tests;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -12,7 +12,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void BindShoudlCallSocketBind()
         {
-            EndPoint endPoint = Substitute.For<EndPoint>();
+            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
             peer.Bind(endPoint);
 
             socket.Received(1).Bind(Arg.Is(endPoint));
@@ -21,13 +21,13 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void CloseSendsDisconnectMessageToAllConnections()
         {
-            EndPoint endPoint = Substitute.For<EndPoint>();
+            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
             peer.Bind(endPoint);
 
-            var endPoints = new EndPoint[maxConnections];
+            var endPoints = new IEndPoint[maxConnections];
             for (int i = 0; i < maxConnections; i++)
             {
-                endPoints[i] = Substitute.For<EndPoint>();
+                endPoints[i] = TestEndPoint.CreateSubstitute();
 
                 socket.SetupReceiveCall(connectRequest, endPoints[i]);
                 peer.Update();
@@ -59,12 +59,12 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void AcceptsConnectionForValidMessage()
         {
-            peer.Bind(Substitute.For<EndPoint>());
+            peer.Bind(TestEndPoint.CreateSubstitute());
 
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
-            EndPoint endPoint = Substitute.For<EndPoint>();
+            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
             socket.SetupReceiveCall(connectRequest, endPoint);
             peer.Update();
 
@@ -80,16 +80,16 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void AcceptsConnectionsUpToMax()
         {
-            peer.Bind(Substitute.For<EndPoint>());
+            peer.Bind(TestEndPoint.CreateSubstitute());
 
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
 
-            var endPoints = new EndPoint[maxConnections];
+            var endPoints = new IEndPoint[maxConnections];
             for (int i = 0; i < maxConnections; i++)
             {
-                endPoints[i] = Substitute.For<EndPoint>();
+                endPoints[i] = TestEndPoint.CreateSubstitute();
 
                 socket.SetupReceiveCall(connectRequest, endPoints[i]);
                 peer.Update();
@@ -111,7 +111,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void RejectsConnectionOverMax()
         {
-            peer.Bind(Substitute.For<EndPoint>());
+            peer.Bind(TestEndPoint.CreateSubstitute());
 
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
@@ -126,7 +126,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             socket.ClearReceivedCalls();
             connectAction.ClearReceivedCalls();
 
-            EndPoint overMaxEndpoint = Substitute.For<EndPoint>();
+            IEndPoint overMaxEndpoint = TestEndPoint.CreateSubstitute();
             socket.SetupReceiveCall(connectRequest, overMaxEndpoint);
 
 
@@ -152,7 +152,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test, Description("Should reject with no reason given")]
         public void IgnoresMessageThatIsInvalid()
         {
-            peer.Bind(Substitute.For<EndPoint>());
+            peer.Bind(TestEndPoint.CreateSubstitute());
 
             Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;

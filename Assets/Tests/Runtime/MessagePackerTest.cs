@@ -9,22 +9,35 @@ namespace Mirage.Tests.Runtime.Serialization
     [TestFixture]
     public class MessagePackerTest
     {
+        NetworkReader reader;
+        [SetUp]
+        public void Setup()
+        {
+            reader = new NetworkReader();
+        }
+        [TearDown]
+        public void TearDown()
+        {
+            reader.Dispose();
+            reader = null;
+        }
+
 
         [Test]
         public void TestPacking()
         {
             var message = new SceneMessage
             {
-                scenePath = "Hello world",
-                sceneOperation = SceneOperation.LoadAdditive
+                MainActivateScene = "Hello world",
+                SceneOperation = SceneOperation.LoadAdditive
             };
 
             byte[] data = MessagePacker.Pack(message);
 
             SceneMessage unpacked = MessagePacker.Unpack<SceneMessage>(data);
 
-            Assert.That(unpacked.scenePath, Is.EqualTo("Hello world"));
-            Assert.That(unpacked.sceneOperation, Is.EqualTo(SceneOperation.LoadAdditive));
+            Assert.That(unpacked.MainActivateScene, Is.EqualTo("Hello world"));
+            Assert.That(unpacked.SceneOperation, Is.EqualTo(SceneOperation.LoadAdditive));
         }
 
         [Test]
@@ -48,8 +61,8 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var message = new SceneMessage
             {
-                scenePath = "Hello world",
-                sceneOperation = SceneOperation.LoadAdditive
+                MainActivateScene = "Hello world",
+                SceneOperation = SceneOperation.LoadAdditive
             };
 
             byte[] data = MessagePacker.Pack(message);
@@ -71,12 +84,12 @@ namespace Mirage.Tests.Runtime.Serialization
             // try a regular message
             var message = new SceneMessage
             {
-                scenePath = "Hello world",
-                sceneOperation = SceneOperation.LoadAdditive
+                MainActivateScene = "Hello world",
+                SceneOperation = SceneOperation.LoadAdditive
             };
 
             byte[] data = MessagePacker.Pack(message);
-            var reader = new NetworkReader(data);
+            reader.Reset(data);
 
             int msgType = MessagePacker.UnpackId(reader);
             Assert.That(msgType, Is.EqualTo(BitConverter.ToUInt16(data, 0)));
@@ -88,8 +101,8 @@ namespace Mirage.Tests.Runtime.Serialization
             // try an invalid message
             Assert.Throws<EndOfStreamException>(() =>
             {
-                var reader2 = new NetworkReader(new byte[0]);
-                _ = MessagePacker.UnpackId(reader2);
+                reader.Reset(new byte[0]);
+                _ = MessagePacker.UnpackId(reader);
             });
         }
 

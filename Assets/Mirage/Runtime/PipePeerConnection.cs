@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using Mirage.Logging;
 using Mirage.SocketLayer;
 using UnityEngine;
@@ -58,7 +57,7 @@ namespace Mirage
             return name;
         }
 
-        EndPoint IConnection.EndPoint => new PipeEndPoint();
+        IEndPoint IConnection.EndPoint => new PipeEndPoint();
 
 
         public ConnectionState State { get; private set; } = ConnectionState.Connected;
@@ -75,40 +74,65 @@ namespace Mirage
             otherConnection.Disconnect();
         }
 
-        INotifyToken IConnection.SendNotify(byte[] packet)
+        public INotifyToken SendNotify(byte[] packet, int offset, int length)
         {
             if (State == ConnectionState.Disconnected)
                 return default;
 
-            receive(packet);
+            receive(packet, offset, length);
 
             return new PipeNotifyToken();
         }
+        public INotifyToken SendNotify(ArraySegment<byte> packet) => SendNotify(packet.Array, packet.Offset, packet.Count);
+        public INotifyToken SendNotify(byte[] packet) => SendNotify(packet, 0, packet.Length);
 
-        void IConnection.SendReliable(byte[] message)
+        public void SendNotify(byte[] packet, int offset, int length, INotifyCallBack callBacks)
         {
             if (State == ConnectionState.Disconnected)
                 return;
 
-            receive(message);
-        }
+            receive(packet, offset, length);
 
-        void IConnection.SendUnreliable(byte[] packet)
+            callBacks.OnDelivered();
+        }
+        public void SendNotify(ArraySegment<byte> packet, INotifyCallBack callBacks) => SendNotify(packet.Array, packet.Offset, packet.Count, callBacks);
+        public void SendNotify(byte[] packet, INotifyCallBack callBacks) => SendNotify(packet, 0, packet.Length, callBacks);
+
+
+        public void SendReliable(byte[] message, int offset, int length)
         {
             if (State == ConnectionState.Disconnected)
                 return;
 
-            receive(packet);
+            receive(message, offset, length);
         }
+        public void SendReliable(ArraySegment<byte> packet) => SendReliable(packet.Array, packet.Offset, packet.Count);
+        public void SendReliable(byte[] packet) => SendReliable(packet, 0, packet.Length);
 
-        private void receive(byte[] packet)
+
+        public void SendUnreliable(byte[] packet, int offset, int length)
+        {
+            if (State == ConnectionState.Disconnected)
+                return;
+
+            receive(packet, offset, length);
+        }
+        public void SendUnreliable(ArraySegment<byte> packet) => SendUnreliable(packet.Array, packet.Offset, packet.Count);
+        public void SendUnreliable(byte[] packet) => SendUnreliable(packet, 0, packet.Length);
+
+        private void receive(byte[] packet, int offset, int length)
         {
             logger.Assert(State == ConnectionState.Connected);
-            otherHandler.ReceiveMessage(otherConnection, new ArraySegment<byte>(packet));
+            otherHandler.ReceiveMessage(otherConnection, new ArraySegment<byte>(packet, offset, length));
         }
 
-        public class PipeEndPoint : EndPoint
+        public class PipeEndPoint : IEndPoint
         {
+            IEndPoint IEndPoint.CreateCopy()
+            {
+                // never need copy of pipeendpoint
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>

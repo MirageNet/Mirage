@@ -28,6 +28,9 @@
 - name: GameObjects
   href: GameObjects/toc.yml
   topicHref: GameObjects/index.md
+- name: Bit Packing
+  href: BitPacking/toc.yml
+  topicHref: BitPacking/index.md
 - name: Mirror Migration Guide
   topicHref: MirrorMigration.md
 - name: Community Guides

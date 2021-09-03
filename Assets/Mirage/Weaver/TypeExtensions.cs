@@ -23,10 +23,19 @@ namespace Mirage.Weaver
             return td.Methods.Where(method => method.Name == methodName).ToList();
         }
 
-        public static MethodReference GetMethodInBaseType(this TypeReference td, string methodName)
+        /// <summary>
+        /// Finds a method in base type
+        /// <para>
+        /// IMPORTANT: dont resolve <paramref name="typeReference"/> before calling this or methods can not be made into generic methods
+        /// </para>
+        /// </summary>
+        /// <param name="typeReference">Unresolved type reference, dont resolve if generic</param>
+        /// <param name="methodName"></param>
+        /// <returns></returns>
+        public static MethodReference GetMethodInBaseType(this TypeReference typeReference, string methodName)
         {
-            TypeDefinition typedef = td.Resolve();
-            TypeReference typeRef = td;
+            TypeDefinition typedef = typeReference.Resolve();
+            TypeReference typeRef = typeReference;
             while (typedef != null)
             {
                 foreach (MethodDefinition md in typedef.Methods)
@@ -36,7 +45,8 @@ namespace Mirage.Weaver
                         MethodReference method = md;
                         if (typeRef.IsGenericInstance)
                         {
-                            var baseTypeInstance = (GenericInstanceType)td;
+                            // use in reference here to make method generic
+                            var baseTypeInstance = (GenericInstanceType)typeReference;
                             method = method.MakeHostInstanceGeneric(baseTypeInstance);
                         }
 
@@ -110,6 +120,17 @@ namespace Mirage.Weaver
 
         public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes) =>
             AddMethod(typeDefinition, name, attributes, typeDefinition.Module.ImportReference(typeof(void)));
+
+        public static FieldDefinition AddField<T>(this TypeDefinition typeDefinition, string name, FieldAttributes attributes) =>
+            AddField(typeDefinition, typeDefinition.Module.ImportReference(typeof(T)), name, attributes);
+
+        public static FieldDefinition AddField(this TypeDefinition typeDefinition, TypeReference fieldType, string name, FieldAttributes attributes)
+        {
+            var field = new FieldDefinition(name, attributes, fieldType);
+            field.DeclaringType = typeDefinition;
+            typeDefinition.Fields.Add(field);
+            return field;
+        }
 
         /// <summary>
         /// Creates a generic type out of another type, if needed.

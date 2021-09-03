@@ -68,7 +68,7 @@ namespace Mirage
             spawner.PlayerPrefab = null;
             Assert.Throws<InvalidOperationException>(() =>
             {
-                spawner.Start();
+                spawner.Awake();
             });
         }
 
@@ -78,28 +78,28 @@ namespace Mirage
             spawner.ServerObjectManager = null;
             Assert.Throws<InvalidOperationException>(() =>
             {
-                spawner.Start();
+                spawner.Awake();
             });
         }
 
         [Test]
         public void AutoConfigureClient()
         {
-            spawner.Start();
+            spawner.Awake();
             Assert.That(spawner.Client, Is.SameAs(client));
         }
 
         [Test]
         public void AutoConfigureServer()
         {
-            spawner.Start();
+            spawner.Awake();
             Assert.That(spawner.Server, Is.SameAs(server));
         }
 
         [Test]
         public void GetStartPositionRoundRobinTest()
         {
-            spawner.Start();
+            spawner.Awake();
 
             spawner.playerSpawnMethod = CharacterSpawner.PlayerSpawnMethod.RoundRobin;
             Assert.That(spawner.GetStartPosition(), Is.SameAs(pos1.transform));
@@ -111,7 +111,7 @@ namespace Mirage
         [Test]
         public void GetStartPositionRandomTest()
         {
-            spawner.Start();
+            spawner.Awake();
 
             spawner.playerSpawnMethod = CharacterSpawner.PlayerSpawnMethod.Random;
             Assert.That(spawner.GetStartPosition(), Is.SameAs(pos1.transform) | Is.SameAs(pos2.transform));
@@ -120,7 +120,7 @@ namespace Mirage
         [Test]
         public void GetStartPositionNullTest()
         {
-            spawner.Start();
+            spawner.Awake();
 
             spawner.startPositions.Clear();
             Assert.That(spawner.GetStartPosition(), Is.SameAs(null));
@@ -132,7 +132,7 @@ namespace Mirage
             spawner.ClientObjectManager = null;
             Assert.Throws<InvalidOperationException>(() =>
             {
-                spawner.Start();
+                spawner.Awake();
             });
         }
     }
