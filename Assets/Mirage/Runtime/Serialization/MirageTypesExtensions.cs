@@ -24,7 +24,7 @@ namespace Mirage.Serialization
                 writer.WriteNetworkIdentity(null);
                 return;
             }
-            writer.WriteNetworkIdentity(value.NetIdentity);
+            writer.WriteNetworkIdentity(value.Identity);
             writer.WriteByte((byte)value.ComponentIndex);
         }
         public static void WriteGameObject(this NetworkWriter writer, GameObject value)

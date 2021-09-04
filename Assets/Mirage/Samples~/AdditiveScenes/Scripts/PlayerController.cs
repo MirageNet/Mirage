@@ -13,7 +13,7 @@ namespace Mirage.Examples.Additive
 
         void Awake()
         {
-            NetIdentity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
+            Identity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
         }
 
         void OnValidate()

@@ -30,10 +30,10 @@ namespace Mirage
 
             foreach (ObjectReady objectReady in ObjectReadyList)
             {
-                bool isOwner = objectReady.NetIdentity == identity;
+                bool isOwner = objectReady.Identity == identity;
                 if ((!isOwner || includeOwner) && objectReady.IsReady)
                 {
-                    playerCache.Add(objectReady.NetIdentity.Owner);
+                    playerCache.Add(objectReady.Identity.Owner);
                 }
             }
 

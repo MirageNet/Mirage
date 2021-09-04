@@ -13,8 +13,8 @@ namespace Mirage.Tests.Performance.Runtime
 
         public void Awake()
         {
-            NetIdentity.OnStartServer.AddListener(StartServer);
-            NetIdentity.OnStopServer.AddListener(StopServer);
+            Identity.OnStartServer.AddListener(StartServer);
+            Identity.OnStopServer.AddListener(StopServer);
         }
 
         private void StopServer()

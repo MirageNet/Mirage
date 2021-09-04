@@ -8,8 +8,8 @@ namespace Mirage.Examples.Light
         [SyncVar] public int health = 10;
         private void Awake()
         {
-            NetIdentity.OnStartServer.AddListener(OnStartServer);
-            NetIdentity.OnStopServer.AddListener(OnStopServer);
+            Identity.OnStartServer.AddListener(OnStartServer);
+            Identity.OnStopServer.AddListener(OnStopServer);
         }
 
         public void OnStartServer()

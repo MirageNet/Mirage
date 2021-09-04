@@ -49,23 +49,23 @@ namespace Mirage
         /// Returns true if this object is active on an active server.
         /// <para>This is only true if the object has been spawned. This is different from NetworkServer.active, which is true if the server itself is active rather than this object being active.</para>
         /// </summary>
-        public bool IsServer => NetIdentity.IsServer;
+        public bool IsServer => Identity.IsServer;
 
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
         /// </summary>
-        public bool IsClient => NetIdentity.IsClient;
+        public bool IsClient => Identity.IsClient;
 
         /// <summary>
         /// Returns true if we're on host mode.
         /// </summary>
-        public bool IsLocalClient => NetIdentity.IsLocalClient;
+        public bool IsLocalClient => Identity.IsLocalClient;
 
         /// <summary>
         /// This returns true if this object is the one that represents the player on the local machine.
         /// <para>In multiplayer games, there are multiple instances of the Player object. The client needs to know which one is for "themselves" so that only that player processes input and potentially has a camera attached. The IsLocalPlayer function will return true only for the player instance that belongs to the player on the local machine, so it can be used to filter out input for non-local players.</para>
         /// </summary>
-        public bool IsLocalPlayer => NetIdentity.IsLocalPlayer;
+        public bool IsLocalPlayer => Identity.IsLocalPlayer;
 
         /// <summary>
         /// True if this object only exists on the server
@@ -81,40 +81,40 @@ namespace Mirage
         /// This returns true if this object is the authoritative version of the object in the distributed network application.
         /// <para>The <see cref="NetworkIdentity.HasAuthority">NetworkIdentity.hasAuthority</see> value on the NetworkIdentity determines how authority is determined. For most objects, authority is held by the server. For objects with <see cref="NetworkIdentity.HasAuthority">NetworkIdentity.hasAuthority</see> set, authority is held by the client of that player.</para>
         /// </summary>
-        public bool HasAuthority => NetIdentity.HasAuthority;
+        public bool HasAuthority => Identity.HasAuthority;
 
         /// <summary>
         /// The unique network Id of this object.
         /// <para>This is assigned at runtime by the network server and will be unique for all objects for that network session.</para>
         /// </summary>
-        public uint NetId => NetIdentity.NetId;
+        public uint NetId => Identity.NetId;
 
         /// <summary>
         /// The <see cref="NetworkServer">NetworkClient</see> associated to this object.
         /// </summary>
-        public INetworkServer Server => NetIdentity.Server;
+        public INetworkServer Server => Identity.Server;
 
         /// <summary>
         /// Quick Reference to the NetworkIdentities ServerObjectManager. Present only for server/host instances.
         /// </summary>
-        public ServerObjectManager ServerObjectManager => NetIdentity.ServerObjectManager;
+        public ServerObjectManager ServerObjectManager => Identity.ServerObjectManager;
 
         /// <summary>
         /// The <see cref="NetworkClient">NetworkClient</see> associated to this object.
         /// </summary>
-        public INetworkClient Client => NetIdentity.Client;
+        public INetworkClient Client => Identity.Client;
 
         /// <summary>
         /// Quick Reference to the NetworkIdentities ClientObjectManager. Present only for instances instances.
         /// </summary>
-        public ClientObjectManager ClientObjectManager => NetIdentity.ClientObjectManager;
+        public ClientObjectManager ClientObjectManager => Identity.ClientObjectManager;
 
         /// <summary>
         /// The <see cref="NetworkPlayer"/> associated with this <see cref="NetworkIdentity" /> This is only valid for player objects on the server.
         /// </summary>
-        public INetworkPlayer Owner => NetIdentity.Owner;
+        public INetworkPlayer Owner => Identity.Owner;
 
-        public NetworkWorld World => NetIdentity.World;
+        public NetworkWorld World => Identity.World;
 
         /// <summary>
         /// Returns the appropriate NetworkTime instance based on if this NetworkBehaviour is running as a Server or Client.
@@ -145,35 +145,35 @@ namespace Mirage
         /// <summary>
         /// NetworkIdentity component caching for easier access
         /// </summary>
-        NetworkIdentity netIdentityCache;
+        NetworkIdentity _identity;
 
         /// <summary>
         /// Returns the NetworkIdentity of this object
         /// </summary>
-        public NetworkIdentity NetIdentity
+        public NetworkIdentity Identity
         {
             get
             {
                 // in this specific case,  we want to know if we have set it before
                 // so we can compare if the reference is null
                 // instead of calling unity's MonoBehaviour == operator
-                if (netIdentityCache is null)
+                if (_identity is null)
                 {
                     // GetComponentInParent doesn't works on disabled gameObject
                     // and GetComponentsInParent(false)[0] isn't allocation free, so
                     // we just drop child support in this specific case
                     if (gameObject.activeSelf)
-                        netIdentityCache = GetComponentInParent<NetworkIdentity>();
+                        _identity = GetComponentInParent<NetworkIdentity>();
                     else
-                        netIdentityCache = GetComponent<NetworkIdentity>();
+                        _identity = GetComponent<NetworkIdentity>();
 
                     // do this 2nd check inside first if so that we are not checking == twice on unity Object
-                    if (netIdentityCache is null)
+                    if (_identity is null)
                     {
                         logger.LogError("There is no NetworkIdentity on " + name + ". Please add one.");
                     }
                 }
-                return netIdentityCache;
+                return _identity;
             }
         }
 
@@ -189,9 +189,9 @@ namespace Mirage
                     return componentIndex.Value;
 
                 // note: FindIndex causes allocations, we search manually instead
-                for (int i = 0; i < NetIdentity.NetworkBehaviours.Length; i++)
+                for (int i = 0; i < Identity.NetworkBehaviours.Length; i++)
                 {
-                    NetworkBehaviour component = NetIdentity.NetworkBehaviours[i];
+                    NetworkBehaviour component = Identity.NetworkBehaviours[i];
                     if (component == this)
                     {
                         componentIndex = i;
@@ -219,7 +219,7 @@ namespace Mirage
         {
             if (IsServer)
             {
-                Server.SyncVarSender.AddDirtyObject(NetIdentity);
+                Server.SyncVarSender.AddDirtyObject(Identity);
             }
         }
 
@@ -318,7 +318,7 @@ namespace Mirage
             // The public facing parameter is excludeOwner in [ClientRpc]
             // so we negate it here to logically align with SendToReady.
             bool includeOwner = !excludeOwner;
-            NetIdentity.SendToRemoteObservers(message, includeOwner, channelId);
+            Identity.SendToRemoteObservers(message, includeOwner, channelId);
         }
 
         protected internal void SendTargetRpcInternal(INetworkPlayer player, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
@@ -376,7 +376,7 @@ namespace Mirage
         {
             SyncVarDirtyBits |= dirtyBit;
             if (IsServer)
-                Server.SyncVarSender.AddDirtyObject(NetIdentity);
+                Server.SyncVarSender.AddDirtyObject(Identity);
         }
 
         /// <summary>
