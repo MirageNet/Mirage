@@ -25,7 +25,7 @@ namespace Mirage
         public bool requireAuthority = true;
     }
 
-    public enum Client { Owner, Observers, Player }
+    public enum RpcTarget { Owner, Observers, Player }
 
     /// <summary>
     /// The server uses a Remote Procedure Call (RPC) to run this function on specific clients.
@@ -35,7 +35,7 @@ namespace Mirage
     public class ClientRpcAttribute : Attribute
     {
         public int channel = Channel.Reliable;
-        public Client target = Client.Observers;
+        public RpcTarget target = RpcTarget.Observers;
         public bool excludeOwner;
     }
 
