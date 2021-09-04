@@ -165,7 +165,7 @@ namespace Mirage.Weaver
         /// <code>
         /// protected static void Skeleton_MyServerRpc(NetworkBehaviour obj, NetworkReader reader, NetworkConnection senderConnection)
         /// {
-        ///     if (!obj.netIdentity.server.active)
+        ///     if (!obj.Identity.server.active)
         ///     {
         ///         return;
         ///     }

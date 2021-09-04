@@ -271,8 +271,8 @@ namespace Mirage
 
         private void Peer_OnConnected(IConnection conn)
         {
-            var networkConnectionToClient = new NetworkPlayer(conn);
-            ConnectionAccepted(networkConnectionToClient);
+            var player = new NetworkPlayer(conn);
+            ConnectionAccepted(player);
         }
 
         private void Peer_OnDisconnected(IConnection conn, DisconnectReason reason)

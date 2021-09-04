@@ -7,8 +7,6 @@ using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver
 {
-    public enum Client { Owner, Observers, Connection }
-
     /// <summary>
     /// Processes [Rpc] methods in NetworkBehaviour
     /// </summary>
@@ -17,7 +15,7 @@ namespace Mirage.Weaver
         struct ClientRpcMethod
         {
             public MethodDefinition stub;
-            public Client target;
+            public RpcTarget target;
             public bool excludeOwner;
             public MethodDefinition skeleton;
         }
@@ -40,7 +38,7 @@ namespace Mirage.Weaver
         /// <code>
         /// protected static void Skeleton_Test(NetworkBehaviour obj, NetworkReader reader, NetworkConnection senderConnection)
         /// {
-        ///     if (!obj.netIdentity.server.active)
+        ///     if (!obj.Identity.server.active)
         ///     {
         ///         return;
         ///     }
@@ -63,8 +61,8 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
             // NetworkConnection parameter is only required for Client.Connection
-            Client target = clientRpcAttr.GetField("target", Client.Observers);
-            bool hasNetworkConnection = target == Client.Connection && HasNetworkConnectionParameter(md);
+            RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
+            bool hasNetworkConnection = target == RpcTarget.Player && HasNetworkConnectionParameter(md);
 
             if (hasNetworkConnection)
             {
@@ -161,7 +159,7 @@ namespace Mirage.Weaver
 
             string rpcName = md.Name;
 
-            Client target = clientRpcAttr.GetField("target", Client.Observers);
+            RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
             int channel = clientRpcAttr.GetField("channel", 0);
             bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
 
@@ -169,9 +167,9 @@ namespace Mirage.Weaver
             // this
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            if (target == Client.Connection && HasNetworkConnectionParameter(md))
+            if (target == RpcTarget.Player && HasNetworkConnectionParameter(md))
                 worker.Append(worker.Create(OpCodes.Ldarg_1));
-            else if (target == Client.Owner)
+            else if (target == RpcTarget.Owner)
                 worker.Append(worker.Create(OpCodes.Ldnull));
 
             worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType.ConvertToGenericIfNeeded()));
@@ -182,7 +180,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
 
-            if (target == Client.Observers)
+            if (target == RpcTarget.Observers)
             {
                 worker.Append(worker.Create(excludeOwner ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
                 MethodReference sendRpcRef = md.Module.ImportReference<NetworkBehaviour>(nb => nb.SendRpcInternal(default, default, default, default, default));
@@ -256,15 +254,15 @@ namespace Mirage.Weaver
                 return false;
             }
 
-            Client target = clientRpcAttr.GetField("target", Client.Observers);
-            if (target == Client.Connection && !HasNetworkConnectionParameter(md))
+            RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
+            if (target == RpcTarget.Player && !HasNetworkConnectionParameter(md))
             {
                 logger.Error("ClientRpc with Client.Connection needs a network connection parameter", md);
                 return false;
             }
 
             bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
-            if (target == Client.Owner && excludeOwner)
+            if (target == RpcTarget.Owner && excludeOwner)
             {
                 logger.Error("ClientRpc with Client.Owner cannot have excludeOwner set as true", md);
                 return false;
@@ -306,7 +304,7 @@ namespace Mirage.Weaver
             if (!Validate(md, clientRpcAttr))
                 return;
 
-            Client clientTarget = clientRpcAttr.GetField("target", Client.Observers);
+            RpcTarget clientTarget = clientRpcAttr.GetField("target", RpcTarget.Observers);
             bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
 
             MethodDefinition userCodeFunc = GenerateStub(md, clientRpcAttr);

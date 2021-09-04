@@ -7,7 +7,7 @@ namespace Mirage
     // proximity to the player. But we might have room based, guild based,
     // instanced based checks too, so NetworkVisibility is more fitting.
     //
-    // note: we inherit from NetworkBehaviour so we can reuse .netIdentity, etc.
+    // note: we inherit from NetworkBehaviour so we can reuse .Identity, etc.
     // note: unlike UNET, we only allow 1 proximity checker per NetworkIdentity.
     [DisallowMultipleComponent]
     public abstract class NetworkVisibility : NetworkBehaviour

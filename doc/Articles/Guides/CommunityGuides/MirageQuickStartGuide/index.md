@@ -104,10 +104,7 @@ namespace GettingStarted
     public class PlayerScript : NetworkBehaviour
     {
         private void Awake() {
-            // This one is for clients only
-            NetIdentity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
-            // This one is for server and clients only (hosts)
-            NetIdentity.OnStartServer.AddListener(OnStartLocalPlayer);
+            Identity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
         }
 
         private void OnStartLocalPlayer()
@@ -118,7 +115,7 @@ namespace GettingStarted
 
         private void Update()
         {
-            if (!NetIdentity.IsLocalPlayer) { return; }
+            if (!IsLocalPlayer) { return; }
 
             float moveX = Input.GetAxis("Horizontal") * Time.deltaTime * 110.0f;
             float moveZ = Input.GetAxis("Vertical") * Time.deltaTime * 4f;
@@ -219,7 +216,7 @@ namespace QuickStart
         [SyncVar(hook = nameof(OnColorChanged))]
         public Color playerColor = Color.white;
 
-        [Command]
+        [ServerRpc]
         public void CmdSetupPlayer(string _name, Color _col)
         {
             // player info sent to server, then server updates sync vars which handles it on all clients
@@ -228,7 +225,7 @@ namespace QuickStart
         }
 
         private void Awake() {
-            NetIdentity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
+            Identity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
         }
 
         private void OnStartLocalPlayer()
@@ -259,7 +256,7 @@ namespace QuickStart
 
         private void Update()
         {
-            if (!NetIdentity.isLocalPlayer)
+            if (!IsLocalPlayer)
             {
                 // make non-local players run this
                 floatingInfo.transform.LookAt(Camera.main.transform);
@@ -307,8 +304,9 @@ void Awake()
 {
     //allow all players to run this
     sceneScript = GameObject.FindObjectOfType<SceneScript>();
+    Identity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
 }
-[Command]
+[ServerRpc]
 public void CmdSendPlayerMessage()
 {
     if (sceneScript) 
@@ -316,7 +314,7 @@ public void CmdSendPlayerMessage()
         sceneScript.statusText = $"{playerName} says hello {Random.Range(10, 99)}";
     }
 }
-[Command]
+[ServerRpc]
 public void CmdSetupPlayer(string _name, Color _col)
 {
     //player info sent to server, then server updates sync vars which handles it on all clients
@@ -324,7 +322,7 @@ public void CmdSetupPlayer(string _name, Color _col)
     playerColor = _col;
     sceneScript.statusText = $"{playerName} joined.";
 }
-public override void OnStartLocalPlayer()
+public void OnStartLocalPlayer()
 {
     sceneScript.playerScript = this;
     //. . . . ^ new line to add here
@@ -413,7 +411,7 @@ void OnWeaponChanged(int _Old, int _New)
     }
 }
 
-[Command]
+[ServerRpc]
 public void CmdChangeActiveWeapon(int newIndex)
 {
     activeWeaponSynced = newIndex;
@@ -435,7 +433,7 @@ Add the weapon switch button in update. Only local player switches its own weapo
 ```cs
 void Update()
 {
-    if (!isLocalPlayer)
+    if (!IsLocalPlayer)
     {
         // make non-local players run this
         floatingInfo.transform.LookAt(Camera.main.transform);

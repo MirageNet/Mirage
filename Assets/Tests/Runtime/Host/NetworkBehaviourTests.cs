@@ -107,7 +107,7 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         [Test]
-        public void HasIdentitysConnectionToClient()
+        public void HasIdentitysOwner()
         {
             (_, identity.Owner) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
             Assert.That(component.Owner, Is.EqualTo(identity.Owner));

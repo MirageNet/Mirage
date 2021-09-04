@@ -24,7 +24,7 @@ See [character objects](../Guides/GameObjects/SpawnPlayer.md) for more informati
 -   Add a NetworkTransform component to the player Prefab
 -   Check the Client Authority checkbox on the component.
 -   Update input and control scripts to respect `IsLocalPlayer`
--   Subscribe to `NetIdentity.OnStartLocalPlayer` event to take control of the Main Camera in the scene for the player.
+-   Subscribe to `Identity.OnStartLocalPlayer` event to take control of the Main Camera in the scene for the player.
 
 For example, this script only processes input for the local player:
 
