@@ -187,23 +187,23 @@ namespace Mirage
         /// </summary>
         public ClientObjectManager ClientObjectManager;
 
-        INetworkPlayer _connectionToClient;
+        INetworkPlayer _owner;
 
         /// <summary>
-        /// The INetworkPlayer associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is valid for player and other owned objects in the server.
+        /// The INetworkPlayer associated with this <see cref="NetworkIdentity">NetworkIdentity</see>. This property is only valid on server
         /// <para>Use it to return details such as the connection&apos;s identity, IP address and ready status.</para>
         /// </summary>
-        public INetworkPlayer ConnectionToClient
+        public INetworkPlayer Owner
         {
-            get => _connectionToClient;
+            get => _owner;
 
             internal set
             {
-                if (_connectionToClient != null)
-                    _connectionToClient.RemoveOwnedObject(this);
+                if (_owner != null)
+                    _owner.RemoveOwnedObject(this);
 
-                _connectionToClient = value;
-                _connectionToClient?.AddOwnedObject(this);
+                _owner = value;
+                _owner?.AddOwnedObject(this);
             }
         }
 
@@ -382,13 +382,13 @@ namespace Mirage
         internal void SetClientOwner(INetworkPlayer player)
         {
             // do nothing if it already has an owner
-            if (ConnectionToClient != null && player != ConnectionToClient)
+            if (Owner != null && player != Owner)
             {
                 throw new InvalidOperationException($"Object {this} netId={NetId} already has an owner. Use RemoveClientAuthority() first");
             }
 
             // otherwise set the owner connection
-            ConnectionToClient = player;
+            Owner = player;
         }
 
         /// <summary>
@@ -1038,9 +1038,9 @@ namespace Mirage
             // -> fixes https://github.com/vis2k/Mirror/issues/692 where a
             //    player might teleport out of the ProximityChecker's cast,
             //    losing the own connection as observer.
-            if (ConnectionToClient != null && ConnectionToClient.SceneIsReady)
+            if (Owner != null && Owner.SceneIsReady)
             {
-                newObservers.Add(ConnectionToClient);
+                newObservers.Add(Owner);
             }
 
             // if no NetworkVisibility component, then add all server connections.
@@ -1128,7 +1128,7 @@ namespace Mirage
                 throw new InvalidOperationException("AssignClientAuthority for " + gameObject + " owner cannot be null. Use RemoveClientAuthority() instead");
             }
 
-            if (ConnectionToClient != null && player != ConnectionToClient)
+            if (Owner != null && player != Owner)
             {
                 throw new InvalidOperationException("AssignClientAuthority for " + gameObject + " already has an owner. Use RemoveClientAuthority() first");
             }
@@ -1154,18 +1154,18 @@ namespace Mirage
                 throw new InvalidOperationException("RemoveClientAuthority can only be called on the server for spawned objects");
             }
 
-            if (ConnectionToClient?.Identity == this)
+            if (Owner?.Identity == this)
             {
                 throw new InvalidOperationException("RemoveClientAuthority cannot remove authority for a player object");
             }
 
-            if (ConnectionToClient != null)
+            if (Owner != null)
             {
-                clientAuthorityCallback?.Invoke(ConnectionToClient, this, false);
+                clientAuthorityCallback?.Invoke(Owner, this, false);
 
-                INetworkPlayer previousOwner = ConnectionToClient;
+                INetworkPlayer previousOwner = Owner;
 
-                ConnectionToClient = null;
+                Owner = null;
 
                 // we need to resynchronize the entire object
                 // so just spawn it again,
@@ -1193,7 +1193,7 @@ namespace Mirage
             Client = null;
             ServerObjectManager = null;
             ClientObjectManager = null;
-            ConnectionToClient = null;
+            Owner = null;
             networkBehavioursCache = null;
 
             ClearObservers();
@@ -1247,8 +1247,8 @@ namespace Mirage
                     if (ownerWritten > 0)
                     {
                         varsMessage.payload = ownerWriter.ToArraySegment();
-                        if (ConnectionToClient != null && ConnectionToClient.SceneIsReady)
-                            ConnectionToClient.Send(varsMessage);
+                        if (Owner != null && Owner.SceneIsReady)
+                            Owner.Send(varsMessage);
                     }
 
                     // send observersWriter to everyone but owner
@@ -1293,7 +1293,7 @@ namespace Mirage
                 if (player == Server.LocalPlayer)
                     continue;
 
-                if (includeOwner || ConnectionToClient != player)
+                if (includeOwner || Owner != player)
                 {
                     connectionsExcludeSelf.Add(player);
                 }

@@ -110,10 +110,9 @@ namespace Mirage
         public ClientObjectManager ClientObjectManager => NetIdentity.ClientObjectManager;
 
         /// <summary>
-        /// The <see cref="NetworkPlayer">NetworkConnection</see> associated with this <see cref="NetworkIdentity">NetworkIdentity.</see> This is only valid for player objects on the server.
+        /// The <see cref="NetworkPlayer"/> associated with this <see cref="NetworkIdentity" /> This is only valid for player objects on the server.
         /// </summary>
-        public INetworkPlayer ConnectionToClient => NetIdentity.ConnectionToClient;
-
+        public INetworkPlayer Owner => NetIdentity.Owner;
 
         public NetworkWorld World => NetIdentity.World;
 
@@ -333,7 +332,7 @@ namespace Mirage
             // connection parameter is optional. assign if null.
             if (player == null)
             {
-                player = ConnectionToClient;
+                player = Owner;
             }
 
             // This cannot use Server.active, as that is not specific to this object.

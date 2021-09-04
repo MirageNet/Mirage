@@ -194,10 +194,10 @@ namespace Mirage
 
         float DrawOwner(NetworkIdentity identity, float initialX, float Y)
         {
-            if (identity.ConnectionToClient != null)
+            if (identity.Owner != null)
             {
                 var ownerRect = new Rect(initialX, Y + 10, 400, 20);
-                GUI.Label(ownerRect, new GUIContent("Client Authority: " + identity.ConnectionToClient), styles.LabelStyle);
+                GUI.Label(ownerRect, new GUIContent("Client Authority: " + identity.Owner), styles.LabelStyle);
                 Y += ownerRect.height;
             }
             return Y;

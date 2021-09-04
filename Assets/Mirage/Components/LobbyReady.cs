@@ -33,7 +33,7 @@ namespace Mirage
                 bool isOwner = objectReady.NetIdentity == identity;
                 if ((!isOwner || includeOwner) && objectReady.IsReady)
                 {
-                    playerCache.Add(objectReady.NetIdentity.ConnectionToClient);
+                    playerCache.Add(objectReady.NetIdentity.Owner);
                 }
             }
 

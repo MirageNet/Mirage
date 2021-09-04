@@ -85,14 +85,14 @@ namespace Mirage.Tests.Runtime
             // add own player connection
             (NetworkPlayer serverPlayer, NetworkPlayer _) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             serverPlayer.SceneIsReady = true;
-            identity.ConnectionToClient = serverPlayer;
+            identity.Owner = serverPlayer;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
 
             // rebuild should at least add own ready player
             identity.RebuildObservers(true);
-            Assert.That(identity.observers, Does.Contain(identity.ConnectionToClient));
+            Assert.That(identity.observers, Does.Contain(identity.Owner));
         }
     }
 }
