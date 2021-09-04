@@ -63,7 +63,7 @@ namespace Mirage
                     //
                     // So we check here for a connectionToClient and if it is null we will
                     // let the server send animation data until we receive an owner.
-                    if (NetIdentity != null && NetIdentity.ConnectionToClient == null)
+                    if (NetIdentity != null && NetIdentity.Owner == null)
                         return true;
                 }
 

@@ -101,7 +101,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             // create a networkidentity with our test component
             serverObjectManager.Spawn(gameObject);
-            Assert.That(testIdentity.ConnectionToClient, Is.Null);
+            Assert.That(testIdentity.Owner, Is.Null);
         }
 
         [Test]
@@ -111,14 +111,14 @@ namespace Mirage.Tests.Runtime.Host
             serverObjectManager.Spawn(gameObject);
             testIdentity.AssignClientAuthority(server.LocalPlayer);
 
-            Assert.That(testIdentity.ConnectionToClient, Is.SameAs(server.LocalPlayer));
+            Assert.That(testIdentity.Owner, Is.SameAs(server.LocalPlayer));
         }
 
         [Test]
         public void SpawnWithAuthority()
         {
             serverObjectManager.Spawn(gameObject, server.LocalPlayer);
-            Assert.That(testIdentity.ConnectionToClient, Is.SameAs(server.LocalPlayer));
+            Assert.That(testIdentity.Owner, Is.SameAs(server.LocalPlayer));
         }
 
         [Test]
@@ -186,7 +186,7 @@ namespace Mirage.Tests.Runtime.Host
             serverObjectManager.Spawn(gameObject);
             testIdentity.AssignClientAuthority(server.LocalPlayer);
             testIdentity.RemoveClientAuthority();
-            Assert.That(testIdentity.ConnectionToClient, Is.Null);
+            Assert.That(testIdentity.Owner, Is.Null);
         }
 
         [UnityTest]

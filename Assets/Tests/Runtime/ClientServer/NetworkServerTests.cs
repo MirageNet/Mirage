@@ -75,7 +75,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             ClientMessageHandler.RegisterHandler<WovenTestMessage>(msg => invoked = true);
 
-            serverIdentity.ConnectionToClient.Send(message);
+            serverIdentity.Owner.Send(message);
 
             // todo assert correct message was sent using Substitute for socket or player
             // connectionToServer.ProcessMessagesAsync().Forget();

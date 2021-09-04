@@ -70,7 +70,7 @@ namespace Mirage.Tests.Runtime
             {
                 Identity = character.GetComponent<NetworkIdentity>()
             };
-            player.Identity.ConnectionToClient = player;
+            player.Identity.Owner = player;
             player.SceneIsReady = true;
             return player;
         }
@@ -168,9 +168,9 @@ namespace Mirage.Tests.Runtime
             player2MatchChecker.MatchId = new Guid(guidMatch1);
 
             // check player1's observers contains player 2
-            Assert.That(player1MatchChecker.Identity.observers, Contains.Item(player2MatchChecker.ConnectionToClient));
+            Assert.That(player1MatchChecker.Identity.observers, Contains.Item(player2MatchChecker.Owner));
             // check player2's observers contains player 1
-            Assert.That(player2MatchChecker.Identity.observers, Contains.Item(player1MatchChecker.ConnectionToClient));
+            Assert.That(player2MatchChecker.Identity.observers, Contains.Item(player1MatchChecker.Owner));
         }
 
         [Test]
@@ -187,9 +187,9 @@ namespace Mirage.Tests.Runtime
             player2MatchChecker.MatchId = new Guid(guidMatch2);
 
             // check player1's observers does NOT contain player 2
-            Assert.That(player1MatchChecker.Identity.observers, !Contains.Item(player2MatchChecker.ConnectionToClient));
+            Assert.That(player1MatchChecker.Identity.observers, !Contains.Item(player2MatchChecker.Owner));
             // check player2's observers does NOT contain player 1
-            Assert.That(player2MatchChecker.Identity.observers, !Contains.Item(player1MatchChecker.ConnectionToClient));
+            Assert.That(player2MatchChecker.Identity.observers, !Contains.Item(player1MatchChecker.Owner));
         }
 
         [Test]
@@ -205,9 +205,9 @@ namespace Mirage.Tests.Runtime
             player2MatchChecker.MatchId = Guid.Empty;
 
             // check player1's observers does NOT contain player 2
-            Assert.That(player1MatchChecker.Identity.observers, !Contains.Item(player2MatchChecker.ConnectionToClient));
+            Assert.That(player1MatchChecker.Identity.observers, !Contains.Item(player2MatchChecker.Owner));
             // check player2's observers does NOT contain player 1
-            Assert.That(player2MatchChecker.Identity.observers, !Contains.Item(player1MatchChecker.ConnectionToClient));
+            Assert.That(player2MatchChecker.Identity.observers, !Contains.Item(player1MatchChecker.Owner));
         }
     }
 }

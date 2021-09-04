@@ -130,8 +130,8 @@ namespace Mirage
             if (currentMatch == Guid.Empty) return;
 
             foreach (NetworkIdentity networkIdentity in matchPlayers[currentMatch])
-                if (networkIdentity != null && networkIdentity.ConnectionToClient != null)
-                    observers.Add(networkIdentity.ConnectionToClient);
+                if (networkIdentity != null && networkIdentity.Owner != null)
+                    observers.Add(networkIdentity.Owner);
         }
 
         #endregion

@@ -241,7 +241,7 @@ namespace Mirage
             // SetClientOwner
             (_, NetworkPlayer original) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
             identity.SetClientOwner(original);
-            Assert.That(identity.ConnectionToClient, Is.EqualTo(original));
+            Assert.That(identity.Owner, Is.EqualTo(original));
         }
 
         [Test]
@@ -259,7 +259,7 @@ namespace Mirage
                 identity.SetClientOwner(overwrite);
             });
 
-            Assert.That(identity.ConnectionToClient, Is.EqualTo(original));
+            Assert.That(identity.Owner, Is.EqualTo(original));
         }
 
         [Test]
@@ -680,13 +680,13 @@ namespace Mirage
         {
             // creates .observers and generates a netId
             identity.StartServer();
-            identity.ConnectionToClient = player1;
+            identity.Owner = player1;
             identity.observers.Add(player1);
 
             // mark for reset and reset
             identity.Reset();
             Assert.That(identity.NetId, Is.EqualTo(0));
-            Assert.That(identity.ConnectionToClient, Is.Null);
+            Assert.That(identity.Owner, Is.Null);
         }
 
         [Test]
@@ -737,14 +737,14 @@ namespace Mirage
 
             // add own player connection that isn't ready
             (_, NetworkPlayer connection) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
-            identity.ConnectionToClient = connection;
+            identity.Owner = connection;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
 
             // rebuild shouldn't add own player because conn wasn't set ready
             identity.RebuildObservers(true);
-            Assert.That(identity.observers, Does.Not.Contains(identity.ConnectionToClient));
+            Assert.That(identity.observers, Does.Not.Contains(identity.Owner));
         }
 
         [Test]

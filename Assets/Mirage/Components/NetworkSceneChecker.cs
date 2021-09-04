@@ -111,8 +111,8 @@ namespace Mirage
 
             // Add everything in the hashset for this object's current scene
             foreach (NetworkIdentity networkIdentity in sceneCheckerObjects[currentScene])
-                if (networkIdentity != null && networkIdentity.ConnectionToClient != null)
-                    observers.Add(networkIdentity.ConnectionToClient);
+                if (networkIdentity != null && networkIdentity.Owner != null)
+                    observers.Add(networkIdentity.Owner);
         }
     }
 }

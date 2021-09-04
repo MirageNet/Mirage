@@ -178,7 +178,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             serverObjectManager.ReplaceCharacter(serverPlayer, playerReplacement, true);
 
-            Assert.That(clientIdentity.ConnectionToClient, Is.EqualTo(null));
+            Assert.That(clientIdentity.Owner, Is.EqualTo(null));
         }
 
         [Test]

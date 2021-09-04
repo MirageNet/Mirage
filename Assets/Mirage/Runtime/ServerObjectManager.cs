@@ -179,7 +179,7 @@ namespace Mirage
         /// <returns></returns>
         public void ReplaceCharacter(INetworkPlayer player, NetworkIdentity identity, bool keepAuthority = false)
         {
-            if (identity.ConnectionToClient != null && identity.ConnectionToClient != player)
+            if (identity.Owner != null && identity.Owner != player)
             {
                 throw new ArgumentException($"Cannot replace player for connection. New player is already owned by a different connection {identity}");
             }
@@ -316,12 +316,12 @@ namespace Mirage
             if (identity.NetId == 0)
             {
                 // If the object has not been spawned, then do a full spawn and update observers
-                Spawn(identity.gameObject, identity.ConnectionToClient);
+                Spawn(identity.gameObject, identity.Owner);
             }
             else
             {
                 // otherwise just replace his data
-                SendSpawnMessage(identity, identity.ConnectionToClient);
+                SendSpawnMessage(identity, identity.Owner);
             }
         }
 
@@ -377,7 +377,7 @@ namespace Mirage
             // ServerRpcs can be for player objects, OR other objects with client-authority
             // -> so if this connection's controller has a different netId then
             //    only allow the ServerRpc if clientAuthorityOwner
-            if (skeleton.cmdRequireAuthority && identity.ConnectionToClient != player)
+            if (skeleton.cmdRequireAuthority && identity.Owner != player)
             {
                 if (logger.WarnEnabled()) logger.LogWarning("ServerRpc for object without authority [netId=" + msg.netId + "]");
                 return;
@@ -400,12 +400,12 @@ namespace Mirage
         {
             NetworkIdentity ownerIdentity = ownerObject.GetNetworkIdentity();
 
-            if (ownerIdentity.ConnectionToClient == null)
+            if (ownerIdentity.Owner == null)
             {
                 throw new InvalidOperationException("Player object is not a player in the connection");
             }
 
-            Spawn(obj, ownerIdentity.ConnectionToClient);
+            Spawn(obj, ownerIdentity.Owner);
         }
 
         /// <summary>
@@ -440,11 +440,11 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Spawns the <paramref name="identity"/> and keeping owner as <see cref="NetworkIdentity.ConnectionToClient"/>
+        /// Spawns the <paramref name="identity"/> and keeping owner as <see cref="NetworkIdentity.Owner"/>
         /// </summary>
         public void Spawn(NetworkIdentity identity)
         {
-            Spawn(identity, identity.ConnectionToClient);
+            Spawn(identity, identity.Owner);
         }
 
         /// <summary>
@@ -459,7 +459,7 @@ namespace Mirage
 
             ThrowIfPrefab(identity.gameObject);
 
-            identity.ConnectionToClient = owner;
+            identity.Owner = owner;
 
             identity.SetServerValues(Server, this);
 
@@ -489,7 +489,7 @@ namespace Mirage
             // one writer for owner, one for observers
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
             {
-                bool isOwner = identity.ConnectionToClient == player;
+                bool isOwner = identity.Owner == player;
 
                 ArraySegment<byte> payload = CreateSpawnMessagePayload(isOwner, identity, ownerWriter, observersWriter);
 
@@ -584,7 +584,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("DestroyObject instance:" + identity.NetId);
 
             Server.World.RemoveIdentity(identity);
-            identity.ConnectionToClient?.RemoveOwnedObject(identity);
+            identity.Owner?.RemoveOwnedObject(identity);
 
             identity.SendToRemoteObservers(new ObjectDestroyMessage { netId = identity.NetId });
 
