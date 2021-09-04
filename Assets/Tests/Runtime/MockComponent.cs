@@ -44,7 +44,7 @@ namespace Mirage.Tests.Runtime
         public string targetRpcArg2;
         public INetworkPlayer targetRpcPlayer;
 
-        [ClientRpc(target = Mirage.Client.Player)]
+        [ClientRpc(target = Mirage.RpcTarget.Player)]
         public void ClientConnRpcTest(INetworkPlayer player, int arg1, string arg2)
         {
             targetRpcPlayer = player;
@@ -55,7 +55,7 @@ namespace Mirage.Tests.Runtime
         public int rpcOwnerArg1;
         public string rpcOwnerArg2;
 
-        [ClientRpc(target = Mirage.Client.Owner)]
+        [ClientRpc(target = Mirage.RpcTarget.Owner)]
         public void RpcOwnerTest(int arg1, string arg2)
         {
             rpcOwnerArg1 = arg1;
