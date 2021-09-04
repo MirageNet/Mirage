@@ -23,7 +23,7 @@ namespace Mirage.Examples.Additive
 
         void Update()
         {
-            if (IsServer && NetIdentity.observers.Count > 0)
+            if (IsServer && Identity.observers.Count > 0)
                 ShootNearestPlayer();
 
             if (IsClient)
@@ -36,7 +36,7 @@ namespace Mirage.Examples.Additive
             GameObject target = null;
             float distance = 100f;
 
-            foreach (INetworkPlayer networkConnection in NetIdentity.observers)
+            foreach (INetworkPlayer networkConnection in Identity.observers)
             {
                 GameObject tempTarget = networkConnection.Identity.gameObject;
                 float tempDistance = Vector3.Distance(tempTarget.transform.position, transform.position);

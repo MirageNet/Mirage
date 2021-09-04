@@ -32,9 +32,9 @@ namespace Mirage.Examples.Basic
 
         void Awake()
         {
-            NetIdentity.OnStartServer.AddListener(OnStartServer);
-            NetIdentity.OnStartClient.AddListener(OnStartClient);
-            NetIdentity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
+            Identity.OnStartServer.AddListener(OnStartServer);
+            Identity.OnStartClient.AddListener(OnStartClient);
+            Identity.OnStartLocalPlayer.AddListener(OnStartLocalPlayer);
         }
 
         // This is called by the hook of playerData SyncVar above

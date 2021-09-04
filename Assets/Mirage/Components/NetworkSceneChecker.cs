@@ -44,7 +44,7 @@ namespace Mirage
             if (!sceneCheckerObjects.ContainsKey(currentScene))
                 sceneCheckerObjects.Add(currentScene, new HashSet<NetworkIdentity>());
 
-            sceneCheckerObjects[currentScene].Add(NetIdentity);
+            sceneCheckerObjects[currentScene].Add(Identity);
         }
 
         [Server(error = false)]
@@ -57,7 +57,7 @@ namespace Mirage
             // and the new scene need to rebuild their respective observers lists.
 
             // Remove this object from the hashset of the scene it just left
-            sceneCheckerObjects[currentScene].Remove(NetIdentity);
+            sceneCheckerObjects[currentScene].Remove(Identity);
 
             // RebuildObservers of all NetworkIdentity's in the scene this object just left
             RebuildSceneObservers();
@@ -70,7 +70,7 @@ namespace Mirage
                 sceneCheckerObjects.Add(currentScene, new HashSet<NetworkIdentity>());
 
             // Add this object to the hashset of the new scene
-            sceneCheckerObjects[currentScene].Add(NetIdentity);
+            sceneCheckerObjects[currentScene].Add(Identity);
 
             // RebuildObservers of all NetworkIdentity's in the scene this object just entered
             RebuildSceneObservers();

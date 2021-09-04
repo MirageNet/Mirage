@@ -10,7 +10,7 @@ namespace Mirage.Examples.Tanks
 
         void Awake()
         {
-            NetIdentity.OnStartServer.AddListener(OnStartServer);
+            Identity.OnStartServer.AddListener(OnStartServer);
         }
 
         [Header("Game Stats")]

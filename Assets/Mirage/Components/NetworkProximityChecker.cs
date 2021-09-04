@@ -36,12 +36,12 @@ namespace Mirage
 
         public void Awake()
         {
-            NetIdentity.OnStartServer.AddListener(() =>
+            Identity.OnStartServer.AddListener(() =>
             {
                 InvokeRepeating(nameof(RebuildObservers), 0, VisibilityUpdateInterval);
             });
 
-            NetIdentity.OnStopServer.AddListener(() =>
+            Identity.OnStopServer.AddListener(() =>
             {
                 CancelInvoke(nameof(RebuildObservers));
             });
@@ -49,7 +49,7 @@ namespace Mirage
 
         void RebuildObservers()
         {
-            NetIdentity.RebuildObservers(false);
+            Identity.RebuildObservers(false);
         }
 
         /// <summary>

@@ -9,7 +9,7 @@ namespace Mirage.Examples.Pong
 
         void Awake()
         {
-            NetIdentity.OnStartServer.AddListener(OnStartServer);
+            Identity.OnStartServer.AddListener(OnStartServer);
         }
 
         public void OnStartServer()
