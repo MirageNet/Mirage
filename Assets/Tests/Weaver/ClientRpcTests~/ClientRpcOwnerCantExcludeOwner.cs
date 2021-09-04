@@ -4,7 +4,7 @@ namespace ClientRpcTests.ClientRpcOwnerCantExcludeOwner
 {
     class ClientRpcOwnerCantExcludeOwner : NetworkBehaviour
     {
-        [ClientRpc(target = Mirage.Client.Owner, excludeOwner = true)]
+        [ClientRpc(target = RpcTarget.Owner, excludeOwner = true)]
         void ClientRpcMethod() { }
     }
 }

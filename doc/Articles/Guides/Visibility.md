@@ -52,7 +52,7 @@ In the `NetworkVisibility` class (which your custom observer scripts inherit fro
 -   **OnSetHostVisibility**  
     This method is called on the server by the visibility system for objects on a host.  Objects on a host (with a local client) cannot be disabled or destroyed when they are not visibile to the local client. So this function is called to allow custom code to hide these objects. A typical implementation will disable renderer components on the object. This is only called on local clients on a host.
 
-You can check whether any given networked game object is a player by checking if its `NetworkIdentity` has a valid connectionToClient. For example:
+You can check whether any given networked game object is a player by checking if its `NetworkIdentity` has a valid Owner. For example:
 
 ``` cs
 int hitCount = Physics.OverlapSphereNonAlloc(transform.position, visRange, hitsBuffer3D, castLayers);
@@ -63,7 +63,7 @@ for (int i = 0; i < hitCount; i++)
 
     NetworkIdentity identity = hit.GetComponent<NetworkIdentity>();
 
-    if (identity != null && identity.connectionToClient != null)
-        observers.Add(identity.connectionToClient);
+    if (identity != null && identity.Owner != null)
+        observers.Add(identity.Owner);
 }
 ```

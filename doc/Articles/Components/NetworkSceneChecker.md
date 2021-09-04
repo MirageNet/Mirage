@@ -36,7 +36,7 @@ SceneMessage msg = new SceneMessage
     sceneOperation = SceneOperation.LoadAdditive
 };
 
-connectionToClient.Send(msg);
+Owner.Send(msg);
 ```
 
 Then, on the server only, you just move the character object to the subscene:

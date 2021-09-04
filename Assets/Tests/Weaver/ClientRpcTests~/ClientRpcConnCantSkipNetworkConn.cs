@@ -4,7 +4,7 @@ namespace ClientRpcTests.ClientRpcConnCantSkipNetworkConn
 {
     class ClientRpcConnCantSkipNetworkConn : NetworkBehaviour
     {
-        [ClientRpc(target = Mirage.Client.Player)]
+        [ClientRpc(target = RpcTarget.Player)]
         void ClientRpcMethod() { }
     }
 }
