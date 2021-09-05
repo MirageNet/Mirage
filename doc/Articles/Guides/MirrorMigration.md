@@ -182,15 +182,15 @@ These fields/properties have been renamed:
 | Mirror                                | Mirage                                                                                 |
 |:-------------------------------------:|:--------------------------------------------------------------------------------------:|
 | `ClientScene.localPlayer`             | [NetworkPlayer.Identity](xref:Mirage.NetworkPlayer.Identity)             |
-| `ClientScene.ready`                   | [NetworkClient.Connection.SceneIsReady](xref:Mirage.NetworkPlayer.SceneIsReady)                  |
+| `ClientScene.ready`                   | [Client.Player.SceneIsReady](xref:Mirage.NetworkPlayer.SceneIsReady)                  |
 | `NetworkIdentity.assetId`             | [NetworkIdentity.AssetId](xref:Mirage.NetworkIdentity.AssetId)                         |
 | `NetworkIdentity.netId`               | [NetworkIdentity.NetId](xref:Mirage.NetworkIdentity.NetId)                             |
-| `NetworkIdentity.connectionToClient`  | [NetworkIdentity.ConnectionToClient](xref:Mirage.NetworkIdentity.ConnectionToClient)   |
+| `NetworkIdentity.connectionToClient`  | [NetworkIdentity.Owner](xref:Mirage.NetworkIdentity.Owner)   |
 | `NetworkBehaviour.isServer`           | [NetworkBehaviour.IsServer](xref:Mirage.NetworkBehaviour.IsServer)                     |
-| `NetworkBehaviour.connectionToClient` | [NetworkBehaviour.ConnectionToClient](xref:Mirage.NetworkBehaviour.ConnectionToClient) |
+| `NetworkBehaviour.connectionToClient` | [NetworkBehaviour.Owner](xref:Mirage.NetworkBehaviour.Owner) |
 | `NetworkBehaviour.connectionToServer` | Removed, use [Client.Player](xref:Mirage.NetworkClient.Player) instead                 |
 | `NetworkBehaviour.hasAuthority`       | [NetworkBehaviour.HasAuthority](xref:Mirage.NetworkBehaviour.HasAuthority)             |
-| `NetworkBehaviour.netIdentity`        | [NetworkBehaviour.NetIdentity](xref:Mirage.NetworkBehaviour.NetIdentity)               |
+| `NetworkBehaviour.netIdentity`        | [NetworkBehaviour.Identity](xref:Mirage.NetworkBehaviour.Identity)               |
 | `NetworkBehaviour.netId`              | [NetworkBehaviour.NetId](xref:Mirage.NetworkBehaviour.NetId)                           |
 | `NetworkBehaviour.isClientOnly`       | [NetworkBehaviour.IsClientOnly](xref:Mirage.NetworkBehaviour.IsClientOnly)             |
 | `NetworkBehaviour.islocalPlayer`      | [NetworkBehaviour.IsLocalPlayer](xref:Mirage.NetworkBehaviour.IsLocalPlayer)           |

@@ -83,7 +83,7 @@ It is possible to invoke ServerRpcs on non-character objects if any of the follo
 - The object was spawned with client authority
 - The object has client authority set with `NetworkIdentity.AssignClientAuthority`
 - the Server RPC Call has the `requireAuthority` option set false.  
-    - You can include an optional `NetworkConnectionToClient sender = null` parameter in the Server RPC Call method signature and Mirage will fill in the sending client for you.
+    - You can include an optional `INetworkPlayer sender = null` parameter in the Server RPC Call method signature and Mirage will fill in the sending client for you.
     - Do not try to set a value for this optional parameter...it will be ignored.
 
 Server RPC Calls sent from these object are run on the server instance of the object, not on the associated character object for the client.
@@ -100,7 +100,7 @@ public class Door : NetworkBehaviour
     public DoorState doorState;
 
     [ServerRpc(requireAuthority = false)]
-    public void CmdSetDoorState(DoorState newDoorState, NetworkConnectionToClient sender = null)
+    public void CmdSetDoorState(DoorState newDoorState, INetworkPlayer sender = null)
     {
         if (sender.identity.GetComponent<Player>().hasDoorKey)
             doorState = newDoorState;
@@ -141,7 +141,7 @@ When running a game as a host with a local client, ClientRpc calls will be invok
 
 You can also specify which client gets the call with the `target` parameter. 
 
-If you only want the client that owns the object to be called,  use `[ClientRpc(target = Client.Owner)]` or you can specify which client gets the message by using `[ClientRpc(target = Client.Connection)]` and passing the connection as a parameter.  For example:
+If you only want the client that owns the object to be called,  use `[ClientRpc(target = RpcTarget.Owner)]` or you can specify which client gets the message by using `[ClientRpc(target = RpcTarget.Player)]` and passing the player as a parameter.  For example:
 
 ``` cs
 public class Player : NetworkBehaviour
@@ -154,11 +154,11 @@ public class Player : NetworkBehaviour
         target.GetComponent<Player>().health -= damage;
 
         NetworkIdentity opponentIdentity = target.GetComponent<NetworkIdentity>();
-        DoMagic(opponentIdentity.connectionToClient, damage);
+        DoMagic(opponentIdentity.Owner, damage);
     }
 
-    [ClientRpc(target = Client.Connection)]
-    public void DoMagic(NetworkConnection target, int damage)
+    [ClientRpc(target = Client.Player)]
+    public void DoMagic(INetworkPlayer target, int damage)
     {
         // This will appear on the opponent's client, not the attacking player's
         Debug.Log($"Magic Damage = {damage}");
@@ -174,7 +174,7 @@ public class Player : NetworkBehaviour
     [ClientRpc(target = Client.Owner)]
     public void Healed(int amount)
     {
-        // No NetworkConnection parameter, so it goes to owner
+        // No NetworkPlayer parameter, so it goes to owner
         Debug.Log($"Health increased by {amount}");
     }
 }
