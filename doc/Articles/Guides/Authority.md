@@ -20,7 +20,7 @@ Even if a client has authority over an object the server still controls SyncVar 
 
 By default the server has Authority over all objects. The server can give authority to objects that a client needs to control, like the character object. 
 
-If you spawn a character object using `NetworkServer.AddPlayerForConnection` then it will automatically be given authority.
+If you spawn a character object using `ServerObjectManager.AddCharacter` then it will automatically be given authority.
 
 
 ### Using NetworkServer.Spawn
@@ -28,7 +28,7 @@ If you spawn a character object using `NetworkServer.AddPlayerForConnection` the
 You can give authority to a client when an object is spawned. This is done by passing in the connection to the spawn message
 ```cs
 GameObject go = Instantiate(prefab);
-NetworkServer.Spawn(go, connectionToClient);
+ServerObjectManager.Spawn(go, owner);
 ```
 
 ### Using identity.AssignClientAuthority
@@ -57,12 +57,12 @@ You can use `identity.RemoveClientAuthority` to remove client authority from an 
 identity.RemoveClientAuthority();
 ```
 
-Authority can't be removed from the character object. Instead you will have to replace the character object using `NetworkServer.ReplacePlayerForConnection`.
+Authority can't be removed from the character object. Instead you will have to replace the character object using `NetworkServer.ReplaceCharacter`.
 
 
 ## On Authority
 
-When authority is given to or removed from an object a message will be sent to that client to notify them. This will cause the `OnStartAuthority` or `OnStopAuthority` functions to be called. 
+When authority is given to or removed from an object a message will be sent to that client to notify them. This will cause the `OnAuthorityChanged(bool)` functions to be called. 
 
 
 ## Check Authority
@@ -73,4 +73,4 @@ The `identity.hasAuthority` property can be used to check if the local player ha
 
 ### Server Side
 
-The `identity.connectionToClient` property can be check to see which client has authority over an object. If it is null then the server has authority.
+The `identity.Owner` property can be check to see which client has authority over an object. If it is null then the server has authority.
