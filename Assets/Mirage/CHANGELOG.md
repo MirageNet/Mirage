@@ -1,3 +1,19 @@
+# [103.0.0](https://github.com/MirageNet/Mirage/compare/v102.0.0...v103.0.0) (2021-09-05)
+
+
+### Code Refactoring
+
+* NetIdentity to Identity ([dc00532](https://github.com/MirageNet/Mirage/commit/dc005327928e57618d503d893390a43450d086d0))
+* renaming Client enum to RpcTarget ([bc32d06](https://github.com/MirageNet/Mirage/commit/bc32d0682c8673af8b4d6fc0327c2fdacd952e94))
+* renaming ConnectionToClient to Owner ([5493eae](https://github.com/MirageNet/Mirage/commit/5493eae810a596ffeb4b2c021ecb163e59753644))
+
+
+### BREAKING CHANGES
+
+* NetIdentity renamed to Identity
+* ConnectionToClient renamed to Owner
+* enum used in ClientRpc has been renamed to RpcTarget
+
 # [102.0.0](https://github.com/MirageNet/Mirage/compare/v101.10.0...v102.0.0) (2021-09-02)
 
 
