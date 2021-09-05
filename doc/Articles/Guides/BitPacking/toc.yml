@@ -9,7 +9,7 @@
 - name: Variable Sized Integer
   href: VarInt.md
 - name: Variable Sized Integer Blocks
-  href: VarIntBlock.md
+  href: VarIntBlocks.md
 - name: Float Pack
   href: FloatPack.md
 - name: Vector Pack
