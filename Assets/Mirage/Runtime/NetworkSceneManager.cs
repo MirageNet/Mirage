@@ -340,6 +340,7 @@ namespace Mirage
             // Let server prepare for scene change
             logger.Log("[NetworkSceneManager] - OnServerChangeScene");
 
+            SetAllClientsNotReady();
             OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation);
 
             if (players == null)
@@ -378,6 +379,7 @@ namespace Mirage
             // Let server prepare for scene change
             if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - OnServerChangeScene");
 
+            SetAllClientsNotReady();
             OnServerStartedSceneChange?.Invoke(scene.path, SceneOperation.UnloadAdditive);
 
             // if not host
@@ -492,6 +494,39 @@ namespace Mirage
 
                     break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Marks all connected clients as no longer ready.
+        /// <para>
+        ///     All clients will no longer be sent state synchronization updates.
+        ///     The player's clients can call ClientManager.Ready() again to re-enter the ready state.
+        ///     This is useful when switching scenes.
+        /// </para>
+        /// </summary>
+        public void SetAllClientsNotReady()
+        {
+            foreach (INetworkPlayer player in Server.Players)
+            {
+                SetClientNotReady(player);
+            }
+        }
+
+        /// <summary>
+        /// Sets the client of the connection to be not-ready.
+        /// <para>Clients that are not ready do not receive spawned objects or state synchronization updates. They client can be made ready again by calling SetClientReady().</para>
+        /// </summary>
+        /// <param name="player">The connection of the client to make not ready.</param>
+        public void SetClientNotReady(INetworkPlayer player)
+        {
+            if (player.SceneIsReady)
+            {
+                if (logger.LogEnabled()) logger.Log("PlayerNotReady " + player);
+                player.SceneIsReady = false;
+                player.RemoveAllVisibleObjects();
+
+                player.Send(new SceneNotReadyMessage());
             }
         }
 

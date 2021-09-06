@@ -4,49 +4,13 @@ using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using static Mirage.Tests.LocalConnections;
 using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.Host
 {
-
     [TestFixture]
     public class ServerObjectManagerHostTest : HostSetup<MockComponent>
     {
-        [Test]
-        public void SetClientReadyAndNotReadyTest()
-        {
-            (_, NetworkPlayer connection) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
-            Assert.That(connection.SceneIsReady, Is.False);
-
-            serverObjectManager.SpawnVisibleObjects(connection);
-            Assert.That(connection.SceneIsReady, Is.True);
-
-            serverObjectManager.SetClientNotReady(connection);
-            Assert.That(connection.SceneIsReady, Is.False);
-        }
-
-        [Test]
-        public void SetAllClientsNotReadyTest()
-        {
-            // add first ready client
-            (_, NetworkPlayer first) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
-            first.SceneIsReady = true;
-            server.Players.Add(first);
-
-            // add second ready client
-            (_, NetworkPlayer second) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
-            second.SceneIsReady = true;
-            server.Players.Add(second);
-
-            // set all not ready
-            serverObjectManager.SetAllClientsNotReady();
-            Assert.That(first.SceneIsReady, Is.False);
-            Assert.That(second.SceneIsReady, Is.False);
-        }
-
-
-
         [Test]
         public void HideForConnection()
         {
