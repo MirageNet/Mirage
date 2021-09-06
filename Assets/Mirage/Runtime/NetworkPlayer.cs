@@ -59,6 +59,11 @@ namespace Mirage
         public bool SceneIsReady { get; set; }
 
         /// <summary>
+        /// Checks if this player has a <see cref="Identity"/>
+        /// </summary>
+        public bool HasCharacter => Identity != null;
+
+        /// <summary>
         /// The IP address / URL / FQDN associated with the connection.
         /// Can be useful for a game master to do IP Bans etc.
         /// </summary>

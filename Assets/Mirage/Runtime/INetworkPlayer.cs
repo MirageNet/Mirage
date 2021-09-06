@@ -49,6 +49,7 @@ namespace Mirage
     public interface IObjectOwner
     {
         NetworkIdentity Identity { get; set; }
+        bool HasCharacter { get; }
         void RemoveOwnedObject(NetworkIdentity networkIdentity);
         void AddOwnedObject(NetworkIdentity networkIdentity);
         void DestroyOwnedObjects();
