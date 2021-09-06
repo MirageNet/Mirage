@@ -1,3 +1,10 @@
+## [103.0.1](https://github.com/MirageNet/Mirage/compare/v103.0.0...v103.0.1) (2021-09-06)
+
+
+### Bug Fixes
+
+* fixing syncvar hook not being called in host mode ([#918](https://github.com/MirageNet/Mirage/issues/918)) ([7accba7](https://github.com/MirageNet/Mirage/commit/7accba707127ba57bf3c2d3f3382b0decfa466b8))
+
 # [103.0.0](https://github.com/MirageNet/Mirage/compare/v102.0.0...v103.0.0) (2021-09-05)
 
 
