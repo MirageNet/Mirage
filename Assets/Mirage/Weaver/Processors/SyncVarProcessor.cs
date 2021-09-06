@@ -98,12 +98,15 @@ namespace Mirage.Weaver
 
         void ProcessSyncVar(FoundSyncVar syncVar)
         {
+            // process attributes first before creating setting, otherwise it wont know about hook
+            syncVar.SetWrapType(module);
+            syncVar.ProcessAttributes();
+
             FieldDefinition fd = syncVar.FieldDefinition;
 
             string originalName = fd.Name;
             Weaver.DebugLog(fd.DeclaringType, $"Sync Var {fd.Name} {fd.FieldType}");
 
-            syncVar.SetWrapType(module);
 
             MethodDefinition get = GenerateSyncVarGetter(syncVar);
             MethodDefinition set = GenerateSyncVarSetter(syncVar);
@@ -126,7 +129,6 @@ namespace Mirage.Weaver
                 propertySiteProcessor.Getters[fd] = get;
             }
 
-            syncVar.ProcessAttributes();
             syncVar.FindSerializeFunctions(writers, readers);
 
             if (syncVar.FloatPackSettings.HasValue)
