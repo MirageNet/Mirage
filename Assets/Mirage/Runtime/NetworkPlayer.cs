@@ -169,7 +169,11 @@ namespace Mirage
             visList.Remove(identity);
         }
 
-        public void RemoveObservers()
+        /// <summary>
+        /// Removes all objects that this player can see
+        /// <para>This is called when loading a new scene</para>
+        /// </summary>
+        public void RemoveAllVisibleObjects()
         {
             foreach (NetworkIdentity identity in visList)
             {
