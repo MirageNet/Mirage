@@ -44,7 +44,7 @@ namespace Mirage.Tests.Performance.Runtime
             Server = Object.FindObjectOfType<NetworkServer>();
             ServerObjectManager = Object.FindObjectOfType<ServerObjectManager>();
 
-            Server.Authenticated.AddListener(conn => ServerObjectManager.SetClientReady(conn));
+            Server.Authenticated.AddListener(conn => ServerObjectManager.SpawnVisibleObjects(conn));
 
             var started = new UniTaskCompletionSource();
             Server.Started.AddListener(() => started.TrySetResult());

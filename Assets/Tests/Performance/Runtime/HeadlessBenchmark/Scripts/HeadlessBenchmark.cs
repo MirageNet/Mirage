@@ -118,7 +118,7 @@ namespace Mirage.HeadlessBenchmark
             spawner.Server = server;
 
             server.Started.AddListener(OnServerStarted);
-            server.Authenticated.AddListener(conn => serverObjectManager.SetClientReady(conn));
+            server.Authenticated.AddListener(conn => serverObjectManager.SpawnVisibleObjects(conn));
             server.StartServer();
             Console.WriteLine("Starting Server Only Mode");
         }

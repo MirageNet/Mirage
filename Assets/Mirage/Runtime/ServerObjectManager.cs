@@ -304,7 +304,7 @@ namespace Mirage
             }
 
             // set ready if not set yet
-            SetClientReady(player);
+            SpawnVisibleObjects(player);
 
             if (logger.LogEnabled()) logger.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.AssetId);
 
@@ -656,11 +656,13 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Sets the client to be ready.
-        /// <para>When a client has signaled that it is ready, this method tells the server that the client is ready to receive spawned objects and state synchronization updates. This is usually called in a handler for the SYSTEM_READY message. If there is not specific action a game needs to take for this message, relying on the default ready handler function is probably fine, so this call wont be needed.</para>
+        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// <para>
+        /// If there is a <see cref="Mirage.NetworkSceneManager"/> then this will be called after the client finishes loading the scene and sends <see cref="SceneReadyMessage"/>
+        /// </para>
         /// </summary>
-        /// <param name="player">The connection of the client to make ready.</param>
-        public void SetClientReady(INetworkPlayer player)
+        /// <param name="player">The player to spawn objects for</param>
+        public void SpawnVisibleObjects(INetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + player);
 
@@ -709,7 +711,7 @@ namespace Mirage
         void OnClientReadyMessage(INetworkPlayer player, SceneReadyMessage msg)
         {
             if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + player);
-            SetClientReady(player);
+            SpawnVisibleObjects(player);
         }
     }
 }

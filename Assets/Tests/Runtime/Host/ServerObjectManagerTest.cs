@@ -19,7 +19,7 @@ namespace Mirage.Tests.Runtime.Host
             (_, NetworkPlayer connection) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
             Assert.That(connection.SceneIsReady, Is.False);
 
-            serverObjectManager.SetClientReady(connection);
+            serverObjectManager.SpawnVisibleObjects(connection);
             Assert.That(connection.SceneIsReady, Is.True);
 
             serverObjectManager.SetClientNotReady(connection);
