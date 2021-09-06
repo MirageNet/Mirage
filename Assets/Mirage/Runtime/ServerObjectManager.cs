@@ -177,11 +177,15 @@ namespace Mirage
             {
                 throw new ArgumentException($"Cannot replace player for connection. New player is already owned by a different connection {identity}");
             }
+            if (!player.HasCharacter)
+            {
+                throw new InvalidOperationException($"ReplaceCharacter can only be called if Player already has a charater");
+            }
 
             //NOTE: there can be an existing player
             logger.Log("NetworkServer ReplacePlayer");
 
-            NetworkIdentity previousPlayer = player.Identity;
+            NetworkIdentity previousCharacter = player.Identity;
 
             player.Identity = identity;
 
@@ -207,7 +211,7 @@ namespace Mirage
             Respawn(identity);
 
             if (!keepAuthority)
-                previousPlayer.RemoveClientAuthority();
+                previousCharacter.RemoveClientAuthority();
         }
 
         void SpawnVisibleObjectForPlayer(INetworkPlayer player)
