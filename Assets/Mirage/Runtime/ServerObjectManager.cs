@@ -280,9 +280,9 @@ namespace Mirage
         public void AddCharacter(INetworkPlayer player, NetworkIdentity identity)
         {
             // cannot have an existing player object while trying to Add another.
-            if (player.Identity != null)
+            if (player.HasCharacter)
             {
-                throw new ArgumentException("AddPlayer: player object already exists");
+                throw new ArgumentException("AddCharacter can only be called if the player does not already have a character");
             }
 
             // make sure we have a controller before we call SetClientReady
@@ -342,15 +342,13 @@ namespace Mirage
         /// <exception cref="InvalidOperationException">Received remove player message but connection has no player</exception>
         public void RemovePlayerForConnection(INetworkPlayer player, bool destroyServerObject = false)
         {
-            if (player.Identity != null)
-            {
-                Destroy(player.Identity.gameObject, destroyServerObject);
-                player.Identity = null;
-            }
-            else
+            if (!player.HasCharacter)
             {
                 throw new InvalidOperationException("Received remove player message but connection has no player");
             }
+
+            Destroy(player.Identity.gameObject, destroyServerObject);
+            player.Identity = null;
         }
 
         /// <summary>
@@ -665,7 +663,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + player);
 
             // client is ready to start spawning objects
-            if (player.Identity != null)
+            if (player.HasCharacter)
                 SpawnVisibleObjectForPlayer(player);
         }
     }

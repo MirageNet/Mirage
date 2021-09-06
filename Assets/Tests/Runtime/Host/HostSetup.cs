@@ -75,7 +75,7 @@ namespace Mirage.Tests.Runtime.Host
                 serverObjectManager.AddCharacter(server.LocalPlayer, playerGO);
 
                 // wait for client to spawn it
-                await AsyncUtil.WaitUntilWithTimeout(() => client.Player.Identity != null);
+                await AsyncUtil.WaitUntilWithTimeout(() => client.Player.HasCharacter);
             }
         });
 

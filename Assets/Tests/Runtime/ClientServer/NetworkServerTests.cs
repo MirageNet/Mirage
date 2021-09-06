@@ -181,7 +181,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                 disconnectCalled++;
                 Assert.That(player, Is.EqualTo(serverPlayer));
                 // use unity null check
-                Assert.That(player.Identity != null);
+                Assert.That(player.HasCharacter);
             });
 
 
@@ -190,8 +190,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             yield return null;
 
             Assert.That(disconnectCalled, Is.EqualTo(1));
-            // use unity null check
-            Assert.That(serverPlayer.Identity == null);
+            Assert.That(serverPlayer.HasCharacter, Is.False);
 
         }
     }

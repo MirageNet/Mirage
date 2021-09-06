@@ -151,7 +151,7 @@ namespace Mirage.Examples.Tanks
             INetworkPlayer player = NetworkManager.Client.Player;
 
             // Check to see if the player object is loaded in yet
-            if (player.Identity == null)
+            if (!player.HasCharacter)
                 return;
 
             LocalPlayer = player.Identity.GetComponent<Tank>();
