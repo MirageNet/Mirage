@@ -7,9 +7,6 @@ namespace Mirage
 
     #region Public System Messages
 
-    [NetworkMessage]
-    public struct ReadyMessage { }
-
     /// <summary>
     /// Sent to client to mark their scene as not ready
     /// <para>Client can sent <see cref="SceneReadyMessage"/> once its scene is ready again</para>
@@ -29,6 +26,9 @@ namespace Mirage
         public List<string> AdditiveScenes;
     }
 
+    /// <summary>
+    /// Sent to indicate the scene is finished loading
+    /// </summary>
     [NetworkMessage]
     public struct SceneReadyMessage { }
 

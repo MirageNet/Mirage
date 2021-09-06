@@ -43,7 +43,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void UnpackWrongMessage()
         {
-            var message = new ReadyMessage();
+            var message = new SceneReadyMessage();
 
             byte[] data = MessagePacker.Pack(message);
 

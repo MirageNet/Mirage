@@ -45,7 +45,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ReadyMessageSetsClientReadyTest() => UniTask.ToCoroutine(async () =>
         {
-            clientPlayer.Send(new ReadyMessage());
+            clientPlayer.Send(new SceneReadyMessage());
 
             await AsyncUtil.WaitUntilWithTimeout(() => serverPlayer.SceneIsReady);
 

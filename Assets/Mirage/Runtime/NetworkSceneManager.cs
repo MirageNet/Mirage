@@ -312,7 +312,7 @@ namespace Mirage
             Client.Player.SceneIsReady = true;
 
             // Tell server we're ready to have a player object spawned
-            Client.Player.Send(new ReadyMessage());
+            Client.Player.Send(new SceneReadyMessage());
         }
 
         #endregion

@@ -67,7 +67,7 @@ namespace Mirage
 
         internal void RegisterMessageHandlers()
         {
-            Server.MessageHandler.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
+            Server.MessageHandler.RegisterHandler<SceneReadyMessage>(OnClientReadyMessage);
             Server.MessageHandler.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
         }
 
@@ -706,7 +706,7 @@ namespace Mirage
         /// </summary>
         /// <param name="player"></param>
         /// <param name="msg"></param>
-        void OnClientReadyMessage(INetworkPlayer player, ReadyMessage msg)
+        void OnClientReadyMessage(INetworkPlayer player, SceneReadyMessage msg)
         {
             if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + player);
             SetClientReady(player);
