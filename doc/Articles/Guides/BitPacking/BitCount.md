@@ -56,7 +56,7 @@ public class MyNetworkBehaviour : NetworkBehaviour
 }
 ```
 
-`BitCount = 7` so max value of Health is 7
+`BitCount = 3` so max value of Health is 7
 
 `WeaponIndex = 5` will serialize to `101`
 
