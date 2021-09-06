@@ -60,13 +60,13 @@ namespace Mirage
                 if (NetworkSceneManager != null)
                 {
                     NetworkSceneManager.OnServerFinishedSceneChange.AddListener(OnFinishedSceneChange);
+                    NetworkSceneManager.OnPlayerSceneReady.AddListener(SpawnVisibleObjects);
                 }
             }
         }
 
         internal void RegisterMessageHandlers()
         {
-            Server.MessageHandler.RegisterHandler<SceneReadyMessage>(OnClientReadyMessage);
             Server.MessageHandler.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
         }
 
@@ -200,7 +200,7 @@ namespace Mirage
             // controller.
             //
             // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
-            SpawnObserversForConnection(player);
+            SpawnVisibleObjectForPlayer(player);
 
             if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.AssetId}");
 
@@ -210,7 +210,7 @@ namespace Mirage
                 previousPlayer.RemoveClientAuthority();
         }
 
-        void SpawnObserversForConnection(INetworkPlayer player)
+        void SpawnVisibleObjectForPlayer(INetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log($"Checking Observers on {Server.World.SpawnedIdentities.Count} objects for player: {player}");
 
@@ -297,7 +297,7 @@ namespace Mirage
                 Server.LocalClient.Player.Identity = identity;
             }
 
-            // set ready if not set yet
+            // spawn any new visible scene objects
             SpawnVisibleObjects(player);
 
             if (logger.LogEnabled()) logger.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.AssetId);
@@ -660,24 +660,9 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + player);
 
-            // set ready
-            player.SceneIsReady = true;
-
             // client is ready to start spawning objects
             if (player.Identity != null)
-                SpawnObserversForConnection(player);
-        }
-
-
-        /// <summary>
-        /// default ready handler. 
-        /// </summary>
-        /// <param name="player"></param>
-        /// <param name="msg"></param>
-        void OnClientReadyMessage(INetworkPlayer player, SceneReadyMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + player);
-            SpawnVisibleObjects(player);
+                SpawnVisibleObjectForPlayer(player);
         }
     }
 }

@@ -19,6 +19,8 @@ namespace Mirage
     /// </summary>
     [Serializable] public class SceneChangeEvent : UnityEvent<string, SceneOperation> { }
 
+    [Serializable] public class PlayerSceneChangeEvent : UnityEvent<INetworkPlayer> { }
+
     public interface INetworkSceneManager
     {
         /// <summary>
@@ -40,6 +42,11 @@ namespace Mirage
         /// Event fires after Server has completed scene change.
         /// </summary>
         SceneChangeEvent OnServerFinishedSceneChange { get; }
+
+        /// <summary>
+        /// Event fires On the server, after Client sends <see cref="ReadyMessage"/> to the server
+        /// </summary>
+        PlayerSceneChangeEvent OnPlayerSceneReady { get; }
 
         /// <summary>
         ///     Allows server to fully load in a new scene and override current active scene.

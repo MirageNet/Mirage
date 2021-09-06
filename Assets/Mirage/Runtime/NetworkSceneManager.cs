@@ -84,6 +84,8 @@ namespace Mirage
         [FormerlySerializedAs("ServerSceneChanged")]
         [SerializeField] SceneChangeEvent _onServerFinishedSceneChange = new SceneChangeEvent();
 
+        [SerializeField] PlayerSceneChangeEvent _onPlayerSceneReady = new PlayerSceneChangeEvent();
+
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
@@ -104,6 +106,11 @@ namespace Mirage
         /// </summary>
         public SceneChangeEvent OnServerFinishedSceneChange => _onServerFinishedSceneChange;
 
+        /// <summary>
+        /// Event fires On the server, after Client sends <see cref="ReadyMessage"/> to the server
+        /// </summary>
+        public PlayerSceneChangeEvent OnPlayerSceneReady => _onPlayerSceneReady;
+
         #endregion
 
         #region Unity Methods
@@ -118,6 +125,7 @@ namespace Mirage
 
             if (Server != null)
             {
+                Server.Started.AddListener(RegisterServerMessages);
                 Server.Authenticated.AddListener(OnServerAuthenticated);
                 Server.Disconnected.AddListener(OnServerPlayerDisconnected);
             }
@@ -129,7 +137,11 @@ namespace Mirage
                 Client.Started.RemoveListener(RegisterClientMessages);
 
             if (Server != null)
+            {
+                Server.Started.RemoveListener(RegisterServerMessages);
                 Server.Authenticated.RemoveListener(OnServerAuthenticated);
+                Server.Disconnected.RemoveListener(OnServerPlayerDisconnected);
+            }
         }
 
         #endregion
@@ -320,6 +332,14 @@ namespace Mirage
         #region Server Side
 
         /// <summary>
+        ///     Register incoming client messages.
+        /// </summary>
+        private void RegisterServerMessages()
+        {
+            Server.MessageHandler.RegisterHandler<SceneReadyMessage>(HandlePlayerSceneReady);
+        }
+
+        /// <summary>
         ///     Allows server to fully load new scene or additive load in another scene.
         /// </summary>
         /// <param name="scenePath">The full path to the scenes files or the names of the scenes.</param>
@@ -495,6 +515,18 @@ namespace Mirage
                     break;
                 }
             }
+        }
+
+        /// <summary>
+        /// default ready handler. 
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="msg"></param>
+        void HandlePlayerSceneReady(INetworkPlayer player, SceneReadyMessage msg)
+        {
+            if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + player);
+            player.SceneIsReady = true;
+            OnPlayerSceneReady.Invoke(player);
         }
 
         /// <summary>
