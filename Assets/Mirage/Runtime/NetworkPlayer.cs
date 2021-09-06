@@ -200,17 +200,23 @@ namespace Mirage
         public void DestroyOwnedObjects()
         {
             // create a copy because the list might be modified when destroying
-            var tmp = new HashSet<NetworkIdentity>(clientOwnedObjects);
-            foreach (NetworkIdentity netIdentity in tmp)
+            var ownedObjects = new HashSet<NetworkIdentity>(clientOwnedObjects);
+
+            foreach (NetworkIdentity netIdentity in ownedObjects)
             {
                 //dont destroy self yet.
-                if (netIdentity != null && netIdentity != Identity && Identity.ServerObjectManager != null)
+                if (netIdentity == Identity)
+                    continue;
+
+                if (netIdentity != null && netIdentity.ServerObjectManager != null)
                 {
-                    Identity.ServerObjectManager.Destroy(netIdentity.gameObject);
+                    // use SOM on object we are destroying, it should be set if object is spawned,
+                    // we can't use Identity.ServerObjectManager because if Identity is null we wont have a SOM
+                    netIdentity.ServerObjectManager.Destroy(netIdentity);
                 }
             }
 
-            if (Identity != null && Identity.Server != null)
+            if (Identity != null && Identity.ServerObjectManager != null)
                 // Destroy the connections own identity.
                 Identity.ServerObjectManager.Destroy(Identity.gameObject);
 
