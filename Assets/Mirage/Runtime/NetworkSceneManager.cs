@@ -196,7 +196,7 @@ namespace Mirage
             if (Client.IsLocalClient) return;
 
             Client.MessageHandler.RegisterHandler<SceneReadyMessage>(ClientFinishedLoadingSceneMessage);
-            Client.MessageHandler.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
+            Client.MessageHandler.RegisterHandler<SceneNotReadyMessage>(ClientNotReadyMessage);
         }
 
         /// <summary>
@@ -287,7 +287,7 @@ namespace Mirage
         /// </summary>
         /// <param name="player">The player that is currently not ready.</param>
         /// <param name="message">The message data coming in.</param>
-        protected internal virtual void ClientNotReadyMessage(INetworkPlayer player, NotReadyMessage message)
+        protected internal virtual void ClientNotReadyMessage(INetworkPlayer player, SceneNotReadyMessage message)
         {
             if (logger.LogEnabled())
                 logger.Log("[NetworkSceneManager] - OnClientNotReadyMessageInternal");

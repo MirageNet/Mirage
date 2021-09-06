@@ -70,7 +70,7 @@ namespace Mirage.Tests.Runtime.Host
             bool invokeNotReadyMessage = false;
             UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
             ClientMessageHandler.RegisterHandler<SceneMessage>(msg => invokeClientSceneMessage = true);
-            ClientMessageHandler.RegisterHandler<NotReadyMessage>(msg => invokeNotReadyMessage = true);
+            ClientMessageHandler.RegisterHandler<SceneNotReadyMessage>(msg => invokeNotReadyMessage = true);
             sceneManager.OnServerStartedSceneChange.AddListener(func1);
 
             sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
@@ -201,7 +201,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ClientNotReadyMessageTest() => UniTask.ToCoroutine(async () =>
         {
-            sceneManager.ClientNotReadyMessage(client.Player, new NotReadyMessage());
+            sceneManager.ClientNotReadyMessage(client.Player, new SceneNotReadyMessage());
 
             await UniTask.Delay(1);
 

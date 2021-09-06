@@ -697,7 +697,7 @@ namespace Mirage
                 player.SceneIsReady = false;
                 player.RemoveAllVisibleObjects();
 
-                player.Send(new NotReadyMessage());
+                player.Send(new SceneNotReadyMessage());
             }
         }
 

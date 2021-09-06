@@ -64,7 +64,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void NotReadyMessageTest()
         {
-            TestSerializeDeserialize(new NotReadyMessage());
+            TestSerializeDeserialize(new SceneNotReadyMessage());
         }
 
         [Test]
