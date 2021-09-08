@@ -222,8 +222,7 @@ namespace Mirage
         /// <param name="message"></param>
         public virtual void ClientStartSceneMessage(INetworkPlayer player, SceneMessage message)
         {
-            if (!Client.IsConnected)
-                throw new InvalidOperationException("[NetworkSceneManager] - SceneLoadStartedMessage: cannot change network scene while client is disconnected");
+            ThrowIfNotClient();
 
             if (string.IsNullOrEmpty(message.MainActivateScene))
                 throw new ArgumentException($"[NetworkSceneManager] - SceneLoadStartedMessage: {nameof(message.MainActivateScene)} cannot be empty or null", nameof(message));
@@ -314,8 +313,7 @@ namespace Mirage
         /// <exception cref="InvalidOperationException">When called with an null or disconnected client</exception>
         public void SetSceneIsReady()
         {
-            if (!Client || !Client.Active)
-                throw new InvalidOperationException("[NetworkSceneManager] - Scene ready called with an null or disconnected client");
+            ThrowIfNotClient();
 
             if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - Scene is loaded and ready has been called.");
 
@@ -325,6 +323,11 @@ namespace Mirage
 
             // Tell server we're ready to have a player object spawned
             Client.Player.Send(new SceneReadyMessage());
+        }
+
+        void ThrowIfNotClient()
+        {
+            if (Client == null || !Client.IsConnected) { throw new InvalidOperationException("Method can only be called if client is active"); }
         }
 
         #endregion
@@ -561,7 +564,7 @@ namespace Mirage
 
         void ThrowIfNotServer()
         {
-            if (Server == null || !Server.Active) { throw new InvalidOperationException("Method can only be called for active server"); }
+            if (Server == null || !Server.Active) { throw new InvalidOperationException("Method can only be called if server is active"); }
         }
 
         #endregion
