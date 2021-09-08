@@ -329,14 +329,14 @@ namespace Mirage
         /// </summary>
         /// <param name="identity"></param>
         /// <param name="player"></param>
-        internal void ShowForPlayer(NetworkIdentity identity, INetworkPlayer player)
+        internal void ShowToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
             // dont send if loading scene
             if (player.SceneIsReady)
                 SendSpawnMessage(identity, player);
         }
 
-        internal void HideForPlayer(NetworkIdentity identity, INetworkPlayer player)
+        internal void HideToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
             player.Send(new ObjectHideMessage { netId = identity.NetId });
         }
