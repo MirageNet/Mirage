@@ -1,3 +1,40 @@
+# [104.0.0](https://github.com/MirageNet/Mirage/compare/v103.1.1...v104.0.0) (2021-09-08)
+
+
+### Bug Fixes
+
+* fixing DestroyOwnedObjects when Identity is null ([4c12efe](https://github.com/MirageNet/Mirage/commit/4c12efe95f84cf55714ce155b3ecb934e0fd411a))
+* fixing ReplaceCharacter when identity has no character ([b685e11](https://github.com/MirageNet/Mirage/commit/b685e1153d34c46e08420f7f298e345d61f73b0a))
+
+
+### Code Refactoring
+
+* changing OnServerAuthenticated to protected ([b0da955](https://github.com/MirageNet/Mirage/commit/b0da9559b7bd993f1a24a7ec9e0805147f0c8c0e))
+* moving ready methods to NetworkSceneManager ([5dade34](https://github.com/MirageNet/Mirage/commit/5dade34fb8961b50124291e1761634b730e0907e))
+* networkplayer sceneis ready notw defaults to true ([319e8d8](https://github.com/MirageNet/Mirage/commit/319e8d87049c78899dcfc8928e26f00f4a829ee5))
+* renaming NotReadyMessage ([77f7777](https://github.com/MirageNet/Mirage/commit/77f7777f94c2428947866c76c994cb6ea3d48973))
+* renaming remove observers ([12ffce7](https://github.com/MirageNet/Mirage/commit/12ffce74221e6b18a508ae3bbd6cfaf558c5322d))
+* renaming SceneObjectManager.SetClientReady ([3f8d2bc](https://github.com/MirageNet/Mirage/commit/3f8d2bc56f4d526ce0a04943a5c5a5e17b563c3d))
+* replacing ReadyMessage with SceneReadyMessage ([beb4ed9](https://github.com/MirageNet/Mirage/commit/beb4ed9bb8a74ca5e50faead99c5c237e8ab4d31))
+
+
+### Features
+
+* adding HasCharacter property to network player ([445081a](https://github.com/MirageNet/Mirage/commit/445081a54bf1784da7c243f19601c221fb859525))
+* adding OnPlayerSceneReady event ([e59c93c](https://github.com/MirageNet/Mirage/commit/e59c93c46ccc39ca6863d6e9dfd4b03abe9e0d6a))
+* adding option to ignore character check for spawning objects ([9234eb4](https://github.com/MirageNet/Mirage/commit/9234eb4957c83b2eda050d577d9f1d9365ea8878))
+
+
+### BREAKING CHANGES
+
+* NetworkServerManager.OnServerAuthenticated is now protected instead of public
+* NetworkPlayer.SceneIsReady now default to true
+* moving SetAllClientsNotReady and SetClientNotReady from ServerObjectManager to NetworkSceneManager
+* Renaming SceneObjectManager.SetClientReady to SpawnVisibleObjects
+* Removing ReadyMessage, Use SceneReadyMessage instead
+* Renaming NotReadyMessage to SceneNotReadyMessage
+* NetworkPlayer.RemoveObservers renamed to RemoveAllVisibleObjects
+
 ## [103.1.1](https://github.com/MirageNet/Mirage/compare/v103.1.0...v103.1.1) (2021-09-08)
 
 
