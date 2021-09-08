@@ -455,7 +455,7 @@ namespace Mirage
         ///     Please override this function if this is not intended behavior for you.</para>
         /// </summary>
         /// <param name="player">The current player that finished authenticating.</param>
-        public virtual void OnServerAuthenticated(INetworkPlayer player)
+        protected internal virtual void OnServerAuthenticated(INetworkPlayer player)
         {
             logger.Log("[NetworkSceneManager] - OnServerAuthenticated");
 
