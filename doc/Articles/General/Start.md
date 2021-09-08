@@ -4,7 +4,7 @@ This document describes steps to creating a multiplayer game with Mirage. The pr
 
 ## Video tutorials
 
-Currently there are no mirage specific videos. You can use mirror existing videos along side our [Mirror to Mirage Conversion](..Guides/MirrorMigration.md) guide.
+Currently there are no mirage specific videos. You can use mirror existing videos along side our [Mirror to Mirage Conversion](../Guides/MirrorMigration.md) guide.
 
 ## Networking set-up
 -   Right click in the Scene, select *Network* > *NetworkManager*. This will create a new GameObject with all the necessary networking components set up for you.
