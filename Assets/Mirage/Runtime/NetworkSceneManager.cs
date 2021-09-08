@@ -417,7 +417,7 @@ namespace Mirage
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         public void ServerLoadSceneNormal(string scenePath)
         {
-            if (!Server && !Server.Active) throw new InvalidOperationException("[NetworkSceneManager] - Server is null or server is currently not active.");
+            ThrowIfNotServer();
 
             ServerSceneLoading(scenePath, Server.Players, true);
         }
@@ -430,7 +430,7 @@ namespace Mirage
         /// <param name="shouldClientLoadNormally">Should the clients load this additively too or load it full normal scene change.</param>
         public void ServerLoadSceneAdditively(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false)
         {
-            if (!Server && !Server.Active) return;
+            ThrowIfNotServer();
 
             ServerSceneLoading(scenePath, players, shouldClientLoadNormally, SceneOperation.LoadAdditive);
         }
@@ -442,7 +442,7 @@ namespace Mirage
         /// <param name="players">Collection of player's that are receiving the new scene unload.</param>
         public void ServerUnloadSceneAdditively(Scene scene, IEnumerable<INetworkPlayer> players)
         {
-            if (Server == null || !Server.Active) throw new InvalidOperationException("Server is not active or is null");
+            ThrowIfNotServer();
 
             ServerSceneUnLoading(scene, players);
         }
@@ -532,6 +532,7 @@ namespace Mirage
         /// </summary>
         public void SetAllClientsNotReady()
         {
+            ThrowIfNotServer();
             foreach (INetworkPlayer player in Server.Players)
             {
                 SetClientNotReady(player);
@@ -545,6 +546,8 @@ namespace Mirage
         /// <param name="player">The connection of the client to make not ready.</param>
         public void SetClientNotReady(INetworkPlayer player)
         {
+            ThrowIfNotServer();
+
             if (player.SceneIsReady)
             {
                 if (logger.LogEnabled()) logger.Log("PlayerNotReady " + player);
@@ -553,6 +556,11 @@ namespace Mirage
 
                 player.Send(new SceneNotReadyMessage());
             }
+        }
+
+        void ThrowIfNotServer()
+        {
+            if (Server == null || !Server.Active) { throw new InvalidOperationException("Method can only be called for active server"); }
         }
 
         #endregion
