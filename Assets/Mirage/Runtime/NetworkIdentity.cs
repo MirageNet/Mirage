@@ -972,7 +972,7 @@ namespace Mirage
             player.AddToVisList(this);
 
             // spawn identity for this conn
-            ServerObjectManager.ShowForConnection(this, player);
+            ServerObjectManager.ShowForPlayer(this, player);
         }
 
         /// <summary>
@@ -1079,7 +1079,7 @@ namespace Mirage
                 {
                     // removed observer
                     player.RemoveFromVisList(this);
-                    ServerObjectManager.HideForConnection(this, player);
+                    ServerObjectManager.HideForPlayer(this, player);
 
                     if (logger.LogEnabled()) logger.Log("Removed Observer for " + gameObject + " " + player);
                     changed = true;
@@ -1101,7 +1101,7 @@ namespace Mirage
                     // new observer
                     player.AddToVisList(this);
                     // spawn identity for this conn
-                    ServerObjectManager.ShowForConnection(this, player);
+                    ServerObjectManager.ShowForPlayer(this, player);
                     if (logger.LogEnabled()) logger.Log("New Observer for " + gameObject + " " + player);
                     changed = true;
                 }

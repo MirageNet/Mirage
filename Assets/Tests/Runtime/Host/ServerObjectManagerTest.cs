@@ -12,7 +12,7 @@ namespace Mirage.Tests.Runtime.Host
     public class ServerObjectManagerHostTest : HostSetup<MockComponent>
     {
         [Test]
-        public void HideForConnection()
+        public void HideForPlayerTest()
         {
             // add connection
 
@@ -20,7 +20,7 @@ namespace Mirage.Tests.Runtime.Host
 
             NetworkIdentity identity = new GameObject().AddComponent<NetworkIdentity>();
 
-            serverObjectManager.HideForConnection(identity, player);
+            serverObjectManager.HideForPlayer(identity, player);
 
             player.Received().Send(Arg.Is<ObjectHideMessage>(msg => msg.netId == identity.NetId));
 

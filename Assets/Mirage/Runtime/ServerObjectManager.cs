@@ -220,8 +220,8 @@ namespace Mirage
 
             if (!player.SceneIsReady)
             {
-                // client needs to finish initializing before we can spawn objects
-                // otherwise it would not find them.
+                // client needs to finish loading scene before we can spawn objects
+                // otherwise it would not find scene objects.
                 return;
             }
 
@@ -323,13 +323,19 @@ namespace Mirage
             }
         }
 
-        internal void ShowForConnection(NetworkIdentity identity, INetworkPlayer player)
+        /// <summary>
+        /// Sends spawn message to player if it is not loading a scene
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <param name="player"></param>
+        internal void ShowForPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
+            // dont send if loading scene
             if (player.SceneIsReady)
                 SendSpawnMessage(identity, player);
         }
 
-        internal void HideForConnection(NetworkIdentity identity, INetworkPlayer player)
+        internal void HideForPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
             player.Send(new ObjectHideMessage { netId = identity.NetId });
         }

@@ -69,7 +69,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [UnityTest]
-        public IEnumerator ShowForConnection() => UniTask.ToCoroutine(async () =>
+        public IEnumerator ShowForPlayerTest() => UniTask.ToCoroutine(async () =>
         {
             bool invoked = false;
 
@@ -78,7 +78,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             serverPlayer.SceneIsReady = true;
 
             // call ShowForConnection
-            serverObjectManager.ShowForConnection(serverIdentity, serverPlayer);
+            serverObjectManager.ShowForPlayer(serverIdentity, serverPlayer);
 
             // todo assert correct message was sent using Substitute for socket or player
 
