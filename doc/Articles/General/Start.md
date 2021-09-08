@@ -4,33 +4,46 @@ This document describes steps to creating a multiplayer game with Mirage. The pr
 
 ## Video tutorials
 
-Check out these [awesome videos](https://www.youtube.com/playlist?list=PLkx8oFug638oBYF5EOwsSS-gOVBXj1dkP) showing you how to get started with mirror. Courtesy of [First Gear Games](https://www.youtube.com/channel/UCGIF1XekJqHYIafvE7l0c2A) also known as Punfish in discord.
+Currently there are no mirage specific videos. You can use mirror existing videos along side our [Mirror to Mirage Conversion](..Guides/MirrorMigration.md) guide.
 
 ## Networking set-up
--   Right click in the Scene, select *Network* > *NetworkManager*. This will create a new GameObject with all the neccessary networking components set up for you.
--   Add the NetworkManagerHUD component to the game object. This provides the default UI for managing the network game state.
+-   Right click in the Scene, select *Network* > *NetworkManager*. This will create a new GameObject with all the necessary networking components set up for you.
+-   Add the NetworkManagerHUD component to the game object. This provides an out of the box canvas ui system that you can use and create your own ui with. Assign the variables
+to properly setup the ui so everything will interact with network code. In future we will be providing out of the box ui that auto set's up.
 
 See [Using the NetworkManager](../Components/NetworkManager.md).
 
 ## Player Prefab
--   Find the Prefab for the player game object in the game, or create a Prefab from the player game object
--   Add the NetworkIdentity component to the player Prefab
--   Set the `playerPrefab` field on the `CharacterSpawner` component  to the player Prefab. You can find this component on the GameObject you created in the first setup.
--   Remove the player game object instance from the Scene if it exists in the Scene
+- Create a new prefab in your project.
+- Add a NetworkIdentity component to the player Prefab
+- Set the `playerPrefab` field on the `CharacterSpawner` component  to the player Prefab. You can find this component on the GameObject you created in the first setup.
 
 See [character objects](../Guides/GameObjects/SpawnPlayer.md) for more information.
 
-## Player movement
--   Add a NetworkTransform component to the player Prefab
--   Check the Client Authority checkbox on the component.
--   Update input and control scripts to respect `IsLocalPlayer`
--   Subscribe to `Identity.OnStartLocalPlayer` event to take control of the Main Camera in the scene for the player.
+## Player Movements
+>[!NOTE]
+> Attach the correct type of movement script you intended to use. NetworkTransform will move the transform component without physics calculations. If you
+>require physics to be also part of your normal movement calculations suggestion would be to attach a NetworkRigidBody component instead.
 
-For example, this script only processes input for the local player:
+>[!WARNING]
+> Currently network transform and network rigid body components cannot handle various lag and drop of packets. Jitter or lag behind may occur. We are working
+>to improve these components and have a better lag and jitter control in the future.
+- Add the correct movement component you require.
+- Check box client authority under the component if you want the player to be able to fully control movement without server controlling it.
+>[!WARNING]
+> If client authority is checked then hacking can occur due to trusting clients and accepting there movement. if you do not want this do not check client authority
+> under the component and you will require to send commands to server to allow movement to occur.
+- Update input and control scripts to reflect what type of control you want. See below for different examples.
 
-``` cs
+>[!NOTE]
+> If you require a camera to run on player prefab subscribe to `Identity.OnStartLocalPlayer` event to take control of the Main Camera in the scene for the player. You do not need a camera on every
+>player prefab.
+
+Example if client authority has been checked and you trust clients. Never trust clients tho.
+
+```cs
 using UnityEngine;
-using Mirror;
+using Mirage;
 
 public class Controls : NetworkBehaviour
 {
@@ -47,15 +60,46 @@ public class Controls : NetworkBehaviour
 }
 ```
 
+Example if server authority is going to be used.
+
+```cs
+using UnityEngine;
+using Mirage;
+
+public class Controls : NetworkBehaviour
+{
+    void Update()
+    {
+        if (!IsLocalPlayer)
+        {
+            // exit from update if this is not the local player
+            return;
+        }
+
+        // handle player input for movement
+
+       // You would call this command after handling input or you can send inputs directly to
+       // server and let server buffer inputs up and do movements based on the buffered inputs.
+       MovePlayer();
+    }
+
+    [ServerRpc]
+    void MovePlayer()
+    {
+        // We are now firing off some kind of movement all done by server.
+    }
+}
+```
+
 ## Basic player game state
 -   Make scripts that contain important data into NetworkBehaviours instead of MonoBehaviours
--   Make important member variables into SyncVars
+-   You can sync different types of data depending on what you need to sync.
 
 See [State Synchronization](../Guides/Sync/index.md).
 
 ## Networked actions
 -   Make scripts that perform important actions into NetworkBehaviours instead of MonoBehaviours
--   Update functions that perform important player actions to be `ServerRpc`s
+-   Update functions that perform important player actions to have an attribute of `[ServerRpc]`
 
 See [Networked Actions](../Guides/Communications/index.md).
 
@@ -63,8 +107,8 @@ See [Networked Actions](../Guides/Communications/index.md).
 
 Fix non-player prefabs such as enemies:
 -   Add the `NetworkIdentify` component
--   Add the `NetworkTransform` component
--   Register spawnable Prefabs with the `ClientObjectManager`
+-   Add the correct component needed to sync movement as state above with player movement.
+-   Once all objects have a network identity. Find ClientObjectManager under the `networkmanager` game object in scene and hit register prefabs.
 -   Update scripts with game state and actions
 
 ## Spawners
