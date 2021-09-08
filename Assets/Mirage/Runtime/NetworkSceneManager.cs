@@ -504,16 +504,9 @@ namespace Mirage
         /// <param name="disconnectedPlayer"></param>
         protected internal virtual void OnServerPlayerDisconnected(INetworkPlayer disconnectedPlayer)
         {
-            foreach (KeyValuePair<Scene, HashSet<INetworkPlayer>> scene in _serverSceneData)
+            foreach (HashSet<INetworkPlayer> playersInScene in _serverSceneData.Values)
             {
-                foreach (INetworkPlayer player in scene.Value)
-                {
-                    if (disconnectedPlayer != player) continue;
-
-                    scene.Value.Remove(disconnectedPlayer);
-
-                    break;
-                }
+                playersInScene.Remove(disconnectedPlayer);
             }
         }
 
