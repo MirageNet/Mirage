@@ -540,10 +540,11 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Sets the client of the connection to be not-ready.
-        /// <para>Clients that are not ready do not receive spawned objects or state synchronization updates. They client can be made ready again by calling SetClientReady().</para>
+        /// Sets a player as not ready and removes all visible objects
+        /// <para>Players that are not ready will not be sent spawn message or state updates.</para>
+        /// <para>Players that are not ready do not receive spawned objects or state synchronization updates. They client can be made ready again by calling SetClientReady().</para>
         /// </summary>
-        /// <param name="player">The connection of the client to make not ready.</param>
+        /// <param name="player">The player to make not ready.</param>
         public void SetClientNotReady(INetworkPlayer player)
         {
             ThrowIfNotServer();
