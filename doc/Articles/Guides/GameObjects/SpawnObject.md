@@ -8,7 +8,11 @@ When the server spawns a game object with a Network Identity component, the game
 
 A game object Prefab must have a Network Identity component before trying to register it with the Network Manager.
 
-To register a Prefab with the Network Manager in the Editor, select the Network Manager game object, and in the Inspector, navigate to the Network Manager component. Click the triangle next to Spawn Info to open the settings, then under Registered Spawnable Prefabs, click the plus (+) button. Drag and drop Prefabs into the empty field to assign them to the list.
+To register a Prefab with the Client Object Manager in the Editor, select the Network Manager game object, and in the Inspector, navigate to the Client Object Manager component. Click the triangle next to Spawn Prefabs to open the settings, click the plus (+) button. Drag and drop Prefabs into the empty field to assign them to the list. 
+For automatic registering click the Register all prefabs button.
+
+>[!NOTE]
+>This searches entire project for prefabs / objects that have a network identity component on it and register it for you.
 
 ![Registered Spawnable Prefabs](SpawnObjects.PNG)
 
@@ -25,13 +29,25 @@ using Mirage;
 public class MyNetworkManager : MonoBehaviour 
 {
     public GameObject treePrefab;
+    public ClientObjectManager;
+    public NetworkClient;
+    public NetworkServer;
+    public ServerObjectManager;
+
+    void Start()
+    {
+        ClientObjectManager = FindObjectOfType<ClientObjectManager>();
+        NetworkClient = FindObjectOfType<NetworkClient>();
+        NetworkServer = FindObjectOfType<NetworkServer>();
+        ServerObjectManager = FindObjectOfType<NetworkServer>();
+    }
 
     // Register prefab and connect to the server  
     public void ClientConnect()
     {
-        ClientScene.RegisterPrefab(treePrefab);
-        NetworkClient.RegisterHandler<ConnectMessage>(OnClientConnect);
+        ClientObjectManager.spawnPrefabs.Add(treePrefab);
         NetworkClient.Connect("localhost");
+        NetworkClient.MessageHandler.RegisterHandler<ConnectMessage>(OnClientConnect);
     }
 
     void OnClientConnect(NetworkConnection conn, ConnectMessage msg)
@@ -50,18 +66,17 @@ For the script to work, you also need to add code for the server. Add this to th
 ``` cs
 public void ServerListen()
 {
-    NetworkServer.RegisterHandler<ConnectMessage>(OnServerConnect);
-    NetworkServer.RegisterHandler<ReadyMessage>(OnClientReady);
-
     // start listening, and allow up to 4 connections
-    NetworkServer.Listen(4);
+    NetworkServer.StartServer();
+
+    NetworkServer.MessageHandler.RegisterHandler<ConnectMessage>(OnServerConnect);
+    NetworkServer.MessageHandler.RegisterHandler<ReadyMessage>(OnClientReady);
 }
 
 // When client is ready spawn a few trees  
 void OnClientReady(NetworkConnection conn, ReadyMessage msg)
 {
     Debug.Log("Client is ready to start: " + conn);
-    NetworkServer.SetClientReady(conn);
     SpawnTrees();
 }
 
@@ -71,7 +86,7 @@ void SpawnTrees()
     for (int i = 0; i < 5; ++i)
     {
         GameObject treeGo = Instantiate(treePrefab, new Vector3(x++, 0, 0), Quaternion.identity);
-        NetworkServer.Spawn(treeGo);
+        ServerObjectManager.Spawn(treeGo);
     }
 }
 
@@ -85,7 +100,7 @@ The server does not need to register anything, as it knows what game object is b
 
 When writing your own network manager, it’s important to make the client ready to receive state updates before calling the spawn command on the server, otherwise they won’t be sent. If you’re using Mirage’s built-in Network Manager component, this happens automatically.
 
-For more advanced uses, such as object pools or dynamically created Assets, you can use the `ClientScene.RegisterSpawnHandler` method, which allows callback functions to be registered for client-side spawning. See documentation on Custom Spawn Functions for an example of this.
+For more advanced uses, such as object pools or dynamically created Assets, you can use the `ClientObjectManager.RegisterSpawnHandler` method, which allows callback functions to be registered for client-side spawning. See documentation on Custom Spawn Functions for an example of this.
 
 If the game object has a network state like synchronized variables, then that state is synchronized with the spawn message. In the following example, this script is attached to the tree Prefab:
 
@@ -93,10 +108,15 @@ If the game object has a network state like synchronized variables, then that st
 using UnityEngine;
 using Mirage;
 
-class Tree : NetworkBehaviour
+public class Tree : NetworkBehaviour
 {
     [SyncVar]
     public int numLeaves;
+
+    void Start()
+    {
+        Identity.OnStartClient.AddLisenter(OnStartClient);
+    }
 
     public override void OnStartClient()
     {
@@ -117,7 +137,7 @@ void SpawnTrees()
         Tree tree = treeGo.GetComponent<Tree>();
         tree.numLeaves = Random.Range(10,200);
         Debug.Log("Spawning leaf with leaf count " + tree.numLeaves);
-        NetworkServer.Spawn(treeGo);
+        ServerObjectManager.Spawn(treeGo);
     }
 }
 ```
@@ -126,7 +146,6 @@ Attach the `Tree` script to the `treePrefab` script created earlier to see this 
 
 ### Constraints
 -   A NetworkIdentity must be on the root game object of a spawnable Prefab. Without this, the Network Manager can’t register the Prefab.
--   NetworkBehaviour scripts must be on the same game object as the NetworkIdentity, not on child game objects
 
 ## Game Object Creation Flow
 
@@ -134,7 +153,7 @@ The actual flow of internal operations that takes place for spawning game object
 -   Prefab with Network Identity component is registered as spawnable.
 -   game object is instantiated from the Prefab on the server.
 -   Game code sets initial values on the instance (note that 3D physics forces applied here do not take effect immediately).
--   `NetworkServer.Spawn` is called with the instance.
+-   `ServerObjectManager.Spawn` is called with the instance.
 -   The state of the SyncVars on the instance on the server are collected by calling `OnSerialize` on [Network Behaviour] components.
 -   A network message of type `ObjectSpawn` is sent to connected clients that includes the SyncVar data.
 -   `OnStartServer` is called on the instance on the server, and `isServer` is set to `true`
@@ -142,7 +161,7 @@ The actual flow of internal operations that takes place for spawning game object
 -   The SyncVar data is applied to the new instance on the client by calling OnDeserialize on Network Behaviour components.
 -   `OnStartClient` is called on the instance on each client, and `isClient` is set to `true`
 -   As game play progresses, changes to SyncVar values are automatically synchronized to clients. This continues until game ends.
--   `NetworkServer.Destroy` is called on the instance on the server.
+-   `ServerObjectManager.Destroy` is called on the instance on the server.
 -   A network message of type `ObjectDestroy` is sent to clients.
 -   `OnNetworkDestroy` is called on the instance on clients, then the instance is destroyed.
 
@@ -152,30 +171,28 @@ Player game objects in the HLAPI work slightly differently to non-player game ob
 -   Prefab with `NetworkIdentity` is registered as the `PlayerPrefab`
 -   Client connects to the server
 -   Client calls `AddPlayer`, network message of type `MsgType.AddPlayer` is sent to the server
--   Server receives message and calls `NetworkManager.OnServerAddPlayer`
+-   Server receives message and calls `CharacterSpawner.OnServerAddPlayer`
 -   game object is instantiated from the Player Prefab on the server
--   `NetworkManager.AddPlayerForConnection` is called with the new player instance on the server
--   The player instance is spawned - you do not have to call `NetworkServer.Spawn` for the player instance. The spawn message is sent to all clients like on a normal spawn.
+-   `ServerObjectManager.AddCharacter` is called with the new player instance on the server
+-   The player instance is spawned - you do not have to call `ServerObjectManager.Spawn` for the player instance. The spawn message is sent to all clients like on a normal spawn.
 -   A network message of type `Owner` is sent to the client that added the player (only that client!)
 -   The original client receives the network message
--   `OnStartLocalPlayer` is called on the player instance on the original client, and `isLocalPlayer` is set to true
+-   `OnStartLocalPlayer` is called on the player instance on the original client, and `IsLocalPlayer` is set to true
 
-Note that `OnStartLocalPlayer` is called after `OnStartClient`, because it only happens when the ownership message arrives from the server after the player game object is spawned, so `isLocalPlayer` is not set in `OnStartClient`.
-
-Because `OnStartLocalPlayer` is only called for the client’s local player game object, it is a good place to perform initialization that should only be done for the local player. This could include enabling input processing, and enabling camera tracking for the player game object.
+>[!Note]
+> That `OnStartLocalPlayer` is called after `OnStartClient`, because it only happens when the ownership message arrives from the server after the player game object is spawned, so `isLocalPlayer` is not set in `OnStartClient`.
+>Because `OnStartLocalPlayer` is only called for the client’s local player game object, it is a good place to perform initialization that should only be done for the local player. This could include enabling input processing, and enabling camera tracking for the player game object.
 
 ## Spawning Game Objects with Client Authority
 
-To spawn game objects and assign authority of those game objects to a particular client, use `NetworkServer.Spawn`, which takes as an argument the `NetworkConnection` of the client that is to be made the authority.
+To spawn game objects and assign authority of those game objects to a particular client, use `ServerObjectManager.Spawn`, which takes as an argument the `INetworkPlayer` of the client that is to be made the authority.
 
 For these game objects, the property `hasAuthority` is true on the client with authority, and `OnStartAuthority` is called on the client with authority. That client can issue Server RPCs for that game object. On other clients (and on the host), `hasAuthority` is false.
 
-Objects spawned with client authority must have `LocalPlayerAuthority` set in their `NetworkIdentity`.
-
-For example, the tree spawn example above can be modified to allow the tree to have client authority like this (note that we now need to pass in a NetworkConnection game object for the owning client’s connection):
+For example, the tree spawn example above can be modified to allow the tree to have client authority like this (note that we now need to pass in a Network Player game object for the owning client’s connection):
 
 ``` cs
-void SpawnTrees(NetworkConnection conn)
+void SpawnTrees(INetworkPlayer player)
 {
     int x = 0;
     for (int i = 0; i < 5; ++i)
@@ -184,7 +201,7 @@ void SpawnTrees(NetworkConnection conn)
         Tree tree = treeGo.GetComponent<Tree>();
         tree.numLeaves = Random.Range(10,200);
         Debug.Log("Spawning leaf with leaf count " + tree.numLeaves);
-        NetworkServer.Spawn(treeGo, conn);
+        ServerObjectManager.Spawn(treeGo, player);
     }
 }
 ```
@@ -192,7 +209,16 @@ void SpawnTrees(NetworkConnection conn)
 The Tree script can now be modified to send a Server RPC Call to the server:
 
 ``` cs
-public override void OnStartAuthority()
+    public void ClientConnect()
+    {
+        ClientObjectManager.spawnPrefabs.Add(treePrefab);
+        NetworkClient.Connect("localhost");
+        NetworkClient.MessageHandler.RegisterHandler<ConnectMessage>(OnClientConnect);
+
+        NetworkClient.Player.Identity.OnAuthorityChanged.AddListener(OnStartAuthority);
+    }
+
+public override void OnStartAuthority(bool changed)
 {
     CmdMessageFromTree("Tree with " + numLeaves + " reporting in");
 }
