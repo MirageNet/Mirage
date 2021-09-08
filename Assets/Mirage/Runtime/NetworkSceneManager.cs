@@ -107,7 +107,7 @@ namespace Mirage
         public SceneChangeEvent OnServerFinishedSceneChange => _onServerFinishedSceneChange;
 
         /// <summary>
-        /// Event fires On the server, after Client sends <see cref="ReadyMessage"/> to the server
+        /// Event fires On the server, after Client sends <see cref="SceneReadyMessage"/> to the server
         /// </summary>
         public PlayerSceneChangeEvent OnPlayerSceneReady => _onPlayerSceneReady;
 
