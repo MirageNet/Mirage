@@ -220,7 +220,7 @@ namespace Mirage.Tests.Runtime.Host
                 sceneManager.ServerUnloadSceneAdditively(SceneManager.GetActiveScene(), new[] { server.LocalPlayer });
             });
 
-            string message = new InvalidOperationException("Server is not active or is null").Message;
+            string message = new InvalidOperationException("Method can only be called if server is active").Message;
             Assert.That(exception, Has.Message.EqualTo(message));
         }
 
