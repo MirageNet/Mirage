@@ -9,13 +9,12 @@ namespace Mirage.Tests.Runtime.Host
         public void SetClientReadyAndNotReadyTest()
         {
             (_, NetworkPlayer connection) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
-            Assert.That(connection.SceneIsReady, Is.False);
-
-            serverObjectManager.SpawnVisibleObjects(connection);
-            Assert.That(connection.SceneIsReady, Is.True);
+            Assert.That(connection.SceneIsReady, Is.True, "Starts in a ready scene");
 
             sceneManager.SetClientNotReady(connection);
             Assert.That(connection.SceneIsReady, Is.False);
+
+
         }
 
         [Test]

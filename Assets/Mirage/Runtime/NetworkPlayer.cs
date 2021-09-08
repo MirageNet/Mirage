@@ -55,8 +55,9 @@ namespace Mirage
         /// Flag that tells us if the scene has fully loaded in for player.
         /// <para>This property is read-only. It is set by the system on the client when the scene has fully loaded, and set by the system on the server when a ready message is received from a client.</para>
         /// <para>A client that is ready is sent spawned objects by the server and updates to the state of spawned objects. A client that is not ready is not sent spawned objects.</para>
+        /// <para>Starts as true, when a client connects it is assumed that it is already in a ready scene. It will be set to not ready if NetworkSceneManager loads a scene</para>
         /// </summary>
-        public bool SceneIsReady { get; set; }
+        public bool SceneIsReady { get; set; } = true;
 
         /// <summary>
         /// Checks if this player has a <see cref="Identity"/>
