@@ -84,6 +84,8 @@ namespace Mirage
         [FormerlySerializedAs("ServerSceneChanged")]
         [SerializeField] SceneChangeEvent _onServerFinishedSceneChange = new SceneChangeEvent();
 
+        [SerializeField] PlayerSceneChangeEvent _onPlayerSceneReady = new PlayerSceneChangeEvent();
+
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
@@ -104,6 +106,11 @@ namespace Mirage
         /// </summary>
         public SceneChangeEvent OnServerFinishedSceneChange => _onServerFinishedSceneChange;
 
+        /// <summary>
+        /// Event fires On the server, after Client sends <see cref="ReadyMessage"/> to the server
+        /// </summary>
+        public PlayerSceneChangeEvent OnPlayerSceneReady => _onPlayerSceneReady;
+
         #endregion
 
         #region Unity Methods
@@ -118,6 +125,7 @@ namespace Mirage
 
             if (Server != null)
             {
+                Server.Started.AddListener(RegisterServerMessages);
                 Server.Authenticated.AddListener(OnServerAuthenticated);
                 Server.Disconnected.AddListener(OnServerPlayerDisconnected);
             }
@@ -129,7 +137,11 @@ namespace Mirage
                 Client.Started.RemoveListener(RegisterClientMessages);
 
             if (Server != null)
+            {
+                Server.Started.RemoveListener(RegisterServerMessages);
                 Server.Authenticated.RemoveListener(OnServerAuthenticated);
+                Server.Disconnected.RemoveListener(OnServerPlayerDisconnected);
+            }
         }
 
         #endregion
@@ -196,7 +208,7 @@ namespace Mirage
             if (Client.IsLocalClient) return;
 
             Client.MessageHandler.RegisterHandler<SceneReadyMessage>(ClientFinishedLoadingSceneMessage);
-            Client.MessageHandler.RegisterHandler<NotReadyMessage>(ClientNotReadyMessage);
+            Client.MessageHandler.RegisterHandler<SceneNotReadyMessage>(ClientNotReadyMessage);
         }
 
         /// <summary>
@@ -210,8 +222,7 @@ namespace Mirage
         /// <param name="message"></param>
         public virtual void ClientStartSceneMessage(INetworkPlayer player, SceneMessage message)
         {
-            if (!Client.IsConnected)
-                throw new InvalidOperationException("[NetworkSceneManager] - SceneLoadStartedMessage: cannot change network scene while client is disconnected");
+            ThrowIfNotClient();
 
             if (string.IsNullOrEmpty(message.MainActivateScene))
                 throw new ArgumentException($"[NetworkSceneManager] - SceneLoadStartedMessage: {nameof(message.MainActivateScene)} cannot be empty or null", nameof(message));
@@ -287,7 +298,7 @@ namespace Mirage
         /// </summary>
         /// <param name="player">The player that is currently not ready.</param>
         /// <param name="message">The message data coming in.</param>
-        protected internal virtual void ClientNotReadyMessage(INetworkPlayer player, NotReadyMessage message)
+        protected internal virtual void ClientNotReadyMessage(INetworkPlayer player, SceneNotReadyMessage message)
         {
             if (logger.LogEnabled())
                 logger.Log("[NetworkSceneManager] - OnClientNotReadyMessageInternal");
@@ -302,8 +313,7 @@ namespace Mirage
         /// <exception cref="InvalidOperationException">When called with an null or disconnected client</exception>
         public void SetSceneIsReady()
         {
-            if (!Client || !Client.Active)
-                throw new InvalidOperationException("[NetworkSceneManager] - Scene ready called with an null or disconnected client");
+            ThrowIfNotClient();
 
             if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - Scene is loaded and ready has been called.");
 
@@ -312,12 +322,25 @@ namespace Mirage
             Client.Player.SceneIsReady = true;
 
             // Tell server we're ready to have a player object spawned
-            Client.Player.Send(new ReadyMessage());
+            Client.Player.Send(new SceneReadyMessage());
+        }
+
+        void ThrowIfNotClient()
+        {
+            if (Client == null || !Client.IsConnected) { throw new InvalidOperationException("Method can only be called if client is active"); }
         }
 
         #endregion
 
         #region Server Side
+
+        /// <summary>
+        ///     Register incoming client messages.
+        /// </summary>
+        private void RegisterServerMessages()
+        {
+            Server.MessageHandler.RegisterHandler<SceneReadyMessage>(HandlePlayerSceneReady);
+        }
 
         /// <summary>
         ///     Allows server to fully load new scene or additive load in another scene.
@@ -340,6 +363,7 @@ namespace Mirage
             // Let server prepare for scene change
             logger.Log("[NetworkSceneManager] - OnServerChangeScene");
 
+            SetAllClientsNotReady();
             OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation);
 
             if (players == null)
@@ -365,7 +389,7 @@ namespace Mirage
         /// <param name="players"></param>
         private void ServerSceneUnLoading(Scene scene, IEnumerable<INetworkPlayer> players)
         {
-            if (scene.handle == 0)
+            if (!scene.IsValid())
                 throw new ArgumentNullException(nameof(scene),
                     "[NetworkSceneManager] - ServerChangeScene: " + nameof(scene) + " cannot be null");
 
@@ -378,6 +402,7 @@ namespace Mirage
             // Let server prepare for scene change
             if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - OnServerChangeScene");
 
+            SetAllClientsNotReady();
             OnServerStartedSceneChange?.Invoke(scene.path, SceneOperation.UnloadAdditive);
 
             // if not host
@@ -395,7 +420,7 @@ namespace Mirage
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         public void ServerLoadSceneNormal(string scenePath)
         {
-            if (!Server && !Server.Active) throw new InvalidOperationException("[NetworkSceneManager] - Server is null or server is currently not active.");
+            ThrowIfNotServer();
 
             ServerSceneLoading(scenePath, Server.Players, true);
         }
@@ -408,7 +433,7 @@ namespace Mirage
         /// <param name="shouldClientLoadNormally">Should the clients load this additively too or load it full normal scene change.</param>
         public void ServerLoadSceneAdditively(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false)
         {
-            if (!Server && !Server.Active) return;
+            ThrowIfNotServer();
 
             ServerSceneLoading(scenePath, players, shouldClientLoadNormally, SceneOperation.LoadAdditive);
         }
@@ -420,7 +445,7 @@ namespace Mirage
         /// <param name="players">Collection of player's that are receiving the new scene unload.</param>
         public void ServerUnloadSceneAdditively(Scene scene, IEnumerable<INetworkPlayer> players)
         {
-            if (Server == null || !Server.Active) throw new InvalidOperationException("Server is not active or is null");
+            ThrowIfNotServer();
 
             ServerSceneUnLoading(scene, players);
         }
@@ -433,7 +458,7 @@ namespace Mirage
         ///     Please override this function if this is not intended behavior for you.</para>
         /// </summary>
         /// <param name="player">The current player that finished authenticating.</param>
-        public virtual void OnServerAuthenticated(INetworkPlayer player)
+        protected internal virtual void OnServerAuthenticated(INetworkPlayer player)
         {
             logger.Log("[NetworkSceneManager] - OnServerAuthenticated");
 
@@ -482,17 +507,64 @@ namespace Mirage
         /// <param name="disconnectedPlayer"></param>
         protected internal virtual void OnServerPlayerDisconnected(INetworkPlayer disconnectedPlayer)
         {
-            foreach (KeyValuePair<Scene, HashSet<INetworkPlayer>> scene in _serverSceneData)
+            foreach (HashSet<INetworkPlayer> playersInScene in _serverSceneData.Values)
             {
-                foreach (INetworkPlayer player in scene.Value)
-                {
-                    if (disconnectedPlayer != player) continue;
-
-                    scene.Value.Remove(disconnectedPlayer);
-
-                    break;
-                }
+                playersInScene.Remove(disconnectedPlayer);
             }
+        }
+
+        /// <summary>
+        /// default ready handler. 
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="msg"></param>
+        void HandlePlayerSceneReady(INetworkPlayer player, SceneReadyMessage msg)
+        {
+            if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + player);
+            player.SceneIsReady = true;
+            OnPlayerSceneReady.Invoke(player);
+        }
+
+        /// <summary>
+        /// Marks all connected clients as no longer ready.
+        /// <para>
+        ///     All clients will no longer be sent state synchronization updates.
+        ///     The player's clients can call ClientManager.Ready() again to re-enter the ready state.
+        ///     This is useful when switching scenes.
+        /// </para>
+        /// </summary>
+        public void SetAllClientsNotReady()
+        {
+            ThrowIfNotServer();
+            foreach (INetworkPlayer player in Server.Players)
+            {
+                SetClientNotReady(player);
+            }
+        }
+
+        /// <summary>
+        /// Sets a player as not ready and removes all visible objects
+        /// <para>Players that are not ready will not be sent spawn message or state updates.</para>
+        /// <para>Players that are not ready do not receive spawned objects or state synchronization updates. They client can be made ready again by calling SetClientReady().</para>
+        /// </summary>
+        /// <param name="player">The player to make not ready.</param>
+        public void SetClientNotReady(INetworkPlayer player)
+        {
+            ThrowIfNotServer();
+
+            if (player.SceneIsReady)
+            {
+                if (logger.LogEnabled()) logger.Log("PlayerNotReady " + player);
+                player.SceneIsReady = false;
+                player.RemoveAllVisibleObjects();
+
+                player.Send(new SceneNotReadyMessage());
+            }
+        }
+
+        void ThrowIfNotServer()
+        {
+            if (Server == null || !Server.Active) { throw new InvalidOperationException("Method can only be called if server is active"); }
         }
 
         #endregion

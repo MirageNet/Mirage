@@ -59,15 +59,14 @@ namespace Mirage
 
                 if (NetworkSceneManager != null)
                 {
-                    NetworkSceneManager.OnServerStartedSceneChange.AddListener(OnStartedSceneChange);
                     NetworkSceneManager.OnServerFinishedSceneChange.AddListener(OnFinishedSceneChange);
+                    NetworkSceneManager.OnPlayerSceneReady.AddListener(SpawnVisibleObjects);
                 }
             }
         }
 
         internal void RegisterMessageHandlers()
         {
-            Server.MessageHandler.RegisterHandler<ReadyMessage>(OnClientReadyMessage);
             Server.MessageHandler.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
         }
 
@@ -89,11 +88,6 @@ namespace Mirage
             Server.World.ClearSpawnedObjects();
             // reset so ids stay small in each session
             nextNetworkId = 1;
-        }
-
-        void OnStartedSceneChange(string scenePath, SceneOperation sceneOperation)
-        {
-            SetAllClientsNotReady();
         }
 
         void OnFinishedSceneChange(string scenePath, SceneOperation sceneOperation)
@@ -183,11 +177,15 @@ namespace Mirage
             {
                 throw new ArgumentException($"Cannot replace player for connection. New player is already owned by a different connection {identity}");
             }
+            if (!player.HasCharacter)
+            {
+                throw new InvalidOperationException($"ReplaceCharacter can only be called if Player already has a charater");
+            }
 
             //NOTE: there can be an existing player
             logger.Log("NetworkServer ReplacePlayer");
 
-            NetworkIdentity previousPlayer = player.Identity;
+            NetworkIdentity previousCharacter = player.Identity;
 
             player.Identity = identity;
 
@@ -206,24 +204,24 @@ namespace Mirage
             // controller.
             //
             // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
-            SpawnObserversForConnection(player);
+            SpawnVisibleObjectForPlayer(player);
 
             if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.AssetId}");
 
             Respawn(identity);
 
             if (!keepAuthority)
-                previousPlayer.RemoveClientAuthority();
+                previousCharacter.RemoveClientAuthority();
         }
 
-        void SpawnObserversForConnection(INetworkPlayer player)
+        void SpawnVisibleObjectForPlayer(INetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log($"Checking Observers on {Server.World.SpawnedIdentities.Count} objects for player: {player}");
 
             if (!player.SceneIsReady)
             {
-                // client needs to finish initializing before we can spawn objects
-                // otherwise it would not find them.
+                // client needs to finish loading scene before we can spawn objects
+                // otherwise it would not find scene objects.
                 return;
             }
 
@@ -231,6 +229,7 @@ namespace Mirage
             // internally sends a spawn message for each one to the connection.
             foreach (NetworkIdentity identity in Server.World.SpawnedIdentities)
             {
+                // todo, do we only need to spawn active objects here? or all objects?
                 if (identity.gameObject.activeSelf)
                 {
                     if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.sceneId}");
@@ -282,9 +281,9 @@ namespace Mirage
         public void AddCharacter(INetworkPlayer player, NetworkIdentity identity)
         {
             // cannot have an existing player object while trying to Add another.
-            if (player.Identity != null)
+            if (player.HasCharacter)
             {
-                throw new ArgumentException("AddPlayer: player object already exists");
+                throw new ArgumentException("AddCharacter can only be called if the player does not already have a character");
             }
 
             // make sure we have a controller before we call SetClientReady
@@ -303,8 +302,8 @@ namespace Mirage
                 Server.LocalClient.Player.Identity = identity;
             }
 
-            // set ready if not set yet
-            SetClientReady(player);
+            // spawn any new visible scene objects
+            SpawnVisibleObjects(player);
 
             if (logger.LogEnabled()) logger.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.AssetId);
 
@@ -325,13 +324,19 @@ namespace Mirage
             }
         }
 
-        internal void ShowForConnection(NetworkIdentity identity, INetworkPlayer player)
+        /// <summary>
+        /// Sends spawn message to player if it is not loading a scene
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <param name="player"></param>
+        internal void ShowToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
+            // dont send if loading scene
             if (player.SceneIsReady)
                 SendSpawnMessage(identity, player);
         }
 
-        internal void HideForConnection(NetworkIdentity identity, INetworkPlayer player)
+        internal void HideToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
             player.Send(new ObjectHideMessage { netId = identity.NetId });
         }
@@ -344,15 +349,13 @@ namespace Mirage
         /// <exception cref="InvalidOperationException">Received remove player message but connection has no player</exception>
         public void RemovePlayerForConnection(INetworkPlayer player, bool destroyServerObject = false)
         {
-            if (player.Identity != null)
-            {
-                Destroy(player.Identity.gameObject, destroyServerObject);
-                player.Identity = null;
-            }
-            else
+            if (!player.HasCharacter)
             {
                 throw new InvalidOperationException("Received remove player message but connection has no player");
             }
+
+            Destroy(player.Identity.gameObject, destroyServerObject);
+            player.Identity = null;
         }
 
         /// <summary>
@@ -656,60 +659,27 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Sets the client to be ready.
-        /// <para>When a client has signaled that it is ready, this method tells the server that the client is ready to receive spawned objects and state synchronization updates. This is usually called in a handler for the SYSTEM_READY message. If there is not specific action a game needs to take for this message, relying on the default ready handler function is probably fine, so this call wont be needed.</para>
+        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// <para>
+        /// If there is a <see cref="Mirage.NetworkSceneManager"/> then this will be called after the client finishes loading the scene and sends <see cref="SceneReadyMessage"/>
+        /// </para>
         /// </summary>
-        /// <param name="player">The connection of the client to make ready.</param>
-        public void SetClientReady(INetworkPlayer player)
+        /// <param name="player">The player to spawn objects for</param>
+        public void SpawnVisibleObjects(INetworkPlayer player) => SpawnVisibleObjects(player, false);
+
+        /// <summary>
+        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// </summary>
+        /// <param name="player">The player to spawn objects for</param>
+        /// <param name="ignoreHasCharacter">If true will spawn visibile objects even if player does not have a spawned character yet</param>
+        // note: can't use optional param here because we need just NetworkPlayer version for event
+        public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter)
         {
             if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + player);
 
-            // set ready
-            player.SceneIsReady = true;
-
             // client is ready to start spawning objects
-            if (player.Identity != null)
-                SpawnObserversForConnection(player);
-        }
-
-        /// <summary>
-        /// Marks all connected clients as no longer ready.
-        /// <para>All clients will no longer be sent state synchronization updates. The player's clients can call ClientManager.Ready() again to re-enter the ready state. This is useful when switching scenes.</para>
-        /// </summary>
-        public void SetAllClientsNotReady()
-        {
-            foreach (INetworkPlayer player in Server.Players)
-            {
-                SetClientNotReady(player);
-            }
-        }
-
-        /// <summary>
-        /// Sets the client of the connection to be not-ready.
-        /// <para>Clients that are not ready do not receive spawned objects or state synchronization updates. They client can be made ready again by calling SetClientReady().</para>
-        /// </summary>
-        /// <param name="player">The connection of the client to make not ready.</param>
-        public void SetClientNotReady(INetworkPlayer player)
-        {
-            if (player.SceneIsReady)
-            {
-                if (logger.LogEnabled()) logger.Log("PlayerNotReady " + player);
-                player.SceneIsReady = false;
-                player.RemoveObservers();
-
-                player.Send(new NotReadyMessage());
-            }
-        }
-
-        /// <summary>
-        /// default ready handler. 
-        /// </summary>
-        /// <param name="player"></param>
-        /// <param name="msg"></param>
-        void OnClientReadyMessage(INetworkPlayer player, ReadyMessage msg)
-        {
-            if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + player);
-            SetClientReady(player);
+            if (ignoreHasCharacter || player.HasCharacter)
+                SpawnVisibleObjectForPlayer(player);
         }
     }
 }

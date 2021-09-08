@@ -113,7 +113,7 @@ namespace Mirage
         {
             logger.Log("CharacterSpawner.OnServerAddPlayer");
 
-            if (player.Identity != null)
+            if (player.HasCharacter)
             {
                 throw new InvalidOperationException("There is already a player for this connection.");
             }

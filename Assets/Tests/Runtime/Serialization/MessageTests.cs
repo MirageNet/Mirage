@@ -64,7 +64,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void NotReadyMessageTest()
         {
-            TestSerializeDeserialize(new NotReadyMessage());
+            TestSerializeDeserialize(new SceneNotReadyMessage());
         }
 
         [Test]
@@ -83,12 +83,6 @@ namespace Mirage.Tests.Runtime.Serialization
             {
                 netId = 42,
             });
-        }
-
-        [Test]
-        public void ReadyMessageTest()
-        {
-            TestSerializeDeserialize(new ReadyMessage());
         }
 
         [Test]

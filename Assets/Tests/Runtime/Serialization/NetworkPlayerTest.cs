@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Mirage.Tests.Runtime
 {
@@ -56,6 +57,26 @@ namespace Mirage.Tests.Runtime
             player.Send(new ArraySegment<byte>(new byte[] { 0, 1, 2 }));
             connection.DidNotReceive().SendReliable(Arg.Any<byte[]>());
             connection.DidNotReceive().SendUnreliable(Arg.Any<byte[]>());
+        }
+
+        [Test]
+        public void HasCharacterReturnsFalseIfIdentityIsSet()
+        {
+            Debug.Assert(player.Identity == null, "player had an identity, this test is invalid");
+            Assert.That(player.HasCharacter, Is.False);
+        }
+
+        [Test]
+        public void HasCharacterReturnsTrueIfIdentityIsSet()
+        {
+            NetworkIdentity character = new GameObject("HasCharacterReturnsTrueIfIdentityIsSet").AddComponent<NetworkIdentity>();
+
+            player.Identity = character;
+
+            Debug.Assert(player.Identity != null, "player did not have identity, this test is invalid");
+            Assert.That(player.HasCharacter, Is.True);
+
+            GameObject.Destroy(character.gameObject);
         }
     }
 }

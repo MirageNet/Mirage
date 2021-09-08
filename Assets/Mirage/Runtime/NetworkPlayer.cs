@@ -55,8 +55,14 @@ namespace Mirage
         /// Flag that tells us if the scene has fully loaded in for player.
         /// <para>This property is read-only. It is set by the system on the client when the scene has fully loaded, and set by the system on the server when a ready message is received from a client.</para>
         /// <para>A client that is ready is sent spawned objects by the server and updates to the state of spawned objects. A client that is not ready is not sent spawned objects.</para>
+        /// <para>Starts as true, when a client connects it is assumed that it is already in a ready scene. It will be set to not ready if NetworkSceneManager loads a scene</para>
         /// </summary>
-        public bool SceneIsReady { get; set; }
+        public bool SceneIsReady { get; set; } = true;
+
+        /// <summary>
+        /// Checks if this player has a <see cref="Identity"/>
+        /// </summary>
+        public bool HasCharacter => Identity != null;
 
         /// <summary>
         /// The IP address / URL / FQDN associated with the connection.
@@ -169,7 +175,11 @@ namespace Mirage
             visList.Remove(identity);
         }
 
-        public void RemoveObservers()
+        /// <summary>
+        /// Removes all objects that this player can see
+        /// <para>This is called when loading a new scene</para>
+        /// </summary>
+        public void RemoveAllVisibleObjects()
         {
             foreach (NetworkIdentity identity in visList)
             {
@@ -188,20 +198,30 @@ namespace Mirage
             clientOwnedObjects.Remove(networkIdentity);
         }
 
+        /// <summary>
+        /// Destroy all objects owned by this player
+        /// <para>NOTE: only destroyed objects that are currently spawned</para>
+        /// </summary>
         public void DestroyOwnedObjects()
         {
             // create a copy because the list might be modified when destroying
-            var tmp = new HashSet<NetworkIdentity>(clientOwnedObjects);
-            foreach (NetworkIdentity netIdentity in tmp)
+            var ownedObjects = new HashSet<NetworkIdentity>(clientOwnedObjects);
+
+            foreach (NetworkIdentity netIdentity in ownedObjects)
             {
                 //dont destroy self yet.
-                if (netIdentity != null && netIdentity != Identity && Identity.ServerObjectManager != null)
+                if (netIdentity == Identity)
+                    continue;
+
+                if (netIdentity != null && netIdentity.ServerObjectManager != null)
                 {
-                    Identity.ServerObjectManager.Destroy(netIdentity.gameObject);
+                    // use SOM on object we are destroying, it should be set if object is spawned,
+                    // we can't use Identity.ServerObjectManager because if Identity is null we wont have a SOM
+                    netIdentity.ServerObjectManager.Destroy(netIdentity);
                 }
             }
 
-            if (Identity != null && Identity.Server != null)
+            if (Identity != null && Identity.ServerObjectManager != null)
                 // Destroy the connections own identity.
                 Identity.ServerObjectManager.Destroy(Identity.gameObject);
 

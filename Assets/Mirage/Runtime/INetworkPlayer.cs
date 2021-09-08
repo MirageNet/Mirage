@@ -40,7 +40,7 @@ namespace Mirage
     {
         void AddToVisList(NetworkIdentity identity);
         void RemoveFromVisList(NetworkIdentity identity);
-        void RemoveObservers();
+        void RemoveAllVisibleObjects();
     }
 
     /// <summary>
@@ -49,6 +49,7 @@ namespace Mirage
     public interface IObjectOwner
     {
         NetworkIdentity Identity { get; set; }
+        bool HasCharacter { get; }
         void RemoveOwnedObject(NetworkIdentity networkIdentity);
         void AddOwnedObject(NetworkIdentity networkIdentity);
         void DestroyOwnedObjects();

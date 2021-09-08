@@ -92,7 +92,7 @@ namespace Mirage
             foreach (INetworkPlayer player in Server.Players)
             {
                 // check distance
-                if (player != null && player.Identity != null && Vector3.Distance(player.Identity.transform.position, position) < VisibilityRange)
+                if (player != null && player.HasCharacter && Vector3.Distance(player.Identity.transform.position, position) < VisibilityRange)
                 {
                     observers.Add(player);
                 }

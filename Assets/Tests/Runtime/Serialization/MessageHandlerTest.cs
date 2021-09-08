@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Mirage.Serialization;
 using NSubstitute;
@@ -31,9 +31,9 @@ namespace Mirage.Tests.Runtime
         public void InvokesMessageHandler()
         {
             int invoked = 0;
-            messageHandler.RegisterHandler<ReadyMessage>(_ => { invoked++; });
+            messageHandler.RegisterHandler<SceneReadyMessage>(_ => { invoked++; });
 
-            int messageId = MessagePacker.GetId<ReadyMessage>();
+            int messageId = MessagePacker.GetId<SceneReadyMessage>();
             messageHandler.InvokeHandler(player, messageId, reader);
 
             Assert.That(invoked, Is.EqualTo(1), "Should have been invoked");
@@ -47,9 +47,9 @@ namespace Mirage.Tests.Runtime
             messageHandler = new MessageHandler(disconnectOnThrow);
 
             int invoked = 0;
-            messageHandler.RegisterHandler<ReadyMessage>(_ => { invoked++; throw new InvalidOperationException("Fun Exception"); });
+            messageHandler.RegisterHandler<SceneReadyMessage>(_ => { invoked++; throw new InvalidOperationException("Fun Exception"); });
 
-            var packet = new ArraySegment<byte>(MessagePacker.Pack(new ReadyMessage()));
+            var packet = new ArraySegment<byte>(MessagePacker.Pack(new SceneReadyMessage()));
             LogAssert.ignoreFailingMessages = true;
             Assert.DoesNotThrow(() =>
             {

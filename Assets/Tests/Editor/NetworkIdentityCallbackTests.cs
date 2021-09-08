@@ -729,7 +729,7 @@ namespace Mirage
         // RebuildObservers should always add the own ready connection
         // (if any). fixes https://github.com/vis2k/Mirror/issues/692
         [Test]
-        public void RebuildObserversOnlyAddsOwnPlayerIfReady()
+        public void RebuildObserversDoesNotAddPlayerIfNotReady()
         {
             // add at least one observers component, otherwise it will just add
             // all server connections
@@ -737,6 +737,9 @@ namespace Mirage
 
             // add own player connection that isn't ready
             (_, NetworkPlayer connection) = PipedConnections(Substitute.For<IMessageReceiver>(), Substitute.For<IMessageReceiver>());
+            // set not ready (ready is default true now)
+            connection.SceneIsReady = false;
+
             identity.Owner = connection;
 
             // call OnStartServer so that observers dict is created

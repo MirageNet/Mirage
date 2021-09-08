@@ -218,13 +218,18 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator DestroyOwnedObjectsTest() => UniTask.ToCoroutine(async () =>
         {
-            var testObj1 = new GameObject();
-            var testObj2 = new GameObject();
-            var testObj3 = new GameObject();
+            NetworkIdentity testObj1 = new GameObject().AddComponent<NetworkIdentity>();
+            NetworkIdentity testObj2 = new GameObject().AddComponent<NetworkIdentity>();
+            NetworkIdentity testObj3 = new GameObject().AddComponent<NetworkIdentity>();
 
-            server.LocalPlayer.AddOwnedObject(testObj1.AddComponent<NetworkIdentity>());
-            server.LocalPlayer.AddOwnedObject(testObj2.AddComponent<NetworkIdentity>());
-            server.LocalPlayer.AddOwnedObject(testObj3.AddComponent<NetworkIdentity>());
+            // only destroys spawned objects, so spawn them here
+            serverObjectManager.Spawn(testObj1);
+            serverObjectManager.Spawn(testObj2);
+            serverObjectManager.Spawn(testObj3);
+
+            server.LocalPlayer.AddOwnedObject(testObj1);
+            server.LocalPlayer.AddOwnedObject(testObj2);
+            server.LocalPlayer.AddOwnedObject(testObj3);
             server.LocalPlayer.DestroyOwnedObjects();
 
             await AsyncUtil.WaitUntilWithTimeout(() => !testObj1);

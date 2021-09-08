@@ -120,7 +120,7 @@ namespace Mirage
         /// Number of active player objects across all connections on the server.
         /// <para>This is only valid on the host / server.</para>
         /// </summary>
-        public int NumberOfPlayers => Players.Count(kv => kv.Identity != null);
+        public int NumberOfPlayers => Players.Count(kv => kv.HasCharacter);
 
         /// <summary>
         /// A list of local connections on the server.
