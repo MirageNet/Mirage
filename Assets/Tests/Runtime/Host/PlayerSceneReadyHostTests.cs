@@ -13,8 +13,6 @@ namespace Mirage.Tests.Runtime.Host
 
             sceneManager.SetClientNotReady(connection);
             Assert.That(connection.SceneIsReady, Is.False);
-
-
         }
 
         [Test]

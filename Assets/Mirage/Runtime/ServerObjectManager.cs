@@ -665,12 +665,20 @@ namespace Mirage
         /// </para>
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
-        public void SpawnVisibleObjects(INetworkPlayer player)
+        public void SpawnVisibleObjects(INetworkPlayer player) => SpawnVisibleObjects(player, false);
+
+        /// <summary>
+        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// </summary>
+        /// <param name="player">The player to spawn objects for</param>
+        /// <param name="ignoreHasCharacter">If true will spawn visibile objects even if player does not have a spawned character yet</param>
+        // note: can't use optional param here because we need just NetworkPlayer version for event
+        public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter)
         {
             if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + player);
 
             // client is ready to start spawning objects
-            if (player.HasCharacter)
+            if (ignoreHasCharacter || player.HasCharacter)
                 SpawnVisibleObjectForPlayer(player);
         }
     }
