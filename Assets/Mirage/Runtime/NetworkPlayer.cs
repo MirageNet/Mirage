@@ -198,6 +198,10 @@ namespace Mirage
             clientOwnedObjects.Remove(networkIdentity);
         }
 
+        /// <summary>
+        /// Destroy all objects owned by this player
+        /// <para>NOTE: only destroyed objects that are currently spawned</para>
+        /// </summary>
         public void DestroyOwnedObjects()
         {
             // create a copy because the list might be modified when destroying
