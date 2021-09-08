@@ -6,7 +6,7 @@ The min value is subtracted from the value before it is written and added back o
 
 This will truncate the bits so that only the small bits are sent. There is no range checking for values using BitCount, so value that are too big or too small will not be unpacked correctly.
 
-Bit Count is calculated using `bitCount = Ceiling(Log2(max - min))`, so `min = -100`, `max = 100` results in `bit count = 8`
+Bit Count is calculated using `bitCount = 1 + Floor(Log2(max - min))`, so `min = -100`, `max = 100` results in `bit count = 8`
 
 Values are written using `Write(value - min, bitCount)` and read using `value = Read(bitCount) + min`
 
