@@ -229,6 +229,7 @@ namespace Mirage
             // internally sends a spawn message for each one to the connection.
             foreach (NetworkIdentity identity in Server.World.SpawnedIdentities)
             {
+                // todo, do we only need to spawn active objects here? or all objects?
                 if (identity.gameObject.activeSelf)
                 {
                     if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.sceneId}");
