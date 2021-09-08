@@ -1,3 +1,10 @@
+# [103.1.0](https://github.com/MirageNet/Mirage/compare/v103.0.1...v103.1.0) (2021-09-08)
+
+
+### Features
+
+* attributes to use new var int bit packers ([#895](https://github.com/MirageNet/Mirage/issues/895)) ([1da5c42](https://github.com/MirageNet/Mirage/commit/1da5c426503cfb90a94fd41bb8c6a6b2f02e7a3f))
+
 ## [103.0.1](https://github.com/MirageNet/Mirage/compare/v103.0.0...v103.0.1) (2021-09-06)
 
 
