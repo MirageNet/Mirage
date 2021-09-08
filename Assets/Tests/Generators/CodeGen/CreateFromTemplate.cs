@@ -1,10 +1,15 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+
 namespace JamesFrowen.SimpleCodeGen
 {
     public sealed class CreateFromTemplate
     {
         readonly string template;
         string output;
+
+        HashSet<string> createdFiles = new HashSet<string>();
 
         public CreateFromTemplate(string templatePath)
         {
@@ -23,6 +28,13 @@ namespace JamesFrowen.SimpleCodeGen
 
         public void WriteToFile(string path)
         {
+            if (createdFiles.Contains(path))
+            {
+                throw new ArgumentException($"File already created from this template with same path: {path}");
+            }
+
+            createdFiles.Add(path);
+
             File.WriteAllText(path, output);
             // reset output to template after writing
             output = template;

@@ -131,6 +131,10 @@ namespace Mirage.Weaver
 
             syncVar.FindSerializeFunctions(writers, readers);
 
+            if (syncVar.VarIntSettings.HasValue)
+            {
+                createVarIntPackField(syncVar);
+            }
             if (syncVar.FloatPackSettings.HasValue)
             {
                 createFloatPackField(syncVar);
@@ -147,6 +151,35 @@ namespace Mirage.Weaver
             {
                 createQuaternionPackField(syncVar);
             }
+        }
+
+        private void createVarIntPackField(FoundSyncVar syncVar)
+        {
+            syncVar.PackerField = behaviour.TypeDefinition.AddField<VarIntPacker>($"{syncVar.FieldDefinition.Name}__Packer", FieldAttributes.Private | FieldAttributes.Static);
+
+            NetworkBehaviourProcessor.AddToStaticConstructor(behaviour.TypeDefinition, (worker) =>
+            {
+                VarIntSettings settings = syncVar.VarIntSettings.Value;
+
+                // cast ulong to long so it can be passed to Create function
+                worker.Append(worker.Create(OpCodes.Ldc_I8, (long)settings.small));
+                worker.Append(worker.Create(OpCodes.Ldc_I8, (long)settings.medium));
+
+                // packer has 2 constructors, get the one that matches the attribute type
+                MethodReference packerCtor = null;
+                if (settings.large.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_I8, (long)settings.large.Value));
+                    worker.Append(worker.Create(settings.throwIfOverLarge ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+                    packerCtor = module.ImportReference(() => new VarIntPacker(default, default, default, default));
+                }
+                else
+                {
+                    packerCtor = module.ImportReference(() => new VarIntPacker(default, default));
+                }
+                worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+                worker.Append(worker.Create(OpCodes.Stsfld, syncVar.PackerField));
+            });
         }
 
         private void createFloatPackField(FoundSyncVar syncVar)
@@ -561,7 +594,15 @@ namespace Mirage.Weaver
         {
             if (syncVar.BitCount.HasValue)
             {
-                WriteWithBitCount();
+                WriteBitCount();
+            }
+            else if (syncVar.VarIntSettings.HasValue)
+            {
+                WritePacker(module.ImportReference(syncVar.VarIntSettings.Value.packMethod));
+            }
+            else if (syncVar.BlockCount.HasValue)
+            {
+                WriteBlockSize();
             }
             else if (syncVar.FloatPackSettings.HasValue)
             {
@@ -600,7 +641,7 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Call, syncVar.WriteFunction));
             }
 
-            void WriteWithBitCount()
+            void WriteBitCount()
             {
                 MethodReference writeWithBitCount = module.ImportReference(writerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkWriter.Write)));
 
@@ -621,6 +662,17 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BitCount.Value));
                 worker.Append(worker.Create(OpCodes.Call, writeWithBitCount));
             }
+            void WriteBlockSize()
+            {
+                MethodReference writeWithBlockSize = module.ImportReference(() => VarIntBlocksPacker.Pack(default, default, default));
+
+                worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+                worker.Append(worker.Create(OpCodes.Ldfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+                worker.Append(worker.Create(OpCodes.Conv_U8));
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BlockCount.Value));
+                worker.Append(worker.Create(OpCodes.Call, writeWithBlockSize));
+            }
             void WriteZigZag()
             {
                 bool useLong = syncVar.FieldDefinition.FieldType.Is<long>();
@@ -637,6 +689,9 @@ namespace Mirage.Weaver
             }
             void WritePacker(MethodReference packMethod)
             {
+                // if PackerField is null it means there was an error earlier, so we dont need to do anything here
+                if (syncVar.PackerField == null) { return; }
+
                 // Generates: packer.pack(writer, field)
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldfld, syncVar.PackerField.MakeHostGenericIfNeeded()));
@@ -765,6 +820,14 @@ namespace Mirage.Weaver
             {
                 ReadWithBitCount();
             }
+            else if (syncVar.VarIntSettings.HasValue)
+            {
+                ReadPacker(module.ImportReference(syncVar.VarIntSettings.Value.unpackMethod));
+            }
+            else if (syncVar.BlockCount.HasValue)
+            {
+                ReadBlockSize();
+            }
             else if (syncVar.FloatPackSettings.HasValue)
             {
                 ReadPacker(module.ImportReference((FloatPacker p) => p.Unpack(default(NetworkReader))));
@@ -777,7 +840,6 @@ namespace Mirage.Weaver
             {
                 ReadPacker(module.ImportReference((Vector3Packer p) => p.Unpack(default(NetworkReader))));
             }
-
             else if (syncVar.QuaternionBitCount.HasValue)
             {
                 ReadPacker(module.ImportReference((QuaternionPacker p) => p.Unpack(default(NetworkReader))));
@@ -827,6 +889,20 @@ namespace Mirage.Weaver
                     ReadAddMinValue();
                 }
             }
+            void ReadBlockSize()
+            {
+                MethodReference writeWithBlockSize = module.ImportReference(() => VarIntBlocksPacker.Unpack(default, default));
+
+                worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BlockCount.Value));
+                worker.Append(worker.Create(OpCodes.Call, writeWithBlockSize));
+
+                // convert result to correct size if needed
+                if (syncVar.BitCountConvert.HasValue)
+                {
+                    worker.Append(worker.Create(syncVar.BitCountConvert.Value));
+                }
+            }
             void ReadZigZag()
             {
                 bool useLong = syncVar.FieldDefinition.FieldType.Is<long>();
@@ -843,6 +919,9 @@ namespace Mirage.Weaver
             }
             void ReadPacker(MethodReference unpackMethod)
             {
+                // if PackerField is null it means there was an error earlier, so we dont need to do anything here
+                if (syncVar.PackerField == null) { return; }
+
                 // Generates: ... = packer.unpack(reader)
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldfld, syncVar.PackerField.MakeHostGenericIfNeeded()));

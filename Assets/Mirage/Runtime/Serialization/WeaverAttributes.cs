@@ -95,5 +95,38 @@ namespace Mirage.Serialization
     {
         public QuaternionPackAttribute(int bitPerElement) { }
     }
+
+    /// <summary>
+    /// Tells weaver how many bits to sue for field
+    /// <para>Only works with interager fields (byte, int, ulong, enums etc)</para>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    public class VarIntAttribute : Attribute
+    {
+        public VarIntAttribute(ulong smallMax, ulong mediumMax) { }
+        public VarIntAttribute(ulong smallMax, ulong mediumMax, ulong largeMax, bool throwIfOverLarge = true) { }
+    }
+
+
+
+    /// <summary>
+    /// Tells weaver how many bits to sue for field
+    /// <para>Only works with interager fields (byte, int, ulong, enums etc)</para>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
+    public class VarIntBlocksAttribute : Attribute
+    {
+        /// <summary>
+        /// Bit size of each block
+        /// <para>how many bits per size bits,</para>
+        /// <para>eg if size = 6 then values under 2^6 will be sent at 7 bits, values under 2^12 sent as 14 bits, etc</para>
+        /// </summary>
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="blockSize">Value should be between 1 and 64</param>
+        public VarIntBlocksAttribute(int blockSize) { }
+    }
 #pragma warning restore IDE0060 // Remove unused parameter
 }

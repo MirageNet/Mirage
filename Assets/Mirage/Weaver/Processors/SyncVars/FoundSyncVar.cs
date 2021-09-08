@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using Mirage.Serialization;
 using Mono.Cecil;
@@ -6,6 +7,15 @@ using UnityEngine;
 
 namespace Mirage.Weaver.SyncVars
 {
+    internal struct VarIntSettings
+    {
+        public ulong small;
+        public ulong medium;
+        public ulong? large;
+        public bool throwIfOverLarge;
+        public LambdaExpression packMethod;
+        public LambdaExpression unpackMethod;
+    }
     internal struct FloatPackSettings
     {
         public float max;
@@ -46,6 +56,8 @@ namespace Mirage.Weaver.SyncVars
         public MethodDefinition HookMethod { get; private set; }
 
         public int? BitCount { get; private set; }
+        public VarIntSettings? VarIntSettings { get; private set; }
+        public int? BlockCount { get; private set; }
         public OpCode? BitCountConvert { get; private set; }
 
         public bool UseZigZagEncoding { get; private set; }
@@ -104,6 +116,7 @@ namespace Mirage.Weaver.SyncVars
             return false;
         }
 
+        bool HasIntAttribute => BitCount.HasValue || VarIntSettings.HasValue || BlockCount.HasValue || BitCountMinValue.HasValue;
 
         /// <summary>
         /// Finds any attribute values needed for this syncvar
@@ -116,11 +129,31 @@ namespace Mirage.Weaver.SyncVars
             HasHookMethod = HookMethod != null;
 
             (BitCount, BitCountConvert) = BitCountFinder.GetBitCount(FieldDefinition);
-            UseZigZagEncoding = ZigZagFinder.HasZigZag(FieldDefinition, BitCount.HasValue);
+            if (FieldDefinition.HasCustomAttribute<VarIntAttribute>())
+            {
+                if (HasIntAttribute)
+                    throw new VarIntException($"[VarInt] can't be used with [BitCount], [VarIntBlocks] or [BitCountFromRange]", FieldDefinition);
 
-            // do this if check here so it doesn't override fields unless attribute exists
+                VarIntSettings = VarIntFinder.GetBitCount(FieldDefinition);
+            }
+
+            if (FieldDefinition.HasCustomAttribute<VarIntBlocksAttribute>())
+            {
+                if (HasIntAttribute)
+                    throw new VarIntBlocksException($"[VarIntBlocks] can't be used with [BitCount], [VarInt] or [BitCountFromRange]", FieldDefinition);
+
+                (BlockCount, BitCountConvert) = VarIntBlocksFinder.GetBitCount(FieldDefinition);
+            }
+
             if (FieldDefinition.HasCustomAttribute<BitCountFromRangeAttribute>())
-                (BitCount, BitCountConvert, BitCountMinValue) = BitCountFromRangeFinder.GetBitFoundFromRange(FieldDefinition, BitCount.HasValue);
+            {
+                if (HasIntAttribute)
+                    throw new BitCountFromRangeException($"[BitCountFromRange] can't be used with [BitCount], [VarInt] or [VarIntBlocks]", FieldDefinition);
+
+                (BitCount, BitCountConvert, BitCountMinValue) = BitCountFromRangeFinder.GetBitFoundFromRange(FieldDefinition);
+            }
+
+            UseZigZagEncoding = ZigZagFinder.HasZigZag(FieldDefinition, BitCount.HasValue);
 
             FloatPackSettings = FloatPackFinder.GetPackerSettings(FieldDefinition);
             Vector2PackSettings = Vector2Finder.GetPackerSettings(FieldDefinition);

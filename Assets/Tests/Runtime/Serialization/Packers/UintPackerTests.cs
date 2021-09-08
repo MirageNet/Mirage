@@ -14,19 +14,19 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
     public class UintPackerTests : PackerTestBase
     {
         readonly Random random = new Random();
-        readonly VariableIntPacker packer;
+        readonly VarIntPacker packer;
         readonly ulong max;
 
         public UintPackerTests(ulong smallValue, ulong mediumValue, ulong? largeValue)
         {
             if (largeValue.HasValue)
             {
-                packer = new VariableIntPacker(smallValue, mediumValue, largeValue.Value, false);
+                packer = new VarIntPacker(smallValue, mediumValue, largeValue.Value, false);
                 max = largeValue.Value;
             }
             else
             {
-                packer = new VariableIntPacker(smallValue, mediumValue);
+                packer = new VarIntPacker(smallValue, mediumValue);
                 max = ulong.MaxValue;
             }
         }

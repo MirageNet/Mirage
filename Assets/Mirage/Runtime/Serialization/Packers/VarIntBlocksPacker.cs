@@ -27,7 +27,7 @@ using System.Runtime.CompilerServices;
 
 namespace Mirage.Serialization
 {
-    public static class VariableBlockPacker
+    public static class VarIntBlocksPacker
     {
         // todo needs doc comments
         // todo neeeds tests

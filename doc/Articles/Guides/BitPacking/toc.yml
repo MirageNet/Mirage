@@ -6,8 +6,10 @@
   href: BitCountFromRange.md
 - name: ZigZag Encode
   href: ZigZagEncode.md
-- name: Variable Sized Int Block packer
-  href: VarIntBlock.md
+- name: Variable Sized Integer
+  href: VarInt.md
+- name: Variable Sized Integer Blocks
+  href: VarIntBlocks.md
 - name: Float Pack
   href: FloatPack.md
 - name: Vector Pack

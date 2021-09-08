@@ -4,7 +4,7 @@ To encoding a value using [ZigZag Encoding](https://gist.github.com/mfuerstenau/
 
 This will cause negative values to be encoded as positive so that the sign bit is not lost when packing.
 
-This works best with [VarIntBlock](./VarIntBlock.md) but also works with [BitCount](./BitCount.md).
+This works best with [VarIntBlocks](./VarIntBlocks.md) but also works with [BitCount](./BitCount.md).
 
 This attribute can not be used on the same field as [BitCountFromRange](./BitCountFromRange.md), this is because `BitCountFromRange` already ensures negative values are packed correctly.
 

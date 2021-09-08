@@ -12,13 +12,13 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests
 {
     public class Vector3PackBehaviour_200_39f : NetworkBehaviour
     {
-        [Vector3Pack(200f, 200f, 200f, 13)]
+        [Vector3Pack(200f, 200f, 200f, 0.05f)]
         [SyncVar] public Vector3 myValue;
     }
     public class Vector3PackTest_200_39f : ClientServerSetup<Vector3PackBehaviour_200_39f>
     {
-        static readonly Vector3 value = new Vector3(10.3f, 0.2f, 20f);
-        const float within = 0.2f;
+        static readonly Vector3 value = new Vector3(-10.3f, 0.2f, -20f);
+        const float within = 0.1f;
 
         [Test]
         public void SyncVarIsBitPacked()
