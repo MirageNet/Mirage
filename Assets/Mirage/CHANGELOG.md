@@ -1,3 +1,15 @@
+## [103.1.1](https://github.com/MirageNet/Mirage/compare/v103.1.0...v103.1.1) (2021-09-08)
+
+
+### Bug Fixes
+
+* allow to set specific number of logs to be used from changelog. Need to change it atm through code. ([d8d28f9](https://github.com/MirageNet/Mirage/commit/d8d28f973a4c0b7a76879b6fdeb74794b9594b80))
+* did not realize there was changes not pushed to the branch got from master now and fixed it all up again. ([988641f](https://github.com/MirageNet/Mirage/commit/988641f040f88fd33bf18c878f368c1165d41521))
+* paths for welcome window changelog. ([a1ec86d](https://github.com/MirageNet/Mirage/commit/a1ec86db6c13ca02cc90e9764faa78c03d69297c))
+* proper fix using current welcome window script path to get changelog path. ([6868453](https://github.com/MirageNet/Mirage/commit/686845314fb3def8a613c2d8071bee39deb807de))
+* this fixes styling and error on 2019+ editors. ([3b58a7b](https://github.com/MirageNet/Mirage/commit/3b58a7bef15bc4943aab65257feeb8bf85b9ace6))
+* Welcome window now searches for existing file of the changelog to know which mirage install was done. ([ab96915](https://github.com/MirageNet/Mirage/commit/ab96915366704577d4aecbb39b1fd7af96ce5cf9))
+
 # [103.1.0](https://github.com/MirageNet/Mirage/compare/v103.0.1...v103.1.0) (2021-09-08)
 
 
