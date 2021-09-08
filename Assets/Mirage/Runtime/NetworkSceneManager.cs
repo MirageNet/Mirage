@@ -386,7 +386,7 @@ namespace Mirage
         /// <param name="players"></param>
         private void ServerSceneUnLoading(Scene scene, IEnumerable<INetworkPlayer> players)
         {
-            if (scene.handle == 0)
+            if (!scene.IsValid())
                 throw new ArgumentNullException(nameof(scene),
                     "[NetworkSceneManager] - ServerChangeScene: " + nameof(scene) + " cannot be null");
 
