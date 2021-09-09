@@ -1,12 +1,11 @@
 using Mirage.Serialization;
 using Mono.Cecil;
-using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver.SyncVars
 {
     internal static class BitCountFinder
     {
-        public static (int? bitCount, OpCode? ConvertCode) GetBitCount(FieldDefinition syncVar)
+        public static ValueSerializer GetSerializer(FieldDefinition syncVar)
         {
             CustomAttribute attribute = syncVar.GetCustomAttribute<BitCountAttribute>();
             if (attribute == null)
@@ -22,7 +21,7 @@ namespace Mirage.Weaver.SyncVars
             if (bitCount > maxSize)
                 throw new BitCountException($"BitCount can not be above target type size, bitCount:{bitCount}, max size:{maxSize}, type:{syncVar.FieldType.Name}", syncVar);
 
-            return (bitCount, BitPackHelper.GetConvertType(syncVar.FieldType));
+            return new BitCountSerializer(bitCount, BitPackHelper.GetConvertType(syncVar.FieldType));
         }
     }
 }

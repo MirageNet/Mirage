@@ -1,12 +1,11 @@
 using Mirage.Serialization;
 using Mono.Cecil;
-using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver.SyncVars
 {
     internal static class BitCountFromRangeFinder
     {
-        public static (int? BitCount, OpCode? BitCountConvert, int? MinValue) GetBitFoundFromRange(FieldDefinition syncVar)
+        public static ValueSerializer GetSerializer(FieldDefinition syncVar)
         {
             CustomAttribute attribute = syncVar.GetCustomAttribute<BitCountFromRangeAttribute>();
 
@@ -31,7 +30,7 @@ namespace Mirage.Weaver.SyncVars
             if (min == 0) minResult = null;
             else minResult = min;
 
-            return (bitCount, BitPackHelper.GetConvertType(syncVar.FieldType), minResult);
+            return new BitCountSerializer(bitCount, BitPackHelper.GetConvertType(syncVar.FieldType), minResult);
         }
     }
 }

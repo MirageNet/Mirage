@@ -5,17 +5,19 @@ namespace Mirage.Weaver.SyncVars
 {
     internal static class ZigZagFinder
     {
-        public static bool HasZigZag(FieldDefinition syncVar, bool hasBitCount)
+        public static void CheckZigZag(FieldDefinition syncVar, ref ValueSerializer valueSerializer)
         {
             bool hasAttribute = syncVar.HasCustomAttribute<ZigZagEncodeAttribute>();
             if (!hasAttribute)
-                return false;
+                return;
 
-            if (!hasBitCount)
+            if (valueSerializer is BitCountSerializer bitCountSerializer)
+            {
+                ThrowIfUnsignedType(syncVar.FieldType, syncVar);
+                valueSerializer = bitCountSerializer.CopyWithZigZag();
+            }
+            else
                 throw new ZigZagException($"[ZigZagEncode] can only be used with [BitCount]", syncVar);
-
-            ThrowIfUnsignedType(syncVar.FieldType, syncVar);
-            return true;
         }
 
         /// <summary>

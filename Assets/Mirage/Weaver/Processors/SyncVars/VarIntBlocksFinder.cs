@@ -1,12 +1,11 @@
 using Mirage.Serialization;
 using Mono.Cecil;
-using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver.SyncVars
 {
     internal static class VarIntBlocksFinder
     {
-        public static (int? blockSize, OpCode? ConvertCode) GetBitCount(FieldDefinition syncVar)
+        public static ValueSerializer GetSerializer(FieldDefinition syncVar)
         {
             CustomAttribute attribute = syncVar.GetCustomAttribute<VarIntBlocksAttribute>();
             if (attribute == null)
@@ -23,7 +22,7 @@ namespace Mirage.Weaver.SyncVars
             if (blockSize > 32)
                 throw new VarIntBlocksException("Blocksize should be below 32", syncVar);
 
-            return (blockSize, BitPackHelper.GetConvertType(syncVar.FieldType));
+            return new BlockSizeSerializer(blockSize, BitPackHelper.GetConvertType(syncVar.FieldType));
         }
 
         /// <summary>
