@@ -101,6 +101,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests.MyEnum_4
 
             serverComponent.RpcSomeFunction(value);
             yield return null;
+            yield return null;
             Assert.That(called, Is.EqualTo(1));
             
             // this will round up to nearest 8
@@ -137,11 +138,12 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests.MyEnum_4
             client.Player.Send(inMessage);
             NetworkDiagnostics.OutMessageEvent -= diagAction;
             yield return null;
+            yield return null;
             Assert.That(called, Is.EqualTo(1));
             // this will round up to nearest 8
             // +2 for message header
             int expectedPayLoadSize = ((4 + 7) / 8) + 2;
-            Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"4 bits is {expectedPayLoadSize} bytes in payload");
+            Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"4 bits is {expectedPayLoadSize - 2} bytes in payload");
             Assert.That(outMessage, Is.EqualTo(inMessage));
         }
 
