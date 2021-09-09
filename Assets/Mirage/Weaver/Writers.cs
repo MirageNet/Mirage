@@ -66,8 +66,7 @@ namespace Mirage.Weaver
             if (!typeReference.Resolve().IsValueType)
                 WriteNullCheck(worker);
 
-            if (!WriteAllFields(typeReference, worker))
-                return writerFunc;
+            WriteAllFields(typeReference, worker);
 
             worker.Append(worker.Create(OpCodes.Ret));
             return writerFunc;
@@ -103,23 +102,19 @@ namespace Mirage.Weaver
         /// <param name="variable"></param>
         /// <param name="worker"></param>
         /// <returns>false if fail</returns>
-        bool WriteAllFields(TypeReference variable, ILProcessor worker)
+        void WriteAllFields(TypeReference variable, ILProcessor worker)
         {
-            uint fields = 0;
             foreach (FieldDefinition field in variable.FindAllPublicFields())
             {
                 MethodReference writeFunc = GetFunction_Thorws(field.FieldType);
 
                 FieldReference fieldRef = module.ImportReference(field);
 
-                fields++;
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldarg_1));
                 worker.Append(worker.Create(OpCodes.Ldfld, fieldRef));
                 worker.Append(worker.Create(OpCodes.Call, writeFunc));
             }
-
-            return true;
         }
 
         protected override MethodReference GenerateSegmentFunction(TypeReference typeReference, TypeReference elementType)
