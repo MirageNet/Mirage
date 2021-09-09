@@ -1,20 +1,24 @@
-﻿using Mirage.Serialization;
+using System;
+using System.Linq.Expressions;
+using Mirage.Serialization;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using UnityEngine;
 
 namespace Mirage.Weaver.SyncVars
 {
     internal static class Vector3Finder
     {
-        public static Vector3PackSettings? GetPackerSettings(FieldDefinition syncVar)
+        public static ValueSerializer GetSerializer(FoundSyncVar syncVar)
         {
-            CustomAttribute attribute = syncVar.GetCustomAttribute<Vector3PackAttribute>();
+            FieldDefinition fieldDefinition = syncVar.FieldDefinition;
+            CustomAttribute attribute = fieldDefinition.GetCustomAttribute<Vector3PackAttribute>();
             if (attribute == null)
                 return default;
 
-            if (!syncVar.FieldType.Is<Vector3>())
+            if (!fieldDefinition.FieldType.Is<Vector3>())
             {
-                throw new Vector3PackException($"{syncVar.FieldType} is not a supported type for [Vector3Pack]", syncVar);
+                throw new Vector3PackException($"{fieldDefinition.FieldType} is not a supported type for [Vector3Pack]", fieldDefinition);
             }
 
             var settings = new Vector3PackSettings();
@@ -23,7 +27,7 @@ namespace Mirage.Weaver.SyncVars
                 settings.max[i] = (float)attribute.ConstructorArguments[i].Value;
                 if (settings.max[i] <= 0)
                 {
-                    throw new Vector3PackException($"Max must be above 0, max:{settings.max}", syncVar);
+                    throw new Vector3PackException($"Max must be above 0, max:{settings.max}", fieldDefinition);
                 }
             }
 
@@ -32,11 +36,11 @@ namespace Mirage.Weaver.SyncVars
                 CustomAttributeArgument arg = attribute.ConstructorArguments[3];
                 if (arg.Type.Is<float>())
                 {
-                    Precisionfrom1(syncVar, ref settings, arg);
+                    Precisionfrom1(fieldDefinition, ref settings, arg);
                 }
                 else
                 {
-                    BitCountfrom1(syncVar, ref settings, arg);
+                    BitCountfrom1(fieldDefinition, ref settings, arg);
                 }
             }
             else
@@ -46,15 +50,19 @@ namespace Mirage.Weaver.SyncVars
                 CustomAttributeArgument zArg = attribute.ConstructorArguments[5];
                 if (xArg.Type.Is<float>())
                 {
-                    PrecisionFrom3(syncVar, ref settings, xArg, yArg, zArg);
+                    PrecisionFrom3(fieldDefinition, ref settings, xArg, yArg, zArg);
                 }
                 else
                 {
-                    BitCountFrom3(syncVar, ref settings, xArg, yArg, zArg);
+                    BitCountFrom3(fieldDefinition, ref settings, xArg, yArg, zArg);
                 }
             }
 
-            return settings;
+            Expression<Action<Vector3Packer>> packMethod = (Vector3Packer p) => p.Pack(default, default);
+            Expression<Action<Vector3Packer>> unpackMethod = (Vector3Packer p) => p.Unpack(default(NetworkReader));
+            FieldDefinition packerField = CreatePackerField(syncVar, settings);
+
+            return new PackerSerializer(packerField, packMethod, unpackMethod, false);
         }
 
         private static void Precisionfrom1(FieldDefinition syncVar, ref Vector3PackSettings settings, CustomAttributeArgument arg)
@@ -95,6 +103,43 @@ namespace Mirage.Weaver.SyncVars
                 (int)xArg.Value,
                 (int)yArg.Value,
                 (int)zArg.Value);
+        }
+
+        private static FieldDefinition CreatePackerField(FoundSyncVar syncVar, Vector3PackSettings settings)
+        {
+            FieldDefinition packerField = syncVar.Behaviour.AddPackerField<Vector3Packer>(syncVar.FieldDefinition.Name);
+
+            NetworkBehaviourProcessor.AddToStaticConstructor(syncVar.Behaviour.TypeDefinition, (worker) =>
+            {
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.x));
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.y));
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.z));
+
+                // packer has 2 constructors, get the one that matches the attribute type
+                MethodReference packerCtor = null;
+                if (settings.precision.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.x));
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.y));
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.z));
+                    packerCtor = syncVar.Module.ImportReference(() => new Vector3Packer(default(float), default(float), default(float), default(float), default(float), default(float)));
+                }
+                else if (settings.bitCount.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.x));
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.y));
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.z));
+                    packerCtor = syncVar.Module.ImportReference(() => new Vector3Packer(default(float), default(float), default(float), default(int), default(int), default(int)));
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Invalid Vector3PackSettings");
+                }
+                worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+                worker.Append(worker.Create(OpCodes.Stsfld, packerField));
+            });
+
+            return packerField;
         }
     }
 }

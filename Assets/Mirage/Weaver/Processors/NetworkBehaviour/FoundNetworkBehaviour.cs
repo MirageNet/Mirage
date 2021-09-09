@@ -10,10 +10,12 @@ namespace Mirage.Weaver.NetworkBehaviours
         const int SyncVarLimit = 64;
         const string SyncVarCountField = "SYNC_VAR_COUNT";
 
+        public readonly ModuleDefinition Module;
         public readonly TypeDefinition TypeDefinition;
 
-        public FoundNetworkBehaviour(TypeDefinition td)
+        public FoundNetworkBehaviour(ModuleDefinition module, TypeDefinition td)
         {
+            Module = module;
             TypeDefinition = td;
         }
 
@@ -28,7 +30,7 @@ namespace Mirage.Weaver.NetworkBehaviours
         public FoundSyncVar AddSyncVar(FieldDefinition fd)
         {
             int dirtyIndex = SyncVarInBase + SyncVars.Count;
-            var syncVar = new FoundSyncVar(fd, dirtyIndex);
+            var syncVar = new FoundSyncVar(Module, this, fd, dirtyIndex);
             SyncVars.Add(syncVar);
             return syncVar;
         }
@@ -51,6 +53,11 @@ namespace Mirage.Weaver.NetworkBehaviours
         public bool HasManualDeserializeOverride()
         {
             return TypeDefinition.GetMethod(DeserializeHelper.MethodName) != null;
+        }
+
+        public FieldDefinition AddPackerField<T>(string name)
+        {
+            return TypeDefinition.AddField<T>($"{name}__Packer", FieldAttributes.Private | FieldAttributes.Static);
         }
     }
 }
