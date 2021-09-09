@@ -15,14 +15,6 @@ namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests
     {
         [BitCount(10), ZigZagEncode]
         [SyncVar] public long myValue;
-
-        public event Action<long> onRpc;
-
-        [ClientRpc]
-        public void RpcSomeFunction([BitCount(10), ZigZagEncode] long myParam)
-        {
-            onRpc?.Invoke(myParam);
-        }
     }
     public class ZigZagTest_long_10_negative : ClientServerSetup<ZigZagBehaviour_long_10_negative>
     {
@@ -47,29 +39,6 @@ namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests
                     Assert.That(clientComponent.myValue, Is.EqualTo(value));
                 }
             }
-        }
-
-        // [UnityTest]
-        // [Ignore("Rpc not supported yet")]
-        public IEnumerator RpcIsBitPacked()
-        {
-            int called = 0;
-            clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };
-
-            client.MessageHandler.UnregisterHandler<RpcMessage>();
-            int payloadSize = 0;
-            client.MessageHandler.RegisterHandler<RpcMessage>((player, msg) =>
-            {
-                // store value in variable because assert will throw and be catch by message wrapper
-                payloadSize = msg.payload.Count;
-                clientObjectManager.OnRpcMessage(msg);
-            });
-
-
-            serverComponent.RpcSomeFunction(value);
-            yield return null;
-            Assert.That(called, Is.EqualTo(1));
-            Assert.That(payloadSize, Is.EqualTo(2), $"10 bits is 2 bytes in payload");
         }
     }
 }
