@@ -17,7 +17,6 @@ namespace Mirage.Weaver.NetworkBehaviours
         ILProcessor worker;
 
         public MethodDefinition Method { get; private set; }
-        public ParameterDefinition TypeParameter { get; private set; }
         public ParameterDefinition WriterParameter { get; private set; }
         public ParameterDefinition InitializeParameter { get; private set; }
         public VariableDefinition DirtyLocal { get; private set; }
@@ -39,7 +38,6 @@ namespace Mirage.Weaver.NetworkBehaviours
                     MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
                     module.ImportReference<bool>());
 
-            TypeParameter = Method.Parameters[0];
             WriterParameter = Method.AddParam<NetworkWriter>("writer");
             InitializeParameter = Method.AddParam<bool>("initialize");
             Method.Body.InitLocals = true;

@@ -27,7 +27,7 @@ namespace Mirage.Weaver
 
         protected override MethodReference GenerateEnumFunction(TypeReference typeReference)
         {
-            MethodDefinition writerFunc = GenerateWriterFunc(typeReference);
+            MethodDefinition writerFunc = GenerateWriterFunc(typeReference).definition;
 
             ILProcessor worker = writerFunc.Body.GetILProcessor();
 
@@ -40,37 +40,43 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ret));
             return writerFunc;
         }
-
-        private MethodDefinition GenerateWriterFunc(TypeReference typeReference)
+        struct WriteMethod
         {
+            public MethodDefinition definition;
+            public ParameterDefinition writerParameter;
+            public ParameterDefinition typeParameter;
+        }
+        private WriteMethod GenerateWriterFunc(TypeReference typeReference)
+        {
+            WriteMethod writeMethod = default;
             string functionName = "_Write_" + typeReference.FullName;
             // create new writer for this type
-            MethodDefinition writerFunc = module.GeneratedClass().AddMethod(functionName,
+            writeMethod.definition = module.GeneratedClass().AddMethod(functionName,
                     MethodAttributes.Public |
                     MethodAttributes.Static |
                     MethodAttributes.HideBySig);
 
-            _ = writerFunc.AddParam<NetworkWriter>("writer");
-            _ = writerFunc.AddParam(typeReference, "value");
-            writerFunc.Body.InitLocals = true;
+            writeMethod.writerParameter = writeMethod.definition.AddParam<NetworkWriter>("writer");
+            writeMethod.typeParameter = writeMethod.definition.AddParam(typeReference, "value");
+            writeMethod.definition.Body.InitLocals = true;
 
-            Register(typeReference, writerFunc);
-            return writerFunc;
+            Register(typeReference, writeMethod.definition);
+            return writeMethod;
         }
 
         protected override MethodReference GenerateClassOrStructFunction(TypeReference typeReference)
         {
-            MethodDefinition writerFunc = GenerateWriterFunc(typeReference);
+            WriteMethod writerFunc = GenerateWriterFunc(typeReference);
 
-            ILProcessor worker = writerFunc.Body.GetILProcessor();
+            ILProcessor worker = writerFunc.definition.Body.GetILProcessor();
 
             if (!typeReference.Resolve().IsValueType)
                 WriteNullCheck(worker);
 
-            WriteAllFields(typeReference, worker);
+            WriteAllFields(typeReference, worker, writerFunc);
 
             worker.Append(worker.Create(OpCodes.Ret));
-            return writerFunc;
+            return writerFunc.definition;
         }
 
         private void WriteNullCheck(ILProcessor worker)
@@ -103,19 +109,25 @@ namespace Mirage.Weaver
         /// <param name="variable"></param>
         /// <param name="worker"></param>
         /// <returns>false if fail</returns>
-        void WriteAllFields(TypeReference variable, ILProcessor worker)
+        void WriteAllFields(TypeReference variable, ILProcessor worker, WriteMethod writerFunc)
         {
             foreach (FieldDefinition field in variable.FindAllPublicFields())
             {
                 ValueSerializer valueSerialize = GetValueSerialize(field);
-                valueSerialize.AppendWrite(module, worker, writerParameter, typeParameter, fieldDefinition);
+                valueSerialize.AppendWrite(module, worker, writerFunc.writerParameter, writerFunc.typeParameter, field);
             }
         }
 
         private ValueSerializer GetValueSerialize(FieldDefinition field)
         {
-            throw new NotImplementedException();
+            if (field.HasCustomAttribute<BitCountAttribute>())
+            {
+                return BitCountFinder.GetSerializer(field);
+            }
+
+
             MethodReference writeFunc = GetFunction_Thorws(field.FieldType);
+            return new FunctionSerializer(writeFunc, null);
         }
 
         protected override MethodReference GenerateSegmentFunction(TypeReference typeReference, TypeReference elementType)
@@ -129,7 +141,7 @@ namespace Mirage.Weaver
             // collection writers use the generic writer, so this will make sure one exists
             _ = GetFunction_Thorws(elementType);
 
-            MethodDefinition writerFunc = GenerateWriterFunc(typeReference);
+            MethodDefinition writerFunc = GenerateWriterFunc(typeReference).definition;
 
             MethodReference collectionWriter = module.ImportReference(genericExpression).GetElementMethod();
 

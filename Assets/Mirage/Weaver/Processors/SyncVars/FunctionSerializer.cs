@@ -18,18 +18,25 @@ namespace Mirage.Weaver.SyncVars
 
         public override void AppendWrite(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
         {
-            AppendWrite_Field(module, worker, writerParameter, typeParameter, fieldDefinition);
-        }
-
-        void AppendWrite_Field(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
-        {
             // make generic and import field
-            FieldReference fieldRef = module.ImportReference(fieldDefinition.MakeHostGenericIfNeeded());
 
-            worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
-            worker.Append(worker.Create(OpCodes.Ldarg, typeParameter));
-            worker.Append(worker.Create(OpCodes.Ldfld, fieldDefinition));
+            // if param is null then load arg0 instead
+            WriteParamOfArg0(worker, writerParameter);
+            WriteParamOfArg0(worker, typeParameter);
+            worker.Append(worker.Create(OpCodes.Ldfld, ImportField(module, fieldDefinition)));
             worker.Append(worker.Create(OpCodes.Call, writeFunction));
+
+        }
+        static void WriteParamOfArg0(ILProcessor worker, ParameterDefinition parameter)
+        {
+            if (parameter == null)
+            {
+                worker.Append(worker.Create(OpCodes.Ldarg_0));
+            }
+            else
+            {
+                worker.Append(worker.Create(OpCodes.Ldarg, parameter));
+            }
         }
 
         public override void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)

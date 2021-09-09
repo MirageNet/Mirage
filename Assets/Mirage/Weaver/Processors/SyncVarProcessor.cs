@@ -401,7 +401,7 @@ namespace Mirage.Weaver
             {
                 foreach (FoundSyncVar syncVar in behaviour.SyncVars)
                 {
-                    WriteFromField(worker, helper.WriterParameter, syncVar);
+                    WriteFromField(worker, helper.WriterParameter, null, syncVar);
                 }
             });
 
@@ -416,7 +416,7 @@ namespace Mirage.Weaver
                 helper.WriteIfSyncVarDirty(syncVar, () =>
                 {
                     // Generates a call to the writer for that field
-                    WriteFromField(worker, helper.WriterParameter, syncVar);
+                    WriteFromField(worker, helper.WriterParameter, null, syncVar);
                 });
             }
 
@@ -424,11 +424,11 @@ namespace Mirage.Weaver
             helper.WriteReturnDirty();
         }
 
-        void WriteFromField(ILProcessor worker, ParameterDefinition writerParameter, FoundSyncVar syncVar)
+        void WriteFromField(ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParam, FoundSyncVar syncVar)
         {
             if (!syncVar.HasProcessed) return;
 
-            syncVar.ValueSerializer.AppendWrite(module, worker, writerParameter, syncVar);
+            syncVar.ValueSerializer.AppendWrite(module, worker, writerParameter, typeParam, syncVar.FieldDefinition);
         }
 
 

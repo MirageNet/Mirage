@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Mirage.Serialization;
 using UnityEngine;
 
 namespace Mirage
@@ -22,7 +23,7 @@ namespace Mirage
     {
         public string MainActivateScene;
         // Normal = 0, LoadAdditive = 1, UnloadAdditive = 2
-        public SceneOperation SceneOperation;
+        [BitCount(2)] public SceneOperation SceneOperation;
         public List<string> AdditiveScenes;
     }
 

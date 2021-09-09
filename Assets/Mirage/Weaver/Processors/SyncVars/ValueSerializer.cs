@@ -12,5 +12,10 @@ namespace Mirage.Weaver.SyncVars
 
         public abstract void AppendWrite(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition);
         public abstract void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar);
+
+        protected static FieldReference ImportField(ModuleDefinition module, FieldDefinition fieldDefinition)
+        {
+            return module.ImportReference(fieldDefinition.MakeHostGenericIfNeeded());
+        }
     }
 }

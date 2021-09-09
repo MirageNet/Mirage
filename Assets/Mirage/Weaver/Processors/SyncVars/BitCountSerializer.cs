@@ -1,4 +1,4 @@
-﻿using Mirage.Serialization;
+using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -38,17 +38,17 @@ namespace Mirage.Weaver.SyncVars
             return new BitCountSerializer(bitCount, typeConverter, true);
         }
 
-        public override void AppendWrite(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, FoundSyncVar syncVar)
+        public override void AppendWrite(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
         {
             MethodReference writeWithBitCount = module.ImportReference(writerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkWriter.Write)));
 
             worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+            worker.Append(worker.Create(OpCodes.Ldfld, ImportField(module, fieldDefinition)));
 
             if (useZigZag)
             {
-                WriteZigZag(module, worker, syncVar);
+                WriteZigZag(module, worker, fieldDefinition);
             }
             if (minValue.HasValue)
             {
@@ -59,9 +59,9 @@ namespace Mirage.Weaver.SyncVars
             worker.Append(worker.Create(OpCodes.Ldc_I4, bitCount));
             worker.Append(worker.Create(OpCodes.Call, writeWithBitCount));
         }
-        void WriteZigZag(ModuleDefinition module, ILProcessor worker, FoundSyncVar syncVar)
+        void WriteZigZag(ModuleDefinition module, ILProcessor worker, FieldDefinition fieldDefinition)
         {
-            bool useLong = syncVar.FieldDefinition.FieldType.Is<long>();
+            bool useLong = fieldDefinition.FieldType.Is<long>();
             MethodReference encode = useLong
                 ? module.ImportReference((long v) => ZigZag.Encode(v))
                 : module.ImportReference((int v) => ZigZag.Encode(v));
