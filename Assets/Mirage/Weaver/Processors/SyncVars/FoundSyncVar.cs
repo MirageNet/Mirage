@@ -1,8 +1,6 @@
-using System.Runtime.CompilerServices;
 using Mirage.Serialization;
 using Mirage.Weaver.NetworkBehaviours;
 using Mono.Cecil;
-using Mono.Cecil.Cil;
 using UnityEngine;
 
 namespace Mirage.Weaver.SyncVars
@@ -41,6 +39,12 @@ namespace Mirage.Weaver.SyncVars
         public readonly int DirtyIndex;
         public long DirtyBit => 1L << DirtyIndex;
 
+        /// <summary>
+        /// Flag to say if the sync var was successfully processed or not.
+        /// We can check this else where in the code to so we dont throw extra errors when syncvar is invalid
+        /// </summary>
+        public bool HasProcessed { get; set; } = false;
+
         public FoundSyncVar(ModuleDefinition module, FoundNetworkBehaviour behaviour, FieldDefinition fieldDefinition, int dirtyIndex)
         {
             Module = module;
@@ -59,37 +63,6 @@ namespace Mirage.Weaver.SyncVars
 
         public bool HasHookMethod { get; private set; }
         public MethodDefinition HookMethod { get; private set; }
-
-        [System.Obsolete("Use abstract instead", true)]
-        public int? BitCount { get; private set; }
-        [System.Obsolete("Use abstract instead", true)]
-        public VarIntSettings? VarIntSettings { get; private set; }
-        [System.Obsolete("Use abstract instead", true)]
-        public int? BlockCount { get; private set; }
-        [System.Obsolete("Use abstract instead", true)]
-        public OpCode? BitCountConvert { get; private set; }
-
-        [System.Obsolete("Use abstract instead", true)]
-        public bool UseZigZagEncoding { get; private set; }
-        [System.Obsolete("Use abstract instead", true)]
-        public int? BitCountMinValue { get; private set; }
-
-        [System.Obsolete("Use abstract instead", true)]
-        public FloatPackSettings? FloatPackSettings { get; private set; }
-        [System.Obsolete("Use abstract instead", true)]
-        public Vector2PackSettings? Vector2PackSettings { get; private set; }
-        [System.Obsolete("Use abstract instead", true)]
-        public Vector3PackSettings? Vector3PackSettings { get; private set; }
-        [System.Obsolete("Use abstract instead", true)]
-        public int? QuaternionBitCount { get; private set; }
-
-        [System.Obsolete("Use abstract instead", true)]
-        public FieldDefinition PackerField { get; internal set; }
-
-        [System.Obsolete("Use abstract instead", true)]
-        public MethodReference WriteFunction { get; private set; }
-        [System.Obsolete("Use abstract instead", true)]
-        public MethodReference ReadFunction { get; private set; }
 
         /// <summary>
         /// Changing the type of the field to the wrapper type, if one exists
@@ -138,7 +111,6 @@ namespace Mirage.Weaver.SyncVars
         /// Finds any attribute values needed for this syncvar
         /// </summary>
         /// <param name="module"></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ProcessAttributes()
         {
             HookMethod = HookMethodFinder.GetHookMethod(FieldDefinition, OriginalType);

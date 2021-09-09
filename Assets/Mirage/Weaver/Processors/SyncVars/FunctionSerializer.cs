@@ -18,9 +18,6 @@ namespace Mirage.Weaver.SyncVars
 
         public override void AppendWrite(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, FoundSyncVar syncVar)
         {
-            // if WriteFunction is null it means there was an error earlier, so we dont need to do anything here
-            if (writeFunction == null) { return; }
-
             // Generates a writer call for each sync variable
             // writer
             worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
@@ -32,9 +29,6 @@ namespace Mirage.Weaver.SyncVars
 
         public override void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)
         {
-            // if ReadFunction is null it means there was an error earlier, so we dont need to do anything here
-            if (readFunction == null) { return; }
-
             // add `reader` to stack
             worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
             // call read function
