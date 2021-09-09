@@ -39,7 +39,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests.%%TYPE%%_%%BIT_C
         public %%TYPE%% myValue;
     }
 
-    [Serailizable]
+    [Serializable]
     public struct BitPackStruct
     {
         [BitCount(%%BIT_COUNT%%)] 
@@ -100,30 +100,39 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests.%%TYPE%%_%%BIT_C
             Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"%%BIT_COUNT%% bits is %%PAYLOAD_SIZE%% bytes in payload");
         }
 
-        [Test]
-        public void StructIsBitPacked() 
+        [UnityTest]
+        public IEnumerator StructIsBitPacked() 
         {
             var inMessage = new BitPackMessage 
             {
-                myValue = value;
+                myValue = value,
             };
 
             int payloadSize = 0;
             int called = 0;
-            BitPackMessage outMessage;
+            BitPackMessage outMessage = default;
             server.MessageHandler.RegisterHandler<BitPackMessage>((player, msg) =>
             {
                 // store value in variable because assert will throw and be catch by message wrapper
-                payloadSize = msg.payload.Count;
                 called++;
                 outMessage = msg;
             });
+            Action<NetworkDiagnostics.MessageInfo> diagAction = (info) =>
+            {
+                if (info.message is BitPackMessage)
+                {
+                    payloadSize = info.bytes;
+                }
+            };
 
+            NetworkDiagnostics.OutMessageEvent += diagAction;
             client.Player.Send(inMessage);
+            NetworkDiagnostics.OutMessageEvent -= diagAction;
             yield return null;
             Assert.That(called, Is.EqualTo(1));
             // this will round up to nearest 8
-            int expectedPayLoadSize = (%%BIT_COUNT%% + 7) / 8;
+            // +2 for message header
+            int expectedPayLoadSize = ((%%BIT_COUNT%% + 7) / 8) + 2;
             Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"%%BIT_COUNT%% bits is {expectedPayLoadSize} bytes in payload");
             Assert.That(outMessage, Is.EqualTo(inMessage));
         }
@@ -133,7 +142,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests.%%TYPE%%_%%BIT_C
         {
             var inStruct = new BitPackStruct 
             {
-                myValue = value;
+                myValue = value,
             };
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -145,13 +154,12 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests.%%TYPE%%_%%BIT_C
 
                 using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
                 {
-                    var outStruct = reader.Read<BitPackStruct();
+                    var outStruct = reader.Read<BitPackStruct>();
                     Assert.That(reader.BitPosition, Is.EqualTo(%%BIT_COUNT%%));
 
                     Assert.That(outStruct, Is.EqualTo(inStruct));
                 }
             }
         }
-
     }
 }
