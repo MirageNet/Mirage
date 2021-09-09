@@ -15,14 +15,6 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
     {
         [BitCount(17)]
         [SyncVar] public int myValue;
-
-        public event Action<int> onRpc;
-
-        [ClientRpc]
-        public void RpcSomeFunction([BitCount(17)] int myParam)
-        {
-            onRpc?.Invoke(myParam);
-        }
     }
     public class BitCountTest_int_17 : ClientServerSetup<BitCountBehaviour_int_17>
     {
@@ -47,30 +39,6 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests
                     Assert.That(clientComponent.myValue, Is.EqualTo(value));
                 }
             }
-        }
-
-        // [UnityTest]
-        // [Ignore("Rpc not supported yet")]
-        public IEnumerator RpcIsBitPacked()
-        {
-
-            int called = 0;
-            clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };
-
-            client.MessageHandler.UnregisterHandler<RpcMessage>();
-            int payloadSize = 0;
-            client.MessageHandler.RegisterHandler<RpcMessage>((player, msg) =>
-            {
-                // store value in variable because assert will throw and be catch by message wrapper
-                payloadSize = msg.payload.Count;
-                clientObjectManager.OnRpcMessage(msg);
-            });
-
-
-            serverComponent.RpcSomeFunction(value);
-            yield return null;
-            Assert.That(called, Is.EqualTo(1));
-            Assert.That(payloadSize, Is.EqualTo(3), $"17 bits is 3 bytes in payload");
         }
     }
 }

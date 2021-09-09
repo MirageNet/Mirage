@@ -15,14 +15,6 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests
     {
         [BitCountFromRange(-2147483648, 2147483647)]
         [SyncVar] public int myValue;
-
-        public event Action<int> onRpc;
-
-        [ClientRpc]
-        public void RpcSomeFunction([BitCountFromRange(-2147483648, 2147483647)] int myParam)
-        {
-            onRpc?.Invoke(myParam);
-        }
     }
     public class BitCountRangeTest_int_N2147483648_2147483647min : ClientServerSetup<BitCountRangeBehaviour_int_N2147483648_2147483647min>
     {
@@ -47,29 +39,6 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests
                     Assert.That(clientComponent.myValue, Is.EqualTo(value));
                 }
             }
-        }
-
-        // [UnityTest]
-        // [Ignore("Rpc not supported yet")]
-        public IEnumerator RpcIsBitPacked()
-        {
-            int called = 0;
-            clientComponent.onRpc += (v) => { called++; Assert.That(v, Is.EqualTo(value)); };
-
-            client.MessageHandler.UnregisterHandler<RpcMessage>();
-            int payloadSize = 0;
-            client.MessageHandler.RegisterHandler<RpcMessage>((player, msg) =>
-            {
-                // store value in variable because assert will throw and be catch by message wrapper
-                payloadSize = msg.payload.Count;
-                clientObjectManager.OnRpcMessage(msg);
-            });
-
-
-            serverComponent.RpcSomeFunction(value);
-            yield return null;
-            Assert.That(called, Is.EqualTo(1));
-            Assert.That(payloadSize, Is.EqualTo(4), $"%%BIT_COUNT%% bits is 4 bytes in payload");
         }
     }
 }
