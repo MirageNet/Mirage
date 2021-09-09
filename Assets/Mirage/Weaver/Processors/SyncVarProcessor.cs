@@ -50,6 +50,7 @@ namespace Mirage.Weaver
                     {
                         FoundSyncVar syncVar = behaviour.AddSyncVar(fd);
                         ProcessSyncVar(syncVar);
+                        syncVar.HasProcessed = true;
                     }
                 }
                 catch (SyncVarException e)
@@ -128,7 +129,6 @@ namespace Mirage.Weaver
             {
                 propertySiteProcessor.Getters[fd] = get;
             }
-
         }
 
         MethodDefinition GenerateSyncVarGetter(FoundSyncVar syncVar)
@@ -426,6 +426,8 @@ namespace Mirage.Weaver
 
         void WriteFromField(ILProcessor worker, ParameterDefinition writerParameter, FoundSyncVar syncVar)
         {
+            if (!syncVar.HasProcessed) return;
+
             syncVar.ValueSerializer.AppendWrite(module, worker, writerParameter, syncVar);
         }
 
@@ -541,6 +543,8 @@ namespace Mirage.Weaver
 
         void ReadToField(ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)
         {
+            if (!syncVar.HasProcessed) return;
+
             // load this
             // read value
             // store to field
