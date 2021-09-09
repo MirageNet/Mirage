@@ -1,4 +1,4 @@
-﻿using Mono.Cecil;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver.SyncVars
@@ -16,14 +16,19 @@ namespace Mirage.Weaver.SyncVars
             this.readFunction = readFunction;
         }
 
-        public override void AppendWrite(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, FoundSyncVar syncVar)
+        public override void AppendWrite(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
         {
-            // Generates a writer call for each sync variable
-            // writer
+            AppendWrite_Field(module, worker, writerParameter, typeParameter, fieldDefinition);
+        }
+
+        void AppendWrite_Field(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
+        {
+            // make generic and import field
+            FieldReference fieldRef = module.ImportReference(fieldDefinition.MakeHostGenericIfNeeded());
+
             worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
-            // this
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
+            worker.Append(worker.Create(OpCodes.Ldarg, typeParameter));
+            worker.Append(worker.Create(OpCodes.Ldfld, fieldDefinition));
             worker.Append(worker.Create(OpCodes.Call, writeFunction));
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Linq.Expressions;
 using Mirage.Serialization;
+using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
@@ -106,15 +107,15 @@ namespace Mirage.Weaver
         {
             foreach (FieldDefinition field in variable.FindAllPublicFields())
             {
-                MethodReference writeFunc = GetFunction_Thorws(field.FieldType);
-
-                FieldReference fieldRef = module.ImportReference(field);
-
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Ldarg_1));
-                worker.Append(worker.Create(OpCodes.Ldfld, fieldRef));
-                worker.Append(worker.Create(OpCodes.Call, writeFunc));
+                ValueSerializer valueSerialize = GetValueSerialize(field);
+                valueSerialize.AppendWrite(module, worker, writerParameter, typeParameter, fieldDefinition);
             }
+        }
+
+        private ValueSerializer GetValueSerialize(FieldDefinition field)
+        {
+            throw new NotImplementedException();
+            MethodReference writeFunc = GetFunction_Thorws(field.FieldType);
         }
 
         protected override MethodReference GenerateSegmentFunction(TypeReference typeReference, TypeReference elementType)

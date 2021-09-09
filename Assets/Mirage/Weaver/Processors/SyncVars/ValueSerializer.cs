@@ -10,7 +10,7 @@ namespace Mirage.Weaver.SyncVars
         /// </summary>
         public abstract bool IsIntType { get; }
 
-        public abstract void AppendWrite(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, FoundSyncVar syncVar);
+        public abstract void AppendWrite(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition);
         public abstract void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar);
     }
 }
