@@ -5,32 +5,6 @@ using UnityEngine;
 
 namespace Mirage.Weaver.SyncVars
 {
-    internal struct VarIntSettings
-    {
-        public ulong small;
-        public ulong medium;
-        public ulong? large;
-        public bool throwIfOverLarge;
-    }
-    internal struct FloatPackSettings
-    {
-        public float max;
-        public float? precision;
-        public int? bitCount;
-    }
-    internal struct Vector2PackSettings
-    {
-        public Vector2 max;
-        public Vector2? precision;
-        public Vector2Int? bitCount;
-    }
-    internal struct Vector3PackSettings
-    {
-        public Vector3 max;
-        public Vector3? precision;
-        public Vector3Int? bitCount;
-    }
-
     internal class FoundSyncVar
     {
         public readonly ModuleDefinition Module;

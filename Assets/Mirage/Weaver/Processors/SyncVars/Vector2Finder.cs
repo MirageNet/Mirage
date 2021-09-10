@@ -9,6 +9,13 @@ namespace Mirage.Weaver.SyncVars
 {
     internal static class Vector2Finder
     {
+        struct Vector2PackSettings
+        {
+            public Vector2 max;
+            public Vector2? precision;
+            public Vector2Int? bitCount;
+        }
+
         public static ValueSerializer GetSerializer(FoundSyncVar syncVar)
         {
             FieldDefinition fieldDefinition = syncVar.FieldDefinition;

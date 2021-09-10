@@ -9,6 +9,14 @@ namespace Mirage.Weaver.SyncVars
 {
     internal static class VarIntFinder
     {
+        struct VarIntSettings
+        {
+            public ulong small;
+            public ulong medium;
+            public ulong? large;
+            public bool throwIfOverLarge;
+        }
+
         public static ValueSerializer GetSerializer(FoundSyncVar syncVar)
         {
             FieldDefinition fieldDefinition = syncVar.FieldDefinition;

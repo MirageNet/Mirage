@@ -8,6 +8,13 @@ namespace Mirage.Weaver.SyncVars
 {
     internal static class FloatPackFinder
     {
+        struct FloatPackSettings
+        {
+            public float max;
+            public float? precision;
+            public int? bitCount;
+        }
+
         public static ValueSerializer GetSerializer(FoundSyncVar syncVar)
         {
             FieldDefinition fieldDefinition = syncVar.FieldDefinition;
