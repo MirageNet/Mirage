@@ -52,7 +52,7 @@ namespace Mirage.Weaver
                 SkeletonPrefix + md.Name,
                 MethodAttributes.Family | MethodAttributes.HideBySig);
 
-            _ = rpc.AddParam<NetworkReader>("reader");
+            ParameterDefinition readerParameter = rpc.AddParam<NetworkReader>("reader");
             _ = rpc.AddParam<INetworkPlayer>("senderConnection");
             _ = rpc.AddParam<int>("replyId");
 
@@ -73,7 +73,7 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
             }
 
-            if (!ReadArguments(md, worker, hasNetworkConnection))
+            if (!ReadArguments(md, worker, readerParameter, hasNetworkConnection))
                 return rpc;
 
             // invoke actual ServerRpc function

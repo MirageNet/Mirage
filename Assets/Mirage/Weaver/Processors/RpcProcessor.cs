@@ -1,7 +1,9 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
 using Mirage.RemoteCalls;
+using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -48,48 +50,63 @@ namespace Mirage.Weaver
             writer.WriteNetworkIdentity(someTarget);
              */
 
+            // NetworkConnection is not sent via the NetworkWriter so skip it here
+            // skip first for NetworkConnection in TargetRpc
             bool skipFirst = callType == RemoteCallType.ClientRpc
                 && HasNetworkConnectionParameter(method);
 
-            // arg of calling  function, arg 0 is "this" so start counting at 1
-            int argNum = 1;
-            foreach (ParameterDefinition param in method.Parameters)
+            // arg of calling  function, arg0 is "this" so start counting at 1
+            int startingArg = skipFirst ? 2 : 1;
+            for (int argIndex = startingArg; argIndex < method.Parameters.Count; argIndex++)
             {
-                // NetworkConnection is not sent via the NetworkWriter so skip it here
-                // skip first for NetworkConnection in TargetRpc
-                if (argNum == 1 && skipFirst)
-                {
-                    argNum += 1;
-                    continue;
-                }
+                // -1 here because Parameters does not include arg0
+                ParameterDefinition param = method.Parameters[argIndex - 1];
+
                 // skip SenderConnection in ServerRpc
                 if (IsNetworkConnection(param.ParameterType))
                 {
-                    argNum += 1;
                     continue;
                 }
 
-                MethodReference writeFunc = writers.TryGetFunction(param.ParameterType, method.DebugInformation.SequencePoints.FirstOrDefault());
-                if (writeFunc == null)
+                if (!TryGetSerializer(method, param, out ValueSerializer valueSerializer))
                 {
-                    logger.Error($"{method.Name} has invalid parameter {param}", method, method.DebugInformation.SequencePoints.FirstOrDefault());
                     return false;
                 }
 
-                // use built-in writer func on writer object
-                // NetworkWriter object
-                worker.Append(worker.Create(OpCodes.Ldloc, writer));
-                // add argument to call
-                worker.Append(worker.Create(OpCodes.Ldarg, argNum));
-                // call writer extension method
-                worker.Append(worker.Create(OpCodes.Call, writeFunc));
-                argNum += 1;
+                // todo remove this function when other Serializer works
+                if (valueSerializer is FunctionSerializer functionSerializer)
+                {
+                    functionSerializer.AppendWriteRpc(worker, writer, argIndex);
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
             }
             return true;
         }
 
+        private bool TryGetSerializer(MethodDefinition method, ParameterDefinition param, out ValueSerializer valueSerializer)
+        {
+            valueSerializer = null;
+            try
+            {
+                valueSerializer = ValueSerializerFinder.GetSerializer(method, param, writers, readers);
+                return true;
+            }
+            catch (SerializeFunctionException)
+            {
+                logger.Error($"{method.Name} has invalid parameter {param}", method, method.DebugInformation.SequencePoints.FirstOrDefault());
+                return false;
+            }
+            catch (ValueSerializerException expection)
+            {
+                logger.Error($"{method.Name} has invalid parameter {param}: {expection}", method, method.DebugInformation.SequencePoints.FirstOrDefault());
+                return false;
+            }
+        }
 
-        public bool ReadArguments(MethodDefinition method, ILProcessor worker, bool skipFirst)
+        public bool ReadArguments(MethodDefinition method, ILProcessor worker, ParameterDefinition readerParameter, bool skipFirst)
         {
             // read each argument
             // example result
@@ -97,46 +114,28 @@ namespace Mirage.Weaver
             CallCmdDoSomething(reader.ReadPackedInt32(), reader.ReadNetworkIdentity());
              */
 
-            // arg of calling  function, arg 0 is "this" so start counting at 1
-            int argNum = 1;
-            foreach (ParameterDefinition param in method.Parameters)
+            // arg of calling  function, arg0 is "this" so start counting at 1
+            int startingArg = skipFirst ? 2 : 1;
+            for (int argIndex = startingArg; argIndex < method.Parameters.Count; argIndex++)
             {
-                // NetworkConnection is not sent via the NetworkWriter so skip it here
-                // skip first for NetworkConnection in TargetRpc
-                if (argNum == 1 && skipFirst)
-                {
-                    argNum += 1;
-                    continue;
-                }
+                // -1 here because Parameters does not include arg0
+                ParameterDefinition param = method.Parameters[argIndex - 1];
+
                 // skip SenderConnection in ServerRpc
                 if (IsNetworkConnection(param.ParameterType))
                 {
-                    argNum += 1;
                     continue;
                 }
 
-                SequencePoint sequencePoint = method.DebugInformation.SequencePoints.ElementAtOrDefault(0);
-                MethodReference readFunc = readers.TryGetFunction(param.ParameterType, sequencePoint);
-
-                if (readFunc == null)
+                if (!TryGetSerializer(method, param, out ValueSerializer valueSerializer))
                 {
-                    logger.Error($"{method.Name} has invalid parameter {param}.  Unsupported type {param.ParameterType},  use a supported Mirage type instead", method);
                     return false;
                 }
 
-                worker.Append(worker.Create(OpCodes.Ldarg_1));
-                worker.Append(worker.Create(OpCodes.Call, readFunc));
-
-                // conversion.. is this needed?
-                if (param.ParameterType.Is<float>())
-                {
-                    worker.Append(worker.Create(OpCodes.Conv_R4));
-                }
-                else if (param.ParameterType.Is<double>())
-                {
-                    worker.Append(worker.Create(OpCodes.Conv_R8));
-                }
+                // todo make sure this works for all ValueSerializer
+                valueSerializer.AppendRead(null, worker, readerParameter, null);
             }
+
             return true;
         }
 

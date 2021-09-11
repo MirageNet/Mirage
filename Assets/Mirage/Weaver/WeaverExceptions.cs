@@ -53,40 +53,52 @@ namespace Mirage.Weaver.SyncVars
     {
         public HookMethodException(string message, MemberReference memberReference) : base(message, memberReference) { }
     }
-    internal class BitCountException : SyncVarException
+}
+
+namespace Mirage.Weaver.Serialization
+{
+    internal abstract class ValueSerializerException : WeaverException
     {
-        public BitCountException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public ValueSerializerException(string message) : base(message, null, null) { }
     }
-    internal class VarIntException : SyncVarException
+    internal class FunctionSerializerException : ValueSerializerException
     {
-        public VarIntException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public FunctionSerializerException(string message) : base(message) { }
     }
-    internal class VarIntBlocksException : SyncVarException
+    internal class BitCountException : ValueSerializerException
     {
-        public VarIntBlocksException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public BitCountException(string message) : base(message) { }
     }
-    internal class ZigZagException : SyncVarException
+    internal class VarIntException : ValueSerializerException
     {
-        public ZigZagException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public VarIntException(string message) : base(message) { }
     }
-    internal class BitCountFromRangeException : SyncVarException
+    internal class VarIntBlocksException : ValueSerializerException
     {
-        public BitCountFromRangeException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public VarIntBlocksException(string message) : base(message) { }
     }
-    internal class FloatPackException : SyncVarException
+    internal class ZigZagException : ValueSerializerException
     {
-        public FloatPackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public ZigZagException(string message) : base(message) { }
     }
-    internal class Vector3PackException : SyncVarException
+    internal class BitCountFromRangeException : ValueSerializerException
     {
-        public Vector3PackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public BitCountFromRangeException(string message) : base(message) { }
     }
-    internal class Vector2PackException : SyncVarException
+    internal class FloatPackException : ValueSerializerException
     {
-        public Vector2PackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public FloatPackException(string message) : base(message) { }
     }
-    internal class QuaternionPackException : SyncVarException
+    internal class Vector3PackException : ValueSerializerException
     {
-        public QuaternionPackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public Vector3PackException(string message) : base(message) { }
+    }
+    internal class Vector2PackException : ValueSerializerException
+    {
+        public Vector2PackException(string message) : base(message) { }
+    }
+    internal class QuaternionPackException : ValueSerializerException
+    {
+        public QuaternionPackException(string message) : base(message) { }
     }
 }

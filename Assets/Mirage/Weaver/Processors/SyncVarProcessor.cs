@@ -100,8 +100,7 @@ namespace Mirage.Weaver
         {
             // process attributes first before creating setting, otherwise it wont know about hook
             syncVar.SetWrapType();
-            syncVar.ProcessAttributes();
-            syncVar.FindSerializeFunctions(writers, readers);
+            syncVar.ProcessAttributes(writers, readers);
 
             FieldDefinition fd = syncVar.FieldDefinition;
 

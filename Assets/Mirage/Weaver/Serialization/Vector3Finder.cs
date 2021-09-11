@@ -1,0 +1,157 @@
+using System;
+using System.Linq.Expressions;
+using Mirage.Serialization;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using UnityEngine;
+
+namespace Mirage.Weaver.Serialization
+{
+    internal class Vector3Finder : PackerFinderBase<Vector2PackAttribute, Vector3Finder.Vector3PackSettings>
+    {
+        protected override bool IsIntType => false;
+
+        public struct Vector3PackSettings
+        {
+            public Vector3 max;
+            public Vector3? precision;
+            public Vector3Int? bitCount;
+        }
+
+        protected override Vector3PackSettings GetSettings(TypeReference fieldType, CustomAttribute attribute)
+        {
+            if (!fieldType.Is<Vector3>())
+            {
+                throw new Vector3PackException($"{fieldType} is not a supported type for [Vector3Pack]");
+            }
+
+            var settings = new Vector3PackSettings();
+            for (int i = 0; i < 3; i++)
+            {
+                settings.max[i] = (float)attribute.ConstructorArguments[i].Value;
+                if (settings.max[i] <= 0)
+                {
+                    throw new Vector3PackException($"Max must be above 0, max:{settings.max}");
+                }
+            }
+
+            if (attribute.ConstructorArguments.Count == 4)
+            {
+                CustomAttributeArgument arg = attribute.ConstructorArguments[3];
+                if (arg.Type.Is<float>())
+                {
+                    Precisionfrom1(ref settings, arg);
+                }
+                else
+                {
+                    BitCountfrom1(ref settings, arg);
+                }
+            }
+            else
+            {
+                CustomAttributeArgument xArg = attribute.ConstructorArguments[3];
+                CustomAttributeArgument yArg = attribute.ConstructorArguments[4];
+                CustomAttributeArgument zArg = attribute.ConstructorArguments[5];
+                if (xArg.Type.Is<float>())
+                {
+                    PrecisionFrom3(ref settings, xArg, yArg, zArg);
+                }
+                else
+                {
+                    BitCountFrom3(ref settings, xArg, yArg, zArg);
+                }
+            }
+
+            return settings;
+        }
+
+        private static void Precisionfrom1(ref Vector3PackSettings settings, CustomAttributeArgument arg)
+        {
+            // check vs all 3 axis
+            float precision = (float)arg.Value;
+            FloatPackFinder.ValidatePrecision(settings.max.x, precision, (s) => new Vector3PackException(s));
+            FloatPackFinder.ValidatePrecision(settings.max.y, precision, (s) => new Vector3PackException(s));
+            FloatPackFinder.ValidatePrecision(settings.max.z, precision, (s) => new Vector3PackException(s));
+            settings.precision = new Vector3(precision, precision, precision);
+        }
+        private static void BitCountfrom1(ref Vector3PackSettings settings, CustomAttributeArgument arg)
+        {
+            // check vs all 3 axis
+            int bitCount = (int)arg.Value;
+            FloatPackFinder.ValidateBitCount(bitCount, (s) => new Vector3PackException(s));
+            settings.bitCount = new Vector3Int(bitCount, bitCount, bitCount);
+        }
+        private static void PrecisionFrom3(ref Vector3PackSettings settings, CustomAttributeArgument xArg, CustomAttributeArgument yArg, CustomAttributeArgument zArg)
+        {
+            // check vs all 3 axis
+            var precision = new Vector3(
+                (float)xArg.Value,
+                (float)yArg.Value,
+                (float)zArg.Value);
+            FloatPackFinder.ValidatePrecision(settings.max.x, precision.x, (s) => new Vector3PackException(s));
+            FloatPackFinder.ValidatePrecision(settings.max.y, precision.y, (s) => new Vector3PackException(s));
+            FloatPackFinder.ValidatePrecision(settings.max.z, precision.z, (s) => new Vector3PackException(s));
+            settings.precision = precision;
+        }
+        private static void BitCountFrom3(ref Vector3PackSettings settings, CustomAttributeArgument xArg, CustomAttributeArgument yArg, CustomAttributeArgument zArg)
+        {
+            // check vs all 3 axis
+            FloatPackFinder.ValidateBitCount((int)xArg.Value, (s) => new Vector3PackException(s));
+            FloatPackFinder.ValidateBitCount((int)yArg.Value, (s) => new Vector3PackException(s));
+            FloatPackFinder.ValidateBitCount((int)zArg.Value, (s) => new Vector3PackException(s));
+            settings.bitCount = new Vector3Int(
+                (int)xArg.Value,
+                (int)yArg.Value,
+                (int)zArg.Value);
+        }
+
+        protected override LambdaExpression GetPackMethod(TypeReference fieldType)
+        {
+            Expression<Action<Vector3Packer>> packMethod = (Vector3Packer p) => p.Pack(default, default);
+            return packMethod;
+        }
+
+        protected override LambdaExpression GetUnpackMethod(TypeReference fieldType)
+        {
+            Expression<Action<Vector3Packer>> unpackMethod = (Vector3Packer p) => p.Unpack(default(NetworkReader));
+            return unpackMethod;
+        }
+
+        protected override FieldDefinition CreatePackerField(ModuleDefinition module, string fieldName, TypeDefinition holder, Vector3PackSettings settings)
+        {
+            FieldDefinition packerField = PackerSerializer.AddPackerField<Vector3Packer>(holder, fieldName);
+
+            NetworkBehaviourProcessor.AddToStaticConstructor(holder, (worker) =>
+            {
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.x));
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.y));
+                worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.z));
+
+                // packer has 2 constructors, get the one that matches the attribute type
+                MethodReference packerCtor = null;
+                if (settings.precision.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.x));
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.y));
+                    worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.z));
+                    packerCtor = module.ImportReference(() => new Vector3Packer(default(float), default(float), default(float), default(float), default(float), default(float)));
+                }
+                else if (settings.bitCount.HasValue)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.x));
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.y));
+                    worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.z));
+                    packerCtor = module.ImportReference(() => new Vector3Packer(default(float), default(float), default(float), default(int), default(int), default(int)));
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Invalid Vector3PackSettings");
+                }
+                worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
+                worker.Append(worker.Create(OpCodes.Stsfld, packerField));
+            });
+
+            return packerField;
+        }
+    }
+}

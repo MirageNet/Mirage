@@ -1,5 +1,5 @@
-using Mirage.Serialization;
 using Mirage.Weaver.NetworkBehaviours;
+using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using UnityEngine;
 
@@ -27,8 +27,7 @@ namespace Mirage.Weaver.SyncVars
             DirtyIndex = dirtyIndex;
         }
 
-        public ValueSerializer _valueSerializer;
-        public ValueSerializer ValueSerializer => _valueSerializer;
+        public ValueSerializer ValueSerializer { get; private set; }
 
         public string OriginalName { get; private set; }
         public TypeReference OriginalType { get; private set; }
@@ -79,74 +78,17 @@ namespace Mirage.Weaver.SyncVars
             return false;
         }
 
-        bool HasIntAttribute => ValueSerializer != null && ValueSerializer.IsIntType;
 
         /// <summary>
         /// Finds any attribute values needed for this syncvar
         /// </summary>
         /// <param name="module"></param>
-        public void ProcessAttributes()
+        public void ProcessAttributes(Writers writers, Readers readers)
         {
             HookMethod = HookMethodFinder.GetHookMethod(FieldDefinition, OriginalType);
             HasHookMethod = HookMethod != null;
 
-            if (FieldDefinition.HasCustomAttribute<BitCountAttribute>())
-                _valueSerializer = BitCountFinder.GetSerializer(FieldDefinition);
-
-            if (FieldDefinition.HasCustomAttribute<VarIntAttribute>())
-            {
-                if (HasIntAttribute)
-                    throw new VarIntException($"[VarInt] can't be used with [BitCount], [VarIntBlocks] or [BitCountFromRange]", FieldDefinition);
-
-                _valueSerializer = VarIntFinder.GetSerializer(this);
-            }
-
-            if (FieldDefinition.HasCustomAttribute<VarIntBlocksAttribute>())
-            {
-                if (HasIntAttribute)
-                    throw new VarIntBlocksException($"[VarIntBlocks] can't be used with [BitCount], [VarInt] or [BitCountFromRange]", FieldDefinition);
-
-                _valueSerializer = VarIntBlocksFinder.GetSerializer(FieldDefinition);
-            }
-
-            if (FieldDefinition.HasCustomAttribute<BitCountFromRangeAttribute>())
-            {
-                if (HasIntAttribute)
-                    throw new BitCountFromRangeException($"[BitCountFromRange] can't be used with [BitCount], [VarInt] or [VarIntBlocks]", FieldDefinition);
-
-                _valueSerializer = BitCountFromRangeFinder.GetSerializer(FieldDefinition);
-            }
-
-            ZigZagFinder.CheckZigZag(FieldDefinition, ref _valueSerializer);
-
-            if (FieldDefinition.HasCustomAttribute<FloatPackAttribute>())
-                _valueSerializer = FloatPackFinder.GetSerializer(this);
-
-            if (FieldDefinition.HasCustomAttribute<Vector2PackAttribute>())
-                _valueSerializer = Vector2Finder.GetSerializer(this);
-
-            if (FieldDefinition.HasCustomAttribute<Vector3PackAttribute>())
-                _valueSerializer = Vector3Finder.GetSerializer(this);
-
-            if (FieldDefinition.HasCustomAttribute<QuaternionPackAttribute>())
-                _valueSerializer = QuaternionFinder.GetSerializer(this);
-        }
-
-        public void FindSerializeFunctions(Writers writers, Readers readers)
-        {
-            // dont need to find function is type already has serializer
-            if (_valueSerializer != null) { return; }
-
-            try
-            {
-                MethodReference writeFunction = writers.GetFunction_Thorws(FieldDefinition.FieldType);
-                MethodReference readFunction = readers.GetFunction_Thorws(FieldDefinition.FieldType);
-                _valueSerializer = new FunctionSerializer(writeFunction, readFunction);
-            }
-            catch (SerializeFunctionException e)
-            {
-                throw new SyncVarException($"{FieldDefinition.Name} is an unsupported type. {e.Message}", FieldDefinition);
-            }
+            ValueSerializer = ValueSerializerFinder.GetSerializer(this, writers, readers);
         }
     }
 }

@@ -179,7 +179,7 @@ namespace Mirage.Weaver
                 MethodAttributes.Family | MethodAttributes.HideBySig,
                 userCodeFunc.ReturnType);
 
-            _ = cmd.AddParam<NetworkReader>("reader");
+            ParameterDefinition readerParameter = cmd.AddParam<NetworkReader>("reader");
             _ = cmd.AddParam<INetworkPlayer>("senderConnection");
             _ = cmd.AddParam<int>("replyId");
 
@@ -189,7 +189,7 @@ namespace Mirage.Weaver
             // setup for reader
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            if (!ReadArguments(method, worker, false))
+            if (!ReadArguments(method, worker, readerParameter, false))
                 return cmd;
 
             AddSenderConnection(method, worker);
