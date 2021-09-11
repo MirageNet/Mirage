@@ -55,12 +55,11 @@ namespace Mirage.Weaver
             bool skipFirst = callType == RemoteCallType.ClientRpc
                 && HasNetworkConnectionParameter(method);
 
-            // arg of calling  function, arg0 is "this" so start counting at 1
-            int startingArg = skipFirst ? 2 : 1;
+            int startingArg = skipFirst ? 1 : 0;
             for (int argIndex = startingArg; argIndex < method.Parameters.Count; argIndex++)
             {
                 // -1 here because Parameters does not include arg0
-                ParameterDefinition param = method.Parameters[argIndex - 1];
+                ParameterDefinition param = method.Parameters[argIndex];
 
                 // skip SenderConnection in ServerRpc
                 if (IsNetworkConnection(param.ParameterType))
@@ -76,7 +75,8 @@ namespace Mirage.Weaver
                 // todo remove this function when other Serializer works
                 if (valueSerializer is FunctionSerializer functionSerializer)
                 {
-                    functionSerializer.AppendWriteRpc(worker, writer, argIndex);
+                    // arg+1 because arg0 is "this"
+                    functionSerializer.AppendWriteRpc(worker, writer, argIndex + 1);
                 }
                 else
                 {
@@ -114,12 +114,11 @@ namespace Mirage.Weaver
             CallCmdDoSomething(reader.ReadPackedInt32(), reader.ReadNetworkIdentity());
              */
 
-            // arg of calling  function, arg0 is "this" so start counting at 1
-            int startingArg = skipFirst ? 2 : 1;
+            int startingArg = skipFirst ? 1 : 0;
             for (int argIndex = startingArg; argIndex < method.Parameters.Count; argIndex++)
             {
                 // -1 here because Parameters does not include arg0
-                ParameterDefinition param = method.Parameters[argIndex - 1];
+                ParameterDefinition param = method.Parameters[argIndex];
 
                 // skip SenderConnection in ServerRpc
                 if (IsNetworkConnection(param.ParameterType))
