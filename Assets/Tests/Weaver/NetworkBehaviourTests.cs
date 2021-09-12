@@ -113,9 +113,7 @@ namespace Mirage.Tests.Weaver
         public void NetworkBehaviourClientRpcParamAbstract()
         {
             HasError("Cannot generate write function for abstract class AbstractClass. Use a supported type or provide a custom write function", "NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract/AbstractClass");
-            HasError("RpcCantHaveParamAbstract has invalid parameter monkeys", "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract::RpcCantHaveParamAbstract(NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract/AbstractClass)");
             HasError("Cannot generate read function for abstract class AbstractClass. Use a supported type or provide a custom read function", "NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract/AbstractClass");
-            HasError("RpcCantHaveParamAbstract has invalid parameter monkeys.  Unsupported type NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract/AbstractClass,  use a supported Mirage type instead", "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract::RpcCantHaveParamAbstract(NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract/AbstractClass)");
         }
 
         [Test]
