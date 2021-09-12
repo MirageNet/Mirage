@@ -14,9 +14,11 @@ namespace Mirage.Tests.Weaver
         private readonly string assemblyPath;
         private InMemoryAssembly inMemoryAssembly;
 
-        public CompiledAssembly(string assemblyPath)
+        public CompiledAssembly(string assemblyPath, AssemblyBuilder assemblyBuilder)
         {
             this.assemblyPath = assemblyPath;
+            Defines = assemblyBuilder.defaultDefines;
+            References = assemblyBuilder.defaultReferences;
         }
 
         public InMemoryAssembly InMemoryAssembly
@@ -128,11 +130,7 @@ namespace Mirage.Tests.Weaver
 #endif
 
                 // assembly builder does not call ILPostProcessor (WTF Unity?),  so we must invoke it ourselves.
-                var compiledAssembly = new CompiledAssembly(assemblyPath)
-                {
-                    Defines = assemblyBuilder.defaultDefines,
-                    References = assemblyBuilder.defaultReferences
-                };
+                var compiledAssembly = new CompiledAssembly(assemblyPath, assemblyBuilder);
 
                 var weaver = new Mirage.Weaver.Weaver(logger);
 
