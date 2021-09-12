@@ -15,16 +15,16 @@ namespace Mirage.Weaver
     /// </summary>
     public class SyncVarProcessor
     {
-        private readonly ModuleDefinition module;
+        private readonly ModuleImportCache moduleCache;
         private readonly Readers readers;
         private readonly Writers writers;
         private readonly PropertySiteProcessor propertySiteProcessor;
 
         private FoundNetworkBehaviour behaviour;
 
-        public SyncVarProcessor(ModuleDefinition module, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor)
+        public SyncVarProcessor(ModuleImportCache moduleCache, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor)
         {
-            this.module = module;
+            this.moduleCache = moduleCache;
             this.readers = readers;
             this.writers = writers;
             this.propertySiteProcessor = propertySiteProcessor;
@@ -32,7 +32,7 @@ namespace Mirage.Weaver
 
         public void ProcessSyncVars(TypeDefinition td, IWeaverLogger logger)
         {
-            behaviour = new FoundNetworkBehaviour(td);
+            behaviour = new FoundNetworkBehaviour(moduleCache, td);
             // the mapping of dirtybits to sync-vars is implicit in the order of the fields here. this order is recorded in m_replacementProperties.
             // start assigning syncvars at the place the base class stopped, if any
 
@@ -99,7 +99,7 @@ namespace Mirage.Weaver
         void ProcessSyncVar(FoundSyncVar syncVar)
         {
             // process attributes first before creating setting, otherwise it wont know about hook
-            syncVar.SetWrapType(module);
+            syncVar.SetWrapType(moduleCache);
             syncVar.ProcessAttributes();
 
             FieldDefinition fd = syncVar.FieldDefinition;
@@ -171,11 +171,11 @@ namespace Mirage.Weaver
                 {
                     worker.Append(worker.Create(OpCodes.Ldc_I8, (long)settings.large.Value));
                     worker.Append(worker.Create(settings.throwIfOverLarge ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
-                    packerCtor = module.ImportReference(() => new VarIntPacker(default, default, default, default));
+                    packerCtor = moduleCache.ImportReference(() => new VarIntPacker(default, default, default, default));
                 }
                 else
                 {
-                    packerCtor = module.ImportReference(() => new VarIntPacker(default, default));
+                    packerCtor = moduleCache.ImportReference(() => new VarIntPacker(default, default));
                 }
                 worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
                 worker.Append(worker.Create(OpCodes.Stsfld, syncVar.PackerField));
@@ -197,12 +197,12 @@ namespace Mirage.Weaver
                 if (settings.precision.HasValue)
                 {
                     worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value));
-                    packerCtor = module.ImportReference(() => new FloatPacker(default, default(float)));
+                    packerCtor = moduleCache.ImportReference(() => new FloatPacker(default, default(float)));
                 }
                 else if (settings.bitCount.HasValue)
                 {
                     worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value));
-                    packerCtor = module.ImportReference(() => new FloatPacker(default, default(int)));
+                    packerCtor = moduleCache.ImportReference(() => new FloatPacker(default, default(int)));
                 }
                 else
                 {
@@ -232,14 +232,14 @@ namespace Mirage.Weaver
                     worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.x));
                     worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.y));
                     worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.z));
-                    packerCtor = module.ImportReference(() => new Vector3Packer(default(float), default(float), default(float), default(float), default(float), default(float)));
+                    packerCtor = moduleCache.ImportReference(() => new Vector3Packer(default(float), default(float), default(float), default(float), default(float), default(float)));
                 }
                 else if (settings.bitCount.HasValue)
                 {
                     worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.x));
                     worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.y));
                     worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.z));
-                    packerCtor = module.ImportReference(() => new Vector3Packer(default(float), default(float), default(float), default(int), default(int), default(int)));
+                    packerCtor = moduleCache.ImportReference(() => new Vector3Packer(default(float), default(float), default(float), default(int), default(int), default(int)));
                 }
                 else
                 {
@@ -266,13 +266,13 @@ namespace Mirage.Weaver
                 {
                     worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.x));
                     worker.Append(worker.Create(OpCodes.Ldc_R4, settings.precision.Value.y));
-                    packerCtor = module.ImportReference(() => new Vector2Packer(default(float), default(float), default(float), default(float)));
+                    packerCtor = moduleCache.ImportReference(() => new Vector2Packer(default(float), default(float), default(float), default(float)));
                 }
                 else if (settings.bitCount.HasValue)
                 {
                     worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.x));
                     worker.Append(worker.Create(OpCodes.Ldc_I4, settings.bitCount.Value.y));
-                    packerCtor = module.ImportReference(() => new Vector2Packer(default(float), default(float), default(int), default(int)));
+                    packerCtor = moduleCache.ImportReference(() => new Vector2Packer(default(float), default(float), default(int), default(int)));
                 }
                 else
                 {
@@ -291,7 +291,7 @@ namespace Mirage.Weaver
                 int bitCount = syncVar.QuaternionBitCount.Value;
 
                 worker.Append(worker.Create(OpCodes.Ldc_I4, bitCount));
-                MethodReference packerCtor = module.ImportReference(() => new QuaternionPacker(default(int)));
+                MethodReference packerCtor = moduleCache.ImportReference(() => new QuaternionPacker(default(int)));
                 worker.Append(worker.Create(OpCodes.Newobj, packerCtor));
                 worker.Append(worker.Create(OpCodes.Stsfld, syncVar.PackerField));
             });
@@ -346,7 +346,7 @@ namespace Mirage.Weaver
             // make generic version of SetSyncVar with field type
             WriteLoadField(worker, syncVar);
 
-            MethodReference syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
+            MethodReference syncVarEqual = moduleCache.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
             var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
             syncVarEqualGm.GenericArguments.Add(originalType);
             worker.Append(worker.Create(OpCodes.Call, syncVarEqualGm));
@@ -364,25 +364,25 @@ namespace Mirage.Weaver
             // this.SetDirtyBit(dirtyBit)
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
-            worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.SetDirtyBit(default)));
+            worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference<NetworkBehaviour>(nb => nb.SetDirtyBit(default))));
 
             if (syncVar.HasHookMethod)
             {
                 //if (base.isLocalClient && !getSyncVarHookGuard(dirtyBit))
                 Instruction label = worker.Create(OpCodes.Nop);
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalClient));
+                worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference((NetworkBehaviour nb) => nb.IsLocalClient)));
                 worker.Append(worker.Create(OpCodes.Brfalse, label));
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
-                worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.GetSyncVarHookGuard(default)));
+                worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference<NetworkBehaviour>(nb => nb.GetSyncVarHookGuard(default))));
                 worker.Append(worker.Create(OpCodes.Brtrue, label));
 
                 // setSyncVarHookGuard(dirtyBit, true)
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
                 worker.Append(worker.Create(OpCodes.Ldc_I4_1));
-                worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.SetSyncVarHookGuard(default, default)));
+                worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference<NetworkBehaviour>(nb => nb.SetSyncVarHookGuard(default, default))));
 
                 // call hook (oldValue, newValue)
                 // Generates: OnValueChanged(oldValue, value)
@@ -392,7 +392,7 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
                 worker.Append(worker.Create(OpCodes.Ldc_I4_0));
-                worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.SetSyncVarHookGuard(default, default)));
+                worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference<NetworkBehaviour>(nb => nb.SetSyncVarHookGuard(default, default))));
 
                 worker.Append(label);
             }
@@ -420,7 +420,7 @@ namespace Mirage.Weaver
             if (syncVar.IsWrapped)
             {
                 worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
-                MethodReference getter = module.ImportReference(fd.FieldType.Resolve().GetMethod("get_Value"));
+                MethodReference getter = moduleCache.ImportReference(fd.FieldType.Resolve().GetMethod("get_Value"));
                 worker.Append(worker.Create(OpCodes.Call, getter));
 
                 // When we use NetworkBehaviors, we normally use a derived class,
@@ -452,7 +452,7 @@ namespace Mirage.Weaver
             if (syncVar.IsWrapped)
             {
                 // there is a wrapper struct, call the setter
-                MethodReference setter = module.ImportReference(fd.FieldType.Resolve().GetMethod("set_Value"));
+                MethodReference setter = moduleCache.ImportReference(fd.FieldType.Resolve().GetMethod("set_Value"));
 
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldflda, fd.MakeHostGenericIfNeeded()));
@@ -541,7 +541,7 @@ namespace Mirage.Weaver
                     hookMethodReference = hookMethod.MakeHostInstanceGeneric(genericType);
                 }
 
-                worker.Append(worker.Create(OpCall, module.ImportReference(hookMethodReference)));
+                worker.Append(worker.Create(OpCall, moduleCache.ImportReference(hookMethodReference)));
             }
         }
 
@@ -557,7 +557,7 @@ namespace Mirage.Weaver
             if (behaviour.SyncVars.Count == 0)
                 return;
 
-            var helper = new SerializeHelper(module, behaviour);
+            var helper = new SerializeHelper(moduleCache, behaviour);
             ILProcessor worker = helper.AddMethod();
 
             helper.AddLocals();
@@ -598,7 +598,7 @@ namespace Mirage.Weaver
             }
             else if (syncVar.VarIntSettings.HasValue)
             {
-                WritePacker(module.ImportReference(syncVar.VarIntSettings.Value.packMethod));
+                WritePacker(moduleCache.ImportReference(syncVar.VarIntSettings.Value.packMethod));
             }
             else if (syncVar.BlockCount.HasValue)
             {
@@ -606,19 +606,19 @@ namespace Mirage.Weaver
             }
             else if (syncVar.FloatPackSettings.HasValue)
             {
-                WritePacker(module.ImportReference((FloatPacker p) => p.Pack(default, default)));
+                WritePacker(moduleCache.ImportReference((FloatPacker p) => p.Pack(default, default)));
             }
             else if (syncVar.Vector2PackSettings.HasValue)
             {
-                WritePacker(module.ImportReference((Vector2Packer p) => p.Pack(default, default)));
+                WritePacker(moduleCache.ImportReference((Vector2Packer p) => p.Pack(default, default)));
             }
             else if (syncVar.Vector3PackSettings.HasValue)
             {
-                WritePacker(module.ImportReference((Vector3Packer p) => p.Pack(default, default)));
+                WritePacker(moduleCache.ImportReference((Vector3Packer p) => p.Pack(default, default)));
             }
             else if (syncVar.QuaternionBitCount.HasValue)
             {
-                WritePacker(module.ImportReference((QuaternionPacker p) => p.Pack(default, default)));
+                WritePacker(moduleCache.ImportReference((QuaternionPacker p) => p.Pack(default, default)));
             }
             else
             {
@@ -643,7 +643,7 @@ namespace Mirage.Weaver
 
             void WriteBitCount()
             {
-                MethodReference writeWithBitCount = module.ImportReference(writerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkWriter.Write)));
+                MethodReference writeWithBitCount = moduleCache.ImportReference(writerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkWriter.Write)));
 
                 worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -664,7 +664,7 @@ namespace Mirage.Weaver
             }
             void WriteBlockSize()
             {
-                MethodReference writeWithBlockSize = module.ImportReference(() => VarIntBlocksPacker.Pack(default, default, default));
+                MethodReference writeWithBlockSize = moduleCache.ImportReference(() => VarIntBlocksPacker.Pack(default, default, default));
 
                 worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -677,8 +677,8 @@ namespace Mirage.Weaver
             {
                 bool useLong = syncVar.FieldDefinition.FieldType.Is<long>();
                 MethodReference encode = useLong
-                    ? module.ImportReference((long v) => ZigZag.Encode(v))
-                    : module.ImportReference((int v) => ZigZag.Encode(v));
+                    ? moduleCache.ImportReference((long v) => ZigZag.Encode(v))
+                    : moduleCache.ImportReference((int v) => ZigZag.Encode(v));
 
                 worker.Append(worker.Create(OpCodes.Call, encode));
             }
@@ -716,7 +716,7 @@ namespace Mirage.Weaver
                 return;
 
 
-            var helper = new DeserializeHelper(module, behaviour);
+            var helper = new DeserializeHelper(moduleCache, behaviour);
             ILProcessor worker = helper.AddMethod();
 
             helper.AddLocals();
@@ -797,7 +797,7 @@ namespace Mirage.Weaver
                 // 'newValue'
                 WriteLoadField(worker, syncVar);
                 // call the function
-                MethodReference syncVarEqual = module.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
+                MethodReference syncVarEqual = moduleCache.ImportReference<NetworkBehaviour>(nb => nb.SyncVarEqual<object>(default, default));
                 var syncVarEqualGm = new GenericInstanceMethod(syncVarEqual.GetElementMethod());
                 syncVarEqualGm.GenericArguments.Add(originalType);
                 worker.Append(worker.Create(OpCodes.Call, syncVarEqualGm));
@@ -822,7 +822,7 @@ namespace Mirage.Weaver
             }
             else if (syncVar.VarIntSettings.HasValue)
             {
-                ReadPacker(module.ImportReference(syncVar.VarIntSettings.Value.unpackMethod));
+                ReadPacker(moduleCache.ImportReference(syncVar.VarIntSettings.Value.unpackMethod));
             }
             else if (syncVar.BlockCount.HasValue)
             {
@@ -830,19 +830,19 @@ namespace Mirage.Weaver
             }
             else if (syncVar.FloatPackSettings.HasValue)
             {
-                ReadPacker(module.ImportReference((FloatPacker p) => p.Unpack(default(NetworkReader))));
+                ReadPacker(moduleCache.ImportReference((FloatPacker p) => p.Unpack(default(NetworkReader))));
             }
             else if (syncVar.Vector2PackSettings.HasValue)
             {
-                ReadPacker(module.ImportReference((Vector2Packer p) => p.Unpack(default(NetworkReader))));
+                ReadPacker(moduleCache.ImportReference((Vector2Packer p) => p.Unpack(default(NetworkReader))));
             }
             else if (syncVar.Vector3PackSettings.HasValue)
             {
-                ReadPacker(module.ImportReference((Vector3Packer p) => p.Unpack(default(NetworkReader))));
+                ReadPacker(moduleCache.ImportReference((Vector3Packer p) => p.Unpack(default(NetworkReader))));
             }
             else if (syncVar.QuaternionBitCount.HasValue)
             {
-                ReadPacker(module.ImportReference((QuaternionPacker p) => p.Unpack(default(NetworkReader))));
+                ReadPacker(moduleCache.ImportReference((QuaternionPacker p) => p.Unpack(default(NetworkReader))));
             }
             else
             {
@@ -865,7 +865,7 @@ namespace Mirage.Weaver
             }
             void ReadWithBitCount()
             {
-                MethodReference readWithBitCount = module.ImportReference(readerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkReader.Read)));
+                MethodReference readWithBitCount = moduleCache.ImportReference(readerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkReader.Read)));
 
                 // add `reader` to stack
                 worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
@@ -891,7 +891,7 @@ namespace Mirage.Weaver
             }
             void ReadBlockSize()
             {
-                MethodReference writeWithBlockSize = module.ImportReference(() => VarIntBlocksPacker.Unpack(default, default));
+                MethodReference writeWithBlockSize = moduleCache.ImportReference(() => VarIntBlocksPacker.Unpack(default, default));
 
                 worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
                 worker.Append(worker.Create(OpCodes.Ldc_I4, syncVar.BlockCount.Value));
@@ -907,8 +907,8 @@ namespace Mirage.Weaver
             {
                 bool useLong = syncVar.FieldDefinition.FieldType.Is<long>();
                 MethodReference encode = useLong
-                    ? module.ImportReference((ulong v) => ZigZag.Decode(v))
-                    : module.ImportReference((uint v) => ZigZag.Decode(v));
+                    ? moduleCache.ImportReference((ulong v) => ZigZag.Decode(v))
+                    : moduleCache.ImportReference((uint v) => ZigZag.Decode(v));
 
                 worker.Append(worker.Create(OpCodes.Call, encode));
             }

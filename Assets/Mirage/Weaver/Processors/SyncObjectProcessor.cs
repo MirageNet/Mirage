@@ -9,13 +9,14 @@ namespace Mirage.Weaver
     public class SyncObjectProcessor
     {
         readonly List<FieldDefinition> syncObjects = new List<FieldDefinition>();
-
+        private readonly ModuleImportCache moduleCache;
         private readonly Readers readers;
         private readonly Writers writers;
         private readonly IWeaverLogger logger;
 
-        public SyncObjectProcessor(Readers readers, Writers writers, IWeaverLogger logger)
+        public SyncObjectProcessor(ModuleImportCache moduleCache, Readers readers, Writers writers, IWeaverLogger logger)
         {
+            this.moduleCache = moduleCache;
             this.readers = readers;
             this.writers = writers;
             this.logger = logger;
@@ -146,13 +147,13 @@ namespace Mirage.Weaver
             // generates code like:
             this.InitSyncObject(m_sizes);
         */
-        static void GenerateSyncObjectRegistration(ILProcessor worker, FieldDefinition fd)
+        void GenerateSyncObjectRegistration(ILProcessor worker, FieldDefinition fd)
         {
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldfld, fd));
 
-            MethodReference initSyncObjectRef = worker.Body.Method.Module.ImportReference<NetworkBehaviour>(nb => nb.InitSyncObject(default));
+            MethodReference initSyncObjectRef = moduleCache.ImportReference<NetworkBehaviour>(nb => nb.InitSyncObject(default));
             worker.Append(worker.Create(OpCodes.Call, initSyncObjectRef));
         }
     }

@@ -11,7 +11,7 @@ namespace Mirage.Weaver.NetworkBehaviours
     {
         public const string MethodName = nameof(NetworkBehaviour.SerializeSyncVars);
 
-        readonly ModuleDefinition module;
+        readonly ModuleImportCache moduleCache;
         readonly FoundNetworkBehaviour behaviour;
 
         ILProcessor worker;
@@ -22,9 +22,9 @@ namespace Mirage.Weaver.NetworkBehaviours
         public VariableDefinition DirtyLocal { get; private set; }
         public VariableDefinition DirtyBitsLocal { get; private set; }
 
-        public SerializeHelper(ModuleDefinition module, FoundNetworkBehaviour behaviour)
+        public SerializeHelper(ModuleImportCache moduleCache, FoundNetworkBehaviour behaviour)
         {
-            this.module = module;
+            this.moduleCache = moduleCache;
             this.behaviour = behaviour;
         }
 
@@ -36,7 +36,7 @@ namespace Mirage.Weaver.NetworkBehaviours
         {
             Method = behaviour.TypeDefinition.AddMethod(MethodName,
                     MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
-                    module.ImportReference<bool>());
+                    moduleCache.ImportReference<bool>());
 
             WriterParameter = Method.AddParam<NetworkWriter>("writer");
             InitializeParameter = Method.AddParam<bool>("initialize");
@@ -52,7 +52,7 @@ namespace Mirage.Weaver.NetworkBehaviours
 
             // store dirty bit in local variable to avoid calling property multiple times
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.SyncVarDirtyBits));
+            worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference((NetworkBehaviour nb) => nb.SyncVarDirtyBits)));
             worker.Append(worker.Create(OpCodes.Stloc, DirtyBitsLocal));
         }
 
@@ -69,7 +69,7 @@ namespace Mirage.Weaver.NetworkBehaviours
                 worker.Append(worker.Create(OpCodes.Ldarg, WriterParameter));
                 // inital?
                 worker.Append(worker.Create(OpCodes.Ldarg, InitializeParameter));
-                worker.Append(worker.Create(OpCodes.Call, module.ImportReference(baseSerialize)));
+                worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference(baseSerialize)));
                 // store to variable
                 worker.Append(worker.Create(OpCodes.Stloc, DirtyLocal));
             }
@@ -101,7 +101,7 @@ namespace Mirage.Weaver.NetworkBehaviours
         /// </summary>
         public void WriteDirtyBitMask()
         {
-            MethodReference writeBitsMethod = module.ImportReference(WriterParameter.ParameterType.Resolve().GetMethod(nameof(NetworkWriter.Write)));
+            MethodReference writeBitsMethod = moduleCache.ImportReference(WriterParameter.ParameterType.Resolve().GetMethod(nameof(NetworkWriter.Write)));
 
             // Generates: writer.Write(dirtyBits >> b, n)
             // where b is syncvars in base, n is syncvars in this

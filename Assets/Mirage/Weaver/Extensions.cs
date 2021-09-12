@@ -49,13 +49,13 @@ namespace Mirage.Weaver
         }
 
         // set the value of a constant in a class
-        public static void SetConst<T>(this TypeDefinition td, string fieldName, T value) where T : struct
+        public static void SetConst<T>(this TypeDefinition td, ModuleImportCache moduleCache, string fieldName, T value) where T : struct
         {
             FieldDefinition field = td.Fields.FirstOrDefault(f => f.Name == fieldName);
 
             if (field == null)
             {
-                field = new FieldDefinition(fieldName, FieldAttributes.Literal | FieldAttributes.NotSerialized | FieldAttributes.Private, td.Module.ImportReference<T>());
+                field = new FieldDefinition(fieldName, FieldAttributes.Literal | FieldAttributes.NotSerialized | FieldAttributes.Private, moduleCache.ImportReference<T>());
                 td.Fields.Add(field);
             }
 

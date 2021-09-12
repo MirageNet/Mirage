@@ -26,7 +26,7 @@ namespace Mirage.Weaver
 
         readonly List<ServerRpcMethod> serverRpcs = new List<ServerRpcMethod>();
 
-        public ServerRpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger) : base(module, readers, writers, logger)
+        public ServerRpcProcessor(ModuleImportCache module, Readers readers, Writers writers, IWeaverLogger logger) : base(module, readers, writers, logger)
         {
         }
 
@@ -71,7 +71,7 @@ namespace Mirage.Weaver
 
             // NetworkWriter writer = NetworkWriterPool.GetWriter()
             VariableDefinition writer = md.AddLocal<PooledNetworkWriter>();
-            worker.Append(worker.Create(OpCodes.Call, md.Module.ImportReference(() => NetworkWriterPool.GetWriter())));
+            worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference(() => NetworkWriterPool.GetWriter())));
             worker.Append(worker.Create(OpCodes.Stloc, writer));
 
             // write all the arguments that the user passed to the Cmd call
@@ -89,7 +89,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType.ConvertToGenericIfNeeded()));
             // invokerClass
-            worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
+            worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference(() => Type.GetTypeFromHandle(default))));
             worker.Append(worker.Create(OpCodes.Ldstr, cmdName));
             // writer
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
@@ -97,7 +97,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
             CallSendServerRpc(md, worker);
 
-            NetworkWriterHelper.CallRelease(module, worker, writer);
+            NetworkWriterHelper.CallRelease(moduleCache, worker, writer);
 
             worker.Append(worker.Create(OpCodes.Ret));
 
@@ -109,7 +109,7 @@ namespace Mirage.Weaver
             // if (IsServer) {
             Instruction endif = worker.Create(OpCodes.Nop);
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
+            worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference((NetworkBehaviour nb) => nb.IsServer)));
             worker.Append(worker.Create(OpCodes.Brfalse, endif));
 
             body();
@@ -132,7 +132,7 @@ namespace Mirage.Weaver
         {
             if (md.ReturnType.Is(typeof(void)))
             {
-                MethodReference sendServerRpcRef = md.Module.ImportReference<NetworkBehaviour>(nb => nb.SendServerRpcInternal(default, default, default, default, default));
+                MethodReference sendServerRpcRef = moduleCache.ImportReference<NetworkBehaviour>(nb => nb.SendServerRpcInternal(default, default, default, default, default));
                 worker.Append(worker.Create(OpCodes.Call, sendServerRpcRef));
             }
             else
@@ -141,7 +141,7 @@ namespace Mirage.Weaver
                 Type netBehaviour = typeof(NetworkBehaviour);
 
                 MethodInfo sendMethod = netBehaviour.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).First(m => m.Name == nameof(NetworkBehaviour.SendServerRpcWithReturn));
-                MethodReference sendRef = md.Module.ImportReference(sendMethod);
+                MethodReference sendRef = moduleCache.ImportReference(sendMethod);
 
                 var returnType = md.ReturnType as GenericInstanceType;
 
@@ -243,7 +243,7 @@ namespace Mirage.Weaver
 
             TypeDefinition netBehaviourSubclass = skeleton.DeclaringType;
             worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass.ConvertToGenericIfNeeded()));
-            worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
+            worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference(() => Type.GetTypeFromHandle(default))));
             worker.Append(worker.Create(OpCodes.Ldstr, cmdName));
             worker.Append(worker.Create(OpCodes.Ldnull));
             CreateRpcDelegate(worker, skeleton);
@@ -253,16 +253,16 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Call, registerMethod));
         }
 
-        private static MethodReference GetRegisterMethod(MethodDefinition func)
+        private MethodReference GetRegisterMethod(MethodDefinition func)
         {
             if (func.ReturnType.Is(typeof(void)))
-                return func.Module.ImportReference(() => RemoteCallHelper.RegisterServerRpcDelegate(default, default, default, default));
+                return moduleCache.ImportReference(() => RemoteCallHelper.RegisterServerRpcDelegate(default, default, default, default));
 
             var taskReturnType = func.ReturnType as GenericInstanceType;
 
             TypeReference returnType = taskReturnType.GenericArguments[0];
 
-            var genericRegisterMethod = func.Module.ImportReference(() => RemoteCallHelper.RegisterRequestDelegate<object>(default, default, default, default)) as GenericInstanceMethod;
+            var genericRegisterMethod = moduleCache.ImportReference(() => RemoteCallHelper.RegisterRequestDelegate<object>(default, default, default, default)) as GenericInstanceMethod;
 
             var registerInstance = new GenericInstanceMethod(genericRegisterMethod.ElementMethod);
             registerInstance.GenericArguments.Add(returnType);

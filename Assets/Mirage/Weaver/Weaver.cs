@@ -16,6 +16,7 @@ namespace Mirage.Weaver
         private Writers writers;
         private PropertySiteProcessor propertySiteProcessor;
         private WeaverDiagnosticsTimer timer;
+        private ModuleImportCache moduleCache;
 
         private AssemblyDefinition CurrentAssembly { get; set; }
 
@@ -77,7 +78,7 @@ namespace Mirage.Weaver
             bool modified = false;
             foreach (TypeDefinition behaviour in behaviourClasses)
             {
-                modified |= new NetworkBehaviourProcessor(behaviour, readers, writers, propertySiteProcessor, logger).Process();
+                modified |= new NetworkBehaviourProcessor(moduleCache, behaviour, readers, writers, propertySiteProcessor, logger).Process();
             }
             return modified;
         }
@@ -94,7 +95,7 @@ namespace Mirage.Weaver
             try
             {
                 bool modified = false;
-                var attributeProcessor = new ServerClientAttributeProcessor(module, logger);
+                var attributeProcessor = new ServerClientAttributeProcessor(moduleCache, logger);
 
                 TypeDefinition[] resolvedTypes = GetAllResolvedClasses(module);
 
@@ -154,6 +155,7 @@ namespace Mirage.Weaver
 
         public AssemblyDefinition Weave(ICompiledAssembly compiledAssembly)
         {
+            long endTime = 0;
             try
             {
                 timer = new WeaverDiagnosticsTimer();
@@ -162,10 +164,11 @@ namespace Mirage.Weaver
                 CurrentAssembly = AssemblyDefinitionFor(compiledAssembly);
 
                 ModuleDefinition module = CurrentAssembly.MainModule;
-                readers = new Readers(module, logger);
-                writers = new Writers(module, logger);
+                moduleCache = new ModuleImportCache(module);
+                readers = new Readers(moduleCache, logger);
+                writers = new Writers(moduleCache, logger);
                 propertySiteProcessor = new PropertySiteProcessor();
-                var rwProcessor = new ReaderWriterProcessor(module, readers, writers);
+                var rwProcessor = new ReaderWriterProcessor(moduleCache, readers, writers);
 
                 bool modified = false;
                 using (timer.Sample("ReaderWriterProcessor"))
@@ -174,6 +177,7 @@ namespace Mirage.Weaver
                 }
 
                 modified |= WeaveModule(module);
+                timer.AfterWeaveModule();
 
                 if (!modified)
                     return CurrentAssembly;
@@ -183,13 +187,17 @@ namespace Mirage.Weaver
                     rwProcessor.InitializeReaderAndWriters();
                 }
 
-                timer.End();
+                endTime = timer.End();
                 return CurrentAssembly;
             }
             catch (Exception e)
             {
                 logger.Error("Exception :" + e);
                 return null;
+            }
+            finally
+            {
+                moduleCache?.Close(endTime);
             }
         }
     }

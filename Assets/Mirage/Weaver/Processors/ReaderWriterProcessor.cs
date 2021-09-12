@@ -16,7 +16,7 @@ namespace Mirage.Weaver
     {
         private readonly HashSet<TypeReference> messages = new HashSet<TypeReference>(new TypeReferenceComparer());
 
-        private readonly ModuleDefinition module;
+        private readonly ModuleImportCache moduleCache;
         private readonly Readers readers;
         private readonly Writers writers;
         private readonly SerailizeExtensionHelper extensionHelper;
@@ -26,12 +26,12 @@ namespace Mirage.Weaver
         /// </summary>
         static Module MirageModule => typeof(NetworkWriter).Module;
 
-        public ReaderWriterProcessor(ModuleDefinition module, Readers readers, Writers writers)
+        public ReaderWriterProcessor(ModuleImportCache moduleCache, Readers readers, Writers writers)
         {
-            this.module = module;
+            this.moduleCache = moduleCache;
             this.readers = readers;
             this.writers = writers;
-            extensionHelper = new SerailizeExtensionHelper(module, readers, writers);
+            extensionHelper = new SerailizeExtensionHelper(moduleCache, readers, writers);
         }
 
         public bool Process()
@@ -66,7 +66,7 @@ namespace Mirage.Weaver
             IEnumerable<Type> types = MirageModule.GetTypes().Where(t => t.GetCustomAttribute<NetworkMessageAttribute>() != null);
             foreach (Type type in types)
             {
-                TypeReference typeReference = module.ImportReference(type);
+                TypeReference typeReference = moduleCache.ImportReference(type);
                 writers.TryGetFunction(typeReference, null);
                 readers.TryGetFunction(typeReference, null);
                 messages.Add(typeReference);
@@ -77,7 +77,7 @@ namespace Mirage.Weaver
         #region Assembly defined reader/writer
         void ProcessAssemblyClasses()
         {
-            var types = new List<TypeDefinition>(module.Types);
+            var types = new List<TypeDefinition>(moduleCache.Module.Types);
 
             foreach (TypeDefinition klass in types)
             {
@@ -87,7 +87,7 @@ namespace Mirage.Weaver
             // Generate readers and writers
             // find all the Send<> and Register<> calls and generate
             // readers and writers for them.
-            CodePass.ForEachInstruction(module, (md, instr, sequencePoint) => GenerateReadersWriters(instr, sequencePoint));
+            CodePass.ForEachInstruction(moduleCache.Module, (md, instr, sequencePoint) => GenerateReadersWriters(instr, sequencePoint));
         }
 
         private void ProcessClass(TypeDefinition klass)
@@ -176,7 +176,7 @@ namespace Mirage.Weaver
                     MethodDefinition constructor = typeDefinition.GetMethod(".ctor");
 
                     bool hasAccess = constructor.IsPublic
-                        || constructor.IsAssembly && typeDefinition.Module == module;
+                        || constructor.IsAssembly && typeDefinition.Module == moduleCache.Module;
 
                     if (!hasAccess)
                         return;
@@ -236,21 +236,21 @@ namespace Mirage.Weaver
         /// <param name="currentAssembly"></param>
         public void InitializeReaderAndWriters()
         {
-            MethodDefinition rwInitializer = module.GeneratedClass().AddMethod(
+            MethodDefinition rwInitializer = moduleCache.GeneratedClass().AddMethod(
                 "InitReadWriters",
                 Mono.Cecil.MethodAttributes.Public | Mono.Cecil.MethodAttributes.Static);
 
             ConstructorInfo attributeconstructor = typeof(RuntimeInitializeOnLoadMethodAttribute).GetConstructor(new[] { typeof(RuntimeInitializeLoadType) });
 
-            var customAttributeRef = new CustomAttribute(module.ImportReference(attributeconstructor));
-            customAttributeRef.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportReference<RuntimeInitializeLoadType>(), RuntimeInitializeLoadType.BeforeSceneLoad));
+            var customAttributeRef = new CustomAttribute(moduleCache.ImportReference(attributeconstructor));
+            customAttributeRef.ConstructorArguments.Add(new CustomAttributeArgument(moduleCache.ImportReference<RuntimeInitializeLoadType>(), RuntimeInitializeLoadType.BeforeSceneLoad));
             rwInitializer.CustomAttributes.Add(customAttributeRef);
 
-            if (IsEditorAssembly(module))
+            if (IsEditorAssembly(moduleCache.Module))
             {
                 // editor assembly,  add InitializeOnLoadMethod too.  Useful for the editor tests
                 ConstructorInfo initializeOnLoadConstructor = typeof(InitializeOnLoadMethodAttribute).GetConstructor(new Type[0]);
-                var initializeCustomConstructorRef = new CustomAttribute(module.ImportReference(initializeOnLoadConstructor));
+                var initializeCustomConstructorRef = new CustomAttribute(moduleCache.ImportReference(initializeOnLoadConstructor));
                 rwInitializer.CustomAttributes.Add(initializeCustomConstructorRef);
             }
 
@@ -267,12 +267,12 @@ namespace Mirage.Weaver
         private void RegisterMessages(ILProcessor worker)
         {
             MethodInfo method = typeof(MessagePacker).GetMethod(nameof(MessagePacker.RegisterMessage));
-            MethodReference registerMethod = module.ImportReference(method);
+            MethodReference registerMethod = moduleCache.ImportReference(method);
 
             foreach (TypeReference message in messages)
             {
                 var genericMethodCall = new GenericInstanceMethod(registerMethod);
-                genericMethodCall.GenericArguments.Add(module.ImportReference(message));
+                genericMethodCall.GenericArguments.Add(moduleCache.ImportReference(message));
                 worker.Append(worker.Create(OpCodes.Call, genericMethodCall));
             }
         }
@@ -285,13 +285,13 @@ namespace Mirage.Weaver
     /// </summary>
     public class SerailizeExtensionHelper
     {
-        private readonly ModuleDefinition module;
+        private readonly ModuleImportCache moduleCache;
         private readonly Readers readers;
         private readonly Writers writers;
 
-        public SerailizeExtensionHelper(ModuleDefinition module, Readers readers, Writers writers)
+        public SerailizeExtensionHelper(ModuleImportCache moduleCache, Readers readers, Writers writers)
         {
-            this.module = module;
+            this.moduleCache = moduleCache;
             this.readers = readers;
             this.writers = writers;
         }
@@ -421,22 +421,22 @@ namespace Mirage.Weaver
         private void RegisterWriter(MethodInfo method)
         {
             Type dataType = method.GetParameters()[1].ParameterType;
-            writers.Register(module.ImportReference(dataType), module.ImportReference(method));
+            writers.Register(moduleCache.ImportReference(dataType), moduleCache.ImportReference(method));
         }
         private void RegisterWriter(MethodDefinition method)
         {
             TypeReference dataType = method.Parameters[1].ParameterType;
-            writers.Register(module.ImportReference(dataType), module.ImportReference(method));
+            writers.Register(moduleCache.ImportReference(dataType), moduleCache.ImportReference(method));
         }
 
 
         private void RegisterReader(MethodInfo method)
         {
-            readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
+            readers.Register(moduleCache.ImportReference(method.ReturnType), moduleCache.ImportReference(method));
         }
         private void RegisterReader(MethodDefinition method)
         {
-            readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
+            readers.Register(moduleCache.ImportReference(method.ReturnType), moduleCache.ImportReference(method));
         }
     }
 }

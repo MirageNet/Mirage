@@ -10,7 +10,7 @@ namespace Mirage.Weaver
 {
     public class Readers : SerializeFunctionBase
     {
-        public Readers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
+        public Readers(ModuleImportCache module, IWeaverLogger logger) : base(module, logger) { }
 
         protected override string FunctionTypeLog => "read function";
 
@@ -24,7 +24,8 @@ namespace Mirage.Weaver
             ILProcessor worker = readerFunc.Body.GetILProcessor();
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create<NetworkReader>(OpCodes.Call, (reader) => reader.ReadNetworkBehaviour()));
+
+            worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference<NetworkReader>((reader) => reader.ReadNetworkBehaviour())));
             worker.Append(worker.Create(OpCodes.Castclass, typeReference));
             worker.Append(worker.Create(OpCodes.Ret));
             return readerFunc;
@@ -60,7 +61,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Call, GetFunction_Thorws(arrayType)));
 
             // return new ArraySegment<T>($array);
-            MethodReference arraySegmentConstructor = module.ImportReference(() => new ArraySegment<object>());
+            MethodReference arraySegmentConstructor = moduleCache.ImportReference(() => new ArraySegment<object>());
             worker.Append(worker.Create(OpCodes.Newobj, arraySegmentConstructor.MakeHostInstanceGeneric(genericInstance)));
             worker.Append(worker.Create(OpCodes.Ret));
             return readerFunc;
@@ -71,7 +72,7 @@ namespace Mirage.Weaver
             string functionName = "_Read_" + variable.FullName;
 
             // create new reader for this type
-            MethodDefinition readerFunc = module.GeneratedClass().AddMethod(functionName,
+            MethodDefinition readerFunc = moduleCache.GeneratedClass().AddMethod(functionName,
                     MethodAttributes.Public |
                     MethodAttributes.Static |
                     MethodAttributes.HideBySig,
@@ -91,7 +92,7 @@ namespace Mirage.Weaver
 
             MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
 
-            MethodReference listReader = module.ImportReference(genericExpression);
+            MethodReference listReader = moduleCache.ImportReference(genericExpression);
 
             var methodRef = new GenericInstanceMethod(listReader.GetElementMethod());
             methodRef.GenericArguments.Add(elementType);
@@ -159,7 +160,7 @@ namespace Mirage.Weaver
             }
             else if (td.IsDerivedFrom<ScriptableObject>())
             {
-                MethodReference createScriptableObjectInstance = worker.Body.Method.Module.ImportReference(() => ScriptableObject.CreateInstance<ScriptableObject>());
+                MethodReference createScriptableObjectInstance = moduleCache.ImportReference(() => ScriptableObject.CreateInstance<ScriptableObject>());
                 var genericInstanceMethod = new GenericInstanceMethod(createScriptableObjectInstance.GetElementMethod());
                 genericInstanceMethod.GenericArguments.Add(type);
                 worker.Append(worker.Create(OpCodes.Call, genericInstanceMethod));
@@ -194,7 +195,7 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Call, readFunc));
 
-                FieldReference fieldRef = module.ImportReference(field);
+                FieldReference fieldRef = moduleCache.ImportReference(field);
 
                 worker.Append(worker.Create(OpCodes.Stfld, fieldRef));
                 fields++;
@@ -207,13 +208,13 @@ namespace Mirage.Weaver
         /// <param name="worker"></param>
         internal void InitializeReaders(ILProcessor worker)
         {
-            TypeReference genericReaderClassRef = module.ImportReference(typeof(Reader<>));
+            TypeReference genericReaderClassRef = moduleCache.ImportReference(typeof(Reader<>));
 
             System.Reflection.PropertyInfo readProperty = typeof(Reader<>).GetProperty(nameof(Reader<object>.Read));
-            MethodReference fieldRef = module.ImportReference(readProperty.GetSetMethod());
-            TypeReference networkReaderRef = module.ImportReference(typeof(NetworkReader));
-            TypeReference funcRef = module.ImportReference(typeof(Func<,>));
-            MethodReference funcConstructorRef = module.ImportReference(typeof(Func<,>).GetConstructors()[0]);
+            MethodReference fieldRef = moduleCache.ImportReference(readProperty.GetSetMethod());
+            TypeReference networkReaderRef = moduleCache.ImportReference(typeof(NetworkReader));
+            TypeReference funcRef = moduleCache.ImportReference(typeof(Func<,>));
+            MethodReference funcConstructorRef = moduleCache.ImportReference(typeof(Func<,>).GetConstructors()[0]);
 
             foreach (MethodReference readFunc in funcs.Values)
             {

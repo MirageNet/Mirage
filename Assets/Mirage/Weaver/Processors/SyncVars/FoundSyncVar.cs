@@ -78,37 +78,37 @@ namespace Mirage.Weaver.SyncVars
         /// <summary>
         /// Changing the type of the field to the wrapper type, if one exists
         /// </summary>
-        public void SetWrapType(ModuleDefinition module)
+        public void SetWrapType(ModuleImportCache moduleCache)
         {
             OriginalName = FieldDefinition.Name;
             OriginalType = FieldDefinition.FieldType;
 
-            if (CheckWrapType(module, OriginalType, out TypeReference wrapType))
+            if (CheckWrapType(moduleCache, OriginalType, out TypeReference wrapType))
             {
                 IsWrapped = true;
                 FieldDefinition.FieldType = wrapType;
             }
         }
 
-        private static bool CheckWrapType(ModuleDefinition module, TypeReference originalType, out TypeReference wrapType)
+        private static bool CheckWrapType(ModuleImportCache moduleCache, TypeReference originalType, out TypeReference wrapType)
         {
             TypeReference typeReference = originalType;
 
             if (typeReference.Is<NetworkIdentity>())
             {
                 // change the type of the field to a wrapper NetworkIdentitySyncvar
-                wrapType = module.ImportReference<NetworkIdentitySyncvar>();
+                wrapType = moduleCache.ImportReference<NetworkIdentitySyncvar>();
                 return true;
             }
             if (typeReference.Is<GameObject>())
             {
-                wrapType = module.ImportReference<GameObjectSyncvar>();
+                wrapType = moduleCache.ImportReference<GameObjectSyncvar>();
                 return true;
             }
 
             if (typeReference.Resolve().IsDerivedFrom<NetworkBehaviour>())
             {
-                wrapType = module.ImportReference<NetworkBehaviorSyncvar>();
+                wrapType = moduleCache.ImportReference<NetworkBehaviorSyncvar>();
                 return true;
             }
 

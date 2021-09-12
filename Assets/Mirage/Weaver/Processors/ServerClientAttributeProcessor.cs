@@ -1,27 +1,30 @@
-// Injects server/client active checks for [Server/Client] attributes
+using System;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver
 {
+    // Injects server/client active checks for [Server/Client] attributes
     class ServerClientAttributeProcessor
     {
         private readonly IWeaverLogger logger;
+        private readonly ModuleImportCache moduleCache;
 
         readonly MethodReference IsServer;
         readonly MethodReference IsClient;
         readonly MethodReference HasAuthority;
         readonly MethodReference IsLocalPlayer;
 
-        public ServerClientAttributeProcessor(ModuleDefinition module, IWeaverLogger logger)
+        public ServerClientAttributeProcessor(ModuleImportCache moduleCache, IWeaverLogger logger)
         {
             this.logger = logger;
+            this.moduleCache = moduleCache;
 
             // Cache these so that we dont import them for each site we process
-            IsServer = module.ImportReference((NetworkBehaviour nb) => nb.IsServer);
-            IsClient = module.ImportReference((NetworkBehaviour nb) => nb.IsClient);
-            HasAuthority = module.ImportReference((NetworkBehaviour nb) => nb.HasAuthority);
-            IsLocalPlayer = module.ImportReference((NetworkBehaviour nb) => nb.IsLocalPlayer);
+            IsServer = moduleCache.ImportReference((NetworkBehaviour nb) => nb.IsServer);
+            IsClient = moduleCache.ImportReference((NetworkBehaviour nb) => nb.IsClient);
+            HasAuthority = moduleCache.ImportReference((NetworkBehaviour nb) => nb.HasAuthority);
+            IsLocalPlayer = moduleCache.ImportReference((NetworkBehaviour nb) => nb.IsLocalPlayer);
         }
 
         public bool Process(TypeDefinition td)
@@ -90,7 +93,7 @@ namespace Mirage.Weaver
             if (throwError)
             {
                 worker.InsertBefore(top, worker.Create(OpCodes.Ldstr, message));
-                worker.InsertBefore(top, worker.Create(OpCodes.Newobj, () => new MethodInvocationException("")));
+                worker.InsertBefore(top, worker.Create(OpCodes.Newobj, moduleCache.ImportReference(() => new MethodInvocationException(""))));
                 worker.InsertBefore(top, worker.Create(OpCodes.Throw));
             }
             InjectGuardParameters(md, worker, top);

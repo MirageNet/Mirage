@@ -10,7 +10,7 @@ namespace Mirage.Weaver
 
     public class Writers : SerializeFunctionBase
     {
-        public Writers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
+        public Writers(ModuleImportCache module, IWeaverLogger logger) : base(module, logger) { }
 
         protected override string FunctionTypeLog => "write function";
         protected override Expression<Action> ArrayExpression => () => CollectionExtensions.WriteArray<byte>(default, default);
@@ -19,7 +19,7 @@ namespace Mirage.Weaver
 
         protected override MethodReference GetNetworkBehaviourFunction(TypeReference typeReference)
         {
-            MethodReference writeFunc = module.ImportReference<NetworkWriter>((nw) => nw.WriteNetworkBehaviour(default));
+            MethodReference writeFunc = moduleCache.ImportReference<NetworkWriter>((nw) => nw.WriteNetworkBehaviour(default));
             Register(typeReference, writeFunc);
             return writeFunc;
         }
@@ -44,7 +44,7 @@ namespace Mirage.Weaver
         {
             string functionName = "_Write_" + typeReference.FullName;
             // create new writer for this type
-            MethodDefinition writerFunc = module.GeneratedClass().AddMethod(functionName,
+            MethodDefinition writerFunc = moduleCache.GeneratedClass().AddMethod(functionName,
                     MethodAttributes.Public |
                     MethodAttributes.Static |
                     MethodAttributes.HideBySig);
@@ -110,7 +110,7 @@ namespace Mirage.Weaver
             {
                 MethodReference writeFunc = GetFunction_Thorws(field.FieldType);
 
-                FieldReference fieldRef = module.ImportReference(field);
+                FieldReference fieldRef = moduleCache.ImportReference(field);
 
                 fields++;
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -135,7 +135,7 @@ namespace Mirage.Weaver
 
             MethodDefinition writerFunc = GenerateWriterFunc(typeReference);
 
-            MethodReference collectionWriter = module.ImportReference(genericExpression).GetElementMethod();
+            MethodReference collectionWriter = moduleCache.ImportReference(genericExpression).GetElementMethod();
 
             var methodRef = new GenericInstanceMethod(collectionWriter);
             methodRef.GenericArguments.Add(elementType);
@@ -160,13 +160,13 @@ namespace Mirage.Weaver
         /// <param name="worker"></param>
         internal void InitializeWriters(ILProcessor worker)
         {
-            TypeReference genericWriterClassRef = module.ImportReference(typeof(Writer<>));
+            TypeReference genericWriterClassRef = moduleCache.ImportReference(typeof(Writer<>));
 
             System.Reflection.PropertyInfo writerProperty = typeof(Writer<>).GetProperty(nameof(Writer<int>.Write));
-            MethodReference fieldRef = module.ImportReference(writerProperty.GetSetMethod());
-            TypeReference networkWriterRef = module.ImportReference(typeof(NetworkWriter));
-            TypeReference actionRef = module.ImportReference(typeof(Action<,>));
-            MethodReference actionConstructorRef = module.ImportReference(typeof(Action<,>).GetConstructors()[0]);
+            MethodReference fieldRef = moduleCache.ImportReference(writerProperty.GetSetMethod());
+            TypeReference networkWriterRef = moduleCache.ImportReference(typeof(NetworkWriter));
+            TypeReference actionRef = moduleCache.ImportReference(typeof(Action<,>));
+            MethodReference actionConstructorRef = moduleCache.ImportReference(typeof(Action<,>).GetConstructors()[0]);
 
             foreach (MethodReference writerMethod in funcs.Values)
             {

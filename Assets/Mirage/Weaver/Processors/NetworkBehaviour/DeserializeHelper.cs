@@ -11,7 +11,7 @@ namespace Mirage.Weaver.NetworkBehaviours
     {
         public const string MethodName = nameof(NetworkBehaviour.DeserializeSyncVars);
 
-        readonly ModuleDefinition module;
+        readonly ModuleImportCache moduleCache;
         readonly FoundNetworkBehaviour behaviour;
 
         ILProcessor worker;
@@ -24,9 +24,9 @@ namespace Mirage.Weaver.NetworkBehaviours
         /// </summary>
         public VariableDefinition DirtyBitsLocal { get; private set; }
 
-        public DeserializeHelper(ModuleDefinition module, FoundNetworkBehaviour behaviour)
+        public DeserializeHelper(ModuleImportCache moduleCache, FoundNetworkBehaviour behaviour)
         {
-            this.module = module;
+            this.moduleCache = moduleCache;
             this.behaviour = behaviour;
         }
 
@@ -63,7 +63,7 @@ namespace Mirage.Weaver.NetworkBehaviours
                 worker.Append(worker.Create(OpCodes.Ldarg, ReaderParameter));
                 // initialState
                 worker.Append(worker.Create(OpCodes.Ldarg, InitializeParameter));
-                worker.Append(worker.Create(OpCodes.Call, module.ImportReference(baseDeserialize)));
+                worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference(baseDeserialize)));
             }
         }
 
@@ -89,7 +89,7 @@ namespace Mirage.Weaver.NetworkBehaviours
         /// </summary>
         public void ReadDirtyBitMask()
         {
-            MethodReference readBitsMethod = module.ImportReference(ReaderParameter.ParameterType.Resolve().GetMethod(nameof(NetworkReader.Read)));
+            MethodReference readBitsMethod = moduleCache.ImportReference(ReaderParameter.ParameterType.Resolve().GetMethod(nameof(NetworkReader.Read)));
 
             // Generates: reader.Read(n)
             // n is syncvars in this

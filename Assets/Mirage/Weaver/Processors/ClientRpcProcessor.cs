@@ -22,7 +22,7 @@ namespace Mirage.Weaver
 
         readonly List<ClientRpcMethod> clientRpcs = new List<ClientRpcMethod>();
 
-        public ClientRpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger) : base(module, readers, writers, logger)
+        public ClientRpcProcessor(ModuleImportCache moduleCache, Readers readers, Writers writers, IWeaverLogger logger) : base(moduleCache, readers, writers, logger)
         {
         }
 
@@ -69,8 +69,8 @@ namespace Mirage.Weaver
                 // this is called in the skeleton (the client)
                 // the client should just get the connection to the server and pass that in
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
-                worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
+                worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference((NetworkBehaviour nb) => nb.Client)));
+                worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference((NetworkClient nb) => nb.Player)));
             }
 
             if (!ReadArguments(md, worker, hasNetworkConnection))
@@ -150,7 +150,7 @@ namespace Mirage.Weaver
 
             // NetworkWriter writer = NetworkWriterPool.GetWriter()
             VariableDefinition writer = md.AddLocal<PooledNetworkWriter>();
-            worker.Append(worker.Create(OpCodes.Call, () => NetworkWriterPool.GetWriter()));
+            worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference(() => NetworkWriterPool.GetWriter())));
             worker.Append(worker.Create(OpCodes.Stloc, writer));
 
             // write all the arguments that the user passed to the Rpc call
@@ -174,7 +174,7 @@ namespace Mirage.Weaver
 
             worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType.ConvertToGenericIfNeeded()));
             // invokerClass
-            worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
+            worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference(() => Type.GetTypeFromHandle(default))));
             worker.Append(worker.Create(OpCodes.Ldstr, rpcName));
             // writer
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
@@ -183,16 +183,16 @@ namespace Mirage.Weaver
             if (target == RpcTarget.Observers)
             {
                 worker.Append(worker.Create(excludeOwner ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
-                MethodReference sendRpcRef = md.Module.ImportReference<NetworkBehaviour>(nb => nb.SendRpcInternal(default, default, default, default, default));
+                MethodReference sendRpcRef = moduleCache.ImportReference<NetworkBehaviour>(nb => nb.SendRpcInternal(default, default, default, default, default));
                 worker.Append(worker.Create(OpCodes.Callvirt, sendRpcRef));
             }
             else
             {
-                MethodReference sendTargetRpcRef = md.Module.ImportReference<NetworkBehaviour>(nb => nb.SendTargetRpcInternal(default, default, default, default, default));
+                MethodReference sendTargetRpcRef = moduleCache.ImportReference<NetworkBehaviour>(nb => nb.SendTargetRpcInternal(default, default, default, default, default));
                 worker.Append(worker.Create(OpCodes.Callvirt, sendTargetRpcRef));
             }
 
-            NetworkWriterHelper.CallRelease(module, worker, writer);
+            NetworkWriterHelper.CallRelease(moduleCache, worker, writer);
 
             worker.Append(worker.Create(OpCodes.Ret));
 
@@ -204,7 +204,7 @@ namespace Mirage.Weaver
             // if (IsLocalClient) {
             Instruction endif = worker.Create(OpCodes.Nop);
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsClient));
+            worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference((NetworkBehaviour nb) => nb.IsClient)));
             worker.Append(worker.Create(OpCodes.Brfalse, endif));
 
             body();
@@ -236,8 +236,8 @@ namespace Mirage.Weaver
                     // need to change the value we pass to the
                     // local connection to the server
                     worker.Append(worker.Create(OpCodes.Ldarg_0));
-                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
-                    worker.Append(worker.Create(OpCodes.Call, (NetworkClient nc) => nc.Player));
+                    worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference((NetworkBehaviour nb) => nb.Client)));
+                    worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference((NetworkClient nc) => nc.Player)));
                 }
                 else
                 {
@@ -287,11 +287,11 @@ namespace Mirage.Weaver
         {
             TypeReference netBehaviourSubclass = func.DeclaringType.ConvertToGenericIfNeeded();
             worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
-            worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
+            worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference(() => Type.GetTypeFromHandle(default))));
             worker.Append(worker.Create(OpCodes.Ldstr, cmdName));
             worker.Append(worker.Create(OpCodes.Ldnull));
             CreateRpcDelegate(worker, func);
-            worker.Append(worker.Create(OpCodes.Call, () => RemoteCallHelper.RegisterRpcDelegate(default, default, default)));
+            worker.Append(worker.Create(OpCodes.Call, moduleCache.ImportReference(() => RemoteCallHelper.RegisterRpcDelegate(default, default, default))));
         }
 
         public void ProcessClientRpc(MethodDefinition md, CustomAttribute clientRpcAttr)
