@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,6 +11,7 @@ namespace Mirage.Weaver
     class PostProcessorAssemblyResolver : IAssemblyResolver
     {
         private readonly string[] _assemblyReferences;
+        private readonly string[] _assemblyReferencesFileName;
         private readonly Dictionary<string, AssemblyDefinition> _assemblyCache = new Dictionary<string, AssemblyDefinition>();
         private readonly ICompiledAssembly _compiledAssembly;
         private AssemblyDefinition _selfAssembly;
@@ -19,6 +20,8 @@ namespace Mirage.Weaver
         {
             _compiledAssembly = compiledAssembly;
             _assemblyReferences = compiledAssembly.References;
+            // cache paths here so we dont need to call it each time we resolve
+            _assemblyReferencesFileName = _assemblyReferences.Select(r => Path.GetFileName(r)).ToArray();
         }
 
 
@@ -69,14 +72,20 @@ namespace Mirage.Weaver
 
         private string FindFile(AssemblyNameReference name)
         {
-            string fileName = _assemblyReferences.FirstOrDefault(r => Path.GetFileName(r) == name.Name + ".dll");
-            if (fileName != null)
-                return fileName;
+            // This method is called a lot, avoid linq
 
-            // perhaps the type comes from an exe instead
-            fileName = _assemblyReferences.FirstOrDefault(r => Path.GetFileName(r) == name.Name + ".exe");
-            if (fileName != null)
-                return fileName;
+            // first pass, check if we can find dll or exe file
+            string dllName = name.Name + ".dll";
+            string exeName = name.Name + ".exe";
+            for (int i = 0; i < _assemblyReferencesFileName.Length; i++)
+            {
+                // if filename matches, return full path
+                string fileName = _assemblyReferencesFileName[i];
+                if (fileName == dllName || fileName == exeName)
+                    return _assemblyReferences[i];
+            }
+
+            // second pass (only run if first fails), 
 
             //Unfortunately the current ICompiledAssembly API only provides direct references.
             //It is very much possible that a postprocessor ends up investigating a type in a directly
@@ -85,7 +94,8 @@ namespace Mirage.Weaver
             //in the ILPostProcessing API. As a workaround, we rely on the fact here that the indirect references
             //are always located next to direct references, so we search in all directories of direct references we
             //got passed, and if we find the file in there, we resolve to it.
-            foreach (string parentDir in _assemblyReferences.Select(Path.GetDirectoryName).Distinct())
+            IEnumerable<string> allParentDirectories = _assemblyReferences.Select(Path.GetDirectoryName).Distinct();
+            foreach (string parentDir in allParentDirectories)
             {
                 string candidate = Path.Combine(parentDir, name.Name + ".dll");
                 if (File.Exists(candidate))
