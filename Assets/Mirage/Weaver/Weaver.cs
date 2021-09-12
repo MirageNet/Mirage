@@ -25,6 +25,7 @@ namespace Mirage.Weaver
         private Writers writers;
         private PropertySiteProcessor propertySiteProcessor;
         private WeaverDiagnosticsTimer timer;
+        private ModuleImportCache moduleCache;
 
         private AssemblyDefinition CurrentAssembly { get; set; }
 
@@ -87,7 +88,7 @@ namespace Mirage.Weaver
             bool modified = false;
             foreach (TypeDefinition behaviour in behaviourClasses)
             {
-                modified |= new NetworkBehaviourProcessor(behaviour, readers, writers, propertySiteProcessor, logger).Process();
+                modified |= new NetworkBehaviourProcessor(moduleCache, behaviour, readers, writers, propertySiteProcessor, logger).Process();
             }
             return modified;
         }
@@ -109,7 +110,7 @@ namespace Mirage.Weaver
 
                 using (timer.Sample("AttributeProcessor"))
                 {
-                    var attributeProcessor = new ServerClientAttributeProcessor(module, logger);
+                    var attributeProcessor = new ServerClientAttributeProcessor(moduleCache, logger);
                     foreach (TypeDefinition td in resolvedTypes)
                     {
                         modified |= attributeProcessor.Process(td);
@@ -176,10 +177,11 @@ namespace Mirage.Weaver
                 }
 
                 ModuleDefinition module = CurrentAssembly.MainModule;
-                readers = new Readers(module, logger);
-                writers = new Writers(module, logger);
+                moduleCache = new ModuleImportCache(module);
+                readers = new Readers(moduleCache, logger);
+                writers = new Writers(moduleCache, logger);
                 propertySiteProcessor = new PropertySiteProcessor();
-                var rwProcessor = new ReaderWriterProcessor(module, readers, writers);
+                var rwProcessor = new ReaderWriterProcessor(moduleCache, readers, writers);
 
                 bool modified = false;
                 using (timer.Sample("ReaderWriterProcessor"))
@@ -207,7 +209,9 @@ namespace Mirage.Weaver
             finally
             {
                 // end in finally incase it return early
-                timer?.End();
+                long endTime = timer?.End() ?? 0;
+
+                moduleCache?.Close(endTime);
             }
         }
     }

@@ -10,7 +10,7 @@ namespace Mirage.Weaver
     {
         protected readonly Dictionary<TypeReference, MethodReference> funcs = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
         private readonly IWeaverLogger logger;
-        protected readonly ModuleDefinition module;
+        protected readonly ModuleImportCache moduleCache;
 
         public int Count => funcs.Count;
 
@@ -19,10 +19,10 @@ namespace Mirage.Weaver
         /// </summary>
         protected abstract string FunctionTypeLog { get; }
 
-        protected SerializeFunctionBase(ModuleDefinition module, IWeaverLogger logger)
+        protected SerializeFunctionBase(ModuleImportCache module, IWeaverLogger logger)
         {
             this.logger = logger;
-            this.module = module;
+            moduleCache = module;
         }
 
 
@@ -38,7 +38,7 @@ namespace Mirage.Weaver
             }
 
             // we need to import type when we Initialize Writers so import here in case it is used anywhere else
-            TypeReference imported = module.ImportReference(dataType);
+            TypeReference imported = moduleCache.ImportReference(dataType);
             funcs[imported] = methodReference;
         }
 
@@ -49,7 +49,7 @@ namespace Mirage.Weaver
         /// <param name="sequencePoint"></param>
         /// <returns>found methohd or null</returns>
         public MethodReference TryGetFunction<T>(SequencePoint sequencePoint) =>
-            TryGetFunction(module.ImportReference<T>(), sequencePoint);
+            TryGetFunction(moduleCache.ImportReference<T>(), sequencePoint);
 
         /// <summary>
         /// Trys to get writer for type, returns null if not found
@@ -86,7 +86,7 @@ namespace Mirage.Weaver
             }
             else
             {
-                return GenerateFunction(module.ImportReference(typeReference));
+                return GenerateFunction(moduleCache.ImportReference(typeReference));
             }
         }
 

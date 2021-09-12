@@ -12,16 +12,16 @@ namespace Mirage.Weaver
         public const string SkeletonPrefix = "Skeleton_";
         public const string UserCodePrefix = "UserCode_";
 
-        protected readonly ModuleDefinition module;
+        protected readonly ModuleImportCache moduleCache;
         protected readonly Readers readers;
         protected readonly Writers writers;
         protected readonly IWeaverLogger logger;
 
         public static string InvokeRpcPrefix => "InvokeUserCode_";
 
-        protected RpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger)
+        protected RpcProcessor(ModuleImportCache moduleCache, Readers readers, Writers writers, IWeaverLogger logger)
         {
-            this.module = module;
+            this.moduleCache = moduleCache;
             this.readers = readers;
             this.writers = writers;
             this.logger = logger;

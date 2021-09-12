@@ -33,25 +33,31 @@ namespace Mirage.Weaver
             return local;
         }
 
-        // todo add documentation 
+        // todo add documentation
+        [System.Obsolete("Use ModuleCache Instead", true)]
         public static Instruction Create(this ILProcessor worker, OpCode code, Expression<Action> expression)
         {
-            MethodReference typeref = worker.Body.Method.Module.ImportReference(expression);
-            return worker.Create(code, typeref);
+            throw new NotSupportedException();
+            //MethodReference typeref = worker.Body.Method.Module.ImportReference(expression);
+            //return worker.Create(code, typeref);
         }
 
         // todo add documentation 
+        [System.Obsolete("Use ModuleCache Instead", true)]
         public static Instruction Create<T>(this ILProcessor worker, OpCode code, Expression<Action<T>> expression)
         {
-            MethodReference typeref = worker.Body.Method.Module.ImportReference(expression);
-            return worker.Create(code, typeref);
+            throw new NotSupportedException();
+            //MethodReference typeref = worker.Body.Method.Module.ImportReference(expression);
+            //return worker.Create(code, typeref);
         }
 
         // todo add documentation 
+        [System.Obsolete("Use ModuleCache Instead", true)]
         public static Instruction Create<T, TR>(this ILProcessor worker, OpCode code, Expression<Func<T, TR>> expression)
         {
-            MethodReference typeref = worker.Body.Method.Module.ImportReference(expression);
-            return worker.Create(code, typeref);
+            throw new NotSupportedException();
+            //MethodReference typeref = worker.Body.Method.Module.ImportReference(expression);
+            //return worker.Create(code, typeref);
         }
 
         public static SequencePoint GetSequencePoint(this MethodDefinition method, Instruction instruction)

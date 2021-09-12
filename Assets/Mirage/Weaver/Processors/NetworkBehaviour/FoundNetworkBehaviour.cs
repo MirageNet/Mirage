@@ -10,10 +10,12 @@ namespace Mirage.Weaver.NetworkBehaviours
         const int SyncVarLimit = 64;
         const string SyncVarCountField = "SYNC_VAR_COUNT";
 
+        private readonly ModuleImportCache moduleCache;
         public readonly TypeDefinition TypeDefinition;
 
-        public FoundNetworkBehaviour(TypeDefinition td)
+        public FoundNetworkBehaviour(ModuleImportCache moduleCache, TypeDefinition td)
         {
+            this.moduleCache = moduleCache;
             TypeDefinition = td;
         }
 
@@ -41,7 +43,7 @@ namespace Mirage.Weaver.NetworkBehaviours
             {
                 throw new NetworkBehaviourException($"{TypeDefinition.Name} has too many SyncVars. Consider refactoring your class into multiple components", TypeDefinition);
             }
-            TypeDefinition.SetConst(SyncVarCountField, totalSyncVars);
+            TypeDefinition.SetConst(moduleCache, SyncVarCountField, totalSyncVars);
         }
 
         public bool HasManualSerializeOverride()

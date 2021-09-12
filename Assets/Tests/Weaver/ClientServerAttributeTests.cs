@@ -61,7 +61,8 @@ namespace Mirage.Tests.Weaver
             Instruction top = body.Instructions[0];
             Assert.That(top.OpCode, Is.EqualTo(OpCodes.Ldarg_0));
 
-            MethodReference methodRef = assembly.MainModule.ImportReference(pred);
+            var cache = new ModuleImportCache(assembly.MainModule);
+            MethodReference methodRef = cache.ImportReference(pred);
 
             Instruction call = body.Instructions[1];
 

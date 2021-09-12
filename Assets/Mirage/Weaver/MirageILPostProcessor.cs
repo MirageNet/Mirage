@@ -17,6 +17,7 @@ namespace Mirage.Weaver
             if (!WillProcess(compiledAssembly))
                 return null;
 
+
             var logger = new WeaverLogger();
             var weaver = new Weaver(logger);
 
