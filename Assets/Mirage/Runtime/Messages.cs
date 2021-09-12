@@ -40,7 +40,9 @@ namespace Mirage
     public struct ServerRpcMessage
     {
         public uint netId;
+        [VarInt(FromBitCount.b3, FromBitCount.b7, FromBitCount.b10, true)]
         public int componentIndex;
+
         public int functionHash;
 
         // if the server Rpc can return values
