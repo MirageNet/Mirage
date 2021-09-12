@@ -62,7 +62,7 @@ namespace Mirage.Weaver
 
             // NetworkConnection parameter is only required for Client.Connection
             RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
-            bool hasNetworkConnection = target == RpcTarget.Player && HasNetworkConnectionParameter(md);
+            bool hasNetworkConnection = target == RpcTarget.Player && HasNetworkPlayerParameter(md);
 
             if (hasNetworkConnection)
             {
@@ -165,7 +165,7 @@ namespace Mirage.Weaver
             // this
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            if (target == RpcTarget.Player && HasNetworkConnectionParameter(md))
+            if (target == RpcTarget.Player && HasNetworkPlayerParameter(md))
                 worker.Append(worker.Create(OpCodes.Ldarg_1));
             else if (target == RpcTarget.Owner)
                 worker.Append(worker.Create(OpCodes.Ldnull));
@@ -253,7 +253,7 @@ namespace Mirage.Weaver
             }
 
             RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
-            if (target == RpcTarget.Player && !HasNetworkConnectionParameter(md))
+            if (target == RpcTarget.Player && !HasNetworkPlayerParameter(md))
             {
                 logger.Error("ClientRpc with Client.Connection needs a network connection parameter", md);
                 return false;

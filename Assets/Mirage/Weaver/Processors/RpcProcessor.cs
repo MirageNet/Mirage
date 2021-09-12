@@ -29,11 +29,11 @@ namespace Mirage.Weaver
             this.logger = logger;
         }
 
-        // helper functions to check if the method has a NetworkConnection parameter
-        public bool HasNetworkConnectionParameter(MethodDefinition md)
+        // helper functions to check if the method has a NetworkPlayer parameter
+        public bool HasNetworkPlayerParameter(MethodDefinition md)
         {
             return md.Parameters.Count > 0 &&
-                   md.Parameters[0].ParameterType.Is<INetworkPlayer>();
+                   IsNetworkPlayer(md.Parameters[0].ParameterType);
         }
 
         public static bool IsNetworkPlayer(TypeReference type)
@@ -53,7 +53,7 @@ namespace Mirage.Weaver
             // NetworkConnection is not sent via the NetworkWriter so skip it here
             // skip first for NetworkConnection in TargetRpc
             bool skipFirst = callType == RemoteCallType.ClientRpc
-                && HasNetworkConnectionParameter(method);
+                && HasNetworkPlayerParameter(method);
 
             int startingArg = skipFirst ? 1 : 0;
             for (int argIndex = startingArg; argIndex < method.Parameters.Count; argIndex++)
