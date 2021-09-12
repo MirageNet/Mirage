@@ -27,9 +27,9 @@ namespace Mirage.Weaver
 
         protected override MethodReference GenerateEnumFunction(TypeReference typeReference)
         {
-            MethodDefinition writerFunc = GenerateWriterFunc(typeReference).definition;
+            WriteMethod writerMethod = GenerateWriterFunc(typeReference);
 
-            ILProcessor worker = writerFunc.Body.GetILProcessor();
+            ILProcessor worker = writerMethod.worker;
 
             MethodReference underlyingWriter = TryGetFunction(typeReference.Resolve().GetEnumUnderlyingType(), null);
 
@@ -38,30 +38,41 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Call, underlyingWriter));
 
             worker.Append(worker.Create(OpCodes.Ret));
-            return writerFunc;
+            return writerMethod.definition;
         }
         struct WriteMethod
         {
-            public MethodDefinition definition;
-            public ParameterDefinition writerParameter;
-            public ParameterDefinition typeParameter;
+            public readonly MethodDefinition definition;
+            public readonly ParameterDefinition writerParameter;
+            public readonly ParameterDefinition typeParameter;
+            public readonly ILProcessor worker;
+
+            public WriteMethod(MethodDefinition definition, ParameterDefinition writerParameter, ParameterDefinition typeParameter, ILProcessor worker)
+            {
+                this.definition = definition;
+                this.writerParameter = writerParameter;
+                this.typeParameter = typeParameter;
+                this.worker = worker;
+            }
         }
+
         private WriteMethod GenerateWriterFunc(TypeReference typeReference)
         {
-            WriteMethod writeMethod = default;
             string functionName = "_Write_" + typeReference.FullName;
             // create new writer for this type
-            writeMethod.definition = module.GeneratedClass().AddMethod(functionName,
+            MethodDefinition definition = module.GeneratedClass().AddMethod(functionName,
                     MethodAttributes.Public |
                     MethodAttributes.Static |
                     MethodAttributes.HideBySig);
 
-            writeMethod.writerParameter = writeMethod.definition.AddParam<NetworkWriter>("writer");
-            writeMethod.typeParameter = writeMethod.definition.AddParam(typeReference, "value");
-            writeMethod.definition.Body.InitLocals = true;
+            ParameterDefinition writerParameter = definition.AddParam<NetworkWriter>("writer");
+            ParameterDefinition typeParameter = definition.AddParam(typeReference, "value");
+            definition.Body.InitLocals = true;
 
-            Register(typeReference, writeMethod.definition);
-            return writeMethod;
+            Register(typeReference, definition);
+
+            ILProcessor worker = definition.Body.GetILProcessor();
+            return new WriteMethod(definition, writerParameter, typeParameter, worker);
         }
 
         protected override MethodReference GenerateClassOrStructFunction(TypeReference typeReference)
@@ -73,7 +84,7 @@ namespace Mirage.Weaver
             if (!typeReference.Resolve().IsValueType)
                 WriteNullCheck(worker);
 
-            WriteAllFields(typeReference, worker, writerFunc);
+            WriteAllFields(typeReference, writerFunc);
 
             worker.Append(worker.Create(OpCodes.Ret));
             return writerFunc.definition;
@@ -106,21 +117,16 @@ namespace Mirage.Weaver
         /// <summary>
         /// Find all fields in type and write them
         /// </summary>
-        /// <param name="variable"></param>
-        /// <param name="worker"></param>
+        /// <param name="type"></param>
+        /// <par
         /// <returns>false if fail</returns>
-        void WriteAllFields(TypeReference variable, ILProcessor worker, WriteMethod writerFunc)
+        void WriteAllFields(TypeReference type, WriteMethod writerFunc)
         {
-            foreach (FieldDefinition field in variable.FindAllPublicFields())
+            foreach (FieldDefinition field in type.FindAllPublicFields())
             {
-                ValueSerializer valueSerialize = GetValueSerialize(field);
-                valueSerialize.AppendWrite(module, worker, writerFunc.writerParameter, writerFunc.typeParameter, field);
+                ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, field, this, null);
+                valueSerialize.AppendWrite(module, writerFunc.worker, writerFunc.writerParameter, writerFunc.typeParameter, field);
             }
-        }
-
-        private ValueSerializer GetValueSerialize(FieldDefinition field)
-        {
-            return ValueSerializerFinder.GetSerializer(module, field, this, null);
         }
 
         protected override MethodReference GenerateSegmentFunction(TypeReference typeReference, TypeReference elementType)
@@ -134,7 +140,7 @@ namespace Mirage.Weaver
             // collection writers use the generic writer, so this will make sure one exists
             _ = GetFunction_Thorws(elementType);
 
-            MethodDefinition writerFunc = GenerateWriterFunc(typeReference).definition;
+            WriteMethod writerMethod = GenerateWriterFunc(typeReference);
 
             MethodReference collectionWriter = module.ImportReference(genericExpression).GetElementMethod();
 
@@ -144,7 +150,7 @@ namespace Mirage.Weaver
             // generates
             // reader.WriteArray<T>(array);
 
-            ILProcessor worker = writerFunc.Body.GetILProcessor();
+            ILProcessor worker = writerMethod.worker;
             worker.Append(worker.Create(OpCodes.Ldarg_0)); // writer
             worker.Append(worker.Create(OpCodes.Ldarg_1)); // collection
 
@@ -152,7 +158,7 @@ namespace Mirage.Weaver
 
             worker.Append(worker.Create(OpCodes.Ret));
 
-            return writerFunc;
+            return writerMethod.definition;
         }
 
         /// <summary>

@@ -73,8 +73,7 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
             }
 
-            if (!ReadArguments(md, worker, readerParameter, hasNetworkConnection))
-                return rpc;
+            ReadArguments(md, worker, readerParameter, null, hasNetworkConnection);
 
             // invoke actual ServerRpc function
             worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
@@ -154,8 +153,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Stloc, writer));
 
             // write all the arguments that the user passed to the Rpc call
-            if (!WriteArguments(worker, md, writer, RemoteCallType.ClientRpc))
-                return rpc;
+            WriteArguments(worker, md, writer, RemoteCallType.ClientRpc);
 
             string rpcName = md.Name;
 
@@ -294,7 +292,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Call, () => RemoteCallHelper.RegisterRpcDelegate(default, default, default)));
         }
 
-        public void ProcessClientRpc(MethodDefinition md, CustomAttribute clientRpcAttr)
+        public void ProcessRpc(MethodDefinition md, CustomAttribute clientRpcAttr)
         {
             if (!ValidateRemoteCallAndParameters(md, RemoteCallType.ClientRpc))
             {

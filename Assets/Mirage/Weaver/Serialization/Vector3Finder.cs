@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Mirage.Weaver.Serialization
 {
-    internal class Vector3Finder : PackerFinderBase<Vector2PackAttribute, Vector3Finder.Vector3PackSettings>
+    internal class Vector3Finder : PackerFinderBase<Vector3PackAttribute, Vector3Finder.Vector3PackSettings>
     {
         protected override bool IsIntType => false;
 

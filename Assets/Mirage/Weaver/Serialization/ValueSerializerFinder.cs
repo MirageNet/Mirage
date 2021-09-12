@@ -8,12 +8,14 @@ namespace Mirage.Weaver.Serialization
     internal static class ValueSerializerFinder
     {
         /// <exception cref="ValueSerializerException">Throws when attribute is used incorrectly</exception>
+        /// <exception cref="SerializeFunctionException">Throws when can not generate read or write function</exception>
         public static ValueSerializer GetSerializer(FoundSyncVar syncVar, Writers writers, Readers readers)
         {
             return GetSerializer(syncVar.Module, syncVar.Behaviour.TypeDefinition, syncVar.FieldDefinition, syncVar.FieldDefinition.FieldType, syncVar.FieldDefinition.Name, writers, readers);
         }
 
         /// <exception cref="ValueSerializerException">Throws when attribute is used incorrectly</exception>
+        /// <exception cref="SerializeFunctionException">Throws when can not generate read or write function</exception>
         public static ValueSerializer GetSerializer(ModuleDefinition module, FieldDefinition field, Writers writers, Readers readers)
         {
             // if field is in this module use its type for Packer field,
@@ -30,6 +32,7 @@ namespace Mirage.Weaver.Serialization
         }
 
         /// <exception cref="ValueSerializerException">Throws when attribute is used incorrectly</exception>
+        /// <exception cref="SerializeFunctionException">Throws when can not generate read or write function</exception>
         public static ValueSerializer GetSerializer(MethodDefinition method, ParameterDefinition param, Writers writers, Readers readers)
         {
             string name = $"{method.Name}_{param.Name}";
@@ -50,6 +53,7 @@ namespace Mirage.Weaver.Serialization
         /// <param name="readers"></param>
         /// <returns></returns>
         /// <exception cref="ValueSerializerException">Throws when attribute is used incorrectly</exception>
+        /// <exception cref="SerializeFunctionException">Throws when can not generate read or write function</exception>
         /// <exception cref="InvalidOperationException">Throws when <paramref name="holder"/> is not in <paramref name="module"/></exception>
         public static ValueSerializer GetSerializer(ModuleDefinition module, TypeDefinition holder, ICustomAttributeProvider attributeProvider, TypeReference fieldType, string fieldName, Writers writers, Readers readers)
         {
@@ -108,21 +112,13 @@ namespace Mirage.Weaver.Serialization
             return valueSerializer;
         }
 
-
+        /// <exception cref="SerializeFunctionException">Throws when can not generate read or write function</exception>
         static ValueSerializer FindSerializeFunctions(Writers writers, Readers readers, TypeReference fieldType)
         {
-            try
-            {
-                // writers or readers might be null here, this is allowed because user of ValueSerializer might only be doing writing, or only doing reading
-                MethodReference writeFunction = writers?.GetFunction_Thorws(fieldType);
-                MethodReference readFunction = readers?.GetFunction_Thorws(fieldType);
-                return new FunctionSerializer(writeFunction, readFunction);
-            }
-            catch (SerializeFunctionException e)
-            {
-                throw new FunctionSerializerException($"{fieldType.Name} is an unsupported type. {e.Message}");
-            }
+            // writers or readers might be null here, this is allowed because user of ValueSerializer might only be doing writing, or only doing reading
+            MethodReference writeFunction = writers?.GetFunction_Thorws(fieldType);
+            MethodReference readFunction = readers?.GetFunction_Thorws(fieldType);
+            return new FunctionSerializer(writeFunction, readFunction);
         }
-
     }
 }

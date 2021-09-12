@@ -211,14 +211,24 @@ namespace Mirage.Weaver
             return self.Module.ImportReference(reference);
         }
 
-        public static CustomAttribute GetCustomAttribute<TAttribute>(this ICustomAttributeProvider method)
+        public static bool TryGetCustomAttribute<TAttribute>(this ICustomAttributeProvider method, out CustomAttribute customAttribute)
         {
             foreach (CustomAttribute ca in method.CustomAttributes)
             {
                 if (ca.AttributeType.Is<TAttribute>())
-                    return ca;
+                {
+                    customAttribute = ca;
+                    return true;
+                }
             }
-            return null;
+
+            customAttribute = null;
+            return false;
+        }
+        public static CustomAttribute GetCustomAttribute<TAttribute>(this ICustomAttributeProvider method)
+        {
+            _ = method.TryGetCustomAttribute<TAttribute>(out CustomAttribute customAttribute);
+            return customAttribute;
         }
 
         public static bool HasCustomAttribute<TAttribute>(this ICustomAttributeProvider attributeProvider)

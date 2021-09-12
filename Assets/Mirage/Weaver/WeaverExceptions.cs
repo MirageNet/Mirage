@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -29,9 +30,17 @@ namespace Mirage.Weaver
         }
     }
 
+    /// <summary>
+    /// Thrown when can't generate read or write for a type
+    /// </summary>
     internal class SerializeFunctionException : WeaverException
     {
-        public SerializeFunctionException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message">Reason method could not be generated</param>
+        /// <param name="typeRef">Type that read or write could not be generated for</param>
+        public SerializeFunctionException(string message, TypeReference typeRef) : base(message, typeRef, null) { }
     }
 
     internal class NetworkBehaviourException : WeaverException
@@ -43,6 +52,11 @@ namespace Mirage.Weaver
     internal class SyncVarException : WeaverException
     {
         public SyncVarException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
+    }
+
+    internal class RpcException : WeaverException
+    {
+        public RpcException(string message, MethodReference rpcMethod) : base(message, rpcMethod, rpcMethod.Resolve().DebugInformation.SequencePoints.FirstOrDefault()) { }
     }
 }
 
@@ -60,10 +74,6 @@ namespace Mirage.Weaver.Serialization
     internal abstract class ValueSerializerException : WeaverException
     {
         public ValueSerializerException(string message) : base(message, null, null) { }
-    }
-    internal class FunctionSerializerException : ValueSerializerException
-    {
-        public FunctionSerializerException(string message) : base(message) { }
     }
     internal class BitCountException : ValueSerializerException
     {

@@ -1,5 +1,6 @@
 using System;
 using Mirage.Weaver.NetworkBehaviours;
+using Mirage.Weaver.Serialization;
 using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -53,7 +54,15 @@ namespace Mirage.Weaver
                         syncVar.HasProcessed = true;
                     }
                 }
+                catch (ValueSerializerException e)
+                {
+                    logger.Error(e.Message, fd);
+                }
                 catch (SyncVarException e)
+                {
+                    logger.Error(e);
+                }
+                catch (SerializeFunctionException e)
                 {
                     logger.Error(e);
                 }
@@ -414,8 +423,8 @@ namespace Mirage.Weaver
             {
                 helper.WriteIfSyncVarDirty(syncVar, () =>
                 {
-                    // Generates a call to the writer for that field
-                    WriteFromField(worker, helper.WriterParameter, null, syncVar);
+                        // Generates a call to the writer for that field
+                        WriteFromField(worker, helper.WriterParameter, null, syncVar);
                 });
             }
 

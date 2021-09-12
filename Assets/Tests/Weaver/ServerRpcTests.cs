@@ -41,6 +41,12 @@ namespace Mirage.Tests.Weaver
         }
 
         [Test]
+        public void ServerRpcWithSenderConnectionAndOtherArgsWrongOrder()
+        {
+            IsSuccess();
+        }
+
+        [Test]
         public void VirtualServerRpc()
         {
             IsSuccess();

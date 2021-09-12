@@ -160,6 +160,7 @@ namespace Mirage.Tests.Weaver
         public void Vector3PackInvalid()
         {
             HasErrorCount(11);
+
             HasError("System.Single is not a supported type for [Vector3Pack]",
                "System.Single BitAttributeTests.Vector3PackInvalid.MyBehaviour::value1");
             HasError("UnityEngine.Vector2 is not a supported type for [Vector3Pack]",

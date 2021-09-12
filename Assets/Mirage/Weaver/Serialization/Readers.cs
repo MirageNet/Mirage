@@ -1,6 +1,7 @@
 using System;
 using System.Linq.Expressions;
 using Mirage.Serialization;
+using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
@@ -20,21 +21,21 @@ namespace Mirage.Weaver
 
         protected override MethodReference GetNetworkBehaviourFunction(TypeReference typeReference)
         {
-            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
-            ILProcessor worker = readerFunc.Body.GetILProcessor();
+            ReadMethod readMethod = GenerateReaderFunction(typeReference);
+            ILProcessor worker = readMethod.worker;
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create<NetworkReader>(OpCodes.Call, (reader) => reader.ReadNetworkBehaviour()));
             worker.Append(worker.Create(OpCodes.Castclass, typeReference));
             worker.Append(worker.Create(OpCodes.Ret));
-            return readerFunc;
+            return readMethod.definition;
         }
 
         protected override MethodReference GenerateEnumFunction(TypeReference typeReference)
         {
-            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
+            ReadMethod readMethod = GenerateReaderFunction(typeReference);
 
-            ILProcessor worker = readerFunc.Body.GetILProcessor();
+            ILProcessor worker = readMethod.worker;
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
@@ -43,16 +44,16 @@ namespace Mirage.Weaver
 
             worker.Append(worker.Create(OpCodes.Call, underlyingFunc));
             worker.Append(worker.Create(OpCodes.Ret));
-            return readerFunc;
+            return readMethod.definition;
         }
 
         protected override MethodReference GenerateSegmentFunction(TypeReference typeReference, TypeReference elementType)
         {
             var genericInstance = (GenericInstanceType)typeReference;
 
-            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
+            ReadMethod readMethod = GenerateReaderFunction(typeReference);
 
-            ILProcessor worker = readerFunc.Body.GetILProcessor();
+            ILProcessor worker = readMethod.worker;
 
             // $array = reader.Read<[T]>()
             ArrayType arrayType = elementType.MakeArrayType();
@@ -63,25 +64,39 @@ namespace Mirage.Weaver
             MethodReference arraySegmentConstructor = module.ImportReference(() => new ArraySegment<object>());
             worker.Append(worker.Create(OpCodes.Newobj, arraySegmentConstructor.MakeHostInstanceGeneric(genericInstance)));
             worker.Append(worker.Create(OpCodes.Ret));
-            return readerFunc;
+            return readMethod.definition;
         }
 
-        private MethodDefinition GenerateReaderFunction(TypeReference variable)
+        struct ReadMethod
+        {
+            public readonly MethodDefinition definition;
+            public readonly ParameterDefinition readParameter;
+            public readonly ILProcessor worker;
+
+            public ReadMethod(MethodDefinition definition, ParameterDefinition readParameter, ILProcessor worker)
+            {
+                this.definition = definition;
+                this.readParameter = readParameter;
+                this.worker = worker;
+            }
+        }
+        private ReadMethod GenerateReaderFunction(TypeReference variable)
         {
             string functionName = "_Read_" + variable.FullName;
 
             // create new reader for this type
-            MethodDefinition readerFunc = module.GeneratedClass().AddMethod(functionName,
+            MethodDefinition definition = module.GeneratedClass().AddMethod(functionName,
                     MethodAttributes.Public |
                     MethodAttributes.Static |
                     MethodAttributes.HideBySig,
                     variable);
 
-            _ = readerFunc.AddParam<NetworkReader>("reader");
-            readerFunc.Body.InitLocals = true;
-            Register(variable, readerFunc);
+            ParameterDefinition readParameter = definition.AddParam<NetworkReader>("reader");
+            definition.Body.InitLocals = true;
+            Register(variable, definition);
 
-            return readerFunc;
+            ILProcessor worker = definition.Body.GetILProcessor();
+            return new ReadMethod(definition, readParameter, worker);
         }
 
         protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, Expression<Action> genericExpression)
@@ -89,7 +104,7 @@ namespace Mirage.Weaver
             // generate readers for the element
             _ = GetFunction_Thorws(elementType);
 
-            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
+            ReadMethod readMethod = GenerateReaderFunction(typeReference);
 
             MethodReference listReader = module.ImportReference(genericExpression);
 
@@ -99,23 +114,23 @@ namespace Mirage.Weaver
             // generates
             // return reader.ReadList<T>();
 
-            ILProcessor worker = readerFunc.Body.GetILProcessor();
+            ILProcessor worker = readMethod.worker;
             worker.Append(worker.Create(OpCodes.Ldarg_0)); // reader
             worker.Append(worker.Create(OpCodes.Call, methodRef)); // Read
 
             worker.Append(worker.Create(OpCodes.Ret));
 
-            return readerFunc;
+            return readMethod.definition;
         }
 
         protected override MethodReference GenerateClassOrStructFunction(TypeReference typeReference)
         {
-            MethodDefinition readerFunc = GenerateReaderFunction(typeReference);
+            ReadMethod readMethod = GenerateReaderFunction(typeReference);
 
             // create local for return value
-            VariableDefinition variable = readerFunc.AddLocal(typeReference);
+            VariableDefinition variable = readMethod.definition.AddLocal(typeReference);
 
-            ILProcessor worker = readerFunc.Body.GetILProcessor();
+            ILProcessor worker = readMethod.worker;
 
 
             TypeDefinition td = typeReference.Resolve();
@@ -124,11 +139,11 @@ namespace Mirage.Weaver
                 GenerateNullCheck(worker);
 
             CreateNew(variable, worker, td);
-            ReadAllFields(typeReference, worker);
+            ReadAllFields(typeReference, readMethod);
 
             worker.Append(worker.Create(OpCodes.Ldloc, variable));
             worker.Append(worker.Create(OpCodes.Ret));
-            return readerFunc;
+            return readMethod.definition;
         }
 
         private void GenerateNullCheck(ILProcessor worker)
@@ -181,8 +196,15 @@ namespace Mirage.Weaver
             }
         }
 
-        void ReadAllFields(TypeReference variable, ILProcessor worker)
+        void ReadAllFields(TypeReference type, ReadMethod readMethod)
         {
+            foreach (FieldDefinition field in type.FindAllPublicFields())
+            {
+                ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, field, null, this);
+                valueSerialize.AppendRead(module, readMethod.worker, readMethod.readParameter, null);
+            }
+
+            /* old read code
             foreach (FieldDefinition field in variable.FindAllPublicFields())
             {
                 // mismatched ldloca/ldloc for struct/class combinations is invalid IL, which causes crash at runtime
@@ -197,6 +219,7 @@ namespace Mirage.Weaver
 
                 worker.Append(worker.Create(OpCodes.Stfld, fieldRef));
             }
+            */
         }
 
         /// <summary>
