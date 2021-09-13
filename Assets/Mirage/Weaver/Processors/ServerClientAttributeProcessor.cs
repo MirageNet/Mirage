@@ -1,4 +1,3 @@
-using System;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -54,13 +53,21 @@ namespace Mirage.Weaver
 
         bool ProcessMethodAttributes(MethodDefinition md)
         {
-            bool modified = InjectGuard<ServerAttribute>(md, IsServer, "[Server] function '" + md.FullName + "' called on client");
+            bool modified = false;
 
-            modified |= InjectGuard<ClientAttribute>(md, IsClient, "[Client] function '" + md.FullName + "' called on server");
+            // check HasCustomAttribute here so avoid string allocation if it does not have an attribute
 
-            modified |= InjectGuard<HasAuthorityAttribute>(md, HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
+            if (md.HasCustomAttribute<ServerAttribute>())
+                modified |= InjectGuard<ServerAttribute>(md, IsServer, "[Server] function '" + md.FullName + "' called on client");
 
-            modified |= InjectGuard<LocalPlayerAttribute>(md, IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
+            if (md.HasCustomAttribute<ClientAttribute>())
+                modified |= InjectGuard<ClientAttribute>(md, IsClient, "[Client] function '" + md.FullName + "' called on server");
+
+            if (md.HasCustomAttribute<HasAuthorityAttribute>())
+                modified |= InjectGuard<HasAuthorityAttribute>(md, HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
+
+            if (md.HasCustomAttribute<LocalPlayerAttribute>())
+                modified |= InjectGuard<LocalPlayerAttribute>(md, IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
 
             return modified;
         }

@@ -12,7 +12,7 @@ namespace Mirage.Weaver
     {
         private readonly string[] _assemblyReferences;
         private readonly string[] _assemblyReferencesFileName;
-        private readonly Dictionary<string, AssemblyDefinition> _assemblyCache = new Dictionary<string, AssemblyDefinition>();
+        private readonly Dictionary<int, AssemblyDefinition> _assemblyCache = new Dictionary<int, AssemblyDefinition>();
         private readonly ICompiledAssembly _compiledAssembly;
         private AssemblyDefinition _selfAssembly;
 
@@ -45,28 +45,46 @@ namespace Mirage.Weaver
                 if (name.Name == _compiledAssembly.Name)
                     return _selfAssembly;
 
-                string fileName = FindFile(name);
-                if (fileName == null)
+                if (!GetFileNameAndKey(name, out string fileName, out int cacheKey))
                     return null;
 
-                DateTime lastWriteTime = File.GetLastWriteTime(fileName);
-
-                string cacheKey = fileName + lastWriteTime;
-
                 if (_assemblyCache.TryGetValue(cacheKey, out AssemblyDefinition result))
+                {
+                    Console.WriteLine($"[PostProcessorAssemblyResolver] Found {cacheKey}");
                     return result;
+                }
+                else
+                {
+                    Console.WriteLine($"[PostProcessorAssemblyResolver] NotFound {cacheKey} {name.FullName}");
+                }
 
-                parameters.AssemblyResolver = this;
-
-                MemoryStream ms = MemoryStreamFor(fileName);
-
-                string pdb = fileName + ".pdb";
-                if (File.Exists(pdb))
-                    parameters.SymbolStream = MemoryStreamFor(pdb);
-
-                var assemblyDefinition = AssemblyDefinition.ReadAssembly(ms, parameters);
+                AssemblyDefinition assemblyDefinition = ReadNewAssembly(parameters, fileName);
                 _assemblyCache.Add(cacheKey, assemblyDefinition);
                 return assemblyDefinition;
+            }
+        }
+
+        private bool GetFileNameAndKey(AssemblyNameReference name, out string fileName, out int cacheKey)
+        {
+            fileName = FindFile(name);
+            cacheKey = 0;
+            if (fileName == null)
+                return false;
+
+            DateTime lastWriteTime = File.GetLastWriteTime(fileName);
+            cacheKey = GetCombineHash(fileName, lastWriteTime);
+            return true;
+        }
+
+        private static int GetCombineHash(string fileName, DateTime lastWriteTime)
+        {
+            unchecked
+            {
+
+                int hash = 17;
+                hash = hash * 31 + fileName.GetHashCode();
+                hash = hash * 31 + lastWriteTime.GetHashCode();
+                return hash;
             }
         }
 
@@ -103,6 +121,20 @@ namespace Mirage.Weaver
             }
 
             return null;
+        }
+
+        private AssemblyDefinition ReadNewAssembly(ReaderParameters parameters, string fileName)
+        {
+            parameters.AssemblyResolver = this;
+
+            MemoryStream ms = MemoryStreamFor(fileName);
+
+            string pdb = fileName + ".pdb";
+            if (File.Exists(pdb))
+                parameters.SymbolStream = MemoryStreamFor(pdb);
+
+            var assemblyDefinition = AssemblyDefinition.ReadAssembly(ms, parameters);
+            return assemblyDefinition;
         }
 
         static MemoryStream MemoryStreamFor(string fileName)

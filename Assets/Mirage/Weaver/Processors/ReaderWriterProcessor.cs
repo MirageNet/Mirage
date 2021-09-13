@@ -9,6 +9,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using UnityEditor;
 using UnityEngine;
+using MethodBody = Mono.Cecil.Cil.MethodBody;
 
 namespace Mirage.Weaver
 {
@@ -16,6 +17,7 @@ namespace Mirage.Weaver
     {
         private readonly HashSet<TypeReference> messages = new HashSet<TypeReference>(new TypeReferenceComparer());
 
+        private readonly IWeaverLogger logger;
         private readonly ModuleImportCache moduleCache;
         private readonly Readers readers;
         private readonly Writers writers;
@@ -26,8 +28,9 @@ namespace Mirage.Weaver
         /// </summary>
         static Module MirageModule => typeof(NetworkWriter).Module;
 
-        public ReaderWriterProcessor(ModuleImportCache moduleCache, Readers readers, Writers writers)
+        public ReaderWriterProcessor(ModuleImportCache moduleCache, Readers readers, Writers writers, IWeaverLogger logger)
         {
+            this.logger = logger;
             this.moduleCache = moduleCache;
             this.readers = readers;
             this.writers = writers;
@@ -87,7 +90,43 @@ namespace Mirage.Weaver
             // Generate readers and writers
             // find all the Send<> and Register<> calls and generate
             // readers and writers for them.
-            CodePass.ForEachInstruction(moduleCache.Module, (md, instr, sequencePoint) => GenerateReadersWriters(instr, sequencePoint));
+            //CodePass.ForEachInstruction(moduleCache.Module, (md, instr, sequencePoint) => GenerateReadersWriters(instr, sequencePoint));
+
+            List<MethodDefinition> methods = CodePass.GetAllMethodBodies(moduleCache.Module);
+            for (int i = 0; i < methods.Count; i++)
+            {
+                MethodDefinition m = methods[i];
+                MethodBody body = GetValidBody(m);
+                if (body != null)
+                    ProcessMethod(m, body);
+            }
+        }
+        static MethodBody GetValidBody(MethodDefinition m)
+        {
+            if (m.IsAbstract) { return null; }
+            MethodBody body = m.Body;
+            if (body == null) { return null; }
+            if (body.Instructions == null) { return null; }
+            if (body.CodeSize <= 0) { return null; }
+
+            return body;
+        }
+        void ProcessMethod(MethodDefinition md, MethodBody body)
+        {
+            Instruction instr = body.Instructions[0];
+            while (instr != null)
+            {
+                try
+                {
+                    GenerateReadersWriters(instr);
+                }
+                catch (SerializeFunctionException e)
+                {
+                    SequencePoint sq = CodePass.GetSequencePointForInstructiion(md.DebugInformation.SequencePoints, instr);
+                    logger.Error(e, sq);
+                }
+                instr = instr.Next;
+            }
         }
 
         private void ProcessClass(TypeDefinition klass)
@@ -110,23 +149,23 @@ namespace Mirage.Weaver
             }
         }
 
-        private Instruction GenerateReadersWriters(Instruction instruction, SequencePoint sequencePoint)
+        private void GenerateReadersWriters(Instruction instruction)
         {
-            if (instruction.OpCode == OpCodes.Ldsfld)
+            OpCode opCode = instruction.OpCode;
+
+            if (opCode == OpCodes.Ldsfld)
             {
-                GenerateReadersWriters((FieldReference)instruction.Operand, sequencePoint);
+                GenerateReadersWriters_StaticField((FieldReference)instruction.Operand);
             }
 
             // We are looking for calls to some specific types
-            if (instruction.OpCode == OpCodes.Call || instruction.OpCode == OpCodes.Callvirt)
+            if (opCode == OpCodes.Call || opCode == OpCodes.Callvirt)
             {
-                GenerateReadersWriters((MethodReference)instruction.Operand, sequencePoint);
+                GenerateReadersWriters_CalledMethod((MethodReference)instruction.Operand);
             }
-
-            return instruction;
         }
 
-        private void GenerateReadersWriters(FieldReference field, SequencePoint sequencePoint)
+        private void GenerateReadersWriters_StaticField(FieldReference field)
         {
             TypeReference type = field.DeclaringType;
 
@@ -136,11 +175,14 @@ namespace Mirage.Weaver
 
                 TypeReference parameterType = typeGenericInstance.GenericArguments[0];
 
-                GenerateReadersWriters(parameterType, sequencePoint);
+                if (parameterType.IsGenericParameter)
+                    return;
+
+                GenerateReadersWriters_TryGenerate(parameterType);
             }
         }
 
-        private void GenerateReadersWriters(MethodReference method, SequencePoint sequencePoint)
+        private void GenerateReadersWriters_CalledMethod(MethodReference method)
         {
             if (!method.IsGenericInstance)
                 return;
@@ -159,32 +201,35 @@ namespace Mirage.Weaver
                 if (parameterType.IsGenericParameter)
                     return;
 
-                GenerateReadersWriters(parameterType, sequencePoint);
+                GenerateReadersWriters_TryGenerate(parameterType);
                 if (isMessage)
                     messages.Add(parameterType);
             }
         }
 
-        private void GenerateReadersWriters(TypeReference parameterType, SequencePoint sequencePoint)
+        private void GenerateReadersWriters_TryGenerate(TypeReference parameterType)
         {
-            if (!parameterType.IsGenericParameter && parameterType.CanBeResolved())
+            if (!parameterType.CanBeResolved())
             {
-                TypeDefinition typeDefinition = parameterType.Resolve();
-
-                if (typeDefinition.IsClass && !typeDefinition.IsValueType)
-                {
-                    MethodDefinition constructor = typeDefinition.GetMethod(".ctor");
-
-                    bool hasAccess = constructor.IsPublic
-                        || constructor.IsAssembly && typeDefinition.Module == moduleCache.Module;
-
-                    if (!hasAccess)
-                        return;
-                }
-
-                writers.TryGetFunction(parameterType, sequencePoint);
-                readers.TryGetFunction(parameterType, sequencePoint);
+                return;
             }
+
+
+            TypeDefinition typeDefinition = parameterType.Resolve();
+
+            if (typeDefinition.IsClass && !typeDefinition.IsValueType)
+            {
+                MethodDefinition constructor = typeDefinition.GetMethod(".ctor");
+
+                bool hasAccess = constructor.IsPublic
+                    || constructor.IsAssembly && typeDefinition.Module == moduleCache.Module;
+
+                if (!hasAccess)
+                    return;
+            }
+
+            writers.GetFunction_Thorws(parameterType);
+            readers.GetFunction_Thorws(parameterType);
         }
 
         /// <summary>
