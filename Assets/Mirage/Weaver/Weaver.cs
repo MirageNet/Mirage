@@ -144,28 +144,29 @@ namespace Mirage.Weaver
         {
             try
             {
+                var timer = new WeaverDiagnosticsTimer();
+                timer.Start(compiledAssembly.Name);
+
                 CurrentAssembly = AssemblyDefinitionFor(compiledAssembly);
 
                 ModuleDefinition module = CurrentAssembly.MainModule;
                 readers = new Readers(module, logger);
                 writers = new Writers(module, logger);
-                var rwstopwatch = System.Diagnostics.Stopwatch.StartNew();
                 propertySiteProcessor = new PropertySiteProcessor();
                 var rwProcessor = new ReaderWriterProcessor(module, readers, writers);
 
                 bool modified = rwProcessor.Process();
-                rwstopwatch.Stop();
-                Console.WriteLine($"Find all reader and writers took {rwstopwatch.ElapsedMilliseconds} milliseconds");
-
-                Console.WriteLine($"Script Module: {module.Name}");
+                timer.AfterReadWrite();
 
                 modified |= WeaveModule(module);
+                timer.AfterWeaveModule();
 
                 if (!modified)
                     return CurrentAssembly;
 
                 rwProcessor.InitializeReaderAndWriters();
 
+                timer.End();
                 return CurrentAssembly;
             }
             catch (Exception e)
@@ -173,6 +174,35 @@ namespace Mirage.Weaver
                 logger.Error("Exception :" + e);
                 return null;
             }
+        }
+    }
+    class WeaverDiagnosticsTimer
+    {
+        System.Diagnostics.Stopwatch stopwatch;
+        private long time1;
+        private string name;
+
+        public void Start(string name)
+        {
+            this.name = name;
+            stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            Console.WriteLine($"[WeaverDiagnostics] Weave Started - {name}");
+        }
+        public void AfterReadWrite()
+        {
+            time1 = stopwatch.ElapsedMilliseconds;
+            Console.WriteLine($"[WeaverDiagnostics] Found all serailize functions: {time1}ms - {name}");
+        }
+        public void AfterWeaveModule()
+        {
+            long time2 = stopwatch.ElapsedMilliseconds - time1;
+            Console.WriteLine($"[WeaverDiagnostics] Weave Module: {time2}ms - {name}");
+        }
+        public long End()
+        {
+            Console.WriteLine($"[WeaverDiagnostics] Weave Finished: {stopwatch.ElapsedMilliseconds}ms - {name}");
+            stopwatch.Stop();
+            return stopwatch.ElapsedMilliseconds;
         }
     }
 }
