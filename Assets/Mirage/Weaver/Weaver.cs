@@ -100,45 +100,6 @@ namespace Mirage.Weaver
                 return module.Types.Where(td => td.IsClass && td.BaseType.CanBeResolved()).ToArray();
             }
         }
-        bool WeaveModule(ModuleDefinition module)
-        {
-            try
-            {
-                bool modified = false;
-
-                TypeDefinition[] resolvedTypes = GetAllResolvedClasses(module);
-
-                using (timer.Sample("AttributeProcessor"))
-                {
-                    var attributeProcessor = new ServerClientAttributeProcessor(moduleCache, logger);
-                    foreach (TypeDefinition td in resolvedTypes)
-                    {
-                        modified |= attributeProcessor.Process(td);
-                    }
-                }
-
-                using (timer.Sample("WeaveNetworkBehavior"))
-                {
-                    foreach (TypeDefinition td in resolvedTypes)
-                    {
-                        modified |= WeaveNetworkBehavior(td);
-                    }
-                }
-
-                using (timer.Sample("propertySiteProcessor"))
-                {
-                    if (modified)
-                        propertySiteProcessor.Process(module);
-                }
-
-                return modified;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex.ToString());
-                throw;
-            }
-        }
 
         public static AssemblyDefinition AssemblyDefinitionFor(ICompiledAssembly compiledAssembly)
         {
@@ -184,12 +145,36 @@ namespace Mirage.Weaver
                 var rwProcessor = new ReaderWriterProcessor(moduleCache, readers, writers, logger);
 
                 bool modified = false;
-                using (timer.Sample("ReaderWriterProcessor"))
+                using (timer.Sample("ProcessExtensionsAndMessages"))
                 {
-                    modified = rwProcessor.Process();
+                    modified |= rwProcessor.ProcessExtensionsAndMessages();
+                }
+                using (timer.Sample("CheckAllInstructionsForGenericCalls"))
+                {
+                    modified |= rwProcessor.CheckAllInstructionsForGenericCalls();
                 }
 
-                modified |= WeaveModule(module);
+                TypeDefinition[] resolvedClasses = GetAllResolvedClasses(module);
+
+                using (timer.Sample("AttributeProcessor"))
+                {
+                    var attributeProcessor = new ServerClientAttributeProcessor(moduleCache, logger);
+                    modified |= attributeProcessor.ProcessModule();
+                }
+
+                using (timer.Sample("WeaveNetworkBehavior"))
+                {
+                    foreach (TypeDefinition td in resolvedClasses)
+                    {
+                        modified |= WeaveNetworkBehavior(td);
+                    }
+                }
+
+                using (timer.Sample("propertySiteProcessor"))
+                {
+                    if (modified)
+                        propertySiteProcessor.Process(module);
+                }
 
                 if (!modified)
                     return CurrentAssembly;
