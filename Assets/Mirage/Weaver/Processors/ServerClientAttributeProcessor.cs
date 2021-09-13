@@ -14,6 +14,8 @@ namespace Mirage.Weaver
         readonly MethodReference HasAuthority;
         readonly MethodReference IsLocalPlayer;
 
+        bool modified;
+
         public ServerClientAttributeProcessor(ModuleImportCache moduleCache, IWeaverLogger logger)
         {
             this.logger = logger;
@@ -26,71 +28,85 @@ namespace Mirage.Weaver
             IsLocalPlayer = moduleCache.ImportReference((NetworkBehaviour nb) => nb.IsLocalPlayer);
         }
 
-        public bool Process(TypeDefinition td)
+        /// <summary>
+        /// Loops through all methods in module and checks them for Mirage Attributes
+        /// <para>Checks for:<br/>
+        /// - <see cref="ServerAttribute"/><br/>
+        /// - <see cref="ClientAttribute"/><br/>
+        /// - <see cref="HasAuthorityAttribute"/><br/>
+        /// - <see cref="LocalPlayerAttribute"/>
+        /// </para>
+        /// </summary>
+        /// <returns></returns>
+        public bool ProcessModule()
         {
-            bool modified = false;
-            foreach (MethodDefinition md in td.Methods)
+            Mono.Collections.Generic.Collection<TypeDefinition> types = moduleCache.Module.Types;
+            foreach (TypeDefinition type in types)
             {
-                modified |= ProcessSiteMethod(md);
-            }
-
-            foreach (TypeDefinition nested in td.NestedTypes)
-            {
-                modified |= Process(nested);
+                ProcessType(type);
             }
             return modified;
         }
-
-        bool ProcessSiteMethod(MethodDefinition md)
+        private void ProcessType(TypeDefinition typeDefinition)
         {
+            foreach (MethodDefinition md in typeDefinition.Methods)
+            {
+                ProcessMethod(md);
+            }
+
+            foreach (TypeDefinition nested in typeDefinition.NestedTypes)
+            {
+                ProcessType(nested);
+            }
+        }
+
+        void ProcessMethod(MethodDefinition md)
+        {
+            // skip these
             if (md.Name == ".cctor" ||
                 md.Name == NetworkBehaviourProcessor.ProcessedFunctionName ||
                 md.Name.StartsWith(RpcProcessor.InvokeRpcPrefix))
-                return false;
-
-            return ProcessMethodAttributes(md);
-        }
-
-        bool ProcessMethodAttributes(MethodDefinition md)
-        {
-            bool modified = false;
+                return;
 
             // check HasCustomAttribute here so avoid string allocation if it does not have an attribute
 
             if (md.HasCustomAttribute<ServerAttribute>())
-                modified |= InjectGuard<ServerAttribute>(md, IsServer, "[Server] function '" + md.FullName + "' called on client");
+                InjectGuard<ServerAttribute>(md, IsServer, "[Server] function '" + md.FullName + "' called on client");
 
             if (md.HasCustomAttribute<ClientAttribute>())
-                modified |= InjectGuard<ClientAttribute>(md, IsClient, "[Client] function '" + md.FullName + "' called on server");
+                InjectGuard<ClientAttribute>(md, IsClient, "[Client] function '" + md.FullName + "' called on server");
 
             if (md.HasCustomAttribute<HasAuthorityAttribute>())
-                modified |= InjectGuard<HasAuthorityAttribute>(md, HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
+                InjectGuard<HasAuthorityAttribute>(md, HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
 
             if (md.HasCustomAttribute<LocalPlayerAttribute>())
-                modified |= InjectGuard<LocalPlayerAttribute>(md, IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
-
-            return modified;
+                InjectGuard<LocalPlayerAttribute>(md, IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
         }
 
-        bool InjectGuard<TAttribute>(MethodDefinition md, MethodReference predicate, string message)
+        void InjectGuard<TAttribute>(MethodDefinition md, MethodReference predicate, string message)
         {
             CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
-                return false;
+                return;
+
+            // set modified here, it means an Attribute was found
+            // and it will give add code, or give error for bad use
+            modified = true;
 
             if (md.IsAbstract)
             {
                 logger.Error($" {typeof(TAttribute)} can't be applied to abstract method. Apply to override methods instead.", md);
-                return false;
+                return;
             }
-
-            bool throwError = attribute.GetField("error", true);
 
             if (!md.DeclaringType.IsDerivedFrom<NetworkBehaviour>())
             {
                 logger.Error($"{attribute.AttributeType.Name} method {md.Name} must be declared in a NetworkBehaviour", md);
-                return true;
+                return;
             }
+
+            bool throwError = attribute.GetField("error", true);
+
             ILProcessor worker = md.Body.GetILProcessor();
             Instruction top = md.Body.Instructions[0];
 
@@ -106,7 +122,6 @@ namespace Mirage.Weaver
             InjectGuardParameters(md, worker, top);
             InjectGuardReturnValue(md, worker, top);
             worker.InsertBefore(top, worker.Create(OpCodes.Ret));
-            return true;
         }
 
         // this is required to early-out from a function with "ref" or "out" parameters
