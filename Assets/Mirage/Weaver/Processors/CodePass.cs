@@ -21,6 +21,31 @@ namespace Mirage.Weaver
         /// <returns>return the same instruction, or replace the instruction and return the replacement</returns>
         public delegate Instruction InstructionProcessor(MethodDefinition md, Instruction instruction, SequencePoint sequencePoint);
 
+        internal static List<MethodDefinition> GetAllMethodBodies(ModuleDefinition module)
+        {
+            // guess 5 methods per type as starting capacity
+            var methods = new List<MethodDefinition>(module.Types.Count * 5);
+            foreach (TypeDefinition td in module.Types)
+            {
+                GetMethodsInType(methods, td);
+            }
+            return methods;
+        }
+        static void GetMethodsInType(List<MethodDefinition> methods, TypeDefinition td)
+        {
+            if (!td.IsClass) { return; }
+
+            foreach (MethodDefinition md in td.Methods)
+            {
+                methods.Add(md);
+            }
+
+            foreach (TypeDefinition nested in td.NestedTypes)
+            {
+                GetMethodsInType(methods, nested);
+            }
+        }
+
         /// <summary>
         /// Executes a method for every instruction in a module
         /// </summary>
@@ -64,27 +89,29 @@ namespace Mirage.Weaver
                 return;
             }
 
-            if (md.Body.CodeSize > 0 && selector(md))
+            if (md.Body.CodeSize <= 0 || !selector(md))
             {
-                Collection<SequencePoint> sequencePoints = md.DebugInformation.SequencePoints;
+                return;
+            }
 
-                int sequencePointIndex = 0;
-                Instruction instr = md.Body.Instructions[0];
+            Collection<SequencePoint> sequencePoints = md.DebugInformation.SequencePoints;
 
-                while (instr != null)
-                {
-                    SequencePoint sequencePoint;
-                    (sequencePoint, sequencePointIndex) = GetSequencePoint(sequencePoints, sequencePointIndex, instr);
-                    instr = processor(md, instr, sequencePoint);
-                    instr = instr.Next;
-                }
+            int sequencePointIndex = 0;
+            Instruction instr = md.Body.Instructions[0];
+
+            while (instr != null)
+            {
+                SequencePoint sequencePoint;
+                (sequencePoint, sequencePointIndex) = GetSequencePoint(sequencePoints, sequencePointIndex, instr);
+                instr = processor(md, instr, sequencePoint);
+                instr = instr.Next;
             }
         }
 
         // I need the sequence point for an instructions,  but the mapping is odd,  and MethodDebugInformation.GetSequencePoint
         // only maps exact locations.
         // this gets executed for every instruction in an assembly, so it must be efficient
-        private static (SequencePoint sequencePoint, int sequencePointIndex) GetSequencePoint(Collection<SequencePoint> sequencePoints, int index, Instruction instr)
+        public static (SequencePoint sequencePoint, int sequencePointIndex) GetSequencePoint(Collection<SequencePoint> sequencePoints, int index, Instruction instr)
         {
             if (sequencePoints.Count == 0)
             {
@@ -102,6 +129,34 @@ namespace Mirage.Weaver
                 return (sequencePoint, index);
 
             return (next, index + 1);
+        }
+
+        public static void GetSequencePointFast(Collection<SequencePoint> sequencePoints, ref int index, Instruction instr)
+        {
+            // dont increment if it would be above limit
+            if (index + 1 >= sequencePoints.Count)
+                return;
+
+            SequencePoint nextSQ = sequencePoints[index + 1];
+
+            // dont increment if nextSQ will be above instruction
+            if (nextSQ.Offset > instr.Offset)
+                return;
+
+            index++;
+        }
+        public static SequencePoint GetSequencePointForInstructiion(Collection<SequencePoint> sequencePoints, Instruction instr)
+        {
+            int offset = instr.Offset;
+            for (int i = 0; i < sequencePoints.Count; i++)
+            {
+                SequencePoint sequencePoint = sequencePoints[i];
+                if (sequencePoint.Offset == offset)
+                {
+                    return sequencePoint;
+                }
+            }
+            return null;
         }
     }
 }

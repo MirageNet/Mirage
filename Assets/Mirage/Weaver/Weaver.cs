@@ -181,7 +181,7 @@ namespace Mirage.Weaver
                 readers = new Readers(moduleCache, logger);
                 writers = new Writers(moduleCache, logger);
                 propertySiteProcessor = new PropertySiteProcessor();
-                var rwProcessor = new ReaderWriterProcessor(moduleCache, readers, writers);
+                var rwProcessor = new ReaderWriterProcessor(moduleCache, readers, writers, logger);
 
                 bool modified = false;
                 using (timer.Sample("ReaderWriterProcessor"))

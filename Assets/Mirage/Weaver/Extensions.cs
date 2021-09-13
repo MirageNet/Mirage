@@ -35,15 +35,14 @@ namespace Mirage.Weaver
 
             // are ANY parent classes of baseClass?
             TypeReference parent = td.BaseType;
+            while (parent != null)
+            {
+                if (parent.Is(baseClass))
+                    return true;
 
-            if (parent == null)
-                return false;
-
-            if (parent.Is(baseClass))
-                return true;
-
-            if (parent.CanBeResolved())
-                return IsDerivedFrom(parent.Resolve(), baseClass);
+                if (parent.CanBeResolved())
+                    parent = parent.Resolve().BaseType;
+            }
 
             return false;
         }
@@ -133,15 +132,15 @@ namespace Mirage.Weaver
                     return false;
                 }
 
+                TypeDefinition resolved = parent.Resolve();
                 if (parent.Scope.Name == "mscorlib")
                 {
-                    TypeDefinition resolved = parent.Resolve();
                     return resolved != null;
                 }
 
                 try
                 {
-                    parent = parent.Resolve().BaseType;
+                    parent = resolved.BaseType;
                 }
                 catch
                 {
