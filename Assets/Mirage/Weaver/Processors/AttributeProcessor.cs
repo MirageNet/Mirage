@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using UnityEngine;
 
 namespace Mirage.Weaver
 {
@@ -41,43 +41,32 @@ namespace Mirage.Weaver
         /// </para>
         /// </summary>
         /// <returns>True if IL code was added</returns>
-        public bool ProcessModule()
+        public bool ProcessTypes(List<FoundType> foundTypes)
         {
-            Mono.Collections.Generic.Collection<TypeDefinition> types = moduleCache.Module.Types;
-            foreach (TypeDefinition type in types)
+            foreach (FoundType type in foundTypes)
             {
                 ProcessType(type);
             }
             return modified;
         }
 
-        private void ProcessType(TypeDefinition typeDefinition)
+        private void ProcessType(FoundType foundType)
         {
-            foreach (MethodDefinition md in typeDefinition.Methods)
+            foreach (MethodDefinition md in foundType.Definition.Methods)
             {
                 ProcessMethod(md);
             }
 
-            bool isMonoBehaviour = typeDefinition.IsDerivedFrom<MonoBehaviour>();
-            bool isNetworkBehaviour = typeDefinition.IsDerivedFrom<NetworkBehaviour>();
-            foreach (FieldDefinition fd in typeDefinition.Fields)
+            foreach (FieldDefinition fd in foundType.Definition.Fields)
             {
-                // SyncObjects are not allowed in MonoBehaviour, Unless it is also NetworkBehaviour
-                bool checkForSyncObjects = isMonoBehaviour && !isNetworkBehaviour;
-                ProcessField(fd, checkForSyncObjects);
-            }
-
-            foreach (TypeDefinition nested in typeDefinition.NestedTypes)
-            {
-                ProcessType(nested);
+                ProcessField(fd, foundType);
             }
         }
 
-        void ProcessField(FieldDefinition fd, bool checkForSyncObjects)
+        void ProcessField(FieldDefinition fd, FoundType foundType)
         {
             CheckUsage<SyncVarAttribute>(fd);
-            if (checkForSyncObjects)
-                CheckSyncObject(fd);
+            CheckSyncObject(fd, foundType);
         }
 
         void CheckUsage<TAttribute>(IMemberDefinition md)
@@ -92,9 +81,12 @@ namespace Mirage.Weaver
             }
         }
 
-        void CheckSyncObject(FieldDefinition fd)
+        void CheckSyncObject(FieldDefinition fd, FoundType foundType)
         {
             // check if SyncObject is used inside a monobehaviour
+            if (foundType.IsNetworkBehaviour) return;
+            if (!foundType.IsMonoBehaviour) return;
+
             if (SyncObjectProcessor.ImplementsSyncObject(fd.FieldType))
             {
                 logger.Error($"{fd.Name} is a SyncObject and can only be used inside a NetworkBehaviour.", fd);

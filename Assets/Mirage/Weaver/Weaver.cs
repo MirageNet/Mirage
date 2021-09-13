@@ -1,15 +1,51 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 using ConditionalAttribute = System.Diagnostics.ConditionalAttribute;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
 namespace Mirage.Weaver
 {
+    internal class FoundType
+    {
+        public readonly TypeDefinition Definition;
+        public readonly bool IsNetworkBehaviour;
+        public readonly bool IsMonoBehaviour;
+
+        public FoundType(TypeDefinition definition, bool isNested)
+        {
+            Definition = definition ?? throw new ArgumentNullException(nameof(definition));
+
+            // dont need to check if NB/MB if type is nested
+            if (definition.IsClass && !isNested)
+            {
+                // is td a NetworkBehaviour or MonoBehaviour
+                TypeReference parent = definition.BaseType;
+                while (parent != null)
+                {
+                    if (parent.Is<NetworkBehaviour>())
+                    {
+                        IsNetworkBehaviour = true;
+                        IsMonoBehaviour = true;
+                        break;
+                    }
+                    else if (parent.Is<UnityEngine.MonoBehaviour>())
+                    {
+                        IsMonoBehaviour = true;
+                        break;
+                    }
+
+                    if (parent.CanBeResolved())
+                        parent = parent.Resolve().BaseType;
+                }
+            }
+        }
+    }
+    
     /// <summary>
     /// Weaves an Assembly
     /// <para>
@@ -94,19 +130,21 @@ namespace Mirage.Weaver
                 }
 
 
+                List<FoundType> foundTypes = FindAllTypes(module);
                 using (timer.Sample("AttributeProcessor"))
                 {
                     var attributeProcessor = new AttributeProcessor(moduleCache, logger);
-                    modified |= attributeProcessor.ProcessModule();
+                    modified |= attributeProcessor.ProcessTypes(foundTypes);
                 }
 
                 using (timer.Sample("WeaveNetworkBehavior"))
                 {
-                    TypeDefinition[] resolvedClasses = GetAllResolvedClasses(module);
-                    foreach (TypeDefinition td in resolvedClasses)
+                    foreach (FoundType type in foundTypes)
                     {
-                        if (td.IsDerivedFrom<NetworkBehaviour>())
-                            modified |= WeaveNetworkBehaviour(td);
+                        if (type.IsNetworkBehaviour)
+                        {
+                            modified |= WeaveNetworkBehaviour(type.Definition);
+                        }
                     }
                 }
 
@@ -140,11 +178,23 @@ namespace Mirage.Weaver
             }
         }
 
-        TypeDefinition[] GetAllResolvedClasses(ModuleDefinition module)
+        List<FoundType> FindAllTypes(ModuleDefinition module)
         {
             using (timer.Sample("GetAllTypes"))
             {
-                return module.Types.Where(td => td.IsClass && td.BaseType.CanBeResolved()).ToArray();
+                var allTypes = new List<FoundType>();
+                AddTypes(module.Types, false, allTypes);
+                return allTypes;
+            }
+
+            void AddTypes(Collection<TypeDefinition> types, bool nested, List<FoundType> allTypes)
+            {
+                foreach (TypeDefinition td in types)
+                {
+                    allTypes.Add(new FoundType(td, nested));
+
+                    AddTypes(td.NestedTypes, true, allTypes);
+                }
             }
         }
 
