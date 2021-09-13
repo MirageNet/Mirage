@@ -127,6 +127,7 @@ namespace Mirage.Weaver
         {
             try
             {
+                // todo "cant inherit", struct can implement, Should it give an error if they do?
                 // value types cant inherit from SyncObject
                 if (typeRef.IsValueType)
                 {

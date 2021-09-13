@@ -1,10 +1,13 @@
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using UnityEngine;
 
 namespace Mirage.Weaver
 {
-    // Injects server/client active checks for [Server/Client] attributes
-    class ServerClientAttributeProcessor
+    /// <summary>
+    /// Processes All methods and fields and checks if they are valid and Injects any code (for [Server/Client] attributes)
+    /// </summary>
+    class AttributeProcessor
     {
         private readonly IWeaverLogger logger;
         private readonly ModuleImportCache moduleCache;
@@ -16,7 +19,7 @@ namespace Mirage.Weaver
 
         bool modified;
 
-        public ServerClientAttributeProcessor(ModuleImportCache moduleCache, IWeaverLogger logger)
+        public AttributeProcessor(ModuleImportCache moduleCache, IWeaverLogger logger)
         {
             this.logger = logger;
             this.moduleCache = moduleCache;
@@ -47,6 +50,7 @@ namespace Mirage.Weaver
             }
             return modified;
         }
+
         private void ProcessType(TypeDefinition typeDefinition)
         {
             foreach (MethodDefinition md in typeDefinition.Methods)
@@ -54,9 +58,46 @@ namespace Mirage.Weaver
                 ProcessMethod(md);
             }
 
+            bool isMonoBehaviour = typeDefinition.IsDerivedFrom<MonoBehaviour>();
+            bool isNetworkBehaviour = typeDefinition.IsDerivedFrom<NetworkBehaviour>();
+            foreach (FieldDefinition fd in typeDefinition.Fields)
+            {
+                // SyncObjects are not allowed in MonoBehaviour, Unless it is also NetworkBehaviour
+                bool checkForSyncObjects = isMonoBehaviour && !isNetworkBehaviour;
+                ProcessField(fd, checkForSyncObjects);
+            }
+
             foreach (TypeDefinition nested in typeDefinition.NestedTypes)
             {
                 ProcessType(nested);
+            }
+        }
+
+        void ProcessField(FieldDefinition fd, bool checkForSyncObjects)
+        {
+            CheckUsage<SyncVarAttribute>(fd);
+            if (checkForSyncObjects)
+                CheckSyncObject(fd);
+        }
+
+        void CheckUsage<TAttribute>(IMemberDefinition md)
+        {
+            CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
+            if (attribute == null)
+                return;
+
+            if (!md.DeclaringType.IsDerivedFrom<NetworkBehaviour>())
+            {
+                logger.Error($"{attribute.AttributeType.Name} can only be used inside a NetworkBehaviour", md);
+            }
+        }
+
+        void CheckSyncObject(FieldDefinition fd)
+        {
+            // check if SyncObject is used inside a monobehaviour
+            if (SyncObjectProcessor.ImplementsSyncObject(fd.FieldType))
+            {
+                logger.Error($"{fd.Name} is a SyncObject and can only be used inside a NetworkBehaviour.", fd);
             }
         }
 
@@ -68,22 +109,15 @@ namespace Mirage.Weaver
                 md.Name.StartsWith(RpcProcessor.InvokeRpcPrefix))
                 return;
 
-            // check HasCustomAttribute here so avoid string allocation if it does not have an attribute
-
-            if (md.HasCustomAttribute<ServerAttribute>())
-                InjectGuard<ServerAttribute>(md, IsServer, "[Server] function '" + md.FullName + "' called on client");
-
-            if (md.HasCustomAttribute<ClientAttribute>())
-                InjectGuard<ClientAttribute>(md, IsClient, "[Client] function '" + md.FullName + "' called on server");
-
-            if (md.HasCustomAttribute<HasAuthorityAttribute>())
-                InjectGuard<HasAuthorityAttribute>(md, HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
-
-            if (md.HasCustomAttribute<LocalPlayerAttribute>())
-                InjectGuard<LocalPlayerAttribute>(md, IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
+            InjectGuard<ServerAttribute>(md, IsServer, "[Server] function '{0}' called on client");
+            InjectGuard<ClientAttribute>(md, IsClient, "[Client] function '{0}' called on server");
+            InjectGuard<HasAuthorityAttribute>(md, HasAuthority, "[Has Authority] function '{0}' called on player without authority");
+            InjectGuard<LocalPlayerAttribute>(md, IsLocalPlayer, "[Local Player] function '{0}' called on nonlocal player");
+            CheckUsage<ServerRpcAttribute>(md);
+            CheckUsage<ClientRpcAttribute>(md);
         }
 
-        void InjectGuard<TAttribute>(MethodDefinition md, MethodReference predicate, string message)
+        void InjectGuard<TAttribute>(MethodDefinition md, MethodReference predicate, string messageFormat)
         {
             CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
@@ -98,7 +132,7 @@ namespace Mirage.Weaver
 
             if (!md.DeclaringType.IsDerivedFrom<NetworkBehaviour>())
             {
-                logger.Error($"{attribute.AttributeType.Name} method {md.Name} must be declared in a NetworkBehaviour", md);
+                logger.Error($"{attribute.AttributeType.Name} can only be used inside a NetworkBehaviour", md);
                 return;
             }
 
@@ -116,6 +150,7 @@ namespace Mirage.Weaver
             worker.InsertBefore(top, worker.Create(OpCodes.Brtrue, top));
             if (throwError)
             {
+                string message = string.Format(messageFormat, md.FullName);
                 worker.InsertBefore(top, worker.Create(OpCodes.Ldstr, message));
                 worker.InsertBefore(top, worker.Create(OpCodes.Newobj, moduleCache.ImportReference(() => new MethodInvocationException(""))));
                 worker.InsertBefore(top, worker.Create(OpCodes.Throw));

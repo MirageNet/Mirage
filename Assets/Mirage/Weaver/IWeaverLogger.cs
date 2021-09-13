@@ -18,6 +18,18 @@ namespace Mirage.Weaver
 
     internal static class WeaverLoggerExtensions
     {
+        public static void Error(this IWeaverLogger logger, string message, IMemberDefinition memberDefinition)
+        {
+            if (memberDefinition is MethodDefinition md)
+            {
+                logger.Error(message, md);
+            }
+            else
+            {
+                logger.Error(message, memberDefinition as MemberReference);
+            }
+        }
+
         public static void Error(this IWeaverLogger logger, WeaverException exception)
         {
             logger.Error(exception.Message, exception.MemberReference, exception.SequencePoint);
