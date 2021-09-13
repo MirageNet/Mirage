@@ -160,7 +160,10 @@ namespace Mirage.Weaver
                 timer = new WeaverDiagnosticsTimer();
                 timer.Start(compiledAssembly.Name);
 
-                CurrentAssembly = AssemblyDefinitionFor(compiledAssembly);
+                using (timer.Sample("AssemblyDefinitionFor"))
+                {
+                    CurrentAssembly = AssemblyDefinitionFor(compiledAssembly);
+                }
 
                 ModuleDefinition module = CurrentAssembly.MainModule;
                 readers = new Readers(module, logger);
