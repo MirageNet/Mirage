@@ -1,3 +1,10 @@
+## [104.0.2](https://github.com/MirageNet/Mirage/compare/v104.0.1...v104.0.2) (2021-09-13)
+
+
+### Performance Improvements
+
+* **Weaver:** caching NetworkBehaviour properties ([#927](https://github.com/MirageNet/Mirage/issues/927)) ([1f2c53b](https://github.com/MirageNet/Mirage/commit/1f2c53b5e368acc688e51a6d5bba2df2ae92379f))
+
 ## [104.0.1](https://github.com/MirageNet/Mirage/compare/v104.0.0...v104.0.1) (2021-09-13)
 
 
