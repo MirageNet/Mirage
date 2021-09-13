@@ -21,6 +21,7 @@ namespace Mirage.Weaver
         /// <param name="expression"></param>
         /// <returns></returns>
         public static MethodReference ImportReference<T>(this ModuleDefinition module, Expression<Action<T>> expression) => ImportReference(module, (LambdaExpression)expression);
+        public static MethodReference ImportReference<T1, T2>(this ModuleDefinition module, Expression<Func<T1, T2>> expression) => ImportReference(module, (LambdaExpression)expression);
 
         public static TypeReference ImportReference<T>(this ModuleDefinition module) => module.ImportReference(typeof(T));
 

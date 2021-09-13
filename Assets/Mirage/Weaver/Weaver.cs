@@ -89,7 +89,7 @@ namespace Mirage.Weaver
                 var watch = System.Diagnostics.Stopwatch.StartNew();
 
                 watch.Start();
-                var attributeProcessor = new ServerClientAttributeProcessor(logger);
+                var attributeProcessor = new ServerClientAttributeProcessor(module, logger);
 
                 var types = new List<TypeDefinition>(module.Types);
 
