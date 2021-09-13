@@ -37,7 +37,7 @@ namespace Mirage.Weaver
         /// - <see cref="LocalPlayerAttribute"/>
         /// </para>
         /// </summary>
-        /// <returns></returns>
+        /// <returns>True if IL code was added</returns>
         public bool ProcessModule()
         {
             Mono.Collections.Generic.Collection<TypeDefinition> types = moduleCache.Module.Types;
@@ -89,9 +89,6 @@ namespace Mirage.Weaver
             if (attribute == null)
                 return;
 
-            // set modified here, it means an Attribute was found
-            // and it will give add code, or give error for bad use
-            modified = true;
 
             if (md.IsAbstract)
             {
@@ -104,6 +101,10 @@ namespace Mirage.Weaver
                 logger.Error($"{attribute.AttributeType.Name} method {md.Name} must be declared in a NetworkBehaviour", md);
                 return;
             }
+
+            // set modified here, it means an Attribute was found
+            // we dont need to set modified for errors above
+            modified = true;
 
             bool throwError = attribute.GetField("error", true);
 
