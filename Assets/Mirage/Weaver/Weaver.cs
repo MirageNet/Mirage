@@ -97,12 +97,12 @@ namespace Mirage.Weaver
             try
             {
                 bool modified = false;
-                var attributeProcessor = new ServerClientAttributeProcessor(module, logger);
 
                 TypeDefinition[] resolvedTypes = GetAllResolvedClasses(module);
 
                 using (timer.Sample("AttributeProcessor"))
                 {
+                    var attributeProcessor = new ServerClientAttributeProcessor(module, logger);
                     foreach (TypeDefinition td in resolvedTypes)
                     {
                         modified |= attributeProcessor.Process(td);
