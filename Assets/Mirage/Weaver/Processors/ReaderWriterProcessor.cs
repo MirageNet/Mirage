@@ -37,7 +37,7 @@ namespace Mirage.Weaver
             extensionHelper = new SerailizeExtensionHelper(moduleCache, readers, writers);
         }
 
-        public bool Process()
+        public bool ProcessExtensionsAndMessages()
         {
             messages.Clear();
 
@@ -47,8 +47,9 @@ namespace Mirage.Weaver
             int writeCount = writers.Count;
             int readCount = readers.Count;
 
-            ProcessAssemblyClasses();
+            FindExtensionsAndMessagesInModule();
 
+            // did we create any new functions?
             return writers.Count != writeCount || readers.Count != readCount;
         }
 
@@ -78,20 +79,30 @@ namespace Mirage.Weaver
         #endregion
 
         #region Assembly defined reader/writer
-        void ProcessAssemblyClasses()
+        void FindExtensionsAndMessagesInModule()
         {
             var types = new List<TypeDefinition>(moduleCache.Module.Types);
 
             foreach (TypeDefinition klass in types)
             {
-                ProcessClass(klass);
+                FindMessageAndExtensionMethodInClass(klass);
             }
+        }
+
+        /// <summary>
+        /// Checks all Instruction and finds any Send/Register/Write calls to the generic methods. If any are found it will generate write/read functions for the type used
+        /// </summary>
+        public bool CheckAllInstructionsForGenericCalls()
+        {
+            int writeCount = writers.Count;
+            int readCount = readers.Count;
 
             // Generate readers and writers
             // find all the Send<> and Register<> calls and generate
             // readers and writers for them.
-            //CodePass.ForEachInstruction(moduleCache.Module, (md, instr, sequencePoint) => GenerateReadersWriters(instr, sequencePoint));
 
+            // old code:
+            // CodePass.ForEachInstruction(moduleCache.Module, (md, instr, sequencePoint) => GenerateReadersWriters(instr, sequencePoint));
             List<MethodDefinition> methods = CodePass.GetAllMethodBodies(moduleCache.Module);
             for (int i = 0; i < methods.Count; i++)
             {
@@ -100,6 +111,9 @@ namespace Mirage.Weaver
                 if (body != null)
                     ProcessMethod(m, body);
             }
+
+            // did we create any new functions?
+            return writers.Count != writeCount || readers.Count != readCount;
         }
         static MethodBody GetValidBody(MethodDefinition m)
         {
@@ -129,7 +143,7 @@ namespace Mirage.Weaver
             }
         }
 
-        private void ProcessClass(TypeDefinition klass)
+        private void FindMessageAndExtensionMethodInClass(TypeDefinition klass)
         {
             // extension methods only live in static classes
             // static classes are represented as sealed and abstract
@@ -145,7 +159,7 @@ namespace Mirage.Weaver
 
             foreach (TypeDefinition nestedClass in klass.NestedTypes)
             {
-                ProcessClass(nestedClass);
+                FindMessageAndExtensionMethodInClass(nestedClass);
             }
         }
 
