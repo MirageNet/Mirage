@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -15,12 +14,8 @@ namespace Mirage.Weaver
 
         public void Process(ModuleDefinition moduleDef)
         {
-            DateTime startTime = DateTime.Now;
-
             // replace all field access with property access for syncvars
             CodePass.ForEachInstruction(moduleDef, WeavedMethods, ProcessInstruction);
-
-            Console.WriteLine("  ProcessSitesModule " + moduleDef.Name + " elapsed time:" + (DateTime.Now - startTime));
         }
 
         private static bool WeavedMethods(MethodDefinition md) =>
