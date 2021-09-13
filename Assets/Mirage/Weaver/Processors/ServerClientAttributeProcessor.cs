@@ -1,6 +1,4 @@
 // Injects server/client active checks for [Server/Client] attributes
-using System;
-using System.Linq.Expressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -10,9 +8,20 @@ namespace Mirage.Weaver
     {
         private readonly IWeaverLogger logger;
 
-        public ServerClientAttributeProcessor(IWeaverLogger logger)
+        readonly MethodReference IsServer;
+        readonly MethodReference IsClient;
+        readonly MethodReference HasAuthority;
+        readonly MethodReference IsLocalPlayer;
+
+        public ServerClientAttributeProcessor(ModuleDefinition module, IWeaverLogger logger)
         {
             this.logger = logger;
+
+            // Cache these so that we dont import them for each site we process
+            IsServer = module.ImportReference((NetworkBehaviour nb) => nb.IsServer);
+            IsClient = module.ImportReference((NetworkBehaviour nb) => nb.IsClient);
+            HasAuthority = module.ImportReference((NetworkBehaviour nb) => nb.HasAuthority);
+            IsLocalPlayer = module.ImportReference((NetworkBehaviour nb) => nb.IsLocalPlayer);
         }
 
         public bool Process(TypeDefinition td)
@@ -42,20 +51,19 @@ namespace Mirage.Weaver
 
         bool ProcessMethodAttributes(MethodDefinition md)
         {
-            bool modified = InjectGuard<ServerAttribute>(md, nb => nb.IsServer, "[Server] function '" + md.FullName + "' called on client");
+            bool modified = InjectGuard<ServerAttribute>(md, IsServer, "[Server] function '" + md.FullName + "' called on client");
 
-            modified |= InjectGuard<ClientAttribute>(md, nb => nb.IsClient, "[Client] function '" + md.FullName + "' called on server");
+            modified |= InjectGuard<ClientAttribute>(md, IsClient, "[Client] function '" + md.FullName + "' called on server");
 
-            modified |= InjectGuard<HasAuthorityAttribute>(md, nb => nb.HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
+            modified |= InjectGuard<HasAuthorityAttribute>(md, HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
 
-            modified |= InjectGuard<LocalPlayerAttribute>(md, nb => nb.IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
+            modified |= InjectGuard<LocalPlayerAttribute>(md, IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
 
             return modified;
         }
 
-        bool InjectGuard<TAttribute>(MethodDefinition md, Expression<Func<NetworkBehaviour, bool>> predExpression, string message)
+        bool InjectGuard<TAttribute>(MethodDefinition md, MethodReference predicate, string message)
         {
-            MethodReference predicate = md.Module.ImportReference(predExpression);
             CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
                 return false;
