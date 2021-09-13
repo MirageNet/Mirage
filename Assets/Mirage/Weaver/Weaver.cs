@@ -20,6 +20,7 @@ namespace Mirage.Weaver
 
         private AssemblyDefinition CurrentAssembly { get; set; }
 
+        [System.Diagnostics.Conditional("WEAVER_DEBUG_LOGS")]
         public static void DebugLog(TypeDefinition td, string message)
         {
             Console.WriteLine($"Weaver[{td.Name}]{message}");
@@ -158,10 +159,13 @@ namespace Mirage.Weaver
             long endTime = 0;
             try
             {
-                timer = new WeaverDiagnosticsTimer();
+                timer = new WeaverDiagnosticsTimer() { writeToFile = true };
                 timer.Start(compiledAssembly.Name);
 
-                CurrentAssembly = AssemblyDefinitionFor(compiledAssembly);
+                using (timer.Sample("AssemblyDefinitionFor"))
+                {
+                    CurrentAssembly = AssemblyDefinitionFor(compiledAssembly);
+                }
 
                 ModuleDefinition module = CurrentAssembly.MainModule;
                 moduleCache = new ModuleImportCache(module);
@@ -177,7 +181,6 @@ namespace Mirage.Weaver
                 }
 
                 modified |= WeaveModule(module);
-                timer.AfterWeaveModule();
 
                 if (!modified)
                     return CurrentAssembly;
@@ -203,18 +206,53 @@ namespace Mirage.Weaver
     }
     class WeaverDiagnosticsTimer
     {
+        public bool writeToFile;
+        StreamWriter writer;
         System.Diagnostics.Stopwatch stopwatch;
         private string name;
 
         public void Start(string name)
         {
             this.name = name;
+
+            if (writeToFile)
+            {
+                string path = $"./Build/ImportCache/Timer_{name}.log";
+                try
+                {
+                    writer = new StreamWriter(path)
+                    {
+                        AutoFlush = true,
+                    };
+                }
+                catch (Exception e)
+                {
+                    writer?.Dispose();
+                    writeToFile = false;
+                    WriteLine($"Failed to open {path}: {e}");
+                }
+            }
+
             stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            Console.WriteLine($"[WeaverDiagnostics] Weave Started - {name}");
+            WriteLine($"[WeaverDiagnostics] Weave Started - {name}");
+#if WEAVER_DEBUG_LOGS
+            WriteLine($"[WeaverDiagnostics] Debug logs enabled");
+#else
+            WriteLine($"[WeaverDiagnostics] Debug logs disabled");
+#endif 
         }
+        void WriteLine(string msg)
+        {
+            Console.WriteLine(msg);
+            if (writeToFile)
+            {
+                writer.WriteLine(msg);
+            }
+        }
+
         public long End()
         {
-            Console.WriteLine($"[WeaverDiagnostics] Weave Finished: {stopwatch.ElapsedMilliseconds}ms - {name}");
+            WriteLine($"[WeaverDiagnostics] Weave Finished: {stopwatch.ElapsedMilliseconds}ms - {name}");
             stopwatch.Stop();
             return stopwatch.ElapsedMilliseconds;
         }
@@ -239,7 +277,7 @@ namespace Mirage.Weaver
 
             public void Dispose()
             {
-                Console.WriteLine($"[WeaverDiagnostics] {label}: {timer.stopwatch.ElapsedMilliseconds - start}ms - {timer.name}");
+                timer.WriteLine($"[WeaverDiagnostics] {label}: {timer.stopwatch.ElapsedMilliseconds - start}ms - {timer.name}");
             }
         }
     }
