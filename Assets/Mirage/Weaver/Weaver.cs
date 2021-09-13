@@ -19,6 +19,7 @@ namespace Mirage.Weaver
 
         private AssemblyDefinition CurrentAssembly { get; set; }
 
+        [System.Diagnostics.Conditional("WEAVER_DEBUG_LOGS")]
         public static void DebugLog(TypeDefinition td, string message)
         {
             Console.WriteLine($"Weaver[{td.Name}]{message}");
@@ -203,6 +204,11 @@ namespace Mirage.Weaver
             this.name = name;
             stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Console.WriteLine($"[WeaverDiagnostics] Weave Started - {name}");
+#if WEAVER_DEBUG_LOGS
+            Console.WriteLine($"[WeaverDiagnostics] Debug logs enabled");
+#else
+            Console.WriteLine($"[WeaverDiagnostics] Debug logs disabled");
+#endif 
         }
         public long End()
         {
