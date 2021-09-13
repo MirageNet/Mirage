@@ -21,7 +21,7 @@ namespace Mirage.Weaver
         /// <returns>return the same instruction, or replace the instruction and return the replacement</returns>
         public delegate Instruction InstructionProcessor(MethodDefinition md, Instruction instruction, SequencePoint sequencePoint);
 
-        internal static List<MethodDefinition> GetAllMethodBodies(ModuleDefinition module)
+        internal static List<MethodDefinition> GetAllMethods(ModuleDefinition module)
         {
             // guess 5 methods per type as starting capacity
             var methods = new List<MethodDefinition>(module.Types.Count * 5);

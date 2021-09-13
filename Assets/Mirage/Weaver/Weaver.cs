@@ -124,10 +124,6 @@ namespace Mirage.Weaver
                 {
                     modified |= rwProcessor.ProcessExtensionsAndMessages();
                 }
-                using (timer.Sample("CheckAllInstructionsForGenericCalls"))
-                {
-                    modified |= rwProcessor.CheckAllInstructionsForGenericCalls();
-                }
 
 
                 List<FoundType> foundTypes = FindAllTypes(module);
@@ -148,10 +144,10 @@ namespace Mirage.Weaver
                     }
                 }
 
-                using (timer.Sample("propertySiteProcessor"))
+                using (timer.Sample("CheckAllInstructions"))
                 {
-                    if (modified)
-                        propertySiteProcessor.Process(module);
+                    var checker = new AllInstructionsChecker(logger, moduleCache, readers, writers, rwProcessor, propertySiteProcessor);
+                    checker.CheckAllInstructions();
                 }
 
                 if (!modified)

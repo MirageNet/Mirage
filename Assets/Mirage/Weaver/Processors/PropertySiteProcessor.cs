@@ -12,10 +12,11 @@ namespace Mirage.Weaver
         // getter functions that replace [SyncVar] member variable references. dict<field, replacement>
         public Dictionary<FieldReference, MethodDefinition> Getters = new Dictionary<FieldReference, MethodDefinition>(new FieldReferenceComparator());
 
+        [System.Obsolete("Called inside AllInstructionsChecker instead", true)]
         public void Process(ModuleDefinition moduleDef)
         {
             // replace all field access with property access for syncvars
-            CodePass.ForEachInstruction(moduleDef, WeavedMethods, ProcessInstruction);
+            //CodePass.ForEachInstruction(moduleDef, WeavedMethods, ProcessInstruction);
         }
 
         private static bool WeavedMethods(MethodDefinition md) =>
@@ -68,7 +69,7 @@ namespace Mirage.Weaver
             }
         }
 
-        Instruction ProcessInstruction(MethodDefinition md, Instruction instr, SequencePoint sequencePoint)
+        public void ProcessInstruction(MethodDefinition md, ref Instruction instr)
         {
             if (instr.OpCode == OpCodes.Stfld && instr.Operand is FieldReference opFieldst)
             {
@@ -104,13 +105,11 @@ namespace Mirage.Weaver
 
                 // loading a field by reference,  watch out for initobj instruction
                 // see https://github.com/vis2k/Mirror/issues/696
-                return ProcessInstructionLoadAddress(md, instr, resolved);
+                ProcessInstructionLoadAddress(md, ref instr, resolved);
             }
-
-            return instr;
         }
 
-        Instruction ProcessInstructionLoadAddress(MethodDefinition md, Instruction instr, FieldReference opField)
+        void ProcessInstructionLoadAddress(MethodDefinition md, ref Instruction instr, FieldReference opField)
         {
             // does it set a field that we replaced?
             if (Setters.TryGetValue(opField, out MethodDefinition replacement))
@@ -136,11 +135,9 @@ namespace Mirage.Weaver
                     worker.Remove(instr);
                     worker.Remove(nextInstr);
 
-                    return newInstr;
+                    instr = newInstr;
                 }
             }
-
-            return instr;
         }
     }
 }
