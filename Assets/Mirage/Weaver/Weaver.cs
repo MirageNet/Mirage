@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
@@ -14,6 +15,7 @@ namespace Mirage.Weaver
         private Readers readers;
         private Writers writers;
         private PropertySiteProcessor propertySiteProcessor;
+        private WeaverDiagnosticsTimer timer;
 
         private AssemblyDefinition CurrentAssembly { get; set; }
 
@@ -80,33 +82,43 @@ namespace Mirage.Weaver
             return modified;
         }
 
+        TypeDefinition[] GetAllResolvedClasses(ModuleDefinition module)
+        {
+            using (timer.Sample("GetAllTypes"))
+            {
+                return module.Types.Where(td => td.IsClass && td.BaseType.CanBeResolved()).ToArray();
+            }
+        }
         bool WeaveModule(ModuleDefinition module)
         {
             try
             {
                 bool modified = false;
-
-                var watch = System.Diagnostics.Stopwatch.StartNew();
-
-                watch.Start();
                 var attributeProcessor = new ServerClientAttributeProcessor(module, logger);
 
-                var types = new List<TypeDefinition>(module.Types);
+                TypeDefinition[] resolvedTypes = GetAllResolvedClasses(module);
 
-                foreach (TypeDefinition td in types)
+                using (timer.Sample("AttributeProcessor"))
                 {
-                    if (td.IsClass && td.BaseType.CanBeResolved())
+                    foreach (TypeDefinition td in resolvedTypes)
                     {
-                        modified |= WeaveNetworkBehavior(td);
                         modified |= attributeProcessor.Process(td);
                     }
                 }
 
-                watch.Stop();
-                Console.WriteLine("Weave behaviours and messages took" + watch.ElapsedMilliseconds + " milliseconds");
+                using (timer.Sample("WeaveNetworkBehavior"))
+                {
+                    foreach (TypeDefinition td in resolvedTypes)
+                    {
+                        modified |= WeaveNetworkBehavior(td);
+                    }
+                }
 
-                if (modified)
-                    propertySiteProcessor.Process(module);
+                using (timer.Sample("propertySiteProcessor"))
+                {
+                    if (modified)
+                        propertySiteProcessor.Process(module);
+                }
 
                 return modified;
             }
@@ -144,7 +156,7 @@ namespace Mirage.Weaver
         {
             try
             {
-                var timer = new WeaverDiagnosticsTimer();
+                timer = new WeaverDiagnosticsTimer();
                 timer.Start(compiledAssembly.Name);
 
                 CurrentAssembly = AssemblyDefinitionFor(compiledAssembly);
@@ -155,16 +167,21 @@ namespace Mirage.Weaver
                 propertySiteProcessor = new PropertySiteProcessor();
                 var rwProcessor = new ReaderWriterProcessor(module, readers, writers);
 
-                bool modified = rwProcessor.Process();
-                timer.AfterReadWrite();
+                bool modified = false;
+                using (timer.Sample("ReaderWriterProcessor"))
+                {
+                    modified = rwProcessor.Process();
+                }
 
                 modified |= WeaveModule(module);
-                timer.AfterWeaveModule();
 
                 if (!modified)
                     return CurrentAssembly;
 
-                rwProcessor.InitializeReaderAndWriters();
+                using (timer.Sample("InitializeReaderAndWriters"))
+                {
+                    rwProcessor.InitializeReaderAndWriters();
+                }
 
                 timer.End();
                 return CurrentAssembly;
@@ -179,7 +196,6 @@ namespace Mirage.Weaver
     class WeaverDiagnosticsTimer
     {
         System.Diagnostics.Stopwatch stopwatch;
-        private long time1;
         private string name;
 
         public void Start(string name)
@@ -188,21 +204,35 @@ namespace Mirage.Weaver
             stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Console.WriteLine($"[WeaverDiagnostics] Weave Started - {name}");
         }
-        public void AfterReadWrite()
-        {
-            time1 = stopwatch.ElapsedMilliseconds;
-            Console.WriteLine($"[WeaverDiagnostics] Found all serailize functions: {time1}ms - {name}");
-        }
-        public void AfterWeaveModule()
-        {
-            long time2 = stopwatch.ElapsedMilliseconds - time1;
-            Console.WriteLine($"[WeaverDiagnostics] Weave Module: {time2}ms - {name}");
-        }
         public long End()
         {
             Console.WriteLine($"[WeaverDiagnostics] Weave Finished: {stopwatch.ElapsedMilliseconds}ms - {name}");
             stopwatch.Stop();
             return stopwatch.ElapsedMilliseconds;
+        }
+
+        public SampleScope Sample(string label)
+        {
+            return new SampleScope(this, label);
+        }
+
+        public struct SampleScope : IDisposable
+        {
+            WeaverDiagnosticsTimer timer;
+            long start;
+            string label;
+
+            public SampleScope(WeaverDiagnosticsTimer timer, string label)
+            {
+                this.timer = timer;
+                start = timer.stopwatch.ElapsedMilliseconds;
+                this.label = label;
+            }
+
+            public void Dispose()
+            {
+                Console.WriteLine($"[WeaverDiagnostics] {label}: {timer.stopwatch.ElapsedMilliseconds - start}ms - {timer.name}");
+            }
         }
     }
 }
