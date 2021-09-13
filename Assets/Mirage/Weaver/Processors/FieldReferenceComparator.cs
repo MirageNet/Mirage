@@ -7,9 +7,12 @@ namespace Mirage.Weaver
     {
         public bool Equals(FieldReference x, FieldReference y)
         {
-            return x.DeclaringType.FullName == y.DeclaringType.FullName && x.Name == y.Name;
+            return x.Name == y.Name && x.DeclaringType.FullName == y.DeclaringType.FullName;
         }
 
-        public int GetHashCode(FieldReference obj) => (obj.DeclaringType.FullName + "." + obj.Name).GetHashCode();
+        public int GetHashCode(FieldReference obj)
+        {
+            return HashCodeHelper.GetCombineHash(obj.Name, obj.DeclaringType.FullName);
+        }
     }
 }
