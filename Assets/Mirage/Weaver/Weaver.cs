@@ -5,6 +5,8 @@ using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
+using ConditionalAttribute = System.Diagnostics.ConditionalAttribute;
+using Stopwatch = System.Diagnostics.Stopwatch;
 
 namespace Mirage.Weaver
 {
@@ -19,7 +21,7 @@ namespace Mirage.Weaver
 
         private AssemblyDefinition CurrentAssembly { get; set; }
 
-        [System.Diagnostics.Conditional("WEAVER_DEBUG_LOGS")]
+        [Conditional("WEAVER_DEBUG_LOGS")]
         public static void DebugLog(TypeDefinition td, string message)
         {
             Console.WriteLine($"Weaver[{td.Name}]{message}");
@@ -157,7 +159,7 @@ namespace Mirage.Weaver
         {
             try
             {
-                timer = new WeaverDiagnosticsTimer();
+                timer = new WeaverDiagnosticsTimer() { writeToFile = true };
                 timer.Start(compiledAssembly.Name);
 
                 using (timer.Sample("AssemblyDefinitionFor"))
@@ -197,27 +199,72 @@ namespace Mirage.Weaver
             }
         }
     }
+
     class WeaverDiagnosticsTimer
     {
-        System.Diagnostics.Stopwatch stopwatch;
+        public bool writeToFile;
+        StreamWriter writer;
+        Stopwatch stopwatch;
         private string name;
 
+        public long ElapsedMilliseconds => stopwatch?.ElapsedMilliseconds ?? 0;
+
+        ~WeaverDiagnosticsTimer()
+        {
+            writer?.Dispose();
+            writer = null;
+        }
+
+        [Conditional("WEAVER_DEBUG_TIMER")]
         public void Start(string name)
         {
             this.name = name;
-            stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            Console.WriteLine($"[WeaverDiagnostics] Weave Started - {name}");
+
+            if (writeToFile)
+            {
+                string path = $"./Build/WeaverLogs/Timer_{name}.log";
+                try
+                {
+                    writer = new StreamWriter(path)
+                    {
+                        AutoFlush = true,
+                    };
+                }
+                catch (Exception e)
+                {
+                    writer?.Dispose();
+                    writeToFile = false;
+                    WriteLine($"Failed to open {path}: {e}");
+                }
+            }
+
+            stopwatch = Stopwatch.StartNew();
+
+            WriteLine($"Weave Started - {name}");
 #if WEAVER_DEBUG_LOGS
-            Console.WriteLine($"[WeaverDiagnostics] Debug logs enabled");
+            WriteLine($"Debug logs enabled");
 #else
-            Console.WriteLine($"[WeaverDiagnostics] Debug logs disabled");
+            WriteLine($"Debug logs disabled");
 #endif 
         }
+
+        [Conditional("WEAVER_DEBUG_TIMER")]
+        void WriteLine(string msg)
+        {
+            string fullMsg = $"[WeaverDiagnostics] {msg}";
+            Console.WriteLine(fullMsg);
+            if (writeToFile)
+            {
+                writer.WriteLine(fullMsg);
+            }
+        }
+
         public long End()
         {
-            Console.WriteLine($"[WeaverDiagnostics] Weave Finished: {stopwatch.ElapsedMilliseconds}ms - {name}");
-            stopwatch.Stop();
-            return stopwatch.ElapsedMilliseconds;
+            WriteLine($"Weave Finished: {ElapsedMilliseconds}ms - {name}");
+            stopwatch?.Stop();
+            writer?.Close();
+            return ElapsedMilliseconds;
         }
 
         public SampleScope Sample(string label)
@@ -227,20 +274,20 @@ namespace Mirage.Weaver
 
         public struct SampleScope : IDisposable
         {
-            WeaverDiagnosticsTimer timer;
-            long start;
-            string label;
+            readonly WeaverDiagnosticsTimer timer;
+            readonly long start;
+            readonly string label;
 
             public SampleScope(WeaverDiagnosticsTimer timer, string label)
             {
                 this.timer = timer;
-                start = timer.stopwatch.ElapsedMilliseconds;
+                start = timer.ElapsedMilliseconds;
                 this.label = label;
             }
 
             public void Dispose()
             {
-                Console.WriteLine($"[WeaverDiagnostics] {label}: {timer.stopwatch.ElapsedMilliseconds - start}ms - {timer.name}");
+                timer.WriteLine($"{label}: {timer.ElapsedMilliseconds - start}ms - {timer.name}");
             }
         }
     }
