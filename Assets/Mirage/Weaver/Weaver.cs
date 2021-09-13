@@ -40,67 +40,6 @@ namespace Mirage.Weaver
             this.logger = logger;
         }
 
-        void CheckMonoBehaviour(TypeDefinition td)
-        {
-            var processor = new MonoBehaviourProcessor(logger);
-
-            if (td.IsDerivedFrom<UnityEngine.MonoBehaviour>())
-            {
-                processor.Process(td);
-            }
-        }
-
-        bool WeaveNetworkBehavior(TypeDefinition td)
-        {
-            if (!td.IsClass)
-                return false;
-
-            if (!td.IsDerivedFrom<NetworkBehaviour>())
-            {
-                CheckMonoBehaviour(td);
-                return false;
-            }
-
-            // process this and base classes from parent to child order
-
-            var behaviourClasses = new List<TypeDefinition>();
-
-            TypeDefinition parent = td;
-            while (parent != null)
-            {
-                if (parent.Is<NetworkBehaviour>())
-                {
-                    break;
-                }
-
-                try
-                {
-                    behaviourClasses.Insert(0, parent);
-                    parent = parent.BaseType.Resolve();
-                }
-                catch (AssemblyResolutionException)
-                {
-                    // this can happen for plugins.
-                    break;
-                }
-            }
-
-            bool modified = false;
-            foreach (TypeDefinition behaviour in behaviourClasses)
-            {
-                modified |= new NetworkBehaviourProcessor(moduleCache, behaviour, readers, writers, propertySiteProcessor, logger).Process();
-            }
-            return modified;
-        }
-
-        TypeDefinition[] GetAllResolvedClasses(ModuleDefinition module)
-        {
-            using (timer.Sample("GetAllTypes"))
-            {
-                return module.Types.Where(td => td.IsClass && td.BaseType.CanBeResolved()).ToArray();
-            }
-        }
-
         public static AssemblyDefinition AssemblyDefinitionFor(ICompiledAssembly compiledAssembly)
         {
             var assemblyResolver = new PostProcessorAssemblyResolver(compiledAssembly);
@@ -197,6 +136,67 @@ namespace Mirage.Weaver
                 long endTime = timer?.End() ?? 0;
 
                 moduleCache?.Close(endTime);
+            }
+        }
+
+        TypeDefinition[] GetAllResolvedClasses(ModuleDefinition module)
+        {
+            using (timer.Sample("GetAllTypes"))
+            {
+                return module.Types.Where(td => td.IsClass && td.BaseType.CanBeResolved()).ToArray();
+            }
+        }
+
+        bool WeaveNetworkBehavior(TypeDefinition td)
+        {
+            if (!td.IsClass)
+                return false;
+
+            if (!td.IsDerivedFrom<NetworkBehaviour>())
+            {
+                CheckMonoBehaviour(td);
+                return false;
+            }
+
+            // process this and base classes from parent to child order
+
+            var behaviourClasses = new List<TypeDefinition>();
+
+            TypeDefinition parent = td;
+            while (parent != null)
+            {
+                if (parent.Is<NetworkBehaviour>())
+                {
+                    break;
+                }
+
+                try
+                {
+                    behaviourClasses.Insert(0, parent);
+                    parent = parent.BaseType.Resolve();
+                }
+                catch (AssemblyResolutionException)
+                {
+                    // this can happen for plugins.
+                    break;
+                }
+            }
+
+            bool modified = false;
+            foreach (TypeDefinition behaviour in behaviourClasses)
+            {
+                modified |= new NetworkBehaviourProcessor(moduleCache, behaviour, readers, writers, propertySiteProcessor, logger).Process();
+            }
+            return modified;
+        }
+
+        void CheckMonoBehaviour(TypeDefinition td)
+        {
+            var processor = new MonoBehaviourProcessor(logger);
+
+            if (td.IsDerivedFrom<UnityEngine.MonoBehaviour>())
+            {
+                processor.Process(td);
             }
         }
     }
