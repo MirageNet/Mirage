@@ -1,3 +1,10 @@
+## [104.0.1](https://github.com/MirageNet/Mirage/compare/v104.0.0...v104.0.1) (2021-09-13)
+
+
+### Performance Improvements
+
+* **Weaver:** optimizing find file in assembly resolver ([#925](https://github.com/MirageNet/Mirage/issues/925)) ([68d6749](https://github.com/MirageNet/Mirage/commit/68d67497abbec0d69428b4b36b4aaba3576429ce))
+
 # [104.0.0](https://github.com/MirageNet/Mirage/compare/v103.1.1...v104.0.0) (2021-09-08)
 
 
