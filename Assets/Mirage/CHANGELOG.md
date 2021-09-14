@@ -1,3 +1,10 @@
+## [104.0.3](https://github.com/MirageNet/Mirage/compare/v104.0.2...v104.0.3) (2021-09-14)
+
+
+### Performance Improvements
+
+* **Weaver:** increasing performance of PostProcessorReflectionImporter ([#931](https://github.com/MirageNet/Mirage/issues/931)) ([13e6d1f](https://github.com/MirageNet/Mirage/commit/13e6d1fdc7f0c47900e5bfb2a7830cde7ed1b56c))
+
 ## [104.0.2](https://github.com/MirageNet/Mirage/compare/v104.0.1...v104.0.2) (2021-09-13)
 
 
