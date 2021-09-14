@@ -10,7 +10,14 @@ using Stopwatch = System.Diagnostics.Stopwatch;
 
 namespace Mirage.Weaver
 {
-
+    /// <summary>
+    /// Weaves an Assembly
+    /// <para>
+    /// Debug Defines:<br />
+    /// - <c>WEAVER_DEBUG_LOGS</c><br />
+    /// - <c>WEAVER_DEBUG_TIMER</c><br />
+    /// </para>
+    /// </summary>
     public class Weaver
     {
         private readonly IWeaverLogger logger;
@@ -154,6 +161,7 @@ namespace Mirage.Weaver
 
             return assemblyDefinition;
         }
+
 
         public AssemblyDefinition Weave(ICompiledAssembly compiledAssembly)
         {
