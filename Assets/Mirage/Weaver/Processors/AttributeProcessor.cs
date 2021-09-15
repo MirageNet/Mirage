@@ -1,9 +1,15 @@
-// Injects server/client active checks for [Server/Client] attributes
+using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver
 {
+    /// <summary>
+    /// Processes methods and fields to check their attrbiutes to make sure they are allowed on the type
+    /// <para>
+    /// Injects server/client active checks for [Server/Client] attributes 
+    /// </para>
+    /// </summary>
     class AttributeProcessor
     {
         private readonly IWeaverLogger logger;
@@ -12,6 +18,8 @@ namespace Mirage.Weaver
         readonly MethodReference IsClient;
         readonly MethodReference HasAuthority;
         readonly MethodReference IsLocalPlayer;
+
+        bool modified = false;
 
         public AttributeProcessor(ModuleDefinition module, IWeaverLogger logger)
         {
@@ -24,12 +32,21 @@ namespace Mirage.Weaver
             IsLocalPlayer = module.ImportReference((NetworkBehaviour nb) => nb.IsLocalPlayer);
         }
 
-        public bool ProcessType(FoundType foundType)
+        public bool ProcessTypes(IReadOnlyList<FoundType> foundTypes)
         {
-            bool modified = false;
+            foreach (FoundType foundType in foundTypes)
+            {
+                ProcessType(foundType);
+            }
+
+            return modified;
+        }
+
+        void ProcessType(FoundType foundType)
+        {
             foreach (MethodDefinition md in foundType.TypeDefinition.Methods)
             {
-                modified |= ProcessMethod(md, foundType);
+                ProcessMethod(md, foundType);
             }
 
             if (!foundType.IsNetworkBehaviour)
@@ -39,8 +56,6 @@ namespace Mirage.Weaver
                     ProcessFields(fd, foundType);
                 }
             }
-
-            return modified;
         }
 
         /// <summary>
@@ -60,12 +75,12 @@ namespace Mirage.Weaver
             }
         }
 
-        bool ProcessMethod(MethodDefinition md, FoundType foundType)
+        void ProcessMethod(MethodDefinition md, FoundType foundType)
         {
             if (IgnoreMethod(md))
-                return false;
+                return;
 
-            return ProcessMethodAttributes(md, foundType);
+            ProcessMethodAttributes(md, foundType);
         }
 
         /// <summary>
@@ -73,28 +88,24 @@ namespace Mirage.Weaver
         /// </summary>
         /// <param name="md"></param>
         /// <returns></returns>
-        private static bool IgnoreMethod(MethodDefinition md)
+        static bool IgnoreMethod(MethodDefinition md)
         {
             return md.Name == ".cctor" ||
                 md.Name == NetworkBehaviourProcessor.ProcessedFunctionName ||
                 md.Name.StartsWith(RpcProcessor.InvokeRpcPrefix);
         }
 
-        bool ProcessMethodAttributes(MethodDefinition md, FoundType foundType)
+        void ProcessMethodAttributes(MethodDefinition md, FoundType foundType)
         {
-            bool modified;
-            modified = InjectGuard<ServerAttribute>(md, foundType, IsServer, "[Server] function '" + md.FullName + "' called on client");
-            modified |= InjectGuard<ClientAttribute>(md, foundType, IsClient, "[Client] function '" + md.FullName + "' called on server");
-            modified |= InjectGuard<HasAuthorityAttribute>(md, foundType, HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
-            modified |= InjectGuard<LocalPlayerAttribute>(md, foundType, IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
+            InjectGuard<ServerAttribute>(md, foundType, IsServer, "[Server] function '" + md.FullName + "' called on client");
+            InjectGuard<ClientAttribute>(md, foundType, IsClient, "[Client] function '" + md.FullName + "' called on server");
+            InjectGuard<HasAuthorityAttribute>(md, foundType, HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
+            InjectGuard<LocalPlayerAttribute>(md, foundType, IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
             CheckAttribute<ServerRpcAttribute>(md, foundType);
             CheckAttribute<ClientRpcAttribute>(md, foundType);
-
-
-            return modified;
         }
 
-        private void CheckAttribute<TAttribute>(MethodDefinition md, FoundType foundType)
+        void CheckAttribute<TAttribute>(MethodDefinition md, FoundType foundType)
         {
             CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
@@ -106,25 +117,28 @@ namespace Mirage.Weaver
             }
         }
 
-        bool InjectGuard<TAttribute>(MethodDefinition md, FoundType foundType, MethodReference predicate, string message)
+        void InjectGuard<TAttribute>(MethodDefinition md, FoundType foundType, MethodReference predicate, string message)
         {
             CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
-                return false;
+                return;
 
             if (md.IsAbstract)
             {
-                logger.Error($" {typeof(TAttribute)} can't be applied to abstract method. Apply to override methods instead.", md);
-                return false;
+                logger.Error($"{typeof(TAttribute)} can't be applied to abstract method. Apply to override methods instead.", md);
+                return;
             }
-
-            bool throwError = attribute.GetField("error", true);
 
             if (!foundType.IsNetworkBehaviour)
             {
                 logger.Error($"{attribute.AttributeType.Name} method {md.Name} must be declared in a NetworkBehaviour", md);
-                return true;
+                return;
             }
+
+            // dont need to set modified for errors, so we set it here when we start doing ILProcessing
+            modified = true;
+
+            bool throwError = attribute.GetField("error", true);
             ILProcessor worker = md.Body.GetILProcessor();
             Instruction top = md.Body.Instructions[0];
 
@@ -140,7 +154,6 @@ namespace Mirage.Weaver
             InjectGuardParameters(md, worker, top);
             InjectGuardReturnValue(md, worker, top);
             worker.InsertBefore(top, worker.Create(OpCodes.Ret));
-            return true;
         }
 
         // this is required to early-out from a function with "ref" or "out" parameters
