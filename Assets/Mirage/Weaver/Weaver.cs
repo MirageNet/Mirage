@@ -39,13 +39,24 @@ namespace Mirage.Weaver
                         break;
                     }
 
-                    if (parent.CanBeResolved())
+                    try
+                    {
+                        if (parent.Scope.Name == "Windows")
+                        {
+                            break;
+                        }
+
                         parent = parent.Resolve().BaseType;
+                    }
+                    catch
+                    {
+                        break;
+                    }
                 }
             }
         }
     }
-    
+
     /// <summary>
     /// Weaves an Assembly
     /// <para>
@@ -274,7 +285,7 @@ namespace Mirage.Weaver
             WriteLine($"Debug logs enabled");
 #else
             WriteLine($"Debug logs disabled");
-#endif 
+#endif
         }
 
         [Conditional("WEAVER_DEBUG_TIMER")]
