@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
+using UnityEngine;
 using ConditionalAttribute = System.Diagnostics.ConditionalAttribute;
 
 namespace Mirage.Weaver
@@ -62,22 +62,22 @@ namespace Mirage.Weaver
                     modified = rwProcessor.Process();
                 }
 
-                TypeDefinition[] resolvedTypes = GetAllResolvedClasses(module);
+                IReadOnlyList<FoundType> resolvedTypes = FindAllClasses(module);
 
                 using (timer.Sample("AttributeProcessor"))
                 {
                     var attributeProcessor = new ServerClientAttributeProcessor(module, logger);
-                    foreach (TypeDefinition td in resolvedTypes)
+                    foreach (FoundType foundType in resolvedTypes)
                     {
-                        modified |= attributeProcessor.Process(td);
+                        modified |= attributeProcessor.Process(foundType);
                     }
                 }
 
                 using (timer.Sample("WeaveNetworkBehavior"))
                 {
-                    foreach (TypeDefinition td in resolvedTypes)
+                    foreach (FoundType foundType in resolvedTypes)
                     {
-                        modified |= WeaveNetworkBehavior(td);
+                        modified |= WeaveNetworkBehavior(foundType);
                     }
                 }
 
@@ -132,65 +132,129 @@ namespace Mirage.Weaver
             return assemblyDefinition;
         }
 
-        TypeDefinition[] GetAllResolvedClasses(ModuleDefinition module)
+        IReadOnlyList<FoundType> FindAllClasses(ModuleDefinition module)
         {
-            using (timer.Sample("GetAllTypes"))
+            using (timer.Sample("FindAllClasses"))
             {
-                return module.Types.Where(td => td.IsClass && td.BaseType.CanBeResolved()).ToArray();
+                var foundTypes = new List<FoundType>();
+                foreach (TypeDefinition type in module.Types)
+                {
+                    ProcessType(type, foundTypes);
+
+                    foreach (TypeDefinition nested in type.NestedTypes)
+                    {
+                        ProcessType(nested, foundTypes);
+                    }
+                }
+
+                return foundTypes;
             }
         }
 
-        bool WeaveNetworkBehavior(TypeDefinition td)
+        private void ProcessType(TypeDefinition type, List<FoundType> foundTypes)
         {
-            if (!td.IsClass)
-                return false;
+            if (!type.IsClass) return;
 
-            if (!td.IsDerivedFrom<NetworkBehaviour>())
-            {
-                CheckMonoBehaviour(td);
-                return false;
-            }
-
-            // process this and base classes from parent to child order
-
-            var behaviourClasses = new List<TypeDefinition>();
-
-            TypeDefinition parent = td;
+            TypeReference parent = type.BaseType;
+            bool isNetworkBehaviour = false;
+            bool isMonoBehaviour = false;
             while (parent != null)
             {
                 if (parent.Is<NetworkBehaviour>())
                 {
+                    isNetworkBehaviour = true;
+                    isMonoBehaviour = true;
+                    break;
+                }
+                else if (parent.Is<MonoBehaviour>())
+                {
+                    isMonoBehaviour = true;
                     break;
                 }
 
-                try
-                {
-                    behaviourClasses.Insert(0, parent);
-                    parent = parent.BaseType.Resolve();
-                }
-                catch (AssemblyResolutionException)
-                {
-                    // this can happen for plugins.
-                    break;
-                }
+                parent = parent.TryResolveParent();
             }
 
-            bool modified = false;
-            foreach (TypeDefinition behaviour in behaviourClasses)
+            foundTypes.Add(new FoundType(type, isNetworkBehaviour, isMonoBehaviour));
+        }
+
+        bool WeaveNetworkBehavior(FoundType foundType)
+        {
+            if (!foundType.IsNetworkBehaviour)
             {
+                CheckMonoBehaviour(foundType);
+                return false;
+            }
+
+
+            List<TypeDefinition> behaviourClasses = FindAllBaseTypes(foundType);
+
+            bool modified = false;
+            // process this and base classes from parent to child order
+            for (int i = behaviourClasses.Count - 1; i >= 0; i--)
+            {
+                TypeDefinition behaviour = behaviourClasses[i];
+                if (NetworkBehaviourProcessor.WasProcessed(behaviour)) { continue; }
+
                 modified |= new NetworkBehaviourProcessor(behaviour, readers, writers, propertySiteProcessor, logger).Process();
             }
             return modified;
         }
 
-        void CheckMonoBehaviour(TypeDefinition td)
+        /// <summary>
+        /// Returns all base types that are between the type and NetworkBehaviour
+        /// </summary>
+        /// <param name="foundType"></param>
+        /// <returns></returns>
+        static List<TypeDefinition> FindAllBaseTypes(FoundType foundType)
+        {
+            var behaviourClasses = new List<TypeDefinition>();
+
+            TypeDefinition type = foundType.TypeDefinition;
+            while (type != null)
+            {
+                if (type.Is<NetworkBehaviour>())
+                {
+                    break;
+                }
+
+                behaviourClasses.Add(type);
+                type = type.BaseType.TryResolve();
+            }
+
+            return behaviourClasses;
+        }
+
+        void CheckMonoBehaviour(FoundType foundType)
         {
             var processor = new MonoBehaviourProcessor(logger);
 
-            if (td.IsDerivedFrom<UnityEngine.MonoBehaviour>())
+            if (foundType.IsMonoBehaviour)
             {
-                processor.Process(td);
+                processor.Process(foundType.TypeDefinition);
             }
+        }
+    }
+
+    public class FoundType
+    {
+        public readonly TypeDefinition TypeDefinition;
+
+        /// <summary>
+        /// Is Derived From NetworkBehaviour
+        /// </summary>
+        public readonly bool IsNetworkBehaviour;
+
+        /// <summary>
+        /// Is Derived From MonoBehaviour
+        /// </summary>
+        public readonly bool IsMonoBehaviour;
+
+        public FoundType(TypeDefinition typeDefinition, bool isNetworkBehaviour, bool isMonoBehaviour)
+        {
+            TypeDefinition = typeDefinition;
+            IsNetworkBehaviour = isNetworkBehaviour;
+            IsMonoBehaviour = isMonoBehaviour;
         }
     }
 }
