@@ -48,6 +48,39 @@ namespace Mirage.Weaver
             return false;
         }
 
+        /// <summary>
+        /// Resolves type using try/catch check
+        /// Replacement for <see cref="CanBeResolved(TypeReference)"/>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static TypeDefinition TryResolve(this TypeReference type)
+        {
+            if (type.Scope.Name == "Windows")
+            {
+                return null;
+            }
+
+            try
+            {
+                return type.Resolve();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Uses <see cref="TryResolve(TypeReference)"/> to find the Base Type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static TypeReference TryResolveParent(this TypeReference type)
+        {
+            return type.TryResolve()?.BaseType;
+        }
+
         // set the value of a constant in a class
         public static void SetConst<T>(this TypeDefinition td, string fieldName, T value) where T : struct
         {
