@@ -24,45 +24,51 @@ namespace Mirage.Weaver
             IsLocalPlayer = module.ImportReference((NetworkBehaviour nb) => nb.IsLocalPlayer);
         }
 
-        public bool Process(TypeDefinition td)
+        public bool Process(FoundType foundType)
         {
             bool modified = false;
-            foreach (MethodDefinition md in td.Methods)
+            foreach (MethodDefinition md in foundType.TypeDefinition.Methods)
             {
-                modified |= ProcessSiteMethod(md);
+                modified |= ProcessSiteMethod(md, foundType);
             }
 
-            foreach (TypeDefinition nested in td.NestedTypes)
-            {
-                modified |= Process(nested);
-            }
             return modified;
         }
 
-        bool ProcessSiteMethod(MethodDefinition md)
+        bool ProcessSiteMethod(MethodDefinition md, FoundType foundType)
         {
-            if (md.Name == ".cctor" ||
-                md.Name == NetworkBehaviourProcessor.ProcessedFunctionName ||
-                md.Name.StartsWith(RpcProcessor.InvokeRpcPrefix))
+            if (IgnoreMethod(md))
                 return false;
 
-            return ProcessMethodAttributes(md);
+            return ProcessMethodAttributes(md, foundType);
         }
 
-        bool ProcessMethodAttributes(MethodDefinition md)
+        /// <summary>
+        /// Ignore if it is static constructor, or a Weaver Generated function
+        /// </summary>
+        /// <param name="md"></param>
+        /// <returns></returns>
+        private static bool IgnoreMethod(MethodDefinition md)
         {
-            bool modified = InjectGuard<ServerAttribute>(md, IsServer, "[Server] function '" + md.FullName + "' called on client");
+            return md.Name == ".cctor" ||
+                md.Name == NetworkBehaviourProcessor.ProcessedFunctionName ||
+                md.Name.StartsWith(RpcProcessor.InvokeRpcPrefix);
+        }
 
-            modified |= InjectGuard<ClientAttribute>(md, IsClient, "[Client] function '" + md.FullName + "' called on server");
+        bool ProcessMethodAttributes(MethodDefinition md, FoundType foundType)
+        {
+            bool modified = InjectGuard<ServerAttribute>(md, foundType, IsServer, "[Server] function '" + md.FullName + "' called on client");
 
-            modified |= InjectGuard<HasAuthorityAttribute>(md, HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
+            modified |= InjectGuard<ClientAttribute>(md, foundType, IsClient, "[Client] function '" + md.FullName + "' called on server");
 
-            modified |= InjectGuard<LocalPlayerAttribute>(md, IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
+            modified |= InjectGuard<HasAuthorityAttribute>(md, foundType, HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
+
+            modified |= InjectGuard<LocalPlayerAttribute>(md, foundType, IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
 
             return modified;
         }
 
-        bool InjectGuard<TAttribute>(MethodDefinition md, MethodReference predicate, string message)
+        bool InjectGuard<TAttribute>(MethodDefinition md, FoundType foundType, MethodReference predicate, string message)
         {
             CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
@@ -76,7 +82,7 @@ namespace Mirage.Weaver
 
             bool throwError = attribute.GetField("error", true);
 
-            if (!md.DeclaringType.IsDerivedFrom<NetworkBehaviour>())
+            if (!foundType.IsNetworkBehaviour)
             {
                 logger.Error($"{attribute.AttributeType.Name} method {md.Name} must be declared in a NetworkBehaviour", md);
                 return true;
