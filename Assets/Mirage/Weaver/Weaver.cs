@@ -89,14 +89,14 @@ namespace Mirage.Weaver
 
         public static AssemblyDefinition AssemblyDefinitionFor(ICompiledAssembly compiledAssembly)
         {
-            var assemblyResolver = new PostProcessorAssemblyResolver(compiledAssembly);
+            var assemblyResolver = new PostProcessorAssemblyResolver();
             var readerParameters = new ReaderParameters
             {
                 SymbolStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PdbData),
                 SymbolReaderProvider = new PortablePdbReaderProvider(),
                 AssemblyResolver = assemblyResolver,
                 ReflectionImporterProvider = new PostProcessorReflectionImporterProvider(),
-                ReadingMode = ReadingMode.Immediate
+                ReadingMode = ReadingMode.Deferred
             };
 
             var assemblyDefinition = AssemblyDefinition.ReadAssembly(new MemoryStream(compiledAssembly.InMemoryAssembly.PeData), readerParameters);
@@ -105,7 +105,7 @@ namespace Mirage.Weaver
             //are also postprocessing MLAPI.Runtime, type resolving will fail, because we do not actually try to resolve
             //inside the assembly we are processing. Let's make sure we do that, so that we can use postprocessor features inside
             //MLAPI.Runtime itself as well.
-            assemblyResolver.AddAssemblyDefinitionBeingOperatedOn(assemblyDefinition);
+            assemblyResolver.AddAssemblyDefinitionBeingOperatedOn(compiledAssembly.Name, compiledAssembly.References, assemblyDefinition);
 
             return assemblyDefinition;
         }
