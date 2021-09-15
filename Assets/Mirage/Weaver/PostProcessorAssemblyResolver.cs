@@ -9,10 +9,38 @@ namespace Mirage.Weaver
 {
     class PostProcessorAssemblyResolver : IAssemblyResolver
     {
-        private static readonly Dictionary<int, AssemblyDefinitionWithLock> _assemblyCache = new Dictionary<int, AssemblyDefinitionWithLock>();
+        class AssemblyDefinitionWithLock
+        {
+            public readonly object locker = new object();
+            public AssemblyDefinition Definition;
+        }
+        class ReferenceWithName
+        {
+            public readonly string References;
+            public readonly string FileName;
 
-        private string[] _assemblyReferencesFileName;
-        private string[] _assemblyReferences;
+            public ReferenceWithName(string references)
+            {
+                References = references;
+                FileName = Path.GetFileName(References);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is ReferenceWithName other)
+                {
+                    return References == other.References;
+                }
+                return false;
+            }
+            public override int GetHashCode()
+            {
+                return References.GetHashCode();
+            }
+        }
+        private static readonly Dictionary<int, AssemblyDefinitionWithLock> _assemblyCache = new Dictionary<int, AssemblyDefinitionWithLock>();
+        private static readonly Dictionary<string, ReferenceWithName> _assemblyReferences = new Dictionary<string, ReferenceWithName>();
+
         private string _selfName;
         private AssemblyDefinition _selfAssembly;
 
@@ -20,9 +48,25 @@ namespace Mirage.Weaver
         {
             _selfAssembly = assemblyDefinition;
             _selfName = name;
-            _assemblyReferences = references;
-            // cache paths here so we dont need to call it each time we resolve
-            _assemblyReferencesFileName = _assemblyReferences.Select(r => Path.GetFileName(r)).ToArray();
+
+            lock (_assemblyReferences)
+            {
+                foreach (string newRef in references)
+                {
+                    var withName = new ReferenceWithName(newRef);
+                    if (_assemblyReferences.TryGetValue(withName.FileName, out ReferenceWithName Existing))
+                    {
+                        if (Existing.References != withName.References)
+                        {
+                            Console.WriteLine($"[PostProcessorAssemblyResolver] Already exists!!! Existing:{Existing.References} New:{withName.References}");
+                        }
+                    }
+                    else
+                    {
+                        _assemblyReferences.Add(withName.FileName, withName);
+                    }
+                }
+            }
         }
 
         public void Dispose()
@@ -39,11 +83,6 @@ namespace Mirage.Weaver
         public AssemblyDefinition Resolve(AssemblyNameReference name) => Resolve(name, new ReaderParameters(ReadingMode.Deferred));
 
 
-        class AssemblyDefinitionWithLock
-        {
-            public readonly object locker = new object();
-            public AssemblyDefinition Definition;
-        }
         public AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters)
         {
             if (name.Name == _selfName)
@@ -127,13 +166,23 @@ namespace Mirage.Weaver
             // first pass, check if we can find dll or exe file
             string dllName = name.Name + ".dll";
             string exeName = name.Name + ".exe";
-            for (int i = 0; i < _assemblyReferencesFileName.Length; i++)
+            ReferenceWithName withName;
+            if (_assemblyReferences.TryGetValue(dllName, out withName))
             {
-                // if filename matches, return full path
-                string fileName = _assemblyReferencesFileName[i];
-                if (fileName == dllName || fileName == exeName)
-                    return _assemblyReferences[i];
+                return withName.References;
             }
+            if (_assemblyReferences.TryGetValue(exeName, out withName))
+            {
+                return withName.References;
+            }
+
+            //for (int i = 0; i < _assemblyReferences.Length; i++)
+            //{
+            //    // if filename matches, return full path
+            //    string fileName = _assemblyReferences[i];
+            //    if (fileName == dllName || fileName == exeName)
+            //        return _assemblyReferences[i];
+            //}
 
             // second pass (only run if first fails), 
 
@@ -144,7 +193,7 @@ namespace Mirage.Weaver
             //in the ILPostProcessing API. As a workaround, we rely on the fact here that the indirect references
             //are always located next to direct references, so we search in all directories of direct references we
             //got passed, and if we find the file in there, we resolve to it.
-            IEnumerable<string> allParentDirectories = _assemblyReferences.Select(Path.GetDirectoryName).Distinct();
+            IEnumerable<string> allParentDirectories = _assemblyReferences.Select(x => x.Value.References).Select(Path.GetDirectoryName).Distinct();
             foreach (string parentDir in allParentDirectories)
             {
                 string candidate = Path.Combine(parentDir, name.Name + ".dll");
