@@ -39,92 +39,6 @@ namespace Mirage.Weaver
             this.logger = logger;
         }
 
-        void CheckMonoBehaviour(TypeDefinition td)
-        {
-            var processor = new MonoBehaviourProcessor(logger);
-
-            if (td.IsDerivedFrom<UnityEngine.MonoBehaviour>())
-            {
-                processor.Process(td);
-            }
-        }
-
-        bool WeaveNetworkBehavior(TypeDefinition td)
-        {
-            if (!td.IsClass)
-                return false;
-
-            if (!td.IsDerivedFrom<NetworkBehaviour>())
-            {
-                CheckMonoBehaviour(td);
-                return false;
-            }
-
-            // process this and base classes from parent to child order
-
-            var behaviourClasses = new List<TypeDefinition>();
-
-            TypeDefinition parent = td;
-            while (parent != null)
-            {
-                if (parent.Is<NetworkBehaviour>())
-                {
-                    break;
-                }
-
-                try
-                {
-                    behaviourClasses.Insert(0, parent);
-                    parent = parent.BaseType.Resolve();
-                }
-                catch (AssemblyResolutionException)
-                {
-                    // this can happen for plugins.
-                    break;
-                }
-            }
-
-            bool modified = false;
-            foreach (TypeDefinition behaviour in behaviourClasses)
-            {
-                modified |= new NetworkBehaviourProcessor(behaviour, readers, writers, propertySiteProcessor, logger).Process();
-            }
-            return modified;
-        }
-
-        TypeDefinition[] GetAllResolvedClasses(ModuleDefinition module)
-        {
-            using (timer.Sample("GetAllTypes"))
-            {
-                return module.Types.Where(td => td.IsClass && td.BaseType.CanBeResolved()).ToArray();
-            }
-        }
-
-
-        public static AssemblyDefinition AssemblyDefinitionFor(ICompiledAssembly compiledAssembly)
-        {
-            var assemblyResolver = new PostProcessorAssemblyResolver(compiledAssembly);
-            var readerParameters = new ReaderParameters
-            {
-                SymbolStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PdbData),
-                SymbolReaderProvider = new PortablePdbReaderProvider(),
-                AssemblyResolver = assemblyResolver,
-                ReflectionImporterProvider = new PostProcessorReflectionImporterProvider(),
-                ReadingMode = ReadingMode.Immediate
-            };
-
-            var assemblyDefinition = AssemblyDefinition.ReadAssembly(new MemoryStream(compiledAssembly.InMemoryAssembly.PeData), readerParameters);
-
-            //apparently, it will happen that when we ask to resolve a type that lives inside MLAPI.Runtime, and we
-            //are also postprocessing MLAPI.Runtime, type resolving will fail, because we do not actually try to resolve
-            //inside the assembly we are processing. Let's make sure we do that, so that we can use postprocessor features inside
-            //MLAPI.Runtime itself as well.
-            assemblyResolver.AddAssemblyDefinitionBeingOperatedOn(assemblyDefinition);
-
-            return assemblyDefinition;
-        }
-
-
         public AssemblyDefinition Weave(ICompiledAssembly compiledAssembly)
         {
             try
@@ -193,6 +107,90 @@ namespace Mirage.Weaver
             {
                 // end in finally incase it return early
                 timer?.End();
+            }
+        }
+
+        public static AssemblyDefinition AssemblyDefinitionFor(ICompiledAssembly compiledAssembly)
+        {
+            var assemblyResolver = new PostProcessorAssemblyResolver(compiledAssembly);
+            var readerParameters = new ReaderParameters
+            {
+                SymbolStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PdbData),
+                SymbolReaderProvider = new PortablePdbReaderProvider(),
+                AssemblyResolver = assemblyResolver,
+                ReflectionImporterProvider = new PostProcessorReflectionImporterProvider(),
+                ReadingMode = ReadingMode.Immediate
+            };
+
+            var assemblyDefinition = AssemblyDefinition.ReadAssembly(new MemoryStream(compiledAssembly.InMemoryAssembly.PeData), readerParameters);
+
+            //apparently, it will happen that when we ask to resolve a type that lives inside MLAPI.Runtime, and we
+            //are also postprocessing MLAPI.Runtime, type resolving will fail, because we do not actually try to resolve
+            //inside the assembly we are processing. Let's make sure we do that, so that we can use postprocessor features inside
+            //MLAPI.Runtime itself as well.
+            assemblyResolver.AddAssemblyDefinitionBeingOperatedOn(assemblyDefinition);
+
+            return assemblyDefinition;
+        }
+
+        TypeDefinition[] GetAllResolvedClasses(ModuleDefinition module)
+        {
+            using (timer.Sample("GetAllTypes"))
+            {
+                return module.Types.Where(td => td.IsClass && td.BaseType.CanBeResolved()).ToArray();
+            }
+        }
+
+        bool WeaveNetworkBehavior(TypeDefinition td)
+        {
+            if (!td.IsClass)
+                return false;
+
+            if (!td.IsDerivedFrom<NetworkBehaviour>())
+            {
+                CheckMonoBehaviour(td);
+                return false;
+            }
+
+            // process this and base classes from parent to child order
+
+            var behaviourClasses = new List<TypeDefinition>();
+
+            TypeDefinition parent = td;
+            while (parent != null)
+            {
+                if (parent.Is<NetworkBehaviour>())
+                {
+                    break;
+                }
+
+                try
+                {
+                    behaviourClasses.Insert(0, parent);
+                    parent = parent.BaseType.Resolve();
+                }
+                catch (AssemblyResolutionException)
+                {
+                    // this can happen for plugins.
+                    break;
+                }
+            }
+
+            bool modified = false;
+            foreach (TypeDefinition behaviour in behaviourClasses)
+            {
+                modified |= new NetworkBehaviourProcessor(behaviour, readers, writers, propertySiteProcessor, logger).Process();
+            }
+            return modified;
+        }
+
+        void CheckMonoBehaviour(TypeDefinition td)
+        {
+            var processor = new MonoBehaviourProcessor(logger);
+
+            if (td.IsDerivedFrom<UnityEngine.MonoBehaviour>())
+            {
+                processor.Process(td);
             }
         }
     }
