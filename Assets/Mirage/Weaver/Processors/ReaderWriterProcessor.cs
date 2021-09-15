@@ -41,7 +41,6 @@ namespace Mirage.Weaver
             messages.Clear();
 
             LoadBuiltinExtensions();
-            LoadBuiltinMessages();
 
             int writeCount = writers.Count;
             int readCount = readers.Count;
@@ -64,7 +63,7 @@ namespace Mirage.Weaver
             }
         }
 
-        private void LoadBuiltinMessages()
+        public void LoadBuiltinMessages()
         {
             IEnumerable<Type> types = MirageModule.GetTypes().Where(t => t.GetCustomAttribute<NetworkMessageAttribute>() != null);
             foreach (Type type in types)

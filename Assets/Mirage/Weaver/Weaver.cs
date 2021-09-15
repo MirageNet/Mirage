@@ -168,6 +168,10 @@ namespace Mirage.Weaver
                 {
                     rwProcessor.InitializeReaderAndWriters();
                 }
+                using (timer.Sample("LoadBuiltinMessages"))
+                {
+                    rwProcessor.LoadBuiltinMessages();
+                }
 
                 return CurrentAssembly;
             }
