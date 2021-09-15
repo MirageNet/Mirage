@@ -4,7 +4,7 @@ using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver
 {
-    class ServerClientAttributeProcessor
+    class AttributeProcessor
     {
         private readonly IWeaverLogger logger;
 
@@ -13,7 +13,7 @@ namespace Mirage.Weaver
         readonly MethodReference HasAuthority;
         readonly MethodReference IsLocalPlayer;
 
-        public ServerClientAttributeProcessor(ModuleDefinition module, IWeaverLogger logger)
+        public AttributeProcessor(ModuleDefinition module, IWeaverLogger logger)
         {
             this.logger = logger;
 
@@ -24,18 +24,43 @@ namespace Mirage.Weaver
             IsLocalPlayer = module.ImportReference((NetworkBehaviour nb) => nb.IsLocalPlayer);
         }
 
-        public bool Process(FoundType foundType)
+        public bool ProcessType(FoundType foundType)
         {
             bool modified = false;
             foreach (MethodDefinition md in foundType.TypeDefinition.Methods)
             {
-                modified |= ProcessSiteMethod(md, foundType);
+                modified |= ProcessMethod(md, foundType);
+            }
+
+            if (!foundType.IsNetworkBehaviour)
+            {
+                foreach (FieldDefinition fd in foundType.TypeDefinition.Fields)
+                {
+                    ProcessFields(fd, foundType);
+                }
             }
 
             return modified;
         }
 
-        bool ProcessSiteMethod(MethodDefinition md, FoundType foundType)
+        /// <summary>
+        /// Check if Syncvar or SyncObject are used outside of NetworkBehaviour
+        /// </summary>
+        /// <param name="fd"></param>
+        /// <param name="foundType"></param>
+        void ProcessFields(FieldDefinition fd, FoundType foundType)
+        {
+            if (fd.HasCustomAttribute<SyncVarAttribute>())
+                logger.Error($"SyncVar {fd.Name} must be inside a NetworkBehaviour.  {foundType.TypeDefinition.Name} is not a NetworkBehaviour", fd);
+
+            // only check SyncObjects inside Monobehaviours
+            if (foundType.IsMonoBehaviour && SyncObjectProcessor.ImplementsSyncObject(fd.FieldType))
+            {
+                logger.Error($"{fd.Name} is a SyncObject and must be inside a NetworkBehaviour.  {foundType.TypeDefinition.Name} is not a NetworkBehaviour", fd);
+            }
+        }
+
+        bool ProcessMethod(MethodDefinition md, FoundType foundType)
         {
             if (IgnoreMethod(md))
                 return false;
@@ -57,15 +82,28 @@ namespace Mirage.Weaver
 
         bool ProcessMethodAttributes(MethodDefinition md, FoundType foundType)
         {
-            bool modified = InjectGuard<ServerAttribute>(md, foundType, IsServer, "[Server] function '" + md.FullName + "' called on client");
-
+            bool modified;
+            modified = InjectGuard<ServerAttribute>(md, foundType, IsServer, "[Server] function '" + md.FullName + "' called on client");
             modified |= InjectGuard<ClientAttribute>(md, foundType, IsClient, "[Client] function '" + md.FullName + "' called on server");
-
             modified |= InjectGuard<HasAuthorityAttribute>(md, foundType, HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
-
             modified |= InjectGuard<LocalPlayerAttribute>(md, foundType, IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
+            CheckAttribute<ServerRpcAttribute>(md, foundType);
+            CheckAttribute<ClientRpcAttribute>(md, foundType);
+
 
             return modified;
+        }
+
+        private void CheckAttribute<TAttribute>(MethodDefinition md, FoundType foundType)
+        {
+            CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
+            if (attribute == null)
+                return;
+
+            if (!foundType.IsNetworkBehaviour)
+            {
+                logger.Error($"{attribute.AttributeType.Name} method {md.Name} must be declared in a NetworkBehaviour", md);
+            }
         }
 
         bool InjectGuard<TAttribute>(MethodDefinition md, FoundType foundType, MethodReference predicate, string message)

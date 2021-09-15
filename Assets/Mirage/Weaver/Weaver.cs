@@ -66,10 +66,10 @@ namespace Mirage.Weaver
 
                 using (timer.Sample("AttributeProcessor"))
                 {
-                    var attributeProcessor = new ServerClientAttributeProcessor(module, logger);
+                    var attributeProcessor = new AttributeProcessor(module, logger);
                     foreach (FoundType foundType in resolvedTypes)
                     {
-                        modified |= attributeProcessor.Process(foundType);
+                        modified |= attributeProcessor.ProcessType(foundType);
                     }
                 }
 
@@ -77,7 +77,8 @@ namespace Mirage.Weaver
                 {
                     foreach (FoundType foundType in resolvedTypes)
                     {
-                        modified |= WeaveNetworkBehavior(foundType);
+                        if (foundType.IsNetworkBehaviour)
+                            modified |= WeaveNetworkBehavior(foundType);
                     }
                 }
 
@@ -166,7 +167,7 @@ namespace Mirage.Weaver
                     isMonoBehaviour = true;
                     break;
                 }
-                else if (parent.Is<MonoBehaviour>())
+                if (parent.Is<MonoBehaviour>())
                 {
                     isMonoBehaviour = true;
                     break;
@@ -180,13 +181,6 @@ namespace Mirage.Weaver
 
         bool WeaveNetworkBehavior(FoundType foundType)
         {
-            if (!foundType.IsNetworkBehaviour)
-            {
-                CheckMonoBehaviour(foundType);
-                return false;
-            }
-
-
             List<TypeDefinition> behaviourClasses = FindAllBaseTypes(foundType);
 
             bool modified = false;
@@ -224,16 +218,6 @@ namespace Mirage.Weaver
 
             return behaviourClasses;
         }
-
-        void CheckMonoBehaviour(FoundType foundType)
-        {
-            var processor = new MonoBehaviourProcessor(logger);
-
-            if (foundType.IsMonoBehaviour)
-            {
-                processor.Process(foundType.TypeDefinition);
-            }
-        }
     }
 
     public class FoundType
@@ -245,16 +229,13 @@ namespace Mirage.Weaver
         /// </summary>
         public readonly bool IsNetworkBehaviour;
 
-        /// <summary>
-        /// Is Derived From MonoBehaviour
-        /// </summary>
         public readonly bool IsMonoBehaviour;
 
         public FoundType(TypeDefinition typeDefinition, bool isNetworkBehaviour, bool isMonoBehaviour)
         {
             TypeDefinition = typeDefinition;
             IsNetworkBehaviour = isNetworkBehaviour;
-            IsMonoBehaviour = isMonoBehaviour;
+            IsMonoBehaviour = isNetworkBehaviour;
         }
     }
 }
