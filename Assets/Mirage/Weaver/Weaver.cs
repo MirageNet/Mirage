@@ -197,13 +197,17 @@ namespace Mirage.Weaver
                     rwProcessor.InitializeReaderAndWriters();
                 }
 
-                timer.End();
                 return CurrentAssembly;
             }
             catch (Exception e)
             {
                 logger.Error("Exception :" + e);
                 return null;
+            }
+            finally
+            {
+                // end in finally incase it return early
+                timer?.End();
             }
         }
     }
