@@ -62,20 +62,17 @@ namespace Mirage.Weaver
                     modified = rwProcessor.Process();
                 }
 
-                IReadOnlyList<FoundType> resolvedTypes = FindAllClasses(module);
+                IReadOnlyList<FoundType> foundTypes = FindAllClasses(module);
 
                 using (timer.Sample("AttributeProcessor"))
                 {
                     var attributeProcessor = new AttributeProcessor(module, logger);
-                    foreach (FoundType foundType in resolvedTypes)
-                    {
-                        modified |= attributeProcessor.ProcessType(foundType);
-                    }
+                    modified |= attributeProcessor.ProcessTypes(foundTypes);
                 }
 
                 using (timer.Sample("WeaveNetworkBehavior"))
                 {
-                    foreach (FoundType foundType in resolvedTypes)
+                    foreach (FoundType foundType in foundTypes)
                     {
                         if (foundType.IsNetworkBehaviour)
                             modified |= WeaveNetworkBehavior(foundType);
