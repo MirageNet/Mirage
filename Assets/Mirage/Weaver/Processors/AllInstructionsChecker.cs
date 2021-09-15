@@ -62,10 +62,11 @@ namespace Mirage.Weaver
 
         private static bool WeavedMethods(MethodDefinition md)
         {
-            return md.Name != ".cctor" &&
-                md.Name != NetworkBehaviourProcessor.ProcessedFunctionName &&
-                !md.Name.StartsWith(RpcProcessor.InvokeRpcPrefix) &&
-                !md.IsConstructor;
+            return
+                md.Name == ".cctor" ||
+                md.Name == NetworkBehaviourProcessor.ProcessedFunctionName ||
+                md.Name.StartsWith(RpcProcessor.InvokeRpcPrefix) ||
+                md.IsConstructor;
         }
 
         static MethodBody GetValidBody(MethodDefinition m)
