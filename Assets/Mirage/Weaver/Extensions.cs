@@ -35,13 +35,16 @@ namespace Mirage.Weaver
 
             // are ANY parent classes of baseClass?
             TypeReference parent = td.BaseType;
+
+            // we only need to check if CanBeResolved once at start of loop as it checks all parents
+            if (!parent.CanBeResolved()) { return false; }
+
             while (parent != null)
             {
                 if (parent.Is(baseClass))
                     return true;
 
-                if (parent.CanBeResolved())
-                    parent = parent.Resolve().BaseType;
+                parent = parent.Resolve().BaseType;
             }
 
             return false;
