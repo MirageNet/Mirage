@@ -125,7 +125,7 @@ namespace Mirage.Weaver
             foreach (FieldDefinition field in type.FindAllPublicFields())
             {
                 ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, field, this, null);
-                valueSerialize.AppendWrite(module, writerFunc.worker, writerFunc.writerParameter, writerFunc.typeParameter, field);
+                valueSerialize.AppendWriteField(module, writerFunc.worker, writerFunc.writerParameter, writerFunc.typeParameter, field);
             }
         }
 

@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
@@ -83,16 +82,8 @@ namespace Mirage.Weaver
                 return;
 
             ValueSerializer valueSerializer = ValueSerializerFinder.GetSerializer(method, param, writers, null);
-            // todo remove this function when other Serializer works
-            if (valueSerializer is FunctionSerializer functionSerializer)
-            {
-                // arg+1 because arg0 is "this"
-                functionSerializer.AppendWriteRpc(worker, writer, argIndex + 1);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            // arg+1 because arg0 is "this"
+            valueSerializer.AppendWriteParameter(module, worker, writer, param);
         }
 
         public void ReadArguments(MethodDefinition method, ILProcessor worker, ParameterDefinition readerParameter, ParameterDefinition senderParameter, bool skipFirst)
@@ -143,7 +134,7 @@ namespace Mirage.Weaver
             ValueSerializer valueSerializer = ValueSerializerFinder.GetSerializer(method, param, null, readers);
 
             // todo make sure this works for all ValueSerializer
-            valueSerializer.AppendRead(null, worker, readerParameter, null);
+            valueSerializer.AppendRead(module, worker, readerParameter, param.ParameterType);
         }
 
         // check if a Command/TargetRpc/Rpc function & parameters are valid for weaving

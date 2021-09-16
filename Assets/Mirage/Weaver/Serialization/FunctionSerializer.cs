@@ -1,5 +1,4 @@
 using System;
-using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -20,41 +19,30 @@ namespace Mirage.Weaver.Serialization
             this.readFunction = readFunction;
         }
 
-        public override void AppendWrite(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
+        public override void AppendWriteField(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
         {
             // make generic and import field
 
             // if param is null then load arg0 instead
-            WriteParamOfArg0(worker, writerParameter);
-            WriteParamOfArg0(worker, typeParameter);
+            worker.Append(CreateParamOrArg0(worker, writerParameter));
+            worker.Append(CreateParamOrArg0(worker, typeParameter));
             worker.Append(worker.Create(OpCodes.Ldfld, ImportField(module, fieldDefinition)));
             worker.Append(worker.Create(OpCodes.Call, writeFunction));
 
         }
-        static void WriteParamOfArg0(ILProcessor worker, ParameterDefinition parameter)
-        {
-            if (parameter == null)
-            {
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-            }
-            else
-            {
-                worker.Append(worker.Create(OpCodes.Ldarg, parameter));
-            }
-        }
 
-        public void AppendWriteRpc(ILProcessor worker, VariableDefinition writer, int argIndex)
+        public override void AppendWriteParameter(ModuleDefinition module, ILProcessor worker, VariableDefinition writer, ParameterDefinition valueParameter)
         {
             // use built-in writer func on writer object
             // NetworkWriter object
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
             // add argument to call
-            worker.Append(worker.Create(OpCodes.Ldarg, argIndex));
+            worker.Append(worker.Create(OpCodes.Ldarg, valueParameter));
             // call writer extension method
             worker.Append(worker.Create(OpCodes.Call, writeFunction));
         }
 
-        public override void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)
+        public override void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, TypeReference fieldType)
         {
             // add `reader` to stack
             worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));

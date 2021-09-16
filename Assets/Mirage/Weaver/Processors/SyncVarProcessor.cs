@@ -409,7 +409,7 @@ namespace Mirage.Weaver
             {
                 foreach (FoundSyncVar syncVar in behaviour.SyncVars)
                 {
-                    WriteFromField(worker, helper.WriterParameter, null, syncVar);
+                    WriteFromField(worker, helper.WriterParameter, syncVar);
                 }
             });
 
@@ -423,8 +423,8 @@ namespace Mirage.Weaver
             {
                 helper.WriteIfSyncVarDirty(syncVar, () =>
                 {
-                        // Generates a call to the writer for that field
-                        WriteFromField(worker, helper.WriterParameter, null, syncVar);
+                    // Generates a call to the writer for that field
+                    WriteFromField(worker, helper.WriterParameter, syncVar);
                 });
             }
 
@@ -432,11 +432,11 @@ namespace Mirage.Weaver
             helper.WriteReturnDirty();
         }
 
-        void WriteFromField(ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParam, FoundSyncVar syncVar)
+        void WriteFromField(ILProcessor worker, ParameterDefinition writerParameter, FoundSyncVar syncVar)
         {
             if (!syncVar.HasProcessed) return;
 
-            syncVar.ValueSerializer.AppendWrite(module, worker, writerParameter, typeParam, syncVar.FieldDefinition);
+            syncVar.ValueSerializer.AppendWriteField(module, worker, writerParameter, null, syncVar.FieldDefinition);
         }
 
 
@@ -559,7 +559,7 @@ namespace Mirage.Weaver
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            syncVar.ValueSerializer.AppendRead(module, worker, readerParameter, syncVar);
+            syncVar.ValueSerializer.AppendRead(module, worker, readerParameter, syncVar.FieldDefinition.FieldType);
 
             worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
         }

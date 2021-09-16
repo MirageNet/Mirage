@@ -1,5 +1,4 @@
 using Mirage.Serialization;
-using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -39,17 +38,17 @@ namespace Mirage.Weaver.Serialization
             return new BitCountSerializer(bitCount, typeConverter, true);
         }
 
-        public override void AppendWrite(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
+        public override void AppendWriteField(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
         {
-            MethodReference writeWithBitCount = module.ImportReference(writerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkWriter.Write)));
+            MethodReference writeWithBitCount = module.ImportReference(typeof(NetworkWriter).GetMethod(nameof(NetworkWriter.Write)));
 
-            worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(CreateParamOrArg0(worker, writerParameter));
+            worker.Append(CreateParamOrArg0(worker, typeParameter));
             worker.Append(worker.Create(OpCodes.Ldfld, ImportField(module, fieldDefinition)));
 
             if (useZigZag)
             {
-                WriteZigZag(module, worker, fieldDefinition);
+                WriteZigZag(module, worker, fieldDefinition.FieldType);
             }
             if (minValue.HasValue)
             {
@@ -60,9 +59,31 @@ namespace Mirage.Weaver.Serialization
             worker.Append(worker.Create(OpCodes.Ldc_I4, bitCount));
             worker.Append(worker.Create(OpCodes.Call, writeWithBitCount));
         }
-        void WriteZigZag(ModuleDefinition module, ILProcessor worker, FieldDefinition fieldDefinition)
+
+
+        public override void AppendWriteParameter(ModuleDefinition module, ILProcessor worker, VariableDefinition writer, ParameterDefinition valueParameter)
         {
-            bool useLong = fieldDefinition.FieldType.Is<long>();
+            MethodReference writeWithBitCount = module.ImportReference(typeof(NetworkWriter).GetMethod(nameof(NetworkWriter.Write)));
+
+            worker.Append(worker.Create(OpCodes.Ldloc, writer));
+            worker.Append(worker.Create(OpCodes.Ldarg, valueParameter));
+
+            if (useZigZag)
+            {
+                WriteZigZag(module, worker, valueParameter.ParameterType);
+            }
+            if (minValue.HasValue)
+            {
+                WriteSubtractMinValue(worker);
+            }
+
+            worker.Append(worker.Create(OpCodes.Conv_U8));
+            worker.Append(worker.Create(OpCodes.Ldc_I4, bitCount));
+            worker.Append(worker.Create(OpCodes.Call, writeWithBitCount));
+        }
+        void WriteZigZag(ModuleDefinition module, ILProcessor worker, TypeReference fieldType)
+        {
+            bool useLong = fieldType.Is<long>();
             MethodReference encode = useLong
                 ? module.ImportReference((long v) => ZigZag.Encode(v))
                 : module.ImportReference((int v) => ZigZag.Encode(v));
@@ -75,7 +96,7 @@ namespace Mirage.Weaver.Serialization
             worker.Append(worker.Create(OpCodes.Sub));
         }
 
-        public override void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)
+        public override void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, TypeReference fieldType)
         {
             MethodReference readWithBitCount = module.ImportReference(readerParameter.ParameterType.Resolve().GetMethod(nameof(NetworkReader.Read)));
 
@@ -94,7 +115,7 @@ namespace Mirage.Weaver.Serialization
 
             if (useZigZag)
             {
-                ReadZigZag(module, worker, syncVar);
+                ReadZigZag(module, worker, fieldType);
             }
             if (minValue.HasValue)
             {
@@ -102,9 +123,9 @@ namespace Mirage.Weaver.Serialization
             }
         }
 
-        void ReadZigZag(ModuleDefinition module, ILProcessor worker, FoundSyncVar syncVar)
+        void ReadZigZag(ModuleDefinition module, ILProcessor worker, TypeReference fieldType)
         {
-            bool useLong = syncVar.FieldDefinition.FieldType.Is<long>();
+            bool useLong = fieldType.Is<long>();
             MethodReference encode = useLong
                 ? module.ImportReference((ulong v) => ZigZag.Decode(v))
                 : module.ImportReference((uint v) => ZigZag.Decode(v));

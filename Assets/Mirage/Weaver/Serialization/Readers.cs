@@ -198,28 +198,21 @@ namespace Mirage.Weaver
 
         void ReadAllFields(TypeReference type, ReadMethod readMethod)
         {
+            ILProcessor worker = readMethod.worker;
             foreach (FieldDefinition field in type.FindAllPublicFields())
             {
-                ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, field, null, this);
-                valueSerialize.AppendRead(module, readMethod.worker, readMethod.readParameter, null);
-            }
+                // load this, write value, store value
 
-            /* old read code
-            foreach (FieldDefinition field in variable.FindAllPublicFields())
-            {
                 // mismatched ldloca/ldloc for struct/class combinations is invalid IL, which causes crash at runtime
-                OpCode opcode = variable.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc;
+                OpCode opcode = type.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc;
                 worker.Append(worker.Create(opcode, 0));
 
-                MethodReference readFunc = GetFunction_Thorws(field.FieldType);
-                worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Call, readFunc));
+                ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, field, null, this);
+                valueSerialize.AppendRead(module, worker, readMethod.readParameter, null);
 
                 FieldReference fieldRef = module.ImportReference(field);
-
                 worker.Append(worker.Create(OpCodes.Stfld, fieldRef));
             }
-            */
         }
 
         /// <summary>

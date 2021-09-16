@@ -24,7 +24,7 @@ namespace Mirage.Weaver.Serialization
             IsIntType = isIntType;
         }
 
-        public override void AppendWrite(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
+        public override void AppendWriteField(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
         {
             // if PackerField is null it means there was an error earlier, so we dont need to do anything here
             if (packerField == null) { return; }
@@ -38,7 +38,12 @@ namespace Mirage.Weaver.Serialization
             worker.Append(worker.Create(OpCodes.Call, module.ImportReference(packMethod)));
         }
 
-        public override void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)
+        public override void AppendWriteParameter(ModuleDefinition module, ILProcessor worker, VariableDefinition writer, ParameterDefinition valueParameter)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, TypeReference fieldType)
         {
             // if PackerField is null it means there was an error earlier, so we dont need to do anything here
             if (packerField == null) { return; }
