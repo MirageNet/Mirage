@@ -24,7 +24,7 @@ namespace Mirage.Weaver.Serialization
             return module.ImportReference(fieldDefinition.MakeHostGenericIfNeeded());
         }
 
-        protected static Instruction CreateParamOrArg0(ILProcessor worker, ParameterDefinition parameter)
+        protected static Instruction LoadParamOrArg0(ILProcessor worker, ParameterDefinition parameter)
         {
             if (parameter == null)
             {

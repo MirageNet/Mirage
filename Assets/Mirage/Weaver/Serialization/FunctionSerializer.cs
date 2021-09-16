@@ -24,8 +24,8 @@ namespace Mirage.Weaver.Serialization
             // make generic and import field
 
             // if param is null then load arg0 instead
-            worker.Append(CreateParamOrArg0(worker, writerParameter));
-            worker.Append(CreateParamOrArg0(worker, typeParameter));
+            worker.Append(LoadParamOrArg0(worker, writerParameter));
+            worker.Append(LoadParamOrArg0(worker, typeParameter));
             worker.Append(worker.Create(OpCodes.Ldfld, ImportField(module, fieldDefinition)));
             worker.Append(worker.Create(OpCodes.Call, writeFunction));
 

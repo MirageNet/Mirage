@@ -42,8 +42,8 @@ namespace Mirage.Weaver.Serialization
         {
             MethodReference writeWithBitCount = module.ImportReference(typeof(NetworkWriter).GetMethod(nameof(NetworkWriter.Write)));
 
-            worker.Append(CreateParamOrArg0(worker, writerParameter));
-            worker.Append(CreateParamOrArg0(worker, typeParameter));
+            worker.Append(LoadParamOrArg0(worker, writerParameter));
+            worker.Append(LoadParamOrArg0(worker, typeParameter));
             worker.Append(worker.Create(OpCodes.Ldfld, ImportField(module, fieldDefinition)));
 
             if (useZigZag)

@@ -1,5 +1,4 @@
 using Mirage.Serialization;
-using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -22,8 +21,8 @@ namespace Mirage.Weaver.Serialization
         {
             MethodReference writeWithBlockSize = module.ImportReference(() => VarIntBlocksPacker.Pack(default, default, default));
 
-            worker.Append(worker.Create(OpCodes.Ldarg, writerParameter));
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(LoadParamOrArg0(worker, writerParameter));
+            worker.Append(LoadParamOrArg0(worker, typeParameter));
             worker.Append(worker.Create(OpCodes.Ldfld, ImportField(module, fieldDefinition)));
             worker.Append(worker.Create(OpCodes.Conv_U8));
             worker.Append(worker.Create(OpCodes.Ldc_I4, blockSize));
