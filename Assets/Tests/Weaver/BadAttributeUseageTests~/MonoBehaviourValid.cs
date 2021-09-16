@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace MonoBehaviourTests.MonoBehaviourValid
+namespace BadAttributeUseageTests.MonoBehaviourValid
 {
     class MonoBehaviourValid : MonoBehaviour
     {

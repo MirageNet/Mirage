@@ -66,12 +66,12 @@ namespace Mirage.Weaver
         void ProcessFields(FieldDefinition fd, FoundType foundType)
         {
             if (fd.HasCustomAttribute<SyncVarAttribute>())
-                logger.Error($"SyncVar {fd.Name} must be inside a NetworkBehaviour.  {foundType.TypeDefinition.Name} is not a NetworkBehaviour", fd);
+                logger.Error($"SyncVar {fd.Name} must be inside a NetworkBehaviour. {foundType.TypeDefinition.Name} is not a NetworkBehaviour", fd);
 
             // only check SyncObjects inside Monobehaviours
             if (foundType.IsMonoBehaviour && SyncObjectProcessor.ImplementsSyncObject(fd.FieldType))
             {
-                logger.Error($"{fd.Name} is a SyncObject and must be inside a NetworkBehaviour.  {foundType.TypeDefinition.Name} is not a NetworkBehaviour", fd);
+                logger.Error($"{fd.Name} is a SyncObject and can not be used inside Monobehaviour. {foundType.TypeDefinition.Name} is not a NetworkBehaviour", fd);
             }
         }
 

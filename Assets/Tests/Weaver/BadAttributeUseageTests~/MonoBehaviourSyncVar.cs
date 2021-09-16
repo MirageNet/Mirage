@@ -1,7 +1,7 @@
 using Mirage;
 using UnityEngine;
 
-namespace MonoBehaviourTests.MonoBehaviourSyncVar
+namespace BadAttributeUseageTests.MonoBehaviourSyncVar
 {
     class MonoBehaviourSyncVar : MonoBehaviour
     {

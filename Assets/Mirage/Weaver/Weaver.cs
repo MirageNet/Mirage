@@ -232,7 +232,12 @@ namespace Mirage.Weaver
         {
             TypeDefinition = typeDefinition;
             IsNetworkBehaviour = isNetworkBehaviour;
-            IsMonoBehaviour = isNetworkBehaviour;
+            IsMonoBehaviour = isMonoBehaviour;
+        }
+
+        public override string ToString()
+        {
+            return TypeDefinition.ToString();
         }
     }
 }

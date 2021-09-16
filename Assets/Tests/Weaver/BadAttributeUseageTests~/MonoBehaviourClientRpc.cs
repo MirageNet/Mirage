@@ -1,7 +1,7 @@
 using Mirage;
 using UnityEngine;
 
-namespace MonoBehaviourTests.MonoBehaviourClientRpc
+namespace BadAttributeUseageTests.MonoBehaviourClientRpc
 {
     class MonoBehaviourClientRpc : MonoBehaviour
     {
