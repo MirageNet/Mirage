@@ -6,7 +6,7 @@ namespace Mirage.Weaver.Serialization
 {
     internal class PackerSerializer : ValueSerializer
     {
-        readonly FieldDefinition packerField;
+        readonly FieldReference packerField;
 
         readonly LambdaExpression packMethod;
         readonly LambdaExpression unpackMethod;
@@ -15,7 +15,7 @@ namespace Mirage.Weaver.Serialization
 
         public PackerSerializer(FieldDefinition packerField, LambdaExpression packMethod, LambdaExpression unpackMethod, bool isIntType)
         {
-            this.packerField = packerField;
+            this.packerField = packerField.MakeHostGenericIfNeeded();
 
             this.packMethod = packMethod;
             this.unpackMethod = unpackMethod;
@@ -29,8 +29,7 @@ namespace Mirage.Weaver.Serialization
             if (packerField == null) { return; }
 
             // Generates: packer.pack(writer, field)
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldfld, packerField.MakeHostGenericIfNeeded()));
+            worker.Append(worker.Create(OpCodes.Ldsfld, packerField));
             worker.Append(LoadParamOrArg0(worker, writerParameter));
             worker.Append(LoadParamOrArg0(worker, typeParameter));
             worker.Append(worker.Create(OpCodes.Ldfld, ImportField(module, fieldDefinition)));
@@ -48,8 +47,7 @@ namespace Mirage.Weaver.Serialization
             if (packerField == null) { return; }
 
             // Generates: ... = packer.unpack(reader)
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldfld, packerField.MakeHostGenericIfNeeded()));
+            worker.Append(worker.Create(OpCodes.Ldsfld, packerField));
             worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
             worker.Append(worker.Create(OpCodes.Call, module.ImportReference(unpackMethod)));
         }
