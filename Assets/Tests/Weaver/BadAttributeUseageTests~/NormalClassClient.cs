@@ -1,9 +1,9 @@
 using Mirage;
 using UnityEngine;
 
-namespace MonoBehaviourTests.MonoBehaviourClient
+namespace BadAttributeUseageTests.NormalClassClient
 {
-    class MonoBehaviourClient : MonoBehaviour
+    class NormalClassClient
     {
         [Client]
         void ThisCantBeOutsideNetworkBehaviour() { }

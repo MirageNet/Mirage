@@ -2,7 +2,7 @@ using Mirage;
 using Mirage.Collections;
 using UnityEngine;
 
-namespace MonoBehaviourTests.MonoBehaviourSyncList
+namespace BadAttributeUseageTests.MonoBehaviourSyncList
 {
     class MonoBehaviourSyncList : MonoBehaviour
     {
