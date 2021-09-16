@@ -1,3 +1,10 @@
+## [104.0.4](https://github.com/MirageNet/Mirage/compare/v104.0.3...v104.0.4) (2021-09-16)
+
+
+### Performance Improvements
+
+* **Weaver:** passing in format string ([6c40fd6](https://github.com/MirageNet/Mirage/commit/6c40fd6a3e1c813ee3e3881fc7cd9551360cea87))
+
 ## [104.0.3](https://github.com/MirageNet/Mirage/compare/v104.0.2...v104.0.3) (2021-09-14)
 
 
