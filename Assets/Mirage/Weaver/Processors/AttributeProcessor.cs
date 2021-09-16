@@ -97,10 +97,10 @@ namespace Mirage.Weaver
 
         void ProcessMethodAttributes(MethodDefinition md, FoundType foundType)
         {
-            InjectGuard<ServerAttribute>(md, foundType, IsServer, "[Server] function '" + md.FullName + "' called on client");
-            InjectGuard<ClientAttribute>(md, foundType, IsClient, "[Client] function '" + md.FullName + "' called on server");
-            InjectGuard<HasAuthorityAttribute>(md, foundType, HasAuthority, "[Has Authority] function '" + md.FullName + "' called on player without authority");
-            InjectGuard<LocalPlayerAttribute>(md, foundType, IsLocalPlayer, "[Local Player] function '" + md.FullName + "' called on nonlocal player");
+            InjectGuard<ServerAttribute>(md, foundType, IsServer, "[Server] function '{0}' called on client");
+            InjectGuard<ClientAttribute>(md, foundType, IsClient, "[Client] function '{0}' called on server");
+            InjectGuard<HasAuthorityAttribute>(md, foundType, HasAuthority, "[Has Authority] function '{0}' called on player without authority");
+            InjectGuard<LocalPlayerAttribute>(md, foundType, IsLocalPlayer, "[Local Player] function '{0}' called on nonlocal player");
             CheckAttribute<ServerRpcAttribute>(md, foundType);
             CheckAttribute<ClientRpcAttribute>(md, foundType);
         }
@@ -117,7 +117,7 @@ namespace Mirage.Weaver
             }
         }
 
-        void InjectGuard<TAttribute>(MethodDefinition md, FoundType foundType, MethodReference predicate, string message)
+        void InjectGuard<TAttribute>(MethodDefinition md, FoundType foundType, MethodReference predicate, string format)
         {
             CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
@@ -147,6 +147,7 @@ namespace Mirage.Weaver
             worker.InsertBefore(top, worker.Create(OpCodes.Brtrue, top));
             if (throwError)
             {
+                string message = string.Format(format, md.Name);
                 worker.InsertBefore(top, worker.Create(OpCodes.Ldstr, message));
                 worker.InsertBefore(top, worker.Create(OpCodes.Newobj, () => new MethodInvocationException("")));
                 worker.InsertBefore(top, worker.Create(OpCodes.Throw));
