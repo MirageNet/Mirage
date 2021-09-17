@@ -59,12 +59,26 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.MyEnum_4
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        static MyEnum[] values = new MyEnum[] { (MyEnum)0, (MyEnum)4, (MyEnum)16, (MyEnum)64 };
-        static int[] expectedBitCounts = new int[] { 5, 5, 10, 10 };
+        public struct TestCase 
+        {
+            public MyEnum value;
+            public int expectedBits;
+            public override string ToString() => value.ToString();
+        }
+        static TestCase[] cases = new TestCase[] 
+        {
+            new TestCase { value = (MyEnum)0, expectedBits = 5 },
+            new TestCase { value = (MyEnum)4, expectedBits = 5 },
+            new TestCase { value = (MyEnum)16, expectedBits = 10 },
+            new TestCase { value = (MyEnum)64, expectedBits = 10 }
+        };
 
         [Test]
-        public void SyncVarIsBitPacked([ValueSource(nameof(values))] MyEnum value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public void SyncVarIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            MyEnum value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             serverComponent.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -84,8 +98,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.MyEnum_4
         }
 
         [UnityTest]
-        public IEnumerator RpcIsBitPacked([ValueSource(nameof(values))] MyEnum value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public IEnumerator RpcIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            MyEnum value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             int called = 0;
             clientComponent.onRpc += (v) => 
             { 
@@ -113,8 +130,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.MyEnum_4
         }
 
         [UnityTest]
-        public IEnumerator StructIsBitPacked([ValueSource(nameof(values))] MyEnum value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public IEnumerator StructIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            MyEnum value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             var inMessage = new BitPackMessage 
             {
                 myValue = value,
@@ -151,8 +171,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.MyEnum_4
         }
 
         [Test]
-        public void MessageIsBitPacked([ValueSource(nameof(values))] MyEnum value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public void MessageIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            MyEnum value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             var inStruct = new BitPackStruct 
             {
                 myValue = value,

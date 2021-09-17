@@ -48,12 +48,23 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.%%NAME%%
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        static %%TYPE%%[] values = new %%TYPE%%[] { %%VALUE_TEST_CASES%% };
-        static int[] expectedBitCounts = new int[] { %%BIT_COUNT_TEST_CASES%% };
+        public struct TestCase 
+        {
+            public %%TYPE%% value;
+            public int expectedBits;
+            public override string ToString() => value.ToString();
+        }
+        static TestCase[] cases = new TestCase[] 
+        {
+            %%TEST_CASES%%
+        };
 
         [Test]
-        public void SyncVarIsBitPacked([ValueSource(nameof(values))] %%TYPE%% value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public void SyncVarIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            %%TYPE%% value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             serverComponent.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -73,8 +84,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.%%NAME%%
         }
 
         [UnityTest]
-        public IEnumerator RpcIsBitPacked([ValueSource(nameof(values))] %%TYPE%% value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public IEnumerator RpcIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            %%TYPE%% value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             int called = 0;
             clientComponent.onRpc += (v) => 
             { 
@@ -102,8 +116,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.%%NAME%%
         }
 
         [UnityTest]
-        public IEnumerator StructIsBitPacked([ValueSource(nameof(values))] %%TYPE%% value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public IEnumerator StructIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            %%TYPE%% value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             var inMessage = new BitPackMessage 
             {
                 myValue = value,
@@ -140,8 +157,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.%%NAME%%
         }
 
         [Test]
-        public void MessageIsBitPacked([ValueSource(nameof(values))] %%TYPE%% value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public void MessageIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            %%TYPE%% value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             var inStruct = new BitPackStruct 
             {
                 myValue = value,

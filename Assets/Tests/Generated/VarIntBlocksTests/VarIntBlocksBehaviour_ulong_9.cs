@@ -48,12 +48,26 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        static ulong[] values = new ulong[] { 10UL, 100UL, 1000UL, 10000UL };
-        static int[] expectedBitCounts = new int[] { 10, 10, 20, 20 };
+        public struct TestCase 
+        {
+            public ulong value;
+            public int expectedBits;
+            public override string ToString() => value.ToString();
+        }
+        static TestCase[] cases = new TestCase[] 
+        {
+            new TestCase { value = 10UL, expectedBits = 10 },
+            new TestCase { value = 100UL, expectedBits = 10 },
+            new TestCase { value = 1000UL, expectedBits = 20 },
+            new TestCase { value = 10000UL, expectedBits = 20 }
+        };
 
         [Test]
-        public void SyncVarIsBitPacked([ValueSource(nameof(values))] ulong value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public void SyncVarIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            ulong value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             serverComponent.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -73,8 +87,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
         }
 
         [UnityTest]
-        public IEnumerator RpcIsBitPacked([ValueSource(nameof(values))] ulong value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public IEnumerator RpcIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            ulong value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             int called = 0;
             clientComponent.onRpc += (v) => 
             { 
@@ -102,8 +119,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
         }
 
         [UnityTest]
-        public IEnumerator StructIsBitPacked([ValueSource(nameof(values))] ulong value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public IEnumerator StructIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            ulong value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             var inMessage = new BitPackMessage 
             {
                 myValue = value,
@@ -140,8 +160,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
         }
 
         [Test]
-        public void MessageIsBitPacked([ValueSource(nameof(values))] ulong value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public void MessageIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            ulong value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             var inStruct = new BitPackStruct 
             {
                 myValue = value,

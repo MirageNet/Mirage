@@ -48,12 +48,26 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.short_100_1000
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        static short[] values = new short[] { (short)10, (short)100, (short)1000, (short)10000 };
-        static int[] expectedBitCounts = new int[] { 8, 8, 12, 16 };
+        public struct TestCase 
+        {
+            public short value;
+            public int expectedBits;
+            public override string ToString() => value.ToString();
+        }
+        static TestCase[] cases = new TestCase[] 
+        {
+            new TestCase { value = (short)10, expectedBits = 8 },
+            new TestCase { value = (short)100, expectedBits = 8 },
+            new TestCase { value = (short)1000, expectedBits = 12 },
+            new TestCase { value = (short)10000, expectedBits = 16 }
+        };
 
         [Test]
-        public void SyncVarIsBitPacked([ValueSource(nameof(values))] short value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public void SyncVarIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            short value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             serverComponent.myValue = value;
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
@@ -73,8 +87,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.short_100_1000
         }
 
         [UnityTest]
-        public IEnumerator RpcIsBitPacked([ValueSource(nameof(values))] short value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public IEnumerator RpcIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            short value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             int called = 0;
             clientComponent.onRpc += (v) => 
             { 
@@ -102,8 +119,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.short_100_1000
         }
 
         [UnityTest]
-        public IEnumerator StructIsBitPacked([ValueSource(nameof(values))] short value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public IEnumerator StructIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            short value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             var inMessage = new BitPackMessage 
             {
                 myValue = value,
@@ -140,8 +160,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.short_100_1000
         }
 
         [Test]
-        public void MessageIsBitPacked([ValueSource(nameof(values))] short value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
+        public void MessageIsBitPacked([ValueSource(nameof(cases))] TestCase TestCase)
         {
+            short value = TestCase.value; 
+            int expectedBitCount = TestCase.expectedBits;
+
             var inStruct = new BitPackStruct 
             {
                 myValue = value,
