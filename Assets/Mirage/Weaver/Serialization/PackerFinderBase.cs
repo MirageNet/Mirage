@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+using System.Linq;
+using System.Linq.Expressions;
 using Mono.Cecil;
 
 namespace Mirage.Weaver.Serialization
@@ -14,7 +15,11 @@ namespace Mirage.Weaver.Serialization
             TSettings settings = GetSettings(fieldType, attribute);
             LambdaExpression packMethod = GetPackMethod(fieldType);
             LambdaExpression unpackMethod = GetUnpackMethod(fieldType);
-            FieldDefinition packerField = CreatePackerField(module, fieldName, holder, settings);
+            // field might be created by another finder, so we can re-use it
+            if (!TryGetPackerField(holder, fieldName, out FieldDefinition packerField))
+            {
+                packerField = CreatePackerField(module, fieldName, holder, settings);
+            }
 
             return new PackerSerializer(packerField, packMethod, unpackMethod, IsIntType);
         }
@@ -24,5 +29,16 @@ namespace Mirage.Weaver.Serialization
         protected abstract LambdaExpression GetPackMethod(TypeReference fieldType);
         protected abstract LambdaExpression GetUnpackMethod(TypeReference fieldType);
         protected abstract FieldDefinition CreatePackerField(ModuleDefinition module, string fieldName, TypeDefinition holder, TSettings settings);
+
+        public static bool TryGetPackerField(TypeDefinition typeDefinition, string name, out FieldDefinition fieldDefinition)
+        {
+            fieldDefinition = typeDefinition.Fields.FirstOrDefault(x => x.Name == $"{name}__Packer");
+            return fieldDefinition != null;
+        }
+
+        public static FieldDefinition AddPackerField<T>(TypeDefinition typeDefinition, string name)
+        {
+            return typeDefinition.AddField<T>($"{name}__Packer", FieldAttributes.Assembly | FieldAttributes.Static);
+        }
     }
 }

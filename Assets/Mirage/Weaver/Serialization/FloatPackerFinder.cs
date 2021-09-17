@@ -87,7 +87,7 @@ namespace Mirage.Weaver.Serialization
 
         protected override FieldDefinition CreatePackerField(ModuleDefinition module, string fieldName, TypeDefinition holder, FloatPackSettings settings)
         {
-            FieldDefinition packerField = PackerSerializer.AddPackerField<FloatPacker>(holder, fieldName);
+            FieldDefinition packerField = AddPackerField<FloatPacker>(holder, fieldName);
 
             NetworkBehaviourProcessor.AddToStaticConstructor(holder, (worker) =>
             {

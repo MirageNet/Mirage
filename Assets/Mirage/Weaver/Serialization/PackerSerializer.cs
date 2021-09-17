@@ -54,10 +54,5 @@ namespace Mirage.Weaver.Serialization
             worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
             worker.Append(worker.Create(OpCodes.Call, unpackMethod));
         }
-
-        public static FieldDefinition AddPackerField<T>(TypeDefinition typeDefinition, string name)
-        {
-            return typeDefinition.AddField<T>($"{name}__Packer", FieldAttributes.Private | FieldAttributes.Static);
-        }
     }
 }

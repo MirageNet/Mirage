@@ -44,7 +44,7 @@ namespace Mirage.Weaver.Serialization
 
         protected override FieldDefinition CreatePackerField(ModuleDefinition module, string fieldName, TypeDefinition holder, int settings)
         {
-            FieldDefinition packerField = PackerSerializer.AddPackerField<QuaternionPacker>(holder, fieldName);
+            FieldDefinition packerField = AddPackerField<QuaternionPacker>(holder, fieldName);
 
             NetworkBehaviourProcessor.AddToStaticConstructor(holder, (worker) =>
             {
