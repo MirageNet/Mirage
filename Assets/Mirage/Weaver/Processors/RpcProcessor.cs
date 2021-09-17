@@ -40,7 +40,45 @@ namespace Mirage.Weaver
             return type.Resolve().ImplementsInterface<INetworkPlayer>();
         }
 
-        public void WriteArguments(ILProcessor worker, MethodDefinition method, VariableDefinition writer, RemoteCallType callType)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns></returns>
+        /// <exception cref="RpcException">Throws when could not get Serializer for any parameter</exception>
+        protected ValueSerializer[] GetValueSerializers(MethodDefinition method)
+        {
+            var serializers = new ValueSerializer[method.Parameters.Count];
+            bool error = false;
+            for (int i = 0; i < method.Parameters.Count; i++)
+            {
+                if (IsNetworkPlayer(method.Parameters[i].ParameterType))
+                    continue;
+
+                try
+                {
+                    serializers[i] = ValueSerializerFinder.GetSerializer(method, method.Parameters[i], writers, readers);
+                }
+                catch (SerializeFunctionException e)
+                {
+                    logger.Error(e, method.DebugInformation.SequencePoints.FirstOrDefault());
+                    error = true;
+                }
+                catch (ValueSerializerException e)
+                {
+                    logger.Error(e.Message, method);
+                    error = true;
+                }
+            }
+
+            if (error)
+            {
+                throw new RpcException($"Could not process Rpc because one or more of its parameter were invalid", method);
+            }
+            return serializers;
+        }
+
+        public void WriteArguments(ILProcessor worker, MethodDefinition method, VariableDefinition writer, ValueSerializer[] paramSerializers, RemoteCallType callType)
         {
             // write each argument
             // example result
@@ -58,35 +96,22 @@ namespace Mirage.Weaver
             for (int argIndex = startingArg; argIndex < method.Parameters.Count; argIndex++)
             {
                 // try/catch for each arg so that it will give error for each
-                try
-                {
-                    WriteArgument(worker, method, writer, argIndex);
-                }
-                catch (SerializeFunctionException e)
-                {
-                    logger.Error(e, method.DebugInformation.SequencePoints.FirstOrDefault());
-                }
-                catch (ValueSerializerException e)
-                {
-                    logger.Error(e.Message, method);
-                }
+                ParameterDefinition param = method.Parameters[argIndex];
+                ValueSerializer serializer = paramSerializers[argIndex];
+                WriteArgument(worker, writer, param, serializer);
             }
         }
 
-        private void WriteArgument(ILProcessor worker, MethodDefinition method, VariableDefinition writer, int argIndex)
+        private void WriteArgument(ILProcessor worker, VariableDefinition writer, ParameterDefinition param, ValueSerializer serializer)
         {
-            ParameterDefinition param = method.Parameters[argIndex];
-
             // dont write anything for INetworkPlayer, it is either target or sender
             if (IsNetworkPlayer(param.ParameterType))
                 return;
 
-            ValueSerializer valueSerializer = ValueSerializerFinder.GetSerializer(method, param, writers, null);
-            // arg+1 because arg0 is "this"
-            valueSerializer.AppendWriteParameter(module, worker, writer, param);
+            serializer.AppendWriteParameter(module, worker, writer, param);
         }
 
-        public void ReadArguments(MethodDefinition method, ILProcessor worker, ParameterDefinition readerParameter, ParameterDefinition senderParameter, bool skipFirst)
+        public void ReadArguments(MethodDefinition method, ILProcessor worker, ParameterDefinition readerParameter, ParameterDefinition senderParameter, bool skipFirst, ValueSerializer[] paramSerializers)
         {
             // read each argument
             // example result
@@ -100,7 +125,9 @@ namespace Mirage.Weaver
                 // try/catch for each arg so that it will give error for each
                 try
                 {
-                    ReadArgument(method, worker, readerParameter, senderParameter, argIndex);
+                    ParameterDefinition param = method.Parameters[argIndex];
+                    ValueSerializer serializer = paramSerializers[argIndex];
+                    ReadArgument(worker, readerParameter, senderParameter, param, serializer);
                 }
                 catch (SerializeFunctionException e)
                 {
@@ -113,10 +140,8 @@ namespace Mirage.Weaver
             }
         }
 
-        private void ReadArgument(MethodDefinition method, ILProcessor worker, ParameterDefinition readerParameter, ParameterDefinition senderParameter, int argIndex)
+        private void ReadArgument(ILProcessor worker, ParameterDefinition readerParameter, ParameterDefinition senderParameter, ParameterDefinition param, ValueSerializer serializer)
         {
-            ParameterDefinition param = method.Parameters[argIndex];
-
             if (IsNetworkPlayer(param.ParameterType))
             {
                 if (senderParameter != null)
@@ -131,10 +156,8 @@ namespace Mirage.Weaver
                 return;
             }
 
-            ValueSerializer valueSerializer = ValueSerializerFinder.GetSerializer(method, param, null, readers);
-
             // todo make sure this works for all ValueSerializer
-            valueSerializer.AppendRead(module, worker, readerParameter, param.ParameterType);
+            serializer.AppendRead(module, worker, readerParameter, param.ParameterType);
         }
 
         // check if a Command/TargetRpc/Rpc function & parameters are valid for weaving

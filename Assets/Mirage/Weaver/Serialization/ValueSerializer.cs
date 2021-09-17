@@ -7,7 +7,7 @@ namespace Mirage.Weaver.Serialization
     /// Appends IL codes to write/read a field/param using bitpacking or extension methods
     /// <para>Use <see cref="ValueSerializerFinder"/> to find a ValueSerializer from a attributes</para>
     /// </summary>
-    internal abstract class ValueSerializer
+    public abstract class ValueSerializer
     {
         /// <summary>
         /// Is the type that this Serializer for an int based type? (byte, int, ulong, etc)

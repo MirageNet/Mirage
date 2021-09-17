@@ -89,16 +89,12 @@ namespace Mirage.Tests.Weaver
         {
             HasError("Cannot generate write function for Object. Use a supported type or provide a custom write function",
                 "UnityEngine.Object");
-            HasError("Cannot generate read function for Object. Use a supported type or provide a custom read function",
-                "UnityEngine.Object");
         }
 
         [Test]
         public void GivesErrorWhenUsingScriptableObject()
         {
             HasError("Cannot generate write function for ScriptableObject. Use a supported type or provide a custom write function",
-                "UnityEngine.ScriptableObject");
-            HasError("Cannot generate read function for ScriptableObject. Use a supported type or provide a custom read function",
                 "UnityEngine.ScriptableObject");
         }
 
@@ -107,16 +103,12 @@ namespace Mirage.Tests.Weaver
         {
             HasError("Cannot generate write function for component type MonoBehaviour. Use a supported type or provide a custom write function",
                 "UnityEngine.MonoBehaviour");
-            HasError("Cannot generate read function for component type MonoBehaviour. Use a supported type or provide a custom read function",
-                "UnityEngine.MonoBehaviour");
         }
 
         [Test]
         public void GivesErrorWhenUsingTypeInheritedFromMonoBehaviour()
         {
             HasError("Cannot generate write function for component type MyBehaviour. Use a supported type or provide a custom write function",
-                "GeneratedReaderWriter.GivesErrorWhenUsingTypeInheritedFromMonoBehaviour.MyBehaviour");
-            HasError("Cannot generate read function for component type MyBehaviour. Use a supported type or provide a custom read function",
                 "GeneratedReaderWriter.GivesErrorWhenUsingTypeInheritedFromMonoBehaviour.MyBehaviour");
         }
 
@@ -132,8 +124,6 @@ namespace Mirage.Tests.Weaver
         {
             HasError("Cannot generate write function for interface IData. Use a supported type or provide a custom write function",
                 "GeneratedReaderWriter.GivesErrorWhenUsingInterface.IData");
-            HasError("Cannot generate read function for interface IData. Use a supported type or provide a custom read function",
-                "GeneratedReaderWriter.GivesErrorWhenUsingInterface.IData");
         }
 
         [Test]
@@ -146,7 +136,6 @@ namespace Mirage.Tests.Weaver
         public void GivesErrorWhenUsingAbstractClass()
         {
             HasError("Cannot generate write function for abstract class DataBase. Use a supported type or provide a custom write function", "GeneratedReaderWriter.GivesErrorWhenUsingAbstractClass.DataBase");
-            HasError("Cannot generate read function for abstract class DataBase. Use a supported type or provide a custom read function", "GeneratedReaderWriter.GivesErrorWhenUsingAbstractClass.DataBase");
         }
 
         [Test]
@@ -190,14 +179,12 @@ namespace Mirage.Tests.Weaver
         public void GivesErrorForInvalidArrayType()
         {
             HasError("Cannot generate write function for component type MonoBehaviour. Use a supported type or provide a custom write function", "UnityEngine.MonoBehaviour");
-            HasError("Cannot generate read function for component type MonoBehaviour. Use a supported type or provide a custom read function", "UnityEngine.MonoBehaviour");
         }
 
         [Test]
         public void GivesErrorForInvalidArraySegmentType()
         {
             HasError("Cannot generate write function for component type MonoBehaviour. Use a supported type or provide a custom write function", "UnityEngine.MonoBehaviour");
-            HasError("Cannot generate read function for component type MonoBehaviour. Use a supported type or provide a custom read function", "UnityEngine.MonoBehaviour");
         }
 
         [Test]
@@ -216,7 +203,6 @@ namespace Mirage.Tests.Weaver
         public void GivesErrorForInvalidListType()
         {
             HasError("Cannot generate write function for component type MonoBehaviour. Use a supported type or provide a custom write function", "UnityEngine.MonoBehaviour");
-            HasError("Cannot generate read function for component type MonoBehaviour. Use a supported type or provide a custom read function", "UnityEngine.MonoBehaviour");
         }
 
         [Test]

@@ -39,21 +39,21 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void SyncVarsGenericParam()
         {
-            HasError("invalidVar is an unsupported type. Cannot generate write function for generic type MySyncVar`1. Use a supported type or provide a custom write function",
+            HasError("Cannot generate write function for generic type MySyncVar`1. Use a supported type or provide a custom write function",
                 "SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam/MySyncVar`1<System.Int32> SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam::invalidVar");
         }
 
         [Test]
         public void SyncVarsInterface()
         {
-            HasError("invalidVar is an unsupported type. Cannot generate write function for interface IMySyncVar. Use a supported type or provide a custom write function",
+            HasError("Cannot generate write function for interface IMySyncVar. Use a supported type or provide a custom write function",
                 "SyncVarTests.SyncVarsInterface.SyncVarsInterface/IMySyncVar SyncVarTests.SyncVarsInterface.SyncVarsInterface::invalidVar");
         }
 
         [Test]
         public void SyncVarsUnityComponent()
         {
-            HasError("invalidVar is an unsupported type. Cannot generate write function for component type TextMesh. Use a supported type or provide a custom write function",
+            HasError("Cannot generate write function for component type TextMesh. Use a supported type or provide a custom write function",
                 "UnityEngine.TextMesh SyncVarTests.SyncVarsUnityComponent.SyncVarsUnityComponent::invalidVar");
         }
 

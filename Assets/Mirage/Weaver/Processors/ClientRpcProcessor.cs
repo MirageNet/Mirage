@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
+using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -46,7 +47,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateSkeleton(MethodDefinition md, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr)
+        MethodDefinition GenerateSkeleton(MethodDefinition md, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
         {
             MethodDefinition rpc = md.DeclaringType.AddMethod(
                 SkeletonPrefix + md.Name,
@@ -73,7 +74,7 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
             }
 
-            ReadArguments(md, worker, readerParameter, null, hasNetworkConnection);
+            ReadArguments(md, worker, readerParameter, null, hasNetworkConnection, paramSerializers);
 
             // invoke actual ServerRpc function
             worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
@@ -135,7 +136,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute clientRpcAttr)
+        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
         {
             MethodDefinition rpc = SubstituteMethod(md);
 
@@ -153,7 +154,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Stloc, writer));
 
             // write all the arguments that the user passed to the Rpc call
-            WriteArguments(worker, md, writer, RemoteCallType.ClientRpc);
+            WriteArguments(worker, md, writer, paramSerializers, RemoteCallType.ClientRpc);
 
             string rpcName = md.Name;
 
@@ -305,9 +306,11 @@ namespace Mirage.Weaver
             RpcTarget clientTarget = clientRpcAttr.GetField("target", RpcTarget.Observers);
             bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
 
-            MethodDefinition userCodeFunc = GenerateStub(md, clientRpcAttr);
+            ValueSerializer[] paramSerializers = GetValueSerializers(md);
 
-            MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, clientRpcAttr);
+            MethodDefinition userCodeFunc = GenerateStub(md, clientRpcAttr, paramSerializers);
+
+            MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, clientRpcAttr, paramSerializers);
             clientRpcs.Add(new ClientRpcMethod
             {
                 stub = md,

@@ -64,7 +64,8 @@ namespace Mirage.Weaver
                 }
                 catch (SerializeFunctionException e)
                 {
-                    logger.Error(e);
+                    // use field as member referecne
+                    logger.Error(e.Message, fd);
                 }
             }
 

@@ -6,6 +6,7 @@ using System.Reflection;
 using Cysharp.Threading.Tasks;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
+using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
@@ -56,7 +57,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute serverRpcAttr)
+        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute serverRpcAttr, ValueSerializer[] paramSerializers)
         {
             MethodDefinition cmd = SubstituteMethod(md);
 
@@ -75,7 +76,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Stloc, writer));
 
             // write all the arguments that the user passed to the Cmd call
-            WriteArguments(worker, md, writer, RemoteCallType.ServerRpc);
+            WriteArguments(worker, md, writer, paramSerializers, RemoteCallType.ServerRpc);
 
             string cmdName = md.Name;
 
@@ -172,7 +173,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc)
+        MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, ValueSerializer[] paramSerializers)
         {
             MethodDefinition cmd = method.DeclaringType.AddMethod(SkeletonPrefix + method.Name,
                 MethodAttributes.Family | MethodAttributes.HideBySig,
@@ -188,7 +189,7 @@ namespace Mirage.Weaver
             // setup for reader
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            ReadArguments(method, worker, readerParameter, senderParameter, false);
+            ReadArguments(method, worker, readerParameter, senderParameter, false, paramSerializers);
 
             // invoke actual ServerRpc function
             worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
@@ -262,9 +263,11 @@ namespace Mirage.Weaver
 
             bool requireAuthority = serverRpcAttr.GetField("requireAuthority", false);
 
-            MethodDefinition userCodeFunc = GenerateStub(md, serverRpcAttr);
+            ValueSerializer[] paramSerializers = GetValueSerializers(md);
 
-            MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc);
+            MethodDefinition userCodeFunc = GenerateStub(md, serverRpcAttr, paramSerializers);
+
+            MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, paramSerializers);
             serverRpcs.Add(new ServerRpcMethod
             {
                 stub = md,
