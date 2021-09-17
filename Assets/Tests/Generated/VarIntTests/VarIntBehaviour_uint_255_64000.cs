@@ -48,12 +48,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.uint_255_64000
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
+        static uint[] values = new uint[] { 170U, 500U, 15000U, 50000U };
+        static int[] expectedBitCounts = new int[] { 9, 18, 18, 18 };
+
         [Test]
-        [TestCase(170U, 9)]
-        [TestCase(500U, 18)]
-        [TestCase(15000U, 18)]
-        [TestCase(50000U, 18)]
-        public void SyncVarIsBitPacked(uint value, int expectedBitCount)
+        public void SyncVarIsBitPacked([ValueSource(nameof(values))] uint value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             serverComponent.myValue = value;
 
@@ -74,11 +73,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.uint_255_64000
         }
 
         [UnityTest]
-        [TestCase(170U, 9)]
-        [TestCase(500U, 18)]
-        [TestCase(15000U, 18)]
-        [TestCase(50000U, 18)]
-        public IEnumerator RpcIsBitPacked(uint value, int expectedBitCount)
+        public IEnumerator RpcIsBitPacked([ValueSource(nameof(values))] uint value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             int called = 0;
             clientComponent.onRpc += (v) => 
@@ -107,11 +102,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.uint_255_64000
         }
 
         [UnityTest]
-        [TestCase(170U, 9)]
-        [TestCase(500U, 18)]
-        [TestCase(15000U, 18)]
-        [TestCase(50000U, 18)]
-        public IEnumerator StructIsBitPacked(uint value, int expectedBitCount)
+        public IEnumerator StructIsBitPacked([ValueSource(nameof(values))] uint value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             var inMessage = new BitPackMessage 
             {
@@ -149,11 +140,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.uint_255_64000
         }
 
         [Test]
-        [TestCase(170U, 9)]
-        [TestCase(500U, 18)]
-        [TestCase(15000U, 18)]
-        [TestCase(50000U, 18)]
-        public void MessageIsBitPacked(uint value, int expectedBitCount)
+        public void MessageIsBitPacked([ValueSource(nameof(values))] uint value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             var inStruct = new BitPackStruct 
             {

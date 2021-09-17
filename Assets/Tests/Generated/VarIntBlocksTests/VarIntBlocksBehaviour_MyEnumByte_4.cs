@@ -59,12 +59,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.MyEnumByte_4
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
+        static MyEnumByte[] values = new MyEnumByte[] { (MyEnumByte)0, (MyEnumByte)4, (MyEnumByte)16, (MyEnumByte)64 };
+        static int[] expectedBitCounts = new int[] { 5, 5, 10, 10 };
+
         [Test]
-        [TestCase((MyEnumByte)0, 5)]
-        [TestCase((MyEnumByte)4, 5)]
-        [TestCase((MyEnumByte)16, 10)]
-        [TestCase((MyEnumByte)64, 10)]
-        public void SyncVarIsBitPacked(MyEnumByte value, int expectedBitCount)
+        public void SyncVarIsBitPacked([ValueSource(nameof(values))] MyEnumByte value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             serverComponent.myValue = value;
 
@@ -85,11 +84,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.MyEnumByte_4
         }
 
         [UnityTest]
-        [TestCase((MyEnumByte)0, 5)]
-        [TestCase((MyEnumByte)4, 5)]
-        [TestCase((MyEnumByte)16, 10)]
-        [TestCase((MyEnumByte)64, 10)]
-        public IEnumerator RpcIsBitPacked(MyEnumByte value, int expectedBitCount)
+        public IEnumerator RpcIsBitPacked([ValueSource(nameof(values))] MyEnumByte value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             int called = 0;
             clientComponent.onRpc += (v) => 
@@ -118,11 +113,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.MyEnumByte_4
         }
 
         [UnityTest]
-        [TestCase((MyEnumByte)0, 5)]
-        [TestCase((MyEnumByte)4, 5)]
-        [TestCase((MyEnumByte)16, 10)]
-        [TestCase((MyEnumByte)64, 10)]
-        public IEnumerator StructIsBitPacked(MyEnumByte value, int expectedBitCount)
+        public IEnumerator StructIsBitPacked([ValueSource(nameof(values))] MyEnumByte value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             var inMessage = new BitPackMessage 
             {
@@ -160,11 +151,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.MyEnumByte_4
         }
 
         [Test]
-        [TestCase((MyEnumByte)0, 5)]
-        [TestCase((MyEnumByte)4, 5)]
-        [TestCase((MyEnumByte)16, 10)]
-        [TestCase((MyEnumByte)64, 10)]
-        public void MessageIsBitPacked(MyEnumByte value, int expectedBitCount)
+        public void MessageIsBitPacked([ValueSource(nameof(values))] MyEnumByte value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             var inStruct = new BitPackStruct 
             {

@@ -63,13 +63,17 @@ namespace Mirage.Tests.CodeGenerators
             fromTemplate.Replace("%%ARGS%%", args);
             fromTemplate.Replace("%%EXTRA_TYPE%%", extraType);
 
-            var testCase = new StringBuilder();
+            var value_testCase = new StringBuilder();
+            var expectedBit_testCase = new StringBuilder();
             for (int i = 0; i < values.Length; i++)
             {
-                if (i > 0) { testCase.AppendLine(); }
-                testCase.Append($"        [TestCase({values[i]}, {expectedBitCount[i]})]");
+                if (i > 0) { value_testCase.Append(", "); }
+                if (i > 0) { expectedBit_testCase.Append(", "); }
+                value_testCase.Append(values[i]);
+                expectedBit_testCase.Append(expectedBitCount[i]);
             }
-            fromTemplate.Replace($"%%TEST_CASES%%", testCase.ToString());
+            fromTemplate.Replace($"%%VALUE_TEST_CASES%%", value_testCase.ToString());
+            fromTemplate.Replace($"%%BIT_COUNT_TEST_CASES%%", expectedBit_testCase.ToString());
 
             string name = $"{type}_{smallMax}_{mediumMax}";
             fromTemplate.Replace("%%NAME%%", name);

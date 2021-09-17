@@ -48,12 +48,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
+        static ulong[] values = new ulong[] { 10UL, 100UL, 1000UL, 10000UL };
+        static int[] expectedBitCounts = new int[] { 10, 10, 20, 20 };
+
         [Test]
-        [TestCase(10UL, 10)]
-        [TestCase(100UL, 10)]
-        [TestCase(1000UL, 20)]
-        [TestCase(10000UL, 20)]
-        public void SyncVarIsBitPacked(ulong value, int expectedBitCount)
+        public void SyncVarIsBitPacked([ValueSource(nameof(values))] ulong value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             serverComponent.myValue = value;
 
@@ -74,11 +73,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
         }
 
         [UnityTest]
-        [TestCase(10UL, 10)]
-        [TestCase(100UL, 10)]
-        [TestCase(1000UL, 20)]
-        [TestCase(10000UL, 20)]
-        public IEnumerator RpcIsBitPacked(ulong value, int expectedBitCount)
+        public IEnumerator RpcIsBitPacked([ValueSource(nameof(values))] ulong value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             int called = 0;
             clientComponent.onRpc += (v) => 
@@ -107,11 +102,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
         }
 
         [UnityTest]
-        [TestCase(10UL, 10)]
-        [TestCase(100UL, 10)]
-        [TestCase(1000UL, 20)]
-        [TestCase(10000UL, 20)]
-        public IEnumerator StructIsBitPacked(ulong value, int expectedBitCount)
+        public IEnumerator StructIsBitPacked([ValueSource(nameof(values))] ulong value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             var inMessage = new BitPackMessage 
             {
@@ -149,11 +140,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ulong_9
         }
 
         [Test]
-        [TestCase(10UL, 10)]
-        [TestCase(100UL, 10)]
-        [TestCase(1000UL, 20)]
-        [TestCase(10000UL, 20)]
-        public void MessageIsBitPacked(ulong value, int expectedBitCount)
+        public void MessageIsBitPacked([ValueSource(nameof(values))] ulong value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             var inStruct = new BitPackStruct 
             {

@@ -48,12 +48,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.short_6
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
+        static short[] values = new short[] { (short)10, (short)100, (short)1000, (short)10000 };
+        static int[] expectedBitCounts = new int[] { 7, 14, 14, 21 };
+
         [Test]
-        [TestCase((short)10, 7)]
-        [TestCase((short)100, 14)]
-        [TestCase((short)1000, 14)]
-        [TestCase((short)10000, 21)]
-        public void SyncVarIsBitPacked(short value, int expectedBitCount)
+        public void SyncVarIsBitPacked([ValueSource(nameof(values))] short value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             serverComponent.myValue = value;
 
@@ -74,11 +73,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.short_6
         }
 
         [UnityTest]
-        [TestCase((short)10, 7)]
-        [TestCase((short)100, 14)]
-        [TestCase((short)1000, 14)]
-        [TestCase((short)10000, 21)]
-        public IEnumerator RpcIsBitPacked(short value, int expectedBitCount)
+        public IEnumerator RpcIsBitPacked([ValueSource(nameof(values))] short value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             int called = 0;
             clientComponent.onRpc += (v) => 
@@ -107,11 +102,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.short_6
         }
 
         [UnityTest]
-        [TestCase((short)10, 7)]
-        [TestCase((short)100, 14)]
-        [TestCase((short)1000, 14)]
-        [TestCase((short)10000, 21)]
-        public IEnumerator StructIsBitPacked(short value, int expectedBitCount)
+        public IEnumerator StructIsBitPacked([ValueSource(nameof(values))] short value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             var inMessage = new BitPackMessage 
             {
@@ -149,11 +140,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.short_6
         }
 
         [Test]
-        [TestCase((short)10, 7)]
-        [TestCase((short)100, 14)]
-        [TestCase((short)1000, 14)]
-        [TestCase((short)10000, 21)]
-        public void MessageIsBitPacked(short value, int expectedBitCount)
+        public void MessageIsBitPacked([ValueSource(nameof(values))] short value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             var inStruct = new BitPackStruct 
             {

@@ -48,11 +48,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.int_100_10000
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
+        static int[] values = new int[] { 10, 100, 1000 };
+        static int[] expectedBitCounts = new int[] { 8, 8, 16 };
+
         [Test]
-        [TestCase(10, 8)]
-        [TestCase(100, 8)]
-        [TestCase(1000, 16)]
-        public void SyncVarIsBitPacked(int value, int expectedBitCount)
+        public void SyncVarIsBitPacked([ValueSource(nameof(values))] int value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             serverComponent.myValue = value;
 
@@ -73,10 +73,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.int_100_10000
         }
 
         [UnityTest]
-        [TestCase(10, 8)]
-        [TestCase(100, 8)]
-        [TestCase(1000, 16)]
-        public IEnumerator RpcIsBitPacked(int value, int expectedBitCount)
+        public IEnumerator RpcIsBitPacked([ValueSource(nameof(values))] int value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             int called = 0;
             clientComponent.onRpc += (v) => 
@@ -105,10 +102,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.int_100_10000
         }
 
         [UnityTest]
-        [TestCase(10, 8)]
-        [TestCase(100, 8)]
-        [TestCase(1000, 16)]
-        public IEnumerator StructIsBitPacked(int value, int expectedBitCount)
+        public IEnumerator StructIsBitPacked([ValueSource(nameof(values))] int value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             var inMessage = new BitPackMessage 
             {
@@ -146,10 +140,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.int_100_10000
         }
 
         [Test]
-        [TestCase(10, 8)]
-        [TestCase(100, 8)]
-        [TestCase(1000, 16)]
-        public void MessageIsBitPacked(int value, int expectedBitCount)
+        public void MessageIsBitPacked([ValueSource(nameof(values))] int value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             var inStruct = new BitPackStruct 
             {

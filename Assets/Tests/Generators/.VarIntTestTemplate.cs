@@ -48,9 +48,11 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.%%NAME%%
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
+        static %%TYPE%%[] values = new %%TYPE%%[] { %%VALUE_TEST_CASES%% };
+        static int[] expectedBitCounts = new int[] { %%BIT_COUNT_TEST_CASES%% };
+
         [Test]
-%%TEST_CASES%%
-        public void SyncVarIsBitPacked(%%TYPE%% value, int expectedBitCount)
+        public void SyncVarIsBitPacked([ValueSource(nameof(values))] %%TYPE%% value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             serverComponent.myValue = value;
 
@@ -71,8 +73,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.%%NAME%%
         }
 
         [UnityTest]
-%%TEST_CASES%%
-        public IEnumerator RpcIsBitPacked(%%TYPE%% value, int expectedBitCount)
+        public IEnumerator RpcIsBitPacked([ValueSource(nameof(values))] %%TYPE%% value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             int called = 0;
             clientComponent.onRpc += (v) => 
@@ -101,8 +102,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.%%NAME%%
         }
 
         [UnityTest]
-%%TEST_CASES%%
-        public IEnumerator StructIsBitPacked(%%TYPE%% value, int expectedBitCount)
+        public IEnumerator StructIsBitPacked([ValueSource(nameof(values))] %%TYPE%% value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             var inMessage = new BitPackMessage 
             {
@@ -140,8 +140,7 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.%%NAME%%
         }
 
         [Test]
-%%TEST_CASES%%
-        public void MessageIsBitPacked(%%TYPE%% value, int expectedBitCount)
+        public void MessageIsBitPacked([ValueSource(nameof(values))] %%TYPE%% value, [ValueSource(nameof(expectedBitCounts))] int expectedBitCount)
         {
             var inStruct = new BitPackStruct 
             {
