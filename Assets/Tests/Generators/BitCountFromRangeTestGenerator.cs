@@ -48,7 +48,7 @@ namespace Mirage.Tests.CodeGenerators
         {
             fromTemplate.Replace("%%MIN%%", min);
             fromTemplate.Replace("%%MAX%%", max);
-            fromTemplate.Replace("%%EXPECTED_BIT_COUNT%%", expectedBitCount);
+            fromTemplate.Replace("%%BIT_COUNT%%", expectedBitCount);
             fromTemplate.Replace("%%TYPE%%", type);
             fromTemplate.Replace("%%PAYLOAD_SIZE%%", Mathf.CeilToInt(expectedBitCount / 8f));
             fromTemplate.Replace("%%EXTRA_TYPE%%", extraType);
