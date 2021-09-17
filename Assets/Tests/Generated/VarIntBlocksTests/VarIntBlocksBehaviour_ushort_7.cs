@@ -8,22 +8,51 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests
+namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.ushort_7
 {
     
-    public class VarIntBlocksBehaviour_ushort_7 : NetworkBehaviour
+    public class BitPackBehaviour : NetworkBehaviour
     {
         [VarIntBlocks(7)]
         [SyncVar] public ushort myValue;
+
+        public event Action<ushort> onRpc;
+
+        [ClientRpc]
+        public void RpcSomeFunction([VarIntBlocks(7)] ushort myParam)
+        {
+            onRpc?.Invoke(myParam);
+        }
+        
+        // Use BitPackStruct in rpc so it has writer generated
+        [ClientRpc]
+        public void RpcOtherFunction(BitPackStruct myParam)
+        {
+            // nothing
+        }
     }
-    public class VarIntBlocksTest_ushort_7 : ClientServerSetup<VarIntBlocksBehaviour_ushort_7>
+    
+    [NetworkMessage]
+    public struct BitPackMessage 
+    {
+        [VarIntBlocks(7)] 
+        public ushort myValue;
+    }
+
+    [Serializable]
+    public struct BitPackStruct
+    {
+        [VarIntBlocks(7)] 
+        public ushort myValue;
+    }
+
+    public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
         [Test]
         [TestCase((ushort)10, 8)]
         [TestCase((ushort)100, 8)]
         [TestCase((ushort)1000, 16)]
         [TestCase((ushort)10000, 16)]
-
         public void SyncVarIsBitPacked(ushort value, int expectedBitCount)
         {
             serverComponent.myValue = value;
@@ -40,6 +69,110 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests
                     Assert.That(reader.BitPosition, Is.EqualTo(expectedBitCount));
 
                     Assert.That(clientComponent.myValue, Is.EqualTo(value));
+                }
+            }
+        }
+
+        [UnityTest]
+        [TestCase((ushort)10, 8)]
+        [TestCase((ushort)100, 8)]
+        [TestCase((ushort)1000, 16)]
+        [TestCase((ushort)10000, 16)]
+        public IEnumerator RpcIsBitPacked(ushort value, int expectedBitCount)
+        {
+            int called = 0;
+            clientComponent.onRpc += (v) => 
+            { 
+                called++;
+                Assert.That(v, Is.EqualTo(value)); 
+            };
+
+            client.MessageHandler.UnregisterHandler<RpcMessage>();
+            int payloadSize = 0;
+            client.MessageHandler.RegisterHandler<RpcMessage>((player, msg) =>
+            {
+                // store value in variable because assert will throw and be catch by message wrapper
+                payloadSize = msg.payload.Count;
+                clientObjectManager.OnRpcMessage(msg);
+            });
+
+            serverComponent.RpcSomeFunction(value);
+            yield return null;
+            yield return null;
+            Assert.That(called, Is.EqualTo(1));
+            
+            // this will round up to nearest 8
+            int expectedPayLoadSize = (expectedBitCount + 7) / 8;
+            Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"expectedBitCount bits is %%PAYLOAD_SIZE%% bytes in payload");
+        }
+
+        [UnityTest]
+        [TestCase((ushort)10, 8)]
+        [TestCase((ushort)100, 8)]
+        [TestCase((ushort)1000, 16)]
+        [TestCase((ushort)10000, 16)]
+        public IEnumerator StructIsBitPacked(ushort value, int expectedBitCount)
+        {
+            var inMessage = new BitPackMessage 
+            {
+                myValue = value,
+            };
+
+            int payloadSize = 0;
+            int called = 0;
+            BitPackMessage outMessage = default;
+            server.MessageHandler.RegisterHandler<BitPackMessage>((player, msg) =>
+            {
+                // store value in variable because assert will throw and be catch by message wrapper
+                called++;
+                outMessage = msg;
+            });
+            Action<NetworkDiagnostics.MessageInfo> diagAction = (info) =>
+            {
+                if (info.message is BitPackMessage)
+                {
+                    payloadSize = info.bytes;
+                }
+            };
+
+            NetworkDiagnostics.OutMessageEvent += diagAction;
+            client.Player.Send(inMessage);
+            NetworkDiagnostics.OutMessageEvent -= diagAction;
+            yield return null;
+            yield return null;
+            Assert.That(called, Is.EqualTo(1));
+            // this will round up to nearest 8
+            // +2 for message header
+            int expectedPayLoadSize = ((expectedBitCount + 7) / 8) + 2;
+            Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"{expectedBitCount} bits is {expectedPayLoadSize - 2} bytes in payload");
+            Assert.That(outMessage, Is.EqualTo(inMessage));
+        }
+
+        [Test]
+        [TestCase((ushort)10, 8)]
+        [TestCase((ushort)100, 8)]
+        [TestCase((ushort)1000, 16)]
+        [TestCase((ushort)10000, 16)]
+        public void MessageIsBitPacked(ushort value, int expectedBitCount)
+        {
+            var inStruct = new BitPackStruct 
+            {
+                myValue = value,
+            };
+
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                // generic write, uses generated function that should include bitPacking
+                writer.Write(inStruct);
+
+                Assert.That(writer.BitPosition, Is.EqualTo(expectedBitCount));
+
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
+                {
+                    var outStruct = reader.Read<BitPackStruct>();
+                    Assert.That(reader.BitPosition, Is.EqualTo(expectedBitCount));
+
+                    Assert.That(outStruct, Is.EqualTo(inStruct));
                 }
             }
         }

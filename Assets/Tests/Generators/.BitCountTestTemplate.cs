@@ -46,7 +46,6 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests.%%TYPE%%_%%BIT_C
         public %%TYPE%% myValue;
     }
 
-
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
         const %%TYPE%% value = %%EXTRA_VALUE%%;

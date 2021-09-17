@@ -23,14 +23,14 @@ namespace Mirage.Tests.CodeGenerators
 
         private static void Create(CreateFromTemplate fromTemplate, float max, string ArgAttribute2, float value, float within, int bitcount)
         {
-            string name = $"{max}_{bitcount}";
+            string name = $"_{max}_{bitcount}";
             fromTemplate.Replace("%%NAME%%", name);
             fromTemplate.Replace("%%PACKER_ATTRIBUTE%%", $"{max}, {ArgAttribute2}");
             fromTemplate.Replace("%%VALUE%%", $"{value}f");
             fromTemplate.Replace("%%WITHIN%%", $"{within}f");
             fromTemplate.Replace("%%BIT_COUNT%%", bitcount);
 
-            fromTemplate.WriteToFile($"./Assets/Tests/Generated/FloatPackTests/FloatPackBehaviour_{name}.cs");
+            fromTemplate.WriteToFile($"./Assets/Tests/Generated/FloatPackTests/FloatPackBehaviour{name}.cs");
         }
     }
 }

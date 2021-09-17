@@ -59,7 +59,7 @@ namespace Mirage.Tests.CodeGenerators
             string name = $"{type}_{minString}_{maxString}{extraName}";
             fromTemplate.Replace("%%NAME%%", name);
 
-            fromTemplate.WriteToFile($"./Assets/Tests/Generated/BitCountFromRangeTests/BitCountBehaviour_{name}.cs");
+            fromTemplate.WriteToFile($"./Assets/Tests/Generated/BitCountFromRangeTests/BitCountFromRange_{name}.cs");
         }
     }
 }

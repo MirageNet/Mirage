@@ -11,7 +11,7 @@ using UnityEngine.TestTools;
 namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.%%NAME%%
 {
     %%EXTRA_TYPE%%
-    public class BitCountRangeBehaviour : NetworkBehaviour
+    public class BitPackBehaviour : NetworkBehaviour
     {
         [BitCountFromRange(%%MIN%%, %%MAX%%)]
         [SyncVar] public %%TYPE%% myValue;
@@ -46,7 +46,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.%%NAME%
         public %%TYPE%% myValue;
     }
     
-    public class BitCountRangeTest : ClientServerSetup<BitCountRangeBehaviour>
+    public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
         const %%TYPE%% value = %%EXTRA_VALUE%%;
 

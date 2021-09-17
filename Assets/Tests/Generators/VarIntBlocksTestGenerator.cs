@@ -61,7 +61,8 @@ namespace Mirage.Tests.CodeGenerators
             var testCase = new StringBuilder();
             for (int i = 0; i < values.Length; i++)
             {
-                testCase.AppendLine($"        [TestCase({values[i]}, {expectedBitCount[i]})]");
+                if (i > 0) { testCase.AppendLine(); }
+                testCase.Append($"        [TestCase({values[i]}, {expectedBitCount[i]})]");
             }
             fromTemplate.Replace($"%%TEST_CASES%%", testCase.ToString());
 

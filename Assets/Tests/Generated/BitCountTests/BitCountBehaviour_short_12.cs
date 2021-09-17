@@ -46,7 +46,6 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests.short_12
         public short myValue;
     }
 
-
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
         const short value = 20;

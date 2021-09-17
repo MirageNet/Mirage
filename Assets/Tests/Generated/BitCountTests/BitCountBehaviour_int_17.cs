@@ -46,7 +46,6 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests.int_17
         public int myValue;
     }
 
-
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
         const int value = 20;
