@@ -199,7 +199,9 @@ namespace Mirage.Weaver
         void ReadAllFields(TypeReference type, ReadMethod readMethod)
         {
             ILProcessor worker = readMethod.worker;
-            foreach (FieldDefinition field in type.FindAllPublicFields())
+            // create copy here because we might add static packer field
+            var fields = type.FindAllPublicFields();
+            foreach (FieldDefinition field in fields)
             {
                 // load this, write value, store value
 
@@ -208,7 +210,7 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(opcode, 0));
 
                 ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, field, null, this);
-                valueSerialize.AppendRead(module, worker, readMethod.readParameter, null);
+                valueSerialize.AppendRead(module, worker, readMethod.readParameter, field.FieldType);
 
                 FieldReference fieldRef = module.ImportReference(field);
                 worker.Append(worker.Create(OpCodes.Stfld, fieldRef));

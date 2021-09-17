@@ -89,7 +89,7 @@ namespace Mirage.Weaver
         {
             while (typeDefinition != null)
             {
-                foreach (FieldDefinition field in typeDefinition.Fields)
+                foreach (FieldDefinition field in typeDefinition.Fields.ToArray())
                 {
                     if (field.IsStatic || field.IsPrivate)
                         continue;

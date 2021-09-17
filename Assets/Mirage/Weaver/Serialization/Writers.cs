@@ -122,7 +122,9 @@ namespace Mirage.Weaver
         /// <returns>false if fail</returns>
         void WriteAllFields(TypeReference type, WriteMethod writerFunc)
         {
-            foreach (FieldDefinition field in type.FindAllPublicFields())
+            // create copy here because we might add static packer field
+            System.Collections.Generic.IEnumerable<FieldDefinition> fields = type.FindAllPublicFields();
+            foreach (FieldDefinition field in fields)
             {
                 ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, field, this, null);
                 valueSerialize.AppendWriteField(module, writerFunc.worker, writerFunc.writerParameter, writerFunc.typeParameter, field);
