@@ -31,7 +31,13 @@ namespace Mirage.Weaver.Serialization
 
         public override void AppendWriteParameter(ModuleDefinition module, ILProcessor worker, VariableDefinition writer, ParameterDefinition valueParameter)
         {
-            throw new System.NotImplementedException();
+            MethodReference writeWithBlockSize = module.ImportReference(() => VarIntBlocksPacker.Pack(default, default, default));
+
+            worker.Append(worker.Create(OpCodes.Ldloc, writer));
+            worker.Append(worker.Create(OpCodes.Ldarg, valueParameter));
+            worker.Append(worker.Create(OpCodes.Conv_U8));
+            worker.Append(worker.Create(OpCodes.Ldc_I4, blockSize));
+            worker.Append(worker.Create(OpCodes.Call, writeWithBlockSize));
         }
 
         public override void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, TypeReference fieldType)

@@ -33,12 +33,15 @@ namespace Mirage.Weaver.Serialization
             worker.Append(LoadParamOrArg0(worker, writerParameter));
             worker.Append(LoadParamOrArg0(worker, typeParameter));
             worker.Append(worker.Create(OpCodes.Ldfld, ImportField(module, fieldDefinition)));
-            worker.Append(worker.Create(OpCodes.Call, module.ImportReference(packMethod)));
+            worker.Append(worker.Create(OpCodes.Call, packMethod));
         }
 
         public override void AppendWriteParameter(ModuleDefinition module, ILProcessor worker, VariableDefinition writer, ParameterDefinition valueParameter)
         {
-            throw new System.NotImplementedException();
+            worker.Append(worker.Create(OpCodes.Ldsfld, packerField));
+            worker.Append(worker.Create(OpCodes.Ldloc, writer));
+            worker.Append(worker.Create(OpCodes.Ldarg, valueParameter));
+            worker.Append(worker.Create(OpCodes.Call, packMethod));
         }
 
         public override void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, TypeReference fieldType)
@@ -49,7 +52,7 @@ namespace Mirage.Weaver.Serialization
             // Generates: ... = packer.unpack(reader)
             worker.Append(worker.Create(OpCodes.Ldsfld, packerField));
             worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
-            worker.Append(worker.Create(OpCodes.Call, module.ImportReference(unpackMethod)));
+            worker.Append(worker.Create(OpCodes.Call, unpackMethod));
         }
 
         public static FieldDefinition AddPackerField<T>(TypeDefinition typeDefinition, string name)
