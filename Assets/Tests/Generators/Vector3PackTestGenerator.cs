@@ -9,7 +9,7 @@ namespace Mirage.Tests.CodeGenerators
         [MenuItem("Tests Generators/Vector3Pack")]
         public static void CreateAll()
         {
-            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.Vector3PackTestTemplate.txt");
+            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.Vector3PackTestTemplate.cs");
             Create(fromTemplate, "100_28f3", new Vector3(100, 20, 100), "0.2f, 0.2f, 0.2f", new Vector3(10.3f, 0.2f, 20), 0.2f, 28);
             Create(fromTemplate, "100_28f", new Vector3(100, 20, 100), "0.2f", new Vector3(10.3f, 0.2f, 20), 0.2f, 28);
             Create(fromTemplate, "100_28b3", new Vector3(100, 20, 100), "10, 8, 10", new Vector3(-10.3f, 0.2f, 20), 0.2f, 28);

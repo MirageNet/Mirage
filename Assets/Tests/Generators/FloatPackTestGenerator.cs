@@ -8,7 +8,7 @@ namespace Mirage.Tests.CodeGenerators
         [MenuItem("Tests Generators/FloatPack")]
         public static void CreateAll()
         {
-            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.FloatPackTestTemplate.txt");
+            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.FloatPackTestTemplate.cs");
             Create(fromTemplate, 100f, "0.2f", 5.2f, 0.196f, 10);
             Create(fromTemplate, 100f, "0.02f", 5.2f, 0.0123f, 14);
 

@@ -9,7 +9,7 @@ namespace Mirage.Tests.CodeGenerators
         [MenuItem("Tests Generators/ZigZag")]
         public static void CreateAll()
         {
-            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.ZigZagTestTemplate.txt");
+            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.ZigZagTestTemplate.cs");
             Create(fromTemplate, "short", extraValue: "15");
             Create(fromTemplate, "short", extraValue: "-20", extraName: "_negative");
             Create(fromTemplate, "int", extraValue: "100");

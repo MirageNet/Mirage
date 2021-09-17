@@ -9,7 +9,7 @@ namespace Mirage.Tests.CodeGenerators
         [MenuItem("Tests Generators/QuaternionPack")]
         public static void CreateAll()
         {
-            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.QuaternionPackTestTemplate.txt");
+            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.QuaternionPackTestTemplate.cs");
             Create(fromTemplate, 8, Quaternion.Euler(0, 90, 0), 0.00540f);
             Create(fromTemplate, 9, Quaternion.Euler(0, 90, 0), 0.00270f);
             Create(fromTemplate, 10, Quaternion.Euler(0, 90, 0), 0.00135f);

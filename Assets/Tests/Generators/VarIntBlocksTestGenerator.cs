@@ -9,7 +9,7 @@ namespace Mirage.Tests.CodeGenerators
         [MenuItem("Tests Generators/VarIntBlocks")]
         public static void CreateAll()
         {
-            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.VarIntBlocksTestTemplate.txt");
+            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.VarIntBlocksTestTemplate.cs");
             Create(fromTemplate, "int", 7, new[] { "10", "100", "1000" }, new[] { 7 + 1, 7 + 1, 14 + 2 });
             Create(fromTemplate, "int", 6, new[] { "10", "100", "1000", "10000" }, new[] { 6 + 1, 12 + 2, 12 + 2, 18 + 3 });
             Create(fromTemplate, "uint", 6, new[] { "170U", "500U", "15000U", "50000U" }, new[] { 12 + 2, 12 + 2, 18 + 3, 18 + 3 });
