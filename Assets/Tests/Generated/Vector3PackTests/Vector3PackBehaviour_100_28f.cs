@@ -50,6 +50,13 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._100_28f
         static readonly Vector3 value = new Vector3(10.3f, 0.2f, 20f);
         const float within = 0.2f;
 
+        static void AssertValue(Vector3 actual)
+        {
+            Assert.That(actual.x, Is.EqualTo(value.x).Within(within));
+            Assert.That(actual.y, Is.EqualTo(value.y).Within(within));
+            Assert.That(actual.z, Is.EqualTo(value.z).Within(within));
+        }
+
         [Test]
         public void SyncVarIsBitPacked()
         {
@@ -80,7 +87,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._100_28f
             clientComponent.onRpc += (v) => 
             { 
                 called++;
-                Assert.That(v, Is.EqualTo(value)); 
+                AssertValue(v); 
             };
 
             client.MessageHandler.UnregisterHandler<RpcMessage>();
@@ -137,7 +144,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._100_28f
             // +2 for message header
             int expectedPayLoadSize = ((28 + 7) / 8) + 2;
             Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"28 bits is {expectedPayLoadSize - 2} bytes in payload");
-            Assert.That(outMessage, Is.EqualTo(inMessage));
+            AssertValue(outMessage.myValue);
         }
 
         [Test]
@@ -160,7 +167,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._100_28f
                     var outStruct = reader.Read<BitPackStruct>();
                     Assert.That(reader.BitPosition, Is.EqualTo(28));
 
-                    Assert.That(outStruct, Is.EqualTo(inStruct));
+                    AssertValue(outStruct.myValue);
                 }
             }
         }

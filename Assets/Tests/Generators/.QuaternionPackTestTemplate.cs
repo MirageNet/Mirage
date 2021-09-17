@@ -50,6 +50,17 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests.%%NAME%%
         static readonly Quaternion value = %%VALUE%%;
         const float within = %%WITHIN%%;
 
+        static void AssertValue(Quaternion actual)
+        {
+            Vector3 inVec = value * Vector3.forward;
+            Vector3 outVec = actual * Vector3.forward;
+
+            // allow for extra within when rotating vector
+            Assert.AreEqual(inVec.x, outVec.x, within * 2, $"vx off by {Mathf.Abs(inVec.x - outVec.x)}");
+            Assert.AreEqual(inVec.y, outVec.y, within * 2, $"vy off by {Mathf.Abs(inVec.y - outVec.y)}");
+            Assert.AreEqual(inVec.z, outVec.z, within * 2, $"vz off by {Mathf.Abs(inVec.z - outVec.z)}");
+        }
+
         [Test]
         public void SyncVarIsBitPacked()
         {
@@ -66,13 +77,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests.%%NAME%%
                     clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(%%BIT_COUNT%%));
 
-                    Vector3 inVec = value * Vector3.forward;
-                    Vector3 outVec = clientComponent.myValue * Vector3.forward;
-
-                    // allow for extra within when rotating vector
-                    Assert.AreEqual(inVec.x, outVec.x, within * 2, $"vx off by {Mathf.Abs(inVec.x - outVec.x)}");
-                    Assert.AreEqual(inVec.y, outVec.y, within * 2, $"vy off by {Mathf.Abs(inVec.y - outVec.y)}");
-                    Assert.AreEqual(inVec.z, outVec.z, within * 2, $"vz off by {Mathf.Abs(inVec.z - outVec.z)}");
+                    AssertValue(clientComponent.myValue);
                 }
             }
         }
@@ -84,7 +89,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests.%%NAME%%
             clientComponent.onRpc += (v) => 
             { 
                 called++;
-                Assert.That(v, Is.EqualTo(value)); 
+                AssertValue(v);
             };
 
             client.MessageHandler.UnregisterHandler<RpcMessage>();
@@ -141,7 +146,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests.%%NAME%%
             // +2 for message header
             int expectedPayLoadSize = ((%%BIT_COUNT%% + 7) / 8) + 2;
             Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"%%BIT_COUNT%% bits is {expectedPayLoadSize - 2} bytes in payload");
-            Assert.That(outMessage, Is.EqualTo(inMessage));
+            AssertValue(outMessage.myValue);
         }
 
         [Test]
@@ -164,7 +169,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests.%%NAME%%
                     var outStruct = reader.Read<BitPackStruct>();
                     Assert.That(reader.BitPosition, Is.EqualTo(%%BIT_COUNT%%));
 
-                    Assert.That(outStruct, Is.EqualTo(inStruct));
+                    AssertValue(outStruct.myValue);
                 }
             }
         }

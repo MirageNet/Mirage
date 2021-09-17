@@ -50,6 +50,12 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._1000_30b
         static readonly Vector2 value = new Vector2(10.3f, 0.2f);
         const float within = 0.2f;
 
+        static void AssertValue(Vector2 actual)
+        {
+            Assert.That(actual.x, Is.EqualTo(value.x).Within(within));
+            Assert.That(actual.y, Is.EqualTo(value.y).Within(within));
+        }
+
         [Test]
         public void SyncVarIsBitPacked()
         {
@@ -66,8 +72,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._1000_30b
                     clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(30));
 
-                    Assert.That(clientComponent.myValue.x, Is.EqualTo(value.x).Within(within));
-                    Assert.That(clientComponent.myValue.y, Is.EqualTo(value.y).Within(within));
+                    AssertValue(clientComponent.myValue);
                 }
             }
         }
@@ -79,7 +84,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._1000_30b
             clientComponent.onRpc += (v) => 
             { 
                 called++;
-                Assert.That(v, Is.EqualTo(value)); 
+                AssertValue(v); 
             };
 
             client.MessageHandler.UnregisterHandler<RpcMessage>();
@@ -136,7 +141,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._1000_30b
             // +2 for message header
             int expectedPayLoadSize = ((30 + 7) / 8) + 2;
             Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"30 bits is {expectedPayLoadSize - 2} bytes in payload");
-            Assert.That(outMessage, Is.EqualTo(inMessage));
+            AssertValue(outMessage.myValue);
         }
 
         [Test]
@@ -159,7 +164,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector2PackAttributeTests._1000_30b
                     var outStruct = reader.Read<BitPackStruct>();
                     Assert.That(reader.BitPosition, Is.EqualTo(30));
 
-                    Assert.That(outStruct, Is.EqualTo(inStruct));
+                    AssertValue(outStruct.myValue);
                 }
             }
         }

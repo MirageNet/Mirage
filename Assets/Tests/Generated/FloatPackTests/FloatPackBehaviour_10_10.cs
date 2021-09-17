@@ -78,7 +78,7 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests._10_10
             clientComponent.onRpc += (v) => 
             { 
                 called++;
-                Assert.That(v, Is.EqualTo(value)); 
+                Assert.That(v, Is.EqualTo(value).Within(within)); 
             };
 
             client.MessageHandler.UnregisterHandler<RpcMessage>();
@@ -135,7 +135,7 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests._10_10
             // +2 for message header
             int expectedPayLoadSize = ((10 + 7) / 8) + 2;
             Assert.That(payloadSize, Is.EqualTo(expectedPayLoadSize), $"10 bits is {expectedPayLoadSize - 2} bytes in payload");
-            Assert.That(outMessage, Is.EqualTo(inMessage));
+            Assert.That(outMessage.myValue, Is.EqualTo(inMessage.myValue).Within(within));
         }
 
         [Test]
@@ -158,7 +158,7 @@ namespace Mirage.Tests.Runtime.Generated.FloatPackAttributeTests._10_10
                     var outStruct = reader.Read<BitPackStruct>();
                     Assert.That(reader.BitPosition, Is.EqualTo(10));
 
-                    Assert.That(outStruct, Is.EqualTo(inStruct));
+                    Assert.That(outStruct.myValue, Is.EqualTo(inStruct.myValue).Within(within));
                 }
             }
         }
