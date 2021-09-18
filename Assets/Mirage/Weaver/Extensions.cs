@@ -225,6 +225,7 @@ namespace Mirage.Weaver
             customAttribute = null;
             return false;
         }
+
         public static CustomAttribute GetCustomAttribute<TAttribute>(this ICustomAttributeProvider method)
         {
             _ = method.TryGetCustomAttribute<TAttribute>(out CustomAttribute customAttribute);

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Mono.Cecil;
@@ -39,6 +40,32 @@ namespace Mirage.Weaver.Serialization
         public static FieldDefinition AddPackerField<T>(TypeDefinition typeDefinition, string name)
         {
             return typeDefinition.AddField<T>($"{name}__Packer", FieldAttributes.Assembly | FieldAttributes.Static);
+        }
+
+        public static void ValidatePrecision<TException>(float max, float precision, Func<string, TException> CreateException) where TException : WeaverException
+        {
+            if (precision < 0)
+            {
+                throw CreateException.Invoke($"Precsion must be positive, precision:{precision}");
+            }
+
+            double expectedBitCount = Math.Floor(Math.Log(2 * max / (double)precision, 2)) + 1;
+            // 30 should be large enough, if someone is trying to use more they might as well just send the whole float
+            if (expectedBitCount > 30)
+            {
+                throw CreateException.Invoke($"Precsion is too small, precision:{precision}");
+            }
+        }
+        public static void ValidateBitCount<TException>(int bitCount, Func<string, TException> CreateException) where TException : WeaverException
+        {
+            if (bitCount > 30)
+            {
+                throw CreateException.Invoke($"BitCount must be between 1 and 30 (inclusive), bitCount:{bitCount}");
+            }
+            if (bitCount < 1)
+            {
+                throw CreateException.Invoke($"BitCount must be between 1 and 30 (inclusive), bitCount:{bitCount}");
+            }
         }
     }
 }

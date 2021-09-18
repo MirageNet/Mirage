@@ -60,7 +60,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Call, GetFunction_Thorws(arrayType)));
 
-            // return new ArraySegment<T>($array);
+            // return new ArraySegment<T>($array)
             MethodReference arraySegmentConstructor = module.ImportReference(() => new ArraySegment<object>());
             worker.Append(worker.Create(OpCodes.Newobj, arraySegmentConstructor.MakeHostInstanceGeneric(genericInstance)));
             worker.Append(worker.Create(OpCodes.Ret));
@@ -112,7 +112,7 @@ namespace Mirage.Weaver
             methodRef.GenericArguments.Add(elementType);
 
             // generates
-            // return reader.ReadList<T>();
+            // return reader.ReadList<T>()
 
             ILProcessor worker = readMethod.worker;
             worker.Append(worker.Create(OpCodes.Ldarg_0)); // reader
@@ -148,9 +148,8 @@ namespace Mirage.Weaver
 
         private void GenerateNullCheck(ILProcessor worker)
         {
-            // if (!reader.ReadBoolean()) {
-            //   return null;
-            // }
+            // if (!reader.ReadBoolean())
+            //   return null
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Call, TryGetFunction<bool>(null)));
 
@@ -200,7 +199,7 @@ namespace Mirage.Weaver
         {
             ILProcessor worker = readMethod.worker;
             // create copy here because we might add static packer field
-            var fields = type.FindAllPublicFields();
+            System.Collections.Generic.IEnumerable<FieldDefinition> fields = type.FindAllPublicFields();
             foreach (FieldDefinition field in fields)
             {
                 // load this, write value, store value
@@ -247,7 +246,6 @@ namespace Mirage.Weaver
                 MethodReference specializedField = fieldRef.MakeHostInstanceGeneric(genericInstance);
                 worker.Append(worker.Create(OpCodes.Call, specializedField));
             }
-
         }
     }
 }

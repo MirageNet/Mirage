@@ -39,8 +39,6 @@ namespace Mirage.Weaver.Serialization
             return GetSerializer(method.DeclaringType.Module, method.DeclaringType, param, param.ParameterType, name, writers, readers);
         }
 
-        // todo what if holder or fieldDefinition are in another assembly??
-        //     like using struct from another assembly
         /// <summary>
         ///
         /// </summary>
@@ -59,6 +57,9 @@ namespace Mirage.Weaver.Serialization
         {
             if (holder.Module != module) throw new InvalidOperationException($"{holder.Name} was not in the weaving module, holderModule: {holder.Module}, weaver Module: {module}");
 
+            // Store result in variable but DONT return early
+            // We need to check if other attributes are also used
+            // if user adds 2 attributes that dont work together weaver should then throw error
             ValueSerializer valueSerializer = null;
             bool HasIntAttribute() => valueSerializer != null && valueSerializer.IsIntType;
 

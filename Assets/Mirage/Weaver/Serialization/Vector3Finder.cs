@@ -69,16 +69,16 @@ namespace Mirage.Weaver.Serialization
         {
             // check vs all 3 axis
             float precision = (float)arg.Value;
-            FloatPackFinder.ValidatePrecision(settings.max.x, precision, (s) => new Vector3PackException(s));
-            FloatPackFinder.ValidatePrecision(settings.max.y, precision, (s) => new Vector3PackException(s));
-            FloatPackFinder.ValidatePrecision(settings.max.z, precision, (s) => new Vector3PackException(s));
+            ValidatePrecision(settings.max.x, precision, (s) => new Vector3PackException(s));
+            ValidatePrecision(settings.max.y, precision, (s) => new Vector3PackException(s));
+            ValidatePrecision(settings.max.z, precision, (s) => new Vector3PackException(s));
             settings.precision = new Vector3(precision, precision, precision);
         }
         private static void BitCountfrom1(ref Vector3PackSettings settings, CustomAttributeArgument arg)
         {
             // check vs all 3 axis
             int bitCount = (int)arg.Value;
-            FloatPackFinder.ValidateBitCount(bitCount, (s) => new Vector3PackException(s));
+            ValidateBitCount(bitCount, (s) => new Vector3PackException(s));
             settings.bitCount = new Vector3Int(bitCount, bitCount, bitCount);
         }
         private static void PrecisionFrom3(ref Vector3PackSettings settings, CustomAttributeArgument xArg, CustomAttributeArgument yArg, CustomAttributeArgument zArg)
@@ -88,17 +88,17 @@ namespace Mirage.Weaver.Serialization
                 (float)xArg.Value,
                 (float)yArg.Value,
                 (float)zArg.Value);
-            FloatPackFinder.ValidatePrecision(settings.max.x, precision.x, (s) => new Vector3PackException(s));
-            FloatPackFinder.ValidatePrecision(settings.max.y, precision.y, (s) => new Vector3PackException(s));
-            FloatPackFinder.ValidatePrecision(settings.max.z, precision.z, (s) => new Vector3PackException(s));
+            ValidatePrecision(settings.max.x, precision.x, (s) => new Vector3PackException(s));
+            ValidatePrecision(settings.max.y, precision.y, (s) => new Vector3PackException(s));
+            ValidatePrecision(settings.max.z, precision.z, (s) => new Vector3PackException(s));
             settings.precision = precision;
         }
         private static void BitCountFrom3(ref Vector3PackSettings settings, CustomAttributeArgument xArg, CustomAttributeArgument yArg, CustomAttributeArgument zArg)
         {
             // check vs all 3 axis
-            FloatPackFinder.ValidateBitCount((int)xArg.Value, (s) => new Vector3PackException(s));
-            FloatPackFinder.ValidateBitCount((int)yArg.Value, (s) => new Vector3PackException(s));
-            FloatPackFinder.ValidateBitCount((int)zArg.Value, (s) => new Vector3PackException(s));
+            ValidateBitCount((int)xArg.Value, (s) => new Vector3PackException(s));
+            ValidateBitCount((int)yArg.Value, (s) => new Vector3PackException(s));
+            ValidateBitCount((int)zArg.Value, (s) => new Vector3PackException(s));
             settings.bitCount = new Vector3Int(
                 (int)xArg.Value,
                 (int)yArg.Value,

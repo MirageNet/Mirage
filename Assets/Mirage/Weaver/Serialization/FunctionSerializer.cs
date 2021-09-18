@@ -48,17 +48,6 @@ namespace Mirage.Weaver.Serialization
             worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
             // call read function
             worker.Append(worker.Create(OpCodes.Call, readFunction));
-
-            // todo check if we need this? it was in Rpc ReadArguments
-            //// conversion.. is this needed?
-            //if (param.ParameterType.Is<float>())
-            //{
-            //    worker.Append(worker.Create(OpCodes.Conv_R4));
-            //}
-            //else if (param.ParameterType.Is<double>())
-            //{
-            //    worker.Append(worker.Create(OpCodes.Conv_R8));
-            //}
         }
     }
 }

@@ -66,14 +66,14 @@ namespace Mirage.Weaver.Serialization
         {
             // check vs all 3 axis
             float precision = (float)arg.Value;
-            FloatPackFinder.ValidatePrecision(settings.max.x, precision, (s) => new Vector2PackException(s));
-            FloatPackFinder.ValidatePrecision(settings.max.y, precision, (s) => new Vector2PackException(s));
+            ValidatePrecision(settings.max.x, precision, (s) => new Vector2PackException(s));
+            ValidatePrecision(settings.max.y, precision, (s) => new Vector2PackException(s));
             settings.precision = new Vector2(precision, precision);
         }
         private static void BitCountfrom1(ref Vector2PackSettings settings, CustomAttributeArgument arg)
         {
             int bitCount = (int)arg.Value;
-            FloatPackFinder.ValidateBitCount(bitCount, (s) => new Vector2PackException(s));
+            ValidateBitCount(bitCount, (s) => new Vector2PackException(s));
             settings.bitCount = new Vector2Int(bitCount, bitCount);
         }
         private static void PrecisionFrom2(ref Vector2PackSettings settings, CustomAttributeArgument xArg, CustomAttributeArgument yArg)
@@ -82,26 +82,26 @@ namespace Mirage.Weaver.Serialization
             var precision = new Vector2(
                 (float)xArg.Value,
                 (float)yArg.Value);
-            FloatPackFinder.ValidatePrecision(settings.max.x, precision.x, (s) => new Vector2PackException(s));
-            FloatPackFinder.ValidatePrecision(settings.max.y, precision.y, (s) => new Vector2PackException(s));
+            ValidatePrecision(settings.max.x, precision.x, (s) => new Vector2PackException(s));
+            ValidatePrecision(settings.max.y, precision.y, (s) => new Vector2PackException(s));
             settings.precision = precision;
         }
         private static void BitCountFrom2(ref Vector2PackSettings settings, CustomAttributeArgument xArg, CustomAttributeArgument yArg)
         {
             // check vs all 3 axis
-            FloatPackFinder.ValidateBitCount((int)xArg.Value, (s) => new Vector2PackException(s));
-            FloatPackFinder.ValidateBitCount((int)yArg.Value, (s) => new Vector2PackException(s));
+            ValidateBitCount((int)xArg.Value, (s) => new Vector2PackException(s));
+            ValidateBitCount((int)yArg.Value, (s) => new Vector2PackException(s));
             settings.bitCount = new Vector2Int(
                 (int)xArg.Value,
                 (int)yArg.Value);
         }
 
-        protected override LambdaExpression GetPackMethod(TypeReference type)
+        protected override LambdaExpression GetPackMethod(TypeReference fieldType)
         {
             Expression<Action<Vector2Packer>> packMethod = (Vector2Packer p) => p.Pack(default, default);
             return packMethod;
         }
-        protected override LambdaExpression GetUnpackMethod(TypeReference type)
+        protected override LambdaExpression GetUnpackMethod(TypeReference fieldType)
         {
             Expression<Action<Vector2Packer>> unpackMethod = (Vector2Packer p) => p.Unpack(default(NetworkReader));
             return unpackMethod;

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Mirage.Serialization;
 using UnityEngine;
 
 namespace Mirage
@@ -23,7 +22,7 @@ namespace Mirage
     {
         public string MainActivateScene;
         // Normal = 0, LoadAdditive = 1, UnloadAdditive = 2
-        [BitCount(2)] public SceneOperation SceneOperation;
+        public SceneOperation SceneOperation;
         public List<string> AdditiveScenes;
     }
 
@@ -40,9 +39,7 @@ namespace Mirage
     public struct ServerRpcMessage
     {
         public uint netId;
-        [VarInt(FromBitCount.b3, FromBitCount.b7, FromBitCount.b10, true)]
         public int componentIndex;
-
         public int functionHash;
 
         // if the server Rpc can return values

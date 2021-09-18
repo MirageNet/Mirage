@@ -73,8 +73,9 @@ namespace Mirage.Weaver.Serialization
 {
     internal abstract class ValueSerializerException : WeaverException
     {
-        public ValueSerializerException(string message) : base(message, null, null) { }
+        protected ValueSerializerException(string message) : base(message, null, null) { }
     }
+
     internal class BitCountException : ValueSerializerException
     {
         public BitCountException(string message) : base(message) { }

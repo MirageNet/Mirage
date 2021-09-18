@@ -17,31 +17,6 @@ namespace Mirage.Weaver.Serialization
             public int? bitCount;
         }
 
-        public static void ValidatePrecision<T>(float max, float precision, Func<string, T> CreateException) where T : WeaverException
-        {
-            if (precision < 0)
-            {
-                throw CreateException.Invoke($"Precsion must be positive, precision:{precision}");
-            }
-            // todo is there a better way to check if Precsion is too small?
-            double expectedBitCount = Math.Floor(Math.Log(2 * max / precision, 2)) + 1;
-            if (expectedBitCount > 30)
-            {
-                throw CreateException.Invoke($"Precsion is too small, precision:{precision}");
-            }
-        }
-        public static void ValidateBitCount<T>(int bitCount, Func<string, T> CreateException) where T : WeaverException
-        {
-            if (bitCount > 30)
-            {
-                throw CreateException.Invoke($"BitCount must be between 1 and 30 (inclusive), bitCount:{bitCount}");
-            }
-            if (bitCount < 1)
-            {
-                throw CreateException.Invoke($"BitCount must be between 1 and 30 (inclusive), bitCount:{bitCount}");
-            }
-        }
-
         protected override FloatPackSettings GetSettings(TypeReference fieldType, CustomAttribute attribute)
         {
             if (!fieldType.Is<float>())
