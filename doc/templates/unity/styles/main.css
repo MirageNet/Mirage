@@ -16,6 +16,8 @@
   --color-background-alert: var(--color-background-dark);
   --color-tip-background: var(--color-background-dark);
   --color-toc-active-background: var(--color-background-dark);
+  --color-mark-text: #fff;
+  --color-mark-background: #5d5d5d;
 }
 
 :root, body.light-theme {
@@ -35,6 +37,8 @@
   --color-background-alert: inherit;
   --color-tip-background: #ffdfe9;
   --color-toc-active-background: #222c37;
+  --color-mark-text: #000;
+  --color-mark-background: #fcf8e3;
 }
 
 body {
@@ -540,4 +544,12 @@ input:checked + .slider:before {
     white-space: nowrap;
     text-overflow: ellipsis;
   }
+}
+
+.mark, mark {
+  background-color: var(--color-mark-background);
+}
+
+mark {
+  color: var(--color-mark-text);
 }
