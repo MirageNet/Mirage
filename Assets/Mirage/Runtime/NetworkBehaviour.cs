@@ -178,6 +178,7 @@ namespace Mirage
         }
 
         private int? componentIndex;
+        public const int COMPONENT_INDEX_NOT_FOUND = -1;
         /// <summary>
         /// Returns the index of the component on this object
         /// </summary>
@@ -202,7 +203,7 @@ namespace Mirage
                 // this should never happen
                 logger.LogError("Could not find component in GameObject. You should not add/remove components in networked objects dynamically", this);
 
-                return -1;
+                return COMPONENT_INDEX_NOT_FOUND;
             }
         }
 
