@@ -29,13 +29,13 @@ namespace Mirage.Weaver
         }
 
         // helper functions to check if the method has a NetworkPlayer parameter
-        public bool HasNetworkPlayerParameter(MethodDefinition md)
+        protected static bool HasNetworkPlayerParameter(MethodDefinition md)
         {
             return md.Parameters.Count > 0 &&
                    IsNetworkPlayer(md.Parameters[0].ParameterType);
         }
 
-        public static bool IsNetworkPlayer(TypeReference type)
+        protected static bool IsNetworkPlayer(TypeReference type)
         {
             return type.Resolve().ImplementsInterface<INetworkPlayer>();
         }
@@ -83,23 +83,28 @@ namespace Mirage.Weaver
             // write each argument
             // example result
             /*
-            writer.WritePackedInt32(someNumber);
-            writer.WriteNetworkIdentity(someTarget);
+            writer.WritePackedInt32(someNumber)
+            writer.WriteNetworkIdentity(someTarget)
              */
 
             // NetworkConnection is not sent via the NetworkWriter so skip it here
             // skip first for NetworkConnection in TargetRpc
-            bool skipFirst = callType == RemoteCallType.ClientRpc
-                && HasNetworkPlayerParameter(method);
+            bool skipFirst = ClientRpcWithTarget(method, callType);
 
             int startingArg = skipFirst ? 1 : 0;
-            for (int argIndex = startingArg; argIndex < method.Parameters.Count; argIndex++)
+            for (int i = startingArg; i < method.Parameters.Count; i++)
             {
                 // try/catch for each arg so that it will give error for each
-                ParameterDefinition param = method.Parameters[argIndex];
-                ValueSerializer serializer = paramSerializers[argIndex];
+                ParameterDefinition param = method.Parameters[i];
+                ValueSerializer serializer = paramSerializers[i];
                 WriteArgument(worker, writer, param, serializer);
             }
+        }
+
+        static bool ClientRpcWithTarget(MethodDefinition method, RemoteCallType callType)
+        {
+            return (callType == RemoteCallType.ClientRpc)
+                && HasNetworkPlayerParameter(method);
         }
 
         private void WriteArgument(ILProcessor worker, VariableDefinition writer, ParameterDefinition param, ValueSerializer serializer)
@@ -116,27 +121,15 @@ namespace Mirage.Weaver
             // read each argument
             // example result
             /*
-            CallCmdDoSomething(reader.ReadPackedInt32(), reader.ReadNetworkIdentity());
+            CallCmdDoSomething(reader.ReadPackedInt32(), reader.ReadNetworkIdentity())
              */
 
             int startingArg = skipFirst ? 1 : 0;
-            for (int argIndex = startingArg; argIndex < method.Parameters.Count; argIndex++)
+            for (int i = startingArg; i < method.Parameters.Count; i++)
             {
-                // try/catch for each arg so that it will give error for each
-                try
-                {
-                    ParameterDefinition param = method.Parameters[argIndex];
-                    ValueSerializer serializer = paramSerializers[argIndex];
-                    ReadArgument(worker, readerParameter, senderParameter, param, serializer);
-                }
-                catch (SerializeFunctionException e)
-                {
-                    logger.Error(e, method.DebugInformation.SequencePoints.FirstOrDefault());
-                }
-                catch (ValueSerializerException e)
-                {
-                    logger.Error(e.Message, method);
-                }
+                ParameterDefinition param = method.Parameters[i];
+                ValueSerializer serializer = paramSerializers[i];
+                ReadArgument(worker, readerParameter, senderParameter, param, serializer);
             }
         }
 
@@ -156,7 +149,6 @@ namespace Mirage.Weaver
                 return;
             }
 
-            // todo make sure this works for all ValueSerializer
             serializer.AppendRead(module, worker, readerParameter, param.ParameterType);
         }
 
