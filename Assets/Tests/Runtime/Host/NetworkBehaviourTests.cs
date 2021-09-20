@@ -100,13 +100,6 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         [Test]
-        public void TimeTest()
-        {
-            SampleBehavior behaviour1 = playerGO.AddComponent<SampleBehavior>();
-            Assert.That(behaviour1.NetworkTime, Is.EqualTo(client.Time));
-        }
-
-        [Test]
         public void HasIdentitysOwner()
         {
             (_, identity.Owner) = PipedConnections(ClientMessageHandler, ServerMessageHandler);

@@ -19,6 +19,11 @@ namespace Mirage
         /// </summary>
         public event Action<NetworkIdentity> onUnspawn;
 
+        /// <summary>
+        /// Time kept in this world
+        /// </summary>
+        public NetworkTime Time { get; } = new NetworkTime();
+
         private readonly Dictionary<uint, NetworkIdentity> SpawnedObjects = new Dictionary<uint, NetworkIdentity>();
 
         public IReadOnlyCollection<NetworkIdentity> SpawnedIdentities => SpawnedObjects.Values;
@@ -60,7 +65,6 @@ namespace Mirage
             if (removed)
                 onUnspawn?.Invoke(identity);
         }
-
 
         internal void ClearSpawnedObjects()
         {

@@ -136,11 +136,6 @@ namespace Mirage
         /// </summary>
         public bool Active { get; private set; }
 
-        /// <summary>
-        /// Time kept in this server
-        /// </summary>
-        public NetworkTime Time { get; } = new NetworkTime();
-
         public NetworkWorld World { get; private set; }
         public SyncVarSender SyncVarSender { get; private set; }
         public MessageHandler MessageHandler { get; private set; }
@@ -198,7 +193,7 @@ namespace Mirage
 
             LocalClient = localClient;
             MessageHandler = new MessageHandler(DisconnectOnException);
-            MessageHandler.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
+            MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing);
 
             ISocket socket = SocketFactory.CreateServerSocket();
             var dataHandler = new DataHandler(MessageHandler, connections);

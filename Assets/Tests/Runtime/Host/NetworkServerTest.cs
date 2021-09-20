@@ -95,7 +95,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void TimeNotNullTest()
         {
-            Assert.That(server.Time, Is.Not.Null);
+            Assert.That(server.World.Time, Is.Not.Null);
         }
     }
 }
