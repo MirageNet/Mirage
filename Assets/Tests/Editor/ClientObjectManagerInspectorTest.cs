@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirage
+namespace Mirage.Tests
 {
     [TestFixture(Category = "ClientObjectManager")]
     public class ClientObjectManagerInspectorTest

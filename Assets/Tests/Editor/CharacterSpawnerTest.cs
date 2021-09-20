@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Mirage
+namespace Mirage.Tests
 {
 
     public class CharacterSpawnerTest

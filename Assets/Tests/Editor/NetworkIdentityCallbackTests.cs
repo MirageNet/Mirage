@@ -8,7 +8,7 @@ using UnityEngine.Events;
 using static Mirage.Tests.LocalConnections;
 using Object = UnityEngine.Object;
 
-namespace Mirage
+namespace Mirage.Tests
 {
     public class NetworkIdentityCallbackTests
     {

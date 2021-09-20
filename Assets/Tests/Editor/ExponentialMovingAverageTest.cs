@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Mirage
+namespace Mirage.Tests
 {
     [TestFixture]
     public class ExponentialMovingAverageTest

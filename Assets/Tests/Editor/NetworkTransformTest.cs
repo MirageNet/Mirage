@@ -2,7 +2,7 @@ using Mirage.Serialization;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirage
+namespace Mirage.Tests
 {
     [TestFixture]
     public class NetworkTransformTest

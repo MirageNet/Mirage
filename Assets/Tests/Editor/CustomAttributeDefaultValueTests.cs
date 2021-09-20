@@ -1,8 +1,8 @@
 using NUnit.Framework;
 
-namespace Mirage
+namespace Mirage.Tests
 {
-    public class CustomAttrributeDefaultValueTests
+    public class CustomAttributeDefaultValueTests
     {
         [Test]
         public void SyncVarHookDefaultsToEmpty()

@@ -2,7 +2,7 @@ using System;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace Mirage
+namespace Mirage.Tests
 {
     public class MessageInterfaceDefaultValueTests
     {

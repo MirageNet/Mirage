@@ -4,7 +4,7 @@ using Mirage.SocketLayer;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace Mirage
+namespace Mirage.Tests
 {
     public class PipePeerConnectionTest
     {

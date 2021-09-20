@@ -1,9 +1,8 @@
-using Mirage.Logging;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mirage
+namespace Mirage.Logging.Tests
 {
     public class LogFactoryTests
     {
