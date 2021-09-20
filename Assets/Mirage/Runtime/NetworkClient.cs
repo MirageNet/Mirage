@@ -132,7 +132,6 @@ namespace Mirage
             // setup all the handlers
             Player = new NetworkPlayer(connection);
             dataHandler.SetConnection(connection, Player);
-            World.Time.Reset();
 
             RegisterMessageHandlers();
             InitializeAuthEvents();
@@ -204,7 +203,6 @@ namespace Mirage
             // invoke started event after everything is set up, but before peer has connected
             _started.Invoke();
 
-
             // we need add server connection to server's dictionary first
             // then invoke connected event on client (client has to connect first or it will miss message in NetworkScenemanager)
             // then invoke connected event on server
@@ -229,7 +227,6 @@ namespace Mirage
                 Connected.AddListener(OnAuthenticated);
             }
         }
-
 
         internal void OnAuthenticated(INetworkPlayer player)
         {
@@ -292,7 +289,6 @@ namespace Mirage
             MessageHandler.RegisterHandler<NetworkPongMessage>(World.Time.OnClientPong);
         }
 
-
         /// <summary>
         /// Shut down a client.
         /// <para>This should be done when a client is no longer going to be used.</para>
@@ -331,7 +327,6 @@ namespace Mirage
                 peer = null;
             }
         }
-
 
         internal class DataHandler : IDataHandler
         {

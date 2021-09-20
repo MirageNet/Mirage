@@ -66,7 +66,6 @@ namespace Mirage
                 onUnspawn?.Invoke(identity);
         }
 
-
         internal void ClearSpawnedObjects()
         {
             SpawnedObjects.Clear();
