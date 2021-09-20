@@ -193,13 +193,12 @@ namespace Mirage
             logger.Assert(Players.Count == 0, "Player could should have been reset since previous session");
             logger.Assert(connections.Count == 0, "connections could should have been reset since previous session");
 
-            LocalClient = localClient;
-            MessageHandler = new MessageHandler(DisconnectOnException);
-            MessageHandler.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
-
             World = new NetworkWorld();
             SyncVarSender = new SyncVarSender();
 
+            LocalClient = localClient;
+            MessageHandler = new MessageHandler(DisconnectOnException);
+            MessageHandler.RegisterHandler<NetworkPingMessage>(Time.OnServerPing);
 
             ISocket socket = SocketFactory.CreateServerSocket();
             var dataHandler = new DataHandler(MessageHandler, connections);
