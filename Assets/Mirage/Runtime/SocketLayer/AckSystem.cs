@@ -100,6 +100,7 @@ namespace Mirage.SocketLayer
             maxFragmentsMessageSize = maxFragments * SizePerFragment;
 
             int size = config.SequenceSize;
+            if (size > 16) throw new ArgumentOutOfRangeException("SequenceSize", size, "SequenceSize has a max value of 16");
             sentAckablePackets = new RingBuffer<AckablePacket>(size);
             reliableOrder = new Sequencer(size);
             reliableReceive = new RingBuffer<ReliableReceived>(size);
