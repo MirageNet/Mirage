@@ -74,7 +74,7 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
             }
 
-            ReadArguments(md, worker, readerParameter, null, hasNetworkConnection, paramSerializers);
+            ReadArguments(md, worker, readerParameter, senderParameter: null, hasNetworkConnection, paramSerializers);
 
             // invoke actual ServerRpc function
             worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
