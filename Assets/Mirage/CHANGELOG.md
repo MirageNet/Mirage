@@ -1,3 +1,20 @@
+# [104.2.0](https://github.com/MirageNet/Mirage/compare/v104.1.0...v104.2.0) (2021-09-20)
+
+
+### Bug Fixes
+
+* **Peer:** throwing if sequence size is too big ([6c7c5ad](https://github.com/MirageNet/Mirage/commit/6c7c5ad0a5837f9b4e147dcb06b410297214bf84))
+
+
+### Features
+
+* **Weaver:** adding constant values for max value for number of bits ([#934](https://github.com/MirageNet/Mirage/issues/934)) ([2f7c322](https://github.com/MirageNet/Mirage/commit/2f7c322e1c76404fc172ed78c7d95de27b81fcc3))
+
+
+### Performance Improvements
+
+* **Peer:** updating header size for ipv6 ([a8798f0](https://github.com/MirageNet/Mirage/commit/a8798f08a6c9947c84c4b26fc97a4d752bd9de88))
+
 # [104.1.0](https://github.com/MirageNet/Mirage/compare/v104.0.4...v104.1.0) (2021-09-20)
 
 
