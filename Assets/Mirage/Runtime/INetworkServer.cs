@@ -59,8 +59,6 @@ namespace Mirage
         /// </summary>
         bool Active { get; }
 
-        NetworkTime Time { get; }
-
         NetworkWorld World { get; }
 
         SyncVarSender SyncVarSender { get; }

@@ -87,11 +87,6 @@ namespace Mirage
         /// </summary>
         public bool IsConnected => connectState == ConnectState.Connected;
 
-        /// <summary>
-        /// Time kept in this client
-        /// </summary>
-        public NetworkTime Time { get; } = new NetworkTime();
-
         public NetworkWorld World { get; private set; }
         public MessageHandler MessageHandler { get; private set; }
 
@@ -137,7 +132,7 @@ namespace Mirage
             // setup all the handlers
             Player = new NetworkPlayer(connection);
             dataHandler.SetConnection(connection, Player);
-            Time.Reset();
+            World.Time.Reset();
 
             RegisterMessageHandlers();
             InitializeAuthEvents();
@@ -160,7 +155,7 @@ namespace Mirage
 
         private void Peer_OnConnected(IConnection conn)
         {
-            Time.UpdateClient(this);
+            World.Time.UpdateClient(this);
             connectState = ConnectState.Connected;
             _connected.Invoke(Player);
         }
@@ -282,7 +277,7 @@ namespace Mirage
             if (!IsLocalClient && Active && connectState == ConnectState.Connected)
             {
                 // only update things while connected
-                Time.UpdateClient(this);
+                World.Time.UpdateClient(this);
             }
             peer?.Update();
         }
@@ -294,7 +289,7 @@ namespace Mirage
 
         internal void RegisterMessageHandlers()
         {
-            MessageHandler.RegisterHandler<NetworkPongMessage>(Time.OnClientPong);
+            MessageHandler.RegisterHandler<NetworkPongMessage>(World.Time.OnClientPong);
         }
 
 
