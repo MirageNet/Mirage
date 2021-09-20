@@ -103,7 +103,7 @@ namespace Mirage.Tests.Runtime.Host
         public void TimeTest()
         {
             SampleBehavior behaviour1 = playerGO.AddComponent<SampleBehavior>();
-            Assert.That(behaviour1.NetworkTime, Is.EqualTo(client.Time));
+            Assert.That(behaviour1.NetworkTime, Is.EqualTo(client.World.Time));
         }
 
         [Test]
