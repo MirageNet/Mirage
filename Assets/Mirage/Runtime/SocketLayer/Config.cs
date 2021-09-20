@@ -42,9 +42,9 @@ namespace Mirage.SocketLayer
         public float DisconnectDuration = 1;
 
         /// <summary>
-        /// IP + UDP Header
+        /// IPv6 + UDP Header
         /// </summary>
-        const int HEADER_SIZE = 20 + 8;
+        const int HEADER_SIZE = 40 + 8;
 
         /// <summary>
         /// MTU is expected to be atleast this number
