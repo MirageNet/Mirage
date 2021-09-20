@@ -16,6 +16,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         public event Action<NetworkBehaviour> onSendNetworkBehaviourCalled;
         public event Action<SampleBehaviorWithRpc> onSendNetworkBehaviourDerivedCalled;
         public event Action<Weaver.Extra.SomeData> onSendTypeFromAnotherAssemblyCalled;
+        public event Action<int, INetworkPlayer> onWithSenderCalled;
+        public event Action<INetworkPlayer, int> onWithSenderInDifferentOrderCalled;
 
         [ClientRpc]
         public void SendNetworkIdentity(NetworkIdentity value)
@@ -69,6 +71,18 @@ namespace Mirage.Tests.Runtime.ClientServer
         public void SendTypeFromAnotherAssembly(Weaver.Extra.SomeData someData)
         {
             onSendTypeFromAnotherAssemblyCalled?.Invoke(someData);
+        }
+
+        [ServerRpc(requireAuthority = false)]
+        public void WithSender(int myNumber, INetworkPlayer sender = null)
+        {
+            onWithSenderCalled?.Invoke(myNumber, sender);
+        }
+
+        [ServerRpc(requireAuthority = false)]
+        public void WithSenderInDifferentOrder(INetworkPlayer sender, int myNumber)
+        {
+            onWithSenderInDifferentOrderCalled?.Invoke(sender, myNumber);
         }
     }
 
@@ -231,6 +245,32 @@ namespace Mirage.Tests.Runtime.ClientServer
             await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
             callback.Received().Invoke(serverPlayerGO);
         });
+
+        [UnityTest]
+        public IEnumerator WithSender() => UniTask.ToCoroutine(async () =>
+        {
+            Action<int, INetworkPlayer> callback = Substitute.For<Action<int, INetworkPlayer>>();
+            serverComponent.onWithSenderCalled += callback;
+
+            const int value = 10;
+            clientComponent.WithSender(value);
+            await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+            callback.Received().Invoke(value, serverPlayer);
+        });
+
+        [UnityTest]
+        public IEnumerator WithSenderInDifferentOrder() => UniTask.ToCoroutine(async () =>
+      {
+          Action<INetworkPlayer, int> callback = Substitute.For<Action<INetworkPlayer, int>>();
+          serverComponent.onWithSenderInDifferentOrderCalled += callback;
+
+          const int value = 10;
+          clientComponent.WithSenderInDifferentOrder(null, value);
+          await UniTask.WaitUntil(() => callback.ReceivedCalls().Any());
+          callback.Received().Invoke(serverPlayer, value);
+      });
+
+
 
         [Test]
         public void SendInvalidGOToServer()

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
+using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -46,13 +47,13 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateSkeleton(MethodDefinition md, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr)
+        MethodDefinition GenerateSkeleton(MethodDefinition md, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
         {
             MethodDefinition rpc = md.DeclaringType.AddMethod(
                 SkeletonPrefix + md.Name,
                 MethodAttributes.Family | MethodAttributes.HideBySig);
 
-            _ = rpc.AddParam<NetworkReader>("reader");
+            ParameterDefinition readerParameter = rpc.AddParam<NetworkReader>("reader");
             _ = rpc.AddParam<INetworkPlayer>("senderConnection");
             _ = rpc.AddParam<int>("replyId");
 
@@ -62,7 +63,7 @@ namespace Mirage.Weaver
 
             // NetworkConnection parameter is only required for Client.Connection
             RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
-            bool hasNetworkConnection = target == RpcTarget.Player && HasNetworkConnectionParameter(md);
+            bool hasNetworkConnection = target == RpcTarget.Player && HasNetworkPlayerParameter(md);
 
             if (hasNetworkConnection)
             {
@@ -73,8 +74,7 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
             }
 
-            if (!ReadArguments(md, worker, hasNetworkConnection))
-                return rpc;
+            ReadArguments(md, worker, readerParameter, senderParameter: null, hasNetworkConnection, paramSerializers);
 
             // invoke actual ServerRpc function
             worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
@@ -136,7 +136,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute clientRpcAttr)
+        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
         {
             MethodDefinition rpc = SubstituteMethod(md);
 
@@ -154,8 +154,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Stloc, writer));
 
             // write all the arguments that the user passed to the Rpc call
-            if (!WriteArguments(worker, md, writer, RemoteCallType.ClientRpc))
-                return rpc;
+            WriteArguments(worker, md, writer, paramSerializers, RemoteCallType.ClientRpc);
 
             string rpcName = md.Name;
 
@@ -167,7 +166,7 @@ namespace Mirage.Weaver
             // this
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            if (target == RpcTarget.Player && HasNetworkConnectionParameter(md))
+            if (target == RpcTarget.Player && HasNetworkPlayerParameter(md))
                 worker.Append(worker.Create(OpCodes.Ldarg_1));
             else if (target == RpcTarget.Owner)
                 worker.Append(worker.Create(OpCodes.Ldnull));
@@ -255,7 +254,7 @@ namespace Mirage.Weaver
             }
 
             RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
-            if (target == RpcTarget.Player && !HasNetworkConnectionParameter(md))
+            if (target == RpcTarget.Player && !HasNetworkPlayerParameter(md))
             {
                 logger.Error("ClientRpc with Client.Connection needs a network connection parameter", md);
                 return false;
@@ -294,7 +293,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Call, () => RemoteCallHelper.RegisterRpcDelegate(default, default, default)));
         }
 
-        public void ProcessClientRpc(MethodDefinition md, CustomAttribute clientRpcAttr)
+        public void ProcessRpc(MethodDefinition md, CustomAttribute clientRpcAttr)
         {
             if (!ValidateRemoteCallAndParameters(md, RemoteCallType.ClientRpc))
             {
@@ -307,9 +306,11 @@ namespace Mirage.Weaver
             RpcTarget clientTarget = clientRpcAttr.GetField("target", RpcTarget.Observers);
             bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
 
-            MethodDefinition userCodeFunc = GenerateStub(md, clientRpcAttr);
+            ValueSerializer[] paramSerializers = GetValueSerializers(md);
 
-            MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, clientRpcAttr);
+            MethodDefinition userCodeFunc = GenerateStub(md, clientRpcAttr, paramSerializers);
+
+            MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, clientRpcAttr, paramSerializers);
             clientRpcs.Add(new ClientRpcMethod
             {
                 stub = md,

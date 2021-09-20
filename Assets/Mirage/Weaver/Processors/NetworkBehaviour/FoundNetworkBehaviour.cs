@@ -54,10 +54,5 @@ namespace Mirage.Weaver.NetworkBehaviours
         {
             return TypeDefinition.GetMethod(DeserializeHelper.MethodName) != null;
         }
-
-        public FieldDefinition AddPackerField<T>(string name)
-        {
-            return TypeDefinition.AddField<T>($"{name}__Packer", FieldAttributes.Private | FieldAttributes.Static);
-        }
     }
 }

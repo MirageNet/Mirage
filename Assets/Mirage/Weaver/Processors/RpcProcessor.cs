@@ -2,6 +2,7 @@ using System.Linq;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
 using Mirage.RemoteCalls;
+using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -27,117 +28,128 @@ namespace Mirage.Weaver
             this.logger = logger;
         }
 
-        // helper functions to check if the method has a NetworkConnection parameter
-        public bool HasNetworkConnectionParameter(MethodDefinition md)
+        // helper functions to check if the method has a NetworkPlayer parameter
+        protected static bool HasNetworkPlayerParameter(MethodDefinition md)
         {
             return md.Parameters.Count > 0 &&
-                   md.Parameters[0].ParameterType.Is<INetworkPlayer>();
+                   IsNetworkPlayer(md.Parameters[0].ParameterType);
         }
 
-        public static bool IsNetworkConnection(TypeReference type)
+        protected static bool IsNetworkPlayer(TypeReference type)
         {
             return type.Resolve().ImplementsInterface<INetworkPlayer>();
         }
 
-        public bool WriteArguments(ILProcessor worker, MethodDefinition method, VariableDefinition writer, RemoteCallType callType)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns></returns>
+        /// <exception cref="RpcException">Throws when could not get Serializer for any parameter</exception>
+        protected ValueSerializer[] GetValueSerializers(MethodDefinition method)
+        {
+            var serializers = new ValueSerializer[method.Parameters.Count];
+            bool error = false;
+            for (int i = 0; i < method.Parameters.Count; i++)
+            {
+                if (IsNetworkPlayer(method.Parameters[i].ParameterType))
+                    continue;
+
+                try
+                {
+                    serializers[i] = ValueSerializerFinder.GetSerializer(method, method.Parameters[i], writers, readers);
+                }
+                catch (SerializeFunctionException e)
+                {
+                    logger.Error(e, method.DebugInformation.SequencePoints.FirstOrDefault());
+                    error = true;
+                }
+                catch (ValueSerializerException e)
+                {
+                    logger.Error(e.Message, method);
+                    error = true;
+                }
+            }
+
+            if (error)
+            {
+                throw new RpcException($"Could not process Rpc because one or more of its parameter were invalid", method);
+            }
+            return serializers;
+        }
+
+        public void WriteArguments(ILProcessor worker, MethodDefinition method, VariableDefinition writer, ValueSerializer[] paramSerializers, RemoteCallType callType)
         {
             // write each argument
             // example result
             /*
-            writer.WritePackedInt32(someNumber);
-            writer.WriteNetworkIdentity(someTarget);
+            writer.WritePackedInt32(someNumber)
+            writer.WriteNetworkIdentity(someTarget)
              */
 
-            bool skipFirst = callType == RemoteCallType.ClientRpc
-                && HasNetworkConnectionParameter(method);
+            // NetworkConnection is not sent via the NetworkWriter so skip it here
+            // skip first for NetworkConnection in TargetRpc
+            bool skipFirst = ClientRpcWithTarget(method, callType);
 
-            // arg of calling  function, arg 0 is "this" so start counting at 1
-            int argNum = 1;
-            foreach (ParameterDefinition param in method.Parameters)
+            int startingArg = skipFirst ? 1 : 0;
+            for (int i = startingArg; i < method.Parameters.Count; i++)
             {
-                // NetworkConnection is not sent via the NetworkWriter so skip it here
-                // skip first for NetworkConnection in TargetRpc
-                if (argNum == 1 && skipFirst)
-                {
-                    argNum += 1;
-                    continue;
-                }
-                // skip SenderConnection in ServerRpc
-                if (IsNetworkConnection(param.ParameterType))
-                {
-                    argNum += 1;
-                    continue;
-                }
-
-                MethodReference writeFunc = writers.TryGetFunction(param.ParameterType, method.DebugInformation.SequencePoints.FirstOrDefault());
-                if (writeFunc == null)
-                {
-                    logger.Error($"{method.Name} has invalid parameter {param}", method, method.DebugInformation.SequencePoints.FirstOrDefault());
-                    return false;
-                }
-
-                // use built-in writer func on writer object
-                // NetworkWriter object
-                worker.Append(worker.Create(OpCodes.Ldloc, writer));
-                // add argument to call
-                worker.Append(worker.Create(OpCodes.Ldarg, argNum));
-                // call writer extension method
-                worker.Append(worker.Create(OpCodes.Call, writeFunc));
-                argNum += 1;
+                // try/catch for each arg so that it will give error for each
+                ParameterDefinition param = method.Parameters[i];
+                ValueSerializer serializer = paramSerializers[i];
+                WriteArgument(worker, writer, param, serializer);
             }
-            return true;
         }
 
+        static bool ClientRpcWithTarget(MethodDefinition method, RemoteCallType callType)
+        {
+            return (callType == RemoteCallType.ClientRpc)
+                && HasNetworkPlayerParameter(method);
+        }
 
-        public bool ReadArguments(MethodDefinition method, ILProcessor worker, bool skipFirst)
+        private void WriteArgument(ILProcessor worker, VariableDefinition writer, ParameterDefinition param, ValueSerializer serializer)
+        {
+            // dont write anything for INetworkPlayer, it is either target or sender
+            if (IsNetworkPlayer(param.ParameterType))
+                return;
+
+            serializer.AppendWriteParameter(module, worker, writer, param);
+        }
+
+        public void ReadArguments(MethodDefinition method, ILProcessor worker, ParameterDefinition readerParameter, ParameterDefinition senderParameter, bool skipFirst, ValueSerializer[] paramSerializers)
         {
             // read each argument
             // example result
             /*
-            CallCmdDoSomething(reader.ReadPackedInt32(), reader.ReadNetworkIdentity());
+            CallCmdDoSomething(reader.ReadPackedInt32(), reader.ReadNetworkIdentity())
              */
 
-            // arg of calling  function, arg 0 is "this" so start counting at 1
-            int argNum = 1;
-            foreach (ParameterDefinition param in method.Parameters)
+            int startingArg = skipFirst ? 1 : 0;
+            for (int i = startingArg; i < method.Parameters.Count; i++)
             {
-                // NetworkConnection is not sent via the NetworkWriter so skip it here
-                // skip first for NetworkConnection in TargetRpc
-                if (argNum == 1 && skipFirst)
-                {
-                    argNum += 1;
-                    continue;
-                }
-                // skip SenderConnection in ServerRpc
-                if (IsNetworkConnection(param.ParameterType))
-                {
-                    argNum += 1;
-                    continue;
-                }
-
-                SequencePoint sequencePoint = method.DebugInformation.SequencePoints.ElementAtOrDefault(0);
-                MethodReference readFunc = readers.TryGetFunction(param.ParameterType, sequencePoint);
-
-                if (readFunc == null)
-                {
-                    logger.Error($"{method.Name} has invalid parameter {param}.  Unsupported type {param.ParameterType},  use a supported Mirage type instead", method);
-                    return false;
-                }
-
-                worker.Append(worker.Create(OpCodes.Ldarg_1));
-                worker.Append(worker.Create(OpCodes.Call, readFunc));
-
-                // conversion.. is this needed?
-                if (param.ParameterType.Is<float>())
-                {
-                    worker.Append(worker.Create(OpCodes.Conv_R4));
-                }
-                else if (param.ParameterType.Is<double>())
-                {
-                    worker.Append(worker.Create(OpCodes.Conv_R8));
-                }
+                ParameterDefinition param = method.Parameters[i];
+                ValueSerializer serializer = paramSerializers[i];
+                ReadArgument(worker, readerParameter, senderParameter, param, serializer);
             }
-            return true;
+        }
+
+        private void ReadArgument(ILProcessor worker, ParameterDefinition readerParameter, ParameterDefinition senderParameter, ParameterDefinition param, ValueSerializer serializer)
+        {
+            if (IsNetworkPlayer(param.ParameterType))
+            {
+                if (senderParameter != null)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldarg, senderParameter));
+                }
+                else
+                {
+                    worker.Append(worker.Create(OpCodes.Ldnull));
+                }
+
+                return;
+            }
+
+            serializer.AppendRead(module, worker, readerParameter, param.ParameterType);
         }
 
         // check if a Command/TargetRpc/Rpc function & parameters are valid for weaving
@@ -199,7 +211,7 @@ namespace Mirage.Weaver
                 return false;
             }
 
-            if (IsNetworkConnection(param.ParameterType))
+            if (IsNetworkPlayer(param.ParameterType))
             {
                 if (callType == RemoteCallType.ClientRpc && firstParam)
                 {

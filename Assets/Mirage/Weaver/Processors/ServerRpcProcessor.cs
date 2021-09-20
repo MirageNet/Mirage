@@ -6,6 +6,7 @@ using System.Reflection;
 using Cysharp.Threading.Tasks;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
+using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
@@ -56,7 +57,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute serverRpcAttr)
+        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute serverRpcAttr, ValueSerializer[] paramSerializers)
         {
             MethodDefinition cmd = SubstituteMethod(md);
 
@@ -75,8 +76,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Stloc, writer));
 
             // write all the arguments that the user passed to the Cmd call
-            if (!WriteArguments(worker, md, writer, RemoteCallType.ServerRpc))
-                return cmd;
+            WriteArguments(worker, md, writer, paramSerializers, RemoteCallType.ServerRpc);
 
             string cmdName = md.Name;
 
@@ -173,14 +173,14 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc)
+        MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, ValueSerializer[] paramSerializers)
         {
             MethodDefinition cmd = method.DeclaringType.AddMethod(SkeletonPrefix + method.Name,
                 MethodAttributes.Family | MethodAttributes.HideBySig,
                 userCodeFunc.ReturnType);
 
-            _ = cmd.AddParam<NetworkReader>("reader");
-            _ = cmd.AddParam<INetworkPlayer>("senderConnection");
+            ParameterDefinition readerParameter = cmd.AddParam<NetworkReader>("reader");
+            ParameterDefinition senderParameter = cmd.AddParam<INetworkPlayer>("senderConnection");
             _ = cmd.AddParam<int>("replyId");
 
 
@@ -189,29 +189,13 @@ namespace Mirage.Weaver
             // setup for reader
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            if (!ReadArguments(method, worker, false))
-                return cmd;
-
-            AddSenderConnection(method, worker);
+            ReadArguments(method, worker, readerParameter, senderParameter, false, paramSerializers);
 
             // invoke actual ServerRpc function
             worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
             worker.Append(worker.Create(OpCodes.Ret));
 
             return cmd;
-        }
-
-        void AddSenderConnection(MethodDefinition method, ILProcessor worker)
-        {
-            foreach (ParameterDefinition param in method.Parameters)
-            {
-                if (IsNetworkConnection(param.ParameterType))
-                {
-                    // NetworkConnection is 3nd arg (arg0 is "obj" not "this" because method is static)
-                    // exmaple: static void InvokeCmdCmdSendServerRpc(NetworkBehaviour obj, NetworkReader reader, NetworkConnection connection)
-                    worker.Append(worker.Create(OpCodes.Ldarg_2));
-                }
-            }
         }
 
         internal bool Validate(MethodDefinition md)
@@ -269,7 +253,7 @@ namespace Mirage.Weaver
             return registerInstance;
         }
 
-        public void ProcessServerRpc(MethodDefinition md, CustomAttribute serverRpcAttr)
+        public void ProcessRpc(MethodDefinition md, CustomAttribute serverRpcAttr)
         {
             if (!ValidateRemoteCallAndParameters(md, RemoteCallType.ServerRpc))
                 return;
@@ -279,9 +263,11 @@ namespace Mirage.Weaver
 
             bool requireAuthority = serverRpcAttr.GetField("requireAuthority", false);
 
-            MethodDefinition userCodeFunc = GenerateStub(md, serverRpcAttr);
+            ValueSerializer[] paramSerializers = GetValueSerializers(md);
 
-            MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc);
+            MethodDefinition userCodeFunc = GenerateStub(md, serverRpcAttr, paramSerializers);
+
+            MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, paramSerializers);
             serverRpcs.Add(new ServerRpcMethod
             {
                 stub = md,

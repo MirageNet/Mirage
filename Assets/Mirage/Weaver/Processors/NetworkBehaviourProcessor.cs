@@ -106,25 +106,9 @@ namespace Mirage.Weaver
             // find ServerRpc and RPC functions
             foreach (MethodDefinition md in methods)
             {
-                bool rpc = false;
-                foreach (CustomAttribute ca in md.CustomAttributes)
-                {
-                    if (ca.AttributeType.Is<ServerRpcAttribute>())
-                    {
-                        serverRpcProcessor.ProcessServerRpc(md, ca);
-                        rpc = true;
-                        break;
-                    }
+                bool isRpc = CheckAndProcessRpc(md);
 
-                    if (ca.AttributeType.Is<ClientRpcAttribute>())
-                    {
-                        clientRpcProcessor.ProcessClientRpc(md, ca);
-                        rpc = true;
-                        break;
-                    }
-                }
-
-                if (rpc)
+                if (isRpc)
                 {
                     if (names.Contains(md.Name))
                     {
@@ -135,6 +119,33 @@ namespace Mirage.Weaver
             }
 
             RegisterRpcs();
+        }
+
+        private bool CheckAndProcessRpc(MethodDefinition md)
+        {
+            try
+            {
+                if (md.TryGetCustomAttribute<ServerRpcAttribute>(out CustomAttribute serverAttribute))
+                {
+                    if (md.HasCustomAttribute<ClientRpcAttribute>()) throw new RpcException("Method should not have both ServerRpc and ClientRpc", md);
+
+                    // todo make processRpc return the found Rpc instead of saving it to hidden list
+                    serverRpcProcessor.ProcessRpc(md, serverAttribute);
+                    return true;
+                }
+                else if (md.TryGetCustomAttribute<ClientRpcAttribute>(out CustomAttribute clientAttribute))
+                {
+                    // todo make processRpc return the found Rpc instead of saving it to hidden list
+                    clientRpcProcessor.ProcessRpc(md, clientAttribute);
+                    return true;
+                }
+            }
+            catch (RpcException e)
+            {
+                logger.Error(e);
+            }
+
+            return false;
         }
 
         /// <summary>

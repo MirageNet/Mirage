@@ -28,6 +28,11 @@ namespace JamesFrowen.SimpleCodeGen
 
         public void WriteToFile(string path)
         {
+            string directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
             if (createdFiles.Contains(path))
             {
                 throw new ArgumentException($"File already created from this template with same path: {path}");

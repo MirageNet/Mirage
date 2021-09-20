@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using JamesFrowen.SimpleCodeGen;
 using UnityEditor;
@@ -9,7 +10,7 @@ namespace Mirage.Tests.CodeGenerators
         [MenuItem("Tests Generators/VarInt")]
         public static void CreateAll()
         {
-            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.VarIntTestTemplate.txt");
+            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.VarIntTestTemplate.cs");
             Create(fromTemplate, "int", 100, 10000, null, new[] { "10", "100", "1000" }, new[] { 7 + 1, 7 + 1, 14 + 2 });
             Create(fromTemplate, "int", 100, 1000, 10000, new[] { "10", "100", "1000", "10000" }, new[] { 7 + 1, 7 + 1, 10 + 2, 14 + 2 });
             Create(fromTemplate, "uint", 100, 1000, 10000, new[] { "10U", "100U", "1000U", "10000U" }, new[] { 7 + 1, 7 + 1, 10 + 2, 14 + 2 });
@@ -66,7 +67,8 @@ namespace Mirage.Tests.CodeGenerators
             var testCase = new StringBuilder();
             for (int i = 0; i < values.Length; i++)
             {
-                testCase.AppendLine($"        [TestCase({values[i]}, {expectedBitCount[i]})]");
+                if (i > 0) { testCase.Append($",{Environment.NewLine}            "); }
+                testCase.Append($"new TestCase {{ value = {values[i]}, expectedBits = {expectedBitCount[i]} }}");
             }
             fromTemplate.Replace($"%%TEST_CASES%%", testCase.ToString());
 

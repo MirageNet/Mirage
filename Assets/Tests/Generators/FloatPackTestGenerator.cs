@@ -8,7 +8,7 @@ namespace Mirage.Tests.CodeGenerators
         [MenuItem("Tests Generators/FloatPack")]
         public static void CreateAll()
         {
-            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.FloatPackTestTemplate.txt");
+            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.FloatPackTestTemplate.cs");
             Create(fromTemplate, 100f, "0.2f", 5.2f, 0.196f, 10);
             Create(fromTemplate, 100f, "0.02f", 5.2f, 0.0123f, 14);
 
@@ -23,14 +23,14 @@ namespace Mirage.Tests.CodeGenerators
 
         private static void Create(CreateFromTemplate fromTemplate, float max, string ArgAttribute2, float value, float within, int bitcount)
         {
-            string name = $"{max}_{bitcount}";
+            string name = $"_{max}_{bitcount}";
             fromTemplate.Replace("%%NAME%%", name);
             fromTemplate.Replace("%%PACKER_ATTRIBUTE%%", $"{max}, {ArgAttribute2}");
             fromTemplate.Replace("%%VALUE%%", $"{value}f");
             fromTemplate.Replace("%%WITHIN%%", $"{within}f");
             fromTemplate.Replace("%%BIT_COUNT%%", bitcount);
 
-            fromTemplate.WriteToFile($"./Assets/Tests/Generated/FloatPackTests/FloatPackBehaviour_{name}.cs");
+            fromTemplate.WriteToFile($"./Assets/Tests/Generated/FloatPackTests/FloatPackBehaviour{name}.cs");
         }
     }
 }

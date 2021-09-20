@@ -103,28 +103,26 @@ namespace Mirage.Tests.Weaver
         {
             HasError("Cannot pass Int32& by reference",
                 "System.Int32&");
-            HasError("RpcCantHaveParamRef has invalid parameter monkeys",
-                "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcParamRef.NetworkBehaviourClientRpcParamRef::RpcCantHaveParamRef(System.Int32&)");
-            HasError("RpcCantHaveParamRef has invalid parameter monkeys.  Unsupported type System.Int32&,  use a supported Mirage type instead",
+            HasError("Could not process Rpc because one or more of its parameter were invalid",
                 "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcParamRef.NetworkBehaviourClientRpcParamRef::RpcCantHaveParamRef(System.Int32&)");
         }
 
         [Test]
         public void NetworkBehaviourClientRpcParamAbstract()
         {
-            HasError("Cannot generate write function for abstract class AbstractClass. Use a supported type or provide a custom write function", "NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract/AbstractClass");
-            HasError("RpcCantHaveParamAbstract has invalid parameter monkeys", "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract::RpcCantHaveParamAbstract(NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract/AbstractClass)");
-            HasError("Cannot generate read function for abstract class AbstractClass. Use a supported type or provide a custom read function", "NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract/AbstractClass");
-            HasError("RpcCantHaveParamAbstract has invalid parameter monkeys.  Unsupported type NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract/AbstractClass,  use a supported Mirage type instead", "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract::RpcCantHaveParamAbstract(NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract/AbstractClass)");
+            HasError("Cannot generate write function for abstract class AbstractClass. Use a supported type or provide a custom write function",
+                "NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract/AbstractClass");
+            HasError("Could not process Rpc because one or more of its parameter were invalid",
+                "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract::RpcCantHaveParamAbstract(NetworkBehaviourTests.NetworkBehaviourClientRpcParamAbstract.NetworkBehaviourClientRpcParamAbstract/AbstractClass)");
         }
 
         [Test]
         public void NetworkBehaviourClientRpcParamComponent()
         {
-            HasError("Cannot generate write function for component type ComponentClass. Use a supported type or provide a custom write function", "NetworkBehaviourTests.NetworkBehaviourClientRpcParamComponent.NetworkBehaviourClientRpcParamComponent/ComponentClass");
-            HasError("RpcCantHaveParamComponent has invalid parameter monkeyComp", "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcParamComponent.NetworkBehaviourClientRpcParamComponent::RpcCantHaveParamComponent(NetworkBehaviourTests.NetworkBehaviourClientRpcParamComponent.NetworkBehaviourClientRpcParamComponent/ComponentClass)");
-            HasError("Cannot generate read function for component type ComponentClass. Use a supported type or provide a custom read function", "NetworkBehaviourTests.NetworkBehaviourClientRpcParamComponent.NetworkBehaviourClientRpcParamComponent/ComponentClass");
-            HasError("RpcCantHaveParamComponent has invalid parameter monkeyComp.  Unsupported type NetworkBehaviourTests.NetworkBehaviourClientRpcParamComponent.NetworkBehaviourClientRpcParamComponent/ComponentClass,  use a supported Mirage type instead", "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcParamComponent.NetworkBehaviourClientRpcParamComponent::RpcCantHaveParamComponent(NetworkBehaviourTests.NetworkBehaviourClientRpcParamComponent.NetworkBehaviourClientRpcParamComponent/ComponentClass)");
+            HasError("Cannot generate write function for component type ComponentClass. Use a supported type or provide a custom write function",
+                "NetworkBehaviourTests.NetworkBehaviourClientRpcParamComponent.NetworkBehaviourClientRpcParamComponent/ComponentClass");
+            HasError("Could not process Rpc because one or more of its parameter were invalid",
+                "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcParamComponent.NetworkBehaviourClientRpcParamComponent::RpcCantHaveParamComponent(NetworkBehaviourTests.NetworkBehaviourClientRpcParamComponent.NetworkBehaviourClientRpcParamComponent/ComponentClass)");
         }
 
         [Test]
@@ -164,18 +162,17 @@ namespace Mirage.Tests.Weaver
         public void NetworkBehaviourCmdParamRef()
         {
             HasError("Cannot pass Int32& by reference", "System.Int32&");
-            // todo only log this error once
-            HasError("CmdCantHaveParamRef has invalid parameter monkeys", "System.Void NetworkBehaviourTests.NetworkBehaviourCmdParamRef.NetworkBehaviourCmdParamRef::CmdCantHaveParamRef(System.Int32&)");
-            HasError("CmdCantHaveParamRef has invalid parameter monkeys.  Unsupported type System.Int32&,  use a supported Mirage type instead", "System.Void NetworkBehaviourTests.NetworkBehaviourCmdParamRef.NetworkBehaviourCmdParamRef::CmdCantHaveParamRef(System.Int32&)");
+            HasError("Could not process Rpc because one or more of its parameter were invalid",
+                "System.Void NetworkBehaviourTests.NetworkBehaviourCmdParamRef.NetworkBehaviourCmdParamRef::CmdCantHaveParamRef(System.Int32&)");
         }
 
         [Test]
         public void NetworkBehaviourCmdParamAbstract()
         {
-            HasError("Cannot generate write function for abstract class AbstractClass. Use a supported type or provide a custom write function", "NetworkBehaviourTests.NetworkBehaviourCmdParamAbstract.NetworkBehaviourCmdParamAbstract/AbstractClass");
-            HasError("CmdCantHaveParamAbstract has invalid parameter monkeys", "System.Void NetworkBehaviourTests.NetworkBehaviourCmdParamAbstract.NetworkBehaviourCmdParamAbstract::CmdCantHaveParamAbstract(NetworkBehaviourTests.NetworkBehaviourCmdParamAbstract.NetworkBehaviourCmdParamAbstract/AbstractClass)");
-            HasError("Cannot generate read function for abstract class AbstractClass. Use a supported type or provide a custom read function", "NetworkBehaviourTests.NetworkBehaviourCmdParamAbstract.NetworkBehaviourCmdParamAbstract/AbstractClass");
-            HasError("CmdCantHaveParamAbstract has invalid parameter monkeys.  Unsupported type NetworkBehaviourTests.NetworkBehaviourCmdParamAbstract.NetworkBehaviourCmdParamAbstract/AbstractClass,  use a supported Mirage type instead", "System.Void NetworkBehaviourTests.NetworkBehaviourCmdParamAbstract.NetworkBehaviourCmdParamAbstract::CmdCantHaveParamAbstract(NetworkBehaviourTests.NetworkBehaviourCmdParamAbstract.NetworkBehaviourCmdParamAbstract/AbstractClass)");
+            HasError("Cannot generate write function for abstract class AbstractClass. Use a supported type or provide a custom write function",
+                "NetworkBehaviourTests.NetworkBehaviourCmdParamAbstract.NetworkBehaviourCmdParamAbstract/AbstractClass");
+            HasError("Could not process Rpc because one or more of its parameter were invalid",
+                "System.Void NetworkBehaviourTests.NetworkBehaviourCmdParamAbstract.NetworkBehaviourCmdParamAbstract::CmdCantHaveParamAbstract(NetworkBehaviourTests.NetworkBehaviourCmdParamAbstract.NetworkBehaviourCmdParamAbstract/AbstractClass)");
         }
 
         [Test]
@@ -183,11 +180,7 @@ namespace Mirage.Tests.Weaver
         {
             HasError("Cannot generate write function for component type ComponentClass. Use a supported type or provide a custom write function",
                 "NetworkBehaviourTests.NetworkBehaviourCmdParamComponent.NetworkBehaviourCmdParamComponent/ComponentClass");
-            HasError("CmdCantHaveParamComponent has invalid parameter monkeyComp",
-                "System.Void NetworkBehaviourTests.NetworkBehaviourCmdParamComponent.NetworkBehaviourCmdParamComponent::CmdCantHaveParamComponent(NetworkBehaviourTests.NetworkBehaviourCmdParamComponent.NetworkBehaviourCmdParamComponent/ComponentClass)");
-            HasError("Cannot generate read function for component type ComponentClass. Use a supported type or provide a custom read function",
-                "NetworkBehaviourTests.NetworkBehaviourCmdParamComponent.NetworkBehaviourCmdParamComponent/ComponentClass");
-            HasError("CmdCantHaveParamComponent has invalid parameter monkeyComp.  Unsupported type NetworkBehaviourTests.NetworkBehaviourCmdParamComponent.NetworkBehaviourCmdParamComponent/ComponentClass,  use a supported Mirage type instead",
+            HasError("Could not process Rpc because one or more of its parameter were invalid",
                 "System.Void NetworkBehaviourTests.NetworkBehaviourCmdParamComponent.NetworkBehaviourCmdParamComponent::CmdCantHaveParamComponent(NetworkBehaviourTests.NetworkBehaviourCmdParamComponent.NetworkBehaviourCmdParamComponent/ComponentClass)");
         }
 

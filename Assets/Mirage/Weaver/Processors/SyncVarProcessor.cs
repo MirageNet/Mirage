@@ -1,5 +1,6 @@
 using System;
 using Mirage.Weaver.NetworkBehaviours;
+using Mirage.Weaver.Serialization;
 using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -53,9 +54,18 @@ namespace Mirage.Weaver
                         syncVar.HasProcessed = true;
                     }
                 }
+                catch (ValueSerializerException e)
+                {
+                    logger.Error(e.Message, fd);
+                }
                 catch (SyncVarException e)
                 {
                     logger.Error(e);
+                }
+                catch (SerializeFunctionException e)
+                {
+                    // use field as member referecne
+                    logger.Error(e.Message, fd);
                 }
             }
 
@@ -100,8 +110,7 @@ namespace Mirage.Weaver
         {
             // process attributes first before creating setting, otherwise it wont know about hook
             syncVar.SetWrapType();
-            syncVar.ProcessAttributes();
-            syncVar.FindSerializeFunctions(writers, readers);
+            syncVar.ProcessAttributes(writers, readers);
 
             FieldDefinition fd = syncVar.FieldDefinition;
 
@@ -428,7 +437,7 @@ namespace Mirage.Weaver
         {
             if (!syncVar.HasProcessed) return;
 
-            syncVar.ValueSerializer.AppendWrite(module, worker, writerParameter, syncVar);
+            syncVar.ValueSerializer.AppendWriteField(module, worker, writerParameter, null, syncVar.FieldDefinition);
         }
 
 
@@ -551,7 +560,7 @@ namespace Mirage.Weaver
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            syncVar.ValueSerializer.AppendRead(module, worker, readerParameter, syncVar);
+            syncVar.ValueSerializer.AppendRead(module, worker, readerParameter, syncVar.FieldDefinition.FieldType);
 
             worker.Append(worker.Create(OpCodes.Stfld, syncVar.FieldDefinition.MakeHostGenericIfNeeded()));
         }

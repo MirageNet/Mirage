@@ -9,7 +9,7 @@ namespace Mirage.Tests.CodeGenerators
         [MenuItem("Tests Generators/BitCount")]
         public static void CreateAll()
         {
-            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.BitCountTestTemplate.txt");
+            var fromTemplate = new CreateFromTemplate("./Assets/Tests/Generators/.BitCountTestTemplate.cs");
             Create(fromTemplate, "int", 10);
             Create(fromTemplate, "int", 17);
             Create(fromTemplate, "int", 32);

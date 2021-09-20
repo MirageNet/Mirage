@@ -97,7 +97,8 @@ namespace Mirage.Serialization
     }
 
     /// <summary>
-    /// Tells weaver how many bits to sue for field
+    /// Tells weaver the max range for small, medium and large values.
+    /// <para>Allows small values to be sent using less bits</para>
     /// <para>Only works with interager fields (byte, int, ulong, enums etc)</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]
@@ -110,7 +111,8 @@ namespace Mirage.Serialization
 
 
     /// <summary>
-    /// Tells weaver how many bits to sue for field
+    /// Tells weaver the block size to use for packing int values
+    /// <para>Allows small values to be sent using less bits</para>
     /// <para>Only works with interager fields (byte, int, ulong, enums etc)</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter)]

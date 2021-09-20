@@ -34,6 +34,13 @@ namespace Mirage.Weaver
         }
 
         // todo add documentation 
+        public static Instruction Create(this ILProcessor worker, OpCode code, LambdaExpression expression)
+        {
+            MethodReference typeref = worker.Body.Method.Module.ImportReference(expression);
+            return worker.Create(code, typeref);
+        }
+
+        // todo add documentation 
         public static Instruction Create(this ILProcessor worker, OpCode code, Expression<Action> expression)
         {
             MethodReference typeref = worker.Body.Method.Module.ImportReference(expression);

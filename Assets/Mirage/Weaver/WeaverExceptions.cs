@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -29,9 +30,17 @@ namespace Mirage.Weaver
         }
     }
 
+    /// <summary>
+    /// Thrown when can't generate read or write for a type
+    /// </summary>
     internal class SerializeFunctionException : WeaverException
     {
-        public SerializeFunctionException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message">Reason method could not be generated</param>
+        /// <param name="typeRef">Type that read or write could not be generated for</param>
+        public SerializeFunctionException(string message, TypeReference typeRef) : base(message, typeRef, null) { }
     }
 
     internal class NetworkBehaviourException : WeaverException
@@ -44,6 +53,11 @@ namespace Mirage.Weaver
     {
         public SyncVarException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
     }
+
+    internal class RpcException : WeaverException
+    {
+        public RpcException(string message, MethodReference rpcMethod) : base(message, rpcMethod, rpcMethod.Resolve().DebugInformation.SequencePoints.FirstOrDefault()) { }
+    }
 }
 
 
@@ -53,40 +67,49 @@ namespace Mirage.Weaver.SyncVars
     {
         public HookMethodException(string message, MemberReference memberReference) : base(message, memberReference) { }
     }
-    internal class BitCountException : SyncVarException
+}
+
+namespace Mirage.Weaver.Serialization
+{
+    internal abstract class ValueSerializerException : WeaverException
     {
-        public BitCountException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        protected ValueSerializerException(string message) : base(message, null, null) { }
     }
-    internal class VarIntException : SyncVarException
+
+    internal class BitCountException : ValueSerializerException
     {
-        public VarIntException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public BitCountException(string message) : base(message) { }
     }
-    internal class VarIntBlocksException : SyncVarException
+    internal class VarIntException : ValueSerializerException
     {
-        public VarIntBlocksException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public VarIntException(string message) : base(message) { }
     }
-    internal class ZigZagException : SyncVarException
+    internal class VarIntBlocksException : ValueSerializerException
     {
-        public ZigZagException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public VarIntBlocksException(string message) : base(message) { }
     }
-    internal class BitCountFromRangeException : SyncVarException
+    internal class ZigZagException : ValueSerializerException
     {
-        public BitCountFromRangeException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public ZigZagException(string message) : base(message) { }
     }
-    internal class FloatPackException : SyncVarException
+    internal class BitCountFromRangeException : ValueSerializerException
     {
-        public FloatPackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public BitCountFromRangeException(string message) : base(message) { }
     }
-    internal class Vector3PackException : SyncVarException
+    internal class FloatPackException : ValueSerializerException
     {
-        public Vector3PackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public FloatPackException(string message) : base(message) { }
     }
-    internal class Vector2PackException : SyncVarException
+    internal class Vector3PackException : ValueSerializerException
     {
-        public Vector2PackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public Vector3PackException(string message) : base(message) { }
     }
-    internal class QuaternionPackException : SyncVarException
+    internal class Vector2PackException : ValueSerializerException
     {
-        public QuaternionPackException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public Vector2PackException(string message) : base(message) { }
+    }
+    internal class QuaternionPackException : ValueSerializerException
+    {
+        public QuaternionPackException(string message) : base(message) { }
     }
 }
