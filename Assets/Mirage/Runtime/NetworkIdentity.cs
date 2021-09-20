@@ -940,10 +940,10 @@ namespace Mirage
             transform.localRotation = msg.rotation;
             transform.localScale = msg.scale;
             NetId = msg.netId;
-            World = clientObjectManager.Client.World;
-            Client = clientObjectManager.Client;
-            ClientObjectManager = clientObjectManager;
             HasAuthority = msg.isOwner;
+            ClientObjectManager = clientObjectManager;
+            Client = ClientObjectManager.Client;
+            World = Client.World;
         }
 
         /// <summary>
