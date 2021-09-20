@@ -1,3 +1,10 @@
+# [104.1.0](https://github.com/MirageNet/Mirage/compare/v104.0.4...v104.1.0) (2021-09-20)
+
+
+### Features
+
+* **Weaver:** allowing bit packing attributes to work on structs and rpcs ([#933](https://github.com/MirageNet/Mirage/issues/933)) ([dca6b54](https://github.com/MirageNet/Mirage/commit/dca6b54b704f70e71aec9e0bb17a4d8eaa18ba22))
+
 ## [104.0.4](https://github.com/MirageNet/Mirage/compare/v104.0.3...v104.0.4) (2021-09-16)
 
 
