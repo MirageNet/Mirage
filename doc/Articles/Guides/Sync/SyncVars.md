@@ -138,7 +138,8 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
-// On the client
+
+// Client
 private void Update()
 {
     if (Input.GetKeyDown(KeyCode.Q))
@@ -148,20 +149,24 @@ private void Update()
     }
 }
 
+// Server
 private void InstantiateWeapon()
 {
     // On the server you first initialize your syncvars
     GameObject weapon = Instantiate(prefabWeapon);
     Weapon weapon = GetComponent<Weapon>();
     weapon.InitializeSyncVarWeaponId(5);
+    
+    // Network Spawn Object 
 }
 
+// Client + Server
 private void SetWeaponBody()
 {
     // Apply the body mesh
 }
 
-
+// Server
 [SyncVar(InitialOnly = true)]
 protected int weaponId;
 
@@ -171,7 +176,6 @@ public void InitializeSyncVarWeaponId(int weaponId)
 {
     this.weaponId = weaponId;
     
-    // Change your weapon
     SetWeaponBody();
 }
 
@@ -189,14 +193,15 @@ public void SetSyncVarWeaponId(int weaponId)
     ClientRpc_SetSyncVarWeaponId(weaponId);
 }
 
+
 [ClientRpc]
 private void ClientRpc_SetSyncVarWeaponId(int weaponId)
 {
     this.weaponId = weaponId;
 
-    // Change your weapon
     SetWeaponBody()
 }
+
 
 [ServerRpc]
 private void ServerRpc_SetSyncVarWeaponId(int weaponId)
