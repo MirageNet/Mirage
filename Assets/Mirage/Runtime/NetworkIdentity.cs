@@ -227,7 +227,6 @@ namespace Mirage
             }
         }
 
-
         NetworkVisibility visibilityCache;
         public NetworkVisibility Visibility
         {
@@ -242,7 +241,6 @@ namespace Mirage
         }
 
         [SerializeField, HideInInspector] string m_AssetId;
-
 
         /// <remarks>
         /// The AssetId trick:
@@ -447,6 +445,7 @@ namespace Mirage
 
 #if UNITY_EDITOR
         void AssignAssetID(GameObject prefab) => AssignAssetID(AssetDatabase.GetAssetPath(prefab));
+
         void AssignAssetID(string path) => m_AssetId = AssetDatabase.AssetPathToGUID(path);
 
         bool ThisIsAPrefab() => PrefabUtility.IsPartOfPrefabAsset(gameObject);
@@ -694,7 +693,6 @@ namespace Mirage
 
             _onStartClient.Invoke();
         }
-
 
         internal void StartLocalPlayer()
         {

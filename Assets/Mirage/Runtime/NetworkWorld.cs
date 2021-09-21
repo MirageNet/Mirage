@@ -25,13 +25,13 @@ namespace Mirage
         public NetworkTime Time { get; } = new NetworkTime();
 
         private readonly Dictionary<uint, NetworkIdentity> SpawnedObjects = new Dictionary<uint, NetworkIdentity>();
-
         public IReadOnlyCollection<NetworkIdentity> SpawnedIdentities => SpawnedObjects.Values;
 
         public bool TryGetIdentity(uint netId, out NetworkIdentity identity)
         {
             return SpawnedObjects.TryGetValue(netId, out identity) && identity != null;
         }
+
         /// <summary>
         /// Adds Identity to world and invokes spawned event
         /// </summary>
@@ -47,6 +47,7 @@ namespace Mirage
             SpawnedObjects.Add(netId, identity);
             onSpawn?.Invoke(identity);
         }
+
         internal void RemoveIdentity(NetworkIdentity identity)
         {
             uint netId = identity.NetId;
@@ -55,6 +56,7 @@ namespace Mirage
             if (removed)
                 onUnspawn?.Invoke(identity);
         }
+
         internal void RemoveIdentity(uint netId)
         {
             if (netId == 0) throw new ArgumentException("id can not be zero", nameof(netId));
