@@ -138,38 +138,61 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
-    private void Start()
+// On the client
+private void Update()
+{
+    if (Input.GetKeyDown(KeyCode.Q))
     {
-        currentWeaponId = 3; // Syncvar Starting Value for new spawned Objects
+        // Client Request weapon change
+        ServerRpc_SetSyncVarWeaponId(7);
     }
+}
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            int newWeaponId = 4;
-            ServerRpc_ChangeWeaponRequest(newWeaponId);
-        }
-    }
+private void InstantiateWeapon()
+{
+    // On the server you first initialize your syncvars
+    GameObject weapon = Instantiate(prefabWeapon);
+    Weapon weapon = GetComponent<Weapon>();
+    weapon.InitializeSyncVarWeaponId(5);
+}
 
-    [SyncVar(InitialOnly = true)]
-    private int currentWeaponId;
 
-    [ServerRpc]
-    public virtual void ServerRpc_ChangeWeaponRequest(int newWeaponId)
-    {
-        this.currentWeaponId = newWeaponId; // Set the server syncvar
+[SyncVar(InitialOnly = true)]
+protected int weaponId;
 
-        // Pass on the new syncvar value for all observable players
-        ClientRpc_ChangeWeaponRequest(newWeaponId);
-    }
 
-    [ClientRpc]
-    public virtual void ClientRpc_ChangeWeaponRequest(int newWeaponId)
+// Server
+public void InitializeSyncVarWeaponId(int weaponId)
+{
+    this.weaponId = weaponId;
+}
 
-    {
-        // Update the new syncvar value for the local client
-        this.currentWeaponId = newWeaponId;
-    }
+// Client + Server
+public int GetSyncVarWeaponId(int weaponId)
+{
+    return this.weaponId;
+}
+
+// Server
+public void SetSyncVarWeaponId(int weaponId)
+{
+    this.weaponId = weaponId;
+
+    ClientRpc_SetSyncVarWeaponId(weaponId);
+}
+
+[ClientRpc]
+private void ClientRpc_SetSyncVarWeaponId(int weaponId)
+{
+    this.weaponId = weaponId;
+
+    // Change your weapon
+}
+
+[ServerRpc]
+private void ServerRpc_SetSyncVarWeaponId(int weaponId)
+{
+    SetSyncVarWeaponId(weaponId);
+}
 }
 ```
