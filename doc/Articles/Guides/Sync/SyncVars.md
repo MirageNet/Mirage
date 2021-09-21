@@ -202,6 +202,8 @@ private void ClientRpc_SetSyncVarWeaponId(int weaponId)
 private void ServerRpc_SetSyncVarWeaponId(int weaponId)
 {
     SetSyncVarWeaponId(weaponId);
+    
+    SetWeaponBody();
 }
 }
 ```
