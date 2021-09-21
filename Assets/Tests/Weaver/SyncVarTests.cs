@@ -11,6 +11,12 @@ namespace Mirage.Tests.Weaver
         }
 
         [Test]
+        public void SyncVarsValidInitialOnly()
+        {
+            IsSuccess();
+        }
+
+        [Test]
         public void SyncVarArraySegment()
         {
             IsSuccess();
