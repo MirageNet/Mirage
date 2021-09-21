@@ -156,6 +156,11 @@ private void InstantiateWeapon()
     weapon.InitializeSyncVarWeaponId(5);
 }
 
+private void SetWeaponBody()
+{
+    // Apply the body mesh
+}
+
 
 [SyncVar(InitialOnly = true)]
 protected int weaponId;
@@ -165,6 +170,9 @@ protected int weaponId;
 public void InitializeSyncVarWeaponId(int weaponId)
 {
     this.weaponId = weaponId;
+    
+    // Change your weapon
+    SetWeaponBody();
 }
 
 // Client + Server
@@ -187,6 +195,7 @@ private void ClientRpc_SetSyncVarWeaponId(int weaponId)
     this.weaponId = weaponId;
 
     // Change your weapon
+    SetWeaponBody()
 }
 
 [ServerRpc]
