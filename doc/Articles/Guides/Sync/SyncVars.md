@@ -3,6 +3,7 @@ SyncVars are properties of classes that inherit from <xref:Mirage.NetworkBehavio
 
 > [!NOTE]
 > The state of SyncVars is applied to game objects on clients before [NetIdentity.OnStartClient](xref:Mirage.NetworkIdentity.OnStartClient) event is invoked, so the state of the object is always up-to-date in subscribed callbacks.
+> These SyncVars are called within Late Update, as they can be also time regulated. They are to be used as non critical value states
 
 SyncVars can use any [type supported by Mirage](../DataTypes.md). You can have up to 64 SyncVars on a single NetworkBehaviour script, including [SyncLists](SyncLists.md) and other sync types.
 
@@ -24,12 +25,12 @@ public class Player : NetworkBehaviour
     {
         if (IsLocalPlayer && Input.GetMouseButtonDown(0))
         {
-            IncreaseClicks();
+            ServerRpc_IncreaseClicks();
         }
     }
 
     [ServerRpc]
-    public void IncreaseClicks()
+    public void ServerRpc_IncreaseClicks()
     {
         // This is executed on the server
         clickCount++;
@@ -113,6 +114,62 @@ public class Player : NetworkBehaviour
     void OnDestroy()
     {
         Destroy(cachedMaterial);
+    }
+}
+```
+
+
+
+SyncVars Initialize Only
+
+Just like regular Syncvars, when an game object is spawned, or a new player joins a game in progress, they are sent the latest state of all SyncVars on networked objects that are visible to them. 
+With the InitialOnly flag set to true you will now be able to control the state of the syncvar directly, without updating the clients in a Late Update. 
+
+> [!NOTE]
+> Make sure you manually update your observable clients with the new state.
+> Syncvar Hooks become redundant, as you are setting the state of the Syncvar directly.
+
+
+## Example
+
+``` cs
+using Mirage;
+using UnityEngine;
+
+public class Player : NetworkBehaviour
+{
+    private void Start()
+    {
+        currentWeaponId = 3; // Syncvar Starting Value for new spawned Objects
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            int newWeaponId = 4;
+            ServerRpc_ChangeWeaponRequest(newWeaponId);
+        }
+    }
+
+    [SyncVar(InitialOnly = true)]
+    private int currentWeaponId;
+
+    [ServerRpc]
+    public virtual void ServerRpc_ChangeWeaponRequest(int newWeaponId)
+    {
+        this.currentWeaponId = newWeaponId; // Set the server syncvar
+
+        // Pass on the new syncvar value for all observable players
+        ClientRpc_ChangeWeaponRequest(newWeaponId);
+    }
+
+    [ClientRpc]
+    public virtual void ClientRpc_ChangeWeaponRequest(int newWeaponId)
+
+    {
+        // Update the new syncvar value for the local client
+        this.currentWeaponId = newWeaponId;
     }
 }
 ```
