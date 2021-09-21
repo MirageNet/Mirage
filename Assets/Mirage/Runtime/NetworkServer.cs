@@ -185,8 +185,8 @@ namespace Mirage
             Application.quitting += Stop;
             if (logger.LogEnabled()) logger.Log($"NetworkServer Created, Mirage version: {Version.Current}");
 
-            logger.Assert(Players.Count == 0, "Player could should have been reset since previous session");
-            logger.Assert(connections.Count == 0, "connections could should have been reset since previous session");
+            logger.Assert(Players.Count == 0, "Player should have been reset since previous session");
+            logger.Assert(connections.Count == 0, "Connections should have been reset since previous session");
 
             World = new NetworkWorld();
             SyncVarSender = new SyncVarSender();
