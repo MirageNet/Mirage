@@ -12,6 +12,8 @@ namespace Mirage
     {
         ///<summary>A function that should be called on the client when the value changes.</summary>
         public string hook;
+        /// <summary>Makes the syncvar only be sent with spawn message, any other changes will not be sent to existing objects</summary>
+        public bool InitialOnly;
     }
 
     /// <summary>
