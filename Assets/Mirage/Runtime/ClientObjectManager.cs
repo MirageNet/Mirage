@@ -49,7 +49,16 @@ namespace Mirage
 
         SyncVarReceiver syncVarReceiver;
 
-        public void Start()
+        private void Awake()
+        {
+            AddEventListeners();
+        }
+
+        /// <summary>
+        /// Adds event listesn to client and scene manager if they are not null
+        /// <para>called automatically from awake, If you are setting client value at runtime you need to call this manually after setting the value</para>
+        /// </summary>
+        public void AddEventListeners()
         {
             if (Client != null)
             {

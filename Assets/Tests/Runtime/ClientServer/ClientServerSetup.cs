@@ -71,12 +71,12 @@ namespace Mirage.Tests.Runtime.ClientServer
             serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
             serverObjectManager.Server = server;
             serverObjectManager.NetworkSceneManager = serverSceneManager;
-            serverObjectManager.Start();
+            serverObjectManager.AddEventListeners();
 
             clientObjectManager = clientGo.GetComponent<ClientObjectManager>();
             clientObjectManager.Client = client;
             clientObjectManager.NetworkSceneManager = clientSceneManager;
-            clientObjectManager.Start();
+            clientObjectManager.AddEventListeners();
 
             ExtraSetup();
 

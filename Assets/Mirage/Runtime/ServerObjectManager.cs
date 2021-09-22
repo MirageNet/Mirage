@@ -49,7 +49,16 @@ namespace Mirage
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => checked(nextNetworkId++);
 
-        public void Start()
+        private void Awake()
+        {
+            AddEventListeners();
+        }
+
+        /// <summary>
+        /// Adds event listesn to server and scene manager if they are not null
+        /// <para>called automatically from awake, If you are setting server value at runtime you need to call this manually after setting the value</para>
+        /// </summary>
+        public void AddEventListeners()
         {
             if (Server != null)
             {

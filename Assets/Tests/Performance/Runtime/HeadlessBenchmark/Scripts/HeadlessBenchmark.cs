@@ -111,7 +111,7 @@ namespace Mirage.HeadlessBenchmark
 
             serverObjectManager.Server = server;
             serverObjectManager.NetworkSceneManager = networkSceneManager;
-            serverObjectManager.Start();
+            serverObjectManager.AddEventListeners();
 
             CharacterSpawner spawner = serverGo.GetComponent<CharacterSpawner>();
             spawner.ServerObjectManager = serverObjectManager;
@@ -168,7 +168,7 @@ namespace Mirage.HeadlessBenchmark
 
             objectManager.Client = client;
             objectManager.NetworkSceneManager = networkSceneManager;
-            objectManager.Start();
+            objectManager.AddEventListeners();
             objectManager.RegisterPrefab(MonsterPrefab.GetComponent<NetworkIdentity>());
             objectManager.RegisterPrefab(PlayerPrefab.GetComponent<NetworkIdentity>());
 
