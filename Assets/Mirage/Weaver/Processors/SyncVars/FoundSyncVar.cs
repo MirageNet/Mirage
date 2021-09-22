@@ -96,7 +96,7 @@ namespace Mirage.Weaver.SyncVars
         static bool GetInitialOnly(FieldDefinition fieldDefinition)
         {
             CustomAttribute attr = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
-            return attr.GetField(nameof(SyncVarAttribute.InitialOnly), false);
+            return attr.GetField(nameof(SyncVarAttribute.initialOnly), false);
         }
     }
 }
