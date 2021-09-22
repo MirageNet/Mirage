@@ -1,3 +1,10 @@
+# [104.3.0](https://github.com/MirageNet/Mirage/compare/v104.2.0...v104.3.0) (2021-09-22)
+
+
+### Features
+
+* **Syncvar:** adding InitialOnly to syncvar ([#941](https://github.com/MirageNet/Mirage/issues/941)) ([abf4637](https://github.com/MirageNet/Mirage/commit/abf463709c8115dc3e039b288661d9ca2c18b7c7))
+
 # [104.2.0](https://github.com/MirageNet/Mirage/compare/v104.1.0...v104.2.0) (2021-09-20)
 
 
