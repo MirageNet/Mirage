@@ -4,7 +4,7 @@ namespace SyncVarTests.SyncVarsValidInitialOnly
 {
     class SyncVarsValidInitialOnly : NetworkBehaviour
     {
-        [SyncVar(InitialOnly = true)] int var;
-        [SyncVar(InitialOnly = false)] int var2;
+        [SyncVar(initialOnly = true)] int var;
+        [SyncVar(initialOnly = false)] int var2;
     }
 }
