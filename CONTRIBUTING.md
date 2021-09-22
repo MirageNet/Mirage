@@ -79,21 +79,28 @@ Before creating enhancement suggestions, please check the list of enhancements s
 A Pull Request title should follow [these rules](https://www.npmjs.com/package/@commitlint/config-conventional).
 
 The title must start with one of the following:
-- build
+- build: Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
 - chore
-- ci
-- docs
-- feat
-- fix
-- perf
-- refactor
+- ci: Changes to our CI configuration files and scripts (example scopes: Travis, Circle, BrowserStack, SauceLabs)
+- docs: Documentation only changes
+- feat: A new feature
+- fix: A bug fix
+- perf: A code change that improves performance
+- refactor: A code change that neither fixes a bug nor adds a feature
 - revert
-- style
-- test
+- style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+- test: Adding missing tests or correcting existing tests
 
 If a Pull request to a certain part of the project its scope can be put after the type, For example `fix(WelcomeWindow): ...` for a Pull request fixing something in the welcome window.
 
 For a full list of rules check the [conventional config](https://www.npmjs.com/package/@commitlint/config-conventional).
+
+Breaking changes should have `BREAKING CHANGE:` in the footer of the commit, for example:
+```
+feat(NetworkSceneManager): improving network scene manager
+
+BREAKING CHANGE: NetworkSceneManager has been re-written, many events and methods now have new names.
+```
 
 #### How Do I Submit A (Good) Pull Request?
 
