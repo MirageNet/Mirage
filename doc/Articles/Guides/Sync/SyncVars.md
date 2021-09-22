@@ -3,11 +3,14 @@ SyncVars are properties of classes that inherit from <xref:Mirage.NetworkBehavio
 
 > [!NOTE]
 > The state of SyncVars is applied to game objects on clients before [NetIdentity.OnStartClient](xref:Mirage.NetworkIdentity.OnStartClient) event is invoked, so the state of the object is always up-to-date in subscribed callbacks.
-> These SyncVars are called within Late Update, as they can be also time regulated. They are to be used as non critical value states
+
 
 SyncVars can use any [type supported by Mirage](../DataTypes.md). You can have up to 64 SyncVars on a single NetworkBehaviour script, including [SyncLists](SyncLists.md) and other sync types.
 
 The server automatically sends SyncVar updates when the value of a SyncVar changes, so you do not need to track when they change or send information about the changes yourself. Changing a value in the inspector will not trigger an update.
+
+> [!NOTE]
+> SyncVars are not sent right away or in the order they are set. They will be sent as a group in the next sync update.
 
 ## Example
 Let's have a simple `Player` class with the following code:
@@ -120,17 +123,17 @@ public class Player : NetworkBehaviour
 
 
 
-SyncVars Initialize Only
+## SyncVars Initialize Only
 
 Just like regular Syncvars, when an game object is spawned, or a new player joins a game in progress, they are sent the latest state of all SyncVars on networked objects that are visible to them. 
-With the InitialOnly flag set to true you will now be able to control the state of the syncvar directly, without updating the clients in a Late Update. 
+With the InitialOnly flag set to true you will now be able to control the state of the syncvar manually rather than waiting for Mirage to update them. 
 
 > [!NOTE]
 > Make sure you manually update your observable clients with the new state.
 > Syncvar Hooks become redundant, as you are setting the state of the Syncvar directly.
 
 
-## Example
+### Example
 
 ``` cs
 using Mirage;
@@ -138,77 +141,55 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
+    [SyncVar(initialOnly = true)]
+    private int weaponId;
 
-// Client
-private void Update()
-{
-    if (Input.GetKeyDown(KeyCode.Q))
+    private void Awake()
     {
-        // Client Request weapon change
-        ServerRpc_SetSyncVarWeaponId(7);
+        Identity.OnStartClient.AddListener(OnStartClient);
     }
-}
+    private void OnStartClient()
+    {
+        // update weapon using id from syncvar (sent to client via spawn message
+        UpdateWeapon(weaponId);
+    }
 
-// Server
-private void InstantiateWeapon()
-{
-    // On the server you first initialize your syncvars
-    GameObject weapon = Instantiate(prefabWeapon);
-    Weapon weapon = GetComponent<Weapon>();
-    weapon.InitializeSyncVarWeaponId(5);
-    
-    // Network Spawn Object 
-}
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            // Client Request weapon change
+            ServerRpc_SetSyncVarWeaponId(7);
+        }
+    }
 
-// Client + Server
-private void SetWeaponBody()
-{
-    // Apply the body mesh
-}
+    [ServerRpc]
+    private void ServerRpc_SetSyncVarWeaponId(int weaponId)
+    {
+        // set weapon id on server so new players get it
+        this.weaponId = weaponId;
 
-// Server
-[SyncVar(InitialOnly = true)]
-protected int weaponId;
+        // tell current players about it
+        ClientRpc_SetSyncVarWeaponId(weaponId);
 
+        // update weapon on server
+        UpdateWeapon(weaponId);
+    }
 
-// Server
-public void InitializeSyncVarWeaponId(int weaponId)
-{
-    this.weaponId = weaponId;
-    
-    SetWeaponBody();
-}
+    [ClientRpc]
+    private void ClientRpc_SetSyncVarWeaponId(int weaponId)
+    {
+        // set id on client
+        this.weaponId = weaponId;
 
-// Client + Server
-public int GetSyncVarWeaponId(int weaponId)
-{
-    return this.weaponId;
-}
+        // update weapon on client
+        UpdateWeapon(weaponId);
+    }
 
-// Server
-public void SetSyncVarWeaponId(int weaponId)
-{
-    this.weaponId = weaponId;
-
-    ClientRpc_SetSyncVarWeaponId(weaponId);
-}
-
-
-[ClientRpc]
-private void ClientRpc_SetSyncVarWeaponId(int weaponId)
-{
-    this.weaponId = weaponId;
-
-    SetWeaponBody()
-}
-
-
-[ServerRpc]
-private void ServerRpc_SetSyncVarWeaponId(int weaponId)
-{
-    SetSyncVarWeaponId(weaponId);
-    
-    SetWeaponBody();
-}
+    public void UpdateWeapon(int weaponId)
+    {
+        // do stuff to update weapon here
+        // for example, its spawning model
+    }
 }
 ```
