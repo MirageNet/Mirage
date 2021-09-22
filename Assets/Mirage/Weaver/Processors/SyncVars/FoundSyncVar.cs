@@ -36,6 +36,7 @@ namespace Mirage.Weaver.SyncVars
 
         public bool HasHookMethod { get; private set; }
         public MethodDefinition HookMethod { get; private set; }
+        public bool InitialOnly { get; private set; }
 
         /// <summary>
         /// Changing the type of the field to the wrapper type, if one exists
@@ -87,8 +88,15 @@ namespace Mirage.Weaver.SyncVars
         {
             HookMethod = HookMethodFinder.GetHookMethod(FieldDefinition, OriginalType);
             HasHookMethod = HookMethod != null;
+            InitialOnly = GetInitialOnly(FieldDefinition);
 
             ValueSerializer = ValueSerializerFinder.GetSerializer(this, writers, readers);
+        }
+
+        static bool GetInitialOnly(FieldDefinition fieldDefinition)
+        {
+            CustomAttribute attr = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
+            return attr.GetField(nameof(SyncVarAttribute.initialOnly), false);
         }
     }
 }

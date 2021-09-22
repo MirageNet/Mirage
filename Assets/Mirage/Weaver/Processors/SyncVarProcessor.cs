@@ -119,7 +119,9 @@ namespace Mirage.Weaver
 
 
             MethodDefinition get = GenerateSyncVarGetter(syncVar);
-            MethodDefinition set = GenerateSyncVarSetter(syncVar);
+            MethodDefinition set = syncVar.InitialOnly
+                ? GenerateSyncVarSetterInitialOnly(syncVar)
+                : GenerateSyncVarSetter(syncVar);
 
             //NOTE: is property even needed? Could just use a setter function?
             //create the property
@@ -163,6 +165,26 @@ namespace Mirage.Weaver
             return get;
         }
 
+        MethodDefinition GenerateSyncVarSetterInitialOnly(FoundSyncVar syncVar)
+        {
+            // todo reduce duplicate code with this and GenerateSyncVarSetter
+            FieldDefinition fd = syncVar.FieldDefinition;
+            TypeReference originalType = syncVar.OriginalType;
+            string originalName = syncVar.OriginalName;
+
+            //Create the set method
+            MethodDefinition set = fd.DeclaringType.AddMethod("set_Network" + originalName, MethodAttributes.Public |
+                    MethodAttributes.SpecialName |
+                    MethodAttributes.HideBySig);
+            ParameterDefinition valueParam = set.AddParam(originalType, "value");
+            set.SemanticsAttributes = MethodSemanticsAttributes.Setter;
+
+            ILProcessor worker = set.Body.GetILProcessor();
+            WriteStoreField(worker, valueParam, syncVar);
+            worker.Append(worker.Create(OpCodes.Ret));
+
+            return set;
+        }
         MethodDefinition GenerateSyncVarSetter(FoundSyncVar syncVar)
         {
             FieldDefinition fd = syncVar.FieldDefinition;
@@ -422,6 +444,9 @@ namespace Mirage.Weaver
             // start at number of syncvars in parent
             foreach (FoundSyncVar syncVar in behaviour.SyncVars)
             {
+                // dont need to write field here if syncvar is InitialOnly
+                if (syncVar.InitialOnly) { continue; }
+
                 helper.WriteIfSyncVarDirty(syncVar, () =>
                 {
                     // Generates a call to the writer for that field
@@ -473,6 +498,9 @@ namespace Mirage.Weaver
             // conditionally read each syncvar
             foreach (FoundSyncVar syncVar in behaviour.SyncVars)
             {
+                // dont need to write field here if syncvar is InitialOnly
+                if (syncVar.InitialOnly) { continue; }
+
                 helper.WriteIfSyncVarDirty(syncVar, () =>
                 {
                     DeserializeField(worker, helper.Method, helper.ReaderParameter, syncVar);
