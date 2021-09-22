@@ -1,3 +1,20 @@
+# [105.0.0](https://github.com/MirageNet/Mirage/compare/v104.3.0...v105.0.0) (2021-09-22)
+
+
+### Bug Fixes
+
+* adding client active check in network ping display ([1d43243](https://github.com/MirageNet/Mirage/commit/1d43243ba72e1b4ca96e8bd9b3f55fc9f0980b9d))
+
+
+### Code Refactoring
+
+* move network time to world ([6b10ba2](https://github.com/MirageNet/Mirage/commit/6b10ba2098ee4fd4e924c64ae96f513eaad8cf87))
+
+
+### BREAKING CHANGES
+
+* NetworkTime move from NetworkServer/NetworkClient to NetworkWorld
+
 # [104.3.0](https://github.com/MirageNet/Mirage/compare/v104.2.0...v104.3.0) (2021-09-22)
 
 
