@@ -1,3 +1,17 @@
+## [105.0.1](https://github.com/MirageNet/Mirage/compare/v105.0.0...v105.0.1) (2021-09-22)
+
+
+### Bug Fixes
+
+* fixing assert when loading scene using its name ([72ac3a6](https://github.com/MirageNet/Mirage/commit/72ac3a64508b73cc168ecdd7192724841a362249))
+* logging error if no handler is registered ([54c8520](https://github.com/MirageNet/Mirage/commit/54c8520f9665362f47608038f8e383aa47a69049))
+* **NetworkSceneManager:** registering ready and not ready message for host client ([6a97ae9](https://github.com/MirageNet/Mirage/commit/6a97ae95a29267907c6435c2e28e33aed41a0d3d))
+
+
+### Reverts
+
+* "fix: logging error if no handler is registered" ([aca8c5a](https://github.com/MirageNet/Mirage/commit/aca8c5a79bd870d68ad0e979120b11b5999d6c93))
+
 # [105.0.0](https://github.com/MirageNet/Mirage/compare/v104.3.0...v105.0.0) (2021-09-22)
 
 
