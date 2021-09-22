@@ -204,9 +204,6 @@ namespace Mirage
         private void RegisterClientMessages()
         {
             Client.MessageHandler.RegisterHandler<SceneMessage>(ClientStartSceneMessage);
-
-            if (Client.IsLocalClient) return;
-
             Client.MessageHandler.RegisterHandler<SceneReadyMessage>(ClientFinishedLoadingSceneMessage);
             Client.MessageHandler.RegisterHandler<SceneNotReadyMessage>(ClientNotReadyMessage);
         }
