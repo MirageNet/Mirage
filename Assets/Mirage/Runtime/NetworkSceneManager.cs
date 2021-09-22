@@ -672,11 +672,17 @@ namespace Mirage
                 }
 
                 await SceneLoadingAsyncOperationInfo;
-
-                logger.Assert(scenePath == ActiveScenePath, "[NetworkSceneManager] - Scene being loaded was not the active scene");
+                AssertSceneIsActive(scenePath);
 
                 CompleteLoadingScene(ActiveScenePath, SceneOperation.Normal);
             }
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void AssertSceneIsActive(string scenePath)
+        {
+            // equal to path or name of active scene
+            logger.Assert(scenePath == ActiveScenePath || scenePath == SceneManager.GetActiveScene().name, "[NetworkSceneManager] - Scene being loaded was not the active scene");
         }
 
         /// <summary>
