@@ -127,7 +127,7 @@ namespace Mirage
                 }
                 catch (InvalidDataException ex)
                 {
-                    logger.LogError(ex.ToString());
+                    logger.Log(ex.ToString());
                 }
                 catch (Exception e)
                 {
