@@ -49,15 +49,6 @@ namespace Mirage
                 {
                     Client.Authenticated.AddListener(OnClientAuthenticated);
                 }
-
-                if (ClientObjectManager != null)
-                {
-                    ClientObjectManager.RegisterPrefab(PlayerPrefab);
-                }
-                else
-                {
-                    throw new InvalidOperationException("Assign a ClientObjectManager");
-                }
             }
             if (Server != null)
             {
@@ -100,6 +91,15 @@ namespace Mirage
         /// <param name="sceneOperation">The type of scene load that happened.</param>
         public virtual void OnClientFinishedSceneChange(string scenePath, SceneOperation sceneOperation)
         {
+            if (ClientObjectManager != null)
+            {
+                ClientObjectManager.RegisterPrefab(PlayerPrefab);
+            }
+            else
+            {
+                throw new InvalidOperationException("Assign a ClientObjectManager");
+            }
+
             if (AutoSpawn && sceneOperation == SceneOperation.Normal)
                 RequestServerSpawnPlayer();
         }
