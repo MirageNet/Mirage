@@ -1,3 +1,15 @@
+# [105.1.0](https://github.com/MirageNet/Mirage/compare/v105.0.1...v105.1.0) (2021-09-23)
+
+
+### Bug Fixes
+
+* fixing order that extension methods are found ([#917](https://github.com/MirageNet/Mirage/issues/917)) ([aa8fe87](https://github.com/MirageNet/Mirage/commit/aa8fe87d94a8b20ec9de882c731eb54f314e4b84))
+
+
+### Features
+
+* **Peer:** adding send buffer limit ([#939](https://github.com/MirageNet/Mirage/issues/939)) ([b4666cb](https://github.com/MirageNet/Mirage/commit/b4666cbd890d2c1cde45dc5950a215394adf773b))
+
 ## [105.0.1](https://github.com/MirageNet/Mirage/compare/v105.0.0...v105.0.1) (2021-09-22)
 
 
