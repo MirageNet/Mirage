@@ -42,7 +42,6 @@ namespace Mirage.SocketLayer
         readonly Pool<ReliablePacket> reliablePool;
         readonly Metrics metrics;
 
-        //todo implement this
         readonly int maxPacketsInSendBufferPerConnection;
         readonly int maxPacketSize;
         readonly float ackTimeout;
@@ -284,9 +283,8 @@ namespace Mirage.SocketLayer
         {
             if (sentAckablePackets.IsFull)
             {
-                throw new InvalidOperationException("Sent queue is full");
+                throw new InvalidOperationException($"Sent queue is full for {connection}");
             }
-
 
             if (length + MIN_RELIABLE_HEADER_SIZE > maxPacketSize)
             {
@@ -388,6 +386,8 @@ namespace Mirage.SocketLayer
 
         void SendReliablePacket(ReliablePacket reliable)
         {
+            ThrowIfBufferLimitReached();
+
             ushort sequence = (ushort)sentAckablePackets.Enqueue(new AckablePacket(reliable));
 
             byte[] final = reliable.buffer.array;
@@ -400,6 +400,15 @@ namespace Mirage.SocketLayer
             ByteUtils.WriteULong(final, ref offset, AckMask);
 
             Send(final, reliable.length);
+        }
+
+        private void ThrowIfBufferLimitReached()
+        {
+            // greater or equal, because we are adding 1 adder this check
+            if (sentAckablePackets.Count >= maxPacketsInSendBufferPerConnection)
+            {
+                throw new InvalidOperationException($"Max packets in send buffer reached for {connection}");
+            }
         }
 
 
