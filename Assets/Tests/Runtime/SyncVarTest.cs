@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace Mirage.Tests.Runtime.Serialization
 {
-
     class MockPlayer : NetworkBehaviour
     {
         public struct Guild

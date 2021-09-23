@@ -487,9 +487,19 @@ namespace Mirage.Weaver
 
             helper.WriteIfInitial(() =>
             {
-                foreach (FoundSyncVar syncVar in behaviour.SyncVars)
+                // For ititial spawn READ all values first, then invoke any hooks
+                var oldValues = new VariableDefinition[behaviour.SyncVars.Count];
+                for (int i = 0; i < behaviour.SyncVars.Count; i++)
                 {
-                    DeserializeField(worker, helper.Method, helper.ReaderParameter, syncVar);
+                    FoundSyncVar syncVar = behaviour.SyncVars[i];
+                    // StartHook create old value local variable,
+                    oldValues[i] = StartHook(worker, helper.Method, syncVar, syncVar.OriginalType);
+                    ReadToField(worker, helper.ReaderParameter, syncVar);
+                }
+                for (int i = 0; i < behaviour.SyncVars.Count; i++)
+                {
+                    FoundSyncVar syncVar = behaviour.SyncVars[i];
+                    EndHook(worker, syncVar, syncVar.OriginalType, oldValues[i]);
                 }
             });
 
@@ -503,7 +513,10 @@ namespace Mirage.Weaver
 
                 helper.WriteIfSyncVarDirty(syncVar, () =>
                 {
-                    DeserializeField(worker, helper.Method, helper.ReaderParameter, syncVar);
+                    VariableDefinition oldValue = StartHook(worker, helper.Method, syncVar, syncVar.OriginalType);
+                    // read value and store in syncvar BEFORE calling the hook
+                    ReadToField(worker, helper.ReaderParameter, syncVar);
+                    EndHook(worker, syncVar, syncVar.OriginalType, oldValue);
                 });
             }
 
@@ -511,17 +524,16 @@ namespace Mirage.Weaver
         }
 
         /// <summary>
-        /// [SyncVar] int/float/struct/etc.?
+        /// If syncvar has a hook method, this will create a local variable with the old value of the field
+        /// <para>should be called before storing the new value in the field</para>
         /// </summary>
-        /// <param name="fd"></param>
         /// <param name="worker"></param>
         /// <param name="deserialize"></param>
-        /// <param name="initialState"></param>
-        /// <param name="hookResult"></param>
-        void DeserializeField(ILProcessor worker, MethodDefinition deserialize, ParameterDefinition readerParameter, FoundSyncVar syncVar)
+        /// <param name="syncVar"></param>
+        /// <param name="originalType"></param>
+        /// <returns></returns>
+        private VariableDefinition StartHook(ILProcessor worker, MethodDefinition deserialize, FoundSyncVar syncVar, TypeReference originalType)
         {
-            TypeReference originalType = syncVar.OriginalType;
-
             /*
              Generates code like:
                 // for hook
@@ -542,9 +554,18 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Stloc, oldValue));
             }
 
-            // read value and store in syncvar BEFORE calling the hook
-            ReadToField(worker, readerParameter, syncVar);
+            return oldValue;
+        }
 
+        /// <summary>
+        /// If syncvar has a hook method, this will invoke the hook method if it is changed with the old and new values
+        /// </summary>
+        /// <param name="worker"></param>
+        /// <param name="syncVar"></param>
+        /// <param name="originalType"></param>
+        /// <param name="oldValue"></param>
+        private void EndHook(ILProcessor worker, FoundSyncVar syncVar, TypeReference originalType, VariableDefinition oldValue)
+        {
             if (syncVar.HasHookMethod)
             {
                 // call hook
