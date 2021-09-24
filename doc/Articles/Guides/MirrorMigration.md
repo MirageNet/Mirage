@@ -15,7 +15,7 @@ using Mirage;
 ```
 
 ## Components
-Many roles that `NetworkManager` fulfilled in Mirror were split into multiple simpler components in Mirage, such as `NetworkClient`, `NetworkServer` and `NetworkSceneManager`. Those clases are no longer static singletons, they are MonoBehaviours instead, so you need to add them to your scene and reference them. `NetworkManager` in Mirage only serves as a reference holder for server and client.
+Many roles that `NetworkManager` fulfilled in Mirror were split into multiple simpler components in Mirage, such as `NetworkClient`, `NetworkServer` and `NetworkSceneManager`. Those classes are no longer static singletons, they are MonoBehaviours instead, so you need to add them to your scene and reference them. `NetworkManager` in Mirage only serves as a reference holder for server and client.
 
 > [!TIP]
 > The easiest way to get started is to right click in the Hierarchy > Network > NetworkManager. This will create a GameObject with all the necessary components and references already set up.
