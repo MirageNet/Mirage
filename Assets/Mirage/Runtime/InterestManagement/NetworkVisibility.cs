@@ -9,7 +9,6 @@ namespace Mirage.InterestManagement
 
         private readonly InterestManager _interestManager;
         private ObserverData visibilitySystemData;
-        private NetworkWorld _networkWorld = new NetworkWorld();
 
         #endregion
 
@@ -17,11 +16,9 @@ namespace Mirage.InterestManagement
 
         public InterestManager InterestManager => _interestManager;
 
-        public NetworkWorld NetworkWorld => _networkWorld;
-
         #endregion
 
-        public NetworkVisibility(InterestManager interestManager)
+        protected NetworkVisibility(InterestManager interestManager)
         {
             _interestManager = interestManager;
         }

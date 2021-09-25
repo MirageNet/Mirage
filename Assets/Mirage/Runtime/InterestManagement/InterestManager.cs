@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using Mirage.Logging;
 using Mirage.Serialization;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Mirage.InterestManagement
 {
@@ -18,7 +17,7 @@ namespace Mirage.InterestManagement
         protected internal readonly ServerObjectManager ServerObjectManager;
         private ObserverData[] _visibilitySystems;
         private readonly int _initialSystems;
-        private List<ObserverData> _observerSystems = new List<ObserverData>();
+        private readonly List<ObserverData> _observerSystems = new List<ObserverData>();
 
         #endregion
 

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
@@ -74,18 +73,14 @@ namespace Mirage.Tests
 
         GameObject gameObject;
         NetworkIdentity identity;
-        private NetworkServer server;
         private ServerObjectManager serverObjectManager;
         private GameObject networkServerGameObject;
-
-        INetworkPlayer player1;
-        INetworkPlayer player2;
 
         [SetUp]
         public void SetUp()
         {
             networkServerGameObject = new GameObject();
-            server = networkServerGameObject.AddComponent<NetworkServer>();
+            var server = networkServerGameObject.AddComponent<NetworkServer>();
             serverObjectManager = networkServerGameObject.AddComponent<ServerObjectManager>();
             serverObjectManager.Server = server;
             networkServerGameObject.AddComponent<NetworkClient>();
@@ -95,8 +90,8 @@ namespace Mirage.Tests
             identity.Server = server;
             identity.ServerObjectManager = serverObjectManager;
 
-            player1 = Substitute.For<INetworkPlayer>();
-            player2 = Substitute.For<INetworkPlayer>();
+            _ = Substitute.For<INetworkPlayer>();
+            _ = Substitute.For<INetworkPlayer>();
         }
 
         [TearDown]
