@@ -48,15 +48,7 @@ namespace Mirage
                 else
                 {
                     Client.Authenticated.AddListener(OnClientAuthenticated);
-                }
-
-                if (ClientObjectManager != null)
-                {
-                    ClientObjectManager.RegisterPrefab(PlayerPrefab);
-                }
-                else
-                {
-                    throw new InvalidOperationException("Assign a ClientObjectManager");
+                    Client.Connected.AddListener(OnClientConnected);
                 }
             }
             if (Server != null)
@@ -79,6 +71,18 @@ namespace Mirage
             if (Server != null)
             {
                 Server.Started.RemoveListener(OnServerStarted);
+            }
+        }
+
+        internal void OnClientConnected(INetworkPlayer player)
+        {
+            if (ClientObjectManager != null)
+            {
+                ClientObjectManager.RegisterPrefab(PlayerPrefab);
+            }
+            else
+            {
+                throw new InvalidOperationException("Assign a ClientObjectManager");
             }
         }
 
