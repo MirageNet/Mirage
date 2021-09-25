@@ -73,7 +73,7 @@ namespace Mirage.InterestManagement
             stopWatch.Stop();
 
             if (logger.logEnabled)
-                Debug.Log($"[Interest Manager] - OnSpawnInWorld Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
+                logger.Log($"[Interest Manager] - OnSpawnInWorld Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
         }
 
         #endregion
@@ -124,7 +124,7 @@ namespace Mirage.InterestManagement
             stopWatch.Stop();
 
             if (logger.logEnabled)
-                Debug.Log($"[Interest Manager] - Send Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
+                logger.Log($"[Interest Manager] - Send Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Mirage.InterestManagement
             stopWatch.Stop();
 
             if (logger.logEnabled)
-                Debug.Log($"[Interest Manager] - CheckGrowVisibilitySystem Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
+                logger.Log($"[Interest Manager] - CheckGrowVisibilitySystem Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -214,7 +214,7 @@ namespace Mirage.InterestManagement
                 stopWatch.Stop();
 
                 if (logger.logEnabled)
-                    Debug.Log($"[Interest Manager] - RegisterVisibilitySystem Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
+                    logger.Log($"[Interest Manager] - RegisterVisibilitySystem Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
 
                 return;
             }
@@ -222,7 +222,7 @@ namespace Mirage.InterestManagement
             stopWatch.Stop();
 
             if (logger.logEnabled)
-                Debug.Log($"[Interest Manager] - RegisterVisibilitySystem Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
+                logger.Log($"[Interest Manager] - RegisterVisibilitySystem Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -245,7 +245,7 @@ namespace Mirage.InterestManagement
                 stopWatch.Stop();
 
                 if (logger.logEnabled)
-                    Debug.Log($"[Interest Manager] - UnRegisterVisibilitySystem  Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
+                    logger.Log($"[Interest Manager] - UnRegisterVisibilitySystem  Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
 
                 return;
             }
@@ -256,7 +256,7 @@ namespace Mirage.InterestManagement
             stopWatch.Stop();
 
             if (logger.logEnabled)
-                Debug.Log($"[Interest Manager] - UnRegisterVisibilitySystem Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
+                logger.Log($"[Interest Manager] - UnRegisterVisibilitySystem Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -276,7 +276,7 @@ namespace Mirage.InterestManagement
             stopWatch.Stop();
 
             if (logger.logEnabled)
-                Debug.Log(
+                logger.Log(
                     $"[Interest Manager] - Observers Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
 
             return observers;
