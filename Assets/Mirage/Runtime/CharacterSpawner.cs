@@ -74,7 +74,7 @@ namespace Mirage
             }
         }
 
-        private void OnClientConnected(INetworkPlayer player)
+        protected internal void OnClientConnected(INetworkPlayer player)
         {
             if (ClientObjectManager != null)
             {
