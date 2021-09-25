@@ -1,3 +1,11 @@
+## [105.1.1](https://github.com/MirageNet/Mirage/compare/v105.1.0...v105.1.1) (2021-09-25)
+
+
+### Bug Fixes
+
+* Character spawner was registering the player prefab in awake and during scene loads this wont ever register again. Need to change it on scene changes. ([d6cdc86](https://github.com/MirageNet/Mirage/commit/d6cdc864616878ebed2f11fe2054aa2b49819626))
+* updates to SpawnObject.md and SpawnObjects.PNG files. ([02e07fa](https://github.com/MirageNet/Mirage/commit/02e07fab67f344bf6d7a3e0c67a7c0ea21c5eff1))
+
 # [105.1.0](https://github.com/MirageNet/Mirage/compare/v105.0.1...v105.1.0) (2021-09-23)
 
 
