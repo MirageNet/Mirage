@@ -110,7 +110,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             // ClearAllComponents should clear dirty even if syncInterval not
             // elapsed yet
-            player.Identity.ClearAllComponentsDirtyBits();
+            player.Identity.ClearDirtyComponentsDirtyBits();
 
             // set lastSyncTime far enough back to be ready for syncing
             player.lastSyncTime = Time.time - player.syncInterval;
