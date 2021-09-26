@@ -4,6 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
+using Mirage.Runtime;
 using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -22,9 +23,13 @@ namespace Mirage
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
+        [Tooltip("Use builtin object pooling system?")]
+        public bool ObjectPooling = true;
+
         // spawn handlers. internal for testing purposes. do not use directly.
         internal readonly Dictionary<Guid, SpawnHandlerDelegate> spawnHandlers = new Dictionary<Guid, SpawnHandlerDelegate>();
         internal readonly Dictionary<Guid, UnSpawnDelegate> unspawnHandlers = new Dictionary<Guid, UnSpawnDelegate>();
+        internal ObjectPoolingManager _objectPoolingManager;
 
         [Header("Prefabs")]
         /// <summary>
@@ -58,12 +63,28 @@ namespace Mirage
 
                 if (NetworkSceneManager != null)
                     NetworkSceneManager.OnClientFinishedSceneChange.AddListener(OnFinishedSceneChange);
+
+                if (ObjectPooling)
+                {
+                    _objectPoolingManager = new ObjectPoolingManager(null, gameObject);
+                }
             }
         }
 
         void OnClientConnected(INetworkPlayer player)
         {
             syncVarReceiver = new SyncVarReceiver(Client, Client.World);
+
+            if (ObjectPooling)
+            {
+                for (int i = 0; i < spawnPrefabs.Count; i++)
+                {
+                    RegisterSpawnHandler(spawnPrefabs[i].AssetId,
+                        _objectPoolingManager.SpawnObject, _objectPoolingManager.UnSpawnObject);
+                    _objectPoolingManager._objectsAssetIds.Add(spawnPrefabs[i].AssetId, spawnPrefabs[i]);
+                }
+            }
+
             RegisterSpawnPrefabs();
 
             // prepare objects right away so objects in first scene can be spawned
@@ -85,6 +106,11 @@ namespace Mirage
             ClearSpawners();
             DestroyAllClientObjects();
             syncVarReceiver = null;
+            _objectPoolingManager?._objectsAssetIds.Clear();
+
+            // Destroy all game objects under parent.
+            for (int child = 0; child < gameObject.transform.childCount; child++)
+                Destroy(gameObject.transform.GetChild(child).gameObject);
         }
 
         void OnFinishedSceneChange(string scenePath, SceneOperation sceneOperation)

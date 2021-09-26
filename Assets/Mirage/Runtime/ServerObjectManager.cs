@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
+using Mirage.Runtime;
 using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -46,6 +47,11 @@ namespace Mirage
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
+        [Tooltip("Use builtin object pooling system?")]
+        public bool ObjectPooling = true;
+
+        private ObjectPoolingManager _objectPoolingManager;
+
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => checked(nextNetworkId++);
 
@@ -62,6 +68,10 @@ namespace Mirage
                     NetworkSceneManager.OnServerFinishedSceneChange.AddListener(OnFinishedSceneChange);
                     NetworkSceneManager.OnPlayerSceneReady.AddListener(SpawnVisibleObjects);
                 }
+
+                if (ObjectPooling)
+                    _objectPoolingManager = new ObjectPoolingManager(this, gameObject);
+
             }
         }
 
