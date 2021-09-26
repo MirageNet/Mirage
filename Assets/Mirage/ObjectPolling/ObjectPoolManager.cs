@@ -10,7 +10,7 @@ namespace Mirage.Runtime
         #region Fields
 
         private readonly Dictionary<int, object> _recycledObjects = new Dictionary<int, object>();
-        private ServerObjectManager _serverObjectManager;
+        private readonly ServerObjectManager _serverObjectManager;
         internal readonly GameObject Parent;
         internal readonly Dictionary<Guid, NetworkIdentity> _objectsAssetIds = new Dictionary<Guid, NetworkIdentity>();
 
