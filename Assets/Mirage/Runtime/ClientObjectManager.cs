@@ -63,11 +63,6 @@ namespace Mirage
 
                 if (NetworkSceneManager != null)
                     NetworkSceneManager.OnClientFinishedSceneChange.AddListener(OnFinishedSceneChange);
-
-                if (ObjectPooling)
-                {
-                    _objectPoolingManager = new ObjectPoolingManager(null, gameObject);
-                }
             }
         }
 
@@ -77,6 +72,8 @@ namespace Mirage
 
             if (ObjectPooling)
             {
+                _objectPoolingManager = new ObjectPoolingManager(null);
+
                 for (int i = 0; i < spawnPrefabs.Count; i++)
                 {
                     RegisterSpawnHandler(spawnPrefabs[i].AssetId,
@@ -106,11 +103,11 @@ namespace Mirage
             ClearSpawners();
             DestroyAllClientObjects();
             syncVarReceiver = null;
-            _objectPoolingManager?._objectsAssetIds.Clear();
 
-            // Destroy all game objects under parent.
-            for (int child = 0; child < gameObject.transform.childCount; child++)
-                Destroy(gameObject.transform.GetChild(child).gameObject);
+            // Destroy all game objects from pooling manager.
+            Destroy(_objectPoolingManager?.Parent);
+
+            _objectPoolingManager = null;
         }
 
         void OnFinishedSceneChange(string scenePath, SceneOperation sceneOperation)

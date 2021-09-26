@@ -11,16 +11,16 @@ namespace Mirage.Runtime
 
         private readonly Dictionary<int, object> _recycledObjects = new Dictionary<int, object>();
         private ServerObjectManager _serverObjectManager;
-        private GameObject _parent;
+        internal readonly GameObject Parent;
         internal readonly Dictionary<Guid, NetworkIdentity> _objectsAssetIds = new Dictionary<Guid, NetworkIdentity>();
 
 
         #endregion
 
-        public ObjectPoolingManager(ServerObjectManager serverObjectManager, GameObject parent)
+        public ObjectPoolingManager(ServerObjectManager serverObjectManager)
         {
             _serverObjectManager = serverObjectManager;
-            _parent = parent;
+            Parent = new GameObject { name = nameof(ObjectPoolingManager) };
         }
 
         #region Custom Spawn Handlers
@@ -103,7 +103,7 @@ namespace Mirage.Runtime
                     ? (ObjectPooling<NetworkIdentity>)_recycledObjects[prefabId]
                     : default).NetworkSpawn(position, rotation);
 
-            var createParent = new GameObject(_objectsAssetIds[AssetId].name) { transform = { parent = _parent.transform } };
+            var createParent = new GameObject(_objectsAssetIds[AssetId].name) { transform = { parent = Parent.transform } };
 
             _recycledObjects[prefabId] = new ObjectPooling<NetworkIdentity>(_objectsAssetIds[AssetId], quantity, createParent);
 
@@ -154,7 +154,7 @@ namespace Mirage.Runtime
                     ? (ObjectPooling<T>)_recycledObjects[prefabId]
                     : default).Spawn(position, rotation);
 
-            var createParent = new GameObject(gObject.name) { transform = { parent = _parent.transform } };
+            var createParent = new GameObject(gObject.name) { transform = { parent = Parent.transform } };
 
             _recycledObjects[prefabId] = new ObjectPooling<T>(gObject, quantity, createParent);
 
@@ -181,7 +181,7 @@ namespace Mirage.Runtime
                     ? (ObjectPooling<T>)_recycledObjects[prefabId]
                     : default).Spawn(parentTransform, worldStayPosition);
 
-            var createParent = new GameObject(gObject.name) { transform = { parent = _parent.transform } };
+            var createParent = new GameObject(gObject.name) { transform = { parent = Parent.transform } };
 
             _recycledObjects[prefabId] = new ObjectPooling<T>(gObject, quantity, createParent);
 

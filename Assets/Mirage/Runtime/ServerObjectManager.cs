@@ -68,10 +68,6 @@ namespace Mirage
                     NetworkSceneManager.OnServerFinishedSceneChange.AddListener(OnFinishedSceneChange);
                     NetworkSceneManager.OnPlayerSceneReady.AddListener(SpawnVisibleObjects);
                 }
-
-                if (ObjectPooling)
-                    _objectPoolingManager = new ObjectPoolingManager(this, gameObject);
-
             }
         }
 
@@ -82,12 +78,17 @@ namespace Mirage
 
         void OnServerStarted()
         {
+            if (ObjectPooling && Server.Active)
+                _objectPoolingManager = new ObjectPoolingManager(this);
+
             RegisterMessageHandlers();
             SpawnOrActivate();
         }
 
         void OnServerStopped()
         {
+            _objectPoolingManager = null;
+
             // todo dont send messages on server stop, only reset NI
             foreach (NetworkIdentity obj in Server.World.SpawnedIdentities.Reverse())
             {
