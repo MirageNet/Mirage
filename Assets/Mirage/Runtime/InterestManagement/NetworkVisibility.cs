@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace Mirage.InterestManagement
 {
     public abstract class NetworkVisibility : INetworkVisibility
@@ -47,10 +44,7 @@ namespace Mirage.InterestManagement
         /// <summary>
         ///     
         /// </summary>
-        /// <param name="identity">The identity of the object that has spawned in.</param>
-        /// <param name="position">The position in which the player spawned in at. We use <see cref="Transform.localPosition"/></param>
-        /// <param name="players"></param>
-        public abstract void CheckForObservers(NetworkIdentity identity, Vector3 position, out HashSet<INetworkPlayer> players);
+        public abstract void CheckForObservers();
 
         #endregion
     }

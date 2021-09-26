@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Mirage.Examples.InterestManagement;
 using Mirage.InterestManagement;
+using Mirage.Sockets.Udp;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
 using UnityEditor.SceneManagement;
@@ -54,6 +55,7 @@ namespace Mirage.Tests.Performance.Runtime
     {
         protected override IEnumerator SetupInterestManagement(NetworkServer server)
         {
+            Setup();
             // wait frame for setup
             yield return null;
         }
@@ -84,7 +86,7 @@ namespace Mirage.Tests.Performance.Runtime
 
 
             server = FindObjectOfType<NetworkServer>();
-            server.SocketFactory = server.gameObject.AddComponent<TestSocketFactory>();
+            server.SocketFactory = server.gameObject.AddComponent<UdpSocketFactory>();
 
             bool started = false;
             server.MaxConnections = clientCount;
@@ -107,7 +109,7 @@ namespace Mirage.Tests.Performance.Runtime
                 {
                     var clientGo = new GameObject { name = $"Client {i}" };
                     NetworkClient client = clientGo.AddComponent<NetworkClient>();
-                    client.SocketFactory = client.gameObject.AddComponent<TestSocketFactory>();
+                    client.SocketFactory = client.gameObject.AddComponent<UdpSocketFactory>();
                     client.Connect("localhost");
                 }
                 catch (Exception ex)
@@ -119,11 +121,11 @@ namespace Mirage.Tests.Performance.Runtime
 
         private void removeExistingIM()
         {
-            NetworkVisibility[] existing = server.GetComponents<NetworkVisibility>();
+            INetworkVisibility[] existing = server.GetComponents<INetworkVisibility>();
 
             for (int i = 0; i < existing.Length; i++)
             {
-                Destroy(existing[i]);
+                //Destroy(existing[i]);
             }
         }
 
@@ -167,6 +169,5 @@ namespace Mirage.Tests.Performance.Runtime
                 .MeasurementCount(300)
                 .Run();
         }
-
     }
 }

@@ -14,7 +14,7 @@ namespace Mirage.InterestManagement
 
         #region Fields
 
-        protected internal readonly ServerObjectManager ServerObjectManager;
+        public readonly ServerObjectManager ServerObjectManager;
         private ObserverData[] _visibilitySystems;
         private readonly int _initialSystems;
         private readonly List<ObserverData> _observerSystems = new List<ObserverData>();
@@ -28,6 +28,23 @@ namespace Mirage.InterestManagement
         #endregion
 
         #region Callback Listener's
+
+        internal void Update()
+        {
+            var stopWatch = Stopwatch.StartNew();
+
+            if (_visibilitySystems == null) return;
+
+            foreach (ObserverData observerData in _visibilitySystems)
+            {
+                observerData.System.CheckForObservers();
+            }
+
+            stopWatch.Stop();
+
+            if (logger.logEnabled)
+                logger.Log($"[Interest Manager] - Update Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
+        }
 
         /// <summary>
         ///     When server stops we will un-register and clean up stuff.

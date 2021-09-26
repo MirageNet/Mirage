@@ -26,9 +26,6 @@ namespace Mirage.InterestManagement
         /// <summary>
         ///     
         /// </summary>
-        /// <param name="identity">The identity of the object that has spawned in.</param>
-        /// <param name="position">The position in which the player spawned in at. We use <see cref="Transform.localPosition"/></param>
-        /// <param name="players"></param>
-        void CheckForObservers(NetworkIdentity identity, Vector3 position, out HashSet<INetworkPlayer> players);
+        void CheckForObservers();
     }
 }

@@ -7,6 +7,7 @@ using UnityEngine.Serialization;
 using Mirage.Logging;
 using Mirage.Serialization;
 using Mirage.Events;
+using Mirage.InterestManagement;
 #if UNITY_EDITOR
 using UnityEditor;
 #if UNITY_2018_3_OR_NEWER
@@ -183,6 +184,11 @@ namespace Mirage
         public ClientObjectManager ClientObjectManager;
 
         INetworkPlayer _owner;
+
+        /// <summary>
+        ///     The visibility systems this network identity is part of.
+        /// </summary>
+        internal List<INetworkVisibility> VisibilitySystems;
 
         /// <summary>
         /// The INetworkPlayer associated with this <see cref="NetworkIdentity">NetworkIdentity</see>. This property is only valid on server
