@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
@@ -8,6 +9,7 @@ using Mirage.Runtime;
 using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Debug = UnityEngine.Debug;
 
 namespace Mirage
 {
@@ -74,12 +76,18 @@ namespace Mirage
             {
                 _objectPoolingManager = new ObjectPoolingManager(null);
 
-                for (int i = 0; i < spawnPrefabs.Count; i++)
+                var stopWatch = Stopwatch.StartNew();
+
+                foreach (NetworkIdentity prefab in spawnPrefabs)
                 {
-                    RegisterSpawnHandler(spawnPrefabs[i].AssetId,
-                        _objectPoolingManager.SpawnObject, _objectPoolingManager.UnSpawnObject);
-                    _objectPoolingManager._objectsAssetIds.Add(spawnPrefabs[i].AssetId, spawnPrefabs[i]);
+                    RegisterSpawnHandler(prefab.AssetId, _objectPoolingManager.SpawnObject, _objectPoolingManager.UnSpawnObject);
+
+                    _objectPoolingManager._objectsAssetIds.Add(prefab.AssetId, prefab);
                 }
+
+                stopWatch.Stop();
+
+                Debug.Log($"{stopWatch.Elapsed.TotalMilliseconds} ms");
             }
 
             RegisterSpawnPrefabs();
