@@ -303,9 +303,7 @@ namespace Mirage
         /// <param name="player"></param>
         public void ShowToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
-            // dont send if loading scene
-            if (player.SceneIsReady)
-                SendSpawnMessage(identity, player);
+            SendSpawnMessage(identity, player);
         }
 
         public void HideToPlayer(NetworkIdentity identity, INetworkPlayer player)

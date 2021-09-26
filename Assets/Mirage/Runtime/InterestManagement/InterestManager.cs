@@ -44,6 +44,7 @@ namespace Mirage.InterestManagement
         protected virtual void OnServerStopped()
         {
             ServerObjectManager.Server.World.onSpawn -= OnSpawnInWorld;
+            ServerObjectManager.Server.Authenticated.RemoveListener(OnAuthenticated);
         }
 
         /// <summary>
@@ -52,6 +53,25 @@ namespace Mirage.InterestManagement
         protected virtual void OnServerStarted()
         {
             ServerObjectManager.Server.World.onSpawn += OnSpawnInWorld;
+            ServerObjectManager.Server.Authenticated.AddListener(OnAuthenticated);
+        }
+
+        private void OnAuthenticated(INetworkPlayer player)
+        {
+            if (_visibilitySystems == null)
+            {
+                foreach (NetworkIdentity identity in ServerObjectManager.Server.World.SpawnedIdentities)
+                {
+                    ServerObjectManager.ShowToPlayer(identity, player);
+                }
+            }
+            else
+            {
+                foreach (ObserverData systemData in _visibilitySystems)
+                {
+                    systemData.System.OnAuthenticated(player);
+                }
+            }
         }
 
         /// <summary>

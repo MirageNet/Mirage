@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace Mirage.InterestManagement
 {
     public interface INetworkVisibility
@@ -22,6 +19,12 @@ namespace Mirage.InterestManagement
         /// </summary>
         /// <param name="identity">The object just spawned</param>
         void OnSpawned(NetworkIdentity identity);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="player"></param>
+        void OnAuthenticated(INetworkPlayer player);
 
         /// <summary>
         ///     

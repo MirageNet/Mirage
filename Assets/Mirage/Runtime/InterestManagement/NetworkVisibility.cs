@@ -42,6 +42,12 @@ namespace Mirage.InterestManagement
         public abstract void OnSpawned(NetworkIdentity identity);
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="player"></param>
+        public abstract void OnAuthenticated(INetworkPlayer player);
+
+        /// <summary>
         ///     
         /// </summary>
         public abstract void CheckForObservers();
