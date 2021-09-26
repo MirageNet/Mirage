@@ -14,8 +14,7 @@ namespace Mirage.InterestManagement
         #region Fields
 
         public readonly ServerObjectManager ServerObjectManager;
-        private ObserverData[] _visibilitySystems;
-        private readonly int _initialSystems;
+        private List<ObserverData> _visibilitySystems = new List<ObserverData>();
         private readonly List<ObserverData> _observerSystems = new List<ObserverData>();
 
         #endregion
@@ -30,7 +29,7 @@ namespace Mirage.InterestManagement
 
         internal void Update()
         {
-            if (_visibilitySystems == null) return;
+            if (_visibilitySystems.Count == 0) return;
 
             foreach (ObserverData observerData in _visibilitySystems)
             {
@@ -58,7 +57,7 @@ namespace Mirage.InterestManagement
 
         private void OnAuthenticated(INetworkPlayer player)
         {
-            if (_visibilitySystems == null)
+            if (_visibilitySystems.Count == 0)
             {
                 foreach (NetworkIdentity identity in ServerObjectManager.Server.World.SpawnedIdentities)
                 {
@@ -81,7 +80,7 @@ namespace Mirage.InterestManagement
         /// <param name="identity"></param>
         private void OnSpawnInWorld(NetworkIdentity identity)
         {
-            if (_visibilitySystems == null)
+            if (_visibilitySystems.Count == 0)
             {
                 foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
                 {
@@ -106,10 +105,8 @@ namespace Mirage.InterestManagement
         /// </summary>
         /// <param name="serverObjectManager">The server object manager so we can pull info from it or send info from it.</param>
         /// <param name="initialSystems">The number of initial systems you will be using.</param>
-        public InterestManager(ServerObjectManager serverObjectManager, int initialSystems = 0)
+        public InterestManager(ServerObjectManager serverObjectManager)
         {
-            _initialSystems = initialSystems;
-
             ServerObjectManager = serverObjectManager;
 
             ServerObjectManager.Server.Started.AddListener(OnServerStarted);
@@ -170,36 +167,13 @@ namespace Mirage.InterestManagement
             return count;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CheckGrowVisibilitySystem()
-        {
-            if (_visibilitySystems == null)
-            {
-                _visibilitySystems = new ObserverData[_initialSystems];
-            }
-            else if (_visibilitySystems[_visibilitySystems.Length - 1].System == default)
-            {
-                // We need to copy and expand our visibility system.
-                if (logger.logEnabled)
-                    logger.Log("[Interest Manager] - Visibility system is expanding array. If this is happening often. Please set initial systems in constructor.");
-
-                var newData = new ObserverData[_initialSystems + _initialSystems];
-
-                _visibilitySystems.CopyTo(newData, 0);
-
-                _visibilitySystems = newData;
-            }
-        }
-
         /// <summary>
         ///     Register a specific interest management system to the interest manager.
         /// </summary>
         /// <param name="system">The system we want to register in the interest manager.</param>
         internal void RegisterVisibilitySystem(ref ObserverData system)
         {
-            CheckGrowVisibilitySystem();
-
-            if (_visibilitySystems.Equals(system))
+            if (_visibilitySystems.Contains(system))
             {
                 logger.LogWarning(
                     "[InterestManager] - System already register to interest manager. Please check if this was correct.");
@@ -210,14 +184,7 @@ namespace Mirage.InterestManagement
             if(logger.logEnabled)
                 logger.Log($"[Interest Manager] - Registering system {system} to our manager.");
 
-            for (int i = 0; i < _visibilitySystems.Length; i++)
-            {
-                if(!_visibilitySystems[i].Equals(default)) continue;
-
-                _visibilitySystems[i] = system;
-
-                break;
-            }
+            _visibilitySystems.Add(system);
         }
 
         /// <summary>
@@ -226,20 +193,17 @@ namespace Mirage.InterestManagement
         /// <param name="system">The system we want to un-register from the interest manager.</param>
         internal void UnRegisterVisibilitySystem(ref ObserverData system)
         {
-            for (int i = 0; i < _visibilitySystems.Length; i++)
+            if(!_visibilitySystems.Contains(system))
             {
-                if (!_visibilitySystems[i].Equals(system)) continue;
-
-                _visibilitySystems[i] = default;
-
                 if (logger.logEnabled)
                     logger.Log($"[Interest Manager] - Un-Registering system {system} from our manager.");
-
                 return;
             }
 
             logger.LogWarning(
                 "[InterestManager] - Cannot find system in interest manager. Please check make sure it was registered.");
+
+            _visibilitySystems.Remove(system);
         }
 
         /// <summary>
@@ -249,7 +213,7 @@ namespace Mirage.InterestManagement
         /// <returns></returns>
         internal HashSet<INetworkPlayer> Observers(NetworkIdentity identity)
         {
-            if (_visibilitySystems == null)
+            if (_visibilitySystems.Count == 0)
                 return ServerObjectManager.Server.Players;
 
             HashSet<INetworkPlayer> observers = new HashSet<INetworkPlayer>();
