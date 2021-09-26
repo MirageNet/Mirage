@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -31,19 +30,12 @@ namespace Mirage.InterestManagement
 
         internal void Update()
         {
-            var stopWatch = Stopwatch.StartNew();
-
             if (_visibilitySystems == null) return;
 
             foreach (ObserverData observerData in _visibilitySystems)
             {
                 observerData.System.CheckForObservers();
             }
-
-            stopWatch.Stop();
-
-            if (logger.logEnabled)
-                logger.Log($"[Interest Manager] - Update Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -69,8 +61,6 @@ namespace Mirage.InterestManagement
         /// <param name="identity"></param>
         private void OnSpawnInWorld(NetworkIdentity identity)
         {
-            var stopWatch = Stopwatch.StartNew();
-
             if (_visibilitySystems == null)
             {
                 foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
@@ -85,11 +75,6 @@ namespace Mirage.InterestManagement
                     systemData.System.OnSpawned(identity);
                 }
             }
-
-            stopWatch.Stop();
-
-            if (logger.logEnabled)
-                logger.Log($"[Interest Manager] - OnSpawnInWorld Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
         }
 
         #endregion
@@ -119,8 +104,6 @@ namespace Mirage.InterestManagement
         /// <param name="channelId"></param>
         protected internal virtual void Send<T>(NetworkIdentity identity, T msg, int channelId = Channel.Reliable, INetworkPlayer skip = null)
         {
-            var stopWatch = Stopwatch.StartNew();
-
             HashSet<INetworkPlayer> observers = Observers(identity);
 
             if (observers.Count == 0)
@@ -131,16 +114,11 @@ namespace Mirage.InterestManagement
                 // pack message into byte[] once
                 MessagePacker.Pack(msg, writer);
                 var segment = writer.ToArraySegment();
-                int count = Send(identity, segment, channelId, skip);
+                int count = Send(observers, segment, channelId, skip);
 
                 if (count > 0)
                     NetworkDiagnostics.OnSend(msg, segment.Count, count);
             }
-
-            stopWatch.Stop();
-
-            if (logger.logEnabled)
-                logger.Log($"[Interest Manager] - Send Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -148,16 +126,16 @@ namespace Mirage.InterestManagement
         /// </summary>
         /// <remarks>Override if you wish to provide
         /// an allocation free send method</remarks>
-        /// <param name="identity">the object that wants to send a message</param>
+        /// <param name="players">The player's we want to send the message to.</param>
         /// <param name="data">the data to send</param>
         /// <param name="channelId">the channel to send it on</param>
         /// <param name="skip">a player who should not receive the message</param>
         /// <returns>Total amounts of messages sent</returns>
-        protected virtual int Send(NetworkIdentity identity, ArraySegment<byte> data, int channelId = Channel.Reliable, INetworkPlayer skip = null)
+        private int Send(HashSet<INetworkPlayer> players, ArraySegment<byte> data, int channelId = Channel.Reliable, INetworkPlayer skip = null)
         {
             int count = 0;
 
-            foreach (INetworkPlayer player in Observers(identity))
+            foreach (INetworkPlayer player in players)
             {
                 if (player == null) continue;
 
@@ -175,8 +153,6 @@ namespace Mirage.InterestManagement
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CheckGrowVisibilitySystem()
         {
-            var stopWatch = Stopwatch.StartNew();
-
             if (_visibilitySystems == null)
             {
                 _visibilitySystems = new ObserverData[_initialSystems];
@@ -193,11 +169,6 @@ namespace Mirage.InterestManagement
 
                 _visibilitySystems = newData;
             }
-
-            stopWatch.Stop();
-
-            if (logger.logEnabled)
-                logger.Log($"[Interest Manager] - CheckGrowVisibilitySystem Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -207,8 +178,6 @@ namespace Mirage.InterestManagement
         internal void RegisterVisibilitySystem(ref ObserverData system)
         {
             CheckGrowVisibilitySystem();
-
-            var stopWatch = Stopwatch.StartNew();
 
             if (_visibilitySystems.Equals(system))
             {
@@ -229,11 +198,6 @@ namespace Mirage.InterestManagement
 
                 break;
             }
-
-            stopWatch.Stop();
-
-            if (logger.logEnabled)
-                logger.Log($"[Interest Manager] - RegisterVisibilitySystem Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -242,8 +206,6 @@ namespace Mirage.InterestManagement
         /// <param name="system">The system we want to un-register from the interest manager.</param>
         internal void UnRegisterVisibilitySystem(ref ObserverData system)
         {
-            var stopWatch = Stopwatch.StartNew();
-
             for (int i = 0; i < _visibilitySystems.Length; i++)
             {
                 if (!_visibilitySystems[i].Equals(system)) continue;
@@ -253,21 +215,11 @@ namespace Mirage.InterestManagement
                 if (logger.logEnabled)
                     logger.Log($"[Interest Manager] - Un-Registering system {system} from our manager.");
 
-                stopWatch.Stop();
-
-                if (logger.logEnabled)
-                    logger.Log($"[Interest Manager] - UnRegisterVisibilitySystem  Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
-
                 return;
             }
 
             logger.LogWarning(
                 "[InterestManager] - Cannot find system in interest manager. Please check make sure it was registered.");
-
-            stopWatch.Stop();
-
-            if (logger.logEnabled)
-                logger.Log($"[Interest Manager] - UnRegisterVisibilitySystem Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -277,18 +229,10 @@ namespace Mirage.InterestManagement
         /// <returns></returns>
         internal HashSet<INetworkPlayer> Observers(NetworkIdentity identity)
         {
-            var stopWatch = Stopwatch.StartNew();
-
             if (_visibilitySystems == null)
                 return ServerObjectManager.Server.Players;
 
-            var observers = new HashSet<INetworkPlayer>();
-
-            stopWatch.Stop();
-
-            if (logger.logEnabled)
-                logger.Log(
-                    $"[Interest Manager] - Observers Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
+            HashSet<INetworkPlayer> observers = new HashSet<INetworkPlayer>();
 
             return observers;
         }
