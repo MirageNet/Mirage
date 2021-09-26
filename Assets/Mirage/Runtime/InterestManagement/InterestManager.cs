@@ -210,12 +210,7 @@ namespace Mirage.InterestManagement
 
                 _visibilitySystems[i] = system;
 
-                stopWatch.Stop();
-
-                if (logger.logEnabled)
-                    logger.Log($"[Interest Manager] - RegisterVisibilitySystem Method Execution Time: {stopWatch.Elapsed.TotalMilliseconds} ms");
-
-                return;
+                break;
             }
 
             stopWatch.Stop();
