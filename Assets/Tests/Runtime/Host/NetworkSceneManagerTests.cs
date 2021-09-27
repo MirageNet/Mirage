@@ -107,7 +107,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ReadyTest()
         {
-            sceneManager.SetSceneIsReady(new Scene());
+            sceneManager.SetSceneIsReady();
             Assert.That(client.Player.SceneIsReady);
         }
 
@@ -120,7 +120,7 @@ namespace Mirage.Tests.Runtime.Host
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                sceneManager.SetSceneIsReady(new Scene());
+                sceneManager.SetSceneIsReady();
             });
         });
 

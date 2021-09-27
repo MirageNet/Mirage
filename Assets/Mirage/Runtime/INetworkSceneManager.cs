@@ -20,7 +20,7 @@ namespace Mirage
     /// </summary>
     [Serializable] public class SceneChangeEvent : UnityEvent<string, SceneOperation> { }
 
-    [Serializable] public class PlayerSceneChangeEvent : UnityEvent<INetworkPlayer, Scene> { }
+    [Serializable] public class PlayerSceneChangeEvent : UnityEvent<INetworkPlayer> { }
 
     public interface INetworkSceneManager
     {

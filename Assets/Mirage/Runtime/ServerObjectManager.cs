@@ -5,7 +5,6 @@ using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 namespace Mirage
@@ -666,17 +665,6 @@ namespace Mirage
         /// </para>
         /// </summary>
         /// <param name="player">The player to spawn objects for</param>
-        /// <param name="scene"></param>
-        public void SpawnVisibleObjects(INetworkPlayer player, Scene scene) => SpawnVisibleObjects(player, false);
-
-        /// <summary>
-        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
-        /// <para>
-        /// If there is a <see cref="Mirage.NetworkSceneManager"/> then this will be called after the client finishes loading the scene and sends <see cref="SceneReadyMessage"/>
-        /// </para>
-        /// </summary>
-        /// <param name="player">The player to spawn objects for</param>
-        // note: can't use optional param here because we need NetworkPlayer and Scene version for event
         public void SpawnVisibleObjects(INetworkPlayer player) => SpawnVisibleObjects(player, false);
 
         /// <summary>
