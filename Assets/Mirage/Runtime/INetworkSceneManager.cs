@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
@@ -19,7 +20,7 @@ namespace Mirage
     /// </summary>
     [Serializable] public class SceneChangeEvent : UnityEvent<string, SceneOperation> { }
 
-    [Serializable] public class PlayerSceneChangeEvent : UnityEvent<INetworkPlayer> { }
+    [Serializable] public class PlayerSceneChangeEvent : UnityEvent<INetworkPlayer, Scene> { }
 
     public interface INetworkSceneManager
     {
@@ -47,6 +48,17 @@ namespace Mirage
         /// Event fires On the server, after Client sends <see cref="SceneReadyMessage"/> to the server
         /// </summary>
         PlayerSceneChangeEvent OnPlayerSceneReady { get; }
+
+        /// <summary>
+        ///     Allows us to load a new physics scene on server and tell other users to load up normally.
+        /// </summary>
+        /// <param name="scenePath">The full path to the scene file or the name of the scene we want to use to create new physics scene.</param>
+        /// <param name="sceneOperation">The type of scene operation we want to do</param>
+        /// <param name="physicsMode">The type of physics scene we want to create and load.</param>
+        /// <param name="players">List of player's that are receiving the new scene load.</param>
+        /// <param name="shouldClientLoadNormally">Should the clients load this additively too or load it full normal scene change.</param>
+        /// <returns>Returns back to end users a scene reference.</returns>
+        Task<Scene> ServerLoadPhysicsScene(string scenePath, LoadSceneMode sceneOperation, LocalPhysicsMode physicsMode, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false);
 
         /// <summary>
         ///     Allows server to fully load in a new scene and override current active scene.

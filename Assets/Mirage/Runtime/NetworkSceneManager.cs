@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using UnityEngine;
@@ -412,6 +413,26 @@ namespace Mirage
         }
 
         /// <summary>
+        ///     Allows us to load a new physics scene on server and tell other users to load up normally.
+        /// </summary>
+        /// <param name="scenePath">The full path to the scene file or the name of the scene we want to use to create new physics scene.</param>
+        /// <param name="sceneOperation">The type of scene operation we want to do</param>
+        /// <param name="physicsMode">The type of physics scene we want to create and load.</param>
+        /// <param name="players">List of player's that are receiving the new scene load.</param>
+        /// <param name="shouldClientLoadNormally">Should the clients load this additively too or load it full normal scene change.</param>
+        /// <returns>Returns back to end users a scene reference.</returns>
+        public async Task<Scene> ServerLoadPhysicsScene(string scenePath, LoadSceneMode sceneOperation, LocalPhysicsMode physicsMode, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false)
+        {
+            ThrowIfNotServer();
+
+            await SceneManager.LoadSceneAsync(scenePath, new LoadSceneParameters { loadSceneMode = sceneOperation, localPhysicsMode = physicsMode });
+
+            await LoadSceneAsync(scenePath, players, sceneOperation == LoadSceneMode.Single ? SceneOperation.Normal : SceneOperation.LoadAdditive);
+
+            return SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+        }
+
+        /// <summary>
         ///     Allows server to fully load in a new scene and override current active scene.
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
@@ -519,7 +540,7 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + player);
             player.SceneIsReady = true;
-            OnPlayerSceneReady.Invoke(player);
+            OnPlayerSceneReady.Invoke(player, msg.Scene);
         }
 
         /// <summary>

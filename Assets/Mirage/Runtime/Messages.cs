@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Mirage
 {
@@ -30,7 +31,10 @@ namespace Mirage
     /// Sent to indicate the scene is finished loading
     /// </summary>
     [NetworkMessage]
-    public struct SceneReadyMessage { }
+    public struct SceneReadyMessage
+    {
+        public Scene Scene;
+    }
 
     #endregion
 
