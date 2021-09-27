@@ -359,9 +359,11 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - ServerChangeScene " + scenePath);
 
             // Let server prepare for scene change
-            logger.Log("[NetworkSceneManager] - OnServerChangeScene");
+            if (logger.logEnabled)
+                logger.Log("[NetworkSceneManager] - OnServerChangeScene");
 
-            SetAllClientsNotReady();
+            SetAllClientsNotReady(players);
+
             OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation);
 
             if (players == null)
@@ -400,7 +402,8 @@ namespace Mirage
             // Let server prepare for scene change
             if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - OnServerChangeScene");
 
-            SetAllClientsNotReady();
+            SetAllClientsNotReady(players);
+
             OnServerStartedSceneChange?.Invoke(scene.path, SceneOperation.UnloadAdditive);
 
             // if not host
@@ -425,9 +428,38 @@ namespace Mirage
         {
             ThrowIfNotServer();
 
+            if (string.IsNullOrEmpty(scenePath))
+            {
+                throw new ArgumentNullException(nameof(scenePath),
+                    "[NetworkSceneManager] - ServerLoadPhysicsScene: " + nameof(scenePath) + " cannot be empty or null");
+            }
+
+            if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - ServerLoadPhysicsScene " + scenePath);
+
+            // Let server prepare for scene change
+            if (logger.logEnabled)
+                logger.Log("[NetworkSceneManager] - ServerLoadPhysicsScene");
+
             await SceneManager.LoadSceneAsync(scenePath, new LoadSceneParameters { loadSceneMode = sceneOperation, localPhysicsMode = physicsMode });
 
-            await LoadSceneAsync(scenePath, players, sceneOperation == LoadSceneMode.Single ? SceneOperation.Normal : SceneOperation.LoadAdditive);
+            SetAllClientsNotReady(players);
+
+            Scene newScene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+
+            if (Server && Server.Active)
+            {
+                _serverSceneData.Add(newScene, new HashSet<INetworkPlayer>(players));
+            }
+
+            var message = new SceneMessage
+            {
+                MainActivateScene = scenePath,
+                SceneOperation = sceneOperation == LoadSceneMode.Single
+                    ? SceneOperation.Normal
+                    : SceneOperation.LoadAdditive
+            };
+
+            NetworkServer.SendToMany(players, message);
 
             return SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
         }
@@ -551,10 +583,11 @@ namespace Mirage
         ///     This is useful when switching scenes.
         /// </para>
         /// </summary>
-        public void SetAllClientsNotReady()
+        public void SetAllClientsNotReady(IEnumerable<INetworkPlayer> players)
         {
             ThrowIfNotServer();
-            foreach (INetworkPlayer player in Server.Players)
+
+            foreach (INetworkPlayer player in players ?? Server.Players)
             {
                 SetClientNotReady(player);
             }
