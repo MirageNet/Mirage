@@ -283,7 +283,7 @@ namespace Mirage
 
             //set ready after scene change has completed
             if (!Client.Player.SceneIsReady)
-                SetSceneIsReady();
+                SetSceneIsReady(SceneManager.GetSceneByPath(scenePath));
 
             //Call event once all scene related actions (subscenes and ready) are done.
             OnClientFinishedSceneChange?.Invoke(scenePath, sceneOperation);
@@ -309,7 +309,7 @@ namespace Mirage
         /// <para>This could be for example when a client enters an ongoing game and has finished loading the current scene. The server should respond to the message with an appropriate handler which instantiates the players object for example.</para>
         /// </summary>
         /// <exception cref="InvalidOperationException">When called with an null or disconnected client</exception>
-        public void SetSceneIsReady()
+        public void SetSceneIsReady(Scene scene)
         {
             ThrowIfNotClient();
 
@@ -320,7 +320,7 @@ namespace Mirage
             Client.Player.SceneIsReady = true;
 
             // Tell server we're ready to have a player object spawned
-            Client.Player.Send(new SceneReadyMessage());
+            Client.Player.Send(new SceneReadyMessage { Scene = scene });
         }
 
         void ThrowIfNotClient()
@@ -516,7 +516,6 @@ namespace Mirage
 
             player.Send(new SceneMessage { MainActivateScene = ActiveScenePath, AdditiveScenes = additiveScenes });
             player.Send(new SceneReadyMessage());
-
         }
         static List<string> GetAdditiveScenes()
         {
@@ -545,7 +544,7 @@ namespace Mirage
         {
             logger.Log(" [NetworkSceneManager] - OnServerSceneChanged");
 
-            Server.SendToAll(new SceneReadyMessage());
+            Server.SendToAll(new SceneReadyMessage { Scene = SceneManager.GetSceneByPath(scenePath) });
 
             OnServerFinishedSceneChange?.Invoke(scenePath, operation);
         }
