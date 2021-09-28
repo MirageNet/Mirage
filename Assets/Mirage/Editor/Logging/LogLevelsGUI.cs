@@ -61,11 +61,9 @@ namespace Mirage.EditorScripts.Logging
 
                 EditorGUILayout.Space();
 
-                foreach (IGrouping<string, LogSettings.LoggerSettings> group in settings.LogLevels.GroupBy(x => x.Namespace))
+                foreach (IGrouping<string, LogSettings.LoggerSettings> group in settings.LogLevels.GroupBy(x => x.Namespace).OrderBy(x => x.Key))
                 {
                     DrawGroup(group);
-
-                    EditorGUILayout.Space();
                 }
 
                 EditorGUILayout.Space();
@@ -103,11 +101,11 @@ namespace Mirage.EditorScripts.Logging
             if (folderOutState[NameSpace])
             {
                 EditorGUI.indentLevel++;
-                foreach (LogSettings.LoggerSettings loggerType in group)
+                foreach (LogSettings.LoggerSettings loggerType in group.OrderBy(x => x.Name))
                 {
                     using (var scope = new EditorGUI.ChangeCheckScope())
                     {
-                        var level = (LogType)EditorGUILayout.EnumPopup(loggerType.Name, loggerType.logLevel);
+                        LogType level = DrawNiceEnum(loggerType);
 
                         if (scope.changed)
                         {
@@ -117,6 +115,9 @@ namespace Mirage.EditorScripts.Logging
                     }
                 }
                 EditorGUI.indentLevel--;
+
+                // draw a space after open foldout
+                EditorGUILayout.Space();
             }
         }
 
@@ -239,46 +240,20 @@ namespace Mirage.EditorScripts.Logging
             }
         }
 
-        [System.Obsolete("old draw", true)]
-        public void Draw()
+        private static LogType DrawNiceEnum(LogSettings.LoggerSettings loggerType)
         {
-            using (var scope = new EditorGUI.ChangeCheckScope())
-            {
-                if (LogFactory.loggers.Count == 0)
-                {
-                    EditorGUILayout.LabelField("No Keys found in LogFactory.loggers\nPlay the game for default log values to be added to LogFactory", EditorStyles.wordWrappedLabel);
-                }
-                else
-                {
-                    EditorGUILayout.Space();
-                    EditorGUILayout.LabelField("Logging Components", EditorStyles.boldLabel);
+            string name = loggerType.Name;
+            LogType level = loggerType.logLevel;
 
-                    foreach (KeyValuePair<string, ILogger> item in LogFactory.loggers)
-                    {
-                        DrawLoggerField(item);
-                    }
+            return (LogType)EditorGUILayout.EnumPopup(ObjectNames.NicifyVariableName(name), level);
 
-                    if (scope.changed)
-                    {
-                        settings.SaveFromDictionary(LogFactory.loggers);
-                    }
-                }
-            }
-        }
-
-        static void DrawLoggerField(KeyValuePair<string, ILogger> item)
-        {
-            ILogger logger = item.Value;
-            string name = item.Key;
-
-            const float fieldWidth = 100f;
-            const float inspectorMargin = 25f;
-
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                EditorGUILayout.LabelField(new GUIContent(ObjectNames.NicifyVariableName(name)), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - fieldWidth - inspectorMargin));
-                logger.filterLogType = (LogType)EditorGUILayout.EnumPopup(logger.filterLogType, GUILayout.Width(fieldWidth));
-            }
+            //const float fieldWidth = 100f;
+            //const float inspectorMargin = 25f;
+            //using (new EditorGUILayout.HorizontalScope())
+            //{
+            //    EditorGUILayout.LabelField(new GUIContent(ObjectNames.NicifyVariableName(name)), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - fieldWidth - inspectorMargin));
+            //    return (LogType)EditorGUILayout.EnumPopup(level, GUILayout.Width(fieldWidth));
+            //}
         }
     }
 }
