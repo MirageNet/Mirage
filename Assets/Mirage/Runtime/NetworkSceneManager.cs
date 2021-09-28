@@ -440,6 +440,10 @@ namespace Mirage
             if (logger.logEnabled)
                 logger.Log("[NetworkSceneManager] - ServerLoadPhysicsScene");
 
+            OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation == LoadSceneMode.Single
+                ? SceneOperation.Normal
+                : SceneOperation.LoadAdditive);
+
             await SceneManager.LoadSceneAsync(scenePath, new LoadSceneParameters { loadSceneMode = sceneOperation, localPhysicsMode = physicsMode });
 
             SetAllClientsNotReady(players);
@@ -460,6 +464,11 @@ namespace Mirage
             };
 
             NetworkServer.SendToMany(players, message);
+
+            // call OnServerSceneChanged
+            OnServerFinishedSceneLoad(scenePath, sceneOperation == LoadSceneMode.Single
+                ? SceneOperation.Normal
+                : SceneOperation.LoadAdditive);
 
             return SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
         }
