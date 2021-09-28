@@ -452,18 +452,14 @@ namespace Mirage
 
             Scene newScene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
 
-            if (Server && Server.Active)
+            _serverSceneData.Add(newScene, players == null ? new HashSet<INetworkPlayer>() : new HashSet<INetworkPlayer>(players));
+
+            if(players != null)
             {
-                _serverSceneData.Add(newScene, players == null ? new HashSet<INetworkPlayer>() : new HashSet<INetworkPlayer>(players));
+                var message = new SceneMessage { MainActivateScene = scenePath, SceneOperation = sceneOperate };
+
+                NetworkServer.SendToMany(players, message);
             }
-
-            var message = new SceneMessage
-            {
-                MainActivateScene = scenePath,
-                SceneOperation = sceneOperate
-            };
-
-            NetworkServer.SendToMany(players, message);
 
             // call OnServerSceneChanged
             OnServerFinishedSceneLoad(scenePath, sceneOperate);
