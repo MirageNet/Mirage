@@ -1,5 +1,6 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using Mirage.Core;
 using Mirage.SocketLayer;
 using NUnit.Framework;
 using UnityEngine;
@@ -13,7 +14,8 @@ namespace Mirage.Tests.Runtime.Host
         #region Setup
         protected GameObject networkManagerGo;
         protected NetworkManager manager;
-        protected NetworkServer server;
+        protected Server server;
+        protected NetworkServer serverBehaviour;
         protected NetworkClient client;
         protected NetworkSceneManager sceneManager;
         protected ServerObjectManager serverObjectManager;
@@ -44,8 +46,9 @@ namespace Mirage.Tests.Runtime.Host
             serverObjectManager = networkManagerGo.AddComponent<ServerObjectManager>();
             clientObjectManager = networkManagerGo.AddComponent<ClientObjectManager>();
             manager = networkManagerGo.AddComponent<NetworkManager>();
+            serverBehaviour = networkManagerGo.GetComponent<NetworkServer>();
             manager.Client = networkManagerGo.GetComponent<NetworkClient>();
-            manager.Server = networkManagerGo.GetComponent<NetworkServer>();
+            manager.NetworkServer = serverBehaviour;
             server = manager.Server;
             client = manager.Client;
 
@@ -53,8 +56,8 @@ namespace Mirage.Tests.Runtime.Host
             if (ClientConfig != null) client.PeerConfig = ClientConfig;
 
             sceneManager.Client = client;
-            sceneManager.Server = server;
-            serverObjectManager.Server = server;
+            sceneManager.NetworkServer = serverBehaviour;
+            serverObjectManager.NetworkServer = serverBehaviour;
             serverObjectManager.NetworkSceneManager = sceneManager;
             clientObjectManager.Client = client;
             clientObjectManager.NetworkSceneManager = sceneManager;

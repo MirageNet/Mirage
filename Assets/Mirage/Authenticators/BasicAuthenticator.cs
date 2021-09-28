@@ -1,4 +1,5 @@
 using System.Collections;
+using Mirage.Core;
 using Mirage.Logging;
 using UnityEngine;
 
@@ -53,7 +54,7 @@ namespace Mirage.Authenticators
 
         #region Server Authenticate
 
-        public override void ServerSetup(NetworkServer server)
+        public override void ServerSetup(Server server)
         {
             // register messsage for Auth when server starts
             // this will ensure the handlers are ready when client connects (even in host mode)

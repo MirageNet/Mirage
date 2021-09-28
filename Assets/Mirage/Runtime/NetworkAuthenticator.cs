@@ -1,4 +1,5 @@
 using System;
+using Mirage.Core;
 using UnityEngine;
 
 namespace Mirage
@@ -43,7 +44,7 @@ namespace Mirage
         /// Used to set up authenticator on server
         /// <para>Can be used to register message handlers before any players connect</para>
         /// </summary>
-        public abstract void ServerSetup(NetworkServer server);
+        public abstract void ServerSetup(Server server);
 
         /// <summary>
         /// Authenticate the player on the Server.
@@ -100,9 +101,9 @@ namespace Mirage
             }
 
             NetworkServer server = GetComponent<NetworkServer>();
-            if (server != null && server.authenticator == null)
+            if (server != null && server.Server.Authenticator == null)
             {
-                server.authenticator = this;
+                server.Server.Authenticator = this;
             }
         }
 #endif

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.Core;
 using Mirage.SocketLayer;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
@@ -24,7 +25,7 @@ namespace Mirage.Tests.Performance.Runtime
         const int ClientCount = 10;
         const int MonsterCount = 10;
 
-        public NetworkServer Server;
+        public Server Server;
         public ServerObjectManager ServerObjectManager;
         public SocketFactory socketFactory;
 
@@ -41,7 +42,12 @@ namespace Mirage.Tests.Performance.Runtime
 
             MonsterPrefab = AssetDatabase.LoadAssetAtPath<NetworkIdentity>(MonsterPath);
             // load host
-            Server = Object.FindObjectOfType<NetworkServer>();
+            NetworkServer networkServer = Object.FindObjectOfType<NetworkServer>();
+            networkServer.Config.MaxConnections = ClientCount;
+            // since we change config via script, we need to recreate the server
+            networkServer.Awake();
+            Server = networkServer.Server;
+
             ServerObjectManager = Object.FindObjectOfType<ServerObjectManager>();
 
             Server.Authenticated.AddListener(conn => ServerObjectManager.SpawnVisibleObjects(conn, true));
@@ -55,7 +61,7 @@ namespace Mirage.Tests.Performance.Runtime
 
             await started.Task;
 
-            socketFactory = Server.GetComponent<SocketFactory>();
+            socketFactory = Server.SocketFactory;
             Debug.Assert(socketFactory != null, "Could not find socket factory for test");
 
             // connect from a bunch of clients

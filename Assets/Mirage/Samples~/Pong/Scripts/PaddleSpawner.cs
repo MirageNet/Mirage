@@ -10,11 +10,11 @@ namespace Mirage.Examples.Pong
 
         GameObject ball;
 
-        public override void Awake()
+        public override void Start()
         {
-            base.Awake();
+            base.Start();
 
-            if (Server != null)
+            if (NetworkServer != null)
             {
                 Server.Disconnected.AddListener(OnServerAddPlayer);
             }

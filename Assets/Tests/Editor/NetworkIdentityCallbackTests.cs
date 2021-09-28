@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks.Triggers;
 using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
@@ -137,13 +138,14 @@ namespace Mirage.Tests
         {
             networkServerGameObject = new GameObject();
             server = networkServerGameObject.AddComponent<NetworkServer>();
+            server.Awake();
             serverObjectManager = networkServerGameObject.AddComponent<ServerObjectManager>();
-            serverObjectManager.Server = server;
+            serverObjectManager.NetworkServer = server;
             networkServerGameObject.AddComponent<NetworkClient>();
 
             gameObject = new GameObject();
             identity = gameObject.AddComponent<NetworkIdentity>();
-            identity.Server = server;
+            identity.Server = server.Server;
             identity.ServerObjectManager = serverObjectManager;
 
             player1 = Substitute.For<INetworkPlayer>();
@@ -338,7 +340,7 @@ namespace Mirage.Tests
             identity.OnStartServer.AddListener(func);
 
             // Since we are testing that exceptions are not swallowed,
-            // when the mock is invoked, throw an exception 
+            // when the mock is invoked, throw an exception
             func
                 .When(f => f.Invoke())
                 .Do(f => { throw new Exception("Some exception"); });
@@ -644,7 +646,7 @@ namespace Mirage.Tests
         [Test]
         public void AddObserver()
         {
-            identity.Server = server;
+            identity.Server = server.Server;
 
             // call OnStartServer so that observers dict is created
             identity.StartServer();
@@ -789,8 +791,8 @@ namespace Mirage.Tests
             notReadyConnection.SceneIsReady.Returns(false);
 
             // add some server connections
-            server.Players.Add(readyConnection);
-            server.Players.Add(notReadyConnection);
+            server.Server.AddConnection(readyConnection);
+            server.Server.AddConnection(notReadyConnection);
 
             // rebuild observers should add all ready server connections
             // because no component implements OnRebuildObservers

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Mirage.Core;
 using Mirage.Logging;
 using UnityEngine;
 
@@ -57,7 +58,7 @@ namespace Mirage.Authenticators
                 StartCoroutine(BeginAuthentication(player, ClientReject));
         }
 
-        public override void ServerSetup(NetworkServer server)
+        public override void ServerSetup(Server server)
         {
             Authenticator.ServerSetup(server);
         }

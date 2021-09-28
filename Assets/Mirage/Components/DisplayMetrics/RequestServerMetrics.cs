@@ -1,14 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Mirage.Core;
 using Mirage.SocketLayer;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Mirage.DisplayMetrics
 {
     public class RequestServerMetrics : MonoBehaviour
     {
-        public NetworkServer server;
+        [FormerlySerializedAs("server")]
+        public NetworkServer NetworkServer;
         public NetworkClient client;
         public DisplayMetricsAverageGui displayMetrics;
         public bool RequestMetrics = false;
@@ -19,6 +22,7 @@ namespace Mirage.DisplayMetrics
         HashSet<INetworkPlayer> connections;
         private Metrics metrics;
         uint lastSendTick;
+        Server server => NetworkServer.Server;
 
         private void Start()
         {

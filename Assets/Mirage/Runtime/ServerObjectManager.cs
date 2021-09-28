@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Mirage.Core;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
@@ -41,8 +42,11 @@ namespace Mirage
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
 
-        [FormerlySerializedAs("server")]
-        public NetworkServer Server;
+        [FormerlySerializedAs("Server")]
+        public NetworkServer NetworkServer;
+
+        public Server Server => NetworkServer.Server;
+
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
@@ -51,7 +55,7 @@ namespace Mirage
 
         public void Start()
         {
-            if (Server != null)
+            if (NetworkServer != null)
             {
                 Server.Started.AddListener(OnServerStarted);
                 Server.OnStartHost.AddListener(StartedHost);
@@ -97,7 +101,7 @@ namespace Mirage
 
         void SpawnOrActivate()
         {
-            if (Server && Server.Active)
+            if (NetworkServer && Server.Active)
             {
                 SpawnObjects();
 
@@ -455,7 +459,7 @@ namespace Mirage
         /// </summary>
         public void Spawn(NetworkIdentity identity, INetworkPlayer owner)
         {
-            if (!Server || !Server.Active)
+            if (!NetworkServer || !Server.Active)
             {
                 throw new InvalidOperationException("NetworkServer is not active. Cannot spawn objects without an active server.");
             }
@@ -641,7 +645,7 @@ namespace Mirage
         public void SpawnObjects()
         {
             // only if server active
-            if (!Server || !Server.Active)
+            if (!NetworkServer || !Server.Active)
                 throw new InvalidOperationException("Server was not active");
 
             NetworkIdentity[] identities = Resources.FindObjectsOfTypeAll<NetworkIdentity>();

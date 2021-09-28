@@ -19,7 +19,7 @@ namespace Mirage.Tests.Runtime.Host
             spawner = networkManagerGo.AddComponent<CharacterSpawner>();
 
             spawner.Client = client;
-            spawner.Server = server;
+            spawner.NetworkServer = serverBehaviour;
             spawner.SceneManager = sceneManager;
             spawner.ClientObjectManager = clientObjectManager;
             spawner.ServerObjectManager = serverObjectManager;

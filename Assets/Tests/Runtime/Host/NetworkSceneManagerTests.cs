@@ -213,7 +213,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
 
-            sceneManager.Server = null;
+            sceneManager.NetworkServer = null;
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
             {

@@ -1,9 +1,12 @@
 using System;
 using System.Collections;
+using Castle.Components.DictionaryAdapter.Xml;
 using Cysharp.Threading.Tasks;
+using Mirage.Core;
 using Mirage.SocketLayer;
 using Mirage.Sockets.Udp;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Mirage.HeadlessBenchmark
 {
@@ -11,7 +14,9 @@ namespace Mirage.HeadlessBenchmark
     {
         public GameObject ServerPrefab;
         public GameObject ClientPrefab;
-        public NetworkServer server;
+
+        [FormerlySerializedAs("server")]
+        public NetworkServer NetworkServer;
         public ServerObjectManager serverObjectManager;
         public GameObject MonsterPrefab;
         public GameObject PlayerPrefab;
@@ -20,6 +25,8 @@ namespace Mirage.HeadlessBenchmark
 
         string[] cachedArgs;
         string port;
+
+        Server server => NetworkServer.Server;
 
         void Start()
         {
@@ -101,21 +108,20 @@ namespace Mirage.HeadlessBenchmark
 
             GameObject serverGo = Instantiate(ServerPrefab);
             serverGo.name = "Server";
-            server = serverGo.GetComponent<NetworkServer>();
-            server.MaxConnections = 9999;
+            serverGo.GetComponent<NetworkServer>().Config.MaxConnections = 9999;
             server.SocketFactory = socketFactory;
             serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
 
             NetworkSceneManager networkSceneManager = serverGo.GetComponent<NetworkSceneManager>();
-            networkSceneManager.Server = server;
+            networkSceneManager.NetworkServer = NetworkServer;
 
-            serverObjectManager.Server = server;
+            serverObjectManager.NetworkServer = NetworkServer;
             serverObjectManager.NetworkSceneManager = networkSceneManager;
             serverObjectManager.Start();
 
             CharacterSpawner spawner = serverGo.GetComponent<CharacterSpawner>();
             spawner.ServerObjectManager = serverObjectManager;
-            spawner.Server = server;
+            spawner.NetworkServer = NetworkServer;
 
             server.Started.AddListener(OnServerStarted);
             server.Authenticated.AddListener(conn => serverObjectManager.SpawnVisibleObjects(conn, true));

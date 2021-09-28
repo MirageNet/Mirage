@@ -1,12 +1,17 @@
+using Mirage.Core;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Mirage.DisplayMetrics
 {
     public class SetDisplayMetrics : MonoBehaviour
     {
-        public NetworkServer server;
+        [FormerlySerializedAs("server")]
+        public NetworkServer NetworkServer;
         public NetworkClient client;
         public DisplayMetricsAverageGui displayMetrics;
+
+        private Server server => NetworkServer.Server;
 
         private void Start()
         {

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.Core;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -50,7 +51,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             serverObjectManager.Spawn(serverIdentity);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => (NetworkServer)serverIdentity.Server == server);
+            await AsyncUtil.WaitUntilWithTimeout(() => (Server)serverIdentity.Server == server);
         });
 
         [Test]

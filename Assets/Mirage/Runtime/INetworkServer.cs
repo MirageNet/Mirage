@@ -44,8 +44,8 @@ namespace Mirage
         INetworkPlayer LocalPlayer { get; }
 
         /// <summary>
-        /// The host client for this server 
-        /// </summary> 
+        /// The host client for this server
+        /// </summary>
         INetworkClient LocalClient { get; }
 
         /// <summary>

@@ -12,6 +12,8 @@ namespace Mirage.Events
     {
         void AddListener(UnityAction handler);
         void RemoveListener(UnityAction handler);
+        void Invoke();
+        void Reset();
     }
 
 

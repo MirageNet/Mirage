@@ -54,8 +54,8 @@ namespace Mirage.Tests.Runtime
             player2.SceneIsReady.Returns(false);
 
             // add some server connections
-            server.Players.Add(player1);
-            server.Players.Add(player2);
+            server.AddConnection(player1);
+            server.AddConnection(player2);
 
             // add a host connection
             server.AddLocalConnection(client, Substitute.For<SocketLayer.IConnection>());

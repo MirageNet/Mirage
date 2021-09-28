@@ -32,18 +32,18 @@ namespace Mirage.Tests.Runtime
 
             server = serverGO.GetComponent<NetworkServer>();
             serverObjectManager = serverGO.GetComponent<ServerObjectManager>();
-            serverObjectManager.Server = server;
+            serverObjectManager.NetworkServer = server;
 
             character1 = new GameObject("TestCharacter1", typeof(NetworkIdentity), typeof(NetworkMatchChecker));
             character2 = new GameObject("TestCharacter2", typeof(NetworkIdentity), typeof(NetworkMatchChecker));
             character3 = new GameObject("TestCharacter3", typeof(NetworkIdentity));
 
 
-            character1.GetComponent<NetworkIdentity>().Server = server;
+            character1.GetComponent<NetworkIdentity>().Server = server.Server;
             character1.GetComponent<NetworkIdentity>().ServerObjectManager = serverObjectManager;
-            character2.GetComponent<NetworkIdentity>().Server = server;
+            character2.GetComponent<NetworkIdentity>().Server = server.Server;
             character2.GetComponent<NetworkIdentity>().ServerObjectManager = serverObjectManager;
-            character3.GetComponent<NetworkIdentity>().Server = server;
+            character3.GetComponent<NetworkIdentity>().Server = server.Server;
             character3.GetComponent<NetworkIdentity>().ServerObjectManager = serverObjectManager;
 
             player1MatchChecker = character1.GetComponent<NetworkMatchChecker>();

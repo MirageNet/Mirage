@@ -32,12 +32,12 @@ namespace Mirage.Tests
             clientObjectManager = go.AddComponent<ClientObjectManager>();
             spawner.SceneManager = sceneManager;
             sceneManager.Client = client;
-            sceneManager.Server = server;
-            serverObjectManager.Server = server;
+            sceneManager.NetworkServer = server;
+            serverObjectManager.NetworkServer = server;
             clientObjectManager.Client = client;
             clientObjectManager.NetworkSceneManager = sceneManager;
             spawner.Client = client;
-            spawner.Server = server;
+            spawner.NetworkServer = server;
             spawner.ServerObjectManager = serverObjectManager;
             spawner.ClientObjectManager = clientObjectManager;
 
@@ -50,6 +50,8 @@ namespace Mirage.Tests
             pos2 = new GameObject().transform;
             spawner.startPositions.Add(pos1);
             spawner.startPositions.Add(pos2);
+
+            server.Awake();
         }
 
         [TearDown]
@@ -68,7 +70,7 @@ namespace Mirage.Tests
             spawner.PlayerPrefab = null;
             Assert.Throws<InvalidOperationException>(() =>
             {
-                spawner.Awake();
+                spawner.Start();
             });
         }
 
@@ -78,28 +80,28 @@ namespace Mirage.Tests
             spawner.ServerObjectManager = null;
             Assert.Throws<InvalidOperationException>(() =>
             {
-                spawner.Awake();
+                spawner.Start();
             });
         }
 
         [Test]
         public void AutoConfigureClient()
         {
-            spawner.Awake();
+            spawner.Start();
             Assert.That(spawner.Client, Is.SameAs(client));
         }
 
         [Test]
         public void AutoConfigureServer()
         {
-            spawner.Awake();
-            Assert.That(spawner.Server, Is.SameAs(server));
+            spawner.Start();
+            Assert.That(spawner.NetworkServer, Is.SameAs(server));
         }
 
         [Test]
         public void GetStartPositionRoundRobinTest()
         {
-            spawner.Awake();
+            spawner.Start();
 
             spawner.playerSpawnMethod = CharacterSpawner.PlayerSpawnMethod.RoundRobin;
             Assert.That(spawner.GetStartPosition(), Is.SameAs(pos1.transform));
@@ -111,7 +113,7 @@ namespace Mirage.Tests
         [Test]
         public void GetStartPositionRandomTest()
         {
-            spawner.Awake();
+            spawner.Start();
 
             spawner.playerSpawnMethod = CharacterSpawner.PlayerSpawnMethod.Random;
             Assert.That(spawner.GetStartPosition(), Is.SameAs(pos1.transform) | Is.SameAs(pos2.transform));
@@ -120,7 +122,7 @@ namespace Mirage.Tests
         [Test]
         public void GetStartPositionNullTest()
         {
-            spawner.Awake();
+            spawner.Start();
 
             spawner.startPositions.Clear();
             Assert.That(spawner.GetStartPosition(), Is.SameAs(null));

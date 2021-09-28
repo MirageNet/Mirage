@@ -9,17 +9,17 @@ namespace Mirage.Events
     /// </summary>
     /// <remarks>
     /// <para>
-    /// AddLateEvent should be used for time sensitive events where Invoke might be called before the user has chance to add a handler. 
+    /// AddLateEvent should be used for time sensitive events where Invoke might be called before the user has chance to add a handler.
     /// For example Server Started event.
     /// </para>
     /// <para>
-    /// Events that are invoked multiple times, like AuthorityChanged, will have the most recent <see cref="Invoke"/> argument sent to new handler. 
+    /// Events that are invoked multiple times, like AuthorityChanged, will have the most recent <see cref="Invoke"/> argument sent to new handler.
     /// </para>
     /// </remarks>
     /// <example>
     /// This Example shows uses of Event
     /// <code>
-    /// 
+    ///
     /// public class Server : MonoBehaviour
     /// {
     ///     // shows in inspector
@@ -55,12 +55,12 @@ namespace Mirage.Events
     /// public class IntUnityEvent : UnityEvent&lt;int&gt; { }
     /// [Serializable]
     /// public class IntAddLateEvent : AddLateEvent&lt;int, IntUnityEvent&gt; { }
-    /// 
+    ///
     /// public class MyClass : MonoBehaviour
     /// {
     ///     [SerializeField]
     ///     private IntAddLateEvent customEvent;
-    /// 
+    ///
     ///     public IAddLateEvent&lt;int&gt; CustomEvent => customEvent;
     /// }
     /// </code>

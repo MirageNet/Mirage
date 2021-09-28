@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Mirage.Core;
 using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -16,9 +17,13 @@ namespace Mirage
 
         [FormerlySerializedAs("client")]
         public NetworkClient Client;
-        [FormerlySerializedAs("server")]
-        public NetworkServer Server;
-        [FormerlySerializedAs("sceneManager")]
+
+        [FormerlySerializedAs("Server")]
+        public NetworkServer NetworkServer;
+
+        public Server Server => NetworkServer.Server;
+
+            [FormerlySerializedAs("sceneManager")]
         public NetworkSceneManager SceneManager;
         [FormerlySerializedAs("clientObjectManager")]
         public ClientObjectManager ClientObjectManager;
@@ -33,7 +38,7 @@ namespace Mirage
         public bool AutoSpawn = true;
 
         // Start is called before the first frame update
-        public virtual void Awake()
+        public virtual void Start()
         {
             if (PlayerPrefab == null)
             {
@@ -51,7 +56,7 @@ namespace Mirage
                     Client.Connected.AddListener(OnClientConnected);
                 }
             }
-            if (Server != null)
+            if (NetworkServer != null)
             {
                 Server.Started.AddListener(OnServerStarted);
                 if (ServerObjectManager == null)
@@ -68,7 +73,7 @@ namespace Mirage
                 SceneManager.OnClientFinishedSceneChange.RemoveListener(OnClientFinishedSceneChange);
                 Client.Authenticated.RemoveListener(OnClientAuthenticated);
             }
-            if (Server != null)
+            if (NetworkServer != null)
             {
                 Server.Started.RemoveListener(OnServerStarted);
             }

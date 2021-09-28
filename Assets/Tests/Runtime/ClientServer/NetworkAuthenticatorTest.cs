@@ -1,4 +1,5 @@
 using System;
+using Mirage.Core;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -19,14 +20,14 @@ namespace Mirage.Tests.Runtime.ClientServer
             public override void ClientAuthenticate(INetworkPlayer player) => ClientAccept(player);
             public override void ServerAuthenticate(INetworkPlayer player) => ServerAccept(player);
             public override void ClientSetup(NetworkClient client) { }
-            public override void ServerSetup(NetworkServer server) { }
+            public override void ServerSetup(Server server) { }
         }
 
         public override void ExtraSetup()
         {
             serverAuthenticator = serverGo.AddComponent<NetworkAuthenticationImpl>();
             clientAuthenticator = clientGo.AddComponent<NetworkAuthenticationImpl>();
-            server.authenticator = serverAuthenticator;
+            server.Authenticator = serverAuthenticator;
             client.authenticator = clientAuthenticator;
 
             serverMockMethod = Substitute.For<Action<INetworkPlayer>>();
@@ -61,7 +62,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ServerOnValidateTest()
         {
-            Assert.That(server.authenticator, Is.EqualTo(serverAuthenticator));
+            Assert.That(server.Authenticator, Is.EqualTo(serverAuthenticator));
         }
 
         [Test]

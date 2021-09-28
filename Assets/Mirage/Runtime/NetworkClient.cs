@@ -1,4 +1,5 @@
 using System;
+using Mirage.Core;
 using Mirage.Events;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -183,7 +184,7 @@ namespace Mirage
             _disconnected?.Invoke(ClientStoppedReason.HostModeStopped);
         }
 
-        internal void ConnectHost(NetworkServer server, IDataHandler serverDataHandler)
+        internal void ConnectHost(Server server, IDataHandler serverDataHandler)
         {
             logger.Log("Client Connect Host to Server");
             // start connecting for setup, then "Peer_OnConnected" below will change to connected

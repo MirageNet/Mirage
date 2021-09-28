@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.Core;
 using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -29,8 +30,10 @@ namespace Mirage
         [FormerlySerializedAs("client")]
         public NetworkClient Client;
 
-        [FormerlySerializedAs("server")]
-        public NetworkServer Server;
+        [FormerlySerializedAs("Server")]
+        public NetworkServer NetworkServer;
+
+        public Server Server => NetworkServer.Server;
 
         /// <summary>
         ///     Sets the NetworksSceneManagers GameObject to DontDestroyOnLoad. Default = true.
@@ -123,7 +126,7 @@ namespace Mirage
             if (Client != null)
                 Client.Started.AddListener(RegisterClientMessages);
 
-            if (Server != null)
+            if (NetworkServer != null)
             {
                 Server.Started.AddListener(RegisterServerMessages);
                 Server.Authenticated.AddListener(OnServerAuthenticated);
@@ -136,7 +139,7 @@ namespace Mirage
             if (Client != null)
                 Client.Started.RemoveListener(RegisterClientMessages);
 
-            if (Server != null)
+            if (NetworkServer != null)
             {
                 Server.Started.RemoveListener(RegisterServerMessages);
                 Server.Authenticated.RemoveListener(OnServerAuthenticated);
@@ -376,11 +379,11 @@ namespace Mirage
             }
 
             var message = new SceneMessage { MainActivateScene = scenePath, SceneOperation = sceneOperation };
-            NetworkServer.SendToMany(players, message);
+            Core.Server.SendToMany(players, message);
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="scene"></param>
         /// <param name="players"></param>
@@ -408,7 +411,7 @@ namespace Mirage
 
             // notify all clients about the new scene
             var msg = new SceneMessage { MainActivateScene = scene.path, SceneOperation = SceneOperation.UnloadAdditive };
-            NetworkServer.SendToMany(players, msg);
+            Core.Server.SendToMany(players, msg);
         }
 
         /// <summary>
@@ -511,7 +514,7 @@ namespace Mirage
         }
 
         /// <summary>
-        /// default ready handler. 
+        /// default ready handler.
         /// </summary>
         /// <param name="player"></param>
         /// <param name="msg"></param>
@@ -561,7 +564,7 @@ namespace Mirage
 
         void ThrowIfNotServer()
         {
-            if (Server == null || !Server.Active) { throw new InvalidOperationException("Method can only be called if server is active"); }
+            if (NetworkServer == null || !Server.Active) { throw new InvalidOperationException("Method can only be called if server is active"); }
         }
 
         #endregion
@@ -576,7 +579,7 @@ namespace Mirage
         internal void CompleteLoadingScene(string scenePath, SceneOperation sceneOperation)
         {
             // If server mode call this to make sure scene finishes loading
-            if (Server && Server.Active)
+            if (NetworkServer && Server.Active)
             {
                 if (logger.LogEnabled())
                     logger.Log("[NetworkSceneManager] - Host: " + sceneOperation + " operation for scene: " +
@@ -696,7 +699,7 @@ namespace Mirage
 
             Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
 
-            if (Server && Server.Active)
+            if (NetworkServer && Server.Active)
             {
                 _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players));
             }
@@ -742,7 +745,7 @@ namespace Mirage
                 logger.LogWarning($"[NetworkSceneManager] - Cannot unload {scene} with UnloadAdditive operation");
             }
 
-            if (Server && Server.Active)
+            if (NetworkServer && Server.Active)
             {
                 _serverSceneData.Remove(scene);
             }

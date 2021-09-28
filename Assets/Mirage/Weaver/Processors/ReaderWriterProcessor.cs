@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Mirage.Core;
 using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -218,8 +219,8 @@ namespace Mirage.Weaver
                 method.Is<MessageHandler>(nameof(MessageHandler.RegisterHandler)) ||
                 method.Is<MessageHandler>(nameof(MessageHandler.UnregisterHandler)) ||
                 method.Is<NetworkClient>(nameof(NetworkClient.Send)) ||
-                method.Is<NetworkServer>(nameof(NetworkServer.SendToAll)) ||
-                method.Is<NetworkServer>(nameof(NetworkServer.SendToMany)) ||
+                method.Is<Server>(nameof(Server.SendToAll)) ||
+                method.Is<Server>(nameof(Server.SendToMany)) ||
                 method.Is<INetworkServer>(nameof(INetworkServer.SendToAll));
         }
 

@@ -1,3 +1,4 @@
+using Mirage.Core;
 using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,8 +12,10 @@ namespace Mirage
 
         [FormerlySerializedAs("client")]
         public NetworkClient Client;
-        [FormerlySerializedAs("server")]
-        public NetworkServer Server;
+        [FormerlySerializedAs("Server")]
+        public NetworkServer NetworkServer;
+
+        public Server Server => NetworkServer.Server;
 
         [Scene]
         [Tooltip("Assign the OnlineScene to load for this zone")]

@@ -18,9 +18,9 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         public override void ExtraSetup()
         {
-            authenticator = server.gameObject.AddComponent<BasicAuthenticator>();
+            authenticator = serverGo.AddComponent<BasicAuthenticator>();
 
-            server.authenticator = authenticator;
+            server.Authenticator = authenticator;
             client.authenticator = authenticator;
 
             base.ExtraSetup();

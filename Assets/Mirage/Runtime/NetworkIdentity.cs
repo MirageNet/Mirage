@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using Mirage.Core;
 using Mirage.RemoteCalls;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -38,12 +39,12 @@ namespace Mirage
     ///     The NetworkIdentity manages the dirty state of the NetworkBehaviours of the object.
     ///     When it discovers that NetworkBehaviours are dirty, it causes an update packet to be created and sent to clients.
     /// </para>
-    /// 
+    ///
     /// <list type="bullet">
     ///     <listheader><description>
     ///         The flow for serialization updates managed by the NetworkIdentity is:
     ///     </description></listheader>
-    ///     
+    ///
     ///     <item><description>
     ///         Each NetworkBehaviour has a dirty mask. This mask is available inside OnSerialize as syncVarDirtyBits
     ///     </description></item>
@@ -79,12 +80,12 @@ namespace Mirage
     ///         The UpdateVars packet is sent to ready clients that are observing the object
     ///     </description></item>
     /// </list>
-    /// 
+    ///
     /// <list type="bullet">
     ///     <listheader><description>
     ///         On the client:
     ///     </description></listheader>
-    /// 
+    ///
     ///     <item><description>
     ///         an UpdateVars packet is received for an object
     ///     </description></item>
@@ -923,12 +924,12 @@ namespace Mirage
             }
         }
 
-        internal void SetServerValues(NetworkServer networkServer, ServerObjectManager serverObjectManager)
+        internal void SetServerValues(Server server, ServerObjectManager serverObjectManager)
         {
-            Server = networkServer;
+            Server = server;
             ServerObjectManager = serverObjectManager;
-            World = networkServer.World;
-            Client = networkServer.LocalClient;
+            World = server.World;
+            Client = server.LocalClient;
         }
 
         internal void SetClientValues(ClientObjectManager clientObjectManager, SpawnMessage msg)
@@ -1298,7 +1299,7 @@ namespace Mirage
             }
 
             if (connectionsExcludeSelf.Count > 0)
-                NetworkServer.SendToMany(connectionsExcludeSelf, msg, channelId);
+                Core.Server.SendToMany(connectionsExcludeSelf, msg, channelId);
         }
 
         /// <summary>

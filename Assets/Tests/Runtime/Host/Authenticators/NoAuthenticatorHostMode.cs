@@ -4,7 +4,7 @@ namespace Mirage.Tests.Runtime.Host.Authenticators
     {
         protected override void AddAuthenticator()
         {
-            server.authenticator = null;
+            server.Authenticator = null;
             client.authenticator = null;
 
         }

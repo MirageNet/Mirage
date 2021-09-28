@@ -7,7 +7,7 @@ namespace Mirage.Tests.Runtime.Host.Authenticators
         protected override void AddAuthenticator()
         {
             BasicAuthenticator auth = networkManagerGo.AddComponent<BasicAuthenticator>();
-            server.authenticator = auth;
+            server.Authenticator = auth;
             client.authenticator = auth;
             auth.serverCode = "1234";
         }

@@ -16,6 +16,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             networkManagerHud = gameObject.GetComponent<NetworkManagerHud>();
             networkManagerHud.NetworkManager = clientGo.AddComponent<NetworkManager>();
             networkManagerHud.NetworkManager.Client = client;
+            networkManagerHud.NetworkManager.NetworkServer = serverBehaviour;
             networkManagerHud.OfflineGO = new GameObject();
             networkManagerHud.OnlineGO = new GameObject();
 

@@ -1,4 +1,5 @@
 using System;
+using Mirage.Core;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -20,8 +21,11 @@ namespace Mirage
     [DisallowMultipleComponent]
     public class NetworkManager : MonoBehaviour
     {
-        [FormerlySerializedAs("server")]
-        public NetworkServer Server;
+        [FormerlySerializedAs("Server")]
+        public NetworkServer NetworkServer;
+
+        public Server Server => NetworkServer.Server;
+
         [FormerlySerializedAs("client")]
         public NetworkClient Client;
         [FormerlySerializedAs("sceneManager")]

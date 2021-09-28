@@ -1,3 +1,4 @@
+using Mirage.Core;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Serialization;
@@ -16,6 +17,8 @@ namespace Mirage
         [Tooltip("Should the server auto-start when the game is started in a headless build?")]
         public bool startOnHeadless = true;
 
+        Server server => Server.Server;
+
         void Start()
         {
             // headless mode? then start the server
@@ -23,7 +26,7 @@ namespace Mirage
             // some transports might not be ready until Start.
             if (Server && SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null && startOnHeadless)
             {
-                Server.StartServer();
+                server.StartServer();
             }
         }
     }

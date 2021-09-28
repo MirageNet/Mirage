@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.Core;
 using Mirage.SocketLayer;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -14,7 +15,8 @@ namespace Mirage.Tests.Runtime.ClientServer
     {
 
         protected GameObject serverGo;
-        protected NetworkServer server;
+        protected NetworkServer serverBehaviour;
+        protected Server server;
         protected NetworkSceneManager serverSceneManager;
         protected ServerObjectManager serverObjectManager;
         protected GameObject serverPlayerGO;
@@ -52,7 +54,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             await UniTask.Delay(1);
 
-            server = serverGo.GetComponent<NetworkServer>();
+            serverBehaviour = serverGo.GetComponent<NetworkServer>();
+            server = serverBehaviour.Server;
             client = clientGo.GetComponent<NetworkClient>();
 
             if (ServerConfig != null) server.PeerConfig = ServerConfig;
@@ -63,13 +66,13 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             serverSceneManager = serverGo.GetComponent<NetworkSceneManager>();
             clientSceneManager = clientGo.GetComponent<NetworkSceneManager>();
-            serverSceneManager.Server = server;
+            serverSceneManager.NetworkServer = serverBehaviour;
             clientSceneManager.Client = client;
             serverSceneManager.Start();
             clientSceneManager.Start();
 
             serverObjectManager = serverGo.GetComponent<ServerObjectManager>();
-            serverObjectManager.Server = server;
+            serverObjectManager.NetworkServer = serverBehaviour;
             serverObjectManager.NetworkSceneManager = serverSceneManager;
             serverObjectManager.Start();
 

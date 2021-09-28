@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Mirage.Core;
 using Mirage.Logging;
 using UnityEngine;
 
@@ -37,7 +38,7 @@ namespace Mirage
                 }
             }
 
-            NetworkServer.SendToMany(playerCache, msg, channelId);
+            Server.SendToMany(playerCache, msg, channelId);
         }
     }
 }
