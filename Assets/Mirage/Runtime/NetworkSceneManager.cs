@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using UnityEngine;
@@ -424,7 +423,7 @@ namespace Mirage
         /// <param name="players">List of player's that are receiving the new scene load.</param>
         /// <param name="shouldClientLoadNormally">Should the clients load this additively too or load it full normal scene change.</param>
         /// <returns>Returns back to end users a scene reference.</returns>
-        public async Task<Scene> ServerLoadPhysicsScene(string scenePath, LoadSceneMode sceneOperation, LocalPhysicsMode physicsMode, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false)
+        public async UniTask<Scene> ServerLoadPhysicsScene(string scenePath, LoadSceneMode sceneOperation, LocalPhysicsMode physicsMode, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false)
         {
             ThrowIfNotServer();
 
@@ -440,9 +439,8 @@ namespace Mirage
             if (logger.logEnabled)
                 logger.Log("[NetworkSceneManager] - ServerLoadPhysicsScene");
 
-            SceneOperation sceneOperate = sceneOperation == LoadSceneMode.Single
-                ? SceneOperation.Normal
-                : SceneOperation.LoadAdditive;
+            SceneOperation sceneOperate = shouldClientLoadNormally ? SceneOperation.Normal :
+                sceneOperation == LoadSceneMode.Single ? SceneOperation.Normal : SceneOperation.LoadAdditive;
 
             OnServerStartedSceneChange?.Invoke(scenePath, sceneOperate);
 

@@ -231,7 +231,7 @@ namespace Mirage.Tests.Runtime.Host
 
             ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                sceneManager.ServerUnloadSceneAdditively(new Scene(), null);
+                sceneManager.ServerUnloadSceneAdditively(default, null);
             });
 
             string message = new ArgumentNullException("scene", "[NetworkSceneManager] - ServerChangeScene: " + "scene" + " cannot be null").Message;
@@ -282,6 +282,40 @@ namespace Mirage.Tests.Runtime.Host
             string message = new ArgumentNullException("players", "No player's were added to send for information").Message;
             Assert.That(exception, Has.Message.EqualTo(message));
         }
+
+        [Test]
+        public void ServerSceneLoadPhysicsThrowForInvalidSceneTest() => UniTask.ToCoroutine(async () =>
+        {
+            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
+            {
+                sceneManager.ServerLoadPhysicsScene(null, LoadSceneMode.Additive, LocalPhysicsMode.Physics3D, new[] { server.LocalPlayer });
+            });
+
+            string message = new ArgumentNullException("scenePath", "[NetworkSceneManager] - ServerLoadPhysicsScene: scenePath cannot be empty or null").Message;
+            Assert.That(exception, Has.Message.EqualTo(message));
+        });
+
+        [Test]
+        public void ServerSceneLoadPhysicsStartedSceneChangedInvokeTest() => UniTask.ToCoroutine(async () =>
+        {
+            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
+            sceneManager.OnServerStartedSceneChange.AddListener(func1);
+
+            await sceneManager.ServerLoadPhysicsScene("Assets/Mirror/Tests/Runtime/testScene.unity", LoadSceneMode.Additive, LocalPhysicsMode.Physics3D, new[] { server.LocalPlayer });
+
+            Assert.That(func1, Is.True);
+        });
+
+        [Test]
+        public void ServerSceneLoadPhysicsFinishedSceneChangedInvokeTest() => UniTask.ToCoroutine(async () =>
+        {
+            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
+            sceneManager.OnServerFinishedSceneChange.AddListener(func1);
+
+            await sceneManager.ServerLoadPhysicsScene("Assets/Mirror/Tests/Runtime/testScene.unity", LoadSceneMode.Additive, LocalPhysicsMode.Physics3D, new[] { server.LocalPlayer });
+
+            Assert.That(func1, Is.True);
+        });
 
         [Test]
         public void IsPlayerInSceneThrowForInvalidScene()

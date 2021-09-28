@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
@@ -58,7 +58,7 @@ namespace Mirage
         /// <param name="players">List of player's that are receiving the new scene load.</param>
         /// <param name="shouldClientLoadNormally">Should the clients load this additively too or load it full normal scene change.</param>
         /// <returns>Returns back to end users a scene reference.</returns>
-        Task<Scene> ServerLoadPhysicsScene(string scenePath, LoadSceneMode sceneOperation, LocalPhysicsMode physicsMode, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false);
+        UniTask<Scene> ServerLoadPhysicsScene(string scenePath, LoadSceneMode sceneOperation, LocalPhysicsMode physicsMode, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false);
 
         /// <summary>
         ///     Allows server to fully load in a new scene and override current active scene.
