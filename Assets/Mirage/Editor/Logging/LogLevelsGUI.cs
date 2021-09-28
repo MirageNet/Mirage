@@ -11,6 +11,19 @@ namespace Mirage.EditorScripts.Logging
 {
     public class LogLevelsGUI
     {
+        private static LogLevelsGUI _drawer;
+
+        public static void DrawStatic(LogSettings settings)
+        {
+            if (_drawer == null)
+            {
+                _drawer = new LogLevelsGUI(settings);
+            }
+
+            Debug.Assert(_drawer.settings == settings);
+            _drawer.Draw2();
+        }
+
         public static LogSettings DrawCreateNewButton()
         {
             if (GUILayout.Button("Create New"))
@@ -22,17 +35,17 @@ namespace Mirage.EditorScripts.Logging
         }
 
         readonly LogSettings settings;
-
-        public LogLevelsGUI(LogSettings settings)
-        {
-            this.settings = settings;
-        }
-        Dictionary<string, bool> folderOutState = new Dictionary<string, bool>();
+        readonly Dictionary<string, bool> folderOutState = new Dictionary<string, bool>();
 
         /// <summary>
         /// Keep track of gui changed. If it has changed then we need to update <see cref="LogFactory"/> and save the new levels to file
         /// </summary>
         bool guiChanged;
+
+        public LogLevelsGUI(LogSettings settings)
+        {
+            this.settings = settings;
+        }
 
         public void Draw2()
         {
@@ -147,7 +160,14 @@ namespace Mirage.EditorScripts.Logging
 
         private void ApplyAndSaveLevels()
         {
-            throw new NotImplementedException();
+            foreach (LogSettings.LoggerSettings logSetting in settings.LogLevels)
+            {
+                ILogger logger = LogFactory.GetLogger(logSetting.FullName);
+                logger.filterLogType = logSetting.logLevel;
+            }
+
+            // tood save outside of editor
+            EditorUtility.SetDirty(settings);
         }
 
         private LogType GetGroupLevel(IEnumerable<LogSettings.LoggerSettings> group)
@@ -203,6 +223,7 @@ namespace Mirage.EditorScripts.Logging
             }
         }
 
+        [System.Obsolete("old draw", true)]
         public void Draw()
         {
             using (var scope = new EditorGUI.ChangeCheckScope())

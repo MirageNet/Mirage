@@ -11,7 +11,7 @@ namespace Mirage.EditorScripts.Logging
         {
             CurrentScriptField();
 
-            LogLevelsGUI.DrawLogFactoryDictionary(target as LogSettings);
+            LogLevelsGUI.DrawStatic(target as LogSettings);
         }
 
         public void CurrentScriptField()

@@ -51,7 +51,7 @@ namespace Mirage.EditorScripts.Logging
                         }
                         else
                         {
-                            LogLevelsGUI.DrawLogFactoryDictionary(settings);
+                            LogLevelsGUI.DrawStatic(settings);
                         }
                     }
                 }

@@ -6,16 +6,6 @@ namespace Mirage.EditorScripts.Logging
     [CustomEditor(typeof(NetworkLogSettings))]
     public class NetworkLogSettingsEditor : Editor
     {
-        private LogLevelsGUI _drawer;
-
-        private LogLevelsGUI GetDrawer(LogSettings settings)
-        {
-            if (_drawer == null)
-            {
-                _drawer = new LogLevelsGUI(settings);
-            }
-            return _drawer;
-        }
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
@@ -34,7 +24,7 @@ namespace Mirage.EditorScripts.Logging
             }
             else
             {
-                GetDrawer(target.settings).Draw();
+                LogLevelsGUI.DrawStatic(target.settings);
             }
         }
     }
