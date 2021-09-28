@@ -440,9 +440,11 @@ namespace Mirage
             if (logger.logEnabled)
                 logger.Log("[NetworkSceneManager] - ServerLoadPhysicsScene");
 
-            OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation == LoadSceneMode.Single
+            SceneOperation sceneOperate = sceneOperation == LoadSceneMode.Single
                 ? SceneOperation.Normal
-                : SceneOperation.LoadAdditive);
+                : SceneOperation.LoadAdditive;
+
+            OnServerStartedSceneChange?.Invoke(scenePath, sceneOperate);
 
             await SceneManager.LoadSceneAsync(scenePath, new LoadSceneParameters { loadSceneMode = sceneOperation, localPhysicsMode = physicsMode });
 
@@ -452,23 +454,19 @@ namespace Mirage
 
             if (Server && Server.Active)
             {
-                _serverSceneData.Add(newScene, new HashSet<INetworkPlayer>(players));
+                _serverSceneData.Add(newScene, players == null ? new HashSet<INetworkPlayer>() : new HashSet<INetworkPlayer>(players));
             }
 
             var message = new SceneMessage
             {
                 MainActivateScene = scenePath,
-                SceneOperation = sceneOperation == LoadSceneMode.Single
-                    ? SceneOperation.Normal
-                    : SceneOperation.LoadAdditive
+                SceneOperation = sceneOperate
             };
 
             NetworkServer.SendToMany(players, message);
 
             // call OnServerSceneChanged
-            OnServerFinishedSceneLoad(scenePath, sceneOperation == LoadSceneMode.Single
-                ? SceneOperation.Normal
-                : SceneOperation.LoadAdditive);
+            OnServerFinishedSceneLoad(scenePath, sceneOperate);
 
             return SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
         }
