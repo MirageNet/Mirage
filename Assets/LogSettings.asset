@@ -1,0 +1,120 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac6e8eccf4b6f4dc7b24c276ef47fde8, type: 3}
+  m_Name: LogSettings
+  m_EditorClassIdentifier: 
+  LogLevels:
+  - Name: Reward
+    Namespace: Mirage.Examples.MultipleAdditiveScenes
+    logLevel: 2
+  - Name: ChatWindow
+    Namespace: Mirage.Examples.Chat
+    logLevel: 2
+  - Name: ZoneHandler
+    Namespace: Mirage.Examples.Additive
+    logLevel: 2
+  - Name: Tests
+    Namespace: Mirage.Tests.Weaver
+    logLevel: 4
+  - Name: HeadlessFrameLimiter
+    Namespace: Mirage
+    logLevel: 2
+  - Name: LobbyReady
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkAnimator
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkProximityChecker
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkSceneChecker
+    Namespace: Mirage
+    logLevel: 2
+  - Name: OnlineOfflineScene
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkRigidbody
+    Namespace: Mirage.Experimental
+    logLevel: 2
+  - Name: CharacterSpawner
+    Namespace: Mirage
+    logLevel: 2
+  - Name: ClientObjectManager
+    Namespace: Mirage
+    logLevel: 2
+  - Name: MessageHandler
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkBehaviour
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkClient
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkIdentity
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkPlayer
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkSceneManager
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkServer
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkTime
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkWorld
+    Namespace: Mirage
+    logLevel: 2
+  - Name: PipePeerConnection
+    Namespace: Mirage
+    logLevel: 2
+  - Name: ServerObjectManager
+    Namespace: Mirage
+    logLevel: 2
+  - Name: SyncVarReceiver
+    Namespace: Mirage
+    logLevel: 2
+  - Name: MirageTypesExtensions
+    Namespace: Mirage.Serialization
+    logLevel: 2
+  - Name: NetworkReaderPool
+    Namespace: Mirage.Serialization
+    logLevel: 2
+  - Name: NetworkWriterPool
+    Namespace: Mirage.Serialization
+    logLevel: 2
+  - Name: RemoteCallHelper
+    Namespace: Mirage.RemoteCalls
+    logLevel: 2
+  - Name: NetworkBehaviourInspector
+    Namespace: Mirage
+    logLevel: 2
+  - Name: NetworkScenePostProcess
+    Namespace: Mirage
+    logLevel: 2
+  - Name: SceneDrawer
+    Namespace: Mirage
+    logLevel: 2
+  - Name: WelcomeWindow
+    Namespace: Mirage
+    logLevel: 2
+  - Name: BasicAuthenticator
+    Namespace: Mirage.Authenticators
+    logLevel: 2
+  - Name: TimeoutAuthenticator
+    Namespace: Mirage.Authenticators
+    logLevel: 2
