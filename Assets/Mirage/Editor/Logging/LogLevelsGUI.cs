@@ -143,11 +143,16 @@ namespace Mirage.EditorScripts.Logging
                 {
                     foreach (Type type in asm.GetTypes())
                     {
+                        // skip unity so that we dont fine Debug.Logger
+                        if (type.FullName.StartsWith("UnityEngine."))
+                            continue;
+
                         foreach (FieldInfo field in type.GetFields(flags))
                         {
                             if (field.IsStatic && field.FieldType == typeof(ILogger))
                             {
                                 var value = (ILogger)field.GetValue(null);
+                                AddIfMissing(type, value);
                                 Debug.Log($"{type} {value.filterLogType}");
                             }
                         }
@@ -155,6 +160,17 @@ namespace Mirage.EditorScripts.Logging
                 }
                 guiChanged = true;
                 Debug.Log(LogFactory.loggers.Count);
+            }
+        }
+
+        private void AddIfMissing(Type type, ILogger logger)
+        {
+            string fullName = type.FullName;
+            LogType logType = logger.filterLogType;
+            bool exist = settings.LogLevels.Any(x => x.FullName == fullName);
+            if (!exist)
+            {
+                settings.LogLevels.Add(new LogSettings.LoggerSettings(fullName, logType));
             }
         }
 
