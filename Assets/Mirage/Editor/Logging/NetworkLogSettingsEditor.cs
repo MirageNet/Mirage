@@ -24,7 +24,7 @@ namespace Mirage.EditorScripts.Logging
             }
             else
             {
-                LogLevelsGUI.DrawStatic(target.settings);
+                LogLevelsGUI.DrawSettings(target.settings);
             }
         }
     }

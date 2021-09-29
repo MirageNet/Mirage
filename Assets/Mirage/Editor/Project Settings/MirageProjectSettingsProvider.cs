@@ -17,16 +17,6 @@ namespace Mirage.Settings
             return new MirageProjectSettingsProvider("Mirage/Logging", SettingsScope.Project) { label = "Logging" };
         }
 
-        private LogLevelsGUI _drawer;
-        private LogLevelsGUI GetDrawer(LogSettings settings)
-        {
-            if (_drawer == null)
-            {
-                _drawer = new LogLevelsGUI(settings);
-            }
-            return _drawer;
-        }
-
         public override void OnGUI(string searchContext)
         {
             if (settings == null)
@@ -37,8 +27,7 @@ namespace Mirage.Settings
             }
             else
             {
-                LogLevelsGUI drawer = GetDrawer(settings);
-                drawer.Draw2();
+                LogLevelsGUI.DrawStatic();
             }
         }
     }
