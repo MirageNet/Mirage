@@ -13,7 +13,7 @@ namespace Mirage.EditorScripts.Logging
     {
         private static LogLevelsGUI _drawer;
 
-        public static void DrawStatic(LogSettings settings)
+        public static void DrawSettings(LogSettings settings)
         {
             if (_drawer == null)
             {
@@ -21,7 +21,7 @@ namespace Mirage.EditorScripts.Logging
             }
 
             Debug.Assert(_drawer.settings == settings);
-            _drawer.Draw2();
+            _drawer.Draw();
         }
 
         public static LogSettings DrawCreateNewButton()
@@ -47,10 +47,9 @@ namespace Mirage.EditorScripts.Logging
             this.settings = settings;
         }
 
-        public void Draw2()
+        public void Draw()
         {
             guiChanged = false;
-            EditorGUILayout.Space();
 
             EditorGUI.BeginChangeCheck();
 
@@ -212,6 +211,14 @@ namespace Mirage.EditorScripts.Logging
             }
         }
 
+        private static LogType DrawNiceEnum(LogSettings.LoggerSettings loggerType)
+        {
+            string name = loggerType.Name;
+            LogType level = loggerType.logLevel;
+
+            return (LogType)EditorGUILayout.EnumPopup(ObjectNames.NicifyVariableName(name), level);
+        }
+
         private class LogGUIScope : GUI.Scope
         {
             private readonly float labelWidth;
@@ -238,22 +245,6 @@ namespace Mirage.EditorScripts.Logging
                 GUILayout.EndVertical();
                 EditorGUIUtility.labelWidth = labelWidth;
             }
-        }
-
-        private static LogType DrawNiceEnum(LogSettings.LoggerSettings loggerType)
-        {
-            string name = loggerType.Name;
-            LogType level = loggerType.logLevel;
-
-            return (LogType)EditorGUILayout.EnumPopup(ObjectNames.NicifyVariableName(name), level);
-
-            //const float fieldWidth = 100f;
-            //const float inspectorMargin = 25f;
-            //using (new EditorGUILayout.HorizontalScope())
-            //{
-            //    EditorGUILayout.LabelField(new GUIContent(ObjectNames.NicifyVariableName(name)), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - fieldWidth - inspectorMargin));
-            //    return (LogType)EditorGUILayout.EnumPopup(level, GUILayout.Width(fieldWidth));
-            //}
         }
     }
 }
