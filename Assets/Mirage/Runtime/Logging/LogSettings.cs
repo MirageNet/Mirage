@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 namespace Mirage.Logging
@@ -7,7 +8,7 @@ namespace Mirage.Logging
     /// </summary>
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/NetworkLogSettings")]
-    [HelpURL("https://mirror-networking.com/docs/Articles/Components/NetworkLogSettings.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkLogSettings.html")]
     public class LogSettings : MonoBehaviour
     {
         [Header("Log Settings Asset")]
@@ -20,9 +21,8 @@ namespace Mirage.Logging
             LogSettingsSO existingSettings = EditorLogSettingsLoader.FindLogSettings();
             if (existingSettings != null)
             {
+                Undo.RecordObject(this, "adding existing settings");
                 settings = existingSettings;
-
-                UnityEditor.EditorUtility.SetDirty(this);
             }
         }
 #endif
