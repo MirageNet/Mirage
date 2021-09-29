@@ -7,7 +7,7 @@ namespace Mirage.Logging
     /// Used to load LogSettings in build
     /// </summary>
     [DisallowMultipleComponent]
-    [AddComponentMenu("Network/NetworkLogSettings")]
+    [AddComponentMenu("Network/LogSettings")]
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkLogSettings.html")]
     public class LogSettings : MonoBehaviour
     {

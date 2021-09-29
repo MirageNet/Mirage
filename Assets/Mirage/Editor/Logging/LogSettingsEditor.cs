@@ -1,24 +1,31 @@
 using Mirage.Logging;
 using UnityEditor;
-using UnityEngine;
 
 namespace Mirage.EditorScripts.Logging
 {
-    [CustomEditor(typeof(LogSettingsSO))]
+    [CustomEditor(typeof(LogSettings))]
     public class LogSettingsEditor : Editor
     {
         public override void OnInspectorGUI()
         {
-            CurrentScriptField();
-            EditorGUILayout.Space();
-            LogLevelsGUI.DrawSettings(target as LogSettingsSO);
-        }
+            DrawDefaultInspector();
 
-        public void CurrentScriptField()
-        {
-            GUI.enabled = false;
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Script"));
-            GUI.enabled = true;
+            var target = this.target as LogSettings;
+
+            if (target.settings == null)
+            {
+                LogSettingsSO newSettings = LogLevelsGUI.DrawCreateNewButton();
+                if (newSettings != null)
+                {
+                    SerializedProperty settingsProp = serializedObject.FindProperty("settings");
+                    settingsProp.objectReferenceValue = newSettings;
+                    serializedObject.ApplyModifiedProperties();
+                }
+            }
+            else
+            {
+                LogLevelsGUI.DrawSettings(target.settings);
+            }
         }
     }
 }
