@@ -6,6 +6,8 @@ namespace Mirage.Logging
 #if UNITY_EDITOR
     public static class EditorLogSettingsLoader
     {
+        static LogSettingsSO cache;
+
         [InitializeOnLoadMethod]
         static void Init()
         {
@@ -22,7 +24,6 @@ namespace Mirage.Logging
             }
         }
 
-        static LogSettingsSO cache;
         public static LogSettingsSO FindLogSettings()
         {
             if (cache != null)
