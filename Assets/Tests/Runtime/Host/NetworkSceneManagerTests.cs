@@ -284,37 +284,43 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         [Test]
-        public void ServerSceneLoadPhysicsThrowForInvalidSceneTest() => UniTask.ToCoroutine(async () =>
+        public void ServerSceneLoadPhysicsThrowForInvalidSceneTest()
         {
-            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
-            {
-                sceneManager.ServerLoadPhysicsScene(null, LoadSceneMode.Additive, LocalPhysicsMode.Physics3D, new[] { server.LocalPlayer });
-            });
-
             string message = new ArgumentNullException("scenePath", "[NetworkSceneManager] - ServerLoadPhysicsScene: scenePath cannot be empty or null").Message;
-            Assert.That(exception, Has.Message.EqualTo(message));
-        });
 
-        [Test]
-        public void ServerSceneLoadPhysicsStartedSceneChangedInvokeTest() => UniTask.ToCoroutine(async () =>
+            try
+            {
+                UniTask<Scene> test = sceneManager.ServerLoadPhysicsScene(null, LoadSceneMode.Additive, LocalPhysicsMode.Physics3D,
+                    new[] { server.LocalPlayer });
+            }
+            catch (Exception e)
+            {
+                Assert.That(e.Message, Has.Message.EqualTo(message));
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ServerSceneLoadPhysicsStartedSceneChangedInvokeTest() => UniTask.ToCoroutine(async () =>
         {
-            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
-            sceneManager.OnServerStartedSceneChange.AddListener(func1);
+            bool serverStartedLoading = false;
+
+            sceneManager.OnServerStartedSceneChange.AddListener((arg0, operation) => serverStartedLoading = true);
 
             await sceneManager.ServerLoadPhysicsScene("Assets/Mirror/Tests/Runtime/testScene.unity", LoadSceneMode.Additive, LocalPhysicsMode.Physics3D, new[] { server.LocalPlayer });
 
-            Assert.That(func1, Is.True);
+            Assert.That(serverStartedLoading, Is.True);
         });
 
-        [Test]
-        public void ServerSceneLoadPhysicsFinishedSceneChangedInvokeTest() => UniTask.ToCoroutine(async () =>
+        [UnityTest]
+        public IEnumerator ServerSceneLoadPhysicsFinishedSceneChangedInvokeTest() => UniTask.ToCoroutine(async () =>
         {
-            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
-            sceneManager.OnServerFinishedSceneChange.AddListener(func1);
+            bool serverFinishedLoading = false;
+
+            sceneManager.OnServerFinishedSceneChange.AddListener((arg0, operation) => serverFinishedLoading = true);
 
             await sceneManager.ServerLoadPhysicsScene("Assets/Mirror/Tests/Runtime/testScene.unity", LoadSceneMode.Additive, LocalPhysicsMode.Physics3D, new[] { server.LocalPlayer });
 
-            Assert.That(func1, Is.True);
+            Assert.That(serverFinishedLoading, Is.True);
         });
 
         [Test]
