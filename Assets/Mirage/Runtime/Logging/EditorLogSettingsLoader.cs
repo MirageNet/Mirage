@@ -18,7 +18,7 @@ namespace Mirage.Logging
             LogSettingsSO settings = FindLogSettings();
             if (settings != null)
             {
-                settings.LoadIntoDictionary(LogFactory.loggers);
+                settings.LoadIntoLogFactory();
             }
         }
 

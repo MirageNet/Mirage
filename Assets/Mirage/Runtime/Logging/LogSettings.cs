@@ -40,7 +40,7 @@ namespace Mirage.Logging
 
         void RefreshDictionary()
         {
-            settings.LoadIntoDictionary(LogFactory.loggers);
+            settings.LoadIntoLogFactory();
         }
     }
 }

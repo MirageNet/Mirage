@@ -52,8 +52,9 @@ namespace Mirage.Logging
 
     public static class LogSettingsExtensions
     {
-        public static void SaveFromDictionary(this LogSettingsSO settings, Dictionary<string, ILogger> dictionary)
+        public static void SaveFromLogFactory(this LogSettingsSO settings)
         {
+            Dictionary<string, ILogger> dictionary = LogFactory.loggers;
             if (settings == null)
             {
                 Debug.LogWarning("Could not SaveFromDictionary because LogSettings were null");
@@ -72,7 +73,7 @@ namespace Mirage.Logging
 #endif
         }
 
-        public static void LoadIntoDictionary(this LogSettingsSO settings, Dictionary<string, ILogger> dictionary)
+        public static void LoadIntoLogFactory(this LogSettingsSO settings)
         {
             if (settings == null)
             {
@@ -82,19 +83,8 @@ namespace Mirage.Logging
 
             foreach (LogSettingsSO.LoggerSettings logLevel in settings.LogLevels)
             {
-                if (dictionary.TryGetValue(logLevel.FullName, out ILogger logger))
-                {
-                    logger.filterLogType = logLevel.logLevel;
-                }
-                else
-                {
-                    logger = new Logger(Debug.unityLogger)
-                    {
-                        filterLogType = logLevel.logLevel
-                    };
-
-                    dictionary[logLevel.FullName] = logger;
-                }
+                ILogger logger = LogFactory.GetLogger(logLevel.FullName);
+                logger.filterLogType = logLevel.logLevel;
             }
         }
     }
