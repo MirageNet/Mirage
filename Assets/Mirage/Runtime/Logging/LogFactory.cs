@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Mirage.Logging
@@ -88,8 +89,11 @@ namespace Mirage.Logging
             logger.Log(LogType.Warning, message);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool LogEnabled(this ILogger logger) => logger.IsLogTypeAllowed(LogType.Log);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool WarnEnabled(this ILogger logger) => logger.IsLogTypeAllowed(LogType.Warning);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ErrorEnabled(this ILogger logger) => logger.IsLogTypeAllowed(LogType.Error);
     }
 }
