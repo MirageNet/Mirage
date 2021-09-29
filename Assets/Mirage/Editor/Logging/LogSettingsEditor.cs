@@ -10,8 +10,8 @@ namespace Mirage.EditorScripts.Logging
         public override void OnInspectorGUI()
         {
             CurrentScriptField();
-
-            LogLevelsGUI.DrawStatic(target as LogSettings);
+            EditorGUILayout.Space();
+            LogLevelsGUI.DrawSettings(target as LogSettings);
         }
 
         public void CurrentScriptField()
