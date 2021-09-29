@@ -1,20 +1,19 @@
 using System.Collections.Generic;
-using Mirage.EditorScripts.Logging;
 using Mirage.Logging;
 using UnityEditor;
 
-namespace Mirage.Settings
+namespace Mirage.EditorScripts.Logging
 {
-    public class MirageProjectSettingsProvider : SettingsProvider
+    public class LogSettingsProvider : SettingsProvider
     {
         private LogSettingsSO settings;
 
-        public MirageProjectSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords) { }
+        public LogSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords) { }
 
         [SettingsProvider]
         public static SettingsProvider CreateProvider()
         {
-            return new MirageProjectSettingsProvider("Mirage/Logging", SettingsScope.Project) { label = "Logging" };
+            return new LogSettingsProvider("Mirage/Logging", SettingsScope.Project) { label = "Logging" };
         }
 
         public override void OnGUI(string searchContext)
@@ -27,7 +26,7 @@ namespace Mirage.Settings
             }
             else
             {
-                LogLevelsGUI.DrawStatic();
+                LogLevelsGUI.DrawSettings(settings);
             }
         }
     }
