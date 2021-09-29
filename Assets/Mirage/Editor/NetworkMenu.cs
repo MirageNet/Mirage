@@ -23,6 +23,7 @@ namespace Mirage
                 typeof(ClientObjectManager),
                 typeof(CharacterSpawner),
                 typeof(UdpSocketFactory),
+                typeof(LogSettingsSO)
             };
             var go = new GameObject("NetworkManager", components);
 

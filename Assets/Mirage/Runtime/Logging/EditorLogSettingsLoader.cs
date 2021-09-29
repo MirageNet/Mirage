@@ -15,31 +15,31 @@ namespace Mirage.Logging
 
         public static void LoadLogSettingsIntoDictionary()
         {
-            LogSettings settings = FindLogSettings();
+            LogSettingsSO settings = FindLogSettings();
             if (settings != null)
             {
                 settings.LoadIntoDictionary(LogFactory.loggers);
             }
         }
 
-        static LogSettings cache;
-        public static LogSettings FindLogSettings()
+        static LogSettingsSO cache;
+        public static LogSettingsSO FindLogSettings()
         {
             if (cache != null)
                 return cache;
 
-            cache = Object.FindObjectOfType<LogSettings>();
+            cache = Object.FindObjectOfType<LogSettingsSO>();
             if (cache != null)
                 return cache;
 
-            string[] assetGuids = AssetDatabase.FindAssets("t:" + nameof(LogSettings));
+            string[] assetGuids = AssetDatabase.FindAssets("t:" + nameof(LogSettingsSO));
             if (assetGuids.Length == 0)
                 return null;
 
             string firstGuid = assetGuids[0];
 
             string path = AssetDatabase.GUIDToAssetPath(firstGuid);
-            cache = AssetDatabase.LoadAssetAtPath<LogSettings>(path);
+            cache = AssetDatabase.LoadAssetAtPath<LogSettingsSO>(path);
 
             if (assetGuids.Length > 2)
             {

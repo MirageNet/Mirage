@@ -7,7 +7,7 @@ namespace Mirage.Settings
 {
     public class MirageProjectSettingsProvider : SettingsProvider
     {
-        private LogSettings settings;
+        private LogSettingsSO settings;
 
         public MirageProjectSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords) { }
 

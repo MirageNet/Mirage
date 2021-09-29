@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using JamesFrowen.EditorScripts;
 using Mirage.Logging;
 using UnityEditor;
 using UnityEngine;
@@ -13,7 +12,7 @@ namespace Mirage.EditorScripts.Logging
     {
         private static LogLevelsGUI _drawer;
 
-        public static void DrawSettings(LogSettings settings)
+        public static void DrawSettings(LogSettingsSO settings)
         {
             if (_drawer == null)
             {
@@ -24,17 +23,17 @@ namespace Mirage.EditorScripts.Logging
             _drawer.Draw();
         }
 
-        public static LogSettings DrawCreateNewButton()
+        public static LogSettingsSO DrawCreateNewButton()
         {
             if (GUILayout.Button("Create New"))
             {
-                return ScriptableObjectUtility.CreateAsset<LogSettings>(nameof(LogSettings));
+                return ScriptableObjectUtility.CreateAsset<LogSettingsSO>(nameof(LogSettingsSO), "Assets");
             }
 
             return null;
         }
 
-        readonly LogSettings settings;
+        readonly LogSettingsSO settings;
         readonly Dictionary<string, bool> folderOutState = new Dictionary<string, bool>();
 
         /// <summary>
@@ -42,7 +41,7 @@ namespace Mirage.EditorScripts.Logging
         /// </summary>
         bool guiChanged;
 
-        public LogLevelsGUI(LogSettings settings)
+        public LogLevelsGUI(LogSettingsSO settings)
         {
             this.settings = settings;
         }
@@ -60,7 +59,7 @@ namespace Mirage.EditorScripts.Logging
 
                 EditorGUILayout.Space();
 
-                foreach (IGrouping<string, LogSettings.LoggerSettings> group in settings.LogLevels.GroupBy(x => x.Namespace).OrderBy(x => x.Key))
+                foreach (IGrouping<string, LogSettingsSO.LoggerSettings> group in settings.LogLevels.GroupBy(x => x.Namespace).OrderBy(x => x.Key))
                 {
                     DrawGroup(group);
                 }
@@ -89,7 +88,7 @@ namespace Mirage.EditorScripts.Logging
             }
         }
 
-        private void DrawGroup(IGrouping<string, LogSettings.LoggerSettings> group)
+        private void DrawGroup(IGrouping<string, LogSettingsSO.LoggerSettings> group)
         {
             string NameSpace = group.Key;
             if (!folderOutState.ContainsKey(NameSpace))
@@ -100,7 +99,7 @@ namespace Mirage.EditorScripts.Logging
             if (folderOutState[NameSpace])
             {
                 EditorGUI.indentLevel++;
-                foreach (LogSettings.LoggerSettings loggerType in group.OrderBy(x => x.Name))
+                foreach (LogSettingsSO.LoggerSettings loggerType in group.OrderBy(x => x.Name))
                 {
                     using (var scope = new EditorGUI.ChangeCheckScope())
                     {
@@ -133,9 +132,6 @@ namespace Mirage.EditorScripts.Logging
         {
             if (GUILayout.Button("Find All type using logger"))
             {
-                // todo remove logs
-                Debug.Log(LogFactory.loggers.Count);
-
                 BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 
                 Assembly[] loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -153,13 +149,11 @@ namespace Mirage.EditorScripts.Logging
                             {
                                 var value = (ILogger)field.GetValue(null);
                                 AddIfMissing(type, value);
-                                Debug.Log($"{type} {value.filterLogType}");
                             }
                         }
                     }
                 }
                 guiChanged = true;
-                Debug.Log(LogFactory.loggers.Count);
             }
         }
 
@@ -170,13 +164,13 @@ namespace Mirage.EditorScripts.Logging
             bool exist = settings.LogLevels.Any(x => x.FullName == fullName);
             if (!exist)
             {
-                settings.LogLevels.Add(new LogSettings.LoggerSettings(fullName, logType));
+                settings.LogLevels.Add(new LogSettingsSO.LoggerSettings(fullName, logType));
             }
         }
 
         private void ApplyAndSaveLevels()
         {
-            foreach (LogSettings.LoggerSettings logSetting in settings.LogLevels)
+            foreach (LogSettingsSO.LoggerSettings logSetting in settings.LogLevels)
             {
                 ILogger logger = LogFactory.GetLogger(logSetting.FullName);
                 logger.filterLogType = logSetting.logLevel;
@@ -186,7 +180,7 @@ namespace Mirage.EditorScripts.Logging
             EditorUtility.SetDirty(settings);
         }
 
-        private LogType GetGroupLevel(IEnumerable<LogSettings.LoggerSettings> group)
+        private LogType GetGroupLevel(IEnumerable<LogSettingsSO.LoggerSettings> group)
         {
             if (!group.Any()) { return LogType.Warning; }
 
@@ -203,15 +197,15 @@ namespace Mirage.EditorScripts.Logging
                 return (LogType)(-1);
             }
         }
-        private void SetGroupLevel(IEnumerable<LogSettings.LoggerSettings> group, LogType level)
+        private void SetGroupLevel(IEnumerable<LogSettingsSO.LoggerSettings> group, LogType level)
         {
-            foreach (LogSettings.LoggerSettings logger in group)
+            foreach (LogSettingsSO.LoggerSettings logger in group)
             {
                 logger.logLevel = level;
             }
         }
 
-        private static LogType DrawNiceEnum(LogSettings.LoggerSettings loggerType)
+        private static LogType DrawNiceEnum(LogSettingsSO.LoggerSettings loggerType)
         {
             string name = loggerType.Name;
             LogType level = loggerType.logLevel;
@@ -247,18 +241,15 @@ namespace Mirage.EditorScripts.Logging
             }
         }
     }
-}
 
-namespace JamesFrowen.EditorScripts
-{
-    public static class ScriptableObjectUtility
+    internal static class ScriptableObjectUtility
     {
         /// <summary>
-        //	This makes it easy to create, name and place unique new ScriptableObject asset files.
+        ///	This makes it easy to create, name and place unique new ScriptableObject asset files.
         /// </summary>
-        public static T CreateAsset<T>(string defaultName) where T : ScriptableObject
+        public static T CreateAsset<T>(string defaultName, string defaultPath) where T : ScriptableObject
         {
-            string path = SavePanel(defaultName);
+            string path = SavePanel(defaultName, defaultPath);
             // user click cancel
             if (string.IsNullOrEmpty(path)) { return null; }
 
@@ -269,11 +260,11 @@ namespace JamesFrowen.EditorScripts
             return asset;
         }
 
-        static string SavePanel(string name)
+        static string SavePanel(string name, string defaultPath)
         {
             string path = EditorUtility.SaveFilePanel(
                            "Save ScriptableObject",
-                           "Assets/Mirror/",
+                           defaultPath,
                            name + ".asset",
                            "asset");
 

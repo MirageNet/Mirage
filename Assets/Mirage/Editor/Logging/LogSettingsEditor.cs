@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace Mirage.EditorScripts.Logging
 {
-    [CustomEditor(typeof(LogSettings))]
+    [CustomEditor(typeof(LogSettingsSO))]
     public class LogSettingsEditor : Editor
     {
         public override void OnInspectorGUI()
         {
             CurrentScriptField();
             EditorGUILayout.Space();
-            LogLevelsGUI.DrawSettings(target as LogSettings);
+            LogLevelsGUI.DrawSettings(target as LogSettingsSO);
         }
 
         public void CurrentScriptField()

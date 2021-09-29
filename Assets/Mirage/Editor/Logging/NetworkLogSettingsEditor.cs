@@ -3,18 +3,18 @@ using UnityEditor;
 
 namespace Mirage.EditorScripts.Logging
 {
-    [CustomEditor(typeof(NetworkLogSettings))]
+    [CustomEditor(typeof(LogSettings))]
     public class NetworkLogSettingsEditor : Editor
     {
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
 
-            var target = this.target as NetworkLogSettings;
+            var target = this.target as LogSettings;
 
             if (target.settings == null)
             {
-                LogSettings newSettings = LogLevelsGUI.DrawCreateNewButton();
+                LogSettingsSO newSettings = LogLevelsGUI.DrawCreateNewButton();
                 if (newSettings != null)
                 {
                     SerializedProperty settingsProp = serializedObject.FindProperty("settings");
