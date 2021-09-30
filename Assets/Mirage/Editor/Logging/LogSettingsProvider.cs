@@ -18,6 +18,7 @@ namespace Mirage.EditorScripts.Logging
 
         public override void OnGUI(string searchContext)
         {
+            settings = (LogSettingsSO)EditorGUILayout.ObjectField("Settings", settings, typeof(LogSettingsSO), false);
             if (settings == null)
             {
                 settings = EditorLogSettingsLoader.FindLogSettings();

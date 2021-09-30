@@ -25,7 +25,7 @@ namespace Mirage.EditorScripts.Logging
 
         public static LogSettingsSO DrawCreateNewButton()
         {
-            if (GUILayout.Button("Create New"))
+            if (GUILayout.Button("Create New Settings"))
             {
                 LogSettingsSO newSettings = ScriptableObjectUtility.CreateAsset<LogSettingsSO>(nameof(LogSettingsSO), "Assets");
                 newSettings.SaveFromLogFactory();
