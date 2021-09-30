@@ -1,3 +1,10 @@
+## [105.1.2](https://github.com/MirageNet/Mirage/compare/v105.1.1...v105.1.2) (2021-09-30)
+
+
+### Bug Fixes
+
+* **ServerRpc:** fixing error message when client is not set ([f9c8033](https://github.com/MirageNet/Mirage/commit/f9c8033b1ad4e137d439336bd515d3ae96df1cdc))
+
 ## [105.1.1](https://github.com/MirageNet/Mirage/compare/v105.1.0...v105.1.1) (2021-09-25)
 
 
