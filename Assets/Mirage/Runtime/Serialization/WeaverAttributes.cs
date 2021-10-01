@@ -93,7 +93,7 @@ namespace Mirage.Serialization
     /// </summary>
     public class QuaternionPackAttribute : Attribute
     {
-        public QuaternionPackAttribute(int bitPerElement) { }
+        public QuaternionPackAttribute(int bitPerElement = 9) { }
     }
 
     /// <summary>
