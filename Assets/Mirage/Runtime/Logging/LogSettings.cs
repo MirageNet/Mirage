@@ -1,35 +1,46 @@
-using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace Mirage.Logging
 {
-    [ExecuteInEditMode]
+    /// <summary>
+    /// Used to load LogSettings in build
+    /// </summary>
+    [DisallowMultipleComponent]
     [AddComponentMenu("Network/LogSettings")]
+    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkLogSettings.html")]
     public class LogSettings : MonoBehaviour
     {
-        [System.Serializable]
-        public struct Level
+        [Header("Log Settings Asset")]
+        [SerializeField] internal LogSettingsSO settings;
+
+#if UNITY_EDITOR
+        // called when component is added to GameObject
+        void Reset()
         {
-            public string Name;
-            public LogType level;
-        };
+            LogSettingsSO existingSettings = EditorLogSettingsLoader.FindLogSettings();
+            if (existingSettings != null)
+            {
+                Undo.RecordObject(this, "adding existing settings");
+                settings = existingSettings;
+            }
+        }
+#endif
 
-        [SerializeField]
-        public List<Level> Levels = new List<Level>();
-
-        // Start is called before the first frame update
         void Awake()
         {
-            SetLogLevels();
+            RefreshDictionary();
         }
 
-        public void SetLogLevels()
+        void OnValidate()
         {
-            foreach (Level setting in Levels)
-            {
-                ILogger logger = LogFactory.GetLogger(setting.Name);
-                logger.filterLogType = setting.level;
-            }
+            // if settings field is changed
+            RefreshDictionary();
+        }
+
+        void RefreshDictionary()
+        {
+            settings.LoadIntoLogFactory();
         }
     }
 }
