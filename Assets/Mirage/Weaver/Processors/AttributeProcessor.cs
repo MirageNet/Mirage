@@ -97,8 +97,8 @@ namespace Mirage.Weaver
 
         void ProcessMethodAttributes(MethodDefinition md, FoundType foundType)
         {
-            InjectGuard<ServerAttribute>(md, foundType, IsServer, "[Server] function '{0}' called on client");
-            InjectGuard<ClientAttribute>(md, foundType, IsClient, "[Client] function '{0}' called on server");
+            InjectGuard<ServerAttribute>(md, foundType, IsServer, "[Server] function '{0}' called when server not active");
+            InjectGuard<ClientAttribute>(md, foundType, IsClient, "[Client] function '{0}' called when client not active");
             InjectGuard<HasAuthorityAttribute>(md, foundType, HasAuthority, "[Has Authority] function '{0}' called on player without authority");
             InjectGuard<LocalPlayerAttribute>(md, foundType, IsLocalPlayer, "[Local Player] function '{0}' called on nonlocal player");
             CheckAttribute<ServerRpcAttribute>(md, foundType);
