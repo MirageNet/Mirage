@@ -1,3 +1,15 @@
+# [106.2.0](https://github.com/MirageNet/Mirage/compare/v106.1.0...v106.2.0) (2021-10-01)
+
+
+### Bug Fixes
+
+* **BitPacking:** setting default QuaternionPack to 9 ([bcc44a7](https://github.com/MirageNet/Mirage/commit/bcc44a7cc43f2a2787c02c757141d183c7af9b78))
+
+
+### Features
+
+* **Metrics:** allowing background to be updated at runtime ([1974a76](https://github.com/MirageNet/Mirage/commit/1974a7618cd4de1a973d67bf70fcf1e0c0188dfb))
+
 # [106.1.0](https://github.com/MirageNet/Mirage/compare/v106.0.0...v106.1.0) (2021-10-01)
 
 
