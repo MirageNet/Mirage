@@ -33,7 +33,7 @@ Basically this is outside Mirage's control.
 
 To start a server object,  [spawn it](SpawnObject.md). 
 If you wish to perform some logic when the object starts in the server, add a 
-component in your gameobject with your own method and subscribe to 
+component in your gameObjects with your own method and subscribe to 
 <xref:Mirage.NetworkIdentity.OnStartServer>
 
 For example:
