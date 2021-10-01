@@ -114,7 +114,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log($"Client connecting to endpoint: {endPoint}");
 
             ISocket socket = SocketFactory.CreateClientSocket();
-            MessageHandler = new MessageHandler(DisconnectOnException);
+            MessageHandler = new MessageHandler(World, DisconnectOnException);
             var dataHandler = new DataHandler(MessageHandler);
             Metrics = EnablePeerMetrics ? new Metrics() : null;
 
@@ -190,7 +190,7 @@ namespace Mirage
             World = server.World;
 
             // create local connection objects and connect them
-            MessageHandler = new MessageHandler(DisconnectOnException);
+            MessageHandler = new MessageHandler(World, DisconnectOnException);
             var dataHandler = new DataHandler(MessageHandler);
             (IConnection clientConn, IConnection serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler, OnHostDisconnected, null);
 
