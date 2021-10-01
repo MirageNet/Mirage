@@ -1,3 +1,10 @@
+# [106.1.0](https://github.com/MirageNet/Mirage/compare/v106.0.0...v106.1.0) (2021-10-01)
+
+
+### Features
+
+* adding sequence size of metrics to inspector ([c7a21dd](https://github.com/MirageNet/Mirage/commit/c7a21dd9976b0263f790c3c537398c89dc6057c7))
+
 # [106.0.0](https://github.com/MirageNet/Mirage/compare/v105.1.3...v106.0.0) (2021-10-01)
 
 
