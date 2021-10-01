@@ -1,6 +1,6 @@
 # Manual scene loading
 
-If you need some special way to load scene it is better to control it manually.
+If you need some special way to load scene it is better to control it manually. Many of the things here are automatically done by [NetworkSceneManager](./NetworkSceneManager.md)
 
 ## Using Messages
 
@@ -11,7 +11,7 @@ These message are build in and used by NetworkSceneManager. If you are create yo
 
 ## Loading a scene
 
-The server should mark the player as <xref:Mirage.INetworkPlayer.SceneIsReady>, and send <xref:Mirage.SceneMessage>.
+The server should mark the player as <xref:Mirage.NetworkPlayer.SceneIsReady>, and send <xref:Mirage.SceneMessage>.
 
 When the client receives the message they should then load the scene. Once the loading has completed they should call <xref:Mirage.ClientObjectManager.PrepareToSpawnSceneObjects> and send <xref:Mirage.SceneReadyMessage> back to the server.
 
