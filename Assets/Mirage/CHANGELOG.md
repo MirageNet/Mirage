@@ -1,3 +1,10 @@
+## [105.1.3](https://github.com/MirageNet/Mirage/compare/v105.1.2...v105.1.3) (2021-10-01)
+
+
+### Bug Fixes
+
+* fixing errror meessage for server client attributes ([#953](https://github.com/MirageNet/Mirage/issues/953)) ([53cf60b](https://github.com/MirageNet/Mirage/commit/53cf60b234e71ccda00df7a37bf75ee2b8bc833a))
+
 ## [105.1.2](https://github.com/MirageNet/Mirage/compare/v105.1.1...v105.1.2) (2021-09-30)
 
 
