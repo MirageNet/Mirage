@@ -26,6 +26,8 @@ namespace Mirage
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkClient));
 
         public bool EnablePeerMetrics;
+        [Tooltip("Sequence size of buffer in bits.\n10 => array size 1024 => ~17 seconds at 60hz")]
+        public int MetricsSize = 10;
         public Metrics Metrics { get; private set; }
 
         /// <summary>
@@ -116,7 +118,7 @@ namespace Mirage
             ISocket socket = SocketFactory.CreateClientSocket();
             MessageHandler = new MessageHandler(World, DisconnectOnException);
             var dataHandler = new DataHandler(MessageHandler);
-            Metrics = EnablePeerMetrics ? new Metrics() : null;
+            Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
             Config config = PeerConfig ?? new Config();
 
