@@ -1,3 +1,21 @@
+# [106.0.0](https://github.com/MirageNet/Mirage/compare/v105.1.3...v106.0.0) (2021-10-01)
+
+
+### Bug Fixes
+
+* fixing use of network identity in network message ([#955](https://github.com/MirageNet/Mirage/issues/955)) ([bc1b82a](https://github.com/MirageNet/Mirage/commit/bc1b82a339ba1d67620c07d060a5588100d50d96))
+
+
+### Features
+
+* better log settings ([#951](https://github.com/MirageNet/Mirage/issues/951)) ([6395251](https://github.com/MirageNet/Mirage/commit/639525107cb3e780f46d882a83538a526a97f76c))
+* **Peer:** updating peer metrics to have more data ([#940](https://github.com/MirageNet/Mirage/issues/940)) ([512d916](https://github.com/MirageNet/Mirage/commit/512d916d33d338a9e02017e65f02eb7e53e98dd1))
+
+
+### BREAKING CHANGES
+
+* log settings are now saved to a SO file instead of EditorPrefs
+
 ## [105.1.3](https://github.com/MirageNet/Mirage/compare/v105.1.2...v105.1.3) (2021-10-01)
 
 
