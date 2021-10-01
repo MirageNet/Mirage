@@ -14,16 +14,32 @@ namespace Mirage.DisplayMetrics
         public Rect offset = new Rect(10, 10, 400, 800);
         public Color background;
         GUIStyle style;
-
+        Texture2D tex;
 
 
         private void Start()
         {
             style = new GUIStyle();
-            var tex = new Texture2D(1, 1);
+            tex = new Texture2D(1, 1);
             tex.SetPixel(0, 0, background);
             tex.Apply();
             style.normal.background = tex;
+        }
+        private void OnDestroy()
+        {
+            if (tex != null)
+            {
+                Destroy(tex);
+            }
+        }
+
+        private void OnValidate()
+        {
+            if (tex != null)
+            {
+                tex.SetPixel(0, 0, background);
+                tex.Apply();
+            }
         }
 
         private void OnGUI()
