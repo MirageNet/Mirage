@@ -2,8 +2,8 @@
   href: index.md
 - name: Getting Started
   href: Start.md
-- name: Transports
-  href: Transports.md
+- name: Sockets
+  href: Sockets.md
 - name: Showcase
   href: Showcase.md
 - name: Integrations
