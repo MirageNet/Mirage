@@ -192,7 +192,7 @@ namespace Mirage
             SyncVarSender = new SyncVarSender();
 
             LocalClient = localClient;
-            MessageHandler = new MessageHandler(DisconnectOnException);
+            MessageHandler = new MessageHandler(World, DisconnectOnException);
             MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing);
 
             ISocket socket = SocketFactory.CreateServerSocket();
