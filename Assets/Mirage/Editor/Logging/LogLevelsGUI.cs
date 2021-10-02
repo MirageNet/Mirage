@@ -145,6 +145,10 @@ namespace Mirage.EditorScripts.Logging
                         if (type.FullName.StartsWith("UnityEngine."))
                             continue;
 
+                        // Can't load fields for generic types
+                        if (type.IsGenericType)
+                            continue;
+
                         foreach (FieldInfo field in type.GetFields(flags))
                         {
                             try
