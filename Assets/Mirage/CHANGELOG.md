@@ -1,3 +1,11 @@
+## [106.2.1](https://github.com/MirageNet/Mirage/compare/v106.2.0...v106.2.1) (2021-10-02)
+
+
+### Bug Fixes
+
+* **LogGUI:** fixing exception in find all loggers for generic types ([11755e7](https://github.com/MirageNet/Mirage/commit/11755e7bf61d08908b7dcf95d65a45fd9b228696))
+* **LogGUI:** fixing exception in find all loggers for generic types ([6221965](https://github.com/MirageNet/Mirage/commit/622196562696902e75abe23795d07ea5dc8a74ba))
+
 # [106.2.0](https://github.com/MirageNet/Mirage/compare/v106.1.0...v106.2.0) (2021-10-01)
 
 
