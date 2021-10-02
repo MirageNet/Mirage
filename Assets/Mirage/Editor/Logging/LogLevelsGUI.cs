@@ -147,10 +147,17 @@ namespace Mirage.EditorScripts.Logging
 
                         foreach (FieldInfo field in type.GetFields(flags))
                         {
-                            if (field.IsStatic && field.FieldType == typeof(ILogger))
+                            try
                             {
-                                var value = (ILogger)field.GetValue(null);
-                                AddIfMissing(type, value);
+                                if (field.IsStatic && field.FieldType == typeof(ILogger))
+                                {
+                                    var value = (ILogger)field.GetValue(null);
+                                    AddIfMissing(type, value);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogError($"Failed to find Logger inside type {type.Name} with exception:{e}");
                             }
                         }
                     }
