@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Mirage.Logging
@@ -7,14 +8,21 @@ namespace Mirage.Logging
     {
         internal static readonly Dictionary<string, ILogger> loggers = new Dictionary<string, ILogger>();
 
+        public static IReadOnlyDictionary<string, ILogger> Loggers => loggers;
+
+        /// <summary>
+        /// logHandler used for new loggers
+        /// </summary>
+        static ILogHandler defaultLogHandler = Debug.unityLogger;
+
         public static ILogger GetLogger<T>(LogType defaultLogLevel = LogType.Warning)
         {
-            return GetLogger(typeof(T).Name, defaultLogLevel);
+            return GetLogger(typeof(T).FullName, defaultLogLevel);
         }
 
         public static ILogger GetLogger(System.Type type, LogType defaultLogLevel = LogType.Warning)
         {
-            return GetLogger(type.Name, defaultLogLevel);
+            return GetLogger(type.FullName, defaultLogLevel);
         }
 
         public static ILogger GetLogger(string loggerName, LogType defaultLogLevel = LogType.Warning)
@@ -24,7 +32,12 @@ namespace Mirage.Logging
                 return logger;
             }
 
-            logger = new Logger(Debug.unityLogger)
+            return CreateNewLogger(loggerName, defaultLogLevel);
+        }
+
+        private static ILogger CreateNewLogger(string loggerName, LogType defaultLogLevel)
+        {
+            var logger = new Logger(defaultLogHandler)
             {
                 // by default, log warnings and up
                 filterLogType = defaultLogLevel
@@ -32,6 +45,20 @@ namespace Mirage.Logging
 
             loggers[loggerName] = logger;
             return logger;
+        }
+
+        /// <summary>
+        /// Replacing log handler for all existing loggers and sets defaultLogHandler for new loggers
+        /// </summary>
+        /// <param name="logHandler"></param>
+        public static void ReplaceLogHandler(ILogHandler logHandler)
+        {
+            defaultLogHandler = logHandler;
+
+            foreach (ILogger logger in loggers.Values)
+            {
+                logger.logHandler = logHandler;
+            }
         }
     }
 
@@ -49,6 +76,7 @@ namespace Mirage.Logging
             if (!condition)
                 logger.Log(LogType.Assert, message);
         }
+
         [System.Diagnostics.Conditional("UNITY_ASSERTIONS")]
         public static void Assert(this ILogger logger, bool condition)
         {
@@ -61,10 +89,11 @@ namespace Mirage.Logging
             logger.Log(LogType.Warning, message);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool LogEnabled(this ILogger logger) => logger.IsLogTypeAllowed(LogType.Log);
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool WarnEnabled(this ILogger logger) => logger.IsLogTypeAllowed(LogType.Warning);
-
-        public static bool ErrorEnabled(this ILogger logger) => logger.IsLogTypeAllowed(LogType.Warning);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ErrorEnabled(this ILogger logger) => logger.IsLogTypeAllowed(LogType.Error);
     }
 }

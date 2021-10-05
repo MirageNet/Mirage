@@ -1,3 +1,69 @@
+## [106.2.2](https://github.com/MirageNet/Mirage/compare/v106.2.1...v106.2.2) (2021-10-05)
+
+
+### Performance Improvements
+
+* **NetworkSceneManager:** using hashset contains to check for player ([e3df3b5](https://github.com/MirageNet/Mirage/commit/e3df3b5403b135491e2879f5f5f8bd29cb02d3d2))
+
+## [106.2.1](https://github.com/MirageNet/Mirage/compare/v106.2.0...v106.2.1) (2021-10-02)
+
+
+### Bug Fixes
+
+* **LogGUI:** fixing exception in find all loggers for generic types ([11755e7](https://github.com/MirageNet/Mirage/commit/11755e7bf61d08908b7dcf95d65a45fd9b228696))
+* **LogGUI:** fixing exception in find all loggers for generic types ([6221965](https://github.com/MirageNet/Mirage/commit/622196562696902e75abe23795d07ea5dc8a74ba))
+
+# [106.2.0](https://github.com/MirageNet/Mirage/compare/v106.1.0...v106.2.0) (2021-10-01)
+
+
+### Bug Fixes
+
+* **BitPacking:** setting default QuaternionPack to 9 ([bcc44a7](https://github.com/MirageNet/Mirage/commit/bcc44a7cc43f2a2787c02c757141d183c7af9b78))
+
+
+### Features
+
+* **Metrics:** allowing background to be updated at runtime ([1974a76](https://github.com/MirageNet/Mirage/commit/1974a7618cd4de1a973d67bf70fcf1e0c0188dfb))
+
+# [106.1.0](https://github.com/MirageNet/Mirage/compare/v106.0.0...v106.1.0) (2021-10-01)
+
+
+### Features
+
+* adding sequence size of metrics to inspector ([c7a21dd](https://github.com/MirageNet/Mirage/commit/c7a21dd9976b0263f790c3c537398c89dc6057c7))
+
+# [106.0.0](https://github.com/MirageNet/Mirage/compare/v105.1.3...v106.0.0) (2021-10-01)
+
+
+### Bug Fixes
+
+* fixing use of network identity in network message ([#955](https://github.com/MirageNet/Mirage/issues/955)) ([bc1b82a](https://github.com/MirageNet/Mirage/commit/bc1b82a339ba1d67620c07d060a5588100d50d96))
+
+
+### Features
+
+* better log settings ([#951](https://github.com/MirageNet/Mirage/issues/951)) ([6395251](https://github.com/MirageNet/Mirage/commit/639525107cb3e780f46d882a83538a526a97f76c))
+* **Peer:** updating peer metrics to have more data ([#940](https://github.com/MirageNet/Mirage/issues/940)) ([512d916](https://github.com/MirageNet/Mirage/commit/512d916d33d338a9e02017e65f02eb7e53e98dd1))
+
+
+### BREAKING CHANGES
+
+* log settings are now saved to a SO file instead of EditorPrefs
+
+## [105.1.3](https://github.com/MirageNet/Mirage/compare/v105.1.2...v105.1.3) (2021-10-01)
+
+
+### Bug Fixes
+
+* fixing errror meessage for server client attributes ([#953](https://github.com/MirageNet/Mirage/issues/953)) ([53cf60b](https://github.com/MirageNet/Mirage/commit/53cf60b234e71ccda00df7a37bf75ee2b8bc833a))
+
+## [105.1.2](https://github.com/MirageNet/Mirage/compare/v105.1.1...v105.1.2) (2021-09-30)
+
+
+### Bug Fixes
+
+* **ServerRpc:** fixing error message when client is not set ([f9c8033](https://github.com/MirageNet/Mirage/commit/f9c8033b1ad4e137d439336bd515d3ae96df1cdc))
+
 ## [105.1.1](https://github.com/MirageNet/Mirage/compare/v105.1.0...v105.1.1) (2021-09-25)
 
 
