@@ -50,21 +50,12 @@ namespace Mirage
         PlayerSceneChangeEvent OnPlayerSceneReady { get; }
 
         /// <summary>
-        ///     Allows us to load a new physics scene on server and tell other users to load up normally.
-        /// </summary>
-        /// <param name="scenePath">The full path to the scene file or the name of the scene we want to use to create new physics scene.</param>
-        /// <param name="sceneOperation">The type of scene operation we want to do</param>
-        /// <param name="physicsMode">The type of physics scene we want to create and load.</param>
-        /// <param name="players">List of player's that are receiving the new scene load.</param>
-        /// <param name="shouldClientLoadNormally">Should the clients load this additively too or load it full normal scene change.</param>
-        /// <returns>Returns back to end users a scene reference.</returns>
-        UniTask<Scene> ServerLoadPhysicsScene(string scenePath, LoadSceneMode sceneOperation, LocalPhysicsMode physicsMode, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false);
-
-        /// <summary>
         ///     Allows server to fully load in a new scene and override current active scene.
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
-        void ServerLoadSceneNormal(string scenePath);
+        /// <param name="createPhysicsScene"></param>
+        /// <param name="sceneLoadParameters"></param>
+        void ServerLoadSceneNormal(string scenePath, bool createPhysicsScene = false, LoadSceneParameters sceneLoadParameters = default);
 
         /// <summary>
         ///     Allows server to fully load in another scene on top of current active scene.
@@ -72,7 +63,7 @@ namespace Mirage
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         /// <param name="players">List of player's that are receiving the new scene load.</param>
         /// <param name="shouldClientLoadNormally">Should the clients load this additively too or load it full normal scene change.</param>
-        void ServerLoadSceneAdditively(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false);
+        void ServerLoadSceneAdditively(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false, bool createPhysicsScene= false, LoadSceneParameters sceneLoadParameters = default);
 
         /// <summary>
         ///     Allows server to fully unload a scene additively.
