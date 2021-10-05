@@ -373,10 +373,10 @@ namespace Mirage
         }
 
         /// <summary>
-        /// 
+        ///     Unload a specific scene from server and clients
         /// </summary>
-        /// <param name="scene"></param>
-        /// <param name="players"></param>
+        /// <param name="scene">What scene do we want to tell server and clients to unload.</param>
+        /// <param name="players">The players we want to tell to unload the scene.</param>
         private void ServerSceneUnLoading(Scene scene, IEnumerable<INetworkPlayer> players)
         {
             if (!scene.IsValid())
