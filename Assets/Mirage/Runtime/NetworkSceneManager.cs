@@ -125,6 +125,8 @@ namespace Mirage
 
             if (Server != null)
             {
+                _serverSceneData.Add(SceneManager.GetActiveScene(), Server.Players);
+
                 Server.Started.AddListener(RegisterServerMessages);
                 Server.Authenticated.AddListener(OnServerAuthenticated);
                 Server.Disconnected.AddListener(OnServerPlayerDisconnected);

@@ -332,7 +332,7 @@ namespace Mirage
         internal void ShowToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
             // dont send if loading scene
-            if (player.SceneIsReady)
+            if (player.SceneIsReady && NetworkSceneManager.ServerSceneData[identity.gameObject.scene].Contains(player))
                 SendSpawnMessage(identity, player);
         }
 
