@@ -164,14 +164,7 @@ namespace Mirage
                 throw new KeyNotFoundException($"Could not find player list for scene:{scene}");
             }
 
-            foreach (INetworkPlayer networkPlayer in players)
-            {
-                if (!networkPlayer.Equals(player)) continue;
-
-                return true;
-            }
-
-            return false;
+            return players.Contains(player);
         }
 
         /// <summary>
