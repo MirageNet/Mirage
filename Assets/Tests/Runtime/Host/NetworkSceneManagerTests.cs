@@ -284,46 +284,6 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         [Test]
-        public void ServerSceneLoadPhysicsThrowForInvalidSceneTest()
-        {
-            string message = new ArgumentNullException("scenePath", "[NetworkSceneManager] - ServerLoadPhysicsScene: scenePath cannot be empty or null").Message;
-
-            try
-            {
-                UniTask<Scene> test = sceneManager.ServerLoadPhysicsScene(null, LoadSceneMode.Additive, LocalPhysicsMode.Physics3D,
-                    new[] { server.LocalPlayer });
-            }
-            catch (Exception e)
-            {
-                Assert.That(e.Message, Has.Message.EqualTo(message));
-            }
-        }
-
-        [UnityTest]
-        public IEnumerator ServerSceneLoadPhysicsStartedSceneChangedInvokeTest() => UniTask.ToCoroutine(async () =>
-        {
-            bool serverStartedLoading = false;
-
-            sceneManager.OnServerStartedSceneChange.AddListener((arg0, operation) => serverStartedLoading = true);
-
-            await sceneManager.ServerLoadPhysicsScene("Assets/Mirror/Tests/Runtime/testScene.unity", LoadSceneMode.Additive, LocalPhysicsMode.Physics3D, new[] { server.LocalPlayer });
-
-            Assert.That(serverStartedLoading, Is.True);
-        });
-
-        [UnityTest]
-        public IEnumerator ServerSceneLoadPhysicsFinishedSceneChangedInvokeTest() => UniTask.ToCoroutine(async () =>
-        {
-            bool serverFinishedLoading = false;
-
-            sceneManager.OnServerFinishedSceneChange.AddListener((arg0, operation) => serverFinishedLoading = true);
-
-            await sceneManager.ServerLoadPhysicsScene("Assets/Mirror/Tests/Runtime/testScene.unity", LoadSceneMode.Additive, LocalPhysicsMode.Physics3D, new[] { server.LocalPlayer });
-
-            Assert.That(serverFinishedLoading, Is.True);
-        });
-
-        [Test]
         public void IsPlayerInSceneThrowForInvalidScene()
         {
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>

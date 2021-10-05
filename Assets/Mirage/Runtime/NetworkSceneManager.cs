@@ -352,7 +352,8 @@ namespace Mirage
             // Let server prepare for scene change
             logger.Log("[NetworkSceneManager] - OnServerChangeScene");
 
-            SetAllClientsNotReady();
+            SetAllClientsNotReady(players);
+
             OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation);
 
             if (players == null)
@@ -391,7 +392,7 @@ namespace Mirage
             // Let server prepare for scene change
             if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - OnServerChangeScene");
 
-            SetAllClientsNotReady();
+            SetAllClientsNotReady(players);
             OnServerStartedSceneChange?.Invoke(scene.path, SceneOperation.UnloadAdditive);
 
             // if not host
@@ -526,10 +527,11 @@ namespace Mirage
         ///     This is useful when switching scenes.
         /// </para>
         /// </summary>
-        public void SetAllClientsNotReady()
+        public void SetAllClientsNotReady(IEnumerable<INetworkPlayer> players)
         {
             ThrowIfNotServer();
-            foreach (INetworkPlayer player in Server.Players)
+
+            foreach (INetworkPlayer player in players ?? Server.Players)
             {
                 SetClientNotReady(player);
             }
