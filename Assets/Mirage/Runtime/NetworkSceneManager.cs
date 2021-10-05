@@ -187,6 +187,7 @@ namespace Mirage
             ScenesPlayerIsInNonAlloc(player, data);
             return data.ToArray();
         }
+
         public void ScenesPlayerIsInNonAlloc(INetworkPlayer player, List<Scene> scenes)
         {
             foreach (KeyValuePair<Scene, HashSet<INetworkPlayer>> scene in _serverSceneData)
@@ -194,6 +195,11 @@ namespace Mirage
                 if (scene.Value.Contains(player))
                     scenes.Add(scene.Key);
             }
+        }
+
+        private void AddSceneToServerData()
+        {
+
         }
 
         #endregion
@@ -451,6 +457,19 @@ namespace Mirage
             SetAllClientsNotReady(players);
 
             Scene newScene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+
+            if(players != null)
+            {
+                foreach (INetworkPlayer player in players)
+                {
+                    foreach (KeyValuePair<Scene, HashSet<INetworkPlayer>> scene in _serverSceneData)
+                    {
+                        if (!scene.Value.Contains(player)) continue;
+
+                        scene.Value.Remove(player);
+                    }
+                }
+            }
 
             _serverSceneData.Add(newScene, players == null ? new HashSet<INetworkPlayer>() : new HashSet<INetworkPlayer>(players));
 
