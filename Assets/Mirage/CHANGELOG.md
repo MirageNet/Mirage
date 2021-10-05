@@ -1,3 +1,10 @@
+## [106.2.2](https://github.com/MirageNet/Mirage/compare/v106.2.1...v106.2.2) (2021-10-05)
+
+
+### Performance Improvements
+
+* **NetworkSceneManager:** using hashset contains to check for player ([e3df3b5](https://github.com/MirageNet/Mirage/commit/e3df3b5403b135491e2879f5f5f8bd29cb02d3d2))
+
 ## [106.2.1](https://github.com/MirageNet/Mirage/compare/v106.2.0...v106.2.1) (2021-10-02)
 
 
