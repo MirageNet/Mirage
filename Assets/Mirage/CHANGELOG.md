@@ -1,3 +1,10 @@
+## [106.2.3](https://github.com/MirageNet/Mirage/compare/v106.2.2...v106.2.3) (2021-10-06)
+
+
+### Bug Fixes
+
+* **NetworkServer:** making listening disable server peer ([#959](https://github.com/MirageNet/Mirage/issues/959)) ([528698b](https://github.com/MirageNet/Mirage/commit/528698b10ced354aeb155c6a09b30ba1228f535a))
+
 ## [106.2.2](https://github.com/MirageNet/Mirage/compare/v106.2.1...v106.2.2) (2021-10-05)
 
 
