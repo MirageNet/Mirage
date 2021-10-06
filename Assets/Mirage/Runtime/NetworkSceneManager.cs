@@ -637,7 +637,7 @@ namespace Mirage
             switch (sceneOperation)
             {
                 case SceneOperation.Normal:
-                    return LoadSceneNormalAsync(scenePath, sceneLoadParameters.Value);
+                    return LoadSceneNormalAsync(scenePath, sceneLoadParameters);
                 case SceneOperation.LoadAdditive:
                     return LoadSceneAdditiveAsync(scenePath, players, sceneLoadParameters);
                 case SceneOperation.UnloadAdditive:
