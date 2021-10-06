@@ -31,10 +31,7 @@ namespace Mirage
     /// Sent to indicate the scene is finished loading
     /// </summary>
     [NetworkMessage]
-    public struct SceneReadyMessage
-    {
-        public Scene Scene;
-    }
+    public struct SceneReadyMessage { }
 
     #endregion
 
