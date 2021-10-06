@@ -1,3 +1,10 @@
+## [106.2.4](https://github.com/MirageNet/Mirage/compare/v106.2.3...v106.2.4) (2021-10-06)
+
+
+### Bug Fixes
+
+* **CharacterSpawner:** respawning character if one exists ([203e487](https://github.com/MirageNet/Mirage/commit/203e487e686ba499e4a03c66586676d871146bfb))
+
 ## [106.2.3](https://github.com/MirageNet/Mirage/compare/v106.2.2...v106.2.3) (2021-10-06)
 
 
