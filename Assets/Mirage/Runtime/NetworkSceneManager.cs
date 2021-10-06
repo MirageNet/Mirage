@@ -339,7 +339,7 @@ namespace Mirage
         /// <param name="players">List of player's we want to send the new scene loading or unloading to.</param>
         /// <param name="shouldClientLoadOrUnloadNormally">Should client load or unload the scene in normal non additive way</param>
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
-        private void ServerSceneLoading(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadOrUnloadNormally, SceneOperation sceneOperation = SceneOperation.Normal, bool createPhysicsScene = false, LoadSceneParameters loadSceneParameters = default)
+        private void ServerSceneLoading(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadOrUnloadNormally, SceneOperation sceneOperation = SceneOperation.Normal, LoadSceneParameters? loadSceneParameters = null)
         {
             if (string.IsNullOrEmpty(scenePath))
             {
@@ -360,7 +360,7 @@ namespace Mirage
                 throw new ArgumentNullException(nameof(players), "No player's were added to send for information");
 
             if (!Server.LocalClientActive)
-                LoadSceneAsync(scenePath, players, sceneOperation, createPhysicsScene, loadSceneParameters).Forget();
+                LoadSceneAsync(scenePath, players, sceneOperation, loadSceneParameters).Forget();
 
             // notify all clients about the new scene
             if (shouldClientLoadOrUnloadNormally)
@@ -408,13 +408,12 @@ namespace Mirage
         ///     Allows server to fully load in a new scene and override current active scene.
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
-        /// <param name="createPhysicsScene">Should we be creating a physics scene or not</param>
         /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
-        public void ServerLoadSceneNormal(string scenePath, bool createPhysicsScene = false, LoadSceneParameters sceneLoadParameters = default)
+        public void ServerLoadSceneNormal(string scenePath, LoadSceneParameters? sceneLoadParameters = null)
         {
             ThrowIfNotServer();
 
-            ServerSceneLoading(scenePath, Server.Players, true, SceneOperation.Normal, createPhysicsScene, sceneLoadParameters);
+            ServerSceneLoading(scenePath, Server.Players, true, SceneOperation.Normal, sceneLoadParameters);
         }
 
         /// <summary>
@@ -425,11 +424,11 @@ namespace Mirage
         /// <param name="shouldClientLoadNormally">Should the clients load this additively too or load it full normal scene change.</param>
         /// <param name="createPhysicsScene">Should we be creating a physics scene or not</param>
         /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
-        public void ServerLoadSceneAdditively(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false, bool createPhysicsScene = false, LoadSceneParameters sceneLoadParameters = default)
+        public void ServerLoadSceneAdditively(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false, LoadSceneParameters? sceneLoadParameters = null)
         {
             ThrowIfNotServer();
 
-            ServerSceneLoading(scenePath, players, shouldClientLoadNormally, SceneOperation.LoadAdditive, createPhysicsScene, sceneLoadParameters);
+            ServerSceneLoading(scenePath, players, shouldClientLoadNormally, SceneOperation.LoadAdditive, sceneLoadParameters);
         }
 
         /// <summary>
@@ -632,16 +631,15 @@ namespace Mirage
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         /// <param name="players">List of player's we want to track which scene they are in.</param>
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
-        /// <param name="createPhysicsScene">Should we be creating a physics scene or not</param>
         /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
-        private UniTask LoadSceneAsync(string scenePath, IEnumerable<INetworkPlayer> players, SceneOperation sceneOperation = SceneOperation.Normal, bool createPhysicsScene = false, LoadSceneParameters sceneLoadParameters = default)
+        private UniTask LoadSceneAsync(string scenePath, IEnumerable<INetworkPlayer> players, SceneOperation sceneOperation = SceneOperation.Normal, LoadSceneParameters? sceneLoadParameters = null)
         {
             switch (sceneOperation)
             {
                 case SceneOperation.Normal:
-                    return LoadSceneNormalAsync(scenePath, createPhysicsScene, sceneLoadParameters);
+                    return LoadSceneNormalAsync(scenePath, sceneLoadParameters.Value);
                 case SceneOperation.LoadAdditive:
-                    return LoadSceneAdditiveAsync(scenePath, players, createPhysicsScene, sceneLoadParameters);
+                    return LoadSceneAdditiveAsync(scenePath, players, sceneLoadParameters);
                 case SceneOperation.UnloadAdditive:
                     return UnLoadSceneAdditiveAsync(scenePath);
                 default:
@@ -654,9 +652,8 @@ namespace Mirage
         ///     Load our scene up in a normal unity fashion.
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
-        /// <param name="createPhysicsScene">Should we be creating a physics scene or not</param>
         /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
-        private async UniTask LoadSceneNormalAsync(string scenePath, bool createPhysicsScene = false, LoadSceneParameters sceneLoadParameters = default)
+        private async UniTask LoadSceneNormalAsync(string scenePath, LoadSceneParameters? sceneLoadParameters = null)
         {
             //Scene is already active.
             if (ActiveScenePath.Equals(scenePath))
@@ -665,8 +662,8 @@ namespace Mirage
             }
             else
             {
-                SceneLoadingAsyncOperationInfo = createPhysicsScene
-                    ? SceneManager.LoadSceneAsync(scenePath, sceneLoadParameters)
+                SceneLoadingAsyncOperationInfo = sceneLoadParameters.HasValue
+                    ? SceneManager.LoadSceneAsync(scenePath, sceneLoadParameters.Value)
                     : SceneManager.LoadSceneAsync(scenePath);
 
                 //If non host client. Wait for server to finish scene change
@@ -694,11 +691,13 @@ namespace Mirage
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         /// <param name="players">The list of players we want to track to know what scene they are on.</param>
-        /// <param name="createPhysicsScene">Should we be creating a physics scene or not</param>
         /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
-        private async UniTask LoadSceneAdditiveAsync(string scenePath, IEnumerable<INetworkPlayer> players, bool createPhysicsScene = false, LoadSceneParameters sceneLoadParameters = default)
+        private async UniTask LoadSceneAdditiveAsync(string scenePath, IEnumerable<INetworkPlayer> players, LoadSceneParameters? sceneLoadParameters)
         {
-            await (createPhysicsScene ? SceneManager.LoadSceneAsync(scenePath, sceneLoadParameters) : SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive));
+            SceneLoadingAsyncOperationInfo = sceneLoadParameters.HasValue ? SceneManager.LoadSceneAsync(scenePath, sceneLoadParameters.Value)
+                : SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
+
+            await SceneLoadingAsyncOperationInfo;
 
             Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
 
