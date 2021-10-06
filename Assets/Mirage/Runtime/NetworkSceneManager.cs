@@ -514,8 +514,10 @@ namespace Mirage
         void HandlePlayerSceneReady(INetworkPlayer player, SceneReadyMessage msg)
         {
             if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + player);
+			
             player.SceneIsReady = true;
-            OnPlayerSceneReady.Invoke(player);
+            
+			OnPlayerSceneReady.Invoke(player);
         }
 
         /// <summary>
