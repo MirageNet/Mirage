@@ -9,7 +9,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void PackRotationUsesDefault9()
         {
-            writer.PackRotation(Quaternion.identity);
+            writer.WriteQuaternion(Quaternion.identity);
             Assert.That(writer.BitPosition, Is.EqualTo(29));
         }
 
@@ -20,7 +20,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             writer.Write(3, 2);
             NetworkReader reader = GetReader();
             Assert.That(reader.BitPosition, Is.EqualTo(0), "Check it starts at 0");
-            Quaternion value = reader.UnpackRotation();
+            Quaternion value = reader.ReadQuaternion();
             Assert.That(reader.BitPosition, Is.EqualTo(29));
             Assert.That(value, Is.EqualTo(Quaternion.identity));
         }
