@@ -8,10 +8,19 @@ namespace Mirage.Tests.Runtime
         public string cmdArg2;
 
         [ServerRpc]
-        public void Test(int arg1, string arg2)
+        public void Send2Args(int arg1, string arg2)
         {
             cmdArg1 = arg1;
             cmdArg2 = arg2;
+        }
+
+
+        public INetworkPlayer cmdSender;
+        [ServerRpc]
+        public void SendWithSender(int arg1, INetworkPlayer sender = null)
+        {
+            cmdArg1 = arg1;
+            cmdSender = sender;
         }
 
         public NetworkIdentity cmdNi;

@@ -23,12 +23,34 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ServerRpc() => UniTask.ToCoroutine(async () =>
         {
-            clientComponent.Test(1, "hello");
+            clientComponent.Send2Args(1, "hello");
 
             await AsyncUtil.WaitUntilWithTimeout(() => serverComponent.cmdArg1 != 0);
 
             Assert.That(serverComponent.cmdArg1, Is.EqualTo(1));
             Assert.That(serverComponent.cmdArg2, Is.EqualTo("hello"));
+        });
+
+        [UnityTest]
+        public IEnumerator ServerRpcWithSenderOnClient() => UniTask.ToCoroutine(async () =>
+        {
+            clientComponent.SendWithSender(1);
+
+            await AsyncUtil.WaitUntilWithTimeout(() => serverComponent.cmdArg1 != 0);
+
+            Assert.That(serverComponent.cmdArg1, Is.EqualTo(1));
+            Assert.That(serverComponent.cmdSender, Is.EqualTo(serverPlayer), "ServerRpc called on client will have client's player (server version)");
+        });
+
+        [UnityTest]
+        public IEnumerator ServerRpcWithSenderOnServer() => UniTask.ToCoroutine(async () =>
+        {
+            serverComponent.SendWithSender(1);
+
+            await AsyncUtil.WaitUntilWithTimeout(() => serverComponent.cmdArg1 != 0);
+
+            Assert.That(serverComponent.cmdArg1, Is.EqualTo(1));
+            Assert.That(serverComponent.cmdSender, Is.Null, "ServerRPC called on server will have no sender");
         });
 
         [UnityTest]
