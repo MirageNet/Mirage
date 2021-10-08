@@ -61,7 +61,7 @@ namespace Mirage
 
         NetworkWorld World { get; }
 
-        SyncVarSender SyncVarSender { get; }
+        SyncVarSenderBase SyncVarSender { get; }
 
         IReadOnlyCollection<INetworkPlayer> Players { get; }
 

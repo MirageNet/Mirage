@@ -45,6 +45,8 @@ namespace Mirage
         [Tooltip("If disabled the server will not create a Network Peer to listen. This can be used to run server single player mode")]
         public bool Listening = true;
 
+        public SyncVarSendMode syncVarSendMode;
+
         [Tooltip("Creates Socket for Peer to use")]
         public SocketFactory SocketFactory;
 
@@ -136,7 +138,7 @@ namespace Mirage
         public bool Active { get; private set; }
 
         public NetworkWorld World { get; private set; }
-        public SyncVarSender SyncVarSender { get; private set; }
+        public SyncVarSenderBase SyncVarSender { get; private set; }
         public MessageHandler MessageHandler { get; private set; }
 
 
@@ -187,8 +189,21 @@ namespace Mirage
             logger.Assert(Players.Count == 0, "Player should have been reset since previous session");
             logger.Assert(connections.Count == 0, "Connections should have been reset since previous session");
 
+            Config config = PeerConfig;
+            if (config == null)
+            {
+                // note: dont write to PeerConfig property here. if we do we will not use MaxConnections if server starts a second time
+                config = new Config
+                {
+                    // only use MaxConnections if config was null
+                    MaxConnections = MaxConnections,
+                };
+            }
+
             World = new NetworkWorld();
-            SyncVarSender = new SyncVarSender();
+
+            // max packet - 17 (reliable ack header)
+            SyncVarSender = SyncVarSenderBase.Create(syncVarSendMode, this, config.MaxPacketSize - 17);
 
             LocalClient = localClient;
             MessageHandler = new MessageHandler(World, DisconnectOnException);
@@ -197,16 +212,6 @@ namespace Mirage
             ISocket socket = SocketFactory.CreateServerSocket();
             var dataHandler = new DataHandler(MessageHandler, connections);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
-
-            Config config = PeerConfig;
-            if (config == null)
-            {
-                config = new Config
-                {
-                    // only use MaxConnections if config was null
-                    MaxConnections = MaxConnections,
-                };
-            }
 
             NetworkWriterPool.Configure(config.MaxPacketSize);
 

@@ -67,7 +67,7 @@ namespace Mirage
                 }
                 else
                 {
-                    if (logger.WarnEnabled()) logger.LogWarning($"Did not find target for sync message for {msg.netId}. Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
+                    if (logger.WarnEnabled()) logger.LogWarning($"Did not find target for sync message for {netId}. Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
                 }
             }
         }
