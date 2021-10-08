@@ -1,3 +1,15 @@
+# [107.0.0](https://github.com/MirageNet/Mirage/compare/v106.2.4...v107.0.0) (2021-10-08)
+
+
+### Performance Improvements
+
+* **BitPacking:** using quaternion compression by default ([#957](https://github.com/MirageNet/Mirage/issues/957)) ([e9fedf1](https://github.com/MirageNet/Mirage/commit/e9fedf10e57ba0b043ef62c4fa9be06c80de9c72))
+
+
+### BREAKING CHANGES
+
+* **BitPacking:** Pack extension methods renamed to WriteQuaternion and ReadQuaternion
+
 ## [106.2.4](https://github.com/MirageNet/Mirage/compare/v106.2.3...v106.2.4) (2021-10-06)
 
 
