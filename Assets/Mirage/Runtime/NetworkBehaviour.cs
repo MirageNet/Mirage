@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using Mirage.Collections;
 using Mirage.Logging;
@@ -384,7 +385,7 @@ namespace Mirage
         /// This clears all the dirty bits that were set on this script by SetDirtyBits();
         /// <para>This is automatically invoked when an update is sent for this object, but can be called manually as well.</para>
         /// </summary>
-        public void ClearAllDirtyBits()
+        public void MarkAsSynced()
         {
             lastSyncTime = Time.time;
             SyncVarDirtyBits = 0L;
@@ -414,19 +415,25 @@ namespace Mirage
             return false;
         }
 
-        public bool IsDirty()
+        /// <returns>if it is time to sync and Any Var is dirty</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool NeedsSync()
         {
-            if (Time.time - lastSyncTime >= syncInterval)
-            {
-                return SyncVarDirtyBits != 0L || AnySyncObjectDirty();
-            }
-            return false;
+            return TimeToSync() && AnyVarDirty();
         }
 
-        // true if this component has data that has not been
-        // synchronized.  Note that it may not synchronize
-        // right away because of syncInterval
-        public bool StillDirty()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool TimeToSync()
+        {
+            return Time.time - lastSyncTime >= syncInterval;
+        }
+
+        /// <summary>
+        /// If any syncvar or syncObject is dirty
+        /// </summary>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool AnyVarDirty()
         {
             return SyncVarDirtyBits != 0L || AnySyncObjectDirty();
         }

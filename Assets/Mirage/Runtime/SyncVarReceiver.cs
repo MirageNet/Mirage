@@ -32,10 +32,12 @@ namespace Mirage
             if (client.IsLocalClient)
             {
                 client.MessageHandler.RegisterHandler<UpdateVarsMessage>(_ => { });
+                client.MessageHandler.RegisterHandler<GroupedSyncVars>(_ => { });
             }
             else
             {
                 client.MessageHandler.RegisterHandler<UpdateVarsMessage>(OnUpdateVarsMessage);
+                client.MessageHandler.RegisterHandler<GroupedSyncVars>(OnGroupedSyncVars);
             }
         }
 
@@ -43,14 +45,30 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnUpdateVarsMessage " + msg.netId);
 
-            if (objectLocator.TryGetIdentity(msg.netId, out NetworkIdentity localObject))
+            if (objectLocator.TryGetIdentity(msg.netId, out NetworkIdentity identity))
             {
-                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
-                    localObject.OnDeserializeAll(networkReader, false);
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
+                    identity.OnDeserializeAll(reader, false);
             }
             else
             {
-                if (logger.WarnEnabled()) logger.LogWarning("Did not find target for sync message for " + msg.netId + " . Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
+                if (logger.WarnEnabled()) logger.LogWarning($"Did not find target for sync message for {msg.netId}. Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
+            }
+        }
+
+        void OnGroupedSyncVars(GroupedSyncVars msg)
+        {
+            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
+            {
+                uint netId = reader.ReadPackedUInt32();
+                if (objectLocator.TryGetIdentity(netId, out NetworkIdentity identity))
+                {
+                    identity.OnDeserializeAll(reader, false);
+                }
+                else
+                {
+                    if (logger.WarnEnabled()) logger.LogWarning($"Did not find target for sync message for {msg.netId}. Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
+                }
             }
         }
     }

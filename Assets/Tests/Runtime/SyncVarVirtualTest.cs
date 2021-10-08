@@ -81,7 +81,7 @@ namespace Mirage.Tests.Runtime.Serialization
             ownerWriter.Reset();
             observersWriter.Reset();
 
-            netIdServer.OnSerializeAll(true, ownerWriter, observersWriter);
+            netIdServer.SerializeAllBehaviours(true, ownerWriter, observersWriter);
 
             // apply all the data from the server object
 

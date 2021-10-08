@@ -40,6 +40,7 @@ namespace Mirage
     {
         void AddToVisList(NetworkIdentity identity);
         void RemoveFromVisList(NetworkIdentity identity);
+        bool IsVisible(NetworkIdentity identity);
         void RemoveAllVisibleObjects();
     }
 

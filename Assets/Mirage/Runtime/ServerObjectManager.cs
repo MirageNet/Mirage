@@ -523,7 +523,7 @@ namespace Mirage
 
             // serialize all components with initialState = true
             // (can be null if has none)
-            identity.OnSerializeAll(true, ownerWriter, observersWriter);
+            identity.SerializeAllBehaviours(true, ownerWriter, observersWriter);
 
             // use owner segment if 'conn' owns this identity, otherwise
             // use observers segment

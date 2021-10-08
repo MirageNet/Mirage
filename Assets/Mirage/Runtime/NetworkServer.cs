@@ -269,7 +269,7 @@ namespace Mirage
         internal void Update()
         {
             peer?.Update();
-            SyncVarSender?.Update();
+            SyncVarSender?.Update_Legacy();
         }
 
         private void Peer_OnConnected(IConnection conn)

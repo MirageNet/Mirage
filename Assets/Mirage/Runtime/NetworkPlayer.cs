@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Mirage.Logging;
 using Mirage.Serialization;
 using Mirage.SocketLayer;
@@ -173,6 +174,12 @@ namespace Mirage
         public void RemoveFromVisList(NetworkIdentity identity)
         {
             visList.Remove(identity);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsVisible(NetworkIdentity identity)
+        {
+            return visList.Contains(identity);
         }
 
         /// <summary>

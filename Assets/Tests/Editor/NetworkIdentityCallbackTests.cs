@@ -508,7 +508,7 @@ namespace Mirage.Tests
             // serialize should propagate exceptions
             Assert.Throws<Exception>(() =>
             {
-                identity.OnSerializeAll(true, ownerWriter, observersWriter);
+                identity.SerializeAllBehaviours(true, ownerWriter, observersWriter);
             });
         }
 
@@ -549,7 +549,7 @@ namespace Mirage.Tests
             // serialize
             var ownerWriter = new NetworkWriter(1300);
             var observersWriter = new NetworkWriter(1300);
-            identity.OnSerializeAll(true, ownerWriter, observersWriter);
+            identity.SerializeAllBehaviours(true, ownerWriter, observersWriter);
 
             // reset component values
             comp1.value = 0;

@@ -779,13 +779,16 @@ namespace Mirage
         ///     </description></item>
         /// </list>
         /// </remarks>
-        void OnSerialize(NetworkBehaviour comp, NetworkWriter writer, bool initialState)
+        void SerializeBehaviour(NetworkBehaviour comp, NetworkWriter writer, bool initialState)
         {
             comp.OnSerialize(writer, initialState);
             if (logger.LogEnabled()) logger.Log("OnSerializeSafely written for object=" + comp.name + " component=" + comp.GetType() + " sceneId=" + sceneId);
 
             // serialize a barrier to be checked by the deserializer
             writer.WriteByte(Barrier);
+
+            // we can't mark as synced inside OnSerialize because it is virutal and user could override it
+            comp.MarkAsSynced();
         }
 
         /// <summary>
@@ -796,7 +799,7 @@ namespace Mirage
         /// <param name="initialState"></param>
         /// <param name="ownerWriter"></param>
         /// <param name="observersWriter"></param>
-        internal (int ownerWritten, int observersWritten) OnSerializeAll(bool initialState, NetworkWriter ownerWriter, NetworkWriter observersWriter)
+        internal (int ownerWritten, int observersWritten) SerializeAllBehaviours(bool initialState, NetworkWriter ownerWriter, NetworkWriter observersWriter)
         {
             int ownerWritten = 0;
             int observersWritten = 0;
@@ -815,7 +818,7 @@ namespace Mirage
                 int startBitPosition = ownerWriter.BitPosition;
 
                 // only calculate isDirty if not intital
-                bool isDirtyOrInitial = initialState || comp.IsDirty();
+                bool isDirtyOrInitial = initialState || comp.NeedsSync();
 
                 // only write isDirty when not initial state
                 // if initial is false, then isDirtyOrInitial will be isDirty
@@ -832,7 +835,8 @@ namespace Mirage
                     // todo dont serialize Owner State if SyncMode==Owner and no owner
 
                     // serialize into ownerWriter first (owner always gets everything!)
-                    OnSerialize(comp, ownerWriter, initialState);
+                    SerializeBehaviour(comp, ownerWriter, initialState);
+
                     ownerWritten++;
 
                     // just copy from 1 buffer to another, faster than serializing again
@@ -848,13 +852,15 @@ namespace Mirage
             return (ownerWritten, observersWritten);
         }
 
-        // Determines if there are changes in any component that have not
-        // been synchronized yet. Probably due to not meeting the syncInterval
-        internal bool StillDirty()
+        /// <summary>
+        /// Checks if any behaviour is dirty
+        /// </summary>
+        /// <returns></returns>
+        internal bool AnyBehaviourDirty()
         {
             foreach (NetworkBehaviour behaviour in NetworkBehaviours)
             {
-                if (behaviour.StillDirty())
+                if (behaviour.AnyVarDirty())
                     return true;
             }
             return false;
@@ -1201,7 +1207,7 @@ namespace Mirage
             _onStopServer.Reset();
         }
 
-        internal void UpdateVars()
+        internal void UpdateVars_Legacy()
         {
             if (observers.Count > 0)
             {
@@ -1221,7 +1227,7 @@ namespace Mirage
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
             {
                 // serialize all the dirty components and send
-                (int ownerWritten, int observersWritten) = OnSerializeAll(false, ownerWriter, observersWriter);
+                (int ownerWritten, int observersWritten) = SerializeAllBehaviours(false, ownerWriter, observersWriter);
                 if (ownerWritten > 0 || observersWritten > 0)
                 {
                     var varsMessage = new UpdateVarsMessage
@@ -1248,15 +1254,6 @@ namespace Mirage
                         varsMessage.payload = observersWriter.ToArraySegment();
                         SendToRemoteObservers(varsMessage, false);
                     }
-
-                    // clear dirty bits only for the components that we serialized
-                    // DO NOT clean ALL component's dirty bits, because
-                    // components can have different syncIntervals and we don't
-                    // want to reset dirty bits for the ones that were not
-                    // synced yet.
-                    // (we serialized only the IsDirty() components, or all of
-                    //  them if initialState. clearing the dirty ones is enough.)
-                    ClearDirtyComponentsDirtyBits();
                 }
             }
         }
@@ -1300,7 +1297,7 @@ namespace Mirage
         {
             foreach (NetworkBehaviour comp in NetworkBehaviours)
             {
-                comp.ClearAllDirtyBits();
+                comp.MarkAsSynced();
             }
         }
 
@@ -1308,13 +1305,14 @@ namespace Mirage
         /// Clear only dirty component's dirty bits. ignores components which
         /// may be dirty but not ready to be synced yet (because of syncInterval)
         /// </summary>
+        [System.Obsolete("We do this inside Seralize", true)]
         internal void ClearDirtyComponentsDirtyBits()
         {
             foreach (NetworkBehaviour comp in NetworkBehaviours)
             {
-                if (comp.IsDirty())
+                if (comp.NeedsSync())
                 {
-                    comp.ClearAllDirtyBits();
+                    comp.MarkAsSynced();
                 }
             }
         }
@@ -1325,6 +1323,63 @@ namespace Mirage
             {
                 comp.ResetSyncObjects();
             }
+        }
+
+        struct UpdateCache
+        {
+            public bool hasCache;
+            public PooledNetworkWriter ownerWriter;
+            public PooledNetworkWriter observersWriter;
+        }
+        UpdateCache updateCache;
+
+        internal NetworkWriter GetCachedUpdate(INetworkPlayer player)
+        {
+            if (!updateCache.hasCache)
+            {
+                CreateUpdateCache();
+            }
+
+            if (Owner == player)
+                return updateCache.ownerWriter;
+            else
+                return updateCache.observersWriter;
+
+        }
+
+        private void CreateUpdateCache()
+        {
+            updateCache.hasCache = true;
+
+            updateCache.observersWriter = NetworkWriterPool.GetWriter();
+            updateCache.ownerWriter = NetworkWriterPool.GetWriter();
+
+            // serialize all the dirty components and send
+            (int ownerWritten, int observersWritten) = SerializeAllBehaviours(false, updateCache.ownerWriter, updateCache.observersWriter);
+
+            if (ownerWritten == 0)
+            {
+                updateCache.ownerWriter.Release();
+                updateCache.ownerWriter = null;
+            }
+
+            if (observersWritten == 0)
+            {
+                updateCache.observersWriter.Release();
+                updateCache.observersWriter = null;
+            }
+        }
+
+        internal void ClearCachedUpdate()
+        {
+            updateCache.observersWriter?.Release();
+            updateCache.ownerWriter?.Release();
+
+            updateCache.observersWriter = null;
+            updateCache.ownerWriter = null;
+            updateCache.hasCache = false;
+
+            ClearAllComponentsDirtyBits();
         }
     }
 }

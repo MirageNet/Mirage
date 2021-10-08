@@ -24,13 +24,13 @@ namespace Mirage.Tests.Runtime.ClientServer
         public void ChangingInitOnlyVarWontSetBehaviourDirty()
         {
             serverComponent.weaponIndex = 10;
-            Assert.That(serverComponent.IsDirty(), Is.False);
+            Assert.That(serverComponent.NeedsSync(), Is.False);
 
             serverComponent.otherValue = 5.2f;
-            Assert.That(serverComponent.IsDirty(), Is.False);
+            Assert.That(serverComponent.NeedsSync(), Is.False);
 
             serverComponent.health = 20;
-            Assert.That(serverComponent.IsDirty(), Is.True);
+            Assert.That(serverComponent.NeedsSync(), Is.True);
         }
 
         [UnityTest]

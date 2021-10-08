@@ -44,7 +44,7 @@ namespace Mirage.Tests.Runtime.Serialization
             // synchronize immediatelly
             player.syncInterval = 0f;
 
-            Assert.That(player.IsDirty(), Is.False, "First time object should not be dirty");
+            Assert.That(player.NeedsSync(), Is.False, "First time object should not be dirty");
 
             var myGuild = new MockPlayer.Guild
             {
@@ -53,13 +53,13 @@ namespace Mirage.Tests.Runtime.Serialization
 
             player.guild = myGuild;
 
-            Assert.That(player.IsDirty(), "Setting struct should mark object as dirty");
-            player.ClearAllDirtyBits();
-            Assert.That(player.IsDirty(), Is.False, "ClearAllDirtyBits() should clear dirty flag");
+            Assert.That(player.NeedsSync(), "Setting struct should mark object as dirty");
+            player.MarkAsSynced();
+            Assert.That(player.NeedsSync(), Is.False, "ClearAllDirtyBits() should clear dirty flag");
 
             // clearing the guild should set dirty bit too
             player.guild = default;
-            Assert.That(player.IsDirty(), "Clearing struct should mark object as dirty");
+            Assert.That(player.NeedsSync(), "Clearing struct should mark object as dirty");
         }
 
         [Test]
@@ -78,7 +78,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 name = "Back street boys"
             };
 
-            Assert.That(player.IsDirty(), Is.False, "Sync interval not met, so not dirty yet");
+            Assert.That(player.NeedsSync(), Is.False, "Sync interval not met, so not dirty yet");
 
             // ClearDirtyComponents should do nothing since syncInterval is not
             // elapsed yet
@@ -88,7 +88,7 @@ namespace Mirage.Tests.Runtime.Serialization
             player.lastSyncTime = Time.time - player.syncInterval;
 
             // should be dirty now
-            Assert.That(player.IsDirty(), Is.True, "Sync interval met, should be dirty");
+            Assert.That(player.NeedsSync(), Is.True, "Sync interval met, should be dirty");
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace Mirage.Tests.Runtime.Serialization
                 name = "Back street boys"
             };
 
-            Assert.That(player.IsDirty(), Is.False, "Sync interval not met, so not dirty yet");
+            Assert.That(player.NeedsSync(), Is.False, "Sync interval not met, so not dirty yet");
 
             // ClearAllComponents should clear dirty even if syncInterval not
             // elapsed yet
@@ -116,7 +116,7 @@ namespace Mirage.Tests.Runtime.Serialization
             player.lastSyncTime = Time.time - player.syncInterval;
 
             // should be dirty now
-            Assert.That(player.IsDirty(), Is.False, "Sync interval met, should still not be dirty");
+            Assert.That(player.NeedsSync(), Is.False, "Sync interval met, should still not be dirty");
         }
 
         [Test]
@@ -133,7 +133,7 @@ namespace Mirage.Tests.Runtime.Serialization
             player1.guild = myGuild;
 
             // serialize all the data as we would for the network
-            identity1.OnSerializeAll(true, ownerWriter, observersWriter);
+            identity1.SerializeAllBehaviours(true, ownerWriter, observersWriter);
 
             // set up a "client" object
             var gameObject2 = new GameObject();
