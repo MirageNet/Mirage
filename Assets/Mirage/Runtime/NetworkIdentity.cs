@@ -219,9 +219,6 @@ namespace Mirage
 
                 NetworkBehaviour[] components = GetComponentsInChildren<NetworkBehaviour>(true);
 
-                if (components.Length > byte.MaxValue)
-                    throw new InvalidOperationException("Only 255 NetworkBehaviour per gameobject allowed");
-
                 networkBehavioursCache = components;
                 return networkBehavioursCache;
             }
@@ -804,42 +801,41 @@ namespace Mirage
             int ownerWritten = 0;
             int observersWritten = 0;
 
-            // check if components are in byte.MaxRange just to be 100% sure
-            // that we avoid overflows
             NetworkBehaviour[] components = NetworkBehaviours;
 
             // serialize all components
-            for (int i = 0; i < components.Length; ++i)
+            for (int i = 0; i < components.Length; i++)
             {
                 // is this component dirty?
                 // -> always serialize if initialState so all components are included in spawn packet
                 // -> note: IsDirty() is false if the component isn't dirty or sendInterval isn't elapsed yet
                 NetworkBehaviour comp = components[i];
-                if (initialState || comp.IsDirty())
+
+                // remember start position in case we need to copy it into observers writer too
+                int startBitPosition = ownerWriter.BitPosition;
+
+                // only calculate isDirty if not intital
+                bool isDirtyOrInitial = initialState || comp.IsDirty();
+
+                // only write isDirty when not initial state
+                // if initial is false, then isDirtyOrInitial will be isDirty
+                if (!initialState)
                 {
-                    if (logger.LogEnabled()) logger.Log("OnSerializeAllSafely: " + name + " -> " + comp.GetType() + " initial=" + initialState);
+                    ownerWriter.WriteBoolean(isDirtyOrInitial);
+                }
 
-                    // remember start position in case we need to copy it into
-                    // observers writer too
-                    int startBitPosition = ownerWriter.BitPosition;
+                // then write values if dirty
+                if (isDirtyOrInitial)
+                {
+                    if (logger.LogEnabled()) logger.Log($"OnSerializeAllSafely: {name} -> {comp.GetType()} initial={initialState}");
 
-                    // write index as byte [0..255]
-                    ownerWriter.WriteByte((byte)i);
+                    // todo dont serialize Owner State if SyncMode==Owner and no owner
 
-                    // serialize into ownerWriter first
-                    // (owner always gets everything!)
+                    // serialize into ownerWriter first (owner always gets everything!)
                     OnSerialize(comp, ownerWriter, initialState);
                     ownerWritten++;
 
-                    // copy into observersWriter too if SyncMode.Observers
-                    // -> we copy instead of calling OnSerialize again because
-                    //    we don't know what magic the user does in OnSerialize.
-                    // -> it's not guaranteed that calling it twice gets the
-                    //    same result
-                    // -> it's not guaranteed that calling it twice doesn't mess
-                    //    with the user's OnSerialize timing code etc.
-                    // => so we just copy the result without touching
-                    //    OnSerialize again
+                    // just copy from 1 buffer to another, faster than serializing again
                     if (comp.syncMode == SyncMode.Observers)
                     {
                         int bitLength = ownerWriter.BitPosition - startBitPosition;
@@ -885,20 +881,16 @@ namespace Mirage
             reader.ObjectLocator = Client != null ? Client.World : null;
             // deserialize all components that were received
             NetworkBehaviour[] components = NetworkBehaviours;
-            // check if we can read atleast 1 byte
-            while (reader.CanReadBytes(1))
+
+            // serialize all components
+            for (int i = 0; i < components.Length; i++)
             {
-                // todo replace index with bool for if next component in order has changed or not
-                //      the index below was an alternative to a mask, but now we have bitpacking we can just use a bool for each NB index
-                // read & check index [0..255]
-                byte index = reader.ReadByte();
-                if (index < components.Length)
+                // initail or ReadIsDirty
+                if (initialState || reader.ReadBoolean())
                 {
-                    // deserialize this component
-                    OnDeserialize(components[index], reader, initialState);
+                    OnDeserialize(components[i], reader, initialState);
                 }
             }
-
         }
 
         /// <summary>
