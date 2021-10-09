@@ -709,7 +709,7 @@ namespace Mirage
                 _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players ?? Server.Players));
             }
 
-            CompleteLoadingScene(scenePath, SceneOperation.LoadAdditive);
+            CompleteLoadingScene(scenePath, SceneOperation.LoadAdditive, players);
         }
 
         /// <summary>
