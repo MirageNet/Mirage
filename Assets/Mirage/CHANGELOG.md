@@ -1,3 +1,10 @@
+## [107.0.1](https://github.com/MirageNet/Mirage/compare/v107.0.0...v107.0.1) (2021-10-09)
+
+
+### Bug Fixes
+
+* **ServerRpc:** fixing sender for server rpc in host mode ([#961](https://github.com/MirageNet/Mirage/issues/961)) ([41b6b79](https://github.com/MirageNet/Mirage/commit/41b6b79156cce14382e7c700aba1c1381c4eb136))
+
 # [107.0.0](https://github.com/MirageNet/Mirage/compare/v106.2.4...v107.0.0) (2021-10-08)
 
 
