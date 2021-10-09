@@ -12,12 +12,23 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ServerRpc() => UniTask.ToCoroutine(async () =>
         {
-            component.Test(1, "hello");
+            component.Send2Args(1, "hello");
 
             await AsyncUtil.WaitUntilWithTimeout(() => component.cmdArg1 != 0);
 
             Assert.That(component.cmdArg1, Is.EqualTo(1));
             Assert.That(component.cmdArg2, Is.EqualTo("hello"));
+        });
+
+        [UnityTest]
+        public IEnumerator ServerRpcWithSender() => UniTask.ToCoroutine(async () =>
+        {
+            component.SendWithSender(1);
+
+            await AsyncUtil.WaitUntilWithTimeout(() => component.cmdArg1 != 0);
+
+            Assert.That(component.cmdArg1, Is.EqualTo(1));
+            Assert.That(component.cmdSender, Is.EqualTo(server.LocalPlayer), "Server Rpc call on host will have localplayer (server version) as sender");
         });
 
         [UnityTest]
