@@ -277,7 +277,7 @@ namespace Mirage
             if (!Client.Player.SceneIsReady)
                 SetSceneIsReady();
 
-            //Call event once all scene related actions (subscenes and ready) are done.
+            //Call event once all scene related actions (sub-scenes and ready) are done.
             OnClientFinishedSceneChange?.Invoke(scenePath, sceneOperation);
         }
 
@@ -465,7 +465,7 @@ namespace Mirage
         {
             var additiveScenes = new List<string>(SceneManager.sceneCount - 1);
 
-            // add all scenes exect active to additive list
+            // add all scenes except active to additive list
             Scene activeScene = SceneManager.GetActiveScene();
             for (int sceneIndex = 0; sceneIndex < SceneManager.sceneCount; sceneIndex++)
             {
@@ -514,10 +514,10 @@ namespace Mirage
         void HandlePlayerSceneReady(INetworkPlayer player, SceneReadyMessage msg)
         {
             if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + player);
-			
+
             player.SceneIsReady = true;
-            
-			OnPlayerSceneReady.Invoke(player);
+
+            OnPlayerSceneReady.Invoke(player);
         }
 
         /// <summary>
