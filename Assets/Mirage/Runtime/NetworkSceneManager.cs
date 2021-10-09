@@ -528,7 +528,7 @@ namespace Mirage
         ///     This is useful when switching scenes.
         /// </para>
         /// </summary>
-        public void SetAllClientsNotReady(IEnumerable<INetworkPlayer> players)
+        public void SetAllClientsNotReady(IEnumerable<INetworkPlayer> players = null)
         {
             ThrowIfNotServer();
 
