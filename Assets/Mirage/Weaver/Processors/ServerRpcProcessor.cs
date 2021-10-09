@@ -278,11 +278,32 @@ namespace Mirage.Weaver
 
         protected void InvokeBody(ILProcessor worker, MethodDefinition rpc)
         {
-            for (int i = 0; i <= rpc.Parameters.Count; i++)
+            // load this
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+
+            // load each param of rpc
+            foreach (ParameterDefinition param in rpc.Parameters)
             {
-                worker.Append(worker.Create(OpCodes.Ldarg, i));
+                // if param is network player, use Server's Local player instead
+                //   in host mode this will be the Server's copy of the the player,
+                //   in server mode this will be null
+                if (IsNetworkPlayer(param))
+                {
+                    worker.Append(worker.Create(OpCodes.Ldarg_0));
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Server));
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkServer server) => server.LocalPlayer));
+                }
+                else
+                {
+                    worker.Append(worker.Create(OpCodes.Ldarg, param));
+                }
             }
             worker.Append(worker.Create(OpCodes.Call, rpc));
+
+            bool IsNetworkPlayer(ParameterDefinition param)
+            {
+                return param.ParameterType.Resolve().ImplementsInterface<INetworkPlayer>();
+            }
         }
     }
 }
