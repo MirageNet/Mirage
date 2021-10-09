@@ -572,7 +572,8 @@ namespace Mirage
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene that is finishing.</param>
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
-        internal void CompleteLoadingScene(string scenePath, SceneOperation sceneOperation)
+        /// <param name="players">List of players we are adding to this scene.</param>
+        internal void CompleteLoadingScene(string scenePath, SceneOperation sceneOperation, IEnumerable<INetworkPlayer> players = null)
         {
             // If server mode call this to make sure scene finishes loading
             if (Server && Server.Active)
@@ -595,7 +596,7 @@ namespace Mirage
                     _serverSceneData.Remove(scene);
                 }
 
-                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(Server.Players));
+                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players ?? Server.Players));
             }
 
             // If client let's call this to finish client scene loading too
@@ -634,7 +635,7 @@ namespace Mirage
         /// <param name="players">List of player's we want to track which scene they are in.</param>
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
         /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
-        private UniTask LoadSceneAsync(string scenePath, IEnumerable<INetworkPlayer> players, SceneOperation sceneOperation = SceneOperation.Normal, LoadSceneParameters? sceneLoadParameters = null)
+        private UniTask LoadSceneAsync(string scenePath, IEnumerable<INetworkPlayer> players = null, SceneOperation sceneOperation = SceneOperation.Normal, LoadSceneParameters? sceneLoadParameters = null)
         {
             switch (sceneOperation)
             {
@@ -694,7 +695,7 @@ namespace Mirage
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         /// <param name="players">The list of players we want to track to know what scene they are on.</param>
         /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
-        private async UniTask LoadSceneAdditiveAsync(string scenePath, IEnumerable<INetworkPlayer> players, LoadSceneParameters? sceneLoadParameters)
+        private async UniTask LoadSceneAdditiveAsync(string scenePath, IEnumerable<INetworkPlayer> players = null, LoadSceneParameters? sceneLoadParameters = null)
         {
             SceneLoadingAsyncOperationInfo = sceneLoadParameters.HasValue ? SceneManager.LoadSceneAsync(scenePath, sceneLoadParameters.Value)
                 : SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
@@ -705,7 +706,7 @@ namespace Mirage
 
             if (Server && Server.Active)
             {
-                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players));
+                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players ?? Server.Players));
             }
 
             CompleteLoadingScene(scenePath, SceneOperation.LoadAdditive);
