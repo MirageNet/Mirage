@@ -57,6 +57,17 @@ namespace Mirage
                 onUnspawn?.Invoke(identity);
         }
 
+        internal void RemoveDestroyedObjects()
+        {
+            var removalCollection = new List<NetworkIdentity>(SpawnedIdentities);
+
+            foreach (NetworkIdentity identity in removalCollection)
+            {
+                if (identity == null)
+                    SpawnedObjects.Remove(identity.NetId);
+            }
+        }
+
         internal void RemoveIdentity(uint netId)
         {
             if (netId == 0) throw new ArgumentException("id can not be zero", nameof(netId));

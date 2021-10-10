@@ -92,6 +92,8 @@ namespace Mirage
 
         void OnFinishedSceneChange(string scenePath, SceneOperation sceneOperation)
         {
+            Server.World.RemoveDestroyedObjects();
+
             SpawnOrActivate();
         }
 
