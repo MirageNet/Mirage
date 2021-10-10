@@ -316,6 +316,7 @@ namespace Mirage
             // create copy so they can be removed inside loop
             // allocation here are fine because is part of clean up
             NetworkIdentity[] all = Client.World.SpawnedIdentities.ToArray();
+
             foreach (NetworkIdentity identity in all)
             {
                 if (identity != null && identity.gameObject != null)

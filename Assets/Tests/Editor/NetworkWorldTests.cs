@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using NSubstitute;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
@@ -298,6 +297,29 @@ namespace Mirage.Tests
 
             world.ClearSpawnedObjects();
             unspawnListener.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [Test]
+        public void ClearDestoryedObjects()
+        {
+            AddValidIdentity(out uint id1, out NetworkIdentity identity1);
+            AddValidIdentity(out uint id2, out NetworkIdentity identity2);
+            AddValidIdentity(out uint id3, out NetworkIdentity identity3);
+
+            NetworkIdentity nullIdentity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
+            nullIdentity.NetId = getValidId();
+            world.AddIdentity(nullIdentity.NetId, nullIdentity);
+
+            Object.DestroyImmediate(nullIdentity);
+
+            Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(4));
+
+            world.RemoveDestroyedObjects();
+
+            foreach (NetworkIdentity identity in world.SpawnedIdentities)
+            {
+                Assert.That(!identity.Equals(null));
+            }
         }
     }
 }

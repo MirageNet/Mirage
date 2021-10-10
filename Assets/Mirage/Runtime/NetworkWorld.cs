@@ -25,6 +25,7 @@ namespace Mirage
         public NetworkTime Time { get; } = new NetworkTime();
 
         private readonly Dictionary<uint, NetworkIdentity> SpawnedObjects = new Dictionary<uint, NetworkIdentity>();
+        private IReadOnlyCollection<NetworkIdentity> removalCollection;
         public IReadOnlyCollection<NetworkIdentity> SpawnedIdentities => SpawnedObjects.Values;
 
         public bool TryGetIdentity(uint netId, out NetworkIdentity identity)
@@ -59,10 +60,12 @@ namespace Mirage
 
         internal void RemoveDestroyedObjects()
         {
-            foreach (KeyValuePair<uint, NetworkIdentity> identity in SpawnedObjects)
+            removalCollection = new List<NetworkIdentity>(SpawnedIdentities);
+
+            foreach (NetworkIdentity identity in removalCollection)
             {
-                if (identity.Value == null)
-                    SpawnedObjects.Remove(identity.Key);
+                if (identity == null)
+                    SpawnedObjects.Remove(identity.NetId);
             }
         }
 
