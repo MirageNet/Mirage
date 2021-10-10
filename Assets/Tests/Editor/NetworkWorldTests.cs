@@ -305,10 +305,7 @@ namespace Mirage.Tests
             AddValidIdentity(out uint id1, out NetworkIdentity identity1);
             AddValidIdentity(out uint id2, out NetworkIdentity identity2);
             AddValidIdentity(out uint id3, out NetworkIdentity identity3);
-
-            NetworkIdentity nullIdentity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
-            nullIdentity.NetId = getValidId();
-            world.AddIdentity(nullIdentity.NetId, nullIdentity);
+            AddValidIdentity(out uint id4, out NetworkIdentity nullIdentity);
 
             Object.DestroyImmediate(nullIdentity);
 
@@ -318,8 +315,10 @@ namespace Mirage.Tests
 
             foreach (NetworkIdentity identity in world.SpawnedIdentities)
             {
-                Assert.That(!identity.Equals(null));
+                Assert.That(identity != null);
             }
+
+            Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(3));
         }
     }
 }
