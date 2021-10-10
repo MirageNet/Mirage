@@ -10,9 +10,8 @@ namespace Mirage.Serialization
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="rotation"></param>
-        [WeaverIgnore]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void PackRotation(this NetworkWriter writer, Quaternion rotation)
+        public static void WriteQuaternion(this NetworkWriter writer, Quaternion rotation)
         {
             QuaternionPacker.Default9.Pack(writer, rotation);
         }
@@ -22,9 +21,8 @@ namespace Mirage.Serialization
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>
-        [WeaverIgnore]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Quaternion UnpackRotation(this NetworkReader reader)
+        public static Quaternion ReadQuaternion(this NetworkReader reader)
         {
             return QuaternionPacker.Default9.Unpack(reader);
         }

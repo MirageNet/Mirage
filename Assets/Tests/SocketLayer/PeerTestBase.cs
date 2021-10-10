@@ -1,4 +1,5 @@
 using System;
+using Mirage.Logging;
 using Mirage.Tests;
 using NSubstitute;
 using NUnit.Framework;
@@ -70,7 +71,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 MaxConnectAttempts = 5,
                 ConnectAttemptInterval = 0.2f,
             };
-            logger = Debug.unityLogger;
+            logger = LogFactory.GetLogger<PeerInstance>();
             peer = new Peer(this.socket, dataHandler, this.config, logger);
         }
     }

@@ -4,7 +4,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Mirage.SocketLayer",
-        "Mirage.Tests.Common"
+        "Mirage.Tests.Common",
+        "Mirage"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -312,22 +312,6 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(output, Is.EqualTo(input));
         }
 
-        static readonly Quaternion[] quaternions = {
-                Quaternion.identity,
-                default,
-                Quaternion.LookRotation(new Vector3(0.3f,0.4f,0.5f)),
-                Quaternion.Euler(45f,56f,Mathf.PI)
-        };
-
-        [Test, TestCaseSource(nameof(quaternions))]
-        public void TestQuaternion(Quaternion input)
-        {
-            writer.WriteQuaternion(input);
-            reader.Reset(writer.ToArraySegment());
-            Quaternion output = reader.ReadQuaternion();
-            Assert.That(output, Is.EqualTo(input));
-        }
-
         static readonly Rect[] rects = {
                 Rect.zero,
                 new Rect(1004.1f,2.001f,4636,400f),

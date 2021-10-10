@@ -1,3 +1,43 @@
+## [107.0.1](https://github.com/MirageNet/Mirage/compare/v107.0.0...v107.0.1) (2021-10-09)
+
+
+### Bug Fixes
+
+* **ServerRpc:** fixing sender for server rpc in host mode ([#961](https://github.com/MirageNet/Mirage/issues/961)) ([41b6b79](https://github.com/MirageNet/Mirage/commit/41b6b79156cce14382e7c700aba1c1381c4eb136))
+
+# [107.0.0](https://github.com/MirageNet/Mirage/compare/v106.2.4...v107.0.0) (2021-10-08)
+
+
+### Performance Improvements
+
+* **BitPacking:** using quaternion compression by default ([#957](https://github.com/MirageNet/Mirage/issues/957)) ([e9fedf1](https://github.com/MirageNet/Mirage/commit/e9fedf10e57ba0b043ef62c4fa9be06c80de9c72))
+
+
+### BREAKING CHANGES
+
+* **BitPacking:** Pack extension methods renamed to WriteQuaternion and ReadQuaternion
+
+## [106.2.4](https://github.com/MirageNet/Mirage/compare/v106.2.3...v106.2.4) (2021-10-06)
+
+
+### Bug Fixes
+
+* **CharacterSpawner:** respawning character if one exists ([203e487](https://github.com/MirageNet/Mirage/commit/203e487e686ba499e4a03c66586676d871146bfb))
+
+## [106.2.3](https://github.com/MirageNet/Mirage/compare/v106.2.2...v106.2.3) (2021-10-06)
+
+
+### Bug Fixes
+
+* **NetworkServer:** making listening disable server peer ([#959](https://github.com/MirageNet/Mirage/issues/959)) ([528698b](https://github.com/MirageNet/Mirage/commit/528698b10ced354aeb155c6a09b30ba1228f535a))
+
+## [106.2.2](https://github.com/MirageNet/Mirage/compare/v106.2.1...v106.2.2) (2021-10-05)
+
+
+### Performance Improvements
+
+* **NetworkSceneManager:** using hashset contains to check for player ([e3df3b5](https://github.com/MirageNet/Mirage/commit/e3df3b5403b135491e2879f5f5f8bd29cb02d3d2))
+
 ## [106.2.1](https://github.com/MirageNet/Mirage/compare/v106.2.0...v106.2.1) (2021-10-02)
 
 
