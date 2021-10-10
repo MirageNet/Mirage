@@ -26,7 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-using JamesFrowen.Logging;
+using Mirage.Logging;
 using UnityEngine;
 
 namespace JamesFrowen.PositionSync
@@ -50,6 +50,8 @@ namespace JamesFrowen.PositionSync
 
     public class SnapshotBuffer
     {
+        static readonly ILogger logger = LogFactory.GetLogger<SnapshotBuffer>();
+
         struct Snapshot
         {
             /// <summary>
@@ -115,7 +117,7 @@ namespace JamesFrowen.PositionSync
             // first snapshot
             if (buffer.Count == 1)
             {
-                SimpleLogger.Debug("First snapshot");
+                if (logger.LogEnabled()) logger.Log("First snapshot");
 
                 return First.state;
             }
@@ -123,7 +125,7 @@ namespace JamesFrowen.PositionSync
             // if first snapshot is after now, there is no "from", so return same as first snapshot
             if (First.time > now)
             {
-                SimpleLogger.Debug($"No snapshots for t={now:0.000}, using earliest t={buffer[0].time:0.000}");
+                if (logger.LogEnabled()) logger.Log($"No snapshots for t={now:0.000}, using earliest t={buffer[0].time:0.000}");
 
                 return First.state;
             }
@@ -133,7 +135,7 @@ namespace JamesFrowen.PositionSync
             // there could be no new data from either lag or because object hasn't moved
             if (Last.time < now)
             {
-                SimpleLogger.DebugWarn($"No snapshots for t={now:0.000}, using first t={buffer[0].time:0.000} last t={Last.time:0.000}");
+                if (logger.WarnEnabled()) logger.LogWarning($"No snapshots for t={now:0.000}, using first t={buffer[0].time:0.000} last t={Last.time:0.000}");
                 return Last.state;
             }
 
@@ -149,14 +151,15 @@ namespace JamesFrowen.PositionSync
                 if (fromTime <= now && now <= toTime)
                 {
                     float alpha = (float)Clamp01((now - fromTime) / (toTime - fromTime));
-                    SimpleLogger.Trace($"alpha:{alpha:0.000}");
-                    Vector3 pos = Vector3.Lerp(from.state.position, to.state.position, alpha);
-                    Quaternion rot = Quaternion.Slerp(from.state.rotation, to.state.rotation, alpha);
+                    // todo add trace log
+                    if (logger.LogEnabled()) logger.Log($"alpha:{alpha:0.000}");
+                    var pos = Vector3.Lerp(from.state.position, to.state.position, alpha);
+                    var rot = Quaternion.Slerp(from.state.rotation, to.state.rotation, alpha);
                     return new TransformState(pos, rot);
                 }
             }
 
-            SimpleLogger.Error("Should never be here! Code should have return from if or for loop above.");
+            logger.LogError("Should never be here! Code should have return from if or for loop above.");
             return Last.state;
         }
 
@@ -189,11 +192,12 @@ namespace JamesFrowen.PositionSync
             }
         }
 
-        public override string ToString()
+
+        public string ToDebugString()
         {
             if (buffer.Count == 0) { return "Buffer Empty"; }
 
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             builder.AppendLine($"count:{buffer.Count}, minTime:{buffer[0].time:0.000}, maxTime:{buffer[buffer.Count - 1].time:0.000}");
             for (int i = 0; i < buffer.Count; i++)
             {

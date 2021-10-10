@@ -24,14 +24,10 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using JamesFrowen.BitPacking;
-using JamesFrowen.Logging;
-using Mirror;
+using Mirage.Logging;
+using Mirage.Serialization;
 using UnityEngine;
-using BitReader = JamesFrowen.BitPacking.NetworkReader;
-using BitWriter = JamesFrowen.BitPacking.NetworkWriter;
 
 namespace JamesFrowen.PositionSync
 {
@@ -42,87 +38,79 @@ namespace JamesFrowen.PositionSync
         public float maxTime = 60 * 60 * 24;
         public float timePrecision = 1 / 1000f;
 
-        [Header("Id Compression")]
-        public int smallBitCount = 6;
-        public int mediumBitCount = 12;
-        public int largeBitCount = 18;
+        [Header("Int Compression")]
+        public int blockSize = 5;
 
         [Header("Position Compression")]
-        public Vector3 min = Vector3.one * -100;
         public Vector3 max = Vector3.one * 100;
-        public float precision = 0.01f;
+        public Vector3 precision = Vector3.one * 0.01f;
 
         [Header("Rotation Compression")]
         public bool syncRotation = true;
         public int bitCount = 9;
 
 
+
         public FloatPacker CreateTimePacker()
         {
-            return new FloatPacker(0, maxTime, timePrecision);
+            return new FloatPacker(maxTime, timePrecision);
         }
-        public UIntVariablePacker2 CreateCountPacker()
+        public Vector3Packer CreatePositionPacker()
         {
-            return new UIntVariablePacker2(4, 10);
-        }
-        public UIntVariablePacker CreateIdPacker()
-        {
-            return new UIntVariablePacker(smallBitCount, mediumBitCount, largeBitCount);
-        }
-        public PositionPacker CreatePositionPacker()
-        {
-            return new PositionPacker(min, max, precision);
+            return new Vector3Packer(max, precision);
         }
         public QuaternionPacker CreateRotationPacker()
         {
             return new QuaternionPacker(bitCount);
         }
     }
-    [Serializable]
-    public class SyncSettingsDebug
-    {
-        // todo replace these serialized fields with custom editor
-        public bool drawGizmo;
-        public Color gizmoColor;
-        [Tooltip("readonly")]
-        public int _posBitCount;
-        [Tooltip("readonly")]
-        public Vector3Int _posBitCountAxis;
-        [Tooltip("readonly")]
-        public int _posByteCount;
+    //[Serializable]
+    //public class SyncSettingsDebug
+    //{
+    //    // todo replace these serialized fields with custom editor
+    //    public bool drawGizmo;
+    //    public Color gizmoColor;
+    //    [Tooltip("readonly")]
+    //    public int _posBitCount;
+    //    [Tooltip("readonly")]
+    //    public Vector3Int _posBitCountAxis;
+    //    [Tooltip("readonly")]
+    //    public int _posByteCount;
 
-        public int _totalBitCountMin;
-        public int _totalBitCountMax;
-        public int _totalByteCountMin;
-        public int _totalByteCountMax;
+    //    public int _totalBitCountMin;
+    //    public int _totalBitCountMax;
+    //    public int _totalByteCountMin;
+    //    public int _totalByteCountMax;
 
-        internal void SetValues(SyncSettings settings)
-        {
-            var positionPacker = new PositionPacker(settings.min, settings.max, settings.precision);
-            _posBitCount = positionPacker.bitCount;
-            _posBitCountAxis = positionPacker.BitCountAxis;
-            _posByteCount = Mathf.CeilToInt(_posBitCount / 8f);
+    //    internal void SetValues(SyncSettings settings)
+    //    {
+    //        var positionPacker = new Vector3Packer(settings.max, settings.precision);
+    //        _posBitCount = positionPacker.bitCount;
+    //        _posBitCountAxis = positionPacker.BitCountAxis;
+    //        _posByteCount = Mathf.CeilToInt(_posBitCount / 8f);
 
-            var timePacker = new FloatPacker(0, settings.maxTime, settings.timePrecision);
-            var idPacker = new UIntVariablePacker(settings.smallBitCount, settings.mediumBitCount, settings.largeBitCount);
-            UIntVariablePacker parentPacker = idPacker;
-            var rotationPacker = new QuaternionPacker(settings.bitCount);
+    //        var timePacker = new FloatPacker(0, settings.maxTime, settings.timePrecision);
+    //        var idPacker = new UIntVariablePacker(settings.smallBitCount, settings.mediumBitCount, settings.largeBitCount);
+    //        UIntVariablePacker parentPacker = idPacker;
+    //        var rotationPacker = new QuaternionPacker(settings.bitCount);
 
 
-            _totalBitCountMin = idPacker.minBitCount + (settings.syncRotation ? rotationPacker.bitCount : 0) + positionPacker.bitCount;
-            _totalBitCountMax = idPacker.maxBitCount + (settings.syncRotation ? rotationPacker.bitCount : 0) + positionPacker.bitCount;
-            _totalByteCountMin = Mathf.CeilToInt(_totalBitCountMin / 8f);
-            _totalByteCountMax = Mathf.CeilToInt(_totalBitCountMax / 8f);
-        }
-    }
+    //        _totalBitCountMin = idPacker.minBitCount + (settings.syncRotation ? rotationPacker.bitCount : 0) + positionPacker.bitCount;
+    //        _totalBitCountMax = idPacker.maxBitCount + (settings.syncRotation ? rotationPacker.bitCount : 0) + positionPacker.bitCount;
+    //        _totalByteCountMin = Mathf.CeilToInt(_totalBitCountMin / 8f);
+    //        _totalByteCountMax = Mathf.CeilToInt(_totalBitCountMax / 8f);
+    //    }
+    //}
     [CreateAssetMenu(menuName = "PositionSync/Packer")]
     public class SyncPositionPacker : ScriptableObject
     {
+        static readonly ILogger logger = LogFactory.GetLogger<SyncPositionPacker>();
+
         [Header("Compression Settings")]
         [SerializeField] SyncSettings settings = new SyncSettings();
 
-        [Header("Position Debug And Gizmo")]
-        [SerializeField] SyncSettingsDebug settingsDebug = new SyncSettingsDebug();
+        //[Header("Position Debug And Gizmo")]
+        //[SerializeField] SyncSettingsDebug settingsDebug = new SyncSettingsDebug();
 
         [Header("Snapshot Interpolation")]
         [Tooltip("Delay to add to client time to make sure there is always a snapshot to interpolate towards. High delay can handle more jitter, but adds latancy to the position.")]
@@ -142,9 +130,7 @@ namespace JamesFrowen.PositionSync
 
         // packers
         [NonSerialized] internal FloatPacker timePacker;
-        [NonSerialized] internal UIntVariablePacker2 countPacker;
-        [NonSerialized] internal UIntVariablePacker idPacker;
-        [NonSerialized] internal PositionPacker positionPacker;
+        [NonSerialized] internal Vector3Packer positionPacker;
         [NonSerialized] internal QuaternionPacker rotationPacker;
         [NonSerialized] InterpolationTime interpolationTime;
 
@@ -196,19 +182,17 @@ namespace JamesFrowen.PositionSync
             _system = null;
         }
 
-        public void CheckIfSysteIsMissing()
-        {
-            if (!CreateSystemIfMissing) return;
-            if (_system != null) return;
+        //public void CheckIfSysteIsMissing()
+        //{
+        //    if (!CreateSystemIfMissing) return;
+        //    if (_system != null) return;
 
-            _system = NetworkManager.singleton.gameObject.AddComponent<SyncPositionSystem>();
-        }
+        //    _system = NetworkManager.singleton.gameObject.AddComponent<SyncPositionSystem>();
+        //}
 
         private void OnEnable()
         {
             timePacker = settings.CreateTimePacker();
-            countPacker = settings.CreateCountPacker();
-            idPacker = settings.CreateIdPacker();
             positionPacker = settings.CreatePositionPacker();
             rotationPacker = settings.CreateRotationPacker();
             interpolationTime = new InterpolationTime(_clientDelay);
@@ -216,44 +200,43 @@ namespace JamesFrowen.PositionSync
 
         private void OnValidate()
         {
-            settingsDebug.SetValues(settings);
+            //settingsDebug.SetValues(settings);
 
             if (!sendToAll)
             {
                 sendToAll = true;
-                UnityEngine.Debug.LogWarning("sendToAll disabled is not implemented yet");
+                logger.LogWarning("sendToAll disabled is not implemented yet");
             }
         }
 
-        [Conditional("UNITY_EDITOR")]
-        internal void DrawGizmo()
-        {
-#if UNITY_EDITOR
-            if (!settingsDebug.drawGizmo) { return; }
-            Gizmos.color = settingsDebug.gizmoColor;
-            Bounds bounds = default;
-            bounds.min = settings.min;
-            bounds.max = settings.max;
-            Gizmos.DrawWireCube(bounds.center, bounds.size);
-#endif  
-        }
+        //        [Conditional("UNITY_EDITOR")]
+        //        internal void DrawGizmo()
+        //        {
+        //#if UNITY_EDITOR
+        //            if (!settingsDebug.drawGizmo) { return; }
+        //            Gizmos.color = settingsDebug.gizmoColor;
+        //            Bounds bounds = default;
+        //            bounds.min = settings.min;
+        //            bounds.max = settings.max;
+        //            Gizmos.DrawWireCube(bounds.center, bounds.size);
+        //#endif  
+        //        }
 
-        public void PackTime(BitWriter writer, float time)
+        public void PackTime(NetworkWriter writer, float time)
         {
             timePacker.Pack(writer, time);
         }
-        public void PackCount(BitWriter writer, int count)
+        public void PackCount(NetworkWriter writer, int count)
         {
-            countPacker.Pack(writer, (uint)count);
+            VarIntBlocksPacker.Pack(writer, (ulong)count, settings.blockSize);
         }
 
-
-        public void PackNext(BitWriter writer, SyncPositionBehaviour behaviour)
+        public void PackNext(NetworkWriter writer, SyncPositionBehaviour behaviour)
         {
-            uint id = behaviour.netId;
+            uint id = behaviour.NetId;
             TransformState state = behaviour.TransformState;
 
-            idPacker.Pack(writer, id);
+            VarIntBlocksPacker.Pack(writer, id, settings.blockSize);
             positionPacker.Pack(writer, state.position);
 
             if (settings.syncRotation)
@@ -262,19 +245,19 @@ namespace JamesFrowen.PositionSync
             }
         }
 
-        public float UnpackTime(BitReader reader)
+        public float UnpackTime(NetworkReader reader)
         {
             return timePacker.Unpack(reader);
         }
 
-        public ulong UnpackCount(BitReader bitReader)
+        public int UnpackCount(NetworkReader reader)
         {
-            return countPacker.Unpack(bitReader);
+            return (int)VarIntBlocksPacker.Unpack(reader, settings.blockSize);
         }
 
-        public void UnpackNext(BitReader reader, out uint id, out Vector3 pos, out Quaternion rot)
+        public void UnpackNext(NetworkReader reader, out uint id, out Vector3 pos, out Quaternion rot)
         {
-            id = (uint)idPacker.Unpack(reader);
+            id = (uint)VarIntBlocksPacker.Unpack(reader, settings.blockSize);
             pos = positionPacker.Unpack(reader);
             rot = settings.syncRotation
                 ? rotationPacker.Unpack(reader)
@@ -283,7 +266,7 @@ namespace JamesFrowen.PositionSync
 
         public void AddBehaviour(SyncPositionBehaviour thing)
         {
-            uint netId = thing.netId;
+            uint netId = thing.NetId;
             Behaviours.Add(netId, thing);
 
 
@@ -292,7 +275,7 @@ namespace JamesFrowen.PositionSync
                 if (existingValue != thing)
                 {
                     // todo what is this log?
-                    SimpleLogger.Error("Parent can't be set without control");
+                    logger.LogError("Parent can't be set without control");
                 }
             }
             else
@@ -303,7 +286,7 @@ namespace JamesFrowen.PositionSync
 
         public void RemoveBehaviour(SyncPositionBehaviour thing)
         {
-            uint netId = thing.netId;
+            uint netId = thing.NetId;
             Behaviours.Remove(netId);
         }
         public void ClearBehaviours()

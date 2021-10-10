@@ -24,20 +24,24 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
-using JamesFrowen.Logging;
-using Mirror;
+using Mirage;
+using Mirage.Logging;
+using Mirage.Serialization;
 using UnityEngine;
-using BitReader = JamesFrowen.BitPacking.NetworkReader;
-using BitWriter = JamesFrowen.BitPacking.NetworkWriter;
 
 namespace JamesFrowen.PositionSync
 {
     [AddComponentMenu("Network/SyncPosition/SyncPositionSystem")]
     public class SyncPositionSystem : MonoBehaviour
     {
+        static readonly ILogger logger = LogFactory.GetLogger<SyncPositionSystem>();
+
         // todo make this work with network Visibility
         // todo add maxMessageSize (splits up update message into multiple messages if too big)
         // todo test sync interval vs fixed hz 
+
+        public NetworkClient Client;
+        public NetworkServer Server;
 
         [Header("Reference")]
         public SyncPositionPacker packer;
@@ -45,49 +49,17 @@ namespace JamesFrowen.PositionSync
         [NonSerialized] float nextSyncInterval;
         HashSet<SyncPositionBehaviour> toUpdate = new HashSet<SyncPositionBehaviour>();
 
-        private void OnDrawGizmos()
-        {
-            if (packer != null)
-                packer.DrawGizmo();
-        }
-
-        public void RegisterClientHandlers()
-        {
-            // todo find a way to register these handles so it doesn't need to be done from NetworkManager
-            if (NetworkClient.active)
-            {
-                NetworkClient.RegisterHandler<NetworkPositionMessage>(ClientHandleNetworkPositionMessage);
-            }
-        }
-        public void RegisterServerHandlers()
-        {
-            // todo find a way to register these handles so it doesn't need to be done from NetworkManager
-            if (NetworkServer.active)
-            {
-                NetworkServer.RegisterHandler<NetworkPositionSingleMessage>(ServerHandleNetworkPositionMessage);
-            }
-        }
-
-        public void UnregisterClientHandlers()
-        {
-            // todo find a way to unregister these handles so it doesn't need to be done from NetworkManager
-            if (NetworkClient.active)
-            {
-                NetworkClient.UnregisterHandler<NetworkPositionMessage>();
-            }
-        }
-        public void UnregisterServerHandlers()
-        {
-            // todo find a way to unregister these handles so it doesn't need to be done from NetworkManager
-            if (NetworkServer.active)
-            {
-                NetworkServer.UnregisterHandler<NetworkPositionSingleMessage>();
-            }
-        }
+        //private void OnDrawGizmos()
+        //{
+        //    if (packer != null)
+        //        packer.DrawGizmo();
+        //}
 
         private void Awake()
         {
             packer.SetSystem(this);
+            Server.Started.AddListener(() => { Server.MessageHandler.RegisterHandler<NetworkPositionSingleMessage>(ServerHandleNetworkPositionMessage); });
+            Client.Started.AddListener(() => { Client.MessageHandler.RegisterHandler<NetworkPositionMessage>(ClientHandleNetworkPositionMessage); });
         }
         private void OnDestroy()
         {
@@ -95,21 +67,33 @@ namespace JamesFrowen.PositionSync
         }
 
         #region Sync Server -> Client
-        [ServerCallback]
+
         private void LateUpdate()
+        {
+            if (Server.Active)
+                ServerUpdate();
+        }
+
+        private void Update()
+        {
+            if (Client.Active)
+                ClientUpdate();
+        }
+
+        private void ServerUpdate()
         {
             if (packer.checkEveryFrame || ShouldSync())
             {
-                var time = packer.Time;
+                float time = packer.Time;
                 SendUpdateToAll(time);
 
                 // host mode
-                if (NetworkClient.active)
+                if (Client.Active)
                     packer.InterpolationTime.OnMessage(time);
             }
         }
-        [ClientCallback]
-        private void Update()
+
+        private void ClientUpdate()
         {
             packer.InterpolationTime.OnTick(packer.DeltaTime);
         }
@@ -133,21 +117,20 @@ namespace JamesFrowen.PositionSync
             // dont send message if no behaviours
             if (packer.Behaviours.Count == 0) { return; }
 
-            // todo dont create new buffer each time
-            var bitWriter = new BitWriter(packer.Behaviours.Count * 32);
-            PackBehaviours(bitWriter, time);
-
-            // always send even if no behaviours so that time is sent
-            var segment = bitWriter.ToArraySegment();
-            NetworkServer.SendToAll(new NetworkPositionMessage
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                payload = segment
-            });
+                PackBehaviours(writer, time);
+
+                Server.SendToAll(new NetworkPositionMessage
+                {
+                    payload = writer.ToArraySegment()
+                });
+            }
         }
 
-        internal void PackBehaviours(BitWriter bitWriter, float time)
+        internal void PackBehaviours(NetworkWriter writer, float time)
         {
-            packer.PackTime(bitWriter, time);
+            packer.PackTime(writer, time);
 
             toUpdate.Clear();
             foreach (SyncPositionBehaviour behaviour in packer.Behaviours.Values)
@@ -158,11 +141,11 @@ namespace JamesFrowen.PositionSync
                 toUpdate.Add(behaviour);
             }
 
-            packer.PackCount(bitWriter, toUpdate.Count);
+            packer.PackCount(writer, toUpdate.Count);
             foreach (SyncPositionBehaviour behaviour in toUpdate)
             {
-                SimpleLogger.Debug($"Time {time:0.000}, Packing {behaviour.name}");
-                packer.PackNext(bitWriter, behaviour);
+                if (logger.LogEnabled()) logger.Log($"Time {time:0.000}, Packing {behaviour.name}");
+                packer.PackNext(writer, behaviour);
 
                 // todo handle client authority updates better
                 behaviour.ClearNeedsUpdate(packer.syncInterval);
@@ -172,20 +155,18 @@ namespace JamesFrowen.PositionSync
         internal void ClientHandleNetworkPositionMessage(NetworkPositionMessage msg)
         {
             // hostMode
-            if (NetworkServer.active)
+            if (Server.Active)
                 return;
 
             int length = msg.payload.Count;
-            // todo stop alloc
-            using (var bitReader = new BitReader())
+            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
             {
-                bitReader.Reset(msg.payload);
-                float time = packer.UnpackTime(bitReader);
-                ulong count = packer.UnpackCount(bitReader);
+                float time = packer.UnpackTime(reader);
+                int count = packer.UnpackCount(reader);
 
                 for (uint i = 0; i < count; i++)
                 {
-                    packer.UnpackNext(bitReader, out uint id, out Vector3 pos, out Quaternion rot);
+                    packer.UnpackNext(reader, out uint id, out Vector3 pos, out Quaternion rot);
 
                     if (packer.Behaviours.TryGetValue(id, out SyncPositionBehaviour behaviour))
                     {
@@ -209,15 +190,12 @@ namespace JamesFrowen.PositionSync
         /// </summary>
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
-        internal void ServerHandleNetworkPositionMessage(NetworkConnection _conn, NetworkPositionSingleMessage msg)
+        internal void ServerHandleNetworkPositionMessage(INetworkPlayer _, NetworkPositionSingleMessage msg)
         {
-            // todo stop alloc
-            using (var bitReader = new BitReader())
+            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
             {
-                bitReader.Reset(msg.payload);
-
-                float time = packer.UnpackTime(bitReader);
-                packer.UnpackNext(bitReader, out uint id, out Vector3 pos, out Quaternion rot);
+                float time = packer.UnpackTime(reader);
+                packer.UnpackNext(reader, out uint id, out Vector3 pos, out Quaternion rot);
 
                 if (packer.Behaviours.TryGetValue(id, out SyncPositionBehaviour behaviour))
                 {
@@ -225,18 +203,20 @@ namespace JamesFrowen.PositionSync
                 }
                 else
                 {
-                    SimpleLogger.DebugWarn($"Could not find behaviour with id {id}");
+                    if (logger.WarnEnabled()) logger.LogWarning($"Could not find behaviour with id {id}");
                 }
             }
         }
         #endregion
     }
 
-    public struct NetworkPositionMessage : NetworkMessage
+    [NetworkMessage]
+    public struct NetworkPositionMessage
     {
         public ArraySegment<byte> payload;
     }
-    public struct NetworkPositionSingleMessage : NetworkMessage
+    [NetworkMessage]
+    public struct NetworkPositionSingleMessage
     {
         public ArraySegment<byte> payload;
     }

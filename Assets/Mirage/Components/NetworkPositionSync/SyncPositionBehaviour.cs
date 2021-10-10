@@ -24,10 +24,10 @@ SOFTWARE.
 
 using System;
 using System.Runtime.CompilerServices;
-using JamesFrowen.Logging;
-using Mirror;
+using Mirage;
+using Mirage.Logging;
+using Mirage.Serialization;
 using UnityEngine;
-using BitWriter = JamesFrowen.BitPacking.NetworkWriter;
 
 namespace JamesFrowen.PositionSync
 {
@@ -38,7 +38,7 @@ namespace JamesFrowen.PositionSync
     [AddComponentMenu("Network/SyncPosition/SyncPositionBehaviour")]
     public class SyncPositionBehaviour : NetworkBehaviour
     {
-        #region ISyncPositionBehaviour
+        static readonly ILogger logger = LogFactory.GetLogger<SyncPositionBehaviour>();
 
         /// <summary>
         /// Checks if object needs syncing to clients
@@ -70,7 +70,7 @@ namespace JamesFrowen.PositionSync
             _latestState = state;
 
             // if host apply using interpolation otherwise apply exact 
-            if (isClient)
+            if (IsClient)
             {
                 AddSnapShotToBuffer(state, time);
             }
@@ -84,12 +84,11 @@ namespace JamesFrowen.PositionSync
         {
             // not host
             // host will have already handled movement in servers code
-            if (isServer)
+            if (IsServer)
                 return;
 
             AddSnapShotToBuffer(state, time);
         }
-        #endregion
 
 
         [Header("References")]
@@ -136,17 +135,18 @@ namespace JamesFrowen.PositionSync
 
         // client
         readonly SnapshotBuffer snapshotBuffer = new SnapshotBuffer();
-       
 
+#if DEBUG
         void OnGUI()
         {
             if (showDebugGui)
             {
                 GUILayout.Label($"ServerTime: {packer.InterpolationTime.ServerTime:0.000}");
                 GUILayout.Label($"LocalTime: {packer.InterpolationTime.ClientTime:0.000}");
-                GUILayout.Label(snapshotBuffer.ToString());
+                GUILayout.Label(snapshotBuffer.ToDebugString());
             }
         }
+#endif
 
         void OnValidate()
         {
@@ -160,7 +160,7 @@ namespace JamesFrowen.PositionSync
         bool IsControlledByServer
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => !clientAuthority || connectionToClient == null || connectionToClient == NetworkServer.localConnection;
+            get => !clientAuthority || Owner == null || Owner == Server.LocalPlayer;
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace JamesFrowen.PositionSync
         bool IsLocalClientInControl
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => clientAuthority && hasAuthority;
+            get => clientAuthority && HasAuthority;
         }
 
         Vector3 Position
@@ -222,7 +222,7 @@ namespace JamesFrowen.PositionSync
             get => _latestState ?? new TransformState(Position, Rotation);
         }
 
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         bool IsTimeToUpdate()
         {
@@ -275,28 +275,40 @@ namespace JamesFrowen.PositionSync
         }
 
 
-        public override void OnStartClient()
+        private void Awake()
         {
-            if (!NetworkServer.active) // dont add twice in host mode
-                packer.AddBehaviour(this);
+            Identity.OnStartClient.AddListener(OnStartClient);
+            Identity.OnStopClient.AddListener(OnStopClient);
+
+            Identity.OnStartServer.AddListener(OnStartServer);
+            Identity.OnStopServer.AddListener(OnStopServer);
         }
-        public override void OnStartServer()
+        public void OnStartClient()
+        {
+            // dont add twice in host mode
+            if (IsServer) return;
+
+            packer.AddBehaviour(this);
+        }
+        public void OnStartServer()
         {
             packer.AddBehaviour(this);
         }
-        public override void OnStopClient()
+        public void OnStopClient()
         {
-            if (!NetworkServer.active) // dont remove twice in host mode
-                packer.RemoveBehaviour(this);
+            // dont add twice in host mode
+            if (IsServer) return;
+
+            packer.RemoveBehaviour(this);
         }
-        public override void OnStopServer()
+        public void OnStopServer()
         {
             packer.RemoveBehaviour(this);
         }
 
         void Update()
         {
-            if (isClient)
+            if (IsClient)
             {
                 if (IsLocalClientInControl)
                 {
@@ -342,7 +354,7 @@ namespace JamesFrowen.PositionSync
         void ClientAuthorityUpdate()
         {
             // host client doesn't need to update server
-            if (isServer) { return; }
+            if (IsServer) { return; }
 
             if (IsTimeToUpdate() && (HasMoved() || HasRotated()))
             {
@@ -354,18 +366,16 @@ namespace JamesFrowen.PositionSync
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void SendMessageToServer()
         {
-            // todo dont create new buffer each time
-            var bitWriter = new BitWriter(64);
-            packer.PackTime(bitWriter, (float)NetworkTime.time);
-            packer.PackNext(bitWriter, this);
-
-            // todo optimize
-            byte[] temp = bitWriter.ToArray();
-
-            NetworkClient.Send(new NetworkPositionSingleMessage
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                payload = new ArraySegment<byte>(temp)
-            });
+                packer.PackTime(writer, (float)NetworkTime.Time);
+                packer.PackNext(writer, this);
+
+                Client.Send(new NetworkPositionSingleMessage
+                {
+                    payload = writer.ToArraySegment()
+                });
+            }
         }
 
         /// <summary>
@@ -386,11 +396,10 @@ namespace JamesFrowen.PositionSync
         {
             if (snapshotBuffer.IsEmpty) { return; }
 
-
             float snapshotTime = packer.InterpolationTime.ClientTime;
             TransformState state = snapshotBuffer.GetLinearInterpolation(snapshotTime);
-            SimpleLogger.Trace($"p1:{Position.x} p2:{state.position.x} delta:{Position.x - state.position.x}");
-
+            // todo add trace log
+            if (logger.LogEnabled()) logger.Log($"p1:{Position.x} p2:{state.position.x} delta:{Position.x - state.position.x}");
 
             Position = state.position;
 
