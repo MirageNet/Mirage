@@ -1,3 +1,15 @@
+# [107.1.0](https://github.com/MirageNet/Mirage/compare/v107.0.1...v107.1.0) (2021-10-10)
+
+
+### Bug Fixes
+
+* this fixes issues with multi scene loading on server and client ([#965](https://github.com/MirageNet/Mirage/issues/965)) ([e725a41](https://github.com/MirageNet/Mirage/commit/e725a417be530a3b617305d59a563339fe9fb93f))
+
+
+### Features
+
+* added a method to do physic scene loads on server and tell clients about it ([f215cef](https://github.com/MirageNet/Mirage/commit/f215cefaf594c5b0bac4223dfe837623bd480b4b))
+
 ## [107.0.1](https://github.com/MirageNet/Mirage/compare/v107.0.0...v107.0.1) (2021-10-09)
 
 
