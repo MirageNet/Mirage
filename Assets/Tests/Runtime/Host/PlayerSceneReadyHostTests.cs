@@ -29,7 +29,7 @@ namespace Mirage.Tests.Runtime.Host
             server.Players.Add(second);
 
             // set all not ready
-            sceneManager.SetAllClientsNotReady();
+            sceneManager.SetAllClientsNotReady(null);
             Assert.That(first.SceneIsReady, Is.False);
             Assert.That(second.SceneIsReady, Is.False);
         }

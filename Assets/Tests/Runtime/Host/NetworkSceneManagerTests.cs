@@ -231,7 +231,7 @@ namespace Mirage.Tests.Runtime.Host
 
             ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                sceneManager.ServerUnloadSceneAdditively(new Scene(), null);
+                sceneManager.ServerUnloadSceneAdditively(default, null);
             });
 
             string message = new ArgumentNullException("scene", "[NetworkSceneManager] - ServerChangeScene: " + "scene" + " cannot be null").Message;

@@ -277,7 +277,7 @@ namespace Mirage
             if (!Client.Player.SceneIsReady)
                 SetSceneIsReady();
 
-            //Call event once all scene related actions (subscenes and ready) are done.
+            //Call event once all scene related actions (sub-scenes and ready) are done.
             OnClientFinishedSceneChange?.Invoke(scenePath, sceneOperation);
         }
 
@@ -339,8 +339,7 @@ namespace Mirage
         /// <param name="players">List of player's we want to send the new scene loading or unloading to.</param>
         /// <param name="shouldClientLoadOrUnloadNormally">Should client load or unload the scene in normal non additive way</param>
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
-        private void ServerSceneLoading(string scenePath, IEnumerable<INetworkPlayer> players,
-            bool shouldClientLoadOrUnloadNormally, SceneOperation sceneOperation = SceneOperation.Normal)
+        private void ServerSceneLoading(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadOrUnloadNormally, SceneOperation sceneOperation = SceneOperation.Normal, LoadSceneParameters? loadSceneParameters = null)
         {
             if (string.IsNullOrEmpty(scenePath))
             {
@@ -353,14 +352,15 @@ namespace Mirage
             // Let server prepare for scene change
             logger.Log("[NetworkSceneManager] - OnServerChangeScene");
 
-            SetAllClientsNotReady();
+            SetAllClientsNotReady(players);
+
             OnServerStartedSceneChange?.Invoke(scenePath, sceneOperation);
 
             if (players == null)
                 throw new ArgumentNullException(nameof(players), "No player's were added to send for information");
 
             if (!Server.LocalClientActive)
-                LoadSceneAsync(scenePath, players, sceneOperation).Forget();
+                LoadSceneAsync(scenePath, players, sceneOperation, loadSceneParameters).Forget();
 
             // notify all clients about the new scene
             if (shouldClientLoadOrUnloadNormally)
@@ -373,10 +373,10 @@ namespace Mirage
         }
 
         /// <summary>
-        /// 
+        ///     Unload a specific scene from server and clients
         /// </summary>
-        /// <param name="scene"></param>
-        /// <param name="players"></param>
+        /// <param name="scene">What scene do we want to tell server and clients to unload.</param>
+        /// <param name="players">The players we want to tell to unload the scene.</param>
         private void ServerSceneUnLoading(Scene scene, IEnumerable<INetworkPlayer> players)
         {
             if (!scene.IsValid())
@@ -392,7 +392,7 @@ namespace Mirage
             // Let server prepare for scene change
             if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - OnServerChangeScene");
 
-            SetAllClientsNotReady();
+            SetAllClientsNotReady(players);
             OnServerStartedSceneChange?.Invoke(scene.path, SceneOperation.UnloadAdditive);
 
             // if not host
@@ -408,11 +408,12 @@ namespace Mirage
         ///     Allows server to fully load in a new scene and override current active scene.
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
-        public void ServerLoadSceneNormal(string scenePath)
+        /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
+        public void ServerLoadSceneNormal(string scenePath, LoadSceneParameters? sceneLoadParameters = null)
         {
             ThrowIfNotServer();
 
-            ServerSceneLoading(scenePath, Server.Players, true);
+            ServerSceneLoading(scenePath, Server.Players, true, SceneOperation.Normal, sceneLoadParameters);
         }
 
         /// <summary>
@@ -421,11 +422,13 @@ namespace Mirage
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         /// <param name="players">Collection of player's that are receiving the new scene load.</param>
         /// <param name="shouldClientLoadNormally">Should the clients load this additively too or load it full normal scene change.</param>
-        public void ServerLoadSceneAdditively(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false)
+        /// <param name="createPhysicsScene">Should we be creating a physics scene or not</param>
+        /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
+        public void ServerLoadSceneAdditively(string scenePath, IEnumerable<INetworkPlayer> players, bool shouldClientLoadNormally = false, LoadSceneParameters? sceneLoadParameters = null)
         {
             ThrowIfNotServer();
 
-            ServerSceneLoading(scenePath, players, shouldClientLoadNormally, SceneOperation.LoadAdditive);
+            ServerSceneLoading(scenePath, players, shouldClientLoadNormally, SceneOperation.LoadAdditive, sceneLoadParameters);
         }
 
         /// <summary>
@@ -462,7 +465,7 @@ namespace Mirage
         {
             var additiveScenes = new List<string>(SceneManager.sceneCount - 1);
 
-            // add all scenes exect active to additive list
+            // add all scenes except active to additive list
             Scene activeScene = SceneManager.GetActiveScene();
             for (int sceneIndex = 0; sceneIndex < SceneManager.sceneCount; sceneIndex++)
             {
@@ -511,7 +514,9 @@ namespace Mirage
         void HandlePlayerSceneReady(INetworkPlayer player, SceneReadyMessage msg)
         {
             if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + player);
+
             player.SceneIsReady = true;
+
             OnPlayerSceneReady.Invoke(player);
         }
 
@@ -523,10 +528,11 @@ namespace Mirage
         ///     This is useful when switching scenes.
         /// </para>
         /// </summary>
-        public void SetAllClientsNotReady()
+        public void SetAllClientsNotReady(IEnumerable<INetworkPlayer> players = null)
         {
             ThrowIfNotServer();
-            foreach (INetworkPlayer player in Server.Players)
+
+            foreach (INetworkPlayer player in players ?? Server.Players)
             {
                 SetClientNotReady(player);
             }
@@ -566,7 +572,8 @@ namespace Mirage
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene that is finishing.</param>
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
-        internal void CompleteLoadingScene(string scenePath, SceneOperation sceneOperation)
+        /// <param name="players">List of players we are adding to this scene.</param>
+        internal void CompleteLoadingScene(string scenePath, SceneOperation sceneOperation, IEnumerable<INetworkPlayer> players = null)
         {
             // If server mode call this to make sure scene finishes loading
             if (Server && Server.Active)
@@ -589,7 +596,7 @@ namespace Mirage
                     _serverSceneData.Remove(scene);
                 }
 
-                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(Server.Players));
+                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players ?? Server.Players));
             }
 
             // If client let's call this to finish client scene loading too
@@ -627,14 +634,15 @@ namespace Mirage
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         /// <param name="players">List of player's we want to track which scene they are in.</param>
         /// <param name="sceneOperation">Choose type of scene loading we are doing <see cref="SceneOperation"/>.</param>
-        private UniTask LoadSceneAsync(string scenePath, IEnumerable<INetworkPlayer> players, SceneOperation sceneOperation = SceneOperation.Normal)
+        /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
+        private UniTask LoadSceneAsync(string scenePath, IEnumerable<INetworkPlayer> players = null, SceneOperation sceneOperation = SceneOperation.Normal, LoadSceneParameters? sceneLoadParameters = null)
         {
             switch (sceneOperation)
             {
                 case SceneOperation.Normal:
-                    return LoadSceneNormalAsync(scenePath);
+                    return LoadSceneNormalAsync(scenePath, sceneLoadParameters);
                 case SceneOperation.LoadAdditive:
-                    return LoadSceneAdditiveAsync(scenePath, players);
+                    return LoadSceneAdditiveAsync(scenePath, players, sceneLoadParameters);
                 case SceneOperation.UnloadAdditive:
                     return UnLoadSceneAdditiveAsync(scenePath);
                 default:
@@ -647,7 +655,8 @@ namespace Mirage
         ///     Load our scene up in a normal unity fashion.
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
-        private async UniTask LoadSceneNormalAsync(string scenePath)
+        /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
+        private async UniTask LoadSceneNormalAsync(string scenePath, LoadSceneParameters? sceneLoadParameters = null)
         {
             //Scene is already active.
             if (ActiveScenePath.Equals(scenePath))
@@ -656,7 +665,9 @@ namespace Mirage
             }
             else
             {
-                SceneLoadingAsyncOperationInfo = SceneManager.LoadSceneAsync(scenePath);
+                SceneLoadingAsyncOperationInfo = sceneLoadParameters.HasValue
+                    ? SceneManager.LoadSceneAsync(scenePath, sceneLoadParameters.Value)
+                    : SceneManager.LoadSceneAsync(scenePath);
 
                 //If non host client. Wait for server to finish scene change
                 if (Client && Client.Active && !Client.IsLocalClient)
@@ -683,18 +694,22 @@ namespace Mirage
         /// </summary>
         /// <param name="scenePath">The full path to the scene file or the name of the scene.</param>
         /// <param name="players">The list of players we want to track to know what scene they are on.</param>
-        private async UniTask LoadSceneAdditiveAsync(string scenePath, IEnumerable<INetworkPlayer> players)
+        /// <param name="sceneLoadParameters">What settings should we be using for physics scene loading.</param>
+        private async UniTask LoadSceneAdditiveAsync(string scenePath, IEnumerable<INetworkPlayer> players = null, LoadSceneParameters? sceneLoadParameters = null)
         {
-            await SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
+            SceneLoadingAsyncOperationInfo = sceneLoadParameters.HasValue ? SceneManager.LoadSceneAsync(scenePath, sceneLoadParameters.Value)
+                : SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Additive);
+
+            await SceneLoadingAsyncOperationInfo;
 
             Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
 
             if (Server && Server.Active)
             {
-                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players));
+                _serverSceneData.Add(scene, new HashSet<INetworkPlayer>(players ?? Server.Players));
             }
 
-            CompleteLoadingScene(scenePath, SceneOperation.LoadAdditive);
+            CompleteLoadingScene(scenePath, SceneOperation.LoadAdditive, players);
         }
 
         /// <summary>
