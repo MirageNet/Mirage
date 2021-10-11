@@ -140,8 +140,8 @@ namespace JamesFrowen.PositionSync
         {
             if (showDebugGui)
             {
-                GUILayout.Label($"ServerTime: {packer.TimeSync.LatestServerTime:0.000}");
-                GUILayout.Label($"InterpTime: {packer.InterpolationTime:0.000}");
+                GUILayout.Label($"ServerTime: {_system.TimeSync.LatestServerTime:0.000}");
+                GUILayout.Label($"InterpTime: {_system.InterpolationTime:0.000}");
                 GUILayout.Label(snapshotBuffer.ToDebugString());
             }
         }
@@ -281,39 +281,38 @@ namespace JamesFrowen.PositionSync
             Identity.OnStartServer.AddListener(OnStartServer);
             Identity.OnStopServer.AddListener(OnStopServer);
         }
-        private SyncPositionSystem System
+        SyncPositionSystem _system;
+        void FindSystem()
         {
-            get
-            {
-                if (IsServer)
-                    return ServerObjectManager.GetComponent<SyncPositionSystem>();
-                else if (IsClient)
-                    return ClientObjectManager.GetComponent<SyncPositionSystem>();
-                else
-                    throw new InvalidOperationException("System can't be found when object is not spawned");
-            }
+            if (IsServer)
+                _system = ServerObjectManager.GetComponent<SyncPositionSystem>();
+            else if (IsClient)
+                _system = ClientObjectManager.GetComponent<SyncPositionSystem>();
+            else throw new InvalidOperationException("System can't be found when object is not spawned");
         }
         public void OnStartClient()
         {
             // dont add twice in host mode
             if (IsServer) return;
-            System.Behaviours.AddBehaviour(this);
+            FindSystem();
+            _system.Behaviours.AddBehaviour(this);
         }
-
         public void OnStartServer()
         {
-            System.Behaviours.AddBehaviour(this);
+            FindSystem();
+            _system.Behaviours.AddBehaviour(this);
         }
         public void OnStopClient()
         {
             // dont add twice in host mode
             if (IsServer) return;
-
-            System.Behaviours.RemoveBehaviour(this);
+            _system.Behaviours.RemoveBehaviour(this);
+            _system = null;
         }
         public void OnStopServer()
         {
-            System.Behaviours.RemoveBehaviour(this);
+            _system.Behaviours.RemoveBehaviour(this);
+            _system = null;
         }
 
         void Update()
@@ -378,8 +377,8 @@ namespace JamesFrowen.PositionSync
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                packer.PackTime(writer, (float)NetworkTime.Time);
-                packer.PackNext(writer, this);
+                _system.PackTime(writer, (float)NetworkTime.Time);
+                _system.PackNext(writer, this);
 
                 Client.Send(new NetworkPositionSingleMessage
                 {
@@ -406,7 +405,7 @@ namespace JamesFrowen.PositionSync
         {
             if (snapshotBuffer.IsEmpty) { return; }
 
-            float snapshotTime = packer.InterpolationTime;
+            float snapshotTime = _system.InterpolationTime;
             TransformState state = snapshotBuffer.GetLinearInterpolation(snapshotTime);
             // todo add trace log
             if (logger.LogEnabled()) logger.Log($"p1:{Position.x} p2:{state.position.x} delta:{Position.x - state.position.x}");

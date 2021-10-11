@@ -24,6 +24,7 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Mirage;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -85,10 +86,28 @@ namespace JamesFrowen.PositionSync
         [Header("Reference")]
         public SyncPositionPacker packer;
 
-        public SyncPositionBehaviourCollection Behaviours { get; }
 
         [NonSerialized] float nextSyncInterval;
         HashSet<SyncPositionBehaviour> toUpdate = new HashSet<SyncPositionBehaviour>();
+        // packers
+        [NonSerialized] internal FloatPacker _timePacker;
+        [NonSerialized] internal Vector3Packer _positionPacker;
+        [NonSerialized] internal QuaternionPacker _rotationPacker;
+        [NonSerialized] TimeSync _timeSync;
+
+
+        public SyncPositionBehaviourCollection Behaviours { get; } = new SyncPositionBehaviourCollection();
+        public TimeSync TimeSync
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _timeSync;
+        }
+        public float InterpolationTime
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _timeSync.ClientTime - packer.ClientDelay;
+        }
+
 
         //private void OnDrawGizmos()
         //{
@@ -100,6 +119,11 @@ namespace JamesFrowen.PositionSync
         {
             Server.Started.AddListener(AddServerHandlers);
             Client.Started.AddListener(AddClientHandlers);
+
+            _timePacker = packer.Settings.CreateTimePacker();
+            _positionPacker = packer.Settings.CreatePositionPacker();
+            _rotationPacker = packer.Settings.CreateRotationPacker();
+            _timeSync = new TimeSync(packer.syncInterval * 0.5f);
         }
         private void OnDestroy()
         {
@@ -141,13 +165,13 @@ namespace JamesFrowen.PositionSync
 
                 // host mode
                 if (Client.Active)
-                    packer.TimeSync.OnMessage(time);
+                    TimeSync.OnMessage(time);
             }
         }
 
         private void ClientUpdate()
         {
-            packer.TimeSync.OnUpdate(packer.DeltaTime);
+            TimeSync.OnUpdate(packer.DeltaTime);
         }
 
         bool ShouldSync()
@@ -182,7 +206,7 @@ namespace JamesFrowen.PositionSync
 
         internal void PackBehaviours(NetworkWriter writer, float time)
         {
-            packer.PackTime(writer, time);
+            PackTime(writer, time);
 
             toUpdate.Clear();
             foreach (SyncPositionBehaviour behaviour in Behaviours.Dictionary.Values)
@@ -193,11 +217,11 @@ namespace JamesFrowen.PositionSync
                 toUpdate.Add(behaviour);
             }
 
-            packer.PackCount(writer, toUpdate.Count);
+            PackCount(writer, toUpdate.Count);
             foreach (SyncPositionBehaviour behaviour in toUpdate)
             {
                 if (logger.LogEnabled()) logger.Log($"Time {time:0.000}, Packing {behaviour.name}");
-                packer.PackNext(writer, behaviour);
+                PackNext(writer, behaviour);
 
                 // todo handle client authority updates better
                 behaviour.ClearNeedsUpdate(packer.syncInterval);
@@ -212,12 +236,12 @@ namespace JamesFrowen.PositionSync
 
             using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
             {
-                float time = packer.UnpackTime(reader);
-                int count = packer.UnpackCount(reader);
+                float time = UnpackTime(reader);
+                int count = UnpackCount(reader);
 
                 for (uint i = 0; i < count; i++)
                 {
-                    packer.UnpackNext(reader, out uint id, out Vector3 pos, out Quaternion rot);
+                    UnpackNext(reader, out uint id, out Vector3 pos, out Quaternion rot);
 
                     if (Behaviours.Dictionary.TryGetValue(id, out SyncPositionBehaviour behaviour))
                     {
@@ -226,7 +250,7 @@ namespace JamesFrowen.PositionSync
 
                 }
 
-                packer.TimeSync.OnMessage(time);
+                TimeSync.OnMessage(time);
             }
         }
 
@@ -245,8 +269,8 @@ namespace JamesFrowen.PositionSync
         {
             using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
             {
-                float time = packer.UnpackTime(reader);
-                packer.UnpackNext(reader, out uint id, out Vector3 pos, out Quaternion rot);
+                float time = UnpackTime(reader);
+                UnpackNext(reader, out uint id, out Vector3 pos, out Quaternion rot);
 
                 if (Behaviours.Dictionary.TryGetValue(id, out SyncPositionBehaviour behaviour))
                 {
@@ -257,6 +281,51 @@ namespace JamesFrowen.PositionSync
                     if (logger.WarnEnabled()) logger.LogWarning($"Could not find behaviour with id {id}");
                 }
             }
+        }
+        #endregion
+
+
+        #region Pack helper
+        public void PackTime(NetworkWriter writer, float time)
+        {
+            _timePacker.Pack(writer, time);
+        }
+        public void PackCount(NetworkWriter writer, int count)
+        {
+            VarIntBlocksPacker.Pack(writer, (ulong)count, packer.Settings.blockSize);
+        }
+
+        public void PackNext(NetworkWriter writer, SyncPositionBehaviour behaviour)
+        {
+            uint id = behaviour.NetId;
+            TransformState state = behaviour.TransformState;
+
+            VarIntBlocksPacker.Pack(writer, id, packer.Settings.blockSize);
+            _positionPacker.Pack(writer, state.position);
+
+            if (packer.SyncRotation)
+            {
+                _rotationPacker.Pack(writer, state.rotation);
+            }
+        }
+
+        public float UnpackTime(NetworkReader reader)
+        {
+            return _timePacker.Unpack(reader);
+        }
+
+        public int UnpackCount(NetworkReader reader)
+        {
+            return (int)VarIntBlocksPacker.Unpack(reader, packer.Settings.blockSize);
+        }
+
+        public void UnpackNext(NetworkReader reader, out uint id, out Vector3 pos, out Quaternion rot)
+        {
+            id = (uint)VarIntBlocksPacker.Unpack(reader, packer.Settings.blockSize);
+            pos = _positionPacker.Unpack(reader);
+            rot = packer.SyncRotation
+                ? _rotationPacker.Unpack(reader)
+                : Quaternion.identity;
         }
         #endregion
     }

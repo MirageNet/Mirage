@@ -102,6 +102,7 @@ namespace JamesFrowen.PositionSync
     //}
     /// <summary>
     /// Settings for SyncPosition packer
+    /// <para>IMPORTANT: DONT HOLD STATE HERE, might be used by multiple instances</para>
     /// </summary>
     [CreateAssetMenu(menuName = "PositionSync/Packer")]
     public class SyncPositionPacker : ScriptableObject
@@ -129,27 +130,10 @@ namespace JamesFrowen.PositionSync
         [Tooltip("Create new system object if missing when first Behaviour is added")]
         public bool CreateSystemIfMissing = false;
 
-
-        // packers
-        [NonSerialized] internal FloatPacker _timePacker;
-        [NonSerialized] internal Vector3Packer _positionPacker;
-        [NonSerialized] internal QuaternionPacker _rotationPacker;
-        [NonSerialized] TimeSync _timeSync;
-
-        public TimeSync TimeSync
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _timeSync;
-        }
         public float ClientDelay
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _clientDelay;
-        }
-        public float InterpolationTime
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _timeSync.ClientTime - _clientDelay;
         }
 
         public float Time
@@ -164,30 +148,12 @@ namespace JamesFrowen.PositionSync
             get => UnityEngine.Time.unscaledDeltaTime;
         }
 
-
-
         public bool SyncRotation
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => settings.syncRotation;
         }
-
-
-        //public void CheckIfSysteIsMissing()
-        //{
-        //    if (!CreateSystemIfMissing) return;
-        //    if (_system != null) return;
-
-        //    _system = NetworkManager.singleton.gameObject.AddComponent<SyncPositionSystem>();
-        //}
-
-        private void OnEnable()
-        {
-            _timePacker = settings.CreateTimePacker();
-            _positionPacker = settings.CreatePositionPacker();
-            _rotationPacker = settings.CreateRotationPacker();
-            _timeSync = new TimeSync(syncInterval * 0.5f);
-        }
+        public SyncSettings Settings => settings;
 
         private void OnValidate()
         {
@@ -212,47 +178,5 @@ namespace JamesFrowen.PositionSync
         //            Gizmos.DrawWireCube(bounds.center, bounds.size);
         //#endif  
         //        }
-
-        public void PackTime(NetworkWriter writer, float time)
-        {
-            _timePacker.Pack(writer, time);
-        }
-        public void PackCount(NetworkWriter writer, int count)
-        {
-            VarIntBlocksPacker.Pack(writer, (ulong)count, settings.blockSize);
-        }
-
-        public void PackNext(NetworkWriter writer, SyncPositionBehaviour behaviour)
-        {
-            uint id = behaviour.NetId;
-            TransformState state = behaviour.TransformState;
-
-            VarIntBlocksPacker.Pack(writer, id, settings.blockSize);
-            _positionPacker.Pack(writer, state.position);
-
-            if (settings.syncRotation)
-            {
-                _rotationPacker.Pack(writer, state.rotation);
-            }
-        }
-
-        public float UnpackTime(NetworkReader reader)
-        {
-            return _timePacker.Unpack(reader);
-        }
-
-        public int UnpackCount(NetworkReader reader)
-        {
-            return (int)VarIntBlocksPacker.Unpack(reader, settings.blockSize);
-        }
-
-        public void UnpackNext(NetworkReader reader, out uint id, out Vector3 pos, out Quaternion rot)
-        {
-            id = (uint)VarIntBlocksPacker.Unpack(reader, settings.blockSize);
-            pos = _positionPacker.Unpack(reader);
-            rot = settings.syncRotation
-                ? _rotationPacker.Unpack(reader)
-                : Quaternion.identity;
-        }
     }
 }
