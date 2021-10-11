@@ -130,7 +130,7 @@ namespace JamesFrowen.PositionSync
         /// Updates client time
         /// </summary>
         /// <param name="deltaTime"></param>
-        public void OnTick(float deltaTime)
+        public void OnUpdate(float deltaTime)
         {
             _clientTime += deltaTime * clientScaleTime;
         }
