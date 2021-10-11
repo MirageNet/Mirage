@@ -108,6 +108,9 @@ namespace JamesFrowen.PositionSync
             get => _timeSync.ClientTime - packer.ClientDelay;
         }
 
+        public bool ClientActive => Client?.Active ?? false;
+        public bool ServerActive => Server?.Active ?? false;
+
 
         //private void OnDrawGizmos()
         //{
@@ -117,8 +120,8 @@ namespace JamesFrowen.PositionSync
 
         private void Awake()
         {
-            Server.Started.AddListener(AddServerHandlers);
-            Client.Started.AddListener(AddClientHandlers);
+            Server?.Started.AddListener(AddServerHandlers);
+            Client?.Started.AddListener(AddClientHandlers);
 
             _timePacker = packer.Settings.CreateTimePacker();
             _positionPacker = packer.Settings.CreatePositionPacker();
@@ -146,13 +149,13 @@ namespace JamesFrowen.PositionSync
 
         private void LateUpdate()
         {
-            if (Server.Active)
+            if (ServerActive)
                 ServerUpdate();
         }
 
         private void Update()
         {
-            if (Client.Active)
+            if (ClientActive)
                 ClientUpdate();
         }
 
@@ -164,7 +167,7 @@ namespace JamesFrowen.PositionSync
                 SendUpdateToAll(time);
 
                 // host mode
-                if (Client.Active)
+                if (Client?.Active ?? false)
                     TimeSync.OnMessage(time);
             }
         }
@@ -231,7 +234,7 @@ namespace JamesFrowen.PositionSync
         internal void ClientHandleNetworkPositionMessage(NetworkPositionMessage msg)
         {
             // hostMode
-            if (Server.Active)
+            if (ServerActive)
                 return;
 
             using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
