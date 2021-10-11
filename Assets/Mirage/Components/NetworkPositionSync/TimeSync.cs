@@ -29,9 +29,13 @@ using UnityEngine;
 
 namespace JamesFrowen.PositionSync
 {
-    public class InterpolationTime
+    /// <summary>
+    /// Syncs time between server and client be receving regular message from server
+    /// <para>Can be used for snapshot interpolation</para>
+    /// </summary>
+    public class TimeSync
     {
-        static readonly ILogger logger = LogFactory.GetLogger<InterpolationTime>();
+        static readonly ILogger logger = LogFactory.GetLogger<TimeSync>();
 
         /// <summary>
         /// if new time and previous time are this far apart then reset client time
@@ -42,18 +46,13 @@ namespace JamesFrowen.PositionSync
         /// <summary>
         /// time client uses to interpolate
         /// </summary>
-        float clientTime;
+        float _clientTime;
         /// <summary>
         /// Multiples deltaTime by this scale each frame
         /// </summary>
         float clientScaleTime;
 
         readonly ExponentialMovingAverage diffAvg;
-
-        /// <summary>
-        /// goal offset between serverTime and clientTime
-        /// </summary>
-        readonly float goalOffset;
 
         /// <summary>
         /// how much above goalOffset diff is allowed to go before changing timescale
@@ -69,26 +68,38 @@ namespace JamesFrowen.PositionSync
         readonly float slowScale = 0.99f;
 
         // debug
-        float previousServerTime;
+        float _latestServerTime;
 
 
+        [System.Obsolete("Use InterpolationTime insteads", true)]
+        public float ClientTime_old { get; }
+        /// <summary>
+        /// Timer that follows server time
+        /// </summary>
         public float ClientTime
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => clientTime;
+            get => _clientTime;
         }
-        public float ServerTime
+        /// <summary>
+        /// Last time Received by server
+        /// </summary>
+        public float LatestServerTime
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => previousServerTime;
+            get => _latestServerTime;
         }
 
-        public InterpolationTime(float clientDelay, float rangeFromGoal = 4, int movingAverageCount = 30)
-        {
-            goalOffset = clientDelay;
+        [System.Obsolete("", true)]
+        public TimeSync(float clientDelay, float rangeFromGoal = 4, int movingAverageCount = 30) { }
 
-            positiveThreshold = clientDelay / rangeFromGoal;
-            negativeThreshold = -clientDelay / rangeFromGoal;
+        /// <param name="diffThreshold">how far off client time can be before changing its speed</param>
+        /// <param name="movingAverageCount">how many ticks used in average, increase or decrease with framerate</param>
+        public TimeSync(float diffThreshold, int movingAverageCount = 30)
+        {
+            // todo do we need tick rate here?
+            positiveThreshold = diffThreshold;
+            negativeThreshold = -diffThreshold;
 
             diffAvg = new ExponentialMovingAverage(movingAverageCount);
 
@@ -96,48 +107,62 @@ namespace JamesFrowen.PositionSync
             clientScaleTime = normalScale;
         }
 
+        /// <summary>
+        /// Updates client time
+        /// </summary>
+        /// <param name="deltaTime"></param>
         public void OnTick(float deltaTime)
         {
-            clientTime += deltaTime * clientScaleTime;
+            _clientTime += deltaTime * clientScaleTime;
         }
 
+        /// <summary>
+        /// Updates <see cref="clientScaleTime"/> to keep <see cref="ClientTime"/> in line with <see cref="LatestServerTime"/>
+        /// </summary>
+        /// <param name="serverTime"></param>
         public void OnMessage(float serverTime)
         {
+            _latestServerTime = serverTime;
+
             // if first message set client time to server-diff
             // reset stuff if too far behind
             // todo check this is correct
-            if (!intialized || (serverTime > previousServerTime + SKIP_TIME_DIFF))
+            if (!intialized || (serverTime > _latestServerTime + SKIP_TIME_DIFF))
             {
-                previousServerTime = serverTime;
-                clientTime = serverTime - goalOffset;
+                _clientTime = serverTime;
                 clientScaleTime = normalScale;
                 intialized = true;
                 return;
             }
 
-            logger.Assert(serverTime > previousServerTime, "Received message out of order.");
+            logger.Assert(serverTime > _latestServerTime, "Received message out of order.");
 
-            previousServerTime = serverTime;
-
-            float diff = serverTime - clientTime;
+            float diff = serverTime - _clientTime;
             diffAvg.Add(diff);
+
+            AdjustClientTimeScale((float)diffAvg.Value);
+
+            //todo add trace level
+            if (logger.LogEnabled()) logger.Log($"st {serverTime:0.00} ct {_clientTime:0.00} diff {diff * 1000:0.0}, wanted:{diffAvg.Value * 1000:0.0}, scale:{clientScaleTime}");
+        }
+
+        private void AdjustClientTimeScale(float diff)
+        {
             // diff is server-client,
-            // we want client to be 2 frames behind so that there is always snapshots to interoplate towards
-            // server-client-offset
             // if positive then server is ahead, => we can run client faster to catch up
             // if negative then server is behind, => we need to run client slow to not run out of spanshots
 
             // we want diffVsGoal to be as close to 0 as possible
-            float fromGoal = (float)diffAvg.Value - goalOffset;
-            if (fromGoal > positiveThreshold)
+
+            // server ahead, speed up client
+            if (diff > positiveThreshold)
                 clientScaleTime = fastScale;
-            else if (fromGoal < negativeThreshold)
+            // server behind, slow down client
+            else if (diff < negativeThreshold)
                 clientScaleTime = slowScale;
+            // close enough
             else
                 clientScaleTime = normalScale;
-
-            //todo add trace level
-            if (logger.LogEnabled()) logger.Log($"st {serverTime:0.00} ct {clientTime:0.00} diff {diff * 1000:0.0}, wanted:{fromGoal * 1000:0.0}, scale:{clientScaleTime}");
         }
     }
 }
