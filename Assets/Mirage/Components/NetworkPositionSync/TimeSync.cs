@@ -141,6 +141,7 @@ namespace JamesFrowen.PositionSync
         /// <param name="serverTime"></param>
         public void OnMessage(float serverTime)
         {
+            logger.Assert(serverTime > _latestServerTime, $"Received message out of order");
             _latestServerTime = serverTime;
 
             // if first message set client time to server-diff
@@ -154,7 +155,6 @@ namespace JamesFrowen.PositionSync
                 return;
             }
 
-            logger.Assert(serverTime > _latestServerTime, "Received message out of order.");
 
             float diff = serverTime - _clientTime;
             diffAvg.Add(diff);
