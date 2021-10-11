@@ -89,13 +89,13 @@ namespace JamesFrowen.PositionSync
 
                 // host mode
                 if (Client.Active)
-                    packer.InterpolationTime.OnMessage(time);
+                    packer.TimeSync.OnMessage(time);
             }
         }
 
         private void ClientUpdate()
         {
-            packer.InterpolationTime.OnTick(packer.DeltaTime);
+            packer.TimeSync.OnUpdate(packer.DeltaTime);
         }
 
         bool ShouldSync()
@@ -158,7 +158,6 @@ namespace JamesFrowen.PositionSync
             if (Server.Active)
                 return;
 
-            int length = msg.payload.Count;
             using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
             {
                 float time = packer.UnpackTime(reader);
@@ -175,7 +174,7 @@ namespace JamesFrowen.PositionSync
 
                 }
 
-                packer.InterpolationTime.OnMessage(time);
+                packer.TimeSync.OnMessage(time);
             }
         }
 

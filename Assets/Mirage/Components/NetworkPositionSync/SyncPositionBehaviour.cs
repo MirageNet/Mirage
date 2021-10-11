@@ -140,8 +140,8 @@ namespace JamesFrowen.PositionSync
         {
             if (showDebugGui)
             {
-                GUILayout.Label($"ServerTime: {packer.InterpolationTime.ServerTime:0.000}");
-                GUILayout.Label($"LocalTime: {packer.InterpolationTime.ClientTime:0.000}");
+                GUILayout.Label($"ServerTime: {packer.TimeSync.LatestServerTime:0.000}");
+                GUILayout.Label($"InterpTime: {packer.InterpolationTime:0.000}");
                 GUILayout.Label(snapshotBuffer.ToDebugString());
             }
         }
@@ -395,7 +395,7 @@ namespace JamesFrowen.PositionSync
         {
             if (snapshotBuffer.IsEmpty) { return; }
 
-            float snapshotTime = packer.InterpolationTime.ClientTime;
+            float snapshotTime = packer.InterpolationTime;
             TransformState state = snapshotBuffer.GetLinearInterpolation(snapshotTime);
             // todo add trace log
             if (logger.LogEnabled()) logger.Log($"p1:{Position.x} p2:{state.position.x} delta:{Position.x - state.position.x}");

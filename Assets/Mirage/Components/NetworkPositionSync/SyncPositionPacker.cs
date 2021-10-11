@@ -113,7 +113,7 @@ namespace JamesFrowen.PositionSync
         //[SerializeField] SyncSettingsDebug settingsDebug = new SyncSettingsDebug();
 
         [Header("Snapshot Interpolation")]
-        [Tooltip("Delay to add to client time to make sure there is always a snapshot to interpolate towards. High delay can handle more jitter, but adds latancy to the position.")]
+        [Tooltip("Delay to add to client time to make sure there is always a snapshot to interpolate towards. High delay can handle more jitter, but adds latancy to the position. Should be ~2*syncInterval")]
         [SerializeField] float _clientDelay = 0.2f;
 
         [Header("Sync")]
@@ -129,20 +129,25 @@ namespace JamesFrowen.PositionSync
 
 
         // packers
-        [NonSerialized] internal FloatPacker timePacker;
-        [NonSerialized] internal Vector3Packer positionPacker;
-        [NonSerialized] internal QuaternionPacker rotationPacker;
-        [NonSerialized] InterpolationTime interpolationTime;
+        [NonSerialized] internal FloatPacker _timePacker;
+        [NonSerialized] internal Vector3Packer _positionPacker;
+        [NonSerialized] internal QuaternionPacker _rotationPacker;
+        [NonSerialized] TimeSync _timeSync;
 
-        public InterpolationTime InterpolationTime
+        public TimeSync TimeSync
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => interpolationTime;
+            get => _timeSync;
         }
         public float ClientDelay
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _clientDelay;
+        }
+        public float InterpolationTime
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _timeSync.ClientTime - _clientDelay;
         }
 
         [NonSerialized] internal Dictionary<uint, SyncPositionBehaviour> Behaviours = new Dictionary<uint, SyncPositionBehaviour>();
@@ -192,10 +197,10 @@ namespace JamesFrowen.PositionSync
 
         private void OnEnable()
         {
-            timePacker = settings.CreateTimePacker();
-            positionPacker = settings.CreatePositionPacker();
-            rotationPacker = settings.CreateRotationPacker();
-            interpolationTime = new InterpolationTime(_clientDelay);
+            _timePacker = settings.CreateTimePacker();
+            _positionPacker = settings.CreatePositionPacker();
+            _rotationPacker = settings.CreateRotationPacker();
+            _timeSync = new TimeSync(syncInterval * 0.5f);
         }
 
         private void OnValidate()
@@ -224,7 +229,7 @@ namespace JamesFrowen.PositionSync
 
         public void PackTime(NetworkWriter writer, float time)
         {
-            timePacker.Pack(writer, time);
+            _timePacker.Pack(writer, time);
         }
         public void PackCount(NetworkWriter writer, int count)
         {
@@ -237,17 +242,17 @@ namespace JamesFrowen.PositionSync
             TransformState state = behaviour.TransformState;
 
             VarIntBlocksPacker.Pack(writer, id, settings.blockSize);
-            positionPacker.Pack(writer, state.position);
+            _positionPacker.Pack(writer, state.position);
 
             if (settings.syncRotation)
             {
-                rotationPacker.Pack(writer, state.rotation);
+                _rotationPacker.Pack(writer, state.rotation);
             }
         }
 
         public float UnpackTime(NetworkReader reader)
         {
-            return timePacker.Unpack(reader);
+            return _timePacker.Unpack(reader);
         }
 
         public int UnpackCount(NetworkReader reader)
@@ -258,9 +263,9 @@ namespace JamesFrowen.PositionSync
         public void UnpackNext(NetworkReader reader, out uint id, out Vector3 pos, out Quaternion rot)
         {
             id = (uint)VarIntBlocksPacker.Unpack(reader, settings.blockSize);
-            pos = positionPacker.Unpack(reader);
+            pos = _positionPacker.Unpack(reader);
             rot = settings.syncRotation
-                ? rotationPacker.Unpack(reader)
+                ? _rotationPacker.Unpack(reader)
                 : Quaternion.identity;
         }
 
