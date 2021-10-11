@@ -23,7 +23,6 @@ SOFTWARE.
 */
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -101,6 +100,9 @@ namespace JamesFrowen.PositionSync
     //        _totalByteCountMax = Mathf.CeilToInt(_totalBitCountMax / 8f);
     //    }
     //}
+    /// <summary>
+    /// Settings for SyncPosition packer
+    /// </summary>
     [CreateAssetMenu(menuName = "PositionSync/Packer")]
     public class SyncPositionPacker : ScriptableObject
     {
@@ -150,9 +152,6 @@ namespace JamesFrowen.PositionSync
             get => _timeSync.ClientTime - _clientDelay;
         }
 
-        [NonSerialized] internal Dictionary<uint, SyncPositionBehaviour> Behaviours = new Dictionary<uint, SyncPositionBehaviour>();
-        private SyncPositionSystem _system;
-
         public float Time
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -172,20 +171,7 @@ namespace JamesFrowen.PositionSync
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => settings.syncRotation;
         }
-        public void SetSystem(SyncPositionSystem value)
-        {
-            if (value == null) throw new ArgumentNullException(nameof(value));
-            if (_system != null) throw new InvalidOperationException($"SyncPositionPacker[{name}] Can not set System to {value} because it was already equal to {_system}");
 
-            _system = value;
-        }
-        public void ClearSystem(SyncPositionSystem oldValue)
-        {
-            if (oldValue == null) throw new ArgumentNullException(nameof(oldValue));
-            if (_system != oldValue) throw new InvalidOperationException($"SyncPositionPacker[{name}] Can not clear System from {_system} because the old value was not equal to {oldValue}");
-
-            _system = null;
-        }
 
         //public void CheckIfSysteIsMissing()
         //{
@@ -267,36 +253,6 @@ namespace JamesFrowen.PositionSync
             rot = settings.syncRotation
                 ? _rotationPacker.Unpack(reader)
                 : Quaternion.identity;
-        }
-
-        public void AddBehaviour(SyncPositionBehaviour thing)
-        {
-            uint netId = thing.NetId;
-            Behaviours.Add(netId, thing);
-
-
-            if (Behaviours.TryGetValue(netId, out SyncPositionBehaviour existingValue))
-            {
-                if (existingValue != thing)
-                {
-                    // todo what is this log?
-                    logger.LogError("Parent can't be set without control");
-                }
-            }
-            else
-            {
-                Behaviours.Add(netId, thing);
-            }
-        }
-
-        public void RemoveBehaviour(SyncPositionBehaviour thing)
-        {
-            uint netId = thing.NetId;
-            Behaviours.Remove(netId);
-        }
-        public void ClearBehaviours()
-        {
-            Behaviours.Clear();
         }
     }
 }

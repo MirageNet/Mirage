@@ -31,6 +31,45 @@ using UnityEngine;
 
 namespace JamesFrowen.PositionSync
 {
+    public class SyncPositionBehaviourCollection
+    {
+        static readonly ILogger logger = LogFactory.GetLogger<SyncPositionBehaviourCollection>();
+
+        private Dictionary<uint, SyncPositionBehaviour> _behaviours = new Dictionary<uint, SyncPositionBehaviour>();
+
+        public IReadOnlyDictionary<uint, SyncPositionBehaviour> Dictionary => _behaviours;
+
+        public void AddBehaviour(SyncPositionBehaviour thing)
+        {
+            uint netId = thing.NetId;
+            _behaviours.Add(netId, thing);
+
+
+            if (_behaviours.TryGetValue(netId, out SyncPositionBehaviour existingValue))
+            {
+                if (existingValue != thing)
+                {
+                    // todo what is this log?
+                    logger.LogError("Parent can't be set without control");
+                }
+            }
+            else
+            {
+                _behaviours.Add(netId, thing);
+            }
+        }
+
+        public void RemoveBehaviour(SyncPositionBehaviour thing)
+        {
+            uint netId = thing.NetId;
+            _behaviours.Remove(netId);
+        }
+        public void ClearBehaviours()
+        {
+            _behaviours.Clear();
+        }
+    }
+
     [AddComponentMenu("Network/SyncPosition/SyncPositionSystem")]
     public class SyncPositionSystem : MonoBehaviour
     {
@@ -46,6 +85,8 @@ namespace JamesFrowen.PositionSync
         [Header("Reference")]
         public SyncPositionPacker packer;
 
+        public SyncPositionBehaviourCollection Behaviours { get; }
+
         [NonSerialized] float nextSyncInterval;
         HashSet<SyncPositionBehaviour> toUpdate = new HashSet<SyncPositionBehaviour>();
 
@@ -57,14 +98,25 @@ namespace JamesFrowen.PositionSync
 
         private void Awake()
         {
-            packer.SetSystem(this);
-            Server.Started.AddListener(() => { Server.MessageHandler.RegisterHandler<NetworkPositionSingleMessage>(ServerHandleNetworkPositionMessage); });
-            Client.Started.AddListener(() => { Client.MessageHandler.RegisterHandler<NetworkPositionMessage>(ClientHandleNetworkPositionMessage); });
+            Server.Started.AddListener(AddServerHandlers);
+            Client.Started.AddListener(AddClientHandlers);
         }
         private void OnDestroy()
         {
-            packer.ClearSystem(this);
+            Server.Started.RemoveListener(AddServerHandlers);
+            Client.Started.RemoveListener(AddClientHandlers);
         }
+
+        private void AddClientHandlers()
+        {
+            Client.MessageHandler.RegisterHandler<NetworkPositionMessage>(ClientHandleNetworkPositionMessage);
+        }
+
+        private void AddServerHandlers()
+        {
+            Server.MessageHandler.RegisterHandler<NetworkPositionSingleMessage>(ServerHandleNetworkPositionMessage);
+        }
+
 
         #region Sync Server -> Client
 
@@ -115,7 +167,7 @@ namespace JamesFrowen.PositionSync
         internal void SendUpdateToAll(float time)
         {
             // dont send message if no behaviours
-            if (packer.Behaviours.Count == 0) { return; }
+            if (Behaviours.Dictionary.Count == 0) { return; }
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -133,7 +185,7 @@ namespace JamesFrowen.PositionSync
             packer.PackTime(writer, time);
 
             toUpdate.Clear();
-            foreach (SyncPositionBehaviour behaviour in packer.Behaviours.Values)
+            foreach (SyncPositionBehaviour behaviour in Behaviours.Dictionary.Values)
             {
                 if (!behaviour.NeedsUpdate())
                     continue;
@@ -167,7 +219,7 @@ namespace JamesFrowen.PositionSync
                 {
                     packer.UnpackNext(reader, out uint id, out Vector3 pos, out Quaternion rot);
 
-                    if (packer.Behaviours.TryGetValue(id, out SyncPositionBehaviour behaviour))
+                    if (Behaviours.Dictionary.TryGetValue(id, out SyncPositionBehaviour behaviour))
                     {
                         behaviour.ApplyOnClient(new TransformState(pos, rot), time);
                     }
@@ -196,7 +248,7 @@ namespace JamesFrowen.PositionSync
                 float time = packer.UnpackTime(reader);
                 packer.UnpackNext(reader, out uint id, out Vector3 pos, out Quaternion rot);
 
-                if (packer.Behaviours.TryGetValue(id, out SyncPositionBehaviour behaviour))
+                if (Behaviours.Dictionary.TryGetValue(id, out SyncPositionBehaviour behaviour))
                 {
                     behaviour.ApplyOnServer(new TransformState(pos, rot), time);
                 }

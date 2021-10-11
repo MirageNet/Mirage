@@ -273,7 +273,6 @@ namespace JamesFrowen.PositionSync
             return rotated;
         }
 
-
         private void Awake()
         {
             Identity.OnStartClient.AddListener(OnStartClient);
@@ -282,27 +281,39 @@ namespace JamesFrowen.PositionSync
             Identity.OnStartServer.AddListener(OnStartServer);
             Identity.OnStopServer.AddListener(OnStopServer);
         }
+        private SyncPositionSystem System
+        {
+            get
+            {
+                if (IsServer)
+                    return ServerObjectManager.GetComponent<SyncPositionSystem>();
+                else if (IsClient)
+                    return ClientObjectManager.GetComponent<SyncPositionSystem>();
+                else
+                    throw new InvalidOperationException("System can't be found when object is not spawned");
+            }
+        }
         public void OnStartClient()
         {
             // dont add twice in host mode
             if (IsServer) return;
-
-            packer.AddBehaviour(this);
+            System.Behaviours.AddBehaviour(this);
         }
+
         public void OnStartServer()
         {
-            packer.AddBehaviour(this);
+            System.Behaviours.AddBehaviour(this);
         }
         public void OnStopClient()
         {
             // dont add twice in host mode
             if (IsServer) return;
 
-            packer.RemoveBehaviour(this);
+            System.Behaviours.RemoveBehaviour(this);
         }
         public void OnStopServer()
         {
-            packer.RemoveBehaviour(this);
+            System.Behaviours.RemoveBehaviour(this);
         }
 
         void Update()
