@@ -133,7 +133,7 @@ namespace JamesFrowen.PositionSync
         Quaternion lastRotation;
 
         // client
-        readonly SnapshotBuffer snapshotBuffer = new SnapshotBuffer();
+        readonly SnapshotBuffer<TransformState> snapshotBuffer = new SnapshotBuffer<TransformState>(TransformState.GetInterpolator());
 
 #if DEBUG
         void OnGUI()

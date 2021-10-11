@@ -31,26 +31,13 @@ using UnityEngine;
 
 namespace JamesFrowen.PositionSync
 {
-    public struct TransformState
+    public interface ISnapshotInterpolator<T>
     {
-        public readonly Vector3 position;
-        public readonly Quaternion rotation;
-
-        public TransformState(Vector3 position, Quaternion rotation)
-        {
-            this.position = position;
-            this.rotation = rotation;
-        }
-
-        public override string ToString()
-        {
-            return $"[{position}, {rotation}]";
-        }
+        T Lerp(T a, T b, float alpha);
     }
-
-    public class SnapshotBuffer
+    public class SnapshotBuffer<T>
     {
-        static readonly ILogger logger = LogFactory.GetLogger<SnapshotBuffer>();
+        static readonly ILogger logger = LogFactory.GetLogger<SnapshotBuffer<T>>();
 
         struct Snapshot
         {
@@ -58,9 +45,9 @@ namespace JamesFrowen.PositionSync
             /// Server Time
             /// </summary>
             public readonly double time;
-            public readonly TransformState state;
+            public readonly T state;
 
-            public Snapshot(TransformState state, double time) : this()
+            public Snapshot(T state, double time) : this()
             {
                 this.state = state;
                 this.time = time;
@@ -68,6 +55,12 @@ namespace JamesFrowen.PositionSync
         }
 
         readonly List<Snapshot> buffer = new List<Snapshot>();
+        readonly ISnapshotInterpolator<T> interpolator;
+
+        public SnapshotBuffer(ISnapshotInterpolator<T> interpolator)
+        {
+            this.interpolator = interpolator;
+        }
 
         public bool IsEmpty
         {
@@ -91,7 +84,7 @@ namespace JamesFrowen.PositionSync
             get => buffer[buffer.Count - 1];
         }
 
-        public void AddSnapShot(TransformState state, double serverTime)
+        public void AddSnapShot(T state, double serverTime)
         {
             if (!IsEmpty && serverTime < Last.time)
             {
@@ -107,7 +100,7 @@ namespace JamesFrowen.PositionSync
         /// </summary>
         /// <param name="now"></param>
         /// <returns></returns>
-        public TransformState GetLinearInterpolation(double now)
+        public T GetLinearInterpolation(double now)
         {
             if (buffer.Count == 0)
             {
@@ -153,9 +146,8 @@ namespace JamesFrowen.PositionSync
                     float alpha = (float)Clamp01((now - fromTime) / (toTime - fromTime));
                     // todo add trace log
                     if (logger.LogEnabled()) logger.Log($"alpha:{alpha:0.000}");
-                    var pos = Vector3.Lerp(from.state.position, to.state.position, alpha);
-                    var rot = Quaternion.Slerp(from.state.rotation, to.state.rotation, alpha);
-                    return new TransformState(pos, rot);
+
+                    return interpolator.Lerp(from.state, to.state, alpha);
                 }
             }
 
