@@ -130,8 +130,8 @@ namespace JamesFrowen.PositionSync
         }
         private void OnDestroy()
         {
-            Server.Started.RemoveListener(AddServerHandlers);
-            Client.Started.RemoveListener(AddClientHandlers);
+            Server?.Started.RemoveListener(AddServerHandlers);
+            Client?.Started.RemoveListener(AddClientHandlers);
         }
 
         private void AddClientHandlers()
