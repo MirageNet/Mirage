@@ -105,9 +105,11 @@ namespace JamesFrowen.PositionSync
 
         // todo make 0 Sensitivity always send (and avoid doing distance/angle check)
         [Tooltip("How far position has to move before it is synced")]
+        [System.Obsolete("Use Sensitivity from packer instead", true)]
         [SerializeField] float positionSensitivity = 0.1f;
 
         [Tooltip("How far rotation has to move before it is synced")]
+        [System.Obsolete("Use Sensitivity from packer instead", true)]
         [SerializeField] float rotationSensitivity = 0.1f;
 
 
@@ -248,7 +250,11 @@ namespace JamesFrowen.PositionSync
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         bool HasMoved()
         {
-            bool moved = Vector3.Distance(lastPosition, Position) > positionSensitivity;
+            Vector3 precision = _system.packer.Settings.precision;
+            Vector3 diff = lastPosition - Position;
+            bool moved = Mathf.Abs(diff.x) > precision.x
+                    || Mathf.Abs(diff.y) > precision.y
+                    || Mathf.Abs(diff.z) > precision.z;
 
             if (moved)
             {
@@ -264,7 +270,8 @@ namespace JamesFrowen.PositionSync
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         bool HasRotated()
         {
-            bool rotated = Quaternion.Angle(lastRotation, Rotation) > rotationSensitivity;
+            // todo fix?
+            bool rotated = Quaternion.Angle(lastRotation, Rotation) > 0.001f;
 
             if (rotated)
             {

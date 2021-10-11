@@ -16,8 +16,8 @@ MonoBehaviour:
     maxTime: 86400
     timePrecision: 0.001
     blockSize: 5
-    max: {x: 100, y: 100, z: 100}
-    precision: {x: 0.01, y: 0.01, z: 0.01}
+    max: {x: 30, y: 30, z: 1}
+    precision: {x: 0.001, y: 0.001, z: 0.2}
     syncRotation: 1
     bitCount: 9
   _clientDelay: 0.2
