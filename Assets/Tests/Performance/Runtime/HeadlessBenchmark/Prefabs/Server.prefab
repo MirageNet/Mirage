@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 9000271836354286204}
   - component: {fileID: -3198233811877010216}
   - component: {fileID: 2772631192065167875}
+  - component: {fileID: 6355448144916027240}
   m_Layer: 0
   m_Name: Server
   m_TagString: Untagged
@@ -47,7 +48,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EnablePeerMetrics: 0
+  MetricsSize: 10
   MaxConnections: 4
+  DisconnectOnException: 1
   Listening: 1
   SocketFactory: {fileID: 0}
   authenticator: {fileID: 0}
@@ -91,16 +94,19 @@ MonoBehaviour:
   Client: {fileID: 0}
   Server: {fileID: 183183950890642064}
   DontDestroy: 1
-  _clientChangeScene:
+  _onClientStartedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _clientSceneChanged:
+  _onClientFinishedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _serverChangeScene:
+  _onServerStartedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _serverSceneChanged:
+  _onServerFinishedSceneChange:
+    m_PersistentCalls:
+      m_Calls: []
+  _onPlayerSceneReady:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &-3198233811877010216
@@ -120,7 +126,8 @@ MonoBehaviour:
   SceneManager: {fileID: 9000271836354286204}
   ClientObjectManager: {fileID: 0}
   ServerObjectManager: {fileID: 2772631192065167875}
-  PlayerPrefab: {fileID: 4169741493956293168, guid: bebeb0dfd33f4074894ef25112ab4a8d, type: 3}
+  PlayerPrefab: {fileID: 4169741493956293168, guid: bebeb0dfd33f4074894ef25112ab4a8d,
+    type: 3}
   AutoSpawn: 1
   startPositionIndex: 0
   startPositions: []
@@ -139,3 +146,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 183183950890642064}
   NetworkSceneManager: {fileID: 9000271836354286204}
+--- !u!114 &6355448144916027240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6837994460994695650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e279736169bd1a4e986031828392594, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Client: {fileID: 0}
+  Server: {fileID: 183183950890642064}
+  packer: {fileID: 11400000, guid: aec77aae2da3b304b8acba8c4835e6a4, type: 2}

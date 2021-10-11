@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 7039704267495960127}
   - component: {fileID: 7039704267495960126}
   - component: {fileID: 4169741493956293168}
-  - component: {fileID: 1303760839613216441}
   - component: {fileID: 2526719955438958857}
+  - component: {fileID: -1079681451773130772}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -49,7 +49,6 @@ SpriteRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -98,48 +97,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 0
-  serverOnly: 0
+  ServerObjectManager: {fileID: 0}
+  ClientObjectManager: {fileID: 0}
   m_AssetId: 
-  OnStartServer:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartClient:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartLocalPlayer:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartAuthority:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopAuthority:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopClient:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopServer:
-    m_PersistentCalls:
-      m_Calls: []
+  _onStartServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartLocalPlayer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onAuthorityChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
   hasSpawned: 0
---- !u!114 &1303760839613216441
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7039704267495960125}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  ClientAuthority: 1
-  LocalPositionSensitivity: 0.01
-  LocalRotationSensitivity: 0.01
-  LocalScaleSensitivity: 0.01
 --- !u!114 &2526719955438958857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -154,6 +139,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  MovementSpeed: 1
-  RotateSpeed: 50
-  Floaty: 0
+--- !u!114 &-1079681451773130772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7039704267495960125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8164eab238fb8240a88e669e5f8108f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  packer: {fileID: 11400000, guid: aec77aae2da3b304b8acba8c4835e6a4, type: 2}
+  target: {fileID: 7039704267495960127}
+  clientAuthority: 1
+  useLocalSpace: 1
+  positionSensitivity: 0.1
+  rotationSensitivity: 0.1
+  clientSyncInterval: 0.1
+  showDebugGui: 0

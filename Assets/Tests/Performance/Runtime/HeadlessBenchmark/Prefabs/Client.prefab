@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1534303551643669022}
   - component: {fileID: 3937582285524225451}
   - component: {fileID: 9193644276306203286}
+  - component: {fileID: 3594747734115602494}
   m_Layer: 0
   m_Name: Client
   m_TagString: Untagged
@@ -47,7 +48,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EnablePeerMetrics: 0
+  MetricsSize: 10
   SocketFactory: {fileID: 0}
+  DisconnectOnException: 1
   authenticator: {fileID: 0}
   _started:
     _event:
@@ -80,16 +83,19 @@ MonoBehaviour:
   Client: {fileID: 8191650661786190473}
   Server: {fileID: 0}
   DontDestroy: 1
-  _clientChangeScene:
+  _onClientStartedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _clientSceneChanged:
+  _onClientFinishedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _serverChangeScene:
+  _onServerStartedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _serverSceneChanged:
+  _onServerFinishedSceneChange:
+    m_PersistentCalls:
+      m_Calls: []
+  _onPlayerSceneReady:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &3937582285524225451
@@ -125,8 +131,24 @@ MonoBehaviour:
   SceneManager: {fileID: 1534303551643669022}
   ClientObjectManager: {fileID: 3937582285524225451}
   ServerObjectManager: {fileID: 0}
-  PlayerPrefab: {fileID: 4169741493956293168, guid: bebeb0dfd33f4074894ef25112ab4a8d, type: 3}
+  PlayerPrefab: {fileID: 4169741493956293168, guid: bebeb0dfd33f4074894ef25112ab4a8d,
+    type: 3}
   AutoSpawn: 1
   startPositionIndex: 0
   startPositions: []
   playerSpawnMethod: 0
+--- !u!114 &3594747734115602494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6160076930074172721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e279736169bd1a4e986031828392594, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Client: {fileID: 8191650661786190473}
+  Server: {fileID: 0}
+  packer: {fileID: 11400000, guid: aec77aae2da3b304b8acba8c4835e6a4, type: 2}
