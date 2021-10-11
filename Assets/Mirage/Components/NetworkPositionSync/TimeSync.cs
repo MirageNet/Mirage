@@ -33,6 +33,31 @@ namespace JamesFrowen.PositionSync
     /// Syncs time between server and client be receving regular message from server
     /// <para>Can be used for snapshot interpolation</para>
     /// </summary>
+    /// <remarks>
+    /// This class will speed up or slow down Client time scale based on if it is ahead of behind the lastest server time
+    /// <para>
+    /// Every Update we add DeltaTime * TimeScale to client time
+    /// </para>
+    /// <para>
+    /// Every Update server sends message with its time<br/>
+    /// When client receives message it calculates difference between server time and local time<br/>
+    /// This difference is stored in a moving average so it is smoothed out
+    /// </para>
+    /// <para>
+    /// If this difference is greater or less than a threashold then we speed up or slow down Client time scale<br/>
+    /// If difference is between threshold time is set back to normal scale
+    /// </para>
+    /// <para>
+    /// This Client time can then be used to snapshot interpolation using <c>InterpolationTime = ClientTime - Offset</c>
+    /// </para>
+    /// <para>
+    /// Some other implementaions include the offset in the time scale calculations itself,
+    /// So that Client time is always (2) intervals behind the recieved server time. <br/>
+    /// Moving that offset to outside this class should still give the same results.
+    /// We are just trying to make the difference equal to 0 instead of negative offset.
+    /// Then subtracking offset from the ClientTime before we do the interpolation
+    /// </para>
+    /// </remarks>
     public class TimeSync
     {
         static readonly ILogger logger = LogFactory.GetLogger<TimeSync>();
@@ -70,9 +95,6 @@ namespace JamesFrowen.PositionSync
         // debug
         float _latestServerTime;
 
-
-        [System.Obsolete("Use InterpolationTime insteads", true)]
-        public float ClientTime_old { get; }
         /// <summary>
         /// Timer that follows server time
         /// </summary>
@@ -90,10 +112,7 @@ namespace JamesFrowen.PositionSync
             get => _latestServerTime;
         }
 
-        [System.Obsolete("", true)]
-        public TimeSync(float clientDelay, float rangeFromGoal = 4, int movingAverageCount = 30) { }
-
-        /// <param name="diffThreshold">how far off client time can be before changing its speed</param>
+        /// <param name="diffThreshold">how far off client time can be before changing its speed, Good value is half SyncInterval</param>
         /// <param name="movingAverageCount">how many ticks used in average, increase or decrease with framerate</param>
         public TimeSync(float diffThreshold, int movingAverageCount = 30)
         {
