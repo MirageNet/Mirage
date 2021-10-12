@@ -170,7 +170,7 @@ namespace Mirage
                     // do this 2nd check inside first if so that we are not checking == twice on unity Object
                     if (_identity is null)
                     {
-                        logger.LogError("There is no NetworkIdentity on " + name + ". Please add one.");
+                        throw new InvalidOperationException($"Could not find NetworkIdentity on {name}.");
                     }
                 }
                 return _identity;
