@@ -162,7 +162,7 @@ namespace Mirage
                     // GetComponentInParent doesn't works on disabled gameObject
                     // and GetComponentsInParent(false)[0] isn't allocation free, so
                     // we just drop child support in this specific case
-                    if (gameObject.activeSelf)
+                    if (gameObject.activeInHierarchy)
                         _identity = GetComponentInParent<NetworkIdentity>();
                     else
                         _identity = GetComponent<NetworkIdentity>();
