@@ -350,9 +350,6 @@ namespace JamesFrowen.PositionSync
             if (IsLocalClientInControl)
                 return;
 
-            // todo do we need this, or do we set it elsewhere?
-            //this.interpolationTime.OnMessage(serverTime);
-
             // buffer will be empty if first snapshot or hasn't moved for a while.
             // in this case we can add a snapshot for (serverTime-syncinterval) for interoplation
             // this assumes snapshots are sent in order!
