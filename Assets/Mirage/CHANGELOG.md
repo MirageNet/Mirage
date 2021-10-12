@@ -1,3 +1,10 @@
+## [107.1.1](https://github.com/MirageNet/Mirage/compare/v107.1.0...v107.1.1) (2021-10-12)
+
+
+### Bug Fixes
+
+* **NetworkBehaviour:** fixing find identity if parent gameobject is disabled ([04700f9](https://github.com/MirageNet/Mirage/commit/04700f9bb664dae6ac306b236464e5427ff7d09e))
+
 # [107.1.0](https://github.com/MirageNet/Mirage/compare/v107.0.1...v107.1.0) (2021-10-10)
 
 
