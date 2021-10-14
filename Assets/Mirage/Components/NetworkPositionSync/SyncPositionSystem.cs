@@ -24,6 +24,7 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Mirage;
 using Mirage.Logging;
@@ -32,6 +33,42 @@ using UnityEngine;
 
 namespace JamesFrowen.PositionSync
 {
+    public static class Benchmark
+    {
+        static long[] frames;
+        static int index;
+        static bool isRecording;
+        static long start;
+
+        public static event Action<long[]> RecordingFinished;
+
+        public static void StartRecording(int frameCount)
+        {
+            frames = new long[frameCount];
+            isRecording = true;
+            index = 0;
+        }
+
+        public static void StartFrame()
+        {
+            if (!isRecording) return;
+
+            start = Stopwatch.GetTimestamp();
+        }
+        public static void EndFrame()
+        {
+            if (!isRecording) return;
+
+            long end = Stopwatch.GetTimestamp();
+            frames[index] = end - start;
+            index++;
+            if (index >= frames.Length)
+            {
+                RecordingFinished?.Invoke(frames);
+            }
+        }
+    }
+
     public class SyncPositionBehaviourCollection
     {
         static readonly ILogger logger = LogFactory.GetLogger<SyncPositionBehaviourCollection>();
@@ -71,6 +108,15 @@ namespace JamesFrowen.PositionSync
         }
     }
 
+    [Serializable]
+    public enum SyncMode
+    {
+        SendToAll = 1,
+        SendToObservers_PlayerDirty = 2,
+        SendToObservers_DirtyObservers = 3,
+        SendToDirtyObservers_PackOnce = 4,
+    }
+
     [AddComponentMenu("Network/SyncPosition/SyncPositionSystem")]
     public class SyncPositionSystem : MonoBehaviour
     {
@@ -83,29 +129,44 @@ namespace JamesFrowen.PositionSync
         public NetworkClient Client;
         public NetworkServer Server;
 
-        [Header("Reference")]
-        public SyncPositionPacker packer;
+        public SyncSettings PackSettings;
+        [NonSerialized] public SyncPacker packer;
+
+        [Tooltip("How many updates per second")]
+        public float tickRate = 20;
+        public float TickInterval => 1 / tickRate;
+
+        [Header("Snapshot Interpolation")]
+        [Tooltip("Number of ticks to delay interpolation to make sure there is always a snapshot to interpolate towards. High delay can handle more jitter, but adds latancy to the position.")]
+        public float TickDelayCount = 2;
+
+        [Tooltip("Skips Visibility and sends position to all ready connections")]
+        public SyncMode syncMode = SyncMode.SendToAll;
 
 
-        [NonSerialized] float nextSyncInterval;
-        HashSet<SyncPositionBehaviour> toUpdate = new HashSet<SyncPositionBehaviour>();
-        // packers
-        [NonSerialized] internal FloatPacker _timePacker;
-        [NonSerialized] internal Vector3Packer _positionPacker;
-        [NonSerialized] internal QuaternionPacker _rotationPacker;
-        [NonSerialized] TimeSync _timeSync;
-
+        // cached object for update list
+        HashSet<SyncPositionBehaviour> dirtySet = new HashSet<SyncPositionBehaviour>();
+        HashSet<SyncPositionBehaviour> toUpdateObserverCache = new HashSet<SyncPositionBehaviour>();
 
         public SyncPositionBehaviourCollection Behaviours { get; } = new SyncPositionBehaviourCollection();
+
+        [NonSerialized] TickRunner tickRunner;
+        [NonSerialized] TimeSync _timeSync;
         public TimeSync TimeSync
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _timeSync;
         }
-        public float InterpolationTime
+        public float Time
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _timeSync.ClientTime - packer.ClientDelay;
+            get => UnityEngine.Time.unscaledTime;
+        }
+
+        public float DeltaTime
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => UnityEngine.Time.unscaledDeltaTime;
         }
 
         public bool ClientActive => Client?.Active ?? false;
@@ -120,28 +181,29 @@ namespace JamesFrowen.PositionSync
 
         private void Awake()
         {
-            Server?.Started.AddListener(AddServerHandlers);
-            Client?.Started.AddListener(AddClientHandlers);
+            Server?.Started.AddListener(ServerStarted);
+            Client?.Started.AddListener(ClientStarted);
 
-            _timePacker = packer.Settings.CreateTimePacker();
-            _positionPacker = packer.Settings.CreatePositionPacker();
-            _rotationPacker = packer.Settings.CreateRotationPacker();
-            _timeSync = new TimeSync(packer.syncInterval * 0.5f);
+
+            _timeSync = new TimeSync(1 / tickRate, 0.5f, TickDelayCount);
+            tickRunner = new TickRunner(tickRate);
         }
         private void OnDestroy()
         {
-            Server?.Started.RemoveListener(AddServerHandlers);
-            Client?.Started.RemoveListener(AddClientHandlers);
+            Server?.Started.RemoveListener(ServerStarted);
+            Client?.Started.RemoveListener(ClientStarted);
         }
 
-        private void AddClientHandlers()
+        private void ClientStarted()
         {
             Client.MessageHandler.RegisterHandler<NetworkPositionMessage>(ClientHandleNetworkPositionMessage);
+            tickRunner.OnTick += ClientUpdate;
         }
 
-        private void AddServerHandlers()
+        private void ServerStarted()
         {
             Server.MessageHandler.RegisterHandler<NetworkPositionSingleMessage>(ServerHandleNetworkPositionMessage);
+            tickRunner.OnTick += ServerUpdate;
         }
 
 
@@ -149,46 +211,38 @@ namespace JamesFrowen.PositionSync
 
         private void LateUpdate()
         {
-            if (ServerActive)
-                ServerUpdate();
-        }
-
-        private void Update()
-        {
-            if (ClientActive)
-                ClientUpdate();
+            tickRunner.OnUpdate(DeltaTime);
         }
 
         private void ServerUpdate()
         {
-            if (packer.checkEveryFrame || ShouldSync())
+            Benchmark.StartFrame();
+            // syncs every frame, each Behaviour will track its own timer
+            switch (syncMode)
             {
-                float time = packer.Time;
-                SendUpdateToAll(time);
-
-                // host mode
-                if (Client?.Active ?? false)
-                    TimeSync.OnMessage(time);
+                case SyncMode.SendToAll:
+                    SendUpdateToAll(Time);
+                    break;
+                case SyncMode.SendToObservers_PlayerDirty:
+                    SendUpdateToObservers_PlayerDirty(Time);
+                    break;
+                case SyncMode.SendToObservers_DirtyObservers:
+                    SendUpdateToObservers_DirtyObservers(Time);
+                    break;
+                case SyncMode.SendToDirtyObservers_PackOnce:
+                    SendUpdateToObservers_DirtyObservers_PackOnce(Time);
+                    break;
             }
+            Benchmark.EndFrame();
+
+            // host mode
+            if (Client?.Active ?? false)
+                TimeSync.OnMessage(Time);
         }
 
         private void ClientUpdate()
         {
-            TimeSync.OnUpdate(packer.DeltaTime);
-        }
-
-        bool ShouldSync()
-        {
-            float now = Time.time;
-            if (now > nextSyncInterval)
-            {
-                nextSyncInterval += packer.syncInterval;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            TimeSync.OnUpdate(DeltaTime);
         }
 
         internal void SendUpdateToAll(float time)
@@ -207,27 +261,169 @@ namespace JamesFrowen.PositionSync
             }
         }
 
-        internal void PackBehaviours(NetworkWriter writer, float time)
+        /// <summary>
+        /// Loops through all players, then through all dirty object and checks if palyer can see each
+        /// </summary>
+        /// <param name="time"></param>
+        internal void SendUpdateToObservers_PlayerDirty(float time)
         {
-            PackTime(writer, time);
+            // dont send message if no behaviours
+            if (Behaviours.Dictionary.Count == 0) { return; }
 
-            toUpdate.Clear();
+
+            UpdateDirtySet();
+
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                writer.Reset();
+
+                foreach (INetworkPlayer player in Server.Players)
+                {
+                    packer.PackTime(writer, time);
+                    foreach (SyncPositionBehaviour behaviour in dirtySet)
+                    {
+                        if (!behaviour.Identity.observers.Contains(player))
+                            continue;
+
+                        packer.PackNext(writer, behaviour);
+                    }
+
+                    player.Send(new NetworkPositionMessage
+                    {
+                        payload = writer.ToArraySegment()
+                    });
+                }
+            }
+
+            ClearDirtySet();
+        }
+
+        Dictionary<INetworkPlayer, PooledNetworkWriter> writerPool;
+        /// <summary>
+        /// Loops through all dirty objects, and then their observers and then writes that behaviouir to a cahced writer
+        /// </summary>
+        /// <param name="time"></param>
+        internal void SendUpdateToObservers_DirtyObservers(float time)
+        {
+            // dont send message if no behaviours
+            if (Behaviours.Dictionary.Count == 0) { return; }
+
+            UpdateDirtySet();
+
+            foreach (SyncPositionBehaviour behaviour in dirtySet)
+            {
+                foreach (INetworkPlayer observer in behaviour.Identity.observers)
+                {
+                    if (!writerPool.TryGetValue(observer, out PooledNetworkWriter writer))
+                    {
+                        writer = NetworkWriterPool.GetWriter();
+                        packer.PackTime(writer, time);
+                    }
+
+                    packer.PackNext(writer, behaviour);
+                }
+            }
+
+            foreach (INetworkPlayer player in Server.Players)
+            {
+                if (!writerPool.TryGetValue(player, out PooledNetworkWriter writer))
+                {
+                    writer = NetworkWriterPool.GetWriter();
+                    packer.PackTime(writer, time);
+                }
+
+                player.Send(new NetworkPositionMessage { payload = writer.ToArraySegment() });
+                writer.Release();
+            }
+
+            ClearDirtySet();
+        }
+
+        /// <summary>
+        /// Loops through all dirty objects, and then their observers and then writes that behaviouir to a cahced writer
+        /// <para>But Packs once and copies bytes</para>
+        /// </summary>
+        /// <param name="time"></param>
+        internal void SendUpdateToObservers_DirtyObservers_PackOnce(float time)
+        {
+            // dont send message if no behaviours
+            if (Behaviours.Dictionary.Count == 0) { return; }
+
+            UpdateDirtySet();
+            using (PooledNetworkWriter packWriter = NetworkWriterPool.GetWriter())
+            {
+                foreach (SyncPositionBehaviour behaviour in dirtySet)
+                {
+                    if (behaviour.Identity.observers.Count == 0) { continue; }
+
+                    packWriter.Reset();
+                    packer.PackNext(packWriter, behaviour);
+
+
+                    foreach (INetworkPlayer observer in behaviour.Identity.observers)
+                    {
+                        if (!writerPool.TryGetValue(observer, out PooledNetworkWriter writer))
+                        {
+                            writer = NetworkWriterPool.GetWriter();
+                            packer.PackTime(writer, time);
+                        }
+
+                        writer.CopyFromWriter(packWriter);
+                    }
+                }
+            }
+
+            foreach (INetworkPlayer player in Server.Players)
+            {
+                if (!writerPool.TryGetValue(player, out PooledNetworkWriter writer))
+                {
+                    writer = NetworkWriterPool.GetWriter();
+                    packer.PackTime(writer, time);
+                }
+
+                player.Send(new NetworkPositionMessage { payload = writer.ToArraySegment() });
+                writer.Release();
+            }
+
+            ClearDirtySet();
+        }
+
+        private void UpdateDirtySet()
+        {
             foreach (SyncPositionBehaviour behaviour in Behaviours.Dictionary.Values)
             {
                 if (!behaviour.NeedsUpdate())
                     continue;
 
-                toUpdate.Add(behaviour);
+                dirtySet.Add(behaviour);
             }
+        }
 
-            PackCount(writer, toUpdate.Count);
-            foreach (SyncPositionBehaviour behaviour in toUpdate)
+        private void ClearDirtySet()
+        {
+            foreach (SyncPositionBehaviour behaviour in dirtySet)
             {
+                behaviour.ClearNeedsUpdate(Time + TickInterval);
+            }
+            dirtySet.Clear();
+        }
+
+        internal void PackBehaviours(NetworkWriter writer, float time)
+        {
+            packer.PackTime(writer, time);
+
+            UpdateDirtySet();
+
+            foreach (SyncPositionBehaviour behaviour in Behaviours.Dictionary.Values)
+            {
+                if (!behaviour.NeedsUpdate())
+                    continue;
+
                 if (logger.LogEnabled()) logger.Log($"Time {time:0.000}, Packing {behaviour.name}");
-                PackNext(writer, behaviour);
+                packer.PackNext(writer, behaviour);
 
                 // todo handle client authority updates better
-                behaviour.ClearNeedsUpdate(packer.syncInterval);
+                behaviour.ClearNeedsUpdate(Time + TickInterval);
             }
         }
 
@@ -239,18 +435,14 @@ namespace JamesFrowen.PositionSync
 
             using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
             {
-                float time = UnpackTime(reader);
-                int count = UnpackCount(reader);
+                float time = packer.UnpackTime(reader);
 
-                for (uint i = 0; i < count; i++)
+                while (packer.TryUnpackNext(reader, out uint id, out Vector3 pos, out Quaternion rot))
                 {
-                    UnpackNext(reader, out uint id, out Vector3 pos, out Quaternion rot);
-
                     if (Behaviours.Dictionary.TryGetValue(id, out SyncPositionBehaviour behaviour))
                     {
                         behaviour.ApplyOnClient(new TransformState(pos, rot), time);
                     }
-
                 }
 
                 TimeSync.OnMessage(time);
@@ -272,8 +464,8 @@ namespace JamesFrowen.PositionSync
         {
             using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
             {
-                float time = UnpackTime(reader);
-                UnpackNext(reader, out uint id, out Vector3 pos, out Quaternion rot);
+                float time = packer.UnpackTime(reader);
+                packer.UnpackNext(reader, out uint id, out Vector3 pos, out Quaternion rot);
 
                 if (Behaviours.Dictionary.TryGetValue(id, out SyncPositionBehaviour behaviour))
                 {
@@ -284,51 +476,6 @@ namespace JamesFrowen.PositionSync
                     if (logger.WarnEnabled()) logger.LogWarning($"Could not find behaviour with id {id}");
                 }
             }
-        }
-        #endregion
-
-
-        #region Pack helper
-        public void PackTime(NetworkWriter writer, float time)
-        {
-            _timePacker.Pack(writer, time);
-        }
-        public void PackCount(NetworkWriter writer, int count)
-        {
-            VarIntBlocksPacker.Pack(writer, (ulong)count, packer.Settings.blockSize);
-        }
-
-        public void PackNext(NetworkWriter writer, SyncPositionBehaviour behaviour)
-        {
-            uint id = behaviour.NetId;
-            TransformState state = behaviour.TransformState;
-
-            VarIntBlocksPacker.Pack(writer, id, packer.Settings.blockSize);
-            _positionPacker.Pack(writer, state.position);
-
-            if (packer.SyncRotation)
-            {
-                _rotationPacker.Pack(writer, state.rotation);
-            }
-        }
-
-        public float UnpackTime(NetworkReader reader)
-        {
-            return _timePacker.Unpack(reader);
-        }
-
-        public int UnpackCount(NetworkReader reader)
-        {
-            return (int)VarIntBlocksPacker.Unpack(reader, packer.Settings.blockSize);
-        }
-
-        public void UnpackNext(NetworkReader reader, out uint id, out Vector3 pos, out Quaternion rot)
-        {
-            id = (uint)VarIntBlocksPacker.Unpack(reader, packer.Settings.blockSize);
-            pos = _positionPacker.Unpack(reader);
-            rot = packer.SyncRotation
-                ? _rotationPacker.Unpack(reader)
-                : Quaternion.identity;
         }
         #endregion
     }

@@ -88,9 +88,11 @@ namespace JamesFrowen.PositionSync
         /// </summary>
         readonly float negativeThreshold;
 
-        readonly float fastScale = 1.01f;
-        readonly float normalScale = 1f;
-        readonly float slowScale = 0.99f;
+        const float fastScale = 1.01f;
+        const float normalScale = 1f;
+        const float slowScale = 0.99f;
+
+        readonly float _clientDelay;
 
         // debug
         float _latestServerTime;
@@ -112,13 +114,26 @@ namespace JamesFrowen.PositionSync
             get => _latestServerTime;
         }
 
+        public float InterpolationTime
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _clientTime - _clientDelay;
+        }
+
+        public float ClientDelay
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _clientDelay;
+        }
+
         /// <param name="diffThreshold">how far off client time can be before changing its speed, Good value is half SyncInterval</param>
         /// <param name="movingAverageCount">how many ticks used in average, increase or decrease with framerate</param>
-        public TimeSync(float diffThreshold, int movingAverageCount = 30)
+        public TimeSync(float tickInterval, float diffThreshold = 0.5f, float tickDelay = 2, int movingAverageCount = 30)
         {
-            // todo do we need tick rate here?
-            positiveThreshold = diffThreshold;
-            negativeThreshold = -diffThreshold;
+            positiveThreshold = tickInterval * diffThreshold;
+            negativeThreshold = -positiveThreshold;
+
+            _clientDelay = tickInterval * tickDelay;
 
             diffAvg = new ExponentialMovingAverage(movingAverageCount);
 

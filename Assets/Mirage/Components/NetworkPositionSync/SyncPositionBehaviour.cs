@@ -90,9 +90,6 @@ namespace JamesFrowen.PositionSync
         }
 
 
-        [Header("References")]
-        [SerializeField] SyncPositionPacker packer;
-
         [Tooltip("Which transform to sync")]
         [SerializeField] Transform target;
 
@@ -128,8 +125,6 @@ namespace JamesFrowen.PositionSync
         /// </summary>
         TransformState? _latestState;
 
-        float _nextSyncInterval;
-
         // values for HasMoved/Rotated
         Vector3 lastPosition;
         Quaternion lastRotation;
@@ -143,7 +138,7 @@ namespace JamesFrowen.PositionSync
             if (showDebugGui)
             {
                 GUILayout.Label($"ServerTime: {_system.TimeSync.LatestServerTime:0.000}");
-                GUILayout.Label($"InterpTime: {_system.InterpolationTime:0.000}");
+                GUILayout.Label($"InterpTime: {_system.TimeSync.InterpolationTime:0.000}");
                 GUILayout.Label(snapshotBuffer.ToDebugString());
             }
         }
@@ -223,22 +218,14 @@ namespace JamesFrowen.PositionSync
             get => _latestState ?? new TransformState(Position, Rotation);
         }
 
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool IsTimeToUpdate()
-        {
-            return packer.Time > _nextSyncInterval;
-        }
-
         /// <summary>
         /// Resets values, called after syncing to client
         /// <para>Called on server</para>
         /// </summary>
-        internal void ClearNeedsUpdate(float interval)
+        internal void ClearNeedsUpdate()
         {
             _needsUpdate = false;
             _latestState = null;
-            _nextSyncInterval = packer.Time + interval;
             lastPosition = Position;
             lastRotation = Rotation;
         }
@@ -250,7 +237,7 @@ namespace JamesFrowen.PositionSync
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         bool HasMoved()
         {
-            Vector3 precision = _system.packer.Settings.precision;
+            Vector3 precision = _system.PackSettings.precision;
             Vector3 diff = lastPosition - Position;
             bool moved = Mathf.Abs(diff.x) > precision.x
                     || Mathf.Abs(diff.y) > precision.y
@@ -369,10 +356,11 @@ namespace JamesFrowen.PositionSync
             // host client doesn't need to update server
             if (IsServer) { return; }
 
-            if (IsTimeToUpdate() && (HasMoved() || HasRotated()))
+            if (HasMoved() || HasRotated())
             {
                 SendMessageToServer();
-                ClearNeedsUpdate(clientSyncInterval);
+                // todo move client auth uppdate to sync system
+                ClearNeedsUpdate();
             }
         }
 
@@ -381,8 +369,8 @@ namespace JamesFrowen.PositionSync
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                _system.PackTime(writer, (float)NetworkTime.Time);
-                _system.PackNext(writer, this);
+                _system.packer.PackTime(writer, (float)NetworkTime.Time);
+                _system.packer.PackNext(writer, this);
 
                 Client.Send(new NetworkPositionSingleMessage
                 {
@@ -409,18 +397,16 @@ namespace JamesFrowen.PositionSync
         {
             if (snapshotBuffer.IsEmpty) { return; }
 
-            float snapshotTime = _system.InterpolationTime;
+            float snapshotTime = _system.TimeSync.InterpolationTime;
             TransformState state = snapshotBuffer.GetLinearInterpolation(snapshotTime);
             // todo add trace log
             if (logger.LogEnabled()) logger.Log($"p1:{Position.x} p2:{state.position.x} delta:{Position.x - state.position.x}");
 
             Position = state.position;
-
-            if (packer.SyncRotation)
-                Rotation = state.rotation;
+            Rotation = state.rotation;
 
             // remove snapshots older than 2times sync interval, they will never be used by Interpolation
-            float removeTime = snapshotTime - (packer.ClientDelay * 1.5f);
+            float removeTime = snapshotTime - (_system.TimeSync.ClientDelay * 1.5f);
             snapshotBuffer.RemoveOldSnapshots(removeTime);
         }
         #endregion

@@ -91,8 +91,8 @@ namespace Mirage.HeadlessBenchmark
         void SpawnMonsters(int i)
         {
             GameObject monster = Instantiate(MonsterPrefab);
-            monster.gameObject.name = $"Monster {i}";
-            serverObjectManager.Spawn(monster.gameObject);
+            monster.name = $"Monster {i}";
+            serverObjectManager.Spawn(monster);
         }
 
         void ParseForServerMode()

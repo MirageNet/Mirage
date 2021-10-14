@@ -23,8 +23,6 @@ SOFTWARE.
 */
 
 using System;
-using System.Runtime.CompilerServices;
-using Mirage.Logging;
 using Mirage.Serialization;
 using UnityEngine;
 
@@ -45,7 +43,7 @@ namespace JamesFrowen.PositionSync
         public Vector3 precision = Vector3.one * 0.01f;
 
         [Header("Rotation Compression")]
-        public bool syncRotation = true;
+        //public bool syncRotation = true;
         public int bitCount = 9;
 
 
@@ -61,6 +59,69 @@ namespace JamesFrowen.PositionSync
         public QuaternionPacker CreateRotationPacker()
         {
             return new QuaternionPacker(bitCount);
+        }
+    }
+
+    public class SyncPacker
+    {
+        // packers
+        readonly FloatPacker timePacker;
+        readonly Vector3Packer positionPacker;
+        readonly QuaternionPacker rotationPacker;
+        readonly int blockSize;
+
+        public SyncPacker(SyncSettings settings)
+        {
+            timePacker = settings.CreateTimePacker();
+            positionPacker = settings.CreatePositionPacker();
+            rotationPacker = settings.CreateRotationPacker();
+        }
+
+        public void PackTime(NetworkWriter writer, float time)
+        {
+            timePacker.Pack(writer, time);
+        }
+
+        public void PackNext(NetworkWriter writer, SyncPositionBehaviour behaviour)
+        {
+            uint id = behaviour.NetId;
+            TransformState state = behaviour.TransformState;
+
+            VarIntBlocksPacker.Pack(writer, id, blockSize);
+            positionPacker.Pack(writer, state.position);
+            rotationPacker.Pack(writer, state.rotation);
+        }
+
+
+        public float UnpackTime(NetworkReader reader)
+        {
+            return timePacker.Unpack(reader);
+        }
+
+        public void UnpackNext(NetworkReader reader, out uint id, out Vector3 pos, out Quaternion rot)
+        {
+            id = (uint)VarIntBlocksPacker.Unpack(reader, blockSize);
+            pos = positionPacker.Unpack(reader);
+            rot = rotationPacker.Unpack(reader);
+        }
+
+        internal bool TryUnpackNext(PooledNetworkReader reader, out uint id, out Vector3 pos, out Quaternion rot)
+        {
+            // assume 1 state is atleast 3 bytes
+            // (it should be more, but there shouldn't be random left over bits in reader so 3 is enough for check)
+            const int minSize = 3;
+            if (reader.CanReadBytes(minSize))
+            {
+                UnpackNext(reader, out id, out pos, out rot);
+                return true;
+            }
+            else
+            {
+                id = default;
+                pos = default;
+                rot = default;
+                return false;
+            }
         }
     }
     //[Serializable]
@@ -100,83 +161,4 @@ namespace JamesFrowen.PositionSync
     //        _totalByteCountMax = Mathf.CeilToInt(_totalBitCountMax / 8f);
     //    }
     //}
-    /// <summary>
-    /// Settings for SyncPosition packer
-    /// <para>IMPORTANT: DONT HOLD STATE HERE, might be used by multiple instances</para>
-    /// </summary>
-    [CreateAssetMenu(menuName = "PositionSync/Packer")]
-    public class SyncPositionPacker : ScriptableObject
-    {
-        static readonly ILogger logger = LogFactory.GetLogger<SyncPositionPacker>();
-
-        [Header("Compression Settings")]
-        [SerializeField] SyncSettings settings = new SyncSettings();
-
-        //[Header("Position Debug And Gizmo")]
-        //[SerializeField] SyncSettingsDebug settingsDebug = new SyncSettingsDebug();
-
-        [Header("Snapshot Interpolation")]
-        [Tooltip("Delay to add to client time to make sure there is always a snapshot to interpolate towards. High delay can handle more jitter, but adds latancy to the position. Should be ~2*syncInterval")]
-        [SerializeField] float _clientDelay = 0.2f;
-
-        [Header("Sync")]
-        [Tooltip("How often 1 behaviour should update")]
-        public float syncInterval = 0.1f;
-
-        [Tooltip("Check if behaviours need update every frame, If false then checks every syncInterval")]
-        public bool checkEveryFrame = true;
-        [Tooltip("Skips Visibility and sends position to all ready connections")]
-        public bool sendToAll = true;
-        [Tooltip("Create new system object if missing when first Behaviour is added")]
-        public bool CreateSystemIfMissing = false;
-
-        public float ClientDelay
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _clientDelay;
-        }
-
-        public float Time
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => UnityEngine.Time.unscaledTime;
-        }
-
-        public float DeltaTime
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => UnityEngine.Time.unscaledDeltaTime;
-        }
-
-        public bool SyncRotation
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => settings.syncRotation;
-        }
-        public SyncSettings Settings => settings;
-
-        private void OnValidate()
-        {
-            //settingsDebug.SetValues(settings);
-
-            if (!sendToAll)
-            {
-                sendToAll = true;
-                logger.LogWarning("sendToAll disabled is not implemented yet");
-            }
-        }
-
-        //        [Conditional("UNITY_EDITOR")]
-        //        internal void DrawGizmo()
-        //        {
-        //#if UNITY_EDITOR
-        //            if (!settingsDebug.drawGizmo) { return; }
-        //            Gizmos.color = settingsDebug.gizmoColor;
-        //            Bounds bounds = default;
-        //            bounds.min = settings.min;
-        //            bounds.max = settings.max;
-        //            Gizmos.DrawWireCube(bounds.center, bounds.size);
-        //#endif  
-        //        }
-    }
 }
