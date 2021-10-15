@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Mirage.Logging;
-using Mirage.Serialization;
 using UnityEngine;
 
 namespace Mirage.InterestManagement
@@ -14,14 +11,14 @@ namespace Mirage.InterestManagement
         #region Fields
 
         public readonly ServerObjectManager ServerObjectManager;
-        private List<ObserverData> _visibilitySystems = new List<ObserverData>();
-        private readonly List<ObserverData> _observerSystems = new List<ObserverData>();
+        private readonly List<ObserverData> _visibilitySystems = new List<ObserverData>();
+        private HashSet<INetworkPlayer> _observers = new HashSet<INetworkPlayer>();
 
         #endregion
 
         #region Properties
 
-        public List<ObserverData> ObserverSystems => _observerSystems;
+        public IReadOnlyCollection<ObserverData> ObserverSystems => _visibilitySystems;
 
         #endregion
 
@@ -104,7 +101,6 @@ namespace Mirage.InterestManagement
         ///     Central system to control and maintain checking for data for all observer visibility systems.
         /// </summary>
         /// <param name="serverObjectManager">The server object manager so we can pull info from it or send info from it.</param>
-        /// <param name="initialSystems">The number of initial systems you will be using.</param>
         public InterestManager(ServerObjectManager serverObjectManager)
         {
             ServerObjectManager = serverObjectManager;
@@ -119,17 +115,18 @@ namespace Mirage.InterestManagement
         /// <param name="identity"></param>
         /// <param name="msg"></param>
         /// <param name="channelId"></param>
+        /// <param name="skip"></param>
         protected internal virtual void Send<T>(NetworkIdentity identity, T msg, int channelId = Channel.Reliable, INetworkPlayer skip = null)
         {
-            HashSet<INetworkPlayer> observers = Observers(identity);
-
-            if (observers.Count == 0)
-                return;
+            _observers = Observers(identity);
 
             // remove skipped player. No need to send to them.
-            observers.Remove(skip);
+            _observers.Remove(skip);
 
-            NetworkServer.SendToMany(observers, msg);
+            if (_observers.Count == 0)
+                return;
+
+            NetworkServer.SendToMany(_observers, msg, channelId);
         }
 
         /// <summary>
@@ -181,9 +178,14 @@ namespace Mirage.InterestManagement
             if (_visibilitySystems.Count == 0)
                 return ServerObjectManager.Server.Players;
 
-            HashSet<INetworkPlayer> observers = new HashSet<INetworkPlayer>();
+            foreach (ObserverData visibilitySystem in _visibilitySystems)
+            {
+                if (!visibilitySystem.Observers.ContainsKey(identity)) return _observers;
 
-            return observers;
+                _observers.UnionWith(visibilitySystem.Observers.Values);
+            }
+
+            return _observers;
         }
 
         #endregion

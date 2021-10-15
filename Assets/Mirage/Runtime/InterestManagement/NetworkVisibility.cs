@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Mirage.InterestManagement
 {
     public abstract class NetworkVisibility : INetworkVisibility
@@ -5,13 +7,15 @@ namespace Mirage.InterestManagement
         #region Fields
 
         private readonly InterestManager _interestManager;
-        private ObserverData visibilitySystemData;
+        private ObserverData _visibilitySystemData;
 
         #endregion
 
         #region Properties
 
         public InterestManager InterestManager => _interestManager;
+
+        public Dictionary<NetworkIdentity, INetworkPlayer> VisibilitySystemData => _visibilitySystemData.Observers;
 
         #endregion
 
@@ -22,14 +26,14 @@ namespace Mirage.InterestManagement
 
         public void Startup()
         {
-            visibilitySystemData = new ObserverData(this, null);
+            _visibilitySystemData = new ObserverData(this, null);
 
-            _interestManager?.RegisterVisibilitySystem(ref visibilitySystemData);
+            _interestManager?.RegisterVisibilitySystem(ref _visibilitySystemData);
         }
 
         public void ShutDown()
         {
-            _interestManager?.UnRegisterVisibilitySystem(ref visibilitySystemData);
+            _interestManager?.UnRegisterVisibilitySystem(ref _visibilitySystemData);
         }
 
         #region Implementation of INetworkVisibility
