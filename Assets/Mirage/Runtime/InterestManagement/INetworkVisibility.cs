@@ -2,15 +2,8 @@ namespace Mirage.InterestManagement
 {
     public interface INetworkVisibility
     {
-
-        /// <summary>
-        /// 
-        /// </summary>
         void Startup();
 
-        /// <summary>
-        /// 
-        /// </summary>
         void ShutDown();
 
         /// <summary>
@@ -21,9 +14,9 @@ namespace Mirage.InterestManagement
         void OnSpawned(NetworkIdentity identity);
 
         /// <summary>
-        /// 
+        ///     Invoked when a player has authenticated on server.
         /// </summary>
-        /// <param name="player"></param>
+        /// <param name="player">The player who just authenticated.</param>
         void OnAuthenticated(INetworkPlayer player);
 
         /// <summary>
