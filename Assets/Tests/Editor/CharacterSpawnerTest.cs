@@ -130,9 +130,10 @@ namespace Mirage.Tests
         public void MissingClientObjectSpawnerExceptionTest()
         {
             spawner.ClientObjectManager = null;
+
             Assert.Throws<InvalidOperationException>(() =>
             {
-                spawner.Awake();
+                spawner.OnClientConnected(null);
             });
         }
     }

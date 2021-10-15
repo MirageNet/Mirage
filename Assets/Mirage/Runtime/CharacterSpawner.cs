@@ -48,15 +48,7 @@ namespace Mirage
                 else
                 {
                     Client.Authenticated.AddListener(OnClientAuthenticated);
-                }
-
-                if (ClientObjectManager != null)
-                {
-                    ClientObjectManager.RegisterPrefab(PlayerPrefab);
-                }
-                else
-                {
-                    throw new InvalidOperationException("Assign a ClientObjectManager");
+                    Client.Connected.AddListener(OnClientConnected);
                 }
             }
             if (Server != null)
@@ -79,6 +71,18 @@ namespace Mirage
             if (Server != null)
             {
                 Server.Started.RemoveListener(OnServerStarted);
+            }
+        }
+
+        internal void OnClientConnected(INetworkPlayer player)
+        {
+            if (ClientObjectManager != null)
+            {
+                ClientObjectManager.RegisterPrefab(PlayerPrefab);
+            }
+            else
+            {
+                throw new InvalidOperationException("Assign a ClientObjectManager");
             }
         }
 
@@ -115,10 +119,15 @@ namespace Mirage
 
             if (player.HasCharacter)
             {
-                throw new InvalidOperationException("There is already a player for this connection.");
+                // player already has character on server, but client asked for it
+                // so we respawn it here so that client recieves it again
+                // this can happen when client loads normally, but server addititively
+                ServerObjectManager.Spawn(player.Identity);
             }
-
-            OnServerAddPlayer(player);
+            else
+            {
+                OnServerAddPlayer(player);
+            }
         }
 
         /// <summary>

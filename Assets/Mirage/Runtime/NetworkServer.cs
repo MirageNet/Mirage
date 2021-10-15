@@ -23,6 +23,8 @@ namespace Mirage
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
 
         public bool EnablePeerMetrics;
+        [Tooltip("Sequence size of buffer in bits.\n10 => array size 1024 => ~17 seconds at 60hz")]
+        public int MetricsSize = 10;
         public Metrics Metrics { get; private set; }
 
         /// <summary>
@@ -40,10 +42,7 @@ namespace Mirage
 
         public bool DisconnectOnException = true;
 
-        /// <summary>
-        /// <para>If you disable this, the server will not listen for incoming connections on the regular network port.</para>
-        /// <para>This can be used if the game is running in host mode and does not want external players to be able to connect - making it like a single-player game.</para>
-        /// </summary>
+        [Tooltip("If disabled the server will not create a Network Peer to listen. This can be used to run server single player mode")]
         public bool Listening = true;
 
         [Tooltip("Creates Socket for Peer to use")]
@@ -192,24 +191,34 @@ namespace Mirage
             SyncVarSender = new SyncVarSender();
 
             LocalClient = localClient;
-            MessageHandler = new MessageHandler(DisconnectOnException);
+            MessageHandler = new MessageHandler(World, DisconnectOnException);
             MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing);
 
             ISocket socket = SocketFactory.CreateServerSocket();
             var dataHandler = new DataHandler(MessageHandler, connections);
-            Metrics = EnablePeerMetrics ? new Metrics() : null;
-            Config config = PeerConfig ?? new Config
+            Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
+
+            Config config = PeerConfig;
+            if (config == null)
             {
-                MaxConnections = MaxConnections,
-            };
+                config = new Config
+                {
+                    // only use MaxConnections if config was null
+                    MaxConnections = MaxConnections,
+                };
+            }
 
             NetworkWriterPool.Configure(config.MaxPacketSize);
 
-            peer = new Peer(socket, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
-            peer.OnConnected += Peer_OnConnected;
-            peer.OnDisconnected += Peer_OnDisconnected;
+            // Only create peer if listening
+            if (Listening)
+            {
+                peer = new Peer(socket, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
+                peer.OnConnected += Peer_OnConnected;
+                peer.OnDisconnected += Peer_OnDisconnected;
 
-            peer.Bind(SocketFactory.GetBindEndPoint());
+                peer.Bind(SocketFactory.GetBindEndPoint());
+            }
 
             if (logger.LogEnabled()) logger.Log("Server started listening");
 
@@ -266,7 +275,14 @@ namespace Mirage
         private void Peer_OnConnected(IConnection conn)
         {
             var player = new NetworkPlayer(conn);
-            ConnectionAccepted(player);
+
+            if (logger.LogEnabled()) logger.Log("Server accepted client:" + player);
+
+            // add connection
+            AddConnection(player);
+
+            // let everyone know we just accepted a connection
+            Connected?.Invoke(player);
         }
 
         private void Peer_OnDisconnected(IConnection conn, DisconnectReason reason)
@@ -446,35 +462,6 @@ namespace Mirage
 
                 NetworkDiagnostics.OnSend(msg, segment.Count, count);
             }
-        }
-
-        void ConnectionAccepted(INetworkPlayer player)
-        {
-            if (logger.LogEnabled()) logger.Log("Server accepted client:" + player);
-
-            //Only allow host client to connect when not Listening for new connections
-            if (!Listening && player != LocalPlayer)
-            {
-                return;
-            }
-
-            // are more connections allowed? if not, kick
-            // (it's easier to handle this in Mirage, so Transports can have
-            //  less code and third party transport might not do that anyway)
-            // (this way we could also send a custom 'tooFull' message later,
-            //  Transport can't do that)
-            if (Players.Count >= MaxConnections)
-            {
-                player.Connection?.Disconnect();
-                if (logger.WarnEnabled()) logger.LogWarning("Server full, kicked client:" + player);
-                return;
-            }
-
-            // add connection
-            AddConnection(player);
-
-            // let everyone know we just accepted a connection
-            Connected?.Invoke(player);
         }
 
         //called once a client disconnects from the server

@@ -162,7 +162,7 @@ namespace Mirage
                     // GetComponentInParent doesn't works on disabled gameObject
                     // and GetComponentsInParent(false)[0] isn't allocation free, so
                     // we just drop child support in this specific case
-                    if (gameObject.activeSelf)
+                    if (gameObject.activeInHierarchy)
                         _identity = GetComponentInParent<NetworkIdentity>();
                     else
                         _identity = GetComponent<NetworkIdentity>();
@@ -170,7 +170,7 @@ namespace Mirage
                     // do this 2nd check inside first if so that we are not checking == twice on unity Object
                     if (_identity is null)
                     {
-                        logger.LogError("There is no NetworkIdentity on " + name + ". Please add one.");
+                        throw new InvalidOperationException($"Could not find NetworkIdentity on {name}.");
                     }
                 }
                 return _identity;
@@ -248,7 +248,7 @@ namespace Mirage
             // this was in Weaver before
             // NOTE: we could remove this later to allow calling Cmds on Server
             //       to avoid Wrapper functions. a lot of people requested this.
-            if (!Client.Active)
+            if (Client == null || !Client.Active)
             {
                 throw new InvalidOperationException($"ServerRpc Function {cmdName} called on server without an active client.");
             }

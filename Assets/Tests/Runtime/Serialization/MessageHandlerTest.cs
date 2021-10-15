@@ -23,7 +23,7 @@ namespace Mirage.Tests.Runtime
             reader = new NetworkReader();
             reader.Reset(new byte[] { 1, 2, 3, 4 });
 
-            messageHandler = new MessageHandler(true);
+            messageHandler = new MessageHandler(null, true);
         }
 
 
@@ -44,7 +44,7 @@ namespace Mirage.Tests.Runtime
         [TestCase(false)]
         public void DisconnectsIfHandlerHasException(bool disconnectOnThrow)
         {
-            messageHandler = new MessageHandler(disconnectOnThrow);
+            messageHandler = new MessageHandler(null, disconnectOnThrow);
 
             int invoked = 0;
             messageHandler.RegisterHandler<SceneReadyMessage>(_ => { invoked++; throw new InvalidOperationException("Fun Exception"); });

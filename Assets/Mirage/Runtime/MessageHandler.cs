@@ -12,6 +12,7 @@ namespace Mirage
         static readonly ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
 
         readonly bool disconnectOnException;
+        readonly IObjectLocator objectLocator;
 
         /// <summary>
         /// Handles network messages on client and server
@@ -22,9 +23,10 @@ namespace Mirage
 
         internal readonly Dictionary<int, NetworkMessageDelegate> messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
 
-        public MessageHandler(bool disconnectOnException)
+        public MessageHandler(IObjectLocator objectLocator, bool disconnectOnException)
         {
             this.disconnectOnException = disconnectOnException;
+            this.objectLocator = objectLocator;
         }
 
         private static NetworkMessageDelegate MessageWrapper<T>(MessageDelegateWithPlayer<T> handler)
@@ -109,6 +111,9 @@ namespace Mirage
         {
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(packet))
             {
+                // set ObjectLocator so that message can use NetworkIdentity
+                networkReader.ObjectLocator = objectLocator;
+
                 // protect against attackers trying to send invalid data packets
                 // exception could be throw if:
                 // - invalid headers

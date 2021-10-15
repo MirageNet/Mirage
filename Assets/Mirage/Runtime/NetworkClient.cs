@@ -26,6 +26,8 @@ namespace Mirage
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkClient));
 
         public bool EnablePeerMetrics;
+        [Tooltip("Sequence size of buffer in bits.\n10 => array size 1024 => ~17 seconds at 60hz")]
+        public int MetricsSize = 10;
         public Metrics Metrics { get; private set; }
 
         /// <summary>
@@ -114,9 +116,9 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log($"Client connecting to endpoint: {endPoint}");
 
             ISocket socket = SocketFactory.CreateClientSocket();
-            MessageHandler = new MessageHandler(DisconnectOnException);
+            MessageHandler = new MessageHandler(World, DisconnectOnException);
             var dataHandler = new DataHandler(MessageHandler);
-            Metrics = EnablePeerMetrics ? new Metrics() : null;
+            Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
             Config config = PeerConfig ?? new Config();
 
@@ -190,7 +192,7 @@ namespace Mirage
             World = server.World;
 
             // create local connection objects and connect them
-            MessageHandler = new MessageHandler(DisconnectOnException);
+            MessageHandler = new MessageHandler(World, DisconnectOnException);
             var dataHandler = new DataHandler(MessageHandler);
             (IConnection clientConn, IConnection serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler, OnHostDisconnected, null);
 
