@@ -126,45 +126,10 @@ namespace Mirage.InterestManagement
             if (observers.Count == 0)
                 return;
 
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
-            {
-                // pack message into byte[] once
-                MessagePacker.Pack(msg, writer);
-                var segment = writer.ToArraySegment();
-                int count = Send(observers, segment, channelId, skip);
+            // remove skipped player. No need to send to them.
+            observers.Remove(skip);
 
-                if (count > 0)
-                    NetworkDiagnostics.OnSend(msg, segment.Count, count);
-            }
-        }
-
-        /// <summary>
-        /// Send a message to all observers of an identity
-        /// </summary>
-        /// <remarks>Override if you wish to provide
-        /// an allocation free send method</remarks>
-        /// <param name="players">The player's we want to send the message to.</param>
-        /// <param name="data">the data to send</param>
-        /// <param name="channelId">the channel to send it on</param>
-        /// <param name="skip">a player who should not receive the message</param>
-        /// <returns>Total amounts of messages sent</returns>
-        private int Send(HashSet<INetworkPlayer> players, ArraySegment<byte> data, int channelId = Channel.Reliable, INetworkPlayer skip = null)
-        {
-            int count = 0;
-
-            foreach (INetworkPlayer player in players)
-            {
-                if (player == null) continue;
-
-                if (player != skip)
-                {
-                    // send to all connections, but don't wait for them
-                    player.Send(data, channelId);
-                    count++;
-                }
-            }
-
-            return count;
+            NetworkServer.SendToMany(observers, msg);
         }
 
         /// <summary>
