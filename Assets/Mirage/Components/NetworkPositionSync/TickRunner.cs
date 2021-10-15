@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2021 James Frowen
@@ -30,7 +30,7 @@ namespace JamesFrowen.PositionSync
 {
     public class TickRunner
     {
-        public event Action OnTick;
+        public event Action<TickRunner> OnTick;
 
         private readonly float tickInterval;
         private readonly Sequencer sequencer;
@@ -55,6 +55,11 @@ namespace JamesFrowen.PositionSync
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _tickTime;
         }
+        public float FixedDeltaTime
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => tickInterval;
+        }
         public ulong Tick
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -68,7 +73,7 @@ namespace JamesFrowen.PositionSync
             {
                 _tickTime += tickInterval;
                 _tick = (uint)sequencer.NextAfter(_tick);
-                OnTick?.Invoke();
+                OnTick?.Invoke(this);
             }
         }
     }

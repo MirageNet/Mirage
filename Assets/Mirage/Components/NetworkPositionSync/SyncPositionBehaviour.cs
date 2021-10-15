@@ -48,7 +48,7 @@ namespace JamesFrowen.PositionSync
         {
             if (IsControlledByServer)
             {
-                return IsTimeToUpdate() && (HasMoved() || HasRotated());
+                return HasMoved() || HasRotated();
             }
             else
             {
@@ -100,16 +100,6 @@ namespace JamesFrowen.PositionSync
         [Tooltip("If true uses local position and rotation, if value uses world position and rotation")]
         [SerializeField] bool useLocalSpace = true;
 
-        // todo make 0 Sensitivity always send (and avoid doing distance/angle check)
-        [Tooltip("How far position has to move before it is synced")]
-        [System.Obsolete("Use Sensitivity from packer instead", true)]
-        [SerializeField] float positionSensitivity = 0.1f;
-
-        [Tooltip("How far rotation has to move before it is synced")]
-        [System.Obsolete("Use Sensitivity from packer instead", true)]
-        [SerializeField] float rotationSensitivity = 0.1f;
-
-
         [Tooltip("Client Authority Sync Interval")]
         [SerializeField] float clientSyncInterval = 0.1f;
 
@@ -139,7 +129,8 @@ namespace JamesFrowen.PositionSync
             {
                 GUILayout.Label($"ServerTime: {_system.TimeSync.LatestServerTime:0.000}");
                 GUILayout.Label($"InterpTime: {_system.TimeSync.InterpolationTime:0.000}");
-                GUILayout.Label(snapshotBuffer.ToDebugString());
+                GUILayout.Label($"Time Delta: {_system.TimeSync.LatestServerTime - _system.TimeSync.InterpolationTime:0.000} scale:{_system.TimeSync.DebugScale:0.000}");
+                GUILayout.Label(snapshotBuffer.ToDebugString(_system.TimeSync.InterpolationTime));
             }
         }
 #endif

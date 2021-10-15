@@ -42,6 +42,8 @@ namespace JamesFrowen.PositionSync
 
         public static event Action<long[]> RecordingFinished;
 
+        public static bool IsRecording => isRecording;
+
         public static void StartRecording(int frameCount)
         {
             frames = new long[frameCount];
@@ -65,6 +67,8 @@ namespace JamesFrowen.PositionSync
             if (index >= frames.Length)
             {
                 RecordingFinished?.Invoke(frames);
+                RecordingFinished = null;
+                isRecording = false;
             }
         }
     }
@@ -157,17 +161,17 @@ namespace JamesFrowen.PositionSync
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _timeSync;
         }
-        public float Time
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => UnityEngine.Time.unscaledTime;
-        }
+        //public float Time
+        //{
+        //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //    get => UnityEngine.Time.unscaledTime;
+        //}
 
-        public float DeltaTime
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => UnityEngine.Time.unscaledDeltaTime;
-        }
+        //public float DeltaTime
+        //{
+        //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //    get => UnityEngine.Time.unscaledDeltaTime;
+        //}
 
         public bool ClientActive => Client?.Active ?? false;
         public bool ServerActive => Server?.Active ?? false;
@@ -185,8 +189,13 @@ namespace JamesFrowen.PositionSync
             Client?.Started.AddListener(ClientStarted);
 
 
-            _timeSync = new TimeSync(1 / tickRate, 0.5f, TickDelayCount);
+            _timeSync = new TimeSync(1 / tickRate, tickDelay: TickDelayCount, timeScale: 0.1f);
             tickRunner = new TickRunner(tickRate);
+            packer = new SyncPacker(PackSettings);
+        }
+        private void OnValidate()
+        {
+            packer = new SyncPacker(PackSettings ?? new SyncSettings());
         }
         private void OnDestroy()
         {
@@ -197,7 +206,6 @@ namespace JamesFrowen.PositionSync
         private void ClientStarted()
         {
             Client.MessageHandler.RegisterHandler<NetworkPositionMessage>(ClientHandleNetworkPositionMessage);
-            tickRunner.OnTick += ClientUpdate;
         }
 
         private void ServerStarted()
@@ -211,38 +219,43 @@ namespace JamesFrowen.PositionSync
 
         private void LateUpdate()
         {
-            tickRunner.OnUpdate(DeltaTime);
+            tickRunner.OnUpdate(UnityEngine.Time.unscaledDeltaTime);
+        }
+        public void Update()
+        {
+            ClientUpdate(UnityEngine.Time.unscaledDeltaTime);
         }
 
-        private void ServerUpdate()
+        private void ServerUpdate(TickRunner runner)
         {
+            float time = runner.FixedTime;
             Benchmark.StartFrame();
             // syncs every frame, each Behaviour will track its own timer
             switch (syncMode)
             {
                 case SyncMode.SendToAll:
-                    SendUpdateToAll(Time);
+                    SendUpdateToAll(time);
                     break;
                 case SyncMode.SendToObservers_PlayerDirty:
-                    SendUpdateToObservers_PlayerDirty(Time);
+                    SendUpdateToObservers_PlayerDirty(time);
                     break;
                 case SyncMode.SendToObservers_DirtyObservers:
-                    SendUpdateToObservers_DirtyObservers(Time);
+                    SendUpdateToObservers_DirtyObservers(time);
                     break;
                 case SyncMode.SendToDirtyObservers_PackOnce:
-                    SendUpdateToObservers_DirtyObservers_PackOnce(Time);
+                    SendUpdateToObservers_DirtyObservers_PackOnce(time);
                     break;
             }
             Benchmark.EndFrame();
 
             // host mode
             if (Client?.Active ?? false)
-                TimeSync.OnMessage(Time);
+                TimeSync.OnMessage(time);
         }
 
-        private void ClientUpdate()
+        private void ClientUpdate(float deltaTime)
         {
-            TimeSync.OnUpdate(DeltaTime);
+            TimeSync.OnRender(deltaTime);
         }
 
         internal void SendUpdateToAll(float time)
@@ -258,6 +271,21 @@ namespace JamesFrowen.PositionSync
                 {
                     payload = writer.ToArraySegment()
                 });
+            }
+        }
+        internal void PackBehaviours(NetworkWriter writer, float time)
+        {
+            packer.PackTime(writer, time);
+
+            UpdateDirtySet();
+
+            foreach (SyncPositionBehaviour behaviour in dirtySet)
+            {
+                if (logger.LogEnabled()) logger.Log($"Time {time:0.000}, Packing {behaviour.name}");
+                packer.PackNext(writer, behaviour);
+
+                // todo handle client authority updates better
+                behaviour.ClearNeedsUpdate();
             }
         }
 
@@ -298,7 +326,7 @@ namespace JamesFrowen.PositionSync
             ClearDirtySet();
         }
 
-        Dictionary<INetworkPlayer, PooledNetworkWriter> writerPool;
+        Dictionary<INetworkPlayer, PooledNetworkWriter> writerPool = new Dictionary<INetworkPlayer, PooledNetworkWriter>();
         /// <summary>
         /// Loops through all dirty objects, and then their observers and then writes that behaviouir to a cahced writer
         /// </summary>
@@ -390,10 +418,11 @@ namespace JamesFrowen.PositionSync
 
         private void UpdateDirtySet()
         {
+            dirtySet.Clear();
             foreach (SyncPositionBehaviour behaviour in Behaviours.Dictionary.Values)
             {
-                if (!behaviour.NeedsUpdate())
-                    continue;
+                //if (!behaviour.NeedsUpdate())
+                //    continue;
 
                 dirtySet.Add(behaviour);
             }
@@ -403,29 +432,12 @@ namespace JamesFrowen.PositionSync
         {
             foreach (SyncPositionBehaviour behaviour in dirtySet)
             {
-                behaviour.ClearNeedsUpdate(Time + TickInterval);
+                behaviour.ClearNeedsUpdate();
             }
             dirtySet.Clear();
         }
 
-        internal void PackBehaviours(NetworkWriter writer, float time)
-        {
-            packer.PackTime(writer, time);
 
-            UpdateDirtySet();
-
-            foreach (SyncPositionBehaviour behaviour in Behaviours.Dictionary.Values)
-            {
-                if (!behaviour.NeedsUpdate())
-                    continue;
-
-                if (logger.LogEnabled()) logger.Log($"Time {time:0.000}, Packing {behaviour.name}");
-                packer.PackNext(writer, behaviour);
-
-                // todo handle client authority updates better
-                behaviour.ClearNeedsUpdate(Time + TickInterval);
-            }
-        }
 
         internal void ClientHandleNetworkPositionMessage(NetworkPositionMessage msg)
         {

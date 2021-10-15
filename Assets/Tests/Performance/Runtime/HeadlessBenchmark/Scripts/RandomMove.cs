@@ -7,6 +7,7 @@ namespace Mirage.HeadlessBenchmark
     {
         [SerializeField] private float movementDuration = 5.0f;
         [SerializeField] private float waitBeforeMoving = 5.0f;
+        [SerializeField] private float speed = 2;
 
         private static Vector3 GetRandomTarget()
         {
@@ -32,7 +33,7 @@ namespace Mirage.HeadlessBenchmark
 
 
                 float timer = 0.0f;
-                Vector3 startPos = transform.position;
+                //Vector3 startPos = transform.position;
                 Vector3 targetPos = GetRandomTarget();
 
                 while (timer < movementDuration)
@@ -42,7 +43,8 @@ namespace Mirage.HeadlessBenchmark
                     float t = timer / movementDuration;
                     // todo what is this??
                     //t = t * t * t * (t * (6f * t - 15f) + 10f);
-                    transform.position = Vector3.Lerp(startPos, targetPos, t);
+                    //transform.position =  Vector3.Lerp(startPos, targetPos, t);
+                    transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
 
                     yield return null;
                 }

@@ -1,11 +1,11 @@
 {
     "name": "Mirage.HeadlessBenchmark",
-    "rootNamespace": "",
     "references": [
         "GUID:30817c1a0e6d646d99c048fc403f5979",
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
         "GUID:c0b2064c294eb174c9f3f7da398eb677",
-        "GUID:ae70f15dce7a4fa4b938107926f64504"
+        "GUID:ae70f15dce7a4fa4b938107926f64504",
+        "GUID:96f081f4a0d214ee39e3aa34e9d43109"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

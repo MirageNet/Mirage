@@ -62,10 +62,7 @@ namespace JamesFrowen.PositionSync
     {
         static readonly ILogger logger = LogFactory.GetLogger<TimeSync>();
 
-        /// <summary>
-        /// if new time and previous time are this far apart then reset client time
-        /// </summary>
-        const float SKIP_TIME_DIFF = 1f;
+
 
         bool intialized;
         /// <summary>
@@ -88,9 +85,14 @@ namespace JamesFrowen.PositionSync
         /// </summary>
         readonly float negativeThreshold;
 
-        const float fastScale = 1.01f;
+        readonly float fastScale = 1.01f;
         const float normalScale = 1f;
-        const float slowScale = 0.99f;
+        readonly float slowScale = 0.99f;
+
+        /// <summary>
+        /// if new time and previous time are this far apart then reset client time
+        /// </summary>
+        readonly float _skipAheadThreshold;
 
         readonly float _clientDelay;
 
@@ -126,12 +128,18 @@ namespace JamesFrowen.PositionSync
             get => _clientDelay;
         }
 
+        public float DebugScale => clientScaleTime;
+
         /// <param name="diffThreshold">how far off client time can be before changing its speed, Good value is half SyncInterval</param>
         /// <param name="movingAverageCount">how many ticks used in average, increase or decrease with framerate</param>
-        public TimeSync(float tickInterval, float diffThreshold = 0.5f, float tickDelay = 2, int movingAverageCount = 30)
+        public TimeSync(float tickInterval, float diffThreshold = 0.5f, float timeScale = 0.01f, float skipThreshold = 2.5f, float tickDelay = 2, int movingAverageCount = 30)
         {
             positiveThreshold = tickInterval * diffThreshold;
             negativeThreshold = -positiveThreshold;
+            _skipAheadThreshold = tickInterval * skipThreshold;
+
+            fastScale = normalScale + timeScale;
+            slowScale = normalScale - timeScale;
 
             _clientDelay = tickInterval * tickDelay;
 
@@ -145,7 +153,7 @@ namespace JamesFrowen.PositionSync
         /// Updates client time
         /// </summary>
         /// <param name="deltaTime"></param>
-        public void OnUpdate(float deltaTime)
+        public void OnRender(float deltaTime)
         {
             _clientTime += deltaTime * clientScaleTime;
         }
@@ -156,28 +164,41 @@ namespace JamesFrowen.PositionSync
         /// <param name="serverTime"></param>
         public void OnMessage(float serverTime)
         {
-            logger.Assert(serverTime > _latestServerTime, $"Received message out of order");
+            logger.Assert(serverTime > _latestServerTime, $"Received message out of order server:{serverTime}, new:{_latestServerTime}");
             _latestServerTime = serverTime;
 
             // if first message set client time to server-diff
             // reset stuff if too far behind
             // todo check this is correct
-            if (!intialized || (serverTime > _latestServerTime + SKIP_TIME_DIFF))
+            if (!intialized)
             {
-                _clientTime = serverTime;
-                clientScaleTime = normalScale;
-                intialized = true;
+                InitNew(serverTime);
                 return;
             }
 
-
             float diff = serverTime - _clientTime;
+
+            if (serverTime - _clientTime > _skipAheadThreshold)
+            {
+                logger.LogWarning($"Client fell behind, skipping ahead. server:{serverTime:0.00} diff:{diff:0.00}");
+                InitNew(serverTime);
+                return;
+            }
+
             diffAvg.Add(diff);
 
             AdjustClientTimeScale((float)diffAvg.Value);
 
             //todo add trace level
             if (logger.LogEnabled()) logger.Log($"st {serverTime:0.00} ct {_clientTime:0.00} diff {diff * 1000:0.0}, wanted:{diffAvg.Value * 1000:0.0}, scale:{clientScaleTime}");
+        }
+
+        private void InitNew(float serverTime)
+        {
+            _clientTime = serverTime;
+            clientScaleTime = normalScale;
+            diffAvg.Reset();
+            intialized = true;
         }
 
         private void AdjustClientTimeScale(float diff)

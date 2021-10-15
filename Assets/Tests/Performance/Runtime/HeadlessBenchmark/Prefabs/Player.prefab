@@ -140,8 +140,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  movementDuration: 5
-  waitBeforeMoving: 5
+  movementDuration: 0.5
+  waitBeforeMoving: 0.25
 --- !u!114 &-1079681451773130772
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -156,12 +156,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  packer: {fileID: 11400000, guid: aec77aae2da3b304b8acba8c4835e6a4, type: 2}
   target: {fileID: 7039704267495960127}
   clientAuthority: 1
   useLocalSpace: 1
-  positionSensitivity: 0.1
-  rotationSensitivity: 0.1
   clientSyncInterval: 0.1
   showDebugGui: 0
 --- !u!114 &-6208204564854418635

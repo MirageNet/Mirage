@@ -14,6 +14,11 @@ namespace Mirage
             alpha = 2.0f / (n + 1);
         }
 
+        public void Reset()
+        {
+            initialized = false;
+        }
+
         public void Add(double newValue)
         {
             // simple algorithm for EMA described here:

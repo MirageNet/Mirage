@@ -160,4 +160,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Client: {fileID: 0}
   Server: {fileID: 183183950890642064}
-  packer: {fileID: 11400000, guid: aec77aae2da3b304b8acba8c4835e6a4, type: 2}
+  PackSettings:
+    maxTime: 86400
+    timePrecision: 0.001
+    blockSize: 5
+    max: {x: 100, y: 100, z: 100}
+    precision: {x: 0.001, y: 0.001, z: 0.001}
+    bitCount: 9
+  tickRate: 20
+  TickDelayCount: 20
+  syncMode: 1

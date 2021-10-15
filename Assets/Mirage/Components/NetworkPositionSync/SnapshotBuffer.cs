@@ -128,7 +128,7 @@ namespace JamesFrowen.PositionSync
             // there could be no new data from either lag or because object hasn't moved
             if (Last.time < now)
             {
-                if (logger.WarnEnabled()) logger.LogWarning($"No snapshots for t={now:0.000}, using first t={buffer[0].time:0.000} last t={Last.time:0.000}");
+                if (logger.LogEnabled()) logger.Log($"No snapshots for t={now:0.000}, using first t={buffer[0].time:0.000} last t={Last.time:0.000}");
                 return Last.state;
             }
 
@@ -185,7 +185,7 @@ namespace JamesFrowen.PositionSync
         }
 
 
-        public string ToDebugString()
+        public string ToDebugString(float now)
         {
             if (buffer.Count == 0) { return "Buffer Empty"; }
 
@@ -193,6 +193,18 @@ namespace JamesFrowen.PositionSync
             builder.AppendLine($"count:{buffer.Count}, minTime:{buffer[0].time:0.000}, maxTime:{buffer[buffer.Count - 1].time:0.000}");
             for (int i = 0; i < buffer.Count; i++)
             {
+                if (i != 0)
+                {
+                    double fromTime = buffer[i - 1].time;
+                    double toTime = buffer[i].time;
+                    // if between times, then use from/to
+                    if (fromTime <= now && now <= toTime)
+                    {
+                        builder.AppendLine($"                    <-----");
+                    }
+                }
+
+
                 builder.AppendLine($"  {i}: {buffer[i].time:0.000}");
             }
             return builder.ToString();

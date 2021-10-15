@@ -165,7 +165,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 15
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -235,7 +235,7 @@ MonoBehaviour:
     type: 3}
   PlayerPrefab: {fileID: 7039704267495960125, guid: bebeb0dfd33f4074894ef25112ab4a8d,
     type: 3}
-  editorArgs: -socket udp -server -port 7777 -client 1 -monster 100
+  editorArgs: -socket udp -server -port 7777 -client 1 -monster 1
   socketFactory: {fileID: 0}
 --- !u!4 &2043118187
 Transform:

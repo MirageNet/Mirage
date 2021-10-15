@@ -1,9 +1,14 @@
 using System;
 using System.Collections;
+using System.Diagnostics;
+using System.Linq;
 using Cysharp.Threading.Tasks;
+using JamesFrowen.PositionSync;
 using Mirage.SocketLayer;
 using Mirage.Sockets.Udp;
 using UnityEngine;
+using Benchmark = JamesFrowen.PositionSync.Benchmark;
+using Debug = UnityEngine.Debug;
 
 namespace Mirage.HeadlessBenchmark
 {
@@ -30,6 +35,27 @@ namespace Mirage.HeadlessBenchmark
             HeadlessStart();
 
         }
+        private IEnumerator MeasureBenchmark()
+        {
+            JamesFrowen.PositionSync.SyncMode mode = 0;
+            Benchmark.RecordingFinished += (long[] data) =>
+            {
+                double avg = data.Average();
+                double ms = avg / Stopwatch.Frequency * 1000;
+                Debug.Log($"Mode:{mode} {ms:0.00}ms");
+            };
+            Benchmark.StartRecording(200);
+
+            for (int i = 1; i < 5; i++)
+            {
+                mode = (JamesFrowen.PositionSync.SyncMode)i;
+                FindObjectOfType<SyncPositionSystem>().syncMode = mode;
+                while (Benchmark.IsRecording)
+                {
+                    yield return null;
+                }
+            }
+        }
         private IEnumerator DisplayFramesPerSecons()
         {
             int previousFrameCount = Time.frameCount;
@@ -42,6 +68,7 @@ namespace Mirage.HeadlessBenchmark
                 int frames = frameCount - previousFrameCount;
 
                 long messageCount = 0;
+
                 // todo use debug metrics from peer when they are added
                 //if (transport is KcpTransport kcpTransport)
                 //{
@@ -79,6 +106,7 @@ namespace Mirage.HeadlessBenchmark
         void OnServerStarted()
         {
             StartCoroutine(DisplayFramesPerSecons());
+            //StartCoroutine(MeasureBenchmark());
 
             string monster = GetArgValue("-monster");
             if (!string.IsNullOrEmpty(monster))

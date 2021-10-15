@@ -75,6 +75,7 @@ namespace JamesFrowen.PositionSync
             timePacker = settings.CreateTimePacker();
             positionPacker = settings.CreatePositionPacker();
             rotationPacker = settings.CreateRotationPacker();
+            blockSize = settings.blockSize;
         }
 
         public void PackTime(NetworkWriter writer, float time)
