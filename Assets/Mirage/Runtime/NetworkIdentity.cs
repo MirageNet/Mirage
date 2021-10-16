@@ -240,7 +240,7 @@ namespace Mirage
             }
         }
 
-        [SerializeField, HideInInspector] string m_AssetId;
+        [SerializeField, HideInInspector] int _prefabHash;
 
         /// <remarks>
         /// The AssetId trick:
@@ -261,46 +261,42 @@ namespace Mirage
         /// The solution is to serialize the string internally here and then
         /// use the real 'Guid' type for everything else via .assetId
         /// </remarks>
-        public Guid AssetId
+        public int PrefabHash
         {
             get
             {
 #if UNITY_EDITOR
                 // This is important because sometimes OnValidate does not run (like when adding view to prefab with no child links)
-                if (string.IsNullOrEmpty(m_AssetId))
+                if (_prefabHash == 0)
                     SetupIDs();
 #endif
-                // convert string to Guid and use .Empty to avoid exception if
-                // we would use 'new Guid("")'
-                return string.IsNullOrEmpty(m_AssetId) ? Guid.Empty : new Guid(m_AssetId);
+                return _prefabHash;
             }
             internal set
             {
-                string newAssetIdString = value == Guid.Empty ? string.Empty : value.ToString("N");
-                string oldAssetIdString = m_AssetId;
+                int newID = value;
+                int oldId = _prefabHash;
 
                 // they are the same, do nothing
-                if (oldAssetIdString == newAssetIdString)
-                {
+                if (oldId == newID)
                     return;
-                }
 
                 // new is empty
-                if (string.IsNullOrEmpty(newAssetIdString))
+                if (newID == 0)
                 {
-                    throw new ArgumentException($"Can not set AssetId to empty guid on NetworkIdentity '{name}', old assetId '{oldAssetIdString}'");
+                    throw new ArgumentException($"Can not set AssetId to empty guid on NetworkIdentity '{name}', old assetId '{oldId}'");
                 }
 
                 // old not empty
-                if (!string.IsNullOrEmpty(oldAssetIdString))
+                if (oldId != 0)
                 {
-                    throw new InvalidOperationException($"Can not Set AssetId on NetworkIdentity '{name}' because it already had an assetId, current assetId '{oldAssetIdString}', attempted new assetId '{newAssetIdString}'");
+                    throw new InvalidOperationException($"Can not Set AssetId on NetworkIdentity '{name}' because it already had an assetId, current assetId '{oldId}', attempted new assetId '{newID}'");
                 }
 
                 // old is empty
-                m_AssetId = newAssetIdString;
+                _prefabHash = newID;
 
-                if (logger.LogEnabled()) logger.Log($"Settings AssetId on NetworkIdentity '{name}', new assetId '{newAssetIdString}'");
+                if (logger.LogEnabled()) logger.Log($"Settings AssetId on NetworkIdentity '{name}', new assetId '{newID}'");
             }
         }
 
@@ -446,7 +442,10 @@ namespace Mirage
 #if UNITY_EDITOR
         void AssignAssetID(GameObject prefab) => AssignAssetID(AssetDatabase.GetAssetPath(prefab));
 
-        void AssignAssetID(string path) => m_AssetId = AssetDatabase.AssetPathToGUID(path);
+        void AssignAssetID(string path)
+        {
+            _prefabHash = path.GetStableHashCode();
+        }
 
         bool ThisIsAPrefab() => PrefabUtility.IsPartOfPrefabAsset(gameObject);
 
@@ -649,7 +648,7 @@ namespace Mirage
             else
             {
                 AssignSceneID();
-                m_AssetId = "";
+                _prefabHash = 0;
             }
         }
 #endif

@@ -94,7 +94,7 @@ namespace Mirage
         /// The id of the prefab to spawn
         /// <para>If sceneId != 0 then it is used instead of assetId</para>
         /// </summary>
-        public Guid assetId;
+        public int? prefabHash;
         /// <summary>
         /// Local position
         /// </summary>

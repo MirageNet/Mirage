@@ -23,8 +23,8 @@ namespace Mirage
         public NetworkSceneManager NetworkSceneManager;
 
         // spawn handlers. internal for testing purposes. do not use directly.
-        internal readonly Dictionary<Guid, SpawnHandlerDelegate> spawnHandlers = new Dictionary<Guid, SpawnHandlerDelegate>();
-        internal readonly Dictionary<Guid, UnSpawnDelegate> unspawnHandlers = new Dictionary<Guid, UnSpawnDelegate>();
+        internal readonly Dictionary<int, SpawnHandlerDelegate> spawnHandlers = new Dictionary<int, SpawnHandlerDelegate>();
+        internal readonly Dictionary<int, UnSpawnDelegate> unspawnHandlers = new Dictionary<int, UnSpawnDelegate>();
 
         [Header("Prefabs")]
         /// <summary>
@@ -37,7 +37,7 @@ namespace Mirage
         /// This is a dictionary of the prefabs that are registered on the client with ClientScene.RegisterPrefab().
         /// <para>The key to the dictionary is the prefab asset Id.</para>
         /// </summary>
-        internal readonly Dictionary<Guid, NetworkIdentity> prefabs = new Dictionary<Guid, NetworkIdentity>();
+        internal readonly Dictionary<int, NetworkIdentity> prefabs = new Dictionary<int, NetworkIdentity>();
 
         /// <summary>
         /// This is dictionary of the disabled NetworkIdentity objects in the scene that could be spawned by messages from the server.
@@ -170,12 +170,12 @@ namespace Mirage
         /// </summary>
         /// <param name="assetId">asset id of the prefab</param>
         /// <returns>true if prefab was registered</returns>
-        public NetworkIdentity GetPrefab(Guid assetId)
+        public NetworkIdentity GetPrefab(int prefabHash)
         {
-            if (assetId == Guid.Empty)
+            if (prefabHash == 0)
                 return null;
 
-            if (prefabs.TryGetValue(assetId, out NetworkIdentity identity))
+            if (prefabs.TryGetValue(prefabHash, out NetworkIdentity identity))
             {
                 return identity;
             }
@@ -190,12 +190,12 @@ namespace Mirage
         /// </summary>
         /// <param name="identity">A Prefab that will be spawned.</param>
         /// <param name="newAssetId">An assetId to be assigned to this prefab. This allows a dynamically created game object to be registered for an already known asset Id.</param>
-        public void RegisterPrefab(NetworkIdentity identity, Guid newAssetId)
+        public void RegisterPrefab(NetworkIdentity identity, int newPrefabHash)
         {
-            identity.AssetId = newAssetId;
+            identity.PrefabHash = newPrefabHash;
 
-            if (logger.LogEnabled()) logger.Log("Registering prefab '" + identity.name + "' as asset:" + identity.AssetId);
-            prefabs[identity.AssetId] = identity;
+            if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' as asset:{identity.PrefabHash}");
+            prefabs[identity.PrefabHash] = identity;
         }
 
         /// <summary>
@@ -207,8 +207,8 @@ namespace Mirage
         /// <param name="identity">A Prefab that will be spawned.</param>
         public void RegisterPrefab(NetworkIdentity identity)
         {
-            if (logger.LogEnabled()) logger.Log("Registering prefab '" + identity.name + "' as asset:" + identity.AssetId);
-            prefabs[identity.AssetId] = identity;
+            if (logger.LogEnabled()) logger.Log("Registering prefab '" + identity.name + "' as asset:" + identity.PrefabHash);
+            prefabs[identity.PrefabHash] = identity;
         }
 
         /// <summary>
@@ -222,15 +222,17 @@ namespace Mirage
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
         public void RegisterPrefab(NetworkIdentity identity, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
-            if (identity.AssetId == Guid.Empty)
+            int prefabHash = identity.PrefabHash;
+
+            if (prefabHash == 0)
             {
                 throw new InvalidOperationException("RegisterPrefab game object " + identity.name + " has no " + nameof(identity) + ". Use RegisterSpawnHandler() instead?");
             }
 
-            if (logger.LogEnabled()) logger.Log("Registering custom prefab '" + identity.name + "' as asset:" + identity.AssetId + " " + spawnHandler.Method.Name + "/" + unspawnHandler.Method.Name);
+            if (logger.LogEnabled()) logger.Log("Registering custom prefab '" + identity.name + "' as asset:" + prefabHash + " " + spawnHandler.Method.Name + "/" + unspawnHandler.Method.Name);
 
-            spawnHandlers[identity.AssetId] = spawnHandler;
-            unspawnHandlers[identity.AssetId] = unspawnHandler;
+            spawnHandlers[prefabHash] = spawnHandler;
+            unspawnHandlers[prefabHash] = unspawnHandler;
         }
 
         /// <summary>
@@ -239,8 +241,10 @@ namespace Mirage
         /// <param name="identity">The prefab to be removed from registration.</param>
         public void UnregisterPrefab(NetworkIdentity identity)
         {
-            spawnHandlers.Remove(identity.AssetId);
-            unspawnHandlers.Remove(identity.AssetId);
+            int prefabHash = identity.PrefabHash;
+
+            spawnHandlers.Remove(prefabHash);
+            unspawnHandlers.Remove(prefabHash);
         }
 
         #endregion
@@ -254,22 +258,22 @@ namespace Mirage
         /// <param name="assetId">Custom assetId string.</param>
         /// <param name="spawnHandler">A method to use as a custom spawnhandler on clients.</param>
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
-        public void RegisterSpawnHandler(Guid assetId, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
+        public void RegisterSpawnHandler(int prefabHash, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
-            if (logger.LogEnabled()) logger.Log("RegisterSpawnHandler asset '" + assetId + "' " + spawnHandler.Method.Name + "/" + unspawnHandler.Method.Name);
+            if (logger.LogEnabled()) logger.Log("RegisterSpawnHandler asset '" + prefabHash + "' " + spawnHandler.Method.Name + "/" + unspawnHandler.Method.Name);
 
-            spawnHandlers[assetId] = spawnHandler;
-            unspawnHandlers[assetId] = unspawnHandler;
+            spawnHandlers[prefabHash] = spawnHandler;
+            unspawnHandlers[prefabHash] = unspawnHandler;
         }
 
         /// <summary>
         /// Removes a registered spawn handler function that was registered with ClientScene.RegisterHandler().
         /// </summary>
         /// <param name="assetId">The assetId for the handler to be removed for.</param>
-        public void UnregisterSpawnHandler(Guid assetId)
+        public void UnregisterSpawnHandler(int prefabHash)
         {
-            spawnHandlers.Remove(assetId);
-            unspawnHandlers.Remove(assetId);
+            spawnHandlers.Remove(prefabHash);
+            unspawnHandlers.Remove(prefabHash);
         }
 
         /// <summary>
@@ -286,10 +290,8 @@ namespace Mirage
 
         void UnSpawn(NetworkIdentity identity)
         {
-            Guid assetId = identity.AssetId;
-
             identity.StopClient();
-            if (unspawnHandlers.TryGetValue(assetId, out UnSpawnDelegate handler) && handler != null)
+            if (unspawnHandlers.TryGetValue(identity.PrefabHash, out UnSpawnDelegate handler) && handler != null)
             {
                 handler(identity);
             }
@@ -329,8 +331,8 @@ namespace Mirage
 
         void ApplySpawnPayload(NetworkIdentity identity, SpawnMessage msg)
         {
-            if (msg.assetId != Guid.Empty)
-                identity.AssetId = msg.assetId;
+            if (msg.prefabHash.HasValue)
+                identity.PrefabHash = msg.prefabHash.Value;
 
             if (!identity.gameObject.activeSelf)
             {
@@ -360,11 +362,11 @@ namespace Mirage
 
         internal void OnSpawn(SpawnMessage msg)
         {
-            if (msg.assetId == Guid.Empty && msg.sceneId == 0)
+            if (msg.prefabHash == null && msg.sceneId == 0)
             {
                 throw new InvalidOperationException($"OnSpawn has empty assetId and scene Id for netId: {msg.netId}");
             }
-            if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} assetID={msg.assetId} sceneId={msg.sceneId} pos={msg.position}");
+            if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} assetID={msg.prefabHash} sceneId={msg.sceneId} pos={msg.position}");
 
             // was the object already spawned?
             bool existing = Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity);
@@ -380,7 +382,7 @@ namespace Mirage
             if (identity == null)
             {
                 //object could not be found.
-                throw new InvalidOperationException($"Could not spawn assetId={msg.assetId} scene={msg.sceneId} netId={msg.netId}");
+                throw new InvalidOperationException($"Could not spawn assetId={msg.prefabHash} scene={msg.sceneId} netId={msg.netId}");
             }
 
             ApplySpawnPayload(identity, msg);
@@ -392,28 +394,28 @@ namespace Mirage
 
         NetworkIdentity SpawnPrefab(SpawnMessage msg)
         {
-            if (spawnHandlers.TryGetValue(msg.assetId, out SpawnHandlerDelegate handler))
+            if (spawnHandlers.TryGetValue(msg.prefabHash.Value, out SpawnHandlerDelegate handler))
             {
                 NetworkIdentity obj = handler(msg);
                 if (obj == null)
                 {
-                    logger.LogWarning("Client spawn handler for " + msg.assetId + " returned null");
+                    logger.LogWarning("Client spawn handler for " + msg.prefabHash + " returned null");
                     return null;
                 }
                 return obj;
             }
-            NetworkIdentity prefab = GetPrefab(msg.assetId);
+            NetworkIdentity prefab = GetPrefab(msg.prefabHash.Value);
             if (!(prefab is null))
             {
                 NetworkIdentity obj = Instantiate(prefab, msg.position, msg.rotation);
                 if (logger.LogEnabled())
                 {
-                    logger.Log("Client spawn handler instantiating [netId:" + msg.netId + " asset ID:" + msg.assetId + " pos:" + msg.position + " rotation: " + msg.rotation + "]");
+                    logger.Log("Client spawn handler instantiating [netId:" + msg.netId + " asset ID:" + msg.prefabHash + " pos:" + msg.position + " rotation: " + msg.rotation + "]");
                 }
 
                 return obj;
             }
-            logger.LogError("Failed to spawn server object, did you forget to add it to the ClientObjectManager? assetId=" + msg.assetId + " netId=" + msg.netId);
+            logger.LogError("Failed to spawn server object, did you forget to add it to the ClientObjectManager? assetId=" + msg.prefabHash + " netId=" + msg.netId);
             return null;
         }
 

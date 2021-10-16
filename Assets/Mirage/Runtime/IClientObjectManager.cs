@@ -13,19 +13,19 @@ namespace Mirage
 
     public interface IClientObjectManager
     {
-        NetworkIdentity GetPrefab(Guid assetId);
+        NetworkIdentity GetPrefab(int prefabHash);
 
         void RegisterPrefab(NetworkIdentity identity);
 
-        void RegisterPrefab(NetworkIdentity identity, Guid newAssetId);
+        void RegisterPrefab(NetworkIdentity identity, int newPrefabHash);
 
         void RegisterPrefab(NetworkIdentity identity, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
 
         void UnregisterPrefab(NetworkIdentity identity);
 
-        void RegisterSpawnHandler(Guid assetId, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
+        void RegisterSpawnHandler(int prefabHash, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler);
 
-        void UnregisterSpawnHandler(Guid assetId);
+        void UnregisterSpawnHandler(int prefabHash);
 
         void ClearSpawners();
 

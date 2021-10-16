@@ -180,59 +180,59 @@ namespace Mirage.Tests
         public void GetSetAssetId()
         {
             // assign a guid
-            var guid = new Guid(0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B);
-            identity.AssetId = guid;
+            int hash = 123456789;
+            identity.PrefabHash = hash;
 
             // did it work?
-            Assert.That(identity.AssetId, Is.EqualTo(guid));
+            Assert.That(identity.PrefabHash, Is.EqualTo(hash));
         }
 
         [Test]
         public void SetAssetId_GivesErrorIfOneExists()
         {
-            var guid1 = Guid.NewGuid();
-            identity.AssetId = guid1;
+            int hash1 = "Assets/Prefab/myPrefab.asset".GetStableHashCode();
+            identity.PrefabHash = hash1;
 
             // assign a guid
-            var guid2 = Guid.NewGuid();
+            int hash2 = "Assets/Prefab/myPrefab2.asset".GetStableHashCode();
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
             {
-                identity.AssetId = guid2;
+                identity.PrefabHash = hash2;
             });
 
-            Assert.That(exception.Message, Is.EqualTo($"Can not Set AssetId on NetworkIdentity '{identity.name}' because it already had an assetId, current assetId '{guid1:N}', attempted new assetId '{guid2:N}'"));
+            Assert.That(exception.Message, Is.EqualTo($"Can not Set AssetId on NetworkIdentity '{identity.name}' because it already had an assetId, current assetId '{hash1:N}', attempted new assetId '{hash2:N}'"));
             // guid was changed
-            Assert.That(identity.AssetId, Is.EqualTo(guid1));
+            Assert.That(identity.PrefabHash, Is.EqualTo(hash1));
         }
 
         [Test]
         public void SetAssetId_GivesErrorForEmptyGuid()
         {
-            var guid1 = Guid.NewGuid();
-            identity.AssetId = guid1;
+            int hash1 = "Assets/Prefab/myPrefab.asset".GetStableHashCode();
+            identity.PrefabHash = hash1;
 
             // assign a guid
-            Guid guid2 = Guid.Empty;
+            int hash2 = 0;
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                identity.AssetId = guid2;
+                identity.PrefabHash = hash2;
             });
 
-            Assert.That(exception.Message, Is.EqualTo($"Can not set AssetId to empty guid on NetworkIdentity '{identity.name}', old assetId '{guid1:N}'"));
+            Assert.That(exception.Message, Is.EqualTo($"Can not set AssetId to empty guid on NetworkIdentity '{identity.name}', old assetId '{hash1:N}'"));
             // guid was NOT changed
-            Assert.That(identity.AssetId, Is.EqualTo(guid1));
+            Assert.That(identity.PrefabHash, Is.EqualTo(hash1));
         }
         [Test]
         public void SetAssetId_DoesNotGiveErrorIfBothOldAndNewAreEmpty()
         {
-            Debug.Assert(identity.AssetId == Guid.Empty, "assetId needs to be empty at the start of this test");
+            Debug.Assert(identity.PrefabHash == 0, "assetId needs to be empty at the start of this test");
             // assign a guid
-            Guid guid2 = Guid.Empty;
+            int hash2 = 0;
             // expect no errors
-            identity.AssetId = guid2;
+            identity.PrefabHash = hash2;
 
             // guid was still empty
-            Assert.That(identity.AssetId, Is.EqualTo(Guid.Empty));
+            Assert.That(identity.PrefabHash, Is.EqualTo(Guid.Empty));
         }
 
         [Test]
@@ -325,7 +325,7 @@ namespace Mirage.Tests
         {
             // OnValidate will have been called. make sure that assetId was set
             // to 0 empty and not anything else, because this is a scene object
-            Assert.That(identity.AssetId, Is.EqualTo(Guid.Empty));
+            Assert.That(identity.PrefabHash, Is.EqualTo(Guid.Empty));
         }
 
         [Test]
