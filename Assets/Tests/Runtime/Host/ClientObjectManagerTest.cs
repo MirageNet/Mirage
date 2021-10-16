@@ -28,15 +28,15 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator GetPrefabTest() => UniTask.ToCoroutine(async () =>
         {
-            var guid = Guid.NewGuid();
+            int hash = NewUniqueHash();
             var prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
             NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
 
-            clientObjectManager.RegisterPrefab(identity, guid);
+            clientObjectManager.RegisterPrefab(identity, hash);
 
             await UniTask.Delay(1);
 
-            NetworkIdentity result = clientObjectManager.GetPrefab(guid);
+            NetworkIdentity result = clientObjectManager.GetPrefab(hash);
 
             Assert.That(result, Is.SameAs(identity));
 
@@ -48,7 +48,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             var prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
             NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
-            identity.AssetId = Guid.Empty;
+            identity.PrefabHash = 0;
 
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -63,12 +63,12 @@ namespace Mirage.Tests.Runtime.Host
         {
             var prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
             NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
-            identity.AssetId = Guid.NewGuid();
+            identity.PrefabHash = NewUniqueHash();
 
             clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(clientObjectManager.spawnHandlers.ContainsKey(identity.AssetId));
-            Assert.That(clientObjectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(clientObjectManager.spawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(clientObjectManager.unspawnHandlers.ContainsKey(identity.PrefabHash));
 
             Object.Destroy(prefabObject);
         }
@@ -78,17 +78,17 @@ namespace Mirage.Tests.Runtime.Host
         {
             var prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
             NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
-            identity.AssetId = Guid.NewGuid();
+            identity.PrefabHash = NewUniqueHash();
 
             clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(clientObjectManager.spawnHandlers.ContainsKey(identity.AssetId));
-            Assert.That(clientObjectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(clientObjectManager.spawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(clientObjectManager.unspawnHandlers.ContainsKey(identity.PrefabHash));
 
             clientObjectManager.UnregisterPrefab(identity);
 
-            Assert.That(!clientObjectManager.spawnHandlers.ContainsKey(identity.AssetId));
-            Assert.That(!clientObjectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(!clientObjectManager.spawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(!clientObjectManager.unspawnHandlers.ContainsKey(identity.PrefabHash));
 
             Object.Destroy(prefabObject);
         }
@@ -98,17 +98,17 @@ namespace Mirage.Tests.Runtime.Host
         {
             var prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
             NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
-            identity.AssetId = Guid.NewGuid();
+            identity.PrefabHash = NewUniqueHash();
 
             clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(clientObjectManager.spawnHandlers.ContainsKey(identity.AssetId));
-            Assert.That(clientObjectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(clientObjectManager.spawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(clientObjectManager.unspawnHandlers.ContainsKey(identity.PrefabHash));
 
-            clientObjectManager.UnregisterSpawnHandler(identity.AssetId);
+            clientObjectManager.UnregisterSpawnHandler(identity.PrefabHash);
 
-            Assert.That(!clientObjectManager.spawnHandlers.ContainsKey(identity.AssetId));
-            Assert.That(!clientObjectManager.unspawnHandlers.ContainsKey(identity.AssetId));
+            Assert.That(!clientObjectManager.spawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(!clientObjectManager.unspawnHandlers.ContainsKey(identity.PrefabHash));
 
             Object.Destroy(prefabObject);
         }
@@ -126,7 +126,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void GetPrefabEmptyNullTest()
         {
-            NetworkIdentity result = clientObjectManager.GetPrefab(Guid.Empty);
+            NetworkIdentity result = clientObjectManager.GetPrefab(0);
 
             Assert.That(result, Is.Null);
         }
@@ -134,19 +134,19 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void GetPrefabNotFoundNullTest()
         {
-            NetworkIdentity result = clientObjectManager.GetPrefab(GenerateUniqueGuid());
+            NetworkIdentity result = clientObjectManager.GetPrefab(NewUniqueHash());
 
             Assert.That(result, Is.Null);
         }
 
         //Used to ensure the test has a unique non empty guid
-        Guid GenerateUniqueGuid()
+        int NewUniqueHash()
         {
-            var testGuid = Guid.NewGuid();
+            int testGuid = Guid.NewGuid().GetHashCode();
 
             if (clientObjectManager.prefabs.ContainsKey(testGuid))
             {
-                testGuid = GenerateUniqueGuid();
+                testGuid = NewUniqueHash();
             }
             return testGuid;
         }
@@ -156,7 +156,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
-            replacementIdentity.AssetId = Guid.NewGuid();
+            replacementIdentity.PrefabHash = NewUniqueHash();
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
             serverObjectManager.ReplaceCharacter(server.LocalPlayer, playerReplacement, true);
@@ -194,13 +194,13 @@ namespace Mirage.Tests.Runtime.Host
         public void SpawnSceneObjectTest()
         {
             //Setup new scene object for test
-            var guid = Guid.NewGuid();
+            int hash = NewUniqueHash();
             var prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
             NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
-            identity.AssetId = guid;
+            identity.PrefabHash = hash;
             clientObjectManager.spawnableObjects.Add(0, identity);
 
-            NetworkIdentity result = clientObjectManager.SpawnSceneObject(new SpawnMessage { sceneId = 0, assetId = guid });
+            NetworkIdentity result = clientObjectManager.SpawnSceneObject(new SpawnMessage { sceneId = 0, prefabHash = hash });
 
             Assert.That(result, Is.SameAs(identity));
 
