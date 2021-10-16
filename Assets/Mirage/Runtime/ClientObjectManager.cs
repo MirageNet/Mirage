@@ -61,6 +61,22 @@ namespace Mirage
             }
         }
 
+#if UNITY_EDITOR
+        readonly Dictionary<int, NetworkIdentity> validateCache = new Dictionary<int, NetworkIdentity>();
+        void OnValidate()
+        {
+            foreach (NetworkIdentity prefab in spawnPrefabs)
+            {
+                if (validateCache.TryGetValue(prefab.PrefabHash, out NetworkIdentity existing))
+                {
+                    Debug.LogError($"2 prefabs had the same hash:'{prefab.PrefabHash}', A:'{prefab.name}' B:'{existing.name}'");
+                }
+
+                validateCache[prefab.PrefabHash] = prefab;
+            }
+        }
+#endif
+
         void OnClientConnected(INetworkPlayer player)
         {
             syncVarReceiver = new SyncVarReceiver(Client, Client.World);
