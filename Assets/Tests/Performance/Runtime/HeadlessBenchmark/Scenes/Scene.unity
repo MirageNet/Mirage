@@ -235,8 +235,9 @@ MonoBehaviour:
     type: 3}
   PlayerPrefab: {fileID: 7039704267495960125, guid: bebeb0dfd33f4074894ef25112ab4a8d,
     type: 3}
-  editorArgs: -socket udp -server -port 7777 -client 1 -monster 1
+  editorArgs: ' -server -port 7777 -client 10 -monster 100'
   socketFactory: {fileID: 0}
+  measureFrames: 200
 --- !u!4 &2043118187
 Transform:
   m_ObjectHideFlags: 0

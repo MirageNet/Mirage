@@ -23,6 +23,10 @@ namespace Mirage.HeadlessBenchmark
         public string editorArgs;
         public SocketFactory socketFactory;
 
+        public int measureFrames = 200;
+
+        SyncPositionSystem serverSystem;
+
         string[] cachedArgs;
         string port;
 
@@ -37,6 +41,7 @@ namespace Mirage.HeadlessBenchmark
         }
         private IEnumerator MeasureBenchmark()
         {
+            yield return new WaitForSeconds(5);
             JamesFrowen.PositionSync.SyncMode mode = 0;
             Benchmark.RecordingFinished += (long[] data) =>
             {
@@ -44,16 +49,21 @@ namespace Mirage.HeadlessBenchmark
                 double ms = avg / Stopwatch.Frequency * 1000;
                 Debug.Log($"Mode:{mode} {ms:0.00}ms");
             };
-            Benchmark.StartRecording(200);
 
-            for (int i = 1; i < 5; i++)
+            for (int i = 1; i < 6; i++)
             {
                 mode = (JamesFrowen.PositionSync.SyncMode)i;
-                FindObjectOfType<SyncPositionSystem>().syncMode = mode;
+                serverSystem.syncMode = mode;
+                Benchmark.StartRecording(measureFrames);
+
                 while (Benchmark.IsRecording)
                 {
                     yield return null;
                 }
+                serverSystem.syncMode = JamesFrowen.PositionSync.SyncMode.SendToAll;
+
+                yield return null;
+                yield return null;
             }
         }
         private IEnumerator DisplayFramesPerSecons()
@@ -105,8 +115,8 @@ namespace Mirage.HeadlessBenchmark
 
         void OnServerStarted()
         {
-            StartCoroutine(DisplayFramesPerSecons());
-            //StartCoroutine(MeasureBenchmark());
+            //StartCoroutine(DisplayFramesPerSecons());
+            StartCoroutine(MeasureBenchmark());
 
             string monster = GetArgValue("-monster");
             if (!string.IsNullOrEmpty(monster))
@@ -149,6 +159,8 @@ namespace Mirage.HeadlessBenchmark
             server.Authenticated.AddListener(conn => serverObjectManager.SpawnVisibleObjects(conn, true));
             server.StartServer();
             Console.WriteLine("Starting Server Only Mode");
+
+            serverSystem = FindObjectOfType<SyncPositionSystem>();
         }
 
         async UniTaskVoid StartClients()

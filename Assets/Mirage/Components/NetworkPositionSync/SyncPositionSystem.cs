@@ -67,7 +67,6 @@ namespace JamesFrowen.PositionSync
             if (index >= frames.Length)
             {
                 RecordingFinished?.Invoke(frames);
-                RecordingFinished = null;
                 isRecording = false;
             }
         }
@@ -117,6 +116,7 @@ namespace JamesFrowen.PositionSync
     {
         SendToAll = 1,
         SendToObservers_PlayerDirty = 2,
+        SendToObservers_PlayerDirty_PackOnce = 5,
         SendToObservers_DirtyObservers = 3,
         SendToDirtyObservers_PackOnce = 4,
     }
@@ -239,6 +239,9 @@ namespace JamesFrowen.PositionSync
                 case SyncMode.SendToObservers_PlayerDirty:
                     SendUpdateToObservers_PlayerDirty(time);
                     break;
+                case SyncMode.SendToObservers_PlayerDirty_PackOnce:
+                    SendUpdateToObservers_PlayerDirty_PackOnce(time);
+                    break;
                 case SyncMode.SendToObservers_DirtyObservers:
                     SendUpdateToObservers_DirtyObservers(time);
                     break;
@@ -263,9 +266,20 @@ namespace JamesFrowen.PositionSync
             // dont send message if no behaviours
             if (Behaviours.Dictionary.Count == 0) { return; }
 
+            UpdateDirtySet();
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                PackBehaviours(writer, time);
+                packer.PackTime(writer, time);
+
+
+                foreach (SyncPositionBehaviour behaviour in dirtySet)
+                {
+                    if (logger.LogEnabled()) logger.Log($"Time {time:0.000}, Packing {behaviour.name}");
+                    packer.PackNext(writer, behaviour);
+
+                    // todo handle client authority updates better
+                    behaviour.ClearNeedsUpdate();
+                }
 
                 Server.SendToAll(new NetworkPositionMessage
                 {
@@ -273,21 +287,7 @@ namespace JamesFrowen.PositionSync
                 });
             }
         }
-        internal void PackBehaviours(NetworkWriter writer, float time)
-        {
-            packer.PackTime(writer, time);
 
-            UpdateDirtySet();
-
-            foreach (SyncPositionBehaviour behaviour in dirtySet)
-            {
-                if (logger.LogEnabled()) logger.Log($"Time {time:0.000}, Packing {behaviour.name}");
-                packer.PackNext(writer, behaviour);
-
-                // todo handle client authority updates better
-                behaviour.ClearNeedsUpdate();
-            }
-        }
 
         /// <summary>
         /// Loops through all players, then through all dirty object and checks if palyer can see each
@@ -298,15 +298,14 @@ namespace JamesFrowen.PositionSync
             // dont send message if no behaviours
             if (Behaviours.Dictionary.Count == 0) { return; }
 
-
             UpdateDirtySet();
 
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
-                writer.Reset();
-
                 foreach (INetworkPlayer player in Server.Players)
                 {
+                    writer.Reset();
+
                     packer.PackTime(writer, time);
                     foreach (SyncPositionBehaviour behaviour in dirtySet)
                     {
@@ -326,7 +325,63 @@ namespace JamesFrowen.PositionSync
             ClearDirtySet();
         }
 
-        Dictionary<INetworkPlayer, PooledNetworkWriter> writerPool = new Dictionary<INetworkPlayer, PooledNetworkWriter>();
+        /// <summary>
+        /// Loops through all players, then through all dirty object and checks if palyer can see each
+        /// </summary>
+        /// <param name="time"></param>
+        internal void SendUpdateToObservers_PlayerDirty_PackOnce(float time)
+        {
+            // dont send message if no behaviours
+            if (Behaviours.Dictionary.Count == 0) { return; }
+
+            UpdateDirtySet();
+            NetworkWriterPool.Configure(100, 200);
+
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                foreach (INetworkPlayer player in Server.Players)
+                {
+                    writer.Reset();
+
+                    packer.PackTime(writer, time);
+                    foreach (SyncPositionBehaviour behaviour in dirtySet)
+                    {
+                        if (!behaviour.Identity.observers.Contains(player))
+                            continue;
+
+                        PooledNetworkWriter packed = GetWriterFromPool_Behaviours(behaviour);
+                        writer.CopyFromWriter(packed);
+                    }
+
+                    player.Send(new NetworkPositionMessage
+                    {
+                        payload = writer.ToArraySegment()
+                    });
+                }
+            }
+
+            foreach (PooledNetworkWriter writer in writerPool_Behaviours.Values)
+            {
+                writer.Release();
+            }
+            writerPool_Behaviours.Clear();
+
+            ClearDirtySet();
+        }
+
+        Dictionary<SyncPositionBehaviour, PooledNetworkWriter> writerPool_Behaviours = new Dictionary<SyncPositionBehaviour, PooledNetworkWriter>();
+        PooledNetworkWriter GetWriterFromPool_Behaviours(SyncPositionBehaviour behaviour)
+        {
+            if (!writerPool_Behaviours.TryGetValue(behaviour, out PooledNetworkWriter writer))
+            {
+                writer = NetworkWriterPool.GetWriter();
+                writerPool_Behaviours[behaviour] = writer;
+                packer.PackNext(writer, behaviour);
+            }
+
+            return writer;
+        }
+
         /// <summary>
         /// Loops through all dirty objects, and then their observers and then writes that behaviouir to a cahced writer
         /// </summary>
@@ -342,11 +397,7 @@ namespace JamesFrowen.PositionSync
             {
                 foreach (INetworkPlayer observer in behaviour.Identity.observers)
                 {
-                    if (!writerPool.TryGetValue(observer, out PooledNetworkWriter writer))
-                    {
-                        writer = NetworkWriterPool.GetWriter();
-                        packer.PackTime(writer, time);
-                    }
+                    PooledNetworkWriter writer = GetWriterFromPool(time, observer);
 
                     packer.PackNext(writer, behaviour);
                 }
@@ -354,18 +405,16 @@ namespace JamesFrowen.PositionSync
 
             foreach (INetworkPlayer player in Server.Players)
             {
-                if (!writerPool.TryGetValue(player, out PooledNetworkWriter writer))
-                {
-                    writer = NetworkWriterPool.GetWriter();
-                    packer.PackTime(writer, time);
-                }
+                PooledNetworkWriter writer = GetWriterFromPool(time, player);
 
                 player.Send(new NetworkPositionMessage { payload = writer.ToArraySegment() });
                 writer.Release();
             }
+            writerPool.Clear();
 
             ClearDirtySet();
         }
+
 
         /// <summary>
         /// Loops through all dirty objects, and then their observers and then writes that behaviouir to a cahced writer
@@ -390,11 +439,7 @@ namespace JamesFrowen.PositionSync
 
                     foreach (INetworkPlayer observer in behaviour.Identity.observers)
                     {
-                        if (!writerPool.TryGetValue(observer, out PooledNetworkWriter writer))
-                        {
-                            writer = NetworkWriterPool.GetWriter();
-                            packer.PackTime(writer, time);
-                        }
+                        PooledNetworkWriter writer = GetWriterFromPool(time, observer);
 
                         writer.CopyFromWriter(packWriter);
                     }
@@ -403,17 +448,28 @@ namespace JamesFrowen.PositionSync
 
             foreach (INetworkPlayer player in Server.Players)
             {
-                if (!writerPool.TryGetValue(player, out PooledNetworkWriter writer))
-                {
-                    writer = NetworkWriterPool.GetWriter();
-                    packer.PackTime(writer, time);
-                }
+                PooledNetworkWriter writer = GetWriterFromPool(time, player);
 
                 player.Send(new NetworkPositionMessage { payload = writer.ToArraySegment() });
                 writer.Release();
             }
+            writerPool.Clear();
+
 
             ClearDirtySet();
+        }
+
+        Dictionary<INetworkPlayer, PooledNetworkWriter> writerPool = new Dictionary<INetworkPlayer, PooledNetworkWriter>();
+        PooledNetworkWriter GetWriterFromPool(float time, INetworkPlayer player)
+        {
+            if (!writerPool.TryGetValue(player, out PooledNetworkWriter writer))
+            {
+                writer = NetworkWriterPool.GetWriter();
+                packer.PackTime(writer, time);
+                writerPool[player] = writer;
+            }
+
+            return writer;
         }
 
         private void UpdateDirtySet()
