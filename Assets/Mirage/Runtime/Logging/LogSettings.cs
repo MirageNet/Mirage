@@ -18,6 +18,8 @@ namespace Mirage.Logging
         // called when component is added to GameObject
         void Reset()
         {
+            if (settings != null) { return; }
+
             LogSettingsSO existingSettings = EditorLogSettingsLoader.FindLogSettings();
             if (existingSettings != null)
             {
