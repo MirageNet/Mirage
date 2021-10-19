@@ -1,3 +1,10 @@
+## [107.1.2](https://github.com/MirageNet/Mirage/compare/v107.1.1...v107.1.2) (2021-10-19)
+
+
+### Bug Fixes
+
+* **LogSettings:** making reset exit if settings is already set ([a227593](https://github.com/MirageNet/Mirage/commit/a227593f158502e7fa2e9684343445be626bee21))
+
 ## [107.1.1](https://github.com/MirageNet/Mirage/compare/v107.1.0...v107.1.1) (2021-10-12)
 
 
