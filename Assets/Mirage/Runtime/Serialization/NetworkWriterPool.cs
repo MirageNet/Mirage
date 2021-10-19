@@ -43,6 +43,18 @@ namespace Mirage.Serialization
             }
         }
 
+        /// <summary>
+        /// Configures an exist pool or creates a new one
+        /// <para>Does not create a new pool if <paramref name="bufferSize"/> is less that current <see cref="BufferSize"/></para>
+        /// </summary>
+        /// <param name="bufferSize">starting capacity of buffer</param>
+        /// <param name="startPoolSize"></param>
+        /// <param name="maxPoolSize"></param>
+        public static void Configure(int startPoolSize, int maxPoolSize)
+        {
+            pool.Configure(startPoolSize, maxPoolSize);
+        }
+
         public static PooledNetworkWriter GetWriter()
         {
             if (pool == null) throw new InvalidOperationException("Configure must be called before ");
