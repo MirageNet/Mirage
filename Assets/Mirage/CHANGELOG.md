@@ -1,3 +1,10 @@
+## [107.1.3](https://github.com/MirageNet/Mirage/compare/v107.1.2...v107.1.3) (2021-10-20)
+
+
+### Bug Fixes
+
+* **LogSettings:** making labels clickable ([7f65a8a](https://github.com/MirageNet/Mirage/commit/7f65a8a03f57024663ce8eaa4f34e5fa62a7f076))
+
 ## [107.1.2](https://github.com/MirageNet/Mirage/compare/v107.1.1...v107.1.2) (2021-10-19)
 
 
