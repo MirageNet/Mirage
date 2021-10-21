@@ -28,7 +28,6 @@ jobs:
         days-before-issue-stale: 120
         days-before-issue-close: 14
         stale-issue-message: 'This issue is stale because it has been open 120 days with no activity. Remove stale label or comment or this will be closed in 14 days.'
-        debug-only: true
         exempt-issue-labels: keep-open
         exempt-pr-labels: keep-open
         
