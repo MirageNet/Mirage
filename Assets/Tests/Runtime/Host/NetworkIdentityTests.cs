@@ -71,32 +71,6 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         [Test]
-        public void AssignClientAuthorityCallback()
-        {
-            // create a networkidentity with our test component
-            serverObjectManager.Spawn(gameObject);
-
-            // test the callback too
-            int callbackCalled = 0;
-
-            void Callback(INetworkPlayer player, NetworkIdentity networkIdentity, bool state)
-            {
-                ++callbackCalled;
-                Assert.That(networkIdentity, Is.EqualTo(testIdentity));
-                Assert.That(state, Is.True);
-            }
-
-            NetworkIdentity.clientAuthorityCallback += Callback;
-
-            // assign authority
-            testIdentity.AssignClientAuthority(server.LocalPlayer);
-
-            Assert.That(callbackCalled, Is.EqualTo(1));
-
-            NetworkIdentity.clientAuthorityCallback -= Callback;
-        }
-
-        [Test]
         public void DefaultAuthority()
         {
             // create a networkidentity with our test component
