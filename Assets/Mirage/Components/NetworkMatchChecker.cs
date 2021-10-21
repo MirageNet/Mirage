@@ -23,8 +23,6 @@ namespace Mirage
         [SyncVar]
         public string currentMatchDebug;
 
-        public NetworkIdentity Identity => GetComponent<NetworkIdentity>();
-
         /// <summary>
         /// Set this to the same value on all networked objects that belong to a given match
         /// </summary>
