@@ -36,13 +36,19 @@ namespace Mirage.Logging
 
         void OnValidate()
         {
-            // if settings field is changed
             RefreshDictionary();
         }
 
         void RefreshDictionary()
         {
-            settings.LoadIntoLogFactory();
+            if (settings != null)
+            {
+                settings.LoadIntoLogFactory();
+            }
+            else
+            {
+                Debug.LogWarning("Log settings component does not have a settings reference", this);
+            }
         }
     }
 }
