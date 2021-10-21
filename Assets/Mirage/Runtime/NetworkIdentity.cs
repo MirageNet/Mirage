@@ -227,16 +227,16 @@ namespace Mirage
             }
         }
 
-        NetworkVisibility visibilityCache;
+        NetworkVisibility _visibility;
         public NetworkVisibility Visibility
         {
             get
             {
-                if (visibilityCache is null)
+                if (_visibility is null)
                 {
-                    visibilityCache = GetComponent<NetworkVisibility>();
+                    _visibility = GetComponent<NetworkVisibility>();
                 }
-                return visibilityCache;
+                return _visibility;
             }
         }
 
