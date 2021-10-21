@@ -555,21 +555,23 @@ namespace Mirage
 
                 int? prefabHash = identity.IsPrefab ? identity.PrefabHash : default(int?);
                 ulong? sceneId = identity.IsSceneObject ? identity.SceneId : default(ulong?);
-
-                Transform transform = identity.transform;
-
-                player.Send(new SpawnMessage
+                var msg = new SpawnMessage
                 {
                     netId = identity.NetId,
                     isLocalPlayer = player.Identity == identity,
                     isOwner = isOwner,
                     sceneId = sceneId,
                     prefabHash = prefabHash,
-                    position = transform.localPosition,
-                    rotation = transform.localRotation,
-                    scale = transform.localScale,
                     payload = payload,
-                });
+                };
+
+                // values in msg are nullable, so by default they are null
+                // only set those values if the identity's settings say to send them
+                if (identity.SpawnSettings.SendPosition) msg.position = identity.transform.localPosition;
+                if (identity.SpawnSettings.SendRotation) msg.rotation = identity.transform.localRotation;
+                if (identity.SpawnSettings.SendScale) msg.scale = identity.transform.localScale;
+
+                player.Send(msg);
             }
         }
 

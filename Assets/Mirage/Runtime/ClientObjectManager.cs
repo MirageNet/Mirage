@@ -438,7 +438,10 @@ namespace Mirage
             NetworkIdentity prefab = GetPrefab(msg.prefabHash.Value);
             if (!(prefab is null))
             {
-                NetworkIdentity obj = Instantiate(prefab, msg.position, msg.rotation);
+                // we need to set position and rotation here incase that their values can be used form awake/onenable
+                Vector3 pos = msg.position ?? prefab.transform.position;
+                Quaternion rot = msg.rotation ?? prefab.transform.rotation;
+                NetworkIdentity obj = Instantiate(prefab, pos, rot);
                 if (logger.LogEnabled())
                 {
                     logger.Log($"Client spawn handler instantiating [netId:{msg.netId} asset ID:{msg.prefabHash:X} pos:{msg.position} rotation: {msg.rotation}]");
