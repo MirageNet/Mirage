@@ -1,3 +1,23 @@
+# [108.0.0](https://github.com/MirageNet/Mirage/compare/v107.1.3...v108.0.0) (2021-10-21)
+
+
+### Bug Fixes
+
+* **LogSettings:** allowing multi object editing ([5c83dc6](https://github.com/MirageNet/Mirage/commit/5c83dc6e6a8dfa975bbf1c24cae057b4ed5a5057))
+* **LogSettings:** improving warning when log settings has no reference ([c2ed26f](https://github.com/MirageNet/Mirage/commit/c2ed26f02e764ac41a9a3a58fb282dce1e7973a7))
+* **LogSettings:** removing log settings component from samples ([a72d777](https://github.com/MirageNet/Mirage/commit/a72d777d2e368da0bb68d0a487c49988db421f5b))
+* removing redundant property ([f8bda6e](https://github.com/MirageNet/Mirage/commit/f8bda6e2b62fc6c676a579a31b1d535043244e44))
+
+
+### Code Refactoring
+
+* **NetworkIdentity:** removing NetworkIdentity.GetSceneIdentity ([34699ae](https://github.com/MirageNet/Mirage/commit/34699aee1f3427cca691c69f74ba73a32a1695a7))
+
+
+### BREAKING CHANGES
+
+* **NetworkIdentity:** `NetworkIdentity.GetSceneIdentity` has been removed
+
 ## [107.1.3](https://github.com/MirageNet/Mirage/compare/v107.1.2...v107.1.3) (2021-10-20)
 
 
