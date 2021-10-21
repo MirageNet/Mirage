@@ -309,6 +309,7 @@ namespace Mirage
         /// </summary>
         static readonly Dictionary<ulong, NetworkIdentity> sceneIds = new Dictionary<ulong, NetworkIdentity>();
 
+        [Header("Events")]
         [SerializeField] AddLateEvent _onStartServer = new AddLateEvent();
         [SerializeField] AddLateEvent _onStartClient = new AddLateEvent();
         [SerializeField] AddLateEvent _onStartLocalPlayer = new AddLateEvent();
