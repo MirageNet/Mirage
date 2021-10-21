@@ -285,14 +285,14 @@ namespace Mirage.Tests
         [Test]
         public void AssignSceneID()
         {
-            // Awake will have assigned a random sceneId of format 0x00000000FFFFFFFF
+            // OnValidate will have assigned a random sceneId of format 0x00000000FFFFFFFF
             // -> make sure that one was assigned, and that the left part was
             //    left empty for scene hash
-            Assert.That(identity.sceneId, !Is.Zero);
+            Assert.That(identity.sceneId, Is.Not.Zero);
             Assert.That(identity.sceneId & 0xFFFFFFFF00000000, Is.EqualTo(0x0000000000000000));
 
-            // make sure that Awake added it to sceneIds dict
-            Assert.That(NetworkIdentity.GetSceneIdentity(identity.sceneId), !Is.Null);
+            // make sure that OnValidate added it to sceneIds dict
+            Assert.That(NetworkIdentity.sceneIds[identity.sceneId], Is.Not.Null);
         }
 
         [Test]

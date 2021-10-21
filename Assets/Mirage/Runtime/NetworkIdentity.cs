@@ -304,10 +304,7 @@ namespace Mirage
             }
         }
 
-        /// <summary>
-        /// Keep track of all sceneIds to detect scene duplicates
-        /// </summary>
-        static readonly Dictionary<ulong, NetworkIdentity> sceneIds = new Dictionary<ulong, NetworkIdentity>();
+
 
         [Header("Events")]
         [SerializeField] AddLateEvent _onStartServer = new AddLateEvent();
@@ -366,13 +363,6 @@ namespace Mirage
         /// </summary>
         /// <remarks>Can be used as hook to save player information</remarks>
         public IAddLateEvent OnStopServer => _onStopServer;
-
-        /// <summary>
-        /// Gets the NetworkIdentity from the sceneIds dictionary with the corresponding id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns>NetworkIdentity from the sceneIds dictionary</returns>
-        public static NetworkIdentity GetSceneIdentity(ulong id) => sceneIds[id];
 
         /// <summary>
         /// used when adding players
@@ -445,6 +435,11 @@ namespace Mirage
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// Keep track of all sceneIds to detect scene duplicates
+        /// </summary>
+        internal static readonly Dictionary<ulong, NetworkIdentity> sceneIds = new Dictionary<ulong, NetworkIdentity>();
+
         void AssignAssetID(GameObject prefab) => AssignAssetID(AssetDatabase.GetAssetPath(prefab));
 
         void AssignAssetID(string path) => m_AssetId = AssetDatabase.AssetPathToGUID(path);
