@@ -38,12 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
+  serializedVersion: 11
   m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 0}
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -118,8 +118,6 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
-    maxJobWorkers: 0
-    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
@@ -175,7 +173,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -218,7 +215,6 @@ GameObject:
   - component: {fileID: 450078212}
   - component: {fileID: 450078220}
   - component: {fileID: 450078213}
-  - component: {fileID: 450078221}
   - component: {fileID: 450078214}
   m_Layer: 0
   m_Name: Network
@@ -242,16 +238,19 @@ MonoBehaviour:
   Client: {fileID: 450078216}
   Server: {fileID: 450078217}
   DontDestroy: 1
-  _clientStartedSceneChange:
+  _onClientStartedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _clientFinishedSceneChange:
+  _onClientFinishedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _serverStartedSceneChange:
+  _onServerStartedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _serverFinishedSceneChange:
+  _onServerFinishedSceneChange:
+    m_PersistentCalls:
+      m_Calls: []
+  _onPlayerSceneReady:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &450078213
@@ -280,8 +279,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9f46b2d67d7a054d8c13075473bd4a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  address: localhost
-  port: 7777
+  Address: localhost
+  Port: 7777
+  SocketLib: 0
+  BufferSize: 262144
 --- !u!114 &450078215
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -312,6 +313,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EnablePeerMetrics: 0
+  MetricsSize: 10
   SocketFactory: {fileID: 450078214}
   DisconnectOnException: 1
   authenticator: {fileID: 0}
@@ -344,6 +346,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EnablePeerMetrics: 0
+  MetricsSize: 10
   MaxConnections: 4
   DisconnectOnException: 1
   Listening: 1
@@ -405,7 +408,8 @@ MonoBehaviour:
   SceneManager: {fileID: 450078212}
   ClientObjectManager: {fileID: 450078220}
   ServerObjectManager: {fileID: 450078213}
-  PlayerPrefab: {fileID: 3878225662718291898, guid: 234985fef22d66a4ca2dba0e688f1743, type: 3}
+  PlayerPrefab: {fileID: 3878225662718291898, guid: 234985fef22d66a4ca2dba0e688f1743,
+    type: 3}
   AutoSpawn: 1
   startPositionIndex: 0
   startPositions:
@@ -430,129 +434,6 @@ MonoBehaviour:
   - {fileID: 3878225662718291898, guid: 234985fef22d66a4ca2dba0e688f1743, type: 3}
   - {fileID: 1818873914431344371, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
   - {fileID: 6727010246441667693, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
---- !u!114 &450078221
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 450078211}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac6e8eccf4b6f4dc7b24c276ef47fde8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Levels:
-  - Name: ServerObjectManager
-    level: 2
-  - Name: NetworkServer
-    level: 2
-  - Name: NetworkTime
-    level: 2
-  - Name: CharacterSpawner
-    level: 2
-  - Name: NetworkBehaviour
-    level: 2
-  - Name: NetworkClient
-    level: 2
-  - Name: NetworkSceneManager
-    level: 2
-  - Name: ClientObjectManager
-    level: 2
-  - Name: NetworkIdentity
-    level: 2
-  - Name: RemoteCallHelper
-    level: 2
-  - Name: HeadlessFrameLimiter
-    level: 2
-  - Name: NetworkBehaviourInspector
-    level: 2
-  - Name: EchoChannelAndSettingsButton
-    level: 2
-  - Name: LoginManager
-    level: 2
-  - Name: NetworkAnimator
-    level: 2
-  - Name: NetworkPositionBehaviour
-    level: 0
-  - Name: UIManager
-    level: 2
-  - Name: PlayerVoiceBehaviour
-    level: 2
-  - Name: CapyCafeNetworkManager
-    level: 2
-  - Name: UIPanel_Chat
-    level: 2
-  - Name: FirebaseLoginManager
-    level: 2
-  - Name: PlayerSpawner
-    level: 2
-  - Name: SyncPositionBehaviour
-    level: 0
-  - Name: SnapshotBuffer
-    level: 0
-  - Name: NetworkProximityChecker
-    level: 2
-  - Name: ZoneHandler
-    level: 2
-  - Name: AdditiveNetworkManager
-    level: 2
-  - Name: NetworkScenePostProcess
-    level: 2
-  - Name: NetworkWriterPool
-    level: 2
-  - Name: NetworkConnection
-    level: 2
-  - Name: NetworkReaderExtensions
-    level: 2
-  - Name: NetworkReaderPool
-    level: 2
-  - Name: BasicAuthenticator
-    level: 2
-  - Name: NetworkRigidbody
-    level: 2
-  - Name: EnterPlayModeSettingsCheck
-    level: 2
-  - Name: SceneDrawer
-    level: 2
-  - Name: InterpolationTime
-    level: 0
-  - Name: NetworkSceneChecker
-    level: 2
-  - Name: Reward
-    level: 2
-  - Name: LogFactoryTests
-    level: 2
-  - Name: NetworkManager
-    level: 2
-  - Name: WeaverTests
-    level: 4
-  - Name: ChatWindow
-    level: 2
-  - Name: NetworkDiscovery
-    level: 2
-  - Name: NetworkDiscoveryBase`2
-    level: 2
-  - Name: KcpConnection
-    level: 2
-  - Name: Tests
-    level: 4
-  - Name: WelcomeWindow
-    level: 2
-  - Name: MessageBroker
-    level: 2
-  - Name: NetworkPlayer
-    level: 3
-  - Name: SyncVarReceiver
-    level: 2
-  - Name: NetworkWorld
-    level: 2
-  - Name: RosterUI
-    level: 2
-  - Name: Peer
-    level: 2
-  - Name: PipePeerConnection
-    level: 2
 --- !u!1 &796071785
 GameObject:
   m_ObjectHideFlags: 0
@@ -606,7 +487,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
-    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -637,7 +517,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1141063017}
-        m_TargetAssemblyTypeName: 
         m_MethodName: AdditiveButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -663,7 +542,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -834,7 +712,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -934,7 +811,6 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
 --- !u!223 &1141063020
 Canvas:
   m_ObjectHideFlags: 0
@@ -1030,7 +906,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1110,7 +985,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
-    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -1141,7 +1015,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1141063017}
-        m_TargetAssemblyTypeName: 
         m_MethodName: Room1ButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -1167,7 +1040,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1243,7 +1115,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
-    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -1274,7 +1145,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1141063017}
-        m_TargetAssemblyTypeName: 
         m_MethodName: Room2ButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -1300,7 +1170,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1461,7 +1330,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.15686275}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1498,6 +1366,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NetworkManager: {fileID: 450078215}
   NetworkAddress: localhost
+  DontDestroy: 1
   NetworkAddressInput: {fileID: 7413922469808744891}
   OfflineGO: {fileID: 7413922469540162080}
   OnlineGO: {fileID: 7413922469404347323}
@@ -1509,55 +1378,68 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: m_LocalPosition.x
       value: -5
       objectReference: {fileID: 0}
-    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: m_LocalRotation.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344369, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1818873914431344371, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344371, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: sceneId
-      value: 4160360001
+      value: 1964962537
       objectReference: {fileID: 0}
-    - target: {fileID: 1818873914431344372, guid: 685b07ee95b6b6b4db30b2440e670157, type: 3}
+    - target: {fileID: 1818873914431344372, guid: 685b07ee95b6b6b4db30b2440e670157,
+        type: 3}
       propertyPath: m_Name
       value: SceneObject
       objectReference: {fileID: 0}
@@ -1570,59 +1452,73 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 6727010246441667690, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667690, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_Name
       value: ServerOnlySceneObject
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667693, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667693, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: sceneId
       value: 3166183123
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667693, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667693, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_AssetId
       value: a6be402bdabdcda42927e4593587fefb
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_LocalPosition.x
       value: -6
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_LocalRotation.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb, type: 3}
+    - target: {fileID: 6727010246441667695, guid: a6be402bdabdcda42927e4593587fefb,
+        type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
@@ -1688,7 +1584,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1843,7 +1738,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1904,7 +1798,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1954,7 +1847,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
-    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -1994,14 +1886,10 @@ MonoBehaviour:
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls: []
-  m_OnSubmit:
-    m_PersistentCalls:
-      m_Calls: []
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 695766755316128326}
-        m_TargetAssemblyTypeName: 
         m_MethodName: OnNetworkAddressInputUpdate
         m_Mode: 1
         m_Arguments:
@@ -2019,7 +1907,6 @@ MonoBehaviour:
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
-  m_ShouldActivateOnSelect: 1
 --- !u!114 &7413922469818467064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2034,7 +1921,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
-    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -2065,7 +1951,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 695766755316128326}
-        m_TargetAssemblyTypeName: 
         m_MethodName: StartHostButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -2138,7 +2023,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2195,7 +2079,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2224,7 +2107,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
-    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -2255,7 +2137,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 695766755316128326}
-        m_TargetAssemblyTypeName: 
         m_MethodName: StartServerOnlyButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -2309,7 +2190,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2398,7 +2278,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2486,7 +2365,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2515,7 +2393,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
-    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -2546,7 +2423,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 695766755316128326}
-        m_TargetAssemblyTypeName: 
         m_MethodName: StartClientButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -2600,7 +2476,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2629,7 +2504,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
-    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -2660,7 +2534,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 695766755316128326}
-        m_TargetAssemblyTypeName: 
         m_MethodName: StopButtonHandler
         m_Mode: 1
         m_Arguments:
@@ -2725,7 +2598,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2849,7 +2721,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 0.5}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2931,7 +2802,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.078431375}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -3006,7 +2876,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:

@@ -220,7 +220,6 @@ GameObject:
   - component: {fileID: 69965674}
   - component: {fileID: 69965667}
   - component: {fileID: 69965675}
-  - component: {fileID: 69965676}
   - component: {fileID: 69965673}
   m_Layer: 0
   m_Name: Network
@@ -324,8 +323,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EnablePeerMetrics: 0
+  MetricsSize: 10
   SocketFactory: {fileID: 69965673}
+  DisconnectOnException: 1
   authenticator: {fileID: 0}
+  _started:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
   _connected:
     _event:
       m_PersistentCalls:
@@ -351,7 +356,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EnablePeerMetrics: 0
+  MetricsSize: 10
   MaxConnections: 4
+  DisconnectOnException: 1
   Listening: 1
   SocketFactory: {fileID: 69965673}
   authenticator: {fileID: 0}
@@ -392,8 +399,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9f46b2d67d7a054d8c13075473bd4a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  address: localhost
-  port: 7777
+  Address: localhost
+  Port: 7777
+  SocketLib: 0
+  BufferSize: 262144
 --- !u!114 &69965674
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -409,16 +418,19 @@ MonoBehaviour:
   Client: {fileID: 69965671}
   Server: {fileID: 69965672}
   DontDestroy: 0
-  _clientChangeScene:
+  _onClientStartedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _clientSceneChanged:
+  _onClientFinishedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _serverChangeScene:
+  _onServerStartedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _serverSceneChanged:
+  _onServerFinishedSceneChange:
+    m_PersistentCalls:
+      m_Calls: []
+  _onPlayerSceneReady:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &69965675
@@ -435,95 +447,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 69965672}
   NetworkSceneManager: {fileID: 69965674}
---- !u!114 &69965676
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 69965666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac6e8eccf4b6f4dc7b24c276ef47fde8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Levels:
-  - Name: PlayerSpawner
-    level: 2
-  - Name: RemoteCallHelper
-    level: 2
-  - Name: NetworkBehaviour
-    level: 2
-  - Name: NetworkSceneManager
-    level: 2
-  - Name: ServerObjectManager
-    level: 2
-  - Name: NetworkIdentity
-    level: 2
-  - Name: Reward
-    level: 2
-  - Name: NetworkClient
-    level: 2
-  - Name: NetworkTime
-    level: 2
-  - Name: ClientObjectManager
-    level: 2
-  - Name: NetworkServer
-    level: 2
-  - Name: NetworkSceneChecker
-    level: 2
-  - Name: NetworkProximityChecker
-    level: 2
-  - Name: NetworkAnimator
-    level: 2
-  - Name: ZoneHandler
-    level: 2
-  - Name: NetworkBehaviourInspector
-    level: 2
-  - Name: HeadlessFrameLimiter
-    level: 2
-  - Name: SyncPositionBehaviour
-    level: 0
-  - Name: SnapshotBuffer
-    level: 0
-  - Name: NetworkRigidbody
-    level: 2
-  - Name: AdditiveNetworkManager
-    level: 2
-  - Name: EnterPlayModeSettingsCheck
-    level: 2
-  - Name: NetworkScenePostProcess
-    level: 2
-  - Name: NetworkConnection
-    level: 2
-  - Name: NetworkWriterPool
-    level: 2
-  - Name: NetworkReaderExtensions
-    level: 2
-  - Name: NetworkReaderPool
-    level: 2
-  - Name: BasicAuthenticator
-    level: 2
-  - Name: SceneDrawer
-    level: 2
-  - Name: ChatWindow
-    level: 2
-  - Name: NetworkDiscovery
-    level: 2
-  - Name: NetworkDiscoveryBase`2
-    level: 2
-  - Name: KcpConnection
-    level: 2
-  - Name: LogFactoryTests
-    level: 2
-  - Name: NetworkManager
-    level: 2
-  - Name: WeaverTests
-    level: 4
-  - Name: Tests
-    level: 4
-  - Name: InterpolationTime
-    level: 0
 --- !u!1 &204334129
 GameObject:
   m_ObjectHideFlags: 0
@@ -2422,6 +2345,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NetworkManager: {fileID: 69965669}
   NetworkAddress: localhost
+  DontDestroy: 1
   NetworkAddressInput: {fileID: 476531299459094784}
   OfflineGO: {fileID: 476531299190545051}
   OnlineGO: {fileID: 476531298786343680}
