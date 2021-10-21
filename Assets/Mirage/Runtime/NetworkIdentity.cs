@@ -219,6 +219,13 @@ namespace Mirage
 
                 NetworkBehaviour[] components = GetComponentsInChildren<NetworkBehaviour>(true);
 
+#if DEBUG
+                foreach (NetworkBehaviour item in components)
+                {
+                    logger.Assert(item.Identity == this, $"Child NetworkBehaviour had a different Identity, this:{name}, Child Identity:{item.Identity.name}");
+                }
+#endif
+
                 if (components.Length > byte.MaxValue)
                     throw new InvalidOperationException("Only 255 NetworkBehaviour per gameobject allowed");
 
