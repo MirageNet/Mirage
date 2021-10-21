@@ -1,3 +1,10 @@
+## [108.0.1](https://github.com/MirageNet/Mirage/compare/v108.0.0...v108.0.1) (2021-10-21)
+
+
+### Bug Fixes
+
+* **NetworkSceneChecker:** fixing awake for networkscenechecker ([fb4321e](https://github.com/MirageNet/Mirage/commit/fb4321eea0b86fb5ed3f979ff10e36533d24c88e)), closes [#754](https://github.com/MirageNet/Mirage/issues/754)
+
 # [108.0.0](https://github.com/MirageNet/Mirage/compare/v107.1.3...v108.0.0) (2021-10-21)
 
 
