@@ -30,17 +30,16 @@ namespace Mirage
 
         Scene currentScene;
 
-        [Server(error = false)]
         void Awake()
         {
-            currentScene = gameObject.scene;
-            if (logger.LogEnabled()) logger.Log($"NetworkSceneChecker.Awake currentScene: {currentScene}");
-
-            OnStartServer();
+            Identity.OnStartServer.AddListener(OnStartServer);
         }
 
         public void OnStartServer()
         {
+            currentScene = gameObject.scene;
+            if (logger.LogEnabled()) logger.Log($"NetworkSceneChecker.OnStartServer currentScene: {currentScene}");
+
             if (!sceneCheckerObjects.ContainsKey(currentScene))
                 sceneCheckerObjects.Add(currentScene, new HashSet<NetworkIdentity>());
 
