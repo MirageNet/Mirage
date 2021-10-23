@@ -1,3 +1,56 @@
+# [109.0.0](https://github.com/MirageNet/Mirage/compare/v108.0.1...v109.0.0) (2021-10-23)
+
+
+### Performance Improvements
+
+* replacing assetid with prefab hash ([b14c692](https://github.com/MirageNet/Mirage/commit/b14c692ae71bb16955b6d58e1f27024c14d10401))
+
+
+### BREAKING CHANGES
+
+* prefab Id is now an int instead of a guid
+
+## [108.0.1](https://github.com/MirageNet/Mirage/compare/v108.0.0...v108.0.1) (2021-10-21)
+
+
+### Bug Fixes
+
+* **NetworkSceneChecker:** fixing awake for networkscenechecker ([fb4321e](https://github.com/MirageNet/Mirage/commit/fb4321eea0b86fb5ed3f979ff10e36533d24c88e)), closes [#754](https://github.com/MirageNet/Mirage/issues/754)
+
+# [108.0.0](https://github.com/MirageNet/Mirage/compare/v107.1.3...v108.0.0) (2021-10-21)
+
+
+### Bug Fixes
+
+* **LogSettings:** allowing multi object editing ([5c83dc6](https://github.com/MirageNet/Mirage/commit/5c83dc6e6a8dfa975bbf1c24cae057b4ed5a5057))
+* **LogSettings:** improving warning when log settings has no reference ([c2ed26f](https://github.com/MirageNet/Mirage/commit/c2ed26f02e764ac41a9a3a58fb282dce1e7973a7))
+* **LogSettings:** removing log settings component from samples ([a72d777](https://github.com/MirageNet/Mirage/commit/a72d777d2e368da0bb68d0a487c49988db421f5b))
+* removing redundant property ([f8bda6e](https://github.com/MirageNet/Mirage/commit/f8bda6e2b62fc6c676a579a31b1d535043244e44))
+
+
+### Code Refactoring
+
+* **NetworkIdentity:** removing NetworkIdentity.GetSceneIdentity ([34699ae](https://github.com/MirageNet/Mirage/commit/34699aee1f3427cca691c69f74ba73a32a1695a7))
+
+
+### BREAKING CHANGES
+
+* **NetworkIdentity:** `NetworkIdentity.GetSceneIdentity` has been removed
+
+## [107.1.3](https://github.com/MirageNet/Mirage/compare/v107.1.2...v107.1.3) (2021-10-20)
+
+
+### Bug Fixes
+
+* **LogSettings:** making labels clickable ([7f65a8a](https://github.com/MirageNet/Mirage/commit/7f65a8a03f57024663ce8eaa4f34e5fa62a7f076))
+
+## [107.1.2](https://github.com/MirageNet/Mirage/compare/v107.1.1...v107.1.2) (2021-10-19)
+
+
+### Bug Fixes
+
+* **LogSettings:** making reset exit if settings is already set ([a227593](https://github.com/MirageNet/Mirage/commit/a227593f158502e7fa2e9684343445be626bee21))
+
 ## [107.1.1](https://github.com/MirageNet/Mirage/compare/v107.1.0...v107.1.1) (2021-10-12)
 
 

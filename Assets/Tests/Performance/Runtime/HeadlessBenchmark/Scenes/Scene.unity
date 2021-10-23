@@ -38,12 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
+  m_IndirectSpecularColor: {r: 0.3731193, g: 0.38073996, b: 0.35872698, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
+  serializedVersion: 11
   m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 0}
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -118,8 +118,6 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
-    maxJobWorkers: 0
-    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
@@ -208,7 +206,6 @@ GameObject:
   - component: {fileID: 2043118187}
   - component: {fileID: 2043118186}
   - component: {fileID: 2043118188}
-  - component: {fileID: 2043118189}
   m_Layer: 0
   m_Name: HeadlessBenchmark
   m_TagString: Untagged
@@ -228,13 +225,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e6d998ffbd3bb34dbaeaba6d44db15b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ServerPrefab: {fileID: 6837994460994695650, guid: 0942fb9374c1d124bb827f594cad43b9, type: 3}
-  ClientPrefab: {fileID: 6160076930074172721, guid: 86372601db7eae54b99b28b05c094ded, type: 3}
+  ServerPrefab: {fileID: 6837994460994695650, guid: 0942fb9374c1d124bb827f594cad43b9,
+    type: 3}
+  ClientPrefab: {fileID: 6160076930074172721, guid: 86372601db7eae54b99b28b05c094ded,
+    type: 3}
   server: {fileID: 0}
   serverObjectManager: {fileID: 0}
-  MonsterPrefab: {fileID: 6374416922608025457, guid: 28d1af38d0173324ea03798dd86eac8f, type: 3}
-  PlayerPrefab: {fileID: 7039704267495960125, guid: bebeb0dfd33f4074894ef25112ab4a8d, type: 3}
-  editorArgs: -socket udp -server -port 3333
+  MonsterPrefab: {fileID: 6374416922608025457, guid: 28d1af38d0173324ea03798dd86eac8f,
+    type: 3}
+  PlayerPrefab: {fileID: 7039704267495960125, guid: bebeb0dfd33f4074894ef25112ab4a8d,
+    type: 3}
+  editorArgs: -socket udp -server -port 3333 -client 1
   socketFactory: {fileID: 0}
 --- !u!4 &2043118187
 Transform:
@@ -263,112 +264,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serverTickRate: 30
---- !u!114 &2043118189
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2043118185}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac6e8eccf4b6f4dc7b24c276ef47fde8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Levels:
-  - Name: HeadlessFrameLimiter
-    level: 2
-  - Name: RemoteCallHelper
-    level: 2
-  - Name: NetworkBehaviour
-    level: 2
-  - Name: NetworkIdentity
-    level: 2
-  - Name: ClientObjectManager
-    level: 2
-  - Name: NetworkClient
-    level: 2
-  - Name: NetworkTime
-    level: 2
-  - Name: NetworkSceneManager
-    level: 2
-  - Name: CharacterSpawner
-    level: 2
-  - Name: ServerObjectManager
-    level: 2
-  - Name: NetworkServer
-    level: 2
-  - Name: NetworkBehaviourInspector
-    level: 2
-  - Name: SteamyFaceTransport
-    level: 2
-  - Name: WelcomeWindow
-    level: 2
-  - Name: EnterPlayModeSettingsCheck
-    level: 2
-  - Name: NetworkScenePostProcess
-    level: 2
-  - Name: SteamServer
-    level: 3
-  - Name: SteamCommon
-    level: 3
-  - Name: NetworkConnection
-    level: 2
-  - Name: NetworkWriterPool
-    level: 2
-  - Name: NetworkReaderExtensions
-    level: 2
-  - Name: NetworkReaderPool
-    level: 2
-  - Name: SteamConnection
-    level: 3
-  - Name: KcpConnection
-    level: 2
-  - Name: NetworkPlayer
-    level: 2
-  - Name: NetworkWorld
-    level: 2
-  - Name: Peer
-    level: 2
-  - Name: PipePeerConnection
-    level: 2
-  - Name: SyncVarReceiver
-    level: 2
-  - Name: PlayerSpawner
-    level: 2
-  - Name: BasicAuthenticator
-    level: 2
-  - Name: NetworkRigidbody
-    level: 2
-  - Name: NetworkProximityChecker
-    level: 2
-  - Name: NetworkAnimator
-    level: 2
-  - Name: NetworkSceneChecker
-    level: 2
-  - Name: Reward
-    level: 2
-  - Name: LogFactoryTests
-    level: 2
-  - Name: NetworkManager
-    level: 2
-  - Name: WeaverTests
-    level: 4
-  - Name: ChatWindow
-    level: 2
-  - Name: AdditiveNetworkManager
-    level: 2
-  - Name: ZoneHandler
-    level: 2
-  - Name: SceneDrawer
-    level: 2
-  - Name: NetworkDiscovery
-    level: 2
-  - Name: NetworkDiscoveryBase`2
-    level: 2
-  - Name: Tests
-    level: 4
-  - Name: SteamSocketManager
-    level: 2
-  - Name: MirageTypesExtensions
-    level: 2

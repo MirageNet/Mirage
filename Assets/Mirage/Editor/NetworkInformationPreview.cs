@@ -278,12 +278,13 @@ namespace Mirage
 
         NetworkIdentityInfo GetAssetId(NetworkIdentity identity)
         {
-            string assetId = identity.AssetId.ToString();
-            if (string.IsNullOrEmpty(assetId))
-            {
-                assetId = "<object has no prefab>";
-            }
-            return GetString("Asset ID", assetId);
+            int prefabHash = identity.PrefabHash;
+
+            string value = prefabHash != 0
+                ? prefabHash.ToString("X")
+                : "<object has no prefab>";
+
+            return GetString("Asset ID", value);
         }
 
         static NetworkIdentityInfo GetString(string name, string value)

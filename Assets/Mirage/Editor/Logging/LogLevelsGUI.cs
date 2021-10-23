@@ -96,7 +96,8 @@ namespace Mirage.EditorScripts.Logging
             if (!folderOutState.ContainsKey(NameSpace))
                 folderOutState[NameSpace] = false;
 
-            folderOutState[NameSpace] = EditorGUILayout.Foldout(folderOutState[NameSpace], NameSpace, EditorStyles.foldoutHeader);
+            folderOutState[NameSpace] = EditorGUILayout.Foldout(folderOutState[NameSpace], NameSpace, toggleOnLabelClick: true, EditorStyles.foldoutHeader);
+
 
             if (folderOutState[NameSpace])
             {

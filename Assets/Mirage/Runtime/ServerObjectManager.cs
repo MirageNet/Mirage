@@ -153,10 +153,10 @@ namespace Mirage
         /// <param name="assetId"></param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
-        public void ReplaceCharacter(INetworkPlayer player, GameObject character, Guid assetId, bool keepAuthority = false)
+        public void ReplaceCharacter(INetworkPlayer player, GameObject character, int prefabHash, bool keepAuthority = false)
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
-            identity.AssetId = assetId;
+            identity.PrefabHash = prefabHash;
             ReplaceCharacter(player, identity, keepAuthority);
         }
 
@@ -210,7 +210,7 @@ namespace Mirage
                 Server.LocalClient.Player.Identity = identity;
             }
 
-            if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.AssetId}");
+            if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash}");
 
             Respawn(identity);
 
@@ -226,10 +226,10 @@ namespace Mirage
         /// <param name="character">Player object spawned for the player.</param>
         /// <param name="assetId"></param>
         /// <returns></returns>
-        public void AddCharacter(INetworkPlayer player, GameObject character, Guid assetId)
+        public void AddCharacter(INetworkPlayer player, GameObject character, int prefabHash)
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
-            identity.AssetId = assetId;
+            identity.PrefabHash = prefabHash;
             AddCharacter(player, identity);
         }
 
@@ -277,7 +277,7 @@ namespace Mirage
                 Server.LocalClient.Player.Identity = identity;
             }
 
-            if (logger.LogEnabled()) logger.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.AssetId);
+            if (logger.LogEnabled()) logger.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.PrefabHash);
 
             Respawn(identity);
         }
@@ -393,13 +393,13 @@ namespace Mirage
         /// <param name="obj">The object to spawn.</param>
         /// <param name="assetId">The assetId of the object to spawn. Used for custom spawn handlers.</param>
         /// <param name="owner">The connection that has authority over the object</param>
-        public void Spawn(GameObject obj, Guid assetId, INetworkPlayer owner = null)
+        public void Spawn(GameObject obj, int prefabHash, INetworkPlayer owner = null)
         {
             // check first before setting AssetId
             ThrowIfPrefab(obj);
 
             NetworkIdentity identity = obj.GetNetworkIdentity();
-            identity.AssetId = assetId;
+            identity.PrefabHash = prefabHash;
             Spawn(identity, owner);
         }
 
@@ -449,7 +449,7 @@ namespace Mirage
                 Server.World.AddIdentity(identity.NetId, identity);
             }
 
-            if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.NetId + " asset ID " + identity.AssetId);
+            if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.NetId + " asset ID " + identity.PrefabHash);
         }
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
@@ -464,13 +464,14 @@ namespace Mirage
 
                 ArraySegment<byte> payload = CreateSpawnMessagePayload(isOwner, identity, ownerWriter, observersWriter);
 
+                int? prefabHash = identity.PrefabHash != 0 ? identity.PrefabHash : default(int?);
                 player.Send(new SpawnMessage
                 {
                     netId = identity.NetId,
                     isLocalPlayer = player.Identity == identity,
                     isOwner = isOwner,
                     sceneId = identity.sceneId,
-                    assetId = identity.AssetId,
+                    prefabHash = prefabHash,
                     // use local values for VR support
                     position = identity.transform.localPosition,
                     rotation = identity.transform.localRotation,

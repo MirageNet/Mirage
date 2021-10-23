@@ -160,7 +160,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
-            replacementIdentity.AssetId = Guid.NewGuid();
+            replacementIdentity.PrefabHash = Guid.NewGuid().GetHashCode();
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
             serverObjectManager.ReplaceCharacter(serverPlayer, playerReplacement);
@@ -173,7 +173,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
-            replacementIdentity.AssetId = Guid.NewGuid();
+            replacementIdentity.PrefabHash = Guid.NewGuid().GetHashCode();
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
             serverObjectManager.ReplaceCharacter(serverPlayer, playerReplacement, true);
@@ -184,29 +184,29 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ReplacePlayerAssetIdTest()
         {
-            var replacementGuid = Guid.NewGuid();
+            int hash = Guid.NewGuid().GetHashCode();
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
-            replacementIdentity.AssetId = replacementGuid;
+            replacementIdentity.PrefabHash = hash;
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
-            serverObjectManager.ReplaceCharacter(serverPlayer, playerReplacement, replacementGuid);
+            serverObjectManager.ReplaceCharacter(serverPlayer, playerReplacement, hash);
 
-            Assert.That(serverPlayer.Identity.AssetId, Is.EqualTo(replacementGuid));
+            Assert.That(serverPlayer.Identity.PrefabHash, Is.EqualTo(hash));
         }
 
         [Test]
         public void AddPlayerForConnectionAssetIdTest()
         {
-            var replacementGuid = Guid.NewGuid();
+            int hash = Guid.NewGuid().GetHashCode();
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
-            replacementIdentity.AssetId = replacementGuid;
+            replacementIdentity.PrefabHash = hash;
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
             serverPlayer.Identity = null;
 
-            serverObjectManager.AddCharacter(serverPlayer, playerReplacement, replacementGuid);
+            serverObjectManager.AddCharacter(serverPlayer, playerReplacement, hash);
 
             Assert.That(replacementIdentity == serverPlayer.Identity);
         }

@@ -18,6 +18,8 @@ namespace Mirage.Logging
         // called when component is added to GameObject
         void Reset()
         {
+            if (settings != null) { return; }
+
             LogSettingsSO existingSettings = EditorLogSettingsLoader.FindLogSettings();
             if (existingSettings != null)
             {
@@ -34,13 +36,19 @@ namespace Mirage.Logging
 
         void OnValidate()
         {
-            // if settings field is changed
             RefreshDictionary();
         }
 
         void RefreshDictionary()
         {
-            settings.LoadIntoLogFactory();
+            if (settings != null)
+            {
+                settings.LoadIntoLogFactory();
+            }
+            else
+            {
+                Debug.LogWarning("Log settings component does not have a settings reference", this);
+            }
         }
     }
 }

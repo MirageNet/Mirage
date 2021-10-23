@@ -124,9 +124,9 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void SpawnWithAssetId()
         {
-            var replacementGuid = Guid.NewGuid();
-            serverObjectManager.Spawn(gameObject, replacementGuid, server.LocalPlayer);
-            Assert.That(testIdentity.AssetId, Is.EqualTo(replacementGuid));
+            var hash = Guid.NewGuid().GetHashCode();
+            serverObjectManager.Spawn(gameObject, hash, server.LocalPlayer);
+            Assert.That(testIdentity.PrefabHash, Is.EqualTo(hash));
         }
 
         [Test]

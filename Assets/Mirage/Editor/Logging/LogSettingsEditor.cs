@@ -3,7 +3,7 @@ using UnityEditor;
 
 namespace Mirage.EditorScripts.Logging
 {
-    [CustomEditor(typeof(LogSettings))]
+    [CustomEditor(typeof(LogSettings)), CanEditMultipleObjects]
     public class LogSettingsEditor : Editor
     {
         public override void OnInspectorGUI()

@@ -137,7 +137,6 @@ GameObject:
   - component: {fileID: 249891960}
   - component: {fileID: 249891961}
   - component: {fileID: 249891962}
-  - component: {fileID: 249891963}
   - component: {fileID: 249891954}
   m_Layer: 0
   m_Name: NetworkManager
@@ -158,8 +157,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9f46b2d67d7a054d8c13075473bd4a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  address: localhost
-  port: 7777
+  Address: localhost
+  Port: 7777
+  SocketLib: 0
+  BufferSize: 262144
 --- !u!114 &249891955
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -227,8 +228,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EnablePeerMetrics: 0
+  MetricsSize: 10
   SocketFactory: {fileID: 249891954}
+  DisconnectOnException: 1
   authenticator: {fileID: 0}
+  _started:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
   _connected:
     _event:
       m_PersistentCalls:
@@ -254,7 +261,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EnablePeerMetrics: 0
+  MetricsSize: 10
   MaxConnections: 4
+  DisconnectOnException: 1
   Listening: 1
   SocketFactory: {fileID: 249891954}
   authenticator: {fileID: 0}
@@ -298,16 +307,19 @@ MonoBehaviour:
   Client: {fileID: 249891958}
   Server: {fileID: 249891959}
   DontDestroy: 1
-  _clientChangeScene:
+  _onClientStartedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _clientSceneChanged:
+  _onClientFinishedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _serverChangeScene:
+  _onServerStartedSceneChange:
     m_PersistentCalls:
       m_Calls: []
-  _serverSceneChanged:
+  _onServerFinishedSceneChange:
+    m_PersistentCalls:
+      m_Calls: []
+  _onPlayerSceneReady:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &249891961
@@ -340,129 +352,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 249891959}
   NetworkSceneManager: {fileID: 249891960}
---- !u!114 &249891963
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 249891953}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac6e8eccf4b6f4dc7b24c276ef47fde8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Levels:
-  - Name: NetworkIdentity
-    level: 2
-  - Name: RemoteCallHelper
-    level: 2
-  - Name: NetworkBehaviour
-    level: 2
-  - Name: NetworkSceneManager
-    level: 2
-  - Name: NetworkProximityChecker
-    level: 2
-  - Name: ServerObjectManager
-    level: 2
-  - Name: NetworkClient
-    level: 2
-  - Name: NetworkTime
-    level: 2
-  - Name: ZoneHandler
-    level: 2
-  - Name: CharacterSpawner
-    level: 2
-  - Name: ClientObjectManager
-    level: 2
-  - Name: NetworkAnimator
-    level: 2
-  - Name: NetworkServer
-    level: 2
-  - Name: HeadlessFrameLimiter
-    level: 2
-  - Name: NetworkBehaviourInspector
-    level: 2
-  - Name: EchoChannelAndSettingsButton
-    level: 2
-  - Name: LoginManager
-    level: 2
-  - Name: NetworkPositionBehaviour
-    level: 0
-  - Name: UIManager
-    level: 2
-  - Name: PlayerVoiceBehaviour
-    level: 2
-  - Name: CapyCafeNetworkManager
-    level: 2
-  - Name: UIPanel_Chat
-    level: 2
-  - Name: FirebaseLoginManager
-    level: 2
-  - Name: PlayerSpawner
-    level: 2
-  - Name: SyncPositionBehaviour
-    level: 0
-  - Name: SnapshotBuffer
-    level: 0
-  - Name: AdditiveNetworkManager
-    level: 2
-  - Name: NetworkScenePostProcess
-    level: 2
-  - Name: NetworkWriterPool
-    level: 2
-  - Name: NetworkConnection
-    level: 2
-  - Name: NetworkReaderExtensions
-    level: 2
-  - Name: NetworkReaderPool
-    level: 2
-  - Name: BasicAuthenticator
-    level: 2
-  - Name: NetworkRigidbody
-    level: 2
-  - Name: EnterPlayModeSettingsCheck
-    level: 2
-  - Name: SceneDrawer
-    level: 2
-  - Name: InterpolationTime
-    level: 0
-  - Name: NetworkSceneChecker
-    level: 2
-  - Name: Reward
-    level: 2
-  - Name: LogFactoryTests
-    level: 2
-  - Name: NetworkManager
-    level: 2
-  - Name: WeaverTests
-    level: 4
-  - Name: ChatWindow
-    level: 2
-  - Name: NetworkDiscovery
-    level: 2
-  - Name: NetworkDiscoveryBase`2
-    level: 2
-  - Name: KcpConnection
-    level: 2
-  - Name: Tests
-    level: 4
-  - Name: WelcomeWindow
-    level: 2
-  - Name: MessageBroker
-    level: 2
-  - Name: NetworkPlayer
-    level: 3
-  - Name: SyncVarReceiver
-    level: 2
-  - Name: NetworkWorld
-    level: 2
-  - Name: RosterUI
-    level: 2
-  - Name: Peer
-    level: 2
-  - Name: PipePeerConnection
-    level: 2
 --- !u!1 &283483315
 GameObject:
   m_ObjectHideFlags: 0
@@ -2335,6 +2224,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NetworkManager: {fileID: 249891956}
   NetworkAddress: localhost
+  DontDestroy: 1
   NetworkAddressInput: {fileID: 476531299129631508}
   OfflineGO: {fileID: 476531299398246543}
   OnlineGO: {fileID: 476531299530866964}

@@ -183,7 +183,7 @@ These fields/properties have been renamed:
 |:-------------------------------------:|:--------------------------------------------------------------------------------------:|
 | `ClientScene.localPlayer`             | [NetworkPlayer.Identity](xref:Mirage.NetworkPlayer.Identity)             |
 | `ClientScene.ready`                   | [Client.Player.SceneIsReady](xref:Mirage.NetworkPlayer.SceneIsReady)                  |
-| `NetworkIdentity.assetId`             | [NetworkIdentity.AssetId](xref:Mirage.NetworkIdentity.AssetId)                         |
+| `NetworkIdentity.assetId`             | [NetworkIdentity.PrefabHash](xref:Mirage.NetworkIdentity.PrefabHash)                         |
 | `NetworkIdentity.netId`               | [NetworkIdentity.NetId](xref:Mirage.NetworkIdentity.NetId)                             |
 | `NetworkIdentity.connectionToClient`  | [NetworkIdentity.Owner](xref:Mirage.NetworkIdentity.Owner)   |
 | `NetworkBehaviour.isServer`           | [NetworkBehaviour.IsServer](xref:Mirage.NetworkBehaviour.IsServer)                     |
