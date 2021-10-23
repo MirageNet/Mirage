@@ -71,6 +71,6 @@ namespace Mirage
 
         void RemoveConnection(INetworkPlayer player);
 
-        void SendToAll<T>(T msg, int channelId = Channel.Reliable);
+        void SendToAll<T>(T msg, int channelId = Channel.Reliable); //NOSONAR
     }
 }
