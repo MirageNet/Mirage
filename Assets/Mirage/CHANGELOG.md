@@ -1,3 +1,15 @@
+# [109.0.0](https://github.com/MirageNet/Mirage/compare/v108.0.1...v109.0.0) (2021-10-23)
+
+
+### Performance Improvements
+
+* replacing assetid with prefab hash ([b14c692](https://github.com/MirageNet/Mirage/commit/b14c692ae71bb16955b6d58e1f27024c14d10401))
+
+
+### BREAKING CHANGES
+
+* prefab Id is now an int instead of a guid
+
 ## [108.0.1](https://github.com/MirageNet/Mirage/compare/v108.0.0...v108.0.1) (2021-10-21)
 
 
