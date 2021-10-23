@@ -13,18 +13,28 @@ namespace Assets.Mirage.Components
 
         #endregion
 
-        #region Unity Methods
+        #region Mirage Callbacks
 
-        protected abstract void Start();
-
-        private void OnEnable()
+        private void OnServerStarted()
         {
             NetworkVisibility?.Startup();
         }
 
-        private void OnDisable()
+        private void OnServerStopped()
         {
             NetworkVisibility?.ShutDown();
+        }
+
+        #endregion
+
+        #region Unity Methods
+
+        protected virtual void Awake()
+        {
+            ServerObjectManager ??= FindObjectOfType<ServerObjectManager>();
+
+            ServerObjectManager.Server.Started.AddListener(OnServerStarted);
+            ServerObjectManager.Server.Stopped.AddListener(OnServerStopped);
         }
 
         private void Destroy()

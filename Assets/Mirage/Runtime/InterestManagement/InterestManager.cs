@@ -180,9 +180,12 @@ namespace Mirage.InterestManagement
 
             foreach (ObserverData visibilitySystem in _visibilitySystems)
             {
-                if (!visibilitySystem.Observers.ContainsKey(identity)) return _observers;
+                foreach (KeyValuePair<INetworkPlayer, HashSet<NetworkIdentity>> observer in visibilitySystem.Observers)
+                {
+                    if (!observer.Value.Contains(identity)) return _observers;
 
-                _observers.UnionWith(visibilitySystem.Observers.Values);
+                    _observers.UnionWith(visibilitySystem.Observers.Keys);
+                }
             }
 
             return _observers;

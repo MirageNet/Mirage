@@ -20,13 +20,13 @@ namespace Mirage.InterestManagement
 
         private readonly INetworkVisibility _system;
 
-        private readonly Dictionary<NetworkIdentity, INetworkPlayer> _observers;
+        private readonly Dictionary<INetworkPlayer, HashSet<NetworkIdentity>> _observers;
 
         public INetworkVisibility System => _system;
 
-        public Dictionary<NetworkIdentity, INetworkPlayer> Observers => _observers;
+        public Dictionary<INetworkPlayer, HashSet<NetworkIdentity>> Observers => _observers;
 
-        public ObserverData(INetworkVisibility system, Dictionary<NetworkIdentity, INetworkPlayer> observers)
+        public ObserverData(INetworkVisibility system, Dictionary<INetworkPlayer, HashSet<NetworkIdentity>> observers)
         {
             _system = system;
             _observers = observers;
@@ -49,7 +49,7 @@ namespace Mirage.InterestManagement
 
         public override string ToString()
         {
-            return $"[Visibility System :{this}]";
+            return $"[Visibility System :{nameof(ObserverData)}]";
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

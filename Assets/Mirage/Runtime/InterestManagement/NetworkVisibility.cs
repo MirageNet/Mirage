@@ -6,34 +6,34 @@ namespace Mirage.InterestManagement
     {
         #region Fields
 
-        private readonly InterestManager _interestManager;
+        private readonly ServerObjectManager _serverObjectManager;
         private ObserverData _visibilitySystemData;
 
         #endregion
 
         #region Properties
 
-        public InterestManager InterestManager => _interestManager;
+        public InterestManager InterestManager => _serverObjectManager.InterestManager;
 
-        public Dictionary<NetworkIdentity, INetworkPlayer> VisibilitySystemData => _visibilitySystemData.Observers;
+        public Dictionary<INetworkPlayer, HashSet<NetworkIdentity>> VisibilitySystemData => _visibilitySystemData.Observers;
 
         #endregion
 
-        protected NetworkVisibility(InterestManager interestManager)
+        protected NetworkVisibility(ServerObjectManager serverObjectManager)
         {
-            _interestManager = interestManager;
+            _serverObjectManager = serverObjectManager;
         }
 
         public void Startup()
         {
-            _visibilitySystemData = new ObserverData(this, null);
+            _visibilitySystemData = new ObserverData(this, new Dictionary<INetworkPlayer, HashSet<NetworkIdentity>>());
 
-            _interestManager?.RegisterVisibilitySystem(ref _visibilitySystemData);
+            _serverObjectManager.InterestManager?.RegisterVisibilitySystem(ref _visibilitySystemData);
         }
 
         public void ShutDown()
         {
-            _interestManager?.UnRegisterVisibilitySystem(ref _visibilitySystemData);
+            _serverObjectManager.InterestManager?.UnRegisterVisibilitySystem(ref _visibilitySystemData);
         }
 
         #region Implementation of INetworkVisibility

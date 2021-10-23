@@ -54,6 +54,8 @@ namespace Mirage
 
         public void Start()
         {
+            InterestManager = new InterestManager(this);
+
             if (Server != null)
             {
                 Server.Started.AddListener(OnServerStarted);
@@ -81,8 +83,6 @@ namespace Mirage
         {
             RegisterMessageHandlers();
             SpawnOrActivate();
-
-            InterestManager = new InterestManager(this);
         }
 
         void OnServerStopped()
@@ -97,8 +97,6 @@ namespace Mirage
             Server.World.ClearSpawnedObjects();
             // reset so ids stay small in each session
             nextNetworkId = 1;
-
-            InterestManager = null;
         }
 
         void OnFinishedSceneChange(string scenePath, SceneOperation sceneOperation)
