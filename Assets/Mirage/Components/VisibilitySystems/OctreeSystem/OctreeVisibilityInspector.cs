@@ -1,4 +1,3 @@
-using Assets.Mirage.Components;
 using UnityEngine;
 
 namespace Mirage.Components

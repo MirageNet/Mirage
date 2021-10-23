@@ -1,8 +1,7 @@
-using Mirage;
 using Mirage.InterestManagement;
 using UnityEngine;
 
-namespace Assets.Mirage.Components
+namespace Mirage.Components
 {
     public abstract class BaseVisibilityInspector : MonoBehaviour
     {
