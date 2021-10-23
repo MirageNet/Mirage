@@ -14,7 +14,7 @@ namespace Mirage
         public NetworkClient Client;
         public Text NetworkPingLabelText;
 
-        void Update()
+        internal void Update()
         {
             if (Client.Active)
                 NetworkPingLabelText.text = string.Format("{0}ms", (int)(Client.World.Time.Rtt * 1000));
