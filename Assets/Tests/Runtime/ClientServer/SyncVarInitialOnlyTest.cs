@@ -52,7 +52,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             var prefab = new GameObject("BothSyncVarsAreSet", typeof(NetworkIdentity), typeof(SyncVarInitialOnly));
             NetworkIdentity identity = prefab.GetComponent<NetworkIdentity>();
-            identity.AssetId = Guid.NewGuid();
+            identity.PrefabHash = Guid.NewGuid().GetHashCode();
 
             clientObjectManager.RegisterPrefab(identity);
 

@@ -83,7 +83,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             // create and register a prefab
             playerPrefab = new GameObject("serverPlayer", typeof(NetworkIdentity), typeof(T));
             NetworkIdentity identity = playerPrefab.GetComponent<NetworkIdentity>();
-            identity.AssetId = Guid.NewGuid();
+            identity.PrefabHash = Guid.NewGuid().GetHashCode();
             clientObjectManager.RegisterPrefab(identity);
 
             // wait for client and server to initialize themselves
