@@ -16,7 +16,7 @@ namespace Mirage.Tests.Runtime.Components
             NetworkPingDisplay pingDisplay = gameObject.GetComponent<NetworkPingDisplay>();
             pingDisplay.Client = client;
 
-            NullReferenceException nullException = Assert.Throws<NullReferenceException>(() =>
+            Assert.Throws<NullReferenceException>(() =>
             {
                 pingDisplay.Update();
             });
