@@ -1,8 +1,7 @@
 using System;
 using System.Collections;
-using Mirage.Examples.InterestManagement;
-using Mirage.InterestManagement;
-using Mirage.Sockets.Udp;
+using Mirage.SocketLayer;
+using Mirage.Components;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
 using UnityEditor.SceneManagement;
@@ -50,29 +49,20 @@ namespace Mirage.Tests.Performance.Runtime
             yield return null;
         }
     }
-
-    public class GlobalInterestManagementPerformanceTest : InterestManagementPerformanceBase
-    {
-        protected override IEnumerator SetupInterestManagement(NetworkServer server)
-        {
-            Setup();
-            // wait frame for setup
-            yield return null;
-        }
-    }
-
     [Category("Performance"), Category("InterestManagement")]
     public abstract class InterestManagementPerformanceBase
     {
-        const string testScene = "Assets/Examples/InterestManagement/Scenes/Scene.unity";
-        const string NpcSpawnerName = "Mobs";
-        const string LootSpawnerName = "Ground";
+        const string testScene = "Assets/Examples/InterestManagement/Scenes/AOI.unity";
+        const string NpcSpawnerName = "NpcSpawner";
+        const string LootSpawnerName = "LootSpawner";
         const int clientCount = 100;
         const int stationaryCount = 3500;
         const int movingCount = 500;
 
 
         private NetworkServer server;
+        private TestSocketFactory transport;
+        IConnection[] clients;
 
         [UnitySetUp]
         public IEnumerator Setup()
@@ -81,12 +71,10 @@ namespace Mirage.Tests.Performance.Runtime
 
             // wait 1 frame for start to be called
             yield return null;
-            GameObject.Find(LootSpawnerName).GetComponent<Spawner>().count = stationaryCount;
-            GameObject.Find(NpcSpawnerName).GetComponent<Spawner>().count = movingCount;
-
 
             server = FindObjectOfType<NetworkServer>();
-            server.SocketFactory = server.gameObject.AddComponent<UdpSocketFactory>();
+            transport = server.gameObject.AddComponent<TestSocketFactory>();
+            server.SocketFactory = transport;
 
             bool started = false;
             server.MaxConnections = clientCount;
@@ -103,29 +91,21 @@ namespace Mirage.Tests.Performance.Runtime
             // wait for start
             while (!started) { yield return null; }
 
+            // connect N clients
+            clients = new IConnection[clientCount];
             for (int i = 0; i < clientCount; i++)
             {
-                try
-                {
-                    var clientGo = new GameObject { name = $"Client {i}" };
-                    NetworkClient client = clientGo.AddComponent<NetworkClient>();
-                    client.SocketFactory = client.gameObject.AddComponent<UdpSocketFactory>();
-                    client.Connect("localhost");
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogException(ex);
-                }
+                transport.CreateClientSocket().Connect(default);
             }
         }
 
         private void removeExistingIM()
         {
-            INetworkVisibility[] existing = server.GetComponents<INetworkVisibility>();
+            BaseVisibilityInspector[] existing = server.GetComponents<BaseVisibilityInspector>();
 
             for (int i = 0; i < existing.Length; i++)
             {
-                //Destroy(existing[i]);
+                Destroy(existing[i]);
             }
         }
 
@@ -169,5 +149,6 @@ namespace Mirage.Tests.Performance.Runtime
                 .MeasurementCount(300)
                 .Run();
         }
+
     }
 }
