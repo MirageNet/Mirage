@@ -1,38 +1,42 @@
 using System;
-using Mirage;
+using Mirage.Tests.Runtime.Host;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Mirage.Tests.Runtime.Components
 {
-    public class PingDisplayTest
+    public class PingDisplayTest : HostSetup<MockComponent>
     {
         [Test]
-        public void PingDisplayClientNullReferencesUpdateTest()
+        public void PingDisplayTextLabelNullReferencesUpdateTest()
         {
             var gameObject = new GameObject("pingDisplay", typeof(NetworkPingDisplay));
 
             NetworkPingDisplay pingDisplay = gameObject.GetComponent<NetworkPingDisplay>();
+            pingDisplay.Client = client;
 
-            NullReferenceException test = Assert.Throws<NullReferenceException>(() => 
+            NullReferenceException nullException = Assert.Throws<NullReferenceException>(() =>
             {
                 pingDisplay.Update();
             });
         }
 
         [Test]
-        public void PingDisplayTextLabelNullReferencesUpdateTest()
+
+        public void PingDisplayTextChangedValue()
         {
-            var gameObject = new GameObject("pingDisplay", typeof(NetworkPingDisplay), typeof(NetworkClient));
+            var gameObject = new GameObject("pingDisplay", typeof(NetworkPingDisplay), typeof(Text));
 
             NetworkPingDisplay pingDisplay = gameObject.GetComponent<NetworkPingDisplay>();
-            pingDisplay.Client = gameObject.GetComponent<NetworkClient>();
-            pingDisplay.Client.connectState = ConnectState.Connected;
+            pingDisplay.Client = client;
+            pingDisplay.NetworkPingLabelText = gameObject.GetComponent<Text>();
 
-            NullReferenceException test = Assert.Throws<NullReferenceException>(() =>
-            {
-                pingDisplay.Update();
-            });
+            Text oldValue = pingDisplay.NetworkPingLabelText;
+
+            pingDisplay.Update();
+
+            Assert.That(oldValue != pingDisplay.NetworkPingLabelText, Is.False);
         }
     }
 }
