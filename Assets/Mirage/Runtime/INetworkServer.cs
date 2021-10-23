@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Mirage.Events;
 
 namespace Mirage
@@ -71,6 +72,7 @@ namespace Mirage
 
         void RemoveConnection(INetworkPlayer player);
 
-        void SendToAll<T>(T msg, int channelId = Channel.Reliable); //NOSONAR
+        [ExcludeFromCodeCoverage]
+        void SendToAll<T>(T msg, int channelId = Channel.Reliable);
     }
 }
