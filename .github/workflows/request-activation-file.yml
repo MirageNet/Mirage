@@ -25,7 +25,7 @@ jobs:
         uses: actions/upload-artifact@v2.2.4
         with:
             name: Manual Activation File
-            path: Unity_${{ github.event.inputs.license-file }}.alf
+            path: Unity_v${{ github.event.inputs.license-file }}.alf
 
       - name: Next Steps
         run: |
