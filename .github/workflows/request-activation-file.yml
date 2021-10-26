@@ -7,6 +7,10 @@ on:
         description: 'What unityci container to use. Just need part after `ubuntu-`'     
         required: true
         default: '2020.3.17f1-base-0.15.0'
+      license-file:
+        description: 'Name of generated file, version expect -base...'     
+        required: true
+        default: '2020.3.17f1'
   
 jobs:
   requestActivationFile:
@@ -21,7 +25,7 @@ jobs:
         uses: actions/upload-artifact@v2.2.4
         with:
             name: Manual Activation File
-            path: Unity_${{ github.event.inputs.unity-version }}.alf
+            path: Unity_${{ github.event.inputs.license-file }}.alf
 
       - name: Next Steps
         run: |
