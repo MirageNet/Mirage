@@ -1,12 +1,17 @@
 name: RequestActivationFile
 
 on: 
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      unity-version:
+        description: 'What unityci container to use. Just need part after `ubuntu-`'     
+        required: true
+        default: '2020.3.17f1-base-0.15.0'
   
 jobs:
   requestActivationFile:
     runs-on: ubuntu-latest
-    container: unityci/editor:ubuntu-2020.3.17f1-base-0.15.0
+    container: unityci/editor:ubuntu-${{ github.event.inputs.unity-version }}
     steps:
       - name: Request manual activation file
         continue-on-error: true
@@ -16,7 +21,7 @@ jobs:
         uses: actions/upload-artifact@v2.2.4
         with:
             name: Manual Activation File
-            path: Unity_v2020.3.17f1.alf
+            path: Unity_${{ github.event.inputs.unity-version }}.alf
 
       - name: Next Steps
         run: |
