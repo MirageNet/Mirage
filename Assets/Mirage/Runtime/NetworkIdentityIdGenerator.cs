@@ -8,9 +8,12 @@ using Mirage.Logging;
 #if UNITY_EDITOR
 using UnityEditor;
 
-#if UNITY_2018_3_OR_NEWER
+#if UNITY_2021_2_OR_NEWER
+using UnityEditor.SceneManagement;
+#elif UNITY_2018_3_OR_NEWER
 using UnityEditor.Experimental.SceneManagement;
 #endif
+
 #endif
 
 namespace Mirage
