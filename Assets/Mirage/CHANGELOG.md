@@ -1,3 +1,11 @@
+## [109.0.1](https://github.com/MirageNet/Mirage/compare/v109.0.0...v109.0.1) (2021-10-27)
+
+
+### Bug Fixes
+
+* fixing using for editor ([27c9522](https://github.com/MirageNet/Mirage/commit/27c9522bdedf9083b73248e11f06611835dc2c28))
+* fixing validate for new prefab id ([f66c3b6](https://github.com/MirageNet/Mirage/commit/f66c3b653b91a759f2687329791fe1e251e44a41))
+
 # [109.0.0](https://github.com/MirageNet/Mirage/compare/v108.0.1...v109.0.0) (2021-10-23)
 
 
