@@ -77,8 +77,8 @@ namespace Mirage
                     if (prefab == existing)
                         continue;
 
-                    string pathA = AssetDatabase.GetAssetPath(prefab);
-                    string pathB = AssetDatabase.GetAssetPath(existing);
+                    string pathA = UnityEditor.AssetDatabase.GetAssetPath(prefab);
+                    string pathB = UnityEditor.AssetDatabase.GetAssetPath(existing);
                     logger.Assert(prefab.PrefabHash == existing.PrefabHash);
                     logger.LogError($"2 prefabs had the same hash:'{hash}', A:'{prefab.name}' B:'{existing.name}'. Path A:{pathA} Path B:{pathB}");
                 }
