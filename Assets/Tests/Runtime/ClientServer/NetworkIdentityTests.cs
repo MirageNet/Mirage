@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
@@ -137,6 +138,47 @@ namespace Mirage.Tests.Runtime.ClientServer
             Debug.Assert(clientIdentity2.HasAuthority == false);
             Assert.That(clientIdentity2.transform.position, Is.EqualTo(clientPosition));
             Assert.That(serverIdentity2.transform.position, Is.EqualTo(Vector3.zero));
+        }
+
+        [Test]
+        [Description("OnAuthorityChanged should not be called on server side")]
+        public void OnAuthorityChanged_Server()
+        {
+            var hasAuthCalls = new Queue<bool>();
+            serverIdentity2.OnAuthorityChanged.AddListener(hasAuth =>
+            {
+                hasAuthCalls.Enqueue(hasAuth);
+            });
+
+            serverIdentity2.AssignClientAuthority(serverPlayer);
+
+            Assert.That(hasAuthCalls.Count, Is.EqualTo(0));
+
+            serverIdentity2.RemoveClientAuthority();
+
+            Assert.That(hasAuthCalls.Count, Is.EqualTo(0));
+        }
+
+        [UnityTest]
+        public IEnumerator OnAuthorityChanged_Client()
+        {
+            var hasAuthCalls = new Queue<bool>();
+            clientIdentity2.OnAuthorityChanged.AddListener(hasAuth =>
+            {
+                hasAuthCalls.Enqueue(hasAuth);
+            });
+
+            serverIdentity2.AssignClientAuthority(serverPlayer);
+            yield return new WaitForSeconds(0.1f);
+
+            Assert.That(hasAuthCalls.Count, Is.EqualTo(1));
+            Assert.That(hasAuthCalls.Dequeue(), Is.True);
+
+            serverIdentity2.RemoveClientAuthority();
+            yield return new WaitForSeconds(0.1f);
+
+            Assert.That(hasAuthCalls.Count, Is.EqualTo(1));
+            Assert.That(hasAuthCalls.Dequeue(), Is.False);
         }
     }
 }
