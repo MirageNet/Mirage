@@ -65,14 +65,25 @@ namespace Mirage
         readonly Dictionary<int, NetworkIdentity> validateCache = new Dictionary<int, NetworkIdentity>();
         void OnValidate()
         {
+            validateCache.Clear();
             foreach (NetworkIdentity prefab in spawnPrefabs)
             {
-                if (validateCache.TryGetValue(prefab.PrefabHash, out NetworkIdentity existing))
+                if (prefab == null)
+                    continue;
+
+                int hash = prefab.PrefabHash;
+                if (validateCache.TryGetValue(hash, out NetworkIdentity existing))
                 {
-                    Debug.LogError($"2 prefabs had the same hash:'{prefab.PrefabHash}', A:'{prefab.name}' B:'{existing.name}'");
+                    if (prefab == existing)
+                        continue;
+
+                    string pathA = AssetDatabase.GetAssetPath(prefab);
+                    string pathB = AssetDatabase.GetAssetPath(existing);
+                    logger.Assert(prefab.PrefabHash == existing.PrefabHash);
+                    logger.LogError($"2 prefabs had the same hash:'{hash}', A:'{prefab.name}' B:'{existing.name}'. Path A:{pathA} Path B:{pathB}");
                 }
 
-                validateCache[prefab.PrefabHash] = prefab;
+                validateCache[hash] = prefab;
             }
         }
 #endif
