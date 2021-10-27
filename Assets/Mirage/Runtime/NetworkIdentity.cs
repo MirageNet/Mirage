@@ -1171,7 +1171,7 @@ namespace Mirage
                 // so just spawn it again,
                 // the client will not create a new instance,  it will simply
                 // reset all variables and remove authority
-                ServerObjectManager.SendSpawnMessage(this, previousOwner);
+                ServerObjectManager.SendRemoveAuthorityMessage(this, previousOwner);
             }
         }
 

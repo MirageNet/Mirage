@@ -516,6 +516,21 @@ namespace Mirage
             }
         }
 
+        internal void SendRemoveAuthorityMessage(NetworkIdentity identity, INetworkPlayer previousOwner)
+        {
+            // for easier debugging
+            if (logger.LogEnabled()) logger.Log($"Server SendRemoveAuthorityMessage: name={identity.name} sceneId={identity.sceneId.ToString("X")} netId={identity.NetId}");
+
+            // one writer for owner, one for observers
+            using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
+            {
+                previousOwner.Send(new RemoveAuthorityMessage
+                {
+                    netId = identity.NetId,
+                });
+            }
+        }
+
         static ArraySegment<byte> CreateSpawnMessagePayload(bool isOwner, NetworkIdentity identity, PooledNetworkWriter ownerWriter, PooledNetworkWriter observersWriter)
         {
             // Only call OnSerializeAllSafely if there are NetworkBehaviours

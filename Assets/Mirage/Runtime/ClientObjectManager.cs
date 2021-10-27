@@ -126,6 +126,7 @@ namespace Mirage
             Client.MessageHandler.RegisterHandler<ObjectDestroyMessage>(msg => { });
             Client.MessageHandler.RegisterHandler<ObjectHideMessage>(msg => { });
             Client.MessageHandler.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
+            Client.MessageHandler.RegisterHandler<RemoveAuthorityMessage>(msg => { });
             Client.MessageHandler.RegisterHandler<ServerRpcReply>(msg => { });
             Client.MessageHandler.RegisterHandler<RpcMessage>(msg => { });
         }
@@ -135,6 +136,7 @@ namespace Mirage
             Client.MessageHandler.RegisterHandler<ObjectDestroyMessage>(OnObjectDestroy);
             Client.MessageHandler.RegisterHandler<ObjectHideMessage>(OnObjectHide);
             Client.MessageHandler.RegisterHandler<SpawnMessage>(OnSpawn);
+            Client.MessageHandler.RegisterHandler<RemoveAuthorityMessage>(OnRemoveAuthority);
             Client.MessageHandler.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
             Client.MessageHandler.RegisterHandler<RpcMessage>(OnRpcMessage);
         }
@@ -474,6 +476,25 @@ namespace Mirage
             }
             logger.LogWarning("Could not find scene object with sceneId:" + sceneId.ToString("X"));
             return null;
+        }
+
+        internal void OnRemoveAuthority(RemoveAuthorityMessage msg)
+        {
+            if (logger.LogEnabled()) logger.Log($"Client remove auth handler");
+
+            // was the object already spawned?
+            bool existing = Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity);
+
+            if (!existing)
+            {
+                logger.LogWarning($"Could not find object with id {msg.netId}");
+                return;
+            }
+
+            identity.HasAuthority = false;
+
+            // objects spawned as part of initial state are started on a second pass
+            identity.NotifyAuthority();
         }
 
         internal void OnObjectHide(ObjectHideMessage msg)
