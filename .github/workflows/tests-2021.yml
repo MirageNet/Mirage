@@ -35,7 +35,7 @@ jobs:
 
       - name: Run editor Tests
         run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
-        timeout-minutes: 20
+        timeout-minutes: 60
         
       - name: Run play Tests
         run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
