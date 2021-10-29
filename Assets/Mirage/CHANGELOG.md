@@ -1,3 +1,10 @@
+## [109.0.2](https://github.com/MirageNet/Mirage/compare/v109.0.1...v109.0.2) (2021-10-29)
+
+
+### Bug Fixes
+
+* **NetworkIdentity:** not sending whole spawn message when removing authority ([#976](https://github.com/MirageNet/Mirage/issues/976)) ([127bcbf](https://github.com/MirageNet/Mirage/commit/127bcbfa29432c92e3a50fb53791a4f6ff817b7d))
+
 ## [109.0.1](https://github.com/MirageNet/Mirage/compare/v109.0.0...v109.0.1) (2021-10-27)
 
 
