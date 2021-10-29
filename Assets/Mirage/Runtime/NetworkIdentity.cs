@@ -351,6 +351,7 @@ namespace Mirage
         /// When an object is spawned with <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included,
         /// this will be called on the client that owns the object.
         /// </para>
+        /// <para>NOTE: this even is only called for client and host</para>
         /// </summary>
         public IAddLateEvent<bool> OnAuthorityChanged => _onAuthorityChanged;
 
@@ -1167,11 +1168,9 @@ namespace Mirage
 
                 Owner = null;
 
-                // we need to resynchronize the entire object
-                // so just spawn it again,
-                // the client will not create a new instance,  it will simply
-                // reset all variables and remove authority
-                ServerObjectManager.SendSpawnMessage(this, previousOwner);
+                // we DONT need to resynchronize the entire object
+                // so only send a message telling client that it no longer has authority
+                ServerObjectManager.SendRemoveAuthorityMessage(this, previousOwner);
             }
         }
 

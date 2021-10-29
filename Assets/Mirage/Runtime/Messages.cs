@@ -115,6 +115,12 @@ namespace Mirage
     }
 
     [NetworkMessage]
+    public struct RemoveAuthorityMessage
+    {
+        public uint netId;
+    }
+
+    [NetworkMessage]
     public struct ObjectDestroyMessage
     {
         public uint netId;

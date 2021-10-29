@@ -10,6 +10,7 @@ using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
+
     public class ClientServerSetup<T> where T : NetworkBehaviour
     {
 
@@ -33,11 +34,16 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         protected TestSocketFactory socketFactory;
         protected INetworkPlayer clientPlayer;
+        /// <summary>
+        /// network player instance on server that represents the client
+        /// <para>NOT the local player</para>
+        /// </summary>
         protected INetworkPlayer serverPlayer;
         protected MessageHandler ClientMessageHandler => client.MessageHandler;
         protected MessageHandler ServerMessageHandler => server.MessageHandler;
 
         public virtual void ExtraSetup() { }
+        public virtual UniTask LateSetup() => UniTask.CompletedTask;
 
         protected virtual bool AutoConnectClient => true;
         protected virtual Config ServerConfig => null;
@@ -120,6 +126,8 @@ namespace Mirage.Tests.Runtime.ClientServer
                 clientPlayerGO = clientIdentity.gameObject;
                 clientComponent = clientPlayerGO.GetComponent<T>();
             }
+
+            await LateSetup();
         });
 
         public virtual void ExtraTearDown() { }
