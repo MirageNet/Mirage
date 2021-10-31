@@ -1,3 +1,10 @@
+## [109.0.3](https://github.com/MirageNet/Mirage/compare/v109.0.2...v109.0.3) (2021-10-31)
+
+
+### Bug Fixes
+
+* fixing spawn prefab when handler is null ([eb0fd1c](https://github.com/MirageNet/Mirage/commit/eb0fd1c6956032692cea171b8829b9dc5428c2f5))
+
 ## [109.0.2](https://github.com/MirageNet/Mirage/compare/v109.0.1...v109.0.2) (2021-10-29)
 
 
