@@ -423,7 +423,7 @@ namespace Mirage
 
         NetworkIdentity SpawnPrefab(SpawnMessage msg)
         {
-            if (spawnHandlers.TryGetValue(msg.prefabHash.Value, out SpawnHandlerDelegate handler))
+            if (spawnHandlers.TryGetValue(msg.prefabHash.Value, out SpawnHandlerDelegate handler) && handler != null)
             {
                 NetworkIdentity obj = handler(msg);
                 if (obj == null)
