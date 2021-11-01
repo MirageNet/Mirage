@@ -28,6 +28,9 @@
 - name: GameObjects
   href: GameObjects/toc.yml
   topicHref: GameObjects/index.md
+- name: Scene Loading
+  href: SceneLoading/toc.yml
+  topicHref: SceneLoading/index.md
 - name: Bit Packing
   href: BitPacking/toc.yml
   topicHref: BitPacking/index.md
