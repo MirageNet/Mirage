@@ -2,6 +2,9 @@
 
 <xref:Mirage.NetworkSceneManager> contains methods and logic to help keep the scene in sync between server and client.
 
+>[!WARNING] 
+> This page is work in progress
+
 ## How to use
 
 ## Virtual Methods
