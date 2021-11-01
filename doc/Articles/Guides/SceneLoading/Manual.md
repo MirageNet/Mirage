@@ -1,20 +1,31 @@
 # Manual scene loading
 
-If you need some special way to load scene it is better to control it manually. Many of the things here are automatically done by [NetworkSceneManager](./NetworkSceneManager.md)
+If [NetworkSceneManager](./NetworkSceneManager.md) doesn't work for your case you can control everything yourself.
+
 
 ## Using Messages
 
-These message are build in and used by NetworkSceneManager. If you are create your own scene logic then you can re-use these message for your own purpose
-- <xref:Mirage.SceneMessage> sent to tell client to start a scene load
-- <xref:Mirage.SceneReadyMessage> sent to either client/server to tell them that they have finished loading
+These messages are built in and used by NetworkSceneManager. If you are creating your own scene logic then you can re-use these messages for your own purpose.
+- <xref:Mirage.SceneMessage> Sent to client to load a scene
+- <xref:Mirage.SceneReadyMessage> Sent to either client or server when they have finished loading
 
 
 ## Loading a scene
 
-The server should mark the player as <xref:Mirage.NetworkPlayer.SceneIsReady>, and send <xref:Mirage.SceneMessage>.
+**Server**
+1) Mark `Player` as not ready, using <xref:Mirage.NetworkPlayer.SceneIsReady>
+2) Send `SceneMessage` to clients
 
-When the client receives the message they should then load the scene. Once the loading has completed they should call <xref:Mirage.ClientObjectManager.PrepareToSpawnSceneObjects> and send <xref:Mirage.SceneReadyMessage> back to the server.
+**Client**
+*after receiving `SceneMessage`*
+3) (optional) Mark their local player as not ready 
+4) Load the scene
 
-<xref:Mirage.ClientObjectManager.PrepareToSpawnSceneObjects> Will tell the client to find all scene object. This will allow them to be spawned by message sent from the server.
+*after loading finished
+5) Call <xref:Mirage.ClientObjectManager.PrepareToSpawnSceneObjects> (This will tell Mirage about any new scene objects)
+6) Send `SceneReadyMessage` to server
 
-When the server receives <xref:Mirage.SceneReadyMessage> it should mark the player as ready, `player.SceneIsReady = true`. This can then be used on the server to check if all players are ready, and then start the game or match if they are ready.
+**Server**
+*after receiving `SceneReadyMessage`*
+7) Mark the player as ready using: `player.SceneIsReady = true`
+8) Call <xref:Mirage.ServerObjectManager.SpawnVisibleObjects> or <xref:Mirage.ServerObjectManager.AddCharacter> (Mirage will send spawn message to client)
