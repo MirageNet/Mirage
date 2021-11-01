@@ -1,3 +1,16 @@
+# [110.0.0](https://github.com/MirageNet/Mirage/compare/v109.0.3...v110.0.0) (2021-11-01)
+
+
+### Bug Fixes
+
+* adding method to remove character without destroying the object ([19cad00](https://github.com/MirageNet/Mirage/commit/19cad00a00bd85536d36ec826d1e849c31c7bb58)), closes [#883](https://github.com/MirageNet/Mirage/issues/883)
+* fixing remove authority for host ([528f66b](https://github.com/MirageNet/Mirage/commit/528f66bf1af6c2fb339532f0ac80ad6be12c1f32))
+
+
+### BREAKING CHANGES
+
+* RemovePlayerForConnection removed, use RemoveCharacter or DestroyCharacter instead. Note for RemoveCharacter destroyServerObject now defaults to true
+
 ## [109.0.3](https://github.com/MirageNet/Mirage/compare/v109.0.2...v109.0.3) (2021-10-31)
 
 
