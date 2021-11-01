@@ -15,7 +15,7 @@ NetworkBehaviour scripts have the following features:
   - [Server RPC Calls](#server-rpc-calls)
   - [Client RPC Calls](#client-rpc-calls)
 
-![Data Flow Graph](UNetDirections.jpg)
+![Data Flow Graph](../RemoteCalls/UNetDirections.jpg)
 
 **Note:** NetworkBehaviors in Mirror and in UNet provide virtual functions as a way for you to add logic in response to lifecycle events.  Mirage does not,  instead add listeners to the events in [NetworkIdentity](../../Components/NetworkIdentity.md).
 
