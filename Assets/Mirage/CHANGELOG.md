@@ -1,3 +1,15 @@
+# [111.0.0](https://github.com/MirageNet/Mirage/compare/v110.0.0...v111.0.0) (2021-11-01)
+
+
+### Code Refactoring
+
+* **NetworkIdentity:** removing clientAuthorityCallback ([#971](https://github.com/MirageNet/Mirage/issues/971)) ([8adf83d](https://github.com/MirageNet/Mirage/commit/8adf83db2cba4c12c75ca39ea1e5d0059cc71bff))
+
+
+### BREAKING CHANGES
+
+* **NetworkIdentity:** NetworkIdentity.clientAuthorityCallback removed
+
 # [110.0.0](https://github.com/MirageNet/Mirage/compare/v109.0.3...v110.0.0) (2021-11-01)
 
 
