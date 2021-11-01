@@ -1,5 +1,4 @@
-
-## Server RPC Calls
+# Server RPC Calls
 
 Server RPC Calls are sent from character objects on the client to character objects on the server. For security, Server RPC Calls can only be sent from YOUR character object by default, so you cannot control the objects of other players.  You can bypass the authority check using `[ServerRpc(requireAuthority = false)]`.
 
