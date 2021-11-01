@@ -212,37 +212,82 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [UnityTest]
-        public IEnumerator RemovePlayerForConnectionTest() => UniTask.ToCoroutine(async () =>
+        public IEnumerator DestroyCharacter() => UniTask.ToCoroutine(async () =>
         {
-            serverObjectManager.RemovePlayerForConnection(serverPlayer);
+            serverObjectManager.DestroyCharacter(serverPlayer);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => !clientIdentity);
+            await UniTask.Yield();
+            await UniTask.Yield();
 
-            Assert.That(serverPlayerGO);
+            Assert.That(serverPlayerGO == null);
+            Assert.That(clientPlayerGO == null);
         });
 
         [UnityTest]
-        public IEnumerator RemovePlayerForConnectionExceptionTest() => UniTask.ToCoroutine(async () =>
+        public IEnumerator DestroyCharacterKeepServerObject() => UniTask.ToCoroutine(async () =>
         {
-            serverObjectManager.RemovePlayerForConnection(serverPlayer);
+            serverObjectManager.DestroyCharacter(serverPlayer, destroyServerObject: false);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => !clientIdentity);
+            await UniTask.Yield();
+            await UniTask.Yield();
+
+            Assert.That(serverPlayerGO != null);
+            Assert.That(clientPlayerGO == null);
+        });
+
+        [UnityTest]
+        public IEnumerator RemoveCharacterKeepAuthority() => UniTask.ToCoroutine(async () =>
+        {
+            serverObjectManager.RemoveCharacter(serverPlayer, true);
+
+            await UniTask.Yield();
+            await UniTask.Yield();
+
+            Assert.That(serverPlayerGO != null);
+            Assert.That(serverIdentity.Owner == serverPlayer);
+
+            Assert.That(clientPlayerGO != null);
+            Assert.That(clientIdentity.HasAuthority, Is.True);
+            Assert.That(clientIdentity.IsLocalPlayer, Is.False);
+        });
+
+        [UnityTest]
+        public IEnumerator RemoveCharacter() => UniTask.ToCoroutine(async () =>
+        {
+            serverObjectManager.RemoveCharacter(serverPlayer);
+
+            await UniTask.Yield();
+            await UniTask.Yield();
+
+            Assert.That(serverPlayerGO != null);
+            Assert.That(serverIdentity.Owner == null);
+
+            Assert.That(clientPlayerGO != null);
+            Assert.That(clientIdentity.HasAuthority, Is.False);
+            Assert.That(clientIdentity.IsLocalPlayer, Is.False);
+        });
+
+        [Test]
+        public void DestroyCharacterThrowsIfNoCharacter()
+        {
+            INetworkPlayer player = Substitute.For<INetworkPlayer>();
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                serverObjectManager.RemovePlayerForConnection(serverPlayer);
+                serverObjectManager.DestroyCharacter(player);
             });
-        });
+        }
 
-        [UnityTest]
-        public IEnumerator RemovePlayerForConnectionDestroyTest() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void RemoveCharacterThrowsIfNoCharacter()
         {
-            serverObjectManager.RemovePlayerForConnection(serverPlayer, true);
+            INetworkPlayer player = Substitute.For<INetworkPlayer>();
 
-            await AsyncUtil.WaitUntilWithTimeout(() => !clientIdentity);
-
-            Assert.That(!serverPlayerGO);
-        });
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                serverObjectManager.RemoveCharacter(player, false);
+            });
+        }
 
         [Test]
         public void ThrowsIfSpawnedCalledWithoutANetworkIdentity()

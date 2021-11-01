@@ -344,21 +344,49 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Removes the player object from the connection
+        /// Removes the character from a player, with the option to keep the player as the owner of the object
         /// </summary>
-        /// <param name="player">The connection of the client to remove from</param>
-        /// <param name="destroyServerObject">Indicates whether the server object should be destroyed</param>
-        /// <exception cref="InvalidOperationException">Received remove player message but connection has no player</exception>
-        public void RemovePlayerForConnection(INetworkPlayer player, bool destroyServerObject = false)
+        /// <param name="player"></param>
+        /// <param name="keepAuthority"></param>
+        /// <exception cref="InvalidOperationException">Throws when player does not have a character</exception>
+        public void RemoveCharacter(INetworkPlayer player, bool keepAuthority = false)
         {
-            if (!player.HasCharacter)
+            ThrowIfNoCharacter(player);
+
+            NetworkIdentity identity = player.Identity;
+            player.Identity = null;
+            if (!keepAuthority)
             {
-                throw new InvalidOperationException("Received remove player message but connection has no player");
+                logger.Assert(identity.Owner == player, "Owner should be player that is being removed");
+                identity.Owner = null;
             }
+
+            player.Send(new RemoveCharacterMessage { keepAuthority = keepAuthority });
+        }
+
+        /// <summary>
+        /// Removes and destroys the character from a player
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="destroyServerObject"></param>
+        /// <exception cref="InvalidOperationException">Throws when player does not have a character</exception>
+        public void DestroyCharacter(INetworkPlayer player, bool destroyServerObject = true)
+        {
+            ThrowIfNoCharacter(player);
 
             Destroy(player.Identity.gameObject, destroyServerObject);
             player.Identity = null;
         }
+
+        /// <exception cref="InvalidOperationException">Throws when player does not have a character</exception>
+        private static void ThrowIfNoCharacter(INetworkPlayer player)
+        {
+            if (!player.HasCharacter)
+            {
+                throw new InvalidOperationException("Player did not have a character");
+            }
+        }
+
 
         /// <summary>
         /// Handle ServerRpc from specific player, this could be one of multiple players on a single client

@@ -127,6 +127,7 @@ namespace Mirage
             Client.MessageHandler.RegisterHandler<ObjectHideMessage>(msg => { });
             Client.MessageHandler.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
             Client.MessageHandler.RegisterHandler<RemoveAuthorityMessage>(msg => { });
+            Client.MessageHandler.RegisterHandler<RemoveCharacterMessage>(OnRemoveCharacter);
             Client.MessageHandler.RegisterHandler<ServerRpcReply>(msg => { });
             Client.MessageHandler.RegisterHandler<RpcMessage>(msg => { });
         }
@@ -137,6 +138,7 @@ namespace Mirage
             Client.MessageHandler.RegisterHandler<ObjectHideMessage>(OnObjectHide);
             Client.MessageHandler.RegisterHandler<SpawnMessage>(OnSpawn);
             Client.MessageHandler.RegisterHandler<RemoveAuthorityMessage>(OnRemoveAuthority);
+            Client.MessageHandler.RegisterHandler<RemoveCharacterMessage>(OnRemoveCharacter);
             Client.MessageHandler.RegisterHandler<ServerRpcReply>(OnServerRpcReply);
             Client.MessageHandler.RegisterHandler<RpcMessage>(OnRpcMessage);
         }
@@ -493,7 +495,25 @@ namespace Mirage
 
             identity.HasAuthority = false;
 
-            // objects spawned as part of initial state are started on a second pass
+            identity.NotifyAuthority();
+        }
+
+        internal void OnRemoveCharacter(RemoveCharacterMessage msg)
+        {
+            if (logger.LogEnabled()) logger.Log($"Client remove character handler");
+
+            INetworkPlayer player = Client.Player;
+            NetworkIdentity identity = player.Identity;
+
+            if (identity == null)
+            {
+                logger.LogWarning($"Could not find player's character");
+                return;
+            }
+
+            player.Identity = null;
+            identity.HasAuthority = msg.keepAuthority;
+
             identity.NotifyAuthority();
         }
 
