@@ -22,8 +22,6 @@ namespace Mirage
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
-        private readonly HashSet<NetworkIdentity> visList = new HashSet<NetworkIdentity>();
-
         /// <summary>
         /// Transport level connection
         /// </summary>
@@ -163,29 +161,6 @@ namespace Mirage
         public override string ToString()
         {
             return $"connection({Address})";
-        }
-
-        public void AddToVisList(NetworkIdentity identity)
-        {
-            visList.Add(identity);
-        }
-
-        public void RemoveFromVisList(NetworkIdentity identity)
-        {
-            visList.Remove(identity);
-        }
-
-        /// <summary>
-        /// Removes all objects that this player can see
-        /// <para>This is called when loading a new scene</para>
-        /// </summary>
-        public void RemoveAllVisibleObjects()
-        {
-            foreach (NetworkIdentity identity in visList)
-            {
-                identity.RemoveObserverInternal(this);
-            }
-            visList.Clear();
         }
 
         public void AddOwnedObject(NetworkIdentity networkIdentity)
