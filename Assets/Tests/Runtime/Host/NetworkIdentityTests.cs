@@ -124,7 +124,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void SpawnWithAssetId()
         {
-            var hash = Guid.NewGuid().GetHashCode();
+            int hash = Guid.NewGuid().GetHashCode();
             serverObjectManager.Spawn(gameObject, hash, server.LocalPlayer);
             Assert.That(testIdentity.PrefabHash, Is.EqualTo(hash));
         }
@@ -187,6 +187,8 @@ namespace Mirage.Tests.Runtime.Host
             testIdentity.AssignClientAuthority(server.LocalPlayer);
             testIdentity.RemoveClientAuthority();
             Assert.That(testIdentity.Owner, Is.Null);
+            Assert.That(testIdentity.HasAuthority, Is.False);
+            Assert.That(testIdentity.IsLocalPlayer, Is.False);
         }
 
         [UnityTest]

@@ -126,7 +126,7 @@ namespace Mirage
             Client.MessageHandler.RegisterHandler<ObjectDestroyMessage>(msg => { });
             Client.MessageHandler.RegisterHandler<ObjectHideMessage>(msg => { });
             Client.MessageHandler.RegisterHandler<SpawnMessage>(OnHostClientSpawn);
-            Client.MessageHandler.RegisterHandler<RemoveAuthorityMessage>(msg => { });
+            Client.MessageHandler.RegisterHandler<RemoveAuthorityMessage>(OnRemoveAuthority);
             Client.MessageHandler.RegisterHandler<RemoveCharacterMessage>(OnRemoveCharacter);
             Client.MessageHandler.RegisterHandler<ServerRpcReply>(msg => { });
             Client.MessageHandler.RegisterHandler<RpcMessage>(msg => { });
