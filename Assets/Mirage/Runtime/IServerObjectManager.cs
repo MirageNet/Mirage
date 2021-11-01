@@ -12,6 +12,9 @@ namespace Mirage
         void ReplaceCharacter(INetworkPlayer player, GameObject character, int prefabHash, bool keepAuthority = false);
         void ReplaceCharacter(INetworkPlayer player, NetworkIdentity identity, bool keepAuthority = false);
 
+        void RemoveCharacter(INetworkPlayer player, bool keepAuthority = false);
+        void DestroyCharacter(INetworkPlayer player, bool destroyServerObject = true);
+
         void Spawn(GameObject obj, INetworkPlayer owner = null);
         void Spawn(GameObject obj, GameObject ownerObject);
         void Spawn(GameObject obj, int prefabHash, INetworkPlayer owner = null);
