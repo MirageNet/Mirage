@@ -65,7 +65,7 @@ namespace Mirage
         static void PrepareSceneObject(NetworkIdentity identity)
         {
             // set scene hash
-            identity.SetSceneIdSceneHashPartInternal();
+            NetworkIdentityIdGenerator.SetSceneIdSceneHashPartInternal(identity);
 
             // safety check for prefabs with more than one NetworkIdentity
             GameObject prefabGO = PrefabUtility.GetCorrespondingObjectFromSource(identity.gameObject);
