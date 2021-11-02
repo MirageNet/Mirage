@@ -141,7 +141,7 @@ namespace Mirage
         /// </summary>
         /// <param name="player">Connection which is adding the player.</param>
         /// <param name="character">Player object spawned for the player.</param>
-        /// <param name="assetId"></param>
+        /// <param name="prefabHash"></param>
         /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
         /// <returns></returns>
         public void ReplaceCharacter(INetworkPlayer player, GameObject character, int prefabHash, bool keepAuthority = false)
@@ -251,7 +251,7 @@ namespace Mirage
         /// </summary>
         /// <param name="player">Connection which is adding the player.</param>
         /// <param name="character">Player object spawned for the player.</param>
-        /// <param name="assetId"></param>
+        /// <param name="prefabHash"></param>
         /// <returns></returns>
         public void AddCharacter(INetworkPlayer player, GameObject character, int prefabHash)
         {
@@ -442,20 +442,20 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Assigns <paramref name="assetId"/> to the <paramref name="obj"/> and then it with <paramref name="owner"/>
+        /// Assigns <paramref name="prefabHash"/> to the <paramref name="obj"/> and then it with <paramref name="owner"/>
         /// <para>
-        ///     <see cref="NetworkIdentity.AssetId"/> can only be set on an identity if the current value is Empty
+        ///     <see cref="NetworkIdentity.PrefabHash"/> can only be set on an identity if the current value is Empty
         /// </para>
         /// <para>
         ///     This method is useful if you are creating network objects at runtime and both server and client know what <see cref="Guid"/> to set on an object
         /// </para>
         /// </summary>
         /// <param name="obj">The object to spawn.</param>
-        /// <param name="assetId">The assetId of the object to spawn. Used for custom spawn handlers.</param>
+        /// <param name="prefabHash">The prefabHash of the object to spawn. Used for custom spawn handlers.</param>
         /// <param name="owner">The connection that has authority over the object</param>
         public void Spawn(GameObject obj, int prefabHash, INetworkPlayer owner = null)
         {
-            // check first before setting AssetId
+            // check first before setting prefab
             ThrowIfPrefab(obj);
 
             NetworkIdentity identity = obj.GetNetworkIdentity();

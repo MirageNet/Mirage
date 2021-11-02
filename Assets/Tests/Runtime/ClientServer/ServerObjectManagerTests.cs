@@ -182,7 +182,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        public void ReplacePlayerAssetIdTest()
+        public void ReplacePlayerPrefabHashTest()
         {
             int hash = Guid.NewGuid().GetHashCode();
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
@@ -196,7 +196,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
 
         [Test]
-        public void AddPlayerForConnectionAssetIdTest()
+        public void AddPlayerForConnectionPrefabHashTest()
         {
             int hash = Guid.NewGuid().GetHashCode();
             playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
