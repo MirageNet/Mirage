@@ -5,7 +5,7 @@
 ### How do I use this feature?
 
 <details>
-  <summary>How to Send/Sync custom data types?</summary>
+  <summary>How to Send/Sync custom data types? (click me)</summary>
   
   Mirage can automatically create Serialization functions for many custom data types when your scripts are compiled.
 
@@ -25,21 +25,21 @@
   ```
 
   For More details 
-  - [DataTypes](https://mirror-networking.com/docs/Guides/DataTypes.html)
-  - [Serialization](https://mirror-networking.com/docs/Guides/Serialization.html)
+  - [DataTypes](./DataTypes.md)
+  - [Serialization](./Serialization.md)
 </details>
 
 
 ### How to Connect
 
 <details>
-  <summary>How to connect to games on same PC</summary>
+  <summary>How to connect to games on same PC (click me)</summary>
 
   Make sure the networkAddress field on NetworkManager or the Hud is set up `localHost`
 </details>
 
 <details>
-  <summary>How to connect to a different PC/Device on same network</summary>
+  <summary>How to connect to a different PC/Device on same network (click me)</summary>
 
   Set the networkAddress field to the LAN IP of the host `192.168.x.x`
 
@@ -51,7 +51,7 @@
 </details>
 
 <details>
-  <summary>How to connect to a different PC/Device over the internet </summary>
+  <summary>How to connect to a different PC/Device over the internet (click me)</summary>
 
   Set the networkAddress field to be the IP address of the host (google 'whats my IP')
 

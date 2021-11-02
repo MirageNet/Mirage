@@ -36,12 +36,12 @@ In the upcoming sections we will go through setting up a provider with the free 
 
 ### Amazon Web Services (AWS)
 
-See [AWS setup](https://mirror-networking.com/docs/Articles/Guides/DevServer/gcloud/index.html)
+See [AWS setup](./AWS/index.md)
 
 
 ### Google Compute Engine
 
-See this guides: [Google cloud setup](https://mirror-networking.com/docs/Articles/Guides/DevServer/gcloud/index.html)
+See this guides: [Google cloud setup](./gcloud/index.md)
 
 
 ### Microsoft Azure
