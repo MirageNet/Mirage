@@ -16,16 +16,24 @@ These messages are built in and used by NetworkSceneManager. If you are creating
 1) Mark `Player` as not ready, using <xref:Mirage.NetworkPlayer.SceneIsReady>
 2) Send `SceneMessage` to clients
 
-**Client**
+**Client** 
+
 *after receiving `SceneMessage`*
-3) (optional) Mark their local player as not ready 
+
+3) (optional) Mark local player as not ready 
 4) Load the scene
 
-*after loading finished
-5) Call <xref:Mirage.ClientObjectManager.PrepareToSpawnSceneObjects> (This will tell Mirage about any new scene objects)
-6) Send `SceneReadyMessage` to server
+*after loading finished*
 
-**Server**
+5) Call [ClientObjectManager.PrepareToSpawnSceneObjects](xref:Mirage.ClientObjectManager.PrepareToSpawnSceneObjects) (This will tell Mirage about any new scene objects)
+6) (optional) Mark local player as ready 
+7) Send `SceneReadyMessage` to server
+
+**Server** 
+
 *after receiving `SceneReadyMessage`*
-7) Mark the player as ready using: `player.SceneIsReady = true`
-8) Call <xref:Mirage.ServerObjectManager.SpawnVisibleObjects> or <xref:Mirage.ServerObjectManager.AddCharacter> (Mirage will send spawn message to client)
+
+8) Mark the player as ready using: `player.SceneIsReady = true`
+9) Call [ServerObjectManager.SpawnVisibleObjects](xref:Mirage.ServerObjectManager.SpawnVisibleObjects(Mirage.INetworkPlayer,System.Boolean)) or [ServerObjectManager.AddCharacter](xref:Mirage.ServerObjectManager.AddCharacter(Mirage.INetworkPlayer,Mirage.NetworkIdentity)) (Mirage will send spawn message to client)
+
+
