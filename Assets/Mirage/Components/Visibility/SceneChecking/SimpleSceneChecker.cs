@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Mirage
 {
-    public class SimpleSceneChecker : NetworkVisibility
+    public class SceneVisibilityChecker : NetworkVisibility
     {
-        static readonly ILogger logger = LogFactory.GetLogger<SimpleSceneChecker>();
+        static readonly ILogger logger = LogFactory.GetLogger<SceneVisibilityChecker>();
 
         public override bool OnCheckObserver(INetworkPlayer player)
         {
