@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Mirage.Experimental
 {
     [AddComponentMenu("Network/Experimental/NetworkLerpRigidbody")]
-    [HelpURL("https://mirror-networking.com/docs/Components/NetworkLerpRigidbody.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkLerpRigidbody.html")]
     public class NetworkLerpRigidbody : NetworkBehaviour
     {
         [Header("Settings")]
