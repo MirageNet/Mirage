@@ -172,6 +172,8 @@ namespace Mirage
         /// </summary>
         public NetworkWorld World { get; internal set; }
 
+        [Header("Runtime References")]
+        
         /// <summary>
         /// The ServerObjectManager is present only for server/host instances.
         /// </summary>
