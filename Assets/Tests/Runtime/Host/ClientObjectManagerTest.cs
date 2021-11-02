@@ -22,7 +22,7 @@ namespace Mirage.Tests.Runtime.Host
                 clientObjectManager.OnSpawn(msg);
             });
 
-            Assert.That(ex.Message, Is.EqualTo($"OnSpawn has empty PrefabHash and scene Id for netId: {msg.netId}"));
+            Assert.That(ex.Message, Is.EqualTo($"OnSpawn has empty prefabHash and sceneId for netId: {msg.netId}"));
         }
 
         [UnityTest]
