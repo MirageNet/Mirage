@@ -13,7 +13,7 @@ namespace Mirage
     [DisallowMultipleComponent]
     [AddComponentMenu("Network/NetworkSceneChecker")]
     [RequireComponent(typeof(NetworkIdentity))]
-    [HelpURL("https://mirror-networking.com/docs/Components/NetworkSceneChecker.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkSceneChecker.html")]
     public class NetworkSceneChecker : NetworkVisibility
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkSceneChecker));
