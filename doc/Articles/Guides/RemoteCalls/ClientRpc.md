@@ -1,10 +1,60 @@
 # ClientRpc Calls
 
-ClientRpc calls are sent from objects on the server to objects on clients. They can be sent from any server object with a NetworkIdentity that has been spawned. Since the server has authority, then there no security issues with server objects being able to send these calls. To make a function into a ClientRpc call, add the [ClientRpc] custom attribute to it. This function will now be run on clients when it is called on the server. Any parameters of [allowed data type](../DataTypes.md) will automatically be passed to the clients with the ClientRpc call..
+ClientRpc are sent from NetworkBehaviours on the server to Behaviours on the client. They can be sent from any NetworkBehaviour that has been spawned.
 
-ClientRpc functions cannot be static.  They must return `void`
+To make a function into a ClientRpc add  `[ClientRpc]` directly above the function.
 
-ClientRpc messages are only sent to observers of an object according to its [Network Visibility](../Visibility.md). character objects are always obeservers of themselves. In some cases, you may want to exclude the owner client when calling a ClientRpc.  This is done with the `excludeOwner` option: `[ClientRpc(excludeOwner = true)]`.
+```cs
+[ClientRpc]
+public void MyRpcFunction() 
+{
+    // code to invoke on client
+}
+```
+
+ClientRpc functions can't be static and must return `void`.
+
+## RpcTarget
+
+There are 3 target modes for ClientRpc:
+- Observers (default)
+- Owner
+- Player
+
+### RpcTarget.Observers
+
+This is the default target.
+
+This will send the RPC message to only the observers of an object according to its [Network Visibility](../Visibility.md). If there is no Network Visibility on the object it will send to all players.
+
+### RpcTarget.Owner
+
+This will send the RPC message to only the owner of the object.
+
+### RpcTarget.Player
+
+This will send the RPC message to the NetworkPlayer that is passed into the call.
+
+```cs
+[ClientRpc(target = RpcTarget.Player)]
+public void MyRpcFunction(NetworkPlayer target) 
+{
+    // code to invoke on client
+}
+```
+
+Mirage will use the `NetworkPlayer target` to know where to sent it, but it will not send the `target` value. Because of this its value will always be null on the client.
+
+## Exclude owner
+
+You may want to exclude the owner client when calling a ClientRpc.  This is done with the `excludeOwner` option: `[ClientRpc(excludeOwner = true)]`.
+
+
+## Channel
+
+RPC can be sent using either the Reliable or Unreliable channels. `[ClientRpc(channel = Channel.Reliable)]`
+
+# Examples 
 
 ``` cs
 public class Player : NetworkBehaviour
