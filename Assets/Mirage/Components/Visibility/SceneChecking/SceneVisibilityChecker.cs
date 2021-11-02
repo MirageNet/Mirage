@@ -14,7 +14,7 @@ namespace Mirage
             NetworkIdentity character = player.Identity;
             if (character == null)
             {
-                if (logger.LogEnabled()) logger.LogWarning($"SceneChecker: {player} had no character");
+                if (logger.LogEnabled()) logger.Log($"SceneChecker: {player} had no character");
                 return false;
             }
 
@@ -27,7 +27,7 @@ namespace Mirage
 
             Scene thisScene = gameObject.scene;
             bool visible = playerScene == thisScene;
-            if (logger.LogEnabled()) logger.LogWarning($"SceneChecker: {player} can see '{this}': {visible}");
+            if (logger.LogEnabled()) logger.Log($"SceneChecker: {player} can see '{this}': {visible}");
             return visible;
         }
 
