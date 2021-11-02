@@ -1,3 +1,10 @@
+# [111.1.0](https://github.com/MirageNet/Mirage/compare/v111.0.0...v111.1.0) (2021-11-02)
+
+
+### Features
+
+* **NetworkVisibility:** adding new visibility scripts for checking scenes ([#958](https://github.com/MirageNet/Mirage/issues/958)) ([6725625](https://github.com/MirageNet/Mirage/commit/67256253934b34fec84fd644a11c34a982980ea8))
+
 # [111.0.0](https://github.com/MirageNet/Mirage/compare/v110.0.0...v111.0.0) (2021-11-01)
 
 
