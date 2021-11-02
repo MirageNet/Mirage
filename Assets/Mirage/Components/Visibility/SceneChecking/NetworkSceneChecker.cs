@@ -14,7 +14,7 @@ namespace Mirage
     [AddComponentMenu("Network/NetworkSceneChecker")]
     [RequireComponent(typeof(NetworkIdentity))]
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkSceneChecker.html")]
-    [System.Obsolete("This checker is Inefficient, Use SimpleSceneChecker Instead")]
+    [System.Obsolete("This checker is inefficient, Use SimpleSceneChecker Instead")]
     public class NetworkSceneChecker : NetworkVisibility
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkSceneChecker));
