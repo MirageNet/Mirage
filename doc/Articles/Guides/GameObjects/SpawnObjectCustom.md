@@ -8,13 +8,6 @@ The spawn / unspawn delegates will look something like this:
 
 **Spawn Handler**
 ``` cs
-GameObject SpawnDelegate(Vector3 position, System.Guid assetId) 
-{
-    // do stuff here
-}
-```
-or 
-``` cs
 GameObject SpawnDelegate(SpawnMessage msg) 
 {
     // do stuff here
@@ -29,27 +22,27 @@ void UnSpawnDelegate(GameObject spawned)
 }
 ```
 
-When a prefab is saved its `assetId` field will be automatically set. If you want to create prefabs at runtime you will have to generate a new GUID.
+When a prefab is saved it's `PrefabHash` field will be automatically set. If you want to create prefabs at runtime you will have to generate a new Hash instead.
 
 **Generate prefab at runtime**
 ``` cs
-// generate a new unique assetId 
-System.Guid creatureAssetId = System.Guid.NewGuid();
+// this is just one way of creating a random hash
+System.Guid creatureHash = System.Guid.NewGuid().ToString().GetStableHashCode();
 
-// register handlers for the new assetId
-ClientScene.RegisterSpawnHandler(creatureAssetId, SpawnCreature, UnSpawnCreature);
+// register handlers for the new PrefabHash
+ClientScene.RegisterSpawnHandler(creatureHash, SpawnCreature, UnSpawnCreature);
 ```
 
 **Use existing prefab**
 ```cs
 // register prefab you'd like to custom spawn and pass in handlers
-ClientScene.RegisterPrefab(coinAssetId, SpawnCoin, UnSpawnCoin);
+ClientScene.RegisterPrefab(coinPrefabHash, SpawnCoin, UnSpawnCoin);
 ```
 
 **Spawn on Server**
 ```cs
 // spawn a coin - SpawnCoin is called on client
-NetworkServer.Spawn(gameObject, coinAssetId);
+NetworkServer.Spawn(gameObject, coinPrefabHash);
 ```
 
 The spawn functions themselves are implemented with the delegate signature. Here is the coin spawner. The `SpawnCreature` would look the same, but have different spawn logic:
@@ -83,39 +76,52 @@ namespace Mirage.Examples
     public class PrefabPoolManager : MonoBehaviour
     {
         [Header("Settings")]
+        public ClientObjectManager clientObjectManager;
         public int startSize = 5;
         public int maxSize = 20;
-        public GameObject prefab;
+        public NetworkIdentity prefab;
 
         [Header("Debug")]
-        [SerializeField] Queue<GameObject> pool;
         [SerializeField] int currentCount;
 
+        Queue<NetworkIdentity> pool;
 
         void Start()
         {
             InitializePool();
 
-            ClientScene.RegisterPrefab(prefab, SpawnHandler, UnspawnHandler);
+            clientObjectManager.RegisterPrefab(prefab, SpawnHandler, UnspawnHandler);
+        }
+
+        // used by clientObjectManager.RegisterPrefab
+        NetworkIdentity SpawnHandler(SpawnMessage msg)
+        {
+            return GetFromPool(msg.position, msg.rotation);
+        }
+
+        // used by clientObjectManager.RegisterPrefab
+        void UnspawnHandler(NetworkIdentity spawned)
+        {
+            PutBackInPool(spawned);
         }
 
         void OnDestroy()
         {
-            ClientScene.UnregisterPrefab(prefab);
+            clientObjectManager.UnregisterPrefab(prefab);
         }
 
         private void InitializePool()
         {
-            pool = new Queue<GameObject>();
+            pool = new Queue<NetworkIdentity>();
             for (int i = 0; i < startSize; i++)
             {
-                GameObject next = CreateNew();
+                NetworkIdentity next = CreateNew();
 
                 pool.Enqueue(next);
             }
         }
 
-        GameObject CreateNew()
+        NetworkIdentity CreateNew()
         {
             if (currentCount > maxSize)
             {
@@ -124,23 +130,11 @@ namespace Mirage.Examples
             }
 
             // use this object as parent so that objects dont crowd hierarchy
-            GameObject next = Instantiate(prefab, transform);
+            NetworkIdentity next = Instantiate(prefab, transform);
             next.name = $"{prefab.name}_pooled_{currentCount}";
-            next.SetActive(false);
+            next.gameObject.SetActive(false);
             currentCount++;
             return next;
-        }
-
-        // used by ClientScene.RegisterPrefab
-        GameObject SpawnHandler(SpawnMessage msg)
-        {
-            return GetFromPool(msg.position, msg.rotation);
-        }
-
-        // used by ClientScene.RegisterPrefab
-        void UnspawnHandler(GameObject spawned)
-        {
-            PutBackInPool(spawned);
         }
 
         /// <summary>
@@ -151,9 +145,9 @@ namespace Mirage.Examples
         /// <param name="position"></param>
         /// <param name="rotation"></param>
         /// <returns></returns>
-        public GameObject GetFromPool(Vector3 position, Quaternion rotation)
+        public NetworkIdentity GetFromPool(Vector3 position, Quaternion rotation)
         {
-            GameObject next = pool.Count > 0
+            NetworkIdentity next = pool.Count > 0
                 ? pool.Dequeue() // take from pool
                 : CreateNew(); // create new because pool is empty
 
@@ -163,7 +157,7 @@ namespace Mirage.Examples
             // set position/rotation and set active
             next.transform.position = position;
             next.transform.rotation = rotation;
-            next.SetActive(true);
+            next.gameObject.SetActive(true);
             return next;
         }
 
@@ -173,10 +167,10 @@ namespace Mirage.Examples
         /// <para>Used on client by ClientScene to unspawn objects</para>
         /// </summary>
         /// <param name="spawned"></param>
-        public void PutBackInPool(GameObject spawned)
+        public void PutBackInPool(NetworkIdentity spawned)
         {
             // disable object
-            spawned.SetActive(false);
+            spawned.gameObject.SetActive(false);
 
             // add back to pool
             pool.Enqueue(spawned);
@@ -227,17 +221,19 @@ In the fire logic on the player, make it use the game object pool:
 void CmdFire()
 {
     // Set up bullet on server
-    GameObject bullet = prefabPoolManager.GetFromPool(transform.position + transform.forward, Quaternion.identity);
-    bullet.GetComponent<Rigidbody>().velocity = transform.forward * 4;
+    NetworkIdentity bullet = prefabPoolManager.GetFromPool(transform.position + transform.forward, Quaternion.identity);
+
+    Rigidbody rigidBody = bullet.GetComponent<Rigidbody>();
+    rigidBody.velocity = transform.forward * 4;
 
     // tell server to send SpawnMessage, which will call SpawnHandler on client
-    NetworkServer.Spawn(bullet);
+    ServerObjectManager.Spawn(bullet);
 
     // destroy bullet after 2 seconds
-    StartCoroutine(Destroy(bullet, 2.0f));
+    StartCoroutine(DestroyDelay(bullet, 2.0f));
 }
 
-public IEnumerator Destroy(GameObject go, float delay)
+IEnumerator DestroyDelay(NetworkIdentity go, float delay)
 {
     yield return new WaitForSeconds(delay);
 
@@ -245,7 +241,7 @@ public IEnumerator Destroy(GameObject go, float delay)
     prefabPoolManager.PutBackInPool(go);
 
     // tell server to send ObjectDestroyMessage, which will call UnspawnHandler on client
-    NetworkServer.UnSpawn(go);
+    ServerObjectManager.Destroy(go, destroyServerObject: false);
 }
 ```
 
