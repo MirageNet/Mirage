@@ -177,7 +177,7 @@ namespace Mirage.Tests
         }
 
         [Test]
-        public void GetSetAssetId()
+        public void GetSetPrefabHash()
         {
             // assign a guid
             int hash = 123456789;
@@ -188,7 +188,7 @@ namespace Mirage.Tests
         }
 
         [Test]
-        public void SetAssetId_GivesErrorIfOneExists()
+        public void SetPrefabHash_GivesErrorIfOneExists()
         {
             int hash1 = "Assets/Prefab/myPrefab.asset".GetStableHashCode();
             identity.PrefabHash = hash1;
@@ -200,13 +200,13 @@ namespace Mirage.Tests
                 identity.PrefabHash = hash2;
             });
 
-            Assert.That(exception.Message, Is.EqualTo($"Can not Set AssetId on NetworkIdentity '{identity.name}' because it already had an assetId, current assetId '{hash1}', attempted new assetId '{hash2}'"));
+            Assert.That(exception.Message, Is.EqualTo($"Can not Set PrefabHash on NetworkIdentity '{identity.name}' because it already had an PrefabHash, current PrefabHash '{hash1}', attempted new PrefabHash '{hash2}'"));
             // guid was changed
             Assert.That(identity.PrefabHash, Is.EqualTo(hash1));
         }
 
         [Test]
-        public void SetAssetId_GivesErrorForEmptyGuid()
+        public void SetPrefabHash_GivesErrorForEmptyGuid()
         {
             int hash1 = "Assets/Prefab/myPrefab.asset".GetStableHashCode();
             identity.PrefabHash = hash1;
@@ -218,14 +218,14 @@ namespace Mirage.Tests
                 identity.PrefabHash = hash2;
             });
 
-            Assert.That(exception.Message, Is.EqualTo($"Can not set AssetId to empty guid on NetworkIdentity '{identity.name}', old assetId '{hash1}'"));
+            Assert.That(exception.Message, Is.EqualTo($"Can not set PrefabHash to empty guid on NetworkIdentity '{identity.name}', old PrefabHash '{hash1}'"));
             // guid was NOT changed
             Assert.That(identity.PrefabHash, Is.EqualTo(hash1));
         }
         [Test]
-        public void SetAssetId_DoesNotGiveErrorIfBothOldAndNewAreEmpty()
+        public void SetPrefabHash_DoesNotGiveErrorIfBothOldAndNewAreEmpty()
         {
-            Debug.Assert(identity.PrefabHash == 0, "assetId needs to be empty at the start of this test");
+            Debug.Assert(identity.PrefabHash == 0, "PrefabHash needs to be empty at the start of this test");
             // assign a guid
             int hash2 = 0;
             // expect no errors
@@ -321,9 +321,9 @@ namespace Mirage.Tests
         }
 
         [Test]
-        public void OnValidateSetupIDsSetsEmptyAssetIDForSceneObject()
+        public void OnValidateSetupIDsSetsEmptyPrefabHashForSceneObject()
         {
-            // OnValidate will have been called. make sure that assetId was set
+            // OnValidate will have been called. make sure that PrefabHash was set
             // to 0 empty and not anything else, because this is a scene object
             Assert.That(identity.PrefabHash, Is.EqualTo(0));
         }

@@ -96,7 +96,7 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         [Test]
-        public void SpawnWithAssetId()
+        public void SpawnWithPrefabHash()
         {
             int hash = Guid.NewGuid().GetHashCode();
             serverObjectManager.Spawn(gameObject, hash, server.LocalPlayer);

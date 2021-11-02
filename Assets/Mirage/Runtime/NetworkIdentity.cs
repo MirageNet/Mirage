@@ -249,25 +249,6 @@ namespace Mirage
 
         [SerializeField, HideInInspector] int _prefabHash;
 
-        /// <remarks>
-        /// The AssetId trick:
-        /// <list type="bullet">
-        ///     <item><description>
-        ///         Ideally we would have a serialized 'Guid m_AssetId' but Unity can't
-        ///         serialize it because Guid's internal bytes are private
-        ///     </description></item>
-        ///     <item><description>
-        ///         UNET used 'NetworkHash128' originally, with byte0, ..., byte16
-        ///         which works, but it just unnecessary extra code
-        ///     </description></item>
-        ///     <item><description>
-        ///         Using just the Guid string would work, but it's 32 chars long and
-        ///         would then be sent over the network as 64 instead of 16 bytes
-        ///     </description></item>
-        /// </list>
-        /// The solution is to serialize the string internally here and then
-        /// use the real 'Guid' type for everything else via .assetId
-        /// </remarks>
         public int PrefabHash
         {
             get
@@ -291,19 +272,19 @@ namespace Mirage
                 // new is empty
                 if (newID == 0)
                 {
-                    throw new ArgumentException($"Can not set AssetId to empty guid on NetworkIdentity '{name}', old assetId '{oldId}'");
+                    throw new ArgumentException($"Can not set PrefabHash to empty guid on NetworkIdentity '{name}', old PrefabHash '{oldId}'");
                 }
 
                 // old not empty
                 if (oldId != 0)
                 {
-                    throw new InvalidOperationException($"Can not Set AssetId on NetworkIdentity '{name}' because it already had an assetId, current assetId '{oldId}', attempted new assetId '{newID}'");
+                    throw new InvalidOperationException($"Can not Set PrefabHash on NetworkIdentity '{name}' because it already had an PrefabHash, current PrefabHash '{oldId}', attempted new PrefabHash '{newID}'");
                 }
 
                 // old is empty
                 _prefabHash = newID;
 
-                if (logger.LogEnabled()) logger.Log($"Settings AssetId on NetworkIdentity '{name}', new assetId '{newID}'");
+                if (logger.LogEnabled()) logger.Log($"Settings PrefabHash on NetworkIdentity '{name}', new PrefabHash '{newID}'");
             }
         }
 

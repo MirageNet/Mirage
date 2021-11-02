@@ -199,7 +199,7 @@ namespace Mirage
         /// Find the registered prefab for this asset id.
         /// Useful for debuggers
         /// </summary>
-        /// <param name="assetId">asset id of the prefab</param>
+        /// <param name="prefabHash">asset id of the prefab</param>
         /// <returns>true if prefab was registered</returns>
         public NetworkIdentity GetPrefab(int prefabHash)
         {
@@ -217,10 +217,10 @@ namespace Mirage
         /// Registers a prefab with the spawning system.
         /// <para>When a NetworkIdentity object is spawned on a server with NetworkServer.SpawnObject(), and the prefab that the object was created from was registered with RegisterPrefab(), the client will use that prefab to instantiate a corresponding client object with the same netId.</para>
         /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register those prefabs with the ClientScene.</para>
-        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of NetworkAssetIds and prefab references.</para>
+        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of PrefabHash and prefab references.</para>
         /// </summary>
         /// <param name="identity">A Prefab that will be spawned.</param>
-        /// <param name="newAssetId">An assetId to be assigned to this prefab. This allows a dynamically created game object to be registered for an already known asset Id.</param>
+        /// <param name="newPrefabHash">A hash to be assigned to this prefab. This allows a dynamically created game object to be registered for an already known asset Id.</param>
         public void RegisterPrefab(NetworkIdentity identity, int newPrefabHash)
         {
             identity.PrefabHash = newPrefabHash;
@@ -233,7 +233,7 @@ namespace Mirage
         /// Registers a prefab with the spawning system.
         /// <para>When a NetworkIdentity object is spawned on a server with NetworkServer.SpawnObject(), and the prefab that the object was created from was registered with RegisterPrefab(), the client will use that prefab to instantiate a corresponding client object with the same netId.</para>
         /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register those prefabs with the ClientScene.</para>
-        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of NetworkAssetIds and prefab references.</para>
+        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of PrefabHash and prefab references.</para>
         /// </summary>
         /// <param name="identity">A Prefab that will be spawned.</param>
         public void RegisterPrefab(NetworkIdentity identity)
@@ -246,7 +246,7 @@ namespace Mirage
         /// Registers a prefab with the spawning system.
         /// <para>When a NetworkIdentity object is spawned on a server with NetworkServer.SpawnObject(), and the prefab that the object was created from was registered with RegisterPrefab(), the client will use that prefab to instantiate a corresponding client object with the same netId.</para>
         /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register those prefabs with the ClientScene.</para>
-        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of NetworkAssetIds and prefab references.</para>
+        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of PrefabHash and prefab references.</para>
         /// </summary>
         /// <param name="identity">A Prefab that will be spawned.</param>
         /// <param name="spawnHandler">A method to use as a custom spawnhandler on clients.</param>
@@ -283,10 +283,10 @@ namespace Mirage
         #region Spawn Handler
 
         /// <summary>
-        /// This is an advanced spawning function that registers a custom assetId with the UNET spawning system.
-        /// <para>This can be used to register custom spawning methods for an assetId - instead of the usual method of registering spawning methods for a prefab. This should be used when no prefab exists for the spawned objects - such as when they are constructed dynamically at runtime from configuration data.</para>
+        /// This is an advanced spawning function that registers a custom prefabHash with the UNET spawning system.
+        /// <para>This can be used to register custom spawning methods for an prefabHash - instead of the usual method of registering spawning methods for a prefab. This should be used when no prefab exists for the spawned objects - such as when they are constructed dynamically at runtime from configuration data.</para>
         /// </summary>
-        /// <param name="assetId">Custom assetId string.</param>
+        /// <param name="prefabHash"></param>
         /// <param name="spawnHandler">A method to use as a custom spawnhandler on clients.</param>
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
         public void RegisterSpawnHandler(int prefabHash, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
@@ -300,7 +300,7 @@ namespace Mirage
         /// <summary>
         /// Removes a registered spawn handler function that was registered with ClientScene.RegisterHandler().
         /// </summary>
-        /// <param name="assetId">The assetId for the handler to be removed for.</param>
+        /// <param name="prefabHash">The prefabHash for the handler to be removed for.</param>
         public void UnregisterSpawnHandler(int prefabHash)
         {
             spawnHandlers.Remove(prefabHash);
@@ -395,9 +395,9 @@ namespace Mirage
         {
             if (msg.prefabHash == null && msg.sceneId == 0)
             {
-                throw new InvalidOperationException($"OnSpawn has empty assetId and scene Id for netId: {msg.netId}");
+                throw new InvalidOperationException($"OnSpawn has empty prefabHash and sceneId for netId: {msg.netId}");
             }
-            if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} assetID={msg.prefabHash} sceneId={msg.sceneId} pos={msg.position}");
+            if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} prefabHash={msg.prefabHash} sceneId={msg.sceneId} pos={msg.position}");
 
             // was the object already spawned?
             bool existing = Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity);
@@ -413,7 +413,7 @@ namespace Mirage
             if (identity == null)
             {
                 //object could not be found.
-                throw new InvalidOperationException($"Could not spawn assetId={msg.prefabHash} scene={msg.sceneId} netId={msg.netId}");
+                throw new InvalidOperationException($"Could not spawn prefabHash={msg.prefabHash} scene={msg.sceneId} netId={msg.netId}");
             }
 
             ApplySpawnPayload(identity, msg);
@@ -446,7 +446,7 @@ namespace Mirage
 
                 return obj;
             }
-            logger.LogError("Failed to spawn server object, did you forget to add it to the ClientObjectManager? assetId=" + msg.prefabHash + " netId=" + msg.netId);
+            logger.LogError("Failed to spawn server object, did you forget to add it to the ClientObjectManager? prefabHash=" + msg.prefabHash + " netId=" + msg.netId);
             return null;
         }
 
