@@ -639,7 +639,7 @@ namespace Mirage
 
             identity.StopServer();
 
-            identity.Reset();
+            identity.NetworkReset();
             // when unspawning, dont destroy the server's object
             if (destroyServerObject)
             {
