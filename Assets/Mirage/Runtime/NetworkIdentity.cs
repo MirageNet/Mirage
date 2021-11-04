@@ -259,7 +259,8 @@ namespace Mirage
             {
 #if UNITY_EDITOR
                 // This is important because sometimes OnValidate does not run (like when adding view to prefab with no child links)
-                if (_prefabHash == 0)
+                // also check for hash that is empty string, if it is, reset its ID to its real path
+                if (_prefabHash == 0 || _prefabHash == StringHash.EmptyString)
                     SetupIDs();
 #endif
                 return _prefabHash;
@@ -418,6 +419,11 @@ namespace Mirage
 
         void AssignAssetID(string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+
             _prefabHash = path.GetStableHashCode();
         }
 
