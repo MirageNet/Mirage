@@ -332,7 +332,7 @@ namespace Mirage
             }
             else
             {
-                identity.Reset();
+                identity.NetworkReset();
                 identity.gameObject.SetActive(false);
                 spawnableObjects[identity.sceneId] = identity;
             }

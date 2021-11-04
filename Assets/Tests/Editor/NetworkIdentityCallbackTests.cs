@@ -684,7 +684,7 @@ namespace Mirage.Tests
             identity.observers.Add(player1);
 
             // mark for reset and reset
-            identity.Reset();
+            identity.NetworkReset();
             Assert.That(identity.NetId, Is.EqualTo(0));
             Assert.That(identity.Owner, Is.Null);
         }

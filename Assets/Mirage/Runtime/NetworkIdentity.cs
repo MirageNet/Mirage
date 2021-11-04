@@ -175,7 +175,7 @@ namespace Mirage
         public NetworkWorld World { get; internal set; }
 
         [Header("Runtime References")]
-        
+
         /// <summary>
         /// The ServerObjectManager is present only for server/host instances.
         /// </summary>
@@ -1164,7 +1164,8 @@ namespace Mirage
         /// as people might want to be able to read the members inside OnDestroy(), and we have no way
         /// of invoking reset after OnDestroy is called.
         /// </summary>
-        internal void Reset()
+        // IMPORTANT: dont use `Reset` as function name because that is a unity callback
+        internal void NetworkReset()
         {
             ResetSyncObjects();
 
