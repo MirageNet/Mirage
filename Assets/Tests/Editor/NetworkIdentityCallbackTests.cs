@@ -141,7 +141,7 @@ namespace Mirage.Tests
             serverObjectManager.Server = server;
             networkServerGameObject.AddComponent<NetworkClient>();
 
-            gameObject = new GameObject();
+            gameObject = new GameObject($"Test go {TestContext.CurrentContext.Test.Name}");
             identity = gameObject.AddComponent<NetworkIdentity>();
             identity.Server = server;
             identity.ServerObjectManager = serverObjectManager;
@@ -289,10 +289,10 @@ namespace Mirage.Tests
             // -> make sure that one was assigned, and that the left part was
             //    left empty for scene hash
             Assert.That(identity.SceneId, Is.Not.Zero);
-            Assert.That(identity.SceneId & 0xFFFFFFFF00000000ul, Is.Zero);
+            Assert.That(identity.SceneId & 0xFFFF_FFFF_0000_0000ul, Is.Zero);
 
             // make sure that OnValidate added it to sceneIds dict
-            Assert.That(NetworkIdentityIdGenerator.sceneIds[(int)(identity.SceneId & 0x00000000FFFFFFFFul)], Is.Not.Null);
+            Assert.That(NetworkIdentityIdGenerator.sceneIds[(int)(identity.SceneId & 0x0000_0000_FFFF_FFFFul)], Is.Not.Null);
         }
 
         [Test]
@@ -302,15 +302,15 @@ namespace Mirage.Tests
             // -> make sure that one was assigned, and that the left part was
             //    left empty for scene hash
             Assert.That(identity.SceneId, Is.Not.Zero);
-            Assert.That(identity.SceneId & 0xFFFFFFFF00000000, Is.Zero, "scene hash should start empty");
+            Assert.That(identity.SceneId & 0xFFFF_FFFF_0000_0000ul, Is.Zero, "scene hash should start empty");
             ulong originalId = identity.SceneId;
 
             // set scene hash
             NetworkIdentityIdGenerator.SetSceneHash(identity);
 
             ulong newSceneId = identity.SceneId;
-            ulong newID = newSceneId & 0x00000000FFFFFFFF;
-            ulong newHash = newSceneId & 0xFFFFFFFF00000000;
+            ulong newID = newSceneId & 0x0000_0000_FFFF_FFFFul;
+            ulong newHash = newSceneId & 0xFFFF_FFFF_0000_0000ul;
 
             // make sure that the right part is still the random sceneid
             Assert.That(newID, Is.EqualTo(originalId));
