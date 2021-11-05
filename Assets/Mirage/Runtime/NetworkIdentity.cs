@@ -115,23 +115,23 @@ namespace Mirage
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
         /// </summary>
-        public bool IsClient => Client != null && Client.Active && NetId != 0;
+        public bool IsClient => IsSpawned && Client != null && Client.Active;
 
         /// <summary>
         /// Returns true if NetworkServer.active and server is not stopped.
         /// </summary>
-        public bool IsServer => Server != null && Server.Active && NetId != 0;
+        public bool IsServer => IsSpawned && Server != null && Server.Active;
 
         /// <summary>
         /// Returns true if we're on host mode.
         /// </summary>
-        public bool IsLocalClient => Server != null && Server.LocalClientActive;
+        public bool IsLocalClient => IsSpawned && Server != null && Server.LocalClientActive;
 
         /// <summary>
         /// This returns true if this object is the one that represents the player on the local machine.
         /// <para>This is set when the server has spawned an object for this particular client.</para>
         /// </summary>
-        public bool IsLocalPlayer => Client != null && Client.Player?.Identity == this;
+        public bool IsLocalPlayer => IsSpawned && Client != null && Client.Player?.Identity == this;
 
         /// <summary>
         /// This returns true if this object is the authoritative player object on the client.

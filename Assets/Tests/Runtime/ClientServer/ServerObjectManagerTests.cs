@@ -99,7 +99,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             NetworkIdentity sceneObject = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
             sceneObject.SetSceneId(42);
 
-            Debug.Assert(sceneObject.NetId == 0, "Identity should be unspawned for this test");
+            Debug.Assert(!sceneObject.IsSpawned, "Identity should be unspawned for this test");
             serverObjectManager.SpawnObjects();
             Assert.That(sceneObject.NetId, Is.Not.Zero);
         }
@@ -110,7 +110,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             NetworkIdentity sceneObject = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
             sceneObject.SetSceneId(0);
 
-            Debug.Assert(sceneObject.NetId == 0, "Identity should be unspawned for this test");
+            Debug.Assert(!sceneObject.IsSpawned, "Identity should be unspawned for this test");
             serverObjectManager.SpawnObjects();
             Assert.That(sceneObject.NetId, Is.Zero);
         }
