@@ -51,7 +51,7 @@ namespace Mirage
                     //   but it's still possible that we call LoadScene in Editor
                     //   for a previously unopened scene.
                     //   (and only do SetActive if this was actually a scene object)
-                    if (identity.HasSceneId())
+                    if (identity.IsSceneObject)
                     {
                         PrepareSceneObject(identity);
                     }

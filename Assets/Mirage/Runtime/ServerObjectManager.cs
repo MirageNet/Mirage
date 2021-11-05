@@ -82,7 +82,7 @@ namespace Mirage
             foreach (NetworkIdentity obj in Server.World.SpawnedIdentities.Reverse())
             {
                 // Unspawn all, but only destroy non-scene objects on server
-                DestroyObject(obj, !obj.HasSceneId());
+                DestroyObject(obj, !obj.IsSceneObject);
             }
 
             Server.World.ClearSpawnedObjects();
@@ -661,7 +661,7 @@ namespace Mirage
 #endif
 
             // If not a scene object
-            return identity.HasSceneId();
+            return identity.IsSceneObject;
         }
 
         private class NetworkIdentityComparer : IComparer<NetworkIdentity>
