@@ -89,7 +89,7 @@ namespace Mirage
         /// <summary>
         /// The id of the scene object to spawn
         /// </summary>
-        public ulong sceneId;
+        public ulong? sceneId;
         /// <summary>
         /// The id of the prefab to spawn
         /// <para>If sceneId != 0 then it is used instead of prefabHash</para>

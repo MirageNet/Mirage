@@ -9,7 +9,6 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
-
     [TestFixture]
     public class ServerObjectManagerTests : ClientServerSetup<MockComponent>
     {
@@ -90,19 +89,21 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void SpawnSceneObject()
         {
-            serverIdentity.sceneId = 42;
-            serverIdentity.gameObject.SetActive(false);
+            serverIdentity.SetSceneId(42);
+
+            Debug.Assert(serverIdentity.NetId == 0, "Identity should be unspawned for this test");
             serverObjectManager.SpawnObjects();
-            Assert.That(serverIdentity.gameObject.activeSelf, Is.False);
+            Assert.That(serverIdentity.NetId, Is.Not.Zero);
         }
 
         [Test]
-        public void SpawnPrefabObject()
+        public void DoesNotSpawnNonSceneObject()
         {
-            serverIdentity.sceneId = 0;
-            serverIdentity.gameObject.SetActive(false);
+            serverIdentity.SetSceneId(0);
+
+            Debug.Assert(serverIdentity.NetId == 0, "Identity should be unspawned for this test");
             serverObjectManager.SpawnObjects();
-            Assert.That(serverIdentity.gameObject.activeSelf, Is.False);
+            Assert.That(serverIdentity.NetId, Is.Zero);
         }
 
         [Test]

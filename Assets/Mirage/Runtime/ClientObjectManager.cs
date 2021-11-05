@@ -149,7 +149,7 @@ namespace Mirage
             return identity.NetId == 0 &&
                    identity.gameObject.hideFlags != HideFlags.NotEditable &&
                    identity.gameObject.hideFlags != HideFlags.HideAndDontSave &&
-                   identity.sceneId != 0;
+                   identity.HasSceneId();
         }
 
         // this is called from message handler for Owner message
@@ -178,7 +178,7 @@ namespace Mirage
 
             foreach (NetworkIdentity obj in sceneObjects)
             {
-                spawnableObjects.Add(obj.sceneId, obj);
+                spawnableObjects.Add(obj.SceneId, obj);
             }
         }
 
@@ -326,7 +326,7 @@ namespace Mirage
             {
                 handler(identity);
             }
-            else if (identity.sceneId == 0)
+            else if (!identity.HasSceneId())
             {
                 Destroy(identity.gameObject);
             }
@@ -334,7 +334,7 @@ namespace Mirage
             {
                 identity.NetworkReset();
                 identity.gameObject.SetActive(false);
-                spawnableObjects[identity.sceneId] = identity;
+                spawnableObjects[identity.SceneId] = identity;
             }
 
             Client.World.RemoveIdentity(identity);
@@ -393,7 +393,7 @@ namespace Mirage
 
         internal void OnSpawn(SpawnMessage msg)
         {
-            if (msg.prefabHash == null && msg.sceneId == 0)
+            if (msg.prefabHash == null && msg.sceneId == null)
             {
                 throw new InvalidOperationException($"OnSpawn has empty prefabHash and sceneId for netId: {msg.netId}");
             }
@@ -405,9 +405,9 @@ namespace Mirage
             if (!existing)
             {
                 //is the object on the prefab or scene object lists?
-                identity = msg.sceneId == 0
-                    ? SpawnPrefab(msg)
-                    : SpawnSceneObject(msg);
+                identity = msg.sceneId.HasValue
+                    ? SpawnSceneObject(msg)
+                    : SpawnPrefab(msg);
             }
 
             if (identity == null)
@@ -430,7 +430,7 @@ namespace Mirage
                 NetworkIdentity obj = handler(msg);
                 if (obj == null)
                 {
-                    logger.LogWarning("Client spawn handler for " + msg.prefabHash + " returned null");
+                    logger.LogWarning($"Client spawn handler for {msg.prefabHash} returned null");
                     return null;
                 }
                 return obj;
@@ -441,7 +441,7 @@ namespace Mirage
                 NetworkIdentity obj = Instantiate(prefab, msg.position, msg.rotation);
                 if (logger.LogEnabled())
                 {
-                    logger.Log("Client spawn handler instantiating [netId:" + msg.netId + " asset ID:" + msg.prefabHash + " pos:" + msg.position + " rotation: " + msg.rotation + "]");
+                    logger.Log($"Client spawn handler instantiating [netId:{msg.netId} asset ID:{msg.prefabHash} pos:{msg.position} rotation: {msg.rotation}]");
                 }
 
                 return obj;
@@ -452,21 +452,21 @@ namespace Mirage
 
         internal NetworkIdentity SpawnSceneObject(SpawnMessage msg)
         {
-            NetworkIdentity spawnedId = SpawnSceneObject(msg.sceneId);
-            if (spawnedId == null)
+            NetworkIdentity spawned = SpawnSceneObject(msg.sceneId.Value);
+            if (spawned == null)
             {
-                logger.LogError("Spawn scene object not found for " + msg.sceneId.ToString("X") + " SpawnableObjects.Count=" + spawnableObjects.Count);
+                logger.LogError($"Spawn scene object not found for {msg.sceneId} SpawnableObjects.Count={spawnableObjects.Count}");
 
                 // dump the whole spawnable objects dict for easier debugging
                 if (logger.LogEnabled())
                 {
                     foreach (KeyValuePair<ulong, NetworkIdentity> kvp in spawnableObjects)
-                        logger.Log("Spawnable: SceneId=" + kvp.Key + " name=" + kvp.Value.name);
+                        logger.Log($"Spawnable: SceneId={kvp.Key} name={kvp.Value.name}");
                 }
             }
 
-            if (logger.LogEnabled()) logger.Log("Client spawn for [netId:" + msg.netId + "] [sceneId:" + msg.sceneId + "] obj:" + spawnedId);
-            return spawnedId;
+            if (logger.LogEnabled()) logger.Log($"Client spawn for [netId:{msg.netId}] [sceneId:{msg.sceneId}] obj:{spawned}");
+            return spawned;
         }
 
         NetworkIdentity SpawnSceneObject(ulong sceneId)
@@ -476,7 +476,7 @@ namespace Mirage
                 spawnableObjects.Remove(sceneId);
                 return identity;
             }
-            logger.LogWarning("Could not find scene object with sceneId:" + sceneId.ToString("X"));
+            logger.LogWarning($"Could not find scene object with sceneId:{sceneId}");
             return null;
         }
 
