@@ -146,7 +146,7 @@ namespace Mirage
         bool ConsiderForSpawning(NetworkIdentity identity)
         {
             // not spawned yet, not hidden, etc.?
-            return identity.NetId == 0 &&
+            return !identity.IsSpawned &&
                    identity.gameObject.hideFlags != HideFlags.NotEditable &&
                    identity.gameObject.hideFlags != HideFlags.HideAndDontSave &&
                    identity.IsSceneObject;

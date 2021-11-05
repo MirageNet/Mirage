@@ -342,7 +342,7 @@ namespace Mirage
 
         void Respawn(NetworkIdentity identity)
         {
-            if (identity.NetId == 0)
+            if (!identity.IsSpawned)
             {
                 // If the object has not been spawned, then do a full spawn and update observers
                 Spawn(identity.gameObject, identity.Owner);
@@ -529,7 +529,7 @@ namespace Mirage
             if (owner == Server.LocalPlayer)
                 identity.HasAuthority = true;
 
-            if (identity.NetId == 0)
+            if (!identity.IsSpawned)
             {
                 // the object has not been spawned yet
                 identity.NetId = GetNextNetworkId();
@@ -553,8 +553,8 @@ namespace Mirage
 
                 ArraySegment<byte> payload = CreateSpawnMessagePayload(isOwner, identity, ownerWriter, observersWriter);
 
-                int? prefabHash = identity.PrefabHash != 0 ? identity.PrefabHash : default(int?);
-                ulong? sceneId = identity.SceneId != 0 ? identity.SceneId : default(ulong?);
+                int? prefabHash = identity.IsPrefab ? identity.PrefabHash : default(int?);
+                ulong? sceneId = identity.IsSceneObject ? identity.SceneId : default(ulong?);
 
                 Transform transform = identity.transform;
 
