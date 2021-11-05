@@ -66,6 +66,64 @@ namespace Mirage.Tests.Runtime.ClientServer
                 clientIdentity.RemoveClientAuthority();
             });
         }
+
+        [Test]
+        public void IsSceneObject()
+        {
+            NetworkIdentity clone = CreateNetworkIdentity();
+
+            clone.SetSceneId(40);
+            Assert.That(clone.IsSceneObject, Is.True);
+        }
+        [Test]
+        public void IsNotSceneObject()
+        {
+            NetworkIdentity clone = CreateNetworkIdentity();
+
+            clone.SetSceneId(0);
+            Assert.That(clone.IsSceneObject, Is.False);
+        }
+        [Test]
+        public void IsPrefab()
+        {
+            NetworkIdentity clone = CreateNetworkIdentity();
+
+            clone.PrefabHash = 23232;
+            Assert.That(clone.IsPrefab, Is.True);
+        }
+        [Test]
+        public void IsNotPrefab()
+        {
+            NetworkIdentity clone = CreateNetworkIdentity();
+
+            clone.PrefabHash = 0;
+            Assert.That(clone.IsPrefab, Is.False);
+        }
+        [Test]
+        public void IsNotPrefabIfScenObject()
+        {
+            NetworkIdentity clone = CreateNetworkIdentity();
+
+            clone.PrefabHash = 23232;
+            clone.SetSceneId(422);
+            Assert.That(clone.IsPrefab, Is.False);
+        }
+        [Test]
+        public void IsSpawned()
+        {
+            NetworkIdentity clone = CreateNetworkIdentity();
+            clone.NetId = 20;
+
+            Assert.That(clone.IsSpawned, Is.True);
+        }
+        [Test]
+        public void IsNotSpawned()
+        {
+            NetworkIdentity clone = CreateNetworkIdentity();
+            clone.NetId = 0;
+
+            Assert.That(clone.IsSpawned, Is.False);
+        }
     }
 
     public class NetworkIdentityAuthorityTests : ClientServerSetup<MockComponent>
