@@ -147,8 +147,22 @@ namespace Mirage
         public void ReplaceCharacter(INetworkPlayer player, GameObject character, int prefabHash, bool keepAuthority = false)
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
-            identity.PrefabHash = prefabHash;
-            ReplaceCharacter(player, identity, keepAuthority);
+            ReplaceCharacter(player, identity, prefabHash, keepAuthority);
+        }
+
+        /// <summary>
+        /// This replaces the player object for a connection with a different player object. The old player object is not destroyed.
+        /// <para>If a connection already has a player object, this can be used to replace that object with a different player object. This does NOT change the ready state of the connection, so it can safely be used while changing scenes.</para>
+        /// </summary>
+        /// <param name="player">Connection which is adding the player.</param>
+        /// <param name="character">Player object spawned for the player.</param>
+        /// <param name="prefabHash"></param>
+        /// <param name="keepAuthority">Does the previous player remain attached to this connection?</param>
+        /// <returns></returns>
+        public void ReplaceCharacter(INetworkPlayer player, NetworkIdentity character, int prefabHash, bool keepAuthority = false)
+        {
+            character.PrefabHash = prefabHash;
+            ReplaceCharacter(player, character, keepAuthority);
         }
 
         /// <summary>
