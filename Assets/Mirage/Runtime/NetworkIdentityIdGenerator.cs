@@ -219,8 +219,8 @@ namespace Mirage
         /// </summary>
         class IdentityWrapper
         {
-            const long ID_MASK = (long)0x00000000FFFFFFFFul;
-            const long HASH_MASK = unchecked((long)0xFFFFFFFF00000000ul);
+            const long ID_MASK = (long)0x0000_0000_FFFF_FFFFul;
+            const long HASH_MASK = unchecked((long)0xFFFF_FFFF_0000_0000ul);
             readonly NetworkIdentity identity;
             readonly SerializedObject _serializedObject;
             readonly SerializedProperty _prefabHashProp;
@@ -253,7 +253,8 @@ namespace Mirage
                 get => (int)(_sceneIdProp.intValue & ID_MASK);
                 set
                 {
-                    _sceneIdProp.longValue = (_sceneIdProp.longValue & HASH_MASK) | (long)value;
+                    // have to mask incoming number incase it is negative
+                    _sceneIdProp.longValue = (_sceneIdProp.longValue & HASH_MASK) | (value & ID_MASK);
                     _serializedObject.ApplyModifiedProperties();
                 }
             }
