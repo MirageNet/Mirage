@@ -245,7 +245,7 @@ namespace Mirage
             var infos = new List<NetworkIdentityInfo>
             {
                 GetAssetId(identity),
-                GetString("Scene ID", identity.sceneId.ToString("X"))
+                GetString("Scene ID", identity.SceneId.ToString("X"))
             };
 
             if (Application.isPlaying)

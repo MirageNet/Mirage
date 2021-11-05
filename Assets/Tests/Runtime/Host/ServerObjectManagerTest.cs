@@ -32,9 +32,9 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ValidateSceneObject()
         {
-            identity.sceneId = 42;
+            identity.SetSceneId(42);
             Assert.That(serverObjectManager.ValidateSceneObject(identity), Is.True);
-            identity.sceneId = 0;
+            identity.SetSceneId(0);
             Assert.That(serverObjectManager.ValidateSceneObject(identity), Is.False);
         }
 

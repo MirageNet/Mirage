@@ -198,9 +198,10 @@ namespace Mirage.Tests.Runtime.Host
             var prefabObject = new GameObject("prefab", typeof(NetworkIdentity));
             NetworkIdentity identity = prefabObject.GetComponent<NetworkIdentity>();
             identity.PrefabHash = hash;
-            clientObjectManager.spawnableObjects.Add(0, identity);
+            ulong sceneId = 10ul;
+            clientObjectManager.spawnableObjects.Add(sceneId, identity);
 
-            NetworkIdentity result = clientObjectManager.SpawnSceneObject(new SpawnMessage { sceneId = 0, prefabHash = hash });
+            NetworkIdentity result = clientObjectManager.SpawnSceneObject(new SpawnMessage { sceneId = sceneId, prefabHash = hash });
 
             Assert.That(result, Is.SameAs(identity));
 

@@ -288,11 +288,11 @@ namespace Mirage.Tests
             // OnValidate will have assigned a random sceneId of format 0x00000000FFFFFFFF
             // -> make sure that one was assigned, and that the left part was
             //    left empty for scene hash
-            Assert.That(identity.sceneId, Is.Not.Zero);
-            Assert.That(identity.sceneId & 0xFFFFFFFF00000000, Is.EqualTo(0x0000000000000000));
+            Assert.That(identity.SceneId, Is.Not.Zero);
+            Assert.That(identity.SceneId & 0xFFFFFFFF00000000ul, Is.Zero);
 
             // make sure that OnValidate added it to sceneIds dict
-            Assert.That(NetworkIdentity.sceneIds[identity.sceneId], Is.Not.Null);
+            Assert.That(NetworkIdentityIdGenerator.sceneIds[(int)(identity.SceneId & 0x00000000FFFFFFFFul)], Is.Not.Null);
         }
 
         [Test]
@@ -301,23 +301,26 @@ namespace Mirage.Tests
             // Awake will have assigned a random sceneId of format 0x00000000FFFFFFFF
             // -> make sure that one was assigned, and that the left part was
             //    left empty for scene hash
-            Assert.That(identity.sceneId, !Is.Zero);
-            Assert.That(identity.sceneId & 0xFFFFFFFF00000000, Is.EqualTo(0x0000000000000000));
-            ulong rightPart = identity.sceneId;
+            Assert.That(identity.SceneId, Is.Not.Zero);
+            Assert.That(identity.SceneId & 0xFFFFFFFF00000000, Is.Zero, "scene hash should start empty");
+            ulong originalId = identity.SceneId;
 
             // set scene hash
-            identity.SetSceneIdSceneHashPartInternal();
+            NetworkIdentityIdGenerator.SetSceneHash(identity);
+
+            ulong newSceneId = identity.SceneId;
+            ulong newID = newSceneId & 0x00000000FFFFFFFF;
+            ulong newHash = newSceneId & 0xFFFFFFFF00000000;
 
             // make sure that the right part is still the random sceneid
-            Assert.That(identity.sceneId & 0x00000000FFFFFFFF, Is.EqualTo(rightPart));
+            Assert.That(newID, Is.EqualTo(originalId));
 
             // make sure that the left part is a scene hash now
-            Assert.That(identity.sceneId & 0xFFFFFFFF00000000, !Is.Zero);
-            ulong finished = identity.sceneId;
+            Assert.That(newHash, Is.Not.Zero);
 
             // calling it again should said the exact same hash again
-            identity.SetSceneIdSceneHashPartInternal();
-            Assert.That(identity.sceneId, Is.EqualTo(finished));
+            NetworkIdentityIdGenerator.SetSceneHash(identity);
+            Assert.That(identity.SceneId, Is.EqualTo(newSceneId), "should be same value as first time it was called");
         }
 
         [Test]

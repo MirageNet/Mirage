@@ -51,7 +51,7 @@ namespace Mirage
                     //   but it's still possible that we call LoadScene in Editor
                     //   for a previously unopened scene.
                     //   (and only do SetActive if this was actually a scene object)
-                    if (identity.sceneId != 0)
+                    if (identity.HasSceneId())
                     {
                         PrepareSceneObject(identity);
                     }
@@ -65,7 +65,7 @@ namespace Mirage
         static void PrepareSceneObject(NetworkIdentity identity)
         {
             // set scene hash
-            identity.SetSceneIdSceneHashPartInternal();
+            NetworkIdentityIdGenerator.SetSceneHash(identity);
 
             // safety check for prefabs with more than one NetworkIdentity
             GameObject prefabGO = PrefabUtility.GetCorrespondingObjectFromSource(identity.gameObject);
