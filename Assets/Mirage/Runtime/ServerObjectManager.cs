@@ -82,7 +82,7 @@ namespace Mirage
             foreach (NetworkIdentity obj in Server.World.SpawnedIdentities.Reverse())
             {
                 // Unspawn all, but only destroy non-scene objects on server
-                DestroyObject(obj, obj.sceneId == 0);
+                DestroyObject(obj, !obj.HasSceneId());
             }
 
             Server.World.ClearSpawnedObjects();
@@ -234,7 +234,7 @@ namespace Mirage
                 // todo, do we only need to spawn active objects here? or all objects?
                 if (identity.gameObject.activeSelf)
                 {
-                    if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.sceneId}");
+                    if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.SceneId}");
 
                     bool visible = identity.OnCheckObserver(player);
                     if (visible)
@@ -516,7 +516,7 @@ namespace Mirage
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
         {
-            if (logger.LogEnabled()) logger.Log("Server SendSpawnMessage: name=" + identity.name + " sceneId=" + identity.sceneId.ToString("X") + " netId=" + identity.NetId);
+            if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId} netId={identity.NetId}");
 
             // one writer for owner, one for observers
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
@@ -526,18 +526,20 @@ namespace Mirage
                 ArraySegment<byte> payload = CreateSpawnMessagePayload(isOwner, identity, ownerWriter, observersWriter);
 
                 int? prefabHash = identity.PrefabHash != 0 ? identity.PrefabHash : default(int?);
+                ulong? sceneId = identity.SceneId != 0 ? identity.SceneId : default(ulong?);
+
+                Transform transform = identity.transform;
+
                 player.Send(new SpawnMessage
                 {
                     netId = identity.NetId,
                     isLocalPlayer = player.Identity == identity,
                     isOwner = isOwner,
-                    sceneId = identity.sceneId,
+                    sceneId = sceneId,
                     prefabHash = prefabHash,
-                    // use local values for VR support
-                    position = identity.transform.localPosition,
-                    rotation = identity.transform.localRotation,
-                    scale = identity.transform.localScale,
-
+                    position = transform.localPosition,
+                    rotation = transform.localRotation,
+                    scale = transform.localScale,
                     payload = payload,
                 });
             }
@@ -545,7 +547,7 @@ namespace Mirage
 
         internal void SendRemoveAuthorityMessage(NetworkIdentity identity, INetworkPlayer previousOwner)
         {
-            if (logger.LogEnabled()) logger.Log($"Server SendRemoveAuthorityMessage: name={identity.name} sceneId={identity.sceneId.ToString("X")} netId={identity.NetId}");
+            if (logger.LogEnabled()) logger.Log($"Server SendRemoveAuthorityMessage: name={identity.name} sceneId={identity.SceneId} netId={identity.NetId}");
 
             previousOwner.Send(new RemoveAuthorityMessage
             {
@@ -659,7 +661,7 @@ namespace Mirage
 #endif
 
             // If not a scene object
-            return identity.sceneId != 0;
+            return identity.HasSceneId();
         }
 
         private class NetworkIdentityComparer : IComparer<NetworkIdentity>
@@ -691,7 +693,7 @@ namespace Mirage
             {
                 if (ValidateSceneObject(identity))
                 {
-                    if (logger.LogEnabled()) logger.Log("SpawnObjects sceneId:" + identity.sceneId.ToString("X") + " name:" + identity.gameObject.name);
+                    if (logger.LogEnabled()) logger.Log($"SpawnObjects sceneId:{identity.SceneId} name:{identity.gameObject.name}");
 
                     Spawn(identity.gameObject);
                 }
