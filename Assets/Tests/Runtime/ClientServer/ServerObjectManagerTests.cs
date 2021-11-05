@@ -12,10 +12,19 @@ namespace Mirage.Tests.Runtime.ClientServer
     [TestFixture]
     public class ServerObjectManagerTests : ClientServerSetup<MockComponent>
     {
-        GameObject playerReplacement;
-
         void AssertNoIdentityMessage(InvalidOperationException ex, string name) => Assert.That(ex.Message, Is.EqualTo($"Gameobject {name} doesn't have NetworkIdentity."));
         void AssertNoIdentityMessage(InvalidOperationException ex) => AssertNoIdentityMessage(ex, new GameObject().name);
+
+        NetworkIdentity CreatePlayerReplacement()
+        {
+            var playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
+            toDestroy.Add(playerReplacement);
+            NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
+            replacementIdentity.PrefabHash = Guid.NewGuid().GetHashCode();
+            clientObjectManager.RegisterPrefab(replacementIdentity);
+
+            return replacementIdentity;
+        }
 
         [Test]
         public void ThrowsIfSpawnCalledWhenServerIsNotAcctive()
@@ -81,29 +90,29 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             // todo assert correct message was sent using Substitute for socket or player
 
-            //connectionToServer.ProcessMessagesAsync().Forget();
-
             await AsyncUtil.WaitUntilWithTimeout(() => invoked);
         });
 
         [Test]
         public void SpawnSceneObject()
         {
-            serverIdentity.SetSceneId(42);
+            NetworkIdentity sceneObject = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
+            sceneObject.SetSceneId(42);
 
-            Debug.Assert(serverIdentity.NetId == 0, "Identity should be unspawned for this test");
+            Debug.Assert(sceneObject.NetId == 0, "Identity should be unspawned for this test");
             serverObjectManager.SpawnObjects();
-            Assert.That(serverIdentity.NetId, Is.Not.Zero);
+            Assert.That(sceneObject.NetId, Is.Not.Zero);
         }
 
         [Test]
         public void DoesNotSpawnNonSceneObject()
         {
-            serverIdentity.SetSceneId(0);
+            NetworkIdentity sceneObject = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
+            sceneObject.SetSceneId(0);
 
-            Debug.Assert(serverIdentity.NetId == 0, "Identity should be unspawned for this test");
+            Debug.Assert(sceneObject.NetId == 0, "Identity should be unspawned for this test");
             serverObjectManager.SpawnObjects();
-            Assert.That(serverIdentity.NetId, Is.Zero);
+            Assert.That(sceneObject.NetId, Is.Zero);
         }
 
         [Test]
@@ -159,25 +168,19 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ReplacePlayerBaseTest()
         {
-            playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
-            NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
-            replacementIdentity.PrefabHash = Guid.NewGuid().GetHashCode();
-            clientObjectManager.RegisterPrefab(replacementIdentity);
+            NetworkIdentity replacement = CreatePlayerReplacement();
 
-            serverObjectManager.ReplaceCharacter(serverPlayer, playerReplacement);
+            serverObjectManager.ReplaceCharacter(serverPlayer, replacement);
 
-            Assert.That(serverPlayer.Identity, Is.EqualTo(replacementIdentity));
+            Assert.That(serverPlayer.Identity, Is.EqualTo(replacement));
         }
 
         [Test]
         public void ReplacePlayerDontKeepAuthTest()
         {
-            playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
-            NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
-            replacementIdentity.PrefabHash = Guid.NewGuid().GetHashCode();
-            clientObjectManager.RegisterPrefab(replacementIdentity);
+            NetworkIdentity replacement = CreatePlayerReplacement();
 
-            serverObjectManager.ReplaceCharacter(serverPlayer, playerReplacement, true);
+            serverObjectManager.ReplaceCharacter(serverPlayer, replacement, true);
 
             Assert.That(clientIdentity.Owner, Is.EqualTo(null));
         }
@@ -185,13 +188,10 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ReplacePlayerPrefabHashTest()
         {
-            int hash = Guid.NewGuid().GetHashCode();
-            playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
-            NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
-            replacementIdentity.PrefabHash = hash;
-            clientObjectManager.RegisterPrefab(replacementIdentity);
+            NetworkIdentity replacement = CreatePlayerReplacement();
+            int hash = replacement.PrefabHash;
 
-            serverObjectManager.ReplaceCharacter(serverPlayer, playerReplacement, hash);
+            serverObjectManager.ReplaceCharacter(serverPlayer, replacement, hash);
 
             Assert.That(serverPlayer.Identity.PrefabHash, Is.EqualTo(hash));
         }
@@ -199,17 +199,14 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void AddPlayerForConnectionPrefabHashTest()
         {
-            int hash = Guid.NewGuid().GetHashCode();
-            playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
-            NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
-            replacementIdentity.PrefabHash = hash;
-            clientObjectManager.RegisterPrefab(replacementIdentity);
+            NetworkIdentity replacement = CreatePlayerReplacement();
+            int hash = replacement.PrefabHash;
 
             serverPlayer.Identity = null;
 
-            serverObjectManager.AddCharacter(serverPlayer, playerReplacement, hash);
+            serverObjectManager.AddCharacter(serverPlayer, replacement, hash);
 
-            Assert.That(replacementIdentity == serverPlayer.Identity);
+            Assert.That(replacement == serverPlayer.Identity);
         }
 
         [UnityTest]
