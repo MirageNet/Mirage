@@ -270,9 +270,23 @@ namespace Mirage
         public void AddCharacter(INetworkPlayer player, GameObject character, int prefabHash)
         {
             NetworkIdentity identity = character.GetNetworkIdentity();
-            identity.PrefabHash = prefabHash;
-            AddCharacter(player, identity);
+            AddCharacter(player, identity, prefabHash);
         }
+
+        /// <summary>
+        /// <para>When an <see cref="AddCharacterMessage"/> message handler has received a request from a player, the server calls this to associate the player object with the connection.</para>
+        /// <para>When a player is added for a connection, the client for that connection is made ready automatically. The player object is automatically spawned, so you do not need to call NetworkServer.Spawn for that object. This function is used for "adding" a player, not for "replacing" the player on a connection. If there is already a player on this playerControllerId for this connection, this will fail.</para>
+        /// </summary>
+        /// <param name="player">Connection which is adding the player.</param>
+        /// <param name="character">Player object spawned for the player.</param>
+        /// <param name="prefabHash"></param>
+        /// <returns></returns>
+        public void AddCharacter(INetworkPlayer player, NetworkIdentity character, int prefabHash)
+        {
+            character.PrefabHash = prefabHash;
+            AddCharacter(player, character);
+        }
+
 
         /// <summary>
         /// <para>When an <see cref="AddCharacterMessage"/> message handler has received a request from a player, the server calls this to associate the player object with the connection.</para>
