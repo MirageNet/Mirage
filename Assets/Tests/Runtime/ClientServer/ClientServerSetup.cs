@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirage.SocketLayer;
@@ -10,10 +11,8 @@ using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
-
     public class ClientServerSetup<T> where T : NetworkBehaviour
     {
-
         protected GameObject serverGo;
         protected NetworkServer server;
         protected NetworkSceneManager serverSceneManager;
@@ -48,6 +47,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         protected virtual bool AutoConnectClient => true;
         protected virtual Config ServerConfig => null;
         protected virtual Config ClientConfig => null;
+
+        protected List<GameObject> toDestroy = new List<GameObject>();
 
         [UnitySetUp]
         public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
@@ -148,7 +149,41 @@ namespace Mirage.Tests.Runtime.ClientServer
             Object.DestroyImmediate(serverPlayerGO);
             Object.DestroyImmediate(clientPlayerGO);
 
+            foreach (GameObject obj in toDestroy)
+            {
+                if (obj != null)
+                {
+                    Object.DestroyImmediate(obj);
+                }
+            }
+
             ExtraTearDown();
         });
+
+
+        /// <summary>
+        /// Instantiate object that will be destroyed at end of test 
+        /// </summary>
+        /// <typeparam name="TObj"></typeparam>
+        /// <param name="prefab"></param>
+        /// <returns></returns>
+        protected GameObject InstantiateForTest(GameObject prefab)
+        {
+            GameObject obj = Object.Instantiate(prefab);
+            toDestroy.Add(obj);
+            return obj;
+        }
+        /// <summary>
+        /// Instantiate object that will be destroyed at end of test 
+        /// </summary>
+        /// <typeparam name="TObj"></typeparam>
+        /// <param name="prefab"></param>
+        /// <returns></returns>
+        protected TObj InstantiateForTest<TObj>(TObj prefab) where TObj : Component
+        {
+            TObj obj = Object.Instantiate(prefab);
+            toDestroy.Add(obj.gameObject);
+            return obj;
+        }
     }
 }
