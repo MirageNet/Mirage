@@ -149,7 +149,7 @@ namespace Mirage
             return identity.NetId == 0 &&
                    identity.gameObject.hideFlags != HideFlags.NotEditable &&
                    identity.gameObject.hideFlags != HideFlags.HideAndDontSave &&
-                   identity.HasSceneId();
+                   identity.IsSceneObject;
         }
 
         // this is called from message handler for Owner message
@@ -326,7 +326,7 @@ namespace Mirage
             {
                 handler(identity);
             }
-            else if (!identity.HasSceneId())
+            else if (!identity.IsSceneObject)
             {
                 Destroy(identity.gameObject);
             }

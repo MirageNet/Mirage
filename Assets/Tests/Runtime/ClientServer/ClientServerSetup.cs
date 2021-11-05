@@ -162,9 +162,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
 
         /// <summary>
-        /// Instantiate object that will be destroyed at end of test 
+        /// Instantiate object that will be destroyed in teardown
         /// </summary>
-        /// <typeparam name="TObj"></typeparam>
         /// <param name="prefab"></param>
         /// <returns></returns>
         protected GameObject InstantiateForTest(GameObject prefab)
@@ -174,7 +173,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             return obj;
         }
         /// <summary>
-        /// Instantiate object that will be destroyed at end of test 
+        /// Instantiate object that will be destroyed in teardown
         /// </summary>
         /// <typeparam name="TObj"></typeparam>
         /// <param name="prefab"></param>
@@ -184,6 +183,17 @@ namespace Mirage.Tests.Runtime.ClientServer
             TObj obj = Object.Instantiate(prefab);
             toDestroy.Add(obj.gameObject);
             return obj;
+        }
+
+        /// <summary>
+        /// Creates a new NetworkIdentity that can be used by tests, then destroyed in teardown 
+        /// </summary>
+        /// <returns></returns>
+        protected NetworkIdentity CreateNetworkIdentity()
+        {
+            playerPrefab = new GameObject("A NetworkIdentity", typeof(NetworkIdentity));
+            toDestroy.Add(playerPrefab);
+            return playerPrefab.GetComponent<NetworkIdentity>();
         }
     }
 }
