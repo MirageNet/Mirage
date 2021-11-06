@@ -7,10 +7,12 @@ using UnityEngine.Serialization;
 using Mirage.Logging;
 using Mirage.Serialization;
 using Mirage.Events;
+using Unity.Profiling;
+using UnityEngine.Profiling;
 #if UNITY_EDITOR
 using UnityEditor;
 #if UNITY_2018_3_OR_NEWER
-using UnityEditor.Experimental.SceneManagement;
+
 #endif
 #endif
 
@@ -587,7 +589,7 @@ namespace Mirage
             //    assign a sceneId and clear the assetId would still be
             //    triggered for prefabs. in other words: if we are in prefab
             //    stage, do not bother with anything else ever!
-            else if (PrefabStageUtility.GetCurrentPrefabStage() != null)
+            else if (UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() != null)
             {
                 // when modifying a prefab in prefab stage, Unity calls
                 // OnValidate for that prefab and for all scene objects based on
@@ -597,14 +599,14 @@ namespace Mirage
                 // scene object based on the prefab?
                 //   * GetCurrentPrefabStage = 'are we editing ANY prefab?'
                 //   * GetPrefabStage(go) = 'are we editing THIS prefab?'
-                if (PrefabStageUtility.GetPrefabStage(gameObject) != null)
+                if (UnityEditor.SceneManagement.PrefabStageUtility.GetPrefabStage(gameObject) != null)
                 {
                     // force 0 for prefabs
                     sceneId = 0;
                     // NOTE: might make sense to use GetPrefabStage for asset
                     //       path, but let's not touch it while it works.
 #if UNITY_2020_1_OR_NEWER
-                    string path = PrefabStageUtility.GetCurrentPrefabStage().assetPath;
+                    string path = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage().assetPath;
 #else
                     string path = PrefabStageUtility.GetCurrentPrefabStage().prefabAssetPath;
 #endif
@@ -708,10 +710,17 @@ namespace Mirage
         /// <returns></returns>
         internal bool OnCheckObserver(INetworkPlayer player)
         {
+            var onCheck = new ProfilerMarker(ProfilerCategory.Network, nameof(OnCheckObserver));
+
+            onCheck.Begin();
+
             if (Visibility != null)
             {
                 return Visibility.OnCheckObserver(player);
             }
+
+            onCheck.End();
+
             return true;
         }
 
@@ -929,6 +938,10 @@ namespace Mirage
 
         internal void AddObserver(INetworkPlayer player)
         {
+            var addObserver = new ProfilerMarker(ProfilerCategory.Network, nameof(AddObserver));
+
+            addObserver.Begin();
+
             if (observers.Contains(player))
             {
                 // if we try to add a connectionId that was already added, then
@@ -942,6 +955,8 @@ namespace Mirage
 
             // spawn identity for this conn
             ServerObjectManager.ShowToPlayer(this, player);
+
+            addObserver.End();
         }
 
         /// <summary>
@@ -998,6 +1013,9 @@ namespace Mirage
         /// <param name="initialize">True if this is the first time.</param>
         public void RebuildObservers(bool initialize)
         {
+            var rebuild = new ProfilerMarker(ProfilerCategory.Network, nameof(RebuildObservers));
+            rebuild.Begin();
+
             bool changed = false;
 
             // call OnRebuildObservers function
@@ -1037,6 +1055,8 @@ namespace Mirage
                         observers.Add(player);
                 }
             }
+
+            rebuild.End();
         }
 
         // remove all old .observers that aren't in newObservers anymore
