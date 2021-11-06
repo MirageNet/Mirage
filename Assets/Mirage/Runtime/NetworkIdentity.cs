@@ -6,10 +6,6 @@ using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
-#if UNITY_EDITOR
-#if UNITY_2018_3_OR_NEWER
-#endif
-#endif
 
 namespace Mirage
 {
