@@ -1,3 +1,10 @@
+## [111.1.1](https://github.com/MirageNet/Mirage/compare/v111.1.0...v111.1.1) (2021-11-06)
+
+
+### Bug Fixes
+
+* weaver error on guard attributes put on awake ([#986](https://github.com/MirageNet/Mirage/issues/986)) ([2f89372](https://github.com/MirageNet/Mirage/commit/2f893724d9b8cb04063a3c296ce54c81eee75cbf))
+
 # [111.1.0](https://github.com/MirageNet/Mirage/compare/v111.0.0...v111.1.0) (2021-11-02)
 
 
