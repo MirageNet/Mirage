@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Mirage
 {
@@ -8,10 +7,8 @@ namespace Mirage
     /// </summary>
     public interface IMessageSender
     {
-        [ExcludeFromCodeCoverage]
         void Send<T>(T message, int channelId = Channel.Reliable);
 
-        [ExcludeFromCodeCoverage]
         void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable);
     }
 
