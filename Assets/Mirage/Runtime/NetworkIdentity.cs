@@ -446,7 +446,7 @@ namespace Mirage
 
         internal void StartServer()
         {
-            if (logger.LogEnabled()) logger.Log("OnStartServer " + this + " NetId:" + NetId + " SceneId:" + _sceneId);
+            if (logger.LogEnabled()) logger.Log($"OnStartServer {this} NetId:{NetId} SceneId:{SceneId:X}");
 
             _onStartServer.Invoke();
         }
@@ -556,7 +556,7 @@ namespace Mirage
         void OnSerialize(NetworkBehaviour comp, NetworkWriter writer, bool initialState)
         {
             comp.OnSerialize(writer, initialState);
-            if (logger.LogEnabled()) logger.Log("OnSerializeSafely written for object=" + comp.name + " component=" + comp.GetType() + " sceneId=" + _sceneId);
+            if (logger.LogEnabled()) logger.Log($"OnSerializeSafely written for object={comp.name} component={comp.GetType()} sceneId={SceneId:X}");
 
             // serialize a barrier to be checked by the deserializer
             writer.WriteByte(Barrier);
@@ -643,7 +643,7 @@ namespace Mirage
             byte barrierData = reader.ReadByte();
             if (barrierData != Barrier)
             {
-                throw new DeserializeFailedException($"Deserialize not aligned for object={name} netId={NetId} component={comp.GetType()} sceneId={_sceneId}. Possible Reasons:\n" +
+                throw new DeserializeFailedException($"Deserialize not aligned for object={name} netId={NetId} component={comp.GetType()} sceneId={SceneId:X}. Possible Reasons:\n" +
                     $"  * Do {comp.GetType()}'s OnSerialize and OnDeserialize calls write the same amount of data? \n" +
                     $"  * Are the server and client the exact same project?\n" +
                     $"  * Maybe this OnDeserialize call was meant for another GameObject? The sceneIds can easily get out of sync if the Hierarchy was modified only in the client OR the server. Try rebuilding both.\n\n");
