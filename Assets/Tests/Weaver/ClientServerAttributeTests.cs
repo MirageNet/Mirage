@@ -21,12 +21,45 @@ namespace Mirage.Tests.Weaver
         }
 
         [Test]
+        public void NetworkBehaviourServerOnAwake()
+        {
+            HasError("ServerAttribute will not work on the Awake method.",
+                "System.Void ClientServerAttributeTests.NetworkBehaviourServer.NetworkBehaviourServerOnAwake::Awake()");
+        }
+
+        [Test]
+        public void NetworkBehaviourServerOnAwakeWithParameters()
+        {
+            IsSuccess();
+            CheckAddedCode(
+                (NetworkBehaviour nb) => nb.IsServer,
+                "ClientServerAttributeTests.NetworkBehaviourServer.NetworkBehaviourServerOnAwakeWithParameters", "Awake");
+
+        }
+
+        [Test]
         public void NetworkBehaviourClient()
         {
             IsSuccess();
             CheckAddedCode(
                 (NetworkBehaviour nb) => nb.IsClient,
                 "ClientServerAttributeTests.NetworkBehaviourClient.NetworkBehaviourClient", "ClientOnlyMethod");
+        }
+
+        [Test]
+        public void NetworkBehaviourClientOnAwake()
+        {
+            HasError("ClientAttribute will not work on the Awake method.",
+                "System.Void ClientServerAttributeTests.NetworkBehaviourClient.NetworkBehaviourClientOnAwake::Awake()");
+        }
+
+        [Test]
+        public void NetworkBehaviourClientOnAwakeWithParameters()
+        {
+            IsSuccess();
+            CheckAddedCode(
+                (NetworkBehaviour nb) => nb.IsClient,
+                "ClientServerAttributeTests.NetworkBehaviourClient.NetworkBehaviourClientOnAwakeWithParameters", "Awake");
         }
 
         [Test]
@@ -39,12 +72,44 @@ namespace Mirage.Tests.Weaver
         }
 
         [Test]
+        public void NetworkBehaviourHasAuthorityOnAwake()
+        {
+            HasError("HasAuthorityAttribute will not work on the Awake method.",
+                "System.Void ClientServerAttributeTests.NetworkBehaviourHasAuthority.NetworkBehaviourHasAuthorityOnAwake::Awake()");
+        }
+
+        [Test]
+        public void NetworkBehaviourHasAuthorityOnAwakeWithParameters()
+        {
+            IsSuccess();
+            CheckAddedCode(
+                (NetworkBehaviour nb) => nb.HasAuthority,
+                "ClientServerAttributeTests.NetworkBehaviourHasAuthority.NetworkBehaviourHasAuthorityOnAwakeWithParameters", "Awake");
+        }
+
+        [Test]
         public void NetworkBehaviourLocalPlayer()
         {
             IsSuccess();
             CheckAddedCode(
                 (NetworkBehaviour nb) => nb.IsLocalPlayer,
                 "ClientServerAttributeTests.NetworkBehaviourLocalPlayer.NetworkBehaviourLocalPlayer", "LocalPlayerMethod");
+        }
+
+        [Test]
+        public void NetworkBehaviourLocalPlayerOnAwake()
+        {
+            HasError("LocalPlayerAttribute will not work on the Awake method.",
+                "System.Void ClientServerAttributeTests.NetworkBehaviourLocalPlayer.NetworkBehaviourLocalPlayerOnAwake::Awake()");
+        }
+
+        [Test]
+        public void NetworkBehaviourLocalPlayerOnAwakeWithParameters()
+        {
+            IsSuccess();
+            CheckAddedCode(
+                (NetworkBehaviour nb) => nb.IsLocalPlayer,
+                "ClientServerAttributeTests.NetworkBehaviourLocalPlayer.NetworkBehaviourLocalPlayerOnAwakeWithParameters", "Awake");
         }
 
         /// <summary>

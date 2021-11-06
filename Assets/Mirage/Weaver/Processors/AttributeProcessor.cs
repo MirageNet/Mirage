@@ -7,7 +7,7 @@ namespace Mirage.Weaver
     /// <summary>
     /// Processes methods and fields to check their attrbiutes to make sure they are allowed on the type
     /// <para>
-    /// Injects server/client active checks for [Server/Client] attributes 
+    /// Injects server/client active checks for [Server/Client] attributes
     /// </para>
     /// </summary>
     class AttributeProcessor
@@ -132,6 +132,12 @@ namespace Mirage.Weaver
             if (!foundType.IsNetworkBehaviour)
             {
                 logger.Error($"{attribute.AttributeType.Name} method {md.Name} must be declared in a NetworkBehaviour", md);
+                return;
+            }
+
+            if (md.Name == "Awake" && !md.HasParameters)
+            {
+                logger.Error($"{attribute.AttributeType.Name} will not work on the Awake method.", md);
                 return;
             }
 
