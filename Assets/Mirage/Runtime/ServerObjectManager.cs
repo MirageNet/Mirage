@@ -222,7 +222,7 @@ namespace Mirage
             // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
             SpawnVisibleObjectForPlayer(player);
 
-            if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash}");
+            if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash:X}");
 
             Respawn(identity);
 
@@ -248,7 +248,7 @@ namespace Mirage
                 // todo, do we only need to spawn active objects here? or all objects?
                 if (identity.gameObject.activeSelf)
                 {
-                    if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.SceneId}");
+                    if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.SceneId:X}");
 
                     bool visible = identity.OnCheckObserver(player);
                     if (visible)
@@ -335,7 +335,7 @@ namespace Mirage
             // spawn any new visible scene objects
             SpawnVisibleObjects(player);
 
-            if (logger.LogEnabled()) logger.Log("Adding new playerGameObject object netId: " + identity.NetId + " asset ID " + identity.PrefabHash);
+            if (logger.LogEnabled()) logger.Log($"Adding new playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash:X}");
 
             Respawn(identity);
         }
@@ -537,14 +537,14 @@ namespace Mirage
                 Server.World.AddIdentity(identity.NetId, identity);
             }
 
-            if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.NetId + " asset ID " + identity.PrefabHash);
+            if (logger.LogEnabled()) logger.Log($"SpawnObject instance ID {identity.NetId} asset ID {identity.PrefabHash:X}");
 
             identity.RebuildObservers(true);
         }
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
         {
-            if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId} netId={identity.NetId}");
+            if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
 
             // one writer for owner, one for observers
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
@@ -575,7 +575,7 @@ namespace Mirage
 
         internal void SendRemoveAuthorityMessage(NetworkIdentity identity, INetworkPlayer previousOwner)
         {
-            if (logger.LogEnabled()) logger.Log($"Server SendRemoveAuthorityMessage: name={identity.name} sceneId={identity.SceneId} netId={identity.NetId}");
+            if (logger.LogEnabled()) logger.Log($"Server SendRemoveAuthorityMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
 
             previousOwner.Send(new RemoveAuthorityMessage
             {
@@ -721,7 +721,7 @@ namespace Mirage
             {
                 if (ValidateSceneObject(identity))
                 {
-                    if (logger.LogEnabled()) logger.Log($"SpawnObjects sceneId:{identity.SceneId} name:{identity.gameObject.name}");
+                    if (logger.LogEnabled()) logger.Log($"SpawnObjects sceneId:{identity.SceneId:X} name:{identity.gameObject.name}");
 
                     Spawn(identity.gameObject);
                 }

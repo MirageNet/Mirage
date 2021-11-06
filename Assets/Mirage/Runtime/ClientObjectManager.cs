@@ -225,7 +225,7 @@ namespace Mirage
         {
             identity.PrefabHash = newPrefabHash;
 
-            if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' as asset:{identity.PrefabHash}");
+            if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' as asset:{identity.PrefabHash:X}");
             prefabs[identity.PrefabHash] = identity;
         }
 
@@ -238,7 +238,7 @@ namespace Mirage
         /// <param name="identity">A Prefab that will be spawned.</param>
         public void RegisterPrefab(NetworkIdentity identity)
         {
-            if (logger.LogEnabled()) logger.Log("Registering prefab '" + identity.name + "' as asset:" + identity.PrefabHash);
+            if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' as asset:{identity.PrefabHash:X}");
             prefabs[identity.PrefabHash] = identity;
         }
 
@@ -397,7 +397,7 @@ namespace Mirage
             {
                 throw new InvalidOperationException($"OnSpawn has empty prefabHash and sceneId for netId: {msg.netId}");
             }
-            if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} prefabHash={msg.prefabHash} sceneId={msg.sceneId} pos={msg.position}");
+            if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} prefabHash={msg.prefabHash:X} sceneId={msg.sceneId:X} pos={msg.position}");
 
             // was the object already spawned?
             bool existing = Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity);
@@ -413,7 +413,7 @@ namespace Mirage
             if (identity == null)
             {
                 //object could not be found.
-                throw new InvalidOperationException($"Could not spawn prefabHash={msg.prefabHash} scene={msg.sceneId} netId={msg.netId}");
+                throw new InvalidOperationException($"Could not spawn prefabHash={msg.prefabHash:X} scene={msg.sceneId:X} netId={msg.netId}");
             }
 
             ApplySpawnPayload(identity, msg);
@@ -430,7 +430,7 @@ namespace Mirage
                 NetworkIdentity obj = handler(msg);
                 if (obj == null)
                 {
-                    logger.LogWarning($"Client spawn handler for {msg.prefabHash} returned null");
+                    logger.LogWarning($"Client spawn handler for {msg.prefabHash:X} returned null");
                     return null;
                 }
                 return obj;
@@ -441,7 +441,7 @@ namespace Mirage
                 NetworkIdentity obj = Instantiate(prefab, msg.position, msg.rotation);
                 if (logger.LogEnabled())
                 {
-                    logger.Log($"Client spawn handler instantiating [netId:{msg.netId} asset ID:{msg.prefabHash} pos:{msg.position} rotation: {msg.rotation}]");
+                    logger.Log($"Client spawn handler instantiating [netId:{msg.netId} asset ID:{msg.prefabHash:X} pos:{msg.position} rotation: {msg.rotation}]");
                 }
 
                 return obj;
@@ -455,7 +455,7 @@ namespace Mirage
             NetworkIdentity spawned = SpawnSceneObject(msg.sceneId.Value);
             if (spawned == null)
             {
-                logger.LogError($"Spawn scene object not found for {msg.sceneId} SpawnableObjects.Count={spawnableObjects.Count}");
+                logger.LogError($"Spawn scene object not found for {msg.sceneId:X} SpawnableObjects.Count={spawnableObjects.Count}");
 
                 // dump the whole spawnable objects dict for easier debugging
                 if (logger.LogEnabled())
@@ -465,7 +465,7 @@ namespace Mirage
                 }
             }
 
-            if (logger.LogEnabled()) logger.Log($"Client spawn for [netId:{msg.netId}] [sceneId:{msg.sceneId}] obj:{spawned}");
+            if (logger.LogEnabled()) logger.Log($"Client spawn for [netId:{msg.netId}] [sceneId:{msg.sceneId:X}] obj:{spawned}");
             return spawned;
         }
 
@@ -476,7 +476,7 @@ namespace Mirage
                 spawnableObjects.Remove(sceneId);
                 return identity;
             }
-            logger.LogWarning($"Could not find scene object with sceneId:{sceneId}");
+            logger.LogWarning($"Could not find scene object with sceneId:{sceneId:X}");
             return null;
         }
 
