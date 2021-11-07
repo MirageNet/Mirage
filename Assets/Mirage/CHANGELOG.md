@@ -1,3 +1,10 @@
+## [112.0.1](https://github.com/MirageNet/Mirage/compare/v112.0.0...v112.0.1) (2021-11-07)
+
+
+### Bug Fixes
+
+* wrapping NetworkIdentityIdGenerator in #if editor ([f058f7f](https://github.com/MirageNet/Mirage/commit/f058f7f1a2177185742b36e034064d19bf66ea17))
+
 # [112.0.0](https://github.com/MirageNet/Mirage/compare/v111.1.1...v112.0.0) (2021-11-07)
 
 
