@@ -1,3 +1,38 @@
+# [112.0.0](https://github.com/MirageNet/Mirage/compare/v111.1.1...v112.0.0) (2021-11-07)
+
+
+### Bug Fixes
+
+* adding a check to make sure asset id isn't created from empty string ([26a5bbc](https://github.com/MirageNet/Mirage/commit/26a5bbc8269c6c4ff67a07bd9d62c95a8270cae5))
+* fixing defines for Unity2021.2 ([#977](https://github.com/MirageNet/Mirage/issues/977)) ([15ffa5b](https://github.com/MirageNet/Mirage/commit/15ffa5bbb1343addd1294318f2489bc7797e3255))
+* fixing id generation for negative numbers ([f5e1b9a](https://github.com/MirageNet/Mirage/commit/f5e1b9a72b37bf5ebbd43de85d4efd8567a2866d))
+* renameing identity.Reset so it doesn't override unity's reset function ([bc5da6a](https://github.com/MirageNet/Mirage/commit/bc5da6a766c53e477421795030dd3a84d40777ff))
+* using hex for logging prefabhash and sceneid ([f0c335f](https://github.com/MirageNet/Mirage/commit/f0c335f8ffb5a028e4ee38c3687f1c0f508f0969))
+
+
+### Code Refactoring
+
+* **NetworkIdentity:** moving id generation to its own file ([51795ce](https://github.com/MirageNet/Mirage/commit/51795ce2e48c1b19be044ac069b2846b26ae8094))
+
+
+### Features
+
+* **NetworkIdentity:** adding helper methods for Id ([0ddfdb8](https://github.com/MirageNet/Mirage/commit/0ddfdb835e9f6c8c06652d6a7533da36ca925876))
+* **ServerObjectManager:** adding AddCharacter method that takes Identity and hash ([629036a](https://github.com/MirageNet/Mirage/commit/629036a000f9a2df1356a9f12b7eff8c315cfc42))
+* **ServerObjectManager:** adding ReplaceCharacter method  that takes Identity and hash ([4320c05](https://github.com/MirageNet/Mirage/commit/4320c054ea07d0a9de332efed7aeaae9cd3ff5ed))
+
+
+### Performance Improvements
+
+* making transform values option to send with spawn message ([#972](https://github.com/MirageNet/Mirage/issues/972)) ([22e7dcd](https://github.com/MirageNet/Mirage/commit/22e7dcd8cd2cec20f2ec6f34a48312014726d4cf))
+* no longer sending PrefabHash if the object is a scene id ([46e29a6](https://github.com/MirageNet/Mirage/commit/46e29a66c01e819feb9007a799e1f2cafa6a4f98))
+
+
+### BREAKING CHANGES
+
+* Scene objects based on a prefab will no longer have their PrefabHash set on spawn on the client
+* **NetworkIdentity:** Scene Id generation is no longer public
+
 ## [111.1.1](https://github.com/MirageNet/Mirage/compare/v111.1.0...v111.1.1) (2021-11-06)
 
 
