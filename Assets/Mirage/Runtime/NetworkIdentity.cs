@@ -4,10 +4,9 @@ using Mirage.Events;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
-using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Serialization;
-using Object = System.Object;
+using Unity.Profiling;
 
 namespace Mirage
 {
