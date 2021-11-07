@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6900008319038825817}
   - component: {fileID: 5194388907919410155}
   - component: {fileID: 114654712548978148}
-  - component: {fileID: -5216695118302212130}
+  - component: {fileID: -2495750083978825820}
   m_Layer: 0
   m_Name: Tank
   m_TagString: Player
@@ -33,6 +33,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7831918942946891954}
   - {fileID: 6564220120147636086}
@@ -53,47 +54,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneId: 0
+  SpawnSettings:
+    SendPosition: 1
+    SendRotation: 1
+    SendScale: 1
+  _sceneId: 0
   ServerObjectManager: {fileID: 0}
   ClientObjectManager: {fileID: 0}
-  m_AssetId: 
-  OnStartServer:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 114654712548978148}
-        m_TargetAssemblyTypeName: Mirage.Examples.InterestManagement.Tank, Mirage.Examples
-        m_MethodName: SetRandomName
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  OnStartClient:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartLocalPlayer:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStartAuthority:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopAuthority:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopClient:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopServer:
-    m_PersistentCalls:
-      m_Calls: []
+  _prefabHash: -99413737
+  _onStartServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStartLocalPlayer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onAuthorityChanged:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopClient:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
+  _onStopServer:
+    _event:
+      m_PersistentCalls:
+        m_Calls: []
   hasSpawned: 0
 --- !u!95 &2240606817507776182
 Animator:
-  serializedVersion: 3
+  serializedVersion: 4
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -106,6 +102,7 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -182,7 +179,7 @@ MonoBehaviour:
   rotationSpeed: 80
   playerName: 
   nameText: {fileID: 6763574687443798610}
---- !u!114 &-5216695118302212130
+--- !u!114 &-2495750083978825820
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -191,14 +188,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1916082411674582}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1731d8de2d0c84333b08ebe1e79f4118, type: 3}
+  m_Script: {fileID: 11500000, guid: 00e628f7a5fc9bd4fad78744c34d8147, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  VisibilityRange: 2
+  VisibilityRange: 10
   VisibilityUpdateInterval: 1
-  ForceHidden: 0
 --- !u!1 &1794225417093723422
 GameObject:
   m_ObjectHideFlags: 0
@@ -227,6 +221,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 0.25, y: 0.25, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4492442352427800}
   m_RootOrder: 3
@@ -242,6 +237,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -321,6 +317,7 @@ Transform:
   m_LocalRotation: {x: 0.02281505, y: -0, z: -0, w: 0.9997397}
   m_LocalPosition: {x: 0.07, y: 0.46, z: 0.126}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4492442352427800}
   m_RootOrder: 1
@@ -384,6 +381,7 @@ Light:
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
 --- !u!1 &4730779867780281009
@@ -412,6 +410,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.412, z: 0.936}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4492442352427800}
   m_RootOrder: 2

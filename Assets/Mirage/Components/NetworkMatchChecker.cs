@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Mirage.InterestManagement;
 using UnityEngine;
 
 namespace Mirage
@@ -20,7 +21,7 @@ namespace Mirage
         Guid currentMatch = Guid.Empty;
 
         [Header("Diagnostics")]
-        [SyncVar]
+        //[SyncVar]
         public string currentMatchDebug;
 
         /// <summary>
@@ -44,7 +45,7 @@ namespace Mirage
                 if (previousMatch != Guid.Empty)
                 {
                     // Remove this object from the hashset of the match it just left
-                    matchPlayers[previousMatch].Remove(Identity);
+                    //matchPlayers[previousMatch].Remove(Identity);
 
                     // RebuildObservers of all NetworkIdentity's in the match this object just left
                     RebuildMatchObservers(previousMatch);
@@ -57,7 +58,7 @@ namespace Mirage
                         matchPlayers.Add(currentMatch, new HashSet<NetworkIdentity>());
 
                     // Add this object to the hashset of the new match
-                    matchPlayers[currentMatch].Add(Identity);
+                    //matchPlayers[currentMatch].Add(Identity);
 
                     // RebuildObservers of all NetworkIdentity's in the match this object just entered
                     RebuildMatchObservers(currentMatch);
@@ -65,14 +66,14 @@ namespace Mirage
                 else
                 {
                     // Not in any match now...RebuildObservers will clear and add self
-                    Identity.RebuildObservers(false);
+                    //Identity.RebuildObservers(false);
                 }
             }
         }
 
         public void Awake()
         {
-            Identity.OnStartServer.AddListener(OnStartServer);
+            //Identity.OnStartServer.AddListener(OnStartServer);
         }
 
         public void OnStartServer()
@@ -82,7 +83,7 @@ namespace Mirage
             if (!matchPlayers.ContainsKey(currentMatch))
                 matchPlayers.Add(currentMatch, new HashSet<NetworkIdentity>());
 
-            matchPlayers[currentMatch].Add(Identity);
+            //matchPlayers[currentMatch].Add(Identity);
 
             // No need to rebuild anything here.
             // identity.RebuildObservers is called right after this from NetworkServer.SpawnObject
@@ -90,9 +91,9 @@ namespace Mirage
 
         void RebuildMatchObservers(Guid specificMatch)
         {
-            foreach (NetworkIdentity networkIdentity in matchPlayers[specificMatch])
-                if (networkIdentity != null)
-                    networkIdentity.RebuildObservers(false);
+            //foreach (NetworkIdentity networkIdentity in matchPlayers[specificMatch])
+            //    if (networkIdentity != null)
+            //        networkIdentity.RebuildObservers(false);
         }
 
         #region Observers
@@ -103,19 +104,19 @@ namespace Mirage
         /// </summary>
         /// <param name="player">Network connection of a player.</param>
         /// <returns>True if the player can see this object.</returns>
-        public override bool OnCheckObserver(INetworkPlayer player)
-        {
-            // Not Visible if not in a match
-            if (MatchId == Guid.Empty)
-                return false;
+        //public override bool OnCheckObserver(INetworkPlayer player)
+        //{
+        //    // Not Visible if not in a match
+        //    if (MatchId == Guid.Empty)
+        //        return false;
 
-            NetworkMatchChecker networkMatchChecker = player.Identity.GetComponent<NetworkMatchChecker>();
+        //    NetworkMatchChecker networkMatchChecker = player.Identity.GetComponent<NetworkMatchChecker>();
 
-            if (networkMatchChecker == null)
-                return false;
+        //    if (networkMatchChecker == null)
+        //        return false;
 
-            return networkMatchChecker.MatchId == MatchId;
-        }
+        //    return networkMatchChecker.MatchId == MatchId;
+        //}
 
         /// <summary>
         /// Callback used by the visibility system to (re)construct the set of observers that can see this object.
@@ -123,13 +124,48 @@ namespace Mirage
         /// </summary>
         /// <param name="observers">The new set of observers for this object.</param>
         /// <param name="initialize">True if the set of observers is being built for the first time.</param>
-        public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
-        {
-            if (currentMatch == Guid.Empty) return;
+        //public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
+        //{
+        //    if (currentMatch == Guid.Empty) return;
 
-            foreach (NetworkIdentity networkIdentity in matchPlayers[currentMatch])
-                if (networkIdentity != null && networkIdentity.Owner != null)
-                    observers.Add(networkIdentity.Owner);
+        //    foreach (NetworkIdentity networkIdentity in matchPlayers[currentMatch])
+        //        if (networkIdentity != null && networkIdentity.Owner != null)
+        //            observers.Add(networkIdentity.Owner);
+        //}
+
+        #endregion
+
+        public NetworkMatchChecker(ServerObjectManager serverObjectManager) : base(serverObjectManager)
+        {
+        }
+
+        #region Overrides of NetworkVisibility
+
+        /// <summary>
+        ///     Invoked when an object is spawned in the server
+        ///     It should show that object to all relevant players
+        /// </summary>
+        /// <param name="identity">The object just spawned</param>
+        public override void OnSpawned(NetworkIdentity identity)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="player"></param>
+        public override void OnAuthenticated(INetworkPlayer player)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///     
+        /// </summary>
+        public override void CheckForObservers()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

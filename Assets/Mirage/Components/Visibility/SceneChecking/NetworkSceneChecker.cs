@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Mirage.InterestManagement;
 using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -33,54 +34,54 @@ namespace Mirage
 
         void Awake()
         {
-            Identity.OnStartServer.AddListener(OnStartServer);
+            //Identity.OnStartServer.AddListener(OnStartServer);
         }
 
         public void OnStartServer()
         {
-            currentScene = gameObject.scene;
-            if (logger.LogEnabled()) logger.Log($"NetworkSceneChecker.OnStartServer currentScene: {currentScene}");
+            //currentScene = gameObject.scene;
+            //if (logger.LogEnabled()) logger.Log($"NetworkSceneChecker.OnStartServer currentScene: {currentScene}");
 
-            if (!sceneCheckerObjects.ContainsKey(currentScene))
-                sceneCheckerObjects.Add(currentScene, new HashSet<NetworkIdentity>());
+            //if (!sceneCheckerObjects.ContainsKey(currentScene))
+            //    sceneCheckerObjects.Add(currentScene, new HashSet<NetworkIdentity>());
 
-            sceneCheckerObjects[currentScene].Add(Identity);
+            //sceneCheckerObjects[currentScene].Add(Identity);
         }
 
-        [Server(error = false)]
+        //[Server(error = false)]
         void Update()
         {
-            if (currentScene == gameObject.scene)
-                return;
+            //if (currentScene == gameObject.scene)
+            //    return;
 
-            // This object is in a new scene so observers in the prior scene
-            // and the new scene need to rebuild their respective observers lists.
+            //// This object is in a new scene so observers in the prior scene
+            //// and the new scene need to rebuild their respective observers lists.
 
-            // Remove this object from the hashset of the scene it just left
-            sceneCheckerObjects[currentScene].Remove(Identity);
+            //// Remove this object from the hashset of the scene it just left
+            //sceneCheckerObjects[currentScene].Remove(Identity);
 
-            // RebuildObservers of all NetworkIdentity's in the scene this object just left
-            RebuildSceneObservers();
+            //// RebuildObservers of all NetworkIdentity's in the scene this object just left
+            //RebuildSceneObservers();
 
-            // Set this to the new scene this object just entered
-            currentScene = gameObject.scene;
+            //// Set this to the new scene this object just entered
+            //currentScene = gameObject.scene;
 
-            // Make sure this new scene is in the dictionary
-            if (!sceneCheckerObjects.ContainsKey(currentScene))
-                sceneCheckerObjects.Add(currentScene, new HashSet<NetworkIdentity>());
+            //// Make sure this new scene is in the dictionary
+            //if (!sceneCheckerObjects.ContainsKey(currentScene))
+            //    sceneCheckerObjects.Add(currentScene, new HashSet<NetworkIdentity>());
 
-            // Add this object to the hashset of the new scene
-            sceneCheckerObjects[currentScene].Add(Identity);
+            //// Add this object to the hashset of the new scene
+            //sceneCheckerObjects[currentScene].Add(Identity);
 
-            // RebuildObservers of all NetworkIdentity's in the scene this object just entered
-            RebuildSceneObservers();
+            //// RebuildObservers of all NetworkIdentity's in the scene this object just entered
+            //RebuildSceneObservers();
         }
 
         void RebuildSceneObservers()
         {
-            foreach (NetworkIdentity networkIdentity in sceneCheckerObjects[currentScene])
-                if (networkIdentity != null)
-                    networkIdentity.RebuildObservers(false);
+            //foreach (NetworkIdentity networkIdentity in sceneCheckerObjects[currentScene])
+            //    if (networkIdentity != null)
+            //        networkIdentity.RebuildObservers(false);
         }
 
         /// <summary>
@@ -89,13 +90,13 @@ namespace Mirage
         /// </summary>
         /// <param name="player">Network connection of a player.</param>
         /// <returns>True if the player can see this object.</returns>
-        public override bool OnCheckObserver(INetworkPlayer player)
-        {
-            if (forceHidden)
-                return false;
+        //public override bool OnCheckObserver(INetworkPlayer player)
+        //{
+        //    if (forceHidden)
+        //        return false;
 
-            return player.Identity.gameObject.scene == gameObject.scene;
-        }
+        //    return player.Identity.gameObject.scene == gameObject.scene;
+        //}
 
         /// <summary>
         /// Callback used by the visibility system to (re)construct the set of observers that can see this object.
@@ -103,16 +104,51 @@ namespace Mirage
         /// </summary>
         /// <param name="observers">The new set of observers for this object.</param>
         /// <param name="initialize">True if the set of observers is being built for the first time.</param>
-        public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
-        {
-            // If forceHidden then return without adding any observers.
-            if (forceHidden)
-                return;
+        //public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
+        //{
+        //    // If forceHidden then return without adding any observers.
+        //    if (forceHidden)
+        //        return;
 
-            // Add everything in the hashset for this object's current scene
-            foreach (NetworkIdentity networkIdentity in sceneCheckerObjects[currentScene])
-                if (networkIdentity != null && networkIdentity.Owner != null)
-                    observers.Add(networkIdentity.Owner);
+        //    // Add everything in the hashset for this object's current scene
+        //    foreach (NetworkIdentity networkIdentity in sceneCheckerObjects[currentScene])
+        //        if (networkIdentity != null && networkIdentity.Owner != null)
+        //            observers.Add(networkIdentity.Owner);
+        //}
+
+        public NetworkSceneChecker(ServerObjectManager serverObjectManager) : base(serverObjectManager)
+        {
         }
+
+        #region Overrides of NetworkVisibility
+
+        /// <summary>
+        ///     Invoked when an object is spawned in the server
+        ///     It should show that object to all relevant players
+        /// </summary>
+        /// <param name="identity">The object just spawned</param>
+        public override void OnSpawned(NetworkIdentity identity)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="player"></param>
+        public override void OnAuthenticated(INetworkPlayer player)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <summary>
+        ///     
+        /// </summary>
+        public override void CheckForObservers()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        #endregion
     }
 }

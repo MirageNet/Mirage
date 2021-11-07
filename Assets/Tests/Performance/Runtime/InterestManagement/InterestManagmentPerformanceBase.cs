@@ -13,7 +13,7 @@ using static UnityEngine.Object;
 
 namespace Mirage.Tests.Performance.Runtime
 {
-    public class DistanceBaseInterestManagementPerformance : InterestManagementPerformanceBase
+    public class GlobalInterestManagementPerformance : InterestManagementPerformanceBase
     {
         #region Overrides of InterestManagementPerformanceBase
 
@@ -38,7 +38,7 @@ namespace Mirage.Tests.Performance.Runtime
         const string NpcSpawnerName = "World Floor";
         const int clientCount = 50;
         const int stationaryCount = 3500;
-        const int movingCount = 1000;
+        const int movingCount = 500;
 
 
         private NetworkServer server;
@@ -117,8 +117,6 @@ namespace Mirage.Tests.Performance.Runtime
                 {
                     Debug.LogException(ex);
                 }
-
-                yield return new WaitForEndOfFrame();
             }
         }
 
@@ -156,15 +154,17 @@ namespace Mirage.Tests.Performance.Runtime
         {
             SampleGroup[] sampleGroups =
             {
-                new SampleGroup("OnCheckObserver", SampleUnit.Microsecond),
-                new SampleGroup("AddObserver", SampleUnit.Microsecond),
-                new SampleGroup("RebuildObservers", SampleUnit.Microsecond),
+                new SampleGroup("Observers", SampleUnit.Microsecond),
+                new SampleGroup("OnAuthenticated", SampleUnit.Microsecond),
+                new SampleGroup("OnSpawnInWorld", SampleUnit.Microsecond),
+                new SampleGroup("Update", SampleUnit.Microsecond),
+                new SampleGroup("Send", SampleUnit.Microsecond),
             };
 
             yield return Measure.Frames()
                 .ProfilerMarkers(sampleGroups)
-                .WarmupCount(20)
-                .MeasurementCount(1000)
+                .WarmupCount(5)
+                .MeasurementCount(300)
                 .Run();
         }
 

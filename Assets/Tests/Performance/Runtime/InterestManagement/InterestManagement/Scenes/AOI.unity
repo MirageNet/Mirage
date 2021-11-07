@@ -1043,7 +1043,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc654f29862fc2643b948f772ebb9e68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 0}
+  Client: {fileID: 1092843219}
   NetworkPingLabelText: {fileID: 974944478}
 --- !u!114 &974944478
 MonoBehaviour:
@@ -1139,7 +1139,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7aaac73a16c040fd871cb977b5c557b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 0}
+  Client: {fileID: 1092843219}
   Server: {fileID: 1092843214}
   SceneManager: {fileID: 1092843211}
   ClientObjectManager: {fileID: 1092843209}
@@ -1161,7 +1161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2cbc85c1c2f1c249bbe95ae110bbcde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 0}
+  Client: {fileID: 1092843219}
   NetworkSceneManager: {fileID: 1092843211}
   spawnPrefabs:
   - {fileID: 8537344390966522168, guid: d930748d872234c43854e5100c045754, type: 3}
@@ -1192,7 +1192,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30967dfd80dbb6c46a270a64ebecb951, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Client: {fileID: 0}
+  Client: {fileID: 1092843219}
   Server: {fileID: 1092843214}
   DontDestroy: 0
   _onClientStartedSceneChange:
@@ -1300,7 +1300,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EnablePeerMetrics: 0
   MetricsSize: 10
-  SocketFactory: {fileID: 0}
+  SocketFactory: {fileID: 1092843207}
   DisconnectOnException: 1
   authenticator: {fileID: 0}
   _started:

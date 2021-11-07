@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Mirage.InterestManagement;
 using Mirage.Logging;
 using UnityEngine;
 
@@ -13,90 +15,167 @@ namespace Mirage
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkProximityChecker.html")]
     public class NetworkProximityChecker : NetworkVisibility
     {
+        private class NetIdComparer : IEqualityComparer<NetworkIdentity>
+        {
+            public bool Equals(NetworkIdentity x, NetworkIdentity y)
+            {
+                return x.NetId == y.NetId;
+            }
+            public int GetHashCode(NetworkIdentity obj)
+            {
+                return (int)obj.NetId;
+            }
+        }
+
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkProximityChecker));
 
-        /// <summary>
-        /// The maximim range that objects will be visible at.
-        /// </summary>
-        [Tooltip("The maximum range that objects will be visible at.")]
-        public int VisibilityRange = 10;
+        private readonly float _sightDistnace = 10;
+        private readonly float _updateInterval = 0;
+        private float _nextUpdate = 0;
+        private readonly Dictionary<INetworkPlayer, HashSet<NetworkIdentity>> lastFrame = new Dictionary<INetworkPlayer, HashSet<NetworkIdentity>>();
 
         /// <summary>
-        /// How often (in seconds) that this object should update the list of observers that can see it.
+        /// 
         /// </summary>
-        [Tooltip("How often (in seconds) that this object should update the list of observers that can see it.")]
-        public float VisibilityUpdateInterval = 1;
-
-        /// <summary>
-        /// Flag to force this object to be hidden for players.
-        /// <para>If this object is a player object, it will not be hidden for that player.</para>
-        /// </summary>
-        [Tooltip("Enable to force this object to be hidden from players.")]
-        public bool ForceHidden;
-
-        public void Awake()
+        /// <param name="serverObjectManager"></param>
+        /// <param name="sightDistance"></param>
+        /// <param name="updateInterval"></param>
+        public NetworkProximityChecker(ServerObjectManager serverObjectManager, float sightDistance, float updateInterval) : base(serverObjectManager)
         {
-            Identity.OnStartServer.AddListener(() =>
-            {
-                InvokeRepeating(nameof(RebuildObservers), 0, VisibilityUpdateInterval);
-            });
-
-            Identity.OnStopServer.AddListener(() =>
-            {
-                CancelInvoke(nameof(RebuildObservers));
-            });
+            _sightDistnace = sightDistance;
+            _updateInterval = updateInterval;
         }
 
-        void RebuildObservers()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool FastInDistanceXZ(Vector3 a, Vector3 b, float sqRange)
         {
-            Identity.RebuildObservers(false);
+            float dx = a.x - b.x;
+            float dz = a.z - b.z;
+            float sqDist = dx * dx + dz * dz;
+            return sqDist < sqRange;
         }
-
-        /// <summary>
-        /// Callback used by the visibility system to determine if an observer (player) can see this object.
-        /// <para>If this function returns true, the network connection will be added as an observer.</para>
-        /// </summary>
-
-        /// <param name="player">Network connection of a player.</param>
-        /// <returns>True if the player can see this object.</returns>
-        public override bool OnCheckObserver(INetworkPlayer player)
+        private void Rebuild()
         {
-            if (ForceHidden)
-                return false;
-
-            return Vector3.Distance(player.Identity.transform.position, transform.position) < VisibilityRange;
-        }
-
-        /// <summary>
-        /// Callback used by the visibility system to (re)construct the set of observers that can see this object.
-        /// <para>Implementations of this callback should add network connections of players that can see this object to the observers set.</para>
-        /// </summary>
-        /// <param name="observers">The new set of observers for this object.</param>
-        /// <param name="initialize">True if the set of observers is being built for the first time.</param>
-        public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
-        {
-            // if force hidden then return without adding any observers.
-            if (ForceHidden)
-                return;
-
-            // 'transform.' calls GetComponent, only do it once
-            Vector3 position = transform.position;
-
-            // brute force distance check
-            // -> only player connections can be observers, so it's enough if we
-            //    go through all connections instead of all spawned identities.
-            // -> compared to UNET's sphere cast checking, this one is orders of
-            //    magnitude faster. if we have 10k monsters and run a sphere
-            //    cast 10k times, we will see a noticeable lag even with physics
-            //    layers. but checking to every connection is fast.
-            foreach (INetworkPlayer player in Server.Players)
+            foreach (NetworkIdentity identity in InterestManager.ServerObjectManager.Server.World.SpawnedIdentities)
             {
-                // check distance
-                if (player != null && player.HasCharacter && Vector3.Distance(player.Identity.transform.position, position) < VisibilityRange)
+                foreach (INetworkPlayer player in VisibilitySystemData.Keys)
                 {
-                    observers.Add(player);
+                    if (!VisibilitySystemData.TryGetValue(player, out HashSet<NetworkIdentity> nextSet))
+                    {
+                        nextSet = new HashSet<NetworkIdentity>(new NetIdComparer());
+                        VisibilitySystemData[player] = nextSet;
+                    }
+
+                    nextSet.Add(identity);
+                }
+            }
+
+            foreach (INetworkPlayer player in InterestManager.ServerObjectManager.Server.Players)
+            {
+                if (!lastFrame.TryGetValue(player, out HashSet<NetworkIdentity> lastSet))
+                {
+                    lastSet = new HashSet<NetworkIdentity>(new NetIdComparer());
+                    lastFrame[player] = lastSet;
+                }
+
+                if (!VisibilitySystemData.TryGetValue(player, out HashSet<NetworkIdentity> nextSet))
+                {
+                    nextSet = new HashSet<NetworkIdentity>(new NetIdComparer());
+                    VisibilitySystemData[player] = nextSet;
+                }
+
+
+                foreach (NetworkIdentity identity in lastSet)
+                {
+                    if (!nextSet.Contains(identity))
+                    {
+                        InterestManager.ServerObjectManager.HideToPlayer(identity, player);
+                    }
+                }
+
+                foreach (NetworkIdentity identity in nextSet)
+                {
+                    if (!lastSet.Contains(identity))
+                    {
+                        InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
+                    }
+                }
+
+                // reset collections
+                lastSet.Clear();
+                foreach (NetworkIdentity identity in nextSet)
+                {
+                    lastSet.Add(identity);
+                }
+
+                nextSet.Clear();
+            }
+        }
+
+        #region Overrides of NetworkVisibility
+
+        /// <summary>
+        ///     Invoked when an object is spawned in the server
+        ///     It should show that object to all relevant players
+        /// </summary>
+        /// <param name="identity">The object just spawned</param>
+        public override void OnSpawned(NetworkIdentity identity)
+        {
+            // does object have owner?
+            if (identity.Owner != null)
+            {
+                OnAuthenticated(identity.Owner);
+            }
+
+            Vector3 a = identity.transform.position;
+            float sqRange = _sightDistnace * _sightDistnace;
+
+            foreach (INetworkPlayer player in InterestManager.ServerObjectManager.Server.Players)
+            {
+                Vector3 b = player.Identity.transform.position;
+
+                if (FastInDistanceXZ(a, b, sqRange))
+                {
+                    InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
                 }
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="player"></param>
+        public override void OnAuthenticated(INetworkPlayer player)
+        {
+            // no owned object, nothing to see
+            if (player.Identity == null) { return; }
+
+            Vector3 b = player.Identity.transform.position;
+            float sqRange = _sightDistnace * _sightDistnace;
+
+            foreach (NetworkIdentity identity in InterestManager.ServerObjectManager.Server.World.SpawnedIdentities)
+            {
+                Vector3 a = identity.transform.position;
+
+                if (FastInDistanceXZ(a, b, sqRange))
+                {
+                    InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
+                }
+            }
+        }
+
+        /// <summary>
+        ///     
+        /// </summary>
+        public override void CheckForObservers()
+        {
+            if (!(_nextUpdate < Time.time)) return;
+
+            Rebuild();
+
+            _nextUpdate += _updateInterval;
+        }
+
+        #endregion
     }
 }

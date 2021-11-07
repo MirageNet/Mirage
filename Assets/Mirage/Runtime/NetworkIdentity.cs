@@ -106,10 +106,6 @@ namespace Mirage
     {
         static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();
 
-        private static readonly ProfilerMarker OnCheckObservers = new ProfilerMarker(nameof(OnCheckObserver));
-        private static readonly ProfilerMarker AddObservers = new ProfilerMarker(nameof(AddObserver));
-        private static readonly ProfilerMarker RebuildObserver = new ProfilerMarker(nameof(RebuildObservers));
-
         public TransformSpawnSettings SpawnSettings = new TransformSpawnSettings(true, true, true);
 
         [NonSerialized]
@@ -142,11 +138,6 @@ namespace Mirage
         /// <para>For objects that had their authority set by AssignClientAuthority on the server, this will be true on the client that owns the object. NOT on other clients.</para>
         /// </summary>
         public bool HasAuthority { get; internal set; }
-
-        /// <summary>
-        /// The set of network connections (players) that can see this object.
-        /// </summary>
-        public readonly HashSet<INetworkPlayer> observers = new HashSet<INetworkPlayer>();
 
         /// <summary>
         /// Unique identifier for this particular object instance, used for tracking objects between networked clients and the server.
@@ -254,19 +245,6 @@ namespace Mirage
 
                 networkBehavioursCache = components;
                 return networkBehavioursCache;
-            }
-        }
-
-        NetworkVisibility _visibility;
-        public NetworkVisibility Visibility
-        {
-            get
-            {
-                if (_visibility is null)
-                {
-                    _visibility = GetComponent<NetworkVisibility>();
-                }
-                return _visibility;
             }
         }
 
@@ -390,15 +368,6 @@ namespace Mirage
         }
 
         /// <summary>
-        /// this is used when a connection is destroyed, since the "observers" property is read-only
-        /// </summary>
-        /// <param name="player"></param>
-        internal void RemoveObserverInternal(INetworkPlayer player)
-        {
-            observers.Remove(player);
-        }
-
-        /// <summary>
         /// hasSpawned should always be false before runtime
         /// </summary>
         [SerializeField, HideInInspector] bool hasSpawned;
@@ -494,33 +463,6 @@ namespace Mirage
         internal void StopAuthority()
         {
             _onAuthorityChanged.Invoke(false);
-        }
-
-        /// <summary>
-        /// check if observer can be seen by connection.
-        /// <list type="bullet">
-        ///     <item><description>
-        ///         returns visibility.OnCheckObserver
-        ///     </description></item>
-        ///     <item><description>
-        ///         returns true if we have no NetworkVisibility, default objects are visible
-        ///     </description></item>
-        /// </list>
-        /// </summary>
-        /// <param name="player"></param>
-        /// <returns></returns>
-        internal bool OnCheckObserver(INetworkPlayer player)
-        {
-            OnCheckObservers.Begin();
-
-            if (Visibility != null)
-            {
-                return Visibility.OnCheckObserver(player);
-            }
-
-            OnCheckObservers.End();
-
-            return true;
         }
 
         internal void StopClient()
@@ -724,178 +666,6 @@ namespace Mirage
         }
 
         /// <summary>
-        /// Called when NetworkIdentity is destroyed
-        /// </summary>
-        internal void ClearObservers()
-        {
-            foreach (INetworkPlayer player in observers)
-            {
-                player.RemoveFromVisList(this);
-            }
-            observers.Clear();
-        }
-
-        internal void AddObserver(INetworkPlayer player)
-        {
-            AddObservers.Begin();
-
-            if (observers.Contains(player))
-            {
-                // if we try to add a connectionId that was already added, then
-                // we may have generated one that was already in use.
-                return;
-            }
-
-            if (logger.LogEnabled()) logger.Log($"Adding [{player.Connection.EndPoint}] as observer for {gameObject}");
-            observers.Add(player);
-            player.AddToVisList(this);
-
-            // spawn identity for this conn
-            ServerObjectManager.ShowToPlayer(this, player);
-
-            AddObservers.End();
-        }
-
-        /// <summary>
-        /// Helper function to call OnRebuildObservers in all components
-        /// <para>HashSet is passed in so we can cache it!</para>
-        /// <para>Returns true if we have a NetworkVisibility, false otherwise</para>
-        /// <para>Initialize is true on first rebuild, false on consecutive rebuilds</para>
-        /// </summary>
-        /// <param name="observersSet"></param>
-        /// <param name="initialize"></param>
-        /// <returns></returns>
-        internal bool GetNewObservers(HashSet<INetworkPlayer> observersSet, bool initialize)
-        {
-            observersSet.Clear();
-
-            if (Visibility != null)
-            {
-                Visibility.OnRebuildObservers(observersSet, initialize);
-                return true;
-            }
-
-            // we have no NetworkVisibility. return false to indicate that we
-            // should use the default implementation.
-            return false;
-        }
-
-        /// <summary>
-        /// Helper function to add all server connections as observers.
-        /// This is used if none of the components provides their own
-        /// OnRebuildObservers function.
-        /// </summary>
-        internal void AddAllReadyServerConnectionsToObservers()
-        {
-            // add all server connections
-            foreach (INetworkPlayer player in Server.Players)
-            {
-                if (player.SceneIsReady)
-                    AddObserver(player);
-            }
-
-            // add local host connection (if any)
-            if (Server.LocalPlayer != null && Server.LocalPlayer.SceneIsReady)
-            {
-                AddObserver(Server.LocalPlayer);
-            }
-        }
-
-        static readonly HashSet<INetworkPlayer> newObservers = new HashSet<INetworkPlayer>();
-
-        /// <summary>
-        /// This causes the set of players that can see this object to be rebuild.
-        /// The OnRebuildObservers callback function will be invoked on each NetworkBehaviour.
-        /// </summary>
-        /// <param name="initialize">True if this is the first time.</param>
-        public void RebuildObservers(bool initialize)
-        {
-            RebuildObserver.Begin();
-
-            bool changed = false;
-
-            // call OnRebuildObservers function
-            bool rebuildOverwritten = GetNewObservers(newObservers, initialize);
-
-            // if player connection: ensure player always see himself no matter what.
-            // -> fixes https://github.com/vis2k/Mirror/issues/692 where a
-            //    player might teleport out of the ProximityChecker's cast,
-            //    losing the own connection as observer.
-            if (Owner != null && Owner.SceneIsReady)
-            {
-                newObservers.Add(Owner);
-            }
-
-            // if no NetworkVisibility component, then add all server connections.
-            if (!rebuildOverwritten)
-            {
-                // only add all connections when rebuilding the first time.
-                // second time we just keep them without rebuilding anything.
-                if (initialize)
-                {
-                    AddAllReadyServerConnectionsToObservers();
-                }
-                return;
-            }
-
-            changed = AddNewObservers(initialize, changed);
-
-            changed = RemoveOldObservers(changed);
-
-            if (changed)
-            {
-                observers.Clear();
-                foreach (INetworkPlayer player in newObservers)
-                {
-                    if (player != null && player.SceneIsReady)
-                        observers.Add(player);
-                }
-            }
-
-            RebuildObserver.End();
-        }
-
-        // remove all old .observers that aren't in newObservers anymore
-        bool RemoveOldObservers(bool changed)
-        {
-            foreach (INetworkPlayer player in observers)
-            {
-                if (!newObservers.Contains(player))
-                {
-                    // removed observer
-                    player.RemoveFromVisList(this);
-                    ServerObjectManager.HideToPlayer(this, player);
-
-                    if (logger.LogEnabled()) logger.Log("Removed Observer for " + gameObject + " " + player);
-                    changed = true;
-                }
-            }
-
-            return changed;
-        }
-
-        // add all newObservers that aren't in .observers yet
-        bool AddNewObservers(bool initialize, bool changed)
-        {
-            foreach (INetworkPlayer player in newObservers)
-            {
-                // only add ready connections.
-                // otherwise the player might not be in the world yet or anymore
-                if (player != null && player.SceneIsReady && (initialize || !observers.Contains(player)))
-                {
-                    // new observer
-                    player.AddToVisList(this);
-                    // spawn identity for this conn
-                    ServerObjectManager.ShowToPlayer(this, player);
-                    if (logger.LogEnabled()) logger.Log("New Observer for " + gameObject + " " + player);
-                    changed = true;
-                }
-            }
-
-            return changed;
-        }
-
-        /// <summary>
         /// Assign control of an object to a client via the client's <see cref="NetworkPlayer">NetworkConnection.</see>
         /// <para>This causes hasAuthority to be set on the client that owns the object, and NetworkBehaviour.OnStartAuthority will be called on that client. This object then will be in the NetworkConnection.clientOwnedObjects list for the connection.</para>
         /// <para>Authority can be removed with RemoveClientAuthority. Only one client can own an object at any time. This does not need to be called for player objects, as their authority is setup automatically.</para>
@@ -976,7 +746,6 @@ namespace Mirage
             Owner = null;
             networkBehavioursCache = null;
 
-            ClearObservers();
             ResetEvents();
         }
 
@@ -993,16 +762,7 @@ namespace Mirage
 
         internal void UpdateVars()
         {
-            if (observers.Count > 0)
-            {
-                SendUpdateVarsMessage();
-            }
-            else
-            {
-                // clear all component's dirty bits.
-                // it would be spawned on new observers anyway.
-                ClearAllComponentsDirtyBits();
-            }
+            SendUpdateVarsMessage();
         }
 
         void SendUpdateVarsMessage()
@@ -1036,7 +796,8 @@ namespace Mirage
                     if (observersWritten > 0)
                     {
                         varsMessage.payload = observersWriter.ToArraySegment();
-                        SendToRemoteObservers(varsMessage, false);
+
+                        ServerObjectManager.InterestManager.Send(this, varsMessage, Channel.Reliable, Server.LocalPlayer);
                     }
 
                     // clear dirty bits only for the components that we serialized
@@ -1048,49 +809,6 @@ namespace Mirage
                     //  them if initialState. clearing the dirty ones is enough.)
                     ClearDirtyComponentsDirtyBits();
                 }
-            }
-        }
-
-        static readonly List<INetworkPlayer> connectionsExcludeSelf = new List<INetworkPlayer>(100);
-
-        /// <summary>
-        /// Send a message to all the remote observers
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="msg"> the message to deliver to to clients</param>
-        /// <param name="includeOwner">Wether the owner should receive this message too</param>
-        /// <param name="channelId"> the transport channel that should be used to deliver the message</param>
-        internal void SendToRemoteObservers<T>(T msg, bool includeOwner = true, int channelId = Channel.Reliable)
-        {
-            if (logger.LogEnabled()) logger.Log("Server.SendToObservers id:" + typeof(T));
-
-            if (observers.Count == 0)
-                return;
-
-            connectionsExcludeSelf.Clear();
-            foreach (INetworkPlayer player in observers)
-            {
-                if (player == Server.LocalPlayer)
-                    continue;
-
-                if (includeOwner || Owner != player)
-                {
-                    connectionsExcludeSelf.Add(player);
-                }
-            }
-
-            if (connectionsExcludeSelf.Count > 0)
-                NetworkServer.SendToMany(connectionsExcludeSelf, msg, channelId);
-        }
-
-        /// <summary>
-        /// clear all component's dirty bits no matter what
-        /// </summary>
-        internal void ClearAllComponentsDirtyBits()
-        {
-            foreach (NetworkBehaviour comp in NetworkBehaviours)
-            {
-                comp.ClearAllDirtyBits();
             }
         }
 
