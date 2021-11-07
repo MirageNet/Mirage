@@ -4,6 +4,7 @@ using Mirage.Events;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -104,6 +105,10 @@ namespace Mirage
     public sealed class NetworkIdentity : MonoBehaviour
     {
         static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();
+
+        private static readonly ProfilerMarker OnCheckObservers = new ProfilerMarker(nameof(OnCheckObserver));
+        private static readonly ProfilerMarker AddObservers = new ProfilerMarker(nameof(AddObserver));
+        private static readonly ProfilerMarker RebuildObserver = new ProfilerMarker(nameof(RebuildObservers));
 
         public TransformSpawnSettings SpawnSettings = new TransformSpawnSettings(true, true, true);
 
@@ -506,10 +511,15 @@ namespace Mirage
         /// <returns></returns>
         internal bool OnCheckObserver(INetworkPlayer player)
         {
+            OnCheckObservers.Begin();
+
             if (Visibility != null)
             {
                 return Visibility.OnCheckObserver(player);
             }
+
+            OnCheckObservers.End();
+
             return true;
         }
 
@@ -727,6 +737,8 @@ namespace Mirage
 
         internal void AddObserver(INetworkPlayer player)
         {
+            AddObservers.Begin();
+
             if (observers.Contains(player))
             {
                 // if we try to add a connectionId that was already added, then
@@ -740,6 +752,8 @@ namespace Mirage
 
             // spawn identity for this conn
             ServerObjectManager.ShowToPlayer(this, player);
+
+            AddObservers.End();
         }
 
         /// <summary>
@@ -796,6 +810,8 @@ namespace Mirage
         /// <param name="initialize">True if this is the first time.</param>
         public void RebuildObservers(bool initialize)
         {
+            RebuildObserver.Begin();
+
             bool changed = false;
 
             // call OnRebuildObservers function
@@ -835,6 +851,8 @@ namespace Mirage
                         observers.Add(player);
                 }
             }
+
+            RebuildObserver.End();
         }
 
         // remove all old .observers that aren't in newObservers anymore
