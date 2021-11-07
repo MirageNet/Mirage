@@ -4,8 +4,10 @@ using Mirage.Events;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Object = System.Object;
 
 namespace Mirage
 {
@@ -506,10 +508,17 @@ namespace Mirage
         /// <returns></returns>
         internal bool OnCheckObserver(INetworkPlayer player)
         {
+            var onCheck = new ProfilerMarker(ProfilerCategory.Network, nameof(OnCheckObserver));
+
+            onCheck.Begin();
+
             if (Visibility != null)
             {
                 return Visibility.OnCheckObserver(player);
             }
+
+            onCheck.End();
+
             return true;
         }
 
@@ -727,6 +736,10 @@ namespace Mirage
 
         internal void AddObserver(INetworkPlayer player)
         {
+            var addObserver = new ProfilerMarker(ProfilerCategory.Network, nameof(AddObserver));
+
+            addObserver.Begin();
+
             if (observers.Contains(player))
             {
                 // if we try to add a connectionId that was already added, then
@@ -740,6 +753,8 @@ namespace Mirage
 
             // spawn identity for this conn
             ServerObjectManager.ShowToPlayer(this, player);
+
+            addObserver.End();
         }
 
         /// <summary>
@@ -796,6 +811,10 @@ namespace Mirage
         /// <param name="initialize">True if this is the first time.</param>
         public void RebuildObservers(bool initialize)
         {
+            var rebuildObservers = new ProfilerMarker(ProfilerCategory.Network, nameof(RebuildObservers));
+
+            rebuildObservers.Begin();
+
             bool changed = false;
 
             // call OnRebuildObservers function
@@ -835,6 +854,8 @@ namespace Mirage
                         observers.Add(player);
                 }
             }
+
+            rebuildObservers.End();
         }
 
         // remove all old .observers that aren't in newObservers anymore
