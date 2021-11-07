@@ -98,15 +98,15 @@ namespace Mirage
         /// <summary>
         /// Local position
         /// </summary>
-        public Vector3 position;
+        public Vector3? position;
         /// <summary>
         /// Local rotation
         /// </summary>
-        public Quaternion rotation;
+        public Quaternion? rotation;
         /// <summary>
         /// Local scale
         /// </summary>
-        public Vector3 scale;
+        public Vector3? scale;
         /// <summary>
         /// The serialized component data
         /// <remark>ArraySegment to avoid unnecessary allocations</remark>

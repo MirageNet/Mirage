@@ -105,6 +105,8 @@ namespace Mirage
     {
         static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();
 
+        public TransformSpawnSettings SpawnSettings = new TransformSpawnSettings(true, true, true);
+
         [NonSerialized]
         NetworkBehaviour[] networkBehavioursCache;
 
@@ -700,10 +702,10 @@ namespace Mirage
 
         internal void SetClientValues(ClientObjectManager clientObjectManager, SpawnMessage msg)
         {
-            // apply local values for VR support
-            transform.localPosition = msg.position;
-            transform.localRotation = msg.rotation;
-            transform.localScale = msg.scale;
+            if (msg.position.HasValue) transform.localPosition = msg.position.Value;
+            if (msg.rotation.HasValue) transform.localRotation = msg.rotation.Value;
+            if (msg.scale.HasValue) transform.localScale = msg.scale.Value;
+
             NetId = msg.netId;
             HasAuthority = msg.isOwner;
             ClientObjectManager = clientObjectManager;
@@ -1094,6 +1096,21 @@ namespace Mirage
             foreach (NetworkBehaviour comp in NetworkBehaviours)
             {
                 comp.ResetSyncObjects();
+            }
+        }
+
+        [System.Serializable]
+        public struct TransformSpawnSettings
+        {
+            public bool SendPosition;
+            public bool SendRotation;
+            public bool SendScale;
+
+            public TransformSpawnSettings(bool sendPosition, bool sendRotation, bool sendScale)
+            {
+                SendPosition = sendPosition;
+                SendRotation = sendRotation;
+                SendScale = sendScale;
             }
         }
     }
