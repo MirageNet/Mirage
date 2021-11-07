@@ -115,8 +115,8 @@ namespace Mirage.InterestManagement
         {
             ServerObjectManager = serverObjectManager;
 
-            ServerObjectManager.Server.Started.AddListener(OnServerStarted);
-            ServerObjectManager.Server.Stopped.AddListener(OnServerStopped);
+            ServerObjectManager.Server?.Started.AddListener(OnServerStarted);
+            ServerObjectManager.Server?.Stopped.AddListener(OnServerStopped);
         }
 
         internal void Update()
