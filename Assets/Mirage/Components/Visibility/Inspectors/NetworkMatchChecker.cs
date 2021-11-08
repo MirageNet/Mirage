@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Mirage.Components
 {
     public class NetworkMatchChecker : BaseVisibilityInspector
@@ -6,7 +8,7 @@ namespace Mirage.Components
 
         protected override void Start()
         {
-            NetworkVisibility = new NetworkMatchCheckerVisibility(ServerObjectManager);
+            NetworkVisibility = new NetworkMatchCheckerVisibility(ServerObjectManager, Identity);
 
             base.Start();
         }

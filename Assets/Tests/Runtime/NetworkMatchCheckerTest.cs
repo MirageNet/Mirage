@@ -91,7 +91,7 @@ namespace Mirage.Tests.Runtime
         {
             // set using reflection so bypass property
             FieldInfo field = typeof(NetworkMatchCheckerVisibility).GetField("currentMatch", BindingFlags.Instance | BindingFlags.NonPublic);
-            field.SetValue(target, guid);
+            //field.SetValue(target, guid);
         }
 
         [Test]

@@ -18,6 +18,7 @@ namespace Mirage.Components
     {
         static readonly Dictionary<Guid, HashSet<NetworkIdentity>> matchPlayers = new Dictionary<Guid, HashSet<NetworkIdentity>>();
 
+        private NetworkIdentity Identity;
         Guid currentMatch = Guid.Empty;
 
         [Header("Diagnostics")]
@@ -45,10 +46,7 @@ namespace Mirage.Components
                 if (previousMatch != Guid.Empty)
                 {
                     // Remove this object from the hashset of the match it just left
-                    //matchPlayers[previousMatch].Remove(Identity);
-
-                    // RebuildObservers of all NetworkIdentity's in the match this object just left
-                    RebuildMatchObservers(previousMatch);
+                    matchPlayers[previousMatch].Remove(Identity);
                 }
 
                 if (currentMatch != Guid.Empty)
@@ -58,85 +56,14 @@ namespace Mirage.Components
                         matchPlayers.Add(currentMatch, new HashSet<NetworkIdentity>());
 
                     // Add this object to the hashset of the new match
-                    //matchPlayers[currentMatch].Add(Identity);
-
-                    // RebuildObservers of all NetworkIdentity's in the match this object just entered
-                    RebuildMatchObservers(currentMatch);
-                }
-                else
-                {
-                    // Not in any match now...RebuildObservers will clear and add self
-                    //Identity.RebuildObservers(false);
+                    matchPlayers[currentMatch].Add(Identity);
                 }
             }
         }
 
-        public void Awake()
+        public NetworkMatchCheckerVisibility(ServerObjectManager serverObjectManager, NetworkIdentity identity) : base(serverObjectManager)
         {
-            //Identity.OnStartServer.AddListener(OnStartServer);
-        }
-
-        public void OnStartServer()
-        {
-            if (currentMatch == Guid.Empty) return;
-
-            if (!matchPlayers.ContainsKey(currentMatch))
-                matchPlayers.Add(currentMatch, new HashSet<NetworkIdentity>());
-
-            //matchPlayers[currentMatch].Add(Identity);
-
-            // No need to rebuild anything here.
-            // identity.RebuildObservers is called right after this from NetworkServer.SpawnObject
-        }
-
-        void RebuildMatchObservers(Guid specificMatch)
-        {
-            //foreach (NetworkIdentity networkIdentity in matchPlayers[specificMatch])
-            //    if (networkIdentity != null)
-            //        networkIdentity.RebuildObservers(false);
-        }
-
-        #region Observers
-
-        /// <summary>
-        /// Callback used by the visibility system to determine if an observer (player) can see this object.
-        /// <para>If this function returns true, the network connection will be added as an observer.</para>
-        /// </summary>
-        /// <param name="player">Network connection of a player.</param>
-        /// <returns>True if the player can see this object.</returns>
-        //public override bool OnCheckObserver(INetworkPlayer player)
-        //{
-        //    // Not Visible if not in a match
-        //    if (MatchId == Guid.Empty)
-        //        return false;
-
-        //    NetworkMatchChecker networkMatchChecker = player.Identity.GetComponent<NetworkMatchChecker>();
-
-        //    if (networkMatchChecker == null)
-        //        return false;
-
-        //    return networkMatchChecker.MatchId == MatchId;
-        //}
-
-        /// <summary>
-        /// Callback used by the visibility system to (re)construct the set of observers that can see this object.
-        /// <para>Implementations of this callback should add network connections of players that can see this object to the observers set.</para>
-        /// </summary>
-        /// <param name="observers">The new set of observers for this object.</param>
-        /// <param name="initialize">True if the set of observers is being built for the first time.</param>
-        //public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
-        //{
-        //    if (currentMatch == Guid.Empty) return;
-
-        //    foreach (NetworkIdentity networkIdentity in matchPlayers[currentMatch])
-        //        if (networkIdentity != null && networkIdentity.Owner != null)
-        //            observers.Add(networkIdentity.Owner);
-        //}
-
-        #endregion
-
-        public NetworkMatchCheckerVisibility(ServerObjectManager serverObjectManager) : base(serverObjectManager)
-        {
+            Identity = identity;
         }
 
         #region Overrides of NetworkVisibility
@@ -148,7 +75,7 @@ namespace Mirage.Components
         /// <param name="identity">The object just spawned</param>
         public override void OnSpawned(NetworkIdentity identity)
         {
-            throw new NotImplementedException();
+            if (currentMatch == Guid.Empty) return;
         }
 
         /// <summary>
@@ -157,7 +84,7 @@ namespace Mirage.Components
         /// <param name="player"></param>
         public override void OnAuthenticated(INetworkPlayer player)
         {
-            throw new NotImplementedException();
+            if (currentMatch == Guid.Empty) return;
         }
 
         /// <summary>
@@ -165,7 +92,7 @@ namespace Mirage.Components
         /// </summary>
         public override void CheckForObservers()
         {
-            throw new NotImplementedException();
+            if (currentMatch == Guid.Empty) return;
         }
 
         #endregion
