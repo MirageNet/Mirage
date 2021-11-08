@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Mirage.Components
 {
-    internal class NetworkProximityCheckerInspector : BaseVisibilityInspector
+    public class NetworkProximityChecker : BaseVisibilityInspector
     {
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace Mirage.Components
 
         protected override void Start()
         {
-            NetworkVisibility = new NetworkProximityChecker(ServerObjectManager, VisibilityRange, VisibilityUpdateInterval);
+            NetworkVisibility = new NetworkProximityCheckerVisibility(ServerObjectManager, VisibilityRange, VisibilityUpdateInterval);
 
             base.Start();
         }

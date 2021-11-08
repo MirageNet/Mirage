@@ -13,7 +13,7 @@ namespace Mirage
     [AddComponentMenu("Network/NetworkProximityChecker")]
     [RequireComponent(typeof(NetworkIdentity))]
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkProximityChecker.html")]
-    public class NetworkProximityChecker : NetworkVisibility
+    public class NetworkProximityCheckerVisibility : NetworkVisibility
     {
         private class NetIdComparer : IEqualityComparer<NetworkIdentity>
         {
@@ -27,7 +27,7 @@ namespace Mirage
             }
         }
 
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkProximityChecker));
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkProximityCheckerVisibility));
 
         private readonly float _sightDistnace = 10;
         private readonly float _updateInterval = 0;
@@ -40,7 +40,7 @@ namespace Mirage
         /// <param name="serverObjectManager"></param>
         /// <param name="sightDistance"></param>
         /// <param name="updateInterval"></param>
-        public NetworkProximityChecker(ServerObjectManager serverObjectManager, float sightDistance, float updateInterval) : base(serverObjectManager)
+        public NetworkProximityCheckerVisibility(ServerObjectManager serverObjectManager, float sightDistance, float updateInterval) : base(serverObjectManager)
         {
             _sightDistnace = sightDistance;
             _updateInterval = updateInterval;
