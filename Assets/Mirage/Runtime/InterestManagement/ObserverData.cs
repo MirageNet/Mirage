@@ -6,13 +6,13 @@ namespace Mirage.InterestManagement
     {
         private readonly INetworkVisibility _system;
 
-        private readonly Dictionary<INetworkPlayer, HashSet<NetworkIdentity>> _observers;
+        private readonly Dictionary<NetworkIdentity, HashSet<INetworkPlayer>> _observers;
 
         public INetworkVisibility System => _system;
 
-        public Dictionary<INetworkPlayer, HashSet<NetworkIdentity>> Observers => _observers;
+        public Dictionary<NetworkIdentity, HashSet<INetworkPlayer>> Observers => _observers;
 
-        public ObserverData(INetworkVisibility system, Dictionary<INetworkPlayer, HashSet<NetworkIdentity>> observers)
+        public ObserverData(INetworkVisibility system, Dictionary<NetworkIdentity, HashSet<INetworkPlayer>> observers)
         {
             _system = system;
             _observers = observers;

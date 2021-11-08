@@ -144,7 +144,7 @@ namespace Mirage.InterestManagement
         {
             OnSendProfilerMarker.Begin();
 
-            _observers = Observers(identity);
+            Observers(identity);
 
             // remove skipped player. No need to send to them.
             _observers.Remove(skip);
@@ -206,35 +206,30 @@ namespace Mirage.InterestManagement
         /// </summary>
         /// <param name="identity">The identity of the object we want to check if player's can see it or not.</param>
         /// <returns></returns>
-        internal List<INetworkPlayer> Observers(NetworkIdentity identity)
+        private void Observers(NetworkIdentity identity)
         {
             ObserverProfilerMarker.Begin();
+
+            _observers.Clear();
 
             if (_visibilitySystems.Count == 0)
             {
                 ObserverProfilerMarker.End();
 
-                return new List<INetworkPlayer>(ServerObjectManager.Server.Players);
+                _observers.AddRange(ServerObjectManager.Server.Players);
             }
 
             foreach (ObserverData visibilitySystem in _visibilitySystems)
             {
-                foreach (KeyValuePair<INetworkPlayer, HashSet<NetworkIdentity>> observer in visibilitySystem.Observers)
+                if (!visibilitySystem.Observers.ContainsKey(identity)) continue;
+
+                foreach (KeyValuePair<NetworkIdentity, HashSet<INetworkPlayer>> observer in visibilitySystem.Observers)
                 {
-                    if (!observer.Value.Contains(identity))
-                    {
-                        ObserverProfilerMarker.End();
-
-                        return _observers;
-                    }
-
-                    _observers.AddRange(visibilitySystem.Observers.Keys);
+                    _observers.AddRange(observer.Value);
                 }
             }
 
             ObserverProfilerMarker.End();
-
-            return _observers;
         }
 
         #endregion

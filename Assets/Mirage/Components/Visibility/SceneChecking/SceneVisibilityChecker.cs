@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Mirage.InterestManagement;
 using Mirage.Logging;
 using UnityEngine;
@@ -9,38 +10,12 @@ namespace Mirage
     {
         static readonly ILogger logger = LogFactory.GetLogger<SceneVisibilityChecker>();
 
-        //public override bool OnCheckObserver(INetworkPlayer player)
-        //{
-        //    NetworkIdentity character = player.Identity;
-        //    if (character == null)
-        //    {
-        //        if (logger.LogEnabled()) logger.Log($"SceneChecker: {player} had no character");
-        //        return false;
-        //    }
+        #region Fields
 
-        //    Scene playerScene = character.gameObject.scene;
-        //    if (!playerScene.IsValid())
-        //    {
-        //        if (logger.WarnEnabled()) logger.LogWarning($"SceneChecker: Could not find scene for {player}");
-        //        return false;
-        //    }
+        private Scene _objectCurrentScene;
+        private NetworkIdentity Identity;
 
-        //    Scene thisScene = gameObject.scene;
-        //    bool visible = playerScene == thisScene;
-        //    if (logger.LogEnabled()) logger.Log($"SceneChecker: {player} can see '{this}': {visible}");
-        //    return visible;
-        //}
-
-        //public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
-        //{
-        //    foreach (INetworkPlayer player in Server.Players)
-        //    {
-        //        if (OnCheckObserver(player))
-        //        {
-        //            observers.Add(player);
-        //        }
-        //    }
-        //}
+        #endregion
 
         /// <summary>
         /// Call this function on an object to move it to a new scene and rebuild its observers
@@ -65,17 +40,10 @@ namespace Mirage
             //    ServerObjectManager.SpawnVisibleObjects(Identity.Owner);
         }
 
-        private void removeObservers(NetworkIdentity identity)
+        public SceneVisibilityChecker(ServerObjectManager serverObjectManager, Scene objectScene, NetworkIdentity identity) : base(serverObjectManager)
         {
-            //HashSet<INetworkPlayer> observers = identity.observers;
-            //foreach (INetworkPlayer observer in observers)
-            //{
-            //    observer.RemoveFromVisList(identity);
-            //}
-        }
-
-        public SceneVisibilityChecker(ServerObjectManager serverObjectManager) : base(serverObjectManager)
-        {
+            _objectCurrentScene = objectScene;
+            Identity = identity;
         }
 
         #region Overrides of NetworkVisibility
@@ -87,7 +55,7 @@ namespace Mirage
         /// <param name="identity">The object just spawned</param>
         public override void OnSpawned(NetworkIdentity identity)
         {
-            throw new System.NotImplementedException();
+            // NOOP
         }
 
         /// <summary>
@@ -96,7 +64,7 @@ namespace Mirage
         /// <param name="player"></param>
         public override void OnAuthenticated(INetworkPlayer player)
         {
-            throw new System.NotImplementedException();
+            if(player.Identity.gameObject.scene.handle != _objectCurrentScene.handle) return;
         }
 
         /// <summary>
@@ -104,7 +72,6 @@ namespace Mirage
         /// </summary>
         public override void CheckForObservers()
         {
-            throw new System.NotImplementedException();
         }
 
         #endregion

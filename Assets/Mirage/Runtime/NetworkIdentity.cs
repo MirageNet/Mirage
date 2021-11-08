@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using Mirage.Events;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
-using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Serialization;
 

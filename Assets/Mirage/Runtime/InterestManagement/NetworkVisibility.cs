@@ -15,7 +15,7 @@ namespace Mirage.InterestManagement
 
         public InterestManager InterestManager => _serverObjectManager.InterestManager;
 
-        public Dictionary<INetworkPlayer, HashSet<NetworkIdentity>> VisibilitySystemData => _visibilitySystemData.Observers;
+        public Dictionary<NetworkIdentity, HashSet<INetworkPlayer>> VisibilitySystemData => _visibilitySystemData.Observers;
 
         #endregion
 
@@ -26,7 +26,7 @@ namespace Mirage.InterestManagement
 
         public void Startup()
         {
-            _visibilitySystemData = new ObserverData(this, new Dictionary<INetworkPlayer, HashSet<NetworkIdentity>>());
+            _visibilitySystemData = new ObserverData(this, new Dictionary<NetworkIdentity, HashSet<INetworkPlayer>>());
 
             _serverObjectManager.InterestManager?.RegisterVisibilitySystem(ref _visibilitySystemData);
         }

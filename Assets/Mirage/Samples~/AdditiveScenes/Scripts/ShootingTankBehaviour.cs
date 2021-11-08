@@ -40,15 +40,18 @@ namespace Mirage.Examples.Additive
 
             foreach (ObserverData observerData in Identity.ServerObjectManager.InterestManager.ObserverSystems)
             {
-                foreach (KeyValuePair<INetworkPlayer, HashSet<NetworkIdentity>> players in observerData.Observers)
+                foreach (KeyValuePair<NetworkIdentity, HashSet<INetworkPlayer>> observer in observerData.Observers)
                 {
-                    GameObject tempTarget = players.Key.Identity.gameObject;
-                    float tempDistance = Vector3.Distance(tempTarget.transform.position, transform.position);
-
-                    if (target == null || distance > tempDistance)
+                    foreach (INetworkPlayer player in observer.Value)
                     {
-                        target = tempTarget;
-                        distance = tempDistance;
+                        GameObject tempTarget = player.Identity.gameObject;
+                        float tempDistance = Vector3.Distance(tempTarget.transform.position, transform.position);
+
+                        if (target == null || distance > tempDistance)
+                        {
+                            target = tempTarget;
+                            distance = tempDistance;
+                        }
                     }
                 }
             }

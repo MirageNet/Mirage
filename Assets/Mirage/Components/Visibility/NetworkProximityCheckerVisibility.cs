@@ -15,24 +15,12 @@ namespace Mirage.Components
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkProximityChecker.html")]
     public class NetworkProximityCheckerVisibility : NetworkVisibility
     {
-        private class NetIdComparer : IEqualityComparer<NetworkIdentity>
-        {
-            public bool Equals(NetworkIdentity x, NetworkIdentity y)
-            {
-                return x.NetId == y.NetId;
-            }
-            public int GetHashCode(NetworkIdentity obj)
-            {
-                return (int)obj.NetId;
-            }
-        }
-
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkProximityCheckerVisibility));
 
         private readonly float _sightDistnace = 10;
         private readonly float _updateInterval = 0;
         private float _nextUpdate = 0;
-        private readonly Dictionary<INetworkPlayer, HashSet<NetworkIdentity>> lastFrame = new Dictionary<INetworkPlayer, HashSet<NetworkIdentity>>();
+        private NetworkIdentity _identity;
 
         /// <summary>
         /// 
@@ -40,10 +28,11 @@ namespace Mirage.Components
         /// <param name="serverObjectManager"></param>
         /// <param name="sightDistance"></param>
         /// <param name="updateInterval"></param>
-        public NetworkProximityCheckerVisibility(ServerObjectManager serverObjectManager, float sightDistance, float updateInterval) : base(serverObjectManager)
+        public NetworkProximityCheckerVisibility(ServerObjectManager serverObjectManager, float sightDistance, float updateInterval, NetworkIdentity objectTransform) : base(serverObjectManager)
         {
             _sightDistnace = sightDistance;
             _updateInterval = updateInterval;
+            _identity = objectTransform;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -53,63 +42,6 @@ namespace Mirage.Components
             float dz = a.z - b.z;
             float sqDist = dx * dx + dz * dz;
             return sqDist < sqRange;
-        }
-        private void Rebuild()
-        {
-            foreach (NetworkIdentity identity in InterestManager.ServerObjectManager.Server.World.SpawnedIdentities)
-            {
-                foreach (INetworkPlayer player in VisibilitySystemData.Keys)
-                {
-                    if (!VisibilitySystemData.TryGetValue(player, out HashSet<NetworkIdentity> nextSet))
-                    {
-                        nextSet = new HashSet<NetworkIdentity>(new NetIdComparer());
-                        VisibilitySystemData[player] = nextSet;
-                    }
-
-                    nextSet.Add(identity);
-                }
-            }
-
-            foreach (INetworkPlayer player in InterestManager.ServerObjectManager.Server.Players)
-            {
-                if (!lastFrame.TryGetValue(player, out HashSet<NetworkIdentity> lastSet))
-                {
-                    lastSet = new HashSet<NetworkIdentity>(new NetIdComparer());
-                    lastFrame[player] = lastSet;
-                }
-
-                if (!VisibilitySystemData.TryGetValue(player, out HashSet<NetworkIdentity> nextSet))
-                {
-                    nextSet = new HashSet<NetworkIdentity>(new NetIdComparer());
-                    VisibilitySystemData[player] = nextSet;
-                }
-
-
-                foreach (NetworkIdentity identity in lastSet)
-                {
-                    if (!nextSet.Contains(identity))
-                    {
-                        InterestManager.ServerObjectManager.HideToPlayer(identity, player);
-                    }
-                }
-
-                foreach (NetworkIdentity identity in nextSet)
-                {
-                    if (!lastSet.Contains(identity))
-                    {
-                        InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
-                    }
-                }
-
-                // reset collections
-                lastSet.Clear();
-                foreach (NetworkIdentity identity in nextSet)
-                {
-                    lastSet.Add(identity);
-                }
-
-                nextSet.Clear();
-            }
         }
 
         #region Overrides of NetworkVisibility
@@ -128,16 +60,19 @@ namespace Mirage.Components
             }
 
             Vector3 a = identity.transform.position;
-            float sqRange = _sightDistnace * _sightDistnace;
 
             foreach (INetworkPlayer player in InterestManager.ServerObjectManager.Server.Players)
             {
                 Vector3 b = player.Identity.transform.position;
 
-                if (FastInDistanceXZ(a, b, sqRange))
-                {
-                    InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
-                }
+                if (!FastInDistanceXZ(a, b, _sightDistnace * _sightDistnace)) continue;
+
+                if (!VisibilitySystemData.ContainsKey(identity))
+                    VisibilitySystemData.Add(identity, new HashSet<INetworkPlayer>());
+                else if (VisibilitySystemData.ContainsKey(identity) && !VisibilitySystemData[identity].Contains(player))
+                    VisibilitySystemData[identity].Add(player);
+
+                InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
             }
         }
 
@@ -151,16 +86,19 @@ namespace Mirage.Components
             if (player.Identity == null) { return; }
 
             Vector3 b = player.Identity.transform.position;
-            float sqRange = _sightDistnace * _sightDistnace;
 
             foreach (NetworkIdentity identity in InterestManager.ServerObjectManager.Server.World.SpawnedIdentities)
             {
                 Vector3 a = identity.transform.position;
 
-                if (FastInDistanceXZ(a, b, sqRange))
-                {
-                    InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
-                }
+                if (!FastInDistanceXZ(a, b, _sightDistnace * _sightDistnace)) continue;
+
+                if (!VisibilitySystemData.ContainsKey(identity))
+                    VisibilitySystemData.Add(identity, new HashSet<INetworkPlayer>());
+                else if (VisibilitySystemData.ContainsKey(identity) && !VisibilitySystemData[identity].Contains(player))
+                    VisibilitySystemData[identity].Add(player);
+
+                InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
             }
         }
 
@@ -171,7 +109,27 @@ namespace Mirage.Components
         {
             if (!(_nextUpdate < Time.time)) return;
 
-            Rebuild();
+            foreach (INetworkPlayer player in InterestManager.ServerObjectManager.Server.Players)
+            {
+                if(!VisibilitySystemData.ContainsKey(_identity)) continue;
+
+                VisibilitySystemData.TryGetValue(_identity, out HashSet<INetworkPlayer> players);
+
+                if (FastInDistanceXZ(player.Identity.transform.position, _identity.transform.position, _sightDistnace * _sightDistnace))
+                {
+                    if (players != null && players.Contains(player)) continue;
+
+                    VisibilitySystemData[_identity].Add(player);
+                    InterestManager.ServerObjectManager.ShowToPlayer(_identity, player);
+                }
+                else
+                {
+                    if(players !=null && !players.Contains(player)) continue;
+
+                    VisibilitySystemData[_identity].Remove(player);
+                    InterestManager.ServerObjectManager.HideToPlayer(_identity, player);
+                }
+            }
 
             _nextUpdate += _updateInterval;
         }
