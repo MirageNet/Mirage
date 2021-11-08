@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Mirage.InterestManagement;
 using UnityEngine;
 
-namespace Mirage
+namespace Mirage.Components
 {
     /// <summary>
     /// Component that controls visibility of networked objects based on match id.
@@ -14,7 +14,7 @@ namespace Mirage
     [AddComponentMenu("Network/NetworkMatchChecker")]
     [RequireComponent(typeof(NetworkIdentity))]
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkMatchChecker.html")]
-    public class NetworkMatchChecker : NetworkVisibility
+    public class NetworkMatchCheckerVisibility : NetworkVisibility
     {
         static readonly Dictionary<Guid, HashSet<NetworkIdentity>> matchPlayers = new Dictionary<Guid, HashSet<NetworkIdentity>>();
 
@@ -135,7 +135,7 @@ namespace Mirage
 
         #endregion
 
-        public NetworkMatchChecker(ServerObjectManager serverObjectManager) : base(serverObjectManager)
+        public NetworkMatchCheckerVisibility(ServerObjectManager serverObjectManager) : base(serverObjectManager)
         {
         }
 

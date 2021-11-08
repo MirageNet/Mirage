@@ -15,11 +15,11 @@ namespace Mirage.InterestManagement
         private readonly List<ObserverData> _visibilitySystems = new List<ObserverData>();
         private List<INetworkPlayer> _observers = new List<INetworkPlayer>();
 
-        private static readonly ProfilerMarker ObserverProfilerMarker = new ProfilerMarker(ProfilerCategory.Network, nameof(Observers));
-        private static readonly ProfilerMarker OnAuthenticatedProfilerMarker = new ProfilerMarker(ProfilerCategory.Network, nameof(OnAuthenticated));
-        private static readonly ProfilerMarker OnSpawnInWorldProfilerMarker = new ProfilerMarker(ProfilerCategory.Network, nameof(OnSpawnInWorld));
-        private static readonly ProfilerMarker OnUpdateProfilerMarker = new ProfilerMarker(ProfilerCategory.Network, nameof(Update));
-        private static readonly ProfilerMarker OnSendProfilerMarker = new ProfilerMarker(ProfilerCategory.Network, nameof(Send));
+        private static readonly ProfilerMarker ObserverProfilerMarker = new ProfilerMarker(nameof(Observers));
+        private static readonly ProfilerMarker OnAuthenticatedProfilerMarker = new ProfilerMarker(nameof(OnAuthenticated));
+        private static readonly ProfilerMarker OnSpawnInWorldProfilerMarker = new ProfilerMarker(nameof(OnSpawnInWorld));
+        private static readonly ProfilerMarker OnUpdateProfilerMarker = new ProfilerMarker(nameof(Update));
+        private static readonly ProfilerMarker OnSendProfilerMarker = new ProfilerMarker(nameof(Send));
 
         #endregion
 

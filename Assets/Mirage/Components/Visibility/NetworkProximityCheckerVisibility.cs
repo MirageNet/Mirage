@@ -4,7 +4,7 @@ using Mirage.InterestManagement;
 using Mirage.Logging;
 using UnityEngine;
 
-namespace Mirage
+namespace Mirage.Components
 {
     /// <summary>
     /// Component that controls visibility of networked objects for players.
