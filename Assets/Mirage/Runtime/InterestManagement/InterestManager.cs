@@ -7,12 +7,27 @@ namespace Mirage.InterestManagement
 {
     public class InterestManager
     {
+        private class SystemComparer : IEqualityComparer<ObserverData>
+        {
+            public bool Equals(ObserverData x, ObserverData y)
+            {
+                return nameof(x.System).GetStableHashCode() == nameof(y.System).GetStableHashCode();
+            }
+
+            public int GetHashCode(ObserverData obj)
+            {
+                int hash = nameof(obj.System).GetStableHashCode();
+
+                return hash;
+            }
+        }
+
         static readonly ILogger Logger = LogFactory.GetLogger(typeof(InterestManager));
 
         #region Fields
 
         public readonly ServerObjectManager ServerObjectManager;
-        private readonly List<ObserverData> _visibilitySystems = new List<ObserverData>();
+        private readonly HashSet<ObserverData> _visibilitySystems = new HashSet<ObserverData>(new SystemComparer());
         private List<INetworkPlayer> _observers = new List<INetworkPlayer>();
 
         private static readonly ProfilerMarker ObserverProfilerMarker = new ProfilerMarker(nameof(Observers));
@@ -67,9 +82,9 @@ namespace Mirage.InterestManagement
             }
             else
             {
-                foreach (ObserverData systemData in _visibilitySystems)
+                foreach (ObserverData observer in _visibilitySystems)
                 {
-                    systemData.System.OnAuthenticated(player);
+                    observer.System.OnAuthenticated(player);
                 }
             }
 
@@ -94,9 +109,9 @@ namespace Mirage.InterestManagement
             }
             else
             {
-                foreach (ObserverData systemData in _visibilitySystems)
+                foreach (ObserverData observer in _visibilitySystems)
                 {
-                    systemData.System.OnSpawned(identity);
+                    observer.System.OnSpawned(identity);
                 }
             }
 
@@ -125,9 +140,9 @@ namespace Mirage.InterestManagement
 
             OnUpdateProfilerMarker.Begin();
 
-            foreach (ObserverData observerData in _visibilitySystems)
+            foreach (ObserverData observer in _visibilitySystems)
             {
-                observerData.System.CheckForObservers();
+                observer.System.CheckForObservers();
             }
 
             OnUpdateProfilerMarker.End();
@@ -164,40 +179,37 @@ namespace Mirage.InterestManagement
         /// <summary>
         ///     Register a specific interest management system to the interest manager.
         /// </summary>
-        /// <param name="system">The system we want to register in the interest manager.</param>
-        internal void RegisterVisibilitySystem(ref ObserverData system)
+        /// <param name="observer">The system we want to register in the interest manager.</param>
+        internal void RegisterVisibilitySystem(ref ObserverData observer)
         {
-            if (_visibilitySystems.Contains(system))
+            if (_visibilitySystems.Contains(observer))
             {
-                Logger.LogWarning(
-                    "[InterestManager] - System already register to interest manager. Please check if this was correct.");
-
                 return;
             }
 
             if (Logger.logEnabled)
-                Logger.Log($"[Interest Manager] - Registering system {system} to our manager.");
+                Logger.Log($"[Interest Manager] - Registering system {observer} to our manager.");
 
-            _visibilitySystems.Add(system);
+            _visibilitySystems.Add(observer);
         }
 
         /// <summary>
         ///     Un-register a specific interest management system from the interest manager.
         /// </summary>
-        /// <param name="system">The system we want to un-register from the interest manager.</param>
-        internal void UnRegisterVisibilitySystem(ref ObserverData system)
+        /// <param name="observer">The system we want to un-register from the interest manager.</param>
+        internal void UnRegisterVisibilitySystem(ref ObserverData observer)
         {
-            if (!_visibilitySystems.Contains(system))
+            if (!_visibilitySystems.Contains(observer))
             {
                 if (Logger.logEnabled)
-                    Logger.Log($"[Interest Manager] - Un-Registering system {system} from our manager.");
+                    Logger.Log($"[Interest Manager] - Un-Registering system {observer} from our manager.");
                 return;
             }
 
             Logger.LogWarning(
                 "[InterestManager] - Cannot find system in interest manager. Please check make sure it was registered.");
 
-            _visibilitySystems.Remove(system);
+            _visibilitySystems.Remove(observer);
         }
 
 

@@ -2,20 +2,16 @@ using System.Collections.Generic;
 
 namespace Mirage.InterestManagement
 {
-    public struct ObserverData
+    public readonly struct ObserverData
     {
-        private readonly INetworkVisibility _system;
+        public INetworkVisibility System { get; }
 
-        private readonly Dictionary<NetworkIdentity, HashSet<INetworkPlayer>> _observers;
-
-        public INetworkVisibility System => _system;
-
-        public Dictionary<NetworkIdentity, HashSet<INetworkPlayer>> Observers => _observers;
+        public Dictionary<NetworkIdentity, HashSet<INetworkPlayer>> Observers { get; }
 
         public ObserverData(INetworkVisibility system, Dictionary<NetworkIdentity, HashSet<INetworkPlayer>> observers)
         {
-            _system = system;
-            _observers = observers;
+            System = system;
+            Observers = observers;
         }
         public override string ToString()
         {
