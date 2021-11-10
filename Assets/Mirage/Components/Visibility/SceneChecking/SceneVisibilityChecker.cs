@@ -76,7 +76,7 @@ namespace Mirage
         /// <summary>
         ///     Controls register new objects to this network visibility system
         /// </summary>
-        public override void RegisterObject(INetworkVisibility.BaseSettings settings)
+        public override void RegisterObject(BaseSettings settings)
         {
             throw new System.NotImplementedException();
         }

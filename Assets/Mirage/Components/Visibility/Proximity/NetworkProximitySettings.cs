@@ -1,5 +1,8 @@
+using UnityEngine;
+
 namespace Mirage.Components
 {
+    [DisallowMultipleComponent]
     public class NetworkProximitySettings : NetworkBehaviour
     {
         public ProximitySettings ProximitySettings = new ProximitySettings();

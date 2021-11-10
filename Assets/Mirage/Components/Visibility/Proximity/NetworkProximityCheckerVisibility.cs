@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Mirage.Components
 {
     [Serializable]
-    public class ProximitySettings : INetworkVisibility.BaseSettings
+    public class ProximitySettings : BaseSettings
     {
         /// <summary>
         /// The maximum range that objects will be visible at.
@@ -29,7 +29,7 @@ namespace Mirage.Components
 
         private readonly float _updateInterval = 0;
         private float _nextUpdate = 0;
-        private List<ProximitySettings> _proximityObjects = new List<ProximitySettings>();
+        private readonly List<ProximitySettings> _proximityObjects = new List<ProximitySettings>();
 
         /// <summary>
         ///     Starts up a new instance of a network proximity visibility system.
@@ -134,7 +134,7 @@ namespace Mirage.Components
         ///     Controls register new objects to this network visibility system
         /// </summary>
         /// <para>Passing in specific settings for this network object.</para>
-        public override void RegisterObject(INetworkVisibility.BaseSettings proximitySettings)
+        public override void RegisterObject(BaseSettings proximitySettings)
         {
             _proximityObjects.Add(proximitySettings as ProximitySettings);
         }

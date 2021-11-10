@@ -3,15 +3,15 @@ using UnityEngine;
 
 namespace Mirage.InterestManagement
 {
+    [Serializable]
+    public class BaseSettings
+    {
+        [HideInInspector]
+        public NetworkIdentity Identity;
+    }
+
     public interface INetworkVisibility
     {
-        [Serializable]
-        public class BaseSettings
-        {
-            [HideInInspector]
-            public NetworkIdentity Identity;
-        }
-
         /// <summary>
         ///     Perform any initialization here.
         /// </summary>

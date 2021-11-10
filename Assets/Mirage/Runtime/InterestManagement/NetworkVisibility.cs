@@ -62,7 +62,7 @@ namespace Mirage.InterestManagement
         ///     Controls register new objects to this network visibility system
         /// </summary>
         /// <para>Passing in specific settings for this network object.</para>
-        public abstract void RegisterObject(INetworkVisibility.BaseSettings settings);
+        public abstract void RegisterObject(BaseSettings settings);
 
         #endregion
     }
