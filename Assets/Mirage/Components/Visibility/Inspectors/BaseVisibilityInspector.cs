@@ -4,11 +4,12 @@ using UnityEngine;
 namespace Mirage.Components
 {
     [DisallowMultipleComponent]
-    public abstract class BaseVisibilityInspector : NetworkBehaviour
+    public abstract class BaseVisibilityInspector : MonoBehaviour
     {
         #region Fields
 
-        protected INetworkVisibility NetworkVisibility;
+        protected ServerObjectManager ServerObjectManager;
+        protected internal INetworkVisibility NetworkVisibility;
 
         #endregion
 
@@ -30,6 +31,8 @@ namespace Mirage.Components
 
         protected virtual void Start()
         {
+            ServerObjectManager ??= FindObjectOfType<ServerObjectManager>();
+
             ServerObjectManager.Server.Started.AddListener(OnServerStarted);
             ServerObjectManager.Server.Stopped.AddListener(OnServerStopped);
         }

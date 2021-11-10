@@ -134,6 +134,15 @@ namespace Mirage.InterestManagement
             ServerObjectManager.Server?.Stopped.AddListener(OnServerStopped);
         }
 
+        /// <summary>
+        ///     Check to see if certain system has already been registered.
+        /// </summary>
+        /// <returns>Returns true if we have already registered the system.</returns>
+        public bool IsRegisteredAlready(ref ObserverData observer)
+        {
+            return _visibilitySystems.Contains(observer);
+        }
+
         internal void Update()
         {
             if (_visibilitySystems.Count == 0) return;
@@ -184,6 +193,9 @@ namespace Mirage.InterestManagement
         {
             if (_visibilitySystems.Contains(observer))
             {
+                Logger.LogWarning(
+                    "[InterestManager] - System already register to interest manager. Please check if this was correct.");
+
                 return;
             }
 
@@ -201,13 +213,14 @@ namespace Mirage.InterestManagement
         {
             if (!_visibilitySystems.Contains(observer))
             {
-                if (Logger.logEnabled)
-                    Logger.Log($"[Interest Manager] - Un-Registering system {observer} from our manager.");
+                Logger.LogWarning(
+                    "[InterestManager] - Cannot find system in interest manager. Please check make sure it was registered.");
+
                 return;
             }
 
-            Logger.LogWarning(
-                "[InterestManager] - Cannot find system in interest manager. Please check make sure it was registered.");
+            if (Logger.logEnabled)
+                Logger.Log($"[Interest Manager] - Un-Registering system {observer} from our manager.");
 
             _visibilitySystems.Remove(observer);
         }

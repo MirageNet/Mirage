@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6900008319038825817}
   - component: {fileID: 5194388907919410155}
   - component: {fileID: 114654712548978148}
-  - component: {fileID: -2495750083978825820}
+  - component: {fileID: -7578597324707459363}
   m_Layer: 0
   m_Name: Tank
   m_TagString: Player
@@ -179,7 +179,7 @@ MonoBehaviour:
   rotationSpeed: 80
   playerName: 
   nameText: {fileID: 6763574687443798610}
---- !u!114 &-2495750083978825820
+--- !u!114 &-7578597324707459363
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -188,11 +188,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1916082411674582}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00e628f7a5fc9bd4fad78744c34d8147, type: 3}
+  m_Script: {fileID: 11500000, guid: f48e8760b46ce5b40b3053de7eb537a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  VisibilityRange: 10
-  VisibilityUpdateInterval: 1
+  syncMode: 0
+  syncInterval: 0.1
+  ProximitySettings:
+    Identity: {fileID: 0}
+    SightDistance: 10
 --- !u!1 &1794225417093723422
 GameObject:
   m_ObjectHideFlags: 0

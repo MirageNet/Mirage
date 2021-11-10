@@ -8,7 +8,7 @@ namespace Mirage.Components
 
         protected override void Start()
         {
-            NetworkVisibility = new NetworkMatchCheckerVisibility(ServerObjectManager, Identity);
+            NetworkVisibility = new NetworkMatchCheckerVisibility(ServerObjectManager);
 
             base.Start();
         }

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8166229233224018893}
   - component: {fileID: 5745257042001409199}
   - component: {fileID: 6411109812051327673}
-  - component: {fileID: 49693649315910475}
+  - component: {fileID: -334175800393835537}
   m_Layer: 0
   m_Name: Loot
   m_TagString: Untagged
@@ -130,7 +130,7 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   hasSpawned: 0
---- !u!114 &49693649315910475
+--- !u!114 &-334175800393835537
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -139,8 +139,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1902385843019246699}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00e628f7a5fc9bd4fad78744c34d8147, type: 3}
+  m_Script: {fileID: 11500000, guid: f48e8760b46ce5b40b3053de7eb537a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  VisibilityRange: 10
-  VisibilityUpdateInterval: 1
+  syncMode: 0
+  syncInterval: 0.1
+  ProximitySettings:
+    Identity: {fileID: 0}
+    SightDistance: 10

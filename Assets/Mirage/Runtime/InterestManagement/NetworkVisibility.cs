@@ -28,12 +28,14 @@ namespace Mirage.InterestManagement
         {
             _visibilitySystemData = new ObserverData(this, new Dictionary<NetworkIdentity, HashSet<INetworkPlayer>>());
 
-            _serverObjectManager.InterestManager?.RegisterVisibilitySystem(ref _visibilitySystemData);
+            if (!InterestManager.IsRegisteredAlready(ref _visibilitySystemData))
+                InterestManager?.RegisterVisibilitySystem(ref _visibilitySystemData);
         }
 
         public void ShutDown()
         {
-            _serverObjectManager.InterestManager?.UnRegisterVisibilitySystem(ref _visibilitySystemData);
+            if (InterestManager.IsRegisteredAlready(ref _visibilitySystemData))
+                InterestManager?.UnRegisterVisibilitySystem(ref _visibilitySystemData);
         }
 
         #region Implementation of INetworkVisibility
@@ -52,9 +54,15 @@ namespace Mirage.InterestManagement
         public abstract void OnAuthenticated(INetworkPlayer player);
 
         /// <summary>
-        ///     
+        ///     Checks for observers for each registered network object.
         /// </summary>
         public abstract void CheckForObservers();
+
+        /// <summary>
+        ///     Controls register new objects to this network visibility system
+        /// </summary>
+        /// <para>Passing in specific settings for this network object.</para>
+        public abstract void RegisterObject(INetworkVisibility.BaseSettings settings);
 
         #endregion
     }

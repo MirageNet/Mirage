@@ -4,7 +4,7 @@ namespace Mirage.Components
     {
         protected override void Start()
         {
-            NetworkVisibility = new SceneVisibilityChecker(ServerObjectManager, gameObject.scene, Identity);
+            NetworkVisibility = new SceneVisibilityChecker(ServerObjectManager, gameObject.scene);
 
             base.Start();
         }

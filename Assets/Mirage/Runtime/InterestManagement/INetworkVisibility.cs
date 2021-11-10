@@ -1,7 +1,17 @@
+using System;
+using UnityEngine;
+
 namespace Mirage.InterestManagement
 {
     public interface INetworkVisibility
     {
+        [Serializable]
+        public class BaseSettings
+        {
+            [HideInInspector]
+            public NetworkIdentity Identity;
+        }
+
         /// <summary>
         ///     Perform any initialization here.
         /// </summary>
@@ -30,5 +40,9 @@ namespace Mirage.InterestManagement
         /// </summary>
         void CheckForObservers();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        void RegisterObject(BaseSettings settings);
     }
 }

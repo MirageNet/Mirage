@@ -61,9 +61,8 @@ namespace Mirage.Components
             }
         }
 
-        public NetworkMatchCheckerVisibility(ServerObjectManager serverObjectManager, NetworkIdentity identity) : base(serverObjectManager)
+        public NetworkMatchCheckerVisibility(ServerObjectManager serverObjectManager) : base(serverObjectManager)
         {
-            Identity = identity;
         }
 
         #region Overrides of NetworkVisibility
@@ -93,6 +92,14 @@ namespace Mirage.Components
         public override void CheckForObservers()
         {
             if (currentMatch == Guid.Empty) return;
+        }
+
+        /// <summary>
+        ///     Controls register new objects to this network visibility system
+        /// </summary>
+        public override void RegisterObject(INetworkVisibility.BaseSettings settings)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

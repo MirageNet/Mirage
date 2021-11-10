@@ -2,15 +2,9 @@ using UnityEngine;
 
 namespace Mirage.Components
 {
+    [DisallowMultipleComponent]
     public class NetworkProximityChecker : BaseVisibilityInspector
     {
-
-        /// <summary>
-        /// The maximum range that objects will be visible at.
-        /// </summary>
-        [Tooltip("The maximum range that objects will be visible at.")]
-        public int VisibilityRange = 10;
-
         /// <summary>
         /// How often (in seconds) that this object should update the list of observers that can see it.
         /// </summary>
@@ -19,9 +13,9 @@ namespace Mirage.Components
 
         protected override void Start()
         {
-            NetworkVisibility = new NetworkProximityCheckerVisibility(ServerObjectManager, VisibilityRange, VisibilityUpdateInterval, Identity);
-
             base.Start();
+
+            NetworkVisibility = new NetworkProximityCheckerVisibility(ServerObjectManager, VisibilityUpdateInterval);
         }
     }
 }

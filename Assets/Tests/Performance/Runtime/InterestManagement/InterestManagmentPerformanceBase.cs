@@ -38,7 +38,7 @@ namespace Mirage.Tests.Performance.Runtime
         const string NpcSpawnerName = "World Floor";
         const int clientCount = 50;
         const int stationaryCount = 3500;
-        const int movingCount = 500;
+        const int movingCount = 1000;
 
 
         private NetworkServer server;
@@ -163,8 +163,8 @@ namespace Mirage.Tests.Performance.Runtime
 
             yield return Measure.Frames()
                 .ProfilerMarkers(sampleGroups)
-                .WarmupCount(5)
-                .MeasurementCount(300)
+                .WarmupCount(20)
+                .MeasurementCount(1000)
                 .Run();
         }
 

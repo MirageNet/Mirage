@@ -40,10 +40,9 @@ namespace Mirage
             //    ServerObjectManager.SpawnVisibleObjects(Identity.Owner);
         }
 
-        public SceneVisibilityChecker(ServerObjectManager serverObjectManager, Scene objectScene, NetworkIdentity identity) : base(serverObjectManager)
+        public SceneVisibilityChecker(ServerObjectManager serverObjectManager, Scene objectScene) : base(serverObjectManager)
         {
             _objectCurrentScene = objectScene;
-            Identity = identity;
         }
 
         #region Overrides of NetworkVisibility
@@ -72,6 +71,14 @@ namespace Mirage
         /// </summary>
         public override void CheckForObservers()
         {
+        }
+
+        /// <summary>
+        ///     Controls register new objects to this network visibility system
+        /// </summary>
+        public override void RegisterObject(INetworkVisibility.BaseSettings settings)
+        {
+            throw new System.NotImplementedException();
         }
 
         #endregion
