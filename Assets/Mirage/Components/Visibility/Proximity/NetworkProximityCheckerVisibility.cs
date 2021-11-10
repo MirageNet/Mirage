@@ -63,8 +63,6 @@ namespace Mirage.Components
             if (identity.Owner != null)
             {
                 OnAuthenticated(identity.Owner);
-
-                return;
             }
         }
 

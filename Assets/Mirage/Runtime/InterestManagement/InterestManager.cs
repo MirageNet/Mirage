@@ -28,7 +28,7 @@ namespace Mirage.InterestManagement
 
         public readonly ServerObjectManager ServerObjectManager;
         private readonly HashSet<ObserverData> _visibilitySystems = new HashSet<ObserverData>(new SystemComparer());
-        private List<INetworkPlayer> _observers = new List<INetworkPlayer>();
+        private HashSet<INetworkPlayer> _observers = new HashSet<INetworkPlayer>();
 
         private static readonly ProfilerMarker ObserverProfilerMarker = new ProfilerMarker(nameof(Observers));
         private static readonly ProfilerMarker OnAuthenticatedProfilerMarker = new ProfilerMarker(nameof(OnAuthenticated));
@@ -239,9 +239,11 @@ namespace Mirage.InterestManagement
 
             if (_visibilitySystems.Count == 0)
             {
+                _observers = ServerObjectManager.Server.Players;
+
                 ObserverProfilerMarker.End();
 
-                _observers.AddRange(ServerObjectManager.Server.Players);
+                return;
             }
 
             foreach (ObserverData visibilitySystem in _visibilitySystems)
@@ -250,7 +252,7 @@ namespace Mirage.InterestManagement
 
                 foreach (KeyValuePair<NetworkIdentity, HashSet<INetworkPlayer>> observer in visibilitySystem.Observers)
                 {
-                    _observers.AddRange(observer.Value);
+                    _observers.UnionWith(observer.Value);
                 }
             }
 
