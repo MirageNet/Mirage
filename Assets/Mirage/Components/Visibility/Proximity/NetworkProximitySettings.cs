@@ -2,7 +2,7 @@ namespace Mirage.Components
 {
     public class NetworkProximitySettings : NetworkBehaviour
     {
-        public ProximitySettings ProximitySettings;
+        public ProximitySettings ProximitySettings = new ProximitySettings();
 
         private void Start()
         {

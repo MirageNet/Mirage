@@ -29,11 +29,20 @@ namespace Mirage.Components
 
         #region Unity Methods
 
+        private void Awake()
+        {
+            ServerObjectManager = FindObjectOfType<ServerObjectManager>();
+        }
+
         protected virtual void Start()
         {
-            ServerObjectManager ??= FindObjectOfType<ServerObjectManager>();
+            if (!ServerObjectManager.Server.Active)
+                ServerObjectManager.Server.Started.AddListener(OnServerStarted);
+            else
+            {
+                OnServerStarted();
+            }
 
-            ServerObjectManager.Server.Started.AddListener(OnServerStarted);
             ServerObjectManager.Server.Stopped.AddListener(OnServerStopped);
         }
 

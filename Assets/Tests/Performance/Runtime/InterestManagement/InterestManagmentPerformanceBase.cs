@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Mirage.Components;
 using Mirage.Examples.InterestManagement;
 using Mirage.SocketLayer;
 using NUnit.Framework;
@@ -30,6 +31,35 @@ namespace Mirage.Tests.Performance.Runtime
         #endregion
     }
 
+    public class ProximityInterestManagerPerformance : InterestManagementPerformanceBase
+    {
+        #region Overrides of InterestManagementPerformanceBase
+
+        /// <summary>
+        /// Called before server starts
+        /// </summary>
+        /// <param name="server"></param>
+        /// <returns></returns>
+        protected override IEnumerator SetupInterestManagement(NetworkServer server)
+        {
+            server.gameObject.AddComponent<NetworkProximityChecker>();
+
+            yield return new WaitForEndOfFrame();
+
+            NetworkIdentity[] all = FindObjectsOfType<NetworkIdentity>();
+
+            foreach (NetworkIdentity obj in all)
+            {
+                obj.gameObject.AddComponent<NetworkProximitySettings>();
+            }
+
+            yield return null;
+        }
+
+        #endregion
+    }
+
+
     [Category("Performance"), Category("InterestManagement")]
     public abstract class InterestManagementPerformanceBase
     {
@@ -55,7 +85,6 @@ namespace Mirage.Tests.Performance.Runtime
             var enemySpawner = GameObject.Find(NpcSpawnerName).GetComponent<EnemySpawner>();
             enemySpawner.NumberOfEnemiesSpawn = movingCount;
 
-
             server = FindObjectOfType<NetworkServer>();
 
             bool started = false;
@@ -63,8 +92,6 @@ namespace Mirage.Tests.Performance.Runtime
 
             // wait frame for destroy
             yield return null;
-
-            yield return SetupInterestManagement(server);
 
             server.Started.AddListener(() => started = true);
             server.StartServer();
@@ -74,6 +101,8 @@ namespace Mirage.Tests.Performance.Runtime
 
             // wait for all enemies to spawn in.
             while(!enemySpawner.FinishedLoadingEnemies) { yield return null; }
+
+            yield return SetupInterestManagement(server);
 
             // connect N clients
             clients = new List<NetworkClient>(clientCount);
