@@ -239,7 +239,7 @@ namespace Mirage.InterestManagement
 
             if (_visibilitySystems.Count == 0)
             {
-                _observers = ServerObjectManager.Server.Players;
+                _observers = new HashSet<INetworkPlayer>(ServerObjectManager.Server.Players);
 
                 ObserverProfilerMarker.End();
 

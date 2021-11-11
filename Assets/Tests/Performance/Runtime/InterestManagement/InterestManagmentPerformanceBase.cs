@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using Mirage.Components;
 using Mirage.Examples.InterestManagement;
 using Mirage.SocketLayer;
+using Mirage.Sockets.Udp;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
 using UnityEditor.SceneManagement;
@@ -19,7 +19,7 @@ namespace Mirage.Tests.Performance.Runtime
         #region Overrides of InterestManagementPerformanceBase
 
         /// <summary>
-        /// Called before server starts
+        /// Called after server starts
         /// </summary>
         /// <param name="server"></param>
         /// <returns></returns>
@@ -36,7 +36,7 @@ namespace Mirage.Tests.Performance.Runtime
         #region Overrides of InterestManagementPerformanceBase
 
         /// <summary>
-        /// Called before server starts
+        /// Called after server starts
         /// </summary>
         /// <param name="server"></param>
         /// <returns></returns>
@@ -59,20 +59,15 @@ namespace Mirage.Tests.Performance.Runtime
         #endregion
     }
 
-
     [Category("Performance"), Category("InterestManagement")]
     public abstract class InterestManagementPerformanceBase
     {
         const string testScene = "Assets/Tests/Performance/Runtime/InterestManagement/InterestManagement/Scenes/AOI.unity";
-        const string LootSpawnerName = "";
         const string NpcSpawnerName = "World Floor";
-        const int clientCount = 50;
-        const int stationaryCount = 3500;
+        const int clientCount = 10;
         const int movingCount = 1000;
 
-
         private NetworkServer server;
-        List<NetworkClient> clients;
 
         [UnitySetUp]
         public IEnumerator Setup()
@@ -82,7 +77,7 @@ namespace Mirage.Tests.Performance.Runtime
             // wait 1 frame for start to be called
             yield return null;
 
-            var enemySpawner = GameObject.Find(NpcSpawnerName).GetComponent<EnemySpawner>();
+            EnemySpawner enemySpawner = GameObject.Find(NpcSpawnerName).GetComponent<EnemySpawner>();
             enemySpawner.NumberOfEnemiesSpawn = movingCount;
 
             server = FindObjectOfType<NetworkServer>();
@@ -104,23 +99,16 @@ namespace Mirage.Tests.Performance.Runtime
 
             yield return SetupInterestManagement(server);
 
-            // connect N clients
-            clients = new List<NetworkClient>(clientCount);
-
             for (int i = 0; i < clientCount; i++)
             {
-                GameObject clientGo = new GameObject($"Client {i}", server.SocketFactory.GetType());
+                GameObject clientGo = new GameObject($"Client {i}", typeof(UdpSocketFactory));
                 clientGo.SetActive(false);
 
                 NetworkClient client = clientGo.AddComponent<NetworkClient>();
                 ClientObjectManager objectManager = clientGo.AddComponent<ClientObjectManager>();
                 CharacterSpawner spawner = clientGo.AddComponent<CharacterSpawner>();
-                NetworkSceneManager networkSceneManager = clientGo.AddComponent<NetworkSceneManager>();
-                networkSceneManager.Client = client;
-                networkSceneManager.DontDestroy = false;
 
                 objectManager.Client = client;
-                objectManager.NetworkSceneManager = networkSceneManager;
 
                 for (int j = 0; j < server.GetComponent<ClientObjectManager>().spawnPrefabs.Count; j++)
                 {
@@ -129,7 +117,6 @@ namespace Mirage.Tests.Performance.Runtime
 
                 spawner.Client = client;
                 spawner.ClientObjectManager = objectManager;
-                spawner.SceneManager = networkSceneManager;
                 spawner.PlayerPrefab = server.GetComponent<CharacterSpawner>().PlayerPrefab;
 
                 client.SocketFactory = client.GetComponent<SocketFactory>();
@@ -138,9 +125,7 @@ namespace Mirage.Tests.Performance.Runtime
 
                 try
                 {
-                    client.Connect("localhost");
-
-                    clients.Add(client);
+                    client.Connect();
                 }
                 catch (Exception ex)
                 {
@@ -150,26 +135,22 @@ namespace Mirage.Tests.Performance.Runtime
         }
 
         /// <summary>
-        /// Called before server starts
+        /// Called after server starts
         /// </summary>
         /// <param name="server"></param>
         /// <returns></returns>
         protected abstract IEnumerator SetupInterestManagement(NetworkServer server);
 
-
         [UnityTearDown]
         public IEnumerator TearDown()
         {
-            foreach (NetworkClient client in clients)
-            {
-                client.Disconnect();
-            }
-
             server.Stop();
+
+            DestroyImmediate(server.gameObject);
 
             // open new scene so that old one is destroyed
             SceneManager.CreateScene("empty", new CreateSceneParameters(LocalPhysicsMode.None));
-            yield return SceneManager.UnloadSceneAsync(testScene, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
+            yield return SceneManager.UnloadSceneAsync(testScene);
         }
 
         [UnityTest]
@@ -192,10 +173,9 @@ namespace Mirage.Tests.Performance.Runtime
 
             yield return Measure.Frames()
                 .ProfilerMarkers(sampleGroups)
-                .WarmupCount(20)
-                .MeasurementCount(1000)
+                .WarmupCount(5)
+                .MeasurementCount(300)
                 .Run();
         }
-
     }
 }

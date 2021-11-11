@@ -29,7 +29,7 @@ namespace Mirage.Components
 
         private readonly float _updateInterval = 0;
         private float _nextUpdate = 0;
-        private readonly List<ProximitySettings> _proximityObjects = new List<ProximitySettings>();
+        private readonly HashSet<ProximitySettings> _proximityObjects = new HashSet<ProximitySettings>();
 
         /// <summary>
         ///     Starts up a new instance of a network proximity visibility system.
