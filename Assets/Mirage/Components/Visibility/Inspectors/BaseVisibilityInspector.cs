@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace Mirage.Components
 {
-    [DisallowMultipleComponent]
     public abstract class BaseVisibilityInspector : MonoBehaviour
     {
         #region Fields
@@ -27,15 +26,19 @@ namespace Mirage.Components
 
         #endregion
 
+        /// <summary>
+        ///     Do initialization of data inside of here.
+        /// </summary>
+        protected abstract void Initialize();
+
         #region Unity Methods
 
         private void Awake()
         {
             ServerObjectManager = FindObjectOfType<ServerObjectManager>();
-        }
 
-        protected virtual void Start()
-        {
+            Initialize();
+
             if (!ServerObjectManager.Server.Active)
                 ServerObjectManager.Server.Started.AddListener(OnServerStarted);
             else

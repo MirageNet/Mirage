@@ -11,12 +11,12 @@ namespace Mirage.InterestManagement
         {
             public bool Equals(ObserverData x, ObserverData y)
             {
-                return nameof(x.System).GetStableHashCode() == nameof(y.System).GetStableHashCode();
+                return x.System.GetType().Name.GetStableHashCode() == y.System.GetType().Name.GetStableHashCode();
             }
 
             public int GetHashCode(ObserverData obj)
             {
-                int hash = nameof(obj.System).GetStableHashCode();
+                int hash = obj.System.GetType().Name.GetStableHashCode();
 
                 return hash;
             }
@@ -246,15 +246,26 @@ namespace Mirage.InterestManagement
                 return;
             }
 
+            int inSystemsCount = 0;
+
             foreach (ObserverData visibilitySystem in _visibilitySystems)
             {
                 if (!visibilitySystem.Observers.ContainsKey(identity)) continue;
+
+                if(visibilitySystem.Observers[identity].Count <= 0) continue;
+
+                inSystemsCount++;
 
                 foreach (KeyValuePair<NetworkIdentity, HashSet<INetworkPlayer>> observer in visibilitySystem.Observers)
                 {
                     _observers.UnionWith(observer.Value);
                 }
             }
+
+            // Multiple systems have been registered. We need to make sure the object is in all system observers
+            // to know that it is actually should be sending data.
+            if(inSystemsCount != _visibilitySystems.Count)
+                _observers.Clear();
 
             ObserverProfilerMarker.End();
         }

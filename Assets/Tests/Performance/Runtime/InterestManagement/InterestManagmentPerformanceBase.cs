@@ -31,6 +31,34 @@ namespace Mirage.Tests.Performance.Runtime
         #endregion
     }
 
+    public class MultiInterestManagementPerformance : InterestManagementPerformanceBase
+    {
+        #region Overrides of InterestManagementPerformanceBase
+
+        /// <summary>
+        /// Called after server starts
+        /// </summary>
+        /// <param name="server"></param>
+        /// <returns></returns>
+        protected override IEnumerator SetupInterestManagement(NetworkServer server)
+        {
+            server.gameObject.AddComponent<NetworkSceneChecker>();
+            server.gameObject.AddComponent<NetworkProximityChecker>();
+
+            NetworkIdentity[] all = FindObjectsOfType<NetworkIdentity>();
+
+            foreach (NetworkIdentity obj in all)
+            {
+                obj.gameObject.AddComponent<SceneVisibilitySettings>();
+                obj.gameObject.AddComponent<NetworkProximitySettings>();
+            }
+
+            yield return null;
+        }
+
+        #endregion
+    }
+
     public class SceneInterestManagementPerformance : InterestManagementPerformanceBase
     {
         #region Overrides of InterestManagementPerformanceBase
@@ -43,8 +71,6 @@ namespace Mirage.Tests.Performance.Runtime
         protected override IEnumerator SetupInterestManagement(NetworkServer server)
         {
             server.gameObject.AddComponent<NetworkSceneChecker>();
-
-            yield return new WaitForEndOfFrame();
 
             NetworkIdentity[] all = FindObjectsOfType<NetworkIdentity>();
 
@@ -71,8 +97,6 @@ namespace Mirage.Tests.Performance.Runtime
         protected override IEnumerator SetupInterestManagement(NetworkServer server)
         {
             server.gameObject.AddComponent<NetworkProximityChecker>();
-
-            yield return new WaitForEndOfFrame();
 
             NetworkIdentity[] all = FindObjectsOfType<NetworkIdentity>();
 

@@ -4,6 +4,7 @@ namespace Mirage.Components
     {
         private NetworkSceneChecker _networkSceneChecker;
         private SceneSettings _sceneSettings;
+
         private void Awake()
         {
             _networkSceneChecker = FindObjectOfType<NetworkSceneChecker>();
