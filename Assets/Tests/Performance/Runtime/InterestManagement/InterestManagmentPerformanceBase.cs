@@ -116,8 +116,8 @@ namespace Mirage.Tests.Performance.Runtime
     {
         const string testScene = "Assets/Tests/Performance/Runtime/InterestManagement/InterestManagement/Scenes/AOI.unity";
         const string NpcSpawnerName = "World Floor";
-        const int clientCount = 10;
-        const int movingCount = 1000;
+        const int clientCount = 50;
+        const int movingCount = 500;
 
         private NetworkServer server;
 
