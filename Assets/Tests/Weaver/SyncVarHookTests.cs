@@ -86,10 +86,24 @@ namespace Mirage.Tests.Weaver
         }
 
         [Test]
+        public void ErrorWhenHookNotAction()
+        {
+            HasError($"Hook Event for 'health' needs to be type 'System.Action<,>' but was 'SyncVarHookTests.ErrorWhenHookNotAction.DoStuff' instead",
+                "SyncVarHookTests.ErrorWhenHookNotAction.DoStuff SyncVarHookTests.ErrorWhenHookNotAction.ErrorWhenHookNotAction::OnChangeHealth");
+        }
+
+        [Test]
+        public void ErrorWhenNotGenericAction()
+        {
+            HasError($"Hook Event for 'health' needs to be type 'System.Action<,>' but was 'System.Action' instead",
+                "System.Action SyncVarHookTests.ErrorWhenNotGenericAction.ErrorWhenNotGenericAction::OnChangeHealth");
+        }
+
+        [Test]
         public void ErrorWhenEventArgsAreWrong()
         {
-            HasError($"Wrong type for Parameter un hook event for 'health', hook name 'OnChangedHealth'. Event should be public event Action<System.Int32,System.Int32> OnChangedHealth",
-                "");
+            HasError($"Hook Event for 'health' needs to be type 'System.Action<,>' but was 'System.Action`2<System.Int32,System.Single>' instead",
+                "System.Action`2<System.Int32,System.Single> SyncVarHookTests.ErrorWhenEventArgsAreWrong.ErrorWhenEventArgsAreWrong::OnChangeHealth");
         }
     }
 }

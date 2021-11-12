@@ -35,7 +35,7 @@ namespace Mirage.Weaver.SyncVars
             EventDefinition @event = syncVar.DeclaringType.Events.Where(x => x.Name == hookFunctionName).FirstOrDefault();
             if (@event != null)
             {
-                return ValidateEvent(originalType, @event);
+                return ValidateEvent(syncVar, originalType, @event);
             }
 
             MethodDefinition[] methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
@@ -61,32 +61,37 @@ namespace Mirage.Weaver.SyncVars
                 syncVar);
         }
 
-        private static SyncVarHook ValidateEvent(TypeReference originalType, EventDefinition @event)
+        private static SyncVarHook ValidateEvent(FieldDefinition syncVar, TypeReference originalType, EventDefinition @event)
         {
             TypeReference eventType = @event.EventType;
             if (!eventType.FullName.Contains("System.Action"))
             {
-                throw new HookMethodException("Event was not Action", @event);
+                ThrowWrongHookType(syncVar, @event, eventType);
             }
 
             if (!eventType.IsGenericInstance)
             {
-                throw new HookMethodException($"Event was not a generic instance", @event);
+                ThrowWrongHookType(syncVar, @event, eventType);
             }
 
             var genericEvent = (GenericInstanceType)eventType;
             Collection<TypeReference> args = genericEvent.GenericArguments;
             if (args.Count != 2)
             {
-                throw new HookMethodException("Event did not have 2 parameters", @event);
+                ThrowWrongHookType(syncVar, @event, eventType);
             }
 
             if (args[0].FullName != originalType.FullName || args[1].FullName != originalType.FullName)
             {
-                throw new HookMethodException("Event parameters were incorrect type", @event);
+                ThrowWrongHookType(syncVar, @event, eventType);
             }
 
             return new SyncVarHook { Event = @event };
+        }
+
+        private static void ThrowWrongHookType(FieldDefinition syncVar, EventDefinition @event, TypeReference eventType)
+        {
+            throw new HookMethodException($"Hook Event for '{syncVar.Name}' needs to be type 'System.Action<,>' but was '{eventType.FullName}' instead", @event);
         }
 
         static string HookParameterMessage(string hookName, TypeReference ValueType)

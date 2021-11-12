@@ -11,13 +11,6 @@ namespace Mirage.Tests.Runtime.ClientServer
         public int health;
 
         public event Action<int, int> OnHealthChanged;
-
-        public void CallEvent(int health)
-        {
-            int oldValue = health;
-            this.health = health;
-            OnHealthChanged?.Invoke(oldValue, health);
-        }
     }
 
     public class SyncVarEventHook : ClientServerSetup<BehaviourWithSyncVarEvent>
