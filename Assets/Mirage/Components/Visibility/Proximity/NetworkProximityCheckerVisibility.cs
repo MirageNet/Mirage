@@ -90,9 +90,6 @@ namespace Mirage.Components
 
                 InterestManager.ServerObjectManager.ShowToPlayer(setting.Identity, player);
             }
-
-            // Always show self to them.
-            InterestManager.ServerObjectManager.ShowToPlayer(player.Identity, player);
         }
 
         /// <summary>

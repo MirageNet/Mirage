@@ -29,7 +29,6 @@ namespace Mirage.InterestManagement
         public readonly ServerObjectManager ServerObjectManager;
         private readonly HashSet<ObserverData> _visibilitySystems = new HashSet<ObserverData>(new SystemComparer());
         private HashSet<INetworkPlayer> _observers = new HashSet<INetworkPlayer>();
-        private INetworkVisibility _defaultSystem;
 
         private static readonly ProfilerMarker ObserverProfilerMarker = new ProfilerMarker(nameof(Observers));
         private static readonly ProfilerMarker OnAuthenticatedProfilerMarker = new ProfilerMarker(nameof(OnAuthenticated));
@@ -54,8 +53,6 @@ namespace Mirage.InterestManagement
         {
             ServerObjectManager.Server.World.onSpawn -= OnSpawnInWorld;
             ServerObjectManager.Server.Authenticated.RemoveListener(OnAuthenticated);
-
-            _defaultSystem.ShutDown();
         }
 
         /// <summary>
@@ -65,9 +62,6 @@ namespace Mirage.InterestManagement
         {
             ServerObjectManager.Server.World.onSpawn += OnSpawnInWorld;
             ServerObjectManager.Server.Authenticated.AddListener(OnAuthenticated);
-
-            _defaultSystem = new GlobalNetworkVisibilitySystem(ServerObjectManager);
-            _defaultSystem.Startup();
         }
 
         /// <summary>
@@ -83,19 +77,22 @@ namespace Mirage.InterestManagement
 
             foreach (ObserverData observer in _visibilitySystems)
             {
-                if (player.Identity != null && observer.Observers.ContainsKey(player.Identity))
-                    found = true;
+                foreach (KeyValuePair<NetworkIdentity, HashSet<INetworkPlayer>> variable in observer.Observers)
+                {
+                    if (variable.Value.Contains(player))
+                        found = true;
+                }
 
                 observer.System.OnAuthenticated(player);
             }
 
-            //if (!found)
-            //{
-            //    // We could not find this identity in any visibility systems.
-            //    // So we should default it to our global system.
-            //    _defaultSystem.RegisterObject(new BaseSettings { Identity = player.Identity});
-            //    _defaultSystem.OnAuthenticated(player);
-            //}
+            if (!found)
+            {
+                foreach (NetworkIdentity identity in ServerObjectManager.Server.World.SpawnedIdentities)
+                {
+                    ServerObjectManager.ShowToPlayer(identity, player);
+                }
+            }
 
             OnAuthenticatedProfilerMarker.End();
         }
@@ -121,11 +118,12 @@ namespace Mirage.InterestManagement
 
             if (!found)
             {
-                // We could not find this identity in any visibility systems.
-                // So we should default it to our global system.
-                _defaultSystem.RegisterObject(new BaseSettings { Identity = identity });
-                _defaultSystem.OnSpawned(identity);
+                foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
+                {
+                    ServerObjectManager.ShowToPlayer(identity, player);
+                }
             }
+
 
             OnSpawnInWorldProfilerMarker.End();
         }
@@ -157,8 +155,6 @@ namespace Mirage.InterestManagement
 
         internal void Update()
         {
-            if (_visibilitySystems.Count == 0) return;
-
             OnUpdateProfilerMarker.Begin();
 
             foreach (ObserverData observer in _visibilitySystems)
@@ -250,12 +246,15 @@ namespace Mirage.InterestManagement
             _observers.Clear();
 
             int inSystemsCount = 0;
+            bool foundList = false;
 
             foreach (ObserverData visibilitySystem in _visibilitySystems)
             {
                 if (!visibilitySystem.Observers.ContainsKey(identity)) continue;
 
                 if(visibilitySystem.Observers[identity].Count <= 0) continue;
+
+                foundList = true;
 
                 inSystemsCount++;
 
@@ -265,8 +264,11 @@ namespace Mirage.InterestManagement
                 }
             }
 
+            if (!foundList)
+                _observers = new HashSet<INetworkPlayer>(ServerObjectManager.Server.Players);
+
             // Multiple systems have been registered. We need to make sure the object is in all system observers
-            // to know that it is actually should be sending data.
+            // to know that it is actually should be sending data. Always -1 because global is default.
             if(inSystemsCount != _visibilitySystems.Count)
                 _observers.Clear();
 
