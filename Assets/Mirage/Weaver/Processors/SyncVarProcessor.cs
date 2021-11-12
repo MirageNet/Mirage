@@ -231,7 +231,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
             worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.SetDirtyBit(default)));
 
-            if (syncVar.HasHookMethod)
+            if (syncVar.HasHook)
             {
                 //if (base.isLocalClient && !getSyncVarHookGuard(dirtyBit))
                 Instruction label = worker.Create(OpCodes.Nop);
@@ -251,7 +251,7 @@ namespace Mirage.Weaver
 
                 // call hook (oldValue, newValue)
                 // Generates: OnValueChanged(oldValue, value)
-                WriteCallHookMethodUsingArgument(worker, syncVar.HookMethod, oldValue);
+                WriteCallHookMethodUsingArgument(worker, syncVar.Hook, oldValue);
 
                 // setSyncVarHookGuard(dirtyBit, false)
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -333,19 +333,27 @@ namespace Mirage.Weaver
         }
 
 
-        void WriteCallHookMethodUsingArgument(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue)
+        void WriteCallHookMethodUsingArgument(ILProcessor worker, SyncVarHook hook, VariableDefinition oldValue)
         {
-            WriteCallHookMethod(worker, hookMethod, oldValue, null);
+            WriteCallHook(worker, hook, oldValue, null);
         }
 
-        void WriteCallHookMethodUsingField(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue, FoundSyncVar syncVarField)
+        void WriteCallHookMethodUsingField(ILProcessor worker, SyncVarHook hook, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
             if (syncVarField == null)
             {
                 throw new ArgumentNullException(nameof(syncVarField));
             }
 
-            WriteCallHookMethod(worker, hookMethod, oldValue, syncVarField);
+            WriteCallHook(worker, hook, oldValue, syncVarField);
+        }
+
+        void WriteCallHook(ILProcessor worker, SyncVarHook hook, VariableDefinition oldValue, FoundSyncVar syncVarField)
+        {
+            if (hook.Method != null)
+                WriteCallHookMethod(worker, hook.Method, oldValue, syncVarField);
+            if (hook.Event != null)
+                WriteCallHookEvent(worker, hook.Event, oldValue, syncVarField);
         }
 
         void WriteCallHookMethod(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue, FoundSyncVar syncVarField)
@@ -409,6 +417,53 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCall, module.ImportReference(hookMethodReference)));
             }
         }
+
+        void WriteCallHookEvent(ILProcessor worker, EventDefinition @event, VariableDefinition oldValue, FoundSyncVar syncVarField)
+        {
+            FieldReference eventField = @event.DeclaringType.GetField(@event.Name);
+            Instruction nop = worker.Create(OpCodes.Nop);
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Ldfld, eventField));
+            // jump to nop if null
+            worker.Append(worker.Create(OpCodes.Brfalse_S, nop));
+
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Ldfld, eventField));
+            WriteOldValue();
+            WriteNewValue();
+
+            MethodReference invokeNonGenreic = @event.Module.ImportReference(typeof(Action<,>).GetMethod("Invoke"));
+            MethodReference invoke = invokeNonGenreic.MakeHostInstanceGeneric((GenericInstanceType)@event.EventType);
+            worker.Append(worker.Create(OpCodes.Call, invoke));
+
+            // after if (event!=null)
+            worker.Append(nop);
+
+
+
+            // *** Local functions used to write OpCodes ***
+            // Local functions have access to function variables, no need to pass in args
+
+            void WriteOldValue()
+            {
+                worker.Append(worker.Create(OpCodes.Ldloc, oldValue));
+            }
+
+            void WriteNewValue()
+            {
+                // write arg1 or this.field
+                if (syncVarField == null)
+                {
+                    worker.Append(worker.Create(OpCodes.Ldarg_1));
+                }
+                else
+                {
+                    WriteLoadField(worker, syncVarField);
+                }
+            }
+        }
+
+
 
         void GenerateSerialization()
         {
@@ -546,7 +601,7 @@ namespace Mirage.Weaver
             // Store old value in local variable, we need it for Hook
             // T oldValue = value
             VariableDefinition oldValue = null;
-            if (syncVar.HasHookMethod)
+            if (syncVar.HasHook)
             {
                 oldValue = deserialize.AddLocal(originalType);
                 WriteLoadField(worker, syncVar);
@@ -566,7 +621,7 @@ namespace Mirage.Weaver
         /// <param name="oldValue"></param>
         private void EndHook(ILProcessor worker, FoundSyncVar syncVar, TypeReference originalType, VariableDefinition oldValue)
         {
-            if (syncVar.HasHookMethod)
+            if (syncVar.HasHook)
             {
                 // call hook
                 // but only if SyncVar changed. otherwise a client would
@@ -592,7 +647,7 @@ namespace Mirage.Weaver
 
                 // call the hook
                 // Generates: OnValueChanged(oldValue, this.syncVar)
-                WriteCallHookMethodUsingField(worker, syncVar.HookMethod, oldValue, syncVar);
+                WriteCallHookMethodUsingField(worker, syncVar.Hook, oldValue, syncVar);
 
                 // Generates: end if (!SyncVarEqual)
                 worker.Append(syncVarEqualLabel);

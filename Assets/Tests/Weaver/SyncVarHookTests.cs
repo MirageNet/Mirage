@@ -78,5 +78,18 @@ namespace Mirage.Tests.Weaver
             HasError($"Wrong type for Parameter in hook for 'health', hook name 'onChangeHealth'. Method signature should be {OldNewMethodFormat("onChangeHealth", "System.Int32")}",
                 "System.Int32 SyncVarHookTests.ErrorForWrongTypeNewParameter.ErrorForWrongTypeNewParameter::health");
         }
+
+        [Test]
+        public void FindsHookEvent()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void ErrorWhenEventArgsAreWrong()
+        {
+            HasError($"Wrong type for Parameter un hook event for 'health', hook name 'OnChangedHealth'. Event should be public event Action<System.Int32,System.Int32> OnChangedHealth",
+                "");
+        }
     }
 }
