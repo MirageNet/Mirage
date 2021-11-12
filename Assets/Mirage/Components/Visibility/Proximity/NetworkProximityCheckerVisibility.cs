@@ -67,9 +67,9 @@ namespace Mirage.Components
         }
 
         /// <summary>
-        /// 
+        ///     When new player authenticates we need to show them objects they should see.
         /// </summary>
-        /// <param name="player"></param>
+        /// <param name="player">The player that just authenticated and we need to show objects to.</param>
         public override void OnAuthenticated(INetworkPlayer player)
         {
             // no owned object, nothing to see
@@ -96,7 +96,7 @@ namespace Mirage.Components
         }
 
         /// <summary>
-        ///     
+        ///     Checks for observers for each registered network object.
         /// </summary>
         public override void CheckForObservers()
         {
@@ -134,9 +134,17 @@ namespace Mirage.Components
         ///     Controls register new objects to this network visibility system
         /// </summary>
         /// <para>Passing in specific settings for this network object.</para>
-        public override void RegisterObject(BaseSettings proximitySettings)
+        public override void RegisterObject(BaseSettings settings)
         {
-            _proximityObjects.Add(proximitySettings as ProximitySettings);
+            _proximityObjects.Add(settings as ProximitySettings);
+        }
+
+        /// <summary>
+        ///     Controls un-register objects from this network visibility system
+        /// </summary>
+        public override void UnRegisterObject(BaseSettings settings)
+        {
+            _proximityObjects.Remove(settings as ProximitySettings);
         }
 
         #endregion

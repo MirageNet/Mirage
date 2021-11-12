@@ -7,11 +7,25 @@ namespace Mirage.Components
     {
         public ProximitySettings ProximitySettings = new ProximitySettings();
 
-        private void Start()
+        private NetworkProximityChecker _networkProximityChecker;
+
+        private void Awake()
         {
             ProximitySettings.Identity = Identity;
 
-            FindObjectOfType<NetworkProximityChecker>().NetworkVisibility.RegisterObject(ProximitySettings);
+            _networkProximityChecker = FindObjectOfType<NetworkProximityChecker>();
+        }
+
+        private void OnEnable()
+        {
+            ProximitySettings.Identity = Identity;
+
+            _networkProximityChecker.NetworkVisibility.RegisterObject(ProximitySettings);
+        }
+
+        private void OnDisable()
+        {
+            _networkProximityChecker.NetworkVisibility.RegisterObject(ProximitySettings);
         }
     }
 }

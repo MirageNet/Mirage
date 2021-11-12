@@ -48,9 +48,9 @@ namespace Mirage.InterestManagement
         public abstract void OnSpawned(NetworkIdentity identity);
 
         /// <summary>
-        /// 
+        ///     When new player authenticates we need to show them objects they should see.
         /// </summary>
-        /// <param name="player"></param>
+        /// <param name="player">The player that just authenticated and we need to show objects to.</param>
         public abstract void OnAuthenticated(INetworkPlayer player);
 
         /// <summary>
@@ -63,6 +63,11 @@ namespace Mirage.InterestManagement
         /// </summary>
         /// <para>Passing in specific settings for this network object.</para>
         public abstract void RegisterObject(BaseSettings settings);
+
+        /// <summary>
+        ///     Controls un-register objects from this network visibility system
+        /// </summary>
+        public abstract void UnRegisterObject(BaseSettings settings);
 
         #endregion
     }

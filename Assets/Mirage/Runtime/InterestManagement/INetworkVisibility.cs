@@ -41,8 +41,13 @@ namespace Mirage.InterestManagement
         void CheckForObservers();
 
         /// <summary>
-        /// 
+        ///     Register network object to visibility system.
         /// </summary>
         void RegisterObject(BaseSettings settings);
+
+        /// <summary>
+        ///     Un-Register network object from visibility system.
+        /// </summary>
+        void UnRegisterObject(BaseSettings settings);
     }
 }

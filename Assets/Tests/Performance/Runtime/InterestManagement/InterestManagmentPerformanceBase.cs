@@ -31,6 +31,34 @@ namespace Mirage.Tests.Performance.Runtime
         #endregion
     }
 
+    public class SceneInterestManagementPerformance : InterestManagementPerformanceBase
+    {
+        #region Overrides of InterestManagementPerformanceBase
+
+        /// <summary>
+        /// Called after server starts
+        /// </summary>
+        /// <param name="server"></param>
+        /// <returns></returns>
+        protected override IEnumerator SetupInterestManagement(NetworkServer server)
+        {
+            server.gameObject.AddComponent<NetworkSceneChecker>();
+
+            yield return new WaitForEndOfFrame();
+
+            NetworkIdentity[] all = FindObjectsOfType<NetworkIdentity>();
+
+            foreach (NetworkIdentity obj in all)
+            {
+                obj.gameObject.AddComponent<SceneVisibilitySettings>();
+            }
+
+            yield return null;
+        }
+
+        #endregion
+    }
+
     public class ProximityInterestManagerPerformance : InterestManagementPerformanceBase
     {
         #region Overrides of InterestManagementPerformanceBase
