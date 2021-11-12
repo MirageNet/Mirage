@@ -173,7 +173,7 @@ namespace Mirage
 
         float DrawObservers(NetworkIdentity identity, float initialX, float Y)
         {
-            if (identity.ServerObjectManager.InterestManager.ObserverSystems.Count > 0)
+            if (identity.ServerObjectManager?.InterestManager?.ObserverSystems.Count > 0)
             {
                 var observerRect = new Rect(initialX, Y + 10, 200, 20);
 
