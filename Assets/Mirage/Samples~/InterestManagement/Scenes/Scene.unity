@@ -1707,7 +1707,19 @@ MonoBehaviour:
       m_Calls: []
   _authenticated:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1107091657}
+        m_TargetAssemblyTypeName: Mirage.Examples.InterestManagement.Spawner, Mirage.Examples
+        m_MethodName: SpawnPrefab
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   _disconnected:
     m_PersistentCalls:
       m_Calls: []

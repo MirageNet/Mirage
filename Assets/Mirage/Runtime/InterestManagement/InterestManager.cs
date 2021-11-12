@@ -29,6 +29,7 @@ namespace Mirage.InterestManagement
         public readonly ServerObjectManager ServerObjectManager;
         private readonly HashSet<ObserverData> _visibilitySystems = new HashSet<ObserverData>(new SystemComparer());
         private HashSet<INetworkPlayer> _observers = new HashSet<INetworkPlayer>();
+        private INetworkVisibility _defaultSystem;
 
         private static readonly ProfilerMarker ObserverProfilerMarker = new ProfilerMarker(nameof(Observers));
         private static readonly ProfilerMarker OnAuthenticatedProfilerMarker = new ProfilerMarker(nameof(OnAuthenticated));
@@ -53,6 +54,8 @@ namespace Mirage.InterestManagement
         {
             ServerObjectManager.Server.World.onSpawn -= OnSpawnInWorld;
             ServerObjectManager.Server.Authenticated.RemoveListener(OnAuthenticated);
+
+            _defaultSystem.ShutDown();
         }
 
         /// <summary>
@@ -62,6 +65,9 @@ namespace Mirage.InterestManagement
         {
             ServerObjectManager.Server.World.onSpawn += OnSpawnInWorld;
             ServerObjectManager.Server.Authenticated.AddListener(OnAuthenticated);
+
+            _defaultSystem = new GlobalNetworkVisibilitySystem(ServerObjectManager);
+            _defaultSystem.Startup();
         }
 
         /// <summary>
@@ -73,20 +79,23 @@ namespace Mirage.InterestManagement
         {
             OnAuthenticatedProfilerMarker.Begin();
 
-            if (_visibilitySystems.Count == 0)
+            bool found = false;
+
+            foreach (ObserverData observer in _visibilitySystems)
             {
-                foreach (NetworkIdentity identity in ServerObjectManager.Server.World.SpawnedIdentities)
-                {
-                    ServerObjectManager.ShowToPlayer(identity, player);
-                }
+                if (player.Identity != null && observer.Observers.ContainsKey(player.Identity))
+                    found = true;
+
+                observer.System.OnAuthenticated(player);
             }
-            else
-            {
-                foreach (ObserverData observer in _visibilitySystems)
-                {
-                    observer.System.OnAuthenticated(player);
-                }
-            }
+
+            //if (!found)
+            //{
+            //    // We could not find this identity in any visibility systems.
+            //    // So we should default it to our global system.
+            //    _defaultSystem.RegisterObject(new BaseSettings { Identity = player.Identity});
+            //    _defaultSystem.OnAuthenticated(player);
+            //}
 
             OnAuthenticatedProfilerMarker.End();
         }
@@ -100,19 +109,22 @@ namespace Mirage.InterestManagement
         {
             OnSpawnInWorldProfilerMarker.Begin();
 
-            if (_visibilitySystems.Count == 0)
+            bool found = false;
+
+            foreach (ObserverData observer in _visibilitySystems)
             {
-                foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
-                {
-                    ServerObjectManager.ShowToPlayer(identity, player);
-                }
+                if (observer.Observers.ContainsKey(identity))
+                    found = true;
+
+                observer.System.OnSpawned(identity);
             }
-            else
+
+            if (!found)
             {
-                foreach (ObserverData observer in _visibilitySystems)
-                {
-                    observer.System.OnSpawned(identity);
-                }
+                // We could not find this identity in any visibility systems.
+                // So we should default it to our global system.
+                _defaultSystem.RegisterObject(new BaseSettings { Identity = identity });
+                _defaultSystem.OnSpawned(identity);
             }
 
             OnSpawnInWorldProfilerMarker.End();
@@ -151,7 +163,7 @@ namespace Mirage.InterestManagement
 
             foreach (ObserverData observer in _visibilitySystems)
             {
-                observer.System.CheckForObservers();
+                observer.System?.CheckForObservers();
             }
 
             OnUpdateProfilerMarker.End();
@@ -236,15 +248,6 @@ namespace Mirage.InterestManagement
             ObserverProfilerMarker.Begin();
 
             _observers.Clear();
-
-            if (_visibilitySystems.Count == 0)
-            {
-                _observers = new HashSet<INetworkPlayer>(ServerObjectManager.Server.Players);
-
-                ObserverProfilerMarker.End();
-
-                return;
-            }
 
             int inSystemsCount = 0;
 

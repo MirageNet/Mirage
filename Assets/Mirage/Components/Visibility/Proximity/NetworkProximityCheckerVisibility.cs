@@ -110,6 +110,8 @@ namespace Mirage.Components
 
                     VisibilitySystemData.TryGetValue(setting.Identity, out HashSet<INetworkPlayer> players);
 
+                    if(player.Identity == null || setting.Identity == null) continue;
+
                     if (FastInDistanceXZ(player.Identity.transform.position, setting.Identity.transform.position, setting.SightDistance * setting.SightDistance))
                     {
                         if (players != null && players.Contains(player)) continue;
