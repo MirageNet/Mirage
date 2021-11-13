@@ -432,8 +432,8 @@ namespace Mirage.Weaver
             WriteOldValue();
             WriteNewValue();
 
-            MethodReference invokeNonGenreic = @event.Module.ImportReference(typeof(Action<,>).GetMethod("Invoke"));
-            MethodReference invoke = invokeNonGenreic.MakeHostInstanceGeneric((GenericInstanceType)@event.EventType);
+            MethodReference invokeNonGeneric = @event.Module.ImportReference(typeof(Action<,>).GetMethod("Invoke"));
+            MethodReference invoke = invokeNonGeneric.MakeHostInstanceGeneric((GenericInstanceType)@event.EventType);
             worker.Append(worker.Create(OpCodes.Call, invoke));
 
             // after if (event!=null)
