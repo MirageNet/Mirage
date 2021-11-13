@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Mirage.Logging;
 using Unity.Profiling;
 using UnityEngine;
@@ -77,11 +78,7 @@ namespace Mirage.InterestManagement
 
             foreach (ObserverData observer in _visibilitySystems)
             {
-                foreach (KeyValuePair<NetworkIdentity, HashSet<INetworkPlayer>> variable in observer.Observers)
-                {
-                    if (variable.Value.Contains(player))
-                        found = true;
-                }
+                found = observer.Observers.Any(x => x.Value.Contains(player));
 
                 observer.System.OnAuthenticated(player);
             }
