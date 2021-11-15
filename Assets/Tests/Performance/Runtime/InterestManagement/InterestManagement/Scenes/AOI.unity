@@ -235,8 +235,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _enemyPrefab: {fileID: 8537344390966522168, guid: d930748d872234c43854e5100c045754, type: 3}
-  NumberOfEnemiesSpawn: 100
-  FinishedLoadingEnemies: 0
+  NumberOfEnemiesSpawn: 500
   _serverObject: {fileID: 1092843210}
   _plane: {fileID: 114156689}
 --- !u!1 &291811936
@@ -432,6 +431,7 @@ GameObject:
   - component: {fileID: 1092843208}
   - component: {fileID: 1092843207}
   - component: {fileID: 1092843216}
+  - component: {fileID: 1092843217}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -597,3 +597,17 @@ MonoBehaviour:
   _onPlayerSceneReady:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1092843217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1092843205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 285e45564b1b327499413348fc828d68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ClientCount: 50
+  _plane: {fileID: 114156689}
