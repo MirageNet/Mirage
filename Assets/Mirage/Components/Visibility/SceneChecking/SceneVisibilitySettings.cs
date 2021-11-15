@@ -7,17 +7,21 @@ namespace Mirage.Components
 
         private void Awake()
         {
-            _networkSceneChecker = FindObjectOfType<NetworkSceneChecker>();
+            Identity.OnStartServer.AddListener(OnStartServer);
+            Identity.OnStopServer.AddListener(OnStopServer);
         }
 
-        private void OnEnable()
+        private void OnStartServer()
         {
             _sceneSettings = new SceneSettings { Scene = gameObject.scene, Identity = Identity };
 
+            // todo find better way to get NetworkSceneChecker, FindObjectOfType wont work with multiple Servers
+            //      maybe Server.GetComponent<NetworkSceneChecker>()
+            _networkSceneChecker = FindObjectOfType<NetworkSceneChecker>();
             _networkSceneChecker.NetworkVisibility.RegisterObject(_sceneSettings);
         }
 
-        private void OnDisable()
+        private void OnStopServer()
         {
             _networkSceneChecker.NetworkVisibility.UnRegisterObject(_sceneSettings);
         }
