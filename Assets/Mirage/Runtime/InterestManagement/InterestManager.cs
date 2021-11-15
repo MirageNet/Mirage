@@ -68,7 +68,7 @@ namespace Mirage.InterestManagement
             {
                 found = system.Observers.Any(x => x.Value.Contains(player));
 
-                system.OnAuthenticated(player);
+                system.RebuildForPlayer(player);
             }
 
             if (!found)
@@ -134,7 +134,7 @@ namespace Mirage.InterestManagement
 
             foreach (VisibilitySystem system in _visibilitySystems)
             {
-                system.Rebuild();
+                system.RebuildAll();
             }
 
             OnUpdateProfilerMarker.End();

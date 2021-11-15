@@ -48,12 +48,12 @@ namespace Mirage.InterestManagement
         ///     When new player authenticates we need to show them objects they should see.
         /// </summary>
         /// <param name="player">The player that just authenticated and we need to show objects to.</param>
-        public abstract void OnAuthenticated(INetworkPlayer player);
+        public abstract void RebuildForPlayer(INetworkPlayer player);
 
         /// <summary>
         ///     Checks for observers for each registered network object.
         /// </summary>
-        public abstract void Rebuild();
+        public abstract void RebuildAll();
 
         /// <summary>
         ///     Controls register new objects to this network visibility system

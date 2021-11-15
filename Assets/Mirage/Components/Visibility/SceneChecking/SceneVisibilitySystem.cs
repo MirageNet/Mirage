@@ -74,7 +74,7 @@ namespace Mirage
             // does object have owner?
             if (identity.Owner != null)
             {
-                OnAuthenticated(identity.Owner);
+                RebuildForPlayer(identity.Owner);
             }
         }
 
@@ -82,7 +82,7 @@ namespace Mirage
         ///     When new player authenticates we need to show them objects they should see.
         /// </summary>
         /// <param name="player">The player that just authenticated and we need to show objects to.</param>
-        public override void OnAuthenticated(INetworkPlayer player)
+        public override void RebuildForPlayer(INetworkPlayer player)
         {
             // no owned object, nothing to see
             if (player.Identity == null) { return; }
@@ -108,7 +108,7 @@ namespace Mirage
         /// <summary>
         ///     Checks for observers for each registered network object.
         /// </summary>
-        public override void Rebuild()
+        public override void RebuildAll()
         {
             //NOOP realistically this should only ever change if devs
             // move game object to another scene manually.
