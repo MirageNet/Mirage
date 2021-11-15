@@ -1,6 +1,5 @@
+using System;
 using System.Collections;
-using System.Linq;
-using Cysharp.Threading.Tasks;
 using Mirage.Components;
 using Mirage.Examples.InterestManagement;
 using Mirage.SocketLayer;
@@ -15,7 +14,6 @@ using static UnityEngine.Object;
 
 namespace Mirage.Tests.Performance.Runtime
 {
-    [Ignore("UnFinished")]
     public class GlobalInterestManagementPerformance : InterestManagementPerformanceBase
     {
         #region Overrides of InterestManagementPerformanceBase
@@ -31,11 +29,11 @@ namespace Mirage.Tests.Performance.Runtime
             yield return null;
         }
 
-        /// <summary>
-        ///     Called after each player connects.
-        /// </summary>
-        /// <param name="networkIdentity"></param>
-        protected override void OnSpawned(NetworkIdentity networkIdentity)
+        protected override void SetupPrefab(NetworkIdentity prefab)
+        {
+            //NOOP
+        }
+        protected override void CleanPrefab(NetworkIdentity prefab)
         {
             //NOOP
         }
@@ -43,7 +41,6 @@ namespace Mirage.Tests.Performance.Runtime
         #endregion
     }
 
-    [Ignore("UnFinished")]
     public class MultiInterestManagementPerformance : InterestManagementPerformanceBase
     {
         #region Overrides of InterestManagementPerformanceBase
@@ -61,20 +58,20 @@ namespace Mirage.Tests.Performance.Runtime
             yield return null;
         }
 
-        /// <summary>
-        ///     Called after each player connects.
-        /// </summary>
-        /// <param name="networkIdentity"></param>
-        protected override void OnSpawned(NetworkIdentity networkIdentity)
+        protected override void SetupPrefab(NetworkIdentity prefab)
         {
-            networkIdentity.gameObject.AddComponent<SceneVisibilitySettings>();
-            networkIdentity.gameObject.AddComponent<NetworkProximitySettings>();
+            prefab.gameObject.AddComponent<SceneVisibilitySettings>();
+            prefab.gameObject.AddComponent<NetworkProximitySettings>();
+        }
+        protected override void CleanPrefab(NetworkIdentity prefab)
+        {
+            DestroyImmediate(prefab.gameObject.GetComponent<SceneVisibilitySettings>());
+            DestroyImmediate(prefab.gameObject.GetComponent<NetworkProximitySettings>());
         }
 
         #endregion
     }
 
-    [Ignore("UnFinished")]
     public class SceneInterestManagementPerformance : InterestManagementPerformanceBase
     {
         #region Overrides of InterestManagementPerformanceBase
@@ -91,19 +88,19 @@ namespace Mirage.Tests.Performance.Runtime
             yield return null;
         }
 
-        /// <summary>
-        ///     Called after each player connects.
-        /// </summary>
-        /// <param name="networkIdentity"></param>
-        protected override void OnSpawned(NetworkIdentity networkIdentity)
+
+        protected override void SetupPrefab(NetworkIdentity prefab)
         {
-            networkIdentity.gameObject.AddComponent<SceneVisibilitySettings>();
+            prefab.gameObject.AddComponent<SceneVisibilitySettings>();
+        }
+        protected override void CleanPrefab(NetworkIdentity prefab)
+        {
+            DestroyImmediate(prefab.gameObject.GetComponent<SceneVisibilitySettings>());
         }
 
         #endregion
     }
 
-    [Ignore("UnFinished")]
     public class ProximityInterestManagerPerformance : InterestManagementPerformanceBase
     {
         #region Overrides of InterestManagementPerformanceBase
@@ -120,13 +117,13 @@ namespace Mirage.Tests.Performance.Runtime
             yield return null;
         }
 
-        /// <summary>
-        ///     Called after each player connects.
-        /// </summary>
-        /// <param name="networkIdentity"></param>
-        protected override void OnSpawned(NetworkIdentity networkIdentity)
+        protected override void SetupPrefab(NetworkIdentity prefab)
         {
-            networkIdentity.gameObject.AddComponent<NetworkProximitySettings>();
+            prefab.gameObject.AddComponent<NetworkProximitySettings>();
+        }
+        protected override void CleanPrefab(NetworkIdentity prefab)
+        {
+            DestroyImmediate(prefab.gameObject.GetComponent<NetworkProximitySettings>());
         }
 
         #endregion
@@ -138,6 +135,7 @@ namespace Mirage.Tests.Performance.Runtime
         const string testScene = "Assets/Tests/Performance/Runtime/InterestManagement/InterestManagement/Scenes/AOI.unity";
         const string MonsterPath = "Assets/Tests/Performance/Runtime/InterestManagement/InterestManagement/Prefabs/Enemy.prefab";
         const string PlayerPath = "Assets/Tests/Performance/Runtime/InterestManagement/InterestManagement/Prefabs/Player.prefab";
+
         const string NpcSpawnerName = "World Floor";
         const int ClientCount = 50;
         const int MonsterCount = 500;
@@ -148,14 +146,35 @@ namespace Mirage.Tests.Performance.Runtime
         private NetworkIdentity PlayerPrefab;
         private NetworkIdentity MonsterPrefab;
 
+
+        /// <summary>
+        /// Called after server starts
+        /// </summary>
+        protected abstract IEnumerator SetupInterestManagement(NetworkServer server);
+
+        /// <summary>
+        /// Setsup prefab before it is used to spawn
+        /// </summary>
+        /// <param name="prefab"></param>
+        protected abstract void SetupPrefab(NetworkIdentity prefab);
+        /// <summary>
+        /// Cleans up prefab so it doesn't effect next test
+        /// </summary>
+        /// <param name="prefab"></param>
+        protected abstract void CleanPrefab(NetworkIdentity prefab);
+
+
+
         [UnitySetUp]
-        public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
+        public IEnumerator Setup()
         {
             // load scene
-            await EditorSceneManager.LoadSceneAsyncInPlayMode(testScene, new LoadSceneParameters(LoadSceneMode.Single));
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(testScene, new LoadSceneParameters(LoadSceneMode.Single));
 
             MonsterPrefab = AssetDatabase.LoadAssetAtPath<NetworkIdentity>(MonsterPath);
             PlayerPrefab = AssetDatabase.LoadAssetAtPath<NetworkIdentity>(PlayerPath);
+            SetupPrefab(MonsterPrefab);
+            SetupPrefab(PlayerPrefab);
 
             EnemySpawner enemySpawner = GameObject.Find(NpcSpawnerName).GetComponent<EnemySpawner>();
             enemySpawner.NumberOfEnemiesSpawn = MonsterCount;
@@ -164,37 +183,50 @@ namespace Mirage.Tests.Performance.Runtime
             Server = FindObjectOfType<NetworkServer>();
             Server.MaxConnections = ClientCount;
 
-            var started = new UniTaskCompletionSource();
-            Server.Started.AddListener(() => started.TrySetResult());
-
             // wait 1 frame before Starting server to give time for Unity to call "Start"
-            await UniTask.Yield();
+            yield return null;
+
             Server.StartServer();
 
-            Server.World.onSpawn += OnSpawned;
+            // set names for existing (we have to call this just incase any are spawned inside Server.Started event
+            foreach (NetworkIdentity ni in Server.World.SpawnedIdentities) SetIdentityName(ni);
+            // set names for new
+            Server.World.onSpawn += SetIdentityName;
 
-            await started.Task;
+            // wait for all enemies to spawn in.
+            while (!enemySpawner.FinishedLoadingEnemies) { yield return null; }
 
-            await SetupInterestManagement(Server);
+            yield return SetupInterestManagement(Server);
 
             // connect from a bunch of clients
             for (int i = 0; i < ClientCount; i++)
-                await StartClient(i, Server.GetComponent<SocketFactory>());
+                yield return StartClient(i, Server.GetComponent<SocketFactory>());
 
-            while (FindObjectsOfType<MonsterBehavior>().Count() < MonsterCount * (ClientCount + 1))
-                await UniTask.Delay(10);
-        });
+            // wait 10 frames for all clients to full setup
+            for (int i = 0; i < 10; i++)
+            {
+                yield return null;
+            }
+        }
+
+        private void SetIdentityName(NetworkIdentity ni)
+        {
+            ni.name += $" [netId:{ni.NetId}]";
+        }
 
         private IEnumerator StartClient(int i, SocketFactory socketFactory)
         {
-            var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager));
+            Scene scene = SceneManager.CreateScene($"Client {i}", new CreateSceneParameters { localPhysicsMode = LocalPhysicsMode.Physics3D });
+            var clientGo = new GameObject($"Client {i}");
+            // disable object so awake isn't called on new components till we enable it
             clientGo.SetActive(false);
-            NetworkClient client = clientGo.GetComponent<NetworkClient>();
-            ClientObjectManager objectManager = clientGo.GetComponent<ClientObjectManager>();
-            objectManager.Client = client;
-            objectManager.Start();
+            SceneManager.MoveGameObjectToScene(clientGo, scene);
 
-            client.SocketFactory = socketFactory;
+            NetworkClient client = clientGo.AddComponent<NetworkClient>();
+            client.SocketFactory = clientGo.AddComponent(socketFactory.GetType()) as SocketFactory;
+
+            ClientObjectManager objectManager = clientGo.AddComponent<ClientObjectManager>();
+            objectManager.Client = client;
 
             CharacterSpawner spawner = clientGo.AddComponent<CharacterSpawner>();
             spawner.Client = client;
@@ -204,45 +236,69 @@ namespace Mirage.Tests.Performance.Runtime
             objectManager.RegisterPrefab(MonsterPrefab);
             objectManager.RegisterPrefab(PlayerPrefab);
 
+            // enable so awake is called
             clientGo.SetActive(true);
-            client.Connect("localhost");
-
+            // yield so start is called
             yield return null;
+            client.Connect("localhost");
+            client.World.onSpawn += (ni) =>
+            {
+                SetIdentityName(ni);
+                // move any NI spawned in on client to the scene for that client
+                SceneManager.MoveGameObjectToScene(ni.gameObject, scene);
+            };
         }
-
-        /// <summary>
-        /// Called after server starts
-        /// </summary>
-        /// <param name="server"></param>
-        /// <returns></returns>
-        protected abstract IEnumerator SetupInterestManagement(NetworkServer server);
-
-        /// <summary>
-        ///     Called after each player connects.
-        /// </summary>
-        /// <param name="networkIdentity"></param>
-        protected abstract void OnSpawned(NetworkIdentity networkIdentity);
 
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            CleanPrefab(MonsterPrefab);
+            CleanPrefab(PlayerPrefab);
+
             Server.Stop();
 
+            // wait for all clients to stop
             yield return null;
+            yield return null;
+
+            // make sure server object is destroyed
+            DestroyImmediate(Server.gameObject);
+
+            // get all scenes, Server+N*clients
+            var scenes = new Scene[SceneManager.sceneCount];
+            for (int i = 0; i < scenes.Length; i++)
+            {
+                scenes[i] = SceneManager.GetSceneAt(i);
+            }
 
             // open new scene so that old one is destroyed
             SceneManager.CreateScene("empty", new CreateSceneParameters(LocalPhysicsMode.None));
-            yield return SceneManager.UnloadSceneAsync(testScene);
-
-            DestroyImmediate(Server.gameObject);
+            for (int i = 0; i < scenes.Length; i++)
+            {
+                // unload all old scenes
+                yield return SceneManager.UnloadSceneAsync(scenes[i]);
+            }
         }
 
+        [Explicit]
         [UnityTest]
         public IEnumerator RunsWithoutErrors()
         {
-            yield return new WaitForSeconds(5);
+            float end = Time.time + 5;
+            var stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+            long lastFrame = stopwatch.ElapsedMilliseconds;
+            float lastFrameTime = Time.time;
+            while (Time.time < end)
+            {
+                yield return null;
+                UnityEngine.Debug.Log($"Frame, Time {(Time.time - lastFrameTime) * 1000:0}, SW:{stopwatch.ElapsedMilliseconds - lastFrame:0}");
+                lastFrame = stopwatch.ElapsedMilliseconds;
+                lastFrameTime = Time.time;
+            }
         }
 
+        [Explicit]
         [UnityTest, Performance]
         public IEnumerator FramePerformance()
         {
@@ -254,6 +310,9 @@ namespace Mirage.Tests.Performance.Runtime
                 new SampleGroup("Update", SampleUnit.Microsecond),
                 new SampleGroup("Send", SampleUnit.Microsecond),
             };
+
+            // collect GC from setup before we start measuring
+            GC.Collect();
 
             yield return Measure.Frames()
                 .ProfilerMarkers(sampleGroups)
