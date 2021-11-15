@@ -15,6 +15,7 @@ using static UnityEngine.Object;
 
 namespace Mirage.Tests.Performance.Runtime
 {
+    [Ignore("UnFinished")]
     public class GlobalInterestManagementPerformance : InterestManagementPerformanceBase
     {
         #region Overrides of InterestManagementPerformanceBase
@@ -42,6 +43,7 @@ namespace Mirage.Tests.Performance.Runtime
         #endregion
     }
 
+    [Ignore("UnFinished")]
     public class MultiInterestManagementPerformance : InterestManagementPerformanceBase
     {
         #region Overrides of InterestManagementPerformanceBase
@@ -72,6 +74,7 @@ namespace Mirage.Tests.Performance.Runtime
         #endregion
     }
 
+    [Ignore("UnFinished")]
     public class SceneInterestManagementPerformance : InterestManagementPerformanceBase
     {
         #region Overrides of InterestManagementPerformanceBase
@@ -100,6 +103,7 @@ namespace Mirage.Tests.Performance.Runtime
         #endregion
     }
 
+    [Ignore("UnFinished")]
     public class ProximityInterestManagerPerformance : InterestManagementPerformanceBase
     {
         #region Overrides of InterestManagementPerformanceBase
