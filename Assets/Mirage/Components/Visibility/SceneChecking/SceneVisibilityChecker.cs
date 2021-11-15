@@ -119,7 +119,8 @@ namespace Mirage
         {
             _sceneObjects.Add(settings as SceneSettings);
 
-            VisibilitySystemData.Add(settings.Identity, new HashSet<INetworkPlayer>());
+            if (!VisibilitySystemData.ContainsKey(settings.Identity))
+                VisibilitySystemData.Add(settings.Identity, new HashSet<INetworkPlayer>());
         }
 
         /// <summary>

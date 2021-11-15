@@ -137,7 +137,8 @@ namespace Mirage.Components
         {
             _proximityObjects.Add(settings as ProximitySettings);
 
-            VisibilitySystemData.Add(settings.Identity, new HashSet<INetworkPlayer>());
+            if (!VisibilitySystemData.ContainsKey(settings.Identity))
+                VisibilitySystemData.Add(settings.Identity, new HashSet<INetworkPlayer>());
         }
 
         /// <summary>
