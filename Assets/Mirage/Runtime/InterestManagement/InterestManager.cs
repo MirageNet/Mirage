@@ -8,27 +8,12 @@ namespace Mirage.InterestManagement
 {
     public class InterestManager
     {
-        private class SystemComparer : IEqualityComparer<VisibilitySystemData>
-        {
-            public bool Equals(VisibilitySystemData x, VisibilitySystemData y)
-            {
-                return x.System.GetType().Name.GetStableHashCode() == y.System.GetType().Name.GetStableHashCode();
-            }
-
-            public int GetHashCode(VisibilitySystemData obj)
-            {
-                int hash = obj.System.GetType().Name.GetStableHashCode();
-
-                return hash;
-            }
-        }
-
         static readonly ILogger Logger = LogFactory.GetLogger(typeof(InterestManager));
 
         #region Fields
 
         public readonly ServerObjectManager ServerObjectManager;
-        private readonly HashSet<VisibilitySystemData> _visibilitySystems = new HashSet<VisibilitySystemData>(new SystemComparer());
+        private readonly HashSet<VisibilitySystemData> _visibilitySystems = new HashSet<VisibilitySystemData>(new VisibilitySystemData.Comparer());
         private HashSet<INetworkPlayer> _observers = new HashSet<INetworkPlayer>();
 
         private static readonly ProfilerMarker ObserverProfilerMarker = new ProfilerMarker(nameof(Observers));
@@ -254,7 +239,7 @@ namespace Mirage.InterestManagement
 
                     foreach (VisibilitySystemData visibilitySystem in _visibilitySystems)
                     {
-                        if(!visibilitySystem.Observers.ContainsKey(identity)) continue;
+                        if (!visibilitySystem.Observers.ContainsKey(identity)) continue;
 
                         inSystemsCount++;
 
