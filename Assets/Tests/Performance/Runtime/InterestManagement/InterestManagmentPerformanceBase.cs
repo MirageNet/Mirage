@@ -137,8 +137,8 @@ namespace Mirage.Tests.Performance.Runtime.AOI
         const string PlayerPath = "Assets/Tests/Performance/Runtime/InterestManagement/InterestManagement/Prefabs/Player.prefab";
 
         const string NpcSpawnerName = "World Floor";
-        const int ClientCount = 50;
-        const int MonsterCount = 500;
+        const int ClientCount = 2;
+        const int MonsterCount = 50;
         const int Warmup = 5;
         const int MeasureCount = 300;
 
