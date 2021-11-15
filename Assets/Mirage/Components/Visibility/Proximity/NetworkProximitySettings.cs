@@ -2,10 +2,11 @@ using UnityEngine;
 
 namespace Mirage.Components
 {
+    // todo find better name
     [DisallowMultipleComponent]
     public class NetworkProximitySettings : NetworkBehaviour
     {
-        public ProximitySettings ProximitySettings = new ProximitySettings();
+        public ProximitySettings ProximitySettings = new ProximitySettings(10);
 
         private DistanceVisibilityFactory _networkProximityChecker;
 

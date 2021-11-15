@@ -5,16 +5,22 @@ using Mirage.InterestManagement;
 using Mirage.Logging;
 using UnityEngine;
 
+// todo move this to sub namespace
 namespace Mirage.Components
 {
     [Serializable]
-    public class ProximitySettings
+    public struct ProximitySettings
     {
         /// <summary>
         /// The maximum range that objects will be visible at.
         /// </summary>
         [Tooltip("The maximum range that objects will be visible at.")]
-        public float SightDistance = 10;
+        public float SightDistance;
+
+        public ProximitySettings(float sightDistance)
+        {
+            SightDistance = sightDistance;
+        }
     }
 
     public class DistanceVisibilitySystem : VisibilitySystem
@@ -134,8 +140,14 @@ namespace Mirage.Components
         /// <para>Passing in specific settings for this network object.</para>
         public override void RegisterObject<TSettings>(NetworkIdentity identity, TSettings settings)
         {
-            Logger.Assert(settings is ProximitySettings);
-            _proximityObjects.Add(identity, settings as ProximitySettings);
+            if (settings is ProximitySettings proximitySettings)
+            {
+                _proximityObjects.Add(identity, proximitySettings);
+            }
+            else
+            {
+                throw new ArgumentException($"Settings should be {nameof(ProximitySettings)}", nameof(settings));
+            }
 
             if (!Observers.ContainsKey(identity))
                 Observers.Add(identity, new HashSet<INetworkPlayer>());

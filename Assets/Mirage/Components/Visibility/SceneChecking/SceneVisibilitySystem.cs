@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using Mirage.InterestManagement;
 using Mirage.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+// todo move this to sub namespace
 namespace Mirage
 {
     public class SceneVisibilitySystem : VisibilitySystem
@@ -108,10 +110,13 @@ namespace Mirage
         /// </summary>
         public override void RegisterObject<TSettings>(NetworkIdentity identity, TSettings settings)
         {
-            Logger.Assert(settings is Scene);
             if (settings is Scene scene)
             {
                 _sceneObjects.Add(identity, scene);
+            }
+            else
+            {
+                throw new ArgumentException($"Settings should be {nameof(Scene)}", nameof(settings));
             }
 
             if (!Observers.ContainsKey(identity))
