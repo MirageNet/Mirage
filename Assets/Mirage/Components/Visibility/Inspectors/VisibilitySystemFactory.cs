@@ -7,9 +7,8 @@ namespace Mirage.Components
     {
         #region Fields
 
-        protected ServerObjectManager ServerObjectManager;
-        protected NetworkServer Server;
-        protected internal VisibilitySystem System;
+        public NetworkServer Server;
+        public VisibilitySystem System { get; private set; }
 
         #endregion
 
@@ -18,12 +17,14 @@ namespace Mirage.Components
         private void OnServerStarted()
         {
             // todo is this null check ok?
-            System?.Startup();
+            System = CreateSystem(Server.GetComponent<ServerObjectManager>());
+            System.Startup();
         }
 
-        private void OnServerStopped()
+        private void ShutDown()
         {
             System?.ShutDown();
+            System = null;
         }
 
         #endregion
@@ -31,25 +32,18 @@ namespace Mirage.Components
         /// <summary>
         ///     Do initialization of data inside of here.
         /// </summary>
-        protected abstract void CreateSystem();
+        protected abstract VisibilitySystem CreateSystem(ServerObjectManager serverObjectManager);
 
         #region Unity Methods
 
         private void Awake()
         {
-            // todo find better way to find ServerObjectManager
-            ServerObjectManager = FindObjectOfType<ServerObjectManager>();
-            Server = FindObjectOfType<NetworkServer>();
-
-            CreateSystem();
-
             Server.Started.AddListener(OnServerStarted);
-            Server.Stopped.AddListener(OnServerStarted);
+            Server.Stopped.AddListener(ShutDown);
         }
-
-        private void Destroy()
+        private void OnDestroy()
         {
-            System = null;
+            ShutDown();
         }
 
         #endregion

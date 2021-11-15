@@ -1,3 +1,4 @@
+using Mirage.InterestManagement;
 using UnityEngine;
 
 namespace Mirage.Components
@@ -5,9 +6,9 @@ namespace Mirage.Components
     [DisallowMultipleComponent]
     public class SceneVisibilityFactory : VisibilitySystemFactory
     {
-        protected override void CreateSystem()
+        protected override VisibilitySystem CreateSystem(ServerObjectManager serverObjectManager)
         {
-            System = new SceneVisibilitySystem(ServerObjectManager);
+            return new SceneVisibilitySystem(serverObjectManager);
         }
     }
 }
