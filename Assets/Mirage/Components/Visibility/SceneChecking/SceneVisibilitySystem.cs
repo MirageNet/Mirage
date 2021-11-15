@@ -35,15 +35,15 @@ namespace Mirage
         public void MoveToScene(Scene scene, NetworkIdentity identity)
         {
             // Remove object from all player's
-            if (VisibilitySystemData.ContainsKey(identity))
+            if (Observers.ContainsKey(identity))
             {
-                foreach (INetworkPlayer player in VisibilitySystemData[identity])
+                foreach (INetworkPlayer player in Observers[identity])
                 {
                     InterestManager.ServerObjectManager.HideToPlayer(identity, player);
                 }
 
                 // Reset list to empty now.
-                VisibilitySystemData[identity] = new HashSet<INetworkPlayer>();
+                Observers[identity] = new HashSet<INetworkPlayer>();
             }
 
             // move player to new scene
@@ -91,10 +91,10 @@ namespace Mirage
             {
                 if (setting.Scene.handle != player.Identity.gameObject.scene.handle) continue;
 
-                if (!VisibilitySystemData.ContainsKey(setting.Identity))
-                    VisibilitySystemData.Add(setting.Identity, new HashSet<INetworkPlayer>());
-                else if (VisibilitySystemData.ContainsKey(setting.Identity) && !VisibilitySystemData[setting.Identity].Contains(player))
-                    VisibilitySystemData[setting.Identity].Add(player);
+                if (!Observers.ContainsKey(setting.Identity))
+                    Observers.Add(setting.Identity, new HashSet<INetworkPlayer>());
+                else if (Observers.ContainsKey(setting.Identity) && !Observers[setting.Identity].Contains(player))
+                    Observers[setting.Identity].Add(player);
 
                 InterestManager.ServerObjectManager.ShowToPlayer(setting.Identity, player);
             }
@@ -119,8 +119,8 @@ namespace Mirage
         {
             _sceneObjects.Add(settings as SceneSettings);
 
-            if (!VisibilitySystemData.ContainsKey(settings.Identity))
-                VisibilitySystemData.Add(settings.Identity, new HashSet<INetworkPlayer>());
+            if (!Observers.ContainsKey(settings.Identity))
+                Observers.Add(settings.Identity, new HashSet<INetworkPlayer>());
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Mirage
         {
             _sceneObjects.Remove(settings as SceneSettings);
 
-            VisibilitySystemData.Remove(settings.Identity);
+            Observers.Remove(settings.Identity);
         }
 
         #endregion

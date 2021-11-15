@@ -77,10 +77,10 @@ namespace Mirage.Components
 
                 if (!FastInDistanceXZ(a, b, setting.SightDistance * setting.SightDistance)) continue;
 
-                if (!VisibilitySystemData.ContainsKey(setting.Identity))
-                    VisibilitySystemData.Add(setting.Identity, new HashSet<INetworkPlayer>());
-                else if (VisibilitySystemData.ContainsKey(setting.Identity) && !VisibilitySystemData[setting.Identity].Contains(player))
-                    VisibilitySystemData[setting.Identity].Add(player);
+                if (!Observers.ContainsKey(setting.Identity))
+                    Observers.Add(setting.Identity, new HashSet<INetworkPlayer>());
+                else if (Observers.ContainsKey(setting.Identity) && !Observers[setting.Identity].Contains(player))
+                    Observers[setting.Identity].Add(player);
 
                 InterestManager.ServerObjectManager.ShowToPlayer(setting.Identity, player);
             }
@@ -95,11 +95,11 @@ namespace Mirage.Components
 
             foreach (ProximitySettings setting in _proximityObjects)
             {
-                if (!VisibilitySystemData.ContainsKey(setting.Identity)) continue;
+                if (!Observers.ContainsKey(setting.Identity)) continue;
 
                 foreach (INetworkPlayer player in InterestManager.ServerObjectManager.Server.Players)
                 {
-                    VisibilitySystemData.TryGetValue(setting.Identity, out HashSet<INetworkPlayer> players);
+                    Observers.TryGetValue(setting.Identity, out HashSet<INetworkPlayer> players);
 
                     if (player.Identity == null || setting.Identity == null) continue;
 
@@ -107,14 +107,14 @@ namespace Mirage.Components
                     {
                         if (players != null && players.Contains(player)) continue;
 
-                        VisibilitySystemData[setting.Identity].Add(player);
+                        Observers[setting.Identity].Add(player);
                         InterestManager.ServerObjectManager.ShowToPlayer(setting.Identity, player);
                     }
                     else
                     {
                         if (players != null && !players.Contains(player)) continue;
 
-                        VisibilitySystemData[setting.Identity].Remove(player);
+                        Observers[setting.Identity].Remove(player);
                         InterestManager.ServerObjectManager.HideToPlayer(setting.Identity, player);
                     }
                 }
@@ -131,8 +131,8 @@ namespace Mirage.Components
         {
             _proximityObjects.Add(settings as ProximitySettings);
 
-            if (!VisibilitySystemData.ContainsKey(settings.Identity))
-                VisibilitySystemData.Add(settings.Identity, new HashSet<INetworkPlayer>());
+            if (!Observers.ContainsKey(settings.Identity))
+                Observers.Add(settings.Identity, new HashSet<INetworkPlayer>());
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Mirage.Components
         {
             _proximityObjects.Remove(settings as ProximitySettings);
 
-            VisibilitySystemData.Remove(settings.Identity);
+            Observers.Remove(settings.Identity);
         }
 
         #endregion
