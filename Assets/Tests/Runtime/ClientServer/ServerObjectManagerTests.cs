@@ -86,7 +86,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             serverPlayer.SceneIsReady = true;
 
             // call ShowForConnection
-            serverObjectManager.ShowToPlayer(serverIdentity, serverPlayer);
+            serverObjectManager.InterestManager.ShowToPlayer(serverIdentity, serverPlayer);
 
             // todo assert correct message was sent using Substitute for socket or player
 

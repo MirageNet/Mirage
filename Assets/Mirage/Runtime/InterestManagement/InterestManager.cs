@@ -17,8 +17,8 @@ namespace Mirage.InterestManagement
         private HashSet<INetworkPlayer> _observers = new HashSet<INetworkPlayer>();
 
         private static readonly ProfilerMarker ObserverProfilerMarker = new ProfilerMarker(nameof(Observers));
-        private static readonly ProfilerMarker OnAuthenticatedProfilerMarker = new ProfilerMarker(nameof(OnAuthenticated));
-        private static readonly ProfilerMarker OnSpawnInWorldProfilerMarker = new ProfilerMarker(nameof(OnSpawnInWorld));
+        private static readonly ProfilerMarker OnAuthenticatedProfilerMarker = new ProfilerMarker(nameof(RebuildForPlayer));
+        private static readonly ProfilerMarker OnSpawnInWorldProfilerMarker = new ProfilerMarker(nameof(OnSpawn));
         private static readonly ProfilerMarker OnUpdateProfilerMarker = new ProfilerMarker(nameof(Update));
         private static readonly ProfilerMarker OnSendProfilerMarker = new ProfilerMarker(nameof(Send));
 
@@ -37,8 +37,7 @@ namespace Mirage.InterestManagement
         /// </summary>
         private void OnServerStopped()
         {
-            ServerObjectManager.Server.World.onSpawn -= OnSpawnInWorld;
-            ServerObjectManager.Server.Authenticated.RemoveListener(OnAuthenticated);
+            ServerObjectManager.Server.Authenticated.RemoveListener(RebuildForPlayer);
 
             _visibilitySystems.Clear();
             _observers.Clear();
@@ -49,8 +48,7 @@ namespace Mirage.InterestManagement
         /// </summary>
         private void OnServerStarted()
         {
-            ServerObjectManager.Server.World.onSpawn += OnSpawnInWorld;
-            ServerObjectManager.Server.Authenticated.AddListener(OnAuthenticated);
+            ServerObjectManager.Server.Authenticated.AddListener(RebuildForPlayer);
         }
 
         /// <summary>
@@ -58,7 +56,7 @@ namespace Mirage.InterestManagement
         ///     and if any we will use that otherwise we will default to global system.
         /// </summary>
         /// <param name="player">The player we want to show or hide objects to.</param>
-        private void OnAuthenticated(INetworkPlayer player)
+        public void RebuildForPlayer(INetworkPlayer player)
         {
             OnAuthenticatedProfilerMarker.Begin();
 
@@ -75,7 +73,7 @@ namespace Mirage.InterestManagement
             {
                 foreach (NetworkIdentity identity in ServerObjectManager.Server.World.SpawnedIdentities)
                 {
-                    ServerObjectManager.ShowToPlayer(identity, player);
+                    ShowToPlayer(identity, player);
                 }
             }
 
@@ -87,7 +85,7 @@ namespace Mirage.InterestManagement
         ///     each system can do what they need or want with the info.
         /// </summary>
         /// <param name="identity">The newly spawned object.</param>
-        private void OnSpawnInWorld(NetworkIdentity identity)
+        internal void OnSpawn(NetworkIdentity identity)
         {
             OnSpawnInWorldProfilerMarker.Begin();
 
@@ -105,11 +103,18 @@ namespace Mirage.InterestManagement
             {
                 foreach (INetworkPlayer player in ServerObjectManager.Server.Players)
                 {
-                    ServerObjectManager.ShowToPlayer(identity, player);
+                    ShowToPlayer(identity, player);
                 }
             }
 
             OnSpawnInWorldProfilerMarker.End();
+        }
+
+        internal void OnDestroy(NetworkIdentity identity)
+        {
+            Send(identity, new ObjectDestroyMessage { netId = identity.NetId });
+
+            // todo do we need to do anything else when an object is destoryed? (like remove it from systems)
         }
 
         #endregion
@@ -126,6 +131,23 @@ namespace Mirage.InterestManagement
 
             ServerObjectManager.Server?.Started.AddListener(OnServerStarted);
             ServerObjectManager.Server?.Stopped.AddListener(OnServerStopped);
+        }
+
+        /// <summary>
+        /// Sends spawn message to player if it is not loading a scene
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <param name="player"></param>
+        public void ShowToPlayer(NetworkIdentity identity, INetworkPlayer player)
+        {
+            // dont send if loading scene
+            if (player.SceneIsReady)
+                ServerObjectManager.SendSpawnMessage(identity, player);
+        }
+
+        public void HideToPlayer(NetworkIdentity identity, INetworkPlayer player)
+        {
+            player.Send(new ObjectHideMessage { netId = identity.NetId });
         }
 
         internal void Update()

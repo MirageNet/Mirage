@@ -71,6 +71,9 @@ namespace Mirage
 
         public void Update()
         {
+            // todo move this to NetworkServer
+            //      NetworkServer should decide when things get rebuild not unity
+            //      this'll be more important when we add tick stuff
             InterestManager?.Update();
         }
 
@@ -214,7 +217,7 @@ namespace Mirage
 
             player.Identity = identity;
 
-            // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
+            // Set the player on the NetworkIdentity on the server
             identity.SetClientOwner(player);
 
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
@@ -224,12 +227,31 @@ namespace Mirage
                 Server.LocalClient.Player.Identity = identity;
             }
 
+            // add player to observers AFTER the character is set.
+            //
+            // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
+            SpawnVisibleObjectForPlayer(player);
+
             if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash:X}");
 
             Respawn(identity);
 
             if (!keepAuthority)
                 previousCharacter.RemoveClientAuthority();
+        }
+
+        void SpawnVisibleObjectForPlayer(INetworkPlayer player)
+        {
+            if (logger.LogEnabled()) logger.Log($"Checking Observers on {Server.World.SpawnedIdentities.Count} objects for player: {player}");
+
+            if (!player.SceneIsReady)
+            {
+                // client needs to finish loading scene before we can spawn objects
+                // otherwise it would not find scene objects.
+                return;
+            }
+
+            InterestManager.RebuildForPlayer(player);
         }
 
         /// <summary>
@@ -322,23 +344,6 @@ namespace Mirage
                 // otherwise just replace his data
                 SendSpawnMessage(identity, identity.Owner);
             }
-        }
-
-        /// <summary>
-        /// Sends spawn message to player if it is not loading a scene
-        /// </summary>
-        /// <param name="identity"></param>
-        /// <param name="player"></param>
-        public void ShowToPlayer(NetworkIdentity identity, INetworkPlayer player)
-        {
-            // dont send if loading scene
-            if (player.SceneIsReady)
-                SendSpawnMessage(identity, player);
-        }
-
-        public void HideToPlayer(NetworkIdentity identity, INetworkPlayer player)
-        {
-            player.Send(new ObjectHideMessage { netId = identity.NetId });
         }
 
         /// <summary>
@@ -508,6 +513,8 @@ namespace Mirage
             }
 
             if (logger.LogEnabled()) logger.Log($"SpawnObject instance ID {identity.NetId} asset ID {identity.PrefabHash:X}");
+
+            InterestManager.OnSpawn(identity);
         }
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
@@ -629,7 +636,7 @@ namespace Mirage
             Server.World.RemoveIdentity(identity);
             identity.Owner?.RemoveOwnedObject(identity);
 
-            InterestManager.Send(identity, new ObjectDestroyMessage { netId = identity.NetId });
+            InterestManager.OnDestroy(identity);
 
             if (Server.LocalClientActive)
             {
@@ -695,6 +702,30 @@ namespace Mirage
                     Spawn(identity.gameObject);
                 }
             }
+        }
+
+        /// <summary>
+        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// <para>
+        /// If there is a <see cref="Mirage.NetworkSceneManager"/> then this will be called after the client finishes loading the scene and sends <see cref="SceneReadyMessage"/>
+        /// </para>
+        /// </summary>
+        /// <param name="player">The player to spawn objects for</param>
+        public void SpawnVisibleObjects(INetworkPlayer player) => SpawnVisibleObjects(player, false);
+
+        /// <summary>
+        /// Sends spawn message for scene objects and other visible objects to the given player if it has a character
+        /// </summary>
+        /// <param name="player">The player to spawn objects for</param>
+        /// <param name="ignoreHasCharacter">If true will spawn visibile objects even if player does not have a spawned character yet</param>
+        // note: can't use optional param here because we need just NetworkPlayer version for event
+        public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter)
+        {
+            if (logger.LogEnabled()) logger.Log("SpawnVisibleObjects for conn:" + player);
+
+            // client is ready to start spawning objects
+            if (ignoreHasCharacter || player.HasCharacter)
+                SpawnVisibleObjectForPlayer(player);
         }
     }
 }

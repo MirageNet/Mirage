@@ -85,7 +85,7 @@ namespace Mirage.Components
                 else if (Observers.ContainsKey(identity) && !Observers[identity].Contains(player))
                     Observers[identity].Add(player);
 
-                InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
+                InterestManager.ShowToPlayer(identity, player);
             }
         }
 
@@ -113,14 +113,14 @@ namespace Mirage.Components
                         if (players != null && players.Contains(player)) continue;
 
                         Observers[identity].Add(player);
-                        InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
+                        InterestManager.ShowToPlayer(identity, player);
                     }
                     else
                     {
                         if (players != null && !players.Contains(player)) continue;
 
                         Observers[identity].Remove(player);
-                        InterestManager.ServerObjectManager.HideToPlayer(identity, player);
+                        InterestManager.HideToPlayer(identity, player);
                     }
                 }
             }

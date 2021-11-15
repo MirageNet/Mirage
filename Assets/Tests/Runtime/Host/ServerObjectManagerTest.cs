@@ -20,7 +20,7 @@ namespace Mirage.Tests.Runtime.Host
 
             NetworkIdentity identity = new GameObject().AddComponent<NetworkIdentity>();
 
-            serverObjectManager.HideToPlayer(identity, player);
+            serverObjectManager.InterestManager.HideToPlayer(identity, player);
 
             player.Received().Send(Arg.Is<ObjectHideMessage>(msg => msg.netId == identity.NetId));
 

@@ -39,7 +39,7 @@ namespace Mirage
             {
                 foreach (INetworkPlayer player in Observers[identity])
                 {
-                    InterestManager.ServerObjectManager.HideToPlayer(identity, player);
+                    InterestManager.HideToPlayer(identity, player);
                 }
 
                 // Reset list to empty now.
@@ -54,7 +54,7 @@ namespace Mirage
             {
                 if (player.Identity.gameObject.scene.handle != scene.handle) continue;
 
-                InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
+                InterestManager.ShowToPlayer(identity, player);
             }
         }
 
@@ -98,11 +98,11 @@ namespace Mirage
                 else if (Observers.ContainsKey(identity) && !Observers[identity].Contains(player))
                     Observers[identity].Add(player);
 
-                InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
+                InterestManager.ShowToPlayer(identity, player);
             }
 
             // Always show self to them.
-            InterestManager.ServerObjectManager.ShowToPlayer(player.Identity, player);
+            InterestManager.ShowToPlayer(player.Identity, player);
         }
 
         /// <summary>
