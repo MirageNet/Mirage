@@ -55,7 +55,7 @@ namespace Mirage.InterestManagement
         /// <summary>
         ///     Checks for observers for each registered network object.
         /// </summary>
-        public abstract void CheckForObservers();
+        public abstract void Rebuild();
 
         /// <summary>
         ///     Controls register new objects to this network visibility system

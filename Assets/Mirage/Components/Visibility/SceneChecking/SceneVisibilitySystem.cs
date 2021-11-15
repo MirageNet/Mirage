@@ -106,7 +106,7 @@ namespace Mirage
         /// <summary>
         ///     Checks for observers for each registered network object.
         /// </summary>
-        public override void CheckForObservers()
+        public override void Rebuild()
         {
             //NOOP realistically this should only ever change if devs
             // move game object to another scene manually.

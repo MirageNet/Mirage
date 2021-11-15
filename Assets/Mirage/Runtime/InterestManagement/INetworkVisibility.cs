@@ -38,7 +38,7 @@ namespace Mirage.InterestManagement
         /// <summary>
         ///     Perform your own checks to see if player's can see other objects.
         /// </summary>
-        void CheckForObservers();
+        void Rebuild();
 
         /// <summary>
         ///     Register network object to visibility system.

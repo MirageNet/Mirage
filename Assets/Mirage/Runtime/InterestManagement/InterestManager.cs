@@ -134,7 +134,7 @@ namespace Mirage.InterestManagement
 
             foreach (VisibilitySystem system in _visibilitySystems)
             {
-                system.CheckForObservers();
+                system.Rebuild();
             }
 
             OnUpdateProfilerMarker.End();
