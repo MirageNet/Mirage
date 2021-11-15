@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using static UnityEngine.Object;
 
-namespace Mirage.Tests.Performance.Runtime
+namespace Mirage.Tests.Performance.Runtime.AOI
 {
     public class GlobalInterestManagementPerformance : InterestManagementPerformanceBase
     {
