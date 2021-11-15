@@ -186,6 +186,8 @@ namespace Mirage.Tests.Performance.Runtime.AOI
             // wait 1 frame before Starting server to give time for Unity to call "Start"
             yield return null;
 
+            yield return SetupInterestManagement(Server);
+
             Server.StartServer();
 
             // set names for existing (we have to call this just incase any are spawned inside Server.Started event
@@ -196,7 +198,6 @@ namespace Mirage.Tests.Performance.Runtime.AOI
             // wait for all enemies to spawn in.
             while (!enemySpawner.FinishedLoadingEnemies) { yield return null; }
 
-            yield return SetupInterestManagement(Server);
 
             // connect from a bunch of clients
             for (int i = 0; i < ClientCount; i++)
