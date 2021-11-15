@@ -17,17 +17,15 @@ namespace Mirage.Components
 
         private void OnStartServer()
         {
-            ProximitySettings.Identity = Identity;
-
             // todo find better way to get NetworkSceneChecker, FindObjectOfType wont work with multiple Servers
             //      maybe Server.GetComponent<NetworkSceneChecker>()
             _networkProximityChecker = FindObjectOfType<DistanceVisibilityFactory>();
-            _networkProximityChecker.System.RegisterObject(ProximitySettings);
+            _networkProximityChecker.System.RegisterObject(Identity, ProximitySettings);
         }
 
         private void OnStopServer()
         {
-            _networkProximityChecker.System.RegisterObject(ProximitySettings);
+            _networkProximityChecker.System.UnregisterObject(Identity);
         }
     }
 }

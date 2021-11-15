@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 namespace Mirage
 {
     [Serializable]
-    public class SceneSettings : BaseSettings
+    public class SceneSettings
     {
         /// <summary>
         /// The maximum range that objects will be visible at.
@@ -23,7 +23,7 @@ namespace Mirage
 
         #region Fields
 
-        private readonly HashSet<SceneSettings> _sceneObjects = new HashSet<SceneSettings>();
+        private readonly Dictionary<NetworkIdentity, SceneSettings> _sceneObjects = new Dictionary<NetworkIdentity, SceneSettings>();
 
         #endregion
 
@@ -87,16 +87,18 @@ namespace Mirage
             // no owned object, nothing to see
             if (player.Identity == null) { return; }
 
-            foreach (SceneSettings setting in _sceneObjects)
+            foreach (KeyValuePair<NetworkIdentity, SceneSettings> kvp in _sceneObjects)
             {
+                NetworkIdentity identity = kvp.Key;
+                SceneSettings setting = kvp.Value;
                 if (setting.Scene.handle != player.Identity.gameObject.scene.handle) continue;
 
-                if (!Observers.ContainsKey(setting.Identity))
-                    Observers.Add(setting.Identity, new HashSet<INetworkPlayer>());
-                else if (Observers.ContainsKey(setting.Identity) && !Observers[setting.Identity].Contains(player))
-                    Observers[setting.Identity].Add(player);
+                if (!Observers.ContainsKey(identity))
+                    Observers.Add(identity, new HashSet<INetworkPlayer>());
+                else if (Observers.ContainsKey(identity) && !Observers[identity].Contains(player))
+                    Observers[identity].Add(player);
 
-                InterestManager.ServerObjectManager.ShowToPlayer(setting.Identity, player);
+                InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
             }
 
             // Always show self to them.
@@ -115,22 +117,23 @@ namespace Mirage
         /// <summary>
         ///     Controls register new objects to this network visibility system
         /// </summary>
-        public override void RegisterObject(BaseSettings settings)
+        public override void RegisterObject<TSettings>(NetworkIdentity identity, TSettings settings)
         {
-            _sceneObjects.Add(settings as SceneSettings);
+            Logger.Assert(settings is SceneSettings);
+            _sceneObjects.Add(identity, settings as SceneSettings);
 
-            if (!Observers.ContainsKey(settings.Identity))
-                Observers.Add(settings.Identity, new HashSet<INetworkPlayer>());
+            if (!Observers.ContainsKey(identity))
+                Observers.Add(identity, new HashSet<INetworkPlayer>());
         }
 
         /// <summary>
         ///     Controls un-register objects from this network visibility system
         /// </summary>
-        public override void UnRegisterObject(BaseSettings settings)
+        public override void UnregisterObject(NetworkIdentity identity)
         {
-            _sceneObjects.Remove(settings as SceneSettings);
+            _sceneObjects.Remove(identity);
 
-            Observers.Remove(settings.Identity);
+            Observers.Remove(identity);
         }
 
         #endregion

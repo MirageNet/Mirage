@@ -14,17 +14,16 @@ namespace Mirage.Components
         private void OnStartServer()
         {
             _sceneSettings.Scene = gameObject.scene;
-            _sceneSettings.Identity = Identity;
 
             // todo find better way to get NetworkSceneChecker, FindObjectOfType wont work with multiple Servers
             //      maybe Server.GetComponent<NetworkSceneChecker>()
             _networkSceneChecker = FindObjectOfType<SceneVisibilityFactory>();
-            _networkSceneChecker.System.RegisterObject(_sceneSettings);
+            _networkSceneChecker.System.RegisterObject(Identity, _sceneSettings);
         }
 
         private void OnStopServer()
         {
-            _networkSceneChecker.System.UnRegisterObject(_sceneSettings);
+            _networkSceneChecker.System.UnregisterObject(Identity);
         }
     }
 }

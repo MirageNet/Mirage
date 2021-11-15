@@ -1,16 +1,8 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Mirage.InterestManagement
 {
-    [Serializable]
-    public class BaseSettings
-    {
-        [HideInInspector]
-        public NetworkIdentity Identity;
-    }
-
     public abstract class VisibilitySystem
     {
         #region Fields
@@ -45,8 +37,6 @@ namespace Mirage.InterestManagement
             InterestManager?.UnregisterSystem(this);
         }
 
-        #region Implementation of INetworkVisibility
-
         /// <summary>
         ///     Invoked when an object is spawned in the server
         ///     It should show that object to all relevant players
@@ -69,13 +59,11 @@ namespace Mirage.InterestManagement
         ///     Controls register new objects to this network visibility system
         /// </summary>
         /// <para>Passing in specific settings for this network object.</para>
-        public abstract void RegisterObject(BaseSettings settings);
+        public abstract void RegisterObject<TSettings>(NetworkIdentity identity, TSettings settings);
 
         /// <summary>
         ///     Controls un-register objects from this network visibility system
         /// </summary>
-        public abstract void UnRegisterObject(BaseSettings settings);
-
-        #endregion
+        public abstract void UnregisterObject(NetworkIdentity identity);
     }
 }

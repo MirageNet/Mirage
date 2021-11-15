@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Mirage.Components
 {
     [Serializable]
-    public class ProximitySettings : BaseSettings
+    public class ProximitySettings
     {
         /// <summary>
         /// The maximum range that objects will be visible at.
@@ -23,7 +23,7 @@ namespace Mirage.Components
 
         private readonly float _updateInterval = 0;
         private float _nextUpdate = 0;
-        private readonly HashSet<ProximitySettings> _proximityObjects = new HashSet<ProximitySettings>();
+        private readonly Dictionary<NetworkIdentity, ProximitySettings> _proximityObjects = new Dictionary<NetworkIdentity, ProximitySettings>();
 
         /// <summary>
         ///     Starts up a new instance of a network proximity visibility system.
@@ -71,18 +71,21 @@ namespace Mirage.Components
 
             Vector3 b = player.Identity.transform.position;
 
-            foreach (ProximitySettings setting in _proximityObjects)
+            foreach (KeyValuePair<NetworkIdentity, ProximitySettings> kvp in _proximityObjects)
             {
-                Vector3 a = setting.Identity.transform.position;
+                NetworkIdentity identity = kvp.Key;
+                ProximitySettings setting = kvp.Value;
+
+                Vector3 a = identity.transform.position;
 
                 if (!FastInDistanceXZ(a, b, setting.SightDistance * setting.SightDistance)) continue;
 
-                if (!Observers.ContainsKey(setting.Identity))
-                    Observers.Add(setting.Identity, new HashSet<INetworkPlayer>());
-                else if (Observers.ContainsKey(setting.Identity) && !Observers[setting.Identity].Contains(player))
-                    Observers[setting.Identity].Add(player);
+                if (!Observers.ContainsKey(identity))
+                    Observers.Add(identity, new HashSet<INetworkPlayer>());
+                else if (Observers.ContainsKey(identity) && !Observers[identity].Contains(player))
+                    Observers[identity].Add(player);
 
-                InterestManager.ServerObjectManager.ShowToPlayer(setting.Identity, player);
+                InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
             }
         }
 
@@ -93,29 +96,31 @@ namespace Mirage.Components
         {
             if (!(_nextUpdate < Time.time)) return;
 
-            foreach (ProximitySettings setting in _proximityObjects)
+            foreach (KeyValuePair<NetworkIdentity, ProximitySettings> kvp in _proximityObjects)
             {
-                if (!Observers.ContainsKey(setting.Identity)) continue;
+                NetworkIdentity identity = kvp.Key;
+                ProximitySettings setting = kvp.Value;
+                if (!Observers.ContainsKey(identity)) continue;
 
                 foreach (INetworkPlayer player in InterestManager.ServerObjectManager.Server.Players)
                 {
-                    Observers.TryGetValue(setting.Identity, out HashSet<INetworkPlayer> players);
+                    Observers.TryGetValue(identity, out HashSet<INetworkPlayer> players);
 
-                    if (player.Identity == null || setting.Identity == null) continue;
+                    if (player.Identity == null || identity == null) continue;
 
-                    if (FastInDistanceXZ(player.Identity.transform.position, setting.Identity.transform.position, setting.SightDistance * setting.SightDistance))
+                    if (FastInDistanceXZ(player.Identity.transform.position, identity.transform.position, setting.SightDistance * setting.SightDistance))
                     {
                         if (players != null && players.Contains(player)) continue;
 
-                        Observers[setting.Identity].Add(player);
-                        InterestManager.ServerObjectManager.ShowToPlayer(setting.Identity, player);
+                        Observers[identity].Add(player);
+                        InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
                     }
                     else
                     {
                         if (players != null && !players.Contains(player)) continue;
 
-                        Observers[setting.Identity].Remove(player);
-                        InterestManager.ServerObjectManager.HideToPlayer(setting.Identity, player);
+                        Observers[identity].Remove(player);
+                        InterestManager.ServerObjectManager.HideToPlayer(identity, player);
                     }
                 }
             }
@@ -127,22 +132,23 @@ namespace Mirage.Components
         ///     Controls register new objects to this network visibility system
         /// </summary>
         /// <para>Passing in specific settings for this network object.</para>
-        public override void RegisterObject(BaseSettings settings)
+        public override void RegisterObject<TSettings>(NetworkIdentity identity, TSettings settings)
         {
-            _proximityObjects.Add(settings as ProximitySettings);
+            Logger.Assert(settings is ProximitySettings);
+            _proximityObjects.Add(identity, settings as ProximitySettings);
 
-            if (!Observers.ContainsKey(settings.Identity))
-                Observers.Add(settings.Identity, new HashSet<INetworkPlayer>());
+            if (!Observers.ContainsKey(identity))
+                Observers.Add(identity, new HashSet<INetworkPlayer>());
         }
 
         /// <summary>
         ///     Controls un-register objects from this network visibility system
         /// </summary>
-        public override void UnRegisterObject(BaseSettings settings)
+        public override void UnregisterObject(NetworkIdentity identity)
         {
-            _proximityObjects.Remove(settings as ProximitySettings);
+            _proximityObjects.Remove(identity);
 
-            Observers.Remove(settings.Identity);
+            Observers.Remove(identity);
         }
 
         #endregion
