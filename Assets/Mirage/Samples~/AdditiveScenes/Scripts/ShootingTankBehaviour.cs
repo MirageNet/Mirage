@@ -38,7 +38,7 @@ namespace Mirage.Examples.Additive
             GameObject target = null;
             float distance = 100f;
 
-            foreach (ObserverData observerData in Identity.ServerObjectManager.InterestManager.ObserverSystems)
+            foreach (VisibilitySystemData observerData in Identity.ServerObjectManager.InterestManager.ObserverSystems)
             {
                 foreach (KeyValuePair<NetworkIdentity, HashSet<INetworkPlayer>> observer in observerData.Observers)
                 {
