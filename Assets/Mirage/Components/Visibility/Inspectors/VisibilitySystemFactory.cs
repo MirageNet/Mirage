@@ -8,6 +8,7 @@ namespace Mirage.Components
         #region Fields
 
         protected ServerObjectManager ServerObjectManager;
+        protected NetworkServer Server;
         protected internal INetworkVisibility NetworkVisibility;
 
         #endregion
@@ -30,7 +31,7 @@ namespace Mirage.Components
         /// <summary>
         ///     Do initialization of data inside of here.
         /// </summary>
-        protected abstract void Initialize();
+        protected abstract void CreateSystem();
 
         #region Unity Methods
 
@@ -38,17 +39,12 @@ namespace Mirage.Components
         {
             // todo find better way to find ServerObjectManager
             ServerObjectManager = FindObjectOfType<ServerObjectManager>();
+            Server = FindObjectOfType<NetworkServer>();
 
-            Initialize();
+            CreateSystem();
 
-            if (!ServerObjectManager.Server.Active)
-                ServerObjectManager.Server.Started.AddListener(OnServerStarted);
-            else
-            {
-                OnServerStarted();
-            }
-
-            ServerObjectManager.Server.Stopped.AddListener(OnServerStopped);
+            Server.Started.AddListener(OnServerStarted);
+            Server.Stopped.AddListener(OnServerStarted);
         }
 
         private void Destroy()

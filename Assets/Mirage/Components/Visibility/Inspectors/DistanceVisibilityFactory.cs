@@ -11,7 +11,7 @@ namespace Mirage.Components
         [Tooltip("How often (in seconds) that this object should update the list of observers that can see it.")]
         public float VisibilityUpdateInterval = 1;
 
-        protected override void Initialize()
+        protected override void CreateSystem()
         {
             NetworkVisibility = new DistanceVisibilitySystem(ServerObjectManager, VisibilityUpdateInterval);
         }
