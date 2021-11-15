@@ -7,7 +7,7 @@ namespace Mirage.Components
     {
         protected override void CreateSystem()
         {
-            NetworkVisibility = new SceneVisibilitySystem(ServerObjectManager);
+            System = new SceneVisibilitySystem(ServerObjectManager);
         }
     }
 }

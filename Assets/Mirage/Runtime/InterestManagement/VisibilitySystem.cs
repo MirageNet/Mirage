@@ -1,9 +1,17 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Mirage.InterestManagement
 {
-    public abstract class VisibilitySystem : INetworkVisibility
+    [Serializable]
+    public class BaseSettings
+    {
+        [HideInInspector]
+        public NetworkIdentity Identity;
+    }
+
+    public abstract class VisibilitySystem
     {
         #region Fields
 

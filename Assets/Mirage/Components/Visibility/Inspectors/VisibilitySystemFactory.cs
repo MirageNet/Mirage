@@ -9,7 +9,7 @@ namespace Mirage.Components
 
         protected ServerObjectManager ServerObjectManager;
         protected NetworkServer Server;
-        protected internal INetworkVisibility NetworkVisibility;
+        protected internal VisibilitySystem System;
 
         #endregion
 
@@ -18,12 +18,12 @@ namespace Mirage.Components
         private void OnServerStarted()
         {
             // todo is this null check ok?
-            NetworkVisibility?.Startup();
+            System?.Startup();
         }
 
         private void OnServerStopped()
         {
-            NetworkVisibility?.ShutDown();
+            System?.ShutDown();
         }
 
         #endregion
@@ -49,7 +49,7 @@ namespace Mirage.Components
 
         private void Destroy()
         {
-            NetworkVisibility = null;
+            System = null;
         }
 
         #endregion

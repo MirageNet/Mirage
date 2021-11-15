@@ -19,12 +19,12 @@ namespace Mirage.Components
             // todo find better way to get NetworkSceneChecker, FindObjectOfType wont work with multiple Servers
             //      maybe Server.GetComponent<NetworkSceneChecker>()
             _networkSceneChecker = FindObjectOfType<SceneVisibilityFactory>();
-            _networkSceneChecker.NetworkVisibility.RegisterObject(_sceneSettings);
+            _networkSceneChecker.System.RegisterObject(_sceneSettings);
         }
 
         private void OnStopServer()
         {
-            _networkSceneChecker.NetworkVisibility.UnRegisterObject(_sceneSettings);
+            _networkSceneChecker.System.UnRegisterObject(_sceneSettings);
         }
     }
 }

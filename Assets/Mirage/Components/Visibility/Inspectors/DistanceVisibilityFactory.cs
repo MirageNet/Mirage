@@ -13,7 +13,7 @@ namespace Mirage.Components
 
         protected override void CreateSystem()
         {
-            NetworkVisibility = new DistanceVisibilitySystem(ServerObjectManager, VisibilityUpdateInterval);
+            System = new DistanceVisibilitySystem(ServerObjectManager, VisibilityUpdateInterval);
         }
     }
 }
