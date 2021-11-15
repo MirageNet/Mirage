@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Mirage.InterestManagement;
 using Mirage.Logging;
@@ -7,23 +6,13 @@ using UnityEngine.SceneManagement;
 
 namespace Mirage
 {
-    [Serializable]
-    public class SceneSettings
-    {
-        /// <summary>
-        /// The maximum range that objects will be visible at.
-        /// </summary>
-        [Tooltip("The maximum range that objects will be visible at.")]
-        public Scene Scene;
-    }
-
     public class SceneVisibilitySystem : VisibilitySystem
     {
         static readonly ILogger Logger = LogFactory.GetLogger<SceneVisibilitySystem>();
 
         #region Fields
 
-        private readonly Dictionary<NetworkIdentity, SceneSettings> _sceneObjects = new Dictionary<NetworkIdentity, SceneSettings>();
+        private readonly Dictionary<NetworkIdentity, Scene> _sceneObjects = new Dictionary<NetworkIdentity, Scene>();
 
         #endregion
 
@@ -87,11 +76,11 @@ namespace Mirage
             // no owned object, nothing to see
             if (player.Identity == null) { return; }
 
-            foreach (KeyValuePair<NetworkIdentity, SceneSettings> kvp in _sceneObjects)
+            foreach (KeyValuePair<NetworkIdentity, Scene> kvp in _sceneObjects)
             {
                 NetworkIdentity identity = kvp.Key;
-                SceneSettings setting = kvp.Value;
-                if (setting.Scene.handle != player.Identity.gameObject.scene.handle) continue;
+                Scene scene = kvp.Value;
+                if (scene != player.Identity.gameObject.scene) continue;
 
                 if (!Observers.ContainsKey(identity))
                     Observers.Add(identity, new HashSet<INetworkPlayer>());
@@ -119,8 +108,11 @@ namespace Mirage
         /// </summary>
         public override void RegisterObject<TSettings>(NetworkIdentity identity, TSettings settings)
         {
-            Logger.Assert(settings is SceneSettings);
-            _sceneObjects.Add(identity, settings as SceneSettings);
+            Logger.Assert(settings is Scene);
+            if (settings is Scene scene)
+            {
+                _sceneObjects.Add(identity, scene);
+            }
 
             if (!Observers.ContainsKey(identity))
                 Observers.Add(identity, new HashSet<INetworkPlayer>());
