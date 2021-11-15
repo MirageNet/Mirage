@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Mirage.InterestManagement
@@ -20,7 +21,7 @@ namespace Mirage.InterestManagement
 
         protected VisibilitySystem(ServerObjectManager serverObjectManager)
         {
-            _serverObjectManager = serverObjectManager;
+            _serverObjectManager = serverObjectManager ?? throw new ArgumentNullException(nameof(serverObjectManager));
         }
 
         public void Startup()
