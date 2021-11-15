@@ -7,7 +7,7 @@ namespace Mirage.Components
     {
         public ProximitySettings ProximitySettings = new ProximitySettings();
 
-        private NetworkProximityChecker _networkProximityChecker;
+        private DistanceVisibilityFactory _networkProximityChecker;
 
         private void Awake()
         {
@@ -21,7 +21,7 @@ namespace Mirage.Components
 
             // todo find better way to get NetworkSceneChecker, FindObjectOfType wont work with multiple Servers
             //      maybe Server.GetComponent<NetworkSceneChecker>()
-            _networkProximityChecker = FindObjectOfType<NetworkProximityChecker>();
+            _networkProximityChecker = FindObjectOfType<DistanceVisibilityFactory>();
             _networkProximityChecker.NetworkVisibility.RegisterObject(ProximitySettings);
         }
 

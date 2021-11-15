@@ -2,7 +2,7 @@ namespace Mirage.Components
 {
     public class SceneVisibilitySettings : NetworkBehaviour
     {
-        private NetworkSceneChecker _networkSceneChecker;
+        private SceneVisibilityFactory _networkSceneChecker;
         private SceneSettings _sceneSettings = new SceneSettings();
 
         private void Awake()
@@ -18,7 +18,7 @@ namespace Mirage.Components
 
             // todo find better way to get NetworkSceneChecker, FindObjectOfType wont work with multiple Servers
             //      maybe Server.GetComponent<NetworkSceneChecker>()
-            _networkSceneChecker = FindObjectOfType<NetworkSceneChecker>();
+            _networkSceneChecker = FindObjectOfType<SceneVisibilityFactory>();
             _networkSceneChecker.NetworkVisibility.RegisterObject(_sceneSettings);
         }
 

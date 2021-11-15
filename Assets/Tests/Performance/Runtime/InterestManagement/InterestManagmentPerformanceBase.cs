@@ -52,8 +52,8 @@ namespace Mirage.Tests.Performance.Runtime.AOI
         /// <returns></returns>
         protected override IEnumerator SetupInterestManagement(NetworkServer server)
         {
-            server.gameObject.AddComponent<NetworkSceneChecker>();
-            server.gameObject.AddComponent<NetworkProximityChecker>();
+            server.gameObject.AddComponent<SceneVisibilityFactory>();
+            server.gameObject.AddComponent<DistanceVisibilityFactory>();
 
             yield return null;
         }
@@ -83,7 +83,7 @@ namespace Mirage.Tests.Performance.Runtime.AOI
         /// <returns></returns>
         protected override IEnumerator SetupInterestManagement(NetworkServer server)
         {
-            server.gameObject.AddComponent<NetworkSceneChecker>();
+            server.gameObject.AddComponent<SceneVisibilityFactory>();
 
             yield return null;
         }
@@ -112,7 +112,7 @@ namespace Mirage.Tests.Performance.Runtime.AOI
         /// <returns></returns>
         protected override IEnumerator SetupInterestManagement(NetworkServer server)
         {
-            server.gameObject.AddComponent<NetworkProximityChecker>();
+            server.gameObject.AddComponent<DistanceVisibilityFactory>();
 
             yield return null;
         }

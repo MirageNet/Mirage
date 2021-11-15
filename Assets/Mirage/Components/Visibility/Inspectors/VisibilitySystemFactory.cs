@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Mirage.Components
 {
-    public abstract class BaseVisibilityInspector : MonoBehaviour
+    public abstract class VisibilitySystemFactory : MonoBehaviour
     {
         #region Fields
 

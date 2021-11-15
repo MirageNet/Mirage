@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Mirage.Components
 {
     [DisallowMultipleComponent]
-    public class NetworkProximityChecker : BaseVisibilityInspector
+    public class DistanceVisibilityFactory : VisibilitySystemFactory
     {
         /// <summary>
         /// How often (in seconds) that this object should update the list of observers that can see it.

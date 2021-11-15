@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Mirage.Components
 {
     [DisallowMultipleComponent]
-    public class NetworkSceneChecker : BaseVisibilityInspector
+    public class SceneVisibilityFactory : VisibilitySystemFactory
     {
         protected override void Initialize()
         {
