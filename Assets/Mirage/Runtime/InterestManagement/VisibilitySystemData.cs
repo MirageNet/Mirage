@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 namespace Mirage.InterestManagement
 {
+    [System.Obsolete("Dont use", true)]
     public readonly struct VisibilitySystemData
     {
         public INetworkVisibility System { get; }

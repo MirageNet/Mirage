@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Mirage.InterestManagement;
 using UnityEditor;
 using UnityEngine;
 
@@ -182,7 +181,7 @@ namespace Mirage
                 observerRect.x += 20;
                 observerRect.y += observerRect.height;
 
-                foreach (VisibilitySystemData system in identity.ServerObjectManager.InterestManager.ObserverSystems)
+                foreach (InterestManagement.VisibilitySystem system in identity.ServerObjectManager.InterestManager.ObserverSystems)
                 {
                     foreach (INetworkPlayer player in system.Observers[identity])
                     {

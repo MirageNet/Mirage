@@ -13,7 +13,7 @@ namespace Mirage.InterestManagement
         #region Fields
 
         public readonly ServerObjectManager ServerObjectManager;
-        private readonly HashSet<VisibilitySystemData> _visibilitySystems = new HashSet<VisibilitySystemData>(new VisibilitySystemData.Comparer());
+        private readonly HashSet<VisibilitySystem> _visibilitySystems = new HashSet<VisibilitySystem>();
         private HashSet<INetworkPlayer> _observers = new HashSet<INetworkPlayer>();
 
         private static readonly ProfilerMarker ObserverProfilerMarker = new ProfilerMarker(nameof(Observers));
@@ -26,7 +26,7 @@ namespace Mirage.InterestManagement
 
         #region Properties
 
-        public IReadOnlyCollection<VisibilitySystemData> ObserverSystems => _visibilitySystems;
+        public IReadOnlyCollection<VisibilitySystem> ObserverSystems => _visibilitySystems;
 
         #endregion
 
@@ -64,11 +64,11 @@ namespace Mirage.InterestManagement
 
             bool found = false;
 
-            foreach (VisibilitySystemData systemData in _visibilitySystems)
+            foreach (VisibilitySystem system in _visibilitySystems)
             {
-                found = systemData.Observers.Any(x => x.Value.Contains(player));
+                found = system.Observers.Any(x => x.Value.Contains(player));
 
-                systemData.System.OnAuthenticated(player);
+                system.OnAuthenticated(player);
             }
 
             if (!found)
@@ -93,12 +93,12 @@ namespace Mirage.InterestManagement
 
             bool found = false;
 
-            foreach (VisibilitySystemData systemData in _visibilitySystems)
+            foreach (VisibilitySystem system in _visibilitySystems)
             {
-                if (systemData.Observers.ContainsKey(identity))
+                if (system.Observers.ContainsKey(identity))
                     found = true;
 
-                systemData.System.OnSpawned(identity);
+                system.OnSpawned(identity);
             }
 
             if (!found)
@@ -128,22 +128,13 @@ namespace Mirage.InterestManagement
             ServerObjectManager.Server?.Stopped.AddListener(OnServerStopped);
         }
 
-        /// <summary>
-        ///     Check to see if certain system has already been registered.
-        /// </summary>
-        /// <returns>Returns true if we have already registered the system.</returns>
-        public bool IsRegisteredAlready(ref VisibilitySystemData observer)
-        {
-            return _visibilitySystems.Contains(observer);
-        }
-
         internal void Update()
         {
             OnUpdateProfilerMarker.Begin();
 
-            foreach (VisibilitySystemData systemData in _visibilitySystems)
+            foreach (VisibilitySystem system in _visibilitySystems)
             {
-                systemData.System?.CheckForObservers();
+                system.CheckForObservers();
             }
 
             OnUpdateProfilerMarker.End();
@@ -180,41 +171,41 @@ namespace Mirage.InterestManagement
         /// <summary>
         ///     Register a specific interest management system to the interest manager.
         /// </summary>
-        /// <param name="systemData">The system we want to register in the interest manager.</param>
-        internal void RegisterVisibilitySystem(ref VisibilitySystemData systemData)
+        /// <param name="system">The system we want to register in the interest manager.</param>
+        internal bool RegisterSystem(VisibilitySystem system)
         {
-            if (_visibilitySystems.Contains(systemData))
-            {
-                Logger.LogWarning(
-                    "[InterestManager] - System already register to interest manager. Please check if this was correct.");
+            bool wasAdded = _visibilitySystems.Add(system);
 
-                return;
+            if (wasAdded)
+            {
+                if (Logger.logEnabled) Logger.Log($"[Interest Manager] - Registering system {system} to our manager.");
+            }
+            else
+            {
+                Logger.LogWarning("[InterestManager] - System already register to interest manager. Please check if this was correct.");
             }
 
-            if (Logger.logEnabled)
-                Logger.Log($"[Interest Manager] - Registering system {systemData} to our manager.");
-
-            _visibilitySystems.Add(systemData);
+            return wasAdded;
         }
 
         /// <summary>
         ///     Un-register a specific interest management system from the interest manager.
         /// </summary>
-        /// <param name="systemData">The system we want to un-register from the interest manager.</param>
-        internal void UnRegisterVisibilitySystem(ref VisibilitySystemData systemData)
+        /// <param name="system">The system we want to un-register from the interest manager.</param>
+        internal bool UnregisterSystem(VisibilitySystem system)
         {
-            if (!_visibilitySystems.Contains(systemData))
-            {
-                Logger.LogWarning(
-                    "[InterestManager] - Cannot find system in interest manager. Please check make sure it was registered.");
+            bool wasRemoved = _visibilitySystems.Remove(system);
 
-                return;
+            if (wasRemoved)
+            {
+                if (Logger.logEnabled) Logger.Log($"[Interest Manager] - Un-Registering system {system} from our manager.");
+            }
+            else
+            {
+                Logger.LogWarning("[InterestManager] - Cannot find system in interest manager. Please check make sure it was registered.");
             }
 
-            if (Logger.logEnabled)
-                Logger.Log($"[Interest Manager] - Un-Registering system {systemData} from our manager.");
-
-            _visibilitySystems.Remove(systemData);
+            return wasRemoved;
         }
 
 
@@ -237,13 +228,13 @@ namespace Mirage.InterestManagement
                 default:
                     int inSystemsCount = 0;
 
-                    foreach (VisibilitySystemData visibilitySystem in _visibilitySystems)
+                    foreach (VisibilitySystem system in _visibilitySystems)
                     {
-                        if (!visibilitySystem.Observers.ContainsKey(identity)) continue;
+                        if (!system.Observers.ContainsKey(identity)) continue;
 
                         inSystemsCount++;
 
-                        _observers.UnionWith(visibilitySystem.Observers[identity]);
+                        _observers.UnionWith(system.Observers[identity]);
                     }
 
                     if (inSystemsCount <= 0)

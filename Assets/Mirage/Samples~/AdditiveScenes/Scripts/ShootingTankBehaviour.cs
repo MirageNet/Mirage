@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Mirage.InterestManagement;
 using UnityEngine;
 
 namespace Mirage.Examples.Additive
@@ -38,7 +37,7 @@ namespace Mirage.Examples.Additive
             GameObject target = null;
             float distance = 100f;
 
-            foreach (VisibilitySystemData observerData in Identity.ServerObjectManager.InterestManager.ObserverSystems)
+            foreach (Mirage.InterestManagement.VisibilitySystem observerData in Identity.ServerObjectManager.InterestManager.ObserverSystems)
             {
                 foreach (KeyValuePair<NetworkIdentity, HashSet<INetworkPlayer>> observer in observerData.Observers)
                 {
