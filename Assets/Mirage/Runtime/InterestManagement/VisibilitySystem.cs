@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Mirage.InterestManagement
 {
-    public abstract class NetworkVisibility : INetworkVisibility
+    public abstract class VisibilitySystem : INetworkVisibility
     {
         #region Fields
 
@@ -19,7 +19,7 @@ namespace Mirage.InterestManagement
 
         #endregion
 
-        protected NetworkVisibility(ServerObjectManager serverObjectManager)
+        protected VisibilitySystem(ServerObjectManager serverObjectManager)
         {
             _serverObjectManager = serverObjectManager;
         }

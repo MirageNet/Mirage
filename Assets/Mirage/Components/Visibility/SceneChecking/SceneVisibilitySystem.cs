@@ -17,9 +17,9 @@ namespace Mirage
         public Scene Scene;
     }
 
-    public class SceneVisibilityChecker : NetworkVisibility
+    public class SceneVisibilitySystem : VisibilitySystem
     {
-        static readonly ILogger Logger = LogFactory.GetLogger<SceneVisibilityChecker>();
+        static readonly ILogger Logger = LogFactory.GetLogger<SceneVisibilitySystem>();
 
         #region Fields
 
@@ -52,13 +52,13 @@ namespace Mirage
             // spawn new objects for player
             foreach (INetworkPlayer player in InterestManager.ServerObjectManager.Server.Players)
             {
-                if(player.Identity.gameObject.scene.handle != scene.handle) continue;
+                if (player.Identity.gameObject.scene.handle != scene.handle) continue;
 
                 InterestManager.ServerObjectManager.ShowToPlayer(identity, player);
             }
         }
 
-        public SceneVisibilityChecker(ServerObjectManager serverObjectManager) : base(serverObjectManager)
+        public SceneVisibilitySystem(ServerObjectManager serverObjectManager) : base(serverObjectManager)
         {
         }
 

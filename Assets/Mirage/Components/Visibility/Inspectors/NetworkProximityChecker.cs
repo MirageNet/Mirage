@@ -13,7 +13,7 @@ namespace Mirage.Components
 
         protected override void Initialize()
         {
-            NetworkVisibility = new NetworkProximityCheckerVisibility(ServerObjectManager, VisibilityUpdateInterval);
+            NetworkVisibility = new DistanceVisibilitySystem(ServerObjectManager, VisibilityUpdateInterval);
         }
     }
 }

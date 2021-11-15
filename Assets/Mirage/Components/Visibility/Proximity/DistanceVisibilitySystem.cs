@@ -17,15 +17,9 @@ namespace Mirage.Components
         public float SightDistance = 10;
     }
 
-    /// <summary>
-    /// Component that controls visibility of networked objects for players.
-    /// <para>Any object with this component on it will not be visible to players more than a (configurable) distance away.</para>
-    /// </summary>
-    [AddComponentMenu("Network/NetworkProximityChecker")]
-    [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkProximityChecker.html")]
-    public class NetworkProximityCheckerVisibility : NetworkVisibility
+    public class DistanceVisibilitySystem : VisibilitySystem
     {
-        static readonly ILogger Logger = LogFactory.GetLogger(typeof(NetworkProximityCheckerVisibility));
+        static readonly ILogger Logger = LogFactory.GetLogger(typeof(DistanceVisibilitySystem));
 
         private readonly float _updateInterval = 0;
         private float _nextUpdate = 0;
@@ -36,7 +30,7 @@ namespace Mirage.Components
         /// </summary>
         /// <param name="serverObjectManager">The reference to <see cref="ServerObjectManager"/>.</param>
         /// <param name="updateInterval"></param>
-        public NetworkProximityCheckerVisibility(ServerObjectManager serverObjectManager, float updateInterval) : base(serverObjectManager)
+        public DistanceVisibilitySystem(ServerObjectManager serverObjectManager, float updateInterval) : base(serverObjectManager)
         {
             _updateInterval = updateInterval;
         }
@@ -107,7 +101,7 @@ namespace Mirage.Components
                 {
                     VisibilitySystemData.TryGetValue(setting.Identity, out HashSet<INetworkPlayer> players);
 
-                    if(player.Identity == null || setting.Identity == null) continue;
+                    if (player.Identity == null || setting.Identity == null) continue;
 
                     if (FastInDistanceXZ(player.Identity.transform.position, setting.Identity.transform.position, setting.SightDistance * setting.SightDistance))
                     {
