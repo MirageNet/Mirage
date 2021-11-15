@@ -16,6 +16,7 @@ namespace Mirage.Components
 
         private void OnServerStarted()
         {
+            // todo is this null check ok?
             NetworkVisibility?.Startup();
         }
 
@@ -35,6 +36,7 @@ namespace Mirage.Components
 
         private void Awake()
         {
+            // todo find better way to find ServerObjectManager
             ServerObjectManager = FindObjectOfType<ServerObjectManager>();
 
             Initialize();
