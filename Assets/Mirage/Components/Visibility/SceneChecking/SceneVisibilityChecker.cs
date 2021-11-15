@@ -118,6 +118,8 @@ namespace Mirage
         public override void RegisterObject(BaseSettings settings)
         {
             _sceneObjects.Add(settings as SceneSettings);
+
+            VisibilitySystemData.Add(settings.Identity, new HashSet<INetworkPlayer>());
         }
 
         /// <summary>
@@ -126,6 +128,8 @@ namespace Mirage
         public override void UnRegisterObject(BaseSettings settings)
         {
             _sceneObjects.Remove(settings as SceneSettings);
+
+            VisibilitySystemData.Remove(settings.Identity);
         }
 
         #endregion

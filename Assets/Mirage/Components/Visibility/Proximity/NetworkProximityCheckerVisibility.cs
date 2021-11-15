@@ -101,10 +101,10 @@ namespace Mirage.Components
 
             foreach (ProximitySettings setting in _proximityObjects)
             {
+                if (!VisibilitySystemData.ContainsKey(setting.Identity)) continue;
+
                 foreach (INetworkPlayer player in InterestManager.ServerObjectManager.Server.Players)
                 {
-                    if (!VisibilitySystemData.ContainsKey(setting.Identity)) continue;
-
                     VisibilitySystemData.TryGetValue(setting.Identity, out HashSet<INetworkPlayer> players);
 
                     if(player.Identity == null || setting.Identity == null) continue;
@@ -136,6 +136,8 @@ namespace Mirage.Components
         public override void RegisterObject(BaseSettings settings)
         {
             _proximityObjects.Add(settings as ProximitySettings);
+
+            VisibilitySystemData.Add(settings.Identity, new HashSet<INetworkPlayer>());
         }
 
         /// <summary>
@@ -144,6 +146,8 @@ namespace Mirage.Components
         public override void UnRegisterObject(BaseSettings settings)
         {
             _proximityObjects.Remove(settings as ProximitySettings);
+
+            VisibilitySystemData.Remove(settings.Identity);
         }
 
         #endregion

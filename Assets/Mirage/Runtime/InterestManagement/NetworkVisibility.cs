@@ -7,7 +7,7 @@ namespace Mirage.InterestManagement
         #region Fields
 
         private readonly ServerObjectManager _serverObjectManager;
-        private ObserverData _visibilitySystemData;
+        private VisibilitySystemData _visibilitySystemData;
 
         #endregion
 
@@ -26,7 +26,7 @@ namespace Mirage.InterestManagement
 
         public void Startup()
         {
-            _visibilitySystemData = new ObserverData(this, new Dictionary<NetworkIdentity, HashSet<INetworkPlayer>>());
+            _visibilitySystemData = new VisibilitySystemData(this, new Dictionary<NetworkIdentity, HashSet<INetworkPlayer>>());
 
             if (!InterestManager.IsRegisteredAlready(ref _visibilitySystemData))
                 InterestManager?.RegisterVisibilitySystem(ref _visibilitySystemData);

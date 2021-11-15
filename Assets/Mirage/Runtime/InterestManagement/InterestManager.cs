@@ -8,14 +8,14 @@ namespace Mirage.InterestManagement
 {
     public class InterestManager
     {
-        private class SystemComparer : IEqualityComparer<ObserverData>
+        private class SystemComparer : IEqualityComparer<VisibilitySystemData>
         {
-            public bool Equals(ObserverData x, ObserverData y)
+            public bool Equals(VisibilitySystemData x, VisibilitySystemData y)
             {
                 return x.System.GetType().Name.GetStableHashCode() == y.System.GetType().Name.GetStableHashCode();
             }
 
-            public int GetHashCode(ObserverData obj)
+            public int GetHashCode(VisibilitySystemData obj)
             {
                 int hash = obj.System.GetType().Name.GetStableHashCode();
 
@@ -28,7 +28,7 @@ namespace Mirage.InterestManagement
         #region Fields
 
         public readonly ServerObjectManager ServerObjectManager;
-        private readonly HashSet<ObserverData> _visibilitySystems = new HashSet<ObserverData>(new SystemComparer());
+        private readonly HashSet<VisibilitySystemData> _visibilitySystems = new HashSet<VisibilitySystemData>(new SystemComparer());
         private HashSet<INetworkPlayer> _observers = new HashSet<INetworkPlayer>();
 
         private static readonly ProfilerMarker ObserverProfilerMarker = new ProfilerMarker(nameof(Observers));
@@ -41,7 +41,7 @@ namespace Mirage.InterestManagement
 
         #region Properties
 
-        public IReadOnlyCollection<ObserverData> ObserverSystems => _visibilitySystems;
+        public IReadOnlyCollection<VisibilitySystemData> ObserverSystems => _visibilitySystems;
 
         #endregion
 
@@ -54,6 +54,9 @@ namespace Mirage.InterestManagement
         {
             ServerObjectManager.Server.World.onSpawn -= OnSpawnInWorld;
             ServerObjectManager.Server.Authenticated.RemoveListener(OnAuthenticated);
+
+            _visibilitySystems.Clear();
+            _observers.Clear();
         }
 
         /// <summary>
@@ -76,11 +79,11 @@ namespace Mirage.InterestManagement
 
             bool found = false;
 
-            foreach (ObserverData observer in _visibilitySystems)
+            foreach (VisibilitySystemData systemData in _visibilitySystems)
             {
-                found = observer.Observers.Any(x => x.Value.Contains(player));
+                found = systemData.Observers.Any(x => x.Value.Contains(player));
 
-                observer.System.OnAuthenticated(player);
+                systemData.System.OnAuthenticated(player);
             }
 
             if (!found)
@@ -105,12 +108,12 @@ namespace Mirage.InterestManagement
 
             bool found = false;
 
-            foreach (ObserverData observer in _visibilitySystems)
+            foreach (VisibilitySystemData systemData in _visibilitySystems)
             {
-                if (observer.Observers.ContainsKey(identity))
+                if (systemData.Observers.ContainsKey(identity))
                     found = true;
 
-                observer.System.OnSpawned(identity);
+                systemData.System.OnSpawned(identity);
             }
 
             if (!found)
@@ -120,7 +123,6 @@ namespace Mirage.InterestManagement
                     ServerObjectManager.ShowToPlayer(identity, player);
                 }
             }
-
 
             OnSpawnInWorldProfilerMarker.End();
         }
@@ -145,7 +147,7 @@ namespace Mirage.InterestManagement
         ///     Check to see if certain system has already been registered.
         /// </summary>
         /// <returns>Returns true if we have already registered the system.</returns>
-        public bool IsRegisteredAlready(ref ObserverData observer)
+        public bool IsRegisteredAlready(ref VisibilitySystemData observer)
         {
             return _visibilitySystems.Contains(observer);
         }
@@ -154,9 +156,9 @@ namespace Mirage.InterestManagement
         {
             OnUpdateProfilerMarker.Begin();
 
-            foreach (ObserverData observer in _visibilitySystems)
+            foreach (VisibilitySystemData systemData in _visibilitySystems)
             {
-                observer.System?.CheckForObservers();
+                systemData.System?.CheckForObservers();
             }
 
             OnUpdateProfilerMarker.End();
@@ -193,10 +195,10 @@ namespace Mirage.InterestManagement
         /// <summary>
         ///     Register a specific interest management system to the interest manager.
         /// </summary>
-        /// <param name="observer">The system we want to register in the interest manager.</param>
-        internal void RegisterVisibilitySystem(ref ObserverData observer)
+        /// <param name="systemData">The system we want to register in the interest manager.</param>
+        internal void RegisterVisibilitySystem(ref VisibilitySystemData systemData)
         {
-            if (_visibilitySystems.Contains(observer))
+            if (_visibilitySystems.Contains(systemData))
             {
                 Logger.LogWarning(
                     "[InterestManager] - System already register to interest manager. Please check if this was correct.");
@@ -205,18 +207,18 @@ namespace Mirage.InterestManagement
             }
 
             if (Logger.logEnabled)
-                Logger.Log($"[Interest Manager] - Registering system {observer} to our manager.");
+                Logger.Log($"[Interest Manager] - Registering system {systemData} to our manager.");
 
-            _visibilitySystems.Add(observer);
+            _visibilitySystems.Add(systemData);
         }
 
         /// <summary>
         ///     Un-register a specific interest management system from the interest manager.
         /// </summary>
-        /// <param name="observer">The system we want to un-register from the interest manager.</param>
-        internal void UnRegisterVisibilitySystem(ref ObserverData observer)
+        /// <param name="systemData">The system we want to un-register from the interest manager.</param>
+        internal void UnRegisterVisibilitySystem(ref VisibilitySystemData systemData)
         {
-            if (!_visibilitySystems.Contains(observer))
+            if (!_visibilitySystems.Contains(systemData))
             {
                 Logger.LogWarning(
                     "[InterestManager] - Cannot find system in interest manager. Please check make sure it was registered.");
@@ -225,9 +227,9 @@ namespace Mirage.InterestManagement
             }
 
             if (Logger.logEnabled)
-                Logger.Log($"[Interest Manager] - Un-Registering system {observer} from our manager.");
+                Logger.Log($"[Interest Manager] - Un-Registering system {systemData} from our manager.");
 
-            _visibilitySystems.Remove(observer);
+            _visibilitySystems.Remove(systemData);
         }
 
 
@@ -242,32 +244,37 @@ namespace Mirage.InterestManagement
 
             _observers.Clear();
 
-            int inSystemsCount = 0;
-            bool foundList = false;
-
-            foreach (ObserverData visibilitySystem in _visibilitySystems)
+            switch (_visibilitySystems.Count == 0)
             {
-                if (!visibilitySystem.Observers.ContainsKey(identity)) continue;
+                case true:
+                    _observers = new HashSet<INetworkPlayer>(ServerObjectManager.Server.Players);
+                    break;
+                default:
+                    int inSystemsCount = 0;
 
-                if(visibilitySystem.Observers[identity].Count <= 0) continue;
+                    foreach (VisibilitySystemData visibilitySystem in _visibilitySystems)
+                    {
+                        if(!visibilitySystem.Observers.ContainsKey(identity)) continue;
 
-                foundList = true;
+                        inSystemsCount++;
 
-                inSystemsCount++;
+                        _observers.UnionWith(visibilitySystem.Observers[identity]);
+                    }
 
-                foreach (KeyValuePair<NetworkIdentity, HashSet<INetworkPlayer>> observer in visibilitySystem.Observers)
-                {
-                    _observers.UnionWith(observer.Value);
-                }
+                    if (inSystemsCount <= 0)
+                    {
+                        _observers = new HashSet<INetworkPlayer>(ServerObjectManager.Server.Players);
+                    }
+                    else
+                    {
+                        // Multiple systems have been registered. We need to make sure the object is in all system observers
+                        // to know that it is actually should be sending data. Always -1 because global is default.
+                        if (inSystemsCount != _visibilitySystems.Count)
+                            _observers.Clear();
+                    }
+
+                    break;
             }
-
-            if (!foundList)
-                _observers = new HashSet<INetworkPlayer>(ServerObjectManager.Server.Players);
-
-            // Multiple systems have been registered. We need to make sure the object is in all system observers
-            // to know that it is actually should be sending data. Always -1 because global is default.
-            if(inSystemsCount != _visibilitySystems.Count)
-                _observers.Clear();
 
             ObserverProfilerMarker.End();
         }

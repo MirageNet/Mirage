@@ -182,7 +182,7 @@ namespace Mirage
                 observerRect.x += 20;
                 observerRect.y += observerRect.height;
 
-                foreach (ObserverData system in identity.ServerObjectManager.InterestManager.ObserverSystems)
+                foreach (VisibilitySystemData system in identity.ServerObjectManager.InterestManager.ObserverSystems)
                 {
                     foreach (INetworkPlayer player in system.Observers[identity])
                     {

@@ -4,9 +4,6 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using UnityEngine;
 using Mirage.Logging;
-
-
-
 using UnityEditor;
 
 #if UNITY_2021_2_OR_NEWER

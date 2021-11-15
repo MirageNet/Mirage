@@ -1,11 +1,12 @@
-using System;
 using System.Collections;
+using System.Linq;
+using Cysharp.Threading.Tasks;
 using Mirage.Components;
 using Mirage.Examples.InterestManagement;
 using Mirage.SocketLayer;
-using Mirage.Sockets.Udp;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -25,7 +26,17 @@ namespace Mirage.Tests.Performance.Runtime
         /// <returns></returns>
         protected override IEnumerator SetupInterestManagement(NetworkServer server)
         {
+            //NOOP
             yield return null;
+        }
+
+        /// <summary>
+        ///     Called after each player connects.
+        /// </summary>
+        /// <param name="networkIdentity"></param>
+        protected override void OnSpawned(NetworkIdentity networkIdentity)
+        {
+            //NOOP
         }
 
         #endregion
@@ -45,15 +56,17 @@ namespace Mirage.Tests.Performance.Runtime
             server.gameObject.AddComponent<NetworkSceneChecker>();
             server.gameObject.AddComponent<NetworkProximityChecker>();
 
-            NetworkIdentity[] all = FindObjectsOfType<NetworkIdentity>();
-
-            foreach (NetworkIdentity obj in all)
-            {
-                obj.gameObject.AddComponent<SceneVisibilitySettings>();
-                obj.gameObject.AddComponent<NetworkProximitySettings>();
-            }
-
             yield return null;
+        }
+
+        /// <summary>
+        ///     Called after each player connects.
+        /// </summary>
+        /// <param name="networkIdentity"></param>
+        protected override void OnSpawned(NetworkIdentity networkIdentity)
+        {
+            networkIdentity.gameObject.AddComponent<SceneVisibilitySettings>();
+            networkIdentity.gameObject.AddComponent<NetworkProximitySettings>();
         }
 
         #endregion
@@ -72,14 +85,16 @@ namespace Mirage.Tests.Performance.Runtime
         {
             server.gameObject.AddComponent<NetworkSceneChecker>();
 
-            NetworkIdentity[] all = FindObjectsOfType<NetworkIdentity>();
-
-            foreach (NetworkIdentity obj in all)
-            {
-                obj.gameObject.AddComponent<SceneVisibilitySettings>();
-            }
-
             yield return null;
+        }
+
+        /// <summary>
+        ///     Called after each player connects.
+        /// </summary>
+        /// <param name="networkIdentity"></param>
+        protected override void OnSpawned(NetworkIdentity networkIdentity)
+        {
+            networkIdentity.gameObject.AddComponent<SceneVisibilitySettings>();
         }
 
         #endregion
@@ -98,14 +113,16 @@ namespace Mirage.Tests.Performance.Runtime
         {
             server.gameObject.AddComponent<NetworkProximityChecker>();
 
-            NetworkIdentity[] all = FindObjectsOfType<NetworkIdentity>();
-
-            foreach (NetworkIdentity obj in all)
-            {
-                obj.gameObject.AddComponent<NetworkProximitySettings>();
-            }
-
             yield return null;
+        }
+
+        /// <summary>
+        ///     Called after each player connects.
+        /// </summary>
+        /// <param name="networkIdentity"></param>
+        protected override void OnSpawned(NetworkIdentity networkIdentity)
+        {
+            networkIdentity.gameObject.AddComponent<NetworkProximitySettings>();
         }
 
         #endregion
@@ -115,75 +132,78 @@ namespace Mirage.Tests.Performance.Runtime
     public abstract class InterestManagementPerformanceBase
     {
         const string testScene = "Assets/Tests/Performance/Runtime/InterestManagement/InterestManagement/Scenes/AOI.unity";
+        const string MonsterPath = "Assets/Tests/Performance/Runtime/InterestManagement/InterestManagement/Prefabs/Enemy.prefab";
+        const string PlayerPath = "Assets/Tests/Performance/Runtime/InterestManagement/InterestManagement/Prefabs/Player.prefab";
         const string NpcSpawnerName = "World Floor";
-        const int clientCount = 50;
-        const int movingCount = 500;
+        const int ClientCount = 50;
+        const int MonsterCount = 500;
+        const int Warmup = 5;
+        const int MeasureCount = 300;
 
-        private NetworkServer server;
+        private NetworkServer Server;
+        private NetworkIdentity PlayerPrefab;
+        private NetworkIdentity MonsterPrefab;
 
         [UnitySetUp]
-        public IEnumerator Setup()
+        public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
         {
-            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(testScene, new LoadSceneParameters(LoadSceneMode.Single));
+            // load scene
+            await EditorSceneManager.LoadSceneAsyncInPlayMode(testScene, new LoadSceneParameters(LoadSceneMode.Single));
 
-            // wait 1 frame for start to be called
-            yield return null;
+            MonsterPrefab = AssetDatabase.LoadAssetAtPath<NetworkIdentity>(MonsterPath);
+            PlayerPrefab = AssetDatabase.LoadAssetAtPath<NetworkIdentity>(PlayerPath);
 
             EnemySpawner enemySpawner = GameObject.Find(NpcSpawnerName).GetComponent<EnemySpawner>();
-            enemySpawner.NumberOfEnemiesSpawn = movingCount;
+            enemySpawner.NumberOfEnemiesSpawn = MonsterCount;
 
-            server = FindObjectOfType<NetworkServer>();
+            // load host
+            Server = FindObjectOfType<NetworkServer>();
+            Server.MaxConnections = ClientCount;
 
-            bool started = false;
-            server.MaxConnections = clientCount;
+            var started = new UniTaskCompletionSource();
+            Server.Started.AddListener(() => started.TrySetResult());
 
-            // wait frame for destroy
+            // wait 1 frame before Starting server to give time for Unity to call "Start"
+            await UniTask.Yield();
+            Server.StartServer();
+
+            Server.World.onSpawn += OnSpawned;
+
+            await started.Task;
+
+            await SetupInterestManagement(Server);
+
+            // connect from a bunch of clients
+            for (int i = 0; i < ClientCount; i++)
+                await StartClient(i, Server.GetComponent<SocketFactory>());
+
+            while (FindObjectsOfType<MonsterBehavior>().Count() < MonsterCount * (ClientCount + 1))
+                await UniTask.Delay(10);
+        });
+
+        private IEnumerator StartClient(int i, SocketFactory socketFactory)
+        {
+            var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager));
+            clientGo.SetActive(false);
+            NetworkClient client = clientGo.GetComponent<NetworkClient>();
+            ClientObjectManager objectManager = clientGo.GetComponent<ClientObjectManager>();
+            objectManager.Client = client;
+            objectManager.Start();
+
+            client.SocketFactory = socketFactory;
+
+            CharacterSpawner spawner = clientGo.AddComponent<CharacterSpawner>();
+            spawner.Client = client;
+            spawner.ClientObjectManager = objectManager;
+            spawner.PlayerPrefab = PlayerPrefab;
+
+            objectManager.RegisterPrefab(MonsterPrefab);
+            objectManager.RegisterPrefab(PlayerPrefab);
+
+            clientGo.SetActive(true);
+            client.Connect("localhost");
+
             yield return null;
-
-            server.Started.AddListener(() => started = true);
-            server.StartServer();
-
-            // wait for start
-            while (!started) { yield return null; }
-
-            // wait for all enemies to spawn in.
-            while(!enemySpawner.FinishedLoadingEnemies) { yield return null; }
-
-            yield return SetupInterestManagement(server);
-
-            for (int i = 0; i < clientCount; i++)
-            {
-                GameObject clientGo = new GameObject($"Client {i}", typeof(UdpSocketFactory));
-                clientGo.SetActive(false);
-
-                NetworkClient client = clientGo.AddComponent<NetworkClient>();
-                ClientObjectManager objectManager = clientGo.AddComponent<ClientObjectManager>();
-                CharacterSpawner spawner = clientGo.AddComponent<CharacterSpawner>();
-
-                objectManager.Client = client;
-
-                for (int j = 0; j < server.GetComponent<ClientObjectManager>().spawnPrefabs.Count; j++)
-                {
-                    objectManager.RegisterPrefab(server.GetComponent<ClientObjectManager>().spawnPrefabs[j]);
-                }
-
-                spawner.Client = client;
-                spawner.ClientObjectManager = objectManager;
-                spawner.PlayerPrefab = server.GetComponent<CharacterSpawner>().PlayerPrefab;
-
-                client.SocketFactory = client.GetComponent<SocketFactory>();
-
-                clientGo.SetActive(true);
-
-                try
-                {
-                    client.Connect();
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogException(ex);
-                }
-            }
         }
 
         /// <summary>
@@ -193,16 +213,24 @@ namespace Mirage.Tests.Performance.Runtime
         /// <returns></returns>
         protected abstract IEnumerator SetupInterestManagement(NetworkServer server);
 
+        /// <summary>
+        ///     Called after each player connects.
+        /// </summary>
+        /// <param name="networkIdentity"></param>
+        protected abstract void OnSpawned(NetworkIdentity networkIdentity);
+
         [UnityTearDown]
         public IEnumerator TearDown()
         {
-            server.Stop();
+            Server.Stop();
 
-            DestroyImmediate(server.gameObject);
+            yield return null;
 
             // open new scene so that old one is destroyed
             SceneManager.CreateScene("empty", new CreateSceneParameters(LocalPhysicsMode.None));
             yield return SceneManager.UnloadSceneAsync(testScene);
+
+            DestroyImmediate(Server.gameObject);
         }
 
         [UnityTest]
@@ -225,8 +253,8 @@ namespace Mirage.Tests.Performance.Runtime
 
             yield return Measure.Frames()
                 .ProfilerMarkers(sampleGroups)
-                .WarmupCount(5)
-                .MeasurementCount(300)
+                .WarmupCount(Warmup)
+                .MeasurementCount(MeasureCount)
                 .Run();
         }
     }

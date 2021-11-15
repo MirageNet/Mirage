@@ -8,7 +8,6 @@ namespace Mirage.Examples.InterestManagement
     {
         [SerializeField] private NetworkIdentity _enemyPrefab;
         public int NumberOfEnemiesSpawn = 100;
-        public bool FinishedLoadingEnemies;
         [SerializeField] private ServerObjectManager _serverObject;
         [SerializeField] private Transform _plane;
 
@@ -31,6 +30,8 @@ namespace Mirage.Examples.InterestManagement
 
         private IEnumerator SpawnEnemies()
         {
+            yield return new WaitForEndOfFrame();
+
             var spawned = 0;
 
             for (int i = 0; i < NumberOfEnemiesSpawn; i++)
@@ -44,15 +45,13 @@ namespace Mirage.Examples.InterestManagement
 
                 spawned++;
 
-                if(spawned == 100)
+                if (spawned == 100)
                 {
                     yield return new WaitForEndOfFrame();
 
                     spawned = 0;
                 }
             }
-
-            FinishedLoadingEnemies = true;
         }
     }
 }
