@@ -290,12 +290,12 @@ namespace Mirage.Tests.Performance.Runtime.AOI
 
         protected static void AddComponentToPrefab<TSettings>(NetworkIdentity prefab)
         {
-            prefab.gameObject.AddComponent<NetworkProximitySettings>();
+            prefab.gameObject.AddComponent<TSettings>();
         }
 
         protected static void RemoveComponentToPrefab<TSettings>(NetworkIdentity prefab)
         {
-            DestroyImmediate(prefab.gameObject.GetComponent<NetworkProximitySettings>(), true);
+            DestroyImmediate(prefab.gameObject.GetComponent<TSettings>(), true);
 
         }
 
