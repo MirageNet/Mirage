@@ -21,6 +21,7 @@ namespace Mirage.Components
             // todo find better way to get NetworkSceneChecker, FindObjectOfType wont work with multiple Servers
             //      maybe Server.GetComponent<NetworkSceneChecker>()
             _networkProximityChecker = FindObjectOfType<DistanceVisibilityFactory>();
+            Debug.Assert(_networkProximityChecker != null, "Could not found DistanceVisibilityFactory");
             _networkProximityChecker.System.RegisterObject(Identity, ProximitySettings);
         }
 

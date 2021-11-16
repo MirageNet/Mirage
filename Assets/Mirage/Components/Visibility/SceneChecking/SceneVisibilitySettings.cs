@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Mirage.Components
 {
     // todo find better name
@@ -16,6 +18,7 @@ namespace Mirage.Components
             // todo find better way to get NetworkSceneChecker, FindObjectOfType wont work with multiple Servers
             //      maybe Server.GetComponent<NetworkSceneChecker>()
             _networkSceneChecker = FindObjectOfType<SceneVisibilityFactory>();
+            Debug.Assert(_networkSceneChecker != null, "Could not found SceneVisibilityFactory");
             _networkSceneChecker.System.RegisterObject(Identity, gameObject.scene);
         }
 

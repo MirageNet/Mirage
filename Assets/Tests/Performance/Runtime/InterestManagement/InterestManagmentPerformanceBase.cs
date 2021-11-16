@@ -288,15 +288,14 @@ namespace Mirage.Tests.Performance.Runtime.AOI
             server.gameObject.SetActive(true);
         }
 
-        protected static void AddComponentToPrefab<TSettings>(NetworkIdentity prefab)
+        protected static void AddComponentToPrefab<TSettings>(NetworkIdentity prefab) where TSettings : Component
         {
             prefab.gameObject.AddComponent<TSettings>();
         }
 
-        protected static void RemoveComponentToPrefab<TSettings>(NetworkIdentity prefab)
+        protected static void RemoveComponentToPrefab<TSettings>(NetworkIdentity prefab) where TSettings : Component
         {
             DestroyImmediate(prefab.gameObject.GetComponent<TSettings>(), true);
-
         }
 
         [Explicit]
