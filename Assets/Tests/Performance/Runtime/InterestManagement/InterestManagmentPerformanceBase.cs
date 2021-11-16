@@ -59,13 +59,13 @@ namespace Mirage.Tests.Performance.Runtime.AOI
 
         protected override void SetupPrefab(NetworkIdentity prefab)
         {
-            prefab.gameObject.AddComponent<SceneVisibilitySettings>();
-            prefab.gameObject.AddComponent<NetworkProximitySettings>();
+            AddComponentToPrefab<SceneVisibilitySettings>(prefab);
+            AddComponentToPrefab<NetworkProximitySettings>(prefab);
         }
         protected override void CleanPrefab(NetworkIdentity prefab)
         {
-            DestroyImmediate(prefab.gameObject.GetComponent<SceneVisibilitySettings>());
-            DestroyImmediate(prefab.gameObject.GetComponent<NetworkProximitySettings>());
+            RemoveComponentToPrefab<SceneVisibilitySettings>(prefab);
+            RemoveComponentToPrefab<NetworkProximitySettings>(prefab);
         }
 
         #endregion
@@ -87,14 +87,13 @@ namespace Mirage.Tests.Performance.Runtime.AOI
             yield return null;
         }
 
-
         protected override void SetupPrefab(NetworkIdentity prefab)
         {
-            prefab.gameObject.AddComponent<SceneVisibilitySettings>();
+            AddComponentToPrefab<SceneVisibilitySettings>(prefab);
         }
         protected override void CleanPrefab(NetworkIdentity prefab)
         {
-            DestroyImmediate(prefab.gameObject.GetComponent<SceneVisibilitySettings>());
+            RemoveComponentToPrefab<SceneVisibilitySettings>(prefab);
         }
 
         #endregion
@@ -118,11 +117,11 @@ namespace Mirage.Tests.Performance.Runtime.AOI
 
         protected override void SetupPrefab(NetworkIdentity prefab)
         {
-            prefab.gameObject.AddComponent<NetworkProximitySettings>();
+            AddComponentToPrefab<NetworkProximitySettings>(prefab);
         }
         protected override void CleanPrefab(NetworkIdentity prefab)
         {
-            DestroyImmediate(prefab.gameObject.GetComponent<NetworkProximitySettings>());
+            RemoveComponentToPrefab<NetworkProximitySettings>(prefab);
         }
 
         #endregion
@@ -144,16 +143,6 @@ namespace Mirage.Tests.Performance.Runtime.AOI
         private NetworkServer Server;
         private NetworkIdentity PlayerPrefab;
         private NetworkIdentity MonsterPrefab;
-
-        protected static void AddFactoryToServer<TFactory>(NetworkServer server) where TFactory : VisibilitySystemFactory
-        {
-            // disable, so we can set field before awake
-            server.gameObject.SetActive(false);
-            TFactory factory = server.gameObject.AddComponent<TFactory>();
-            factory.Server = server;
-            // triggers awake
-            server.gameObject.SetActive(true);
-        }
 
         /// <summary>
         /// Called after server starts
@@ -287,6 +276,27 @@ namespace Mirage.Tests.Performance.Runtime.AOI
                 // unload all old scenes
                 yield return SceneManager.UnloadSceneAsync(scenes[i]);
             }
+        }
+
+        protected static void AddFactoryToServer<TFactory>(NetworkServer server) where TFactory : VisibilitySystemFactory
+        {
+            // disable, so we can set field before awake
+            server.gameObject.SetActive(false);
+            TFactory factory = server.gameObject.AddComponent<TFactory>();
+            factory.Server = server;
+            // triggers awake
+            server.gameObject.SetActive(true);
+        }
+
+        protected static void AddComponentToPrefab<TSettings>(NetworkIdentity prefab)
+        {
+            prefab.gameObject.AddComponent<NetworkProximitySettings>();
+        }
+
+        protected static void RemoveComponentToPrefab<TSettings>(NetworkIdentity prefab)
+        {
+            DestroyImmediate(prefab.gameObject.GetComponent<NetworkProximitySettings>(), true);
+
         }
 
         [Explicit]
