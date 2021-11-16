@@ -1,40 +1,28 @@
 using System;
 using System.Collections.Generic;
+using Mirage.Logging;
+using UnityEngine;
 
 namespace Mirage.InterestManagement
 {
     public abstract class VisibilitySystem
     {
-        #region Fields
+        private static readonly ILogger logger = LogFactory.GetLogger<VisibilitySystem>();
+        protected readonly ServerObjectManager ServerObjectManager;
+        protected readonly InterestManager InterestManager;
 
-        private readonly ServerObjectManager _serverObjectManager;
-
-        #endregion
-
-        #region Properties
-
-        public InterestManager InterestManager => _serverObjectManager.InterestManager;
-
-        public Dictionary<NetworkIdentity, HashSet<INetworkPlayer>> Observers { get; private set; }
-
-        #endregion
+        public readonly Dictionary<NetworkIdentity, HashSet<INetworkPlayer>> Observers = new Dictionary<NetworkIdentity, HashSet<INetworkPlayer>>();
 
         protected VisibilitySystem(ServerObjectManager serverObjectManager)
         {
-            _serverObjectManager = serverObjectManager ?? throw new ArgumentNullException(nameof(serverObjectManager));
-        }
-
-        public void Startup()
-        {
-            Observers = new Dictionary<NetworkIdentity, HashSet<INetworkPlayer>>();
-
-            // todo is this null check ok?
-            InterestManager?.RegisterSystem(this);
+            ServerObjectManager = serverObjectManager ?? throw new ArgumentNullException(nameof(serverObjectManager));
+            InterestManager = serverObjectManager.InterestManager;
+            InterestManager.RegisterSystem(this);
         }
 
         public void ShutDown()
         {
-            InterestManager?.UnregisterSystem(this);
+            InterestManager.UnregisterSystem(this);
         }
 
         /// <summary>

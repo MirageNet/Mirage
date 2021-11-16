@@ -47,15 +47,22 @@ namespace Mirage
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
-        public InterestManager InterestManager { get; private set; }
+        private InterestManager _interestManager;
+        public InterestManager InterestManager
+        {
+            get
+            {
+                if (_interestManager is null)
+                    _interestManager = new InterestManager(this);
+                return _interestManager;
+            }
+        }
 
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => checked(nextNetworkId++);
 
         public void Start()
         {
-            InterestManager = new InterestManager(this);
-
             if (Server != null)
             {
                 Server.Started.AddListener(OnServerStarted);
