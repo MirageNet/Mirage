@@ -124,10 +124,9 @@ namespace Mirage
         /// <summary>
         /// A list of local connections on the server.
         /// </summary>
-        public readonly HashSet<INetworkPlayer> Players = new HashSet<INetworkPlayer>();
-        readonly Dictionary<IConnection, INetworkPlayer> connections = new Dictionary<IConnection, INetworkPlayer>();
+        public IReadOnlyCollection<INetworkPlayer> Players => connections.Values;
 
-        IReadOnlyCollection<INetworkPlayer> INetworkServer.Players => Players;
+        readonly Dictionary<IConnection, INetworkPlayer> connections = new Dictionary<IConnection, INetworkPlayer>();
 
         /// <summary>
         /// <para>Checks if the server has been started.</para>
@@ -159,7 +158,6 @@ namespace Mirage
             }
 
             // just clear list, connections will be disconnected when peer is closed
-            Players.Clear();
             connections.Clear();
             LocalPlayer = null;
 
@@ -348,9 +346,6 @@ namespace Mirage
         {
             if (!Players.Contains(player))
             {
-                // connection cannot be null here or conn.connectionId
-                // would throw NRE
-                Players.Add(player);
                 connections.Add(player.Connection, player);
             }
         }
@@ -361,7 +356,6 @@ namespace Mirage
         /// <param name="connectionId">The id of the connection to remove.</param>
         public void RemoveConnection(INetworkPlayer player)
         {
-            Players.Remove(player);
             connections.Remove(player.Connection);
         }
 
