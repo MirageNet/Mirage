@@ -21,12 +21,12 @@ namespace Mirage.Tests.Runtime.Host
             // add first ready client
             (_, NetworkPlayer first) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
             first.SceneIsReady = true;
-            server.Players.Add(first);
+            server.AddTestPlayer(first);
 
             // add second ready client
             (_, NetworkPlayer second) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
             second.SceneIsReady = true;
-            server.Players.Add(second);
+            server.AddTestPlayer(second);
 
             // set all not ready
             sceneManager.SetAllClientsNotReady(null);

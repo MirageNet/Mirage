@@ -792,8 +792,8 @@ namespace Mirage.Tests
             notReadyConnection.SceneIsReady.Returns(false);
 
             // add some server connections
-            server.Players.Add(readyConnection);
-            server.Players.Add(notReadyConnection);
+            server.AddTestPlayer(readyConnection);
+            server.AddTestPlayer(notReadyConnection);
 
             // rebuild observers should add all ready server connections
             // because no component implements OnRebuildObservers

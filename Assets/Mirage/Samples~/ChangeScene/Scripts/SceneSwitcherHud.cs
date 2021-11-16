@@ -38,7 +38,7 @@ namespace Mirage.Examples.SceneChange
 
         public void AdditiveButtonHandler()
         {
-            HashSet<INetworkPlayer> players = sceneManager.Server.Players;
+            IReadOnlyCollection<INetworkPlayer> players = sceneManager.Server.Players;
 
             if (additiveLoaded)
             {
