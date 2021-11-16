@@ -302,6 +302,13 @@ namespace Mirage.Tests.Performance.Runtime.AOI
         [UnityTest]
         public IEnumerator RunsWithoutErrors()
         {
+            yield return new WaitForSeconds(5);
+        }
+
+        [Explicit]
+        [UnityTest]
+        public IEnumerator LogFrameTimes()
+        {
             float end = Time.time + 5;
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
