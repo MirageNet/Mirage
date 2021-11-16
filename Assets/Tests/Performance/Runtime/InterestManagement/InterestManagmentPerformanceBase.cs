@@ -52,9 +52,8 @@ namespace Mirage.Tests.Performance.Runtime.AOI
         /// <returns></returns>
         protected override IEnumerator SetupInterestManagement(NetworkServer server)
         {
-            server.gameObject.AddComponent<SceneVisibilityFactory>();
-            server.gameObject.AddComponent<DistanceVisibilityFactory>();
-
+            AddFactoryToServer<SceneVisibilityFactory>(server);
+            AddFactoryToServer<DistanceVisibilityFactory>(server);
             yield return null;
         }
 
@@ -83,7 +82,7 @@ namespace Mirage.Tests.Performance.Runtime.AOI
         /// <returns></returns>
         protected override IEnumerator SetupInterestManagement(NetworkServer server)
         {
-            server.gameObject.AddComponent<SceneVisibilityFactory>();
+            AddFactoryToServer<SceneVisibilityFactory>(server);
 
             yield return null;
         }
@@ -112,7 +111,7 @@ namespace Mirage.Tests.Performance.Runtime.AOI
         /// <returns></returns>
         protected override IEnumerator SetupInterestManagement(NetworkServer server)
         {
-            server.gameObject.AddComponent<DistanceVisibilityFactory>();
+            AddFactoryToServer<DistanceVisibilityFactory>(server);
 
             yield return null;
         }
@@ -146,6 +145,15 @@ namespace Mirage.Tests.Performance.Runtime.AOI
         private NetworkIdentity PlayerPrefab;
         private NetworkIdentity MonsterPrefab;
 
+        protected static void AddFactoryToServer<TFactory>(NetworkServer server) where TFactory : VisibilitySystemFactory
+        {
+            // disable, so we can set field before awake
+            server.gameObject.SetActive(false);
+            TFactory factory = server.gameObject.AddComponent<TFactory>();
+            factory.Server = server;
+            // triggers awake
+            server.gameObject.SetActive(true);
+        }
 
         /// <summary>
         /// Called after server starts
