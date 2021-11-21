@@ -22,7 +22,14 @@ namespace Mirage.SocketLayer
         void Bind(IEndPoint endPoint);
         IConnection Connect(IEndPoint endPoint);
         void Close();
-        void Update();
+        /// <summary>
+        /// Call this at the start of the frame to receive new messages
+        /// </summary>
+        void UpdateReceive();
+        /// <summary>
+        /// Call this at end of frame to send new batches
+        /// </summary>
+        void UpdateSent();
     }
 
     /// <summary>
@@ -215,9 +222,18 @@ namespace Mirage.SocketLayer
             }
         }
 
-        public void Update()
+        /// <summary>
+        /// Call this at the start of the frame to receive new messages
+        /// </summary>
+        public void UpdateReceive()
         {
             ReceiveLoop();
+        }
+        /// <summary>
+        /// Call this at end of frame to send new batches
+        /// </summary>
+        public void UpdateSent()
+        {
             UpdateConnections();
             metrics?.OnTick(connections.Count);
         }

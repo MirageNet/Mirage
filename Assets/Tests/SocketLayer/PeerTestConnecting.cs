@@ -45,7 +45,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 connectAction.ReceivedWithAnyArgs(i).Invoke(default);
 
                 // run tick on server, should read packet from client i
-                server.peer.Update();
+                server.peer.UpdateTest();
 
                 // server invokes connect event 
                 connectAction.ReceivedWithAnyArgs(i + 1).Invoke(default);
@@ -62,7 +62,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
                 // no change on cleint till update
                 clientConnectAction.ReceivedWithAnyArgs(0).Invoke(default);
-                clients[i].peer.Update();
+                clients[i].peer.UpdateTest();
                 clientConnectAction.ReceivedWithAnyArgs(1).Invoke(default);
             }
         }
@@ -85,7 +85,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 clients[i].peer.Connect(server.endPoint);
 
                 // run tick on server, should read packet from client i
-                server.peer.Update();
+                server.peer.UpdateTest();
 
                 Assert.That(serverConnections, Is.Unique);
             }

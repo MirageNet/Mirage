@@ -9,6 +9,14 @@ using UnityEngine.TestTools;
 
 namespace Mirage.SocketLayer.Tests.PeerTests
 {
+    public static class PeerTestExtensions
+    {
+        public static void UpdateTest(this Peer peer)
+        {
+            peer.UpdateReceive();
+            peer.UpdateSent();
+        }
+    }
     [Category("SocketLayer"), Description("integration test to make sure that send and receiving works as a whole")]
     public class PeerTestSendReceive
     {
@@ -50,10 +58,10 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
         void UpdateAll()
         {
-            server.peer.Update();
+            server.peer.UpdateTest();
             for (int i = 0; i < ClientCount; i++)
             {
-                clients[i].peer.Update();
+                clients[i].peer.UpdateTest();
             }
         }
 
