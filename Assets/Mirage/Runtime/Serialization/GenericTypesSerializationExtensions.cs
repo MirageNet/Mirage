@@ -31,7 +31,7 @@ namespace Mirage.Serialization
     public static class GenericTypesSerializationExtensions
     {
         /// <summary>
-        /// Writes any type that mirror supports
+        /// Writes any type that mirage supports
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
@@ -51,7 +51,7 @@ namespace Mirage.Serialization
         }
 
         /// <summary>
-        /// Reads any data type that mirror supports
+        /// Reads any data type that mirage supports
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
