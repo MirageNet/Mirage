@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
@@ -111,9 +112,21 @@ namespace Mirage.Weaver
             }
         }
 
-        public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes, TypeReference typeReference)
+        public static TypeDefinition AddType(this TypeDefinition typeDefinition, string name, TypeAttributes typeAttributes, bool valueType) =>
+            AddType(typeDefinition, name, typeAttributes, valueType ? typeDefinition.Module.ImportReference(typeof(ValueType)) : null);
+        public static TypeDefinition AddType(this TypeDefinition typeDefinition, string name, TypeAttributes typeAttributes, TypeReference baseType)
         {
-            var method = new MethodDefinition(name, attributes, typeReference);
+            var type = new TypeDefinition("", name, typeAttributes, baseType)
+            {
+                DeclaringType = typeDefinition
+            };
+            typeDefinition.NestedTypes.Add(type);
+            return type;
+        }
+
+        public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes, TypeReference returnType)
+        {
+            var method = new MethodDefinition(name, attributes, returnType);
             typeDefinition.Methods.Add(method);
             return method;
         }
