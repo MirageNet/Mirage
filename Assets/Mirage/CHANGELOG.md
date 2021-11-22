@@ -1,3 +1,10 @@
+## [112.0.2](https://github.com/MirageNet/Mirage/compare/v112.0.1...v112.0.2) (2021-11-22)
+
+
+### Bug Fixes
+
+* **NetworkReader:** fixing reset putting reader back into pool ([52253b6](https://github.com/MirageNet/Mirage/commit/52253b6e5e9de8131e37849b82da9e712707e86e))
+
 ## [112.0.1](https://github.com/MirageNet/Mirage/compare/v112.0.0...v112.0.1) (2021-11-07)
 
 
