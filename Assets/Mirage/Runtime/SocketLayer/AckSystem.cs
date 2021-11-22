@@ -251,7 +251,7 @@ namespace Mirage.SocketLayer
         {
             if (inLength + NOTIFY_HEADER_SIZE > maxPacketSize)
             {
-                throw new ArgumentException($"Message is bigger than MTU, max Notify message size is {maxPacketSize - NOTIFY_HEADER_SIZE}");
+                throw new ArgumentException($"Message is bigger than MTU, size:{inLength} but max Notify message size is {maxPacketSize - NOTIFY_HEADER_SIZE}");
             }
             if (sentAckablePackets.IsFull)
             {
