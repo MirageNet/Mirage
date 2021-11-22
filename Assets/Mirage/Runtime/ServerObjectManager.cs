@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Mirage.InterestManagement;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
@@ -46,6 +47,17 @@ namespace Mirage
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
+        private InterestManager _interestManager;
+        public InterestManager InterestManager
+        {
+            get
+            {
+                if (_interestManager is null)
+                    _interestManager = new InterestManager(this);
+                return _interestManager;
+            }
+        }
+
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => checked(nextNetworkId++);
 
@@ -60,9 +72,16 @@ namespace Mirage
                 if (NetworkSceneManager != null)
                 {
                     NetworkSceneManager.OnServerFinishedSceneChange.AddListener(OnFinishedSceneChange);
-                    NetworkSceneManager.OnPlayerSceneReady.AddListener(SpawnVisibleObjects);
                 }
             }
+        }
+
+        public void Update()
+        {
+            // todo move this to NetworkServer
+            //      NetworkServer should decide when things get rebuild not unity
+            //      this'll be more important when we add tick stuff
+            InterestManager?.Update();
         }
 
         internal void RegisterMessageHandlers()
@@ -205,7 +224,7 @@ namespace Mirage
 
             player.Identity = identity;
 
-            // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
+            // Set the player on the NetworkIdentity on the server
             identity.SetClientOwner(player);
 
             // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
@@ -215,9 +234,7 @@ namespace Mirage
                 Server.LocalClient.Player.Identity = identity;
             }
 
-            // add connection to observers AFTER the playerController was set.
-            // by definition, there is nothing to observe if there is no player
-            // controller.
+            // add player to observers AFTER the character is set.
             //
             // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
             SpawnVisibleObjectForPlayer(player);
@@ -241,22 +258,7 @@ namespace Mirage
                 return;
             }
 
-            // add connection to each nearby NetworkIdentity's observers, which
-            // internally sends a spawn message for each one to the connection.
-            foreach (NetworkIdentity identity in Server.World.SpawnedIdentities)
-            {
-                // todo, do we only need to spawn active objects here? or all objects?
-                if (identity.gameObject.activeSelf)
-                {
-                    if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.SceneId:X}");
-
-                    bool visible = identity.OnCheckObserver(player);
-                    if (visible)
-                    {
-                        identity.AddObserver(player);
-                    }
-                }
-            }
+            InterestManager.RebuildForPlayer(player);
         }
 
         /// <summary>
@@ -332,9 +334,6 @@ namespace Mirage
                 Server.LocalClient.Player.Identity = identity;
             }
 
-            // spawn any new visible scene objects
-            SpawnVisibleObjects(player);
-
             if (logger.LogEnabled()) logger.Log($"Adding new playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash:X}");
 
             Respawn(identity);
@@ -352,23 +351,6 @@ namespace Mirage
                 // otherwise just replace his data
                 SendSpawnMessage(identity, identity.Owner);
             }
-        }
-
-        /// <summary>
-        /// Sends spawn message to player if it is not loading a scene
-        /// </summary>
-        /// <param name="identity"></param>
-        /// <param name="player"></param>
-        internal void ShowToPlayer(NetworkIdentity identity, INetworkPlayer player)
-        {
-            // dont send if loading scene
-            if (player.SceneIsReady)
-                SendSpawnMessage(identity, player);
-        }
-
-        internal void HideToPlayer(NetworkIdentity identity, INetworkPlayer player)
-        {
-            player.Send(new ObjectHideMessage { netId = identity.NetId });
         }
 
         /// <summary>
@@ -539,7 +521,7 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log($"SpawnObject instance ID {identity.NetId} asset ID {identity.PrefabHash:X}");
 
-            identity.RebuildObservers(true);
+            InterestManager.OnSpawn(identity);
         }
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
@@ -661,9 +643,8 @@ namespace Mirage
             Server.World.RemoveIdentity(identity);
             identity.Owner?.RemoveOwnedObject(identity);
 
-            identity.SendToRemoteObservers(new ObjectDestroyMessage { netId = identity.NetId });
+            InterestManager.OnDestroy(identity);
 
-            identity.ClearObservers();
             if (Server.LocalClientActive)
             {
                 identity.StopClient();
@@ -747,7 +728,7 @@ namespace Mirage
         // note: can't use optional param here because we need just NetworkPlayer version for event
         public void SpawnVisibleObjects(INetworkPlayer player, bool ignoreHasCharacter)
         {
-            if (logger.LogEnabled()) logger.Log("SetClientReadyInternal for conn:" + player);
+            if (logger.LogEnabled()) logger.Log("SpawnVisibleObjects for conn:" + player);
 
             // client is ready to start spawning objects
             if (ignoreHasCharacter || player.HasCharacter)

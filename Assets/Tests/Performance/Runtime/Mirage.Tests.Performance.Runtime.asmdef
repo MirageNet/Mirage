@@ -1,14 +1,16 @@
 {
     "name": "Mirage.Tests.Performance.Runtime",
+    "rootNamespace": "",
     "references": [
         "GUID:c0dd0d10738d4ad4a9de57c559d0ca1b",
         "GUID:30817c1a0e6d646d99c048fc403f5979",
         "GUID:4e9aca8a359ab48de906aedbfa1ffe21",
-        "GUID:bc6737b19bee94a798a182a84b660226",
         "GUID:27619889b8ba8c24980f49ee34dbb44a",
         "GUID:0acc523941302664db1f4e527237feb3",
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:c0b2064c294eb174c9f3f7da398eb677"
+        "GUID:c0b2064c294eb174c9f3f7da398eb677",
+        "GUID:96f081f4a0d214ee39e3aa34e9d43109",
+        "GUID:ae70f15dce7a4fa4b938107926f64504"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

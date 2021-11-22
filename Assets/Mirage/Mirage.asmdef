@@ -1,5 +1,6 @@
 {
     "name": "Mirage",
+    "rootNamespace": "",
     "references": [
         "UniTask",
         "UniTask.Linq",

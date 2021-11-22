@@ -551,8 +551,8 @@ namespace Mirage
             if (player.SceneIsReady)
             {
                 if (logger.LogEnabled()) logger.Log("PlayerNotReady " + player);
+
                 player.SceneIsReady = false;
-                player.RemoveAllVisibleObjects();
 
                 player.Send(new SceneNotReadyMessage());
             }

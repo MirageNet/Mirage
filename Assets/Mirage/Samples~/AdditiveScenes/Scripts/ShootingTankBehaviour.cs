@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mirage.Examples.Additive
@@ -23,7 +24,7 @@ namespace Mirage.Examples.Additive
 
         void Update()
         {
-            if (IsServer && Identity.observers.Count > 0)
+            if (IsServer && Identity.ServerObjectManager.InterestManager.ObserverSystems.Count > 0)
                 ShootNearestPlayer();
 
             if (IsClient)
@@ -36,15 +37,21 @@ namespace Mirage.Examples.Additive
             GameObject target = null;
             float distance = 100f;
 
-            foreach (INetworkPlayer networkConnection in Identity.observers)
+            foreach (Mirage.InterestManagement.VisibilitySystem observerData in Identity.ServerObjectManager.InterestManager.ObserverSystems)
             {
-                GameObject tempTarget = networkConnection.Identity.gameObject;
-                float tempDistance = Vector3.Distance(tempTarget.transform.position, transform.position);
-
-                if (target == null || distance > tempDistance)
+                foreach (KeyValuePair<NetworkIdentity, HashSet<INetworkPlayer>> observer in observerData.Observers)
                 {
-                    target = tempTarget;
-                    distance = tempDistance;
+                    foreach (INetworkPlayer player in observer.Value)
+                    {
+                        GameObject tempTarget = player.Identity.gameObject;
+                        float tempDistance = Vector3.Distance(tempTarget.transform.position, transform.position);
+
+                        if (target == null || distance > tempDistance)
+                        {
+                            target = tempTarget;
+                            distance = tempDistance;
+                        }
+                    }
                 }
             }
 

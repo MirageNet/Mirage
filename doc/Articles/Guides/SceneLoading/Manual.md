@@ -34,6 +34,6 @@ These messages are built in and used by NetworkSceneManager. If you are creating
 *after receiving `SceneReadyMessage`*
 
 8) Mark the player as ready using: `player.SceneIsReady = true`
-9) Call [ServerObjectManager.SpawnVisibleObjects](xref:Mirage.ServerObjectManager.SpawnVisibleObjects(Mirage.INetworkPlayer,System.Boolean)) or [ServerObjectManager.AddCharacter](xref:Mirage.ServerObjectManager.AddCharacter(Mirage.INetworkPlayer,Mirage.NetworkIdentity)) (Mirage will send spawn message to client)
+9) Call [ServerObjectManager.AddCharacter](xref:Mirage.ServerObjectManager.AddCharacter(Mirage.INetworkPlayer,Mirage.NetworkIdentity)) (Mirage will send spawn message to client)
 
 

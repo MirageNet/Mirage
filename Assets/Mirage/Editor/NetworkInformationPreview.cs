@@ -172,7 +172,7 @@ namespace Mirage
 
         float DrawObservers(NetworkIdentity identity, float initialX, float Y)
         {
-            if (identity.observers.Count > 0)
+            if (identity.ServerObjectManager?.InterestManager?.ObserverSystems.Count > 0)
             {
                 var observerRect = new Rect(initialX, Y + 10, 200, 20);
 
@@ -181,11 +181,14 @@ namespace Mirage
                 observerRect.x += 20;
                 observerRect.y += observerRect.height;
 
-                foreach (INetworkPlayer player in identity.observers)
+                foreach (InterestManagement.VisibilitySystem system in identity.ServerObjectManager.InterestManager.ObserverSystems)
                 {
-                    GUI.Label(observerRect, player.Connection.EndPoint + ":" + player, styles.ComponentName);
-                    observerRect.y += observerRect.height;
-                    Y = observerRect.y;
+                    foreach (INetworkPlayer player in system.Observers[identity])
+                    {
+                        GUI.Label(observerRect, player.Connection.EndPoint + ":" + player, styles.ComponentName);
+                        observerRect.y += observerRect.height;
+                        Y = observerRect.y;
+                    }
                 }
             }
 
