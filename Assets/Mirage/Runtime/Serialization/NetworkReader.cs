@@ -125,7 +125,8 @@ namespace Mirage.Serialization
             if (needsDisposing)
             {
                 // dispose old handler first
-                Dispose();
+                // false here so we dont release reader back to pool
+                Dispose(false);
             }
 
             // reset disposed bool, as it can be disposed again after reset
