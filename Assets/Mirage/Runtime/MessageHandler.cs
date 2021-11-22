@@ -21,7 +21,7 @@ namespace Mirage
         /// <param name="reader"></param>
         internal delegate void NetworkMessageDelegate(INetworkPlayer player, NetworkReader reader);
 
-        internal readonly Dictionary<int, NetworkMessageDelegate> messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
+        internal readonly Dictionary<int, HashSet<NetworkMessageDelegate>> messageHandlers = new Dictionary<int, HashSet<NetworkMessageDelegate>>();
 
         public MessageHandler(IObjectLocator objectLocator, bool disconnectOnException)
         {
@@ -49,11 +49,15 @@ namespace Mirage
         public void RegisterHandler<T>(MessageDelegateWithPlayer<T> handler)
         {
             int msgType = MessagePacker.GetId<T>();
-            if (logger.filterLogType == LogType.Log && messageHandlers.ContainsKey(msgType))
+
+            if (messageHandlers.ContainsKey(msgType))
             {
-                logger.Log("RegisterHandler replacing " + msgType);
+                messageHandlers[msgType].Add(MessageWrapper(handler));
             }
-            messageHandlers[msgType] = MessageWrapper(handler);
+            else
+            {
+                messageHandlers[msgType] = new HashSet<NetworkMessageDelegate> { MessageWrapper(handler) };
+            }
         }
 
         /// <summary>
@@ -89,9 +93,12 @@ namespace Mirage
 
         internal void InvokeHandler(INetworkPlayer player, int msgType, NetworkReader reader)
         {
-            if (messageHandlers.TryGetValue(msgType, out NetworkMessageDelegate msgDelegate))
+            if (messageHandlers.TryGetValue(msgType, out HashSet<NetworkMessageDelegate> handlers))
             {
-                msgDelegate.Invoke(player, reader);
+                foreach (NetworkMessageDelegate msgDelegate in handlers)
+                {
+                    msgDelegate.Invoke(player, reader);
+                }
             }
             else
             {
