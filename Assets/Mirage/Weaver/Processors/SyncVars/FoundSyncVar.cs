@@ -34,8 +34,8 @@ namespace Mirage.Weaver.SyncVars
         public bool IsWrapped { get; private set; }
 
 
-        public bool HasHookMethod { get; private set; }
-        public MethodDefinition HookMethod { get; private set; }
+        public bool HasHook { get; private set; }
+        public SyncVarHook Hook { get; private set; }
         public bool InitialOnly { get; private set; }
 
         /// <summary>
@@ -86,8 +86,10 @@ namespace Mirage.Weaver.SyncVars
         /// <param name="module"></param>
         public void ProcessAttributes(Writers writers, Readers readers)
         {
-            HookMethod = HookMethodFinder.GetHookMethod(FieldDefinition, OriginalType);
-            HasHookMethod = HookMethod != null;
+            SyncVarHook hook = HookMethodFinder.GetHookMethod(FieldDefinition, OriginalType);
+            Hook = hook;
+            HasHook = hook != null;
+
             InitialOnly = GetInitialOnly(FieldDefinition);
 
             ValueSerializer = ValueSerializerFinder.GetSerializer(this, writers, readers);

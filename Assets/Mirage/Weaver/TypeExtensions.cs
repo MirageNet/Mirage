@@ -18,10 +18,10 @@ namespace Mirage.Weaver
             return td.Methods.FirstOrDefault(method => method.Name == methodName);
         }
 
-        public static List<MethodDefinition> GetMethods(this TypeDefinition td, string methodName)
+        public static MethodDefinition[] GetMethods(this TypeDefinition td, string methodName)
         {
             // Linq allocations don't matter in weaver
-            return td.Methods.Where(method => method.Name == methodName).ToList();
+            return td.Methods.Where(method => method.Name == methodName).ToArray();
         }
 
         /// <summary>
