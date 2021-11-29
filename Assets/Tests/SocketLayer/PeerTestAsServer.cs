@@ -30,7 +30,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 endPoints[i] = TestEndPoint.CreateSubstitute();
 
                 socket.SetupReceiveCall(connectRequest, endPoints[i]);
-                peer.Update();
+                peer.UpdateTest();
             }
 
             for (int i = 0; i < maxConnections; i++)
@@ -66,7 +66,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
             IEndPoint endPoint = TestEndPoint.CreateSubstitute();
             socket.SetupReceiveCall(connectRequest, endPoint);
-            peer.Update();
+            peer.UpdateTest();
 
             // server sends accept and invokes event locally
             socket.Received(1).Send(endPoint, Arg.Is<byte[]>(x =>
@@ -92,7 +92,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 endPoints[i] = TestEndPoint.CreateSubstitute();
 
                 socket.SetupReceiveCall(connectRequest, endPoints[i]);
-                peer.Update();
+                peer.UpdateTest();
             }
 
 
@@ -119,7 +119,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             for (int i = 0; i < maxConnections; i++)
             {
                 socket.SetupReceiveCall(connectRequest);
-                peer.Update();
+                peer.UpdateTest();
             }
 
             // clear calls from valid connections
@@ -136,7 +136,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 received = (byte[])x[1];
             });
 
-            peer.Update();
+            peer.UpdateTest();
 
             Debug.Log($"Length:{received.Length} [{received[0]},{received[1]},{received[2]}]");
             const int length = 3;
@@ -163,7 +163,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             };
 
             socket.SetupReceiveCall(invalidRequest);
-            peer.Update();
+            peer.UpdateTest();
 
             // server does nothing for invalid
             socket.DidNotReceiveWithAnyArgs().Send(default, default, default);

@@ -132,6 +132,10 @@ namespace Mirage.SocketLayer
             return $"[{EndPoint}]";
         }
 
+        /// <summary>
+        /// Checks if new message need to be sent using its <see cref="State"/>
+        /// <para>Call this at end of frame to send new batches</para>
+        /// </summary>
         public void Update()
         {
             switch (State)
@@ -149,6 +153,7 @@ namespace Mirage.SocketLayer
                     break;
             }
         }
+
         public void SetReceiveTime()
         {
             timeoutTracker.SetReceiveTime();

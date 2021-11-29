@@ -77,7 +77,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 (byte)UnityEngine.Random.Range(0, 255),
             });
 
-            peer.Update();
+            peer.UpdateTest();
 
             // server does nothing for invalid
             socket.DidNotReceiveWithAnyArgs().Send(default, default, default);
@@ -97,7 +97,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
             IndexOutOfRangeException exception = Assert.Throws<IndexOutOfRangeException>(() =>
             {
-                peer.Update();
+                peer.UpdateTest();
             });
 
             Assert.That(exception, Has.Message.EqualTo($"Socket returned length above MTU. MaxPacketSize:{config.MaxPacketSize} length:{aboveMTU}"));
@@ -122,7 +122,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             }
             socket.SetupReceiveCall(randomData);
 
-            peer.Update();
+            peer.UpdateTest();
 
             // server does nothing for invalid
             socket.DidNotReceiveWithAnyArgs().Send(default, default, default);

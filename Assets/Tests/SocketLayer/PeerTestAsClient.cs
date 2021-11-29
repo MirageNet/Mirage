@@ -58,7 +58,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             int sendCount = 0;
             while (end > time.Now)
             {
-                peer.Update();
+                peer.UpdateTest();
                 if (nextSendCheck < time.Now)
                 {
                     nextSendCheck = time.Now + config.ConnectAttemptInterval * 1.1f;
@@ -95,7 +95,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             float end = time.Now + config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
             while (end > time.Now)
             {
-                peer.Update();
+                peer.UpdateTest();
                 yield return null;
             }
 
@@ -114,7 +114,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 (byte) Commands.ConnectionRejected,
                 (byte)RejectReason.ServerFull,
             }, endPoint);
-            peer.Update();
+            peer.UpdateTest();
 
             connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
             disconnectAction.DidNotReceiveWithAnyArgs().Invoke(default, default);
@@ -137,7 +137,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             float maxTime = config.MaxConnectAttempts * config.ConnectAttemptInterval + 0.5f;
             while (start + maxTime < UnityEngine.Time.time)
             {
-                peer.Update();
+                peer.UpdateTest();
                 yield return null;
             }
 
@@ -184,7 +184,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             byte[] expected = connectRequest;
             IEndPoint endPoint = TestEndPoint.CreateSubstitute();
             socket.SetupReceiveCall(expected, endPoint);
-            peer.Update();
+            peer.UpdateTest();
 
             // server sends accept and invokes event locally
             socket.Received(1).Send(endPoint, Arg.Is<byte[]>(x =>

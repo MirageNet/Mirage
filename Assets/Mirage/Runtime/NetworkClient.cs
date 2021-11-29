@@ -278,7 +278,8 @@ namespace Mirage
                 // only update things while connected
                 World.Time.UpdateClient(this);
             }
-            peer?.Update();
+            peer?.UpdateReceive();
+            peer?.UpdateSent();
         }
 
         internal void RegisterHostHandlers()
