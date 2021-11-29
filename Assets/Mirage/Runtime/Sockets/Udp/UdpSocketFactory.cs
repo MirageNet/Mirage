@@ -9,7 +9,7 @@ namespace Mirage.Sockets.Udp
 {
     public enum SocketLib { Automatic, Native, Managed };
 
-    public sealed class UdpSocketFactory : SocketFactory
+    public sealed class UdpSocketFactory : SocketFactory, IHasAddress, IHasPort
     {
         public string Address = "localhost";
         public ushort Port = 7777;
@@ -21,6 +21,17 @@ namespace Mirage.Sockets.Udp
         public int BufferSize = 256 * 1024;
 
         bool useNanoSocket => SocketLib == SocketLib.Native || (SocketLib == SocketLib.Automatic && IsDesktop);
+
+        string IHasAddress.Address
+        {
+            get => Address;
+            set => Address = value;
+        }
+        int IHasPort.Port
+        {
+            get => Port;
+            set => Port = checked((ushort)value);
+        }
 
         static int initCount;
 
