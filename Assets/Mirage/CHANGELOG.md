@@ -1,3 +1,26 @@
+# [113.0.0](https://github.com/MirageNet/Mirage/compare/v112.0.2...v113.0.0) (2021-11-29)
+
+
+### Bug Fixes
+
+* making NetworkServer.players a readonly collection ([f1b4512](https://github.com/MirageNet/Mirage/commit/f1b4512f00bde3be1e2da6c222e037939e442f8f))
+
+
+### Features
+
+* adding interfaces for SocketFactory to use so it is easier to get/set address and port ([#996](https://github.com/MirageNet/Mirage/issues/996)) ([e969e6d](https://github.com/MirageNet/Mirage/commit/e969e6dc4c85337e2deaa40202d557da6ac51f69))
+* allowing events to be used with syncvar hook ([#991](https://github.com/MirageNet/Mirage/issues/991)) ([f455a2d](https://github.com/MirageNet/Mirage/commit/f455a2d8991cb88c8ea69764c5926e3626a590b6))
+
+
+### Performance Improvements
+
+* splitting peer update into 2 functions ([#993](https://github.com/MirageNet/Mirage/issues/993)) ([0d6d34b](https://github.com/MirageNet/Mirage/commit/0d6d34bd4d03800dc9edfc0adda1cd2d4b483d44))
+
+
+### BREAKING CHANGES
+
+* NetworkServer.Players is now a IReadOnlyCollection<INetworkPlayer>
+
 ## [112.0.2](https://github.com/MirageNet/Mirage/compare/v112.0.1...v112.0.2) (2021-11-22)
 
 
