@@ -5,6 +5,22 @@ using UnityEngine;
 namespace Mirage.SocketLayer
 {
     /// <summary>
+    /// Can be added to SocketFactory that have an Address Setting
+    /// </summary>
+    public interface IHasAddress
+    {
+        string Address { get; set; }
+    }
+
+    /// <summary>
+    /// Can be added to SocketFactory that have a Port Setting
+    /// </summary>
+    public interface IHasPort
+    {
+        int Port { get; set; }
+    }
+
+    /// <summary>
     /// Creates an instance of <see cref="ISocket"/>
     /// </summary>
     /// <remarks>
