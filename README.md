@@ -97,7 +97,7 @@ Mirage supports multiple ways of transporting data:
 - Native UDP socket (default on Windows, Mac and Linux)
 - C# UDP Socket (default on other platforms)
 - Steam ([Facepunch Steamworks](https://github.com/MirageNet/SteamyFaceNG))
-- Websocket, to support webgl clients (coming soon)
+- Websocket, to support webgl clients ([SimpleWebSocket](https://github.com/James-Frowen/SimpleWebSocket))
 
 
 ## Contributing
