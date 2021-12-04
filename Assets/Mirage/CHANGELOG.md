@@ -1,3 +1,10 @@
+## [113.0.3](https://github.com/MirageNet/Mirage/compare/v113.0.2...v113.0.3) (2021-12-04)
+
+
+### Bug Fixes
+
+* fixing rpc return values for unity 2021.2 ([#1000](https://github.com/MirageNet/Mirage/issues/1000)) ([a6ee5e8](https://github.com/MirageNet/Mirage/commit/a6ee5e8d618398b171c4698878a2ced8140621aa))
+
 ## [113.0.2](https://github.com/MirageNet/Mirage/compare/v113.0.1...v113.0.2) (2021-12-04)
 
 
