@@ -1,3 +1,10 @@
+## [113.0.1](https://github.com/MirageNet/Mirage/compare/v113.0.0...v113.0.1) (2021-12-04)
+
+
+### Bug Fixes
+
+* fixing ReadNetworkBehaviour when NI is not found ([cb20ad9](https://github.com/MirageNet/Mirage/commit/cb20ad9a62fb22e158d2a97ff8c883bee2123b93))
+
 # [113.0.0](https://github.com/MirageNet/Mirage/compare/v112.0.2...v113.0.0) (2021-11-29)
 
 
