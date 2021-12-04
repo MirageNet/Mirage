@@ -48,27 +48,38 @@ namespace Mirage.Serialization
             if (netId == 0)
                 return null;
 
-            if (reader.ObjectLocator != null)
+            return FindNetworkIdentity(reader.ObjectLocator, netId);
+        }
+
+        private static NetworkIdentity FindNetworkIdentity(IObjectLocator objectLocator, uint netId)
+        {
+            if (objectLocator == null)
             {
-                // if not found return c# null
-                return reader.ObjectLocator.TryGetIdentity(netId, out NetworkIdentity identity)
-                    ? identity
-                    : null;
+                if (logger.WarnEnabled()) logger.LogWarning($"Could not find NetworkIdentity because ObjectLocator is null");
+                return null;
             }
 
-            if (logger.WarnEnabled()) logger.LogFormat(LogType.Warning, "ReadNetworkIdentity netId:{0} not found in spawned", netId);
-            return null;
+            // if not found return c# null
+            return objectLocator.TryGetIdentity(netId, out NetworkIdentity identity)
+                ? identity
+                : null;
         }
 
         public static NetworkBehaviour ReadNetworkBehaviour(this NetworkReader reader)
         {
-            NetworkIdentity identity = reader.ReadNetworkIdentity();
-            if (identity == null)
-            {
+            // we can't use ReadNetworkIdentity here, because we need to know if netid was 0 or not
+            // if it is not 0 we need to read component index even if NI is null, or it'll fail to deserilize next part
+            uint netId = reader.ReadPackedUInt32();
+            if (netId == 0)
                 return null;
-            }
 
+            // always read index if netid is not 0
             byte componentIndex = reader.ReadByte();
+
+            NetworkIdentity identity = FindNetworkIdentity(reader.ObjectLocator, netId);
+            if (identity is null)
+                return null;
+
             return identity.NetworkBehaviours[componentIndex];
         }
 
