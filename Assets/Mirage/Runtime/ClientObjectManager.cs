@@ -598,6 +598,7 @@ namespace Mirage
                 callbacks.Remove(replyId);
                 using (PooledNetworkReader reader = NetworkReaderPool.GetReader(reply.payload))
                 {
+                    reader.ObjectLocator = Client.World;
                     action(reader);
                 }
             }
