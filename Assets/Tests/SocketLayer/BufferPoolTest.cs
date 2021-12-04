@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using NSubstitute;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.SocketLayer.Tests
@@ -71,11 +73,11 @@ namespace Mirage.SocketLayer.Tests
 
             const int takeCount = 8;
 
-            var temp = new TestBuffer[takeCount];
-            var temp2 = new TestBuffer[takeCount];
+            var temp = new List<TestBuffer>();
+            var temp2 = new List<TestBuffer>();
             for (int i = 0; i < takeCount; i++)
             {
-                temp[i] = pool.Take();
+                temp.Add(pool.Take());
             }
 
             create.ClearReceivedCalls();
@@ -88,7 +90,7 @@ namespace Mirage.SocketLayer.Tests
 
             for (int i = 0; i < takeCount; i++)
             {
-                temp2[i] = pool.Take();
+                temp2.Add(pool.Take());
             }
 
             create.DidNotReceiveWithAnyArgs().Invoke(default, default);
@@ -106,10 +108,11 @@ namespace Mirage.SocketLayer.Tests
 
             const int takeCount = 8;
 
-            var temp = new TestBuffer[takeCount];
+            var temp = new List<TestBuffer>();
+
             for (int i = 0; i < takeCount; i++)
             {
-                temp[i] = pool.Take();
+                temp.Add(pool.Take());
             }
 
             // check instances are the different
@@ -123,52 +126,45 @@ namespace Mirage.SocketLayer.Tests
             const int bufferSize = 100;
             var pool = new Pool<TestBuffer>(TestBuffer.Create, bufferSize, 0, maxCount);
 
-            var temp = new TestBuffer[maxCount + 1];
+            var temp = new List<TestBuffer>();
             for (int i = 0; i < maxCount; i++)
             {
-                temp[i] = pool.Take();
+                temp.Add(pool.Take());
             }
 
             LogAssert.NoUnexpectedReceived();
 
             LogAssert.Expect(UnityEngine.LogType.Warning, $"Pool Max Size reached, type:{typeof(TestBuffer).Name} created:{maxCount + 1} max:{maxCount}");
-            temp[maxCount] = pool.Take();
+            temp.Add(pool.Take());
             LogAssert.NoUnexpectedReceived();
 
             Assert.That(temp, Is.Unique);
-
         }
         [Test]
-        public void PutingMoreBuffersThanMaxLogsWarning()
+        public void DoesNotSpamLogsIfTakingManyOverMax()
         {
             const int maxCount = 5;
             const int bufferSize = 100;
-            var pool = new Pool<TestBuffer>(TestBuffer.Create, bufferSize, 0, maxCount);
+            ILogger logger = Substitute.For<ILogger>();
+            logger.IsLogTypeAllowed(LogType.Warning).Returns(true);
+            var pool = new Pool<TestBuffer>(TestBuffer.Create, bufferSize, 0, maxCount, logger);
 
-            var temp = new TestBuffer[maxCount + 1];
-            for (int i = 0; i < maxCount + 1; i++)
-            {
-                temp[i] = pool.Take();
-            }
-
-            // have to expect this so that noUnexpected doesn't fail below
-            LogAssert.Expect(UnityEngine.LogType.Warning, $"Pool Max Size reached, type:{typeof(TestBuffer).Name} created:{maxCount + 1} max:{maxCount}");
-
+            var temp = new List<TestBuffer>();
             for (int i = 0; i < maxCount; i++)
             {
-                pool.Put(temp[i]);
+                temp.Add(pool.Take());
             }
 
-            LogAssert.NoUnexpectedReceived();
-
-            LogAssert.Expect(UnityEngine.LogType.Warning, $"Cant Put buffer into full pool, leaving for GC");
-            pool.Put(temp[maxCount]);
-
-            LogAssert.NoUnexpectedReceived();
+            temp.Add(pool.Take());
+            // should only get 1 log
+            logger.Received(1).Log(LogType.Warning, $"Pool Max Size reached, type:{typeof(TestBuffer).Name} created:{maxCount + 1} max:{maxCount}");
+            logger.ClearReceivedCalls();
+            temp.Add(pool.Take());
+            temp.Add(pool.Take());
+            logger.DidNotReceive().Log(LogType.Warning, Arg.Any<string>());
 
             Assert.That(temp, Is.Unique);
         }
-
 
         public class TestBuffer
         {
