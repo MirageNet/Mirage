@@ -103,7 +103,6 @@ namespace Mirage.SocketLayer
             }
             else
             {
-                if (logger.IsLogTypeAllowed(LogType.Warning)) logger.Log(LogType.Warning, $"Cant Put buffer into full pool, leaving for GC");
                 // buffer is left for GC, so decrement created
                 created--;
             }
