@@ -1,3 +1,10 @@
+## [113.0.4](https://github.com/MirageNet/Mirage/compare/v113.0.3...v113.0.4) (2021-12-04)
+
+
+### Performance Improvements
+
+* limit when pool logs when creating over max ([#1001](https://github.com/MirageNet/Mirage/issues/1001)) ([ef5c426](https://github.com/MirageNet/Mirage/commit/ef5c426e1adf1d6ab8b4524d341a256fbae024ad)), closes [#998](https://github.com/MirageNet/Mirage/issues/998)
+
 ## [113.0.3](https://github.com/MirageNet/Mirage/compare/v113.0.2...v113.0.3) (2021-12-04)
 
 
