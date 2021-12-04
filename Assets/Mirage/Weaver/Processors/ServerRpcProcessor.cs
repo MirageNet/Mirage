@@ -176,9 +176,10 @@ namespace Mirage.Weaver
         MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, ValueSerializer[] paramSerializers)
         {
             MethodDefinition cmd = method.DeclaringType.AddMethod(SkeletonPrefix + method.Name,
-                MethodAttributes.Family | MethodAttributes.HideBySig,
+                MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Static,
                 userCodeFunc.ReturnType);
 
+            _ = cmd.AddParam(method.DeclaringType, "behaviour");
             ParameterDefinition readerParameter = cmd.AddParam<NetworkReader>("reader");
             ParameterDefinition senderParameter = cmd.AddParam<INetworkPlayer>("senderConnection");
             _ = cmd.AddParam<int>("replyId");
@@ -186,9 +187,10 @@ namespace Mirage.Weaver
 
             ILProcessor worker = cmd.Body.GetILProcessor();
 
-            // setup for reader
+            // load `behaviour.`
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
+            // read and load args
             ReadArguments(method, worker, readerParameter, senderParameter, false, paramSerializers);
 
             // invoke actual ServerRpc function
