@@ -1,5 +1,3 @@
-using Cysharp.Threading.Tasks;
-
 namespace Mirage.Tests.Runtime
 {
     public class MockComponent : NetworkBehaviour
@@ -29,14 +27,6 @@ namespace Mirage.Tests.Runtime
         public void CmdNetworkIdentity(NetworkIdentity ni)
         {
             cmdNi = ni;
-        }
-
-        public int rpcResult;
-
-        [ServerRpc]
-        public UniTask<int> GetResult()
-        {
-            return UniTask.FromResult(rpcResult);
         }
 
         public int rpcArg1;
