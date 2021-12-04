@@ -4,7 +4,7 @@ Sockets are low level objects that are responsible for sending and receiving raw
 ## Available sockets
 The table below shows a list of available sockets and their features.
 
-|                | UDP (built-in)                       | Steam ([SteamWorks.NET](https://github.com/MirageNet/FizzySteamyMirror), [Facepunch](https://github.com/MirageNet/SteamyFaceNG))   | ([Websocket](https://github.com/James-Frowen/SimpleWebSocket)            | 
+|                | UDP (built-in)                       | Steam ([SteamWorks.NET](https://github.com/MirageNet/FizzySteamyMirror), [Facepunch](https://github.com/MirageNet/SteamyFaceNG))   | [Websocket](https://github.com/James-Frowen/SimpleWebSocket)            | 
 | -------------- | :----------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------: |
 | **CCU**        | 1000+                                | ?                                                                                                                                  | ?                                                                        |
 | **Protocol**   | UDP                                  | UDP                                                                                                                                | TCP                                                                      |
