@@ -4,19 +4,20 @@ Sockets are low level objects that are responsible for sending and receiving raw
 ## Available sockets
 The table below shows a list of available sockets and their features.
 
-|                | UDP (built-in)                       | Steam ([SteamWorks.NET](https://github.com/MirageNet/FizzySteamyMirror), [Facepunch](https://github.com/MirageNet/SteamyFaceNG))   |
-| -------------- | :----------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------: |
-| **CCU**        | 1000+                                | ?                                                                                                                                  |
-| **Protocol**   | UDP                                  | UDP                                                                                                                                |
-| **Unreliable** | :white_check_mark:                   | :white_check_mark:                                                                                                                 |
-| **Mobile**     | :white_check_mark:                   |                                                                                                                                    |
-| **CPU**        | LOW                                  | LOW                                                                                                                                |
-| **NAT Punch**  |                                      | :white_check_mark:                                                                                                                 |
-| **Encryption** |                                      | :white_check_mark:                                                                                                                 |
-| **IPv6**       | :white_check_mark:                   | ?                                                                                                                                  |
-| **Managed**    | :white_check_mark:                   | :white_check_mark:                                                                                                                 |
-| **Native**     | :white_check_mark:                   |                                                                                                                                    |
-| **Based on**   | NanoSockets (native), .NET (managed) | Steam Game Networking Sockets                                                                                                      |
+|                | UDP (built-in)                       | Steam ([SteamWorks.NET](https://github.com/MirageNet/FizzySteamyMirror), [Facepunch](https://github.com/MirageNet/SteamyFaceNG))   | ([Websocket](https://github.com/James-Frowen/SimpleWebSocket)            | 
+| -------------- | :----------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------: |
+| **CCU**        | 1000+                                | ?                                                                                                                                  | ?                                                                        |
+| **Protocol**   | UDP                                  | UDP                                                                                                                                | TCP                                                                      |
+| **Unreliable** | :white_check_mark:                   | :white_check_mark:                                                                                                                 |                                                                          |
+| **Mobile**     | :white_check_mark:                   |                                                                                                                                    | :white_check_mark:                                                       |
+| **WebGL**      |                                      |                                                                                                                                    | :white_check_mark:                                                       |
+| **CPU**        | LOW                                  | LOW                                                                                                                                | ?                                                                        |
+| **NAT Punch**  |                                      | :white_check_mark:                                                                                                                 |                                                                          |
+| **Encryption** |                                      | :white_check_mark:                                                                                                                 | :white_check_mark:                                                       |
+| **IPv6**       | :white_check_mark:                   | ?                                                                                                                                  | ?                                                                        |
+| **Managed**    | :white_check_mark:                   | :white_check_mark:                                                                                                                 | :white_check_mark:                                                       |
+| **Native**     | :white_check_mark:                   |                                                                                                                                    |                                                                          |
+| **Based on**   | NanoSockets (native), .NET (managed) | Steam Game Networking Sockets                                                                                                      | [SimpleWebTransport](https://github.com/James-Frowen/SimpleWebTransport) |
 
 ## Changing a socket
 To change a socket, follow the steps below:
