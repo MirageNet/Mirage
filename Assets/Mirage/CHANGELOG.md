@@ -1,3 +1,10 @@
+## [113.0.2](https://github.com/MirageNet/Mirage/compare/v113.0.1...v113.0.2) (2021-12-04)
+
+
+### Bug Fixes
+
+* fixing Return rpc for values that require ObjectLocator ([11b2fb3](https://github.com/MirageNet/Mirage/commit/11b2fb3473b74b7b46447c0e449fa9b5dbf3bc1d))
+
 ## [113.0.1](https://github.com/MirageNet/Mirage/compare/v113.0.0...v113.0.1) (2021-12-04)
 
 
