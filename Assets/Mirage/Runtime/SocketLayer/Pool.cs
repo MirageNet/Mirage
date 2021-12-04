@@ -1,5 +1,7 @@
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+using Stopwatch = System.Diagnostics.Stopwatch;
 
 namespace Mirage.SocketLayer
 {
@@ -15,7 +17,7 @@ namespace Mirage.SocketLayer
         readonly ILogger logger;
         public delegate T CreateNewItem(int bufferSize, Pool<T> pool);
         readonly CreateNewItem createNew;
-
+        OverMaxLog overMaxLog;
 
         T[] pool;
         int next = -1;
@@ -69,8 +71,8 @@ namespace Mirage.SocketLayer
 
         private T CreateNewBuffer()
         {
-            if (created >= maxPoolSize && logger.IsLogTypeAllowed(LogType.Warning)) logger.Log(LogType.Warning, $"Pool Max Size reached, type:{typeof(T).Name} created:{created + 1} max:{maxPoolSize}");
             created++;
+            overMaxLog.CheckLimit(this);
             return createNew.Invoke(bufferSize, this);
         }
 
@@ -104,6 +106,46 @@ namespace Mirage.SocketLayer
                 if (logger.IsLogTypeAllowed(LogType.Warning)) logger.Log(LogType.Warning, $"Cant Put buffer into full pool, leaving for GC");
                 // buffer is left for GC, so decrement created
                 created--;
+            }
+        }
+
+        struct OverMaxLog
+        {
+            // 10 seconds log interval
+            const float LogInterval = 10;
+
+            private float GetTime()
+            {
+                return Stopwatch.GetTimestamp() / (float)Stopwatch.Frequency;
+            }
+
+            float nextLogTime;
+            int lastLogValue;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void CheckLimit(Pool<T> pool)
+            {
+                if (pool.created >= pool.maxPoolSize && pool.logger.IsLogTypeAllowed(LogType.Warning))
+                {
+                    float now = GetTime();
+
+                    // if has been enough time since last log, then log again 
+                    if (now > nextLogTime)
+                    {
+                        lastLogValue = pool.created;
+                        nextLogTime = now + LogInterval;
+                        pool.logger.Log(LogType.Warning, $"Pool Max Size reached, type:{typeof(T).Name} created:{pool.created + 1} max:{pool.maxPoolSize}");
+                        return;
+                    }
+
+                    // if pool has grown enough since last log (but has been less than LogInterval) then log again now
+                    if (pool.created > lastLogValue + pool.maxPoolSize)
+                    {
+                        lastLogValue = pool.created;
+                        nextLogTime = now + LogInterval;
+                        pool.logger.Log(LogType.Warning, $"Pool Max Size reached, type:{typeof(T).Name} created:{pool.created + 1} max:{pool.maxPoolSize}");
+                    }
+                }
             }
         }
     }
