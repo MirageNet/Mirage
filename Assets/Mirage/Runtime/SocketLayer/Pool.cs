@@ -17,11 +17,12 @@ namespace Mirage.SocketLayer
         readonly ILogger logger;
         public delegate T CreateNewItem(int bufferSize, Pool<T> pool);
         readonly CreateNewItem createNew;
-        OverMaxLog overMaxLog;
 
         T[] pool;
         int next = -1;
         int created = 0;
+
+        OverMaxLog overMaxLog = new OverMaxLog();
 
         /// <summary>
         /// sets max pool size and then creates writers up to new start size
