@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace Mirage.SocketLayer.Tests
 {
@@ -124,7 +123,9 @@ namespace Mirage.SocketLayer.Tests
         {
             const int maxCount = 5;
             const int bufferSize = 100;
-            var pool = new Pool<TestBuffer>(TestBuffer.Create, bufferSize, 0, maxCount);
+            ILogger logger = Substitute.For<ILogger>();
+            logger.IsLogTypeAllowed(LogType.Warning).Returns(true);
+            var pool = new Pool<TestBuffer>(TestBuffer.Create, bufferSize, 0, maxCount, logger);
 
             var temp = new List<TestBuffer>();
             for (int i = 0; i < maxCount; i++)
@@ -132,11 +133,8 @@ namespace Mirage.SocketLayer.Tests
                 temp.Add(pool.Take());
             }
 
-            LogAssert.NoUnexpectedReceived();
-
-            LogAssert.Expect(UnityEngine.LogType.Warning, $"Pool Max Size reached, type:{typeof(TestBuffer).Name} created:{maxCount + 1} max:{maxCount}");
             temp.Add(pool.Take());
-            LogAssert.NoUnexpectedReceived();
+            logger.Received(1).Log(LogType.Warning, $"Pool Max Size reached, type:{typeof(TestBuffer).Name} created:{maxCount + 1} max:{maxCount}");
 
             Assert.That(temp, Is.Unique);
         }
