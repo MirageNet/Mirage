@@ -88,7 +88,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             ExtraSetup();
 
             // create and register a prefab
-            playerPrefab = new GameObject("serverPlayer", typeof(NetworkIdentity), typeof(T));
+            playerPrefab = new GameObject("player (unspawned)", typeof(NetworkIdentity), typeof(T));
             NetworkIdentity identity = playerPrefab.GetComponent<NetworkIdentity>();
             identity.PrefabHash = Guid.NewGuid().GetHashCode();
             clientObjectManager.RegisterPrefab(identity);
@@ -116,6 +116,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
                 // create a player object in the server
                 serverPlayerGO = Object.Instantiate(playerPrefab);
+                serverPlayerGO.name = "player (server)";
                 serverIdentity = serverPlayerGO.GetComponent<NetworkIdentity>();
                 serverComponent = serverPlayerGO.GetComponent<T>();
                 serverObjectManager.AddCharacter(serverPlayer, serverPlayerGO);
@@ -125,6 +126,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
                 clientIdentity = clientPlayer.Identity;
                 clientPlayerGO = clientIdentity.gameObject;
+                clientPlayerGO.name = "player (client)";
                 clientComponent = clientPlayerGO.GetComponent<T>();
             }
 
