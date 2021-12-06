@@ -114,8 +114,7 @@ namespace Mirage
         /// <param name="networkConnectionId"></param>
         public NetworkPlayer(IConnection connection)
         {
-            Assert.IsNotNull(connection);
-            this.connection = connection;
+            this.connection = connection ?? throw new ArgumentNullException(nameof(connection));
         }
 
 
