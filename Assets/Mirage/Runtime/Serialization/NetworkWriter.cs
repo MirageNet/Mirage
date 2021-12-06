@@ -396,6 +396,22 @@ namespace Mirage.Serialization
             bitPosition = newPosition;
         }
 
+        /// <summary>
+        /// Copies all data from <paramref name="other"/>
+        /// </summary>
+        /// <param name="other"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyFromWriter(NetworkWriter other)
+        {
+            CopyFromWriter(other, 0, other.BitPosition);
+        }
+
+        /// <summary>
+        /// Copies <paramref name="bitLength"/> bits from <paramref name="other"/> starting at <paramref name="otherBitPosition"/>
+        /// </summary>
+        /// <param name="other"></param>
+        /// <param name="otherBitPosition"></param>
+        /// <param name="bitLength"></param>
         public void CopyFromWriter(NetworkWriter other, int otherBitPosition, int bitLength)
         {
             int newBit = bitPosition + bitLength;
