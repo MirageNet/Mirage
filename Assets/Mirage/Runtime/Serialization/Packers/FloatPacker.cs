@@ -28,7 +28,6 @@ using UnityEngine;
 
 namespace Mirage.Serialization
 {
-
     /// <summary>
     /// Helps compresses a float into a reduced number of bits
     /// </summary>
