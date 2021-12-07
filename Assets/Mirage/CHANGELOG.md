@@ -1,3 +1,10 @@
+# [113.1.0](https://github.com/MirageNet/Mirage/compare/v113.0.4...v113.1.0) (2021-12-07)
+
+
+### Features
+
+* adding packers for variable length floats ([4c38c09](https://github.com/MirageNet/Mirage/commit/4c38c095461fc4fa1b823563cdb8075abe45dfe3))
+
 ## [113.0.4](https://github.com/MirageNet/Mirage/compare/v113.0.3...v113.0.4) (2021-12-04)
 
 
