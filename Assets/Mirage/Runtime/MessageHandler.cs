@@ -51,7 +51,7 @@ namespace Mirage
             int msgType = MessagePacker.GetId<T>();
             if (logger.filterLogType == LogType.Log && messageHandlers.ContainsKey(msgType))
             {
-                logger.Log("RegisterHandler replacing " + msgType);
+                logger.Log($"RegisterHandler replacing {msgType}");
             }
             messageHandlers[msgType] = MessageWrapper(handler);
         }
@@ -98,11 +98,11 @@ namespace Mirage
                 try
                 {
                     Type type = MessagePacker.GetMessageType(msgType);
-                    throw new InvalidDataException($"Unexpected message {type} received in {this}. Did you register a handler for it?");
+                    throw new InvalidDataException($"Unexpected message {type} received from {player}. Did you register a handler for it?");
                 }
                 catch (KeyNotFoundException)
                 {
-                    throw new InvalidDataException($"Unexpected message ID {msgType} received in {this}. May be due to no existing RegisterHandler for this message.");
+                    throw new InvalidDataException($"Unexpected message ID {msgType} received from {player}. May be due to no existing RegisterHandler for this message.");
                 }
             }
         }
@@ -136,7 +136,7 @@ namespace Mirage
                 }
                 catch (Exception e)
                 {
-                    string disconnectMessage = disconnectOnException ? $", Closed connection: {this}" : "";
+                    string disconnectMessage = disconnectOnException ? $", Closed connection: {player}" : "";
                     logger.LogError($"{e.GetType()} in Message handler (see stack below){disconnectMessage}\n{e}");
                     if (disconnectOnException)
                     {
