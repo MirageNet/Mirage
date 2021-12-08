@@ -1,3 +1,10 @@
+## [113.1.2](https://github.com/MirageNet/Mirage/compare/v113.1.1...v113.1.2) (2021-12-08)
+
+
+### Bug Fixes
+
+* fixing error message in message handler ([b38a24c](https://github.com/MirageNet/Mirage/commit/b38a24c8bd0d0c31245742b038e837f5d70bf979))
+
 ## [113.1.1](https://github.com/MirageNet/Mirage/compare/v113.1.0...v113.1.1) (2021-12-07)
 
 
