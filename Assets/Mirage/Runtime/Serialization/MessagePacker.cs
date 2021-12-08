@@ -17,14 +17,22 @@ namespace Mirage.Serialization
     public static class MessagePacker
     {
         /// <summary>
-        /// Map of Message Id => Type
-        /// When we receive a message, we can lookup here to find out what type
-        /// it was.  This is populated by the weaver.
+        /// Backing field for <see cref="MessageTypes"/>
         /// </summary>
         private static readonly Dictionary<int, Type> messageTypes = new Dictionary<int, Type>();
 
-        public static Type GetMessageType(int id) => messageTypes[id];
+        /// <summary>
+        /// Map of Message Id => Type
+        /// When we receive a message, we can lookup here to find out what type it was.
+        /// This is populated by the weaver.
+        /// </summary>
+        public static IReadOnlyDictionary<int, Type> MessageTypes => messageTypes;
 
+        /// <summary>
+        /// Registers a message with its ID, Useful for debugging if a message handler is missing
+        /// <para>Used by weaver</para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         public static void RegisterMessage<T>()
         {
             int id = GetId<T>();

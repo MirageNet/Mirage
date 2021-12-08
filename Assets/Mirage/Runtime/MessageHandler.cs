@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Mirage.Logging;
 using Mirage.Serialization;
 using UnityEngine;
@@ -95,14 +94,13 @@ namespace Mirage
             }
             else
             {
-                try
+                if (MessagePacker.MessageTypes.TryGetValue(msgType, out Type type))
                 {
-                    Type type = MessagePacker.GetMessageType(msgType);
-                    throw new InvalidDataException($"Unexpected message {type} received from {player}. Did you register a handler for it?");
+                    logger.Log($"Unexpected message {type} received from {player}. Did you register a handler for it?");
                 }
-                catch (KeyNotFoundException)
+                else
                 {
-                    throw new InvalidDataException($"Unexpected message ID {msgType} received from {player}. May be due to no existing RegisterHandler for this message.");
+                    logger.Log($"Unexpected message ID {msgType} received from {player}. May be due to no existing RegisterHandler for this message.");
                 }
             }
         }
@@ -129,10 +127,6 @@ namespace Mirage
                 {
                     int msgType = MessagePacker.UnpackId(networkReader);
                     InvokeHandler(player, msgType, networkReader);
-                }
-                catch (InvalidDataException ex)
-                {
-                    logger.Log(ex.ToString());
                 }
                 catch (Exception e)
                 {
