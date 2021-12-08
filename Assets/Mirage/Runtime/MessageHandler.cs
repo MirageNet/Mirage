@@ -95,6 +95,8 @@ namespace Mirage
             }
             else
             {
+                // todo log leve instead of in catch(InvalidDataException)
+                //      seems bad practice to throw only to catch in function that called this one
                 try
                 {
                     Type type = MessagePacker.GetMessageType(msgType);
@@ -132,7 +134,7 @@ namespace Mirage
                 }
                 catch (InvalidDataException ex)
                 {
-                    logger.Log(ex.ToString());
+                    logger.LogWarning(ex.ToString());
                 }
                 catch (Exception e)
                 {
