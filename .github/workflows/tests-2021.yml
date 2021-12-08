@@ -42,7 +42,7 @@ jobs:
         timeout-minutes: 20
 
       - name: Archive test results
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2.3.0
         if: always()
         with:
           name: Test results
