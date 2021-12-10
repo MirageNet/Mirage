@@ -23,8 +23,8 @@
   href: Sync/toc.yml
   topicHref: Sync/index.md
 - name: Remote Actions
-  href: RemoteActions/toc.yml
-  topicHref: RemoteActions/index.md
+  href: RemoteCalls/toc.yml
+  topicHref: RemoteCalls/index.md
 - name: Callbacks
   href: Callbacks/toc.yml
   topicHref: Callbacks/index.md

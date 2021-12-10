@@ -1,6 +1,6 @@
 # Data types
 
-The client and server can pass data to each other via [RPC Methods](./RemoteActions/index.md), [State Synchronization](Sync/index.md) or via [Network Messages](RemoteActions/NetworkMessages.md)
+The client and server can pass data to each other via [RPC Methods](./RemoteCalls/index.md), [State Synchronization](Sync/index.md) or via [Network Messages](RemoteCalls/NetworkMessages.md)
 
 Mirage supports a number of data types you can use with these, including:
 - Basic c# types (byte, int, char, uint, UInt64, float, string, etc)

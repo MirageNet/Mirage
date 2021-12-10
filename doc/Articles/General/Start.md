@@ -101,7 +101,7 @@ See [State Synchronization](../Guides/Sync/index.md).
 -   Make scripts that perform important actions into NetworkBehaviours instead of MonoBehaviours
 -   Update functions that perform important player actions to have an attribute of `[ServerRpc]`
 
-See [Remote actions](../Guides/RemoteActions/index.md).
+See [Remote actions](../Guides/RemoteCalls/index.md).
 
 ## Non-player game objects
 

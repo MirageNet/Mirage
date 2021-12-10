@@ -11,9 +11,9 @@ These attributes can be used for Unity game loop methods like Start or Update, a
 -   **<xref:Mirage.ClientAttribute>**  
     Only a Client can call the method (throws an error when called on the server unless you specify error = false).
 -   **<xref:Mirage.ClientRpcAttribute>**  
-    The server uses a Remote Procedure Call (RPC) to run that function on clients. It has a **target** option allowing you to specify in which clients it should be executed, along with a **channel** option. See also: [Client Rpc](./RemoteActions/ClientRpc.md)
+    The server uses a Remote Procedure Call (RPC) to run that function on clients. It has a **target** option allowing you to specify in which clients it should be executed, along with a **channel** option. See also: [Client Rpc](./RemoteCalls/ClientRpc.md)
 -   **<xref:Mirage.ServerRpcAttribute>**  
-    Call this from a client to run this function on the server. Make sure to validate input etc. It's not possible to call this from a server. Use this as a wrapper around another function, if you want to call it from the server too. Note that you can return value from it. See also [Server Rpc](./RemoteActions/ServerRpc.md)
+    Call this from a client to run this function on the server. Make sure to validate input etc. It's not possible to call this from a server. Use this as a wrapper around another function, if you want to call it from the server too. Note that you can return value from it. See also [Server Rpc](./RemoteCalls/ServerRpc.md)
     
     The allowed argument types are:
 
