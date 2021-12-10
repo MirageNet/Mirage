@@ -63,7 +63,7 @@ See [Client RPC](../RemoteCalls/ClientRpc.md) and related sections for more info
 
 Callbacks can be used to make sure code is executed at the right time.
 
-The network callbacks are found inside <xref:NetworkIdentity> so they can also be used outside of an NetworkBehaviour.
+The network callbacks are found inside <xref:Mirage.NetworkIdentity> so they can also be used outside of an NetworkBehaviour.
 
 See [NetworkBehaviour CallBacks](../CallBacks/NetworkBehaviour.md) and related sections for more information.
 

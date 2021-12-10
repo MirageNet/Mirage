@@ -11,9 +11,9 @@ Server authority means that the server has control of an object. Server has auth
 
 Client authority means that the client has control of an object. 
 
-When a client has authority over an object it means that they can call [ServerRpc](Communications/RemoteActions.md) and that the object will automatically be destroyed when the client disconnects.
+When a client has authority over an object it means that they can call [ServerRpc](./RemoteCalls/ServerRpc.md) and that the object will automatically be destroyed when the client disconnects.
 
-Even if a client has authority over an object the server still controls SyncVar and control other serialization features. A component will need to use a [ServerRpc](Communications/RemoteActions.md) to update the state on the server in order for it to sync to other clients.
+Even if a client has authority over an object the server still controls SyncVar and control other serialization features. A component will need to use a [ServerRpc](./RemoteCalls/ServerRpc.md) to update the state on the server in order for it to sync to other clients.
 
 
 ## How to give authority

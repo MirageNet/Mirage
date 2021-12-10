@@ -1,7 +1,7 @@
 todo
 
 # Network Messages
-For the most part we recommend the high level [RPC](RemoteActions.md) calls and [SyncVar](../Sync/index.md), but you can also send low level network messages. This can be useful if you want clients to send messages that are not tied to game objects, such as logging, analytics or profiling information.
+For the most part we recommend the high level [ServerRpc](./ServerRpc.md)/[ClientRpc](./ClientRpc.md) calls and [SyncVar](../Sync/index.md), but you can also send low level network messages. This can be useful if you want clients to send messages that are not tied to game objects, such as logging, analytics or profiling information.
 
 ## Usage
 1. Define a new struct (rather than a class to prevent GC allocations) which will represent your message.

@@ -3,4 +3,4 @@
 - name: Network Manager
   href: NetworkManager.md
 - name: Network Behaviour
-  href: NetworkBehaviourCallbacks.md
+  href: NetworkBehaviour.md
