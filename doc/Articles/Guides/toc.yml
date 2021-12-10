@@ -22,6 +22,9 @@
 - name: Synchronization
   href: Sync/toc.yml
   topicHref: Sync/index.md
+- name: RemoteCalls
+  href: RemoteCalls/toc.yml
+  topicHref: RemoteCalls/index.md
 - name: Communications
   href: Communications/toc.yml
   topicHref: Communications/index.md
