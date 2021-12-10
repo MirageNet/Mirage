@@ -6,3 +6,5 @@
   href: ServerRpc.md
 - name: Network Messages
   href: NetworkMessages.md
+- name: Rpc Example
+  href: RpcExamples.md
