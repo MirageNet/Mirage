@@ -29,7 +29,7 @@
   href: Callbacks/toc.yml
   topicHref: Callbacks/index.md
 - name: Game Objects
-  href: Game Objects/toc.yml
+  href: GameObjects/toc.yml
   topicHref: GameObjects/index.md
 - name: Scene Loading
   href: SceneLoading/toc.yml

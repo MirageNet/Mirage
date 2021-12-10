@@ -8,7 +8,7 @@
 - **No static state:** Run multiple servers/clients from a single Unity instance.
 - **Low bandwidth usage:** Use our [BitPacking](Articles/Guides/BitPacking/index.md) features to greatly reduce bandwidth.
 - **State synchronization:** Use [SyncVars](Articles/Guides/Sync/index.md) to easily synchronize your game state over the network.
-- **Server authoritative:** Utilize the [Server RPCs](Articles/Guides/RemoteCalls/ServerRpc.md) to do server-authoritative tasks.
+- **Server authoritative:** Utilize the [Server RPCs](Articles/Guides/RemoteActions/ServerRpc.md) to do server-authoritative tasks.
 - **Message system:** Send classes or structs as network messages for low-level operations.
 - **Simple socket API:** Easy to implement new protocols or services. High performance UDP socket built in.
 - **Unity's Fast domain reload support**
