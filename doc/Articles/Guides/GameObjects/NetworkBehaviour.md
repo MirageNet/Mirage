@@ -9,11 +9,11 @@ With the server-authoritative system of Mirage, the server must use the `Network
 **Note:** This is not a component that you can add to a game object directly. Instead, you must create a script which inherits from `NetworkBehaviour` (instead of the default `MonoBehaviour`), then you can add your script as a component to a game object.
 
 NetworkBehaviour scripts have the following features:
-- [NetworkBehaviour](#networkbehaviour)
-  - [Synchronized variables](#synchronized-variables)
-  - [Server and Client functions](#server-and-client-functions)
-  - [Server RPC Calls](#server-rpc-calls)
-  - [Client RPC Calls](#client-rpc-calls)
+- [Synchronized variables](#synchronized-variables)
+- [Server and Client functions](#server-and-client-functions)
+- [Server RPC Calls](#server-rpc-calls)
+- [Client RPC Calls](#client-rpc-calls)
+- [Callbacks](#network-callbacks)
 
 ![Data Flow Graph](../RemoteCalls/UNetDirections.jpg)
 
@@ -45,7 +45,7 @@ Server RPC Calls are called just by invoking the function normally on the client
 
 Server RPC Calls are type-safe, have built-in security and routing to the player, and use an efficient serialization mechanism for the arguments to make calling them fast.
 
-See [Communications](../Communications/index.md) and related sections for more information.
+See [Server RPC](../RemoteCalls/ClientRpc.md) and related sections for more information.
 
 ## Client RPC Calls
 
@@ -57,4 +57,13 @@ To define a Client RPC call in your code, you must write a function which:
 -   Has a name that begins with `Rpc`
 -   Has the `ClientRpc` attribute
 
-See [Communications](../Communications/index.md) and related sections for more information.
+See [Client RPC](../RemoteCalls/ClientRpc.md) and related sections for more information.
+
+## Network Callbacks
+
+Callbacks can be used to make sure code is executed at the right time.
+
+The network callbacks are found inside <xref:NetworkIdentity> so they can also be used outside of an NetworkBehaviour.
+
+See [NetworkBehaviour CallBacks](../CallBacks/NetworkBehaviour.md) and related sections for more information.
+

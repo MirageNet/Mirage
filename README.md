@@ -63,7 +63,7 @@ Mirage has many new features
 * Modular,  use only the components you need.
 * Error handling
 * [Version defines](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html#define-symbols)
-* Server Rpcs can [return values](https://miragenet.github.io/Mirage/Articles/Guides/Communications/RemoteActions.html)
+* Server Rpcs can [return values](https://miragenet.github.io/Mirage/Articles/Guides/RemoteCalls/ServerRpc.html)
 * The default transport features DoS prevention
 * The default transport has CRC64 integrity check
 

@@ -27,13 +27,13 @@ Reliability is handled on top of the factory by Mirage.
 
 ## Message Layer
 
-The message layer is concerned about sending and receiving [messages](../Guides/Communications/NetworkMessages.md)
+The message layer is concerned about sending and receiving [messages](../Guides/RemoteCalls/NetworkMessages.md)
 
-If you wish to use this funtionality, you will need to have a <xref:Mirage.NetworkClient> in the client and a <xref:Mirage.NetworkServer> for the server. These classes provide events you can subscribe to for the life cycle of connections.  A connection is an implementation of <xref:Mirage.INetworkPlayer>, and can send and receive messages. 
+If you wish to use this functionality, you will need to have a <xref:Mirage.NetworkClient> in the client and a <xref:Mirage.NetworkServer> for the server. These classes provide events you can subscribe to for the life cycle of connections.  A connection is an implementation of <xref:Mirage.INetworkPlayer>, and can send and receive messages. 
 
 ## Object Layer
 
-This layer is the highest level layer,  the classes in this layer are concerned about [synchronizing state](../Guides/Sync/index.md) between objects, as well as sending [RPC calls](../Guides/Communications/RemoteActions.md).
+This layer is the highest level layer,  the classes in this layer are concerned about [synchronizing state](../Guides/Sync/index.md) between objects, as well as sending [RPC calls](../Guides/RemoteCalls/index.md).
 
 The client needs a <xref:Mirage.ClientObjectManager>,  the server needs a <xref:Mirage.ServerObjectManager>. It will spawn and destroy objects and keep the objects in the client in sync with the objects in the server
 

@@ -1,15 +1,15 @@
 # Remote Actions
 
-To invoke code across the network you can use RPC and messages. 
+To invoke code across the network you can use RPC (remote procedure call) and messages. 
 
 RPC stands for  Remote Procedure Calls. They can be used inside [NetworkBehaviours](xref:Mirage.NetworkBehaviour) to tell either the client or server to do an action. For example, the client sending an RPC to the server to update the player's name.
 
-There are 2 types of RPC:
-- [ClientRpc](./ClientRpc.md) | Called on server, Invoked on client
-- [ServerRpc](./ServerRpc.md) | Called on client, Invoked on server
+There are 3 types of RPC:
+- [Client Rpc](./ClientRpc.md) | Called on server, Invoked on client
+- [Server Rpc](./ServerRpc.md) | Called on client, Invoked on server, can have return values
+- [Network Messages](./NetworkMessages.md) | Calls on either server/client, requires a handler to be registered
 
-
-Mirage uses network Messages for sending everything, this includes Spawning, RPC, and SyncVars. Network message serialized into bytes then sent over the network. 
+Mirage uses [Network messages](./NetworkMessages.md) for sending everything, this includes Spawning, RPC, and SyncVars. Network message serialized into bytes then sent over the network. 
 
 Network Message can be used to send data or invoke actions without a NetworkBehaviours. For example, sending character select information before the player's character is spawned. 
 

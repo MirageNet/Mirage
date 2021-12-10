@@ -6,7 +6,7 @@ Mirage normally generates readers and writers for any [Data Type](../Guides/Data
 In order to do so,  it needs to know what types you want to read or write.
 You are getting this error because Mirage did not know you wanted to read or write this type.
 
-Mirage scans your code looking for calls to `Send`, `ReceiveHandler`, `Write` or `Read`. It will also recognize [SyncVars](../Guides/Sync/index.md) and parameters of [RPC methods](../Guides/Communications/RemoteActions.md). If it does not find one,  it assumes you are not trying to serialize the type so it does not generate the reader and writer.
+Mirage scans your code looking for calls to `Send`, `ReceiveHandler`, `Write` or `Read`. It will also recognize [SyncVars](../Guides/Sync/index.md) and parameters of [RPC methods](../Guides/RemoteCalls/index.md). If it does not find one,  it assumes you are not trying to serialize the type so it does not generate the reader and writer.
 
 For example, you might get this error with this code when trying to sync the synclist.
 
