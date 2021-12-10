@@ -22,10 +22,13 @@
 - name: Synchronization
   href: Sync/toc.yml
   topicHref: Sync/index.md
-- name: Communications
-  href: Communications/toc.yml
-  topicHref: Communications/index.md
-- name: GameObjects
+- name: Remote Actions
+  href: RemoteCalls/toc.yml
+  topicHref: RemoteCalls/index.md
+- name: Callbacks
+  href: Callbacks/toc.yml
+  topicHref: Callbacks/index.md
+- name: Game Objects
   href: GameObjects/toc.yml
   topicHref: GameObjects/index.md
 - name: Scene Loading

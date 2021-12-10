@@ -97,11 +97,11 @@ public class Controls : NetworkBehaviour
 
 See [State Synchronization](../Guides/Sync/index.md).
 
-## Networked actions
+## Remote calls
 -   Make scripts that perform important actions into NetworkBehaviours instead of MonoBehaviours
 -   Update functions that perform important player actions to have an attribute of `[ServerRpc]`
 
-See [Networked Actions](../Guides/Communications/index.md).
+See [Remote actions](../Guides/RemoteCalls/index.md).
 
 ## Non-player game objects
 

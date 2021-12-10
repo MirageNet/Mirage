@@ -14,7 +14,7 @@ namespace Mirage
     }
 
     [AddComponentMenu("Network/NetworkManager")]
-    [HelpURL("https://miragenet.github.io/Mirage/Articles/Guides/Communications/NetworkManager.html")]
+    [HelpURL("https://miragenet.github.io/Mirage/Articles/Guides/Callbacks/NetworkManager.html")]
     [RequireComponent(typeof(NetworkServer))]
     [RequireComponent(typeof(NetworkClient))]
     [DisallowMultipleComponent]
