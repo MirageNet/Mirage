@@ -26,7 +26,6 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace Mirage.Serialization
 {
@@ -356,12 +355,11 @@ namespace Mirage.Serialization
         /// <para>
         ///    Moves position to nearest byte then copies struct from that position
         /// </para>
-        /// See <see href="https://docs.unity3d.com/ScriptReference/Unity.Collections.LowLevel.Unsafe.UnsafeUtility.CopyPtrToStructure.html">UnsafeUtility.CopyPtrToStructure</see>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <param name="byteSize"></param>
-        public void PadAndCopy<T>(int byteSize, out T value) where T : struct
+        public void PadAndCopy<T>(int byteSize, out T value) where T : unmanaged
         {
             PadToByte();
             int newPosition = bitPosition + (64 * byteSize);
@@ -369,7 +367,7 @@ namespace Mirage.Serialization
 
             byte* startPtr = ((byte*)longPtr) + (bitPosition >> 3);
 
-            UnsafeUtility.CopyPtrToStructure(startPtr, out value);
+            value = *(T*)startPtr;
             bitPosition = newPosition;
         }
 
