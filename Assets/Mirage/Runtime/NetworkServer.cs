@@ -163,7 +163,7 @@ namespace Mirage
 
             Cleanup();
 
-            // remove listen when server is stopped so that 
+            // remove listen when server is stopped so that we can cleanup correctly 
             Application.quitting -= Stop;
         }
 
@@ -464,7 +464,8 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("Server disconnect client:" + player);
 
-            // set flag first so we dont try to send message to connection
+            // set the flag first so we dont try to send any messages to the disconnected
+			// connection as they wouldn't get them
             player.MarkAsDisconnected();
 
             RemoveConnection(player);
