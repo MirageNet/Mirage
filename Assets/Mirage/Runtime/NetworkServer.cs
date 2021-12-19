@@ -275,7 +275,7 @@ namespace Mirage
         {
             var player = new NetworkPlayer(conn);
 
-            if (logger.LogEnabled()) logger.Log("Server accepted client:" + player);
+            if (logger.LogEnabled()) logger.Log($"Server accepted client: {player}");
 
             // add connection
             AddConnection(player);
@@ -286,7 +286,7 @@ namespace Mirage
 
         private void Peer_OnDisconnected(IConnection conn, DisconnectReason reason)
         {
-            if (logger.LogEnabled()) logger.Log($"[{conn}] discconnected with reason {reason}");
+            if (logger.LogEnabled()) logger.Log($"Client {conn} disconnected with reason: {reason}");
 
             if (connections.TryGetValue(conn, out INetworkPlayer player))
             {
