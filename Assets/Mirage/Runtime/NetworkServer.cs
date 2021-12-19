@@ -368,16 +368,16 @@ namespace Mirage
         {
             if (LocalPlayer != null)
             {
-                throw new InvalidOperationException("Local Connection already exists");
+                throw new InvalidOperationException("Local client connection already exists");
             }
 
             var player = new NetworkPlayer(connection);
             LocalPlayer = player;
             LocalClient = client;
 
-            if (logger.LogEnabled()) logger.Log("Server accepted Local client:" + player);
+            if (logger.LogEnabled()) logger.Log($"Server accepted local client connection: {player}");
 
-            // add connection
+            // add the connection for this local player.
             AddConnection(player);
         }
 
@@ -389,7 +389,7 @@ namespace Mirage
         {
             if (LocalPlayer == null)
             {
-                throw new InvalidOperationException("Local Connection does not exist");
+                throw new InvalidOperationException("Local connection does not exist");
             }
             Connected?.Invoke(LocalPlayer);
         }
@@ -508,7 +508,7 @@ namespace Mirage
                 else
                 {
                     // todo remove or replace with assert
-                    if (logger.WarnEnabled()) logger.LogWarning($"No player found for [{connection}]");
+                    if (logger.WarnEnabled()) logger.LogWarning($"No player found for message received from client {connection}");
                 }
             }
         }
