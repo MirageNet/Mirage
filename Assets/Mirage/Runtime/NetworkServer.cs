@@ -295,7 +295,7 @@ namespace Mirage
             else
             {
                 // todo remove or replace with assert
-                if (logger.WarnEnabled()) logger.LogWarning($"No handler found for [{conn}]");
+                if (logger.WarnEnabled()) logger.LogWarning($"No handler found for disconnected client {conn}");
             }
         }
 
