@@ -120,7 +120,10 @@ namespace Mirage.Serialization
             int length = reader.ReadPackedInt32();
             if (length < 0)
                 return null;
-            if (!reader.CanReadBytes(length))
+            // T might be only 1 bit long, so we have to check vs bit length
+            // todo have weaver calculate minimum size for T, so we can use it here instead of 1 bit
+            //     NOTE: we cant just use sizeof(T) because T might be bitpacked so smaller than size in memory
+            if (!reader.CanReadBits(length))
                 throw new EndOfStreamException($"Can't read {length} elements because it would read past the end of the stream.");
             var result = new T[length];
             for (int i = 0; i < length; i++)
