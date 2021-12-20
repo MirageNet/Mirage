@@ -33,6 +33,7 @@ namespace Mirage
 
             if (Client != null)
             {
+                Client.Started.AddListener(OnClientStarted);
                 Client.Disconnected.AddListener(OnClientDisconnected);
             }
             if (Server != null)
@@ -40,6 +41,12 @@ namespace Mirage
                 Server.Started.AddListener(OnServerStarted);
                 Server.Stopped.AddListener(OnServerStopped);
             }
+        }
+
+        void OnClientStarted()
+        {
+            // set not ready and wait for server to send scene message
+            Client.Player.SceneIsReady = false;
         }
 
         void OnClientDisconnected(ClientStoppedReason reason)
