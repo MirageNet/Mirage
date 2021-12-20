@@ -148,20 +148,6 @@ namespace Mirage
         /// </summary>
         NetworkIdentity _identity;
 
-
-#if !UNITY_2020_1_OR_NEWER
-        /// <summary>
-        /// Cache list for the results of GetComponentsInParent calls when looking up NetworkIdentity for NetworkBehaviour.
-        /// Used to avoid runtime allocations.
-        /// </summary>
-        /// <remarks>
-        /// This is required only for pre-2020.1 Unity versions, as they don't have an option to include inactive objects when calling non-allocating GetComponentInParent().
-        /// Setting the list's initial size to 1 prevents new allocations because GetComponentsInParent() can never find more than one NetworkIdentity
-        /// (given the fact that only 1 NetworkIdentity per hierarchy is currently allowed in Mirage).
-        /// </remarks>
-        private static List<NetworkIdentity> networkIdentityGetComponentCacheList = new List<NetworkIdentity>(1);
-#endif
-
         /// <summary>
         /// Returns the NetworkIdentity of this object
         /// </summary>
@@ -176,14 +162,7 @@ namespace Mirage
                 {
                     // we look up NetworkIdentity on this GO or any of its parents;
                     // this allows placing NetworkBehaviours on children of NetworkIdentity
-#if UNITY_2021_2_OR_NEWER
-                    _identity = GetComponentInParent<NetworkIdentity>(true);
-#elif UNITY_2020_1_OR_NEWER
                     _identity = gameObject.GetComponentInParent<NetworkIdentity>(true);
-#else
-                    GetComponentsInParent<NetworkIdentity>(true, networkIdentityGetComponentCacheList);
-                    _identity = networkIdentityGetComponentCacheList[0];
-#endif
 
                     // do this 2nd check inside first if so that we are not checking == twice on unity Object
                     if (_identity is null)
