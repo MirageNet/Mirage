@@ -1,3 +1,10 @@
+## [113.1.3](https://github.com/MirageNet/Mirage/compare/v113.1.2...v113.1.3) (2021-12-20)
+
+
+### Bug Fixes
+
+* fix a typo with NetworkServer disconnection logs, improve comments, fix formatting ([#1005](https://github.com/MirageNet/Mirage/issues/1005)) ([adcf3f6](https://github.com/MirageNet/Mirage/commit/adcf3f659c70c2fe8d425546d6018915370db736))
+
 ## [113.1.2](https://github.com/MirageNet/Mirage/compare/v113.1.1...v113.1.2) (2021-12-08)
 
 
