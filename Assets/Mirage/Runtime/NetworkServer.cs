@@ -163,7 +163,7 @@ namespace Mirage
 
             Cleanup();
 
-            // remove listen when server is stopped so that 
+            // remove listen when server is stopped so that we can cleanup correctly 
             Application.quitting -= Stop;
         }
 
@@ -275,7 +275,7 @@ namespace Mirage
         {
             var player = new NetworkPlayer(conn);
 
-            if (logger.LogEnabled()) logger.Log("Server accepted client:" + player);
+            if (logger.LogEnabled()) logger.Log($"Server accepted client: {player}");
 
             // add connection
             AddConnection(player);
@@ -286,7 +286,7 @@ namespace Mirage
 
         private void Peer_OnDisconnected(IConnection conn, DisconnectReason reason)
         {
-            if (logger.LogEnabled()) logger.Log($"[{conn}] discconnected with reason {reason}");
+            if (logger.LogEnabled()) logger.Log($"Client {conn} disconnected with reason: {reason}");
 
             if (connections.TryGetValue(conn, out INetworkPlayer player))
             {
@@ -295,7 +295,7 @@ namespace Mirage
             else
             {
                 // todo remove or replace with assert
-                if (logger.WarnEnabled()) logger.LogWarning($"No handler found for [{conn}]");
+                if (logger.WarnEnabled()) logger.LogWarning($"No handler found for disconnected client {conn}");
             }
         }
 
@@ -368,16 +368,16 @@ namespace Mirage
         {
             if (LocalPlayer != null)
             {
-                throw new InvalidOperationException("Local Connection already exists");
+                throw new InvalidOperationException("Local client connection already exists");
             }
 
             var player = new NetworkPlayer(connection);
             LocalPlayer = player;
             LocalClient = client;
 
-            if (logger.LogEnabled()) logger.Log("Server accepted Local client:" + player);
+            if (logger.LogEnabled()) logger.Log($"Server accepted local client connection: {player}");
 
-            // add connection
+            // add the connection for this local player.
             AddConnection(player);
         }
 
@@ -389,7 +389,7 @@ namespace Mirage
         {
             if (LocalPlayer == null)
             {
-                throw new InvalidOperationException("Local Connection does not exist");
+                throw new InvalidOperationException("Local connection does not exist");
             }
             Connected?.Invoke(LocalPlayer);
         }
@@ -464,7 +464,8 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("Server disconnect client:" + player);
 
-            // set flag first so we dont try to send message to connection
+            // set the flag first so we dont try to send any messages to the disconnected
+			// connection as they wouldn't get them
             player.MarkAsDisconnected();
 
             RemoveConnection(player);
@@ -508,7 +509,7 @@ namespace Mirage
                 else
                 {
                     // todo remove or replace with assert
-                    if (logger.WarnEnabled()) logger.LogWarning($"No player found for [{connection}]");
+                    if (logger.WarnEnabled()) logger.LogWarning($"No player found for message received from client {connection}");
                 }
             }
         }
