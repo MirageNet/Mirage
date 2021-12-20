@@ -1,3 +1,15 @@
+# [113.2.0](https://github.com/MirageNet/Mirage/compare/v113.1.3...v113.2.0) (2021-12-20)
+
+
+### Bug Fixes
+
+* **Serialization:** fixing ReadArray when reading items that are bitpacked ([6dfbf84](https://github.com/MirageNet/Mirage/commit/6dfbf846c5456b7a80f4d5c8d3977426e4bff4c5))
+
+
+### Features
+
+* **Serialization:** adding CanReadBits function to network reader ([3aae955](https://github.com/MirageNet/Mirage/commit/3aae955c8e30b87e9b005323febc9f1831c45bb7))
+
 ## [113.1.3](https://github.com/MirageNet/Mirage/compare/v113.1.2...v113.1.3) (2021-12-20)
 
 
