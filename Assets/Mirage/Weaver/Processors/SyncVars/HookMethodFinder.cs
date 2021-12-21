@@ -32,7 +32,7 @@ namespace Mirage.Weaver.SyncVars
         static SyncVarHook FindHookMethod(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
         {
             // check event first
-            EventDefinition @event = syncVar.DeclaringType.Events.Where(x => x.Name == hookFunctionName).FirstOrDefault();
+            EventDefinition @event = syncVar.DeclaringType.Events.FirstOrDefault(x => x.Name == hookFunctionName);
             if (@event != null)
             {
                 return ValidateEvent(syncVar, originalType, @event);

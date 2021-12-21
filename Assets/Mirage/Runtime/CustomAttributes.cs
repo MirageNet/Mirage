@@ -16,6 +16,11 @@ namespace Mirage
         /// If true, this syncvar will only be sent with spawn message, any other changes will not be sent to existing objects
         /// </summary>
         public bool initialOnly;
+
+        /// <summary>
+        ///     If true this syncvar hook will also fire on the server side.
+        /// </summary>
+        public bool fireOnServer;
     }
 
     /// <summary>

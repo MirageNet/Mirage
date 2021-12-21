@@ -488,6 +488,10 @@ namespace Mirage.Weaver
                 foreach (FoundSyncVar syncVar in behaviour.SyncVars)
                 {
                     WriteFromField(worker, helper.WriterParameter, syncVar);
+
+                    if (syncVar.FireOnServer && syncVar.HasHook)
+                    {
+                    }
                 }
             });
 
@@ -507,6 +511,15 @@ namespace Mirage.Weaver
                     // Generates a call to the writer for that field
                     WriteFromField(worker, helper.WriterParameter, syncVar);
                 });
+
+                if (syncVar.FireOnServer && syncVar.HasHook)
+                {
+                    VariableDefinition oldValue = helper.Method.AddLocal(syncVar.OriginalType);
+
+                    // call the hook
+                    // Generates: OnValueChanged(oldValue, this.syncVar)
+                    WriteCallHookMethodUsingField(worker, syncVar.Hook, oldValue, syncVar);
+                }
             }
 
             // generate: return dirtyLocal
@@ -627,7 +640,6 @@ namespace Mirage.Weaver
                 // but only if SyncVar changed. otherwise a client would
                 // get hook calls for all initial values, even if they
                 // didn't change from the default values on the client.
-                // see also: https://github.com/vis2k/Mirror/issues/1278
 
                 // Generates: if (!SyncVarEqual)
                 Instruction syncVarEqualLabel = worker.Create(OpCodes.Nop);
@@ -652,6 +664,7 @@ namespace Mirage.Weaver
                 // Generates: end if (!SyncVarEqual)
                 worker.Append(syncVarEqualLabel);
             }
+
         }
 
         void ReadToField(ILProcessor worker, ParameterDefinition readerParameter, FoundSyncVar syncVar)
