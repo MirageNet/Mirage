@@ -490,18 +490,17 @@ namespace Mirage.Weaver
                 {
                     WriteFromField(worker, helper.WriterParameter, syncVar);
 
-                    if (syncVar.FireOnServer && syncVar.HasHook)
+                    if (syncVar.InvokeHookOnServer && syncVar.HasHook)
                     {
                         VariableDefinition oldValue = helper.Method.AddLocal(syncVar.OriginalType);
 
                         // call the hook
                         // Generates: OnValueChanged(oldValue, this.syncVar)
-                        WriteCallHookMethodUsingField(worker, syncVar.Hook, oldValue, syncVar);
+                        EndHook(worker, syncVar, syncVar.OriginalType, oldValue);
                     }
-                    else if (syncVar.FireOnServer && !syncVar.HasHook)
+                    else if (syncVar.InvokeHookOnServer && !syncVar.HasHook)
                     {
-                        Debug.LogWarning(
-                            $"Parameter {syncVar.FireOnServer} is set to true but no hook was implemented. Please implement hook or set {syncVar.FireOnServer} back to false or remove for default false.");
+                        throw new HookMethodException($"Parameter {syncVar.InvokeHookOnServer} is set to true but no hook was implemented. Please implement hook or set {syncVar.InvokeHookOnServer} back to false or remove for default false.", helper.Method);
                     }
                 }
             });
@@ -523,18 +522,17 @@ namespace Mirage.Weaver
                     WriteFromField(worker, helper.WriterParameter, syncVar);
                 });
 
-                if (syncVar.FireOnServer && syncVar.HasHook)
+                if (syncVar.InvokeHookOnServer && syncVar.HasHook)
                 {
                     VariableDefinition oldValue = helper.Method.AddLocal(syncVar.OriginalType);
 
                     // call the hook
                     // Generates: OnValueChanged(oldValue, this.syncVar)
-                    WriteCallHookMethodUsingField(worker, syncVar.Hook, oldValue, syncVar);
+                    EndHook(worker, syncVar, syncVar.OriginalType, oldValue);
                 }
-                else if (syncVar.FireOnServer && !syncVar.HasHook)
+                else if (syncVar.InvokeHookOnServer && !syncVar.HasHook)
                 {
-                    Debug.LogWarning(
-                        $"Parameter {syncVar.FireOnServer} is set to true but no hook was implemented. Please implement hook or set {syncVar.FireOnServer} back to false or remove for default false.");
+                    throw new HookMethodException($"Parameter {syncVar.InvokeHookOnServer} is set to true but no hook was implemented. Please implement hook or set {syncVar.InvokeHookOnServer} back to false or remove for default false.", helper.Method);
                 }
             }
 

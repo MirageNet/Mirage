@@ -37,7 +37,7 @@ namespace Mirage.Weaver.SyncVars
         public bool HasHook { get; private set; }
         public SyncVarHook Hook { get; private set; }
         public bool InitialOnly { get; private set; }
-        public bool FireOnServer { get; private set; }
+        public bool InvokeHookOnServer { get; private set; }
 
         /// <summary>
         /// Changing the type of the field to the wrapper type, if one exists
@@ -93,7 +93,7 @@ namespace Mirage.Weaver.SyncVars
 
             InitialOnly = GetInitialOnly(FieldDefinition);
 
-            FireOnServer = GetFireOnServer(FieldDefinition);
+            InvokeHookOnServer = GetFireOnServer(FieldDefinition);
 
             ValueSerializer = ValueSerializerFinder.GetSerializer(this, writers, readers);
         }
@@ -107,7 +107,7 @@ namespace Mirage.Weaver.SyncVars
         static bool GetFireOnServer(FieldDefinition fieldDefinition)
         {
             CustomAttribute attr = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
-            return attr.GetField(nameof(SyncVarAttribute.fireOnServer), false);
+            return attr.GetField(nameof(SyncVarAttribute.invokeHookOnServer), false);
         }
     }
 }

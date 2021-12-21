@@ -20,7 +20,7 @@ namespace Mirage
         /// <summary>
         ///     If true this syncvar hook will also fire on the server side.
         /// </summary>
-        public bool fireOnServer;
+        public bool invokeHookOnServer;
     }
 
     /// <summary>
