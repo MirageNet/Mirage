@@ -167,7 +167,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             System.GC.Collect();
         }
 
-        [UnityTest]
+        [Test]
         [TestCase(true, 100, 0f, 0f)]
         [TestCase(true, 100, 0.2f, 0f)]
         [TestCase(true, 100, 0.2f, 0.4f)]
@@ -183,7 +183,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         {
             SendManyMessages(instance2Sends, messageCount, dropChance, skipChance);
 
-            // ---- asserts ---- // 
+            // ---- asserts ---- //
             Assert.That(receives2, Has.Count.EqualTo(messageCount + 1));
             Assert.That(receives1, Has.Count.EqualTo(instance2Sends ? messageCount + 1 : 0));
 
@@ -240,7 +240,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 instance2.ackSystem.SendReliable(new byte[1] { 0 });
             }
             // run for enough updates that all message should be received
-            // wait more than timeout incase 
+            // wait more than timeout incase
             for (float t = 0; t < timeout * 2f; t += tick)
             {
                 // fake Update
@@ -302,7 +302,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 instance2.ackSystem.SendReliable(new byte[1] { 0 });
             }
             // run for enough updates that all message should be received
-            // wait more than timeout incase 
+            // wait more than timeout incase
             for (float t = 0; t < timeout * 2f; t += tick)
             {
                 // fake Update
@@ -313,7 +313,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             Assert.That(instance1.connection.packets, Does.Not.Contain(null));
             Assert.That(instance2.connection.packets, Does.Not.Contain(null));
 
-            // ---- asserts ---- // 
+            // ---- asserts ---- //
             Assert.That(receives2, Has.Count.EqualTo(messageCount + 1));
             Assert.That(receives1, Has.Count.EqualTo(instance2Sends ? messageCount + 1 : 0));
 
