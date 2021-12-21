@@ -4,6 +4,7 @@ using Mirage.Weaver.Serialization;
 using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using UnityEngine;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using PropertyAttributes = Mono.Cecil.PropertyAttributes;
@@ -497,6 +498,11 @@ namespace Mirage.Weaver
                         // Generates: OnValueChanged(oldValue, this.syncVar)
                         WriteCallHookMethodUsingField(worker, syncVar.Hook, oldValue, syncVar);
                     }
+                    else if (syncVar.FireOnServer && !syncVar.HasHook)
+                    {
+                        Debug.LogWarning(
+                            $"Parameter {syncVar.FireOnServer} is set to true but no hook was implemented. Please implement hook or set {syncVar.FireOnServer} back to false or remove for default false.");
+                    }
                 }
             });
 
@@ -524,6 +530,11 @@ namespace Mirage.Weaver
                     // call the hook
                     // Generates: OnValueChanged(oldValue, this.syncVar)
                     WriteCallHookMethodUsingField(worker, syncVar.Hook, oldValue, syncVar);
+                }
+                else if (syncVar.FireOnServer && !syncVar.HasHook)
+                {
+                    Debug.LogWarning(
+                        $"Parameter {syncVar.FireOnServer} is set to true but no hook was implemented. Please implement hook or set {syncVar.FireOnServer} back to false or remove for default false.");
                 }
             }
 
