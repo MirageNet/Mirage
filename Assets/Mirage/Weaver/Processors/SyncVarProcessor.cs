@@ -491,6 +491,11 @@ namespace Mirage.Weaver
 
                     if (syncVar.FireOnServer && syncVar.HasHook)
                     {
+                        VariableDefinition oldValue = helper.Method.AddLocal(syncVar.OriginalType);
+
+                        // call the hook
+                        // Generates: OnValueChanged(oldValue, this.syncVar)
+                        WriteCallHookMethodUsingField(worker, syncVar.Hook, oldValue, syncVar);
                     }
                 }
             });
