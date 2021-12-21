@@ -178,6 +178,9 @@ namespace Mirage.Tests.Weaver
             HasError("BitCount must be between 1 and 30 (inclusive), bitCount:0",
                "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value7");
 
+            // string interpolation for numerical values is required to force how to print the decimal separator
+            // because the string check is strict, operating systems using a different one, such as commas
+            // would print it differently and make the test fails
 #if UNITY_2021_2_OR_NEWER
             HasError($"Max must be above 0, max:({-1.0:0.00}, {0.0:0.00}, {0.0:0.00})",
                "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value8");
