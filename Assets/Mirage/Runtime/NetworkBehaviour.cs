@@ -149,6 +149,7 @@ namespace Mirage
         NetworkIdentity _identity;
 
 
+        // TODO: remove this bit once Unity drops support for 2019 LTS
 #if !UNITY_2020_1_OR_NEWER
         /// <summary>
         /// Cache list for the results of GetComponentsInParent calls when looking up NetworkIdentity for NetworkBehaviour.
@@ -181,6 +182,7 @@ namespace Mirage
 #elif UNITY_2020_1_OR_NEWER
                     _identity = gameObject.GetComponentInParent<NetworkIdentity>(true);
 #else
+                    // TODO: remove this bit once Unity drops support for 2019 LTS
                     GetComponentsInParent<NetworkIdentity>(true, networkIdentityGetComponentCacheList);
                     _identity = networkIdentityGetComponentCacheList[0];
 #endif
