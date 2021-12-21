@@ -167,19 +167,19 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             System.GC.Collect();
         }
 
-        [UnityTest]
-        [TestCase(true, 100, 0f, 0f, ExpectedResult = null)]
-        [TestCase(true, 100, 0.2f, 0f, ExpectedResult = null)]
-        [TestCase(true, 100, 0.2f, 0.4f, ExpectedResult = null)]
-        [TestCase(true, 3000, 0.2f, 0f, ExpectedResult = null)]
-        [TestCase(true, 3000, 0.2f, 0.4f, ExpectedResult = null)]
-        [TestCase(false, 100, 0f, 0f, ExpectedResult = null)]
-        [TestCase(false, 100, 0.2f, 0f, ExpectedResult = null)]
-        [TestCase(false, 100, 0.2f, 0.4f, ExpectedResult = null)]
-        [TestCase(false, 3000, 0.2f, 0f, ExpectedResult = null)]
-        [TestCase(false, 3000, 0.2f, 0.4f, ExpectedResult = null)]
+        [Test]
+        [TestCase(true, 100, 0f, 0f)]
+        [TestCase(true, 100, 0.2f, 0f)]
+        [TestCase(true, 100, 0.2f, 0.4f)]
+        [TestCase(true, 3000, 0.2f, 0f)]
+        [TestCase(true, 3000, 0.2f, 0.4f)]
+        [TestCase(false, 100, 0f, 0f)]
+        [TestCase(false, 100, 0.2f, 0f)]
+        [TestCase(false, 100, 0.2f, 0.4f)]
+        [TestCase(false, 3000, 0.2f, 0f)]
+        [TestCase(false, 3000, 0.2f, 0.4f)]
         [Repeat(100)]
-        public IEnumerator AllMessagesShouldHaveBeenReceivedInOrder(bool instance2Sends, int messageCount, float dropChance, float skipChance)
+        public void AllMessagesShouldHaveBeenReceivedInOrder(bool instance2Sends, int messageCount, float dropChance, float skipChance)
         {
             SendManyMessages(instance2Sends, messageCount, dropChance, skipChance);
 
@@ -207,8 +207,6 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                     AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
                 }
             }
-
-            yield return null;
         }
 
         void SendManyMessages(bool instance2Sends, int messageCount, float dropChance, float skipChance)
