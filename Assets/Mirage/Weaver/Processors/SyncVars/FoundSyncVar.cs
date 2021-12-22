@@ -96,6 +96,9 @@ namespace Mirage.Weaver.SyncVars
             InvokeHookOnServer = GetFireOnServer(FieldDefinition);
 
             ValueSerializer = ValueSerializerFinder.GetSerializer(this, writers, readers);
+
+            if (!HasHook && InvokeHookOnServer)
+                throw new HookMethodException("'invokeHookOnServer' is set to true but no hook was implemented. Please implement hook or set 'invokeHookOnServer' back to false or remove for default false.", FieldDefinition);
         }
 
         static bool GetInitialOnly(FieldDefinition fieldDefinition)

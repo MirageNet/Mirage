@@ -4,7 +4,6 @@ using Mirage.Weaver.Serialization;
 using Mirage.Weaver.SyncVars;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using UnityEngine;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using PropertyAttributes = Mono.Cecil.PropertyAttributes;
@@ -109,10 +108,7 @@ namespace Mirage.Weaver
 
         void ProcessSyncVar(FoundSyncVar syncVar)
         {
-            if (!syncVar.HasHook && syncVar.InvokeHookOnServer)
-                throw new HookMethodException(
-                    $"Parameter {syncVar.InvokeHookOnServer} is set to true but no hook was implemented. Please implement hook or set {syncVar.InvokeHookOnServer} back to false or remove for default false.",
-                    syncVar.Hook.Method);
+
 
             // process attributes first before creating setting, otherwise it wont know about hook
             syncVar.SetWrapType();
