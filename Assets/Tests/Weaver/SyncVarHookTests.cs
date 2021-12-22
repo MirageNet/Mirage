@@ -116,7 +116,7 @@ namespace Mirage.Tests.Weaver
         public void SyncVarHookServerError()
         {
             HasError($"'invokeHookOnServer' is set to true but no hook was implemented. Please implement hook or set 'invokeHookOnServer' back to false or remove for default false.",
-                "System.Int32 SyncVarHookTests.SyncVarHookServer.SyncVarHookServer::health");
+                "System.Int32 SyncVarHookTests.SyncVarHookServerError.SyncVarHookServerError::health");
         }
     }
 }
