@@ -47,7 +47,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                 called++;
             };
 
-            serverComponent.health = CValue;
+            serverComponent.health = SValue;
 
             yield return new WaitUntil(() => called > 0);
 

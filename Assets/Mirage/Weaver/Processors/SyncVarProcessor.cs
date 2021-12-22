@@ -109,6 +109,11 @@ namespace Mirage.Weaver
 
         void ProcessSyncVar(FoundSyncVar syncVar)
         {
+            if (!syncVar.HasHook && syncVar.InvokeHookOnServer)
+                throw new HookMethodException(
+                    $"Parameter {syncVar.InvokeHookOnServer} is set to true but no hook was implemented. Please implement hook or set {syncVar.InvokeHookOnServer} back to false or remove for default false.",
+                    syncVar.Hook.Method);
+
             // process attributes first before creating setting, otherwise it wont know about hook
             syncVar.SetWrapType();
             syncVar.ProcessAttributes(writers, readers);
@@ -117,11 +122,6 @@ namespace Mirage.Weaver
 
             string originalName = fd.Name;
             Weaver.DebugLog(fd.DeclaringType, $"Sync Var {fd.Name} {fd.FieldType}");
-
-            if (!syncVar.HasHook && syncVar.InvokeHookOnServer)
-                throw new HookMethodException(
-                    $"Parameter {syncVar.InvokeHookOnServer} is set to true but no hook was implemented. Please implement hook or set {syncVar.InvokeHookOnServer} back to false or remove for default false.",
-                    syncVar.Hook.Method);
 
             MethodDefinition get = GenerateSyncVarGetter(syncVar);
             MethodDefinition set = syncVar.InitialOnly
