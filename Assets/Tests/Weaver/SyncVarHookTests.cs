@@ -105,5 +105,18 @@ namespace Mirage.Tests.Weaver
             HasError($"Hook Event for 'health' needs to be type 'System.Action<,>' but was 'System.Action`2<System.Int32,System.Single>' instead",
                 "System.Action`2<System.Int32,System.Single> SyncVarHookTests.ErrorWhenEventArgsAreWrong.ErrorWhenEventArgsAreWrong::OnChangeHealth");
         }
+
+        [Test]
+        public void SyncVarHookServer()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void SyncVarHookServerError()
+        {
+            HasError($"'invokeHookOnServer' is set to true but no hook was implemented. Please implement hook or set 'invokeHookOnServer' back to false or remove for default false.",
+                "System.Int32 SyncVarHookTests.SyncVarHookServer.SyncVarHookServer::health");
+        }
     }
 }
