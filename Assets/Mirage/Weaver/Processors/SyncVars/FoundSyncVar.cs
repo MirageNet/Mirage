@@ -37,6 +37,7 @@ namespace Mirage.Weaver.SyncVars
         public bool HasHook { get; private set; }
         public SyncVarHook Hook { get; private set; }
         public bool InitialOnly { get; private set; }
+        public bool InvokeHookOnServer { get; private set; }
 
         /// <summary>
         /// Changing the type of the field to the wrapper type, if one exists
@@ -92,13 +93,24 @@ namespace Mirage.Weaver.SyncVars
 
             InitialOnly = GetInitialOnly(FieldDefinition);
 
+            InvokeHookOnServer = GetFireOnServer(FieldDefinition);
+
             ValueSerializer = ValueSerializerFinder.GetSerializer(this, writers, readers);
+
+            if (!HasHook && InvokeHookOnServer)
+                throw new HookMethodException("'invokeHookOnServer' is set to true but no hook was implemented. Please implement hook or set 'invokeHookOnServer' back to false or remove for default false.", FieldDefinition);
         }
 
         static bool GetInitialOnly(FieldDefinition fieldDefinition)
         {
             CustomAttribute attr = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
             return attr.GetField(nameof(SyncVarAttribute.initialOnly), false);
+        }
+
+        static bool GetFireOnServer(FieldDefinition fieldDefinition)
+        {
+            CustomAttribute attr = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
+            return attr.GetField(nameof(SyncVarAttribute.invokeHookOnServer), false);
         }
     }
 }
