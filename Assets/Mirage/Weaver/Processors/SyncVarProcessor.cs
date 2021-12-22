@@ -235,10 +235,12 @@ namespace Mirage.Weaver
                 //if (base.isLocalClient && !getSyncVarHookGuard(dirtyBit))
                 Instruction label = worker.Create(OpCodes.Nop);
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
+                // if invokeOnServer, then `IsServer` will also cover the Host case too so we dont need to use an OR here
                 if (syncVar.InvokeHookOnServer)
                     worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
                 else
                     worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalClient));
+
                 worker.Append(worker.Create(OpCodes.Brfalse, label));
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
