@@ -1,3 +1,15 @@
+# [113.3.0](https://github.com/MirageNet/Mirage/compare/v113.2.0...v113.3.0) (2021-12-22)
+
+
+### Bug Fixes
+
+* **NetworkBehaviour:** can now found NetworkIdentity in parent when gameobject is disabled ([#1006](https://github.com/MirageNet/Mirage/issues/1006)) ([d54537a](https://github.com/MirageNet/Mirage/commit/d54537a8c0a136130d4f8cf91a4e779bdb992221))
+
+
+### Features
+
+* **SyncVar:** option to invoke hooks on server too ([#1012](https://github.com/MirageNet/Mirage/issues/1012)) ([8c12c28](https://github.com/MirageNet/Mirage/commit/8c12c280467c8f68e9e96344bf6143db9b032a9f))
+
 # [113.2.0](https://github.com/MirageNet/Mirage/compare/v113.1.3...v113.2.0) (2021-12-20)
 
 
