@@ -108,8 +108,6 @@ namespace Mirage.Weaver
 
         void ProcessSyncVar(FoundSyncVar syncVar)
         {
-
-
             // process attributes first before creating setting, otherwise it wont know about hook
             syncVar.SetWrapType();
             syncVar.ProcessAttributes(writers, readers);
