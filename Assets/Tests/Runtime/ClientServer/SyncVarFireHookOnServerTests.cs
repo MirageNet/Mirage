@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.ClientServer
@@ -48,8 +49,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             serverComponent.health = CValue;
 
-            yield return null;
-            yield return null;
+            yield return new WaitUntil(() => called > 0);
 
             Assert.That(called, Is.EqualTo(1));
             Assert.That(oldValue, Is.EqualTo(CValue));
@@ -61,7 +61,7 @@ namespace Mirage.Tests.Runtime.ClientServer
     public class SyncVarFireHookMethodOnServerTests : ClientServerSetup<BehaviourWithSyncVarOnServerMethod>
     {
         [UnityTest]
-        public IEnumerator SyncVarHookEventIsCalledOnServer()
+        public IEnumerator SyncVarHookMethodIsCalledOnServer()
         {
             const int SValue = 10;
             int oldValue = serverComponent.health;
@@ -69,8 +69,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             serverComponent.health = SValue;
 
-            yield return null;
-            yield return null;
+            yield return new WaitUntil(() => oldValue == newValue);
 
             newValue = serverComponent.health;
 

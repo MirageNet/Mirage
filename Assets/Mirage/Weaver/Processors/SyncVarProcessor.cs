@@ -118,6 +118,10 @@ namespace Mirage.Weaver
             string originalName = fd.Name;
             Weaver.DebugLog(fd.DeclaringType, $"Sync Var {fd.Name} {fd.FieldType}");
 
+            if (!syncVar.HasHook && syncVar.InvokeHookOnServer)
+                throw new HookMethodException(
+                    $"Parameter {syncVar.InvokeHookOnServer} is set to true but no hook was implemented. Please implement hook or set {syncVar.InvokeHookOnServer} back to false or remove for default false.",
+                    syncVar.Hook.Method);
 
             MethodDefinition get = GenerateSyncVarGetter(syncVar);
             MethodDefinition set = syncVar.InitialOnly
@@ -237,7 +241,10 @@ namespace Mirage.Weaver
                 //if (base.isLocalClient && !getSyncVarHookGuard(dirtyBit))
                 Instruction label = worker.Create(OpCodes.Nop);
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
-                worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalClient));
+                if (syncVar.InvokeHookOnServer)
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
+                else
+                    worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsLocalClient));
                 worker.Append(worker.Create(OpCodes.Brfalse, label));
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
@@ -248,7 +255,8 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Ldc_I8, syncVar.DirtyBit));
                 worker.Append(worker.Create(OpCodes.Ldc_I4_1));
-                worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call, nb => nb.SetSyncVarHookGuard(default, default)));
+                worker.Append(worker.Create<NetworkBehaviour>(OpCodes.Call,
+                    nb => nb.SetSyncVarHookGuard(default, default)));
 
                 // call hook (oldValue, newValue)
                 // Generates: OnValueChanged(oldValue, value)
@@ -489,19 +497,6 @@ namespace Mirage.Weaver
                 foreach (FoundSyncVar syncVar in behaviour.SyncVars)
                 {
                     WriteFromField(worker, helper.WriterParameter, syncVar);
-
-                    if (syncVar.InvokeHookOnServer && syncVar.HasHook)
-                    {
-                        VariableDefinition oldValue = helper.Method.AddLocal(syncVar.OriginalType);
-
-                        // call the hook
-                        // Generates: OnValueChanged(oldValue, this.syncVar)
-                        EndHook(worker, syncVar, syncVar.OriginalType, oldValue);
-                    }
-                    else if (syncVar.InvokeHookOnServer && !syncVar.HasHook)
-                    {
-                        throw new HookMethodException($"Parameter {syncVar.InvokeHookOnServer} is set to true but no hook was implemented. Please implement hook or set {syncVar.InvokeHookOnServer} back to false or remove for default false.", helper.Method);
-                    }
                 }
             });
 
@@ -521,19 +516,6 @@ namespace Mirage.Weaver
                     // Generates a call to the writer for that field
                     WriteFromField(worker, helper.WriterParameter, syncVar);
                 });
-
-                if (syncVar.InvokeHookOnServer && syncVar.HasHook)
-                {
-                    VariableDefinition oldValue = helper.Method.AddLocal(syncVar.OriginalType);
-
-                    // call the hook
-                    // Generates: OnValueChanged(oldValue, this.syncVar)
-                    EndHook(worker, syncVar, syncVar.OriginalType, oldValue);
-                }
-                else if (syncVar.InvokeHookOnServer && !syncVar.HasHook)
-                {
-                    throw new HookMethodException($"Parameter {syncVar.InvokeHookOnServer} is set to true but no hook was implemented. Please implement hook or set {syncVar.InvokeHookOnServer} back to false or remove for default false.", helper.Method);
-                }
             }
 
             // generate: return dirtyLocal
