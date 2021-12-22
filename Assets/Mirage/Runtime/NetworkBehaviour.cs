@@ -175,17 +175,7 @@ namespace Mirage
                 // instead of calling unity's MonoBehaviour == operator
                 if (_identity is null)
                 {
-                    // we look up NetworkIdentity on this GO or any of its parents;
-                    // this allows placing NetworkBehaviours on children of NetworkIdentity
-#if UNITY_2021_2_OR_NEWER
-                    _identity = GetComponentInParent<NetworkIdentity>(true);
-#elif UNITY_2020_1_OR_NEWER
-                    _identity = gameObject.GetComponentInParent<NetworkIdentity>(true);
-#else
-                    // TODO: remove this bit once Unity drops support for 2019 LTS
-                    GetComponentsInParent<NetworkIdentity>(true, networkIdentityGetComponentCacheList);
-                    _identity = networkIdentityGetComponentCacheList[0];
-#endif
+                    _identity = TryFindIdentity();
 
                     // do this 2nd check inside first if so that we are not checking == twice on unity Object
                     if (_identity is null)
@@ -225,6 +215,26 @@ namespace Mirage
 
                 return COMPONENT_INDEX_NOT_FOUND;
             }
+        }
+
+        /// <summary>
+        /// Tries to find <see cref="NetworkIdentity"/> which is responsible for this <see cref="NetworkBehaviour"/>.
+        /// </summary>
+        /// <remarks>We look up NetworkIdentity on this GameObject or any of its parents. This allows placing NetworkBehaviours on children of NetworkIdentity.</remarks>
+        /// <returns><see cref="NetworkIdentity"/> if found, null otherwise.</returns>
+        private NetworkIdentity TryFindIdentity()
+        {
+#if UNITY_2021_2_OR_NEWER
+            var identity = GetComponentInParent<NetworkIdentity>(true);
+#elif UNITY_2020_1_OR_NEWER
+            var identity = gameObject.GetComponentInParent<NetworkIdentity>(true);
+#else
+            // TODO: remove this bit once Unity drops support for 2019 LTS
+            GetComponentsInParent<NetworkIdentity>(true, networkIdentityGetComponentCacheList);
+            var identity = networkIdentityGetComponentCacheList[0];
+#endif
+
+            return identity;
         }
 
         // this gets called in the constructor by the weaver
