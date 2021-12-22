@@ -16,10 +16,11 @@ namespace Mirage
 
     /// <summary>
     /// Base class which should be inherited by scripts which contain networking functionality.
+    ///
     /// </summary>
     /// <remarks>
     /// <para>This is a MonoBehaviour class so scripts which need to use the networking feature should inherit this class instead of MonoBehaviour. It allows you to invoke networked actions, receive various callbacks, and automatically synchronize state from server-to-client.</para>
-    /// <para>The NetworkBehaviour component requires a NetworkIdentity on the game object. There can be multiple NetworkBehaviours on a single game object. For an object with sub-components in a hierarchy, the NetworkIdentity must be on the root object, and NetworkBehaviour scripts must also be on the root object.</para>
+    /// <para>The NetworkBehaviour component requires a NetworkIdentity on the same game object or any of its parents. There can be multiple NetworkBehaviours on a single game object. For an object with sub-components in a hierarchy, the NetworkIdentity must be on the root object, and NetworkBehaviour scripts can be on the root object or any of its children.</para>
     /// <para>Some of the built-in components of the networking system are derived from NetworkBehaviour, including NetworkTransport, NetworkAnimator and NetworkProximityChecker.</para>
     /// </remarks>
     [AddComponentMenu("")]
@@ -147,6 +148,21 @@ namespace Mirage
         /// </summary>
         NetworkIdentity _identity;
 
+
+        // TODO: remove this bit once Unity drops support for 2019 LTS
+#if !UNITY_2020_1_OR_NEWER
+        /// <summary>
+        /// Cache list for the results of GetComponentsInParent calls when looking up NetworkIdentity for NetworkBehaviour.
+        /// Used to avoid runtime allocations.
+        /// </summary>
+        /// <remarks>
+        /// This is required only for pre-2020.1 Unity versions, as they don't have an option to include inactive objects when calling non-allocating GetComponentInParent().
+        /// Setting the list's initial size to 1 prevents new allocations because GetComponentsInParent() can never find more than one NetworkIdentity
+        /// (given the fact that only 1 NetworkIdentity per hierarchy is currently allowed in Mirage).
+        /// </remarks>
+        private static List<NetworkIdentity> networkIdentityGetComponentCacheList = new List<NetworkIdentity>(1);
+#endif
+
         /// <summary>
         /// Returns the NetworkIdentity of this object
         /// </summary>
@@ -159,18 +175,12 @@ namespace Mirage
                 // instead of calling unity's MonoBehaviour == operator
                 if (_identity is null)
                 {
-                    // GetComponentInParent doesn't works on disabled gameObject
-                    // and GetComponentsInParent(false)[0] isn't allocation free, so
-                    // we just drop child support in this specific case
-                    if (gameObject.activeInHierarchy)
-                        _identity = GetComponentInParent<NetworkIdentity>();
-                    else
-                        _identity = GetComponent<NetworkIdentity>();
+                    _identity = TryFindIdentity();
 
                     // do this 2nd check inside first if so that we are not checking == twice on unity Object
                     if (_identity is null)
                     {
-                        throw new InvalidOperationException($"Could not find NetworkIdentity on {name}.");
+                        throw new InvalidOperationException($"Could not find NetworkIdentity for {name}.");
                     }
                 }
                 return _identity;
@@ -205,6 +215,26 @@ namespace Mirage
 
                 return COMPONENT_INDEX_NOT_FOUND;
             }
+        }
+
+        /// <summary>
+        /// Tries to find <see cref="NetworkIdentity"/> which is responsible for this <see cref="NetworkBehaviour"/>.
+        /// </summary>
+        /// <remarks>We look up NetworkIdentity on this GameObject or any of its parents. This allows placing NetworkBehaviours on children of NetworkIdentity.</remarks>
+        /// <returns><see cref="NetworkIdentity"/> if found, null otherwise.</returns>
+        private NetworkIdentity TryFindIdentity()
+        {
+#if UNITY_2021_2_OR_NEWER
+            var identity = GetComponentInParent<NetworkIdentity>(true);
+#elif UNITY_2020_1_OR_NEWER
+            var identity = gameObject.GetComponentInParent<NetworkIdentity>(true);
+#else
+            // TODO: remove this bit once Unity drops support for 2019 LTS
+            GetComponentsInParent<NetworkIdentity>(true, networkIdentityGetComponentCacheList);
+            var identity = networkIdentityGetComponentCacheList[0];
+#endif
+
+            return identity;
         }
 
         // this gets called in the constructor by the weaver
