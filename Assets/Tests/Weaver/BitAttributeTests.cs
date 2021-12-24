@@ -146,7 +146,7 @@ namespace Mirage.Tests.Weaver
             HasError($"Precsion is too small, precision:{float.Epsilon}",
                 "System.Single BitAttributeTests.FloatPackInvalid.MyBehaviour::value8");
 
-            HasError("Precsion must be positive, precision:-0.1",
+            HasError($"Precsion must be positive, precision:{-0.1:0.0}",
                 "System.Single BitAttributeTests.FloatPackInvalid.MyBehaviour::value9");
         }
 
@@ -178,23 +178,26 @@ namespace Mirage.Tests.Weaver
             HasError("BitCount must be between 1 and 30 (inclusive), bitCount:0",
                "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value7");
 
+            // string interpolation for numerical values is required to force how to print the decimal separator
+            // because the string check is strict, operating systems using a different one, such as commas
+            // would print it differently and make the test fails
 #if UNITY_2021_2_OR_NEWER
-            HasError("Max must be above 0, max:(-1.00, 0.00, 0.00)",
+            HasError($"Max must be above 0, max:({-1.0:0.00}, {0.0:0.00}, {0.0:0.00})",
                "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value8");
-            HasError("Max must be above 0, max:(1.00, -1.00, 0.00)",
+            HasError($"Max must be above 0, max:({1.0:0.00}, {-1.0:0.00}, {0.0:0.00})",
                "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value9");
-            HasError("Max must be above 0, max:(1.00, 1.00, -1.00)",
+            HasError($"Max must be above 0, max:({1.0:0.00}, {1.0:0.00}, {-1.0:0.00})",
                "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value10");
-            HasError("Max must be above 0, max:(-1.00, 0.00, 0.00)",
+            HasError($"Max must be above 0, max:({-1.0:0.00}, {0.0:0.00}, {0.0:0.00})",
                "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value11");
 #else
-            HasError("Max must be above 0, max:(-1.0, 0.0, 0.0)",
+            HasError($"Max must be above 0, max:({-1.0:0.0}, {0.0:0.0}, {0.0:0.0})",
                "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value8");
-            HasError("Max must be above 0, max:(1.0, -1.0, 0.0)",
+            HasError($"Max must be above 0, max:({1.0:0.0}, {-1.0:0.0}, {0.0:0.0})",
                "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value9");
-            HasError("Max must be above 0, max:(1.0, 1.0, -1.0)",
+            HasError($"Max must be above 0, max:({1.0:0.0}, {1.0:0.0}, {-1.0:0.0})",
                "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value10");
-            HasError("Max must be above 0, max:(-1.0, 0.0, 0.0)",
+            HasError($"Max must be above 0, max:({-1.0:0.0}, {0.0:0.0}, {0.0:0.0})",
                "UnityEngine.Vector3 BitAttributeTests.Vector3PackInvalid.MyBehaviour::value11");
 #endif
         }
@@ -223,18 +226,18 @@ namespace Mirage.Tests.Weaver
             HasError("BitCount must be between 1 and 30 (inclusive), bitCount:0",
                "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value6");
 #if UNITY_2021_2_OR_NEWER
-            HasError("Max must be above 0, max:(-1.00, 0.00)",
+            HasError($"Max must be above 0, max:({-1.0:0.00}, {0.0:0.00})",
                "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value7");
-            HasError("Max must be above 0, max:(1.00, -1.00)",
+            HasError($"Max must be above 0, max:({1.0:0.00}, {-1.0:0.00})",
                "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value8");
-            HasError("Max must be above 0, max:(-1.00, 0.00)",
+            HasError($"Max must be above 0, max:({-1.0:0.00}, {0.0:0.00})",
                "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value9");
 #else
-            HasError("Max must be above 0, max:(-1.0, 0.0)",
+            HasError($"Max must be above 0, max:({-1.0:0.0}, {0.0:0.0})",
                "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value7");
-            HasError("Max must be above 0, max:(1.0, -1.0)",
+            HasError($"Max must be above 0, max:({1.0:0.0}, {-1.0:0.0})",
                "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value8");
-            HasError("Max must be above 0, max:(-1.0, 0.0)",
+            HasError($"Max must be above 0, max:({-1.0:0.0}, {0.0:0.0})",
                "UnityEngine.Vector2 BitAttributeTests.Vector2PackInvalid.MyBehaviour::value9");
 #endif
         }
