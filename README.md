@@ -72,6 +72,7 @@ Mirage has some notable differences from its distant sister, Mirror. The table b
 * Error handling
 * [Version defines](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html#define-symbols)
 * Server Rpcs can [return values](https://miragenet.github.io/Mirage/Articles/Guides/RemoteCalls/ServerRpc.html)
+* Bit packing to help compress values and reduce bandwidth
 
 Peeking under the hood, Mirage is built upon fundamental pillars: 
 
