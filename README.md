@@ -16,7 +16,7 @@ Mirage is a rolling-release **high level** API for the Unity Game Engine that pr
 
 Networked objects in the client are mirror images of the objects in the server, and the API provides all the tools necessary to keep them in sync and pass messages between them.
 
-Mirage is a rolling-release network stack. With every update, you get the latest features and bug fixes. You are **encouraged** to diagnose, report and help fix bugs that you find - Issue tickets will be investigated, feature requests are considered and pull requests are regularly reviewed.
+Mirage is a rolling-release network stack. With every update, you get the latest features and bug fixes. You are **encouraged** to diagnose, report and help fix bugs that you find: Issue tickets will be investigated, feature requests are considered and pull requests are regularly reviewed.
 
 Mirage is built by passionate network engineers and is backed by a friendly community.
 
@@ -24,9 +24,10 @@ Mirage is built by passionate network engineers and is backed by a friendly comm
 
 To install Mirage, follow these steps:
 
-1) Install [Unity 2020 LTS or later](https://unity.com/) - _LTS versions are strongly recommended._
-2) Start a new project or open your existing one
-3) Add the OpenUPM registry.  Click on the `Edit` menu, then select `Project settings...`, select `Package Manager` and add a scoped registry like so: <br/>
+1) Mirage requires at least Unity 2020 LTS. You may install [Unity 2020 LTS](https://unity.com/) via the Unity website or via the Unity Hub. <br/>
+    You may use newer versions, however _LTS versions are strongly recommended_ as newer versions can contain bugs, glitches or just flat out break game projects.
+2) Start a new project or open your existing one. If opening an exsiting one, it is **strongly recommended** to back it up before installing Mirage.
+4) Add the OpenUPM registry.  Click on the `Edit` menu, then select `Project settings...`, select `Package Manager` and add a scoped registry like so: <br/>
     Name: `OpenUPM` <br/>
     Url: `https://package.openupm.com` <br/>
     Scopes:
@@ -39,6 +40,10 @@ To install Mirage, follow these steps:
    ![Install Mirage](doc/images/Install%20Mirage.png)
 6) You may come back to the package manager at any time to uninstall Mirage or upgrade it.
 
+## Migrating from Mirror
+
+If you've got a project already using Mirror and you want to migrate it to Mirage, it's recommended to check out our [Migration Guide](https://miragenet.github.io/Mirage/Articles/Guides/MirrorMigration.html) for a smooth transition. Also check the heading below, as there are some major differences between Mirage and the other network library.
+
 ## Comparison with Mirror
 
 Mirage has some notable differences from its distant sister, Mirror. The table below briefly details them:
@@ -48,7 +53,7 @@ Mirage has some notable differences from its distant sister, Mirror. The table b
 | Installs via Unity Package Manager                  | Installs from Asset Store              |
 | Errors are thrown as exceptions                     | Errors are logged                      |
 | `[ServerRpc]`                                       | `[Command]`                            |
-| `[ClientRpc(target = Client.Owner)]`                | `[TargetRpc]`                          |
+| `[ClientRpc(target = RpcTarget.Owner)]`             | `[TargetRpc]`                          |
 | Subscribe to events in `NetworkServer`              | Override methods in `NetworkManager`   |
 | Subscribe to events in `NetworkClient`              | Override methods in `NetworkManager`   |
 | Subscribe to events in `NetworkIdentity`            | Override methods in `NetworkBehaviour` |
@@ -61,18 +66,17 @@ Mirage has some notable differences from its distant sister, Mirror. The table b
 **Some notable features that Mirage has:**
 
 * [Fast play mode support](https://blogs.unity3d.com/2019/11/05/enter-play-mode-faster-in-unity-2019-3/)
-* Clients can connect to multiple servers - for example, a chat server while connected to a game server.
+* Clients can connect to multiple servers - for example, be connected to a chat server while connected to a game server
 * Components can be added in child objects
-* Modular API: You only use the components you need.
+* Modular API: You only use the components you need
 * Error handling
 * [Version defines](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html#define-symbols)
 * Server Rpcs can [return values](https://miragenet.github.io/Mirage/Articles/Guides/RemoteCalls/ServerRpc.html)
-* A built-in reliable UDP default transport featuring DoS prevention and CRC64 integrity checks
 
 Peeking under the hood, Mirage is built upon fundamental pillars: 
 
-* Mirage avoids singletons and static state in general.
-* Mirage follows the [SOLID principles](https://en.wikipedia.org/wiki/SOLID).
+* Mirage avoids singletons and static state in general
+* Mirage follows the [SOLID principles](https://en.wikipedia.org/wiki/SOLID)
 * Mirage has high [![Test Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=coverage)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
 * Mirage has low [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
 
@@ -84,13 +88,20 @@ If you want to contribute to Mirage, follow these steps:
 
 1) Install the git client
 2) Clone this repo
+    ```sh
+    cd /path/to/somewhere/on/your/disk
+    mkdir MirageNetworking
+    git clone https://github.com/MirageNet/Mirage.git MirageNetworking
+    ```
 3) Open the newly cloned repo in Unity 2020 LTS or later.
 
 ### Windows
 
 1) Install [git](https://git-scm.com/download/win) or use your favorite git client (Fork, SourceTree, etc)
-2) As administrator, clone this repo with symbolic links support:
-    ```sh
+2) As administrator, clone this repo with symbolic links support using Git Bash:
+    ```sh 
+    cd C:\UnityProjects\DontReallyUseThisExamplePath
+    mkdir MirageNetworking
     git clone -c core.symlinks=true https://github.com/MirageNet/Mirage.git
     ```
     It you don't want to use administrator, [add symlink support](https://www.joshkel.com/2018/01/18/symlinks-in-windows/) to your account.
@@ -111,3 +122,7 @@ Mirage supports multiple ways of transporting data:
 3. Commit your changes: `git commit -am 'Add some feature'`
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request :smiley:
+
+The team will review it ASAP and give it the stamp of approval, ask for changes or decline it with a detailed explaination. 
+
+Thank you for using Mirage and we hope to see your project be successful!
