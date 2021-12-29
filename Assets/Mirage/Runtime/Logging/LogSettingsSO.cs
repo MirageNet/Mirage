@@ -16,7 +16,17 @@ namespace Mirage.Logging
             public string Namespace;
 
             private string fullNameCache;
-            public string FullName => fullNameCache;
+            public string FullName
+            {
+                get
+                {
+                    // need lazy property here because unity deserializes without using constructor
+                    if (string.IsNullOrEmpty(fullNameCache))
+                        fullNameCache = CreateFullName(Name, Namespace);
+
+                    return fullNameCache;
+                }
+            }
 
             static string CreateFullName(string name, string space)
             {
@@ -105,9 +115,19 @@ namespace Mirage.Logging
                 return;
             }
 
-            foreach (LogSettingsSO.LoggerSettings logLevel in settings.LogLevels)
+            for (int i = 0; i < settings.LogLevels.Count; i++)
             {
-                ILogger logger = LogFactory.GetLogger(logLevel.FullName);
+                LogSettingsSO.LoggerSettings logLevel = settings.LogLevels[i];
+                string key = logLevel.FullName;
+                if (key == null)
+                {
+                    settings.LogLevels.RemoveAt(i);
+                    i--;
+                    Debug.LogWarning("Found null key in log settings, removing item");
+                    continue;
+                }
+
+                ILogger logger = LogFactory.GetLogger(key);
                 logger.filterLogType = logLevel.logLevel;
             }
         }
