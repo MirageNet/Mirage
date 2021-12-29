@@ -1,3 +1,10 @@
+## [113.3.3](https://github.com/MirageNet/Mirage/compare/v113.3.2...v113.3.3) (2021-12-29)
+
+
+### Bug Fixes
+
+* **Logging:** fixing full name not being loaded ([caece7e](https://github.com/MirageNet/Mirage/commit/caece7e3fcac6a7569f84970cee6ea9b4dd5a29a))
+
 ## [113.3.2](https://github.com/MirageNet/Mirage/compare/v113.3.1...v113.3.2) (2021-12-29)
 
 
