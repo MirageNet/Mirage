@@ -1,3 +1,10 @@
+## [113.3.1](https://github.com/MirageNet/Mirage/compare/v113.3.0...v113.3.1) (2021-12-29)
+
+
+### Bug Fixes
+
+* making sure server/client stops if gameobject is destroyed ([9cdc27d](https://github.com/MirageNet/Mirage/commit/9cdc27d8d5e0f5a9231cdfe21725ae1378c3e067))
+
 # [113.3.0](https://github.com/MirageNet/Mirage/compare/v113.2.0...v113.3.0) (2021-12-22)
 
 
