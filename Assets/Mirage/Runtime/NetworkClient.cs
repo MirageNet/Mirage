@@ -235,6 +235,12 @@ namespace Mirage
             _authenticated.Invoke(player);
         }
 
+        private void OnDestroy()
+        {
+            if (Active)
+                Disconnect();
+        }
+
         /// <summary>
         /// Disconnect from server.
         /// <para>The disconnect message will be invoked.</para>

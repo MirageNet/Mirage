@@ -138,6 +138,12 @@ namespace Mirage
         public SyncVarSender SyncVarSender { get; private set; }
         public MessageHandler MessageHandler { get; private set; }
 
+        private void OnDestroy()
+        {
+            // if gameobject with server on is destroyed, stop the server
+            if (Active)
+                Stop();
+        }
 
         /// <summary>
         /// This shuts down the server and disconnects all clients.
@@ -465,7 +471,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("Server disconnect client:" + player);
 
             // set the flag first so we dont try to send any messages to the disconnected
-			// connection as they wouldn't get them
+            // connection as they wouldn't get them
             player.MarkAsDisconnected();
 
             RemoveConnection(player);
