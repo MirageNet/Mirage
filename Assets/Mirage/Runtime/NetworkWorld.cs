@@ -40,11 +40,13 @@ namespace Mirage
         internal void AddIdentity(uint netId, NetworkIdentity identity)
         {
             if (netId == 0) throw new ArgumentException("id can not be zero", nameof(netId));
-            if (SpawnedObjects.ContainsKey(netId)) throw new ArgumentException("An item with same id already exists", nameof(netId));
             if (identity == null) throw new ArgumentNullException(nameof(identity));
             if (netId != identity.NetId) throw new ArgumentException("NetworkIdentity did not have matching netId", nameof(identity));
+            if (SpawnedObjects.TryGetValue(netId, out NetworkIdentity existing) && existing != null) throw new ArgumentException("An Identity with same id already exists in network world", nameof(netId));
 
-            SpawnedObjects.Add(netId, identity);
+            // dont use add, netid might already exist but have been destroyed
+            // this canhappen client side. we check for this case in TryGetValue above
+            SpawnedObjects[netId] = identity;
             onSpawn?.Invoke(identity);
         }
 
