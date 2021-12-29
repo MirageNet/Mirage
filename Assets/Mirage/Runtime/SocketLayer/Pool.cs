@@ -44,7 +44,7 @@ namespace Mirage.SocketLayer
                 Put(CreateNewBuffer());
             }
 
-            if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log(LogType.Log, $"Configuring buffer, start Size {startPoolSize}, max size {maxPoolSize}");
+            if (logger.Enabled(LogType.Log)) logger.Log(LogType.Log, $"Configuring buffer, start Size {startPoolSize}, max size {maxPoolSize}");
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Mirage.SocketLayer
 
             this.bufferSize = bufferSize;
             this.maxPoolSize = maxPoolSize;
-            this.logger = logger ?? Debug.unityLogger;
+            this.logger = logger;
 
             pool = new T[maxPoolSize];
             for (int i = 0; i < startPoolSize; i++)
@@ -125,7 +125,7 @@ namespace Mirage.SocketLayer
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void CheckLimit(Pool<T> pool)
             {
-                if (pool.created >= pool.maxPoolSize && pool.logger.IsLogTypeAllowed(LogType.Warning))
+                if (pool.created >= pool.maxPoolSize && pool.logger.Enabled(LogType.Warning))
                 {
                     float now = GetTime();
 

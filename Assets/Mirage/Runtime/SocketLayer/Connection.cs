@@ -73,23 +73,23 @@ namespace Mirage.SocketLayer
                 switch (value)
                 {
                     case ConnectionState.Connected:
-                        logger.Assert(_state == ConnectionState.Created || _state == ConnectionState.Connecting);
+                        logger?.Assert(_state == ConnectionState.Created || _state == ConnectionState.Connecting);
                         break;
 
                     case ConnectionState.Connecting:
-                        logger.Assert(_state == ConnectionState.Created);
+                        logger?.Assert(_state == ConnectionState.Created);
                         break;
 
                     case ConnectionState.Disconnected:
-                        logger.Assert(_state == ConnectionState.Connected);
+                        logger?.Assert(_state == ConnectionState.Connected);
                         break;
 
                     case ConnectionState.Destroyed:
-                        logger.Assert(_state == ConnectionState.Removing);
+                        logger?.Assert(_state == ConnectionState.Removing);
                         break;
                 }
 
-                if (logger.IsLogTypeAllowed(LogType.Log)) logger.Log($"{EndPoint} changed state from {_state} to {value}");
+                if (logger.Enabled(LogType.Log)) logger.Log($"{EndPoint} changed state from {_state} to {value}");
                 _state = value;
             }
         }
@@ -112,7 +112,7 @@ namespace Mirage.SocketLayer
         internal Connection(Peer peer, IEndPoint endPoint, IDataHandler dataHandler, Config config, Time time, Pool<ByteBuffer> bufferPool, ILogger logger, Metrics metrics)
         {
             this.peer = peer;
-            this.logger = logger ?? Debug.unityLogger;
+            this.logger = logger;
 
             EndPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
             this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
@@ -268,7 +268,7 @@ namespace Mirage.SocketLayer
         }
         internal void Disconnect(DisconnectReason reason, bool sendToOther = true)
         {
-            if (logger.filterLogType == LogType.Log) logger.Log($"Disconnect with reason: {reason}");
+            if (logger.Enabled(LogType.Log)) logger.Log($"Disconnect with reason: {reason}");
             switch (State)
             {
                 case ConnectionState.Connecting:
@@ -343,7 +343,7 @@ namespace Mirage.SocketLayer
 
             // copy first
             int copyLength = received.length - 1;
-            logger.Assert(copyLength == ackSystem.SizePerFragment, "First should be max size");
+            logger?.Assert(copyLength == ackSystem.SizePerFragment, "First should be max size");
             Buffer.BlockCopy(firstArray, 1, message, 0, copyLength);
             received.buffer.Release();
 
@@ -354,7 +354,7 @@ namespace Mirage.SocketLayer
                 AckSystem.ReliableReceived next = ackSystem.GetNextFragment();
                 byte[] nextArray = next.buffer.array;
 
-                logger.Assert(i == (fragmentLength - 1 - nextArray[0]), "fragment index should decrement each time");
+                logger?.Assert(i == (fragmentLength - 1 - nextArray[0]), "fragment index should decrement each time");
 
                 // +1 because first is copied above
                 copyLength = next.length - 1;
