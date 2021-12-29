@@ -36,6 +36,7 @@ namespace Mirage.EditorScripts.Logging
         }
 
         readonly LogSettingsSO settings;
+        readonly LogSettingChecker checker;
         readonly Dictionary<string, bool> folderOutState = new Dictionary<string, bool>();
 
         /// <summary>
@@ -46,10 +47,13 @@ namespace Mirage.EditorScripts.Logging
         public LogLevelsGUI(LogSettingsSO settings)
         {
             this.settings = settings;
+            checker = new LogSettingChecker(settings);
         }
 
         public void Draw()
         {
+            checker.Refresh();
+
             guiChanged = false;
 
             EditorGUI.BeginChangeCheck();
@@ -92,7 +96,7 @@ namespace Mirage.EditorScripts.Logging
 
         private void DrawGroup(IGrouping<string, LogSettingsSO.LoggerSettings> group)
         {
-            string NameSpace = group.Key;
+            string NameSpace = group.Key ?? "<none>";
             if (!folderOutState.ContainsKey(NameSpace))
                 folderOutState[NameSpace] = false;
 

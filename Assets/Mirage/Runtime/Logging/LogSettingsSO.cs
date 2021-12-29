@@ -14,7 +14,19 @@ namespace Mirage.Logging
         {
             public string Name;
             public string Namespace;
-            public string FullName => $"{Namespace}.{Name}";
+
+            private string fullNameCache;
+            public string FullName => fullNameCache;
+
+            static string CreateFullName(string name, string space)
+            {
+                // special case when namespace is null we just return null
+                // see GetNameAndNameSapceFromFullname
+                if (space == null)
+                    return name;
+                else
+                    return $"{space}.{name}";
+            }
 
             public LogType logLevel;
 
@@ -23,15 +35,26 @@ namespace Mirage.Logging
                 Name = name;
                 this.Namespace = Namespace;
                 logLevel = level;
+                fullNameCache = CreateFullName(Name, Namespace);
             }
             public LoggerSettings(string fullname, LogType level)
             {
-                (Name, Namespace) = GetNameAndNameSapceFromFullname(fullname);
+                (Name, Namespace) = GetNameAndNameSpaceFromFullname(fullname);
                 logLevel = level;
+                fullNameCache = CreateFullName(Name, Namespace);
             }
 
-            private static (string name, string @namespace) GetNameAndNameSapceFromFullname(string fullname)
+            private static (string name, string @namespace) GetNameAndNameSpaceFromFullname(string fullname)
             {
+                // NOTE we need to be able to recreate fullname from name/namespace
+                // so we cant always just use empty string for no namespace
+
+                if (!fullname.Contains("."))
+                {
+                    // if no `.` then return null
+                    return (fullname, null);
+                }
+
                 string[] parts = fullname.Split('.');
                 string name = parts.Last();
 
@@ -45,6 +68,7 @@ namespace Mirage.Logging
                     @namespace = string.Join(".", parts.Take(parts.Length - 1));
                 }
 
+                Debug.Assert(CreateFullName(name, @namespace) == fullname, "Could not re-create full name from created parted");
                 return (name, @namespace);
             }
         }
