@@ -8,17 +8,22 @@ namespace Mirage.SocketLayer
         {
             if (!condition) logger.Log(LogType.Assert, "Failed Assertion");
         }
-        internal static void Assert<T>(this ILogger logger, bool condition, T msg )
+        internal static void Assert<T>(this ILogger logger, bool condition, T msg)
         {
             if (!condition) logger.Log(LogType.Assert, $"Failed Assertion: {msg}");
         }
         internal static void Error<T>(this ILogger logger, T msg = default)
         {
-             logger.Log(LogType.Error, msg);
+            logger.Log(LogType.Error, msg);
         }
         internal static void Warn<T>(this ILogger logger, T msg = default)
         {
             logger.Log(LogType.Warning, msg);
+        }
+
+        internal static bool Enabled(this ILogger logger, LogType logType)
+        {
+            return logger != null && logger.IsLogTypeAllowed(logType);
         }
     }
 }
