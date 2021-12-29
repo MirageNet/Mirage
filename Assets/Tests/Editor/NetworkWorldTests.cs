@@ -159,7 +159,7 @@ namespace Mirage.Tests
                 world.AddIdentity(id, identity);
             });
 
-            var expected = new ArgumentException("An item with same id already exists", "netId");
+            var expected = new ArgumentException("An Identity with same id already exists in network world", "netId");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
         [Test]
