@@ -1,3 +1,14 @@
+## [113.3.2](https://github.com/MirageNet/Mirage/compare/v113.3.1...v113.3.2) (2021-12-29)
+
+
+### Bug Fixes
+
+* adding try/catch for nanosocket ([#1010](https://github.com/MirageNet/Mirage/issues/1010)) ([88badd6](https://github.com/MirageNet/Mirage/commit/88badd61fc0f1f8c377b2299cb647f6e70a1ef7b))
+* fixing log settings that have no namespace ([#1014](https://github.com/MirageNet/Mirage/issues/1014)) ([ead317f](https://github.com/MirageNet/Mirage/commit/ead317f7ea35c3faaa538326145ed56bd0a3f438))
+* **NetworkBehavior:** removing NB that belong to another NI from list ([#970](https://github.com/MirageNet/Mirage/issues/970)) ([4738d29](https://github.com/MirageNet/Mirage/commit/4738d2938e3881481612465cff27680189c6442b))
+* **NetworkWorld:** fixing add identity when object is destroyed client side ([b5a765e](https://github.com/MirageNet/Mirage/commit/b5a765e7010da2f9daf47c12b81a6616d32c0250))
+* Setting client not ready to stop character spawning before scene change ([#1009](https://github.com/MirageNet/Mirage/issues/1009)) ([fcbe10d](https://github.com/MirageNet/Mirage/commit/fcbe10d3383b28da88b167da004c69578c165d72))
+
 ## [113.3.1](https://github.com/MirageNet/Mirage/compare/v113.3.0...v113.3.1) (2021-12-29)
 
 
