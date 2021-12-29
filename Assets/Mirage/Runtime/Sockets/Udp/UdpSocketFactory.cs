@@ -45,12 +45,21 @@ namespace Mirage.Sockets.Udp
         {
             if (!useNanoSocket) return;
 
-            if (initCount == 0)
+            try
             {
-                UDP.Initialize();
-            }
+                if (initCount == 0)
+                {
+                    UDP.Initialize();
+                }
 
-            initCount++;
+                initCount++;
+            }
+            catch (DllNotFoundException)
+            {
+                Debug.LogWarning("Nanosocket dll not found, Using c# Managed Socket instead");
+                SocketLib = SocketLib.Managed;
+                return;
+            }
         }
 
         void OnDestroy()
