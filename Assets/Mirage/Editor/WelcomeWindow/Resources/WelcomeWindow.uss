@@ -47,6 +47,19 @@
     white-space: normal;
 }
 
+#ChangeSet {
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 15px;
+}
+
+#ChangeLogVersion {
+    font-size: 20px;
+    -unity-font-style: bold;
+    flex-wrap: nowrap;
+    margin-bottom: 5px;
+}
+
 #Description {
     font-size: 14px;
     -unity-text-align: upper-left;
