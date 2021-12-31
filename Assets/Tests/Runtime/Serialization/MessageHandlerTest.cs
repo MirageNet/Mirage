@@ -1,8 +1,9 @@
 using System;
-using System.IO;
+using Mirage.Logging;
 using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime
@@ -72,27 +73,45 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ThrowsWhenNoHandlerIsFound()
         {
-            int messageId = MessagePacker.GetId<SceneMessage>();
-
-            InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
+            ExpectLog(() =>
             {
+                int messageId = MessagePacker.GetId<SceneMessage>();
                 messageHandler.InvokeHandler(player, messageId, reader);
-            });
-
-            Assert.That(exception.Message, Does.StartWith("Unexpected message Mirage.SceneMessage received"));
+            }
+            , $"Unexpected message {typeof(SceneMessage)} received from {player}. Did you register a handler for it?");
         }
 
         [Test]
         public void ThrowsWhenUnknownMessage()
         {
-            _ = MessagePacker.GetId<SceneMessage>();
-            InvalidDataException exception = Assert.Throws<InvalidDataException>(() =>
+            const int id = 1234;
+            ExpectLog(() =>
             {
-                // some random id with no message
-                messageHandler.InvokeHandler(player, 1234, reader);
-            });
+                messageHandler.InvokeHandler(player, id, reader);
+            }
+            , $"Unexpected message ID {id} received from {player}. May be due to no existing RegisterHandler for this message.");
+        }
 
-            Assert.That(exception.Message, Does.StartWith("Unexpected message ID 1234 received"));
+        void ExpectLog(Action action, string log)
+        {
+            ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
+            ILogHandler existing = logger.logHandler;
+            LogType existingLevel = logger.filterLogType;
+            try
+            {
+                ILogHandler handler = Substitute.For<ILogHandler>();
+                logger.logHandler = handler;
+                logger.filterLogType = LogType.Log;
+
+                action.Invoke();
+
+                handler.Received(1).LogFormat(LogType.Log, null, "{0}", log);
+            }
+            finally
+            {
+                logger.logHandler = existing;
+                logger.filterLogType = existingLevel;
+            }
         }
     }
 }
