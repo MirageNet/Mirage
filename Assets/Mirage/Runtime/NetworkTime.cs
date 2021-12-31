@@ -16,7 +16,7 @@ namespace Mirage
         /// how often are we sending ping messages
         /// used to calculate network time and RTT
         /// </summary>
-        public float PingFrequency = 2.0f;
+        public float PingInterval = 2.0f;
 
         /// <summary>
         /// average out the last few results from Ping
@@ -55,7 +55,7 @@ namespace Mirage
 
         internal void UpdateClient(INetworkClient client)
         {
-            if (UnityEngine.Time.time - lastPingTime >= PingFrequency)
+            if (UnityEngine.Time.time - lastPingTime >= PingInterval)
             {
                 var pingMessage = new NetworkPingMessage
                 {
