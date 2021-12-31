@@ -115,7 +115,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             int id = MessagePacker.GetId<SomeRandomMessage>();
 
-            Type type = MessagePacker.GetMessageType(id);
+            Type type = MessagePacker.MessageTypes[id];
 
             Assert.That(type, Is.EqualTo(typeof(SomeRandomMessage)));
         }
@@ -138,7 +138,7 @@ namespace Mirage.Tests.Runtime.Serialization
         public void FindSystemMessage()
         {
             int id = MessagePacker.GetId<SceneMessage>();
-            Type type = MessagePacker.GetMessageType(id);
+            Type type = MessagePacker.MessageTypes[id];
             Assert.That(type, Is.EqualTo(typeof(SceneMessage)));
         }
 
@@ -151,7 +151,7 @@ namespace Mirage.Tests.Runtime.Serialization
             int id = MessagePacker.GetId(typeof(SomeRandomMessageNotRegistered));
             Assert.Throws<KeyNotFoundException>(() =>
             {
-                _ = MessagePacker.GetMessageType(id);
+                _ = MessagePacker.MessageTypes[id];
             });
         }
     }
