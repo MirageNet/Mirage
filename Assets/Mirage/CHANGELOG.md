@@ -1,3 +1,10 @@
+## [114.0.1](https://github.com/MirageNet/Mirage/compare/v114.0.0...v114.0.1) (2021-12-31)
+
+
+### Bug Fixes
+
+* **WelcomeWindow:** fixed parsing of change logs ([#1017](https://github.com/MirageNet/Mirage/issues/1017)) ([5da522d](https://github.com/MirageNet/Mirage/commit/5da522d950113470573bbd406f622772d398336e))
+
 # [114.0.0](https://github.com/MirageNet/Mirage/compare/v113.3.4...v114.0.0) (2021-12-31)
 
 
