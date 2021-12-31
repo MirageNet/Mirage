@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:VisualElement name="Header" style="flex-wrap: nowrap; white-space: nowrap;">
-        <ui:Label text="Version" display-tooltip-when-elided="true" name="ChangeLogVersion" style="font-size: 20px; -unity-font-style: bold; flex-wrap: nowrap;" />
+    <ui:VisualElement name="ChangeSet" style="flex-wrap: nowrap; white-space: nowrap;">
+        <ui:Label text="Version" display-tooltip-when-elided="true" name="ChangeLogVersion" />
         <ui:Label display-tooltip-when-elided="true" name="ChangeLogText" style="-unity-font-style: normal; font-size: 12px; flex-wrap: nowrap; white-space: normal;" />
     </ui:VisualElement>
 </ui:UXML>

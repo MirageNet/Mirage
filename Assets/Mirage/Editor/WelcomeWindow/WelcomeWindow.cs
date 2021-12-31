@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using Mirage.Logging;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -39,6 +40,12 @@ namespace Mirage
         private const string BestPracticesUrl = "https://miragenet.github.io/Mirage/Articles/Guides/BestPractices.html";
         private const string FaqUrl = "https://miragenet.github.io/Mirage/Articles/Guides/FAQ.html";
         private const string DiscordInviteUrl = "https://discord.gg/DTBPBYvexy";
+
+#if UNITY_2021_2_OR_NEWER
+        private const string BoldReplace = "<b>$1</b>";
+#else
+        private const string BoldReplace = "$1";
+#endif
 
         private readonly List<Package> Packages = new List<Package>()
         {
@@ -183,7 +190,7 @@ namespace Mirage
 
         private void OnDisable()
         {
-            //now that we have seen the welcome window, 
+            //now that we have seen the welcome window,
             //set this this to true so we don't load the window every time we recompile (for the current version)
             EditorPrefs.SetBool(firstStartUpKey, true);
             EditorPrefs.SetBool(firstTimeMirageKey, true);
@@ -302,6 +309,9 @@ namespace Mirage
             int currentVersionCount = -1;
 
             var builder = new StringBuilder();
+            var firstTitle = true;
+            var regexLine = new Regex("^\\* (.*)$");
+            var regexBold = new Regex("\\*\\*(.*)\\*\\*");
 
             for (int i = 0; i < content.Count; i++)
             {
@@ -320,21 +330,29 @@ namespace Mirage
                     rootVisualElement.Q<VisualElement>("ChangelogData").Add(newLog);
 
                     builder = new StringBuilder();
+                    firstTitle = true;
                 }
                 //if the item is a change title
                 else if (item.Contains("###"))
                 {
                     //only add a space above the title if it isn't the first title
-                    if (i > 2) { builder.Append("\n"); }
+                    if (!firstTitle) { builder.Append("\n"); }
 
-                    builder.Append(item.Substring(4));
+#if UNITY_2021_2_OR_NEWER
+                    string subTitle = $"<b>{item.Substring(4)}</b>";
+#else
+                    string subTitle = item.Substring(4);
+#endif
+                    builder.Append(subTitle);
                     builder.Append("\n");
+                    firstTitle = false;
                 }
                 //if the item is a change
                 else
                 {
                     string change = item.Split(new string[] { "([" }, StringSplitOptions.None)[0];
-                    change = change.Replace("*", "-");
+                    change = regexLine.Replace(change, "- $1\n");
+                    change = regexBold.Replace(change, BoldReplace);
 
                     builder.Append(change);
                 }
