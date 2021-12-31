@@ -1,3 +1,10 @@
+## [113.3.4](https://github.com/MirageNet/Mirage/compare/v113.3.3...v113.3.4) (2021-12-31)
+
+
+### Bug Fixes
+
+* **LogFactory:** fixing clear and find all buttons in log factory ([6f7e5d5](https://github.com/MirageNet/Mirage/commit/6f7e5d538f8da2e635796632c1a8d946cfa22e61))
+
 ## [113.3.3](https://github.com/MirageNet/Mirage/compare/v113.3.2...v113.3.3) (2021-12-29)
 
 
