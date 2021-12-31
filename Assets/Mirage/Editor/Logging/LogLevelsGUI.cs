@@ -96,7 +96,7 @@ namespace Mirage.EditorScripts.Logging
 
         private void DrawGroup(IGrouping<string, LogSettingsSO.LoggerSettings> group)
         {
-            string NameSpace = group.Key ?? "<none>";
+            string NameSpace = string.IsNullOrEmpty(group.Key) ? "< no namespace >" : group.Key;
             if (!folderOutState.ContainsKey(NameSpace))
                 folderOutState[NameSpace] = false;
 
@@ -128,9 +128,11 @@ namespace Mirage.EditorScripts.Logging
 
         private void DrawDeleteAllButton()
         {
+            GUILayout.Label("NOTES: when clearing it might require assembly to be reloaded before the 'find all' button will find everything");
             if (GUILayout.Button("Clear All levels"))
             {
                 settings.LogLevels.Clear();
+                LogFactory.loggers.Clear();
                 guiChanged = true;
             }
         }
@@ -160,8 +162,12 @@ namespace Mirage.EditorScripts.Logging
                             {
                                 if (field.IsStatic && field.FieldType == typeof(ILogger))
                                 {
+                                    // will cause static field to initialize and call GetLogger
+                                    // this will get existing or add new logger to factory
                                     var value = (ILogger)field.GetValue(null);
-                                    AddIfMissing(type, value);
+
+                                    // we dont then need to add it to factory manually, because the above should have added it
+                                    // this is better than adding manually because AddLogger might add using string instead of types full name
                                 }
                             }
                             catch (Exception e)
@@ -171,18 +177,10 @@ namespace Mirage.EditorScripts.Logging
                         }
                     }
                 }
-                guiChanged = true;
-            }
-        }
 
-        private void AddIfMissing(Type type, ILogger logger)
-        {
-            string fullName = type.FullName;
-            LogType logType = logger.filterLogType;
-            bool exist = settings.LogLevels.Any(x => x.FullName == fullName);
-            if (!exist)
-            {
-                settings.LogLevels.Add(new LogSettingsSO.LoggerSettings(fullName, logType));
+                // refresh so settings list has new items from Factory
+                checker.Refresh();
+                guiChanged = true;
             }
         }
 
@@ -194,7 +192,7 @@ namespace Mirage.EditorScripts.Logging
                 logger.filterLogType = logSetting.logLevel;
             }
 
-            // tood save outside of editor
+            // todo save outside of editor
             EditorUtility.SetDirty(settings);
         }
 
