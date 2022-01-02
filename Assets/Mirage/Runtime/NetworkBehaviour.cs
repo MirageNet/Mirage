@@ -91,6 +91,13 @@ namespace Mirage
         public uint NetId => Identity.NetId;
 
         /// <summary>
+        ///     The unique server id that this object is controlled by.
+        ///     This is default assgined at runtime. Can be overriden by inheriting from <see cref="ServerIdGenerator"/> and passing it to
+        ///     the <see cref="ServerObjectManager"/> inspector.
+        /// </summary>
+        public byte ServerId => Identity.ServerId;
+
+        /// <summary>
         /// The <see cref="NetworkServer">NetworkClient</see> associated to this object.
         /// </summary>
         public INetworkServer Server => Identity.Server;
@@ -263,6 +270,7 @@ namespace Mirage
             var message = new ServerRpcMessage
             {
                 netId = NetId,
+                serverId = ServerId,
                 componentIndex = ComponentIndex,
                 // type+func so Inventory.RpcUse != Equipment.RpcUse
                 functionHash = RemoteCallHelper.GetMethodHash(invokeClass, cmdName),
@@ -305,6 +313,7 @@ namespace Mirage
             var message = new ServerRpcMessage
             {
                 netId = NetId,
+                serverId = ServerId,
                 componentIndex = ComponentIndex,
                 replyId = id,
                 // type+func so Inventory.RpcUse != Equipment.RpcUse
@@ -339,6 +348,7 @@ namespace Mirage
             var message = new RpcMessage
             {
                 netId = NetId,
+                serverId = ServerId,
                 componentIndex = ComponentIndex,
                 // type+func so Inventory.RpcUse != Equipment.RpcUse
                 functionHash = RemoteCallHelper.GetMethodHash(invokeClass, rpcName),
@@ -377,6 +387,7 @@ namespace Mirage
             var message = new RpcMessage
             {
                 netId = NetId,
+                serverId = ServerId,
                 componentIndex = ComponentIndex,
                 // type+func so Inventory.RpcUse != Equipment.RpcUse
                 functionHash = RemoteCallHelper.GetMethodHash(invokeClass, rpcName),

@@ -15,10 +15,12 @@ namespace Mirage
         /// </summary>
         internal IObjectLocator objectLocator;
         internal uint netId;
+        internal byte serverId;
 
         internal NetworkIdentity identity;
 
         internal uint NetId => identity != null ? identity.NetId : netId;
+        internal byte ServerId => identity != null ? identity.ServerId : serverId;
 
         public NetworkIdentity Value
         {
@@ -27,7 +29,7 @@ namespace Mirage
                 if (identity != null)
                     return identity;
 
-                if (objectLocator != null && objectLocator.TryGetIdentity(NetId, out NetworkIdentity result))
+                if (objectLocator != null && objectLocator.TryGetIdentity(NetId, ServerId, out NetworkIdentity result))
                 {
                     return result;
                 }
@@ -38,7 +40,10 @@ namespace Mirage
             set
             {
                 if (value == null)
+                {
                     netId = 0;
+                    serverId = 0;
+                }
                 identity = value;
             }
         }
@@ -50,19 +55,22 @@ namespace Mirage
         public static void WriteNetworkIdentitySyncVar(this NetworkWriter writer, NetworkIdentitySyncvar id)
         {
             writer.WritePackedUInt32(id.NetId);
+            writer.WriteByte(id.ServerId);
         }
 
         public static NetworkIdentitySyncvar ReadNetworkIdentitySyncVar(this NetworkReader reader)
         {
             uint netId = reader.ReadPackedUInt32();
+            byte serverId = reader.ReadByte();
 
             NetworkIdentity identity = null;
-            reader.ObjectLocator?.TryGetIdentity(netId, out identity);
+            reader.ObjectLocator?.TryGetIdentity(netId, serverId, out identity);
 
             return new NetworkIdentitySyncvar
             {
                 objectLocator = reader.ObjectLocator,
                 netId = netId,
+                serverId = serverId,
                 identity = identity
             };
         }

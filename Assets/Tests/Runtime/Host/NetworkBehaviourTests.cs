@@ -100,6 +100,13 @@ namespace Mirage.Tests.Runtime.Host
         }
 
         [Test]
+        public void HasIdentityServerId()
+        {
+            identity.ServerId = 10;
+            Assert.That(component.ServerId, Is.EqualTo(10));
+        }
+
+        [Test]
         public void HasIdentitysOwner()
         {
             (_, identity.Owner) = PipedConnections(ClientMessageHandler, ServerMessageHandler);

@@ -64,11 +64,12 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             serverObjectManager.Spawn(clone);
             uint netId = behaviour.NetId;
+            byte serverId = behaviour.ServerId;
 
             yield return null;
             yield return null;
 
-            client.World.TryGetIdentity(netId, out NetworkIdentity clientClient);
+            client.World.TryGetIdentity(netId, serverId, out NetworkIdentity clientClient);
             SyncVarInitialOnly clientBehaviour = clientClient.GetComponent<SyncVarInitialOnly>();
 
             Assert.That(clientBehaviour.weaponIndex, Is.EqualTo(3));

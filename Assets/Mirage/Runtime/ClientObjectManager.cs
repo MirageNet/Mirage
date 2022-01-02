@@ -400,7 +400,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} prefabHash={msg.prefabHash:X} sceneId={msg.sceneId:X} pos={msg.position}");
 
             // was the object already spawned?
-            bool existing = Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity);
+            bool existing = Client.World.TryGetIdentity(msg.netId, msg.serverId, out NetworkIdentity identity);
 
             if (!existing)
             {
@@ -488,7 +488,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log($"Client remove auth handler");
 
             // was the object already spawned?
-            bool existing = Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity);
+            bool existing = Client.World.TryGetIdentity(msg.netId, msg.serverId, out NetworkIdentity identity);
 
             if (!existing)
             {
@@ -522,19 +522,19 @@ namespace Mirage
 
         internal void OnObjectHide(ObjectHideMessage msg)
         {
-            DestroyObject(msg.netId);
+            DestroyObject(msg.netId, msg.serverId);
         }
 
         internal void OnObjectDestroy(ObjectDestroyMessage msg)
         {
-            DestroyObject(msg.netId);
+            DestroyObject(msg.netId, msg.serverId);
         }
 
-        void DestroyObject(uint netId)
+        void DestroyObject(uint netId, byte serverId)
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnObjDestroy netId:" + netId);
 
-            if (Client.World.TryGetIdentity(netId, out NetworkIdentity localObject))
+            if (Client.World.TryGetIdentity(netId, serverId, out NetworkIdentity localObject))
             {
                 UnSpawn(localObject);
             }
@@ -546,7 +546,7 @@ namespace Mirage
 
         internal void OnHostClientSpawn(SpawnMessage msg)
         {
-            if (Client.World.TryGetIdentity(msg.netId, out NetworkIdentity localObject))
+            if (Client.World.TryGetIdentity(msg.netId, msg.serverId, out NetworkIdentity localObject))
             {
                 if (msg.isLocalPlayer)
                     InternalAddPlayer(localObject);
@@ -561,7 +561,7 @@ namespace Mirage
 
         internal void OnRpcMessage(RpcMessage msg)
         {
-            if (logger.LogEnabled()) logger.Log("ClientScene.OnRPCMessage hash:" + msg.functionHash + " netId:" + msg.netId);
+            if (logger.LogEnabled()) logger.Log("ClientScene.OnRPCMessage hash:" + msg.functionHash + " netId:" + msg.netId + " serverId: " + msg.serverId);
 
             Skeleton skeleton = RemoteCallHelper.GetSkeleton(msg.functionHash);
 
@@ -569,7 +569,7 @@ namespace Mirage
             {
                 throw new MethodInvocationException($"Invalid RPC call with id {msg.functionHash}");
             }
-            if (Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity))
+            if (Client.World.TryGetIdentity(msg.netId, msg.serverId, out NetworkIdentity identity))
             {
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
                 {

@@ -16,10 +16,13 @@ namespace Mirage
         /// </summary>
         internal IObjectLocator objectLocator;
         internal uint netId;
+        internal byte serverId;
 
         internal GameObject gameObject;
 
         internal uint NetId => gameObject != null ? gameObject.GetComponent<NetworkIdentity>().NetId : netId;
+
+        internal byte ServerId => gameObject != null ? gameObject.GetComponent<NetworkIdentity>().ServerId : serverId;
 
         public GameObject Value
         {
@@ -28,7 +31,7 @@ namespace Mirage
                 if (gameObject != null)
                     return gameObject;
 
-                if (objectLocator != null && objectLocator.TryGetIdentity(NetId, out NetworkIdentity result))
+                if (objectLocator != null && objectLocator.TryGetIdentity(NetId, ServerId, out NetworkIdentity result))
                 {
                     return result.gameObject;
                 }
@@ -39,7 +42,10 @@ namespace Mirage
             set
             {
                 if (value == null)
+                {
                     netId = 0;
+                    serverId = 0;
+                }
                 gameObject = value;
             }
         }
@@ -50,19 +56,22 @@ namespace Mirage
         public static void WriteGameObjectSyncVar(this NetworkWriter writer, GameObjectSyncvar id)
         {
             writer.WritePackedUInt32(id.NetId);
+            writer.WriteByte(id.ServerId);
         }
 
         public static GameObjectSyncvar ReadGameObjectSyncVar(this NetworkReader reader)
         {
             uint netId = reader.ReadPackedUInt32();
+            byte serverId = reader.ReadByte();
 
             NetworkIdentity identity = null;
-            bool hasValue = reader.ObjectLocator?.TryGetIdentity(netId, out identity) ?? false;
+            bool hasValue = reader.ObjectLocator?.TryGetIdentity(netId, serverId, out identity) ?? false;
 
             return new GameObjectSyncvar
             {
                 objectLocator = reader.ObjectLocator,
                 netId = netId,
+                serverId = serverId,
                 gameObject = hasValue ? identity.gameObject : null
             };
         }

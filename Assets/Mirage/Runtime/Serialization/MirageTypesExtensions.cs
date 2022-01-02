@@ -13,9 +13,11 @@ namespace Mirage.Serialization
             if (value == null)
             {
                 writer.WritePackedUInt32(0);
+                writer.WriteByte(0);
                 return;
             }
             writer.WritePackedUInt32(value.NetId);
+            writer.WriteByte(value.ServerId);
         }
         public static void WriteNetworkBehaviour(this NetworkWriter writer, NetworkBehaviour value)
         {
@@ -45,13 +47,15 @@ namespace Mirage.Serialization
         public static NetworkIdentity ReadNetworkIdentity(this NetworkReader reader)
         {
             uint netId = reader.ReadPackedUInt32();
-            if (netId == 0)
+            byte serverId = reader.ReadByte();
+
+            if (netId == 0 || serverId == 0)
                 return null;
 
-            return FindNetworkIdentity(reader.ObjectLocator, netId);
+            return FindNetworkIdentity(reader.ObjectLocator, netId, serverId);
         }
 
-        private static NetworkIdentity FindNetworkIdentity(IObjectLocator objectLocator, uint netId)
+        private static NetworkIdentity FindNetworkIdentity(IObjectLocator objectLocator, uint netId, byte serverId)
         {
             if (objectLocator == null)
             {
@@ -60,7 +64,7 @@ namespace Mirage.Serialization
             }
 
             // if not found return c# null
-            return objectLocator.TryGetIdentity(netId, out NetworkIdentity identity)
+            return objectLocator.TryGetIdentity(netId, serverId, out NetworkIdentity identity)
                 ? identity
                 : null;
         }
@@ -70,13 +74,15 @@ namespace Mirage.Serialization
             // we can't use ReadNetworkIdentity here, because we need to know if netid was 0 or not
             // if it is not 0 we need to read component index even if NI is null, or it'll fail to deserilize next part
             uint netId = reader.ReadPackedUInt32();
-            if (netId == 0)
+            byte serverId = reader.ReadByte();
+
+            if (netId == 0 || serverId == 0)
                 return null;
 
             // always read index if netid is not 0
             byte componentIndex = reader.ReadByte();
 
-            NetworkIdentity identity = FindNetworkIdentity(reader.ObjectLocator, netId);
+            NetworkIdentity identity = FindNetworkIdentity(reader.ObjectLocator, netId, serverId);
             if (identity is null)
                 return null;
 

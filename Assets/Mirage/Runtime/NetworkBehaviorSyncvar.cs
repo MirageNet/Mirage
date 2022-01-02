@@ -16,11 +16,13 @@ namespace Mirage
         internal IObjectLocator objectLocator;
         internal uint netId;
         internal int componentId;
+        internal byte serverId;
 
         internal NetworkBehaviour component;
 
         internal uint NetId => component != null ? component.NetId : netId;
         internal int ComponentId => component != null ? component.ComponentIndex : componentId;
+        internal byte ServerId => component != null ? component.ServerId : serverId;
 
         public NetworkBehaviour Value
         {
@@ -29,7 +31,7 @@ namespace Mirage
                 if (component != null)
                     return component;
 
-                if (objectLocator != null && objectLocator.TryGetIdentity(NetId, out NetworkIdentity result))
+                if (objectLocator != null && objectLocator.TryGetIdentity(NetId, serverId, out NetworkIdentity result))
                 {
                     return result.NetworkBehaviours[componentId];
                 }
@@ -44,6 +46,7 @@ namespace Mirage
                 {
                     netId = 0;
                     componentId = 0;
+                    serverId = 0;
                 }
                 component = value;
             }
@@ -57,15 +60,17 @@ namespace Mirage
         {
             writer.WritePackedUInt32(id.NetId);
             writer.WritePackedInt32(id.ComponentId);
+            writer.WriteByte(id.ServerId);
         }
 
         public static NetworkBehaviorSyncvar ReadNetworkBehaviourSyncVar(this NetworkReader reader)
         {
             uint netId = reader.ReadPackedUInt32();
             int componentId = reader.ReadPackedInt32();
+            byte serverId = reader.ReadByte();
 
             NetworkIdentity identity = null;
-            bool hasValue = reader.ObjectLocator?.TryGetIdentity(netId, out identity) ?? false;
+            bool hasValue = reader.ObjectLocator?.TryGetIdentity(netId, serverId,  out identity) ?? false;
 
             return new NetworkBehaviorSyncvar
             {

@@ -46,8 +46,12 @@ namespace Mirage
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
+        public ServerIdGenerator NextServerIdGenerator;
+
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => checked(nextNetworkId++);
+
+        byte GetNextServerId() => NextServerIdGenerator is null ? (byte)1 : NextServerIdGenerator.GenerateServerId();
 
         public void Start()
         {
@@ -222,7 +226,7 @@ namespace Mirage
             // IMPORTANT: do this in AddCharacter & ReplaceCharacter!
             SpawnVisibleObjectForPlayer(player);
 
-            if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash:X}");
+            if (logger.LogEnabled()) logger.Log($"Replacing playerGameObject object netId: {identity.NetId} serverId {identity.ServerId} asset ID {identity.PrefabHash:X}");
 
             Respawn(identity);
 
@@ -248,7 +252,7 @@ namespace Mirage
                 // todo, do we only need to spawn active objects here? or all objects?
                 if (identity.gameObject.activeSelf)
                 {
-                    if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} sceneId={identity.SceneId:X}");
+                    if (logger.LogEnabled()) logger.Log($"Checking Observers on server objects name='{identity.name}' netId={identity.NetId} serverId {identity.ServerId} sceneId={identity.SceneId:X}");
 
                     bool visible = identity.OnCheckObserver(player);
                     if (visible)
@@ -335,7 +339,7 @@ namespace Mirage
             // spawn any new visible scene objects
             SpawnVisibleObjects(player);
 
-            if (logger.LogEnabled()) logger.Log($"Adding new playerGameObject object netId: {identity.NetId} asset ID {identity.PrefabHash:X}");
+            if (logger.LogEnabled()) logger.Log($"Adding new playerGameObject object netId: {identity.NetId} serverId {identity.ServerId} asset ID {identity.PrefabHash:X}");
 
             Respawn(identity);
         }
@@ -368,7 +372,7 @@ namespace Mirage
 
         internal void HideToPlayer(NetworkIdentity identity, INetworkPlayer player)
         {
-            player.Send(new ObjectHideMessage { netId = identity.NetId });
+            player.Send(new ObjectHideMessage { netId = identity.NetId, serverId = identity.ServerId});
         }
 
         /// <summary>
@@ -423,9 +427,9 @@ namespace Mirage
         /// <param name="msg"></param>
         void OnServerRpcMessage(INetworkPlayer player, ServerRpcMessage msg)
         {
-            if (!Server.World.TryGetIdentity(msg.netId, out NetworkIdentity identity))
+            if (!Server.World.TryGetIdentity(msg.netId, msg.serverId, out NetworkIdentity identity))
             {
-                if (logger.WarnEnabled()) logger.LogWarning("Spawned object not found when handling ServerRpc message [netId=" + msg.netId + "]");
+                if (logger.WarnEnabled()) logger.LogWarning("Spawned object not found when handling ServerRpc message [netId=" + msg.netId + " serverId=" + msg.serverId+ "]");
                 return;
             }
             Skeleton skeleton = RemoteCallHelper.GetSkeleton(msg.functionHash);
@@ -533,18 +537,19 @@ namespace Mirage
             {
                 // the object has not been spawned yet
                 identity.NetId = GetNextNetworkId();
+                identity.ServerId = GetNextServerId();
                 identity.StartServer();
                 Server.World.AddIdentity(identity.NetId, identity);
             }
 
-            if (logger.LogEnabled()) logger.Log($"SpawnObject instance ID {identity.NetId} asset ID {identity.PrefabHash:X}");
+            if (logger.LogEnabled()) logger.Log($"SpawnObject instance ID {identity.NetId} serverId {identity.ServerId} asset ID {identity.PrefabHash:X}");
 
             identity.RebuildObservers(true);
         }
 
         internal void SendSpawnMessage(NetworkIdentity identity, INetworkPlayer player)
         {
-            if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
+            if (logger.LogEnabled()) logger.Log($"Server SendSpawnMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId} serverId={identity.ServerId}");
 
             // one writer for owner, one for observers
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
@@ -558,6 +563,7 @@ namespace Mirage
                 var msg = new SpawnMessage
                 {
                     netId = identity.NetId,
+                    serverId = identity.ServerId,
                     isLocalPlayer = player.Identity == identity,
                     isOwner = isOwner,
                     sceneId = sceneId,
@@ -577,11 +583,12 @@ namespace Mirage
 
         internal void SendRemoveAuthorityMessage(NetworkIdentity identity, INetworkPlayer previousOwner)
         {
-            if (logger.LogEnabled()) logger.Log($"Server SendRemoveAuthorityMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId}");
+            if (logger.LogEnabled()) logger.Log($"Server SendRemoveAuthorityMessage: name={identity.name} sceneId={identity.SceneId:X} netId={identity.NetId} serverId={identity.ServerId}");
 
             previousOwner.Send(new RemoveAuthorityMessage
             {
                 netId = identity.NetId,
+                serverId = identity.ServerId
             });
         }
 
@@ -661,7 +668,7 @@ namespace Mirage
             Server.World.RemoveIdentity(identity);
             identity.Owner?.RemoveOwnedObject(identity);
 
-            identity.SendToRemoteObservers(new ObjectDestroyMessage { netId = identity.NetId });
+            identity.SendToRemoteObservers(new ObjectDestroyMessage { netId = identity.NetId, serverId = identity.ServerId});
 
             identity.ClearObservers();
             if (Server.LocalClientActive)

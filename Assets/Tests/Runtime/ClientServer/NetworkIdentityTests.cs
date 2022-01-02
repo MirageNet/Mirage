@@ -113,6 +113,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             NetworkIdentity clone = CreateNetworkIdentity();
             clone.NetId = 20;
+            clone.ServerId = 1;
 
             Assert.That(clone.IsSpawned, Is.True);
         }
@@ -121,6 +122,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             NetworkIdentity clone = CreateNetworkIdentity();
             clone.NetId = 0;
+            clone.ServerId = 0;
 
             Assert.That(clone.IsSpawned, Is.False);
         }
@@ -140,7 +142,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             await UniTask.DelayFrame(2);
 
-            client.World.TryGetIdentity(serverIdentity2.NetId, out clientIdentity2);
+            client.World.TryGetIdentity(serverIdentity2.NetId, serverIdentity2.ServerId, out clientIdentity2);
             Debug.Assert(clientIdentity2 != null);
         }
 

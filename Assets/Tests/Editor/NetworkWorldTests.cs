@@ -14,6 +14,7 @@ namespace Mirage.Tests
         private Action<NetworkIdentity> spawnListener;
         private Action<NetworkIdentity> unspawnListener;
         HashSet<uint> existingIds;
+        HashSet<byte> existingServerIds;
 
         [SetUp]
         public void SetUp()
@@ -26,12 +27,14 @@ namespace Mirage.Tests
             existingIds = new HashSet<uint>();
         }
 
-        void AddValidIdentity(out uint id, out NetworkIdentity identity)
+        void AddValidIdentity(out uint id, out byte serverId, out NetworkIdentity identity)
         {
             id = getValidId();
+            serverId = getValidServerId();
 
             identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
             identity.NetId = id;
+            identity.ServerId = serverId;
             world.AddIdentity(id, identity);
         }
 
@@ -48,6 +51,20 @@ namespace Mirage.Tests
             return id;
         }
 
+        private byte getValidServerId()
+        {
+            byte id;
+
+            do
+            {
+                id = (byte)Random.Range(1, byte.MaxValue);
+
+            } while (existingServerIds.Contains(id));
+
+            existingServerIds.Add(id);
+            return id;
+        }
+
         [Test]
         public void StartsEmpty()
         {
@@ -58,36 +75,36 @@ namespace Mirage.Tests
         public void TryGetReturnsFalseIfNotFound()
         {
             uint id = getValidId();
-            bool found = world.TryGetIdentity(id, out NetworkIdentity _);
+            bool found = world.TryGetIdentity(id, 1, out NetworkIdentity _);
             Assert.That(found, Is.False);
         }
         [Test]
         public void TryGetReturnsFalseIfNull()
         {
-            AddValidIdentity(out uint id, out NetworkIdentity identity);
+            AddValidIdentity(out uint id, out byte serverId, out NetworkIdentity identity);
 
             Object.DestroyImmediate(identity);
 
-            bool found = world.TryGetIdentity(id, out NetworkIdentity _);
+            bool found = world.TryGetIdentity(id, 1, out NetworkIdentity _);
             Assert.That(found, Is.False);
         }
         [Test]
         public void TryGetReturnsTrueIfFound()
         {
-            AddValidIdentity(out uint id, out NetworkIdentity identity);
+            AddValidIdentity(out uint id, out byte serverId, out NetworkIdentity identity);
 
-            bool found = world.TryGetIdentity(id, out NetworkIdentity _);
+            bool found = world.TryGetIdentity(id, 1, out NetworkIdentity _);
             Assert.That(found, Is.True);
         }
 
         [Test]
         public void AddToCollection()
         {
-            AddValidIdentity(out uint id, out NetworkIdentity expected);
+            AddValidIdentity(out uint id, out byte serverId, out NetworkIdentity expected);
 
             IReadOnlyCollection<NetworkIdentity> collection = world.SpawnedIdentities;
 
-            world.TryGetIdentity(id, out NetworkIdentity actual);
+            world.TryGetIdentity(id, 1, out NetworkIdentity actual);
 
             Assert.That(collection.Count, Is.EqualTo(1));
             Assert.That(actual, Is.EqualTo(expected));
@@ -96,17 +113,17 @@ namespace Mirage.Tests
         [Test]
         public void CanAddManyObjects()
         {
-            AddValidIdentity(out uint id1, out NetworkIdentity expected1);
-            AddValidIdentity(out uint id2, out NetworkIdentity expected2);
-            AddValidIdentity(out uint id3, out NetworkIdentity expected3);
-            AddValidIdentity(out uint id4, out NetworkIdentity expected4);
+            AddValidIdentity(out uint id1, out byte serverId1, out NetworkIdentity expected1);
+            AddValidIdentity(out uint id2, out byte serverId2, out NetworkIdentity expected2);
+            AddValidIdentity(out uint id3, out byte serverId3, out NetworkIdentity expected3);
+            AddValidIdentity(out uint id4, out byte serverId4, out NetworkIdentity expected4);
 
             IReadOnlyCollection<NetworkIdentity> collection = world.SpawnedIdentities;
 
-            world.TryGetIdentity(id1, out NetworkIdentity actual1);
-            world.TryGetIdentity(id2, out NetworkIdentity actual2);
-            world.TryGetIdentity(id3, out NetworkIdentity actual3);
-            world.TryGetIdentity(id4, out NetworkIdentity actual4);
+            world.TryGetIdentity(id1, serverId1, out NetworkIdentity actual1);
+            world.TryGetIdentity(id2, serverId2, out NetworkIdentity actual2);
+            world.TryGetIdentity(id3, serverId3, out NetworkIdentity actual3);
+            world.TryGetIdentity(id4, serverId4, out NetworkIdentity actual4);
 
             Assert.That(collection.Count, Is.EqualTo(4));
             Assert.That(actual1, Is.EqualTo(expected1));
@@ -117,17 +134,17 @@ namespace Mirage.Tests
         [Test]
         public void AddInvokesEvent()
         {
-            AddValidIdentity(out uint id, out NetworkIdentity expected);
+            AddValidIdentity(out uint id, out byte serverId, out NetworkIdentity expected);
 
             spawnListener.Received(1).Invoke(expected);
         }
         [Test]
         public void AddInvokesEventOncePerAdd()
         {
-            AddValidIdentity(out uint id1, out NetworkIdentity expected1);
-            AddValidIdentity(out uint id2, out NetworkIdentity expected2);
-            AddValidIdentity(out uint id3, out NetworkIdentity expected3);
-            AddValidIdentity(out uint id4, out NetworkIdentity expected4);
+            AddValidIdentity(out uint id1, out byte serverId1, out NetworkIdentity expected1);
+            AddValidIdentity(out uint id2, out byte serverId2, out NetworkIdentity expected2);
+            AddValidIdentity(out uint id3, out byte serverId3, out NetworkIdentity expected3);
+            AddValidIdentity(out uint id4, out byte serverId4, out NetworkIdentity expected4);
 
             spawnListener.Received(1).Invoke(expected1);
             spawnListener.Received(1).Invoke(expected2);
@@ -152,7 +169,7 @@ namespace Mirage.Tests
         [Test]
         public void AddThrowsIfIdAlreadyInCollection()
         {
-            AddValidIdentity(out uint id, out NetworkIdentity identity);
+            AddValidIdentity(out uint id, out byte serverId, out NetworkIdentity identity);
 
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
@@ -168,6 +185,7 @@ namespace Mirage.Tests
             uint id = 0;
             NetworkIdentity identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
             identity.NetId = id;
+            identity.ServerId = 0;
 
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
@@ -176,6 +194,9 @@ namespace Mirage.Tests
 
             var expected = new ArgumentException("id can not be zero", "netId");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
+
+            var expectedId = new ArgumentException("server id can not be zero", "serverId");
+            Assert.That(exception, Has.Message.EqualTo(expectedId.Message));
 
             spawnListener.DidNotReceiveWithAnyArgs().Invoke(default);
         }
@@ -203,41 +224,41 @@ namespace Mirage.Tests
         [Test]
         public void RemoveFromCollectionUsingIdentity()
         {
-            AddValidIdentity(out uint id, out NetworkIdentity identity);
+            AddValidIdentity(out uint id, out byte serverId, out NetworkIdentity identity);
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(1));
 
             world.RemoveIdentity(identity);
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(0));
 
-            Assert.That(world.TryGetIdentity(id, out NetworkIdentity identityOut), Is.False);
+            Assert.That(world.TryGetIdentity(id, serverId, out NetworkIdentity identityOut), Is.False);
             Assert.That(identityOut, Is.EqualTo(null));
         }
         [Test]
         public void RemoveFromCollectionUsingNetId()
         {
-            AddValidIdentity(out uint id, out NetworkIdentity identity);
+            AddValidIdentity(out uint id, out byte serverId, out NetworkIdentity identity);
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(1));
 
             world.RemoveIdentity(id);
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(0));
 
-            Assert.That(world.TryGetIdentity(id, out NetworkIdentity identityOut), Is.False);
+            Assert.That(world.TryGetIdentity(id, serverId, out NetworkIdentity identityOut), Is.False);
             Assert.That(identityOut, Is.EqualTo(null));
         }
         [Test]
         public void RemoveOnlyRemovesCorrectItem()
         {
-            AddValidIdentity(out uint id1, out NetworkIdentity identity1);
-            AddValidIdentity(out uint id2, out NetworkIdentity identity2);
-            AddValidIdentity(out uint id3, out NetworkIdentity identity3);
+            AddValidIdentity(out uint id1, out byte serverId1, out NetworkIdentity identity1);
+            AddValidIdentity(out uint id2, out byte serverId2, out NetworkIdentity identity2);
+            AddValidIdentity(out uint id3, out byte serverId3, out NetworkIdentity identity3);
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(3));
 
             world.RemoveIdentity(identity2);
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(2));
 
-            Assert.That(world.TryGetIdentity(id1, out NetworkIdentity identityOut1), Is.True);
-            Assert.That(world.TryGetIdentity(id2, out NetworkIdentity identityOut2), Is.False);
-            Assert.That(world.TryGetIdentity(id3, out NetworkIdentity identityOut3), Is.True);
+            Assert.That(world.TryGetIdentity(id1, serverId1, out NetworkIdentity identityOut1), Is.True);
+            Assert.That(world.TryGetIdentity(id2, serverId2, out NetworkIdentity identityOut2), Is.False);
+            Assert.That(world.TryGetIdentity(id3, serverId3, out NetworkIdentity identityOut3), Is.True);
             Assert.That(identityOut1, Is.EqualTo(identity1));
             Assert.That(identityOut2, Is.EqualTo(null));
             Assert.That(identityOut3, Is.EqualTo(identity3));
@@ -245,9 +266,9 @@ namespace Mirage.Tests
         [Test]
         public void RemoveInvokesEvent()
         {
-            AddValidIdentity(out uint id1, out NetworkIdentity identity1);
-            AddValidIdentity(out uint id2, out NetworkIdentity identity2);
-            AddValidIdentity(out uint id3, out NetworkIdentity identity3);
+            AddValidIdentity(out uint id1, out byte serverId1, out NetworkIdentity identity1);
+            AddValidIdentity(out uint id2, out byte serverId2, out NetworkIdentity identity2);
+            AddValidIdentity(out uint id3, out byte serverId3, out NetworkIdentity identity3);
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(3));
 
             world.RemoveIdentity(identity3);
@@ -279,9 +300,9 @@ namespace Mirage.Tests
         [Test]
         public void ClearRemovesAllFromCollection()
         {
-            AddValidIdentity(out uint id1, out NetworkIdentity identity1);
-            AddValidIdentity(out uint id2, out NetworkIdentity identity2);
-            AddValidIdentity(out uint id3, out NetworkIdentity identity3);
+            AddValidIdentity(out uint id1, out byte serverId1, out NetworkIdentity identity1);
+            AddValidIdentity(out uint id2, out byte serverId2, out NetworkIdentity identity2);
+            AddValidIdentity(out uint id3, out byte serverId3, out NetworkIdentity identity3);
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(3));
 
             world.ClearSpawnedObjects();
@@ -290,9 +311,9 @@ namespace Mirage.Tests
         [Test]
         public void ClearDoesNotInvokeEvent()
         {
-            AddValidIdentity(out uint id1, out NetworkIdentity identity1);
-            AddValidIdentity(out uint id2, out NetworkIdentity identity2);
-            AddValidIdentity(out uint id3, out NetworkIdentity identity3);
+            AddValidIdentity(out uint id1, out byte serverId1, out NetworkIdentity identity1);
+            AddValidIdentity(out uint id2, out byte serverId2, out NetworkIdentity identity2);
+            AddValidIdentity(out uint id3, out byte serverId3, out NetworkIdentity identity3);
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(3));
 
             world.ClearSpawnedObjects();
@@ -302,10 +323,10 @@ namespace Mirage.Tests
         [Test]
         public void ClearDestoryedObjects()
         {
-            AddValidIdentity(out uint id1, out NetworkIdentity identity1);
-            AddValidIdentity(out uint id2, out NetworkIdentity identity2);
-            AddValidIdentity(out uint id3, out NetworkIdentity identity3);
-            AddValidIdentity(out uint id4, out NetworkIdentity nullIdentity);
+            AddValidIdentity(out uint id1, out byte serverId1, out NetworkIdentity identity1);
+            AddValidIdentity(out uint id2, out byte serverId2, out NetworkIdentity identity2);
+            AddValidIdentity(out uint id3, out byte serverId3, out NetworkIdentity identity3);
+            AddValidIdentity(out uint id4, out byte serverId4, out NetworkIdentity nullIdentity);
 
             Object.DestroyImmediate(nullIdentity);
 

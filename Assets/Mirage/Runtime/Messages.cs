@@ -39,6 +39,7 @@ namespace Mirage
     public struct ServerRpcMessage
     {
         public uint netId;
+        public byte serverId;
         public int componentIndex;
         public int functionHash;
 
@@ -62,6 +63,7 @@ namespace Mirage
     public struct RpcMessage
     {
         public uint netId;
+        public byte serverId;
         public int componentIndex;
         public int functionHash;
         // the parameters for the Cmd function
@@ -78,6 +80,12 @@ namespace Mirage
         /// netId of new or existing object
         /// </summary>
         public uint netId;
+
+        /// <summary>
+        ///     server id of new or existing object.
+        /// </summary>
+        public byte serverId;
+
         /// <summary>
         /// Is the spawning object the local player. Sets ClientScene.localPlayer
         /// </summary>
@@ -118,6 +126,8 @@ namespace Mirage
     public struct RemoveAuthorityMessage
     {
         public uint netId;
+
+        public byte serverId;
     }
 
     [NetworkMessage]
@@ -130,18 +140,25 @@ namespace Mirage
     public struct ObjectDestroyMessage
     {
         public uint netId;
+
+        public byte serverId;
     }
 
     [NetworkMessage]
     public struct ObjectHideMessage
     {
         public uint netId;
+
+        public byte serverId;
     }
 
     [NetworkMessage]
     public struct UpdateVarsMessage
     {
         public uint netId;
+
+        public byte serverId;
+
         // the serialized component data
         // -> ArraySegment to avoid unnecessary allocations
         public ArraySegment<byte> payload;

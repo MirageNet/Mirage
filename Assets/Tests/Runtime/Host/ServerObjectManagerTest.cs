@@ -22,7 +22,7 @@ namespace Mirage.Tests.Runtime.Host
 
             serverObjectManager.HideToPlayer(identity, player);
 
-            player.Received().Send(Arg.Is<ObjectHideMessage>(msg => msg.netId == identity.NetId));
+            player.Received().Send(Arg.Is<ObjectHideMessage>(msg => msg.netId == identity.NetId && msg.serverId == identity.ServerId));
 
             // destroy GO after shutdown, otherwise isServer is true in OnDestroy and it tries to call
             // GameObject.Destroy (but we need DestroyImmediate in Editor)
@@ -56,6 +56,7 @@ namespace Mirage.Tests.Runtime.Host
 
             // it should have been marked for reset now
             Assert.That(identity.NetId, Is.Zero);
+            Assert.That(identity.ServerId, Is.Zero);
         }
 
         [UnityTest]

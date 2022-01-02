@@ -250,6 +250,7 @@ namespace Mirage
 
             if (Application.isPlaying)
             {
+                infos.Add(GetString("Server ID", identity.ServerId.ToString()));
                 infos.Add(GetString("Network ID", identity.NetId.ToString()));
                 infos.Add(GetBoolean("Is Client", identity.IsClient));
                 infos.Add(GetBoolean("Is Server", identity.IsServer));

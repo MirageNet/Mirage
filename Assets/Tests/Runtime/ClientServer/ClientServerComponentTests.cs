@@ -105,7 +105,8 @@ namespace Mirage.Tests.Runtime.ClientServer
             var gameObject = new GameObject();
             NetworkIdentity identity = gameObject.AddComponent<NetworkIdentity>();
             identity.PrefabHash = hash;
-            identity.NetId = (uint)Random.Range(0, int.MaxValue);
+            identity.NetId = (uint)Random.Range(1, int.MaxValue);
+            identity.ServerId = (byte)Random.Range(1, byte.MaxValue);
 
             clientObjectManager.RegisterSpawnHandler(hash, SpawnDelegateTest, go => { });
             clientObjectManager.RegisterPrefab(identity, hash);
@@ -124,7 +125,8 @@ namespace Mirage.Tests.Runtime.ClientServer
             var gameObject = new GameObject();
             NetworkIdentity identity = gameObject.AddComponent<NetworkIdentity>();
             identity.PrefabHash = hash;
-            identity.NetId = (uint)Random.Range(0, int.MaxValue);
+            identity.NetId = (uint)Random.Range(1, int.MaxValue);
+            identity.ServerId = (byte)Random.Range(1, byte.MaxValue);
 
             UnSpawnDelegate unspawnDelegate = Substitute.For<UnSpawnDelegate>();
 
@@ -136,7 +138,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             clientObjectManager.OnObjectDestroy(new ObjectDestroyMessage
             {
-                netId = identity.NetId
+                netId = identity.NetId,
+                serverId = identity.ServerId
             });
             unspawnDelegate.Received().Invoke(Arg.Any<NetworkIdentity>());
         });

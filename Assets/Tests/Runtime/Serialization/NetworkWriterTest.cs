@@ -1002,8 +1002,9 @@ namespace Mirage.Tests.Runtime.Serialization
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
+            mock.Identity.ServerId = 1;
             // returns found id
-            reader.ObjectLocator.TryGetIdentity(1, out NetworkIdentity _).Returns(x => { x[1] = mock.Identity; return true; });
+            reader.ObjectLocator.TryGetIdentity(1, 1, out NetworkIdentity _).Returns(x => { x[2] = mock.Identity; return true; });
 
             // try/fianlly so go is always destroyed
             try
@@ -1031,8 +1032,9 @@ namespace Mirage.Tests.Runtime.Serialization
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
+            mock.Identity.ServerId = 1;
             // return not found
-            reader.ObjectLocator.TryGetIdentity(1, out NetworkIdentity _).Returns(x => { x[1] = null; return false; });
+            reader.ObjectLocator.TryGetIdentity(1, 1, out NetworkIdentity _).Returns(x => { x[2] = null; return false; });
 
             // try/fianlly so go is always destroyed
             try

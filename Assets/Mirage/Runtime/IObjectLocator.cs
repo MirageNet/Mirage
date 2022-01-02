@@ -10,8 +10,9 @@ namespace Mirage
         /// Finds a network identity by id
         /// </summary>
         /// <param name="netId">the id of the object to find</param>
+        /// <param name="serverId">the id of the server that object is from.</param>
         /// <param name="identity">The NetworkIdentity matching the netId or null if none is found</param>
         /// <returns>true if identity is found and is not null</returns>
-        bool TryGetIdentity(uint netId, out NetworkIdentity identity);
+        bool TryGetIdentity(uint netId, byte serverId, out NetworkIdentity identity);
     }
 }

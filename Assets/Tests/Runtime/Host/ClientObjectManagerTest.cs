@@ -169,7 +169,8 @@ namespace Mirage.Tests.Runtime.Host
         {
             clientObjectManager.OnObjectHide(new ObjectHideMessage
             {
-                netId = identity.NetId
+                netId = identity.NetId,
+                serverId = identity.ServerId
             });
 
             await AsyncUtil.WaitUntilWithTimeout(() => identity == null);
@@ -182,7 +183,8 @@ namespace Mirage.Tests.Runtime.Host
         {
             clientObjectManager.OnObjectDestroy(new ObjectDestroyMessage
             {
-                netId = identity.NetId
+                netId = identity.NetId,
+                serverId = identity.ServerId
             });
 
             await AsyncUtil.WaitUntilWithTimeout(() => identity == null);

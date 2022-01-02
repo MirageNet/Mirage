@@ -689,6 +689,7 @@ namespace Mirage.Tests
             // mark for reset and reset
             identity.NetworkReset();
             Assert.That(identity.NetId, Is.EqualTo(0));
+            Assert.That(identity.ServerId, Is.EqualTo(0));
             Assert.That(identity.Owner, Is.Null);
         }
 

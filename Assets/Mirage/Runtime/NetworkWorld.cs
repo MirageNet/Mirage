@@ -27,9 +27,10 @@ namespace Mirage
         private readonly Dictionary<uint, NetworkIdentity> SpawnedObjects = new Dictionary<uint, NetworkIdentity>();
         public IReadOnlyCollection<NetworkIdentity> SpawnedIdentities => SpawnedObjects.Values;
 
-        public bool TryGetIdentity(uint netId, out NetworkIdentity identity)
+        public bool TryGetIdentity(uint netId, byte serverId, out NetworkIdentity identity)
         {
-            return SpawnedObjects.TryGetValue(netId, out identity) && identity != null;
+            bool isSpawned = SpawnedObjects.TryGetValue(netId, out identity);
+            return isSpawned && identity != null && identity.ServerId == serverId;
         }
 
         /// <summary>
