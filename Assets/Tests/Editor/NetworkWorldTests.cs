@@ -25,6 +25,7 @@ namespace Mirage.Tests
             world.onSpawn += spawnListener;
             world.onUnspawn += unspawnListener;
             existingIds = new HashSet<uint>();
+            existingServerIds = new HashSet<byte>();
         }
 
         void AddValidIdentity(out uint id, out byte serverId, out NetworkIdentity identity)
@@ -75,7 +76,8 @@ namespace Mirage.Tests
         public void TryGetReturnsFalseIfNotFound()
         {
             uint id = getValidId();
-            bool found = world.TryGetIdentity(id, 1, out NetworkIdentity _);
+            byte serverId = getValidServerId();
+            bool found = world.TryGetIdentity(id, serverId, out NetworkIdentity _);
             Assert.That(found, Is.False);
         }
         [Test]
@@ -85,7 +87,7 @@ namespace Mirage.Tests
 
             Object.DestroyImmediate(identity);
 
-            bool found = world.TryGetIdentity(id, 1, out NetworkIdentity _);
+            bool found = world.TryGetIdentity(id, serverId, out NetworkIdentity _);
             Assert.That(found, Is.False);
         }
         [Test]
@@ -93,7 +95,7 @@ namespace Mirage.Tests
         {
             AddValidIdentity(out uint id, out byte serverId, out NetworkIdentity identity);
 
-            bool found = world.TryGetIdentity(id, 1, out NetworkIdentity _);
+            bool found = world.TryGetIdentity(id, serverId, out NetworkIdentity _);
             Assert.That(found, Is.True);
         }
 
@@ -104,7 +106,7 @@ namespace Mirage.Tests
 
             IReadOnlyCollection<NetworkIdentity> collection = world.SpawnedIdentities;
 
-            world.TryGetIdentity(id, 1, out NetworkIdentity actual);
+            world.TryGetIdentity(id, serverId, out NetworkIdentity actual);
 
             Assert.That(collection.Count, Is.EqualTo(1));
             Assert.That(actual, Is.EqualTo(expected));
@@ -185,7 +187,6 @@ namespace Mirage.Tests
             uint id = 0;
             NetworkIdentity identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
             identity.NetId = id;
-            identity.ServerId = 0;
 
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
@@ -194,9 +195,6 @@ namespace Mirage.Tests
 
             var expected = new ArgumentException("id can not be zero", "netId");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
-
-            var expectedId = new ArgumentException("server id can not be zero", "serverId");
-            Assert.That(exception, Has.Message.EqualTo(expectedId.Message));
 
             spawnListener.DidNotReceiveWithAnyArgs().Invoke(default);
         }
@@ -208,7 +206,6 @@ namespace Mirage.Tests
 
             NetworkIdentity identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
             identity.NetId = id1;
-
 
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
