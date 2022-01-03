@@ -51,7 +51,7 @@ namespace Mirage
         uint nextNetworkId = 1;
         uint GetNextNetworkId() => checked(nextNetworkId++);
 
-        byte GetNextServerId() => NextServerIdGenerator is null ? (byte)1 : NextServerIdGenerator.GenerateServerId();
+        byte GetNextServerId() => NextServerIdGenerator == null ? (byte)1 : NextServerIdGenerator.GenerateServerId();
 
         public void Start()
         {
