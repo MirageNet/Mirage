@@ -420,7 +420,7 @@ namespace Mirage
 
             // add after applying payload, but only if it is new object
             if (!existing)
-                Client.World.AddIdentity(msg.netId, identity);
+                Client.World.AddIdentity(msg.netId, msg.serverId, identity);
         }
 
         NetworkIdentity SpawnPrefab(SpawnMessage msg)

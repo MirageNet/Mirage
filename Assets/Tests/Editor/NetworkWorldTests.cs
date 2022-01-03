@@ -1,8 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
@@ -36,7 +40,7 @@ namespace Mirage.Tests
             identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
             identity.NetId = id;
             identity.ServerId = serverId;
-            world.AddIdentity(id, identity);
+            world.AddIdentity(id, serverId, identity);
         }
 
         private uint getValidId()
@@ -160,7 +164,7 @@ namespace Mirage.Tests
 
             ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                world.AddIdentity(id, null);
+                world.AddIdentity(id, 1, null);
             });
 
             var expected = new ArgumentNullException("identity");
@@ -175,25 +179,46 @@ namespace Mirage.Tests
 
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                world.AddIdentity(id, identity);
+                world.AddIdentity(id, serverId, identity);
             });
 
-            var expected = new ArgumentException("An Identity with same id already exists in network world", "netId");
+            var expected = new ArgumentException($"NetId:{id} ServerId:{serverId} resulted in an id already exists in dictionary.", "uniqueId");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
         [Test]
-        public void AddThrowsIfIdIs0()
+        public void AddThrowsIfNetIdIs0()
         {
             uint id = 0;
+            byte serverId = 1;
             NetworkIdentity identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
             identity.NetId = id;
+            identity.ServerId = serverId;
 
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                world.AddIdentity(id, identity);
+                world.AddIdentity(id, serverId, identity);
             });
 
-            var expected = new ArgumentException("id can not be zero", "netId");
+            var expected = new ArgumentException("net id can not be zero", "netId");
+            Assert.That(exception, Has.Message.EqualTo(expected.Message));
+
+            spawnListener.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+        [Test]
+        public void AddThrowsIfServerIdIs0()
+        {
+            uint id = 1;
+            byte serverId = 0;
+            NetworkIdentity identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
+            identity.NetId = id;
+            identity.ServerId = serverId;
+
+            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            {
+                world.AddIdentity(id, serverId, identity);
+            });
+
+            var expected = new ArgumentException("server id can not be zero", "serverId");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
 
             spawnListener.DidNotReceiveWithAnyArgs().Invoke(default);
@@ -209,7 +234,7 @@ namespace Mirage.Tests
 
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                world.AddIdentity(id2, identity);
+                world.AddIdentity(id2, 1, identity);
             });
 
             var expected = new ArgumentException("NetworkIdentity did not have matching netId", "identity");
@@ -236,7 +261,7 @@ namespace Mirage.Tests
             AddValidIdentity(out uint id, out byte serverId, out NetworkIdentity identity);
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(1));
 
-            world.RemoveIdentity(id);
+            world.RemoveIdentity(id, serverId);
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(0));
 
             Assert.That(world.TryGetIdentity(id, serverId, out NetworkIdentity identityOut), Is.False);
@@ -271,24 +296,42 @@ namespace Mirage.Tests
             world.RemoveIdentity(identity3);
             unspawnListener.Received(1).Invoke(identity3);
 
-            world.RemoveIdentity(id1);
+            world.RemoveIdentity(id1, serverId1);
             unspawnListener.Received(1).Invoke(identity1);
 
-            world.RemoveIdentity(id2);
+            world.RemoveIdentity(id2, serverId2);
             unspawnListener.Received(1).Invoke(identity2);
         }
 
         [Test]
-        public void RemoveThrowsIfIdIs0()
+        public void RemoveThrowsIfNetIdIs0()
         {
             uint id = 0;
+            byte serverId = 1;
 
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                world.RemoveIdentity(id);
+                world.RemoveIdentity(id, serverId);
             });
 
-            var expected = new ArgumentException("id can not be zero", "netId");
+            var expected = new ArgumentException("net id can not be zero", "netId");
+            Assert.That(exception, Has.Message.EqualTo(expected.Message));
+
+            unspawnListener.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [Test]
+        public void RemoveThrowsIfServerIdIs0()
+        {
+            uint id = 1;
+            byte serverId = 0;
+
+            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            {
+                world.RemoveIdentity(id, serverId);
+            });
+
+            var expected = new ArgumentException("server id can not be zero", "serverId");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
 
             unspawnListener.DidNotReceiveWithAnyArgs().Invoke(default);
@@ -338,5 +381,26 @@ namespace Mirage.Tests
 
             Assert.That(world.SpawnedIdentities.Count, Is.EqualTo(3));
         }
+
+        [UnityTest, Explicit]
+        public IEnumerator TestNetworkWorldDictionaryCollisions() => UniTask.ToCoroutine(async () =>
+        {
+            NetworkIdentity identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
+
+            for (uint x = 1; x < uint.MaxValue; x++)
+            {
+                for (byte y = 1; y < byte.MaxValue; y++)
+                {
+                    identity.NetId = x;
+                    identity.ServerId = y;
+                    world.AddIdentity(x, y, identity);
+                }
+
+                while (EditorApplication.isUpdating)
+                {
+                    await UniTask.Delay(5);
+                }
+            }
+        });
     }
 }

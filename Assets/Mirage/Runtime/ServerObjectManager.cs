@@ -539,7 +539,7 @@ namespace Mirage
                 identity.NetId = GetNextNetworkId();
                 identity.ServerId = GetNextServerId();
                 identity.StartServer();
-                Server.World.AddIdentity(identity.NetId, identity);
+                Server.World.AddIdentity(identity.NetId, identity.ServerId, identity);
             }
 
             if (logger.LogEnabled()) logger.Log($"SpawnObject instance ID {identity.NetId} serverId {identity.ServerId} asset ID {identity.PrefabHash:X}");
