@@ -387,7 +387,7 @@ namespace Mirage.Tests
         {
             NetworkIdentity identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
 
-            for (uint x = 1; x < uint.MaxValue; x++)
+            for (uint x = 1; x < ushort.MaxValue; x++)
             {
                 for (byte y = 1; y < byte.MaxValue; y++)
                 {
@@ -395,6 +395,24 @@ namespace Mirage.Tests
                     identity.ServerId = y;
                     world.AddIdentity(x, y, identity);
                 }
+
+                while (EditorApplication.isUpdating)
+                {
+                    await UniTask.Delay(5);
+                }
+            }
+        });
+
+        [UnityTest, Explicit]
+        public IEnumerator TestNetworkWorldDictionaryDefaultCollisions() => UniTask.ToCoroutine(async () =>
+        {
+            NetworkIdentity identity = new GameObject("WorldTest").AddComponent<NetworkIdentity>();
+
+            for (uint x = 1; x < ushort.MaxValue; x++)
+            {
+                identity.NetId = x;
+                identity.ServerId = 1;
+                world.AddIdentity(x, 1, identity);
 
                 while (EditorApplication.isUpdating)
                 {
