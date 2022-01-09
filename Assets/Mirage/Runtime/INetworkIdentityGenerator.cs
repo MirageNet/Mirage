@@ -5,6 +5,6 @@ namespace Mirage
         /// <summary>
         ///     Generate your own specific net id.
         /// </summary>
-        byte GenerateNetId();
+        uint GenerateNetId();
     }
 }

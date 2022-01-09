@@ -49,7 +49,7 @@ namespace Mirage
         public INetworkIdentityGenerator NetIdGenerator;
 
         uint nextNetworkId = 1;
-        uint GetNextNetworkId() => NetIdGenerator?.GenerateNetId() ?? (byte)1;
+        uint GetNextNetworkId() => NetIdGenerator?.GenerateNetId() ?? checked(nextNetworkId++);
 
         public void Start()
         {
