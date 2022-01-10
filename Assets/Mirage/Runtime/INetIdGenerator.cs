@@ -1,6 +1,6 @@
 namespace Mirage
 {
-    public interface INetworkIdentityGenerator
+    public interface INetIdGenerator
     {
         /// <summary>
         ///     Generate your own specific net id.
