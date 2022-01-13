@@ -71,7 +71,7 @@ namespace Mirage.Weaver
                 // the client should just get the connection to the server and pass that in
                 worker.Append(worker.Create(OpCodes.Ldarg_0));
                 worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
-                worker.Append(worker.Create(OpCodes.Call, (NetworkClient nb) => nb.Player));
+                worker.Append(worker.Create(OpCodes.Callvirt, (INetworkClient nb) => nb.Player));
             }
 
             ReadArguments(md, worker, readerParameter, senderParameter: null, hasNetworkConnection, paramSerializers);
@@ -236,14 +236,14 @@ namespace Mirage.Weaver
                     // local connection to the server
                     worker.Append(worker.Create(OpCodes.Ldarg_0));
                     worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Client));
-                    worker.Append(worker.Create(OpCodes.Call, (NetworkClient nc) => nc.Player));
+                    worker.Append(worker.Create(OpCodes.Callvirt, (INetworkClient nc) => nc.Player));
                 }
                 else
                 {
                     worker.Append(worker.Create(OpCodes.Ldarg, i + 1));
                 }
             }
-            worker.Append(worker.Create(OpCodes.Call, rpc));
+            worker.Append(worker.Create(OpCodes.Callvirt, rpc));
         }
         bool Validate(MethodDefinition md, CustomAttribute clientRpcAttr)
         {

@@ -293,14 +293,14 @@ namespace Mirage.Weaver
                 {
                     worker.Append(worker.Create(OpCodes.Ldarg_0));
                     worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Server));
-                    worker.Append(worker.Create(OpCodes.Call, (NetworkServer server) => server.LocalPlayer));
+                    worker.Append(worker.Create(OpCodes.Callvirt, (INetworkServer server) => server.LocalPlayer));
                 }
                 else
                 {
                     worker.Append(worker.Create(OpCodes.Ldarg, param));
                 }
             }
-            worker.Append(worker.Create(OpCodes.Call, rpc));
+            worker.Append(worker.Create(OpCodes.Callvirt, rpc));
 
             bool IsNetworkPlayer(ParameterDefinition param)
             {
