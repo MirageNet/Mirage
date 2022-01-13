@@ -1,3 +1,10 @@
+## [114.0.3](https://github.com/MirageNet/Mirage/compare/v114.0.2...v114.0.3) (2022-01-13)
+
+
+### Bug Fixes
+
+* fixing calls to interface for target RPCs ([#1021](https://github.com/MirageNet/Mirage/issues/1021)) ([780123d](https://github.com/MirageNet/Mirage/commit/780123d6bb5602632e029d1c5fdc4e73ed477f0c))
+
 ## [114.0.2](https://github.com/MirageNet/Mirage/compare/v114.0.1...v114.0.2) (2022-01-03)
 
 
