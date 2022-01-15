@@ -1,3 +1,10 @@
+# [114.1.0](https://github.com/MirageNet/Mirage/compare/v114.0.3...v114.1.0) (2022-01-15)
+
+
+### Features
+
+* allow end user's to create there own net id generator ([#1019](https://github.com/MirageNet/Mirage/issues/1019)) ([d2e8834](https://github.com/MirageNet/Mirage/commit/d2e88343b939d12d15f9acae0c06b14386c6dd74))
+
 ## [114.0.3](https://github.com/MirageNet/Mirage/compare/v114.0.2...v114.0.3) (2022-01-13)
 
 
