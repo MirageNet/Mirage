@@ -46,8 +46,10 @@ namespace Mirage
         [FormerlySerializedAs("networkSceneManager")]
         public NetworkSceneManager NetworkSceneManager;
 
+        public INetIdGenerator NetIdGenerator;
+
         uint nextNetworkId = 1;
-        uint GetNextNetworkId() => checked(nextNetworkId++);
+        uint GetNextNetworkId() => NetIdGenerator?.GenerateNetId() ?? checked(nextNetworkId++);
 
         public void Start()
         {
