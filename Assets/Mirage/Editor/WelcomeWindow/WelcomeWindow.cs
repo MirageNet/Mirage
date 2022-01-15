@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Mirage.Logging;
@@ -28,7 +29,6 @@ namespace Mirage
         static readonly ILogger logger = LogFactory.GetLogger<WelcomeWindow>();
 
         private Button lastClickedTab;
-        private readonly List<Button> installButtons = new List<Button>();
 
         #region Setup
 
@@ -47,18 +47,14 @@ namespace Mirage
         private const string BoldReplace = "$1";
 #endif
 
-        private readonly List<Package> Packages = new List<Package>()
-        {
-            new Package { displayName = "LAN Discovery", packageName = "com.miragenet.discovery", gitUrl = "https://github.com/MirageNet/Discovery.git?path=/Assets/Discovery"},
-            new Package { displayName = "Steam (Facepunch)", packageName = "com.miragenet.steamyface", gitUrl = "https://github.com/MirageNet/SteamyFaceNG.git?path=/Assets/Mirage/Runtime/Transport/SteamyFaceMirror" },
-            new Package { displayName = "Steam (Steamworks.NET)", packageName = "com.miragenet.steamy", gitUrl = "https://github.com/MirageNet/FizzySteamyMirror.git?path=/Assets/Mirage/Runtime/Transport/FizzySteamyMirror" },
-        };
+        private readonly List<Package> packages = new List<Package>();
 
         #endregion
 
         //request for the module install
         private AddRequest installRequest;
         private RemoveRequest uninstallRequest;
+        private SearchRequest searchRequest;
         private ListRequest listRequest;
 
         private static WelcomeWindow currentWindow;
@@ -149,6 +145,19 @@ namespace Mirage
         //the code to handle display and button clicking
         private void OnEnable()
         {
+            // Might need to do this later on if we go to asset store.
+            // Packages read off of the scoped registry which if we use asset store release wont have this.
+            MethodInfo unityMethod = typeof(Client).GetMethod("AddScopedRegistry",
+                BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic, null,
+                new[] { typeof(string), typeof(string), typeof(string[]) }, null);
+
+            unityMethod.Invoke(this, new object[]
+                {
+                    "Mirage",
+                    "https://package.openupm.com",
+                    new[]{ "com.miragenet", "com.cysharp.unitask"}
+                });
+
             changeLogPath = AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this)) + "/../../../CHANGELOG.md";
 
             //Load the UI
@@ -381,16 +390,40 @@ namespace Mirage
                 EditorPrefs.SetString(screenToOpenKey, "Packages");
             };
 
-            listRequest = UnityEditor.PackageManager.Client.List(true, false);
+            listRequest = Client.List(true, false);
+            searchRequest = Client.SearchAll(false);
 
             //subscribe to ListPackageProgress for updates
             EditorApplication.update += ListPackageProgress;
         }
 
+        /// <summary>
+        ///     Install or uninstall package.
+        /// </summary>
+        /// <param name="packageName">The package to install or uninstall.</param>
+        private void ModuleButtonClicked(string packageName)
+        {
+            VisualElement packageElement = rootVisualElement.Q<VisualElement>("ModulesList").Q<VisualElement>(packageName);
+
+            Button packageButton = packageElement.Q<Button>();
+
+            switch (packageButton.text)
+            {
+                case "Install":
+                    InstallPackage(packageName);
+                    packageButton.text = "Uninstall";
+                    break;
+                case "Uninstall":
+                    UninstallPackage(packageName);
+                    packageButton.text = "Install";
+                    break;
+            }
+        }
+
         //install the package
         private void InstallPackage(string packageName)
         {
-            installRequest = UnityEditor.PackageManager.Client.Add(Packages.Find((x) => x.displayName == packageName).gitUrl);
+            installRequest = Client.Add(packages.Find((x) => x.displayName == packageName).gitUrl);
 
             //subscribe to InstallPackageProgress for updates
             EditorApplication.update += InstallPackageProgress;
@@ -399,7 +432,7 @@ namespace Mirage
         //uninstall the package
         private void UninstallPackage(string packageName)
         {
-            uninstallRequest = UnityEditor.PackageManager.Client.Remove(Packages.Find((x) => x.displayName == packageName).packageName);
+            uninstallRequest = Client.Remove(packages.Find((x) => x.displayName == packageName).packageName);
 
             //subscribe to UninstallPackageProgress for updates
             EditorApplication.update += UninstallPackageProgress;
@@ -418,13 +451,13 @@ namespace Mirage
                 else if (installRequest.Status == StatusCode.Failure)
                 {
                     logger.LogError($"Package install was unsuccessful. \n Error Code: {installRequest.Error.errorCode}\n Error Message: {installRequest.Error.message}");
+                    
                 }
 
                 EditorApplication.update -= InstallPackageProgress;
 
                 //refresh the package tab
-                currentWindow?.Close();
-                OpenWindow();
+                currentWindow.Repaint();
             }
         }
 
@@ -445,96 +478,84 @@ namespace Mirage
                 }
 
                 //refresh the package tab
-                currentWindow?.Close();
-                OpenWindow();
+                currentWindow.Repaint();
             }
         }
 
         private void ListPackageProgress()
         {
-            if (!listRequest.IsCompleted)
+            if (!searchRequest.IsCompleted | !listRequest.IsCompleted)
             {
                 return;
             }
 
             EditorApplication.update -= ListPackageProgress;
 
-            switch (listRequest.Status)
+            switch (searchRequest.Status)
             {
-                //log error
                 case StatusCode.Success:
+
+                    packages.Clear();
+
+                    foreach (PackageInfo package in searchRequest.Result)
                     {
-                        var installedPackages = new List<string>();
+                        if (!package.name.Contains("com.miragenet") || package.name.Equals(miragePackageName)) continue;
 
-                        //populate installedPackages
-                        foreach (PackageInfo package in listRequest.Result)
+                        bool packageInstalled = false;
+
+                        foreach (PackageInfo installedPackages in listRequest.Result)
                         {
-                            Package? miragePackage = Packages.Find((x) => x.packageName == package.name);
+                            if (!package.name.Equals(installedPackages.name)) continue;
 
-                            if (miragePackage?.packageName == null)
-                            {
-                                continue;
-                            }
-
-                            installedPackages.Add(miragePackage.Value.displayName);
+                            packageInstalled = true;
                         }
 
-                        ConfigureInstallButtons(installedPackages);
-                        break;
+                        packages.Add(new Package
+                        {
+                            displayName = package.displayName,
+                            gitUrl = package.name,
+                            packageName = package.name,
+                            installed = packageInstalled
+                        });
                     }
+
+                    ConfigureInstallButtons();
+
+                    break;
                 case StatusCode.Failure:
-                    if (logger.ErrorEnabled()) logger.LogError($"There was an issue finding packages. \n Error Code: {listRequest.Error.errorCode }\n Error Message: {listRequest.Error.message}");
+                    if (logger.ErrorEnabled()) logger.LogError($"There was an issue finding packages. \n Error Code: {searchRequest.Error.errorCode }\n Error Message: {searchRequest.Error.message}");
                     break;
             }
         }
 
         //configures the install button
         //changes text and functionality after button press
-        private void ConfigureInstallButtons(List<string> installedPackages)
+        private void ConfigureInstallButtons()
         {
-            //get all the packages
-            foreach (VisualElement package in rootVisualElement.Q<VisualElement>("ModulesList").Children())
+            VisualElement moduleVisualElement = rootVisualElement.Q<VisualElement>("ModulesList");
+            moduleVisualElement.Clear();
+
+            foreach (Package module in packages)
             {
-                //get the button and name of the package
-                Button installButton = package.Q<Button>("InstallButton");
-                string packageName = package.Q<Label>("Name").text;
-                bool foundInInstalledPackages = installedPackages.Contains(packageName);
-
-                //set text
-                installButton.text = !foundInInstalledPackages ? "Install" : "Uninstall";
-
-                //set functionality
-                if (!foundInInstalledPackages)
-                {
-                    installButton.clicked += () =>
+                //set the button and name of the package
+                var moduleButton = new Button(() => ModuleButtonClicked(module.displayName))
                     {
-                        InstallPackage(packageName);
-                        installButton.text = "Installing";
-                        DisableInstallButtons();
+                        style = { height = new Length(20, LengthUnit.Pixel), position = Position.Relative, left = 40},
+                        text = module.installed ? "Uninstall" : "Install"
                     };
-                }
-                else
+
+                var containerElement = new VisualElement
                 {
-                    installButton.clicked += () =>
-                    {
-                        UninstallPackage(packageName);
-                        installButton.text = "Uninstalling";
-                        DisableInstallButtons();
-                    };
-                }
+                    style = { flexDirection = FlexDirection.Row, alignItems = Align.Center },
+                    name = module.displayName
+                };
 
-                installButtons.Add(installButton);
-            }
-        }
+                var label = new Label(module.displayName) { style = { width = new StyleLength(200) } };
 
-        //prevents user from spamming install button
-        //spamming the button while installing/uninstalling throws errors
-        //buttons enabled again after window refreshes
-        private void DisableInstallButtons()
-        {
-            foreach (Button button in installButtons)
-            {
-                button.SetEnabled(false);
+                containerElement.Add(label);
+                containerElement.Add(moduleButton);
+
+                moduleVisualElement.Add(containerElement);
             }
         }
 
@@ -549,5 +570,6 @@ namespace Mirage
         public string displayName;
         public string packageName;
         public string gitUrl;
+        public bool installed;
     }
 }
