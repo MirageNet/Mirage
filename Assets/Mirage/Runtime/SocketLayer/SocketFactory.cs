@@ -36,6 +36,7 @@ namespace Mirage.SocketLayer
         public abstract ISocket CreateServerSocket();
 
         /// <summary>Creates the <see cref="EndPoint"/> that the Server Socket will bind to</summary>
+        /// <exception cref="NotSupportedException">Throw when Client is not supported on current platform</exception>
         public abstract IEndPoint GetBindEndPoint();
 
 
@@ -44,6 +45,7 @@ namespace Mirage.SocketLayer
         public abstract ISocket CreateClientSocket();
 
         /// <summary>Creates the <see cref="EndPoint"/> that the Client Socket will connect to using the parameter given</summary>
+        /// <exception cref="NotSupportedException">Throw when Client is not supported on current platform</exception>
         public abstract IEndPoint GetConnectEndPoint(string address = null, ushort? port = null);
     }
 }
