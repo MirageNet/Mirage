@@ -58,17 +58,8 @@
                     <ui:Label name="Description" text="Mirage is a modular networking library. It ships with the foundation that you can build upon by installing packages." style="flex-basis: auto; flex-grow: 0; flex-shrink: 0;" />
                     <ui:Label text="Available Packages" display-tooltip-when-elided="True" style="padding-left: 10px; -unity-font-style: bold;" />
                     <ui:VisualElement name="ModulesList" style="flex-grow: 1; padding-left: 10px; padding-right: 10px;">
-                        <ui:VisualElement name="Module" tooltip="Automatically find games within the same network.">
-                            <ui:Label text="LAN Discovery" name="Name" />
-                            <ui:Button text="Install" name="InstallButton" class="installButton" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="Module" tooltip="A transport that uses Facepunch&apos;s Steam SDK.">
-                            <ui:Label text="Steam (Facepunch)" name="Name" />
-                            <ui:Button text="Install" name="InstallButton" class="installButton" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="Module" tooltip="A transport that uses Steamworks.NET.">
-                            <ui:Label text="Steam (Steamworks.NET)" name="Name" />
-                            <ui:Button text="Install" name="InstallButton" class="installButton" />
+                        <ui:VisualElement>
+                            <ui:Label text="Loading...." name="Name" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement name="Spacer" />

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Mirage.Logging;
@@ -145,19 +144,6 @@ namespace Mirage
         //the code to handle display and button clicking
         private void OnEnable()
         {
-            // Might need to do this later on if we go to asset store.
-            // Packages read off of the scoped registry which if we use asset store release wont have this.
-            MethodInfo unityMethod = typeof(Client).GetMethod("AddScopedRegistry",
-                BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic, null,
-                new[] { typeof(string), typeof(string), typeof(string[]) }, null);
-
-            unityMethod.Invoke(this, new object[]
-                {
-                    "Mirage",
-                    "https://package.openupm.com",
-                    new[]{ "com.miragenet", "com.cysharp.unitask"}
-                });
-
             changeLogPath = AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this)) + "/../../../CHANGELOG.md";
 
             //Load the UI
@@ -515,6 +501,7 @@ namespace Mirage
                             displayName = package.displayName,
                             gitUrl = package.name,
                             packageName = package.name,
+                            tooltip = package.description,
                             installed = packageInstalled
                         });
                     }
@@ -550,7 +537,7 @@ namespace Mirage
                     name = module.displayName
                 };
 
-                var label = new Label(module.displayName) { style = { width = new StyleLength(200) } };
+                var label = new Label(module.displayName) { style = { width = new StyleLength(200) }, tooltip = module.tooltip };
 
                 containerElement.Add(label);
                 containerElement.Add(moduleButton);
@@ -570,6 +557,7 @@ namespace Mirage
         public string displayName;
         public string packageName;
         public string gitUrl;
+        public string tooltip;
         public bool installed;
     }
 }
