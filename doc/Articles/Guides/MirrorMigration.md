@@ -68,11 +68,11 @@ class MyNetworkManager : NetworkManager {
         // Server stopped
     }
 
-    public override void OnClinetConnect(NetworkConnection conn) {
+    public override void OnClientConnect(NetworkConnection conn) {
         // Client connected
     }
 
-    public override void OnClientDisconenct(NetworkConnection conn) {
+    public override void OnClientDisconnect(NetworkConnection conn) {
         // Client disconnected
     }
 }
@@ -89,7 +89,7 @@ class MyNetworkManager : NetworkManager {
         Server.Authenticated.AddListener(OnServerConnect);
         Server.Stopped.AddListener(OnStopServer);
         Client.Authenticated.AddListener(OnClientConnect);
-        Client.Disconnected.AddListener(OnClientDisconenct);
+        Client.Disconnected.AddListener(OnClientDisconnected);
     }
 
     void OnStartServer() {
@@ -104,11 +104,11 @@ class MyNetworkManager : NetworkManager {
         // Server stopped
     }
 
-    void OnClinetConnect(INetworkPlayer conn) {
+    void OnClientConnect(INetworkPlayer conn) {
         // Client connected
     }
 
-    void OnClientDisconenct() {
+    void OnClientDisconnected() {
         // Client disconnected
     }
 }
@@ -117,15 +117,15 @@ class MyNetworkManager : NetworkManager {
 ### NetworkBehaviour events
 Table below shows the Mirror's `NetworkBehaviour` override method names on the left and the Mirage events on the right.
 
-| Mirror (override)      | Mirage (event)                                                                    |
-|:----------------------:|:---------------------------------------------------------------------------------:|
-| `OnStartServer`        | [Identity.OnStartServer](xref:Mirage.NetworkIdentity.OnStartServer)            |
-| `OnStopServer`         | [Identity.OnStopServer](xref:Mirage.NetworkIdentity.OnStopServer)              |
-| `OnStartClient`        | [Identity.OnStartClient](xref:Mirage.NetworkIdentity.OnStartClient)            |
-| `OnStopClient`         | [Identity.OnStopClient](xref:Mirage.NetworkIdentity.OnStopClient)              |
-| `OnStartLocalPlayer`   | [Identity.OnStartLocalPlayer](xref:Mirage.NetworkIdentity.OnStartLocalPlayer)  |
-| `OnStartAuthority`     | [Identity.OnAuthorityChanged](xref:Mirage.NetworkIdentity.OnAuthorityChanged)      |
-| `OnStopAuthority`      | [Identity.OnAuthorityChanged](xref:Mirage.NetworkIdentity.OnAuthorityChanged)        |
+| Mirror (override)      | Mirage (event)                                                                |
+|:----------------------:|:-----------------------------------------------------------------------------:|
+| `OnStartServer`        | [Identity.OnStartServer](xref:Mirage.NetworkIdentity.OnStartServer)           |
+| `OnStopServer`         | [Identity.OnStopServer](xref:Mirage.NetworkIdentity.OnStopServer)             |
+| `OnStartClient`        | [Identity.OnStartClient](xref:Mirage.NetworkIdentity.OnStartClient)           |
+| `OnStopClient`         | [Identity.OnStopClient](xref:Mirage.NetworkIdentity.OnStopClient)             |
+| `OnStartLocalPlayer`   | [Identity.OnStartLocalPlayer](xref:Mirage.NetworkIdentity.OnStartLocalPlayer) |
+| `OnStartAuthority`     | [Identity.OnAuthorityChanged](xref:Mirage.NetworkIdentity.OnAuthorityChanged) |
+| `OnStopAuthority`      | [Identity.OnAuthorityChanged](xref:Mirage.NetworkIdentity.OnAuthorityChanged) |
 
 Let's take this `Player` class as an example. In Mirror, you would do:
 
@@ -167,7 +167,7 @@ public class Player : NetworkBehaviour {
 > [!NOTE]
 > Please note that due to timing all event callbacks should be registered in `Awake` method or via Unity inspector in order for them to be invoked consistently.
 
-## Attributes
+## Method Attributes
 The table below shows the new attribute names in Mirage.
 
 | Mirror             | Mirage                                                                    |
@@ -175,6 +175,9 @@ The table below shows the new attribute names in Mirage.
 | `[Command]`        | [[ServerRpc]](xref:Mirage.ServerRpcAttribute)                             |
 | `[TargetRpc]`      | [[ClientRpc(target = Mirage.Client enum)](xref:Mirage.ClientRpcAttribute) |
 | `[ServerCallback]` | [[Server(error = false)]](xref:Mirage.ServerAttribute)                    |
+| `[ClientCallback]` | [[Client(error = false)]](xref:Mirage.ClientAttribute)                    |
+| doesn't exist      | [[HasAuthority(error = false)]](xref:Mirage.HasAuthorityAttribute)        |
+| doesn't exist      | [[LocalPlayer(error = false)]](xref:Mirage.LocalPlayerAttribute)         |
 
 ## Renames
 These fields/properties have been renamed:
@@ -190,7 +193,7 @@ These fields/properties have been renamed:
 | `NetworkBehaviour.connectionToClient` | [NetworkBehaviour.Owner](xref:Mirage.NetworkBehaviour.Owner) |
 | `NetworkBehaviour.connectionToServer` | Removed, use [Client.Player](xref:Mirage.NetworkClient.Player) instead                 |
 | `NetworkBehaviour.hasAuthority`       | [NetworkBehaviour.HasAuthority](xref:Mirage.NetworkBehaviour.HasAuthority)             |
-| `NetworkBehaviour.Identity`        | [NetworkBehaviour.Identity](xref:Mirage.NetworkBehaviour.Identity)               |
+| `NetworkBehaviour.Identity`           | [NetworkBehaviour.Identity](xref:Mirage.NetworkBehaviour.Identity)               |
 | `NetworkBehaviour.netId`              | [NetworkBehaviour.NetId](xref:Mirage.NetworkBehaviour.NetId)                           |
 | `NetworkBehaviour.isClientOnly`       | [NetworkBehaviour.IsClientOnly](xref:Mirage.NetworkBehaviour.IsClientOnly)             |
 | `NetworkBehaviour.islocalPlayer`      | [NetworkBehaviour.IsLocalPlayer](xref:Mirage.NetworkBehaviour.IsLocalPlayer)           |
