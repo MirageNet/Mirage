@@ -1022,6 +1022,42 @@ namespace Mirage.Tests.Runtime.Serialization
             }
         }
 
+        // make weaver generate writers for MockComponent[]
+        [NetworkMessage]
+        struct _BehaviourArrayWriter
+        {
+            public MockComponent[] mockComponents;
+        }
+        [Test]
+        public void WriteNetworkBehaviorArray()
+        {
+            var go = new GameObject("TestWriteNetworkBehaviorNotNull", typeof(NetworkIdentity), typeof(MockComponent));
+            MockComponent mock = go.GetComponent<MockComponent>();
+            // init lazy props
+            _ = mock.Identity.NetworkBehaviours;
+            mock.Identity.NetId = 1;
+            // returns found id
+            reader.ObjectLocator.TryGetIdentity(1, out NetworkIdentity _).Returns(x => { x[1] = mock.Identity; return true; });
+
+            // try/fianlly so go is always destroyed
+            try
+            {
+                var mockArray = new MockComponent[] { mock };
+                writer.Write(mockArray);
+
+                reader.Reset(writer.ToArraySegment());
+                MockComponent[] readArray = reader.Read<MockComponent[]>();
+
+                Assert.That(mockArray.Length == mockArray.Length);
+                Assert.That(mockArray[0] == mockArray[0]);
+                Assert.That(writer.ByteLength, Is.EqualTo(reader.BytePosition));
+            }
+            finally
+            {
+                GameObject.Destroy(go);
+            }
+        }
+
         [Test]
         public void WriteNetworkBehaviorDestroyed()
         {

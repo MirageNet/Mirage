@@ -8,7 +8,6 @@ using Mono.Cecil.Rocks;
 
 namespace Mirage.Weaver
 {
-
     public class Writers : SerializeFunctionBase
     {
         public Writers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
@@ -20,9 +19,15 @@ namespace Mirage.Weaver
 
         protected override MethodReference GetNetworkBehaviourFunction(TypeReference typeReference)
         {
-            MethodReference writeFunc = module.ImportReference<NetworkWriter>((nw) => nw.WriteNetworkBehaviour(default));
-            Register(typeReference, writeFunc);
-            return writeFunc;
+            WriteMethod writeMethod = GenerateWriterFunc(typeReference);
+            ILProcessor worker = writeMethod.worker;
+
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Ldarg_1));
+            worker.Append(worker.Create(OpCodes.Call, (NetworkWriter writer) => writer.WriteNetworkBehaviour(default)));
+            worker.Append(worker.Create(OpCodes.Ret));
+
+            return writeMethod.definition;
         }
 
         protected override MethodReference GenerateEnumFunction(TypeReference typeReference)
