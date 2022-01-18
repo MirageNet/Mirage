@@ -119,13 +119,13 @@ Table below shows the Mirror's `NetworkBehaviour` override method names on the l
 
 | Mirror (override)      | Mirage (event)                                                                    |
 |:----------------------:|:---------------------------------------------------------------------------------:|
-| `OnStartServer`        | [NetIdentity.OnStartServer](xref:Mirage.NetworkIdentity.OnStartServer)            |
-| `OnStopServer`         | [NetIdentity.OnStopServer](xref:Mirage.NetworkIdentity.OnStopServer)              |
-| `OnStartClient`        | [NetIdentity.OnStartClient](xref:Mirage.NetworkIdentity.OnStartClient)            |
-| `OnStopClient`         | [NetIdentity.OnStopClient](xref:Mirage.NetworkIdentity.OnStopClient)              |
-| `OnStartLocalPlayer`   | [NetIdentity.OnStartLocalPlayer](xref:Mirage.NetworkIdentity.OnStartLocalPlayer)  |
-| `OnStartAuthority`     | [NetIdentity.OnAuthorityChanged](xref:Mirage.NetworkIdentity.OnAuthorityChanged)      |
-| `OnStopAuthority`      | [NetIdentity.OnAuthorityChanged](xref:Mirage.NetworkIdentity.OnAuthorityChanged)        |
+| `OnStartServer`        | [Identity.OnStartServer](xref:Mirage.NetworkIdentity.OnStartServer)            |
+| `OnStopServer`         | [Identity.OnStopServer](xref:Mirage.NetworkIdentity.OnStopServer)              |
+| `OnStartClient`        | [Identity.OnStartClient](xref:Mirage.NetworkIdentity.OnStartClient)            |
+| `OnStopClient`         | [Identity.OnStopClient](xref:Mirage.NetworkIdentity.OnStopClient)              |
+| `OnStartLocalPlayer`   | [Identity.OnStartLocalPlayer](xref:Mirage.NetworkIdentity.OnStartLocalPlayer)  |
+| `OnStartAuthority`     | [Identity.OnAuthorityChanged](xref:Mirage.NetworkIdentity.OnAuthorityChanged)      |
+| `OnStopAuthority`      | [Identity.OnAuthorityChanged](xref:Mirage.NetworkIdentity.OnAuthorityChanged)        |
 
 Let's take this `Player` class as an example. In Mirror, you would do:
 
@@ -150,8 +150,8 @@ using Mirage;
 
 public class Player : NetworkBehaviour {
     void Awake() {
-        NetIdentity.OnStartServer.AddListener(OnStartServer);
-        NetIdentity.OnStartClient.AddListener(OnStartClient);
+        Identity.OnStartServer.AddListener(OnStartServer);
+        Identity.OnStartClient.AddListener(OnStartClient);
     }
 
     void OnStartServer() {
@@ -190,7 +190,7 @@ These fields/properties have been renamed:
 | `NetworkBehaviour.connectionToClient` | [NetworkBehaviour.Owner](xref:Mirage.NetworkBehaviour.Owner) |
 | `NetworkBehaviour.connectionToServer` | Removed, use [Client.Player](xref:Mirage.NetworkClient.Player) instead                 |
 | `NetworkBehaviour.hasAuthority`       | [NetworkBehaviour.HasAuthority](xref:Mirage.NetworkBehaviour.HasAuthority)             |
-| `NetworkBehaviour.netIdentity`        | [NetworkBehaviour.Identity](xref:Mirage.NetworkBehaviour.Identity)               |
+| `NetworkBehaviour.Identity`        | [NetworkBehaviour.Identity](xref:Mirage.NetworkBehaviour.Identity)               |
 | `NetworkBehaviour.netId`              | [NetworkBehaviour.NetId](xref:Mirage.NetworkBehaviour.NetId)                           |
 | `NetworkBehaviour.isClientOnly`       | [NetworkBehaviour.IsClientOnly](xref:Mirage.NetworkBehaviour.IsClientOnly)             |
 | `NetworkBehaviour.islocalPlayer`      | [NetworkBehaviour.IsLocalPlayer](xref:Mirage.NetworkBehaviour.IsLocalPlayer)           |

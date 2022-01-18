@@ -55,8 +55,8 @@ There are different callbacks for different operations, such as `OnChange` (any 
 
 Depending on where you want to invoke the callbacks, you can use these methods to register them:
 - `Awake` for both client and server
-- `NetIdentity.OnStartServer` event for server-only
-- `NetIdentity.OnStartClient` event for cleint-only
+- `Identity.OnStartServer` event for server-only
+- `Identity.OnStartClient` event for cleint-only
 
 > [!NOTE]
 > By the time you subscribe, the list will already be initialized, so you will not get a call for the initial data, only updates.
@@ -74,7 +74,7 @@ public class Player : NetworkBehaviour {
     void Awake()
     {
         inventory.OnChange += UpdateInventory;
-        NetIdentity.OnStartClient.AddListener(OnStartClient);
+        Identity.OnStartClient.AddListener(OnStartClient);
     }
 
     // hotbar changes will only be invoked on clients

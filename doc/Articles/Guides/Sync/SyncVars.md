@@ -2,7 +2,7 @@
 SyncVars are properties of classes that inherit from <xref:Mirage.NetworkBehaviour>, which are synchronized from the server to clients. When a game object is spawned, or a new player joins a game in progress, they are sent the latest state of all SyncVars on networked objects that are visible to them. Use the [[SyncVar]](xref:Mirage.SyncVarAttribute) custom attribute to specify which variables in your script you want to synchronize.
 
 > [!NOTE]
-> The state of SyncVars is applied to game objects on clients before [NetIdentity.OnStartClient](xref:Mirage.NetworkIdentity.OnStartClient) event is invoked, so the state of the object is always up-to-date in subscribed callbacks.
+> The state of SyncVars is applied to game objects on clients before [Identity.OnStartClient](xref:Mirage.NetworkIdentity.OnStartClient) event is invoked, so the state of the object is always up-to-date in subscribed callbacks.
 
 
 SyncVars can use any [type supported by Mirage](../DataTypes.md). You can have up to 64 SyncVars on a single NetworkBehaviour script, including [SyncLists](SyncLists.md) and other sync types.
@@ -95,7 +95,7 @@ public class Player : NetworkBehaviour
     void Awake()
     {
         renderer = GetComponent<Renderer>();
-        NetIdentity.OnStartServer.AddListener(OnStartServer);
+        Identity.OnStartServer.AddListener(OnStartServer);
     }
 
     void OnStartServer()
@@ -143,7 +143,7 @@ public class Player : NetworkBehaviour
     void Awake()
     {
         renderer = GetComponent<Renderer>();
-        NetIdentity.OnStartServer.AddListener(OnStartServer);
+        Identity.OnStartServer.AddListener(OnStartServer);
     }
 
     void OnStartServer()
