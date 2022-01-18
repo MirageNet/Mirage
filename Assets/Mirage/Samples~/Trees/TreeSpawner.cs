@@ -49,6 +49,8 @@ namespace Mirage.Examples.Trees
                     await Task.Yield();
                 }
             }
+
+            Debug.Log($"Spawned {Count}");
         }
     }
 }

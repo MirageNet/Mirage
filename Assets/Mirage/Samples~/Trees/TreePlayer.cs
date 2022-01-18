@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mirage.Examples.Trees
@@ -10,7 +11,7 @@ namespace Mirage.Examples.Trees
         private void Update()
         {
             move();
-            //attack();
+            attack();
         }
         private void Awake()
         {
@@ -27,9 +28,37 @@ namespace Mirage.Examples.Trees
             transform.position += dir * speed * Time.deltaTime;
         }
 
-        //private void attack()
-        //{
-        //    throw new NotImplementedException();
-        //}
+        static List<Tree> cache = new List<Tree>();
+
+        private void attack()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Vector3 pos = transform.position;
+                foreach (NetworkIdentity identity in Client.World.SpawnedIdentities)
+                {
+                    if (identity.TryGetComponent(out Tree tree))
+                    {
+                        if (Vector3.Distance(tree.transform.position, pos) < 10)
+                        {
+                            cache.Add(tree);
+                        }
+                    }
+                }
+                AttackTrees(this, cache.ToArray());
+                cache.Clear();
+            }
+        }
+
+        [ServerRpc]
+        // treePlayer in this rpc is for debug
+        void AttackTrees(TreePlayer treePlayer, Tree[] trees)
+        {
+            Debug.Log($"{treePlayer.NetId} attacks {trees.Length} Trees");
+            foreach (Tree tree in trees)
+            {
+                tree.health -= 5;
+            }
+        }
     }
 }

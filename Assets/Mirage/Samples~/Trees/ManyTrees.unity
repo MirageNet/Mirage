@@ -244,9 +244,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Prefab: {fileID: 2612016849867313396, guid: ae6812fde3cacf4439b8f5bf543fdbee, type: 3}
-  Count: 1000000
-  Box: {x: 500, y: 500}
-  maxSpawnPerFrame: 2000
+  Count: 1000
+  Box: {x: 100, y: 100}
+  maxSpawnPerFrame: 100
 --- !u!114 &1623268031
 MonoBehaviour:
   m_ObjectHideFlags: 0
