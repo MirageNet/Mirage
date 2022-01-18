@@ -5,6 +5,7 @@ using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 namespace Mirage
@@ -92,7 +93,7 @@ namespace Mirage
             nextNetworkId = 1;
         }
 
-        void OnFinishedSceneChange(string scenePath, SceneOperation sceneOperation)
+        void OnFinishedSceneChange(Scene scene, SceneOperation sceneOperation)
         {
             Server.World.RemoveDestroyedObjects();
 

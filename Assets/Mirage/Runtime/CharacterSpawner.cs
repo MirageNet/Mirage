@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Mirage.Logging;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 namespace Mirage
@@ -100,9 +101,9 @@ namespace Mirage
         /// Called on the client when a normal scene change happens.
         /// <para>The default implementation of this function sets the client as ready and adds a player. Override the function to dictate what happens when the client connects.</para>
         /// </summary>
-        /// <param name="scenePath"></param>
+        /// <param name="scene"></param>
         /// <param name="sceneOperation">The type of scene load that happened.</param>
-        public virtual void OnClientFinishedSceneChange(string scenePath, SceneOperation sceneOperation)
+        public virtual void OnClientFinishedSceneChange(Scene scene, SceneOperation sceneOperation)
         {
             if (AutoSpawn && sceneOperation == SceneOperation.Normal)
                 RequestServerSpawnPlayer();

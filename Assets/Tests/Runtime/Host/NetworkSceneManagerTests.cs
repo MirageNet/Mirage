@@ -17,13 +17,13 @@ namespace Mirage.Tests.Runtime.Host
     {
         AssetBundle bundle;
 
-        UnityAction<string, SceneOperation> sceneEventFunction;
+        UnityAction<Scene, SceneOperation> sceneEventFunction;
 
         public override void ExtraSetup()
         {
             bundle = AssetBundle.LoadFromFile("Assets/Tests/Runtime/TestScene/testscene");
 
-            sceneEventFunction = Substitute.For<UnityAction<string, SceneOperation>>();
+            sceneEventFunction = Substitute.For<UnityAction<Scene, SceneOperation>>();
             sceneManager.OnServerFinishedSceneChange.AddListener(sceneEventFunction);
         }
 
@@ -35,22 +35,22 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void FinishLoadSceneHostTest()
         {
-            UnityAction<string, SceneOperation> func2 = Substitute.For<UnityAction<string, SceneOperation>>();
-            UnityAction<string, SceneOperation> func3 = Substitute.For<UnityAction<string, SceneOperation>>();
+            UnityAction<Scene, SceneOperation> func2 = Substitute.For<UnityAction<Scene, SceneOperation>>();
+            UnityAction<Scene, SceneOperation> func3 = Substitute.For<UnityAction<Scene, SceneOperation>>();
 
             sceneManager.OnServerFinishedSceneChange.AddListener(func2);
             sceneManager.OnClientFinishedSceneChange.AddListener(func3);
 
-            sceneManager.CompleteLoadingScene("test", SceneOperation.Normal);
+            sceneManager.CompleteLoadingScene(default, SceneOperation.Normal);
 
-            func2.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
-            func3.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+            func2.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
+            func3.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
         }
 
         [UnityTest]
         public IEnumerator FinishLoadServerOnlyTest() => UniTask.ToCoroutine(async () =>
         {
-            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
+            UnityAction<Scene, SceneOperation> func1 = Substitute.For<UnityAction<Scene, SceneOperation>>();
 
             client.Disconnect();
 
@@ -58,9 +58,9 @@ namespace Mirage.Tests.Runtime.Host
 
             sceneManager.OnServerFinishedSceneChange.AddListener(func1);
 
-            sceneManager.CompleteLoadingScene("test", SceneOperation.Normal);
+            sceneManager.CompleteLoadingScene(default, SceneOperation.Normal);
 
-            func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+            func1.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
         });
 
         [UnityTest]
@@ -86,7 +86,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ServerChangedFiredOnceTest()
         {
-            sceneEventFunction.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+            sceneEventFunction.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
         }
 
         [Test]
@@ -130,7 +130,7 @@ namespace Mirage.Tests.Runtime.Host
             UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
             sceneManager.OnClientStartedSceneChange.AddListener(func1);
 
-            sceneManager.OnClientStartedSceneChange.Invoke("", SceneOperation.Normal);
+            sceneManager.OnClientStartedSceneChange.Invoke(default, SceneOperation.Normal);
 
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
         }
@@ -138,18 +138,18 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ClientSceneChangedTest()
         {
-            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
+            UnityAction<Scene, SceneOperation> func1 = Substitute.For<UnityAction<Scene, SceneOperation>>();
             sceneManager.OnClientFinishedSceneChange.AddListener(func1);
-            sceneManager.OnClientFinishedSceneChange.Invoke("test", SceneOperation.Normal);
-            func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+            sceneManager.OnClientFinishedSceneChange.Invoke(default, SceneOperation.Normal);
+            func1.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
         }
 
         [Test]
         public void ClientSceneReadyAfterChangedTest()
         {
             bool _readyAfterSceneChanged = false;
-            sceneManager.OnClientFinishedSceneChange.AddListener((string name, SceneOperation operation) => _readyAfterSceneChanged = client.Player.SceneIsReady);
-            sceneManager.OnClientFinishedSceneChange.Invoke("test", SceneOperation.Normal);
+            sceneManager.OnClientFinishedSceneChange.AddListener((Scene scene, SceneOperation operation) => _readyAfterSceneChanged = client.Player.SceneIsReady);
+            sceneManager.OnClientFinishedSceneChange.Invoke(default, SceneOperation.Normal);
 
             Assert.That(_readyAfterSceneChanged, Is.True);
         }
