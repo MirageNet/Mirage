@@ -1,3 +1,10 @@
+## [114.1.1](https://github.com/MirageNet/Mirage/compare/v114.1.0...v114.1.1) (2022-01-19)
+
+
+### Bug Fixes
+
+* fixing array and generic write for NetworkBehaviours ([d2ee8ac](https://github.com/MirageNet/Mirage/commit/d2ee8acd16a494c6a39fb12977850c98c6e2d9e3))
+
 # [114.1.0](https://github.com/MirageNet/Mirage/compare/v114.0.3...v114.1.0) (2022-01-15)
 
 
