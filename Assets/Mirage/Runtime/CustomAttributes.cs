@@ -133,4 +133,10 @@ namespace Mirage
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class FoldoutEventAttribute : PropertyAttribute { }
+
+    /// <summary>
+    /// Draws UnityEvent as a foldout
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class ReadOnlyInspectorAttribute : PropertyAttribute { }
 }
