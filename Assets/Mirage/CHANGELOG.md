@@ -1,3 +1,20 @@
+# [115.0.0](https://github.com/MirageNet/Mirage/compare/v114.1.1...v115.0.0) (2022-01-22)
+
+
+### Bug Fixes
+
+* fix welcome window packages tab displaying actual modules ([#1024](https://github.com/MirageNet/Mirage/issues/1024)) ([5930281](https://github.com/MirageNet/Mirage/commit/593028177a7f55e0d80bc94984f6c2634d010e18))
+* **NetworkSceneManager:** fixing exception when scene is null ([a366843](https://github.com/MirageNet/Mirage/commit/a36684397923110b8336652978d20837a4a17345))
+
+
+* feat(NetworkSceneManager)!: return scene instead of strings from events (#1028) ([106e714](https://github.com/MirageNet/Mirage/commit/106e714bb5adcb6d35712d31fd682dd1a9dcd3d9)), closes [#1028](https://github.com/MirageNet/Mirage/issues/1028) [#1026](https://github.com/MirageNet/Mirage/issues/1026)
+
+
+### BREAKING CHANGES
+
+* - Scene finished loading events now return scene
+- SceneChangeEvent class renamed to SceneChangeStartedEvent and SceneChangeFinishedEvent
+
 ## [114.1.1](https://github.com/MirageNet/Mirage/compare/v114.1.0...v114.1.1) (2022-01-19)
 
 
