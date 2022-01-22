@@ -157,7 +157,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                 clientSceneManager.OnClientSceneLoadFinished(default, SceneOperation.Normal);
             });
 
-            string message = new ArgumentNullException(default, "Some how a null scene path has been entered.").Message;
+            string message = new ArgumentNullException("ClientPendingAdditiveSceneLoadingList[0]", "Some how a null scene path has been entered.").Message;
             Assert.That(exception, Has.Message.EqualTo(message));
         }
 

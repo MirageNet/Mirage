@@ -264,8 +264,7 @@ namespace Mirage
             if (ClientPendingAdditiveSceneLoadingList.Count > 0 && Client && !Client.IsLocalClient)
             {
                 if (string.IsNullOrEmpty(ClientPendingAdditiveSceneLoadingList[0]))
-                    // using `scene.path` instead of the old scenePath variable, what does this check even do?
-                    throw new ArgumentNullException(nameof(scene.path), "Some how a null scene path has been entered.");
+                    throw new ArgumentNullException("ClientPendingAdditiveSceneLoadingList[0]", "Some how a null scene path has been entered.");
 
                 LoadSceneAsync(ClientPendingAdditiveSceneLoadingList[0], new[] { Client.Player }, SceneOperation.LoadAdditive).Forget();
 
