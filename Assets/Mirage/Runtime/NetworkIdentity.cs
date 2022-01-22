@@ -193,6 +193,8 @@ namespace Mirage
         /// <summary>
         /// The ServerObjectManager is present only for server/host instances.
         /// </summary>
+        [ReadOnlyInspector]
+        [Tooltip("Reference to Server set after the object is spawned. Used when debugging to see which server this object belongs to.")]
         public ServerObjectManager ServerObjectManager;
 
         /// <summary>
@@ -203,6 +205,8 @@ namespace Mirage
         /// <summary>
         /// The ClientObjectManager is present only for client instances.
         /// </summary>
+        [ReadOnlyInspector]
+        [Tooltip("Reference to Client set after the object is spawned. Used when debugging to see which client this object belongs to.")]
         public ClientObjectManager ClientObjectManager;
 
         INetworkPlayer _owner;
