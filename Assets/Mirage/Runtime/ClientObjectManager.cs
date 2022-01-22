@@ -6,6 +6,7 @@ using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 namespace Mirage
@@ -26,11 +27,11 @@ namespace Mirage
         internal readonly Dictionary<int, SpawnHandlerDelegate> spawnHandlers = new Dictionary<int, SpawnHandlerDelegate>();
         internal readonly Dictionary<int, UnSpawnDelegate> unspawnHandlers = new Dictionary<int, UnSpawnDelegate>();
 
-        [Header("Prefabs")]
         /// <summary>
         /// List of prefabs that will be registered with the spawning system.
         /// <para>For each of these prefabs, ClientManager.RegisterPrefab() will be automatically invoke.</para>
         /// </summary>
+        [Header("Prefabs")]
         public List<NetworkIdentity> spawnPrefabs = new List<NetworkIdentity>();
 
         /// <summary>
@@ -114,7 +115,7 @@ namespace Mirage
             syncVarReceiver = null;
         }
 
-        void OnFinishedSceneChange(string scenePath, SceneOperation sceneOperation)
+        void OnFinishedSceneChange(Scene scene, SceneOperation sceneOperation)
         {
             Client.World.RemoveDestroyedObjects();
 

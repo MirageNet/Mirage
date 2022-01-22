@@ -53,11 +53,11 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void FinishLoadSceneTest()
         {
-            UnityAction<string, SceneOperation> func2 = Substitute.For<UnityAction<string, SceneOperation>>();
+            UnityAction<Scene, SceneOperation> func2 = Substitute.For<UnityAction<Scene, SceneOperation>>();
             clientSceneManager.OnClientFinishedSceneChange.AddListener(func2);
-            clientSceneManager.CompleteLoadingScene("Assets/Mirror/Tests/Runtime/testScene.unity", SceneOperation.Normal);
+            clientSceneManager.CompleteLoadingScene(default, SceneOperation.Normal);
 
-            func2.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+            func2.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
         }
 
         [UnityTest]
@@ -141,10 +141,10 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ServerSceneChangedTest()
         {
-            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
+            UnityAction<Scene, SceneOperation> func1 = Substitute.For<UnityAction<Scene, SceneOperation>>();
             serverSceneManager.OnServerFinishedSceneChange.AddListener(func1);
-            serverSceneManager.OnServerFinishedSceneChange.Invoke("test", SceneOperation.Normal);
-            func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
+            serverSceneManager.OnServerFinishedSceneChange.Invoke(default, SceneOperation.Normal);
+            func1.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
         }
 
         [Test]
@@ -154,10 +154,10 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                clientSceneManager.OnClientSceneLoadFinished(null, SceneOperation.Normal);
+                clientSceneManager.OnClientSceneLoadFinished(default, SceneOperation.Normal);
             });
 
-            string message = new ArgumentNullException("scenePath", "Some how a null scene path has been entered.").Message;
+            string message = new ArgumentNullException(default, "Some how a null scene path has been entered.").Message;
             Assert.That(exception, Has.Message.EqualTo(message));
         }
 
@@ -173,7 +173,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         });
 
         bool noAdditiveScenesFound;
-        void CheckForPendingAdditiveSceneList(string scenePath, SceneOperation sceneOperation)
+        void CheckForPendingAdditiveSceneList(Scene scene, SceneOperation sceneOperation)
         {
             if (clientSceneManager.ClientPendingAdditiveSceneLoadingList.Count == 0)
             {

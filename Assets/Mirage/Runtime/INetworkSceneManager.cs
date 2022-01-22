@@ -13,11 +13,18 @@ namespace Mirage
     }
 
     /// <summary>
-    /// Event fires from <see cref="INetworkSceneManager">INetworkSceneManager</see> when a scene change happens on either Server or Client.
-    /// <para>string - New ScenePath</para>
+    /// Event fires from <see cref="INetworkSceneManager">INetworkSceneManager</see> when a scene change finishes on either Server or Client.
+    /// <para>Scene - Loaded scene</para>
     /// <para>SceneOperation - Scene change type (Normal, Additive Load, Additive Unload).</para>
     /// </summary>
-    [Serializable] public class SceneChangeEvent : UnityEvent<string, SceneOperation> { }
+    [Serializable] public class SceneChangeFinishedEvent : UnityEvent<Scene, SceneOperation> { }
+
+    /// <summary>
+    /// Event fires from <see cref="INetworkSceneManager">INetworkSceneManager</see> when a scene change begins on either Server or Client.
+    /// <para>Scene - Name or path of the scene that's about to be loaded</para>
+    /// <para>SceneOperation - Scene change type (Normal, Additive Load, Additive Unload).</para>
+    /// </summary>
+    [Serializable] public class SceneChangeStartedEvent : UnityEvent<string, SceneOperation> { }
 
     [Serializable] public class PlayerSceneChangeEvent : UnityEvent<INetworkPlayer> { }
 
@@ -26,22 +33,22 @@ namespace Mirage
         /// <summary>
         /// Event fires when the Client starts changing scene.
         /// </summary>
-        SceneChangeEvent OnClientStartedSceneChange { get; }
+        SceneChangeStartedEvent OnClientStartedSceneChange { get; }
 
         /// <summary>
         /// Event fires after the Client has completed its scene change.
         /// </summary>
-        SceneChangeEvent OnClientFinishedSceneChange { get; }
+        SceneChangeFinishedEvent OnClientFinishedSceneChange { get; }
 
         /// <summary>
         /// Event fires before Server changes scene.
         /// </summary>
-        SceneChangeEvent OnServerStartedSceneChange { get; }
+        SceneChangeStartedEvent OnServerStartedSceneChange { get; }
 
         /// <summary>
         /// Event fires after Server has completed scene change.
         /// </summary>
-        SceneChangeEvent OnServerFinishedSceneChange { get; }
+        SceneChangeFinishedEvent OnServerFinishedSceneChange { get; }
 
         /// <summary>
         /// Event fires On the server, after Client sends <see cref="SceneReadyMessage"/> to the server
