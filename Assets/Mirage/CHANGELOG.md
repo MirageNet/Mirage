@@ -1,3 +1,15 @@
+# [116.0.0](https://github.com/MirageNet/Mirage/compare/v115.0.0...v116.0.0) (2022-01-23)
+
+
+### Bug Fixes
+
+* **NetworkReader:** fixing PadAndCopy function ([8e6c516](https://github.com/MirageNet/Mirage/commit/8e6c516e4608e8d661ac9e6c5f8577a6e87ff96e))
+
+
+### BREAKING CHANGES
+
+* **NetworkReader:** NetworkReader.PadAndCopy no longer needs the byte size argument
+
 # [115.0.0](https://github.com/MirageNet/Mirage/compare/v114.1.1...v115.0.0) (2022-01-22)
 
 
