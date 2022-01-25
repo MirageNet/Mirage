@@ -170,14 +170,14 @@ public class Player : NetworkBehaviour {
 ## Method Attributes
 The table below shows the new attribute names in Mirage.
 
-| Mirror             | Mirage                                                                    |
-|:------------------:|:-------------------------------------------------------------------------:|
-| `[Command]`        | [[ServerRpc]](xref:Mirage.ServerRpcAttribute)                             |
-| `[TargetRpc]`      | [[ClientRpc(target = Mirage.Client enum)](xref:Mirage.ClientRpcAttribute) |
-| `[ServerCallback]` | [[Server(error = false)]](xref:Mirage.ServerAttribute)                    |
-| `[ClientCallback]` | [[Client(error = false)]](xref:Mirage.ClientAttribute)                    |
-| doesn't exist      | [[HasAuthority(error = false)]](xref:Mirage.HasAuthorityAttribute)        |
-| doesn't exist      | [[LocalPlayer(error = false)]](xref:Mirage.LocalPlayerAttribute)         |
+| Mirror             | Mirage                                                                       |
+|:------------------:|:----------------------------------------------------------------------------:|
+| `[Command]`        | [[ServerRpc]](xref:Mirage.ServerRpcAttribute)                                |
+| `[TargetRpc]`      | [[ClientRpc(target = Mirage.RpcTarget enum)](xref:Mirage.ClientRpcAttribute) |
+| `[ServerCallback]` | [[Server(error = false)]](xref:Mirage.ServerAttribute)                       |
+| `[ClientCallback]` | [[Client(error = false)]](xref:Mirage.ClientAttribute)                       |
+| doesn't exist      | [[HasAuthority(error = false)]](xref:Mirage.HasAuthorityAttribute)           |
+| doesn't exist      | [[LocalPlayer(error = false)]](xref:Mirage.LocalPlayerAttribute)             |
 
 ## Renames
 These fields/properties have been renamed:
