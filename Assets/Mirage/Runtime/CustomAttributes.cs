@@ -34,7 +34,24 @@ namespace Mirage
         public bool requireAuthority = true;
     }
 
-    public enum RpcTarget { Owner, Observers, Player }
+    /// <summary>
+    /// Used by ClientRpc to tell mirage who to send remote call to
+    /// </summary>
+    public enum RpcTarget
+    {
+        /// <summary>
+        /// Sends to the <see cref="NetworkPlayer">Player</see> that owns the object
+        /// </summary>
+        Owner,
+        /// <summary>
+        /// Sends to all <see cref="NetworkPlayer">Players</see> that can see the object
+        /// </summary>
+        Observers,
+        /// <summary>
+        /// Sends to the <see cref="NetworkPlayer">Player</see> that is given as an argument in the RPC function (requires target to be an observer)
+        /// </summary>
+        Player
+    }
 
     /// <summary>
     /// The server uses a Remote Procedure Call (RPC) to run this function on specific clients.
