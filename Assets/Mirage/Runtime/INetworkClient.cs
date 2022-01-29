@@ -38,6 +38,8 @@ namespace Mirage
 
         NetworkWorld World { get; }
 
+        MessageHandler MessageHandler { get; }
+
         void Disconnect();
     }
 }

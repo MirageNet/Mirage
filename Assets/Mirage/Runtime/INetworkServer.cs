@@ -63,6 +63,8 @@ namespace Mirage
 
         SyncVarSender SyncVarSender { get; }
 
+        MessageHandler MessageHandler { get; }
+
         IReadOnlyCollection<INetworkPlayer> Players { get; }
 
         void Stop();
