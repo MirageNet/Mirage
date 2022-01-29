@@ -276,6 +276,11 @@ namespace Mirage
             Player.Send(segment, channelId);
         }
 
+        public void Send<T>(T message, INotifyCallBack notifyCallBack)
+        {
+            Player.Send(message, notifyCallBack);
+        }
+
         internal void Update()
         {
             // local connection?

@@ -1,4 +1,5 @@
 using System;
+using Mirage.SocketLayer;
 
 namespace Mirage
 {
@@ -8,8 +9,8 @@ namespace Mirage
     public interface IMessageSender
     {
         void Send<T>(T message, int channelId = Channel.Reliable);
-
         void Send(ArraySegment<byte> segment, int channelId = Channel.Reliable);
+        void Send<T>(T message, INotifyCallBack notifyCallBack);
     }
 
     // delegates to give names to variables in handles

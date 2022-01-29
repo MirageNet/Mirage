@@ -158,6 +158,27 @@ namespace Mirage
             }
         }
 
+        /// <summary>
+        /// This sends a network message to the connection.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="msg">The message to send.</param>
+        /// <param name="channelId">The transport layer channel to send on.</param>
+        /// <returns></returns>
+        public void Send<T>(T message, INotifyCallBack token)
+        {
+            if (isDisconnected) { return; }
+
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                MessagePacker.Pack(message, writer);
+
+                var segment = writer.ToArraySegment();
+                NetworkDiagnostics.OnSend(message, segment.Count, 1);
+                connection.SendNotify(segment, token);
+            }
+        }
+
         public override string ToString()
         {
             return $"connection({Address})";
