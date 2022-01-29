@@ -11,6 +11,12 @@ namespace Mirage.Tests.Weaver
         }
 
         [Test]
+        public void ClientRpcOverload()
+        {
+            IsSuccess();
+        }
+
+        [Test]
         public void ClientRpcCantBeStatic()
         {
             HasError("RpcCantBeStatic must not be static",
@@ -59,6 +65,30 @@ namespace Mirage.Tests.Weaver
         public void ClientRpcOwnerCantExcludeOwner()
         {
             HasError("ClientRpc with RpcTarget.Owner cannot have excludeOwner set as true", "System.Void ClientRpcTests.ClientRpcOwnerCantExcludeOwner.ClientRpcOwnerCantExcludeOwner::ClientRpcMethod()");
+        }
+
+        [Test]
+        public void CallToRpcBase()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void CallToNonRpcBase()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void CallToNonRpcOverLoad()
+        {
+            IsSuccess();
+        }
+
+        [Test]
+        public void RpcAndOverLoad()
+        {
+            IsSuccess();
         }
     }
 }
