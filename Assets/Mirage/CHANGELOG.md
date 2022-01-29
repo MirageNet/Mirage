@@ -1,3 +1,15 @@
+# [116.1.0](https://github.com/MirageNet/Mirage/compare/v116.0.0...v116.1.0) (2022-01-29)
+
+
+### Bug Fixes
+
+* adding missing MessageHandler to interfaces ([370c5ab](https://github.com/MirageNet/Mirage/commit/370c5ab47bb58980c109f2814c933fd3ed26bfa9))
+
+
+### Features
+
+* adding notify send to NetworkPlayer ([ad699fc](https://github.com/MirageNet/Mirage/commit/ad699fcdc9f5d4fb7a83f02b88240e92bed8246e))
+
 # [116.0.0](https://github.com/MirageNet/Mirage/compare/v115.0.0...v116.0.0) (2022-01-23)
 
 
