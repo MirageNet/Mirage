@@ -17,7 +17,6 @@ namespace Mirage.Weaver
         protected readonly Writers writers;
         protected readonly IWeaverLogger logger;
 
-        public static string InvokeRpcPrefix => "InvokeUserCode_";
 
         protected RpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger)
         {
