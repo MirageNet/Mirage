@@ -231,7 +231,7 @@ namespace Mirage
 #else
             // TODO: remove this bit once Unity drops support for 2019 LTS
             GetComponentsInParent<NetworkIdentity>(true, networkIdentityGetComponentCacheList);
-            var identity = networkIdentityGetComponentCacheList[0];
+            NetworkIdentity identity = networkIdentityGetComponentCacheList[0];
 #endif
 
             return identity;
@@ -255,38 +255,36 @@ namespace Mirage
         }
 
         #region ServerRpcs
-        protected internal void SendServerRpcInternal(Type invokeClass, string cmdName, NetworkWriter writer, int channelId, bool requireAuthority = true)
+        protected internal void SendServerRpcInternal(int hash, NetworkWriter writer, int channelId, bool requireAuthority = true)
         {
-            ValidateServerRpc(invokeClass, cmdName, requireAuthority);
+            RpcMethod rpc = RemoteCallHelper.GetRpc(hash);
+            ValidateServerRpc(rpc, requireAuthority);
 
-            // construct the message
             var message = new ServerRpcMessage
             {
                 netId = NetId,
                 componentIndex = ComponentIndex,
-                // type+func so Inventory.RpcUse != Equipment.RpcUse
-                functionHash = RemoteCallHelper.GetMethodHash(invokeClass, cmdName),
-                // segment to avoid reader allocations
+                functionHash = hash,
                 payload = writer.ToArraySegment()
             };
 
             Client.Send(message, channelId);
         }
 
-        private void ValidateServerRpc(Type invokeClass, string cmdName, bool requireAuthority)
+        private void ValidateServerRpc(RpcMethod rpc, bool requireAuthority)
         {
             // this was in Weaver before
             // NOTE: we could remove this later to allow calling Cmds on Server
             //       to avoid Wrapper functions. a lot of people requested this.
             if (Client == null || !Client.Active)
             {
-                throw new InvalidOperationException($"ServerRpc Function {cmdName} called on server without an active client.");
+                throw new InvalidOperationException($"ServerRpc Function {rpc} called on server without an active client.");
             }
 
             // local players can always send ServerRpcs, regardless of authority, other objects must have authority.
             if (requireAuthority && !(IsLocalPlayer || HasAuthority))
             {
-                throw new UnauthorizedAccessException($"Trying to send ServerRpc for object without authority. {invokeClass}.{cmdName}");
+                throw new UnauthorizedAccessException($"Trying to send ServerRpc for object without authority. {rpc}");
             }
 
             if (Client.Player == null)
@@ -295,21 +293,19 @@ namespace Mirage
             }
         }
 
-        protected internal UniTask<T> SendServerRpcWithReturn<T>(Type invokeClass, string cmdName, NetworkWriter writer, int channelId, bool requireAuthority = true)
+        protected internal UniTask<T> SendServerRpcWithReturn<T>(int hash, NetworkWriter writer, int channelId, bool requireAuthority = true)
         {
-            ValidateServerRpc(invokeClass, cmdName, requireAuthority);
+            RpcMethod rpc = RemoteCallHelper.GetRpc(hash);
+            ValidateServerRpc(rpc, requireAuthority);
 
             (UniTask<T> task, int id) = ClientObjectManager.CreateReplyTask<T>();
 
-            // construct the message
             var message = new ServerRpcMessage
             {
                 netId = NetId,
                 componentIndex = ComponentIndex,
                 replyId = id,
-                // type+func so Inventory.RpcUse != Equipment.RpcUse
-                functionHash = RemoteCallHelper.GetMethodHash(invokeClass, cmdName),
-                // segment to avoid reader allocations
+                functionHash = hash,
                 payload = writer.ToArraySegment()
             };
 
@@ -321,17 +317,19 @@ namespace Mirage
         #endregion
 
         #region Client RPCs
-        protected internal void SendRpcInternal(Type invokeClass, string rpcName, NetworkWriter writer, int channelId, bool excludeOwner)
+        protected internal void SendRpcInternal(int hash, NetworkWriter writer, int channelId, bool excludeOwner)
         {
+            RpcMethod rpc = RemoteCallHelper.GetRpc(hash);
+
             // this was in Weaver before
             if (Server == null || !Server.Active)
             {
-                throw new InvalidOperationException($"RPC Function {rpcName} called when server is not active.");
+                throw new InvalidOperationException($"RPC Function {rpc} called when server is not active.");
             }
             // This cannot use Server.active, as that is not specific to this object.
             if (!IsServer)
             {
-                if (logger.WarnEnabled()) logger.LogWarning("ClientRpc " + rpcName + " called on un-spawned object: " + name);
+                if (logger.WarnEnabled()) logger.LogWarning($"ClientRpc {rpc} called on un-spawned object: {name}");
                 return;
             }
 
@@ -341,7 +339,7 @@ namespace Mirage
                 netId = NetId,
                 componentIndex = ComponentIndex,
                 // type+func so Inventory.RpcUse != Equipment.RpcUse
-                functionHash = RemoteCallHelper.GetMethodHash(invokeClass, rpcName),
+                functionHash = hash,
                 // segment to avoid reader allocations
                 payload = writer.ToArraySegment()
             };
@@ -352,12 +350,14 @@ namespace Mirage
             Identity.SendToRemoteObservers(message, includeOwner, channelId);
         }
 
-        protected internal void SendTargetRpcInternal(INetworkPlayer player, Type invokeClass, string rpcName, NetworkWriter writer, int channelId)
+        protected internal void SendTargetRpcInternal(INetworkPlayer player, int hash, NetworkWriter writer, int channelId)
         {
+            RpcMethod rpc = RemoteCallHelper.GetRpc(hash);
+
             // this was in Weaver before
             if (Server == null || !Server.Active)
             {
-                throw new InvalidOperationException($"RPC Function {rpcName} called when server is not active.");
+                throw new InvalidOperationException($"RPC Function {rpc} called when server is not active.");
             }
 
             // connection parameter is optional. assign if null.
@@ -369,7 +369,7 @@ namespace Mirage
             // This cannot use Server.active, as that is not specific to this object.
             if (!IsServer)
             {
-                if (logger.WarnEnabled()) logger.LogWarning("ClientRpc " + rpcName + " called on un-spawned object: " + name);
+                if (logger.WarnEnabled()) logger.LogWarning($"ClientRpc {rpc} called on un-spawned object: {name}");
                 return;
             }
 
@@ -379,7 +379,7 @@ namespace Mirage
                 netId = NetId,
                 componentIndex = ComponentIndex,
                 // type+func so Inventory.RpcUse != Equipment.RpcUse
-                functionHash = RemoteCallHelper.GetMethodHash(invokeClass, rpcName),
+                functionHash = hash,
                 // segment to avoid reader allocations
                 payload = writer.ToArraySegment()
             };

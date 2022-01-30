@@ -571,9 +571,9 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnRPCMessage hash:" + msg.functionHash + " netId:" + msg.netId);
 
-            Skeleton skeleton = RemoteCallHelper.GetSkeleton(msg.functionHash);
+            RpcMethod skeleton = RemoteCallHelper.GetRpc(msg.functionHash);
 
-            if (skeleton.invokeType != RpcInvokeType.ClientRpc)
+            if (skeleton.InvokeType != RpcInvokeType.ClientRpc)
             {
                 throw new MethodInvocationException($"Invalid RPC call with id {msg.functionHash}");
             }
