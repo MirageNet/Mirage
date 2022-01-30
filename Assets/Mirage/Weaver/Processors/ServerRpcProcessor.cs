@@ -162,7 +162,7 @@ namespace Mirage.Weaver
         /// </remarks>
         MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, ValueSerializer[] paramSerializers)
         {
-            string newName = $"Skeleton_{method.Name}";
+            string newName = SkeletonMethodName(method);
             MethodDefinition cmd = method.DeclaringType.AddMethod(newName,
                 MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Static,
                 userCodeFunc.ReturnType);

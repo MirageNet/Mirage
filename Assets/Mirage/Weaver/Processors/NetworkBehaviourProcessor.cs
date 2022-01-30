@@ -98,8 +98,6 @@ namespace Mirage.Weaver
 
         void ProcessRpcs()
         {
-            var names = new HashSet<string>();
-
             // copy the list of methods because we will be adding methods in the loop
             var methods = new List<MethodDefinition>(netBehaviourSubclass.Methods);
             // find ServerRpc and RPC functions
@@ -112,13 +110,6 @@ namespace Mirage.Weaver
                     if (rpc != null)
                     {
                         rpcs.Add(rpc);
-
-                        // todo add overload support
-                        if (names.Contains(md.Name))
-                        {
-                            logger.Error($"Duplicate Rpc name {md.Name}", md);
-                        }
-                        names.Add(md.Name);
                     }
                 }
                 catch (RpcException e)

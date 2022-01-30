@@ -37,7 +37,7 @@ namespace Mirage.Weaver
         /// </remarks>
         MethodDefinition GenerateSkeleton(MethodDefinition md, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
         {
-            string newName = $"Skeleton_{md.Name}";
+            string newName = SkeletonMethodName(md);
             MethodDefinition rpc = md.DeclaringType.AddMethod(
                 newName,
                 MethodAttributes.Family | MethodAttributes.HideBySig);
