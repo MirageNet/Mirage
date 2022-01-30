@@ -1,7 +1,6 @@
+using System;
 using System.Linq;
-using System.Reflection;
 using Cysharp.Threading.Tasks;
-using Mirage.RemoteCalls;
 using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -71,6 +70,7 @@ namespace Mirage.Weaver
                 }
             }
 
+            // check and log all bad params before throwing RPC
             if (error)
             {
                 throw new RpcException($"Could not process Rpc because one or more of its parameter were invalid", method);
@@ -152,125 +152,110 @@ namespace Mirage.Weaver
             serializer.AppendRead(module, worker, readerParameter, param.ParameterType);
         }
 
-        // check if a Command/TargetRpc/Rpc function & parameters are valid for weaving
-        public bool ValidateRemoteCallAndParameters(MethodDefinition method, RemoteCallType callType)
+        /// <summary>
+        /// check if a method is valid for rpc
+        /// </summary>
+        /// <exception cref="RpcException">Throws when method is invalid</exception>
+        protected void ValidateMethod(MethodDefinition method, RemoteCallType callType)
         {
             if (method.IsAbstract)
             {
-                logger.Error("Abstract Rpcs are currently not supported, use virtual method instead", method);
-                return false;
+                throw new RpcException("Abstract Rpcs are currently not supported, use virtual method instead", method);
             }
 
             if (method.IsStatic)
             {
-                logger.Error($"{method.Name} must not be static", method);
-                return false;
+                throw new RpcException($"{method.Name} must not be static", method);
             }
 
             if (method.ReturnType.Is<System.Collections.IEnumerator>())
             {
-                logger.Error($"{method.Name} cannot be a coroutine", method);
-                return false;
+                throw new RpcException($"{method.Name} cannot be a coroutine", method);
             }
 
             if (method.HasGenericParameters)
             {
-                logger.Error($"{method.Name} cannot have generic parameters", method);
-                return false;
+                throw new RpcException($"{method.Name} cannot have generic parameters", method);
             }
 
-            return ValidateParameters(method, callType);
         }
 
-        // check if all Command/TargetRpc/Rpc function's parameters are valid for weaving
-        bool ValidateParameters(MethodReference method, RemoteCallType callType)
+        /// <summary>
+        /// checks if method parameters are valid for rpc
+        /// </summary>
+        /// <exception cref="RpcException">Throws when parameter are invalid</exception>
+        protected void ValidateParameters(MethodReference method, RemoteCallType callType)
         {
-            for (int i = 0; i < method.Parameters.Count; ++i)
+            for (int i = 0; i < method.Parameters.Count; i++)
             {
                 ParameterDefinition param = method.Parameters[i];
-                if (!ValidateParameter(method, param, callType, i == 0))
-                {
-                    return false;
-                }
+                ValidateParameter(method, param, callType, i == 0);
             }
-            return true;
         }
 
-        // validate parameters for a remote function call like Rpc/Cmd
-        bool ValidateParameter(MethodReference method, ParameterDefinition param, RemoteCallType callType, bool firstParam)
+        /// <summary>
+        /// checks if return type if valid for rpc
+        /// </summary>
+        /// <exception cref="RpcException">Throws when parameter are invalid</exception>
+        protected void ValidateReturnType(MethodDefinition md, RemoteCallType callType)
+        {
+            TypeReference returnType = md.ReturnType;
+            if (returnType.Is(typeof(void)))
+                return;
+
+            // only ServerRpc allow UniTask
+            if (callType == RemoteCallType.ServerRpc)
+            {
+                Type unitaskType = typeof(UniTask<int>).GetGenericTypeDefinition();
+                if (returnType.Is(unitaskType))
+                    return;
+            }
+
+
+            if (callType == RemoteCallType.ServerRpc)
+                throw new RpcException($"Use UniTask<{md.ReturnType}> to return values from [ServerRpc]", md);
+            else
+                throw new RpcException($"[ClientRpc] must return void", md);
+        }
+
+        /// <summary>
+        /// checks if a parameter is valid for rpc
+        /// </summary>
+        /// <exception cref="RpcException">Throws when parameter are invalid</exception>
+        void ValidateParameter(MethodReference method, ParameterDefinition param, RemoteCallType callType, bool firstParam)
         {
             if (param.IsOut)
             {
-                logger.Error($"{method.Name} cannot have out parameters", method);
-                return false;
+                throw new RpcException($"{method.Name} cannot have out parameters", method);
             }
 
             if (param.ParameterType.IsGenericParameter)
             {
-                logger.Error($"{method.Name} cannot have generic parameters", method);
-                return false;
+                throw new RpcException($"{method.Name} cannot have generic parameters", method);
             }
 
             if (IsNetworkPlayer(param.ParameterType))
             {
                 if (callType == RemoteCallType.ClientRpc && firstParam)
                 {
-                    // perfectly fine,  target rpc can receive a network connection as first parameter
-                    return true;
+                    return;
                 }
 
                 if (callType == RemoteCallType.ServerRpc)
                 {
-                    return true;
+                    return;
                 }
 
-                logger.Error($"{method.Name} has invalid parameter {param}, Cannot pass NetworkConnections", method);
-                return false;
+                throw new RpcException($"{method.Name} has invalid parameter {param}, Cannot pass NetworkConnections", method);
             }
 
+            // check networkplayer before optional, because networkplayer can be optional
             if (param.IsOptional)
             {
-                logger.Error($"{method.Name} cannot have optional parameters", method);
-                return false;
+                throw new RpcException($"{method.Name} cannot have optional parameters", method);
             }
-
-            return true;
         }
 
-        public void CreateRpcDelegate(ILProcessor worker, MethodDefinition func)
-        {
-            MethodReference CmdDelegateConstructor;
-
-            if (func.ReturnType.Is(typeof(void)))
-            {
-                ConstructorInfo[] constructors = typeof(CmdDelegate).GetConstructors();
-                CmdDelegateConstructor = func.Module.ImportReference(constructors.First());
-            }
-            else if (func.ReturnType.Is(typeof(UniTask<int>).GetGenericTypeDefinition()))
-            {
-                var taskReturnType = func.ReturnType as GenericInstanceType;
-
-                TypeReference returnType = taskReturnType.GenericArguments[0];
-                TypeReference genericDelegate = func.Module.ImportReference(typeof(RequestDelegate<int>).GetGenericTypeDefinition());
-
-                var delegateInstance = new GenericInstanceType(genericDelegate);
-                delegateInstance.GenericArguments.Add(returnType);
-
-                ConstructorInfo constructor = typeof(RequestDelegate<int>).GetConstructors().First();
-
-                MethodReference constructorRef = func.Module.ImportReference(constructor);
-
-                CmdDelegateConstructor = constructorRef.MakeHostInstanceGeneric(delegateInstance);
-            }
-            else
-            {
-                logger.Error("Use UniTask<x> to return a value from ServerRpc in" + func);
-                return;
-            }
-
-            worker.Append(worker.Create(OpCodes.Ldftn, func));
-            worker.Append(worker.Create(OpCodes.Newobj, CmdDelegateConstructor));
-        }
 
         // creates a method substitute
         // For example, if we have this:

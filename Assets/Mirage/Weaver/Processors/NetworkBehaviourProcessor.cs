@@ -86,14 +86,13 @@ namespace Mirage.Weaver
         }
         #endregion
 
-        void RegisterRpcs()
+        void RegisterRpcs(List<RpcMethod> rpcs)
         {
             Weaver.DebugLog(netBehaviourSubclass, "  GenerateConstants ");
 
             AddToStaticConstructor(netBehaviourSubclass, (worker) =>
             {
-                serverRpcProcessor.RegisterServerRpcs(worker);
-                clientRpcProcessor.RegisterClientRpcs(worker);
+                RegisterRpc.RegisterAll(worker, rpcs);
             });
         }
 
@@ -104,48 +103,46 @@ namespace Mirage.Weaver
             // copy the list of methods because we will be adding methods in the loop
             var methods = new List<MethodDefinition>(netBehaviourSubclass.Methods);
             // find ServerRpc and RPC functions
+            var rpcs = new List<RpcMethod>();
             foreach (MethodDefinition md in methods)
             {
-                bool isRpc = CheckAndProcessRpc(md);
-
-                if (isRpc)
+                try
                 {
-                    if (names.Contains(md.Name))
+                    RpcMethod rpc = CheckAndProcessRpc(md);
+                    if (rpc != null)
                     {
-                        logger.Error($"Duplicate Rpc name {md.Name}", md);
+                        rpcs.Add(rpc);
+
+                        // todo add overload support
+                        if (names.Contains(md.Name))
+                        {
+                            logger.Error($"Duplicate Rpc name {md.Name}", md);
+                        }
+                        names.Add(md.Name);
                     }
-                    names.Add(md.Name);
+                }
+                catch (RpcException e)
+                {
+                    logger.Error(e);
                 }
             }
 
-            RegisterRpcs();
+            RegisterRpcs(rpcs);
         }
 
-        private bool CheckAndProcessRpc(MethodDefinition md)
+        private RpcMethod CheckAndProcessRpc(MethodDefinition md)
         {
-            try
+            if (md.TryGetCustomAttribute<ServerRpcAttribute>(out CustomAttribute serverAttribute))
             {
-                if (md.TryGetCustomAttribute<ServerRpcAttribute>(out CustomAttribute serverAttribute))
-                {
-                    if (md.HasCustomAttribute<ClientRpcAttribute>()) throw new RpcException("Method should not have both ServerRpc and ClientRpc", md);
+                if (md.HasCustomAttribute<ClientRpcAttribute>()) throw new RpcException("Method should not have both ServerRpc and ClientRpc", md);
 
-                    // todo make processRpc return the found Rpc instead of saving it to hidden list
-                    serverRpcProcessor.ProcessRpc(md, serverAttribute);
-                    return true;
-                }
-                else if (md.TryGetCustomAttribute<ClientRpcAttribute>(out CustomAttribute clientAttribute))
-                {
-                    // todo make processRpc return the found Rpc instead of saving it to hidden list
-                    clientRpcProcessor.ProcessRpc(md, clientAttribute);
-                    return true;
-                }
+                return serverRpcProcessor.ProcessRpc(md, serverAttribute);
             }
-            catch (RpcException e)
+            else if (md.TryGetCustomAttribute<ClientRpcAttribute>(out CustomAttribute clientAttribute))
             {
-                logger.Error(e);
+                return clientRpcProcessor.ProcessRpc(md, clientAttribute);
             }
-
-            return false;
+            return null;
         }
 
         /// <summary>
