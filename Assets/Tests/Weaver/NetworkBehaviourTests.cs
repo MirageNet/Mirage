@@ -140,8 +140,7 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void NetworkBehaviourClientRpcDuplicateName()
         {
-            HasError("Duplicate Rpc name RpcCantHaveSameName",
-                "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcDuplicateName.NetworkBehaviourClientRpcDuplicateName::RpcCantHaveSameName(System.Int32,System.Int32)");
+            IsSuccess();
         }
 
         [Test]
@@ -193,8 +192,7 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void NetworkBehaviourCmdDuplicateName()
         {
-            HasError("Duplicate Rpc name CmdCantHaveSameName",
-                "System.Void NetworkBehaviourTests.NetworkBehaviourCmdDuplicateName.NetworkBehaviourCmdDuplicateName::CmdCantHaveSameName(System.Int32,System.Int32)");
+            IsSuccess();
         }
 
         [Test]

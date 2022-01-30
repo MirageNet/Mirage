@@ -23,6 +23,11 @@ namespace Mirage.Weaver
             this.logger = logger;
         }
 
+        /// <summary>
+        /// Type of attribute for this rpc, eg [ServerRPC] or [ClientRPC}
+        /// </summary>
+        protected abstract Type AttributeType { get; }
+
         // helper functions to check if the method has a NetworkPlayer parameter
         protected static bool HasNetworkPlayerParameter(MethodDefinition md)
         {
@@ -302,8 +307,7 @@ namespace Mirage.Weaver
         //  this returns the newly created method with all the user provided code
         public MethodDefinition SubstituteMethod(MethodDefinition method)
         {
-            // append fullName hash to end to support overloads, but keep "md.Name" so it is human readable when debugging
-            string newName = $"UserCode_{method.Name}_{method.FullName.GetStableHashCode()}";
+            string newName = UserCodeMethodName(method);
             MethodDefinition generatedMethod = method.DeclaringType.AddMethod(newName, method.Attributes, method.ReturnType);
 
             // add parameters
@@ -343,35 +347,35 @@ namespace Mirage.Weaver
 
             foreach (Instruction instruction in generatedMethod.Body.Instructions)
             {
-                // if call to base.CmdDoSomething within this.CallCmdDoSomething
-                if (IsCallToMethod(instruction, out MethodDefinition calledMethod) &&
-                    calledMethod.Name == rpcName)
+                if (!IsCallToMethod(instruction, out MethodDefinition calledMethod))
+                    continue;
+
+                // does method have same name? (NOTE: could be overload or non RPC at this point)
+                if (calledMethod.Name != rpcName)
+                    continue;
+
+                // method (base or overload) is not an rpc, dont try to change it
+                if (!calledMethod.HasCustomAttribute(AttributeType))
+                    continue;
+
+                string targetName = UserCodeMethodName(calledMethod);
+                // check this type and base types for methods
+                // if the calledMethod is an rpc, then it will have a UserCode_ method generated for it
+                MethodReference userCodeReplacement = type.GetMethodInBaseType(targetName);
+
+                if (userCodeReplacement == null)
                 {
-                    TypeDefinition baseType = type.BaseType.Resolve();
-                    MethodReference baseMethod = baseType.GetMethodInBaseType(userCodeName);
-
-                    // todo isn't calledMethod == baseMethod, improve this
-                    if (calledMethod != baseMethod)
-                    {
-                        throw new RpcException("call was not to base method", method);
-                    }
-
-                    if (baseMethod == null)
-                    {
-                        logger.Error($"Could not find base method for {userCodeName}", generatedMethod);
-                        return;
-                    }
-
-                    if (!baseMethod.Resolve().IsVirtual)
-                    {
-                        logger.Error($"Could not find base method that was virtual {userCodeName}", generatedMethod);
-                        return;
-                    }
-
-                    instruction.Operand = generatedMethod.Module.ImportReference(baseMethod);
-
-                    Weaver.DebugLog(type, $"Replacing call to '{calledMethod.FullName}' with '{baseMethod.FullName}' inside '{ generatedMethod.FullName}'");
+                    throw new RpcException($"Could not find base method for {userCodeName}", generatedMethod);
                 }
+
+                if (!userCodeReplacement.Resolve().IsVirtual)
+                {
+                    throw new RpcException($"Could not find base method that was virtual {userCodeName}", generatedMethod);
+                }
+
+                instruction.Operand = generatedMethod.Module.ImportReference(userCodeReplacement);
+
+                Weaver.DebugLog(type, $"Replacing call to '{calledMethod.FullName}' with '{userCodeReplacement.FullName}' inside '{ generatedMethod.FullName}'");
             }
         }
 

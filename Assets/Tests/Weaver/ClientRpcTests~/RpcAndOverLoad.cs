@@ -6,7 +6,7 @@ namespace ClientRpcTests.RpcAndOverLoad
     {
         // normal and rpc method with same name
 
-        [ClientRpc(target = RpcTarget.Target)]
+        [ClientRpc(target = RpcTarget.Player)]
         public void RpcThatIsTotallyValid(INetworkPlayer player, int a) { }
 
         public void RpcThatIsTotallyValid(int a) { }

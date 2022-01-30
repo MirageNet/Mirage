@@ -18,6 +18,8 @@ namespace Mirage.Weaver
         {
         }
 
+        protected override Type AttributeType => typeof(ServerRpcAttribute);
+
         /// <summary>
         /// Replaces the user code with a stub.
         /// Moves the original code to a new method
@@ -65,7 +67,7 @@ namespace Mirage.Weaver
             // write all the arguments that the user passed to the Cmd call
             WriteArguments(worker, md, writer, paramSerializers, RemoteCallType.ServerRpc);
 
-            string cmdName = md.Name;
+            string cmdName = md.FullName;
 
             int channel = serverRpcAttr.GetField("channel", 0);
             bool requireAuthority = serverRpcAttr.GetField("requireAuthority", true);

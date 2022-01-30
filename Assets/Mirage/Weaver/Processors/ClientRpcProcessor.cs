@@ -15,6 +15,8 @@ namespace Mirage.Weaver
         {
         }
 
+        protected override Type AttributeType => typeof(ClientRpcAttribute);
+
         /// <summary>
         /// Generates a skeleton for an RPC
         /// </summary>
@@ -145,7 +147,7 @@ namespace Mirage.Weaver
             // write all the arguments that the user passed to the Rpc call
             WriteArguments(worker, md, writer, paramSerializers, RemoteCallType.ClientRpc);
 
-            string rpcName = md.Name;
+            string rpcName = md.FullName;
 
             RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
             int channel = clientRpcAttr.GetField("channel", 0);

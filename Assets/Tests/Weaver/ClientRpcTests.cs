@@ -86,6 +86,12 @@ namespace Mirage.Tests.Weaver
         }
 
         [Test]
+        public void CallToNonRpcOverLoadReverse()
+        {
+            IsSuccess();
+        }
+
+        [Test]
         public void RpcAndOverLoad()
         {
             IsSuccess();
