@@ -37,8 +37,9 @@ namespace Mirage.Weaver
         /// </remarks>
         MethodDefinition GenerateSkeleton(MethodDefinition md, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
         {
+            string newName = $"Skeleton_{md.Name}";
             MethodDefinition rpc = md.DeclaringType.AddMethod(
-                SkeletonPrefix + md.Name,
+                newName,
                 MethodAttributes.Family | MethodAttributes.HideBySig);
 
             ParameterDefinition readerParameter = rpc.AddParam<NetworkReader>("reader");

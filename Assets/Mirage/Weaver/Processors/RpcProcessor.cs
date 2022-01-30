@@ -9,9 +9,6 @@ namespace Mirage.Weaver
 {
     public abstract class RpcProcessor
     {
-        public const string SkeletonPrefix = "Skeleton_";
-        public const string UserCodePrefix = "UserCode_";
-
         protected readonly ModuleDefinition module;
         protected readonly Readers readers;
         protected readonly Writers writers;
@@ -279,78 +276,76 @@ namespace Mirage.Weaver
         //
         //  the original method definition loses all code
         //  this returns the newly created method with all the user provided code
-        public MethodDefinition SubstituteMethod(MethodDefinition md)
+        public MethodDefinition SubstituteMethod(MethodDefinition method)
         {
-            string newName = UserCodePrefix + md.Name;
-            MethodDefinition cmd = md.DeclaringType.AddMethod(newName, md.Attributes, md.ReturnType);
+            string newName = $"UserCode_{method.Name}";
+            MethodDefinition generatedMethod = method.DeclaringType.AddMethod(newName, method.Attributes, method.ReturnType);
 
             // add parameters
-            foreach (ParameterDefinition pd in md.Parameters)
+            foreach (ParameterDefinition pd in method.Parameters)
             {
-                _ = cmd.AddParam(pd.ParameterType, pd.Name);
+                _ = generatedMethod.AddParam(pd.ParameterType, pd.Name);
             }
 
             // swap bodies
-            (cmd.Body, md.Body) = (md.Body, cmd.Body);
+            (generatedMethod.Body, method.Body) = (method.Body, generatedMethod.Body);
 
             // Move over all the debugging information
-            foreach (SequencePoint sequencePoint in md.DebugInformation.SequencePoints)
-                cmd.DebugInformation.SequencePoints.Add(sequencePoint);
-            md.DebugInformation.SequencePoints.Clear();
+            foreach (SequencePoint sequencePoint in method.DebugInformation.SequencePoints)
+                generatedMethod.DebugInformation.SequencePoints.Add(sequencePoint);
+            method.DebugInformation.SequencePoints.Clear();
 
-            foreach (CustomDebugInformation customInfo in md.CustomDebugInformations)
-                cmd.CustomDebugInformations.Add(customInfo);
-            md.CustomDebugInformations.Clear();
+            foreach (CustomDebugInformation customInfo in method.CustomDebugInformations)
+                generatedMethod.CustomDebugInformations.Add(customInfo);
+            method.CustomDebugInformations.Clear();
 
-            (md.DebugInformation.Scope, cmd.DebugInformation.Scope) = (cmd.DebugInformation.Scope, md.DebugInformation.Scope);
+            (method.DebugInformation.Scope, generatedMethod.DebugInformation.Scope) = (generatedMethod.DebugInformation.Scope, method.DebugInformation.Scope);
 
-            FixRemoteCallToBaseMethod(md.DeclaringType, cmd);
-            return cmd;
+            FixRemoteCallToBaseMethod(method.DeclaringType, method, generatedMethod);
+            return generatedMethod;
         }
-
 
         /// <summary>
         /// Finds and fixes call to base methods within remote calls
         /// <para>For example, changes `base.CmdDoSomething` to `base.UserCode_CmdDoSomething` within `this.UserCode_CmdDoSomething`</para>
         /// </summary>
         /// <param name="type"></param>
-        /// <param name="method"></param>
-        public void FixRemoteCallToBaseMethod(TypeDefinition type, MethodDefinition method)
+        /// <param name="generatedMethod"></param>
+        void FixRemoteCallToBaseMethod(TypeDefinition type, MethodDefinition method, MethodDefinition generatedMethod)
         {
-            string callName = method.Name;
+            string userCodeName = generatedMethod.Name;
+            string rpcName = method.Name;
 
-            // all ServerRpcs/Rpc start with "UserCode_"
-            // eg CallCmdDoSomething
-            if (!callName.StartsWith(UserCodePrefix))
-                return;
-
-            // eg CmdDoSomething
-            string baseRemoteCallName = method.Name.Substring(UserCodePrefix.Length);
-
-            foreach (Instruction instruction in method.Body.Instructions)
+            foreach (Instruction instruction in generatedMethod.Body.Instructions)
             {
                 // if call to base.CmdDoSomething within this.CallCmdDoSomething
                 if (IsCallToMethod(instruction, out MethodDefinition calledMethod) &&
-                    calledMethod.Name == baseRemoteCallName)
+                    calledMethod.Name == rpcName)
                 {
                     TypeDefinition baseType = type.BaseType.Resolve();
-                    MethodReference baseMethod = baseType.GetMethodInBaseType(callName);
+                    MethodReference baseMethod = baseType.GetMethodInBaseType(userCodeName);
+
+                    // todo isn't calledMethod == baseMethod, improve this
+                    if (calledMethod != baseMethod)
+                    {
+                        throw new RpcException("call was not to base method", method);
+                    }
 
                     if (baseMethod == null)
                     {
-                        logger.Error($"Could not find base method for {callName}", method);
+                        logger.Error($"Could not find base method for {userCodeName}", generatedMethod);
                         return;
                     }
 
                     if (!baseMethod.Resolve().IsVirtual)
                     {
-                        logger.Error($"Could not find base method that was virtual {callName}", method);
+                        logger.Error($"Could not find base method that was virtual {userCodeName}", generatedMethod);
                         return;
                     }
 
-                    instruction.Operand = method.Module.ImportReference(baseMethod);
+                    instruction.Operand = generatedMethod.Module.ImportReference(baseMethod);
 
-                    Weaver.DebugLog(type, $"Replacing call to '{calledMethod.FullName}' with '{baseMethod.FullName}' inside '{ method.FullName}'");
+                    Weaver.DebugLog(type, $"Replacing call to '{calledMethod.FullName}' with '{baseMethod.FullName}' inside '{ generatedMethod.FullName}'");
                 }
             }
         }
