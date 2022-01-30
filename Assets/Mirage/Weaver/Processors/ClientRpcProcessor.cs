@@ -1,4 +1,5 @@
 using System;
+using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using Mirage.Weaver.Serialization;
 using Mono.Cecil;
@@ -157,11 +158,6 @@ namespace Mirage.Weaver
             // this
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            if (target == RpcTarget.Player && HasNetworkPlayerParameter(md))
-                worker.Append(worker.Create(OpCodes.Ldarg_1));
-            else if (target == RpcTarget.Owner)
-                worker.Append(worker.Create(OpCodes.Ldnull));
-
             worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType.ConvertToGenericIfNeeded()));
             // invokerClass
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
@@ -170,17 +166,20 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
 
+            // last arg of send is either bool, or NetworkPlayer
+            // see ClientRpcSender.Send methods
             if (target == RpcTarget.Observers)
-            {
                 worker.Append(worker.Create(excludeOwner ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
-                MethodReference sendRpcRef = md.Module.ImportReference<NetworkBehaviour>(nb => nb.SendRpcInternal(default, default, default, default, default));
-                worker.Append(worker.Create(OpCodes.Callvirt, sendRpcRef));
-            }
-            else
-            {
-                MethodReference sendTargetRpcRef = md.Module.ImportReference<NetworkBehaviour>(nb => nb.SendTargetRpcInternal(default, default, default, default, default));
-                worker.Append(worker.Create(OpCodes.Callvirt, sendTargetRpcRef));
-            }
+            else if (target == RpcTarget.Player && HasNetworkPlayerParameter(md))
+                worker.Append(worker.Create(OpCodes.Ldarg_1));
+            else // owner, or Player with no arg
+                worker.Append(worker.Create(OpCodes.Ldnull));
+
+            MethodReference sendMethod = target == RpcTarget.Observers
+                ? md.Module.ImportReference(() => ClientRpcSender.Send(default, default, default, default, default))
+                : md.Module.ImportReference(() => ClientRpcSender.SendTarget(default, default, default, default, default));
+
+            worker.Append(worker.Create(OpCodes.Call, sendMethod));
 
             NetworkWriterHelper.CallRelease(module, worker, writer);
 

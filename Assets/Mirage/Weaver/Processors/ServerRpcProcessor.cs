@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using Mirage.Weaver.Serialization;
 using Mono.Cecil;
@@ -84,7 +85,8 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
             worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
-            CallSendServerRpc(md, worker);
+            MethodReference sendMethod = GetSendMethod(md, worker);
+            worker.Append(worker.Create(OpCodes.Call, sendMethod));
 
             NetworkWriterHelper.CallRelease(module, worker, writer);
 
@@ -117,28 +119,25 @@ namespace Mirage.Weaver
             });
         }
 
-        private void CallSendServerRpc(MethodDefinition md, ILProcessor worker)
+        MethodReference GetSendMethod(MethodDefinition md, ILProcessor worker)
         {
             if (md.ReturnType.Is(typeof(void)))
             {
-                MethodReference sendServerRpcRef = md.Module.ImportReference<NetworkBehaviour>(nb => nb.SendServerRpcInternal(default, default, default, default, default));
-                worker.Append(worker.Create(OpCodes.Call, sendServerRpcRef));
+                MethodReference sendMethod = md.Module.ImportReference(() => ServerRpcSender.Send(default, default, default, default, default));
+                return sendMethod;
             }
             else
             {
-                // call SendServerRpcWithReturn<T> and return the result
-                Type netBehaviour = typeof(NetworkBehaviour);
-
-                MethodInfo sendMethod = netBehaviour.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).First(m => m.Name == nameof(NetworkBehaviour.SendServerRpcWithReturn));
+                // call ServerRpcSender.SendWithReturn<T> and return the result
+                MethodInfo sendMethod = typeof(ServerRpcSender).GetMethods(BindingFlags.Public | BindingFlags.Static).First(m => m.Name == nameof(ServerRpcSender.SendWithReturn));
                 MethodReference sendRef = md.Module.ImportReference(sendMethod);
 
                 var returnType = md.ReturnType as GenericInstanceType;
 
-                var instanceMethod = new GenericInstanceMethod(sendRef);
-                instanceMethod.GenericArguments.Add(returnType.GenericArguments[0]);
+                var genericMethod = new GenericInstanceMethod(sendRef);
+                genericMethod.GenericArguments.Add(returnType.GenericArguments[0]);
 
-                worker.Append(worker.Create(OpCodes.Call, instanceMethod));
-
+                return genericMethod;
             }
         }
 
