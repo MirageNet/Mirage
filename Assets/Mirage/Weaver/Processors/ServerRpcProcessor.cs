@@ -73,19 +73,15 @@ namespace Mirage.Weaver
             int channel = serverRpcAttr.GetField("channel", 0);
             bool requireAuthority = serverRpcAttr.GetField("requireAuthority", true);
 
+            int hash = GetStableHash(md);
+            MethodReference sendMethod = GetSendMethod(md, worker);
 
-            // invoke internal send and return
-            // load 'base.' to call the SendServerRpc function with
+            // ServerRpcSender.Send(this, 12345, writer, channel, requireAuthority)
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType.ConvertToGenericIfNeeded()));
-            // invokerClass
-            worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
-            worker.Append(worker.Create(OpCodes.Ldstr, cmdName));
-            // writer
+            worker.Append(worker.Create(OpCodes.Ldc_I4, hash));
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
             worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
-            MethodReference sendMethod = GetSendMethod(md, worker);
             worker.Append(worker.Create(OpCodes.Call, sendMethod));
 
             NetworkWriterHelper.CallRelease(module, worker, writer);

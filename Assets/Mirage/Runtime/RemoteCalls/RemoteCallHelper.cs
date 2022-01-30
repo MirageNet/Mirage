@@ -18,7 +18,6 @@ namespace Mirage.RemoteCalls
     // invoke type for Rpc
     public enum RpcInvokeType
     {
-        // IMPORTANT: dont change these numbers they are used by weaver, see Mirage.Weaver.RegisterRpc
         ServerRpc = 0,
         ClientRpc = 1,
     }
@@ -112,10 +111,10 @@ namespace Mirage.RemoteCalls
         /// <param name="func"></param>
         /// <param name="cmdRequireAuthority"></param>
         /// <returns>remote function hash</returns>
-        public static int Register(Type invokeClass, string name, int hash, RpcInvokeType invokerType, RpcDelegate func, bool cmdRequireAuthority)
+        public static void Register(Type invokeClass, string name, int hash, RpcInvokeType invokerType, RpcDelegate func, bool cmdRequireAuthority)
         {
             if (CheckDuplicate(invokeClass, invokerType, func, hash))
-                return hash;
+                return;
 
             var invoker = new RpcMethod
             {
@@ -133,8 +132,6 @@ namespace Mirage.RemoteCalls
                 string requireAuthorityMessage = invokerType == RpcInvokeType.ServerRpc ? $" RequireAuthority:{cmdRequireAuthority}" : "";
                 logger.Log($"RegisterDelegate hash: {hash} invokerType: {invokerType} method: {func.Method.Name}{requireAuthorityMessage}");
             }
-
-            return hash;
         }
 
         public static void RegisterRequest<T>(Type invokeClass, string name, int hash, RequestDelegate<T> func, bool cmdRequireAuthority)
@@ -181,19 +178,6 @@ namespace Mirage.RemoteCalls
             }
 
             return false;
-        }
-
-        [System.Obsolete("Use Register", true)]
-        public static void RegisterServerRpc(Type invokeClass, string name, int hash, RpcDelegate func, bool requireAuthority)
-        {
-            Register(invokeClass, name, hash, RpcInvokeType.ServerRpc, func, requireAuthority);
-        }
-
-        // todo do we need these extra methods, weaver could just call RegisterDelegate
-        [System.Obsolete("Use Register", true)]
-        public static void RegisterClientRpc(Type invokeClass, string name, int hash, RpcDelegate func)
-        {
-            Register(invokeClass, name, hash, RpcInvokeType.ClientRpc, func);
         }
 
         /// <summary>
