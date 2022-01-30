@@ -234,8 +234,12 @@ namespace Mirage.Weaver
 
         public static bool HasCustomAttribute<TAttribute>(this ICustomAttributeProvider attributeProvider)
         {
-            // Linq allocations don't matter in weaver
-            return attributeProvider.CustomAttributes.Any(attr => attr.AttributeType.Is<TAttribute>());
+            return HasCustomAttribute(attributeProvider, typeof(TAttribute));
+        }
+
+        public static bool HasCustomAttribute(this ICustomAttributeProvider attributeProvider, Type t)
+        {
+            return attributeProvider.CustomAttributes.Any(attr => attr.AttributeType.Is(t));
         }
 
         public static T GetField<T>(this CustomAttribute ca, string field, T defaultValue)
