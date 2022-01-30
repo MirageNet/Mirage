@@ -36,7 +36,7 @@ namespace Mirage.RemoteCalls
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static RpcMessage CreateMessage(NetworkBehaviour behaviour, int hash, NetworkWriter writer)
         {
-            RpcMethod rpc = RemoteCallHelper.GetRpc(hash);
+            RemoteCall rpc = RemoteCallHelper.GetCall(hash);
 
             Validate(behaviour, rpc);
 
@@ -50,7 +50,7 @@ namespace Mirage.RemoteCalls
             return message;
         }
 
-        static void Validate(NetworkBehaviour behaviour, RpcMethod rpc)
+        static void Validate(NetworkBehaviour behaviour, RemoteCall rpc)
         {
             INetworkServer server = behaviour.Server;
             if (server == null || !server.Active)
