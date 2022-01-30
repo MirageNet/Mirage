@@ -37,27 +37,21 @@ namespace Mirage.Weaver
         static void RegisterServerRpc(ILProcessor worker, ServerRpcMethod rpcMethod)
         {
             MethodDefinition skeleton = rpcMethod.skeleton;
-            string name = HumanReadableName(rpcMethod.stub);
-            int hash = RpcProcessor.GetStableHash(rpcMethod.stub);
             bool requireAuthority = rpcMethod.requireAuthority;
 
-
-            TypeDefinition netBehaviourSubclass = skeleton.DeclaringType;
-            worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass.ConvertToGenericIfNeeded()));
-            worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
-            worker.Append(worker.Create(OpCodes.Ldstr, name));
-            worker.Append(worker.Create(OpCodes.Ldc_I4, hash));
-            // 0 for RemoteCalls.RpcInvokeType.ServerRpc
-            worker.Append(worker.Create(OpCodes.Ldc_I4_0));
-            worker.Append(worker.Create(OpCodes.Ldnull));
-            worker.Append(worker.Create(OpCodes.Ldftn, skeleton));
-            MethodReference @delegate = CreateRpcDelegate(skeleton);
-            worker.Append(worker.Create(OpCodes.Newobj, @delegate));
-
-            worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
-
             MethodReference registerMethod = GetRegisterMethod(skeleton);
-            worker.Append(worker.Create(OpCodes.Call, registerMethod));
+            RpcInvokeType? invokeType = GetInvokeType(rpcMethod);
+            CallRegister(worker, rpcMethod, invokeType, registerMethod, requireAuthority);
+        }
+
+        static RpcInvokeType? GetInvokeType(ServerRpcMethod rpcMethod)
+        {
+            MethodDefinition func = rpcMethod.skeleton;
+            if (func.ReturnType.Is(typeof(void)))
+                return RpcInvokeType.ServerRpc;
+            else
+                // Request RPC dont need type, so pass nullable so opcode is exlcuded from register
+                return default(RpcInvokeType?);
         }
 
         /// <summary>
@@ -92,25 +86,39 @@ namespace Mirage.Weaver
         /// <param name="rpcMethod"></param>
         static void RegisterClientRpc(ILProcessor worker, ClientRpcMethod rpcMethod)
         {
+            MethodReference registerMethod = worker.Body.Method.Module.ImportReference(() => RemoteCallHelper.Register(default, default, default, default, default, default));
+            CallRegister(worker, rpcMethod, RpcInvokeType.ClientRpc, registerMethod, false);
+        }
+
+        static void CallRegister(ILProcessor worker, RpcMethod rpcMethod, RpcInvokeType? invokeType, MethodReference registerMethod, bool requireAuthority)
+        {
             MethodDefinition skeleton = rpcMethod.skeleton;
             string name = HumanReadableName(rpcMethod.stub);
             int hash = RpcProcessor.GetStableHash(rpcMethod.stub);
 
+            // typeof()
             TypeReference netBehaviourSubclass = skeleton.DeclaringType.ConvertToGenericIfNeeded();
             worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
+
             worker.Append(worker.Create(OpCodes.Ldstr, name));
             worker.Append(worker.Create(OpCodes.Ldc_I4, hash));
-            // 1 for RemoteCalls.RpcInvokeType.ClientRpc
-            worker.Append(worker.Create(OpCodes.Ldc_I4_1));
+
+            // RegisterRequest has no type, it is always serverRpc, so dont need to include arg
+            if (invokeType.HasValue)
+            {
+                worker.Append(worker.Create(OpCodes.Ldc_I4, (int)invokeType.Value));
+            }
+
+            // new delegate
             worker.Append(worker.Create(OpCodes.Ldnull));
             worker.Append(worker.Create(OpCodes.Ldftn, skeleton));
             MethodReference @delegate = CreateRpcDelegate(skeleton);
             worker.Append(worker.Create(OpCodes.Newobj, @delegate));
 
-            worker.Append(worker.Create(OpCodes.Call, () => RemoteCallHelper.Register(default, default, default, default, default, default)));
+            worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+            worker.Append(worker.Create(OpCodes.Call, registerMethod));
         }
-
 
         static MethodReference CreateRpcDelegate(MethodDefinition func)
         {

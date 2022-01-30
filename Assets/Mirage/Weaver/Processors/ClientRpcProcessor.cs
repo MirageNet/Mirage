@@ -154,18 +154,14 @@ namespace Mirage.Weaver
             int channel = clientRpcAttr.GetField("channel", 0);
             bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
 
-            // invoke SendInternal and return
-            // this
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            int hash = GetStableHash(md);
+            MethodReference sendMethod = GetSendMethod(md, target);
 
-            worker.Append(worker.Create(OpCodes.Ldtoken, md.DeclaringType.ConvertToGenericIfNeeded()));
-            // invokerClass
-            worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
-            worker.Append(worker.Create(OpCodes.Ldstr, rpcName));
-            // writer
+            // ClientRpcSender.Send(this, 12345, writer, channel, requireAuthority)
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Ldc_I4, hash));
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
-
             // last arg of send is either bool, or NetworkPlayer
             // see ClientRpcSender.Send methods
             if (target == RpcTarget.Observers)
@@ -175,9 +171,6 @@ namespace Mirage.Weaver
             else // owner, or Player with no arg
                 worker.Append(worker.Create(OpCodes.Ldnull));
 
-            MethodReference sendMethod = target == RpcTarget.Observers
-                ? md.Module.ImportReference(() => ClientRpcSender.Send(default, default, default, default, default))
-                : md.Module.ImportReference(() => ClientRpcSender.SendTarget(default, default, default, default, default));
 
             worker.Append(worker.Create(OpCodes.Call, sendMethod));
 
@@ -186,6 +179,13 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ret));
 
             return rpc;
+        }
+
+        private static MethodReference GetSendMethod(MethodDefinition md, RpcTarget target)
+        {
+            return target == RpcTarget.Observers
+                          ? md.Module.ImportReference(() => ClientRpcSender.Send(default, default, default, default, default))
+                          : md.Module.ImportReference(() => ClientRpcSender.SendTarget(default, default, default, default, default));
         }
 
         void IsClient(ILProcessor worker, Action body)

@@ -53,8 +53,7 @@ namespace Mirage.Weaver
         protected static string UserCodeMethodName(MethodDefinition method)
         {
             // append fullName hash to end to support overloads, but keep "md.Name" so it is human readable when debugging
-            // uint to make it nicer to read, negative works in generated names, but looks ugly
-            return $"UserCode_{method.Name}_{(uint)method.FullName.GetStableHashCode()}";
+            return $"UserCode_{method.Name}_{GetStableHash(method)}";
         }
 
         /// <summary>
@@ -65,7 +64,7 @@ namespace Mirage.Weaver
         protected static string SkeletonMethodName(MethodDefinition method)
         {
             // append fullName hash to end to support overloads, but keep "md.Name" so it is human readable when debugging
-            return $"Skeleton_{method.Name}_{(uint)method.FullName.GetStableHashCode()}";
+            return $"Skeleton_{method.Name}_{GetStableHash(method)}";
         }
 
         /// <summary>
