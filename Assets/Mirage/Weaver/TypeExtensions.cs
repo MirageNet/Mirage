@@ -35,13 +35,27 @@ namespace Mirage.Weaver
         /// <returns></returns>
         public static MethodReference GetMethodInBaseType(this TypeReference typeReference, string methodName)
         {
+            return GetMethodInBaseType(typeReference, (md) => md.Name == methodName);
+        }
+
+        /// <summary>
+        /// Finds a method in base type
+        /// <para>
+        /// IMPORTANT: dont resolve <paramref name="typeReference"/> before calling this or methods can not be made into generic methods
+        /// </para>
+        /// </summary>
+        /// <param name="typeReference">Unresolved type reference, dont resolve if generic</param>
+        /// <param name="methodName"></param>
+        /// <returns></returns>
+        public static MethodReference GetMethodInBaseType(this TypeReference typeReference, Predicate<MethodDefinition> match)
+        {
             TypeDefinition typedef = typeReference.Resolve();
             TypeReference typeRef = typeReference;
             while (typedef != null)
             {
                 foreach (MethodDefinition md in typedef.Methods)
                 {
-                    if (md.Name == methodName)
+                    if (match.Invoke(md))
                     {
                         MethodReference method = md;
                         if (typeRef.IsGenericInstance)
