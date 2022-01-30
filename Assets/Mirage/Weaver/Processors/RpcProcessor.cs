@@ -35,6 +35,30 @@ namespace Mirage.Weaver
             return type.Resolve().ImplementsInterface<INetworkPlayer>();
         }
 
+
+        /// <summary>
+        /// Gets the UserCode_ name for a method
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns></returns>
+        protected static string UserCodeMethodName(MethodDefinition method)
+        {
+            // append fullName hash to end to support overloads, but keep "md.Name" so it is human readable when debugging
+            // uint to make it nicer to read, negative works in generated names, but looks ugly
+            return $"UserCode_{method.Name}_{(uint)method.FullName.GetStableHashCode()}";
+        }
+
+        /// <summary>
+        /// Gets the Skeleton_ name for a method
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns></returns>
+        protected static string SkeletonMethodName(MethodDefinition method)
+        {
+            // append fullName hash to end to support overloads, but keep "md.Name" so it is human readable when debugging
+            return $"Skeleton_{method.Name}_{(uint)method.FullName.GetStableHashCode()}";
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -278,7 +302,8 @@ namespace Mirage.Weaver
         //  this returns the newly created method with all the user provided code
         public MethodDefinition SubstituteMethod(MethodDefinition method)
         {
-            string newName = $"UserCode_{method.Name}";
+            // append fullName hash to end to support overloads, but keep "md.Name" so it is human readable when debugging
+            string newName = $"UserCode_{method.Name}_{method.FullName.GetStableHashCode()}";
             MethodDefinition generatedMethod = method.DeclaringType.AddMethod(newName, method.Attributes, method.ReturnType);
 
             // add parameters

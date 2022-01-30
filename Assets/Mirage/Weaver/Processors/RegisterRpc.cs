@@ -29,7 +29,7 @@ namespace Mirage.Weaver
         static void RegisterServerRpc(ILProcessor worker, ServerRpcMethod cmdResult)
         {
             MethodDefinition skeleton = cmdResult.skeleton;
-            string name = cmdResult.stub.Name;
+            string name = cmdResult.stub.FullName;
             bool requireAuthority = cmdResult.requireAuthority;
 
             MethodReference registerMethod = GetRegisterMethod(skeleton);
@@ -81,7 +81,7 @@ namespace Mirage.Weaver
         static void RegisterClientRpc(ILProcessor worker, ClientRpcMethod clientRpc)
         {
             MethodDefinition skeleton = clientRpc.skeleton;
-            string name = clientRpc.stub.Name;
+            string name = clientRpc.stub.FullName;
 
             TypeReference netBehaviourSubclass = skeleton.DeclaringType.ConvertToGenericIfNeeded();
             worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
