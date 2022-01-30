@@ -716,7 +716,7 @@ namespace Mirage
         /// <param name="invokeType"></param>
         /// <param name="reader"></param>
         /// <param name="senderPlayer"></param>
-        internal void HandleRemoteCall(Skeleton skeleton, int componentIndex, NetworkReader reader, INetworkPlayer senderPlayer = null, int replyId = 0)
+        internal void HandleRemoteCall(RpcMethod skeleton, int componentIndex, NetworkReader reader, INetworkPlayer senderPlayer = null, int replyId = 0)
         {
             // find the right component to invoke the function on
             if (componentIndex >= 0 && componentIndex < NetworkBehaviours.Length)
@@ -726,7 +726,7 @@ namespace Mirage
             }
             else
             {
-                throw new MethodInvocationException($"Invalid component {componentIndex} in {this} for RPC {skeleton.invokeFunction}");
+                throw new MethodInvocationException($"Invalid component {componentIndex} in {this} for RPC {skeleton.function}");
             }
         }
 

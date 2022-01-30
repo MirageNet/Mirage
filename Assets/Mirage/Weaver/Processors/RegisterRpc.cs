@@ -65,7 +65,7 @@ namespace Mirage.Weaver
 
             TypeReference returnType = taskReturnType.GenericArguments[0];
 
-            var genericRegisterMethod = func.Module.ImportReference(() => RemoteCallHelper.RegisterRequestDelegate<object>(default, default, default, default)) as GenericInstanceMethod;
+            var genericRegisterMethod = func.Module.ImportReference(() => RemoteCallHelper.RegisterRequest<object>(default, default, default, default)) as GenericInstanceMethod;
 
             var registerInstance = new GenericInstanceMethod(genericRegisterMethod.ElementMethod);
             registerInstance.GenericArguments.Add(returnType);
@@ -100,7 +100,7 @@ namespace Mirage.Weaver
         {
             if (func.ReturnType.Is(typeof(void)))
             {
-                ConstructorInfo[] constructors = typeof(CmdDelegate).GetConstructors();
+                ConstructorInfo[] constructors = typeof(RpcDelegate).GetConstructors();
                 return func.Module.ImportReference(constructors.First());
             }
             else if (func.ReturnType.Is(typeof(UniTask<int>).GetGenericTypeDefinition()))

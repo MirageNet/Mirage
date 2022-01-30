@@ -12,7 +12,7 @@ namespace Mirage.RemoteCalls
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="reader"></param>
-    public delegate void CmdDelegate(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId);
+    public delegate void RpcDelegate(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId);
     public delegate UniTask<T> RequestDelegate<T>(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId);
 
     // invoke type for Rpc
@@ -25,28 +25,53 @@ namespace Mirage.RemoteCalls
     /// <summary>
     /// Stub Skeleton for RPC
     /// </summary>
-    class Skeleton
+    class RpcMethod
     {
-        public Type invokeClass;
-        public RpcInvokeType invokeType;
-        public CmdDelegate invokeFunction;
-        public bool cmdRequireAuthority;
+        /// <summary>
+        /// Type that rpc was declared in
+        /// </summary>
+        public Type DeclaringType;
+        /// <summary>
+        /// Server rpc or client rpc
+        /// </summary>
+        public RpcInvokeType InvokeType;
+        /// <summary>
+        /// Function to be invoked when receiving message
+        /// </summary>
+        public RpcDelegate function;
+        /// <summary>
+        /// Used by ServerRpc
+        /// </summary>
+        public bool RequireAuthority;
+        /// <summary>
+        /// User friendly name
+        /// </summary>
+        public string name;
 
-        public bool AreEqual(Type invokeClass, RpcInvokeType invokeType, CmdDelegate invokeFunction)
+        public bool AreEqual(Type invokeClass, RpcInvokeType invokeType, RpcDelegate invokeFunction)
         {
-            return this.invokeClass == invokeClass &&
-                    this.invokeType == invokeType &&
-                    this.invokeFunction == invokeFunction;
+            return DeclaringType == invokeClass &&
+                    InvokeType == invokeType &&
+                    function == invokeFunction;
         }
 
         internal void Invoke(NetworkReader reader, NetworkBehaviour invokingType, INetworkPlayer senderPlayer = null, int replyId = 0)
         {
-            if (invokeClass.IsInstanceOfType(invokingType))
+            if (DeclaringType.IsInstanceOfType(invokingType))
             {
-                invokeFunction(invokingType, reader, senderPlayer, replyId);
+                function(invokingType, reader, senderPlayer, replyId);
                 return;
             }
-            throw new MethodInvocationException($"Invalid Rpc call {invokeFunction} for component {invokingType}");
+            throw new MethodInvocationException($"Invalid Rpc call {function} for component {invokingType}");
+        }
+
+        /// <summary>
+        /// User friendly name used for debug/error messages
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return name;
         }
     }
 
@@ -57,7 +82,7 @@ namespace Mirage.RemoteCalls
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(RemoteCallHelper));
 
-        static readonly Dictionary<int, Skeleton> cmdHandlerDelegates = new Dictionary<int, Skeleton>();
+        static readonly Dictionary<int, RpcMethod> cmdHandlerDelegates = new Dictionary<int, RpcMethod>();
 
         /// <summary>
         /// Creates hash from Type and method name
@@ -65,6 +90,7 @@ namespace Mirage.RemoteCalls
         /// <param name="invokeClass"></param>
         /// <param name="methodName"></param>
         /// <returns></returns>
+        [System.Obsolete("Generate this hash in weaver instead", true)]
         internal static int GetMethodHash(Type invokeClass, string methodName)
         {
             // (invokeClass + ":" + cmdName).GetStableHashCode() would cause allocations.
@@ -80,39 +106,37 @@ namespace Mirage.RemoteCalls
         /// helper function register a ServerRpc/Rpc delegate
         /// </summary>
         /// <param name="invokeClass"></param>
-        /// <param name="cmdName"></param>
+        /// <param name="name"></param>
         /// <param name="invokerType"></param>
         /// <param name="func"></param>
         /// <param name="cmdRequireAuthority"></param>
         /// <returns>remote function hash</returns>
-        public static int RegisterDelegate(Type invokeClass, string cmdName, RpcInvokeType invokerType, CmdDelegate func, bool cmdRequireAuthority = true)
+        public static int Register(Type invokeClass, string name, int hash, RpcInvokeType invokerType, RpcDelegate func, bool cmdRequireAuthority = true)
         {
-            // type+func so Inventory.RpcUse != Equipment.RpcUse
-            int cmdHash = GetMethodHash(invokeClass, cmdName);
+            if (CheckIfDelegateExists(invokeClass, invokerType, func, hash))
+                return hash;
 
-            if (CheckIfDelegateExists(invokeClass, invokerType, func, cmdHash))
-                return cmdHash;
-
-            var invoker = new Skeleton
+            var invoker = new RpcMethod
             {
-                invokeType = invokerType,
-                invokeClass = invokeClass,
-                invokeFunction = func,
-                cmdRequireAuthority = cmdRequireAuthority,
+                name = name,
+                InvokeType = invokerType,
+                DeclaringType = invokeClass,
+                function = func,
+                RequireAuthority = cmdRequireAuthority,
             };
 
-            cmdHandlerDelegates[cmdHash] = invoker;
+            cmdHandlerDelegates[hash] = invoker;
 
             if (logger.LogEnabled())
             {
                 string requireAuthorityMessage = invokerType == RpcInvokeType.ServerRpc ? $" RequireAuthority:{cmdRequireAuthority}" : "";
-                logger.Log($"RegisterDelegate hash: {cmdHash} invokerType: {invokerType} method: {func.Method.Name}{requireAuthorityMessage}");
+                logger.Log($"RegisterDelegate hash: {hash} invokerType: {invokerType} method: {func.Method.Name}{requireAuthorityMessage}");
             }
 
-            return cmdHash;
+            return hash;
         }
 
-        public static void RegisterRequestDelegate<T>(Type invokeClass, string cmdName, RequestDelegate<T> func, bool cmdRequireAuthority = true)
+        public static void RegisterRequest<T>(Type invokeClass, string name, int hash, RequestDelegate<T> func, bool cmdRequireAuthority = true)
         {
             async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
             {
@@ -137,35 +161,36 @@ namespace Mirage.RemoteCalls
                 Wrapper(obj, reader, senderPlayer, replyId).Forget();
             }
 
-            RegisterDelegate(invokeClass, cmdName, RpcInvokeType.ServerRpc, CmdWrapper, cmdRequireAuthority);
+            Register(invokeClass, name, hash, RpcInvokeType.ServerRpc, CmdWrapper, cmdRequireAuthority);
         }
 
-        static bool CheckIfDelegateExists(Type invokeClass, RpcInvokeType invokerType, CmdDelegate func, int cmdHash)
+        static bool CheckIfDelegateExists(Type invokeClass, RpcInvokeType invokerType, RpcDelegate func, int cmdHash)
         {
             if (cmdHandlerDelegates.ContainsKey(cmdHash))
             {
                 // something already registered this hash
-                Skeleton oldInvoker = cmdHandlerDelegates[cmdHash];
+                RpcMethod oldInvoker = cmdHandlerDelegates[cmdHash];
                 if (oldInvoker.AreEqual(invokeClass, invokerType, func))
                 {
                     // it's all right,  it was the same function
                     return true;
                 }
 
-                logger.LogError($"Function {oldInvoker.invokeClass}.{oldInvoker.invokeFunction.Method.Name} and {invokeClass}.{func.Method.Name} have the same hash.  Please rename one of them");
+                logger.LogError($"Function {oldInvoker.DeclaringType}.{oldInvoker.function.Method.Name} and {invokeClass}.{func.Method.Name} have the same hash.  Please rename one of them");
             }
 
             return false;
         }
 
-        public static void RegisterServerRpcDelegate(Type invokeClass, string cmdName, CmdDelegate func, bool requireAuthority)
+        public static void RegisterServerRpc(Type invokeClass, string name, int hash, RpcDelegate func, bool requireAuthority)
         {
-            RegisterDelegate(invokeClass, cmdName, RpcInvokeType.ServerRpc, func, requireAuthority);
+            Register(invokeClass, name, hash, RpcInvokeType.ServerRpc, func, requireAuthority);
         }
 
-        public static void RegisterRpcDelegate(Type invokeClass, string rpcName, CmdDelegate func)
+        // todo do we need these extra methods, weaver could just call RegisterDelegate
+        public static void RegisterClientRpc(Type invokeClass, string name, int hash, RpcDelegate func)
         {
-            RegisterDelegate(invokeClass, rpcName, RpcInvokeType.ClientRpc, func);
+            Register(invokeClass, name, hash, RpcInvokeType.ClientRpc, func);
         }
 
         /// <summary>
@@ -176,10 +201,9 @@ namespace Mirage.RemoteCalls
             cmdHandlerDelegates.Remove(hash);
         }
 
-        internal static Skeleton GetSkeleton(int cmdHash)
+        internal static RpcMethod GetRpc(int cmdHash)
         {
-
-            if (cmdHandlerDelegates.TryGetValue(cmdHash, out Skeleton invoker))
+            if (cmdHandlerDelegates.TryGetValue(cmdHash, out RpcMethod invoker))
             {
                 return invoker;
             }
@@ -191,13 +215,13 @@ namespace Mirage.RemoteCalls
         /// Gets the handler function for a given hash
         /// Can be used by profilers and debuggers
         /// </summary>
-        /// <param name="cmdHash">rpc function hash</param>
+        /// <param name="hash">rpc function hash</param>
         /// <returns>The function delegate that will handle the ServerRpc</returns>
-        public static CmdDelegate GetDelegate(int cmdHash)
+        public static RpcDelegate GetDelegate(int hash)
         {
-            if (cmdHandlerDelegates.TryGetValue(cmdHash, out Skeleton invoker))
+            if (cmdHandlerDelegates.TryGetValue(hash, out RpcMethod invoker))
             {
-                return invoker.invokeFunction;
+                return invoker.function;
             }
             return null;
         }
