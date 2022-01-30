@@ -26,18 +26,29 @@ namespace Mirage.Weaver
             }
         }
 
-        static void RegisterServerRpc(ILProcessor worker, ServerRpcMethod cmdResult)
+        static string HumanReadableName(MethodReference method)
         {
-            MethodDefinition skeleton = cmdResult.skeleton;
-            string name = cmdResult.stub.FullName;
-            bool requireAuthority = cmdResult.requireAuthority;
+            string typeName = method.DeclaringType.FullName;
+            string methodName = method.Name;
 
-            MethodReference registerMethod = GetRegisterMethod(skeleton);
+            return $"{typeName}.{methodName}";
+        }
+
+        static void RegisterServerRpc(ILProcessor worker, ServerRpcMethod rpcMethod)
+        {
+            MethodDefinition skeleton = rpcMethod.skeleton;
+            string name = HumanReadableName(rpcMethod.stub);
+            int hash = RpcProcessor.GetStableHash(rpcMethod.stub);
+            bool requireAuthority = rpcMethod.requireAuthority;
+
 
             TypeDefinition netBehaviourSubclass = skeleton.DeclaringType;
             worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass.ConvertToGenericIfNeeded()));
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
             worker.Append(worker.Create(OpCodes.Ldstr, name));
+            worker.Append(worker.Create(OpCodes.Ldc_I4, hash));
+            // 0 for RemoteCalls.RpcInvokeType.ServerRpc
+            worker.Append(worker.Create(OpCodes.Ldc_I4_0));
             worker.Append(worker.Create(OpCodes.Ldnull));
             worker.Append(worker.Create(OpCodes.Ldftn, skeleton));
             MethodReference @delegate = CreateRpcDelegate(skeleton);
@@ -45,6 +56,7 @@ namespace Mirage.Weaver
 
             worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
 
+            MethodReference registerMethod = GetRegisterMethod(skeleton);
             worker.Append(worker.Create(OpCodes.Call, registerMethod));
         }
 
@@ -54,7 +66,7 @@ namespace Mirage.Weaver
         static MethodReference GetRegisterMethod(MethodDefinition func)
         {
             if (func.ReturnType.Is(typeof(void)))
-                return func.Module.ImportReference(() => RemoteCallHelper.RegisterServerRpcDelegate(default, default, default, default));
+                return func.Module.ImportReference(() => RemoteCallHelper.Register(default, default, default, default, default, default));
             else
                 return CreateGenericRequestDelegate(func);
         }
@@ -65,7 +77,7 @@ namespace Mirage.Weaver
 
             TypeReference returnType = taskReturnType.GenericArguments[0];
 
-            var genericRegisterMethod = func.Module.ImportReference(() => RemoteCallHelper.RegisterRequest<object>(default, default, default, default)) as GenericInstanceMethod;
+            var genericRegisterMethod = func.Module.ImportReference(() => RemoteCallHelper.RegisterRequest<object>(default, default, default, default, default)) as GenericInstanceMethod;
 
             var registerInstance = new GenericInstanceMethod(genericRegisterMethod.ElementMethod);
             registerInstance.GenericArguments.Add(returnType);
@@ -77,22 +89,26 @@ namespace Mirage.Weaver
         /// NetworkBehaviour.RegisterServerRpcDelegate(base.GetType(), "CmdThrust", new NetworkBehaviour.CmdDelegate(ShipControl.InvokeCmdCmdThrust));
         /// </summary>
         /// <param name="worker"></param>
-        /// <param name="clientRpc"></param>
-        static void RegisterClientRpc(ILProcessor worker, ClientRpcMethod clientRpc)
+        /// <param name="rpcMethod"></param>
+        static void RegisterClientRpc(ILProcessor worker, ClientRpcMethod rpcMethod)
         {
-            MethodDefinition skeleton = clientRpc.skeleton;
-            string name = clientRpc.stub.FullName;
+            MethodDefinition skeleton = rpcMethod.skeleton;
+            string name = HumanReadableName(rpcMethod.stub);
+            int hash = RpcProcessor.GetStableHash(rpcMethod.stub);
 
             TypeReference netBehaviourSubclass = skeleton.DeclaringType.ConvertToGenericIfNeeded();
             worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
             worker.Append(worker.Create(OpCodes.Ldstr, name));
+            worker.Append(worker.Create(OpCodes.Ldc_I4, hash));
+            // 1 for RemoteCalls.RpcInvokeType.ClientRpc
+            worker.Append(worker.Create(OpCodes.Ldc_I4_1));
             worker.Append(worker.Create(OpCodes.Ldnull));
             worker.Append(worker.Create(OpCodes.Ldftn, skeleton));
             MethodReference @delegate = CreateRpcDelegate(skeleton);
             worker.Append(worker.Create(OpCodes.Newobj, @delegate));
 
-            worker.Append(worker.Create(OpCodes.Call, () => RemoteCallHelper.RegisterRpcDelegate(default, default, default)));
+            worker.Append(worker.Create(OpCodes.Call, () => RemoteCallHelper.Register(default, default, default, default, default, default)));
         }
 
 

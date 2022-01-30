@@ -18,8 +18,9 @@ namespace Mirage.RemoteCalls
     // invoke type for Rpc
     public enum RpcInvokeType
     {
-        ServerRpc,
-        ClientRpc
+        // IMPORTANT: dont change these numbers they are used by weaver, see Mirage.Weaver.RegisterRpc
+        ServerRpc = 0,
+        ClientRpc = 1,
     }
 
     /// <summary>
@@ -82,7 +83,7 @@ namespace Mirage.RemoteCalls
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(RemoteCallHelper));
 
-        static readonly Dictionary<int, RpcMethod> cmdHandlerDelegates = new Dictionary<int, RpcMethod>();
+        static readonly Dictionary<int, RpcMethod> rpcMethods = new Dictionary<int, RpcMethod>();
 
         /// <summary>
         /// Creates hash from Type and method name
@@ -111,9 +112,9 @@ namespace Mirage.RemoteCalls
         /// <param name="func"></param>
         /// <param name="cmdRequireAuthority"></param>
         /// <returns>remote function hash</returns>
-        public static int Register(Type invokeClass, string name, int hash, RpcInvokeType invokerType, RpcDelegate func, bool cmdRequireAuthority = true)
+        public static int Register(Type invokeClass, string name, int hash, RpcInvokeType invokerType, RpcDelegate func, bool cmdRequireAuthority)
         {
-            if (CheckIfDelegateExists(invokeClass, invokerType, func, hash))
+            if (CheckDuplicate(invokeClass, invokerType, func, hash))
                 return hash;
 
             var invoker = new RpcMethod
@@ -125,7 +126,7 @@ namespace Mirage.RemoteCalls
                 RequireAuthority = cmdRequireAuthority,
             };
 
-            cmdHandlerDelegates[hash] = invoker;
+            rpcMethods[hash] = invoker;
 
             if (logger.LogEnabled())
             {
@@ -136,7 +137,7 @@ namespace Mirage.RemoteCalls
             return hash;
         }
 
-        public static void RegisterRequest<T>(Type invokeClass, string name, int hash, RequestDelegate<T> func, bool cmdRequireAuthority = true)
+        public static void RegisterRequest<T>(Type invokeClass, string name, int hash, RequestDelegate<T> func, bool cmdRequireAuthority)
         {
             async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
             {
@@ -164,12 +165,12 @@ namespace Mirage.RemoteCalls
             Register(invokeClass, name, hash, RpcInvokeType.ServerRpc, CmdWrapper, cmdRequireAuthority);
         }
 
-        static bool CheckIfDelegateExists(Type invokeClass, RpcInvokeType invokerType, RpcDelegate func, int cmdHash)
+        static bool CheckDuplicate(Type invokeClass, RpcInvokeType invokerType, RpcDelegate func, int cmdHash)
         {
-            if (cmdHandlerDelegates.ContainsKey(cmdHash))
+            if (rpcMethods.ContainsKey(cmdHash))
             {
                 // something already registered this hash
-                RpcMethod oldInvoker = cmdHandlerDelegates[cmdHash];
+                RpcMethod oldInvoker = rpcMethods[cmdHash];
                 if (oldInvoker.AreEqual(invokeClass, invokerType, func))
                 {
                     // it's all right,  it was the same function
@@ -182,12 +183,14 @@ namespace Mirage.RemoteCalls
             return false;
         }
 
+        [System.Obsolete("Use Register", true)]
         public static void RegisterServerRpc(Type invokeClass, string name, int hash, RpcDelegate func, bool requireAuthority)
         {
             Register(invokeClass, name, hash, RpcInvokeType.ServerRpc, func, requireAuthority);
         }
 
         // todo do we need these extra methods, weaver could just call RegisterDelegate
+        [System.Obsolete("Use Register", true)]
         public static void RegisterClientRpc(Type invokeClass, string name, int hash, RpcDelegate func)
         {
             Register(invokeClass, name, hash, RpcInvokeType.ClientRpc, func);
@@ -198,17 +201,17 @@ namespace Mirage.RemoteCalls
         /// </summary>
         internal static void RemoveDelegate(int hash)
         {
-            cmdHandlerDelegates.Remove(hash);
+            rpcMethods.Remove(hash);
         }
 
-        internal static RpcMethod GetRpc(int cmdHash)
+        internal static RpcMethod GetRpc(int hash)
         {
-            if (cmdHandlerDelegates.TryGetValue(cmdHash, out RpcMethod invoker))
+            if (rpcMethods.TryGetValue(hash, out RpcMethod invoker))
             {
                 return invoker;
             }
 
-            throw new MethodInvocationException($"No RPC method found for hash {cmdHash}");
+            throw new MethodInvocationException($"No RPC method found for hash {hash}");
         }
 
         /// <summary>
@@ -219,7 +222,7 @@ namespace Mirage.RemoteCalls
         /// <returns>The function delegate that will handle the ServerRpc</returns>
         public static RpcDelegate GetDelegate(int hash)
         {
-            if (cmdHandlerDelegates.TryGetValue(hash, out RpcMethod invoker))
+            if (rpcMethods.TryGetValue(hash, out RpcMethod invoker))
             {
                 return invoker.function;
             }
