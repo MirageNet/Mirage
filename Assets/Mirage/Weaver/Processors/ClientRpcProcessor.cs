@@ -54,7 +54,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
             // NetworkConnection parameter is only required for RpcTarget.Player
-            RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
+            RpcTarget target = clientRpcAttr.GetField(nameof(ClientRpcAttribute.target), RpcTarget.Observers);
             bool hasNetworkConnection = target == RpcTarget.Player && HasNetworkPlayerParameter(md);
 
             if (hasNetworkConnection)
@@ -150,9 +150,9 @@ namespace Mirage.Weaver
 
             string rpcName = md.FullName;
 
-            RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
-            int channel = clientRpcAttr.GetField("channel", 0);
-            bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
+            RpcTarget target = clientRpcAttr.GetField(nameof(ClientRpcAttribute.target), RpcTarget.Observers);
+            int channel = clientRpcAttr.GetField(nameof(ClientRpcAttribute.channel), 0);
+            bool excludeOwner = clientRpcAttr.GetField(nameof(ClientRpcAttribute.excludeOwner), false);
 
             int hash = GetStableHash(md);
             MethodReference sendMethod = GetSendMethod(md, target);
@@ -243,8 +243,8 @@ namespace Mirage.Weaver
             ValidateReturnType(md, RemoteCallType.ClientRpc);
             ValidateAttribute(md, clientRpcAttr);
 
-            RpcTarget clientTarget = clientRpcAttr.GetField("target", RpcTarget.Observers);
-            bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
+            RpcTarget clientTarget = clientRpcAttr.GetField(nameof(ClientRpcAttribute.target), RpcTarget.Observers);
+            bool excludeOwner = clientRpcAttr.GetField(nameof(ClientRpcAttribute.excludeOwner), false);
 
             ValueSerializer[] paramSerializers = GetValueSerializers(md);
 
@@ -267,13 +267,13 @@ namespace Mirage.Weaver
         /// <exception cref="RpcException">Throws when parameter are invalid</exception>
         void ValidateAttribute(MethodDefinition md, CustomAttribute clientRpcAttr)
         {
-            RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
+            RpcTarget target = clientRpcAttr.GetField(nameof(ClientRpcAttribute.target), RpcTarget.Observers);
             if (target == RpcTarget.Player && !HasNetworkPlayerParameter(md))
             {
                 throw new RpcException("ClientRpc with RpcTarget.Player needs a network player parameter", md);
             }
 
-            bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
+            bool excludeOwner = clientRpcAttr.GetField(nameof(ClientRpcAttribute.excludeOwner), false);
             if (target == RpcTarget.Owner && excludeOwner)
             {
                 throw new RpcException("ClientRpc with RpcTarget.Owner cannot have excludeOwner set as true", md);

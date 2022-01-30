@@ -21,7 +21,7 @@ namespace Mirage.Weaver.SyncVars
             if (syncVarAttr == null)
                 throw new InvalidOperationException("FoundSyncVar did not have a SyncVarAttribute");
 
-            string hookFunctionName = syncVarAttr.GetField<string>("hook", null);
+            string hookFunctionName = syncVarAttr.GetField<string>(nameof(SyncVarAttribute.hook), null);
 
             if (string.IsNullOrEmpty(hookFunctionName))
                 return null;
