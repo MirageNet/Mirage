@@ -70,8 +70,8 @@ namespace Mirage.Weaver
 
             string cmdName = md.FullName;
 
-            int channel = serverRpcAttr.GetField("channel", 0);
-            bool requireAuthority = serverRpcAttr.GetField("requireAuthority", true);
+            int channel = serverRpcAttr.GetField(nameof(ServerRpcAttribute.channel), 0);
+            bool requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
 
             int hash = GetStableHash(md);
             MethodReference sendMethod = GetSendMethod(md, worker);
@@ -191,7 +191,8 @@ namespace Mirage.Weaver
             ValidateParameters(md, RemoteCallType.ServerRpc);
             ValidateReturnType(md, RemoteCallType.ServerRpc);
 
-            bool requireAuthority = serverRpcAttr.GetField("requireAuthority", false);
+            // default vaue true for requireAuthority, or someone could force call these on server
+            bool requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
 
             ValueSerializer[] paramSerializers = GetValueSerializers(md);
 
