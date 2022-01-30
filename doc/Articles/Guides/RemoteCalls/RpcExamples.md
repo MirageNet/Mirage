@@ -37,29 +37,29 @@ public class Player : NetworkBehaviour
     {
         if (this.IsServer)
         {
-            UserCode_RpcChangeName(newName);
+            UserCode_RpcChangeName_123456789(newName);
         }
         else 
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
                 writer.WriteString(newName);
-                this.SendServerRpcInternal(typeof(Player), "RpcChangeName", writer, 0, true);
+                ServerRpcSender.Send(this, 123456789, writer, 0, true);
             }
         }
     }
 
-    public void UserCode_RpcChangeName(string newName)
+    public void UserCode_RpcChangeName_123456789(string newName)
     {
         PlayerName = newName;
     }
-    protected void Skeleton_RpcChangeName(NetworkReader reader, INetworkPlayer senderConnection, int replyId)
+    protected void Skeleton_RpcChangeName_123456789(NetworkReader reader, INetworkPlayer senderConnection, int replyId)
     {
-        this.UserCode_RpcChangeName(reader.ReadString());
+        this.UserCode_RpcChangeName_123456789(reader.ReadString());
     }
     static Player()
     {
-        RemoteCallHelper.RegisterServerRpcDelegate(typeof(Player), "RpcChangeName", new CmdDelegate(null.Skeleton_RpcChangeName), false);
+        RemoteCallHelper.Register(typeof(Player), "Player.RpcChangeName", 123456789, RpcInvokeType.ServerRpc, new CmdDelegate(Skeleton_RpcChangeName), true);
     }
 }
 ```
