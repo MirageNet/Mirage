@@ -52,13 +52,13 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void ClientRpcConnCantSkipNetworkConn()
         {
-            HasError("ClientRpc with Client.Connection needs a network connection parameter", "System.Void ClientRpcTests.ClientRpcConnCantSkipNetworkConn.ClientRpcConnCantSkipNetworkConn::ClientRpcMethod()");
+            HasError("ClientRpc with RpcTarget.Player needs a network player parameter", "System.Void ClientRpcTests.ClientRpcConnCantSkipNetworkConn.ClientRpcConnCantSkipNetworkConn::ClientRpcMethod()");
         }
 
         [Test]
         public void ClientRpcOwnerCantExcludeOwner()
         {
-            HasError("ClientRpc with Client.Owner cannot have excludeOwner set as true", "System.Void ClientRpcTests.ClientRpcOwnerCantExcludeOwner.ClientRpcOwnerCantExcludeOwner::ClientRpcMethod()");
+            HasError("ClientRpc with RpcTarget.Owner cannot have excludeOwner set as true", "System.Void ClientRpcTests.ClientRpcOwnerCantExcludeOwner.ClientRpcOwnerCantExcludeOwner::ClientRpcMethod()");
         }
     }
 }

@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using Mirage.Weaver.Serialization;
 using Mono.Cecil;
@@ -13,16 +11,6 @@ namespace Mirage.Weaver
     /// </summary>
     public class ClientRpcProcessor : RpcProcessor
     {
-        struct ClientRpcMethod
-        {
-            public MethodDefinition stub;
-            public RpcTarget target;
-            public bool excludeOwner;
-            public MethodDefinition skeleton;
-        }
-
-        readonly List<ClientRpcMethod> clientRpcs = new List<ClientRpcMethod>();
-
         public ClientRpcProcessor(ModuleDefinition module, Readers readers, Writers writers, IWeaverLogger logger) : base(module, readers, writers, logger)
         {
         }
@@ -61,7 +49,7 @@ namespace Mirage.Weaver
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
-            // NetworkConnection parameter is only required for Client.Connection
+            // NetworkConnection parameter is only required for RpcTarget.Player
             RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
             bool hasNetworkConnection = target == RpcTarget.Player && HasNetworkPlayerParameter(md);
 
@@ -198,7 +186,7 @@ namespace Mirage.Weaver
             return rpc;
         }
 
-        public void IsClient(ILProcessor worker, Action body)
+        void IsClient(ILProcessor worker, Action body)
         {
             // if (IsLocalClient) {
             Instruction endif = worker.Create(OpCodes.Nop);
@@ -213,7 +201,7 @@ namespace Mirage.Weaver
 
         }
 
-        private void CallBody(ILProcessor worker, MethodDefinition rpc)
+        void CallBody(ILProcessor worker, MethodDefinition rpc)
         {
             IsClient(worker, () =>
             {
@@ -221,7 +209,7 @@ namespace Mirage.Weaver
             });
         }
 
-        protected void InvokeBody(ILProcessor worker, MethodDefinition rpc)
+        void InvokeBody(ILProcessor worker, MethodDefinition rpc)
         {
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
@@ -245,63 +233,13 @@ namespace Mirage.Weaver
             }
             worker.Append(worker.Create(OpCodes.Callvirt, rpc));
         }
-        bool Validate(MethodDefinition md, CustomAttribute clientRpcAttr)
+
+        public ClientRpcMethod ProcessRpc(MethodDefinition md, CustomAttribute clientRpcAttr)
         {
-            if (!md.ReturnType.Is(typeof(void)))
-            {
-                logger.Error($"{md.Name} cannot return a value.  Make it void instead", md);
-                return false;
-            }
-
-            RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
-            if (target == RpcTarget.Player && !HasNetworkPlayerParameter(md))
-            {
-                logger.Error("ClientRpc with Client.Connection needs a network connection parameter", md);
-                return false;
-            }
-
-            bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
-            if (target == RpcTarget.Owner && excludeOwner)
-            {
-                logger.Error("ClientRpc with Client.Owner cannot have excludeOwner set as true", md);
-                return false;
-            }
-            return true;
-
-        }
-
-        public void RegisterClientRpcs(ILProcessor cctorWorker)
-        {
-            foreach (ClientRpcMethod clientRpcResult in clientRpcs)
-            {
-                GenerateRegisterRemoteDelegate(cctorWorker, clientRpcResult.skeleton, clientRpcResult.stub.Name);
-            }
-        }
-
-        /*
-            // This generates code like:
-            NetworkBehaviour.RegisterServerRpcDelegate(base.GetType(), "CmdThrust", new NetworkBehaviour.CmdDelegate(ShipControl.InvokeCmdCmdThrust));
-        */
-        void GenerateRegisterRemoteDelegate(ILProcessor worker, MethodDefinition func, string cmdName)
-        {
-            TypeReference netBehaviourSubclass = func.DeclaringType.ConvertToGenericIfNeeded();
-            worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
-            worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
-            worker.Append(worker.Create(OpCodes.Ldstr, cmdName));
-            worker.Append(worker.Create(OpCodes.Ldnull));
-            CreateRpcDelegate(worker, func);
-            worker.Append(worker.Create(OpCodes.Call, () => RemoteCallHelper.RegisterRpcDelegate(default, default, default)));
-        }
-
-        public void ProcessRpc(MethodDefinition md, CustomAttribute clientRpcAttr)
-        {
-            if (!ValidateRemoteCallAndParameters(md, RemoteCallType.ClientRpc))
-            {
-                return;
-            }
-
-            if (!Validate(md, clientRpcAttr))
-                return;
+            ValidateMethod(md, RemoteCallType.ClientRpc);
+            ValidateParameters(md, RemoteCallType.ClientRpc);
+            ValidateReturnType(md, RemoteCallType.ClientRpc);
+            ValidateAttribute(md, clientRpcAttr);
 
             RpcTarget clientTarget = clientRpcAttr.GetField("target", RpcTarget.Observers);
             bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
@@ -311,13 +249,33 @@ namespace Mirage.Weaver
             MethodDefinition userCodeFunc = GenerateStub(md, clientRpcAttr, paramSerializers);
 
             MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, clientRpcAttr, paramSerializers);
-            clientRpcs.Add(new ClientRpcMethod
+
+            return new ClientRpcMethod
             {
                 stub = md,
                 target = clientTarget,
                 excludeOwner = excludeOwner,
                 skeleton = skeletonFunc
-            });
+            };
+        }
+
+        /// <summary>
+        /// checks ClientRpc Attribute values are valid
+        /// </summary>
+        /// <exception cref="RpcException">Throws when parameter are invalid</exception>
+        void ValidateAttribute(MethodDefinition md, CustomAttribute clientRpcAttr)
+        {
+            RpcTarget target = clientRpcAttr.GetField("target", RpcTarget.Observers);
+            if (target == RpcTarget.Player && !HasNetworkPlayerParameter(md))
+            {
+                throw new RpcException("ClientRpc with RpcTarget.Player needs a network player parameter", md);
+            }
+
+            bool excludeOwner = clientRpcAttr.GetField("excludeOwner", false);
+            if (target == RpcTarget.Owner && excludeOwner)
+            {
+                throw new RpcException("ClientRpc with RpcTarget.Owner cannot have excludeOwner set as true", md);
+            }
         }
     }
 }

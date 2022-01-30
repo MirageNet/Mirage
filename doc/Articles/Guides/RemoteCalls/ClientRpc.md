@@ -97,7 +97,7 @@ public class Player : NetworkBehaviour
         DoMagic(opponentIdentity.Owner, damage);
     }
 
-    [ClientRpc(target = Client.Player)]
+    [ClientRpc(target = RpcTarget.Player)]
     public void DoMagic(INetworkPlayer target, int damage)
     {
         // This will appear on the opponent's client, not the attacking player's
@@ -111,7 +111,7 @@ public class Player : NetworkBehaviour
         Healed(10);
     }
 
-    [ClientRpc(target = Client.Owner)]
+    [ClientRpc(target = RpcTarget.Owner)]
     public void Healed(int amount)
     {
         // No NetworkPlayer parameter, so it goes to owner

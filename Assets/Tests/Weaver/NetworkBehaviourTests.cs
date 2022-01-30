@@ -80,7 +80,7 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void NetworkBehaviourClientRpcVoidReturn()
         {
-            HasError("RpcCantHaveNonVoidReturn cannot return a value.  Make it void instead",
+            HasError("[ClientRpc] must return void",
                 "System.Int32 NetworkBehaviourTests.NetworkBehaviourClientRpcVoidReturn.NetworkBehaviourClientRpcVoidReturn::RpcCantHaveNonVoidReturn()");
         }
 
