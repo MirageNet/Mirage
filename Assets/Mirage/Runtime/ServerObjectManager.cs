@@ -431,9 +431,9 @@ namespace Mirage
                 if (logger.WarnEnabled()) logger.LogWarning("Spawned object not found when handling ServerRpc message [netId=" + msg.netId + "]");
                 return;
             }
-            RpcMethod skeleton = RemoteCallHelper.GetRpc(msg.functionHash);
+            RemoteCall remoteCall = RemoteCallHelper.GetCall(msg.functionHash);
 
-            if (skeleton.InvokeType != RpcInvokeType.ServerRpc)
+            if (remoteCall.InvokeType != RpcInvokeType.ServerRpc)
             {
                 throw new MethodInvocationException($"Invalid ServerRpc for id {msg.functionHash}");
             }
@@ -441,7 +441,7 @@ namespace Mirage
             // ServerRpcs can be for player objects, OR other objects with client-authority
             // -> so if this connection's controller has a different netId then
             //    only allow the ServerRpc if clientAuthorityOwner
-            if (skeleton.RequireAuthority && identity.Owner != player)
+            if (remoteCall.RequireAuthority && identity.Owner != player)
             {
                 if (logger.WarnEnabled()) logger.LogWarning("ServerRpc for object without authority [netId=" + msg.netId + "]");
                 return;
@@ -452,7 +452,7 @@ namespace Mirage
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
             {
                 networkReader.ObjectLocator = Server.World;
-                identity.HandleRemoteCall(skeleton, msg.componentIndex, networkReader, player, msg.replyId.GetValueOrDefault());
+                identity.HandleRemoteCall(remoteCall, msg.componentIndex, networkReader, player, msg.replyId.GetValueOrDefault());
             }
         }
 

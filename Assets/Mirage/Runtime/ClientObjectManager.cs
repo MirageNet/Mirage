@@ -571,9 +571,9 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnRPCMessage hash:" + msg.functionHash + " netId:" + msg.netId);
 
-            RpcMethod skeleton = RemoteCallHelper.GetRpc(msg.functionHash);
+            RemoteCall remoteCall = RemoteCallHelper.GetCall(msg.functionHash);
 
-            if (skeleton.InvokeType != RpcInvokeType.ClientRpc)
+            if (remoteCall.InvokeType != RpcInvokeType.ClientRpc)
             {
                 throw new MethodInvocationException($"Invalid RPC call with id {msg.functionHash}");
             }
@@ -582,7 +582,7 @@ namespace Mirage
                 using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
                 {
                     networkReader.ObjectLocator = Client.World;
-                    identity.HandleRemoteCall(skeleton, msg.componentIndex, networkReader);
+                    identity.HandleRemoteCall(remoteCall, msg.componentIndex, networkReader);
                 }
             }
         }

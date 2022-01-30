@@ -23,9 +23,9 @@ namespace Mirage.RemoteCalls
     }
 
     /// <summary>
-    /// Stub Skeleton for RPC
+    /// Used for invoking a RPC methods
     /// </summary>
-    class RpcMethod
+    public class RemoteCall
     {
         /// <summary>
         /// Type that rpc was declared in
@@ -57,6 +57,7 @@ namespace Mirage.RemoteCalls
 
         internal void Invoke(NetworkReader reader, NetworkBehaviour invokingType, INetworkPlayer senderPlayer = null, int replyId = 0)
         {
+            // todo do we need to do this check? it should never happen
             if (DeclaringType.IsInstanceOfType(invokingType))
             {
                 function(invokingType, reader, senderPlayer, replyId);
@@ -82,25 +83,7 @@ namespace Mirage.RemoteCalls
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(RemoteCallHelper));
 
-        static readonly Dictionary<int, RpcMethod> rpcMethods = new Dictionary<int, RpcMethod>();
-
-        /// <summary>
-        /// Creates hash from Type and method name
-        /// </summary>
-        /// <param name="invokeClass"></param>
-        /// <param name="methodName"></param>
-        /// <returns></returns>
-        [System.Obsolete("Generate this hash in weaver instead", true)]
-        internal static int GetMethodHash(Type invokeClass, string methodName)
-        {
-            // (invokeClass + ":" + cmdName).GetStableHashCode() would cause allocations.
-            // so hash1 + hash2 is better.
-            unchecked
-            {
-                int hash = invokeClass.FullName.GetStableHashCode();
-                return hash * 503 + methodName.GetStableHashCode();
-            }
-        }
+        static readonly Dictionary<int, RemoteCall> calls = new Dictionary<int, RemoteCall>();
 
         /// <summary>
         /// helper function register a ServerRpc/Rpc delegate
@@ -116,7 +99,7 @@ namespace Mirage.RemoteCalls
             if (CheckDuplicate(invokeClass, invokerType, func, hash))
                 return;
 
-            var invoker = new RpcMethod
+            var invoker = new RemoteCall
             {
                 name = name,
                 InvokeType = invokerType,
@@ -125,7 +108,7 @@ namespace Mirage.RemoteCalls
                 RequireAuthority = cmdRequireAuthority,
             };
 
-            rpcMethods[hash] = invoker;
+            calls[hash] = invoker;
 
             if (logger.LogEnabled())
             {
@@ -164,10 +147,10 @@ namespace Mirage.RemoteCalls
 
         static bool CheckDuplicate(Type invokeClass, RpcInvokeType invokerType, RpcDelegate func, int cmdHash)
         {
-            if (rpcMethods.ContainsKey(cmdHash))
+            if (calls.ContainsKey(cmdHash))
             {
                 // something already registered this hash
-                RpcMethod oldInvoker = rpcMethods[cmdHash];
+                RemoteCall oldInvoker = calls[cmdHash];
                 if (oldInvoker.AreEqual(invokeClass, invokerType, func))
                 {
                     // it's all right,  it was the same function
@@ -180,17 +163,9 @@ namespace Mirage.RemoteCalls
             return false;
         }
 
-        /// <summary>
-        /// We need this in order to clean up tests
-        /// </summary>
-        internal static void RemoveDelegate(int hash)
+        public static RemoteCall GetCall(int hash)
         {
-            rpcMethods.Remove(hash);
-        }
-
-        internal static RpcMethod GetRpc(int hash)
-        {
-            if (rpcMethods.TryGetValue(hash, out RpcMethod invoker))
+            if (calls.TryGetValue(hash, out RemoteCall invoker))
             {
                 return invoker;
             }
@@ -198,19 +173,9 @@ namespace Mirage.RemoteCalls
             throw new MethodInvocationException($"No RPC method found for hash {hash}");
         }
 
-        /// <summary>
-        /// Gets the handler function for a given hash
-        /// Can be used by profilers and debuggers
-        /// </summary>
-        /// <param name="hash">rpc function hash</param>
-        /// <returns>The function delegate that will handle the ServerRpc</returns>
-        public static RpcDelegate GetDelegate(int hash)
+        public static bool TryGetCall(int hash, out RemoteCall call)
         {
-            if (rpcMethods.TryGetValue(hash, out RpcMethod invoker))
-            {
-                return invoker.function;
-            }
-            return null;
+            return calls.TryGetValue(hash, out call);
         }
     }
 }

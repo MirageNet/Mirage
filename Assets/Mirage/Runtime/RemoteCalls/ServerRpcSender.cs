@@ -33,7 +33,7 @@ namespace Mirage.RemoteCalls
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static ServerRpcMessage CreateMessage(NetworkBehaviour behaviour, int hash, NetworkWriter writer, bool requireAuthority)
         {
-            RpcMethod rpc = RemoteCallHelper.GetRpc(hash);
+            RemoteCall rpc = RemoteCallHelper.GetCall(hash);
             Validate(behaviour, rpc, requireAuthority);
 
             var message = new ServerRpcMessage
@@ -46,7 +46,7 @@ namespace Mirage.RemoteCalls
             return message;
         }
 
-        static void Validate(NetworkBehaviour behaviour, RpcMethod rpc, bool requireAuthority)
+        static void Validate(NetworkBehaviour behaviour, RemoteCall rpc, bool requireAuthority)
         {
             INetworkClient client = behaviour.Client;
 
