@@ -2,10 +2,13 @@ using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
 
 namespace Mirage.Tests.Performance.Runtime
 {
@@ -20,8 +23,12 @@ namespace Mirage.Tests.Performance.Runtime
         [UnitySetUp]
         public IEnumerator SetUp() => UniTask.ToCoroutine(async () =>
         {
-            // load scene
+#if UNITY_EDITOR
             await EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
+#else
+            throw new System.NotSupportedException("Test not supported in player");
+#endif
+
             Scene scene = SceneManager.GetSceneByPath(ScenePath);
             SceneManager.SetActiveScene(scene);
 
