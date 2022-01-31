@@ -5,11 +5,14 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
 
 namespace Mirage.Tests.Runtime.Host
 {
@@ -260,7 +263,11 @@ namespace Mirage.Tests.Runtime.Host
 
             sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
 
+#if UNITY_EDITOR
             await EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Tests/Performance/Runtime/10K/Scenes/Scene.unity", new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
+#else
+            throw new System.NotSupportedException("Test not supported in player");
+#endif
 
             sceneManager.OnServerStartedSceneChange.AddListener((arg0, operation) => _invokedOnServerStartedSceneChange = true);
 
