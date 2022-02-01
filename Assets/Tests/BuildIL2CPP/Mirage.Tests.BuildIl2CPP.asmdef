@@ -1,0 +1,10 @@
+{
+    "name": "Mirage.Tests.BuildIl2CPP",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}
