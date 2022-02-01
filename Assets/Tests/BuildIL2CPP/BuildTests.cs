@@ -114,9 +114,9 @@ namespace Mirage.Tests.BuildIL2CPP
         }
         public void Dispose()
         {
-            UnityEngine.Debug.Log("Revert IL2CPP");
             if (startingBackend.HasValue)
             {
+                UnityEngine.Debug.Log("Revert IL2CPP");
                 PlayerSettings.SetScriptingBackend(group, startingBackend.Value);
             }
         }
