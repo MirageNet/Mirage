@@ -68,6 +68,7 @@ namespace Mirage.Tests.BuildIL2CPP
                 {
                     Directory.Delete(targetFolder, true);
                 }
+                Debug.Log($"Deleted Temp folder {targetFolder}");
             }
             catch (Exception e)
             {
