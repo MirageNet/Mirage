@@ -41,7 +41,7 @@ public class Scores : MonoBehaviour
             lives = lives
         };
 
-        NetworkServer.SendToAll(msg);
+        Server.SendToAll(msg);
     }
 
     void OnScore(INetworkPlayer player, ScoreMessage msg)
