@@ -1,3 +1,10 @@
+## [116.1.1](https://github.com/MirageNet/Mirage/compare/v116.1.0...v116.1.1) (2022-02-01)
+
+
+### Bug Fixes
+
+* fixing calling base methods for generic types in IL2CPP ([cf91e1d](https://github.com/MirageNet/Mirage/commit/cf91e1d54796866d2cf87f8e919bb5c681977e45))
+
 # [116.1.0](https://github.com/MirageNet/Mirage/compare/v116.0.0...v116.1.0) (2022-01-29)
 
 
