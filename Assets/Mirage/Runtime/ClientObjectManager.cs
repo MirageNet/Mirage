@@ -322,7 +322,14 @@ namespace Mirage
 
         void UnSpawn(NetworkIdentity identity)
         {
+            // it is useful to remove authority when destroying the object
+            // this can be useful to clean up stuff after a local player is destroyed
+            // call before StopClient, but dont reset the HasAuthority bool, people might want to use HasAuthority from stopclient or destroy
+            if (identity.HasAuthority)
+                identity.CallStopAuthority();
+
             identity.StopClient();
+
             if (unspawnHandlers.TryGetValue(identity.PrefabHash, out UnSpawnDelegate handler) && handler != null)
             {
                 handler(identity);

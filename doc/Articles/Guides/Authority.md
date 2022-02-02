@@ -64,6 +64,10 @@ Authority can't be removed from the character object. Instead you will have to r
 
 When authority is given to or removed from an object a message will be sent to that client to notify them. This will cause the `OnAuthorityChanged(bool)` functions to be called. 
 
+## On Destroy
+
+if the client has authority, then `OnAuthorityChanged(false)` will be called on the object when it is destroyed.
+
 
 ## Check Authority
 

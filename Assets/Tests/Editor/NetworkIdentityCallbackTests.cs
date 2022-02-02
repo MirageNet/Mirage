@@ -398,7 +398,7 @@ namespace Mirage.Tests
             // make sure exceptions are not swallowed
             Assert.Throws<Exception>(() =>
             {
-                identity.StartAuthority();
+                identity.CallStartAuthority();
             });
             func.Received(1).Invoke(Arg.Any<bool>());
         }
