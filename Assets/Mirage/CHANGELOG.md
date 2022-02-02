@@ -1,3 +1,33 @@
+# [117.0.0](https://github.com/MirageNet/Mirage/compare/v116.2.0...v117.0.0) (2022-02-02)
+
+
+### Bug Fixes
+
+* **RPC:** fixing rpc calls to base methods and overloads ([8bc165d](https://github.com/MirageNet/Mirage/commit/8bc165deb6432e881340f82c63a3a4d0a6039263))
+* **RPC:** fixing ServerRpc that could be called without Authority ([51411fb](https://github.com/MirageNet/Mirage/commit/51411fb068d2a44330d85e740d4c36b3f74c3ce6))
+
+
+### Code Refactoring
+
+* **RPC:** moving send rpc functions to their own classes ([eaadd62](https://github.com/MirageNet/Mirage/commit/eaadd62266c9c0d9ce8a34afebfdae7130e68a7c))
+* **RPC:** renaming methods for RemoteCallHelper ([186f228](https://github.com/MirageNet/Mirage/commit/186f22866207e1af6bb1713479034db1fdbe136e))
+
+
+### Features
+
+* **RPC:** adding rpc overloads ([5ca30f1](https://github.com/MirageNet/Mirage/commit/5ca30f1a05fbcb4fd880fd59d74386a19ab47d5c))
+
+
+### Performance Improvements
+
+* **RPC:** generating hash at compile time not runtime ([4f81402](https://github.com/MirageNet/Mirage/commit/4f814024293f7f0e0988003f622d43a52cf7b414))
+
+
+### BREAKING CHANGES
+
+* **RPC:** removed RemoteCallHelper.GetDelegate, use GetCall or TryGetCall instead
+* **RPC:** Send Rpc methods are now found in ServerRpcSender and ClientRpcSender and may have been renamed
+
 # [116.2.0](https://github.com/MirageNet/Mirage/compare/v116.1.1...v116.2.0) (2022-02-02)
 
 
