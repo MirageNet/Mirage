@@ -1,3 +1,10 @@
+# [116.2.0](https://github.com/MirageNet/Mirage/compare/v116.1.1...v116.2.0) (2022-02-02)
+
+
+### Features
+
+* calling OnAuthorityChanged with false when an object is unspawned ([#1034](https://github.com/MirageNet/Mirage/issues/1034)) ([d8334e8](https://github.com/MirageNet/Mirage/commit/d8334e8902998981001040b0601fcee5a9e68955))
+
 ## [116.1.1](https://github.com/MirageNet/Mirage/compare/v116.1.0...v116.1.1) (2022-02-01)
 
 
