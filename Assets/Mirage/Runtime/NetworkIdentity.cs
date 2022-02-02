@@ -513,18 +513,18 @@ namespace Mirage
         internal void NotifyAuthority()
         {
             if (!hadAuthority && HasAuthority)
-                StartAuthority();
+                CallStartAuthority();
             if (hadAuthority && !HasAuthority)
-                StopAuthority();
+                CallStopAuthority();
             hadAuthority = HasAuthority;
         }
 
-        internal void StartAuthority()
+        internal void CallStartAuthority()
         {
             _onAuthorityChanged.Invoke(true);
         }
 
-        internal void StopAuthority()
+        internal void CallStopAuthority()
         {
             _onAuthorityChanged.Invoke(false);
         }
