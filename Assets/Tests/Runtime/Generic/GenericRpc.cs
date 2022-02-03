@@ -76,11 +76,11 @@ namespace Mirage.Tests.Runtime.ClientServer.ManualRpcTests
     {
         protected static void Skeleton_MyRpc_1234(NetworkBehaviour behaviour, NetworkReader reader, INetworkPlayer senderConnection, int replyId)
         {
-            ((__IRpcSkeleton)behaviour).Skeleton_MyRpc_1234(behaviour, reader, senderConnection, replyId);
+            ((__IRpcSkeleton)behaviour).Skeleton_MyRpc_1234(reader, senderConnection, replyId);
         }
         protected static void Skeleton_MyRpc2_4321(NetworkBehaviour behaviour, NetworkReader reader, INetworkPlayer senderConnection, int replyId)
         {
-            ((__IRpcSkeleton)behaviour).Skeleton_MyRpc2_4321(behaviour, reader, senderConnection, replyId);
+            ((__IRpcSkeleton)behaviour).Skeleton_MyRpc2_4321(reader, senderConnection, replyId);
         }
 
         public static void Register()
@@ -185,11 +185,11 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         public event Action<int> serverCalled;
 
 
-        [ServerRpc(requireAuthority = false)]
-        public void MyRpc2(int value, INetworkPlayer sender)
-        {
-            serverCalled?.Invoke(value);
-        }
+        //[ServerRpc(requireAuthority = false)]
+        //public void MyRpc2(int value, INetworkPlayer sender)
+        //{
+        //    serverCalled?.Invoke(value);
+        //}
         [ClientRpc]
         public void MyRpc(int value)
         {
@@ -214,19 +214,19 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             // nothing
         }
 
-        [UnityTest]
-        public IEnumerator CanCallServerRpc()
-        {
-            const int num = 32;
-            Action<int> sub = Substitute.For<Action<int>>();
-            serverComponent.serverCalled += sub;
-            clientComponent.MyRpc2(num, default);
+        //[UnityTest]
+        //public IEnumerator CanCallServerRpc()
+        //{
+        //    const int num = 32;
+        //    Action<int> sub = Substitute.For<Action<int>>();
+        //    serverComponent.serverCalled += sub;
+        //    clientComponent.MyRpc2(num, default);
 
-            yield return null;
-            yield return null;
+        //    yield return null;
+        //    yield return null;
 
-            sub.Received(1).Invoke(num);
-        }
+        //    sub.Received(1).Invoke(num);
+        //}
 
         [UnityTest]
         public IEnumerator CanCallClientRpc()
@@ -250,19 +250,19 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             // nothing
         }
 
-        [UnityTest]
-        public IEnumerator CanCallServerRpc()
-        {
-            const int num = 32;
-            Action<int> sub = Substitute.For<Action<int>>();
-            serverComponent.serverCalled += sub;
-            clientComponent.MyRpc2(num, default);
+        //[UnityTest]
+        //public IEnumerator CanCallServerRpc()
+        //{
+        //    const int num = 32;
+        //    Action<int> sub = Substitute.For<Action<int>>();
+        //    serverComponent.serverCalled += sub;
+        //    clientComponent.MyRpc2(num, default);
 
-            yield return null;
-            yield return null;
+        //    yield return null;
+        //    yield return null;
 
-            sub.Received(1).Invoke(num);
-        }
+        //    sub.Received(1).Invoke(num);
+        //}
 
         [UnityTest]
         public IEnumerator CanCallClientRpc()
