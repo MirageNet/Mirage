@@ -421,6 +421,5 @@ namespace Mirage.Weaver
                 return false;
             }
         }
-
     }
 }
