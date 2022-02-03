@@ -160,17 +160,29 @@ namespace Mirage.Weaver
         MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, ValueSerializer[] paramSerializers)
         {
             string newName = SkeletonMethodName(method);
-            MethodDefinition cmd = method.DeclaringType.AddMethod(newName,
+            MethodDefinition rpc = method.DeclaringType.AddMethod(newName,
                 MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Static,
                 userCodeFunc.ReturnType);
 
-            _ = cmd.AddParam(method.DeclaringType, "behaviour");
-            ParameterDefinition readerParameter = cmd.AddParam<NetworkReader>("reader");
-            ParameterDefinition senderParameter = cmd.AddParam<INetworkPlayer>("senderConnection");
-            _ = cmd.AddParam<int>("replyId");
+
+            //if (method.DeclaringType.HasGenericParameters)
+            //{
+            //    //var nonGenericSkeleton= module.GeneratedClass().AddMethod(newName, MethodAttributes.HideBySig | MethodAttributes.Static, userCodeFunc.ReturnType);
+
+            //    //var generic = new GenericInstanceType(method.DeclaringType);
+            //    //foreach (GenericParameter param in method.DeclaringType.GenericParameters)
+            //    //    generic.GenericArguments.Add(param);
+            //    //_ = rpc.AddParam(generic, "behaviour");
+            //    _ = rpc.AddParam(module.ImportReference(typeof(NetworkBehaviour)), "behaviour");
+            //}
+            //else
+            _ = rpc.AddParam(method.DeclaringType, "behaviour");
+            ParameterDefinition readerParameter = rpc.AddParam<NetworkReader>("reader");
+            ParameterDefinition senderParameter = rpc.AddParam<INetworkPlayer>("senderConnection");
+            _ = rpc.AddParam<int>("replyId");
 
 
-            ILProcessor worker = cmd.Body.GetILProcessor();
+            ILProcessor worker = rpc.Body.GetILProcessor();
 
             // load `behaviour.`
             worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -182,7 +194,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
             worker.Append(worker.Create(OpCodes.Ret));
 
-            return cmd;
+            return rpc;
         }
 
         public ServerRpcMethod ProcessRpc(MethodDefinition md, CustomAttribute serverRpcAttr)

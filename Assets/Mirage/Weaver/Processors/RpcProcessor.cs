@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Mirage.Serialization;
 using Mirage.Weaver.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -86,6 +87,10 @@ namespace Mirage.Weaver
                 {
                     serializers[i] = ValueSerializerFinder.GetSerializer(method, method.Parameters[i], writers, readers);
                 }
+                catch (ArgumentNullException)
+                {
+                    serializers[i] = null;
+                }
                 catch (SerializeFunctionException e)
                 {
                     logger.Error(e, method.DebugInformation.SequencePoints.FirstOrDefault());
@@ -141,7 +146,24 @@ namespace Mirage.Weaver
             if (IsNetworkPlayer(param.ParameterType))
                 return;
 
-            serializer.AppendWriteParameter(module, worker, writer, param);
+            if (serializer != null)
+                serializer.AppendWriteParameter(module, worker, writer, param);
+            else
+            {
+                TypeDefinition genericType = module.ImportReference(typeof(GenericTypesSerializationExtensions)).Resolve();
+                MethodReference method = module.ImportReference(genericType.GetMethod(nameof(GenericTypesSerializationExtensions.Write)));
+
+                var generic = new GenericInstanceMethod(method);
+                generic.GenericArguments.Add(param.ParameterType);
+
+                // use built-in writer func on writer object
+                // NetworkWriter object
+                worker.Append(worker.Create(OpCodes.Ldloc, writer));
+                // add argument to call
+                worker.Append(worker.Create(OpCodes.Ldarg, param));
+                // call writer extension method
+                worker.Append(worker.Create(OpCodes.Call, generic));
+            }
         }
 
         public void ReadArguments(MethodDefinition method, ILProcessor worker, ParameterDefinition readerParameter, ParameterDefinition senderParameter, bool skipFirst, ValueSerializer[] paramSerializers)
@@ -177,7 +199,21 @@ namespace Mirage.Weaver
                 return;
             }
 
-            serializer.AppendRead(module, worker, readerParameter, param.ParameterType);
+            if (serializer != null)
+                serializer.AppendRead(module, worker, readerParameter, param.ParameterType);
+            else
+            {
+                TypeDefinition genericType = module.ImportReference(typeof(GenericTypesSerializationExtensions)).Resolve();
+                MethodReference method = module.ImportReference(genericType.GetMethod(nameof(GenericTypesSerializationExtensions.Read)));
+
+                var generic = new GenericInstanceMethod(method);
+                generic.GenericArguments.Add(param.ParameterType);
+
+                // add `reader` to stack
+                worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
+                // call read function
+                worker.Append(worker.Create(OpCodes.Call, generic));
+            }
         }
 
         /// <summary>

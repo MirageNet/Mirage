@@ -38,13 +38,15 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateSkeleton(MethodDefinition md, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
+        MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
         {
-            string newName = SkeletonMethodName(md);
-            MethodDefinition rpc = md.DeclaringType.AddMethod(
+            string newName = SkeletonMethodName(method);
+            MethodDefinition rpc = method.DeclaringType.AddMethod(
                 newName,
-                MethodAttributes.Family | MethodAttributes.HideBySig);
+                MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Static);
 
+            _ = rpc.AddParam(method.DeclaringType, "behaviour");
+            //_ = rpc.AddParam(module.ImportReference(typeof(NetworkBehaviour)), "behaviour");
             ParameterDefinition readerParameter = rpc.AddParam<NetworkReader>("reader");
             _ = rpc.AddParam<INetworkPlayer>("senderConnection");
             _ = rpc.AddParam<int>("replyId");
@@ -55,7 +57,7 @@ namespace Mirage.Weaver
 
             // NetworkConnection parameter is only required for RpcTarget.Player
             RpcTarget target = clientRpcAttr.GetField(nameof(ClientRpcAttribute.target), RpcTarget.Observers);
-            bool hasNetworkConnection = target == RpcTarget.Player && HasNetworkPlayerParameter(md);
+            bool hasNetworkConnection = target == RpcTarget.Player && HasNetworkPlayerParameter(method);
 
             if (hasNetworkConnection)
             {
@@ -66,9 +68,11 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Callvirt, (INetworkClient nb) => nb.Player));
             }
 
-            ReadArguments(md, worker, readerParameter, senderParameter: null, hasNetworkConnection, paramSerializers);
+            ReadArguments(method, worker, readerParameter, senderParameter: null, hasNetworkConnection, paramSerializers);
 
             // invoke actual ServerRpc function
+
+            //userCodeFunc.MakeHostInstanceGeneric();
             worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
             worker.Append(worker.Create(OpCodes.Ret));
 
@@ -233,7 +237,20 @@ namespace Mirage.Weaver
                     worker.Append(worker.Create(OpCodes.Ldarg, i + 1));
                 }
             }
-            worker.Append(worker.Create(OpCodes.Callvirt, rpc));
+
+            if (rpc.HasGenericParameters)
+            {
+                var genericRpc = new GenericInstanceMethod(rpc);
+                // GenericParameters for rpc will be same as caller,
+                // so we can just use them here instead of requiring the caller
+                foreach (GenericParameter param in genericRpc.GenericParameters)
+                {
+                    genericRpc.GenericArguments.Add(param);
+                }
+                worker.Append(worker.Create(OpCodes.Callvirt, genericRpc));
+            }
+            else
+                worker.Append(worker.Create(OpCodes.Callvirt, rpc));
         }
 
         public ClientRpcMethod ProcessRpc(MethodDefinition md, CustomAttribute clientRpcAttr)

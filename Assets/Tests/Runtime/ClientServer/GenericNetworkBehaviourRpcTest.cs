@@ -9,7 +9,7 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
-    public class GenericBehaviourWithRpc<T> : NetworkBehaviour where T : NetworkBehaviour
+    public class GenericBehaviourWithRpc<T> : NetworkBehaviour
     {
         public event Action<NetworkIdentity> onSendNetworkIdentityCalled;
         public event Action<GameObject> onSendGameObjectCalled;
@@ -65,7 +65,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         }
     }
 
-    public class GenericBehaviourWithRpcImplement : GenericBehaviourWithRpc<GenericBehaviourWithRpcImplement> { }
+    public class GenericBehaviourWithRpcImplement : GenericBehaviourWithRpc<object> { }
 
     public class GenericNetworkBehaviourRpcTests : ClientServerSetup<GenericBehaviourWithRpcImplement>
     {

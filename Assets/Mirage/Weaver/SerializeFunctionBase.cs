@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Mirage.Serialization;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -83,6 +84,7 @@ namespace Mirage.Weaver
             // if is <T> then  just return generic write./read with T as the generic argument
             if (typeReference.IsGenericParameter)
             {
+                return null;
                 return CreateGenericFunction(typeReference);
             }
 
@@ -200,7 +202,23 @@ namespace Mirage.Weaver
         {
             MethodReference method = GetGenericFunction();
             var generic = new GenericInstanceMethod(method);
-            generic.GenericArguments.Add(argument);
+            var genericParam = (GenericParameter)argument;
+            //var a = new GenericParameter(genericParam.Owner);
+            generic.GenericArguments.Add(genericParam);
+
+
+            Mono.Collections.Generic.Collection<Instruction> ins = module.ImportReference(() => MessagePacker.Pack<object>(default)).Resolve().Body.Instructions;
+            foreach (Instruction i in ins)
+            {
+                if (i.Operand is GenericInstanceMethod gm)
+                {
+                    foreach (TypeReference arg in gm.GenericArguments)
+                    {
+
+                    }
+                }
+            }
+
             return generic;
         }
 
