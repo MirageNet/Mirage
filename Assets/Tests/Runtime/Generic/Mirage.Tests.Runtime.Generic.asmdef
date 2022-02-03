@@ -1,0 +1,30 @@
+{
+    "name": "Mirage.Tests.Runtime.Generic",
+    "references": [
+        "Mirage",
+        "Mirage.SocketLayer",
+        "Mirage.Tests.Common",
+        "Mirage.Tests.Runtime",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Mirage.Authenticators",
+        "UniTask",
+        "Mirage.Components",
+        "WeaverTestExtraAssembly"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "NSubstitute.dll",
+        "System.Threading.Tasks.Extensions.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

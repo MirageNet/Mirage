@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using NSubstitute;
+using NUnit.Framework;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.ClientServer.RpcTests
@@ -71,36 +72,56 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 
 
     // note, this can't be a behaviour by itself, it must have a child class in order to be used
-    public class NotGenericWithRpc_behaviour<T> : NetworkBehaviour
+    public class NotGenericWithRpcBase_behaviour<T> : NetworkBehaviour
+    {
+        [SyncVar] int baseValue;
+
+    }
+    public class NotGenericWithRpc_behaviour<T> : NotGenericWithRpcBase_behaviour<T>
     {
         public event Action<int> clientCalled;
         public event Action<int> serverCalled;
 
+        [SyncVar] int value;
 
-        [ServerRpc(requireAuthority = false)]
-        public void MyRpc2(int value, INetworkPlayer sender)
-        {
-            serverCalled?.Invoke(value);
-        }
-        [ClientRpc]
-        public void MyRpc(int value)
-        {
-            clientCalled?.Invoke(value);
-        }
+        //[ServerRpc(requireAuthority = false)]
+        //public void MyRpc2(int value, INetworkPlayer sender)
+        //{
+        //    serverCalled?.Invoke(value);
+        //}
+        //[ClientRpc]
+        //public void MyRpc(int value)
+        //{
+        //    clientCalled?.Invoke(value);
+        //}
+
+        public int GetInt() => 0;
     }
 
-    public class NotGenericWithRpc_behaviourInt : NotGenericWithRpc_behaviour<int> { }
-    public class NotGenericWithRpc_behaviourObject : NotGenericWithRpc_behaviour<object> { }
+    public class NotGenericWithRpc_behaviourInt : NotGenericWithRpc_behaviour<int>
+    {
+        [SyncVar] int moreValue;
+    }
+    public class NotGenericWithRpc_behaviourObject : NotGenericWithRpc_behaviour<object>
+    {
+        [SyncVar] int moreValue;
+    }
 
     public class NotGenericWithRpcInt : ClientServerSetup<NotGenericWithRpc_behaviourInt>
     {
+        [Test]
+        public void DoesNotError()
+        {
+            // nothing
+        }
+
         [UnityTest]
         public IEnumerator CanCallServerRpc()
         {
             const int num = 32;
             Action<int> sub = Substitute.For<Action<int>>();
             serverComponent.serverCalled += sub;
-            clientComponent.MyRpc2(num, default);
+            //clientComponent.MyRpc2(num, default);
 
             yield return null;
             yield return null;
@@ -114,7 +135,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             const int num = 32;
             Action<int> sub = Substitute.For<Action<int>>();
             clientComponent.clientCalled += sub;
-            serverComponent.MyRpc(num);
+            //serverComponent.MyRpc(num);
 
             yield return null;
             yield return null;
@@ -124,13 +145,19 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
     }
     public class NotGenericWithRpcObject : ClientServerSetup<NotGenericWithRpc_behaviourObject>
     {
+        [Test]
+        public void DoesNotError()
+        {
+            // nothing
+        }
+
         [UnityTest]
         public IEnumerator CanCallServerRpc()
         {
             const int num = 32;
             Action<int> sub = Substitute.For<Action<int>>();
             serverComponent.serverCalled += sub;
-            clientComponent.MyRpc2(num, default);
+            //clientComponent.MyRpc2(num, default);
 
             yield return null;
             yield return null;
@@ -144,7 +171,7 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
             const int num = 32;
             Action<int> sub = Substitute.For<Action<int>>();
             clientComponent.clientCalled += sub;
-            serverComponent.MyRpc(num);
+            //serverComponent.MyRpc(num);
 
             yield return null;
             yield return null;
