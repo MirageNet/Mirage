@@ -80,6 +80,12 @@ namespace Mirage.Weaver
         // todo rename this to GetFunction once other classes are able to catch Exception
         public MethodReference GetFunction_Thorws(TypeReference typeReference)
         {
+            // if is <T> then  just return generic write./read with T as the generic argument
+            if (typeReference.IsGenericParameter)
+            {
+                return CreateGenericFunction(typeReference);
+            }
+
             if (funcs.TryGetValue(typeReference, out MethodReference foundFunc))
             {
                 return foundFunc;
@@ -89,6 +95,7 @@ namespace Mirage.Weaver
                 return GenerateFunction(module.ImportReference(typeReference));
             }
         }
+
 
         private MethodReference GenerateFunction(TypeReference typeReference)
         {
@@ -184,6 +191,25 @@ namespace Mirage.Weaver
             return GenerateClassOrStructFunction(typeReference);
         }
 
+        /// <summary>
+        /// Creates Generic instance for Write{T} or Read{T} with <paramref name="argument"/> as then generic argument
+        /// </summary>
+        /// <param name="argument"></param>
+        /// <returns></returns>
+        private GenericInstanceMethod CreateGenericFunction(TypeReference argument)
+        {
+            MethodReference method = GetGenericFunction();
+            var generic = new GenericInstanceMethod(method);
+            generic.GenericArguments.Add(argument);
+            return generic;
+        }
+
+        /// <summary>
+        /// Gets generic Write{T} or Read{T}
+        /// </summary>
+        /// <returns></returns>
+        protected abstract MethodReference GetGenericFunction();
+
         SerializeFunctionException ThrowCantGenerate(TypeReference typeReference, string typeDescription = null)
         {
             string reasonStr = string.IsNullOrEmpty(typeDescription) ? string.Empty : $"{typeDescription} ";
@@ -200,6 +226,7 @@ namespace Mirage.Weaver
         protected abstract Expression<Action> ArrayExpression { get; }
         protected abstract Expression<Action> ListExpression { get; }
         protected abstract Expression<Action> NullableExpression { get; }
+        //protected abstract Expression<Action> GenericExpression { get; }
 
         protected abstract MethodReference GenerateClassOrStructFunction(TypeReference typeReference);
     }

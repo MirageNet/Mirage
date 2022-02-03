@@ -238,7 +238,7 @@ namespace Mirage.Weaver
 
         public ClientRpcMethod ProcessRpc(MethodDefinition md, CustomAttribute clientRpcAttr)
         {
-            ValidateMethod(md, RemoteCallType.ClientRpc);
+            ValidateMethod(md);
             ValidateParameters(md, RemoteCallType.ClientRpc);
             ValidateReturnType(md, RemoteCallType.ClientRpc);
             ValidateAttribute(md, clientRpcAttr);

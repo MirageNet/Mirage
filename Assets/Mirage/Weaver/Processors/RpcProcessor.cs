@@ -184,7 +184,7 @@ namespace Mirage.Weaver
         /// check if a method is valid for rpc
         /// </summary>
         /// <exception cref="RpcException">Throws when method is invalid</exception>
-        protected void ValidateMethod(MethodDefinition method, RemoteCallType callType)
+        protected void ValidateMethod(MethodDefinition method)
         {
             if (method.IsAbstract)
             {
@@ -200,12 +200,6 @@ namespace Mirage.Weaver
             {
                 throw new RpcException($"{method.Name} cannot be a coroutine", method);
             }
-
-            if (method.HasGenericParameters)
-            {
-                throw new RpcException($"{method.Name} cannot have generic parameters", method);
-            }
-
         }
 
         /// <summary>
@@ -255,11 +249,6 @@ namespace Mirage.Weaver
             if (param.IsOut)
             {
                 throw new RpcException($"{method.Name} cannot have out parameters", method);
-            }
-
-            if (param.ParameterType.IsGenericParameter)
-            {
-                throw new RpcException($"{method.Name} cannot have generic parameters", method);
             }
 
             if (IsNetworkPlayer(param.ParameterType))

@@ -63,7 +63,6 @@ namespace Mirage.Weaver.Serialization
             ValueSerializer valueSerializer = null;
             bool HasIntAttribute() => valueSerializer != null && valueSerializer.IsIntType;
 
-
             if (attributeProvider.HasCustomAttribute<BitCountAttribute>())
                 valueSerializer = BitCountFinder.GetSerializer(attributeProvider, fieldType);
 
