@@ -135,6 +135,10 @@ namespace Mirage.Tests.Weaver
                 var weaver = new Mirage.Weaver.Weaver(logger);
 
                 assembly = weaver.Weave(compiledAssembly);
+
+                // NOTE: we need to write to check for ArgumentException from writing
+                if (assembly != null)
+                    WriteAssembly(assembly);
             };
 
             // Start build of assembly
@@ -150,6 +154,16 @@ namespace Mirage.Tests.Weaver
             }
 
             return assembly;
+        }
+
+        private static void WriteAssembly(AssemblyDefinition assembly)
+        {
+            string file = $"./temp/WeaverTests/{assembly.Name}.dll";
+            string dir = Path.GetDirectoryName(file);
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            assembly.Write(file);
         }
     }
 }
