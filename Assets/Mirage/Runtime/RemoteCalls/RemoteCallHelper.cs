@@ -58,11 +58,11 @@ namespace Mirage.RemoteCalls
         internal void Invoke(NetworkReader reader, NetworkBehaviour invokingType, INetworkPlayer senderPlayer = null, int replyId = 0)
         {
             // todo do we need to do this check? it should never happen
-            if (DeclaringType.IsInstanceOfType(invokingType))
-            {
-                function(invokingType, reader, senderPlayer, replyId);
-                return;
-            }
+            //if (DeclaringType.IsInstanceOfType(invokingType))
+            //{
+            function(invokingType, reader, senderPlayer, replyId);
+            return;
+            //}
             throw new MethodInvocationException($"Invalid Rpc call {function} for component {invokingType}");
         }
 
