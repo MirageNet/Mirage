@@ -15,6 +15,9 @@ namespace Mirage.Weaver
         {
             foreach (RpcMethod rpc in rpcs)
             {
+                if (rpc.skeleton == null)
+                    continue;
+
                 if (rpc is ServerRpcMethod serverRpc)
                 {
                     RegisterServerRpc(worker, serverRpc);
@@ -41,7 +44,7 @@ namespace Mirage.Weaver
 
             MethodReference registerMethod = GetRegisterMethod(skeleton);
             RpcInvokeType? invokeType = GetInvokeType(rpcMethod);
-            CallRegister(worker, rpcMethod, invokeType, registerMethod, requireAuthority);
+            CallRegister(worker, rpcMethod.skeleton, rpcMethod.stub, invokeType, registerMethod, requireAuthority);
         }
 
         static RpcInvokeType? GetInvokeType(ServerRpcMethod rpcMethod)
@@ -87,12 +90,7 @@ namespace Mirage.Weaver
         static void RegisterClientRpc(ILProcessor worker, ClientRpcMethod rpcMethod)
         {
             MethodReference registerMethod = worker.Body.Method.Module.ImportReference(() => RemoteCallHelper.Register(default, default, default, default, default, default));
-            CallRegister(worker, rpcMethod, RpcInvokeType.ClientRpc, registerMethod, false);
-        }
-
-        static void CallRegister(ILProcessor worker, RpcMethod rpcMethod, RpcInvokeType? invokeType, MethodReference registerMethod, bool requireAuthority)
-        {
-            CallRegister(worker, rpcMethod, invokeType, registerMethod, requireAuthority);
+            CallRegister(worker, rpcMethod.skeleton, rpcMethod.stub, RpcInvokeType.ClientRpc, registerMethod, false);
         }
 
         public static void CallRegister(ILProcessor worker, MethodDefinition skeleton, MethodDefinition stub, RpcInvokeType? invokeType, MethodReference registerMethod, bool requireAuthority)
