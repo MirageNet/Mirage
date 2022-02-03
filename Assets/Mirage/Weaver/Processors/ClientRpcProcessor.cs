@@ -249,19 +249,20 @@ namespace Mirage.Weaver
                 }
             }
 
-            if (rpc.HasGenericParameters)
-            {
-                var genericRpc = new GenericInstanceMethod(rpc);
-                // GenericParameters for rpc will be same as caller,
-                // so we can just use them here instead of requiring the caller
-                foreach (GenericParameter param in genericRpc.GenericParameters)
-                {
-                    genericRpc.GenericArguments.Add(param);
-                }
-                worker.Append(worker.Create(OpCodes.Callvirt, genericRpc));
-            }
-            else
-                worker.Append(worker.Create(OpCodes.Callvirt, rpc));
+            worker.Append(worker.Create(OpCodes.Callvirt, rpc));
+
+            //if (rpc.HasGenericParameters)
+            //{
+            //    var genericRpc = new GenericInstanceMethod(rpc);
+            //    // GenericParameters for rpc will be same as caller,
+            //    // so we can just use them here instead of requiring the caller
+            //    foreach (GenericParameter param in genericRpc.GenericParameters)
+            //    {
+            //        genericRpc.GenericArguments.Add(param);
+            //    }
+            //    worker.Append(worker.Create(OpCodes.Callvirt, genericRpc));
+            //}
+            //else
         }
 
         public ClientRpcMethod ProcessRpc(MethodDefinition md, CustomAttribute clientRpcAttr)
