@@ -97,9 +97,11 @@ namespace Mirage.Weaver
             int hash = RpcProcessor.GetStableHash(rpcMethod.stub);
 
             // typeof()
-            TypeReference netBehaviourSubclass = skeleton.DeclaringType.ConvertToGenericIfNeeded();
-            worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
-            worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
+            //TypeReference netBehaviourSubclass = skeleton.DeclaringType.ConvertToGenericIfNeeded();
+            //worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
+            //worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
+            worker.Append(worker.Create(OpCodes.Ldnull));
+
 
             worker.Append(worker.Create(OpCodes.Ldstr, name));
             worker.Append(worker.Create(OpCodes.Ldc_I4, hash));
