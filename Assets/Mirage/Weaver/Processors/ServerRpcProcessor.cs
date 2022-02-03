@@ -176,7 +176,7 @@ namespace Mirage.Weaver
             //    _ = rpc.AddParam(module.ImportReference(typeof(NetworkBehaviour)), "behaviour");
             //}
             //else
-            _ = rpc.AddParam(method.DeclaringType, "behaviour");
+            _ = rpc.AddParam(module.ImportReference(typeof(NetworkBehaviour)), "behaviour");
             ParameterDefinition readerParameter = rpc.AddParam<NetworkReader>("reader");
             ParameterDefinition senderParameter = rpc.AddParam<INetworkPlayer>("senderConnection");
             _ = rpc.AddParam<int>("replyId");
@@ -191,7 +191,7 @@ namespace Mirage.Weaver
             ReadArguments(method, worker, readerParameter, senderParameter, false, paramSerializers);
 
             // invoke actual ServerRpc function
-            worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
+            worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc.MakeHostInstanceGenericOfGenericType()));
             worker.Append(worker.Create(OpCodes.Ret));
 
             return rpc;

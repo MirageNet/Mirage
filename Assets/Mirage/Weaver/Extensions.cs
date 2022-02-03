@@ -211,6 +211,32 @@ namespace Mirage.Weaver
             return self.Module.ImportReference(reference);
         }
 
+        /// <summary>
+        /// Given a method of a generic class such as ArraySegment`T.get_Count,
+        /// and a generic instance such as ArraySegment`int
+        /// Creates a reference to the specialized method  ArraySegment`int`.get_Count
+        /// <para> Note that calling ArraySegment`T.get_Count directly gives an invalid IL error </para>
+        /// </summary>
+        /// <param name="self"></param>
+        /// <param name="instanceType"></param>
+        /// <returns></returns>
+        public static MethodReference MakeHostInstanceGenericOfGenericType(this MethodReference self)
+        {
+            TypeReference type = self.DeclaringType;
+            if (!type.HasGenericParameters)
+            {
+                return self;
+            }
+            else
+            {
+                var genericType = new GenericInstanceType(type);
+                foreach (GenericParameter param in type.GenericParameters)
+                    genericType.GenericArguments.Add(param);
+
+                return self.MakeHostInstanceGeneric(genericType);
+            }
+        }
+
         public static bool TryGetCustomAttribute<TAttribute>(this ICustomAttributeProvider method, out CustomAttribute customAttribute)
         {
             foreach (CustomAttribute ca in method.CustomAttributes)

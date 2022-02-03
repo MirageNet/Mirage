@@ -273,8 +273,23 @@ namespace Mirage.Weaver
             readers.InitializeReaders(worker);
 
             RegisterMessages(worker);
+            RegisterGenericRpcs(worker);
 
             worker.Append(worker.Create(OpCodes.Ret));
+        }
+
+        private void RegisterGenericRpcs(ILProcessor worker)
+        {
+            TypeDefinition generated = module.GeneratedClass();
+            MethodDefinition method = generated.GetMethod("RegisterGenericRpcs");
+            if (method != null)
+            {
+                worker.Emit(OpCodes.Call, method);
+
+                // the RegisterGenericRpcs method doesn't emit its own return, it waits for here to be done
+                ILProcessor worker2 = method.Body.GetILProcessor();
+                worker2.Emit(OpCodes.Ret);
+            }
         }
 
         private void RegisterMessages(ILProcessor worker)

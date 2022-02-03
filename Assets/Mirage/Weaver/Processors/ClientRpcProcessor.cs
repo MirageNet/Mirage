@@ -38,15 +38,26 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
+        MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers, MethodDefinition skelotonInterface)
         {
-            string newName = SkeletonMethodName(method);
-            MethodDefinition rpc = method.DeclaringType.AddMethod(
-                newName,
-                MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Static);
+            MethodDefinition rpc;
+            if (skelotonInterface != null)
+            {
+                rpc = method.DeclaringType.AddMethod(
+                    skelotonInterface.Name,
+                    MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual);
+                rpc.Overrides.Add(skelotonInterface);
+            }
+            else
+            {
+                string newName = SkeletonMethodName(method);
+                rpc = method.DeclaringType.AddMethod(
+                    newName,
+                    MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Static);
 
-            _ = rpc.AddParam(method.DeclaringType, "behaviour");
-            //_ = rpc.AddParam(module.ImportReference(typeof(NetworkBehaviour)), "behaviour");
+                _ = rpc.AddParam<NetworkBehaviour>("behaviour");
+            }
+
             ParameterDefinition readerParameter = rpc.AddParam<NetworkReader>("reader");
             _ = rpc.AddParam<INetworkPlayer>("senderConnection");
             _ = rpc.AddParam<int>("replyId");
@@ -263,11 +274,17 @@ namespace Mirage.Weaver
             RpcTarget clientTarget = clientRpcAttr.GetField(nameof(ClientRpcAttribute.target), RpcTarget.Observers);
             bool excludeOwner = clientRpcAttr.GetField(nameof(ClientRpcAttribute.excludeOwner), false);
 
+            MethodDefinition skelotonInterface = null;
+            if (md.DeclaringType.HasGenericParameters)
+            {
+                skelotonInterface = GenerateGenericHelper(md);
+            }
+
             ValueSerializer[] paramSerializers = GetValueSerializers(md);
 
             MethodDefinition userCodeFunc = GenerateStub(md, clientRpcAttr, paramSerializers);
 
-            MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, clientRpcAttr, paramSerializers);
+            MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, clientRpcAttr, paramSerializers, skelotonInterface);
 
             return new ClientRpcMethod
             {
@@ -277,6 +294,65 @@ namespace Mirage.Weaver
                 skeleton = skeletonFunc
             };
         }
+
+        private MethodDefinition GenerateGenericHelper(MethodDefinition md)
+        {
+            TypeDefinition generated = module.GeneratedClass();
+            MethodDefinition register = generated.GetMethod("RegisterGenericRpcs");
+            if (register == null)
+            {
+                generated.AddMethod("RegisterGenericRpcs", MethodAttributes.Static | MethodAttributes.HideBySig);
+            }
+            ILProcessor worker = register.Body.GetILProcessor();
+
+            (TypeDefinition @interface, MethodDefinition interfaceMethod, MethodDefinition skeleton) = GenericSkeleton(md);
+            MethodReference registerMethod = worker.Body.Method.Module.ImportReference(() => RemoteCallHelper.Register(default, default, default, default, default, default));
+            RegisterRpc.CallRegister(worker, skeleton, md, RpcInvokeType.ClientRpc, registerMethod, false);
+
+            AddInterface(md, @interface);
+
+            return interfaceMethod;
+        }
+
+        private void AddInterface(MethodDefinition md, TypeDefinition @interface)
+        {
+            var imp = new InterfaceImplementation(@interface);
+            md.DeclaringType.Interfaces.Add(imp);
+        }
+
+        (TypeDefinition @interface, MethodDefinition interfaceMethod, MethodDefinition skeleton) GenericSkeleton(MethodDefinition md)
+        {
+            // todo generate 1 interface per type not per method
+            var @interface = new TypeDefinition("Mirage", $"__I{SkeletonMethodName(md)}", TypeAttributes.Interface);
+            module.Types.Add(@interface);
+            MethodDefinition interfaceMethod = @interface.AddMethod(SkeletonMethodName(md), MethodAttributes.Public, module.ImportReference(typeof(void)));
+            _ = interfaceMethod.AddParam<NetworkReader>("reader");
+            _ = interfaceMethod.AddParam<INetworkPlayer>("senderConnection");
+            _ = interfaceMethod.AddParam<int>("replyId");
+
+            return (@interface, interfaceMethod, GenerateGenericSkeletonStatic(interfaceMethod));
+        }
+
+        MethodDefinition GenerateGenericSkeletonStatic(MethodReference interfaceMethod)
+        {
+            TypeDefinition generated = module.GeneratedClass();
+            MethodDefinition method = generated.AddMethod(interfaceMethod.Name, MethodAttributes.Static);
+            _ = method.AddParam<NetworkBehaviour>("behaviour");
+            for (int i = 0; i < 3; i++)
+            {
+                ParameterDefinition param = interfaceMethod.Parameters[i];
+                method.AddParam(param.ParameterType, param.Name);
+            }
+
+            ILProcessor worker = method.Body.GetILProcessor();
+            for (int i = 0; i < 4; i++)
+            {
+                worker.Emit(OpCodes.Ldarg_S, i);
+            }
+            worker.Emit(OpCodes.Callvirt, interfaceMethod);
+            return method;
+        }
+
 
         /// <summary>
         /// checks ClientRpc Attribute values are valid

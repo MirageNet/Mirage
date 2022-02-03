@@ -26,7 +26,7 @@ namespace Mirage.Weaver
             }
         }
 
-        static string HumanReadableName(MethodReference method)
+        public static string HumanReadableName(MethodReference method)
         {
             string typeName = method.DeclaringType.FullName;
             string methodName = method.Name;
@@ -92,15 +92,19 @@ namespace Mirage.Weaver
 
         static void CallRegister(ILProcessor worker, RpcMethod rpcMethod, RpcInvokeType? invokeType, MethodReference registerMethod, bool requireAuthority)
         {
-            MethodDefinition skeleton = rpcMethod.skeleton;
-            string name = HumanReadableName(rpcMethod.stub);
-            int hash = RpcProcessor.GetStableHash(rpcMethod.stub);
+            CallRegister(worker, rpcMethod, invokeType, registerMethod, requireAuthority);
+        }
+
+        public static void CallRegister(ILProcessor worker, MethodDefinition skeleton, MethodDefinition stub, RpcInvokeType? invokeType, MethodReference registerMethod, bool requireAuthority)
+        {
+            string name = HumanReadableName(stub);
+            int hash = RpcProcessor.GetStableHash(stub);
 
             // typeof()
-            //TypeReference netBehaviourSubclass = skeleton.DeclaringType.ConvertToGenericIfNeeded();
-            //worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
-            //worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
-            worker.Append(worker.Create(OpCodes.Ldnull));
+            TypeReference netBehaviourSubclass = skeleton.DeclaringType.ConvertToGenericIfNeeded();
+            worker.Append(worker.Create(OpCodes.Ldtoken, netBehaviourSubclass));
+            worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
+            //worker.Append(worker.Create(OpCodes.Ldnull));
 
 
             worker.Append(worker.Create(OpCodes.Ldstr, name));

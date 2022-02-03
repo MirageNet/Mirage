@@ -1,9 +1,182 @@
 using System;
 using System.Collections;
+using Mirage.RemoteCalls;
+using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
+namespace Mirage.Tests.Runtime.ClientServer.ManualRpcTests
+{
+    public class Manual_GenericWithRpc_behaviour<T> : NetworkBehaviour, __IRpcSkeleton
+    {
+        public event Action<int> serverCalled;
+
+
+        public void MyRpc2(int value, INetworkPlayer sender)
+        {
+            if (base.IsServer)
+            {
+                UserCode_MyRpc2_4321(value, base.Server.LocalPlayer);
+                return;
+            }
+
+            PooledNetworkWriter writer = NetworkWriterPool.GetWriter();
+            writer.WritePackedInt32(value);
+            ServerRpcSender.Send(this, 4321, writer, 0, false);
+            writer.Release();
+        }
+        public void UserCode_MyRpc2_4321(int value, INetworkPlayer sender)
+        {
+            serverCalled?.Invoke(value);
+        }
+
+        public void Skeleton_MyRpc2_4321(NetworkReader reader, INetworkPlayer senderConnection, int replyId)
+        {
+            UserCode_MyRpc2_4321(reader.ReadPackedInt32(), senderConnection);
+        }
+
+
+
+        public event Action<int> clientCalled;
+
+        public void MyRpc(int value)
+        {
+            if (base.IsClient)
+            {
+                UserCode_MyRpc_1234(value);
+            }
+            PooledNetworkWriter writer = NetworkWriterPool.GetWriter();
+            writer.WritePackedInt32(value);
+            ClientRpcSender.Send(this, 1234, writer, 0, false);
+            writer.Release();
+        }
+
+        public void UserCode_MyRpc_1234(int value)
+        {
+            clientCalled?.Invoke(value);
+        }
+
+        public void Skeleton_MyRpc_1234(NetworkReader reader, INetworkPlayer senderConnection, int replyId)
+        {
+            UserCode_MyRpc_1234(reader.ReadPackedInt32());
+        }
+
+        static Manual_GenericWithRpc_behaviour()
+        {
+            __RPCGenericCaller.Register();
+        }
+    }
+    interface __IRpcSkeleton
+    {
+        void Skeleton_MyRpc_1234(NetworkReader reader, INetworkPlayer senderConnection, int replyId);
+        void Skeleton_MyRpc2_4321(NetworkReader reader, INetworkPlayer senderConnection, int replyId);
+    }
+    public class __RPCGenericCaller
+    {
+        protected static void Skeleton_MyRpc_1234(NetworkBehaviour behaviour, NetworkReader reader, INetworkPlayer senderConnection, int replyId)
+        {
+            ((__IRpcSkeleton)behaviour).Skeleton_MyRpc_1234(behaviour, reader, senderConnection, replyId);
+        }
+        protected static void Skeleton_MyRpc2_4321(NetworkBehaviour behaviour, NetworkReader reader, INetworkPlayer senderConnection, int replyId)
+        {
+            ((__IRpcSkeleton)behaviour).Skeleton_MyRpc2_4321(behaviour, reader, senderConnection, replyId);
+        }
+
+        public static void Register()
+        {
+            {
+                var func = new RpcDelegate(Skeleton_MyRpc_1234);
+                RemoteCallHelper.Register(null, "MyRpc", 1234, RpcInvokeType.ClientRpc, func, false);
+            }
+
+            {
+                var func = new RpcDelegate(Skeleton_MyRpc2_4321);
+                RemoteCallHelper.Register(null, "MyRpc2", 4321, RpcInvokeType.ServerRpc, func, false);
+            }
+        }
+    }
+
+    public class Manual_GenericWithRpc_behaviourInt : Manual_GenericWithRpc_behaviour<int>
+    {
+    }
+    public class Manual_GenericWithRpc_behaviourObject : Manual_GenericWithRpc_behaviour<object>
+    {
+    }
+
+    public class Manual_GenericWithRpcInt : ClientServerSetup<Manual_GenericWithRpc_behaviourInt>
+    {
+        [Test]
+        public void DoesNotError()
+        {
+            // nothing
+        }
+
+        [UnityTest]
+        public IEnumerator CanCallServerRpc()
+        {
+            const int num = 32;
+            Action<int> sub = Substitute.For<Action<int>>();
+            serverComponent.serverCalled += sub;
+            clientComponent.MyRpc2(num, default);
+
+            yield return null;
+            yield return null;
+
+            sub.Received(1).Invoke(num);
+        }
+
+        [UnityTest]
+        public IEnumerator CanCallClientRpc()
+        {
+            const int num = 32;
+            Action<int> sub = Substitute.For<Action<int>>();
+            clientComponent.clientCalled += sub;
+            serverComponent.MyRpc(num);
+
+            yield return null;
+            yield return null;
+
+            sub.Received(1).Invoke(num);
+        }
+    }
+    public class GenericWithRpcObject : ClientServerSetup<Manual_GenericWithRpc_behaviourObject>
+    {
+        [Test]
+        public void DoesNotError()
+        {
+            // nothing
+        }
+
+        [UnityTest]
+        public IEnumerator CanCallServerRpc()
+        {
+            const int num = 32;
+            Action<int> sub = Substitute.For<Action<int>>();
+            serverComponent.serverCalled += sub;
+            clientComponent.MyRpc2(num, default);
+
+            yield return null;
+            yield return null;
+
+            sub.Received(1).Invoke(num);
+        }
+
+        [UnityTest]
+        public IEnumerator CanCallClientRpc()
+        {
+            const int num = 32;
+            Action<int> sub = Substitute.For<Action<int>>();
+            clientComponent.clientCalled += sub;
+            serverComponent.MyRpc(num);
+
+            yield return null;
+            yield return null;
+
+            sub.Received(1).Invoke(num);
+        }
+    }
+}
 namespace Mirage.Tests.Runtime.ClientServer.RpcTests
 {
     public class GenericWithRpc_behaviour<T> : NetworkBehaviour
