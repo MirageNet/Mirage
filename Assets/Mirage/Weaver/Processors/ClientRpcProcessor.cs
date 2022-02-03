@@ -291,7 +291,8 @@ namespace Mirage.Weaver
                 stub = md,
                 target = clientTarget,
                 excludeOwner = excludeOwner,
-                skeleton = skeletonFunc
+                // only return skelton if not generic
+                skeleton = skelotonInterface != null ? null : skeletonFunc
             };
         }
 
@@ -301,7 +302,7 @@ namespace Mirage.Weaver
             MethodDefinition register = generated.GetMethod("RegisterGenericRpcs");
             if (register == null)
             {
-                generated.AddMethod("RegisterGenericRpcs", MethodAttributes.Static | MethodAttributes.HideBySig);
+                register = generated.AddMethod("RegisterGenericRpcs", MethodAttributes.Static | MethodAttributes.HideBySig);
             }
             ILProcessor worker = register.Body.GetILProcessor();
 
@@ -330,10 +331,10 @@ namespace Mirage.Weaver
             _ = interfaceMethod.AddParam<INetworkPlayer>("senderConnection");
             _ = interfaceMethod.AddParam<int>("replyId");
 
-            return (@interface, interfaceMethod, GenerateGenericSkeletonStatic(interfaceMethod));
+            return (@interface, interfaceMethod, GenerateGenericSkeletonStatic(@interface, interfaceMethod));
         }
 
-        MethodDefinition GenerateGenericSkeletonStatic(MethodReference interfaceMethod)
+        MethodDefinition GenerateGenericSkeletonStatic(TypeDefinition @interface, MethodReference interfaceMethod)
         {
             TypeDefinition generated = module.GeneratedClass();
             MethodDefinition method = generated.AddMethod(interfaceMethod.Name, MethodAttributes.Static);
@@ -345,11 +346,16 @@ namespace Mirage.Weaver
             }
 
             ILProcessor worker = method.Body.GetILProcessor();
-            for (int i = 0; i < 4; i++)
+            worker.Emit(OpCodes.Ldarg_0);
+            worker.Emit(OpCodes.Castclass, @interface);
+
+
+            for (int i = 1; i < 4; i++)
             {
-                worker.Emit(OpCodes.Ldarg_S, i);
+                worker.Emit(OpCodes.Ldarg, i);
             }
             worker.Emit(OpCodes.Callvirt, interfaceMethod);
+            worker.Emit(OpCodes.Ret);
             return method;
         }
 
