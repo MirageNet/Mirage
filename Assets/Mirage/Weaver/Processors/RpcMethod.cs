@@ -8,6 +8,8 @@ namespace Mirage.Weaver
         public MethodDefinition stub;
         /// <summary>Method that receives the call and deserialize parmas</summary>
         public MethodDefinition skeleton;
+        /// <summary>Hash given to method in order to call it over the network. Should be unqiue.</summary>
+        public int UniqueHash;
     }
 
     public class ServerRpcMethod : RpcMethod

@@ -211,6 +211,26 @@ namespace Mirage.Weaver
             return self.Module.ImportReference(reference);
         }
 
+
+        public static MethodReference MakeHostInstanceSelfGeneric(this MethodReference self)
+        {
+            TypeReference type = self.DeclaringType;
+            if (!type.HasGenericParameters)
+            {
+                // if type isn't generic we dont need to do anything
+                return self;
+            }
+            else
+            {
+                // make generic instance of type, and give it the generic params as args
+                var genericType = new GenericInstanceType(type);
+                foreach (GenericParameter param in type.GenericParameters)
+                    genericType.GenericArguments.Add(param);
+
+                return self.MakeHostInstanceGeneric(genericType);
+            }
+        }
+
         public static bool TryGetCustomAttribute<TAttribute>(this ICustomAttributeProvider method, out CustomAttribute customAttribute)
         {
             foreach (CustomAttribute ca in method.CustomAttributes)

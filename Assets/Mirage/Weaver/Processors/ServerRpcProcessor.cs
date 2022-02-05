@@ -179,7 +179,7 @@ namespace Mirage.Weaver
             ReadArguments(method, worker, readerParameter, senderParameter, false, paramSerializers);
 
             // invoke actual ServerRpc function
-            worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
+            worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc.MakeHostInstanceSelfGeneric()));
             worker.Append(worker.Create(OpCodes.Ret));
 
             return cmd;
@@ -201,6 +201,7 @@ namespace Mirage.Weaver
             MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, paramSerializers);
             return new ServerRpcMethod
             {
+                UniqueHash = GetStableHash(md),
                 stub = md,
                 requireAuthority = requireAuthority,
                 skeleton = skeletonFunc
@@ -218,7 +219,7 @@ namespace Mirage.Weaver
                 // if param is network player, use Server's Local player instead
                 //   in host mode this will be the Server's copy of the the player,
                 //   in server mode this will be null
-                if (IsNetworkPlayer(param))
+                if (IsNetworkPlayer(param.ParameterType))
                 {
                     worker.Append(worker.Create(OpCodes.Ldarg_0));
                     worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.Server));
@@ -229,12 +230,7 @@ namespace Mirage.Weaver
                     worker.Append(worker.Create(OpCodes.Ldarg, param));
                 }
             }
-            worker.Append(worker.Create(OpCodes.Callvirt, rpc));
-
-            bool IsNetworkPlayer(ParameterDefinition param)
-            {
-                return param.ParameterType.Resolve().ImplementsInterface<INetworkPlayer>();
-            }
+            worker.Append(worker.Create(OpCodes.Callvirt, rpc.MakeHostInstanceSelfGeneric()));
         }
     }
 }

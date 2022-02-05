@@ -69,7 +69,7 @@ namespace Mirage.Weaver
             ReadArguments(md, worker, readerParameter, senderParameter: null, hasNetworkConnection, paramSerializers);
 
             // invoke actual ServerRpc function
-            worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc));
+            worker.Append(worker.Create(OpCodes.Callvirt, userCodeFunc.MakeHostInstanceSelfGeneric()));
             worker.Append(worker.Create(OpCodes.Ret));
 
             return rpc;
@@ -233,7 +233,7 @@ namespace Mirage.Weaver
                     worker.Append(worker.Create(OpCodes.Ldarg, i + 1));
                 }
             }
-            worker.Append(worker.Create(OpCodes.Callvirt, rpc));
+            worker.Append(worker.Create(OpCodes.Callvirt, rpc.MakeHostInstanceSelfGeneric()));
         }
 
         public ClientRpcMethod ProcessRpc(MethodDefinition md, CustomAttribute clientRpcAttr)
@@ -254,6 +254,7 @@ namespace Mirage.Weaver
 
             return new ClientRpcMethod
             {
+                UniqueHash = GetStableHash(md),
                 stub = md,
                 target = clientTarget,
                 excludeOwner = excludeOwner,
