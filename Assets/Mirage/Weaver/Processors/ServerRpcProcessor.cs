@@ -164,7 +164,7 @@ namespace Mirage.Weaver
                 MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Static,
                 userCodeFunc.ReturnType);
 
-            _ = cmd.AddParam(method.DeclaringType, "behaviour");
+            _ = cmd.AddParam<NetworkBehaviour>("behaviour");
             ParameterDefinition readerParameter = cmd.AddParam<NetworkReader>("reader");
             ParameterDefinition senderParameter = cmd.AddParam<INetworkPlayer>("senderConnection");
             _ = cmd.AddParam<int>("replyId");
