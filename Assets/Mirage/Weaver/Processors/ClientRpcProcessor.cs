@@ -43,8 +43,9 @@ namespace Mirage.Weaver
             string newName = SkeletonMethodName(md);
             MethodDefinition rpc = md.DeclaringType.AddMethod(
                 newName,
-                MethodAttributes.Family | MethodAttributes.HideBySig);
+                MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Static);
 
+            _ = rpc.AddParam<NetworkBehaviour>("behaviour");
             ParameterDefinition readerParameter = rpc.AddParam<NetworkReader>("reader");
             _ = rpc.AddParam<INetworkPlayer>("senderConnection");
             _ = rpc.AddParam<int>("replyId");
