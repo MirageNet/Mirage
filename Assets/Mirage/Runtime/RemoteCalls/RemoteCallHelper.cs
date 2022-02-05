@@ -48,11 +48,38 @@ namespace Mirage.RemoteCalls
         /// </summary>
         public string name;
 
-        public bool AreEqual(Type invokeClass, RpcInvokeType invokeType, RpcDelegate invokeFunction)
+        public bool AreEqual(Type declaringType, RpcInvokeType invokeType, RpcDelegate function)
         {
-            return DeclaringType == invokeClass &&
-                    InvokeType == invokeType &&
-                    function == invokeFunction;
+            if (InvokeType != invokeType)
+                return false;
+
+            if (declaringType.IsGenericType)
+                return AreEqualIgnoringGeneric(declaringType, function);
+
+            return DeclaringType == declaringType
+                && this.function == function;
+        }
+
+        bool AreEqualIgnoringGeneric(Type declaringType, RpcDelegate function)
+        {
+            // if this.type not generic, then not equal
+            if (!DeclaringType.IsGenericType)
+                return false;
+
+            // types must be in same assembly to be equal
+            if (DeclaringType.Assembly != declaringType.Assembly)
+                return false;
+
+            Debug.Assert(declaringType == function.Method.DeclaringType);
+            Debug.Assert(DeclaringType == this.function.Method.DeclaringType);
+
+            // we check Assembly above, so we know these 2 functions must be in same assmebly here
+            // - we can check Namespace and Name to acount generic check
+            // - weaver check to make sure method in type have unique hash
+            // - weaver appends hash to names, so overloads will have different hash/names
+            return DeclaringType.Namespace == declaringType.Namespace
+                && DeclaringType.Name == declaringType.Name
+                && this.function.Method.Name == function.Method.Name;
         }
 
         internal void Invoke(NetworkReader reader, NetworkBehaviour invokingType, INetworkPlayer senderPlayer = null, int replyId = 0)

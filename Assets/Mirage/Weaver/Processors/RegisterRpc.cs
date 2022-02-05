@@ -112,7 +112,7 @@ namespace Mirage.Weaver
 
             // new delegate
             worker.Append(worker.Create(OpCodes.Ldnull));
-            worker.Append(worker.Create(OpCodes.Ldftn, skeleton));
+            worker.Append(worker.Create(OpCodes.Ldftn, skeleton.MakeHostInstanceSelfGeneric()));
             MethodReference @delegate = CreateRpcDelegate(skeleton);
             worker.Append(worker.Create(OpCodes.Newobj, @delegate));
 

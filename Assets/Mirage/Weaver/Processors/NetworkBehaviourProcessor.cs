@@ -100,8 +100,11 @@ namespace Mirage.Weaver
         {
             // copy the list of methods because we will be adding methods in the loop
             var methods = new List<MethodDefinition>(netBehaviourSubclass.Methods);
-            // find ServerRpc and RPC functions
+
             var rpcs = new List<RpcMethod>();
+            // kept track of hashes to check they are unique
+            var hash = new Dictionary<int, RpcMethod>();
+
             foreach (MethodDefinition md in methods)
             {
                 try
@@ -109,6 +112,12 @@ namespace Mirage.Weaver
                     RpcMethod rpc = CheckAndProcessRpc(md);
                     if (rpc != null)
                     {
+                        if (hash.ContainsKey(rpc.UniqueHash))
+                        {
+                            logger.Error($"Found 2 methods with same hash {rpc.UniqueHash} (see below).\nMethod1:{rpc.stub}\nMethod2:{rpc.stub}", md);
+                        }
+
+                        hash.Add(rpc.UniqueHash, rpc);
                         rpcs.Add(rpc);
                     }
                 }
