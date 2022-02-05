@@ -21,10 +21,18 @@ namespace Mirage.Tests.BuildIL2CPP
         [MenuItem("Build/Build tests with IL2CPP", priority = 1002)]
         public static void BuildWithIl2CPP()
         {
+            BuildWithIl2CPP(true);
+        }
+        [MenuItem("Build/Build tests with IL2CPP (no Clean up)", priority = 1003)]
+        public static void BuildWithIl2CPP_NoClean()
+        {
+            BuildWithIl2CPP(false);
+        }
+
+        public static void BuildWithIl2CPP(bool cleanup)
+        {
             DateTime startTime = DateTime.Now;
             Debug.Log("Start BuildWithIl2CPP");
-            //var settings = BuildScriptSettings.Get();
-            //string targetPath = BuildPathUtils.GetFilePath("mirage.exe", "tests", settings.Target, "_TestPlayer");
 
             BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
             string targetFolder = "./Temp/TestPlayerBuild";
@@ -53,7 +61,8 @@ namespace Mirage.Tests.BuildIL2CPP
             finally
             {
                 UnityEngine.Object.DestroyImmediate(runner);
-                CleanUpBuildFolder(targetFolder);
+                if (cleanup)
+                    CleanUpBuildFolder(targetFolder);
             }
             TimeSpan duration = DateTime.Now - startTime;
             Debug.Log($"End BuildWithIl2CPP duration:{duration.TotalSeconds:0.0}s");
