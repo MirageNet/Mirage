@@ -80,6 +80,12 @@ namespace Mirage.Weaver
         // todo rename this to GetFunction once other classes are able to catch Exception
         public MethodReference GetFunction_Thorws(TypeReference typeReference)
         {
+            // if is <T> then  just return generic write./read with T as the generic argument
+            if (typeReference.IsGenericParameter)
+            {
+                return CreateGenericFunction(typeReference);
+            }
+
             if (funcs.TryGetValue(typeReference, out MethodReference foundFunc))
             {
                 return foundFunc;
@@ -190,8 +196,30 @@ namespace Mirage.Weaver
             return new SerializeFunctionException($"Cannot generate {FunctionTypeLog} for {reasonStr}{typeReference.Name}. Use a supported type or provide a custom {FunctionTypeLog}", typeReference);
         }
 
-        protected abstract MethodReference GetNetworkBehaviourFunction(TypeReference typeReference);
+        /// <summary>
+        /// Creates Generic instance for Write{T} or Read{T} with <paramref name="argument"/> as then generic argument
+        /// </summary>
+        /// <param name="argument"></param>
+        /// <returns></returns>
+        private GenericInstanceMethod CreateGenericFunction(TypeReference argument)
+        {
+            MethodReference method = GetGenericFunction();
 
+            var generic = new GenericInstanceMethod(method);
+            var genericParam = (GenericParameter)argument;
+            //var a = new GenericParameter(genericParam.Owner);
+            generic.GenericArguments.Add(genericParam);
+
+            return generic;
+        }
+
+        /// <summary>
+        /// Gets generic Write{T} or Read{T}
+        /// </summary>
+        /// <returns></returns>
+        protected abstract MethodReference GetGenericFunction();
+
+        protected abstract MethodReference GetNetworkBehaviourFunction(TypeReference typeReference);
 
         protected abstract MethodReference GenerateEnumFunction(TypeReference typeReference);
         protected abstract MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, Expression<Action> genericExpression);

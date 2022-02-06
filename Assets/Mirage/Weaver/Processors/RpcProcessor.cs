@@ -205,7 +205,6 @@ namespace Mirage.Weaver
             {
                 throw new RpcException($"{method.Name} cannot have generic parameters", method);
             }
-
         }
 
         /// <summary>
