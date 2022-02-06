@@ -425,7 +425,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldfld, eventField));
             // jump to nop if null
-            worker.Append(worker.Create(OpCodes.Brfalse_S, nop));
+            worker.Append(worker.Create(OpCodes.Brfalse, nop));
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldfld, eventField));
