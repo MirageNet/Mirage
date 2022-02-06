@@ -420,25 +420,38 @@ namespace Mirage.Weaver
 
         void WriteCallHookEvent(ILProcessor worker, EventDefinition @event, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
-            FieldReference eventField = @event.DeclaringType.GetField(@event.Name);
-            Instruction nop = worker.Create(OpCodes.Nop);
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldfld, eventField));
-            // jump to nop if null
-            worker.Append(worker.Create(OpCodes.Brfalse, nop));
+            // get backing field for event, and sure it is generic instance (eg MyType<T>.myEvent
+            FieldReference eventField = @event.DeclaringType.GetField(@event.Name).MakeHostGenericIfNeeded();
 
+            // get Invoke method and make it correct type
+            MethodReference invokeNonGeneric = @event.Module.ImportReference(typeof(Action<,>).GetMethod("Invoke"));
+            MethodReference invoke = invokeNonGeneric.MakeHostInstanceGeneric((GenericInstanceType)@event.EventType);
+
+            Instruction nopEvent = worker.Create(OpCodes.Nop);
+            Instruction nopEnd = worker.Create(OpCodes.Nop);
+
+            // **null check**
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldfld, eventField));
+            // dup so we dont need to load field twice
+            worker.Append(worker.Create(OpCodes.Dup));
+
+            // jump to nop if null
+            worker.Append(worker.Create(OpCodes.Brtrue, nopEvent));
+            // pop because we didn't use field on if it was null
+            worker.Append(worker.Create(OpCodes.Pop));
+            worker.Append(worker.Create(OpCodes.Br, nopEnd));
+
+            // **call invoke**
+            worker.Append(nopEvent);
+
             WriteOldValue();
             WriteNewValue();
 
-            MethodReference invokeNonGeneric = @event.Module.ImportReference(typeof(Action<,>).GetMethod("Invoke"));
-            MethodReference invoke = invokeNonGeneric.MakeHostInstanceGeneric((GenericInstanceType)@event.EventType);
             worker.Append(worker.Create(OpCodes.Call, invoke));
 
             // after if (event!=null)
-            worker.Append(nop);
-
+            worker.Append(nopEnd);
 
 
             // *** Local functions used to write OpCodes ***
