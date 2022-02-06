@@ -37,6 +37,8 @@
 - name: Bit Packing
   href: BitPacking/toc.yml
   topicHref: BitPacking/index.md
+- name: Generics
+  href: Generics.md
 - name: Mirror Migration Guide
   topicHref: MirrorMigration.md
 - name: Community Guides
