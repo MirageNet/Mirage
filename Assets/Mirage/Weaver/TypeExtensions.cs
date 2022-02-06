@@ -253,7 +253,7 @@ namespace Mirage.Weaver
             }
         }
 
-        public static FieldReference GetField(this TypeDefinition type, string fieldName)
+        public static FieldDefinition GetField(this TypeDefinition type, string fieldName)
         {
             if (type.HasFields)
             {
