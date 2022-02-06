@@ -6,27 +6,22 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.ClientServer.Generics
 {
-    public class WithGenericSyncVarHook_behaviour<T> : NetworkBehaviour
+    public class WithGenericSyncVarEvent_behaviour<T> : NetworkBehaviour
     {
-        public event Action<T, T> hookCalled;
+        public event Action<T, T> hook;
 
-        [SyncVar(hook = nameof(onValueChanged))]
+        [SyncVar(hook = nameof(hook))]
         public T value;
-
-        void onValueChanged(T oldValue, T newValue)
-        {
-            hookCalled?.Invoke(oldValue, newValue);
-        }
     }
 
-    public class WithGenericSyncVarHook_behaviourInt : WithGenericSyncVarHook_behaviour<int>
+    public class WithGenericSyncVarEvent_behaviourInt : WithGenericSyncVarEvent_behaviour<int>
     {
     }
-    public class WithGenericSyncVarHook_behaviourObject : WithGenericSyncVarHook_behaviour<MyClass>
+    public class WithGenericSyncVarEvent_behaviourObject : WithGenericSyncVarEvent_behaviour<MyClass>
     {
     }
 
-    public class WithGenericSyncVarHookInt : ClientServerSetup<WithGenericSyncVarHook_behaviourInt>
+    public class WithGenericSyncVarEventInt : ClientServerSetup<WithGenericSyncVarEvent_behaviourInt>
     {
         [Test]
         public void DoesNotError()
@@ -36,11 +31,11 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         }
 
         [UnityTest]
-        public IEnumerator HookMethodCalled()
+        public IEnumerator HookEventCalled()
         {
             const int num = 32;
             Action<int, int> hook = Substitute.For<Action<int, int>>();
-            clientComponent.hookCalled += hook;
+            clientComponent.hook += hook;
             serverComponent.value = num;
 
             yield return null;
@@ -49,8 +44,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
             hook.Received(1).Invoke(0, num);
         }
     }
-
-    public class WithGenericSyncVarHookObject : ClientServerSetup<WithGenericSyncVarHook_behaviourObject>
+    public class WithGenericSyncVarEventObject : ClientServerSetup<WithGenericSyncVarEvent_behaviourObject>
     {
         [Test]
         public void DoesNotError()
@@ -60,11 +54,12 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         }
 
         [UnityTest]
-        public IEnumerator HookMethodCalled()
+        public IEnumerator HookEventCalled()
         {
             const int num = 32;
             Action<MyClass, MyClass> hook = Substitute.For<Action<MyClass, MyClass>>();
-            clientComponent.hookCalled += hook;
+
+            clientComponent.hook += hook;
             serverComponent.value = new MyClass { Value = num };
 
             yield return null;
