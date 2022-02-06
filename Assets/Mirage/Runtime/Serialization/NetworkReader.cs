@@ -81,7 +81,7 @@ namespace Mirage.Serialization
         /// some service object that can find objects by net id
         /// </summary>
         // todo try move this somewhere else
-        public IObjectLocator ObjectLocator { get; internal set; }
+        public IObjectLocator ObjectLocator { get; set; }
 
 
         public NetworkReader() { }
