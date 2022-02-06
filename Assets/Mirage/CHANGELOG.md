@@ -1,3 +1,15 @@
+# [117.1.0](https://github.com/MirageNet/Mirage/compare/v117.0.0...v117.1.0) (2022-02-06)
+
+
+### Bug Fixes
+
+* **RPC:** fixing call when type is generic ([84e2dd6](https://github.com/MirageNet/Mirage/commit/84e2dd66523da92cc98ef3bd559a3aac0de32e36))
+
+
+### Features
+
+* making setter for NetworkReader.ObjectLocator public ([50ab932](https://github.com/MirageNet/Mirage/commit/50ab93246d89421498bc10f1c4043727d038b7ae))
+
 # [117.0.0](https://github.com/MirageNet/Mirage/compare/v116.2.0...v117.0.0) (2022-02-02)
 
 
