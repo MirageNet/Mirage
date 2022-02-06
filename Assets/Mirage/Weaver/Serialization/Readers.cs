@@ -19,6 +19,13 @@ namespace Mirage.Weaver
         protected override Expression<Action> ListExpression => () => CollectionExtensions.ReadList<byte>(default);
         protected override Expression<Action> NullableExpression => () => SystemTypesExtensions.ReadNullable<byte>(default);
 
+        protected override MethodReference GetGenericFunction()
+        {
+            TypeDefinition genericType = module.ImportReference(typeof(GenericTypesSerializationExtensions)).Resolve();
+            MethodDefinition method = genericType.GetMethod(nameof(GenericTypesSerializationExtensions.Read));
+            return module.ImportReference(method);
+        }
+
         protected override MethodReference GetNetworkBehaviourFunction(TypeReference typeReference)
         {
             ReadMethod readMethod = GenerateReaderFunction(typeReference);
