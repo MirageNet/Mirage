@@ -82,11 +82,6 @@ namespace Mirage.Weaver
                 return false;
             }
 
-            if (field.FieldType.IsGenericParameter)
-            {
-                throw new SyncVarException($"{field.Name} cannot be synced since it's a generic parameter", field);
-            }
-
             if ((field.Attributes & FieldAttributes.Static) != 0)
             {
                 throw new SyncVarException($"{field.Name} cannot be static", field);
