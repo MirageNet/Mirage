@@ -205,7 +205,6 @@ namespace Mirage.Weaver
             {
                 throw new RpcException($"{method.Name} cannot have generic parameters", method);
             }
-
         }
 
         /// <summary>
@@ -255,11 +254,6 @@ namespace Mirage.Weaver
             if (param.IsOut)
             {
                 throw new RpcException($"{method.Name} cannot have out parameters", method);
-            }
-
-            if (param.ParameterType.IsGenericParameter)
-            {
-                throw new RpcException($"{method.Name} cannot have generic parameters", method);
             }
 
             if (IsNetworkPlayer(param.ParameterType))
