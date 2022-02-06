@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using NSubstitute;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
@@ -15,8 +13,6 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
     public class GenericWithSyncVar_behaviour<T> : GenericWithSyncVarBase_behaviour<T>
     {
         [SyncVar] public int value;
-
-        public int GetInt() => 0;
     }
 
     public class GenericWithSyncVar_behaviourInt : GenericWithSyncVar_behaviour<int>
@@ -43,7 +39,6 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
             const int num1 = 11;
             const int num2 = 12;
             const int num3 = 13;
-            Action<int> sub = Substitute.For<Action<int>>();
             serverComponent.baseValue = num1;
             serverComponent.value = num2;
             serverComponent.moreValue = num3;
@@ -71,7 +66,6 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
             const int num1 = 11;
             const int num2 = 12;
             const int num3 = 13;
-            Action<int> sub = Substitute.For<Action<int>>();
             serverComponent.baseValue = num1;
             serverComponent.value = num2;
             serverComponent.moreValue = num3;
