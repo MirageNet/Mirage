@@ -1,3 +1,11 @@
+## [117.1.1](https://github.com/MirageNet/Mirage/compare/v117.1.0...v117.1.1) (2022-02-07)
+
+
+### Bug Fixes
+
+* fixing rpc cast for generic types ([111fce6](https://github.com/MirageNet/Mirage/commit/111fce6a0eb276bbe68c2dff0129b5289d2752a3))
+* rpcs for fixing IL2CPP ([e574a80](https://github.com/MirageNet/Mirage/commit/e574a80cae66df440edc28ab46b6ac3bda87bd00))
+
 # [117.1.0](https://github.com/MirageNet/Mirage/compare/v117.0.0...v117.1.0) (2022-02-06)
 
 
