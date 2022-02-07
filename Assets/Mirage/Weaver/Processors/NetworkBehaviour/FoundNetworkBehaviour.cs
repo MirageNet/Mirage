@@ -6,30 +6,23 @@ namespace Mirage.Weaver.NetworkBehaviours
 {
     internal class FoundNetworkBehaviour
     {
-        // ulong = 64 bytes
-        const int SyncVarLimit = 64;
-        const string SyncVarCountField = "SYNC_VAR_COUNT";
-
         public readonly ModuleDefinition Module;
         public readonly TypeDefinition TypeDefinition;
+        readonly ConstFieldTracker syncVarCounter;
 
         public FoundNetworkBehaviour(ModuleDefinition module, TypeDefinition td)
         {
             Module = module;
             TypeDefinition = td;
+
+            syncVarCounter = new ConstFieldTracker("SYNC_VAR_COUNT", td, 64, "[SyncVar]");
         }
 
-        public int SyncVarInBase { get; private set; }
         public List<FoundSyncVar> SyncVars { get; private set; } = new List<FoundSyncVar>();
-
-        public void GetSyncVarCountFromBase()
-        {
-            SyncVarInBase = TypeDefinition.BaseType.Resolve().GetConst<int>(SyncVarCountField);
-        }
 
         public FoundSyncVar AddSyncVar(FieldDefinition fd)
         {
-            int dirtyIndex = SyncVarInBase + SyncVars.Count;
+            int dirtyIndex = syncVarCounter.GetInBase() + SyncVars.Count;
             var syncVar = new FoundSyncVar(Module, this, fd, dirtyIndex);
             SyncVars.Add(syncVar);
             return syncVar;
@@ -37,13 +30,7 @@ namespace Mirage.Weaver.NetworkBehaviours
 
         public void SetSyncVarCount()
         {
-            int totalSyncVars = SyncVarInBase + SyncVars.Count;
-
-            if (totalSyncVars >= SyncVarLimit)
-            {
-                throw new NetworkBehaviourException($"{TypeDefinition.Name} has too many SyncVars. Consider refactoring your class into multiple components", TypeDefinition);
-            }
-            TypeDefinition.SetConst(SyncVarCountField, totalSyncVars);
+            syncVarCounter.Set(SyncVars.Count);
         }
 
         public bool HasManualSerializeOverride()
