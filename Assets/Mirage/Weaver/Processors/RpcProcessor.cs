@@ -259,11 +259,6 @@ namespace Mirage.Weaver
                 throw new RpcException($"{method.Name} cannot have out parameters", method);
             }
 
-            if (param.ParameterType.IsGenericParameter)
-            {
-                throw new RpcException($"{method.Name} cannot have generic parameters", method);
-            }
-
             if (IsNetworkPlayer(param.ParameterType))
             {
                 if (callType == RemoteCallType.ClientRpc && firstParam)
