@@ -106,7 +106,7 @@ namespace Mirage.Weaver.NetworkBehaviours
             Instruction endIf = worker.Create(OpCodes.Nop);
 
             // we dont shift read bits, so we have to shift dirty bit here
-            long syncVarIndex = syncVar.DirtyBit >> behaviour.SyncVarInBase;
+            long syncVarIndex = syncVar.DirtyBit >> behaviour.syncVarCounter.GetInBase();
 
             // check if dirty bit is set
             worker.Append(worker.Create(OpCodes.Ldloc, DirtyBitsLocal));

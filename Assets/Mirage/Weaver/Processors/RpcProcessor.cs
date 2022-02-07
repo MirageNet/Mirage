@@ -40,7 +40,10 @@ namespace Mirage.Weaver
             return type.Resolve().ImplementsInterface<INetworkPlayer>();
         }
 
-        public static int GetStableHash(MethodReference method)
+        /// <summary>
+        /// Hash to name names unique
+        /// </summary>
+        static int GetStableHash(MethodReference method)
         {
             return method.FullName.GetStableHashCode();
         }

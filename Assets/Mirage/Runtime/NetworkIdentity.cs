@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Mirage.Events;
 using Mirage.Logging;
-using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -706,28 +705,6 @@ namespace Mirage
                 }
             }
 
-        }
-
-        /// <summary>
-        /// Helper function to handle Command/Rpc
-        /// </summary>
-        /// <param name="componentIndex"></param>
-        /// <param name="functionHash"></param>
-        /// <param name="invokeType"></param>
-        /// <param name="reader"></param>
-        /// <param name="senderPlayer"></param>
-        internal void HandleRemoteCall(RemoteCall remoteCall, int componentIndex, NetworkReader reader, INetworkPlayer senderPlayer = null, int replyId = 0)
-        {
-            // find the right component to invoke the function on
-            if (componentIndex >= 0 && componentIndex < NetworkBehaviours.Length)
-            {
-                NetworkBehaviour behaviour = NetworkBehaviours[componentIndex];
-                remoteCall?.Invoke(reader, behaviour, senderPlayer, replyId);
-            }
-            else
-            {
-                throw new MethodInvocationException($"Invalid component {componentIndex} in {this} for RPC {remoteCall.function}");
-            }
         }
 
         internal void SetServerValues(NetworkServer networkServer, ServerObjectManager serverObjectManager)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Mirage.Collections;
 using Mirage.Logging;
+using Mirage.RemoteCalls;
 using Mirage.Serialization;
 using UnityEngine;
 
@@ -474,5 +475,18 @@ namespace Mirage
                 syncObject.Reset();
             }
         }
+
+        #region RPC
+        // todo move this to NetworkIdentity to optimize (add a registermethod on NB that NI will call)
+
+        // overriden by weaver
+        protected internal virtual int GetRpcCount() => 0;
+        protected internal RemoteCallCollection remoteCallCollection;
+
+        public NetworkBehaviour()
+        {
+            remoteCallCollection = new RemoteCallCollection(this);
+        }
+        #endregion
     }
 }

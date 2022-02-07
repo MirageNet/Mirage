@@ -431,11 +431,14 @@ namespace Mirage
                 if (logger.WarnEnabled()) logger.LogWarning("Spawned object not found when handling ServerRpc message [netId=" + msg.netId + "]");
                 return;
             }
-            RemoteCall remoteCall = RemoteCallHelper.GetCall(msg.functionHash);
+
+            NetworkBehaviour behaviour = identity.NetworkBehaviours[msg.componentIndex];
+
+            RemoteCall remoteCall = behaviour.remoteCallCollection.Get(msg.functionIndex);
 
             if (remoteCall.InvokeType != RpcInvokeType.ServerRpc)
             {
-                throw new MethodInvocationException($"Invalid ServerRpc for id {msg.functionHash}");
+                throw new MethodInvocationException($"Invalid ServerRpc for index {msg.functionIndex}");
             }
 
             // ServerRpcs can be for player objects, OR other objects with client-authority
@@ -449,10 +452,10 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log("OnServerRpcMessage for netId=" + msg.netId + " conn=" + player);
 
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
+            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
             {
-                networkReader.ObjectLocator = Server.World;
-                identity.HandleRemoteCall(remoteCall, msg.componentIndex, networkReader, player, msg.replyId.GetValueOrDefault());
+                reader.ObjectLocator = Server.World;
+                remoteCall.Invoke(reader, behaviour, player, msg.replyId.GetValueOrDefault());
             }
         }
 

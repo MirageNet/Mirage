@@ -121,7 +121,7 @@ namespace Mirage.Weaver.Serialization
         {
             FieldDefinition packerField = AddPackerField<Vector3Packer>(holder, fieldName);
 
-            NetworkBehaviourProcessor.AddToStaticConstructor(holder, (worker) =>
+            holder.AddToStaticConstructor((worker) =>
             {
                 worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.x));
                 worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max.y));

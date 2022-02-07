@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
+using Mirage.Weaver.NetworkBehaviours;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
-using TypeAttributes = Mono.Cecil.TypeAttributes;
 
 namespace Mirage.Weaver
 {
@@ -24,6 +23,7 @@ namespace Mirage.Weaver
         readonly ClientRpcProcessor clientRpcProcessor;
         readonly SyncVarProcessor syncVarProcessor;
         readonly SyncObjectProcessor syncObjectProcessor;
+        readonly ConstFieldTracker rpcCounter;
 
         public NetworkBehaviourProcessor(TypeDefinition td, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor, IWeaverLogger logger)
         {
@@ -34,6 +34,9 @@ namespace Mirage.Weaver
             clientRpcProcessor = new ClientRpcProcessor(netBehaviourSubclass.Module, readers, writers, logger);
             syncVarProcessor = new SyncVarProcessor(netBehaviourSubclass.Module, readers, writers, propertySiteProcessor);
             syncObjectProcessor = new SyncObjectProcessor(readers, writers, logger);
+
+            // no max for rpcs, index is sent as var int, so more rpc just means bigger header size (still smaller than 4 byte hash)
+            rpcCounter = new ConstFieldTracker("RPC_COUNT", td, int.MaxValue, "Rpc");
         }
 
         // return true if modified
@@ -88,12 +91,26 @@ namespace Mirage.Weaver
 
         void RegisterRpcs(List<RpcMethod> rpcs)
         {
+            SetRpcCount(rpcs.Count);
             Weaver.DebugLog(netBehaviourSubclass, "  GenerateConstants ");
 
-            AddToStaticConstructor(netBehaviourSubclass, (worker) =>
+            netBehaviourSubclass.AddToConstructor(logger, (worker) =>
             {
                 RegisterRpc.RegisterAll(worker, rpcs);
             });
+        }
+
+        private void SetRpcCount(int count)
+        {
+            // set const so that child classes know count of base classes
+            rpcCounter.Set(count);
+
+            // override virtual method so returns total
+            MethodDefinition method = netBehaviourSubclass.AddMethod(nameof(NetworkBehaviour.GetRpcCount), MethodAttributes.Virtual | MethodAttributes.Family, typeof(int));
+            ILProcessor worker = method.Body.GetILProcessor();
+            // write count of base+current so that `GetInBase` call will return total
+            worker.Emit(OpCodes.Ldc_I4, rpcCounter.GetInBase() + count);
+            worker.Emit(OpCodes.Ret);
         }
 
         void ProcessRpcs()
@@ -102,22 +119,17 @@ namespace Mirage.Weaver
             var methods = new List<MethodDefinition>(netBehaviourSubclass.Methods);
 
             var rpcs = new List<RpcMethod>();
-            // kept track of hashes to check they are unique
-            var hash = new Dictionary<int, RpcMethod>();
 
+            int index = rpcCounter.GetInBase();
             foreach (MethodDefinition md in methods)
             {
                 try
                 {
-                    RpcMethod rpc = CheckAndProcessRpc(md);
+                    RpcMethod rpc = CheckAndProcessRpc(md, index);
                     if (rpc != null)
                     {
-                        if (hash.ContainsKey(rpc.UniqueHash))
-                        {
-                            logger.Error($"Found 2 methods with same hash {rpc.UniqueHash} (see below).\nMethod1:{rpc.stub}\nMethod2:{rpc.stub}", md);
-                        }
-
-                        hash.Add(rpc.UniqueHash, rpc);
+                        // increment only if rpc was count
+                        index++;
                         rpcs.Add(rpc);
                     }
                 }
@@ -130,68 +142,19 @@ namespace Mirage.Weaver
             RegisterRpcs(rpcs);
         }
 
-        private RpcMethod CheckAndProcessRpc(MethodDefinition md)
+        private RpcMethod CheckAndProcessRpc(MethodDefinition md, int index)
         {
             if (md.TryGetCustomAttribute<ServerRpcAttribute>(out CustomAttribute serverAttribute))
             {
                 if (md.HasCustomAttribute<ClientRpcAttribute>()) throw new RpcException("Method should not have both ServerRpc and ClientRpc", md);
 
-                return serverRpcProcessor.ProcessRpc(md, serverAttribute);
+                return serverRpcProcessor.ProcessRpc(md, serverAttribute, index);
             }
             else if (md.TryGetCustomAttribute<ClientRpcAttribute>(out CustomAttribute clientAttribute))
             {
-                return clientRpcProcessor.ProcessRpc(md, clientAttribute);
+                return clientRpcProcessor.ProcessRpc(md, clientAttribute, index);
             }
             return null;
-        }
-
-        /// <summary>
-        /// Adds code to static Constructor
-        /// <para>
-        /// If Constructor is missing a new one will be created
-        /// </para>
-        /// </summary>
-        /// <param name="body">code to write</param>
-        public static void AddToStaticConstructor(TypeDefinition typeDefinition, Action<ILProcessor> body)
-        {
-            MethodDefinition cctor = typeDefinition.GetMethod(".cctor");
-            if (cctor != null)
-            {
-                // remove the return opcode from end of function. will add our own later.
-                if (cctor.Body.Instructions.Count != 0)
-                {
-                    Instruction retInstr = cctor.Body.Instructions[cctor.Body.Instructions.Count - 1];
-                    if (retInstr.OpCode == OpCodes.Ret)
-                    {
-                        cctor.Body.Instructions.RemoveAt(cctor.Body.Instructions.Count - 1);
-                    }
-                    else
-                    {
-                        throw new NetworkBehaviourException($"{typeDefinition.Name} has invalid static constructor", cctor, cctor.GetSequencePoint(retInstr));
-                    }
-                }
-            }
-            else
-            {
-                // make one!
-                cctor = typeDefinition.AddMethod(".cctor", MethodAttributes.Private |
-                        MethodAttributes.HideBySig |
-                        MethodAttributes.SpecialName |
-                        MethodAttributes.RTSpecialName |
-                        MethodAttributes.Static);
-            }
-
-            ILProcessor worker = cctor.Body.GetILProcessor();
-
-            // add new code to bottom of constructor
-            // todo should we be adding new code to top of function instead? incase user has early return in custom constructor?
-            body.Invoke(worker);
-
-            // re-add return bececause we removed it earlier
-            worker.Append(worker.Create(OpCodes.Ret));
-
-            // in case class had no cctor, it might have BeforeFieldInit, so injected cctor would be called too late
-            typeDefinition.Attributes &= ~TypeAttributes.BeforeFieldInit;
         }
     }
 }

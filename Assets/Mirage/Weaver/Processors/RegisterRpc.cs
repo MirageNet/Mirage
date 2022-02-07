@@ -34,17 +34,17 @@ namespace Mirage.Weaver
             return $"{typeName}.{methodName}";
         }
 
-        static void RegisterServerRpc(ILProcessor worker, ServerRpcMethod rpcMethod)
+        static void RegisterServerRpc(ILProcessor worker, ServerRpcMethod rpc)
         {
-            MethodDefinition skeleton = rpcMethod.skeleton;
-            bool requireAuthority = rpcMethod.requireAuthority;
+            MethodDefinition skeleton = rpc.skeleton;
+            bool requireAuthority = rpc.requireAuthority;
 
             MethodReference registerMethod = GetRegisterMethod(skeleton);
-            RpcInvokeType? invokeType = GetInvokeType(rpcMethod);
-            CallRegister(worker, rpcMethod, invokeType, registerMethod, requireAuthority);
+            RpcInvokeType? invokeType = GetServerInvokeType(rpc);
+            CallRegister(worker, rpc, invokeType, registerMethod, requireAuthority);
         }
 
-        static RpcInvokeType? GetInvokeType(ServerRpcMethod rpcMethod)
+        static RpcInvokeType? GetServerInvokeType(ServerRpcMethod rpcMethod)
         {
             MethodDefinition func = rpcMethod.skeleton;
             if (func.ReturnType.Is(typeof(void)))
@@ -60,7 +60,7 @@ namespace Mirage.Weaver
         static MethodReference GetRegisterMethod(MethodDefinition func)
         {
             if (func.ReturnType.Is(typeof(void)))
-                return func.Module.ImportReference(() => RemoteCallHelper.Register(default, default, default, default, default, default));
+                return func.Module.ImportReference((RemoteCallCollection c) => c.Register(default, default, default, default, default, default));
             else
                 return CreateGenericRequestDelegate(func);
         }
@@ -71,7 +71,7 @@ namespace Mirage.Weaver
 
             TypeReference returnType = taskReturnType.GenericArguments[0];
 
-            var genericRegisterMethod = func.Module.ImportReference(() => RemoteCallHelper.RegisterRequest<object>(default, default, default, default, default)) as GenericInstanceMethod;
+            var genericRegisterMethod = func.Module.ImportReference((RemoteCallCollection c) => c.RegisterRequest<object>(default, default, default, default, default)) as GenericInstanceMethod;
 
             var registerInstance = new GenericInstanceMethod(genericRegisterMethod.ElementMethod);
             registerInstance.GenericArguments.Add(returnType);
@@ -83,18 +83,30 @@ namespace Mirage.Weaver
         /// NetworkBehaviour.RegisterServerRpcDelegate(base.GetType(), "CmdThrust", new NetworkBehaviour.CmdDelegate(ShipControl.InvokeCmdCmdThrust));
         /// </summary>
         /// <param name="worker"></param>
-        /// <param name="rpcMethod"></param>
-        static void RegisterClientRpc(ILProcessor worker, ClientRpcMethod rpcMethod)
+        /// <param name="rpc"></param>
+        static void RegisterClientRpc(ILProcessor worker, ClientRpcMethod rpc)
         {
-            MethodReference registerMethod = worker.Body.Method.Module.ImportReference(() => RemoteCallHelper.Register(default, default, default, default, default, default));
-            CallRegister(worker, rpcMethod, RpcInvokeType.ClientRpc, registerMethod, false);
+            MethodReference registerMethod = GetRegisterMethod(rpc.skeleton);
+            CallRegister(worker, rpc, RpcInvokeType.ClientRpc, registerMethod, false);
         }
 
         static void CallRegister(ILProcessor worker, RpcMethod rpcMethod, RpcInvokeType? invokeType, MethodReference registerMethod, bool requireAuthority)
         {
             MethodDefinition skeleton = rpcMethod.skeleton;
             string name = HumanReadableName(rpcMethod.stub);
-            int hash = RpcProcessor.GetStableHash(rpcMethod.stub);
+            int index = rpcMethod.Index;
+            ModuleDefinition module = rpcMethod.stub.Module;
+
+            FieldInfo collectionFieldInfo = typeof(NetworkBehaviour).GetField(nameof(NetworkBehaviour.remoteCallCollection), BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldReference collectionField = module.ImportReference(collectionFieldInfo);
+
+            // arg0 is remote collection
+            // this.remoteCallCollection
+            worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Ldfld, collectionField));
+
+            // arg1 is rpc index
+            worker.Append(worker.Create(OpCodes.Ldc_I4, index));
 
             // typeof()
             TypeReference netBehaviourSubclass = skeleton.DeclaringType.ConvertToGenericIfNeeded();
@@ -102,7 +114,6 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Call, () => Type.GetTypeFromHandle(default)));
 
             worker.Append(worker.Create(OpCodes.Ldstr, name));
-            worker.Append(worker.Create(OpCodes.Ldc_I4, hash));
 
             // RegisterRequest has no type, it is always serverRpc, so dont need to include arg
             if (invokeType.HasValue)

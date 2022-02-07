@@ -10,16 +10,16 @@ namespace Mirage.RemoteCalls
     /// </summary>
     public static class ServerRpcSender
     {
-        public static void Send(NetworkBehaviour behaviour, int hash, NetworkWriter writer, int channelId, bool requireAuthority)
+        public static void Send(NetworkBehaviour behaviour, int index, NetworkWriter writer, int channelId, bool requireAuthority)
         {
-            ServerRpcMessage message = CreateMessage(behaviour, hash, writer, requireAuthority);
+            ServerRpcMessage message = CreateMessage(behaviour, index, writer, requireAuthority);
 
             behaviour.Client.Send(message, channelId);
         }
 
-        public static UniTask<T> SendWithReturn<T>(NetworkBehaviour behaviour, int hash, NetworkWriter writer, int channelId, bool requireAuthority)
+        public static UniTask<T> SendWithReturn<T>(NetworkBehaviour behaviour, int index, NetworkWriter writer, int channelId, bool requireAuthority)
         {
-            ServerRpcMessage message = CreateMessage(behaviour, hash, writer, requireAuthority);
+            ServerRpcMessage message = CreateMessage(behaviour, index, writer, requireAuthority);
 
             (UniTask<T> task, int id) = behaviour.ClientObjectManager.CreateReplyTask<T>();
 
@@ -31,16 +31,16 @@ namespace Mirage.RemoteCalls
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static ServerRpcMessage CreateMessage(NetworkBehaviour behaviour, int hash, NetworkWriter writer, bool requireAuthority)
+        static ServerRpcMessage CreateMessage(NetworkBehaviour behaviour, int index, NetworkWriter writer, bool requireAuthority)
         {
-            RemoteCall rpc = RemoteCallHelper.GetCall(hash);
+            RemoteCall rpc = behaviour.remoteCallCollection.Get(index);
             Validate(behaviour, rpc, requireAuthority);
 
             var message = new ServerRpcMessage
             {
                 netId = behaviour.NetId,
                 componentIndex = behaviour.ComponentIndex,
-                functionHash = hash,
+                functionIndex = index,
                 payload = writer.ToArraySegment()
             };
             return message;
