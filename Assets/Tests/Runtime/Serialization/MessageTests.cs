@@ -17,7 +17,7 @@ namespace Mirage.Tests.Runtime.Serialization
             {
                 netId = 42,
                 componentIndex = 4,
-                functionHash = 0xABCDEF,
+                functionIndex = 2,
                 payload = new ArraySegment<byte>(new byte[] { 0x01, 0x02 })
             };
             byte[] arr = MessagePacker.Pack(message);
@@ -26,7 +26,7 @@ namespace Mirage.Tests.Runtime.Serialization
             ServerRpcMessage fresh = MessagePacker.Unpack<ServerRpcMessage>(arr);
             Assert.That(fresh.netId, Is.EqualTo(message.netId));
             Assert.That(fresh.componentIndex, Is.EqualTo(message.componentIndex));
-            Assert.That(fresh.functionHash, Is.EqualTo(message.functionHash));
+            Assert.That(fresh.functionIndex, Is.EqualTo(message.functionIndex));
             Assert.That(fresh.payload, Has.Count.EqualTo(message.payload.Count));
             for (int i = 0; i < fresh.payload.Count; ++i)
                 Assert.That(fresh.payload.Array[fresh.payload.Offset + i],
@@ -105,14 +105,14 @@ namespace Mirage.Tests.Runtime.Serialization
             {
                 netId = 42,
                 componentIndex = 4,
-                functionHash = 0xABCDEF,
+                functionIndex = 3,
                 payload = new ArraySegment<byte>(new byte[] { 0x01, 0x02 })
             };
             byte[] arr = MessagePacker.Pack(message);
             RpcMessage fresh = MessagePacker.Unpack<RpcMessage>(arr);
             Assert.That(fresh.netId, Is.EqualTo(message.netId));
             Assert.That(fresh.componentIndex, Is.EqualTo(message.componentIndex));
-            Assert.That(fresh.functionHash, Is.EqualTo(message.functionHash));
+            Assert.That(fresh.functionIndex, Is.EqualTo(message.functionIndex));
             Assert.That(fresh.payload.Count, Is.EqualTo(message.payload.Count));
             for (int i = 0; i < fresh.payload.Count; ++i)
                 Assert.That(fresh.payload.Array[fresh.payload.Offset + i],
