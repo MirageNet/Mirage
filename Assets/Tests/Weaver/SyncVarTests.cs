@@ -38,8 +38,7 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void SyncVarsGenericField()
         {
-            HasError("invalidVar cannot be synced since it's a generic parameter",
-                "T SyncVarTests.SyncVarGenericFields.SyncVarGenericFields`1::invalidVar");
+            IsSuccess();
         }
 
         [Test]
