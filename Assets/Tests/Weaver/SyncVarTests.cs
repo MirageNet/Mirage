@@ -79,7 +79,7 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void SyncVarsMoreThan63()
         {
-            HasError("SyncVarsMoreThan63 has too many SyncVars. Consider refactoring your class into multiple components",
+            HasError("SyncVarsMoreThan63 has too many [SyncVar]. Consider refactoring your class into multiple components",
                 "SyncVarTests.SyncVarsMoreThan63.SyncVarsMoreThan63");
         }
     }
