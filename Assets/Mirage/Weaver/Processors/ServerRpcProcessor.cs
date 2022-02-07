@@ -174,6 +174,7 @@ namespace Mirage.Weaver
 
             // load `behaviour.`
             worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Castclass, method.DeclaringType));
 
             // read and load args
             ReadArguments(method, worker, readerParameter, senderParameter, false, paramSerializers);

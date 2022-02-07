@@ -53,6 +53,7 @@ namespace Mirage.Weaver
             ILProcessor worker = rpc.Body.GetILProcessor();
 
             worker.Append(worker.Create(OpCodes.Ldarg_0));
+            worker.Append(worker.Create(OpCodes.Castclass, md.DeclaringType));
 
             // NetworkConnection parameter is only required for RpcTarget.Player
             RpcTarget target = clientRpcAttr.GetField(nameof(ClientRpcAttribute.target), RpcTarget.Observers);
