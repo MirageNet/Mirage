@@ -215,6 +215,9 @@ namespace Mirage.Weaver
             return method;
         }
 
+        public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes, Type returnType)
+        => typeDefinition.AddMethod(name, attributes, typeDefinition.Module.ImportReference(returnType));
+
         public static MethodDefinition AddMethod(this TypeDefinition typeDefinition, string name, MethodAttributes attributes) =>
             AddMethod(typeDefinition, name, attributes, typeDefinition.Module.ImportReference(typeof(void)));
 
