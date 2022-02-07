@@ -31,8 +31,7 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void NetworkBehaviourCmdGenericArgument()
         {
-            HasError("CmdCantHaveGeneric cannot have generic parameters",
-                "System.Void NetworkBehaviourTests.NetworkBehaviourCmdGenericArgument.NetworkBehaviourCmdGenericArgument`1::CmdCantHaveGeneric(T)");
+            IsSuccess();
         }
 
         [Test]
@@ -59,8 +58,7 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void NetworkBehaviourClientRpcGenericArgument()
         {
-            HasError("RpcCantHaveGeneric cannot have generic parameters",
-                "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcGenericArgument.NetworkBehaviourClientRpcGenericArgument`1::RpcCantHaveGeneric(T)");
+            IsSuccess();
         }
 
         [Test]
