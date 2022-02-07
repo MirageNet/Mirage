@@ -36,9 +36,6 @@ namespace Mirage.Weaver
             // the mapping of dirtybits to sync-vars is implicit in the order of the fields here. this order is recorded in m_replacementProperties.
             // start assigning syncvars at the place the base class stopped, if any
 
-            // get numbers of syncvars in parent class, it will be added to syncvars in this class for total
-            behaviour.GetSyncVarCountFromBase();
-
             // find syncvars
             // use ToArray to create copy, ProcessSyncVar might add new fields
             foreach (FieldDefinition fd in td.Fields.ToArray())
