@@ -57,9 +57,15 @@ public class Player : NetworkBehaviour
     {
         this.UserCode_RpcChangeName_123456789(reader.ReadString());
     }
-    static Player()
+
+    public Player()
     {
-        RemoteCallHelper.Register(typeof(Player), "Player.RpcChangeName", 123456789, RpcInvokeType.ServerRpc, new CmdDelegate(Skeleton_RpcChangeName), true);
+        this.remoteCallCollection.Register(0, typeof(Player), "Player.RpcChangeName", RpcInvokeType.ServerRpc, new CmdDelegate(Skeleton_RpcChangeName), true);
+    }
+
+    protected override int GetRpcCount()
+    {
+        return 1;
     }
 }
 ```
