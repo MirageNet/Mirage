@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.TestTools.TestRunner.Api;
+using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 namespace Mirage.Tests.BuildIL2CPP
@@ -31,6 +32,8 @@ namespace Mirage.Tests.BuildIL2CPP
 
         public static void BuildWithIl2CPP(bool cleanup)
         {
+            bool hasErrors = false;
+
             DateTime startTime = DateTime.Now;
             Debug.Log("Start BuildWithIl2CPP");
 
@@ -55,7 +58,13 @@ namespace Mirage.Tests.BuildIL2CPP
                         // sync so that IL2CPPApplier will revert after
                         runSynchronously = true,
                     };
-                    runner.Execute(testSettings);
+
+                    using (var logCatcher = new LogCatcher())
+                    {
+                        runner.Execute(testSettings);
+
+                        hasErrors = logCatcher.HasErrors;
+                    }
                 }
             }
             finally
@@ -66,6 +75,12 @@ namespace Mirage.Tests.BuildIL2CPP
             }
             TimeSpan duration = DateTime.Now - startTime;
             Debug.Log($"End BuildWithIl2CPP duration:{duration.TotalSeconds:0.0}s");
+
+            if (hasErrors)
+            {
+                // throw so it fails in both editor and CI
+                throw new Exception("BuildWithIl2CPP failed");
+            }
         }
 
         private static void CleanUpBuildFolder(string targetFolder)
@@ -95,6 +110,37 @@ namespace Mirage.Tests.BuildIL2CPP
             runSettings.GetType().GetProperty("buildOnlyLocationPath").SetValue(runSettings, targetPath);
 
             return (ITestRunSettings)runSettings;
+        }
+    }
+
+    class LogCatcher : ILogHandler, IDisposable
+    {
+        ILogHandler inner;
+        public bool HasErrors;
+
+
+        public LogCatcher()
+        {
+            inner = Debug.unityLogger.logHandler;
+            Debug.unityLogger.logHandler = this;
+        }
+        public void Dispose()
+        {
+            Debug.unityLogger.logHandler = inner;
+        }
+
+        public void LogException(Exception exception, UnityEngine.Object context)
+        {
+            HasErrors = true;
+            inner.LogException(exception, context);
+        }
+
+        public void LogFormat(LogType logType, UnityEngine.Object context, string format, params object[] args)
+        {
+            if (logType == LogType.Error || logType == LogType.Assert || logType == LogType.Exception)
+                HasErrors = true;
+
+            inner.LogFormat(logType, context, format, args);
         }
     }
 
