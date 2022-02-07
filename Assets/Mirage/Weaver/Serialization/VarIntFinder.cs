@@ -135,7 +135,7 @@ namespace Mirage.Weaver.Serialization
         {
             FieldDefinition packerField = AddPackerField<VarIntPacker>(holder, fieldName);
 
-            NetworkBehaviourProcessor.AddToStaticConstructor(holder, (worker) =>
+            holder.AddToStaticConstructor((worker) =>
             {
                 // cast ulong to long so it can be passed to Create function
                 worker.Append(worker.Create(OpCodes.Ldc_I8, (long)settings.small));

@@ -46,7 +46,7 @@ namespace Mirage.Weaver.Serialization
         {
             FieldDefinition packerField = AddPackerField<QuaternionPacker>(holder, fieldName);
 
-            NetworkBehaviourProcessor.AddToStaticConstructor(holder, (worker) =>
+            holder.AddToStaticConstructor((worker) =>
             {
                 worker.Append(worker.Create(OpCodes.Ldc_I4, settings));
                 MethodReference packerCtor = module.ImportReference(() => new QuaternionPacker(default(int)));

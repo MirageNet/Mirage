@@ -47,7 +47,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute serverRpcAttr, ValueSerializer[] paramSerializers)
+        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute serverRpcAttr, int rpcIndex, ValueSerializer[] paramSerializers)
         {
             MethodDefinition cmd = SubstituteMethod(md);
 
@@ -73,12 +73,11 @@ namespace Mirage.Weaver
             int channel = serverRpcAttr.GetField(nameof(ServerRpcAttribute.channel), 0);
             bool requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
 
-            int hash = GetStableHash(md);
             MethodReference sendMethod = GetSendMethod(md, worker);
 
             // ServerRpcSender.Send(this, 12345, writer, channel, requireAuthority)
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldc_I4, hash));
+            worker.Append(worker.Create(OpCodes.Ldc_I4, rpcIndex));
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
             worker.Append(worker.Create(requireAuthority ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
@@ -186,7 +185,7 @@ namespace Mirage.Weaver
             return cmd;
         }
 
-        public ServerRpcMethod ProcessRpc(MethodDefinition md, CustomAttribute serverRpcAttr)
+        public ServerRpcMethod ProcessRpc(MethodDefinition md, CustomAttribute serverRpcAttr, int rpcIndex)
         {
             ValidateMethod(md, RemoteCallType.ServerRpc);
             ValidateParameters(md, RemoteCallType.ServerRpc);
@@ -197,12 +196,12 @@ namespace Mirage.Weaver
 
             ValueSerializer[] paramSerializers = GetValueSerializers(md);
 
-            MethodDefinition userCodeFunc = GenerateStub(md, serverRpcAttr, paramSerializers);
+            MethodDefinition userCodeFunc = GenerateStub(md, serverRpcAttr, rpcIndex, paramSerializers);
 
             MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, paramSerializers);
             return new ServerRpcMethod
             {
-                UniqueHash = GetStableHash(md),
+                Index = rpcIndex,
                 stub = md,
                 requireAuthority = requireAuthority,
                 skeleton = skeletonFunc

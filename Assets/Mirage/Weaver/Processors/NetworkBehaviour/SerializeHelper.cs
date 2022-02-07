@@ -112,10 +112,11 @@ namespace Mirage.Weaver.NetworkBehaviours
             worker.Append(worker.Create(OpCodes.Ldloc, DirtyBitsLocal));
 
             // shift if there are syncvars in base class
-            if (behaviour.SyncVarInBase > 0)
+            int syncVarInBase = behaviour.syncVarCounter.GetInBase();
+            if (syncVarInBase > 0)
             {
                 // load inBaseCount
-                worker.Append(worker.Create(OpCodes.Ldc_I4, behaviour.SyncVarInBase));
+                worker.Append(worker.Create(OpCodes.Ldc_I4, syncVarInBase));
                 // right shift, dirtyBits >> inBaseCount
                 worker.Append(worker.Create(OpCodes.Shr));
             }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Serialization;
@@ -7,6 +6,66 @@ using UnityEngine;
 
 namespace Mirage.RemoteCalls
 {
+    public class RemoteCallCollection
+    {
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(RemoteCallCollection));
+
+        public RemoteCall[] remoteCalls;
+
+        public RemoteCallCollection(NetworkBehaviour behaviour)
+        {
+            remoteCalls = new RemoteCall[behaviour.GetRpcCount()];
+        }
+
+        public void Register(int index, Type invokeClass, string name, RpcInvokeType invokerType, RpcDelegate func, bool cmdRequireAuthority)
+        {
+            // weaver gives index, so should never give 2 indexes that are the same
+            if (remoteCalls[index] != null)
+                throw new InvalidOperationException("2 Rpc has same index");
+
+            var call = new RemoteCall(invokeClass, invokerType, func, cmdRequireAuthority, name);
+            remoteCalls[index] = call;
+
+            if (logger.LogEnabled())
+            {
+                string requireAuthorityMessage = invokerType == RpcInvokeType.ServerRpc ? $" RequireAuthority:{cmdRequireAuthority}" : "";
+                logger.Log($"RegisterDelegate invokerType: {invokerType} method: {func.Method.Name}{requireAuthorityMessage}");
+            }
+        }
+
+        public void RegisterRequest<T>(int index, Type invokeClass, string name, RequestDelegate<T> func, bool cmdRequireAuthority)
+        {
+            async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
+            {
+                /// invoke the serverRpc and send a reply message
+                T result = await func(obj, reader, senderPlayer, replyId);
+
+                using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+                {
+                    writer.Write(result);
+                    var serverRpcReply = new ServerRpcReply
+                    {
+                        replyId = replyId,
+                        payload = writer.ToArraySegment()
+                    };
+
+                    senderPlayer.Send(serverRpcReply);
+                }
+            }
+
+            void CmdWrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
+            {
+                Wrapper(obj, reader, senderPlayer, replyId).Forget();
+            }
+
+            Register(index, invokeClass, name, RpcInvokeType.ServerRpc, CmdWrapper, cmdRequireAuthority);
+        }
+
+        public RemoteCall Get(int index)
+        {
+            return remoteCalls[index];
+        }
+    }
     /// <summary>
     /// Delegate for ServerRpc functions.
     /// </summary>
@@ -30,23 +89,32 @@ namespace Mirage.RemoteCalls
         /// <summary>
         /// Type that rpc was declared in
         /// </summary>
-        public Type DeclaringType;
+        public readonly Type DeclaringType;
         /// <summary>
         /// Server rpc or client rpc
         /// </summary>
-        public RpcInvokeType InvokeType;
+        public readonly RpcInvokeType InvokeType;
         /// <summary>
         /// Function to be invoked when receiving message
         /// </summary>
-        public RpcDelegate function;
+        public readonly RpcDelegate function;
         /// <summary>
         /// Used by ServerRpc
         /// </summary>
-        public bool RequireAuthority;
+        public readonly bool RequireAuthority;
         /// <summary>
         /// User friendly name
         /// </summary>
-        public string name;
+        public readonly string name;
+
+        public RemoteCall(Type declaringType, RpcInvokeType invokeType, RpcDelegate function, bool requireAuthority, string name)
+        {
+            DeclaringType = declaringType;
+            InvokeType = invokeType;
+            this.function = function;
+            RequireAuthority = requireAuthority;
+            this.name = name;
+        }
 
         public bool AreEqual(Type declaringType, RpcInvokeType invokeType, RpcDelegate function)
         {
@@ -94,109 +162,6 @@ namespace Mirage.RemoteCalls
         public override string ToString()
         {
             return name;
-        }
-    }
-
-    /// <summary>
-    /// Used to help manage remote calls for NetworkBehaviours
-    /// </summary>
-    public static class RemoteCallHelper
-    {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(RemoteCallHelper));
-
-        static readonly Dictionary<int, RemoteCall> calls = new Dictionary<int, RemoteCall>();
-
-        /// <summary>
-        /// helper function register a ServerRpc/Rpc delegate
-        /// </summary>
-        /// <param name="invokeClass"></param>
-        /// <param name="name"></param>
-        /// <param name="invokerType"></param>
-        /// <param name="func"></param>
-        /// <param name="cmdRequireAuthority"></param>
-        /// <returns>remote function hash</returns>
-        public static void Register(Type invokeClass, string name, int hash, RpcInvokeType invokerType, RpcDelegate func, bool cmdRequireAuthority)
-        {
-            if (CheckDuplicate(invokeClass, invokerType, func, hash))
-                return;
-
-            var invoker = new RemoteCall
-            {
-                name = name,
-                InvokeType = invokerType,
-                DeclaringType = invokeClass,
-                function = func,
-                RequireAuthority = cmdRequireAuthority,
-            };
-
-            calls[hash] = invoker;
-
-            if (logger.LogEnabled())
-            {
-                string requireAuthorityMessage = invokerType == RpcInvokeType.ServerRpc ? $" RequireAuthority:{cmdRequireAuthority}" : "";
-                logger.Log($"RegisterDelegate hash: {hash} invokerType: {invokerType} method: {func.Method.Name}{requireAuthorityMessage}");
-            }
-        }
-
-        public static void RegisterRequest<T>(Type invokeClass, string name, int hash, RequestDelegate<T> func, bool cmdRequireAuthority)
-        {
-            async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
-            {
-                /// invoke the serverRpc and send a reply message
-                T result = await func(obj, reader, senderPlayer, replyId);
-
-                using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
-                {
-                    writer.Write(result);
-                    var serverRpcReply = new ServerRpcReply
-                    {
-                        replyId = replyId,
-                        payload = writer.ToArraySegment()
-                    };
-
-                    senderPlayer.Send(serverRpcReply);
-                }
-            }
-
-            void CmdWrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
-            {
-                Wrapper(obj, reader, senderPlayer, replyId).Forget();
-            }
-
-            Register(invokeClass, name, hash, RpcInvokeType.ServerRpc, CmdWrapper, cmdRequireAuthority);
-        }
-
-        static bool CheckDuplicate(Type invokeClass, RpcInvokeType invokerType, RpcDelegate func, int cmdHash)
-        {
-            if (calls.ContainsKey(cmdHash))
-            {
-                // something already registered this hash
-                RemoteCall oldInvoker = calls[cmdHash];
-                if (oldInvoker.AreEqual(invokeClass, invokerType, func))
-                {
-                    // it's all right,  it was the same function
-                    return true;
-                }
-
-                logger.LogError($"Function {oldInvoker.DeclaringType}.{oldInvoker.function.Method.Name} and {invokeClass}.{func.Method.Name} have the same hash.  Please rename one of them");
-            }
-
-            return false;
-        }
-
-        public static RemoteCall GetCall(int hash)
-        {
-            if (calls.TryGetValue(hash, out RemoteCall invoker))
-            {
-                return invoker;
-            }
-
-            throw new MethodInvocationException($"No RPC method found for hash {hash}");
-        }
-
-        public static bool TryGetCall(int hash, out RemoteCall call)
-        {
-            return calls.TryGetValue(hash, out call);
         }
     }
 }

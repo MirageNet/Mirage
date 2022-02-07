@@ -8,7 +8,7 @@ namespace Mirage.Weaver.NetworkBehaviours
     {
         public readonly ModuleDefinition Module;
         public readonly TypeDefinition TypeDefinition;
-        readonly ConstFieldTracker syncVarCounter;
+        public readonly ConstFieldTracker syncVarCounter;
 
         public FoundNetworkBehaviour(ModuleDefinition module, TypeDefinition td)
         {

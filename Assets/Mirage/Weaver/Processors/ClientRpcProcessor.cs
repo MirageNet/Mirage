@@ -130,7 +130,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute clientRpcAttr, ValueSerializer[] paramSerializers)
+        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute clientRpcAttr, int rpcIndex, ValueSerializer[] paramSerializers)
         {
             MethodDefinition rpc = SubstituteMethod(md);
 
@@ -156,12 +156,11 @@ namespace Mirage.Weaver
             int channel = clientRpcAttr.GetField(nameof(ClientRpcAttribute.channel), 0);
             bool excludeOwner = clientRpcAttr.GetField(nameof(ClientRpcAttribute.excludeOwner), false);
 
-            int hash = GetStableHash(md);
             MethodReference sendMethod = GetSendMethod(md, target);
 
             // ClientRpcSender.Send(this, 12345, writer, channel, requireAuthority)
             worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Ldc_I4, hash));
+            worker.Append(worker.Create(OpCodes.Ldc_I4, rpcIndex));
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
             worker.Append(worker.Create(OpCodes.Ldc_I4, channel));
             // last arg of send is either bool, or NetworkPlayer
@@ -238,7 +237,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Callvirt, rpc.MakeHostInstanceSelfGeneric()));
         }
 
-        public ClientRpcMethod ProcessRpc(MethodDefinition md, CustomAttribute clientRpcAttr)
+        public ClientRpcMethod ProcessRpc(MethodDefinition md, CustomAttribute clientRpcAttr, int rpcIndex)
         {
             ValidateMethod(md, RemoteCallType.ClientRpc);
             ValidateParameters(md, RemoteCallType.ClientRpc);
@@ -250,13 +249,13 @@ namespace Mirage.Weaver
 
             ValueSerializer[] paramSerializers = GetValueSerializers(md);
 
-            MethodDefinition userCodeFunc = GenerateStub(md, clientRpcAttr, paramSerializers);
+            MethodDefinition userCodeFunc = GenerateStub(md, clientRpcAttr, rpcIndex, paramSerializers);
 
             MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, clientRpcAttr, paramSerializers);
 
             return new ClientRpcMethod
             {
-                UniqueHash = GetStableHash(md),
+                Index = rpcIndex,
                 stub = md,
                 target = clientTarget,
                 excludeOwner = excludeOwner,

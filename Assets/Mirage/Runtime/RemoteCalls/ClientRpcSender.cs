@@ -10,9 +10,9 @@ namespace Mirage.RemoteCalls
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientRpcSender));
 
-        public static void Send(NetworkBehaviour behaviour, int hash, NetworkWriter writer, int channelId, bool excludeOwner)
+        public static void Send(NetworkBehaviour behaviour, int index, NetworkWriter writer, int channelId, bool excludeOwner)
         {
-            RpcMessage message = CreateMessage(behaviour, hash, writer);
+            RpcMessage message = CreateMessage(behaviour, index, writer);
 
             // The public facing parameter is excludeOwner in [ClientRpc]
             // so we negate it here to logically align with SendToReady.
@@ -20,9 +20,9 @@ namespace Mirage.RemoteCalls
             behaviour.Identity.SendToRemoteObservers(message, includeOwner, channelId);
         }
 
-        public static void SendTarget(NetworkBehaviour behaviour, int hash, NetworkWriter writer, int channelId, INetworkPlayer player)
+        public static void SendTarget(NetworkBehaviour behaviour, int index, NetworkWriter writer, int channelId, INetworkPlayer player)
         {
-            RpcMessage message = CreateMessage(behaviour, hash, writer);
+            RpcMessage message = CreateMessage(behaviour, index, writer);
 
             // connection parameter is optional. use owner if null
             if (player == null)
@@ -34,9 +34,9 @@ namespace Mirage.RemoteCalls
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static RpcMessage CreateMessage(NetworkBehaviour behaviour, int hash, NetworkWriter writer)
+        static RpcMessage CreateMessage(NetworkBehaviour behaviour, int index, NetworkWriter writer)
         {
-            RemoteCall rpc = RemoteCallHelper.GetCall(hash);
+            RemoteCall rpc = behaviour.remoteCallCollection.Get(index);
 
             Validate(behaviour, rpc);
 
@@ -44,7 +44,7 @@ namespace Mirage.RemoteCalls
             {
                 netId = behaviour.NetId,
                 componentIndex = behaviour.ComponentIndex,
-                functionHash = hash,
+                functionIndex = index,
                 payload = writer.ToArraySegment()
             };
             return message;

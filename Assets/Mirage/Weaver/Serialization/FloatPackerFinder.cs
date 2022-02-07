@@ -64,7 +64,7 @@ namespace Mirage.Weaver.Serialization
         {
             FieldDefinition packerField = AddPackerField<FloatPacker>(holder, fieldName);
 
-            NetworkBehaviourProcessor.AddToStaticConstructor(holder, (worker) =>
+            holder.AddToStaticConstructor((worker) =>
             {
                 worker.Append(worker.Create(OpCodes.Ldc_R4, settings.max));
 

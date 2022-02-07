@@ -569,21 +569,27 @@ namespace Mirage
 
         internal void OnRpcMessage(RpcMessage msg)
         {
-            if (logger.LogEnabled()) logger.Log("ClientScene.OnRPCMessage hash:" + msg.functionHash + " netId:" + msg.netId);
+            if (logger.LogEnabled()) logger.Log($"ClientScene.OnRPCMessage index:{msg.functionIndex} netId:{msg.netId}");
 
-            RemoteCall remoteCall = RemoteCallHelper.GetCall(msg.functionHash);
+            if (!Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity))
+            {
+                if (logger.WarnEnabled()) logger.LogWarning($"Spawned object not found when handling ClientRpc message [netId={msg.netId}]");
+                return;
+            }
+
+            NetworkBehaviour behaviour = identity.NetworkBehaviours[msg.componentIndex];
+
+            RemoteCall remoteCall = behaviour.remoteCallCollection.Get(msg.functionIndex);
 
             if (remoteCall.InvokeType != RpcInvokeType.ClientRpc)
             {
-                throw new MethodInvocationException($"Invalid RPC call with id {msg.functionHash}");
+                throw new MethodInvocationException($"Invalid RPC call with index {msg.functionIndex}");
             }
-            if (Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity))
+
+            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
             {
-                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload))
-                {
-                    networkReader.ObjectLocator = Client.World;
-                    identity.HandleRemoteCall(remoteCall, msg.componentIndex, networkReader);
-                }
+                reader.ObjectLocator = Client.World;
+                remoteCall.Invoke(reader, behaviour, null, 0);
             }
         }
 
