@@ -1,3 +1,16 @@
+# [117.2.0](https://github.com/MirageNet/Mirage/compare/v117.1.1...v117.2.0) (2022-02-07)
+
+
+### Bug Fixes
+
+* fixing generic syncvar hooks ([90e9f24](https://github.com/MirageNet/Mirage/commit/90e9f248d44fb1aa0b212e33668b11720fceb73a))
+* **Weaver:** avoiding short instructions for methods with unknown length ([f605c46](https://github.com/MirageNet/Mirage/commit/f605c46c5c2637e605d387d9d220fcc873e0388b))
+
+
+### Features
+
+* **RPC:** adding support for generic syncvars ([b6984ca](https://github.com/MirageNet/Mirage/commit/b6984ca6a56390aedde023e8f361be82feadb51c))
+
 ## [117.1.1](https://github.com/MirageNet/Mirage/compare/v117.1.0...v117.1.1) (2022-02-07)
 
 
