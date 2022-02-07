@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Mirage.Collections;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -88,38 +87,13 @@ namespace Mirage.Weaver
         {
             Weaver.DebugLog(netBehaviourSubclass, "  GenerateConstants ");
 
-            // find instance constructor
-            MethodDefinition ctor = netBehaviourSubclass.GetMethod(".ctor");
-
-            if (ctor == null)
+            netBehaviourSubclass.AddToConstructor(logger, (worker) =>
             {
-                logger.Error($"{netBehaviourSubclass.Name} has invalid constructor", netBehaviourSubclass);
-                return;
-            }
-
-            Instruction ret = ctor.Body.Instructions[ctor.Body.Instructions.Count - 1];
-            if (ret.OpCode == OpCodes.Ret)
-            {
-                ctor.Body.Instructions.RemoveAt(ctor.Body.Instructions.Count - 1);
-            }
-            else
-            {
-                logger.Error($"{netBehaviourSubclass.Name} has invalid constructor", ctor, ctor.DebugInformation.SequencePoints.FirstOrDefault());
-                return;
-            }
-
-            ILProcessor ctorWorker = ctor.Body.GetILProcessor();
-
-            foreach (FieldDefinition fd in syncObjects)
-            {
-                GenerateSyncObjectRegistration(ctorWorker, fd);
-            }
-
-            // finish ctor
-            ctorWorker.Append(ctorWorker.Create(OpCodes.Ret));
-
-            // in case class had no cctor, it might have BeforeFieldInit, so injected cctor would be called too late
-            netBehaviourSubclass.Attributes &= ~TypeAttributes.BeforeFieldInit;
+                foreach (FieldDefinition fd in syncObjects)
+                {
+                    GenerateSyncObjectRegistration(worker, fd);
+                }
+            });
         }
 
         public static bool ImplementsSyncObject(TypeReference typeRef)
