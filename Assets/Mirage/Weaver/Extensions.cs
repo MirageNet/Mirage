@@ -211,7 +211,6 @@ namespace Mirage.Weaver
             return self.Module.ImportReference(reference);
         }
 
-
         public static MethodReference MakeHostInstanceSelfGeneric(this MethodReference self)
         {
             TypeReference type = self.DeclaringType;
@@ -222,12 +221,26 @@ namespace Mirage.Weaver
             }
             else
             {
+                var genericType = (GenericInstanceType)type.MakeSelfGeneric();
+                return self.MakeHostInstanceGeneric(genericType);
+            }
+        }
+
+        public static TypeReference MakeSelfGeneric(this TypeReference self)
+        {
+            if (!self.HasGenericParameters)
+            {
+                // if type isn't generic we dont need to do anything
+                return self;
+            }
+            else
+            {
                 // make generic instance of type, and give it the generic params as args
-                var genericType = new GenericInstanceType(type);
-                foreach (GenericParameter param in type.GenericParameters)
+                var genericType = new GenericInstanceType(self);
+                foreach (GenericParameter param in self.GenericParameters)
                     genericType.GenericArguments.Add(param);
 
-                return self.MakeHostInstanceGeneric(genericType);
+                return genericType;
             }
         }
 
