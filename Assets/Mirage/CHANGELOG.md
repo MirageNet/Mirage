@@ -1,3 +1,20 @@
+# [118.0.0](https://github.com/MirageNet/Mirage/compare/v117.2.0...v118.0.0) (2022-02-08)
+
+
+### Features
+
+* support for generic syncvar ([057e177](https://github.com/MirageNet/Mirage/commit/057e177a101b69683969f7f8550a96fbaa49d47e))
+
+
+### Performance Improvements
+
+* using index for rpcs instead of hash ([88c4cd3](https://github.com/MirageNet/Mirage/commit/88c4cd3e678f805afb87dc4e889a812d07616c6d))
+
+
+### BREAKING CHANGES
+
+* removed RemoteCallHelper and adding RemoteCallCollection instead NetworkBehaviour
+
 # [117.2.0](https://github.com/MirageNet/Mirage/compare/v117.1.1...v117.2.0) (2022-02-07)
 
 
