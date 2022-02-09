@@ -14,3 +14,9 @@ Mirage includes several small examples to help you learn how to use various feat
 -   [Tanks](Tanks/index.md)  
     This is a simple scene with animated tanks, networked rigidbody projectiles, and NavMesh movement
 
+## Import samples
+
+Sample can be imported using the Unity Package manager. They can be found inside the `Samples` Dropdown.
+
+![Sample dropdown](./UPM-samples.png)
+
