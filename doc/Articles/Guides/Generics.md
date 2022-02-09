@@ -19,20 +19,35 @@ public class MyGenericBehaviour<T> : NetworkBehaviour
 }
 ```
 
-[!WARNING] making the rpc itself generic does not work. for example `MyRpc<T>(T value)` will not work. This is because the receiver will have no idea what generic to invoke the type as.
+>[!WARNING] 
+> making the rpc itself generic does not work. for example `MyRpc<T>(T value)` will not work. This is because the receiver will have no idea what generic to invoke the type as.
 
 ## Network Messages
 
-*Coming soon*
+Generic message are partly supported. Generic Instance can be used as messages, For example using `MyMessage<int>` in the example below.
 
-Generic Message are current **NOT** supported, but might be added in the future
 ```cs
-[NetworkMessage]
 public struct MyMessage<T>
 {
     public int Value;
 }
+
+class Manager 
+{
+    void Start() 
+    {
+        Server.MessageHandler.RegisterHandler<MyMessage<int>>(HandleMessage);
+    }
+
+    void HandleIntMessage(INetworkPlayer player, MyMessage<int> msg)
+    {
+        // do stuff
+    }
+}
 ```
+
+>[!NOTE] 
+> generic message should not have `[NetworkMessage]` because this cause Mirage to try to make writer for the generic itself. Only generic instances (eg MyMessage<int>) can have serialize functions 
 
 ## Ensure Type has Write and Read functions
 

@@ -172,8 +172,8 @@ namespace Mirage.Weaver
                 throw ThrowCantGenerate(typeReference);
             }
 
-
-            if (typeDefinition.HasGenericParameters)
+            // if it is genericInstance, then we can generate writer for it
+            if (!typeReference.IsGenericInstance && typeDefinition.HasGenericParameters)
             {
                 throw ThrowCantGenerate(typeReference, "generic type");
             }
