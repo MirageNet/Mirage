@@ -21,7 +21,7 @@ jobs:
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit
 
 
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2.4.0
 
       - name: Cache Library
         id: cache-library
