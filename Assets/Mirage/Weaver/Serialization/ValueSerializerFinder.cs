@@ -16,19 +16,21 @@ namespace Mirage.Weaver.Serialization
 
         /// <exception cref="ValueSerializerException">Throws when attribute is used incorrectly</exception>
         /// <exception cref="SerializeFunctionException">Throws when can not generate read or write function</exception>
-        public static ValueSerializer GetSerializer(ModuleDefinition module, FieldDefinition field, Writers writers, Readers readers)
+        public static ValueSerializer GetSerializer(ModuleDefinition module, FieldReference field, Writers writers, Readers readers)
         {
+            // note: we have to `Resolve()` DeclaringType first, because imported referencev `Module` will be equal.
+            TypeDefinition holder = field.DeclaringType.Resolve();
+            string name = field.Name;
+
             // if field is in this module use its type for Packer field,
             // else use the generated class
-            TypeDefinition holder = field.DeclaringType.Module == module
-                ? field.DeclaringType
-                : module.GeneratedClass();
+            if (holder.Module != module)
+            {
+                holder = module.GeneratedClass();
+                name = $"{field.DeclaringType.FullName}_{field.Name}";
+            }
 
-            string name = field.DeclaringType.Module == module
-                ? field.Name
-                : $"{field.DeclaringType.FullName}_{field.Name}";
-
-            return GetSerializer(module, holder, field, field.FieldType, name, writers, readers);
+            return GetSerializer(module, holder, field.Resolve(), field.FieldType, name, writers, readers);
         }
 
         /// <exception cref="ValueSerializerException">Throws when attribute is used incorrectly</exception>

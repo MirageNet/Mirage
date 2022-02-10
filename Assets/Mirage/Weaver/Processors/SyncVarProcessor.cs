@@ -527,7 +527,8 @@ namespace Mirage.Weaver
         {
             if (!syncVar.HasProcessed) return;
 
-            syncVar.ValueSerializer.AppendWriteField(module, worker, writerParameter, null, syncVar.FieldDefinition);
+            FieldReference fieldRef = syncVar.FieldDefinition.MakeHostGenericIfNeeded();
+            syncVar.ValueSerializer.AppendWriteField(module, worker, writerParameter, null, fieldRef);
         }
 
 

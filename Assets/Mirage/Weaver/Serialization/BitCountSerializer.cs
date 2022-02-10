@@ -38,17 +38,17 @@ namespace Mirage.Weaver.Serialization
             return new BitCountSerializer(bitCount, typeConverter, true);
         }
 
-        public override void AppendWriteField(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
+        public override void AppendWriteField(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldReference fieldReference)
         {
             MethodReference writeWithBitCount = module.ImportReference(typeof(NetworkWriter).GetMethod(nameof(NetworkWriter.Write)));
 
             worker.Append(LoadParamOrArg0(worker, writerParameter));
             worker.Append(LoadParamOrArg0(worker, typeParameter));
-            worker.Append(worker.Create(OpCodes.Ldfld, ImportField(module, fieldDefinition)));
+            worker.Append(worker.Create(OpCodes.Ldfld, fieldReference));
 
             if (useZigZag)
             {
-                WriteZigZag(module, worker, fieldDefinition.FieldType);
+                WriteZigZag(module, worker, fieldReference.FieldType);
             }
             if (minValue.HasValue)
             {

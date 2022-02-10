@@ -288,6 +288,31 @@ namespace Mirage.Weaver
             return defaultValue;
         }
 
+        /// <summary>
+        /// Imports a field and makes it a member of its orignal type.
+        /// <para>This is needed if orignal type is a generic instance, this will ensure that it stays a member of that instance, eg MyMessage{int}.Value</para>
+        /// </summary>
+        /// <param name="module"></param>
+        /// <param name="field"></param>
+        /// <param name="orignalType">Type that the field orignal belonged to, NOT the resolved type</param>
+        /// <returns></returns>
+        public static FieldReference ImportField(this ModuleDefinition module, FieldDefinition field, TypeReference orignalType)
+        {
+            if (orignalType.Module != module)
+                orignalType = module.ImportReference(orignalType);
+
+            TypeReference fieldType = module.ImportReference(field.FieldType);
+            return new FieldReference(field.Name, fieldType, orignalType);
+        }
+
+        /// <summary>
+        /// Makes a field part of generic defintion
+        /// <para>
+        /// NOTE: this only works when you need the type to be part of a generic defintion, NOT a generic instance, eg member of List{T} works, but List{int} doesn't
+        /// </para>
+        /// </summary>
+        /// <param name="fd"></param>
+        /// <returns></returns>
         public static FieldReference MakeHostGenericIfNeeded(this FieldReference fd)
         {
             if (fd.DeclaringType.HasGenericParameters)

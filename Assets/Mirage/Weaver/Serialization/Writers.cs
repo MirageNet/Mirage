@@ -136,10 +136,12 @@ namespace Mirage.Weaver
         {
             // create copy here because we might add static packer field
             System.Collections.Generic.IEnumerable<FieldDefinition> fields = type.FindAllPublicFields();
-            foreach (FieldDefinition field in fields)
+            foreach (FieldDefinition fieldDef in fields)
             {
-                ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, field, this, null);
-                valueSerialize.AppendWriteField(module, writerFunc.worker, writerFunc.writerParameter, writerFunc.typeParameter, field);
+                FieldReference fieldRef = module.ImportField(fieldDef, type);
+
+                ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, fieldRef, this, null);
+                valueSerialize.AppendWriteField(module, writerFunc.worker, writerFunc.writerParameter, writerFunc.typeParameter, fieldRef);
             }
         }
 
