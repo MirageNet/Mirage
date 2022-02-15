@@ -151,6 +151,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
             Assert.That(called, Is.EqualTo(1));
         }
     }
+
     public class NetworkClientConnectFailedTest : ClientServerSetup<MockComponent>
     {
         protected override bool AutoConnectClient => false;
@@ -203,6 +204,32 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
 
             // stop connecting
             client.Disconnect();
+
+            // wait 2 frames so that messages can go from client->server->client
+            yield return null;
+            yield return null;
+
+            Assert.That(called, Is.EqualTo(1));
+        }
+    }
+
+    public class NetworkClientConnectFailedBadKeyTest : ClientServerSetup<MockComponent>
+    {
+        protected override Config ServerConfig => new Config { key = "Server Key" };
+        protected override Config ClientConfig => new Config { key = "Client Key" };
+        protected override bool AutoConnectClient => false;
+
+        [UnityTest]
+        public IEnumerator DisconnectEventWhenFull()
+        {
+            client.Connect("localhost");
+
+            int called = 0;
+            client.Disconnected.AddListener((reason) =>
+            {
+                called++;
+                Assert.That(reason, Is.EqualTo(ClientStoppedReason.KeyInvalid));
+            });
 
             // wait 2 frames so that messages can go from client->server->client
             yield return null;

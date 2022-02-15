@@ -69,7 +69,7 @@ namespace Mirage.SocketLayer
             this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
             time = new Time();
 
-            connectKeyValidator = new ConnectKeyValidator();
+            connectKeyValidator = new ConnectKeyValidator(this.config.key);
 
             bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, this.config.MaxPacketSize, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
             Application.quitting += Application_quitting;
@@ -178,7 +178,12 @@ namespace Mirage.SocketLayer
 
         internal void SendConnectRequest(Connection connection)
         {
-            SendCommand(connection, Commands.ConnectRequest, connectKeyValidator.GetKey());
+            using (ByteBuffer buffer = bufferPool.Take())
+            {
+                int length = CreateCommandPacket(buffer, Commands.ConnectRequest, null);
+                connectKeyValidator.CopyTo(buffer.array);
+                Send(connection, buffer.array, length + connectKeyValidator.KeyLength);
+            }
         }
 
         internal void SendCommand(Connection connection, Commands command, byte? extra = null)
@@ -369,7 +374,12 @@ namespace Mirage.SocketLayer
             // if invalid, then reject without reason
             if (!Validate(packet)) { return; }
 
-            if (AtMaxConnections())
+
+            if (!connectKeyValidator.Validate(packet.buffer.array))
+            {
+                RejectConnectionWithReason(endPoint, RejectReason.KeyInvalid);
+            }
+            else if (AtMaxConnections())
             {
                 RejectConnectionWithReason(endPoint, RejectReason.ServerFull);
             }
@@ -395,9 +405,6 @@ namespace Mirage.SocketLayer
                 return false;
 
             if (packet.command != Commands.ConnectRequest)
-                return false;
-
-            if (!connectKeyValidator.Validate(packet.buffer.array))
                 return false;
 
             //if (!hashCashValidator.Validate(packet))

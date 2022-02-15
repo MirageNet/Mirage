@@ -13,12 +13,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     public class PeerTestBase
     {
         public const int maxConnections = 5;
-        protected static readonly byte[] connectRequest = new byte[3]
-        {
-            (byte)PacketType.Command,
-            (byte)Commands.ConnectRequest,
-            new ConnectKeyValidator().GetKey(),
-        };
+        protected byte[] connectRequest;
 
         PeerInstance instance;
         protected Action<IConnection> connectAction;
@@ -45,6 +40,17 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             peer.OnConnected += connectAction;
             peer.OnConnectionFailed += connectFailedAction;
             peer.OnDisconnected += disconnectAction;
+
+            CreateConnectPacket();
+        }
+
+        private void CreateConnectPacket()
+        {
+            var keyValidator = new ConnectKeyValidator(instance.config.key);
+            connectRequest = new byte[2 + keyValidator.KeyLength];
+            connectRequest[0] = (byte)PacketType.Command;
+            connectRequest[1] = (byte)Commands.ConnectRequest;
+            keyValidator.CopyTo(connectRequest);
         }
     }
 
