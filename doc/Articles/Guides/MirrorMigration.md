@@ -61,17 +61,21 @@ class MyNetworkManager : NetworkManager {
     }
 
     public override void OnServerConnect(NetworkConnection conn) {
-        // Client connected on server
+        // Client connected and authenticated on server
     }
 
     public override void OnStopServer() {
         // Server stopped
     }
 
-    public override void OnClientConnect(NetworkConnection conn) {
-        // Client connected
+    public override void OnStartClient() {
+        // Client started
     }
-
+        
+    public override void OnClientConnect(NetworkConnection conn) {
+        // Client connected and authenticated
+    }
+            
     public override void OnClientDisconnect(NetworkConnection conn) {
         // Client disconnected
     }
@@ -88,6 +92,7 @@ class MyNetworkManager : NetworkManager {
         Server.Started.AddListener(OnStartServer);
         Server.Authenticated.AddListener(OnServerConnect);
         Server.Stopped.AddListener(OnStopServer);
+        Client.Started.AddListener(OnClientStarted);
         Client.Authenticated.AddListener(OnClientConnect);
         Client.Disconnected.AddListener(OnClientDisconnected);
     }
@@ -104,11 +109,15 @@ class MyNetworkManager : NetworkManager {
         // Server stopped
     }
 
+    void OnClientStarted() {
+       // Client started
+    }
+
     void OnClientConnect(INetworkPlayer conn) {
         // Client connected
     }
 
-    void OnClientDisconnected() {
+    void OnClientDisconnected(ClientStoppedReason reason) {
         // Client disconnected
     }
 }
