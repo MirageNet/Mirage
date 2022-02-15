@@ -37,6 +37,13 @@ namespace Mirage.SocketLayer
 
         #region shared
         /// <summary>
+        /// Key sent with connection message (defaults to Major version of assmebly)
+        /// <para>Used to validate that server and client are same application/version</para>
+        /// <para>NOTE: key will be ASCII encoded</para>
+        /// </summary>
+        public string key = null;
+
+        /// <summary>
         /// How long after disconnect before connection is fully removed from Peer
         /// </summary>
         public float DisconnectDuration = 1;

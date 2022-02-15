@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Mirage.SocketLayer
 {
     /// <summary>
@@ -6,22 +8,49 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal class ConnectKeyValidator
     {
-        // todo pass in key instead of having constant
-        readonly byte key = (byte)'H';
+        readonly byte[] key;
+        public readonly int KeyLength;
+        const int OFFSET = 2;
 
-        public int KeyLength => 1;
+        public ConnectKeyValidator(byte[] key)
+        {
+            this.key = key;
+            KeyLength = key.Length;
+        }
+
+        static byte[] GetKeyBytes(string key)
+        {
+            // default to mirage version
+            if (string.IsNullOrEmpty(key))
+            {
+                string version = typeof(ConnectKeyValidator).Assembly.GetName().Version.Major.ToString();
+                key = $"Mirage V{version}";
+            }
+
+            return Encoding.ASCII.GetBytes(key);
+        }
+        public ConnectKeyValidator(string key) : this(GetKeyBytes(key))
+        {
+        }
 
         public bool Validate(byte[] buffer)
         {
-            byte keyByte = buffer[2];
+            for (int i = 0; i < KeyLength; i++)
+            {
+                byte keyByte = buffer[i + OFFSET];
+                if (keyByte != key[i])
+                    return false;
+            }
 
-            return keyByte == key;
+            return true;
         }
 
         public void CopyTo(byte[] buffer)
         {
-            buffer[2] = key;
+            for (int i = 0; i < KeyLength; i++)
+            {
+                buffer[i + OFFSET] = key[i];
+            }
         }
-        public byte GetKey() => key;
     }
 }

@@ -24,5 +24,10 @@ namespace Mirage.SocketLayer
         /// Closed called locally before connect
         /// </summary>
         ClosedByPeer = 3,
+
+        /// <summary>
+        /// Key given with first message did not match the value on the server
+        /// </summary>
+        KeyInvalid = 4,
     }
 }

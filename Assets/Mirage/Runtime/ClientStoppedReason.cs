@@ -14,6 +14,8 @@ namespace Mirage
     [Serializable]
     public enum ClientStoppedReason
     {
+        // IMPORTANT: When adding new values, check all numbers, they might not be in order!
+
         /// <summary>No reason given</summary>
         None = 0,
 
@@ -33,6 +35,8 @@ namespace Mirage
         ConnectingTimeout = 5,
         /// <summary>Disconnect called locally before server replies with connected</summary>
         ConnectingCancel = 6,
+        /// <summary>Key given with first message did not match the value on the server, See SocketLayer Config</summary>
+        KeyInvalid = 9,
 
         /// <summary>Disconnect called when server was stopped in host mode</summary>
         HostModeStopped = 7,
@@ -62,6 +66,7 @@ namespace Mirage
                 case RejectReason.None: return ClientStoppedReason.None;
                 case RejectReason.Timeout: return ClientStoppedReason.ConnectingTimeout;
                 case RejectReason.ServerFull: return ClientStoppedReason.ServerFull;
+                case RejectReason.KeyInvalid: return ClientStoppedReason.KeyInvalid;
                 case RejectReason.ClosedByPeer: return ClientStoppedReason.ConnectingCancel;
             }
         }
