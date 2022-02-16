@@ -1,3 +1,13 @@
+# [119.0.0](https://github.com/MirageNet/Mirage/compare/v118.0.0...v119.0.0) (2022-02-16)
+
+
+* feat!(SocketLayer): adding connection key based on mirage version ([ff5a308](https://github.com/MirageNet/Mirage/commit/ff5a308470d6d46b24dd731a7d7639d55795ec9b))
+
+
+### BREAKING CHANGES
+
+* Mismatched server/client versions will no longer be able to connect to each other
+
 # [118.0.0](https://github.com/MirageNet/Mirage/compare/v117.2.0...v118.0.0) (2022-02-08)
 
 
