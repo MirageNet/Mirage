@@ -87,10 +87,7 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void SyncListErrorForGenericStruct()
         {
-            HasError("Cannot generate write function for generic type MyGenericStruct`1. Use a supported type or provide a custom write function",
-                "SyncListTests.SyncListErrorForGenericStruct.SyncListErrorForGenericStruct/MyGenericStruct`1<System.Single>");
-            HasError("Cannot generate read function for generic type MyGenericStruct`1. Use a supported type or provide a custom read function",
-                "SyncListTests.SyncListErrorForGenericStruct.SyncListErrorForGenericStruct/MyGenericStruct`1<System.Single>");
+            IsSuccess();
         }
 
         [Test]

@@ -44,20 +44,13 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void SyncDictionaryErrorForGenericStructKey()
         {
-            HasError("Cannot generate read function for generic type MyGenericStruct`1. Use a supported type or provide a custom read function",
-                "SyncDictionaryTests.SyncDictionaryErrorForGenericStructKey.SyncDictionaryErrorForGenericStructKey/MyGenericStruct`1<System.Single>");
-            HasError("Cannot generate write function for generic type MyGenericStruct`1. Use a supported type or provide a custom write function",
-                "SyncDictionaryTests.SyncDictionaryErrorForGenericStructKey.SyncDictionaryErrorForGenericStructKey/MyGenericStruct`1<System.Single>");
-
+            IsSuccess();
         }
 
         [Test]
         public void SyncDictionaryErrorForGenericStructItem()
         {
-            HasError("Cannot generate write function for generic type MyGenericStruct`1. Use a supported type or provide a custom write function",
-                "SyncDictionaryTests.SyncDictionaryErrorForGenericStructItem.SyncDictionaryErrorForGenericStructItem/MyGenericStruct`1<System.Single>");
-            HasError("Cannot generate read function for generic type MyGenericStruct`1. Use a supported type or provide a custom read function",
-                "SyncDictionaryTests.SyncDictionaryErrorForGenericStructItem.SyncDictionaryErrorForGenericStructItem/MyGenericStruct`1<System.Single>");
+            IsSuccess();
         }
 
         [Test]
