@@ -42,10 +42,21 @@ namespace Mirage
         public int componentIndex;
         public int functionIndex;
 
+        // the parameters for the Cmd function
+        // -> ArraySegment to avoid unnecessary allocations
+        public ArraySegment<byte> payload;
+    }
+
+    [NetworkMessage]
+    public struct ServerRpcWithReplyMessage
+    {
+        public uint netId;
+        public int componentIndex;
+        public int functionIndex;
+
         // if the server Rpc can return values
         // this then a ServerRpcReply will be sent with this id
-        // use nullable for syncing so sent as 1 bit if null, but 0 for no id else where in the code
-        public int? replyId;
+        public int replyId;
         // the parameters for the Cmd function
         // -> ArraySegment to avoid unnecessary allocations
         public ArraySegment<byte> payload;
