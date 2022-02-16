@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Mirage.Logging;
 using Mirage.RemoteCalls;
 using Mirage.Serialization;
@@ -71,6 +72,7 @@ namespace Mirage
         internal void RegisterMessageHandlers()
         {
             Server.MessageHandler.RegisterHandler<ServerRpcMessage>(OnServerRpcMessage);
+            Server.MessageHandler.RegisterHandler<ServerRpcWithReplyMessage>(OnServerRpcWithReplyMessage);
         }
 
         void OnServerStarted()
@@ -424,21 +426,30 @@ namespace Mirage
         /// </summary>
         /// <param name="player"></param>
         /// <param name="msg"></param>
+        void OnServerRpcWithReplyMessage(INetworkPlayer player, ServerRpcWithReplyMessage msg)
+        {
+            OnServerRpc(player, msg.netId, msg.componentIndex, msg.functionIndex, msg.payload, msg.replyId);
+        }
         void OnServerRpcMessage(INetworkPlayer player, ServerRpcMessage msg)
         {
-            if (!Server.World.TryGetIdentity(msg.netId, out NetworkIdentity identity))
+            OnServerRpc(player, msg.netId, msg.componentIndex, msg.functionIndex, msg.payload, default);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void OnServerRpc(INetworkPlayer player, uint netId, int componentIndex, int functionIndex, ArraySegment<byte> payload, int replyId)
+        {
+            if (!Server.World.TryGetIdentity(netId, out NetworkIdentity identity))
             {
-                if (logger.WarnEnabled()) logger.LogWarning("Spawned object not found when handling ServerRpc message [netId=" + msg.netId + "]");
+                if (logger.WarnEnabled()) logger.LogWarning($"Spawned object not found when handling ServerRpc message [netId={netId}]");
                 return;
             }
 
-            NetworkBehaviour behaviour = identity.NetworkBehaviours[msg.componentIndex];
+            NetworkBehaviour behaviour = identity.NetworkBehaviours[componentIndex];
 
-            RemoteCall remoteCall = behaviour.remoteCallCollection.Get(msg.functionIndex);
+            RemoteCall remoteCall = behaviour.remoteCallCollection.Get(functionIndex);
 
             if (remoteCall.InvokeType != RpcInvokeType.ServerRpc)
             {
-                throw new MethodInvocationException($"Invalid ServerRpc for index {msg.functionIndex}");
+                throw new MethodInvocationException($"Invalid ServerRpc for index {functionIndex}");
             }
 
             // ServerRpcs can be for player objects, OR other objects with client-authority
@@ -446,16 +457,16 @@ namespace Mirage
             //    only allow the ServerRpc if clientAuthorityOwner
             if (remoteCall.RequireAuthority && identity.Owner != player)
             {
-                if (logger.WarnEnabled()) logger.LogWarning("ServerRpc for object without authority [netId=" + msg.netId + "]");
+                if (logger.WarnEnabled()) logger.LogWarning($"ServerRpc for object without authority [netId={netId}]");
                 return;
             }
 
-            if (logger.LogEnabled()) logger.Log("OnServerRpcMessage for netId=" + msg.netId + " conn=" + player);
+            if (logger.LogEnabled()) logger.Log($"OnServerRpcMessage for netId={netId} conn={player}");
 
-            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
+            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(payload))
             {
                 reader.ObjectLocator = Server.World;
-                remoteCall.Invoke(reader, behaviour, player, msg.replyId.GetValueOrDefault());
+                remoteCall.Invoke(reader, behaviour, player, replyId);
             }
         }
 

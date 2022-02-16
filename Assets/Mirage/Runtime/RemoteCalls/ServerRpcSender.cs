@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using Mirage.Serialization;
 
@@ -12,14 +11,29 @@ namespace Mirage.RemoteCalls
     {
         public static void Send(NetworkBehaviour behaviour, int index, NetworkWriter writer, int channelId, bool requireAuthority)
         {
-            ServerRpcMessage message = CreateMessage(behaviour, index, writer, requireAuthority);
+            Validate(behaviour, index, requireAuthority);
+
+            var message = new ServerRpcMessage
+            {
+                netId = behaviour.NetId,
+                componentIndex = behaviour.ComponentIndex,
+                functionIndex = index,
+                payload = writer.ToArraySegment()
+            };
 
             behaviour.Client.Send(message, channelId);
         }
 
         public static UniTask<T> SendWithReturn<T>(NetworkBehaviour behaviour, int index, NetworkWriter writer, int channelId, bool requireAuthority)
         {
-            ServerRpcMessage message = CreateMessage(behaviour, index, writer, requireAuthority);
+            Validate(behaviour, index, requireAuthority);
+            var message = new ServerRpcWithReplyMessage
+            {
+                netId = behaviour.NetId,
+                componentIndex = behaviour.ComponentIndex,
+                functionIndex = index,
+                payload = writer.ToArraySegment()
+            };
 
             (UniTask<T> task, int id) = behaviour.ClientObjectManager.CreateReplyTask<T>();
 
@@ -30,24 +44,9 @@ namespace Mirage.RemoteCalls
             return task;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static ServerRpcMessage CreateMessage(NetworkBehaviour behaviour, int index, NetworkWriter writer, bool requireAuthority)
+        static void Validate(NetworkBehaviour behaviour, int index, bool requireAuthority)
         {
             RemoteCall rpc = behaviour.remoteCallCollection.Get(index);
-            Validate(behaviour, rpc, requireAuthority);
-
-            var message = new ServerRpcMessage
-            {
-                netId = behaviour.NetId,
-                componentIndex = behaviour.ComponentIndex,
-                functionIndex = index,
-                payload = writer.ToArraySegment()
-            };
-            return message;
-        }
-
-        static void Validate(NetworkBehaviour behaviour, RemoteCall rpc, bool requireAuthority)
-        {
             INetworkClient client = behaviour.Client;
 
             if (client == null || !client.Active)
