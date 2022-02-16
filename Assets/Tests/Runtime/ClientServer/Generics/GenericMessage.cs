@@ -74,15 +74,15 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
             yield return new WaitForSeconds(0.4f);
 
             Assert.That(clientComponent.myList.Count, Is.EqualTo(2));
-            Assert.That(clientComponent.myList[0], Is.EqualTo(num1));
-            Assert.That(clientComponent.myList[1], Is.EqualTo(num2));
+            Assert.That(clientComponent.myList[0].value, Is.EqualTo(num1));
+            Assert.That(clientComponent.myList[1].value, Is.EqualTo(num2));
 
             serverComponent.myList.Remove(new GenericSyncList_Behaviour.MyStruct<int> { value = num1 });
 
             yield return new WaitForSeconds(0.4f);
 
             Assert.That(clientComponent.myList.Count, Is.EqualTo(1));
-            Assert.That(clientComponent.myList[1], Is.EqualTo(num2));
+            Assert.That(clientComponent.myList[0].value, Is.EqualTo(num2));
         }
     }
 
@@ -120,7 +120,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
             const int num = 32;
             Action<int> sub = Substitute.For<Action<int>>();
             clientComponent.structParam += sub;
-            clientComponent.MyRpc(new GenericStructAsArg_Behaviour.MyStruct<int> { value = num });
+            serverComponent.MyRpc(new GenericStructAsArg_Behaviour.MyStruct<int> { value = num });
 
             yield return null;
             yield return null;
@@ -134,7 +134,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
             const int num = 32;
             Action<int> sub = Substitute.For<Action<int>>();
             clientComponent.holderParam += sub;
-            clientComponent.MyRpcHolder(new GenericStructAsArg_Behaviour.MyHolder
+            serverComponent.MyRpcHolder(new GenericStructAsArg_Behaviour.MyHolder
             {
                 inner = new GenericStructAsArg_Behaviour.MyStruct<int>
                 {
