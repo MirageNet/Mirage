@@ -1,3 +1,10 @@
+# [119.1.0](https://github.com/MirageNet/Mirage/compare/v119.0.1...v119.1.0) (2022-02-17)
+
+
+### Features
+
+* support for generic network messages ([#1040](https://github.com/MirageNet/Mirage/issues/1040)) ([2d8990d](https://github.com/MirageNet/Mirage/commit/2d8990dc02dc945ec072fdccf40e63c1c5b8cd43))
+
 ## [119.0.1](https://github.com/MirageNet/Mirage/compare/v119.0.0...v119.0.1) (2022-02-16)
 
 
