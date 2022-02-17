@@ -207,18 +207,25 @@ namespace Mirage.Weaver
             ILProcessor worker = readMethod.worker;
             // create copy here because we might add static packer field
             System.Collections.Generic.IEnumerable<FieldDefinition> fields = type.FindAllPublicFields();
-            foreach (FieldDefinition field in fields)
+            foreach (FieldDefinition fieldDef in fields)
             {
+                // note:
+                // - fieldDef to get attributes
+                // - fieldType (made non-generic if possible) used to get type (eg if MyMessage<int> and field `T Value` then get writer for int)
+                // - fieldRef (imported) to emit IL codes
+                TypeReference fieldType = fieldDef.GetFieldTypeIncludingGeneric(type);
+                FieldReference fieldRef = module.ImportField(fieldDef, type);
+
+                ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, fieldDef, fieldType, null, this);
+
                 // load this, write value, store value
 
                 // mismatched ldloca/ldloc for struct/class combinations is invalid IL, which causes crash at runtime
                 OpCode opcode = type.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc;
                 worker.Append(worker.Create(opcode, 0));
 
-                ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, field, null, this);
-                valueSerialize.AppendRead(module, worker, readMethod.readParameter, field.FieldType);
+                valueSerialize.AppendRead(module, worker, readMethod.readParameter, fieldType);
 
-                FieldReference fieldRef = module.ImportReference(field);
                 worker.Append(worker.Create(OpCodes.Stfld, fieldRef));
             }
         }

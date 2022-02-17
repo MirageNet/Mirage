@@ -16,19 +16,21 @@ namespace Mirage.Weaver.Serialization
 
         /// <exception cref="ValueSerializerException">Throws when attribute is used incorrectly</exception>
         /// <exception cref="SerializeFunctionException">Throws when can not generate read or write function</exception>
-        public static ValueSerializer GetSerializer(ModuleDefinition module, FieldDefinition field, Writers writers, Readers readers)
+        public static ValueSerializer GetSerializer(ModuleDefinition module, FieldReference field, TypeReference fieldType, Writers writers, Readers readers)
         {
+            // note: we have to `Resolve()` DeclaringType first, because imported referencev `Module` will be equal.
+            TypeDefinition holder = field.DeclaringType.Resolve();
+            string name = field.Name;
+
             // if field is in this module use its type for Packer field,
             // else use the generated class
-            TypeDefinition holder = field.DeclaringType.Module == module
-                ? field.DeclaringType
-                : module.GeneratedClass();
+            if (holder.Module != module)
+            {
+                holder = module.GeneratedClass();
+                name = $"{field.DeclaringType.FullName}_{field.Name}";
+            }
 
-            string name = field.DeclaringType.Module == module
-                ? field.Name
-                : $"{field.DeclaringType.FullName}_{field.Name}";
-
-            return GetSerializer(module, holder, field, field.FieldType, name, writers, readers);
+            return GetSerializer(module, holder, field.Resolve(), fieldType, name, writers, readers);
         }
 
         /// <exception cref="ValueSerializerException">Throws when attribute is used incorrectly</exception>
@@ -38,6 +40,7 @@ namespace Mirage.Weaver.Serialization
             string name = $"{method.Name}_{param.Name}";
             return GetSerializer(method.DeclaringType.Module, method.DeclaringType, param, param.ParameterType, name, writers, readers);
         }
+
 
         /// <summary>
         ///
@@ -61,15 +64,28 @@ namespace Mirage.Weaver.Serialization
             // We need to check if other attributes are also used
             // if user adds 2 attributes that dont work together weaver should then throw error
             ValueSerializer valueSerializer = null;
-            bool HasIntAttribute() => valueSerializer != null && valueSerializer.IsIntType;
 
+            // attributeProvider is null for generic fields,
+            // but that is find because they wont have any of these attributes anyway
+            if (attributeProvider != null)
+                valueSerializer = GetUsingAttribute(module, holder, attributeProvider, fieldType, fieldName, valueSerializer);
 
+            if (valueSerializer == null)
+            {
+                valueSerializer = FindSerializeFunctions(writers, readers, fieldType);
+            }
+
+            return valueSerializer;
+        }
+
+        private static ValueSerializer GetUsingAttribute(ModuleDefinition module, TypeDefinition holder, ICustomAttributeProvider attributeProvider, TypeReference fieldType, string fieldName, ValueSerializer valueSerializer)
+        {
             if (attributeProvider.HasCustomAttribute<BitCountAttribute>())
                 valueSerializer = BitCountFinder.GetSerializer(attributeProvider, fieldType);
 
             if (attributeProvider.HasCustomAttribute<VarIntAttribute>())
             {
-                if (HasIntAttribute())
+                if (HasIntAttribute(valueSerializer))
                     throw new VarIntException($"[VarInt] can't be used with [BitCount], [VarIntBlocks] or [BitCountFromRange]");
 
                 valueSerializer = new VarIntFinder().GetSerializer(module, holder, attributeProvider, fieldType, fieldName);
@@ -77,7 +93,7 @@ namespace Mirage.Weaver.Serialization
 
             if (attributeProvider.HasCustomAttribute<VarIntBlocksAttribute>())
             {
-                if (HasIntAttribute())
+                if (HasIntAttribute(valueSerializer))
                     throw new VarIntBlocksException($"[VarIntBlocks] can't be used with [BitCount], [VarInt] or [BitCountFromRange]");
 
                 valueSerializer = VarIntBlocksFinder.GetSerializer(attributeProvider, fieldType);
@@ -85,7 +101,7 @@ namespace Mirage.Weaver.Serialization
 
             if (attributeProvider.HasCustomAttribute<BitCountFromRangeAttribute>())
             {
-                if (HasIntAttribute())
+                if (HasIntAttribute(valueSerializer))
                     throw new BitCountFromRangeException($"[BitCountFromRange] can't be used with [BitCount], [VarInt] or [VarIntBlocks]");
 
                 valueSerializer = BitCountFromRangeFinder.GetSerializer(attributeProvider, fieldType);
@@ -104,14 +120,11 @@ namespace Mirage.Weaver.Serialization
 
             if (attributeProvider.HasCustomAttribute<QuaternionPackAttribute>())
                 valueSerializer = new QuaternionFinder().GetSerializer(module, holder, attributeProvider, fieldType, fieldName);
-
-            if (valueSerializer == null)
-            {
-                valueSerializer = FindSerializeFunctions(writers, readers, fieldType);
-            }
-
             return valueSerializer;
         }
+
+        static bool HasIntAttribute(ValueSerializer valueSerializer) => valueSerializer != null && valueSerializer.IsIntType;
+
 
         /// <exception cref="SerializeFunctionException">Throws when can not generate read or write function</exception>
         static ValueSerializer FindSerializeFunctions(Writers writers, Readers readers, TypeReference fieldType)

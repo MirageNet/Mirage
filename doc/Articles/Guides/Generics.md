@@ -19,20 +19,8 @@ public class MyGenericBehaviour<T> : NetworkBehaviour
 }
 ```
 
-[!WARNING] making the rpc itself generic does not work. for example `MyRpc<T>(T value)` will not work. This is because the receiver will have no idea what generic to invoke the type as.
-
-## Network Messages
-
-*Coming soon*
-
-Generic Message are current **NOT** supported, but might be added in the future
-```cs
-[NetworkMessage]
-public struct MyMessage<T>
-{
-    public int Value;
-}
-```
+>[!WARNING] 
+> making the rpc itself generic does not work. for example `MyRpc<T>(T value)` will not work. This is because the receiver will have no idea what generic to invoke the type as.
 
 ## Ensure Type has Write and Read functions
 
@@ -62,3 +50,49 @@ public static class MyCustomTypeExtensions
     }
 }
 ```
+
+## Network Messages and other types
+
+Generic message are partly supported. Generic Instance can be used as messages, For example using `MyMessage<int>` in the example below.
+
+This also includes using generic types in RPC or inside other types as long they are generic instances.
+
+```cs
+public struct MyMessage<T>
+{
+    public T Value;
+}
+
+class Manager 
+{
+    void Start() 
+    {
+        Server.MessageHandler.RegisterHandler<MyMessage<int>>(HandleMessage);
+    }
+
+    void HandleIntMessage(INetworkPlayer player, MyMessage<int> msg)
+    {
+        // do stuff
+    }
+}
+```
+
+>[!NOTE] 
+> generic message should not have `[NetworkMessage]` because this cause Mirage to try to make writer for the generic itself. Only generic instances (eg MyMessage<int>) can have serialize functions 
+
+## SyncList, SyncDictionary, SyncSet
+
+SyncList, SyncDictionary and SyncSet can have generic types as their element type as long as it is a generic instance (eg `MyType<int>` not `MyType<T>`).
+
+```cs 
+public struct MyType<T>
+{
+    public bool Option;
+    public T Value;
+}
+public class MyBehaviour : NetworkBehaviour
+{
+    public SyncList<MyType<float>> myList;
+}
+```
+

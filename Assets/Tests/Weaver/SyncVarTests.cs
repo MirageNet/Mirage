@@ -44,8 +44,7 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void SyncVarsGenericParam()
         {
-            HasError("Cannot generate write function for generic type MySyncVar`1. Use a supported type or provide a custom write function",
-                "SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam/MySyncVar`1<System.Int32> SyncVarTests.SyncVarsGenericParam.SyncVarsGenericParam::invalidVar");
+            IsSuccess();
         }
 
         [Test]

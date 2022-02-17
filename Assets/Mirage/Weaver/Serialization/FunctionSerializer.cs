@@ -19,14 +19,14 @@ namespace Mirage.Weaver.Serialization
             this.readFunction = readFunction;
         }
 
-        public override void AppendWriteField(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldDefinition fieldDefinition)
+        public override void AppendWriteField(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldReference fieldReference)
         {
             // make generic and import field
 
             // if param is null then load arg0 instead
             worker.Append(LoadParamOrArg0(worker, writerParameter));
             worker.Append(LoadParamOrArg0(worker, typeParameter));
-            worker.Append(worker.Create(OpCodes.Ldfld, ImportField(module, fieldDefinition)));
+            worker.Append(worker.Create(OpCodes.Ldfld, fieldReference));
             worker.Append(worker.Create(OpCodes.Call, writeFunction));
 
         }

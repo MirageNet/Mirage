@@ -136,10 +136,18 @@ namespace Mirage.Weaver
         {
             // create copy here because we might add static packer field
             System.Collections.Generic.IEnumerable<FieldDefinition> fields = type.FindAllPublicFields();
-            foreach (FieldDefinition field in fields)
+            foreach (FieldDefinition fieldDef in fields)
             {
-                ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, field, this, null);
-                valueSerialize.AppendWriteField(module, writerFunc.worker, writerFunc.writerParameter, writerFunc.typeParameter, field);
+                // note:
+                // - fieldDef to get attributes
+                // - fieldType (made non-generic if possible) used to get type (eg if MyMessage<int> and field `T Value` then get writer for int)
+                // - fieldRef (imported) to emit IL codes
+
+                TypeReference fieldType = fieldDef.GetFieldTypeIncludingGeneric(type);
+                FieldReference fieldRef = module.ImportField(fieldDef, type);
+
+                ValueSerializer valueSerialize = ValueSerializerFinder.GetSerializer(module, fieldDef, fieldType, this, null);
+                valueSerialize.AppendWriteField(module, writerFunc.worker, writerFunc.writerParameter, writerFunc.typeParameter, fieldRef);
             }
         }
 
