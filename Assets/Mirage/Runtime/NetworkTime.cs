@@ -94,12 +94,12 @@ namespace Mirage
             _rtt.Add(newRtt);
 
             // the difference in time between the client and the server
-            // but subtract half of the rtt to compensate for latency
+            // but add half of the rtt to compensate for latency
             // half of rtt is the best approximation we have
-            double newOffset = now - newRtt * 0.5f - msg.serverTime;
+            double newOffset = - now + newRtt * 0.5f + msg.serverTime;
 
-            double newOffsetMin = now - newRtt - msg.serverTime;
-            double newOffsetMax = now - msg.serverTime;
+            double newOffsetMin = - now + msg.serverTime;
+            double newOffsetMax = - now + newRtt + msg.serverTime;
             offsetMin = Math.Max(offsetMin, newOffsetMin);
             offsetMax = Math.Min(offsetMax, newOffsetMax);
 
@@ -108,6 +108,9 @@ namespace Mirage
                 // the old offset was offrange,  throw it away and use new one
                 _offset = new ExponentialMovingAverage(PingWindowSize);
                 _offset.Add(newOffset);
+
+                offsetMin = double.MinValue;
+                offsetMax = double.MaxValue;
             }
             else if (newOffset >= offsetMin || newOffset <= offsetMax)
             {
@@ -156,7 +159,7 @@ namespace Mirage
                 if (lastFrame != UnityEngine.Time.frameCount)
                 {
                     // Notice _offset is 0 at the server
-                    _time = LocalTime() - _offset.Value;
+                    _time = LocalTime() + _offset.Value;
                     lastFrame = UnityEngine.Time.frameCount;
                 }
                 return _time;
