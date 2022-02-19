@@ -1,3 +1,10 @@
+## [119.1.1](https://github.com/MirageNet/Mirage/compare/v119.1.0...v119.1.1) (2022-02-19)
+
+
+### Bug Fixes
+
+* fixing ArgumentOutOfRangeException when no NetworkIdentity on object ([d8e7830](https://github.com/MirageNet/Mirage/commit/d8e7830ef709a968cf27d35557b48235b4572d0c))
+
 # [119.1.0](https://github.com/MirageNet/Mirage/compare/v119.0.1...v119.1.0) (2022-02-17)
 
 
