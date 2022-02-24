@@ -121,7 +121,7 @@ jobs:
         with:
           path: Library
           key: Library-2020.1.17
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3.0.0
         with:
           node-version: '14'
 
