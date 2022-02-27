@@ -6,18 +6,32 @@ using UnityEngine;
 
 namespace Mirage.Sockets.Udp
 {
-    public class UdpSocket : ISocket
+    public abstract class UdpSocketBase : ISocket
     {
-        Socket socket;
+        protected Socket socket;
         EndPointWrapper Endpoint;
 
         public void Bind(IEndPoint endPoint)
         {
+            if (this is ClientUdpSocket)
+                throw new InvalidOperationException("Can't Bind using a ClientUdpSocket");
+
             Endpoint = (EndPointWrapper)endPoint;
 
             socket = CreateSocket(Endpoint.inner);
             socket.DualMode = true;
             socket.Bind(Endpoint.inner);
+        }
+
+        public void Connect(IEndPoint endPoint)
+        {
+            if (this is ServerUdpSocket)
+                throw new InvalidOperationException("Can't Connect using a ServerUdpSocket");
+
+            Endpoint = (EndPointWrapper)endPoint;
+
+            socket = CreateSocket(Endpoint.inner);
+            socket.Connect(Endpoint.inner);
         }
 
         static Socket CreateSocket(EndPoint endPoint)
@@ -65,14 +79,6 @@ namespace Mirage.Sockets.Udp
             }
         }
 
-        public void Connect(IEndPoint endPoint)
-        {
-            Endpoint = (EndPointWrapper)endPoint;
-
-            socket = CreateSocket(Endpoint.inner);
-            socket.Connect(Endpoint.inner);
-        }
-
         public void Close()
         {
             socket.Close();
@@ -95,10 +101,23 @@ namespace Mirage.Sockets.Udp
             return c;
         }
 
-        public void Send(IEndPoint endPoint, byte[] packet, int length)
+        public abstract void Send(IEndPoint endPoint, byte[] packet, int length);
+    }
+    public class ServerUdpSocket : UdpSocketBase
+    {
+        public override void Send(IEndPoint endPoint, byte[] packet, int length)
         {
             EndPoint netEndPoint = ((EndPointWrapper)endPoint).inner;
             socket.SendTo(packet, length, SocketFlags.None, netEndPoint);
+        }
+    }
+    public class ClientUdpSocket : UdpSocketBase
+    {
+        public override void Send(IEndPoint endPoint, byte[] packet, int length)
+        {
+            // macOS throws error if calling `SendTo` after `Connect`
+            // so we have to use `Send` for client to avoid that error
+            socket.Send(packet, length, SocketFlags.None);
         }
     }
 }

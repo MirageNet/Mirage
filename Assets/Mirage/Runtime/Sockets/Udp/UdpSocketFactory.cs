@@ -80,7 +80,7 @@ namespace Mirage.Sockets.Udp
 
             if (useNanoSocket) return new NanoSocket(this);
 
-            return new UdpSocket();
+            return new ClientUdpSocket();
         }
 
         public override ISocket CreateServerSocket()
@@ -89,7 +89,7 @@ namespace Mirage.Sockets.Udp
 
             if (useNanoSocket) return new NanoSocket(this);
 
-            return new UdpSocket();
+            return new ServerUdpSocket();
         }
 
         public override IEndPoint GetBindEndPoint()
