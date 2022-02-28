@@ -49,7 +49,7 @@ jobs:
           path: Tests
 
       - name: Publish test results
-        uses: MirageNet/nunit-reporter@v1.0.11
+        uses: MirageNet/nunit-reporter@v1.1.0
         if: always()
         with:
           path: "Tests/*.xml"
