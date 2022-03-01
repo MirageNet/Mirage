@@ -1,3 +1,10 @@
+## [119.1.2](https://github.com/MirageNet/Mirage/compare/v119.1.1...v119.1.2) (2022-03-01)
+
+
+### Bug Fixes
+
+* fixing udp socket for macOS ([#1049](https://github.com/MirageNet/Mirage/issues/1049)) ([67baff1](https://github.com/MirageNet/Mirage/commit/67baff1e072eca93629744c954c5edb3bf49f952))
+
 ## [119.1.1](https://github.com/MirageNet/Mirage/compare/v119.1.0...v119.1.1) (2022-02-19)
 
 
