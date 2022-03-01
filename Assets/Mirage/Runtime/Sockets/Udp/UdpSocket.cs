@@ -70,7 +70,6 @@ namespace Mirage.Sockets.Udp
             Endpoint = (EndPointWrapper)endPoint;
 
             socket = CreateSocket(Endpoint.inner);
-            socket.Connect(Endpoint.inner);
         }
 
         public void Close()
