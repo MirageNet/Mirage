@@ -16,10 +16,13 @@ namespace Mirage.Examples.Pong
 
             if (Server != null)
             {
-                Server.Disconnected.AddListener(OnServerAddPlayer);
+                // add disconnect event so that OnServerDisconnect will be called when player disconnects
+                Server.Disconnected.AddListener(OnServerDisconnect);
             }
         }
 
+        // override OnServerAddPlayer so to do custom spawn location for character
+        // this method will be called by base class when player sends `AddCharacterMessage`
         public override void OnServerAddPlayer(INetworkPlayer player)
         {
             // add player at correct spawn position
