@@ -1,3 +1,10 @@
+## [119.1.3](https://github.com/MirageNet/Mirage/compare/v119.1.2...v119.1.3) (2022-03-02)
+
+
+### Bug Fixes
+
+* fixing pong example ([0b28fe4](https://github.com/MirageNet/Mirage/commit/0b28fe47e746a5a2fc5e65e8565c83671ce8560a))
+
 ## [119.1.2](https://github.com/MirageNet/Mirage/compare/v119.1.1...v119.1.2) (2022-03-01)
 
 
