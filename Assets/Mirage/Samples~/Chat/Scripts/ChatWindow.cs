@@ -23,6 +23,11 @@ namespace Mirage.Examples.Chat
         {
             Player.OnMessage += OnPlayerMessage;
         }
+        
+        public void OnDestroy()
+        {
+            Player.OnMessage -= OnPlayerMessage;
+        }
 
         void OnPlayerMessage(Player player, string message)
         {
