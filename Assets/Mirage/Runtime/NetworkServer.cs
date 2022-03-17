@@ -213,7 +213,9 @@ namespace Mirage
 
             NetworkWriterPool.Configure(config.MaxPacketSize);
 
-            // Only create peer if listening
+            // Are we listening for incoming connections?
+            // If yes, set up a socket for incoming connections (we're a multiplayer game).
+            // If not, that's okay. Some games use a non-listening server for their single player game mode (Battlefield, Call of Duty...)
             if (Listening)
             {
                 // Create a server specific socket.
@@ -223,13 +225,14 @@ namespace Mirage
                 peer = new Peer(socket, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
                 peer.OnConnected += Peer_OnConnected;
                 peer.OnDisconnected += Peer_OnDisconnected;
-
+                // Bind it to the endpoint.
                 peer.Bind(SocketFactory.GetBindEndPoint());
 
                 if (logger.LogEnabled()) logger.Log("Server started, listening for connections");
             }
             else
             {
+                // Nicely mention that we're going live, but not listening for connections.
                 if (logger.LogEnabled()) logger.Log("Server started, but not listening for connections: Attempts to connect to this instance will fail!");
             }
 
