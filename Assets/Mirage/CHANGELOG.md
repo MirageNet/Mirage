@@ -1,3 +1,11 @@
+## [119.1.4](https://github.com/MirageNet/Mirage/compare/v119.1.3...v119.1.4) (2022-03-17)
+
+
+### Bug Fixes
+
+* Don't create a socket if not listening (should fix [#1054](https://github.com/MirageNet/Mirage/issues/1054)) ([f33c6eb](https://github.com/MirageNet/Mirage/commit/f33c6eb2525919a4304e39f1309552c75c788abf))
+* networkserver shouldn't create socket if we're not listening (addresses ticket [#1054](https://github.com/MirageNet/Mirage/issues/1054)) ([5117f49](https://github.com/MirageNet/Mirage/commit/5117f49cfc7c5750388f248db2ec1b6296510503))
+
 ## [119.1.3](https://github.com/MirageNet/Mirage/compare/v119.1.2...v119.1.3) (2022-03-02)
 
 
