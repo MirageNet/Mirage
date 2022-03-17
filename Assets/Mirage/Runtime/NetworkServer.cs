@@ -186,7 +186,7 @@ namespace Mirage
             ThrowIfSocketIsMissing();
 
             Application.quitting += Stop;
-            if (logger.LogEnabled()) logger.Log($"NetworkServer Created, Mirage version: {Version.Current}");
+            if (logger.LogEnabled()) logger.Log($"NetworkServer created, Mirage version: {Version.Current}");
 
             logger.Assert(Players.Count == 0, "Player should have been reset since previous session");
             logger.Assert(connections.Count == 0, "Connections should have been reset since previous session");
@@ -198,7 +198,6 @@ namespace Mirage
             MessageHandler = new MessageHandler(World, DisconnectOnException);
             MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing);
 
-            ISocket socket = SocketFactory.CreateServerSocket();
             var dataHandler = new DataHandler(MessageHandler, connections);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
@@ -214,17 +213,28 @@ namespace Mirage
 
             NetworkWriterPool.Configure(config.MaxPacketSize);
 
-            // Only create peer if listening
+            // Are we listening for incoming connections?
+            // If yes, set up a socket for incoming connections (we're a multiplayer game).
+            // If not, that's okay. Some games use a non-listening server for their single player game mode (Battlefield, Call of Duty...)
             if (Listening)
             {
+                // Create a server specific socket.
+                ISocket socket = SocketFactory.CreateServerSocket();
+
+                // Tell the peer to use that newly created socket.
                 peer = new Peer(socket, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
                 peer.OnConnected += Peer_OnConnected;
                 peer.OnDisconnected += Peer_OnDisconnected;
-
+                // Bind it to the endpoint.
                 peer.Bind(SocketFactory.GetBindEndPoint());
-            }
 
-            if (logger.LogEnabled()) logger.Log("Server started listening");
+                if (logger.LogEnabled()) logger.Log("Server started, listening for connections");
+            }
+            else
+            {
+                // Nicely mention that we're going live, but not listening for connections.
+                if (logger.LogEnabled()) logger.Log("Server started, but not listening for connections: Attempts to connect to this instance will fail!");
+            }
 
             InitializeAuthEvents();
             Active = true;
