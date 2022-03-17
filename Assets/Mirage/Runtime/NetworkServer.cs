@@ -186,7 +186,7 @@ namespace Mirage
             ThrowIfSocketIsMissing();
 
             Application.quitting += Stop;
-            if (logger.LogEnabled()) logger.Log($"NetworkServer Created, Mirage version: {Version.Current}");
+            if (logger.LogEnabled()) logger.Log($"NetworkServer created, Mirage version: {Version.Current}");
 
             logger.Assert(Players.Count == 0, "Player should have been reset since previous session");
             logger.Assert(connections.Count == 0, "Connections should have been reset since previous session");
