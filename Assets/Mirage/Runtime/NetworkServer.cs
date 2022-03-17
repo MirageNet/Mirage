@@ -198,7 +198,6 @@ namespace Mirage
             MessageHandler = new MessageHandler(World, DisconnectOnException);
             MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing);
 
-            ISocket socket = SocketFactory.CreateServerSocket();
             var dataHandler = new DataHandler(MessageHandler, connections);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
@@ -217,14 +216,22 @@ namespace Mirage
             // Only create peer if listening
             if (Listening)
             {
+                // Create a server specific socket.
+                ISocket socket = SocketFactory.CreateServerSocket();
+
+                // Tell the peer to use that newly created socket.
                 peer = new Peer(socket, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
                 peer.OnConnected += Peer_OnConnected;
                 peer.OnDisconnected += Peer_OnDisconnected;
 
                 peer.Bind(SocketFactory.GetBindEndPoint());
-            }
 
-            if (logger.LogEnabled()) logger.Log("Server started listening");
+                if (logger.LogEnabled()) logger.Log("Server started, listening for connections");
+            }
+            else
+            {
+                if (logger.LogEnabled()) logger.Log("Server started, but not listening for connections: Attempts to connect to this instance will fail!");
+            }
 
             InitializeAuthEvents();
             Active = true;
