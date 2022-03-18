@@ -13,7 +13,7 @@ namespace Mirage.Events.Tests
         protected abstract void AddListener();
         protected abstract void RemoveListener();
         protected abstract void Reset();
-        protected abstract void RemoveAllListeners();
+        //protected abstract void RemoveAllListeners();
 
 
         [SetUp]
@@ -116,23 +116,23 @@ namespace Mirage.Events.Tests
             Assert.That(listenerCallCount, Is.EqualTo(1));
         }
 
-        [Test]
-        public void RemoveAllRemovesListeners()
-        {
-            AddListener();
+        //[Test]
+        //public void RemoveAllRemovesListeners()
+        //{
+        //    AddListener();
 
-            Invoke();
-            Assert.That(listenerCallCount, Is.EqualTo(1));
+        //    Invoke();
+        //    Assert.That(listenerCallCount, Is.EqualTo(1));
 
-            RemoveAllListeners();
+        //    RemoveAllListeners();
 
-            Assert.DoesNotThrow(() =>
-            {
-                Invoke();
-            });
-            // listener removed so no increase to count
-            Assert.That(listenerCallCount, Is.EqualTo(1));
-        }
+        //    Assert.DoesNotThrow(() =>
+        //    {
+        //        Invoke();
+        //    });
+        //    // listener removed so no increase to count
+        //    Assert.That(listenerCallCount, Is.EqualTo(1));
+        //}
     }
 
 
@@ -164,10 +164,10 @@ namespace Mirage.Events.Tests
             allLate.Reset();
         }
 
-        protected override void RemoveAllListeners()
-        {
-            allLate.RemoveAllListeners();
-        }
+        //protected override void RemoveAllListeners()
+        //{
+        //    allLate.RemoveAllListeners();
+        //}
     }
 
 
@@ -207,10 +207,10 @@ namespace Mirage.Events.Tests
             allLate.Reset();
         }
 
-        protected override void RemoveAllListeners()
-        {
-            allLate.RemoveAllListeners();
-        }
+        //protected override void RemoveAllListeners()
+        //{
+        //    allLate.RemoveAllListeners();
+        //}
 
         [Test]
         public void ListenerIsInvokedWithCorrectArgs()
@@ -286,10 +286,10 @@ namespace Mirage.Events.Tests
             allLate.Reset();
         }
 
-        protected override void RemoveAllListeners()
-        {
-            allLate.RemoveAllListeners();
-        }
+        //protected override void RemoveAllListeners()
+        //{
+        //    allLate.RemoveAllListeners();
+        //}
 
         [Test]
         public void ListenerIsInvokedWithCorrectArgs()

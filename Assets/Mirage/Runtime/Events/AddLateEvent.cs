@@ -68,9 +68,10 @@ namespace Mirage.Events
     [Serializable]
     public sealed class AddLateEvent : AddLateEventBase, IAddLateEvent
     {
-        [SerializeField] UnityEvent _event = new UnityEvent();
+        //[SerializeField] UnityEvent _event = new UnityEvent();
+        public event UnityAction _event;
 
-        protected override UnityEventBase baseEvent => _event;
+        //protected override UnityEventBase baseEvent => _event;
 
         public void AddListener(UnityAction handler)
         {
@@ -81,12 +82,12 @@ namespace Mirage.Events
             }
 
             // add handler to inner event so that it can be invoked again
-            _event.AddListener(handler);
+            _event += handler;
         }
 
         public void RemoveListener(UnityAction handler)
         {
-            _event.RemoveListener(handler);
+            _event -= handler;
         }
 
         public void Invoke()

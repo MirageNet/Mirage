@@ -345,14 +345,13 @@ namespace Mirage
         }
 
 
-
         [Header("Events")]
-        [SerializeField] AddLateEvent _onStartServer = new AddLateEvent();
-        [SerializeField] AddLateEvent _onStartClient = new AddLateEvent();
-        [SerializeField] AddLateEvent _onStartLocalPlayer = new AddLateEvent();
-        [SerializeField] BoolAddLateEvent _onAuthorityChanged = new BoolAddLateEvent();
-        [SerializeField] AddLateEvent _onStopClient = new AddLateEvent();
-        [SerializeField] AddLateEvent _onStopServer = new AddLateEvent();
+        AddLateEvent _onStartServer = new AddLateEvent();
+        AddLateEvent _onStartClient = new AddLateEvent();
+        AddLateEvent _onStartLocalPlayer = new AddLateEvent();
+        BoolAddLateEvent _onAuthorityChanged = new BoolAddLateEvent();
+        AddLateEvent _onStopClient = new AddLateEvent();
+        AddLateEvent _onStopServer = new AddLateEvent();
 
         bool clientStarted;
         bool localPlayerStarted;

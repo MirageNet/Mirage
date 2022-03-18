@@ -4,7 +4,8 @@ namespace Mirage.Events
 {
     public abstract class AddLateEventBase
     {
-        protected abstract UnityEventBase baseEvent { get; }
+        [System.Obsolete("Remove me", true)]
+        protected virtual UnityEventBase baseEvent { get; }
         protected bool hasInvoked { get; private set; }
 
         protected void MarkInvoked()
@@ -21,12 +22,12 @@ namespace Mirage.Events
             hasInvoked = false;
         }
 
-        /// <summary>
-        /// Remove all non-persisent (ie created from script) listeners from the event.
-        /// </summary>
-        public void RemoveAllListeners()
-        {
-            baseEvent.RemoveAllListeners();
-        }
+        ///// <summary>
+        ///// Remove all non-persisent (ie created from script) listeners from the event.
+        ///// </summary>
+        //public void RemoveAllListeners()
+        //{
+        //    baseEvent.RemoveAllListeners();
+        //}
     }
 }
