@@ -29,7 +29,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             maxSequence = (ushort)((1 << config.SequenceSize) - 1);
 
             connection = new SubIRawConnection();
-            ackSystem = new AckSystem(connection, config, new Time(), bufferPool);
+            ackSystem = new AckSystem(connection, config, MAX_PACKET_SIZE, new Time(), bufferPool);
 
             message = createRandomData(1);
             ackSystem.SendNotify(message);

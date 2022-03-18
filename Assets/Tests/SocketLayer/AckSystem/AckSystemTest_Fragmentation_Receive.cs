@@ -18,21 +18,21 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         public void SetUp()
         {
             config = new Config();
-            int mtu = config.MaxPacketSize;
+            int mtu = MAX_PACKET_SIZE;
             int bigSize = (int)(mtu * 1.5f);
 
             message = CreateBigData(1, bigSize);
 
             var sender = new AckTestInstance();
             sender.connection = new SubIRawConnection();
-            sender.ackSystem = new AckSystem(sender.connection, config, new Time(), bufferPool);
+            sender.ackSystem = new AckSystem(sender.connection, config, MAX_PACKET_SIZE, new Time(), bufferPool);
             sender.ackSystem.SendReliable(message);
             packet1 = sender.packet(0);
             packet2 = sender.packet(1);
 
 
             var connection = new SubIRawConnection();
-            ackSystem = new AckSystem(connection, config, new Time(), bufferPool);
+            ackSystem = new AckSystem(connection, config, MAX_PACKET_SIZE, new Time(), bufferPool);
         }
 
         byte[] CreateBigData(int id, int size)
@@ -80,7 +80,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
             ackSystem.ReceiveReliable(packet2, packet2.Length, true);
 
-            int bytesIn1 = config.MaxPacketSize - AckSystem.MIN_RELIABLE_FRAGMENT_HEADER_SIZE;
+            int bytesIn1 = MAX_PACKET_SIZE - AckSystem.MIN_RELIABLE_FRAGMENT_HEADER_SIZE;
             int bytesIn2 = message.Length - bytesIn1;
 
             Assert.IsTrue(ackSystem.NextReliablePacket(out AckSystem.ReliableReceived first));

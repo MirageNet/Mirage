@@ -116,15 +116,16 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log($"Client connecting to endpoint: {endPoint}");
 
             ISocket socket = SocketFactory.CreateClientSocket();
+            int maxPacketSize = SocketFactory.MaxPacketSize;
             MessageHandler = new MessageHandler(World, DisconnectOnException);
             var dataHandler = new DataHandler(MessageHandler);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
             Config config = PeerConfig ?? new Config();
 
-            NetworkWriterPool.Configure(config.MaxPacketSize);
+            NetworkWriterPool.Configure(maxPacketSize);
 
-            peer = new Peer(socket, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
+            peer = new Peer(socket, maxPacketSize, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
             peer.OnConnected += Peer_OnConnected;
             peer.OnConnectionFailed += Peer_OnConnectionFailed;
             peer.OnDisconnected += Peer_OnDisconnected;

@@ -15,14 +15,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         public void SetUp()
         {
             var config = new Config();
-            int mtu = config.MaxPacketSize;
+            int mtu = MAX_PACKET_SIZE;
             int bigSize = (int)(mtu * 1.5f);
 
             byte[] message = CreateBigData(1, bigSize);
 
             instance = new AckTestInstance();
             instance.connection = new SubIRawConnection();
-            instance.ackSystem = new AckSystem(instance.connection, config, new Time(), bufferPool);
+            instance.ackSystem = new AckSystem(instance.connection, config, MAX_PACKET_SIZE, new Time(), bufferPool);
 
             // create and send n messages
             instance.messages = new List<byte[]>();

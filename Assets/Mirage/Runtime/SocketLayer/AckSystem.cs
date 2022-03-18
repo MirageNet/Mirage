@@ -77,7 +77,7 @@ namespace Mirage.SocketLayer
         /// <param name="connection"></param>
         /// <param name="ackTimeout">how long after last send before sending empty ack</param>
         /// <param name="time"></param>
-        public AckSystem(IRawConnection connection, Config config, ITime time, Pool<ByteBuffer> bufferPool, Metrics metrics = null)
+        public AckSystem(IRawConnection connection, Config config, int maxPacketSize, ITime time, Pool<ByteBuffer> bufferPool, Metrics metrics = null)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
 
@@ -90,7 +90,7 @@ namespace Mirage.SocketLayer
             ackTimeout = config.TimeBeforeEmptyAck;
             emptyAckLimit = config.EmptyAckLimit;
             receivesBeforeEmpty = config.ReceivesBeforeEmptyAck;
-            maxPacketSize = config.MaxPacketSize;
+            this.maxPacketSize = maxPacketSize;
             maxPacketsInSendBufferPerConnection = config.MaxReliablePacketsInSendBufferPerConnection;
 
             maxFragments = config.MaxReliableFragments;

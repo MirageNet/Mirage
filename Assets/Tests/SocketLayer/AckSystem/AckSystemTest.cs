@@ -20,8 +20,9 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     /// </summary>
     public class AckSystemTestBase
     {
+        public const int MAX_PACKET_SIZE = 1300;
         protected readonly Random rand = new Random();
-        protected Pool<ByteBuffer> bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, 1300, 100, 1000);
+        protected Pool<ByteBuffer> bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, MAX_PACKET_SIZE, 100, 1000);
 
         protected byte[] createRandomData(int id)
         {

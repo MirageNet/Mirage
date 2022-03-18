@@ -42,6 +42,7 @@ namespace Mirage.SocketLayer
         readonly ISocket socket;
         readonly IDataHandler dataHandler;
         readonly Config config;
+        readonly int maxPacketSize;
         readonly Time time;
 
         readonly ConnectKeyValidator connectKeyValidator;
@@ -59,11 +60,14 @@ namespace Mirage.SocketLayer
         /// </summary>
         bool active;
 
-        public Peer(ISocket socket, IDataHandler dataHandler, Config config = null, ILogger logger = null, Metrics metrics = null)
+        public Peer(ISocket socket, int maxPacketSize, IDataHandler dataHandler, Config config = null, ILogger logger = null, Metrics metrics = null)
         {
             this.logger = logger;
             this.metrics = metrics;
             this.config = config ?? new Config();
+            this.maxPacketSize = maxPacketSize;
+            if (maxPacketSize < AckSystem.MIN_RELIABLE_HEADER_SIZE + 1)
+                throw new ArgumentException($"Max packet size too small for AckSystem header", nameof(maxPacketSize));
 
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
             this.dataHandler = dataHandler ?? throw new ArgumentNullException(nameof(dataHandler));
@@ -71,7 +75,7 @@ namespace Mirage.SocketLayer
 
             connectKeyValidator = new ConnectKeyValidator(this.config.key);
 
-            bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, this.config.MaxPacketSize, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
+            bufferPool = new Pool<ByteBuffer>(ByteBuffer.CreateNew, maxPacketSize, this.config.BufferPoolStartSize, this.config.BufferPoolMaxSize, this.logger);
             Application.quitting += Application_quitting;
         }
 
@@ -253,8 +257,8 @@ namespace Mirage.SocketLayer
                     int length = socket.Receive(buffer.array, out IEndPoint receiveEndPoint);
 
                     // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
-                    if (length > config.MaxPacketSize)
-                        throw new IndexOutOfRangeException($"Socket returned length above MTU. MaxPacketSize:{config.MaxPacketSize} length:{length}");
+                    if (length > maxPacketSize)
+                        throw new IndexOutOfRangeException($"Socket returned length above MTU. MaxPacketSize:{maxPacketSize} length:{length}");
 
                     var packet = new Packet(buffer, length);
 
@@ -432,7 +436,7 @@ namespace Mirage.SocketLayer
             // this is so that we can re-use the endpoint (reduces alloc) for receive and not worry about changing internal data needed for each connection
             IEndPoint endPoint = _newEndPoint?.CreateCopy();
 
-            var connection = new Connection(this, endPoint, dataHandler, config, time, bufferPool, logger, metrics);
+            var connection = new Connection(this, endPoint, dataHandler, config, maxPacketSize, time, bufferPool, logger, metrics);
             connection.SetReceiveTime();
             connections.Add(endPoint, connection);
             return connection;

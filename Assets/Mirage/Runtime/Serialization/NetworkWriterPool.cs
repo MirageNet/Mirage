@@ -18,8 +18,8 @@ namespace Mirage.Serialization
         static NetworkWriterPool()
         {
             // auto configure so that pool can be used without having to manually call it
-            var config = new Config();
-            Configure(config.MaxPacketSize);
+            // 1300 is greater than udp's MTU value
+            Configure(1300);
         }
 
         /// <summary>

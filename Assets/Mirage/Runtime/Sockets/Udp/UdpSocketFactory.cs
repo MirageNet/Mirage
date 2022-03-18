@@ -20,6 +20,8 @@ namespace Mirage.Sockets.Udp
         [Header("NanoSocket options")]
         public int BufferSize = 256 * 1024;
 
+        public override int MaxPacketSize => UdpMTU.MaxPacketSize;
+
         bool useNanoSocket => SocketLib == SocketLib.Native || (SocketLib == SocketLib.Automatic && IsDesktop);
 
         string IHasAddress.Address
@@ -177,5 +179,26 @@ namespace Mirage.Sockets.Udp
             EndPoint copy = inner.Create(inner.Serialize());
             return new EndPointWrapper(copy);
         }
+    }
+
+    public class UdpMTU
+    {
+        /// <summary>
+        /// IPv6 + UDP Header
+        /// </summary>
+        const int HEADER_SIZE = 40 + 8;
+
+        /// <summary>
+        /// MTU is expected to be atleast this number
+        /// </summary>
+        const int MIN_MTU = 1280;
+
+        /// <summary>
+        /// Max size of array that will be sent to or can be received from <see cref="ISocket"/>
+        /// <para>This will also be the size of all buffers used by <see cref="Peer"/></para>
+        /// <para>This is not max message size because this size includes packets header added by <see cref="Peer"/></para>
+        /// </summary>
+        // todo move these settings to socket
+        public static int MaxPacketSize => MIN_MTU - HEADER_SIZE;
     }
 }
