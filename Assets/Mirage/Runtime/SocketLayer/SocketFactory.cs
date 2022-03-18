@@ -31,6 +31,10 @@ namespace Mirage.SocketLayer
     /// </remarks>
     public abstract class SocketFactory : MonoBehaviour
     {
+        /// <summary>Max size for packets sent to or received from Socket
+        /// <para>Called once when Sockets are created</para></summary>
+        public abstract int MaxPacketSize { get; }
+
         /// <summary>Creates a <see cref="ISocket"/> to be used by <see cref="Peer"/> on the server</summary>
         /// <exception cref="NotSupportedException">Throw when Server is not supported on current platform</exception>
         public abstract ISocket CreateServerSocket();

@@ -37,7 +37,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             serverConnections = new List<IConnection>();
 
             var config = new Config { MaxConnections = ClientCount };
-            maxFragmentMessageSize = config.MaxReliableFragments * (config.MaxPacketSize - AckSystem.MIN_RELIABLE_FRAGMENT_HEADER_SIZE);
+            maxFragmentMessageSize = config.MaxReliableFragments * (PeerTestBase.MAX_PACKET_SIZE - AckSystem.MIN_RELIABLE_FRAGMENT_HEADER_SIZE);
             NotifyWaitTime = config.TimeBeforeEmptyAck * 2;
 
 

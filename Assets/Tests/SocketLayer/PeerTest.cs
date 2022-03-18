@@ -15,7 +15,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                _ = new Peer(null, Substitute.For<IDataHandler>(), new Config(), Substitute.For<ILogger>());
+                _ = new Peer(null, 1000, Substitute.For<IDataHandler>(), new Config(), Substitute.For<ILogger>());
             });
             var expected = new ArgumentNullException("socket");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
@@ -25,7 +25,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                _ = new Peer(Substitute.For<ISocket>(), null, new Config(), Substitute.For<ILogger>());
+                _ = new Peer(Substitute.For<ISocket>(), 1000, null, new Config(), Substitute.For<ILogger>());
             });
             var expected = new ArgumentNullException("dataHandler");
             Assert.That(exception, Has.Message.EqualTo(expected.Message));
@@ -35,7 +35,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             Assert.DoesNotThrow(() =>
             {
-                _ = new Peer(Substitute.For<ISocket>(), Substitute.For<IDataHandler>(), null, Substitute.For<ILogger>());
+                _ = new Peer(Substitute.For<ISocket>(), 1000, Substitute.For<IDataHandler>(), null, Substitute.For<ILogger>());
             });
         }
         [Test]
@@ -43,8 +43,19 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             Assert.DoesNotThrow(() =>
             {
-                _ = new Peer(Substitute.For<ISocket>(), Substitute.For<IDataHandler>(), new Config(), null);
+                _ = new Peer(Substitute.For<ISocket>(), 1000, Substitute.For<IDataHandler>(), new Config(), null);
             });
+        }
+
+        [Test]
+        public void ThrowIfPacketSizeIsTooSmall()
+        {
+            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            {
+                _ = new Peer(Substitute.For<ISocket>(), 0, Substitute.For<IDataHandler>(), new Config(), Substitute.For<ILogger>());
+            });
+            var expected = new ArgumentException($"Max packet size too small for AckSystem header", "maxPacketSize");
+            Assert.That(exception, Has.Message.EqualTo(expected.Message));
         }
 
         [Test]
@@ -100,7 +111,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 peer.UpdateTest();
             });
 
-            Assert.That(exception, Has.Message.EqualTo($"Socket returned length above MTU. MaxPacketSize:{config.MaxPacketSize} length:{aboveMTU}"));
+            Assert.That(exception, Has.Message.EqualTo($"Socket returned length above MTU. MaxPacketSize:{MAX_PACKET_SIZE} length:{aboveMTU}"));
         }
 
         [Test]

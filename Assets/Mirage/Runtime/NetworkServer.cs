@@ -211,7 +211,8 @@ namespace Mirage
                 };
             }
 
-            NetworkWriterPool.Configure(config.MaxPacketSize);
+            int maxPacketSize = SocketFactory.MaxPacketSize;
+            NetworkWriterPool.Configure(maxPacketSize);
 
             // Are we listening for incoming connections?
             // If yes, set up a socket for incoming connections (we're a multiplayer game).
@@ -222,7 +223,7 @@ namespace Mirage
                 ISocket socket = SocketFactory.CreateServerSocket();
 
                 // Tell the peer to use that newly created socket.
-                peer = new Peer(socket, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
+                peer = new Peer(socket, maxPacketSize, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
                 peer.OnConnected += Peer_OnConnected;
                 peer.OnDisconnected += Peer_OnDisconnected;
                 // Bind it to the endpoint.

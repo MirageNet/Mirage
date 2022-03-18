@@ -49,24 +49,6 @@ namespace Mirage.SocketLayer
         public float DisconnectDuration = 1;
 
         /// <summary>
-        /// IPv6 + UDP Header
-        /// </summary>
-        const int HEADER_SIZE = 40 + 8;
-
-        /// <summary>
-        /// MTU is expected to be atleast this number
-        /// </summary>
-        const int MIN_MTU = 1280;
-
-        /// <summary>
-        /// Max size of array that will be sent to or can be received from <see cref="ISocket"/>
-        /// <para>This will also be the size of all buffers used by <see cref="Peer"/></para>
-        /// <para>This is not max message size because this size includes packets header added by <see cref="Peer"/></para>
-        /// </summary>
-        // todo move these settings to socket
-        public int MaxPacketSize = MIN_MTU - HEADER_SIZE;
-
-        /// <summary>
         /// How many buffers to create at start
         /// </summary>
         public int BufferPoolStartSize = 100;
@@ -111,7 +93,7 @@ namespace Mirage.SocketLayer
 
         /// <summary>
         /// How many fragments large reliable message can be split into
-        /// <para>if set to 0 then messages over <see cref="MaxPacketSize"/> will not be allowed to be sent</para>
+        /// <para>if set to 0 then messages over <see cref="SocketFactory.MaxPacketSize"/> will not be allowed to be sent</para>
         /// <para>max value is 255</para>
         /// </summary>
         public int MaxReliableFragments = 5;

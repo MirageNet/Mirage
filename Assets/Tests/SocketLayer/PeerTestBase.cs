@@ -13,6 +13,8 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     public class PeerTestBase
     {
         public const int maxConnections = 5;
+        public const int MAX_PACKET_SIZE = 1300;
+
         protected byte[] connectRequest;
 
         PeerInstance instance;
@@ -78,7 +80,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 ConnectAttemptInterval = 0.2f,
             };
             logger = LogFactory.GetLogger<PeerInstance>();
-            peer = new Peer(this.socket, dataHandler, this.config, logger);
+            peer = new Peer(this.socket, PeerTestBase.MAX_PACKET_SIZE, dataHandler, this.config, logger);
         }
     }
 
