@@ -102,6 +102,14 @@ feat(NetworkSceneManager): improving network scene manager
 BREAKING CHANGE: NetworkSceneManager has been re-written, many events and methods now have new names.
 ```
 
+`!` can also be added to title before `:` to imply that it is a breaking change, the `BREAKING CHANGE:` footer must still be included
+
+```
+perf(Server)!: some change
+
+BREAKING CHANGE: what is breaking
+```
+
 #### How Do I Submit A (Good) Pull Request?
 
 Please send a [GitHub Pull Request](https://github.com/MirageNet/Mirage/compare) with a clear list of what you've done (read more about [pull requests](http://help.github.com/pull-requests/)). 
