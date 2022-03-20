@@ -69,7 +69,7 @@ Before creating enhancement suggestions, please check the list of enhancements s
 * **List some other similar projects where this enhancement exists.**
 * **Specify which version of the project you're using.**
 * **Specify the current environment you're using.** if this is a useful information.
-* **Provide a specific use case:**  Often we get requests for a feature not realizing there is already a way to fulfill their use case. In other words, don't just give us a solution, give us a problem.
+* **Provide a specific use case:** Often we get requests for a feature not realizing there is already a way to fulfill their use case. In other words, don't just give us a solution, give us a problem.
 
 
 ### Creating Pull Requests
@@ -134,27 +134,27 @@ $ git commit -m "A brief summary of the commit""
 > 
 > A paragraph describing what changed and its impact.
 ```
-  
+
 If your pull request breaks any test, it has no hope of being merged.
 
 Here are some more [good practices](https://blog.ploeh.dk/2015/01/15/10-tips-for-better-pull-requests/) to follow when submitting pull requests to any project.
 
 #### Optimizations
 
-There are generally 2 types of optimizations, micro-optimizations and macro-optimizations.  The distinction has nothing to do with how much they improve the program.
+There are generally 2 types of optimizations, micro-optimizations and macro-optimizations. The distinction has nothing to do with how much they improve the program.
 
-Micro-optimizations try to improve the performance of an application by replacing instructions with equivalent but more efficient instructions.  Some example micro-optimizations include:
+Micro-optimizations try to improve the performance of an application by replacing instructions with equivalent but more efficient instructions. Some example micro-optimizations include:
 
 * Replace `i / 4` with `i >> 2`
 * Eliminate an allocation
 * Replace `Vector3.Distance(a,b) < K` with `Vector3.SqrMagnitude(b - a) < K * K`
 * Converting a class to struct
 
-Macro-optimizations try to improve the performance of an application by changing the algorithm.  Some examples include:
+Macro-optimizations try to improve the performance of an application by changing the algorithm. Some examples include:
 
 * Serialize a message once `O(1)`, instead of for every single client `O(n)`
 * Changing the interest management algorithm, as of this writing every object checks every other object `O(n^2)`. It could be replaced by a sweep and prune algorithm that uses `O(n log n)`.
-* When synchronizing movement, in of synchronizing every position change,  you could synchronize the velocity and let the other side predict the position.
+* When synchronizing movement, in of synchronizing every position change, you could synchronize the velocity and let the other side predict the position.
 
 Macro-optimizations tend to change the **scalability** of Mirage, by changing an algorithm, you may now support 10x more customers on the same hardware, it is even possible for a macro optimization to make performance worse for small numbers. Macro optimization usually make a really big difference, but are much harder to make. 
 
