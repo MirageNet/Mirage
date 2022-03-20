@@ -121,9 +121,9 @@ We can always use more test coverage.
 * **Provide a link to the related issue** if the pull request is a follow up of an existing bug report or enhancement suggestion.
 * **Comment why this pull request represents an enhancement** and give a rationale explaining why you did it that way and not another way.
 * **Use the same coding style as the one used in this project**.
-* **Documentation:** If your PR adds or changes any public properties or methods, you must retain the old versions preceded with `[Obsolete("Describe what to do/use instead")` attribute wherever possible, and you must update any relevant pages in the `/docs` folder.  It's not done until it's documented!
+* **Documentation:** If your PR adds or changes any public properties or methods, you must retain the old versions preceded with `[Obsolete("Describe what to do/use instead")` attribute wherever possible, and you must update any relevant pages in the `/docs` folder. It's not done until it's documented!
 * **Welcome suggestions from the maintainers to improve your pull request**.
-* **Include unit tests for new code** Unit test for new code helps us check if it works. See the [Unity Test Runner](https://docs.unity3d.com/2018.4/Documentation/Manual/testing-editortestsrunner.html) for more information about running tests in unity.
+* **Include unit tests for new code.** Unit tests for new code helps us check if it works. See the [Unity Test Runner](https://docs.unity3d.com/2020.3/Documentation/Manual/testing-editortestsrunner.html) for more information about running tests in unity.
 
 Please follow our coding conventions (below) and make sure all of your commits are atomic (one feature per commit). Rebase your pull requests if necessary.
 
