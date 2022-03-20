@@ -1,3 +1,13 @@
+# [120.0.0](https://github.com/MirageNet/Mirage/compare/v119.1.4...v120.0.0) (2022-03-20)
+
+
+* refactor(SocketLayer)!: moving MaxPacketSize to SocketFactory ([49c7f41](https://github.com/MirageNet/Mirage/commit/49c7f41bedf6ffd1a3655037a74d14884cf1b23e))
+
+
+### BREAKING CHANGES
+
+* socket factories now have to override MaxPacketSize property
+
 ## [119.1.4](https://github.com/MirageNet/Mirage/compare/v119.1.3...v119.1.4) (2022-03-17)
 
 
