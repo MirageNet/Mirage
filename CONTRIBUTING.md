@@ -20,7 +20,7 @@ There are multiple ways to help: testing, finding bugs or issues, or even fixing
 
 ### Testing
 
-We have [unit tests](https://en.wikipedia.org/wiki/Unit_testing) that cover some parts of Mirror, but the best way to find a problem is running it with existing projects. Try our releases and pull requests in your own projects and let us know if there are any issues.
+We have [unit tests](https://en.wikipedia.org/wiki/Unit_testing) that cover some parts of Mirage, but the best way to find a problem is running it with existing projects. Try our releases and pull requests in your own projects and let us know if there are any issues. Please don't forget to check the reporting recommendations below.
 
 ### Reporting Bugs
 
