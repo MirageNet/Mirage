@@ -42,7 +42,7 @@ Explain the problem and include additional details to help maintainers reproduce
 
 Provide more context by answering these questions:
 
-* **Did the problem start happening recently?** (e.g. after updating to a new version) or was this always a problem?
+* **Did the problem start happening recently?** For example, did this happen after upgrading to a newer version or was this always a problem?
 * If the problem started happening recently, **can you reproduce the problem in an older version?** What's the most recent version in which the problem doesn't happen?
 * **Can you reliably reproduce the issue?** If not, provide details about how often the problem happens and under which conditions it normally happens.
 
