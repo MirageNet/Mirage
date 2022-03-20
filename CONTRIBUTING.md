@@ -172,7 +172,7 @@ Start reading our code and you'll get the hang of it. We optimize for readabilit
 * We value simplicity. The code should be easy to read and avoid magic
 * **KISS / Occam's Razor:** Always use the most simple solution.
 * **No Premature Optimizations:**
-	MMOs need to run for weeks without issues or exploits.
+    MMOs need to run for weeks without issues or exploits.
     Only do GC optimizations and caching in hot path. Avoid it everywhere else to keep the code simple.
 * **Naming**
     Follow [C# standard naming conventions](https://github.com/ktaranov/naming-convention/blob/master/C%23%20Coding%20Standards%20and%20Naming%20Conventions.md). Also, be descriptive. \`NetworkIdentity identity\`, not \`NetworkIdentity uv\` or similar. If you need a comment to explain it, the name needs to be changed. For example, don't do `msg = ... // the message`, use `message = ...` without a comment instead. Avoid prefixes like `m_`, `s_`, or similar.
