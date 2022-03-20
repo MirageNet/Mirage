@@ -6,7 +6,7 @@ First off, thank you for considering contributing to this project. It's people l
 
 Following these guidelines helps to communicate that you respect the time of the developers managing and developing this open source project. In return, they should reciprocate that respect in addressing your issue, assessing changes, and helping you finalize your pull requests.
 
-This is an open source project and we love to receive contributions from our community — you! There are many ways to contribute, from writing tutorials or blog posts, improving the documentation, submitting bug reports and feature requests or writing code which can be incorporated into the main project itself.
+This is an open source project and we love to receive contributions from our community — **you**! There are many ways to contribute, from writing tutorials or blog posts, improving the documentation, submitting bug reports and feature requests or writing code which can be incorporated into the main project itself.
 
 If you haven't already, come find us in [Discord](https://discord.gg/DTBPBYvexy). We want you working on things you're excited about, and we can give you instant feedback.
 
@@ -20,7 +20,7 @@ There are multiple ways to help: testing, finding bugs or issues, or even fixing
 
 ### Testing
 
-We have [unit tests](https://en.wikipedia.org/wiki/Unit_testing) that cover some parts of Mirror, but the best way to find a problem is running it with existing projects. Try our releases and pull requests in your own projects and let us know if there are any issues.
+We have [unit tests](https://en.wikipedia.org/wiki/Unit_testing) that cover some parts of Mirage, but the best way to find a problem is running it with existing projects. Try our releases and pull requests in your own projects and let us know if there are any issues. Please don't forget to check the reporting recommendations below.
 
 ### Reporting Bugs
 
@@ -42,15 +42,15 @@ Explain the problem and include additional details to help maintainers reproduce
 
 Provide more context by answering these questions:
 
-* **Did the problem start happening recently** (e.g. after updating to a new version) or was this always a problem?
+* **Did the problem start happening recently?** For example, did this happen after upgrading to a newer version or was this always a problem?
 * If the problem started happening recently, **can you reproduce the problem in an older version?** What's the most recent version in which the problem doesn't happen?
 * **Can you reliably reproduce the issue?** If not, provide details about how often the problem happens and under which conditions it normally happens.
 
 Include details about your configuration and environment:
 
-* **Which version of the project are you using?**
-* **What's the name and version of the OS you're using**?
-* **Any other information that could be useful about you environment**
+* **Which version of the project are you using?** For example, Mirage version 119.2.0.
+* **What's the name and version of the OS you're using?** For example, Arch Linux, Windows 11 Insider Preview or MacOS Big Sur.
+* **Any other information that could be useful about your environment.** For example, you use a VPN to connect to the internet, you're behind a corporate firewall or running on a unreliable mobile connection.
 
 ### Suggesting Enhancements
 
@@ -69,7 +69,7 @@ Before creating enhancement suggestions, please check the list of enhancements s
 * **List some other similar projects where this enhancement exists.**
 * **Specify which version of the project you're using.**
 * **Specify the current environment you're using.** if this is a useful information.
-* **Provide a specific use case** - Often we get requests for a feature not realizing there is already a way to fulfill their use case. In other words, don't just give us a solution, give us a problem.
+* **Provide a specific use case:** Often we get requests for a feature not realizing there is already a way to fulfill their use case. In other words, don't just give us a solution, give us a problem.
 
 
 ### Creating Pull Requests
@@ -121,9 +121,9 @@ We can always use more test coverage.
 * **Provide a link to the related issue** if the pull request is a follow up of an existing bug report or enhancement suggestion.
 * **Comment why this pull request represents an enhancement** and give a rationale explaining why you did it that way and not another way.
 * **Use the same coding style as the one used in this project**.
-* **Documentation:** If your PR adds or changes any public properties or methods, you must retain the old versions preceded with `[Obsolete("Describe what to do / use instead")` attribute wherever possible, and you must update any relevant pages in the /docs folder.  It's not done until it's documented!
+* **Documentation:** If your PR adds or changes any public properties or methods, you must retain the old versions preceded with `[Obsolete("Describe what to do/use instead")` attribute wherever possible, and you must update any relevant pages in the `/docs` folder. It's not done until it's documented!
 * **Welcome suggestions from the maintainers to improve your pull request**.
-* **Include unit tests for new code** Unit test for new code helps us check if it works. See the [Unity Test Runner](https://docs.unity3d.com/2018.4/Documentation/Manual/testing-editortestsrunner.html) for more information about running tests in unity.
+* **Include unit tests for new code.** Unit tests for new code helps us check if it works. See the [Unity Test Runner](https://docs.unity3d.com/2020.3/Documentation/Manual/testing-editortestsrunner.html) for more information about running tests in unity.
 
 Please follow our coding conventions (below) and make sure all of your commits are atomic (one feature per commit). Rebase your pull requests if necessary.
 
@@ -134,31 +134,33 @@ $ git commit -m "A brief summary of the commit""
 > 
 > A paragraph describing what changed and its impact.
 ```
-  
-If your pull request breaks any test,  it has no hope of being merged.
+
+If your pull request breaks any test, it has no hope of being merged.
 
 Here are some more [good practices](https://blog.ploeh.dk/2015/01/15/10-tips-for-better-pull-requests/) to follow when submitting pull requests to any project.
 
 #### Optimizations
 
-There are generally 2 types of optimizations, micro-optimizations and macro-optimizations.  The distinction has nothing to do with how much they improve the program.
+There are generally 2 types of optimizations, micro-optimizations and macro-optimizations. The distinction has nothing to do with how much they improve the program.
 
-Micro-optimizations try to improve the performance of an application by replacing instructions with equivalent but more efficient instructions.  Some example micro-optimizations include:
-* replace `i / 4` with `i >> 2`
-* eliminate an allocation.
-* replace `Vector3.Distance(a,b) < K` with `Vector3.SqrMagnitude(b - a) < K * K`
-* convert a class to struct
+Micro-optimizations try to improve the performance of an application by replacing instructions with equivalent but more efficient instructions. Some example micro-optimizations include:
 
-Macro-optimizations try to improve the performance of an application by changing the algorithm.  Some examples include:
-* Serialize a message once O(1),  instead of for every single client O(n)
-* Change interest management algorithm,  as of this writing every object checks every other object O(n^2),  it could be replaced by a sweep and prune algorithm O(n log n)
-* When synchronizing movement,  instead of synchronizing every position change,  you could synchronize the velocity and let the other side predict the position.
+* Replace `i / 4` with `i >> 2`
+* Eliminate an allocation
+* Replace `Vector3.Distance(a,b) < K` with `Vector3.SqrMagnitude(b - a) < K * K`
+* Converting a class to struct
 
-Macro-optimizations tend to change the **scalability** of mirror,  by changing an algorithm, you may now support 10x more customers on the same hardware, it is even possible for a macro optimization to make performance worse for small numbers. Macro optimization usually make a really big difference, but are much harder to make. 
+Macro-optimizations try to improve the performance of an application by changing the algorithm. Some examples include:
 
-Micro-optimizations tend to change the performance of mirror in a linear way. There are some micro optimizations that make a huge impact on performance such as eliminating allocations in the hot path.
+* Serialize a message once `O(1)`, instead of for every single client `O(n)`
+* Changing the interest management algorithm, as of this writing every object checks every other object `O(n^2)`. It could be replaced by a sweep and prune algorithm that uses `O(n log n)`.
+* When synchronizing movement, in of synchronizing every position change, you could synchronize the velocity and let the other side predict the position.
 
-We prefer readable code over optimal code. We do not like any kind of optimization if it makes the code less readable (they generally do).  For that reason,  we require that both micro and macro optimization pull requests come with screenshots profiling a real game or at least a synthetic **representative** test. It is not enough to show that one operation is faster than the other,  you must prove that this makes a significant difference in Mirror or in a real game using Mirror.
+Macro-optimizations tend to change the **scalability** of Mirage. By changing an algorithm, you may now support 10x more customers on the same hardware. However, it is even possible for a macro optimization to make performance worse for small numbers or cause a _regression_. Macro optimization usually make a really big difference, but are much harder to make.
+
+Micro-optimizations tend to change the performance of Mirage in a linear way. There are some micro optimizations that make a huge impact on performance such as eliminating allocations in the hot path.
+
+We prefer readable code over optimal code. We do not like any kind of optimization if it makes the code less readable (they generally do). For that reason, we require that both micro and macro optimization pull requests come with screenshots profiling a real game or at least a synthetic **representative** test. It is not enough to show that one operation is faster than the other, you must prove that this makes a significant difference in Mirage or in a real game using Mirage.
 
 If your optimization pull request does not come with profiling data showing real gains in a meaningful test is has no hope of getting merged.
 
@@ -168,13 +170,13 @@ Start reading our code and you'll get the hang of it. We optimize for readabilit
 
 * We indent using 4 spaces (soft tabs)
 * We value simplicity. The code should be easy to read and avoid magic
-* **KISS / Occam's Razor** - always use the most simple solution.
-* **No Premature Optimizations**
-	MMOs need to run for weeks without issues or exploits.
+* **KISS / Occam's Razor:** Always use the most simple solution.
+* **No Premature Optimizations:**
+    MMOs need to run for weeks without issues or exploits.
     Only do GC optimizations and caching in hot path. Avoid it everywhere else to keep the code simple.
 * **Naming**
     Follow [C# standard naming conventions](https://github.com/ktaranov/naming-convention/blob/master/C%23%20Coding%20Standards%20and%20Naming%20Conventions.md). Also, be descriptive. \`NetworkIdentity identity\`, not \`NetworkIdentity uv\` or similar. If you need a comment to explain it, the name needs to be changed. For example, don't do `msg = ... // the message`, use `message = ...` without a comment instead. Avoid prefixes like `m_`, `s_`, or similar.
-* **type** vs. **var**: use var when the type is obvious from the right hand side,  use explicit type when it is not.
+* **type** vs. **var**: use var when the type is obvious from the right hand side, use explicit type when it is not.
 * **int** vs. **Int32**: use int instead of Int32, double instead of Double, string instead of String and so on. We won't convert all ints to Int32, so it makes most sense to never use Int32 anywhere and avoid time wasting discussions.
 * When in doubt, consult Microsoft's official [C# coding conventions](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions) they exist for a reason.
 * This is open source software. Consider the people who will read your code, and make it look nice for them. It's sort of like driving a car: Perhaps you love doing donuts when you're alone, but with passengers the goal is to make the ride as smooth as possible.
