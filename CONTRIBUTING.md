@@ -156,7 +156,7 @@ Macro-optimizations try to improve the performance of an application by changing
 * Changing the interest management algorithm, as of this writing every object checks every other object `O(n^2)`. It could be replaced by a sweep and prune algorithm that uses `O(n log n)`.
 * When synchronizing movement, in of synchronizing every position change, you could synchronize the velocity and let the other side predict the position.
 
-Macro-optimizations tend to change the **scalability** of Mirage, by changing an algorithm, you may now support 10x more customers on the same hardware, it is even possible for a macro optimization to make performance worse for small numbers. Macro optimization usually make a really big difference, but are much harder to make. 
+Macro-optimizations tend to change the **scalability** of Mirage. By changing an algorithm, you may now support 10x more customers on the same hardware. However, it is even possible for a macro optimization to make performance worse for small numbers or cause a _regression_. Macro optimization usually make a really big difference, but are much harder to make.
 
 Micro-optimizations tend to change the performance of Mirage in a linear way. There are some micro optimizations that make a huge impact on performance such as eliminating allocations in the hot path.
 
