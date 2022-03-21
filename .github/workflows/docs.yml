@@ -25,7 +25,7 @@ jobs:
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: Library
           key: Library-Library-2020.3.17
