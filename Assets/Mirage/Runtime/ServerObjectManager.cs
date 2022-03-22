@@ -330,7 +330,7 @@ namespace Mirage
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
             identity.SetClientOwner(player);
 
-            // special case,  we are in host mode,  set hasAuthority to true so that all overrides see it
+            // special case, we are in host mode, set hasAuthority to true so that all overrides see it
             if (player == Server.LocalPlayer)
             {
                 identity.HasAuthority = true;
