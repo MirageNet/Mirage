@@ -143,6 +143,9 @@ namespace Mirage
                 ? Instantiate(PlayerPrefab, startPos.position, startPos.rotation)
                 : Instantiate(PlayerPrefab);
 
+            // When spawning a player game object, Unity defaults to something like "MyPlayerObject(clone)"
+            // which sucks... So let's override it and make it easier to debug. Credit to Mirror for the nice touch.
+            player.name = $"{playerPrefab.name} {player.Connection.Endpoint}";
             ServerObjectManager.AddCharacter(player, character.gameObject);
         }
 
