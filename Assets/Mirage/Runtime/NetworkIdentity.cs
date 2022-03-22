@@ -904,7 +904,8 @@ namespace Mirage
         {
             if (!IsServer)
             {
-                throw new InvalidOperationException("AssignClientAuthority can only be called on the server for spawned objects");
+                // You can't do that, you're not a server.
+                throw new InvalidOperationException("Clients cannot call this function. Only the server can call AssignClientAuthority on spawned objects.");
             }
 
             if (player == null)
