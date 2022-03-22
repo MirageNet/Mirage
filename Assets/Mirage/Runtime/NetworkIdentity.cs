@@ -678,10 +678,12 @@ namespace Mirage
             byte barrierData = reader.ReadByte();
             if (barrierData != Barrier)
             {
-                throw new DeserializeFailedException($"Deserialize not aligned for object={name} netId={NetId} component={comp.GetType()} sceneId={SceneId:X}. Possible Reasons:\n" +
-                    $"  * Do {comp.GetType()}'s OnSerialize and OnDeserialize calls write the same amount of data? \n" +
-                    $"  * Are the server and client the exact same project?\n" +
-                    $"  * Maybe this OnDeserialize call was meant for another GameObject? The sceneIds can easily get out of sync if the Hierarchy was modified only in the client OR the server. Try rebuilding both.\n\n");
+                // Coburn: something something not aligned...? "Deserialize not aligned [...]" ... also could we show the amount of data in our buffer?
+                throw new DeserializeFailedException($"Deserialization failure for component '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId:X}). Possible Reasons:\n" +
+                    $"  * Do {comp.GetType()}'s OnSerialize and OnDeserialize calls write the same amount of data?\n" +
+                    $"  * Did something fail in {comp.GetType()}'s OnSerialize/OnDeserialize code?\n"
+                    $"  * Are the server and client instances built from the exact same project?\n" +
+                    $"  * Maybe this OnDeserialize call was meant for another GameObject? The sceneIds can easily get out of sync if the Hierarchy was modified only on the client OR the server. Try rebuilding both.\n\n");
             }
         }
 
