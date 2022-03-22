@@ -32,7 +32,7 @@ jobs:
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: Library
           key: Library-2020.1.17
@@ -80,7 +80,7 @@ jobs:
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: Library
           key: Library-2020.1.17
@@ -117,7 +117,7 @@ jobs:
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: Library
           key: Library-2020.1.17
@@ -162,7 +162,7 @@ jobs:
 
       - name: Cache Library
         id: cache-library
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: Library
           key: Library-2020.1.17
