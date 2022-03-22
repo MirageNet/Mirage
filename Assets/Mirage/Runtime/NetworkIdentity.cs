@@ -481,7 +481,7 @@ namespace Mirage
 
         internal void StartServer()
         {
-            if (logger.LogEnabled()) logger.Log($"OnStartServer {this} NetId:{NetId} SceneId:{SceneId:X}");
+            if (logger.LogEnabled()) logger.Log($"OnStartServer invoked on '{this}' (NetId: {NetId}, SceneId: {SceneId:X})");
 
             _onStartServer.Invoke();
         }
