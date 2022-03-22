@@ -414,7 +414,7 @@ namespace Mirage
             // do nothing if it already has an owner
             if (Owner != null && player != Owner)
             {
-                throw new InvalidOperationException($"Object {this} netId={NetId} already has an owner. Use RemoveClientAuthority() first");
+                throw new InvalidOperationException($"Object '{this}' (NetID {NetId}) already has an owner. Please call RemoveClientAuthority() first.");
             }
 
             // otherwise set the owner connection
