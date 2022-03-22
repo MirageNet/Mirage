@@ -62,7 +62,9 @@ namespace Mirage
     /// </summary>
     public interface INetworkPlayer : IMessageSender, IVisibilityTracker, IObjectOwner, IAuthenticatedObject, ISceneLoader
     {
+        SocketLayer.IEndPoint Address { get; }
         SocketLayer.IConnection Connection { get; }
+
         void Disconnect();
         void MarkAsDisconnected();
     }
