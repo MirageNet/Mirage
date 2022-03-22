@@ -751,7 +751,7 @@ namespace Mirage
                 return;
             }
 
-            if (logger.LogEnabled()) logger.Log($"Adding [{player.Connection.EndPoint}] as observer for {gameObject}");
+            if (logger.LogEnabled()) logger.Log($"Adding '{player.Connection.EndPoint}' as an observer for {gameObject}");
             observers.Add(player);
             player.AddToVisList(this);
 
@@ -865,7 +865,7 @@ namespace Mirage
                     player.RemoveFromVisList(this);
                     ServerObjectManager.HideToPlayer(this, player);
 
-                    if (logger.LogEnabled()) logger.Log("Removed Observer for " + gameObject + " " + player);
+                    if (logger.LogEnabled()) logger.Log($"Removed observer '{player}' for {gameObject}");
                     changed = true;
                 }
             }
@@ -886,7 +886,7 @@ namespace Mirage
                     player.AddToVisList(this);
                     // spawn identity for this conn
                     ServerObjectManager.ShowToPlayer(this, player);
-                    if (logger.LogEnabled()) logger.Log("New Observer for " + gameObject + " " + player);
+                    if (logger.LogEnabled()) logger.Log($"Added new observer '{player}' for {gameObject}");
                     changed = true;
                 }
             }
