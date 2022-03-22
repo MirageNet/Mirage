@@ -693,7 +693,7 @@ namespace Mirage
             reader.ObjectLocator = Client != null ? Client.World : null;
             // deserialize all components that were received
             NetworkBehaviour[] components = NetworkBehaviours;
-            // check if we can read atleast 1 byte
+            // check if we can read at least 1 byte
             while (reader.CanReadBytes(1))
             {
                 // todo replace index with bool for if next component in order has changed or not
