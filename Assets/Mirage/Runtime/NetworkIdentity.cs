@@ -910,12 +910,14 @@ namespace Mirage
 
             if (player == null)
             {
-                throw new InvalidOperationException("AssignClientAuthority for " + gameObject + " owner cannot be null. Use RemoveClientAuthority() instead");
+                // The player is null. How'd that happen? Are we trying to deassign the owner? (If so, tell them to use RemoveClientAuthority instead).
+                throw new InvalidOperationException($"Cannot assign a null owner to '{gameObject}'. Please use RemoveClientAuthority() instead.");
             }
 
             if (Owner != null && player != Owner)
             {
-                throw new InvalidOperationException("AssignClientAuthority for " + gameObject + " already has an owner. Use RemoveClientAuthority() first");
+                // Trying to assign another owner to an already owned object.
+                throw new InvalidOperationException($"Cannot assign a new owner to '{gameObject}' as it already has an owner. Please call RemoveClientAuthority() first.");
             }
 
             SetClientOwner(player);
@@ -934,12 +936,14 @@ namespace Mirage
         {
             if (!IsServer)
             {
-                throw new InvalidOperationException("RemoveClientAuthority can only be called on the server for spawned objects");
+                // You can't do that, you're not a server.
+                throw new InvalidOperationException("Clients cannot call this function. Only the server can call RemoveClientAuthority on spawned objects.");
             }
 
             if (Owner?.Identity == this)
             {
-                throw new InvalidOperationException("RemoveClientAuthority cannot remove authority for a player object");
+                // You can't remove your own authority.
+                throw new InvalidOperationException($"RemoveClientAuthority cannot remove authority for a player object '{gameObject}'.");
             }
 
             if (Owner != null)
