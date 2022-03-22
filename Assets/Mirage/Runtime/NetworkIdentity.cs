@@ -255,8 +255,9 @@ namespace Mirage
         /// <summary>
         /// Removes NetworkBehaviour that belong to another NetworkIdentity from the components array
         /// <para>
-        ///     If there are nested NetworkIdentities then Behaviour that belong to those Identities will be found by GetComponentsInChildren if the child object is added before the Array is intialized.
-        ///     This method will check each Behaviour to make sure that the Identity is the same as the current Identity, and if it is not remove it from the array
+        ///     If there are nested NetworkIdentities then Behaviour that belong to those Identities will be found by GetComponentsInChildren if the child object is added
+        ///     before the Array is intialized. This method will check each Behaviour to make sure that the Identity is the same as the current Identity, and if it is not
+        ///     remove it from the array.
         /// </para>
         /// </summary>
         /// <param name="components"></param>
@@ -326,19 +327,20 @@ namespace Mirage
                 // new is empty
                 if (newID == 0)
                 {
-                    throw new ArgumentException($"Can not set PrefabHash to empty guid on NetworkIdentity '{name}', old PrefabHash '{oldId}'");
+                    throw new ArgumentException($"Cannot set PrefabHash to an empty guid on NetworkIdentity '{name}'. Old PrefabHash '{oldId}'.");
                 }
 
                 // old not empty
                 if (oldId != 0)
                 {
-                    throw new InvalidOperationException($"Can not Set PrefabHash on NetworkIdentity '{name}' because it already had an PrefabHash, current PrefabHash '{oldId}', attempted new PrefabHash '{newID}'");
+                    throw new InvalidOperationException($"Cannot set PrefabHash on NetworkIdentity '{name}' because it already had an PrefabHash. " +
+                        $"Current PrefabHash is '{oldId}', attempted new PrefabHash is '{newID}'.");
                 }
 
                 // old is empty
                 _prefabHash = newID;
 
-                if (logger.LogEnabled()) logger.Log($"Settings PrefabHash on NetworkIdentity '{name}', new PrefabHash '{newID}'");
+                if (logger.LogEnabled()) logger.Log($"Setting PrefabHash on NetworkIdentity '{name}' with new PrefabHash '{newID}'");
             }
         }
 
@@ -366,13 +368,15 @@ namespace Mirage
 
         /// <summary>
         /// Called on every NetworkBehaviour when it is activated on a client.
-        /// <para>Objects on the host have this function called, as there is a local client on the host. The values of SyncVars on object are guaranteed to be initialized correctly with the latest state from the server when this function is called on the client.</para>
+        /// <para>Objects on the host have this function called, as there is a local client on the host. The values of SyncVars on object are guaranteed to be initialized
+        /// correctly with the latest state from the server when this function is called on the client.</para>
         /// </summary>
         public IAddLateEvent OnStartClient => _onStartClient;
 
         /// <summary>
         /// Called when the local player object has been set up.
-        /// <para>This happens after OnStartClient(), as it is triggered by an ownership message from the server. This is an appropriate place to activate components or functionality that should only be active for the local player, such as cameras and input.</para>
+        /// <para>This happens after OnStartClient(), as it is triggered by an ownership message from the server. This is an appropriate place to activate components or
+        /// functionality that should only be active for the local player, such as cameras and input.</para>
         /// </summary>
         public IAddLateEvent OnStartLocalPlayer => _onStartLocalPlayer;
 
@@ -438,7 +442,8 @@ namespace Mirage
         {
             if (hasSpawned)
             {
-                logger.LogError($"Object '{name}' (NetID {NetId}) has already been spawned. Don't call Instantiate for NetworkIdentities that were in the scene since the beginning (aka scene objects). Otherwise the client won't know which object to use for a SpawnSceneObject message.");
+                logger.LogError($"Object '{name}' (NetID {NetId}) has already been spawned. Don't call Instantiate for NetworkIdentities that were in the scene " +
+                    $"since the beginning (aka scene objects). Otherwise the client won't know which object to use for a SpawnSceneObject message.");
 
                 SpawnedFromInstantiate = true;
                 Destroy(gameObject);
@@ -677,11 +682,13 @@ namespace Mirage
             if (barrierData != Barrier)
             {
                 // Coburn: something something not aligned...? "Deserialize not aligned [...]" ... also could we show the amount of data in our buffer?
-                throw new DeserializeFailedException($"Deserialization failure for component '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId:X}). Possible Reasons:\n" +
+                throw new DeserializeFailedException($"Deserialization failure for component '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId:X})." +
+                    $" Possible Reasons:\n" +
                     $"  * Do {comp.GetType()}'s OnSerialize and OnDeserialize calls write the same amount of data?\n" +
                     $"  * Did something fail in {comp.GetType()}'s OnSerialize/OnDeserialize code?\n"
                     $"  * Are the server and client instances built from the exact same project?\n" +
-                    $"  * Maybe this OnDeserialize call was meant for another GameObject? The sceneIds can easily get out of sync if the Hierarchy was modified only on the client OR the server. Try rebuilding both.\n\n");
+                    $"  * Maybe this OnDeserialize call was meant for another GameObject? The sceneIds can easily get out of sync if the Hierarchy was modified only on the client " +
+                    $"OR the server. Try rebuilding both.\n\n");
             }
         }
 
@@ -894,8 +901,10 @@ namespace Mirage
 
         /// <summary>
         /// Assign control of an object to a client via the client's <see cref="NetworkPlayer">NetworkConnection.</see>
-        /// <para>This causes hasAuthority to be set on the client that owns the object, and NetworkBehaviour.OnStartAuthority will be called on that client. This object then will be in the NetworkConnection.clientOwnedObjects list for the connection.</para>
-        /// <para>Authority can be removed with RemoveClientAuthority. Only one client can own an object at any time. This does not need to be called for player objects, as their authority is setup automatically.</para>
+        /// <para>This causes hasAuthority to be set on the client that owns the object, and NetworkBehaviour.OnStartAuthority will be called on that client. This object then will be
+        /// in the NetworkConnection.clientOwnedObjects list for the connection.</para>
+        /// <para>Authority can be removed with RemoveClientAuthority. Only one client can own an object at any time. This does not need to be called for player objects, as their
+        /// authority is setup automatically.</para>
         /// </summary>
         /// <param name="player">	The connection of the client to assign authority to.</param>
         public void AssignClientAuthority(INetworkPlayer player)
@@ -927,7 +936,8 @@ namespace Mirage
 
         /// <summary>
         /// Removes ownership for an object.
-        /// <para>This applies to objects that had authority set by AssignClientAuthority, or <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included.</para>
+        /// <para>This applies to objects that had authority set by AssignClientAuthority, or <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection
+        /// parameter included.</para>
         /// <para>Authority cannot be removed for player objects.</para>
         /// </summary>
         public void RemoveClientAuthority()
