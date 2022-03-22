@@ -239,10 +239,8 @@ namespace Mirage
                 {
                     NetworkBehaviour[] components = FindBehaviourForThisIdentity();
 
-
-
                     if (components.Length > byte.MaxValue)
-                        throw new InvalidOperationException("Only 255 NetworkBehaviour per gameobject allowed");
+                        throw new InvalidOperationException("Only 255 NetworkBehaviours are allowed per GameObject.");
 
                     networkBehavioursCache = components;
                 }
