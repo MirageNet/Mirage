@@ -1,3 +1,10 @@
+## [120.1.1](https://github.com/MirageNet/Mirage/compare/v120.1.0...v120.1.1) (2022-03-23)
+
+
+### Bug Fixes
+
+* **NetworkClient:** checking if client is already active before connecting host ([bc89211](https://github.com/MirageNet/Mirage/commit/bc892115495d4bfde3c8395c66268b36e3e8f0ae))
+
 # [120.1.0](https://github.com/MirageNet/Mirage/compare/v120.0.0...v120.1.0) (2022-03-22)
 
 
