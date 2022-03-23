@@ -186,6 +186,8 @@ namespace Mirage
 
         internal void ConnectHost(NetworkServer server, IDataHandler serverDataHandler)
         {
+            ThrowIfActive();
+
             logger.Log("Client Connect Host to Server");
             // start connecting for setup, then "Peer_OnConnected" below will change to connected
             connectState = ConnectState.Connecting;
