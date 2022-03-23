@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Reflection;
+using Mirage.Tests.PlayerTests;
 using UnityEditor;
 using UnityEditor.TestTools.TestRunner.Api;
-using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 namespace Mirage.Tests.BuildIL2CPP
@@ -59,7 +59,7 @@ namespace Mirage.Tests.BuildIL2CPP
                         runSynchronously = true,
                     };
 
-                    using (var logCatcher = new LogCatcher())
+                    using (var logCatcher = new LogErrorChecker())
                     {
                         runner.Execute(testSettings);
 
@@ -106,41 +106,11 @@ namespace Mirage.Tests.BuildIL2CPP
             var assembly = Assembly.Load("UnityEditor.TestRunner");
             string typeName = "UnityEditor.TestTools.TestRunner.PlayerLauncherTestRunSettings";
             object runSettings = assembly.CreateInstance(typeName);
-            runSettings.GetType().GetProperty("buildOnly").SetValue(runSettings, true);
+            runSettings.GetType().GetProperty("buildOnly" +
+                "").SetValue(runSettings, true);
             runSettings.GetType().GetProperty("buildOnlyLocationPath").SetValue(runSettings, targetPath);
 
             return (ITestRunSettings)runSettings;
-        }
-    }
-
-    class LogCatcher : ILogHandler, IDisposable
-    {
-        ILogHandler inner;
-        public bool HasErrors;
-
-
-        public LogCatcher()
-        {
-            inner = Debug.unityLogger.logHandler;
-            Debug.unityLogger.logHandler = this;
-        }
-        public void Dispose()
-        {
-            Debug.unityLogger.logHandler = inner;
-        }
-
-        public void LogException(Exception exception, UnityEngine.Object context)
-        {
-            HasErrors = true;
-            inner.LogException(exception, context);
-        }
-
-        public void LogFormat(LogType logType, UnityEngine.Object context, string format, params object[] args)
-        {
-            if (logType == LogType.Error || logType == LogType.Assert || logType == LogType.Exception)
-                HasErrors = true;
-
-            inner.LogFormat(logType, context, format, args);
         }
     }
 

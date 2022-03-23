@@ -2,7 +2,8 @@
     "name": "Mirage.Tests.BuildIl2CPP",
     "references": [
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "Mirage.Tests.Common"
     ],
     "includePlatforms": [
         "Editor"
