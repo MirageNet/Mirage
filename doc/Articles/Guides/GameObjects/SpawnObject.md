@@ -2,6 +2,12 @@
 
 In Unity, you usually “spawn” (that is, create) new game objects with `Instantiate`. However, in Mirage, the word “spawn” means something more specific. In the server-authoritative model of the Mirage, to “spawn” a game object on the server means that the game object is created on clients connected to the server, and is managed by the spawning system.
 
+To spawn an object on the server you need to `Instantiate` the prefab and then call `Spawn` on the new object. This will assign a `NetId` to the object and send a `SpawnMessage` to clients.
+```cs
+var boxGo = Instantiate(boxPrefab);
+ServerObjectManager.Spawn(boxGo);
+```
+
 Once the game object is spawned using this system, state updates are sent to clients whenever the game object changes on the server. When Mirage destroys the game object on the server, it also destroys it on the clients. The server manages spawned game objects alongside all other networked game objects, so that if another client joins the game later, the server can spawn the game objects on that client. These spawned game objects have a unique network instance ID called “netId” that is the same on the server and clients for each game object. The unique network instance ID is used to route messages set across the network to game objects, and to identify game objects.
 
 When the server spawns a game object with a Network Identity component, the game object spawned on the client has the same “state”. This means it is identical to the game object on the server; it has the same Transform, movement state, and (if Network Transform and SyncVars are used) synchronized variables. Therefore, client game objects are always up-to-date when Mirage creates them. This avoids issues such as game objects spawning at the wrong initial location, then reappearing at their correct position when a state update arrives.
