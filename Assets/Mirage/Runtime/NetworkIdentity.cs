@@ -1073,7 +1073,7 @@ namespace Mirage
         /// <param name="channelId">The transport channel that should be used to deliver the message. Default is the Reliable channel.</param>
         internal void SendToRemoteObservers<T>(T msg, bool includeOwner = true, int channelId = Channel.Reliable)
         {
-            if (logger.LogEnabled()) logger.Log($"Server.SendToObservers: Sending message Id: {typeof(T))}");
+            if (logger.LogEnabled()) logger.Log($"Server.SendToObservers: Sending message Id: {typeof(T)}");
 
             if (observers.Count == 0)
                 return;
