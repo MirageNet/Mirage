@@ -239,10 +239,8 @@ namespace Mirage
                 {
                     NetworkBehaviour[] components = FindBehaviourForThisIdentity();
 
-
-
                     if (components.Length > byte.MaxValue)
-                        throw new InvalidOperationException("Only 255 NetworkBehaviour per gameobject allowed");
+                        throw new InvalidOperationException("Only 255 NetworkBehaviours are allowed per GameObject.");
 
                     networkBehavioursCache = components;
                 }
@@ -257,8 +255,9 @@ namespace Mirage
         /// <summary>
         /// Removes NetworkBehaviour that belong to another NetworkIdentity from the components array
         /// <para>
-        ///     If there are nested NetworkIdentities then Behaviour that belong to those Identities will be found by GetComponentsInChildren if the child object is added before the Array is intialized.
-        ///     This method will check each Behaviour to make sure that the Identity is the same as the current Identity, and if it is not remove it from the array
+        ///     If there are nested NetworkIdentities then Behaviour that belong to those Identities will be found by GetComponentsInChildren if the child object is added
+        ///     before the Array is intialized. This method will check each Behaviour to make sure that the Identity is the same as the current Identity, and if it is not
+        ///     remove it from the array.
         /// </para>
         /// </summary>
         /// <param name="components"></param>
@@ -328,19 +327,20 @@ namespace Mirage
                 // new is empty
                 if (newID == 0)
                 {
-                    throw new ArgumentException($"Can not set PrefabHash to empty guid on NetworkIdentity '{name}', old PrefabHash '{oldId}'");
+                    throw new ArgumentException($"Cannot set PrefabHash to an empty guid on NetworkIdentity '{name}'. Old PrefabHash '{oldId}'.");
                 }
 
                 // old not empty
                 if (oldId != 0)
                 {
-                    throw new InvalidOperationException($"Can not Set PrefabHash on NetworkIdentity '{name}' because it already had an PrefabHash, current PrefabHash '{oldId}', attempted new PrefabHash '{newID}'");
+                    throw new InvalidOperationException($"Cannot set PrefabHash on NetworkIdentity '{name}' because it already had an PrefabHash. " +
+                        $"Current PrefabHash is '{oldId}', attempted new PrefabHash is '{newID}'.");
                 }
 
                 // old is empty
                 _prefabHash = newID;
 
-                if (logger.LogEnabled()) logger.Log($"Settings PrefabHash on NetworkIdentity '{name}', new PrefabHash '{newID}'");
+                if (logger.LogEnabled()) logger.Log($"Setting PrefabHash on NetworkIdentity '{name}' with new PrefabHash '{newID}'");
             }
         }
 
@@ -368,13 +368,15 @@ namespace Mirage
 
         /// <summary>
         /// Called on every NetworkBehaviour when it is activated on a client.
-        /// <para>Objects on the host have this function called, as there is a local client on the host. The values of SyncVars on object are guaranteed to be initialized correctly with the latest state from the server when this function is called on the client.</para>
+        /// <para>Objects on the host have this function called, as there is a local client on the host. The values of SyncVars on object are guaranteed to be initialized
+        /// correctly with the latest state from the server when this function is called on the client.</para>
         /// </summary>
         public IAddLateEvent OnStartClient => _onStartClient;
 
         /// <summary>
         /// Called when the local player object has been set up.
-        /// <para>This happens after OnStartClient(), as it is triggered by an ownership message from the server. This is an appropriate place to activate components or functionality that should only be active for the local player, such as cameras and input.</para>
+        /// <para>This happens after OnStartClient(), as it is triggered by an ownership message from the server. This is an appropriate place to activate components or
+        /// functionality that should only be active for the local player, such as cameras and input.</para>
         /// </summary>
         public IAddLateEvent OnStartLocalPlayer => _onStartLocalPlayer;
 
@@ -414,7 +416,7 @@ namespace Mirage
             // do nothing if it already has an owner
             if (Owner != null && player != Owner)
             {
-                throw new InvalidOperationException($"Object {this} netId={NetId} already has an owner. Use RemoveClientAuthority() first");
+                throw new InvalidOperationException($"Object '{this}' (NetID {NetId}) already has an owner. Please call RemoveClientAuthority() first.");
             }
 
             // otherwise set the owner connection
@@ -440,7 +442,8 @@ namespace Mirage
         {
             if (hasSpawned)
             {
-                logger.LogError($"{name} has already spawned. Don't call Instantiate for NetworkIdentities that were in the scene since the beginning (aka scene objects).  Otherwise the client won't know which object to use for a SpawnSceneObject message.");
+                logger.LogError($"Object '{name}' (NetID {NetId}) has already been spawned. Don't call Instantiate for NetworkIdentities that were in the scene " +
+                    $"since the beginning (aka scene objects). Otherwise the client won't know which object to use for a SpawnSceneObject message.");
 
                 SpawnedFromInstantiate = true;
                 Destroy(gameObject);
@@ -481,7 +484,7 @@ namespace Mirage
 
         internal void StartServer()
         {
-            if (logger.LogEnabled()) logger.Log($"OnStartServer {this} NetId:{NetId} SceneId:{SceneId:X}");
+            if (logger.LogEnabled()) logger.Log($"OnStartServer invoked on '{this}' (NetId: {NetId}, SceneId: {SceneId:X})");
 
             _onStartServer.Invoke();
         }
@@ -591,7 +594,7 @@ namespace Mirage
         void OnSerialize(NetworkBehaviour comp, NetworkWriter writer, bool initialState)
         {
             comp.OnSerialize(writer, initialState);
-            if (logger.LogEnabled()) logger.Log($"OnSerializeSafely written for object={comp.name} component={comp.GetType()} sceneId={SceneId:X}");
+            if (logger.LogEnabled()) logger.Log($"OnSerializeSafely written for '{comp.name}', Component '{comp.GetType()}', SceneId {SceneId:X}");
 
             // serialize a barrier to be checked by the deserializer
             writer.WriteByte(Barrier);
@@ -623,7 +626,7 @@ namespace Mirage
                 NetworkBehaviour comp = components[i];
                 if (initialState || comp.IsDirty())
                 {
-                    if (logger.LogEnabled()) logger.Log("OnSerializeAllSafely: " + name + " -> " + comp.GetType() + " initial=" + initialState);
+                    if (logger.LogEnabled()) logger.Log($"OnSerializeAllSafely: '{name}', component '{comp.GetType()}', initial state: '{initialState}');
 
                     // remember start position in case we need to copy it into
                     // observers writer too
@@ -678,10 +681,14 @@ namespace Mirage
             byte barrierData = reader.ReadByte();
             if (barrierData != Barrier)
             {
-                throw new DeserializeFailedException($"Deserialize not aligned for object={name} netId={NetId} component={comp.GetType()} sceneId={SceneId:X}. Possible Reasons:\n" +
-                    $"  * Do {comp.GetType()}'s OnSerialize and OnDeserialize calls write the same amount of data? \n" +
-                    $"  * Are the server and client the exact same project?\n" +
-                    $"  * Maybe this OnDeserialize call was meant for another GameObject? The sceneIds can easily get out of sync if the Hierarchy was modified only in the client OR the server. Try rebuilding both.\n\n");
+                // Coburn: something something not aligned...? "Deserialize not aligned [...]" ... also could we show the amount of data in our buffer?
+                throw new DeserializeFailedException($"Deserialization failure for component '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId:X})." +
+                    $" Possible Reasons:\n" +
+                    $"  * Do {comp.GetType()}'s OnSerialize and OnDeserialize calls write the same amount of data?\n" +
+                    $"  * Did something fail in {comp.GetType()}'s OnSerialize/OnDeserialize code?\n"
+                    $"  * Are the server and client instances built from the exact same project?\n" +
+                    $"  * Maybe this OnDeserialize call was meant for another GameObject? The sceneIds can easily get out of sync if the Hierarchy was modified only on the client " +
+                    $"OR the server. Try rebuilding both.\n\n");
             }
         }
 
@@ -691,7 +698,7 @@ namespace Mirage
             reader.ObjectLocator = Client != null ? Client.World : null;
             // deserialize all components that were received
             NetworkBehaviour[] components = NetworkBehaviours;
-            // check if we can read atleast 1 byte
+            // check if we can read at least 1 byte
             while (reader.CanReadBytes(1))
             {
                 // todo replace index with bool for if next component in order has changed or not
@@ -749,7 +756,7 @@ namespace Mirage
                 return;
             }
 
-            if (logger.LogEnabled()) logger.Log($"Adding [{player.Connection.EndPoint}] as observer for {gameObject}");
+            if (logger.LogEnabled()) logger.Log($"Adding '{player.Connection.EndPoint}' as an observer for {gameObject}");
             observers.Add(player);
             player.AddToVisList(this);
 
@@ -863,7 +870,7 @@ namespace Mirage
                     player.RemoveFromVisList(this);
                     ServerObjectManager.HideToPlayer(this, player);
 
-                    if (logger.LogEnabled()) logger.Log("Removed Observer for " + gameObject + " " + player);
+                    if (logger.LogEnabled()) logger.Log($"Removed observer '{player}' for {gameObject}");
                     changed = true;
                 }
             }
@@ -884,7 +891,7 @@ namespace Mirage
                     player.AddToVisList(this);
                     // spawn identity for this conn
                     ServerObjectManager.ShowToPlayer(this, player);
-                    if (logger.LogEnabled()) logger.Log("New Observer for " + gameObject + " " + player);
+                    if (logger.LogEnabled()) logger.Log($"Added new observer '{player}' for {gameObject}");
                     changed = true;
                 }
             }
@@ -894,25 +901,30 @@ namespace Mirage
 
         /// <summary>
         /// Assign control of an object to a client via the client's <see cref="NetworkPlayer">NetworkConnection.</see>
-        /// <para>This causes hasAuthority to be set on the client that owns the object, and NetworkBehaviour.OnStartAuthority will be called on that client. This object then will be in the NetworkConnection.clientOwnedObjects list for the connection.</para>
-        /// <para>Authority can be removed with RemoveClientAuthority. Only one client can own an object at any time. This does not need to be called for player objects, as their authority is setup automatically.</para>
+        /// <para>This causes hasAuthority to be set on the client that owns the object, and NetworkBehaviour.OnStartAuthority will be called on that client. This object then will be
+        /// in the NetworkConnection.clientOwnedObjects list for the connection.</para>
+        /// <para>Authority can be removed with RemoveClientAuthority. Only one client can own an object at any time. This does not need to be called for player objects, as their
+        /// authority is setup automatically.</para>
         /// </summary>
         /// <param name="player">	The connection of the client to assign authority to.</param>
         public void AssignClientAuthority(INetworkPlayer player)
         {
             if (!IsServer)
             {
-                throw new InvalidOperationException("AssignClientAuthority can only be called on the server for spawned objects");
+                // You can't do that, you're not a server.
+                throw new InvalidOperationException("Only the server can call AssignClientAuthority on spawned objects.");
             }
 
             if (player == null)
             {
-                throw new InvalidOperationException("AssignClientAuthority for " + gameObject + " owner cannot be null. Use RemoveClientAuthority() instead");
+                // The player is null. How'd that happen? Are we trying to deassign the owner? (If so, tell them to use RemoveClientAuthority instead).
+                throw new ArgumentNullException($"Cannot assign a null owner to '{gameObject}'. Please use RemoveClientAuthority() instead.");
             }
 
             if (Owner != null && player != Owner)
             {
-                throw new InvalidOperationException("AssignClientAuthority for " + gameObject + " already has an owner. Use RemoveClientAuthority() first");
+                // Trying to assign another owner to an already owned object.
+                throw new InvalidOperationException($"Cannot assign a new owner to '{gameObject}' as it already has an owner. Please call RemoveClientAuthority() first.");
             }
 
             SetClientOwner(player);
@@ -924,19 +936,22 @@ namespace Mirage
 
         /// <summary>
         /// Removes ownership for an object.
-        /// <para>This applies to objects that had authority set by AssignClientAuthority, or <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included.</para>
+        /// <para>This applies to objects that had authority set by AssignClientAuthority, or <see cref="ServerObjectManager.Spawn">NetworkServer.Spawn</see> with a NetworkConnection
+        /// parameter included.</para>
         /// <para>Authority cannot be removed for player objects.</para>
         /// </summary>
         public void RemoveClientAuthority()
         {
             if (!IsServer)
             {
-                throw new InvalidOperationException("RemoveClientAuthority can only be called on the server for spawned objects");
+                // You can't do that, you're not a server.
+                throw new InvalidOperationException("Only the server can call RemoveClientAuthority on spawned objects.");
             }
 
             if (Owner?.Identity == this)
             {
-                throw new InvalidOperationException("RemoveClientAuthority cannot remove authority for a player object");
+                // You can't remove your own authority.
+                throw new InvalidOperationException($"RemoveClientAuthority cannot remove authority from the player's character '{gameObject}'.");
             }
 
             if (Owner != null)
@@ -1053,13 +1068,13 @@ namespace Mirage
         /// <summary>
         /// Send a message to all the remote observers
         /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="msg"> the message to deliver to to clients</param>
-        /// <param name="includeOwner">Wether the owner should receive this message too</param>
-        /// <param name="channelId"> the transport channel that should be used to deliver the message</param>
+        /// <typeparam name="T">The message type to dispatch.</typeparam>
+        /// <param name="msg">The message to deliver to clients.</param>
+        /// <param name="includeOwner">Should the owner should receive this message too?</param>
+        /// <param name="channelId">The transport channel that should be used to deliver the message. Default is the Reliable channel.</param>
         internal void SendToRemoteObservers<T>(T msg, bool includeOwner = true, int channelId = Channel.Reliable)
         {
-            if (logger.LogEnabled()) logger.Log("Server.SendToObservers id:" + typeof(T));
+            if (logger.LogEnabled()) logger.Log($"Server.SendToObservers: Sending message Id: {typeof(T))}";
 
             if (observers.Count == 0)
                 return;
