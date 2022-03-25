@@ -199,8 +199,8 @@ namespace Mirage.Tests
             {
                 identity.PrefabHash = hash2;
             });
-
-            Assert.That(exception.Message, Is.EqualTo($"Can not Set PrefabHash on NetworkIdentity '{identity.name}' because it already had an PrefabHash, current PrefabHash '{hash1}', attempted new PrefabHash '{hash2}'"));
+            
+            Assert.That(exception.Message, Is.EqualTo($"Cannot set PrefabHash on NetworkIdentity '{identity.name}' because it already had an PrefabHash. Current PrefabHash is '{hash1}', attempted new PrefabHash is '{hash2}'."));
             // guid was changed
             Assert.That(identity.PrefabHash, Is.EqualTo(hash1));
         }
@@ -218,7 +218,7 @@ namespace Mirage.Tests
                 identity.PrefabHash = hash2;
             });
 
-            Assert.That(exception.Message, Is.EqualTo($"Can not set PrefabHash to empty guid on NetworkIdentity '{identity.name}', old PrefabHash '{hash1}'"));
+            Assert.That(exception.Message, Is.EqualTo($"Cannot set PrefabHash to an empty guid on NetworkIdentity '{identity.name}'. Old PrefabHash '{hash1}'."));
             // guid was NOT changed
             Assert.That(identity.PrefabHash, Is.EqualTo(hash1));
         }
