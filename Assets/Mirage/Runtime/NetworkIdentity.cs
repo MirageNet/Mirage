@@ -912,7 +912,7 @@ namespace Mirage
             if (!IsServer)
             {
                 // You can't do that, you're not a server.
-                throw new InvalidOperationException("Clients cannot call this function. Only the server can call AssignClientAuthority on spawned objects.");
+                throw new InvalidOperationException("Only the server can call AssignClientAuthority on spawned objects.");
             }
 
             if (player == null)
@@ -945,7 +945,7 @@ namespace Mirage
             if (!IsServer)
             {
                 // You can't do that, you're not a server.
-                throw new InvalidOperationException("Clients cannot call this function. Only the server can call RemoveClientAuthority on spawned objects.");
+                throw new InvalidOperationException("Only the server can call RemoveClientAuthority on spawned objects.");
             }
 
             if (Owner?.Identity == this)
