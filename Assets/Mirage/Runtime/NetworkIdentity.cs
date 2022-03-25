@@ -918,7 +918,7 @@ namespace Mirage
             if (player == null)
             {
                 // The player is null. How'd that happen? Are we trying to deassign the owner? (If so, tell them to use RemoveClientAuthority instead).
-                throw new InvalidOperationException($"Cannot assign a null owner to '{gameObject}'. Please use RemoveClientAuthority() instead.");
+                throw new ArgumentNullException($"Cannot assign a null owner to '{gameObject}'. Please use RemoveClientAuthority() instead.");
             }
 
             if (Owner != null && player != Owner)
