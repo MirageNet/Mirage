@@ -684,7 +684,7 @@ namespace Mirage
                 throw new DeserializeFailedException($"Deserialization failure for component '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId:X})." +
                     $" Possible Reasons:\n" +
                     $"  * Do {comp.GetType()}'s OnSerialize and OnDeserialize calls write the same amount of data?\n" +
-                    $"  * Did something fail in {comp.GetType()}'s OnSerialize/OnDeserialize code?\n"
+                    $"  * Did something fail in {comp.GetType()}'s OnSerialize/OnDeserialize code?\n" + 
                     $"  * Are the server and client instances built from the exact same project?\n" +
                     $"  * Maybe this OnDeserialize call was meant for another GameObject? The sceneIds can easily get out of sync if the Hierarchy was modified only on the client " +
                     $"OR the server. Try rebuilding both.\n\n");
@@ -1073,7 +1073,7 @@ namespace Mirage
         /// <param name="channelId">The transport channel that should be used to deliver the message. Default is the Reliable channel.</param>
         internal void SendToRemoteObservers<T>(T msg, bool includeOwner = true, int channelId = Channel.Reliable)
         {
-            if (logger.LogEnabled()) logger.Log($"Server.SendToObservers: Sending message Id: {typeof(T))}";
+            if (logger.LogEnabled()) logger.Log($"Server.SendToObservers: Sending message Id: {typeof(T))}");
 
             if (observers.Count == 0)
                 return;
