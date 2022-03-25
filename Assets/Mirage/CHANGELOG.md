@@ -1,3 +1,10 @@
+# [120.1.0](https://github.com/MirageNet/Mirage/compare/v120.0.0...v120.1.0) (2022-03-22)
+
+
+### Features
+
+* adding SetCharacterName to character spawner ([1b051c7](https://github.com/MirageNet/Mirage/commit/1b051c76e793d5731dddec33f993b5fdc82816ed))
+
 # [120.0.0](https://github.com/MirageNet/Mirage/compare/v119.1.4...v120.0.0) (2022-03-20)
 
 
