@@ -951,7 +951,7 @@ namespace Mirage
             if (Owner?.Identity == this)
             {
                 // You can't remove your own authority.
-                throw new InvalidOperationException($"RemoveClientAuthority cannot remove authority for a player object '{gameObject}'.");
+                throw new InvalidOperationException($"RemoveClientAuthority cannot remove authority from the player's character '{gameObject}'.");
             }
 
             if (Owner != null)
