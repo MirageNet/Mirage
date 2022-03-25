@@ -680,8 +680,7 @@ namespace Mirage
             // check if Barrier is at end of Deserialize, if it is then the Deserialize was likely a success
             byte barrierData = reader.ReadByte();
             if (barrierData != Barrier)
-            {
-                // Coburn: something something not aligned...? "Deserialize not aligned [...]" ... also could we show the amount of data in our buffer?
+            {                
                 throw new DeserializeFailedException($"Deserialization failure for component '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId:X})." +
                     $" Possible Reasons:\n" +
                     $"  * Do {comp.GetType()}'s OnSerialize and OnDeserialize calls write the same amount of data?\n" +
