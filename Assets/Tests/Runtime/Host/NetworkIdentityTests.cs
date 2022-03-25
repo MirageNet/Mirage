@@ -127,7 +127,7 @@ namespace Mirage.Tests.Runtime.Host
 
             // someone might try to remove authority by assigning null.
             // make sure this fails.
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<ArgumentNullException>(() =>
             {
                 testIdentity.AssignClientAuthority(null);
             });
