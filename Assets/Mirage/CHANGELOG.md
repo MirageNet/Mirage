@@ -1,3 +1,12 @@
+## [120.1.2](https://github.com/MirageNet/Mirage/compare/v120.1.1...v120.1.2) (2022-03-25)
+
+
+### Bug Fixes
+
+* **NetworkIdentity:** fix more missing things ([7420bd1](https://github.com/MirageNet/Mirage/commit/7420bd128c505044d452c12e034ded4f43ab31cb))
+* **NetworkIdentity:** fix one quote on a log string to unbreak it all ([339ab4c](https://github.com/MirageNet/Mirage/commit/339ab4c02bfd963e3f1beeb49a0a929a78d03c80))
+* **tests:** networkidentity test failing due to changed exception text ([877eb12](https://github.com/MirageNet/Mirage/commit/877eb12e63db914cdbd4f1211c58e77f211adc76))
+
 ## [120.1.1](https://github.com/MirageNet/Mirage/compare/v120.1.0...v120.1.1) (2022-03-23)
 
 
