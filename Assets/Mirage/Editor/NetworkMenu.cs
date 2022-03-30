@@ -1,17 +1,32 @@
 using System;
 using Mirage.Logging;
+using Mirage.SocketLayer;
 using Mirage.Sockets.Udp;
 using UnityEditor;
 using UnityEngine;
 
 namespace Mirage
 {
-
     public static class NetworkMenu
     {
-        // Start is called before the first frame update
+        /// <summary>
+        /// Creates a new game object with NetworkManager and other network components attached, Including UdpSocketFactory
+        /// </summary>
+        /// <returns></returns>
         [MenuItem("GameObject/Network/NetworkManager", priority = 7)]
         public static GameObject CreateNetworkManager()
+        {
+            return CreateNetworkManager<UdpSocketFactory>();
+        }
+
+        /// <summary>
+        /// Creates a new game object with NetworkManager and other network components attached, Including Socket factory that is given as generic arg
+        /// </summary>
+        /// <remarks>
+        /// This methods can be used by other socketfactories to create networkmanager with their setup
+        /// </remarks>
+        /// <returns></returns>
+        public static GameObject CreateNetworkManager<T>() where T : SocketFactory
         {
             var components = new Type[]
             {
@@ -22,12 +37,12 @@ namespace Mirage
                 typeof(ServerObjectManager),
                 typeof(ClientObjectManager),
                 typeof(CharacterSpawner),
-                typeof(UdpSocketFactory),
+                typeof(T),
                 typeof(LogSettings)
             };
             var go = new GameObject("NetworkManager", components);
 
-            UdpSocketFactory socketFactory = go.GetComponent<UdpSocketFactory>();
+            T socketFactory = go.GetComponent<T>();
             NetworkSceneManager nsm = go.GetComponent<NetworkSceneManager>();
 
             NetworkClient networkClient = go.GetComponent<NetworkClient>();
