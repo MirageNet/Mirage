@@ -25,15 +25,15 @@ namespace Mirage.Authenticators
         [Header("Custom Properties")]
         public string serverCode;
 
-
         /// <summary>
         /// Use whatever credentials make sense for your game.
         /// <para>
         ///     This example uses a code so that only players that know the code can join.
         /// </para>
         /// <para>
-        ///     You might want to use an accessToken or passwords. Be aware that the normal connection
-        ///     in Mirage is not encrypted so sending secure information directly is not adviced
+        ///     You might want to use an access token or passwords. Be aware that the normal connection
+        ///     in Mirage is not encrypted so sending sensitive information directly without any protection
+        ///     is not advised.
         /// </para>
         /// </summary>
 
