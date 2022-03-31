@@ -37,7 +37,8 @@ namespace Mirage
                 // also there is no context about which scene this is in.
                 if (identity.GetComponent<NetworkManager>() != null)
                 {
-                    logger.LogError("NetworkManager has a NetworkIdentity component. This will cause the NetworkManager object to be disabled, so it is not recommended.");
+                    logger.LogError($"NetworkManager on '{identity.name}' detected a NetworkIdentity on the same GameObject.\n" +
+                        $"Avoid having a NetworkIdentity on a NetworkManager GameObject as this will cause it to be disabled at runtime, causing unwanted behaviour.");
                 }
 
                 // not spawned before?
