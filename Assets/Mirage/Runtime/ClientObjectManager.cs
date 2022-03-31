@@ -154,16 +154,14 @@ namespace Mirage
         }
 
         // this is called from message handler for Owner message
-        internal void InternalAddPlayer(NetworkIdentity identity)
+        internal void InternalAddCharacter(NetworkIdentity identity)
         {
-            if (Client.Player != null)
+            if (!Client.Active)
             {
-                Client.Player.Identity = identity;
+                throw new InvalidOperationException("Can't add character while client is not active");
             }
-            else
-            {
-                logger.LogWarning("No ready connection found for setting player controller during InternalAddPlayer");
-            }
+
+            Client.Player.Identity = identity;
         }
 
         /// <summary>
@@ -381,7 +379,7 @@ namespace Mirage
             identity.SetClientValues(this, msg);
 
             if (msg.isLocalPlayer)
-                InternalAddPlayer(identity);
+                InternalAddCharacter(identity);
 
             // deserialize components if any payload
             // (Count is 0 if there were no components)
@@ -557,7 +555,7 @@ namespace Mirage
             if (Client.World.TryGetIdentity(msg.netId, out NetworkIdentity localObject))
             {
                 if (msg.isLocalPlayer)
-                    InternalAddPlayer(localObject);
+                    InternalAddCharacter(localObject);
 
                 localObject.SetClientValues(this, msg);
 
