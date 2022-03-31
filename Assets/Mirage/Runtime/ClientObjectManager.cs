@@ -216,12 +216,16 @@ namespace Mirage
 
         /// <summary>
         /// Registers a prefab with the spawning system.
-        /// <para>When a NetworkIdentity object is spawned on a server with NetworkServer.SpawnObject(), and the prefab that the object was created from was registered with RegisterPrefab(), the client will use that prefab to instantiate a corresponding client object with the same netId.</para>
+        /// <para>When a NetworkIdentity object is spawned on a server with NetworkServer.SpawnObject(), and the prefab that the object was created
+        /// from was registered with RegisterPrefab(), the client will use that prefab to instantiate a corresponding client object with the same
+        /// netId.</para>
         /// <para>The ClientObjectManager has a list of spawnable prefabs, it uses this function to register those prefabs with the ClientScene.</para>
-        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a dictionary of PrefabHash and prefab references.</para>
+        /// <para>The set of current spawnable object is available in the ClientScene static member variable ClientScene.prefabs, which is a
+        /// dictionary of PrefabHash and prefab references.</para>
         /// </summary>
         /// <param name="identity">A Prefab that will be spawned.</param>
-        /// <param name="newPrefabHash">A hash to be assigned to this prefab. This allows a dynamically created game object to be registered for an already known asset Id.</param>
+        /// <param name="newPrefabHash">A hash to be assigned to this prefab. This allows a dynamically created game object to be registered for
+        /// an already known asset Id.</param>
         public void RegisterPrefab(NetworkIdentity identity, int newPrefabHash)
         {
             identity.PrefabHash = newPrefabHash;
