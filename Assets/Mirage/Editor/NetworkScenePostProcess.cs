@@ -57,7 +57,7 @@ namespace Mirage
                     }
                     // throwing an exception would only show it for one object
                     // because this function would return afterwards.
-                    else logger.LogWarning("Scene " + identity.gameObject.scene.path + " needs to be opened and resaved, because the scene object " + identity.name + " has no valid sceneId yet.");
+                    else logger.LogWarning($"Scene '{identity.gameObject.scene.path}' needs to be opened and resaved. The scene object '{identity.name}' has no valid sceneId yet.");
                 }
             }
         }
@@ -75,7 +75,8 @@ namespace Mirage
                 GameObject prefabRootGO = prefabGO.transform.root.gameObject;
                 if (prefabRootGO != null && prefabRootGO.GetComponentsInChildren<NetworkIdentity>().Length > 1)
                 {
-                    logger.LogFormat(LogType.Warning, "Prefab '{0}' has several NetworkIdentity components attached to itself or its children, this is not supported.", prefabRootGO.name);
+                    // TODO: Should this be a warning or a error?
+                    logger.LogWarning($"Prefab '{prefabRootGO.name}' has several NetworkIdentity components attached to itself or its children, this is not supported.");
                 }
             }
         }
