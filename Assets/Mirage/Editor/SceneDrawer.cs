@@ -22,7 +22,7 @@ namespace Mirage
                 }
                 if (sceneObject == null && !string.IsNullOrEmpty(property.stringValue))
                 {
-                    logger.LogError($"Could not find scene {property.stringValue} in {property.propertyPath}, assign the proper scenes in your NetworkManager");
+                    logger.LogError($"Could not find scene '{property.stringValue}' in '{property.propertyPath}'. Please assign the proper scenes in your NetworkManager.");
                 }
                 var scene = (SceneAsset)EditorGUI.ObjectField(position, label, sceneObject, typeof(SceneAsset), true);
 
