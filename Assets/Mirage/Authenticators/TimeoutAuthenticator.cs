@@ -32,6 +32,8 @@ namespace Mirage.Authenticators
         {
             pendingAuthentication.Remove(player);
             ServerAccept(player);
+
+            if (logger.LogEnabled()) logger.Log($"Authentication succeeded for {player}.");
         }
 
         private void HandleClientAuthenticated(INetworkPlayer player)
