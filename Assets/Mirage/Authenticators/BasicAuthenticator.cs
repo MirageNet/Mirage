@@ -136,12 +136,12 @@ namespace Mirage.Authenticators
         {
             if (msg.success)
             {
-                if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Authentication Success: {0}", msg.message);
+                if (logger.LogEnabled()) logger.Log($"Authentication Success: {msg.message}");
                 ClientAccept(player);
             }
             else
             {
-                logger.LogFormat(LogType.Error, "Authentication Fail: {0}", msg.message);
+                logger.LogError($"Authentication Failed: {msg.message}");
                 ClientReject(player);
             }
         }
