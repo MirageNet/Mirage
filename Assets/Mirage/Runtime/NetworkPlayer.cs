@@ -40,6 +40,11 @@ namespace Mirage
         bool isDisconnected = false;
 
         /// <summary>
+        /// Backing field for <see cref="Identity"/>
+        /// </summary>
+        private NetworkIdentity _identity;
+
+        /// <summary>
         /// Marks if this player has been accepted by a <see cref="NetworkAuthenticator"/>
         /// </summary>
         public bool IsAuthenticated { get; set; }
@@ -94,9 +99,25 @@ namespace Mirage
         }
 
         /// <summary>
+        /// Event called when <see cref="Identity"/> property is changed
+        /// </summary>
+        public event Action<NetworkIdentity> OnIdentityChanged;
+
+        /// <summary>
         /// The NetworkIdentity for this connection.
         /// </summary>
-        public NetworkIdentity Identity { get; set; }
+        public NetworkIdentity Identity
+        {
+            get => _identity;
+            set
+            {
+                if (_identity == value)
+                    return;
+
+                _identity = value;
+                OnIdentityChanged?.Invoke(_identity);
+            }
+        }
 
         /// <summary>
         /// A list of the NetworkIdentity objects owned by this connection. This list is read-only.
