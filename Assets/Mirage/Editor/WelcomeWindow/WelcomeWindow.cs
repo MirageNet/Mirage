@@ -432,12 +432,12 @@ namespace Mirage
                 //log results
                 if (installRequest.Status == StatusCode.Success)
                 {
-                    if (logger.LogEnabled()) logger.Log("Package install successful.");
+                    if (logger.LogEnabled()) logger.Log("Package installation was successful.");
                 }
                 else if (installRequest.Status == StatusCode.Failure)
                 {
-                    logger.LogError($"Package install was unsuccessful. \n Error Code: {installRequest.Error.errorCode}\n Error Message: {installRequest.Error.message}");
-                    
+                    logger.LogError($"Package installation was unsuccessful with error code: {installRequest.Error.errorCode}.\n" +
+                        $"Error Message: {installRequest.Error.message}");
                 }
 
                 EditorApplication.update -= InstallPackageProgress;
@@ -456,11 +456,12 @@ namespace Mirage
 
                 if (uninstallRequest.Status == StatusCode.Success)
                 {
-                    if (logger.LogEnabled()) logger.Log("Package uninstall successful.");
+                    if (logger.LogEnabled()) logger.Log("Package uninstallation was successful.");
                 }
                 else if (uninstallRequest.Status == StatusCode.Failure)
                 {
-                    logger.LogError($"Package uninstall was unsuccessful. \n Error Code: {uninstallRequest.Error.errorCode}\n Error Message: {uninstallRequest.Error.message}");
+                    logger.LogError($"Package uninstallation was unsuccessful with error code: {uninstallRequest.Error.errorCode}.\n" +
+                        $"Error Message: {uninstallRequest.Error.message}");
                 }
 
                 //refresh the package tab
@@ -510,7 +511,8 @@ namespace Mirage
 
                     break;
                 case StatusCode.Failure:
-                    if (logger.ErrorEnabled()) logger.LogError($"There was an issue finding packages. \n Error Code: {searchRequest.Error.errorCode }\n Error Message: {searchRequest.Error.message}");
+                    if (logger.ErrorEnabled()) logger.LogError($"There was an issue finding packages. The error code returned was {searchRequest.Error.errorCode}.\n" +
+                        $"Error Message: {searchRequest.Error.message}");
                     break;
             }
         }
