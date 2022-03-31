@@ -14,7 +14,7 @@ namespace Mirage.Sockets.Udp
         public string Address = "localhost";
         public ushort Port = 7777;
 
-        [Tooltip("Allows you to set which Socket implementation you want to use.\nAutomatic will use native (NanoSockets) on supported platforms (Windows, Mac & Linux).")]
+        [Tooltip("Allows you to set which Socket implementation you want to use.\nAutomatic will use native (NanoSockets) on supported platforms (Windows, Mac & Linux on x86_64 platforms).")]
         public SocketLib SocketLib;
 
         [Header("NanoSocket options")]
