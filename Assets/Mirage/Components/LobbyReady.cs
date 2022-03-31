@@ -24,7 +24,7 @@ namespace Mirage
 
         public void SendToReady<T>(NetworkIdentity identity, T msg, bool includeOwner = true, int channelId = Channel.Reliable)
         {
-            if (logger.LogEnabled()) logger.Log("Server.SendToReady msgType:" + typeof(T));
+            if (logger.LogEnabled()) logger.Log($"Server.SendToReady msgType:{typeof(T)}");
 
             playerCache.Clear();
 
