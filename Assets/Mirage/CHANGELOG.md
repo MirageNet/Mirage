@@ -1,3 +1,19 @@
+# [121.0.0](https://github.com/MirageNet/Mirage/compare/v120.1.2...v121.0.0) (2022-03-31)
+
+
+* fix!: fixing removing RequireComponent from NetworkManager ([81d8603](https://github.com/MirageNet/Mirage/commit/81d8603e64f98fa3a47f4b384b42c0762cf16be1))
+
+
+### Features
+
+* adding event to NetworkPlayer when Identity is changed ([9e22ff4](https://github.com/MirageNet/Mirage/commit/9e22ff4c313923b9b4990c5dcc59a95d33249303))
+* adding methods to create NetworkMamger using other socket facories ([aaba9bc](https://github.com/MirageNet/Mirage/commit/aaba9bc5824c79bc81569b5423844ba468ab2ae6))
+
+
+### BREAKING CHANGES
+
+* RequireComponent from NetworkManager. NetworkServer and NetworkClient will now need to be added manaully.
+
 ## [120.1.2](https://github.com/MirageNet/Mirage/compare/v120.1.1...v120.1.2) (2022-03-25)
 
 
