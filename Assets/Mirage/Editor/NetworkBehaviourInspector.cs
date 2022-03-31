@@ -56,11 +56,14 @@ namespace Mirage
 
         void OnEnable()
         {
-            if (target == null) { logger.LogWarning("NetworkBehaviourInspector had no target object"); return; }
+            if (target == null) {
+                logger.LogWarning("NetworkBehaviourInspector had no target object");
+                return;
+            }
 
             // If target's base class is changed from NetworkBehaviour to MonoBehaviour
             // then Unity temporarily keep using this Inspector causing things to break
-            if (!(target is NetworkBehaviour)) { return; }
+            if (!(target is NetworkBehaviour)) return;
 
             Type scriptClass = target.GetType();
 
