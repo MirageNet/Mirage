@@ -69,13 +69,13 @@ namespace Mirage.Authenticators
 
         IEnumerator BeginAuthentication(INetworkPlayer player, Action<INetworkPlayer> reject)
         {
-            if (logger.LogEnabled()) logger.Log($"Authentication countdown started {player} {Timeout}");
+            if (logger.LogEnabled()) logger.Log($"Authentication countdown started for {player}: {Timeout} seconds.");
 
             yield return new WaitForSecondsRealtime(Timeout);
 
             if (pendingAuthentication.Contains(player))
             {
-                if (logger.LogEnabled()) logger.Log($"Authentication Timeout {player}");
+                if (logger.LogEnabled()) logger.Log($"Authentication timed out for {player}. Disconnecting client.");
 
                 pendingAuthentication.Remove(player);
                 reject.Invoke(player);
