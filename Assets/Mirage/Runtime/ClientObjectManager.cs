@@ -296,7 +296,7 @@ namespace Mirage
         /// <param name="unspawnHandler">A method to use as a custom un-spawnhandler on clients.</param>
         public void RegisterSpawnHandler(int prefabHash, SpawnHandlerDelegate spawnHandler, UnSpawnDelegate unspawnHandler)
         {
-            if (logger.LogEnabled()) logger.Log("RegisterSpawnHandler asset '" + prefabHash + "' " + spawnHandler.Method.Name + "/" + unspawnHandler.Method.Name);
+            if (logger.LogEnabled()) logger.Log($"RegisterSpawnHandler: Registering asset '{prefabHash}', Spawn handler: {spawnHandler.Method.Name}, Unspawn handler: {unspawnHandler.Method.Name}");
 
             spawnHandlers[prefabHash] = spawnHandler;
             unspawnHandlers[prefabHash] = unspawnHandler;
