@@ -81,7 +81,7 @@ namespace Mirage
                     string pathA = UnityEditor.AssetDatabase.GetAssetPath(prefab);
                     string pathB = UnityEditor.AssetDatabase.GetAssetPath(existing);
                     logger.Assert(prefab.PrefabHash == existing.PrefabHash);
-                    logger.LogError($"2 prefabs had the same hash:'{hash}', A:'{prefab.name}' B:'{existing.name}'. Path A:{pathA} Path B:{pathB}");
+                    logger.LogError($"2 prefabs have the same hash. Hash: '{hash}', Prefab A: '{prefab.name}' ({pathA}), Prefab B: '{existing.name}' ({pathB}).");
                 }
 
                 validateCache[hash] = prefab;
