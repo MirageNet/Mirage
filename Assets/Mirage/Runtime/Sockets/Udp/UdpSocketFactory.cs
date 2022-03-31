@@ -58,7 +58,9 @@ namespace Mirage.Sockets.Udp
             }
             catch (DllNotFoundException)
             {                
-                Debug.LogWarning("Unable to find the Nanosocket Native library. Using C# Managed Sockets instead.");
+                Debug.LogWarning("Unable to find the Nanosocket Native library. Using C# Managed Sockets instead.\n" +
+                    "Possible reasons include that a version of the Native library wasn't found for this devices' architecture (ie. ARM64 instead of x86_64)\n" +
+                    "or the native library file is missing.");
                 SocketLib = SocketLib.Managed;
                 return;
             }
