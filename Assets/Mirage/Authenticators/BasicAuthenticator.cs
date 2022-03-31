@@ -50,7 +50,6 @@ namespace Mirage.Authenticators
             public string message;
         }
 
-
         #region Server Authenticate
 
         public override void ServerSetup(NetworkServer server)
@@ -69,7 +68,9 @@ namespace Mirage.Authenticators
 
         void OnAuthRequestMessage(INetworkPlayer player, AuthRequestMessage msg)
         {
-            if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Authentication Request: {0} {1}", msg.serverCode);
+            // TODO: Show which client (Endpoint) is trying to authenticate?
+            // - Would add a reference to the SocketLayer namespace...
+            if (logger.LogEnabled()) logger.Log($"Authentication Request: {msg.serverCode}");
 
             // check if client send the same code as the one stored in the server
             if (msg.serverCode == serverCode)
