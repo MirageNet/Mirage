@@ -407,9 +407,9 @@ namespace Mirage
         {
             if (msg.prefabHash == null && msg.sceneId == null)
             {
-                throw new InvalidOperationException($"OnSpawn has empty prefabHash and sceneId for netId: {msg.netId}");
+                throw new InvalidOperationException($"OnSpawn has empty prefabHash and sceneId for netId {msg.netId}");
             }
-            if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} prefabHash={msg.prefabHash:X} sceneId={msg.sceneId:X} pos={msg.position}");
+            if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId {msg.netId} (Prefab hash: {msg.prefabHash:X}, Scene ID: {msg.sceneId:X}, Position: {msg.position}).");
 
             // was the object already spawned?
             bool existing = Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity);
@@ -425,7 +425,7 @@ namespace Mirage
             if (identity == null)
             {
                 //object could not be found.
-                throw new InvalidOperationException($"Could not spawn prefabHash={msg.prefabHash:X} scene={msg.sceneId:X} netId={msg.netId}");
+                throw new InvalidOperationException($"Could not spawn object with netId {msg.netId}. (Prefab hash: {msg.prefabHash:X}, Scene ID: {msg.sceneId:X})");
             }
 
             ApplySpawnPayload(identity, msg);
@@ -442,7 +442,7 @@ namespace Mirage
                 NetworkIdentity obj = handler(msg);
                 if (obj == null)
                 {
-                    logger.LogWarning($"Client spawn handler for {msg.prefabHash:X} returned null");
+                    logger.LogWarning($"Client spawn handler for netId {msg.netId} (Prefab hash: {msg.prefabHash:X}) returned null");
                     return null;
                 }
                 return obj;
@@ -456,12 +456,12 @@ namespace Mirage
                 NetworkIdentity obj = Instantiate(prefab, pos, rot);
                 if (logger.LogEnabled())
                 {
-                    logger.Log($"Client spawn handler instantiating [netId:{msg.netId} asset ID:{msg.prefabHash:X} pos:{msg.position} rotation: {msg.rotation}]");
+                    logger.Log($"Client spawn handler instantiating object with netId {msg.netId} (Prefab hash: {msg.prefabHash:X}, Position: {msg.position}, Rotation: {msg.rotation})");
                 }
 
                 return obj;
             }
-            logger.LogError("Failed to spawn server object, did you forget to add it to the ClientObjectManager? prefabHash=" + msg.prefabHash + " netId=" + msg.netId);
+            logger.LogError($"Failed to spawn server object, did you forget to add it to the ClientObjectManager? Server object netId {msg.netId}, prefab hash: {msg.prefabHash}");
             return null;
         }
 
@@ -470,7 +470,7 @@ namespace Mirage
             NetworkIdentity spawned = SpawnSceneObject(msg.sceneId.Value);
             if (spawned == null)
             {
-                logger.LogError($"Spawn scene object not found for {msg.sceneId:X} SpawnableObjects.Count={spawnableObjects.Count}");
+                logger.LogError($"Spawn scene object not found for {msg.sceneId:X}. SpawnableObjects.Count = {spawnableObjects.Count}.");
 
                 // dump the whole spawnable objects dict for easier debugging
                 if (logger.LogEnabled())
@@ -480,7 +480,7 @@ namespace Mirage
                 }
             }
 
-            if (logger.LogEnabled()) logger.Log($"Client spawn for [netId:{msg.netId}] [sceneId:{msg.sceneId:X}] obj:{spawned}");
+            if (logger.LogEnabled()) logger.Log($"Client spawning object '{spawned}' with netId {msg.netId}, sceneId {msg.sceneId:X}");
             return spawned;
         }
 
