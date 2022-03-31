@@ -83,6 +83,7 @@ namespace Mirage.Authenticators
                 });
 
                 ServerAccept(player);
+                if (logger.LogEnabled()) logger.Log("Authentication was successful.");
             }
             else
             {
@@ -94,6 +95,7 @@ namespace Mirage.Authenticators
                 };
 
                 ServerReject(player);
+                if (logger.LogEnabled()) logger.Log("Authentication failed.");
 
                 player.Send(authResponseMessage);
 
