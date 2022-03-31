@@ -491,7 +491,7 @@ namespace Mirage
                 spawnableObjects.Remove(sceneId);
                 return identity;
             }
-            logger.LogWarning($"Could not find scene object with sceneId:{sceneId:X}");
+            logger.LogWarning($"Could not find scene object with sceneId {sceneId:X}.");
             return null;
         }
 
@@ -504,7 +504,7 @@ namespace Mirage
 
             if (!existing)
             {
-                logger.LogWarning($"Could not find object with id {msg.netId}");
+                logger.LogWarning($"Could not find object with netId {msg.netId}.");
                 return;
             }
 
@@ -522,7 +522,7 @@ namespace Mirage
 
             if (identity == null)
             {
-                logger.LogWarning($"Could not find player's character");
+                logger.LogWarning($"Could not find this players' character");
                 return;
             }
 
@@ -544,7 +544,7 @@ namespace Mirage
 
         void DestroyObject(uint netId)
         {
-            if (logger.LogEnabled()) logger.Log("ClientScene.OnObjDestroy netId:" + netId);
+            if (logger.LogEnabled()) logger.Log($"ClientScene.OnObjDestroy netId {netId}");
 
             if (Client.World.TryGetIdentity(netId, out NetworkIdentity localObject))
             {
@@ -552,7 +552,7 @@ namespace Mirage
             }
             else
             {
-                logger.LogWarning("Did not find target for destroy message for " + netId);
+                logger.LogWarning($"Did not find target for destroy message for {netId}.");
             }
         }
 
@@ -573,11 +573,11 @@ namespace Mirage
 
         internal void OnRpcMessage(RpcMessage msg)
         {
-            if (logger.LogEnabled()) logger.Log($"ClientScene.OnRPCMessage index:{msg.functionIndex} netId:{msg.netId}");
+            if (logger.LogEnabled()) logger.Log($"ClientScene.OnRPCMessage index {msg.functionIndex}, netId {msg.netId}");
 
             if (!Client.World.TryGetIdentity(msg.netId, out NetworkIdentity identity))
             {
-                if (logger.WarnEnabled()) logger.LogWarning($"Spawned object not found when handling ClientRpc message [netId={msg.netId}]");
+                if (logger.WarnEnabled()) logger.LogWarning($"Spawned object not found when handling ClientRpc message for netId {msg.netId}");
                 return;
             }
 
@@ -604,7 +604,7 @@ namespace Mirage
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
                 identity.StartLocalPlayer();
 
-                if (logger.LogEnabled()) logger.Log("ClientScene.OnOwnerMessage - player=" + identity.name);
+                if (logger.LogEnabled()) logger.Log($"ClientScene.OnOwnerMessage: player {identity.name}");
             }
         }
 
