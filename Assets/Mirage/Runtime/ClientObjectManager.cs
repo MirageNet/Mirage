@@ -230,7 +230,7 @@ namespace Mirage
         {
             identity.PrefabHash = newPrefabHash;
 
-            if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' as asset:{identity.PrefabHash:X}");
+            if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' (Prefab hash: {identity.PrefabHash:X})");
             prefabs[identity.PrefabHash] = identity;
         }
 
@@ -243,7 +243,7 @@ namespace Mirage
         /// <param name="identity">A Prefab that will be spawned.</param>
         public void RegisterPrefab(NetworkIdentity identity)
         {
-            if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' as asset:{identity.PrefabHash:X}");
+            if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' (Prefab hash: {identity.PrefabHash:X})");
             prefabs[identity.PrefabHash] = identity;
         }
 
