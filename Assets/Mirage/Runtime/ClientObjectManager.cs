@@ -262,10 +262,10 @@ namespace Mirage
 
             if (prefabHash == 0)
             {
-                throw new InvalidOperationException("RegisterPrefab game object " + identity.name + " has no " + nameof(identity) + ". Use RegisterSpawnHandler() instead?");
+                throw new InvalidOperationException($"RegisterPrefab: GameObject '{identity.name}' has no '{nameof(identity)}'. Use RegisterSpawnHandler() instead?");
             }
 
-            if (logger.LogEnabled()) logger.Log("Registering custom prefab '" + identity.name + "' as asset:" + prefabHash + " " + spawnHandler.Method.Name + "/" + unspawnHandler.Method.Name);
+            if (logger.LogEnabled()) logger.Log($"Registering custom prefab '{identity.name}' with prefab hash: {prefabHash}. Spawn handler: '{spawnHandler.Method.Name}', Unspawn handler: '{unspawnHandler.Method.Name}'");
 
             spawnHandlers[prefabHash] = spawnHandler;
             unspawnHandlers[prefabHash] = unspawnHandler;
