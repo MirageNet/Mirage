@@ -44,10 +44,10 @@ namespace Mirage.Tests.Runtime.Host
             serverObjectManager = networkManagerGo.AddComponent<ServerObjectManager>();
             clientObjectManager = networkManagerGo.AddComponent<ClientObjectManager>();
             manager = networkManagerGo.AddComponent<NetworkManager>();
+            server = networkManagerGo.AddComponent<NetworkServer>();
+            client = networkManagerGo.AddComponent<NetworkClient>();
             manager.Client = networkManagerGo.GetComponent<NetworkClient>();
             manager.Server = networkManagerGo.GetComponent<NetworkServer>();
-            server = manager.Server;
-            client = manager.Client;
 
             if (ServerConfig != null) server.PeerConfig = ServerConfig;
             if (ClientConfig != null) client.PeerConfig = ClientConfig;
