@@ -5,17 +5,21 @@ using UnityEngine;
 
 namespace Mirage
 {
+    /// <summary>
+    /// Holds collection of spawned network objects
+    /// <para>This class works on both server and client</para>
+    /// </summary>
     public class NetworkWorld : IObjectLocator
     {
         static readonly ILogger logger = LogFactory.GetLogger<NetworkWorld>();
 
         /// <summary>
-        /// Raised when the client spawns an object
+        /// Raised when object is spawned
         /// </summary>
         public event Action<NetworkIdentity> onSpawn;
 
         /// <summary>
-        /// Raised when the client unspawns an object
+        /// Raised when object is unspawned or destroyed
         /// </summary>
         public event Action<NetworkIdentity> onUnspawn;
 
@@ -44,8 +48,8 @@ namespace Mirage
             if (netId != identity.NetId) throw new ArgumentException("NetworkIdentity did not have matching netId", nameof(identity));
             if (SpawnedObjects.TryGetValue(netId, out NetworkIdentity existing) && existing != null) throw new ArgumentException("An Identity with same id already exists in network world", nameof(netId));
 
-            // dont use add, netid might already exist but have been destroyed
-            // this canhappen client side. we check for this case in TryGetValue above
+            // dont use add, netId might already exist but have been destroyed
+            // this can happen client side. we check for this case in TryGetValue above
             SpawnedObjects[netId] = identity;
             onSpawn?.Invoke(identity);
         }
