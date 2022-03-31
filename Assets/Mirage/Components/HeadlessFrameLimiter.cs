@@ -23,7 +23,7 @@ namespace Mirage
             if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null)
             {
                 Application.targetFrameRate = serverTickRate;
-                if (logger.logEnabled) logger.Log("Server Tick Rate set to: " + Application.targetFrameRate + " Hz.");
+                if (logger.logEnabled) logger.Log($"Server update frequency set to {Application.targetFrameRate} ticks per second.");
             }
         }
     }
