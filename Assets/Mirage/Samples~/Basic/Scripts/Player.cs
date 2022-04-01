@@ -65,9 +65,6 @@ namespace Mirage.Examples.Basic
         // This fires on all clients when this player object is network-ready
         public void OnStartClient()
         {
-            // Make this a child of the layout panel in the Canvas
-            transform.SetParent(GameObject.Find("PlayersPanel").transform);
-
             // Calculate position in the layout panel
             int x = 100 + ((playerNo % 4) * 150);
             int y = -170 - ((playerNo / 4) * 80);
