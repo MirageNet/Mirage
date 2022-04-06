@@ -19,12 +19,16 @@ namespace Mirage.Weaver
         /// </summary>
         protected abstract string FunctionTypeLog { get; }
 
+        /// <summary>
+        /// Name for const that will tell other asmdef's that type has already generated function
+        /// </summary>
+        protected abstract string GeneratedLabel { get; }
+
         protected SerializeFunctionBase(ModuleDefinition module, IWeaverLogger logger)
         {
             this.logger = logger;
             this.module = module;
         }
-
 
         public void Register(TypeReference dataType, MethodReference methodReference)
         {
@@ -40,6 +44,43 @@ namespace Mirage.Weaver
             // we need to import type when we Initialize Writers so import here in case it is used anywhere else
             TypeReference imported = module.ImportReference(dataType);
             funcs[imported] = methodReference;
+
+            // mark type as generated,
+            MarkAsGenerated(dataType);
+        }
+
+        /// <summary>
+        /// Marks type as having write/read function if it is in the current module
+        /// </summary>
+        private void MarkAsGenerated(TypeReference typeReference)
+        {
+            MarkAsGenerated(typeReference.Resolve());
+        }
+
+        /// <summary>
+        /// Marks type as having write/read function if it is in the current module
+        /// </summary>
+        private void MarkAsGenerated(TypeDefinition typeDefinition)
+        {
+            // if in this module, then mark as generated
+            if (typeDefinition.Module == module)
+            {
+                typeDefinition.SetConst(GeneratedLabel, true);
+            }
+        }
+
+        /// <summary>
+        /// Check if type has a write/read function generated in another module
+        /// <para>returns false if type is a member of current module</para>
+        /// </summary>
+        private bool HasGeneratedFunctionInAnotherModule(TypeReference typeReference)
+        {
+            TypeDefinition def = typeReference.Resolve();
+            // if type is in this module, then we want to generate new function
+            if (def.Module == module)
+                return false;
+
+            return def.GetConst<bool>(GeneratedLabel);
         }
 
         /// <summary>
@@ -86,15 +127,25 @@ namespace Mirage.Weaver
                 return CreateGenericFunction(typeReference);
             }
 
+            // check if there is already a known function for type
+            // this will find extention methods within this module
             if (funcs.TryGetValue(typeReference, out MethodReference foundFunc))
             {
                 return foundFunc;
             }
             else
             {
+                // before generating new function, check if one was generated for type in its own module
+                if (HasGeneratedFunctionInAnotherModule(typeReference))
+                {
+                    return CreateGenericFunction(typeReference);
+                }
+
                 return GenerateFunction(module.ImportReference(typeReference));
             }
         }
+
+
 
         private MethodReference GenerateFunction(TypeReference typeReference)
         {
@@ -186,8 +237,11 @@ namespace Mirage.Weaver
                 throw ThrowCantGenerate(typeReference, "abstract class");
             }
 
-            // generate writer for class/struct
-            return GenerateClassOrStructFunction(typeReference);
+            // generate writer for class/struct 
+            MethodReference generated = GenerateClassOrStructFunction(typeReference);
+            MarkAsGenerated(typeDefinition);
+
+            return generated;
         }
 
         SerializeFunctionException ThrowCantGenerate(TypeReference typeReference, string typeDescription = null)
@@ -198,6 +252,7 @@ namespace Mirage.Weaver
 
         /// <summary>
         /// Creates Generic instance for Write{T} or Read{T} with <paramref name="argument"/> as then generic argument
+        /// <para>Can also create Write{int} if real type is given instead of generic argument</para>
         /// </summary>
         /// <param name="argument"></param>
         /// <returns></returns>
@@ -206,9 +261,7 @@ namespace Mirage.Weaver
             MethodReference method = GetGenericFunction();
 
             var generic = new GenericInstanceMethod(method);
-            var genericParam = (GenericParameter)argument;
-            //var a = new GenericParameter(genericParam.Owner);
-            generic.GenericArguments.Add(genericParam);
+            generic.GenericArguments.Add(argument);
 
             return generic;
         }
