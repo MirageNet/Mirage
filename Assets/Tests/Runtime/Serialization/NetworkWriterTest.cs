@@ -1150,21 +1150,25 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(unpacked, Is.EqualTo(value));
         }
 
+        [Test]
         public void SByteLength()
         {
             writer.WriteSByte(14);
             Assert.That(writer.BitPosition, Is.EqualTo(8));
         }
+        [Test]
         public void Int16Length()
         {
             writer.WriteInt16(50);
             Assert.That(writer.BitPosition, Is.EqualTo(16));
         }
+        [Test]
         public void Int32Length()
         {
             writer.WriteInt32(20);
             Assert.That(writer.BitPosition, Is.EqualTo(32));
         }
+        [Test]
         public void Int64Length()
         {
             writer.WriteInt64(21);
@@ -1172,21 +1176,25 @@ namespace Mirage.Tests.Runtime.Serialization
         }
 
 
+        [Test]
         public void ByteLength()
         {
             writer.WriteByte(20);
             Assert.That(writer.BitPosition, Is.EqualTo(8));
         }
+        [Test]
         public void UInt16Length()
         {
             writer.WriteUInt16(263);
             Assert.That(writer.BitPosition, Is.EqualTo(16));
         }
+        [Test]
         public void UInt32Length()
         {
             writer.WriteUInt32(65);
             Assert.That(writer.BitPosition, Is.EqualTo(32));
         }
+        [Test]
         public void UInt64Length()
         {
             writer.WriteUInt64(22);
