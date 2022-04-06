@@ -1200,5 +1200,33 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.WriteUInt64(22);
             Assert.That(writer.BitPosition, Is.EqualTo(64));
         }
+
+        [Test]
+        public void NetworkWriterOtherAsmDefTest()
+        {
+            // reset flags
+            MessageWithCustomWriterExtesions.WriterCalled = 0;
+            MessageWithCustomWriterExtesions.ReaderCalled = 0;
+
+            var inValue = new MessageWithCustomWriter()
+            {
+                type = 3,
+                value = 1.4f
+            };
+
+            // use generic writer
+            writer.Write(inValue);
+            Assert.That(writer.BitPosition, Is.EqualTo(MessageWithCustomWriterExtesions.WriteSize));
+            reader.Reset(writer.ToArraySegment());
+
+            MessageWithCustomWriter outValue = reader.Read<MessageWithCustomWriter>();
+            Assert.That(reader.BitPosition, Is.EqualTo(MessageWithCustomWriterExtesions.WriteSize));
+            Assert.That(outValue.type, Is.EqualTo(inValue.type));
+            Assert.That(outValue.value, Is.EqualTo(inValue.value).Within(0.01f));
+
+            // methods should be called once
+            Assert.That(MessageWithCustomWriterExtesions.WriterCalled, Is.EqualTo(1));
+            Assert.That(MessageWithCustomWriterExtesions.ReaderCalled, Is.EqualTo(1));
+        }
     }
 }
