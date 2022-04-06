@@ -1,3 +1,11 @@
+## [121.0.1](https://github.com/MirageNet/Mirage/compare/v121.0.0...v121.0.1) (2022-04-06)
+
+
+### Bug Fixes
+
+* adding const to type when writer is generated ([f3bcc89](https://github.com/MirageNet/Mirage/commit/f3bcc895654345442fae47fe4e58c1ae192b7a9f))
+* throwing if SceneManager returns null ([833634a](https://github.com/MirageNet/Mirage/commit/833634a75274b52f7f4bbb309ad4b72c880b6098))
+
 # [121.0.0](https://github.com/MirageNet/Mirage/compare/v120.1.2...v121.0.0) (2022-03-31)
 
 
