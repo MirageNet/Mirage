@@ -14,7 +14,7 @@ namespace Mirage.Weaver
         public Readers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
 
         protected override string FunctionTypeLog => "read function";
-
+        protected override string GeneratedLabel => "__MirageReaderGenerated";
         protected override Expression<Action> ArrayExpression => () => CollectionExtensions.ReadArray<byte>(default);
         protected override Expression<Action> ListExpression => () => CollectionExtensions.ReadList<byte>(default);
         protected override Expression<Action> NullableExpression => () => SystemTypesExtensions.ReadNullable<byte>(default);

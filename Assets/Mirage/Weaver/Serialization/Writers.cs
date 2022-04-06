@@ -13,6 +13,7 @@ namespace Mirage.Weaver
         public Writers(ModuleDefinition module, IWeaverLogger logger) : base(module, logger) { }
 
         protected override string FunctionTypeLog => "write function";
+        protected override string GeneratedLabel => "__MirageWirterGenerated";
         protected override Expression<Action> ArrayExpression => () => CollectionExtensions.WriteArray<byte>(default, default);
         protected override Expression<Action> ListExpression => () => CollectionExtensions.WriteList<byte>(default, default);
         protected override Expression<Action> NullableExpression => () => SystemTypesExtensions.WriteNullable<byte>(default, default);
