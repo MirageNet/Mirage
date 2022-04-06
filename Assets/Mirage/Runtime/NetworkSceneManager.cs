@@ -667,6 +667,9 @@ namespace Mirage
                     ? SceneManager.LoadSceneAsync(scenePath, sceneLoadParameters.Value)
                     : SceneManager.LoadSceneAsync(scenePath);
 
+                if (SceneLoadingAsyncOperationInfo == null)
+                    throw new InvalidOperationException($"SceneManager failed to load scene with path: {scenePath}");
+
                 //If non host client. Wait for server to finish scene change
                 if (Client && Client.Active && !Client.IsLocalClient)
                 {
