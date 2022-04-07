@@ -60,7 +60,7 @@
         "globalMetadata": {
             "_homepage": "https://github.com/MirageNet/Mirage",
             "_appLogoPath": "logo.png",
-			"_appFaviconPath": "favicon.ico",
+			"_appFaviconPath": "mirage-favicon.ico",
             "_enableSearch": true,
             "_gitContribute": {
                 "branch": "master"
