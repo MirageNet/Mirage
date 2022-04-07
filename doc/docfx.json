@@ -46,8 +46,7 @@
         "overwrite": [
             {
                 "files": [
-                    "apidoc/**.md",
-					"**.ico"
+                    "apidoc/**.md"
                 ],
                 "exclude": [
                     "obj/**",
@@ -60,7 +59,6 @@
         "globalMetadata": {
             "_homepage": "https://github.com/MirageNet/Mirage",
             "_appLogoPath": "logo.png",
-			"_appFaviconPath": "mirage-favicon.ico",
             "_enableSearch": true,
             "_gitContribute": {
                 "branch": "master"
