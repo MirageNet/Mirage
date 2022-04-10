@@ -131,7 +131,7 @@ using Mirage;
 
 public class Player : NetworkBehaviour
 {
-    [SyncVar(hook = nameof(UpdateColor), fireOnServer = true)]
+    [SyncVar(hook = nameof(UpdateColor), invokeHookOnServer = true)]
     Color playerColor = Color.black;
 
     Renderer renderer;
