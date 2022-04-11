@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
@@ -164,31 +164,15 @@ namespace Mirage.Tests.Runtime.Host
             Assert.That(server.LocalClient.Player.Identity, Is.EqualTo(replacementIdentity));
         }
 
-        [UnityTest]
-        public IEnumerator ObjectHideTest() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void UnSpawnShouldAssertIfCalledInHostMode()
         {
-            clientObjectManager.OnObjectHide(new ObjectHideMessage
-            {
-                netId = identity.NetId
-            });
-
-            await AsyncUtil.WaitUntilWithTimeout(() => identity == null);
-
-            Assert.That(identity == null);
-        });
-
-        [UnityTest]
-        public IEnumerator ObjectDestroyTest() => UniTask.ToCoroutine(async () =>
-        {
+            LogAssert.Expect(LogType.Assert, "UnSpawn should not be called in host mode");
             clientObjectManager.OnObjectDestroy(new ObjectDestroyMessage
             {
                 netId = identity.NetId
             });
-
-            await AsyncUtil.WaitUntilWithTimeout(() => identity == null);
-
-            Assert.That(identity == null);
-        });
+        }
 
         [Test]
         public void SpawnSceneObjectTest()

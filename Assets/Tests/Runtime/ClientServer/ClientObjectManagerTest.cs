@@ -151,19 +151,6 @@ namespace Mirage.Tests.Runtime.ClientServer
             return testGuid;
         }
 
-        [Test]
-        public void ReplacePlayerHostTest()
-        {
-            playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
-            NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
-            replacementIdentity.PrefabHash = NewUniqueHash();
-            clientObjectManager.RegisterPrefab(replacementIdentity);
-
-            serverObjectManager.ReplaceCharacter(server.LocalPlayer, playerReplacement, true);
-
-            Assert.That(server.LocalClient.Player.Identity, Is.EqualTo(replacementIdentity));
-        }
-
         [UnityTest]
         public IEnumerator ObjectHideTest() => UniTask.ToCoroutine(async () =>
         {
