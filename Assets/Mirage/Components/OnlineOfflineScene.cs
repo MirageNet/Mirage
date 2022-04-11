@@ -9,10 +9,10 @@ namespace Mirage
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(OnlineOfflineScene));
 
-        [FormerlySerializedAs("client")]
-        public NetworkClient Client;
         [FormerlySerializedAs("server")]
         public NetworkServer Server;
+
+        public NetworkSceneManager NetworkSceneManager;
 
         [Scene]
         [Tooltip("Assign the OnlineScene to load for this zone")]
@@ -31,11 +31,6 @@ namespace Mirage
             if (string.IsNullOrEmpty(OfflineScene))
                 throw new MissingReferenceException("OfflineScene missing. Please assign to OnlineOfflineScene component.");
 
-            if (Client != null)
-            {
-                Client.Started.AddListener(OnClientStarted);
-                Client.Disconnected.AddListener(OnClientDisconnected);
-            }
             if (Server != null)
             {
                 Server.Started.AddListener(OnServerStarted);
@@ -43,25 +38,15 @@ namespace Mirage
             }
         }
 
-        void OnClientStarted()
-        {
-            // set not ready and wait for server to send scene message
-            Client.Player.SceneIsReady = false;
-        }
-
-        void OnClientDisconnected(ClientStoppedReason reason)
-        {
-            SceneManager.LoadSceneAsync(OfflineScene);
-        }
-
         void OnServerStarted()
         {
-            SceneManager.LoadSceneAsync(OnlineScene);
+            NetworkSceneManager.ServerLoadSceneNormal(OnlineScene);
         }
 
         void OnServerStopped()
         {
-            SceneManager.LoadSceneAsync(OfflineScene);
+            Debug.Log("OnlineOfflineScene.OnServerStopped");
+            NetworkSceneManager.ServerLoadSceneNormal(OfflineScene);
         }
     }
 }
