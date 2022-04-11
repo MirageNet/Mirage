@@ -683,6 +683,10 @@ namespace Mirage
             identity.ClearObservers();
             if (Server.LocalClientActive)
             {
+                // see ClientObjectManager.UnSpawn for comments
+                if (identity.HasAuthority)
+                    identity.CallStopAuthority();
+
                 identity.StopClient();
             }
 
