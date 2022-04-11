@@ -352,6 +352,13 @@ namespace Mirage
         /// </summary>
         public void DestroyAllClientObjects()
         {
+            // dont destroy objects if we are server
+            if (Client.IsLocalClient)
+            {
+                if (logger.LogEnabled()) logger.Log("Skipping DestroyAllClientObjects because we are host client");
+                return;
+            }
+
             // create copy so they can be removed inside loop
             // allocation here are fine because is part of clean up
             NetworkIdentity[] all = Client.World.SpawnedIdentities.ToArray();
