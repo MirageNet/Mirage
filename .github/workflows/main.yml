@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: Library
-          key: Library-2020.1.17
+          key: Library-2020.1.17-2
 
       - name: Run editor Tests
         run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
@@ -83,7 +83,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: Library
-          key: Library-2020.1.17
+          key: Library-2020.1.17-2
 
       - name: Run by Build with il2cpp
       # checks that all weaver generate code in the test dlls also compiles for IL2CPP
@@ -120,7 +120,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: Library
-          key: Library-2020.1.17
+          key: Library-2020.1.17-2
       - uses: actions/setup-node@v3
         with:
           node-version: '14'
@@ -165,7 +165,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: Library
-          key: Library-2020.1.17
+          key: Library-2020.1.17-2
 
       - name: Install sonar scanner
         run: |
