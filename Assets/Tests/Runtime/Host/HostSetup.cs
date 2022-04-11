@@ -9,8 +9,6 @@ namespace Mirage.Tests.Runtime.Host
 {
     public class HostSetup<T> where T : NetworkBehaviour
     {
-
-        #region Setup
         protected GameObject networkManagerGo;
         protected NetworkManager manager;
         protected NetworkServer server;
@@ -119,7 +117,5 @@ namespace Mirage.Tests.Runtime.Host
                 client.Update();
             }
         }
-
-        #endregion
     }
 }
