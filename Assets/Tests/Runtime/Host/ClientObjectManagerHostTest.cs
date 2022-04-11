@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 namespace Mirage.Tests.Runtime.Host
 {
     [TestFixture]
-    public class ClientObjectManagerTest : HostSetup<MockComponent>
+    public class ClientObjectManagerHostTest : HostSetup<MockComponent>
     {
         GameObject playerReplacement;
 
