@@ -320,6 +320,7 @@ namespace Mirage
 
         void UnSpawn(NetworkIdentity identity)
         {
+            logger.Assert(!Client.IsLocalClient, "UnSpawn should not be called in host mode");
             // it is useful to remove authority when destroying the object
             // this can be useful to clean up stuff after a local player is destroyed
             // call before StopClient, but dont reset the HasAuthority bool, people might want to use HasAuthority from stopclient or destroy
