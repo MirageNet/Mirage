@@ -1,3 +1,18 @@
+# [122.0.0](https://github.com/MirageNet/Mirage/compare/v121.0.1...v122.0.0) (2022-04-12)
+
+
+### Bug Fixes
+
+* adding end of stream check to ReadList and ReadBytes as well ([9dc69dc](https://github.com/MirageNet/Mirage/commit/9dc69dc6a8d801a0d882af49f0ead7eedb0678a5))
+* fixing OnlineOfflineScene to work with NetworkSceneManager ([bb916f3](https://github.com/MirageNet/Mirage/commit/bb916f348629aa5b2adb10f33ef5a37f164e49bf))
+* fixing StopAuthority not being called in host mode on destroy ([f331875](https://github.com/MirageNet/Mirage/commit/f331875ec98f27d2fc66f4c8f5e924976dbc3dde))
+* stopping `DestroyAllClientObjects` being called in host mode. ([582c20b](https://github.com/MirageNet/Mirage/commit/582c20b84517690efad88f957dd0de7a8172055e))
+
+
+### BREAKING CHANGES
+
+* OnlineOfflineScene uses NetworkSceneManager instead of just loading locally using client start
+
 ## [121.0.1](https://github.com/MirageNet/Mirage/compare/v121.0.0...v121.0.1) (2022-04-06)
 
 
