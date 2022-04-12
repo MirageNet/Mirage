@@ -97,6 +97,9 @@ namespace Mirage.Serialization
 
         public static byte[] ReadBytes(this NetworkReader reader, int count)
         {
+            // we know each element is 8 bits, so count*8 for max size
+            ValidateSize(reader, count * 8);
+
             byte[] bytes = new byte[count];
             reader.ReadBytes(bytes, 0, count);
             return bytes;
@@ -107,6 +110,7 @@ namespace Mirage.Serialization
             int length = reader.ReadPackedInt32();
             if (length < 0)
                 return null;
+            ValidateSize(reader, length);
             var result = new List<T>(length);
             for (int i = 0; i < length; i++)
             {
@@ -120,17 +124,28 @@ namespace Mirage.Serialization
             int length = reader.ReadPackedInt32();
             if (length < 0)
                 return null;
-            // T might be only 1 bit long, so we have to check vs bit length
-            // todo have weaver calculate minimum size for T, so we can use it here instead of 1 bit
-            //     NOTE: we cant just use sizeof(T) because T might be bitpacked so smaller than size in memory
-            if (!reader.CanReadBits(length))
-                throw new EndOfStreamException($"Can't read {length} elements because it would read past the end of the stream.");
+            ValidateSize(reader, length);
             var result = new T[length];
             for (int i = 0; i < length; i++)
             {
                 result[i] = reader.Read<T>();
             }
             return result;
+        }
+
+        /// <summary>
+        /// Use to check max size in reader before allocating array/list
+        /// <para>Assumes each element is only 1 bit, so max size allocated will be MTU*8 if attacks tries to attack</para>
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="lengthInBits"></param>
+        static void ValidateSize(NetworkReader reader, int lengthInBits)
+        {
+            // T might be only 1 bit long, so we have to check vs bit length
+            // todo have weaver calculate minimum size for T, so we can use it here instead of 1 bit
+            //     NOTE: we cant just use sizeof(T) because T might be bitpacked so smaller than size in memory
+            if (!reader.CanReadBits(lengthInBits))
+                throw new EndOfStreamException($"Can't read {lengthInBits} elements because it would read past the end of the stream.");
         }
     }
 }
