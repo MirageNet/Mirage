@@ -71,28 +71,28 @@ namespace Mirage.Tests.Runtime
         }
 
         [Test]
-        public void ThrowsWhenNoHandlerIsFound()
+        public void LogsWhenNoHandlerIsFound()
         {
             ExpectLog(() =>
             {
                 int messageId = MessagePacker.GetId<SceneMessage>();
                 messageHandler.InvokeHandler(player, messageId, reader);
             }
-            , $"Unexpected message {typeof(SceneMessage)} received from {player}. Did you register a handler for it?");
+            , LogType.Warning, $"Unexpected message {typeof(SceneMessage)} received from {player}. Did you register a handler for it?");
         }
 
         [Test]
-        public void ThrowsWhenUnknownMessage()
+        public void LogsWhenUnknownMessage()
         {
             const int id = 1234;
             ExpectLog(() =>
             {
                 messageHandler.InvokeHandler(player, id, reader);
             }
-            , $"Unexpected message ID {id} received from {player}. May be due to no existing RegisterHandler for this message.");
+            , LogType.Log, $"Unexpected message ID {id} received from {player}. May be due to no existing RegisterHandler for this message.");
         }
 
-        void ExpectLog(Action action, string log)
+        void ExpectLog(Action action, LogType type, string log)
         {
             ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
             ILogHandler existing = logger.logHandler;
@@ -105,7 +105,7 @@ namespace Mirage.Tests.Runtime
 
                 action.Invoke();
 
-                handler.Received(1).LogFormat(LogType.Log, null, "{0}", log);
+                handler.Received(1).LogFormat(type, null, "{0}", log);
             }
             finally
             {
