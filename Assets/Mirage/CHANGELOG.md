@@ -1,3 +1,10 @@
+## [122.0.1](https://github.com/MirageNet/Mirage/compare/v122.0.0...v122.0.1) (2022-04-13)
+
+
+### Performance Improvements
+
+* stopping allocations from log in MessageHandler when not enabled ([d5b3292](https://github.com/MirageNet/Mirage/commit/d5b329231ce256904e03542bfc584d6637bc4e98))
+
 # [122.0.0](https://github.com/MirageNet/Mirage/compare/v121.0.1...v122.0.0) (2022-04-12)
 
 
