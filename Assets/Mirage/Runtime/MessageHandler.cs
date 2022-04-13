@@ -92,10 +92,13 @@ namespace Mirage
             {
                 msgDelegate.Invoke(player, reader);
             }
-            else
+            // check LogEnabled to stop allocations if not enabled
+            else if (logger.LogEnabled())
             {
                 if (MessagePacker.MessageTypes.TryGetValue(msgType, out Type type))
                 {
+                    // todo use warning here instead of log, it seems important to know a known type has no handler
+                    //      probably fine to leave unexpected message as log, but maybe we should handle it differently? we dont want someone spaming ids to find a handler they can do stuff with...
                     logger.Log($"Unexpected message {type} received from {player}. Did you register a handler for it?");
                 }
                 else
