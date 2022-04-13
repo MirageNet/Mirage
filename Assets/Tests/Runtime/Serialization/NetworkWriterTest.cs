@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
@@ -1227,6 +1228,58 @@ namespace Mirage.Tests.Runtime.Serialization
             // methods should be called once
             Assert.That(MessageWithCustomWriterExtesions.WriterCalled, Is.EqualTo(1));
             Assert.That(MessageWithCustomWriterExtesions.ReaderCalled, Is.EqualTo(1));
+        }
+
+        [Test]
+        [TestCase(null)]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(10)]
+        public void WritePlusOne(int? inCount)
+        {
+            CollectionExtensions.WriteCountPlusOne(writer, inCount);
+            reader.Reset(writer.ToArraySegment());
+            bool hasValue = CollectionExtensions.ReadCountPlusOne(reader, out int outCount);
+
+            Assert.That(hasValue, Is.EqualTo(inCount.HasValue));
+            if (hasValue)
+            {
+                Assert.That(outCount, Is.EqualTo(inCount.Value));
+            }
+        }
+
+        [Test]
+        [Description("valids size from reader with 80 bits")]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(50)]
+        [TestCase(79)]
+        [TestCase(80)]
+        public void ValidateSizeNoThrow(int count)
+        {
+            // 10 bytes = 80 bits
+            reader.Reset(new byte[10]);
+            Assert.DoesNotThrow(() =>
+            {
+                CollectionExtensions.ValidateSize(reader, count);
+            });
+        }
+
+        [Test]
+        [Description("valids size from reader with 80 bits")]
+        [TestCase(81)]
+        [TestCase(100)]
+        [TestCase(50000)]
+        [TestCase(int.MaxValue)]
+        public void ValidateSizeThrows(int count)
+        {
+            // 10 bytes = 80 bits
+            reader.Reset(new byte[10]);
+            EndOfStreamException e = Assert.Throws<EndOfStreamException>(() =>
+            {
+                CollectionExtensions.ValidateSize(reader, count);
+            });
+            Assert.That(e.Message, Is.EqualTo($"Can't read {count} elements because it would read past the end of the stream."));
         }
     }
 }

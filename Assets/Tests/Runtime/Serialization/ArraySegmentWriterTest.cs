@@ -80,6 +80,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
                 ArraySegment<int> unpacked = MessagePacker.Unpack<ArraySegment<int>>(data);
 
+                Assert.IsNull(unpacked.Array);
                 Assert.That(unpacked.Offset, Is.EqualTo(0));
                 Assert.That(unpacked.Count, Is.EqualTo(0));
             }

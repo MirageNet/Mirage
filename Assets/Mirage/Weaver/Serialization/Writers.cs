@@ -16,6 +16,7 @@ namespace Mirage.Weaver
         protected override string GeneratedLabel => "__MirageWirterGenerated";
         protected override Expression<Action> ArrayExpression => () => CollectionExtensions.WriteArray<byte>(default, default);
         protected override Expression<Action> ListExpression => () => CollectionExtensions.WriteList<byte>(default, default);
+        protected override Expression<Action> SegmentExpression => () => CollectionExtensions.WriteArraySegment<byte>(default, default);
         protected override Expression<Action> NullableExpression => () => SystemTypesExtensions.WriteNullable<byte>(default, default);
 
         protected override MethodReference GetGenericFunction()
@@ -152,11 +153,6 @@ namespace Mirage.Weaver
             }
         }
 
-        protected override MethodReference GenerateSegmentFunction(TypeReference typeReference, TypeReference elementType)
-        {
-            Expression<Action> segmentExpression = () => CollectionExtensions.WriteArraySegment<byte>(default, default);
-            return GenerateCollectionFunction(typeReference, elementType, segmentExpression);
-        }
         protected override MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, Expression<Action> genericExpression)
         {
             // make sure element has a writer
