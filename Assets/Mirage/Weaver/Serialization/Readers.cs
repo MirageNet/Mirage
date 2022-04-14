@@ -17,6 +17,7 @@ namespace Mirage.Weaver
         protected override string GeneratedLabel => "__MirageReaderGenerated";
         protected override Expression<Action> ArrayExpression => () => CollectionExtensions.ReadArray<byte>(default);
         protected override Expression<Action> ListExpression => () => CollectionExtensions.ReadList<byte>(default);
+        protected override Expression<Action> SegmentExpression => () => CollectionExtensions.ReadArraySegment<byte>(default);
         protected override Expression<Action> NullableExpression => () => SystemTypesExtensions.ReadNullable<byte>(default);
 
         protected override MethodReference GetGenericFunction()
@@ -50,26 +51,6 @@ namespace Mirage.Weaver
             MethodReference underlyingFunc = TryGetFunction(underlyingType, null);
 
             worker.Append(worker.Create(OpCodes.Call, underlyingFunc));
-            worker.Append(worker.Create(OpCodes.Ret));
-            return readMethod.definition;
-        }
-
-        protected override MethodReference GenerateSegmentFunction(TypeReference typeReference, TypeReference elementType)
-        {
-            var genericInstance = (GenericInstanceType)typeReference;
-
-            ReadMethod readMethod = GenerateReaderFunction(typeReference);
-
-            ILProcessor worker = readMethod.worker;
-
-            // $array = reader.Read<[T]>()
-            ArrayType arrayType = elementType.MakeArrayType();
-            worker.Append(worker.Create(OpCodes.Ldarg_0));
-            worker.Append(worker.Create(OpCodes.Call, GetFunction_Thorws(arrayType)));
-
-            // return new ArraySegment<T>($array)
-            MethodReference arraySegmentConstructor = module.ImportReference(() => new ArraySegment<object>());
-            worker.Append(worker.Create(OpCodes.Newobj, arraySegmentConstructor.MakeHostInstanceGeneric(genericInstance)));
             worker.Append(worker.Create(OpCodes.Ret));
             return readMethod.definition;
         }

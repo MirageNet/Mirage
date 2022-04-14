@@ -180,7 +180,7 @@ namespace Mirage.Weaver
                 var genericInstance = (GenericInstanceType)typeReference;
                 TypeReference elementType = genericInstance.GenericArguments[0];
 
-                return GenerateSegmentFunction(typeReference, elementType);
+                return GenerateCollectionFunction(typeReference, elementType, SegmentExpression);
             }
             if (typeReference.Is(typeof(List<>)))
             {
@@ -276,10 +276,10 @@ namespace Mirage.Weaver
 
         protected abstract MethodReference GenerateEnumFunction(TypeReference typeReference);
         protected abstract MethodReference GenerateCollectionFunction(TypeReference typeReference, TypeReference elementType, Expression<Action> genericExpression);
-        protected abstract MethodReference GenerateSegmentFunction(TypeReference typeReference, TypeReference elementType);
 
         protected abstract Expression<Action> ArrayExpression { get; }
         protected abstract Expression<Action> ListExpression { get; }
+        protected abstract Expression<Action> SegmentExpression { get; }
         protected abstract Expression<Action> NullableExpression { get; }
 
         protected abstract MethodReference GenerateClassOrStructFunction(TypeReference typeReference);
