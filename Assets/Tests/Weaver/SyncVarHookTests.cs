@@ -4,6 +4,15 @@ namespace Mirage.Tests.Weaver
 {
     public class SyncVarHookTests : TestsBuildFromTestName
     {
+        string TypeName()
+        {
+            string name = TestContext.CurrentContext.Test.Name;
+            string ClassName = nameof(SyncVarHookTests);
+            // standard format for test name
+            return $"{ClassName}.{name}.{name}";
+        }
+
+
         [Test]
         public void FindsPrivateHook()
         {
@@ -49,29 +58,29 @@ namespace Mirage.Tests.Weaver
         [Test]
         public void ErrorWhenNoHookFound()
         {
-            HasError($"Could not find hook for 'health', hook name 'onChangeHealth'.",
-                "System.Int32 SyncVarHookTests.ErrorWhenNoHookFound.ErrorWhenNoHookFound::health");
+            HasError($"Could not find hook for 'health', hook name 'onChangeHealth', hook type Automatic. See SyncHookType for valid signatures",
+                $"System.Int32 {TypeName()}::health");
         }
 
         [Test]
         public void ErrorWhenNoHookWithCorrectParametersFound()
         {
-            HasError($"Could not find hook for 'health', hook name 'onChangeHealth'.",
-                "System.Int32 SyncVarHookTests.ErrorWhenNoHookWithCorrectParametersFound.ErrorWhenNoHookWithCorrectParametersFound::health");
+            HasError($"Could not find hook for 'health', hook name 'onChangeHealth', hook type Automatic. See SyncHookType for valid signatures",
+                $"System.Int32 {TypeName()}::health");
         }
 
         [Test]
         public void ErrorForWrongTypeOldParameter()
         {
             HasError($"Wrong type for Parameter in hook for 'health', hook name 'onChangeHealth'.",
-                "System.Int32 SyncVarHookTests.ErrorForWrongTypeOldParameter.ErrorForWrongTypeOldParameter::health");
+                $"System.Int32 {TypeName()}::health");
         }
 
         [Test]
         public void ErrorForWrongTypeNewParameter()
         {
             HasError($"Wrong type for Parameter in hook for 'health', hook name 'onChangeHealth'.",
-                "System.Int32 SyncVarHookTests.ErrorForWrongTypeNewParameter.ErrorForWrongTypeNewParameter::health");
+                $"System.Int32 {TypeName()}::health");
         }
 
         [Test]
@@ -84,21 +93,21 @@ namespace Mirage.Tests.Weaver
         public void ErrorWhenHookNotAction()
         {
             HasError($"Hook Event for 'health' needs to be type 'System.Action<,>' but was 'SyncVarHookTests.ErrorWhenHookNotAction.DoStuff' instead",
-                "SyncVarHookTests.ErrorWhenHookNotAction.DoStuff SyncVarHookTests.ErrorWhenHookNotAction.ErrorWhenHookNotAction::OnChangeHealth");
+                $"SyncVarHookTests.ErrorWhenHookNotAction.DoStuff {TypeName()}::OnChangeHealth");
         }
 
         [Test]
         public void ErrorWhenNotGenericAction()
         {
             HasError($"Hook Event for 'health' needs to be type 'System.Action<,>' but was 'System.Action' instead",
-                "System.Action SyncVarHookTests.ErrorWhenNotGenericAction.ErrorWhenNotGenericAction::OnChangeHealth");
+                $"System.Action {TypeName()}::OnChangeHealth");
         }
 
         [Test]
         public void ErrorWhenEventArgsAreWrong()
         {
             HasError($"Hook Event for 'health' needs to be type 'System.Action<,>' but was 'System.Action`2<System.Int32,System.Single>' instead",
-                "System.Action`2<System.Int32,System.Single> SyncVarHookTests.ErrorWhenEventArgsAreWrong.ErrorWhenEventArgsAreWrong::OnChangeHealth");
+                $"System.Action`2<System.Int32,System.Single> {TypeName()}::OnChangeHealth");
         }
 
         [Test]
@@ -111,7 +120,7 @@ namespace Mirage.Tests.Weaver
         public void SyncVarHookServerError()
         {
             HasError($"'invokeHookOnServer' is set to true but no hook was implemented. Please implement hook or set 'invokeHookOnServer' back to false or remove for default false.",
-                "System.Int32 SyncVarHookTests.SyncVarHookServerError.SyncVarHookServerError::health");
+                $"System.Int32 {TypeName()}::health");
         }
 
         [Test]
@@ -142,14 +151,14 @@ namespace Mirage.Tests.Weaver
         public void AutomaticNotFound()
         {
             HasError("Could not find hook for 'health', hook name 'onChangeHealth', hook type Automatic. See SyncHookType for valid signatures",
-                "System.Int32 SyncVarHookTests.AutomaticNotFound.AutomaticNotFound::health");
+                $"System.Int32 {TypeName()}::health");
         }
 
         [Test]
         public void AutomaticFound2Methods()
         {
             HasError("Mutliple hooks found for 'health', hook name 'onChangeHealth'. Please set HookType or remove one of the overloads",
-                "System.Int32 SyncVarHookTests.AutomaticFound2Methods.AutomaticFound2Methods::health");
+                $"System.Int32 {TypeName()}::health");
         }
 
         [Test]
@@ -192,28 +201,28 @@ namespace Mirage.Tests.Weaver
         public void ExplicitMethod1NotFound()
         {
             HasError("Could not find hook for 'health', hook name 'onChangeHealth', hook type MethodWith1Arg. See SyncHookType for valid signatures",
-                "System.Int32 SyncVarHookTests.AutomaticNotFound.AutomaticNotFound::health");
+                $"System.Int32 {TypeName()}::health");
         }
 
         [Test]
         public void ExplicitMethod2NotFound()
         {
             HasError("Could not find hook for 'health', hook name 'onChangeHealth', hook type MethodWith2Arg. See SyncHookType for valid signatures",
-                "System.Int32 SyncVarHookTests.AutomaticNotFound.AutomaticNotFound::health");
+                $"System.Int32 {TypeName()}::health");
         }
 
         [Test]
         public void ExplicitEvent1NotFound()
         {
             HasError("Could not find hook for 'health', hook name 'onChangeHealth', hook type EventWith1Arg. See SyncHookType for valid signatures",
-                 "System.Int32 SyncVarHookTests.AutomaticNotFound.AutomaticNotFound::health");
+                 $"System.Int32 {TypeName()}::health");
         }
 
         [Test]
         public void ExplicitEvent2NotFound()
         {
             HasError("Could not find hook for 'health', hook name 'onChangeHealth', hook type EventWith2Arg. See SyncHookType for valid signatures",
-                 "System.Int32 SyncVarHookTests.AutomaticNotFound.AutomaticNotFound::health");
+                 $"System.Int32 {TypeName()}::health");
         }
     }
 }
