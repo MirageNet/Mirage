@@ -170,10 +170,12 @@ namespace Mirage.Weaver.SyncVars
 
             if (MatchesParameters(genericEvent, originalType, argCount))
             {
+                return new SyncVarHook { Event = @event };
+            }
+            else
+            {
                 ThrowWrongHookType(syncVar, @event, eventType);
             }
-
-            return new SyncVarHook { Event = @event };
         }
 
         private static void ThrowWrongHookType(FieldDefinition syncVar, EventDefinition @event, TypeReference eventType)
