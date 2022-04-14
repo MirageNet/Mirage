@@ -31,8 +31,8 @@ namespace Mirage.Logging
             static string CreateFullName(string name, string space)
             {
                 // special case when namespace is null we just return null
-                // see GetNameAndNameSapceFromFullname
-                if (space == null)
+                // see GetNameAndNameSpaceFromFullname
+                if (string.IsNullOrEmpty(space))
                     return name;
                 else
                     return $"{space}.{name}";
@@ -40,10 +40,11 @@ namespace Mirage.Logging
 
             public LogType logLevel;
 
-            public LoggerSettings(string name, string Namespace, LogType level)
+            public LoggerSettings(string name, string @namespace, LogType level)
             {
-                Name = name;
-                this.Namespace = Namespace;
+                // if string is null, use empty string instead
+                Name = name ?? string.Empty;
+                Namespace = @namespace ?? string.Empty;
                 logLevel = level;
                 fullNameCache = CreateFullName(Name, Namespace);
             }
