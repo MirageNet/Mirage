@@ -7,8 +7,21 @@ namespace Mirage.Weaver.SyncVars
 {
     class SyncVarHook
     {
-        public MethodDefinition Method;
-        public EventDefinition Event;
+        public readonly MethodDefinition Method;
+        public readonly EventDefinition Event;
+        public readonly SyncHookType hookType;
+
+        public SyncVarHook(MethodDefinition method, SyncHookType hookType)
+        {
+            Method = method;
+            this.hookType = hookType;
+        }
+        public SyncVarHook(EventDefinition @event, SyncHookType hookType)
+        {
+            Event = @event;
+            this.hookType = hookType;
+        }
+
     }
     internal static class HookMethodFinder
     {
@@ -105,7 +118,7 @@ namespace Mirage.Weaver.SyncVars
             {
                 if (MatchesParameters(method, originalType, argCount))
                 {
-                    return new SyncVarHook { Method = method };
+                    return new SyncVarHook(method, argCount == 1 ? SyncHookType.MethodWith1Arg : SyncHookType.MethodWith2Arg);
                 }
             }
 
@@ -152,7 +165,7 @@ namespace Mirage.Weaver.SyncVars
 
             if (MatchesParameters(genericEvent, originalType, argCount))
             {
-                return new SyncVarHook { Event = @event };
+                return new SyncVarHook(@event, argCount == 1 ? SyncHookType.EventWith1Arg : SyncHookType.EventWith2Arg);
             }
             else
             {
