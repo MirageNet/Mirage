@@ -1,3 +1,16 @@
+# [122.1.0](https://github.com/MirageNet/Mirage/compare/v122.0.2...v122.1.0) (2022-04-14)
+
+
+### Bug Fixes
+
+* fixing double types showing up in log settings if no namespace given ([5ea84d5](https://github.com/MirageNet/Mirage/commit/5ea84d5ca3f92f334f1bf0239907f70ecabd9447))
+* fixing logger for id generator using nameof instead of typeof ([3665b80](https://github.com/MirageNet/Mirage/commit/3665b801fed8d201c1f6cbb598ea10a652fffbd1))
+
+
+### Features
+
+* syncvar hook with 1 arg ([#1070](https://github.com/MirageNet/Mirage/issues/1070)) ([6e21877](https://github.com/MirageNet/Mirage/commit/6e21877090dbc9c2eab82565b258efabfcc138f6))
+
 ## [122.0.2](https://github.com/MirageNet/Mirage/compare/v122.0.1...v122.0.2) (2022-04-14)
 
 
