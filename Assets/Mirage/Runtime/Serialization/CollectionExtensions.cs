@@ -175,7 +175,7 @@ namespace Mirage.Serialization
 
         /// <summary>Reads 0 as null, and all over values as -1</summary>
         /// <param name="count">The real count of the </param>
-        /// <returns>if collection should be null or not</returns>
+        /// <returns>true if collection has value, false if collection is null</returns>
         internal static bool ReadCountPlusOne(NetworkReader reader, out int count)
         {
             // count = 0 means the array was null
