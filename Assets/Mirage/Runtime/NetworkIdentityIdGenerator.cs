@@ -5,8 +5,6 @@ using System.Security.Cryptography;
 using UnityEngine;
 using Mirage.Logging;
 
-
-
 using UnityEditor;
 
 #if UNITY_2021_2_OR_NEWER
@@ -19,7 +17,7 @@ namespace Mirage
 {
     internal static class NetworkIdentityIdGenerator
     {
-        static readonly ILogger logger = LogFactory.GetLogger(nameof(NetworkIdentityIdGenerator));
+        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkIdentityIdGenerator));
 
         /// <summary>
         /// Keep track of all sceneIds to detect scene duplicates
