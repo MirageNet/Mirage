@@ -1,3 +1,15 @@
+## [122.0.2](https://github.com/MirageNet/Mirage/compare/v122.0.1...v122.0.2) (2022-04-14)
+
+
+### Bug Fixes
+
+* increasing log to warning when receiving known type without handler ([#1072](https://github.com/MirageNet/Mirage/issues/1072)) ([05db6cf](https://github.com/MirageNet/Mirage/commit/05db6cf1008526ec6f5969765a4ca6735b3f7445))
+
+
+### Performance Improvements
+
+* using plus 1 count for other collection types ([#1073](https://github.com/MirageNet/Mirage/issues/1073)) ([25ab6f3](https://github.com/MirageNet/Mirage/commit/25ab6f321d76d2298bb69f63e6f2c9575d176a9e))
+
 ## [122.0.1](https://github.com/MirageNet/Mirage/compare/v122.0.0...v122.0.1) (2022-04-13)
 
 
