@@ -83,71 +83,53 @@ namespace Mirage.Weaver.SyncVars
 
         private static SyncVarHook FindMethod1Arg(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
         {
-            MethodDefinition[] methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
-            MethodDefinition[] methodsWith1Param = methods.Where(m => m.Parameters.Count == 1).ToArray();
-            if (methodsWith1Param.Length == 0)
-            {
-                return null;
-            }
-
-            // return method if matching args are found
-            foreach (MethodDefinition method in methodsWith1Param)
-            {
-                if (MatchesParameters(method, originalType, 1))
-                {
-                    return new SyncVarHook { Method = method };
-                }
-            }
-
-            // else throw saying args were wrong
-            throw new HookMethodException($"Wrong type for Parameter in hook for '{syncVar.Name}', hook name '{hookFunctionName}'. ", syncVar);
+            return ValidateMethod(syncVar, hookFunctionName, originalType, 1);
         }
 
         private static SyncVarHook FindMethod2Arg(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
         {
-            MethodDefinition[] methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
-            MethodDefinition[] methodsWith2Param = methods.Where(m => m.Parameters.Count == 2).ToArray();
+            return ValidateMethod(syncVar, hookFunctionName, originalType, 2);
+        }
 
-            if (methodsWith2Param.Length == 0)
+        private static SyncVarHook ValidateMethod(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType, int argCount)
+        {
+            MethodDefinition[] methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
+            MethodDefinition[] methodsWithParams = methods.Where(m => m.Parameters.Count == argCount).ToArray();
+            if (methodsWithParams.Length == 0)
             {
                 return null;
             }
 
             // return method if matching args are found
-            foreach (MethodDefinition method in methodsWith2Param)
+            foreach (MethodDefinition method in methodsWithParams)
             {
-                if (MatchesParameters(method, originalType, 2))
+                if (MatchesParameters(method, originalType, argCount))
                 {
                     return new SyncVarHook { Method = method };
                 }
             }
 
             // else throw saying args were wrong
-            throw new HookMethodException($"Wrong type for Parameter in hook for '{syncVar.Name}', hook name '{hookFunctionName}'. ", syncVar);
+            throw new HookMethodException($"Wrong type for Parameter in hook for '{syncVar.Name}', hook name '{hookFunctionName}'.", syncVar);
         }
 
         private static SyncVarHook FindEvent1Arg(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
         {
-            // we can't have 2 events/fields with same name, so using `First` is ok here
-            EventDefinition @event = syncVar.DeclaringType.Events.FirstOrDefault(x => x.Name == hookFunctionName);
-            if (@event == null)
-                return null;
-
-            return ValidateEvent(syncVar, originalType, @event, 1);
+            return ValidateEvent(syncVar, originalType, hookFunctionName, 1);
         }
 
         private static SyncVarHook FindEvent2Arg(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)
         {
+            return ValidateEvent(syncVar, originalType, hookFunctionName, 2);
+        }
+
+        private static SyncVarHook ValidateEvent(FieldDefinition syncVar, TypeReference originalType, string hookFunctionName, int argCount)
+        {
             // we can't have 2 events/fields with same name, so using `First` is ok here
             EventDefinition @event = syncVar.DeclaringType.Events.FirstOrDefault(x => x.Name == hookFunctionName);
             if (@event == null)
                 return null;
 
-            return ValidateEvent(syncVar, originalType, @event, 2);
-        }
-
-        private static SyncVarHook ValidateEvent(FieldDefinition syncVar, TypeReference originalType, EventDefinition @event, int argCount)
-        {
             TypeReference eventType = @event.EventType;
             if (!eventType.FullName.Contains("System.Action"))
             {
@@ -176,6 +158,8 @@ namespace Mirage.Weaver.SyncVars
             {
                 ThrowWrongHookType(syncVar, @event, eventType);
             }
+
+            throw new InvalidOperationException("Code should never reach even, should return or throw ealier");
         }
 
         private static void ThrowWrongHookType(FieldDefinition syncVar, EventDefinition @event, TypeReference eventType)
