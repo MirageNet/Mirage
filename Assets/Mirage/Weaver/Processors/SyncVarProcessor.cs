@@ -348,17 +348,21 @@ namespace Mirage.Weaver
         void WriteCallHook(ILProcessor worker, SyncVarHook hook, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
             if (hook.Method != null)
-                WriteCallHookMethod(worker, hook.Method, oldValue, syncVarField);
+                WriteCallHookMethod(worker, hook.Method, hook.hookType, oldValue, syncVarField);
             if (hook.Event != null)
-                WriteCallHookEvent(worker, hook.Event, oldValue, syncVarField);
+                WriteCallHookEvent(worker, hook.Event, hook.hookType, oldValue, syncVarField);
         }
 
-        void WriteCallHookMethod(ILProcessor worker, MethodDefinition hookMethod, VariableDefinition oldValue, FoundSyncVar syncVarField)
+        void WriteCallHookMethod(ILProcessor worker, MethodDefinition hookMethod, SyncHookType hookType, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
+            if (hookType != SyncHookType.MethodWith1Arg && hookType != SyncHookType.MethodWith2Arg)
+                throw new ArgumentException($"hook type should be method, but was {hookType}", nameof(hookType));
+
             WriteStartFunctionCall();
 
             // write args
-            WriteOldValue();
+            if (hookType == SyncHookType.MethodWith2Arg)
+                WriteOldValue();
             WriteNewValue();
 
             WriteEndFunctionCall();
@@ -415,13 +419,21 @@ namespace Mirage.Weaver
             }
         }
 
-        void WriteCallHookEvent(ILProcessor worker, EventDefinition @event, VariableDefinition oldValue, FoundSyncVar syncVarField)
+        void WriteCallHookEvent(ILProcessor worker, EventDefinition @event, SyncHookType hookType, VariableDefinition oldValue, FoundSyncVar syncVarField)
         {
+            if (hookType != SyncHookType.EventWith1Arg && hookType != SyncHookType.EventWith2Arg)
+                throw new ArgumentException($"hook type should be event, but was {hookType}", nameof(hookType));
+
             // get backing field for event, and sure it is generic instance (eg MyType<T>.myEvent
             FieldReference eventField = @event.DeclaringType.GetField(@event.Name).MakeHostGenericIfNeeded();
 
+            // get action type with number of args
+            Type actionType = hookType == SyncHookType.EventWith1Arg
+                ? typeof(Action<>)
+                : typeof(Action<,>);
+
             // get Invoke method and make it correct type
-            MethodReference invokeNonGeneric = @event.Module.ImportReference(typeof(Action<,>).GetMethod("Invoke"));
+            MethodReference invokeNonGeneric = module.ImportReference(actionType.GetMethod("Invoke"));
             MethodReference invoke = invokeNonGeneric.MakeHostInstanceGeneric((GenericInstanceType)@event.EventType);
 
             Instruction nopEvent = worker.Create(OpCodes.Nop);
@@ -442,7 +454,8 @@ namespace Mirage.Weaver
             // **call invoke**
             worker.Append(nopEvent);
 
-            WriteOldValue();
+            if (hookType == SyncHookType.EventWith2Arg)
+                WriteOldValue();
             WriteNewValue();
 
             worker.Append(worker.Create(OpCodes.Call, invoke));
