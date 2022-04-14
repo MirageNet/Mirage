@@ -92,18 +92,18 @@ namespace Mirage
             {
                 msgDelegate.Invoke(player, reader);
             }
-            // check LogEnabled to stop allocations if not enabled
-            else if (logger.LogEnabled())
+            else
             {
                 if (MessagePacker.MessageTypes.TryGetValue(msgType, out Type type))
                 {
-                    // todo use warning here instead of log, it seems important to know a known type has no handler
-                    //      probably fine to leave unexpected message as log, but maybe we should handle it differently? we dont want someone spaming ids to find a handler they can do stuff with...
-                    logger.Log($"Unexpected message {type} received from {player}. Did you register a handler for it?");
+                    // this means we received a Message that has a struct, but no handler, It is likely that the developer forgot to register a handler or sent it by mistake
+                    // we want this to be warning level
+                    if (logger.WarnEnabled()) logger.LogWarning($"Unexpected message {type} received from {player}. Did you register a handler for it?");
                 }
                 else
                 {
-                    logger.Log($"Unexpected message ID {msgType} received from {player}. May be due to no existing RegisterHandler for this message.");
+                    // todo maybe we should handle it differently? we dont want someone spaming ids to find a handler they can do stuff with...
+                    if (logger.LogEnabled()) logger.Log($"Unexpected message ID {msgType} received from {player}. May be due to no existing RegisterHandler for this message.");
                 }
             }
         }
