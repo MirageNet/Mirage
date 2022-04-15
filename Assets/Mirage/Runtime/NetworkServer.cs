@@ -420,11 +420,32 @@ namespace Mirage
         public void SendToAll<T>(T msg, int channelId = Channel.Reliable)
         {
             if (logger.LogEnabled()) logger.Log("Server.SendToAll id:" + typeof(T));
-            SendToMany(Players, msg, channelId);
+
+            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            {
+                // pack message into byte[] once
+                MessagePacker.Pack(msg, writer);
+                var segment = writer.ToArraySegment();
+                int count = 0;
+
+                // using SendToMany (with IEnumerable) will cause Enumerator to be boxed and create GC/alloc
+                // instead we can use while loop and MoveNext to avoid boxing
+                Dictionary<IConnection, INetworkPlayer>.ValueCollection.Enumerator enumerator = connections.Values.GetEnumerator();
+                while (enumerator.MoveNext())
+                {
+                    INetworkPlayer player = enumerator.Current;
+                    player.Send(segment, channelId);
+                    count++;
+                }
+                enumerator.Dispose();
+
+                NetworkDiagnostics.OnSend(msg, segment.Count, count);
+            }
         }
 
         /// <summary>
         /// Sends a message to many connections
+        /// <para>WARNING: using this method <b>may</b> cause Enumerator to be boxed creating GC/alloc. Use <see cref="SendToMany{T}(IReadOnlyList{INetworkPlayer}, T, int)"/> version where possible</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="players"></param>
