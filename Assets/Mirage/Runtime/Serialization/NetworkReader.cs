@@ -121,6 +121,9 @@ namespace Mirage.Serialization
         }
         public void Reset(byte[] array, int position, int length)
         {
+            if (array == null)
+                throw new ArgumentNullException(nameof(array), "Cant use null array in Reader");
+
             if (needsDisposing)
             {
                 // dispose old handler first
