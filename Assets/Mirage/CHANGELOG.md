@@ -1,3 +1,20 @@
+# [123.0.0](https://github.com/MirageNet/Mirage/compare/v122.1.0...v123.0.0) (2022-04-22)
+
+
+### Bug Fixes
+
+* peer now sends invalid key even if key is shorter than correct key ([1139527](https://github.com/MirageNet/Mirage/commit/1139527ea8442e5dd47226560bb4872fc3949ca4))
+
+
+### Code Refactoring
+
+* forcing GetReader to be given objectLocator ([2f3c4b5](https://github.com/MirageNet/Mirage/commit/2f3c4b58c54fd1e24f2ee460d44721292d83d792))
+
+
+### BREAKING CHANGES
+
+* NetworkReaderPool.GetReader now has IObjectLocator argument (can be null). Use MirageNetworkReader instead of NetworkReader if you need to read NetworkIdentity
+
 # [122.1.0](https://github.com/MirageNet/Mirage/compare/v122.0.2...v122.1.0) (2022-04-14)
 
 
