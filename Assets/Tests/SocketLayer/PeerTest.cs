@@ -131,12 +131,60 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             {
                 randomData[i] = (byte)UnityEngine.Random.Range(0, 255);
             }
+            // make sure it is not Command, otherwise might be seen as valid packet
+            // a valid packet starts with (1,1,...key...)
+            // if key is wrong "invalid key" is sent back to client
+            if (randomData[0] == (byte)PacketType.Command)
+            {
+                randomData[0] = 0;
+            }
+
             socket.SetupReceiveCall(randomData);
 
             peer.UpdateTest();
 
             // server does nothing for invalid
             socket.DidNotReceiveWithAnyArgs().Send(default, default, default);
+            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
+        }
+
+        [Test]
+        [Repeat(10)]
+        public void SendsInvalidKeyForRandomKey()
+        {
+            peer.Bind(TestEndPoint.CreateSubstitute());
+
+            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            peer.OnConnected += connectAction;
+
+            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
+
+            // 2 is min length of a message
+            byte[] randomData = new byte[UnityEngine.Random.Range(2, 20)];
+            for (int i = 0; i < randomData.Length; i++)
+            {
+                randomData[i] = (byte)UnityEngine.Random.Range(0, 255);
+            }
+            // a valid packet starts with (1,1,...key...)
+            // if key is wrong "invalid key" is sent back to client
+            randomData[0] = (byte)PacketType.Command;
+            randomData[1] = (byte)Commands.ConnectRequest;
+            if (randomData.Length >= 3)
+                randomData[2] = 1; // set to 1 so tests desn't randomly pick valid key
+
+            socket.SetupReceiveCall(randomData, endPoint);
+
+            peer.UpdateTest();
+
+            // server does nothing for invalid
+            socket.Received(1).Send(
+                endPoint: endPoint,
+                length: 3,
+                packet: Arg.Is<byte[]>(sent =>
+                    sent[0] == (byte)PacketType.Command &&
+                    sent[1] == (byte)Commands.ConnectionRejected &&
+                    sent[2] == (byte)RejectReason.KeyInvalid
+                ));
             connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
         }
 

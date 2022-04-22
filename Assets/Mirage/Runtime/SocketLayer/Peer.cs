@@ -387,6 +387,9 @@ namespace Mirage.SocketLayer
             {
                 RejectConnectionWithReason(endPoint, RejectReason.ServerFull);
             }
+            // todo do other security stuff here:
+            // - white/black list for endpoint?
+            // (maybe a callback for developers to use?)
             else
             {
                 AcceptNewConnection(endPoint);
@@ -395,24 +398,16 @@ namespace Mirage.SocketLayer
 
         private bool Validate(Packet packet)
         {
-            int requestLength = 2 + connectKeyValidator.KeyLength;
-            if (packet.length < requestLength)
+            // key could be anything, so any message over 2 could be key.
+            int minLength = 2;
+            if (packet.length < minLength)
                 return false;
-
-            // todo do security stuff here:
-            // - connect request
-            // - simple key/phrase send from client with first message
-            // - hashcash??
-            // - white/black list for endpoint?
 
             if (packet.type != PacketType.Command)
                 return false;
 
             if (packet.command != Commands.ConnectRequest)
                 return false;
-
-            //if (!hashCashValidator.Validate(packet))
-            //    return false;
 
             return true;
         }
