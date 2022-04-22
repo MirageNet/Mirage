@@ -54,14 +54,16 @@ namespace Mirage
 
         public static NetworkIdentitySyncvar ReadNetworkIdentitySyncVar(this NetworkReader reader)
         {
+            MirageNetworkReader mirageReader = reader.ToMirageReader();
+
             uint netId = reader.ReadPackedUInt32();
 
             NetworkIdentity identity = null;
-            reader.ObjectLocator?.TryGetIdentity(netId, out identity);
+            mirageReader.ObjectLocator?.TryGetIdentity(netId, out identity);
 
             return new NetworkIdentitySyncvar
             {
-                objectLocator = reader.ObjectLocator,
+                objectLocator = mirageReader.ObjectLocator,
                 netId = netId,
                 identity = identity
             };

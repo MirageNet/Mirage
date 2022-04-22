@@ -12,7 +12,7 @@ namespace Mirage.Tests.Runtime.Serialization
     public class NetworkWriterTest
     {
         private readonly NetworkWriter writer = new NetworkWriter(1300);
-        private readonly NetworkReader reader = new NetworkReader();
+        private readonly MirageNetworkReader reader = new MirageNetworkReader();
 
         [SetUp]
         public void Setup()

@@ -16,7 +16,7 @@ namespace Mirage.Tests.Runtime.Serialization
             // should throw an exception
             byte[] bytes = { 0x00, 0x01 };
 
-            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(bytes))
+            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(bytes, null))
             {
                 Assert.Throws<EndOfStreamException>(() =>
                 {

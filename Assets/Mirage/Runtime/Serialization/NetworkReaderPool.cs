@@ -25,30 +25,62 @@ namespace Mirage.Serialization
             }
         }
 
-        public static PooledNetworkReader GetReader(ArraySegment<byte> packet)
+        /// <summary>
+        /// Gets reader from pool. sets internal array and objectLocator values
+        /// </summary>
+        /// <param name="packet"></param>
+        /// <param name="objectLocator">Can be null, but must be set in order to read NetworkIdentity Values</param>
+        /// <returns></returns>
+        public static PooledNetworkReader GetReader(ArraySegment<byte> packet, IObjectLocator objectLocator)
         {
             PooledNetworkReader reader = pool.Take();
+            reader.ObjectLocator = objectLocator;
             reader.Reset(packet.Array, packet.Offset, packet.Count);
             return reader;
         }
-        public static PooledNetworkReader GetReader(byte[] array)
+        /// <summary>
+        /// Gets reader from pool. sets internal array and objectLocator values
+        /// </summary>
+        /// <param name="packet"></param>
+        /// <param name="objectLocator">Can be null, but must be set in order to read NetworkIdentity Values</param>
+        /// <returns></returns>
+        public static PooledNetworkReader GetReader(byte[] array, IObjectLocator objectLocator)
         {
             PooledNetworkReader reader = pool.Take();
+            reader.ObjectLocator = objectLocator;
             reader.Reset(array, 0, array.Length);
             return reader;
         }
-        public static PooledNetworkReader GetReader(byte[] array, int offset, int length)
+        /// <summary>
+        /// Gets reader from pool. sets internal array and objectLocator values
+        /// </summary>
+        /// <param name="packet"></param>
+        /// <param name="objectLocator">Can be null, but must be set in order to read NetworkIdentity Values</param>
+        /// <returns></returns>
+        public static PooledNetworkReader GetReader(byte[] array, int offset, int length, IObjectLocator objectLocator)
         {
             PooledNetworkReader reader = pool.Take();
+            reader.ObjectLocator = objectLocator;
             reader.Reset(array, offset, length);
             return reader;
         }
     }
 
     /// <summary>
+    /// NetworkReader but has a ObjectLocator field that can be used by Reader functions to fetch NetworkIdentity
+    /// </summary>
+    public class MirageNetworkReader : NetworkReader
+    {
+        /// <summary>
+        /// Used to find objects by net id
+        /// </summary>
+        public IObjectLocator ObjectLocator { get; set; }
+    }
+
+    /// <summary>
     /// NetworkReader to be used with <see cref="NetworkReaderPool">NetworkReaderPool</see>
     /// </summary>
-    public sealed class PooledNetworkReader : NetworkReader, IDisposable
+    public sealed class PooledNetworkReader : MirageNetworkReader, IDisposable
     {
         private readonly Pool<PooledNetworkReader> pool;
 

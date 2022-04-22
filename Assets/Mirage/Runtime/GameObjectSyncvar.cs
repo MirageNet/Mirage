@@ -54,14 +54,16 @@ namespace Mirage
 
         public static GameObjectSyncvar ReadGameObjectSyncVar(this NetworkReader reader)
         {
+            MirageNetworkReader mirageReader = reader.ToMirageReader();
+
             uint netId = reader.ReadPackedUInt32();
 
             NetworkIdentity identity = null;
-            bool hasValue = reader.ObjectLocator?.TryGetIdentity(netId, out identity) ?? false;
+            bool hasValue = mirageReader.ObjectLocator?.TryGetIdentity(netId, out identity) ?? false;
 
             return new GameObjectSyncvar
             {
-                objectLocator = reader.ObjectLocator,
+                objectLocator = mirageReader.ObjectLocator,
                 netId = netId,
                 gameObject = hasValue ? identity.gameObject : null
             };
