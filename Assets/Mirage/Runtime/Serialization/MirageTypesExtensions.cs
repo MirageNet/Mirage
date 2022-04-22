@@ -49,7 +49,7 @@ namespace Mirage.Serialization
             if (reader is MirageNetworkReader mirageReader)
                 return mirageReader;
             else
-                throw new InvalidOperationException("Must be MirageNetworkReader to use ReadNetworkIdentity");
+                throw new InvalidOperationException("Reader is not MirageNetworkReader");
         }
 
         public static NetworkIdentity ReadNetworkIdentity(this NetworkReader reader)
