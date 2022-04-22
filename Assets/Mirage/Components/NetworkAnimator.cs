@@ -522,7 +522,7 @@ namespace Mirage
             if (logger.LogEnabled()) logger.Log("OnAnimationMessage for netId=" + NetId);
 
             // handle and broadcast
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters))
+            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters, null))
             {
                 HandleAnimMsg(stateHash, normalizedTime, layerId, weight, networkReader);
                 RpcOnAnimationClientMessage(stateHash, normalizedTime, layerId, weight, parameters);
@@ -537,7 +537,7 @@ namespace Mirage
                 return;
 
             // handle and broadcast
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters))
+            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters, null))
             {
                 HandleAnimParamsMsg(networkReader);
                 RpcOnAnimationParametersClientMessage(parameters);
@@ -587,14 +587,14 @@ namespace Mirage
         [ClientRpc]
         void RpcOnAnimationClientMessage(int stateHash, float normalizedTime, int layerId, float weight, ArraySegment<byte> parameters)
         {
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters))
+            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters, null))
                 HandleAnimMsg(stateHash, normalizedTime, layerId, weight, networkReader);
         }
 
         [ClientRpc]
         void RpcOnAnimationParametersClientMessage(ArraySegment<byte> parameters)
         {
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters))
+            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters, null))
                 HandleAnimParamsMsg(networkReader);
         }
 

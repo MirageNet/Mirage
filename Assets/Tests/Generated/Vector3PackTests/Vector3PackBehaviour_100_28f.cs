@@ -68,7 +68,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._100_28f
 
                 Assert.That(writer.BitPosition, Is.EqualTo(28));
 
-                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), null))
                 {
                     clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(28));
@@ -162,7 +162,7 @@ namespace Mirage.Tests.Runtime.Generated.Vector3PackAttributeTests._100_28f
 
                 Assert.That(writer.BitPosition, Is.EqualTo(28));
 
-                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), null))
                 {
                     var outStruct = reader.Read<BitPackStruct>();
                     Assert.That(reader.BitPosition, Is.EqualTo(28));

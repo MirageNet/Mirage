@@ -62,6 +62,12 @@ namespace Mirage
             }
         }
 
+        void LateUpdate()
+        {
+            // use late update because that will be called after all received message for this frame
+
+        }
+
 #if UNITY_EDITOR
         readonly Dictionary<int, NetworkIdentity> validateCache = new Dictionary<int, NetworkIdentity>();
         void OnValidate()
@@ -393,7 +399,7 @@ namespace Mirage
             // (Count is 0 if there were no components)
             if (msg.payload.Count > 0)
             {
-                using (PooledNetworkReader payloadReader = NetworkReaderPool.GetReader(msg.payload))
+                using (PooledNetworkReader payloadReader = NetworkReaderPool.GetReader(msg.payload, Client.World))
                 {
                     identity.OnDeserializeAll(payloadReader, true);
                 }
@@ -592,9 +598,8 @@ namespace Mirage
                 throw new MethodInvocationException($"Invalid RPC call with index {msg.functionIndex}");
             }
 
-            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload))
+            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(msg.payload, Client.World))
             {
-                reader.ObjectLocator = Client.World;
                 remoteCall.Invoke(reader, behaviour, null, 0);
             }
         }
@@ -616,10 +621,9 @@ namespace Mirage
             if (callbacks.TryGetValue(reply.replyId, out Action<NetworkReader> action))
             {
                 callbacks.Remove(replyId);
-                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(reply.payload))
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(reply.payload, Client.World))
                 {
-                    reader.ObjectLocator = Client.World;
-                    action(reader);
+                    action.Invoke(reader);
                 }
             }
             else

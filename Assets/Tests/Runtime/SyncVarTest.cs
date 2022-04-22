@@ -22,7 +22,7 @@ namespace Mirage.Tests.Runtime.Serialization
     {
         readonly NetworkWriter ownerWriter = new NetworkWriter(1300);
         readonly NetworkWriter observersWriter = new NetworkWriter(1300);
-        readonly NetworkReader reader = new NetworkReader();
+        readonly MirageNetworkReader reader = new MirageNetworkReader();
 
         [TearDown]
         public void TearDown()
@@ -149,14 +149,16 @@ namespace Mirage.Tests.Runtime.Serialization
         }
 
         [Test]
-        public void SetNetworkIdentitySyncvar()
+        [Description("Syncvars are converted to properties behind the scenes, this tests makes sure you can set and get them")]
+        public void CanSetAndGetNetworkIdentitySyncvar()
         {
             var gameObject = new GameObject("player", typeof(NetworkIdentity), typeof(MockPlayer));
+            var other = new GameObject("other", typeof(NetworkIdentity));
             MockPlayer player = gameObject.GetComponent<MockPlayer>();
 
-            player.target = gameObject.GetComponent<NetworkIdentity>();
+            player.target = other.GetComponent<NetworkIdentity>();
 
-            Assert.That(player.target, Is.EqualTo(player.GetComponent<NetworkIdentity>()));
+            Assert.That(player.target, Is.EqualTo(other.GetComponent<NetworkIdentity>()));
         }
     }
 }

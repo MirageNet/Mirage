@@ -77,13 +77,6 @@ namespace Mirage.Serialization
             get => (bitPosition + 0b111) >> 3;
         }
 
-        /// <summary>
-        /// some service object that can find objects by net id
-        /// </summary>
-        // todo try move this somewhere else
-        public IObjectLocator ObjectLocator { get; set; }
-
-
         public NetworkReader() { }
 
         ~NetworkReader()

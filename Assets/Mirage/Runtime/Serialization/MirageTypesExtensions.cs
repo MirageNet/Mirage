@@ -40,15 +40,27 @@ namespace Mirage.Serialization
             writer.WriteNetworkIdentity(identity);
         }
 
-
+        /// <summary>
+        /// Casts reader to <see cref="MirageNetworkReader"/>, throw if cast is invalid
+        /// </summary>
+        /// <param name=""></param>
+        public static MirageNetworkReader ToMirageReader(this NetworkReader reader)
+        {
+            if (reader is MirageNetworkReader mirageReader)
+                return mirageReader;
+            else
+                throw new InvalidOperationException("Must be MirageNetworkReader to use ReadNetworkIdentity");
+        }
 
         public static NetworkIdentity ReadNetworkIdentity(this NetworkReader reader)
         {
+            MirageNetworkReader mirageReader = reader.ToMirageReader();
+
             uint netId = reader.ReadPackedUInt32();
             if (netId == 0)
                 return null;
 
-            return FindNetworkIdentity(reader.ObjectLocator, netId);
+            return FindNetworkIdentity(mirageReader.ObjectLocator, netId);
         }
 
         private static NetworkIdentity FindNetworkIdentity(IObjectLocator objectLocator, uint netId)
@@ -67,6 +79,8 @@ namespace Mirage.Serialization
 
         public static NetworkBehaviour ReadNetworkBehaviour(this NetworkReader reader)
         {
+            MirageNetworkReader mirageReader = reader.ToMirageReader();
+
             // we can't use ReadNetworkIdentity here, because we need to know if netid was 0 or not
             // if it is not 0 we need to read component index even if NI is null, or it'll fail to deserilize next part
             uint netId = reader.ReadPackedUInt32();
@@ -76,7 +90,7 @@ namespace Mirage.Serialization
             // always read index if netid is not 0
             byte componentIndex = reader.ReadByte();
 
-            NetworkIdentity identity = FindNetworkIdentity(reader.ObjectLocator, netId);
+            NetworkIdentity identity = FindNetworkIdentity(mirageReader.ObjectLocator, netId);
             if (identity is null)
                 return null;
 

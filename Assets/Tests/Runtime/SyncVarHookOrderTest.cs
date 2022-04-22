@@ -100,7 +100,7 @@ namespace Mirage.Tests.Runtime.Serialization
             {
                 serverComponent.SerializeSyncVars(writer, initial);
 
-                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), clientComponent.World))
                 {
                     clientComponent.DeserializeSyncVars(reader, initial);
                 }

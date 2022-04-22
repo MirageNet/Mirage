@@ -253,8 +253,15 @@ namespace Mirage
                 infos.Add(GetString("Network ID", identity.NetId.ToString()));
                 infos.Add(GetBoolean("Is Client", identity.IsClient));
                 infos.Add(GetBoolean("Is Server", identity.IsServer));
-                infos.Add(GetBoolean("Has Authority", identity.HasAuthority));
-                infos.Add(GetBoolean("Is Local Player", identity.IsLocalPlayer));
+                if (identity.IsClient)
+                {
+                    infos.Add(GetBoolean("Has Authority", identity.HasAuthority));
+                    infos.Add(GetBoolean("Is Local Player", identity.IsLocalPlayer));
+                }
+                if (identity.IsServer)
+                {
+                    infos.Add(GetString("Owner", identity.Owner != null ? identity.Owner.ToString() : "NULL"));
+                }
             }
             return infos;
         }

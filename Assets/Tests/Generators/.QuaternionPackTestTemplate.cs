@@ -72,7 +72,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests.%%NAME%%
 
                 Assert.That(writer.BitPosition, Is.EqualTo(%%BIT_COUNT%%));
 
-                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), null))
                 {
                     clientComponent.DeserializeSyncVars(reader, true);
                     Assert.That(reader.BitPosition, Is.EqualTo(%%BIT_COUNT%%));
@@ -164,7 +164,7 @@ namespace Mirage.Tests.Runtime.Generated.QuaternionPackAttributeTests.%%NAME%%
 
                 Assert.That(writer.BitPosition, Is.EqualTo(%%BIT_COUNT%%));
 
-                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment()))
+                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), null))
                 {
                     var outStruct = reader.Read<BitPackStruct>();
                     Assert.That(reader.BitPosition, Is.EqualTo(%%BIT_COUNT%%));

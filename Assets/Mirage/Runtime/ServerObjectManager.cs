@@ -463,9 +463,8 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log($"OnServerRpcMessage for netId={netId} conn={player}");
 
-            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(payload))
+            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(payload, Server.World))
             {
-                reader.ObjectLocator = Server.World;
                 remoteCall.Invoke(reader, behaviour, player, replyId);
             }
         }

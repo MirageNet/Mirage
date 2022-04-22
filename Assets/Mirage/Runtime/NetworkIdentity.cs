@@ -680,11 +680,11 @@ namespace Mirage
             // check if Barrier is at end of Deserialize, if it is then the Deserialize was likely a success
             byte barrierData = reader.ReadByte();
             if (barrierData != Barrier)
-            {                
+            {
                 throw new DeserializeFailedException($"Deserialization failure for component '{comp.GetType()}' on networked object '{name}' (NetId {NetId}, SceneId {SceneId:X})." +
                     $" Possible Reasons:\n" +
                     $"  * Do {comp.GetType()}'s OnSerialize and OnDeserialize calls write the same amount of data?\n" +
-                    $"  * Did something fail in {comp.GetType()}'s OnSerialize/OnDeserialize code?\n" + 
+                    $"  * Did something fail in {comp.GetType()}'s OnSerialize/OnDeserialize code?\n" +
                     $"  * Are the server and client instances built from the exact same project?\n" +
                     $"  * Maybe this OnDeserialize call was meant for another GameObject? The sceneIds can easily get out of sync if the Hierarchy was modified only on the client " +
                     $"OR the server. Try rebuilding both.\n\n");
@@ -693,8 +693,6 @@ namespace Mirage
 
         internal void OnDeserializeAll(NetworkReader reader, bool initialState)
         {
-            // needed so that we can deserialize gameobjects and NI
-            reader.ObjectLocator = Client != null ? Client.World : null;
             // deserialize all components that were received
             NetworkBehaviour[] components = NetworkBehaviours;
             // check if we can read at least 1 byte

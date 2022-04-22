@@ -202,7 +202,7 @@ namespace Mirage
                 return;
 
             // deserialize payload
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(payload))
+            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(payload, Server.World))
                 DeserializeFromReader(networkReader);
 
             // server-only mode does no interpolation to save computations,

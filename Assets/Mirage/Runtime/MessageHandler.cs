@@ -110,10 +110,8 @@ namespace Mirage
 
         public void HandleMessage(INetworkPlayer player, ArraySegment<byte> packet)
         {
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(packet))
+            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(packet, objectLocator))
             {
-                // set ObjectLocator so that message can use NetworkIdentity
-                networkReader.ObjectLocator = objectLocator;
 
                 // protect against attackers trying to send invalid data packets
                 // exception could be throw if:
