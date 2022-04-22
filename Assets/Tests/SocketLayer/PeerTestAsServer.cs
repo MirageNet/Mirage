@@ -148,26 +148,5 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             ), length);
             connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
         }
-
-        [Test, Description("Should reject with no reason given")]
-        public void IgnoresMessageThatIsInvalid()
-        {
-            peer.Bind(TestEndPoint.CreateSubstitute());
-
-            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
-            peer.OnConnected += connectAction;
-
-            byte[] invalidRequest = new byte[2] {
-                (byte)PacketType.Command,
-                (byte)Commands.ConnectRequest
-            };
-
-            socket.SetupReceiveCall(invalidRequest);
-            peer.UpdateTest();
-
-            // server does nothing for invalid
-            socket.DidNotReceiveWithAnyArgs().Send(default, default, default);
-            connectAction.DidNotReceiveWithAnyArgs().Invoke(default);
-        }
     }
 }
