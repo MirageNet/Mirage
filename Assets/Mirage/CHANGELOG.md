@@ -1,3 +1,10 @@
+## [123.0.1](https://github.com/MirageNet/Mirage/compare/v123.0.0...v123.0.1) (2022-04-24)
+
+
+### Bug Fixes
+
+* fixing NRE in log when handler is null ([013b03c](https://github.com/MirageNet/Mirage/commit/013b03c17adbdb08292f671aa22820422f9b0840))
+
 # [123.0.0](https://github.com/MirageNet/Mirage/compare/v122.1.0...v123.0.0) (2022-04-22)
 
 
