@@ -1,3 +1,10 @@
+## [123.0.2](https://github.com/MirageNet/Mirage/compare/v123.0.1...v123.0.2) (2022-04-27)
+
+
+### Performance Improvements
+
+* removing allocation from SendToAll ([6166244](https://github.com/MirageNet/Mirage/commit/616624491c2bf6e77c9d74641931c15359116df4))
+
 ## [123.0.1](https://github.com/MirageNet/Mirage/compare/v123.0.0...v123.0.1) (2022-04-24)
 
 
