@@ -185,7 +185,8 @@ namespace Mirage
     public sealed class FoldoutEventAttribute : PropertyAttribute { }
 
     /// <summary>
-    /// Draws UnityEvent as a foldout
+    /// Makes field readonly in inspector.
+    /// <para>This is useful for fields that are set by code, but are shown iin inpector for debuggiing</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class ReadOnlyInspectorAttribute : PropertyAttribute { }
