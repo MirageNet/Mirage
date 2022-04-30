@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -8,6 +9,8 @@ namespace Mirage.Visibility.SpatialHash
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Vector2 ToXZ(this Vector3 v) => new Vector2(v.x, v.z);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Vector3 FromXZ(this Vector2 v) => new Vector3(v.x, 0, v.y);
     }
 
     public class SpatialHashSystem : MonoBehaviour
@@ -20,18 +23,15 @@ namespace Mirage.Visibility.SpatialHash
         [Tooltip("How often (in seconds) that this object should update the list of observers that can see it.")]
         public float VisibilityUpdateInterval = 1;
 
-        [Tooltip("height and width of 1 box in grid")]
-        public float gridSize = 10;
-
-        public Vector2 Centre = new Vector2(0, 0);
-
         [Tooltip("Bounds of the map used to calculate visibility. Objects out side of grid will not be visibility")]
-        public Vector2 Size = new Vector2(100, 100);
+        public Bounds Bounds = new Bounds(Vector3.zero, 100 * Vector3.one);
+
+        [Tooltip("How many points to split the grid into (in each xz axis)")]
+        public Vector2Int GridCount = Vector2Int.one * 10;
 
         // todo is list vs hashset better? Set would be better for remove objects, list would be better for looping
         List<SpatialHashVisibility> all = new List<SpatialHashVisibility>();
         public GridHolder<INetworkPlayer> Grid;
-
 
         public void Awake()
         {
@@ -43,7 +43,7 @@ namespace Mirage.Visibility.SpatialHash
                 // skip first invoke, list will be empty
                 InvokeRepeating(nameof(RebuildObservers), VisibilityUpdateInterval, VisibilityUpdateInterval);
 
-                Grid = new GridHolder<INetworkPlayer>(gridSize, Centre, Size);
+                Grid = new GridHolder<INetworkPlayer>(Bounds, GridCount);
             });
 
             Server.Stopped.AddListener(() =>
@@ -58,6 +58,7 @@ namespace Mirage.Visibility.SpatialHash
             NetworkVisibility visibility = identity.Visibility;
             if (visibility is SpatialHashVisibility obj)
             {
+                Debug.Assert(obj.System == null);
                 obj.System = this;
                 all.Add(obj);
             }
@@ -67,6 +68,8 @@ namespace Mirage.Visibility.SpatialHash
             NetworkVisibility visibility = identity.Visibility;
             if (visibility is SpatialHashVisibility obj)
             {
+                Debug.Assert(obj.System == this);
+                obj.System = null;
                 all.Remove(obj);
             }
         }
@@ -114,19 +117,23 @@ namespace Mirage.Visibility.SpatialHash
         {
             public readonly int Width;
             public readonly int Height;
-            public readonly float GridSize;
-            public readonly Vector2 Centre;
+            public readonly Vector2 Offset;
             public readonly Vector2 Size;
+            public readonly Vector2 Extents;
+            public readonly Vector2 GridSize;
 
             public readonly GridPoint[] Points;
 
-            public GridHolder(float gridSize, Vector2 centre, Vector2 size)
+            public GridHolder(Bounds bounds, Vector2Int gridCount)
             {
-                Centre = centre;
-                Size = size;
-                Width = Mathf.CeilToInt(size.x / gridSize);
-                Height = Mathf.CeilToInt(size.y / gridSize);
-                GridSize = gridSize;
+                Offset = (bounds.center - bounds.extents).ToXZ();
+                Size = bounds.size.ToXZ();
+                Extents = bounds.extents.ToXZ();
+
+                Width = gridCount.x;
+                Height = gridCount.y;
+
+                GridSize = Size / gridCount;
 
                 Points = new GridPoint[Width * Height];
             }
@@ -134,8 +141,11 @@ namespace Mirage.Visibility.SpatialHash
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void AddObject(Vector2 position, T obj)
             {
-                ToGridIndex(position, out int x, out int y);
-                AddObject(x, y, obj);
+                if (InBounds(position))
+                {
+                    ToGridIndex(position, out int x, out int y);
+                    AddObject(x, y, obj);
+                }
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -153,6 +163,12 @@ namespace Mirage.Visibility.SpatialHash
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public HashSet<T> GetObjects(int i, int j)
             {
+#if DEBUG
+                if (i < 0) throw new IndexOutOfRangeException($"i ({i}) is less than zero");
+                if (j < 0) throw new IndexOutOfRangeException($"j ({j}) is less than zero");
+                if (i >= Width) throw new IndexOutOfRangeException($"i ({i}) is greater than {Width}");
+                if (j >= Height) throw new IndexOutOfRangeException($"j ({j}) is greater than {Height}");
+#endif
                 return Points[i + j * Width].objects;
             }
 
@@ -165,17 +181,15 @@ namespace Mirage.Visibility.SpatialHash
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool InBounds(Vector2 position)
             {
-                float x = position.x - Centre.x;
-                float y = position.y - Centre.y;
-
-                return (0 < x && x < Size.x)
-                    && (0 < y && y < Size.y);
+                return (-Extents.x <= position.x && position.x <= Extents.x)
+                    && (-Extents.y <= position.y && position.y <= Extents.y);
             }
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool InBounds(int x, int y)
             {
-                return (0 < x && x < Width)
-                    && (0 < y && y < Height);
+                // inclusive lower bound
+                return (0 <= x && x < Width)
+                    && (0 <= y && y < Height);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -202,11 +216,11 @@ namespace Mirage.Visibility.SpatialHash
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void ToGridIndex(Vector2 position, out int x, out int y)
             {
-                float fx = position.x - Centre.x;
-                float fy = position.y - Centre.y;
+                float fx = position.x - Offset.x;
+                float fy = position.y - Offset.y;
 
-                x = Mathf.RoundToInt(fx / GridSize);
-                y = Mathf.RoundToInt(fy / GridSize);
+                x = Mathf.RoundToInt(fx / GridSize.x);
+                y = Mathf.RoundToInt(fy / GridSize.y);
             }
 
             public void BuildObservers(HashSet<T> observers, Vector2 position, int range)
@@ -215,7 +229,7 @@ namespace Mirage.Visibility.SpatialHash
                 if (!InBounds(position))
                     return;
 
-                ToGridIndex(position - Centre, out int x, out int y);
+                ToGridIndex(position, out int x, out int y);
 
                 for (int i = x - range; i <= x + range; i++)
                 {
@@ -223,10 +237,22 @@ namespace Mirage.Visibility.SpatialHash
                     {
                         if (InBounds(i, j))
                         {
-                            observers.UnionWith(GetObjects(i, j));
+                            HashSet<T> set = GetObjects(i, j);
+                            if (set != null)
+                                UnionWithNonAlloc(observers, set);
                         }
                     }
                 }
+            }
+
+            void UnionWithNonAlloc(HashSet<T> first, HashSet<T> second)
+            {
+                HashSet<T>.Enumerator enumerator = second.GetEnumerator();
+                while (enumerator.MoveNext())
+                {
+                    first.Add(enumerator.Current);
+                }
+                enumerator.Dispose();
             }
 
             public struct GridPoint

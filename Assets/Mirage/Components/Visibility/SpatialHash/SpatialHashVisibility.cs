@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Mirage.Logging;
 using UnityEngine;
@@ -11,12 +12,15 @@ namespace Mirage.Visibility.SpatialHash
         [Tooltip("How many grid away the player can be to see this object. Real distance is this mutlipled by SpatialHashSystem")]
         public int GridVisibleRange = 1;
 
+        [ReadOnlyInspector]
         public SpatialHashSystem System;
 
         /// <param name="player">Network connection of a player.</param>
         /// <returns>True if the player can see this object.</returns>
         public override bool OnCheckObserver(INetworkPlayer player)
         {
+            ThrowIfNoSystem();
+
             if (player.Identity == null)
                 return false;
 
@@ -35,7 +39,17 @@ namespace Mirage.Visibility.SpatialHash
         /// <param name="initialize">True if the set of observers is being built for the first time.</param>
         public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
         {
+            ThrowIfNoSystem();
+
             System.Grid.BuildObservers(observers, transform.position.ToXZ(), GridVisibleRange);
+        }
+
+        private void ThrowIfNoSystem()
+        {
+            if (System is null)
+            {
+                throw new InvalidOperationException("No SpatialHashSystem Set on SpatialHashVisibility. Add SpatialHashSystem to your NetworkManager before using this component.");
+            }
         }
     }
 }
