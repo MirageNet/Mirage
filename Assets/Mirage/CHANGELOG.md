@@ -1,3 +1,10 @@
+## [123.0.3](https://github.com/MirageNet/Mirage/compare/v123.0.2...v123.0.3) (2022-05-06)
+
+
+### Bug Fixes
+
+* **Weaver:** making const fields static ([09c3b3b](https://github.com/MirageNet/Mirage/commit/09c3b3b116a466f55bbfee2771c2b9ca60b2dad4))
+
 ## [123.0.2](https://github.com/MirageNet/Mirage/compare/v123.0.1...v123.0.2) (2022-04-27)
 
 
