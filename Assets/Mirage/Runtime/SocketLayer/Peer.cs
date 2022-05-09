@@ -97,6 +97,7 @@ namespace Mirage.SocketLayer
         public IConnection Connect(IEndPoint endPoint)
         {
             if (active) throw new InvalidOperationException("Peer is already active");
+            if (endPoint == null) throw new ArgumentNullException(nameof(endPoint));
 
             active = true;
             socket.Connect(endPoint);
