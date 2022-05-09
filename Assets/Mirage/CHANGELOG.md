@@ -1,3 +1,10 @@
+## [123.0.5](https://github.com/MirageNet/Mirage/compare/v123.0.4...v123.0.5) (2022-05-09)
+
+
+### Bug Fixes
+
+* **SocketLayer:** throwing if Peer is given a null endpoint ([3e3c737](https://github.com/MirageNet/Mirage/commit/3e3c737b9c8718a751bbb8795238823690b74e1d))
+
 ## [123.0.4](https://github.com/MirageNet/Mirage/compare/v123.0.3...v123.0.4) (2022-05-09)
 
 
