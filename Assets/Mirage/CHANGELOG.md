@@ -1,3 +1,10 @@
+## [123.0.4](https://github.com/MirageNet/Mirage/compare/v123.0.3...v123.0.4) (2022-05-09)
+
+
+### Bug Fixes
+
+* **Weaver:** fixing crash from missing attribute ([e54a3a2](https://github.com/MirageNet/Mirage/commit/e54a3a26be577f60d2d6135df11187f8671fcd05))
+
 ## [123.0.3](https://github.com/MirageNet/Mirage/compare/v123.0.2...v123.0.3) (2022-05-06)
 
 
