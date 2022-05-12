@@ -31,7 +31,7 @@ namespace Mirage.Tests.Runtime.Serialization
         }
     }
 
-    public class RpcWithTypeInAnotherAssembly : ClientServerSetup<RpcWithTypeInAnotherAssemblyBehaviour>
+    public class GeneratedFunctionsInOtherAssembly : ClientServerSetup<RpcWithTypeInAnotherAssemblyBehaviour>
     {
         [UnityTest]
         [Description("This has custom writer in other Assembly, we need to make sure we use it")]
