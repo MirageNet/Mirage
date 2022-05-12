@@ -63,10 +63,14 @@ namespace Mirage.Weaver
         private void MarkAsGenerated(TypeDefinition typeDefinition)
         {
             // if in this module, then mark as generated
-            if (typeDefinition.Module == module)
-            {
-                typeDefinition.AddCustomAttribute(module, GeneratedAttribute);
-            }
+            if (typeDefinition.Module != module)
+                return;
+
+            // dont add twice
+            if (typeDefinition.HasCustomAttribute(GeneratedAttribute))
+                return;
+
+            typeDefinition.AddCustomAttribute(module, GeneratedAttribute);
         }
 
         /// <summary>
