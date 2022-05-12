@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Mono.Cecil;
+using ConstructorInfo = System.Reflection.ConstructorInfo;
 
 namespace Mirage.Weaver
 {
@@ -276,6 +277,13 @@ namespace Mirage.Weaver
         public static bool HasCustomAttribute(this ICustomAttributeProvider attributeProvider, Type t)
         {
             return attributeProvider.CustomAttributes.Any(attr => attr.AttributeType.Is(t));
+        }
+
+        public static void AddCustomAttribute(this ICustomAttributeProvider attributeProvider, ModuleDefinition module, Type t)
+        {
+            ConstructorInfo constructor = t.GetConstructor(new Type[0]);
+            var customAttribute = new CustomAttribute(module.ImportReference(constructor));
+            attributeProvider.CustomAttributes.Add(customAttribute);
         }
 
         public static T GetField<T>(this CustomAttribute ca, string field, T defaultValue)
