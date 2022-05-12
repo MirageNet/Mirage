@@ -238,5 +238,46 @@ namespace Mirage.Tests.Runtime.ClientServer
             Assert.That(hasAuthCalls.Count, Is.EqualTo(1));
             Assert.That(hasAuthCalls.Dequeue(), Is.False);
         }
+
+        [Test]
+        public void OnOwnerChanged_Server()
+        {
+            var hasAuthCalls = new Queue<INetworkPlayer>();
+            serverIdentity2.OnOwnerChanged.AddListener(newOwner =>
+            {
+                hasAuthCalls.Enqueue(newOwner);
+            });
+
+            serverIdentity2.AssignClientAuthority(serverPlayer);
+
+            Assert.That(hasAuthCalls.Count, Is.EqualTo(1));
+            Assert.That(hasAuthCalls.Dequeue(), Is.EqualTo(serverPlayer));
+
+            serverIdentity2.RemoveClientAuthority();
+
+            Assert.That(hasAuthCalls.Count, Is.EqualTo(1));
+            Assert.That(hasAuthCalls.Dequeue(), Is.Null);
+        }
+
+        [UnityTest]
+        [Description("OnOwnerChanged should not be called on client side")]
+        public IEnumerator OnOwnerChanged_Client()
+        {
+            var hasAuthCalls = new Queue<INetworkPlayer>();
+            clientIdentity2.OnOwnerChanged.AddListener(newOwner =>
+            {
+                hasAuthCalls.Enqueue(newOwner);
+            });
+
+            serverIdentity2.AssignClientAuthority(serverPlayer);
+            yield return new WaitForSeconds(0.1f);
+
+            Assert.That(hasAuthCalls.Count, Is.EqualTo(0));
+
+            serverIdentity2.RemoveClientAuthority();
+            yield return new WaitForSeconds(0.1f);
+
+            Assert.That(hasAuthCalls.Count, Is.EqualTo(0));
+        }
     }
 }
