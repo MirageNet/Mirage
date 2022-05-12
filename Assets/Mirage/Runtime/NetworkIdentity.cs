@@ -220,11 +220,16 @@ namespace Mirage
 
             internal set
             {
+                // do nothing if value is the same
+                if (_owner == value)
+                    return;
+
                 if (_owner != null)
                     _owner.RemoveOwnedObject(this);
 
                 _owner = value;
                 _owner?.AddOwnedObject(this);
+                _onOwnerChanged.Invoke(_owner);
             }
         }
 
@@ -351,6 +356,7 @@ namespace Mirage
         [SerializeField] AddLateEvent _onStartClient = new AddLateEvent();
         [SerializeField] AddLateEvent _onStartLocalPlayer = new AddLateEvent();
         [SerializeField] BoolAddLateEvent _onAuthorityChanged = new BoolAddLateEvent();
+        [SerializeField] NetworkPlayerAddLateEvent _onOwnerChanged = new NetworkPlayerAddLateEvent();
         [SerializeField] AddLateEvent _onStopClient = new AddLateEvent();
         [SerializeField] AddLateEvent _onStopServer = new AddLateEvent();
 
@@ -393,6 +399,13 @@ namespace Mirage
         /// <para>NOTE: this even is only called for client and host</para>
         /// </summary>
         public IAddLateEvent<bool> OnAuthorityChanged => _onAuthorityChanged;
+
+        /// <summary>
+        /// This is invoked on behaviours that have an owner assigned.
+        /// <para>This even is only called on server</para>
+        /// <para>See <see cref="OnAuthorityChanged"/> for more comments on owner and authority</para>
+        /// </summary>
+        public IAddLateEvent<INetworkPlayer> OnOwnerChanged => _onOwnerChanged;
 
         /// <summary>
         /// This is invoked on clients when the server has caused this object to be destroyed.
