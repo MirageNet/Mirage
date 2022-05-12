@@ -1,3 +1,10 @@
+# [123.1.0](https://github.com/MirageNet/Mirage/compare/v123.0.6...v123.1.0) (2022-05-12)
+
+
+### Features
+
+* adding OwnerChanged to networkIdentity ([#1077](https://github.com/MirageNet/Mirage/issues/1077)) ([7c94ab7](https://github.com/MirageNet/Mirage/commit/7c94ab7a487501b5b538986d4d9af1debc293c91))
+
 ## [123.0.6](https://github.com/MirageNet/Mirage/compare/v123.0.5...v123.0.6) (2022-05-12)
 
 
