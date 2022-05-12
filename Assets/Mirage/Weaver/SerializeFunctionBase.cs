@@ -22,7 +22,7 @@ namespace Mirage.Weaver
         /// <summary>
         /// Name for const that will tell other asmdef's that type has already generated function
         /// </summary>
-        protected abstract string GeneratedLabel { get; }
+        protected abstract Type GeneratedAttribute { get; }
 
         protected SerializeFunctionBase(ModuleDefinition module, IWeaverLogger logger)
         {
@@ -65,7 +65,7 @@ namespace Mirage.Weaver
             // if in this module, then mark as generated
             if (typeDefinition.Module == module)
             {
-                typeDefinition.SetConst(GeneratedLabel, true);
+                typeDefinition.AddCustomAttribute(module, GeneratedAttribute);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Mirage.Weaver
             if (def.Module == module)
                 return false;
 
-            return def.GetConst<bool>(GeneratedLabel);
+            return def.HasCustomAttribute(GeneratedAttribute);
         }
 
         /// <summary>
