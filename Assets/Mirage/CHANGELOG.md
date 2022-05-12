@@ -1,3 +1,10 @@
+## [123.0.6](https://github.com/MirageNet/Mirage/compare/v123.0.5...v123.0.6) (2022-05-12)
+
+
+### Bug Fixes
+
+* replacing const with attribute ([#1076](https://github.com/MirageNet/Mirage/issues/1076)) ([de6c97c](https://github.com/MirageNet/Mirage/commit/de6c97caf94138b86028edde4c425fda26bcc952))
+
 ## [123.0.5](https://github.com/MirageNet/Mirage/compare/v123.0.4...v123.0.5) (2022-05-09)
 
 
