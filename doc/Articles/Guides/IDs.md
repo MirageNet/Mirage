@@ -1,17 +1,15 @@
 # Got ID?
 
-## Asset Id
+## NetId
 
-Mirage uses GUID for Asset Ids. Every prefab with a NetworkIdentity component has an Asset Id, which is simply Unity's AssetDatabase.AssetPathToGUID converted to 16 bytes. Mirage needs that to know which prefabs to spawn.
+Mirage uses uint for NetId. Every NetworkIdentity is assigned a NetId when it is being spawned. Mirage uses the id when passing messages between client and server to tell which object is the recipient of the message.
+
+## Prefab Hash
+
+The prefab hash is used to uniquely identify each prefab so that they can be spawned over the network. Mirage create the prefab hash by taking a 32 bit hash of the Asset path. The path is found using [AssetDatabase.GetAssetPath](https://docs.unity3d.com/ScriptReference/AssetDatabase.GetAssetPath.html)
 
 ## Scene Id
 
-Mirage uses uint for Scene Ids. Every game object with a NetworkIdentity in the scene (hierarchy) is assigned a scene id in OnPostProcessScene. Mirage needs that to distinguish scene objects from each other, because Unity has no unique id for different game objects in the scene.
+Mirage uses ulong for Scene Ids. Every game object with a NetworkIdentity in the scene (hierarchy) is assigned a scene id in OnPostProcessScene. Mirage needs that to distinguish scene objects from each other, because Unity has no unique id for different game objects in the scene.
 
-## Network Instance Id (a.k.a. NetId)
 
-Mirage uses uint for NetId. Every NetworkIdentity is assigned a NetId in NetworkIdentity.OnStartServer, or after spawning it. Mirage uses the id when passing messages between client and server to tell which object is the recipient of the message.
-
-## Connection Id
-
-Every network connection has a connection id, which is assigned by the low level Transport layer. Connection id 0 is reserved for the local connection when the server is also a client (host)
