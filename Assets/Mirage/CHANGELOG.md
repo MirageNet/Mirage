@@ -1,3 +1,10 @@
+## [123.1.1](https://github.com/MirageNet/Mirage/compare/v123.1.0...v123.1.1) (2022-05-19)
+
+
+### Bug Fixes
+
+* adding defines for nanosocket ([#1078](https://github.com/MirageNet/Mirage/issues/1078)) ([b4523a0](https://github.com/MirageNet/Mirage/commit/b4523a09d25b15937509d3ab5ee265971b531cff))
+
 # [123.1.0](https://github.com/MirageNet/Mirage/compare/v123.0.6...v123.1.0) (2022-05-12)
 
 
