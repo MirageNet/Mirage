@@ -2,8 +2,10 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using Mirage.SocketLayer;
-using NanoSockets;
 using UnityEngine;
+#if UNITY_STANDALONE || UNITY_EDITOR
+using NanoSockets;
+#endif
 
 namespace Mirage.Sockets.Udp
 {
@@ -47,6 +49,7 @@ namespace Mirage.Sockets.Udp
         {
             if (!useNanoSocket) return;
 
+#if UNITY_STANDALONE || UNITY_EDITOR
             try
             {
                 if (initCount == 0)
@@ -62,25 +65,33 @@ namespace Mirage.Sockets.Udp
                 SocketLib = SocketLib.Managed;
                 return;
             }
+#else
+            Debug.LogWarning("Nanosocket dll not found, Using c# Managed Socket instead");
+            SocketLib = SocketLib.Managed;
+#endif
         }
 
         void OnDestroy()
         {
             if (!useNanoSocket) return;
 
+#if UNITY_STANDALONE || UNITY_EDITOR
             initCount--;
 
             if (initCount == 0)
             {
                 UDP.Deinitialize();
             }
+#endif
         }
 
         public override ISocket CreateClientSocket()
         {
             ThrowIfNotSupported();
 
+#if UNITY_STANDALONE || UNITY_EDITOR
             if (useNanoSocket) return new NanoSocket(this);
+#endif
 
             return new UdpSocket();
         }
@@ -89,14 +100,18 @@ namespace Mirage.Sockets.Udp
         {
             ThrowIfNotSupported();
 
+#if UNITY_STANDALONE || UNITY_EDITOR
             if (useNanoSocket) return new NanoSocket(this);
+#endif
 
             return new UdpSocket();
         }
 
         public override IEndPoint GetBindEndPoint()
         {
+#if UNITY_STANDALONE || UNITY_EDITOR
             if (useNanoSocket) return new NanoEndPoint("::0", Port);
+#endif
 
             return new EndPointWrapper(new IPEndPoint(IPAddress.IPv6Any, Port));
         }
@@ -108,7 +123,9 @@ namespace Mirage.Sockets.Udp
 
             ushort portIn = port ?? Port;
 
+#if UNITY_STANDALONE || UNITY_EDITOR
             if (useNanoSocket) return new NanoEndPoint(addressString, portIn);
+#endif
 
             return new EndPointWrapper(new IPEndPoint(ipAddress, portIn));
         }

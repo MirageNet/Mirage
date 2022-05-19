@@ -229,7 +229,7 @@ namespace Mirage
                 // Bind it to the endpoint.
                 peer.Bind(SocketFactory.GetBindEndPoint());
 
-                if (logger.LogEnabled()) logger.Log("Server started, listening for connections");
+                if (logger.LogEnabled()) logger.Log($"Server started, listening for connections. Using socket {socket.GetType()}");
             }
             else
             {
