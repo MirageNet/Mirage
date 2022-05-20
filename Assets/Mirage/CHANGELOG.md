@@ -1,3 +1,10 @@
+## [123.1.2](https://github.com/MirageNet/Mirage/compare/v123.1.1...v123.1.2) (2022-05-20)
+
+
+### Bug Fixes
+
+* fixing ResizeBuffer ([2232c11](https://github.com/MirageNet/Mirage/commit/2232c11b71784585b63f4ec5b1f90484d343e1a5))
+
 ## [123.1.1](https://github.com/MirageNet/Mirage/compare/v123.1.0...v123.1.1) (2022-05-19)
 
 
