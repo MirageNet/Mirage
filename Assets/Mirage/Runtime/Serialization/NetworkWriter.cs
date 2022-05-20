@@ -109,7 +109,8 @@ namespace Mirage.Serialization
 
         void ResizeBuffer(int minBitCapacity)
         {
-            int minByteCapacity = minBitCapacity / 8;
+            // +7 to round up to next byte
+            int minByteCapacity = (minBitCapacity + 7) / 8;
             int size = managedBuffer.Length;
             while (size < minByteCapacity)
             {
