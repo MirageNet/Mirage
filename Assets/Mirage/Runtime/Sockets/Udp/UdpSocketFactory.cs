@@ -49,8 +49,14 @@ namespace Mirage.Sockets.Udp
         {
             if (!useNanoSocket) return;
 
+			// NanoSocket is only available on Windows, Mac and Linux
+			// However on newer versions of Mac it causes the standalone builds
+			// to be unable to load the NanoSocket native library. So we just use
+			// C# Managed sockets instead.
+			
+			// Are we a Unity Editor instance or standalone instance?
 #if UNITY_STANDALONE || UNITY_EDITOR
-            try
+			try
             {
                 if (initCount == 0)
                 {
@@ -61,12 +67,12 @@ namespace Mirage.Sockets.Udp
             }
             catch (DllNotFoundException)
             {
-                Debug.LogWarning("Nanosocket dll not found, Using c# Managed Socket instead");
+                Debug.LogWarning("NanoSocket DLL not found or failed to load. Switching to C# Managed Sockets.");
                 SocketLib = SocketLib.Managed;
                 return;
             }
 #else
-            Debug.LogWarning("Nanosocket dll not found, Using c# Managed Socket instead");
+            Debug.LogWarning("NanoSocket does not support this platform, switching to C# Managed sockets.");
             SocketLib = SocketLib.Managed;
 #endif
         }
