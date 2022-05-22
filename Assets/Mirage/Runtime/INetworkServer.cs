@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Mirage.Events;
+using Mirage.SocketLayer;
 
 namespace Mirage
 {
@@ -67,13 +68,17 @@ namespace Mirage
 
         IReadOnlyCollection<INetworkPlayer> Players { get; }
 
-        void StartServer();
+        void StartServer(INetworkClient localClient = null);
 
         void Stop();
 
         void AddConnection(INetworkPlayer player);
 
         void RemoveConnection(INetworkPlayer player);
+
+        void AddLocalConnection(INetworkClient client, IConnection connection);
+
+        void InvokeLocalConnected();
 
         void SendToAll<T>(T msg, int channelId = Channel.Reliable);
     }
