@@ -184,7 +184,7 @@ namespace Mirage
             _disconnected?.Invoke(ClientStoppedReason.HostModeStopped);
         }
 
-        public void ConnectHost(INetworkServer server, IDataHandler serverDataHandler)
+        internal void ConnectHost(NetworkServer server, IDataHandler serverDataHandler)
         {
             ThrowIfActive();
 

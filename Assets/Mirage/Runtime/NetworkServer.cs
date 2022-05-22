@@ -180,7 +180,7 @@ namespace Mirage
         /// <param name="config">Config for <see cref="Peer"/></param>
         /// <param name="localClient">if not null then start the server and client in hostmode</param>
         // Has to be called "StartServer" to stop unity complaining about "Start" method
-        public void StartServer(INetworkClient localClient = null)
+        public void StartServer(NetworkClient localClient = null)
         {
             ThrowIfActive();
             ThrowIfSocketIsMissing();
@@ -247,9 +247,14 @@ namespace Mirage
                 // this allows server methods like NetworkServer.Spawn to be called in there
                 _onStartHost?.Invoke();
 
-                LocalClient.ConnectHost(this, dataHandler);
+                localClient.ConnectHost(this, dataHandler);
                 if (logger.LogEnabled()) logger.Log("NetworkServer StartHost");
             }
+        }
+
+        void INetworkServer.StartServer()
+        {
+            StartServer();
         }
 
         void ThrowIfActive()
@@ -381,7 +386,7 @@ namespace Mirage
         /// Create Player on Server for hostmode and adds it to collections
         /// <para>Does not invoke <see cref="Connected"/> event, use <see cref="InvokeLocalConnected"/> instead at the correct time</para>
         /// </summary>
-        public void AddLocalConnection(INetworkClient client, IConnection connection)
+        internal void AddLocalConnection(INetworkClient client, IConnection connection)
         {
             if (LocalPlayer != null)
             {
@@ -402,7 +407,7 @@ namespace Mirage
         /// Invokes the Connected event using the local player
         /// <para>this should be done after the clients version has been invoked</para>
         /// </summary>
-        public void InvokeLocalConnected()
+        internal void InvokeLocalConnected()
         {
             if (LocalPlayer == null)
             {

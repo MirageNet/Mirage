@@ -1,5 +1,4 @@
 using Mirage.Events;
-using Mirage.SocketLayer;
 
 namespace Mirage
 {
@@ -42,8 +41,6 @@ namespace Mirage
         MessageHandler MessageHandler { get; }
 
         void Connect(string address = null, ushort? port = null);
-
-        void ConnectHost(INetworkServer server, IDataHandler serverDataHandler);
 
         void Disconnect();
     }
