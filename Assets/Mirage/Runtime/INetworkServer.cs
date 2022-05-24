@@ -67,6 +67,8 @@ namespace Mirage
 
         IReadOnlyCollection<INetworkPlayer> Players { get; }
 
+        void StartServer();
+
         void Stop();
 
         void AddConnection(INetworkPlayer player);

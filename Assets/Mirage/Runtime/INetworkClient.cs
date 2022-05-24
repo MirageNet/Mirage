@@ -40,6 +40,8 @@ namespace Mirage
 
         MessageHandler MessageHandler { get; }
 
+        void Connect(string address = null, ushort? port = null);
+
         void Disconnect();
     }
 }

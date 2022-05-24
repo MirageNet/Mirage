@@ -252,6 +252,11 @@ namespace Mirage
             }
         }
 
+        void INetworkServer.StartServer()
+        {
+            StartServer();
+        }
+
         void ThrowIfActive()
         {
             if (Active) throw new InvalidOperationException("Server is already active");
