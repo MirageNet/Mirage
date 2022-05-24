@@ -1,3 +1,10 @@
+## [123.1.3](https://github.com/MirageNet/Mirage/compare/v123.1.2...v123.1.3) (2022-05-24)
+
+
+### Bug Fixes
+
+* adding ability to start the Client & Server from interfaces ([#1079](https://github.com/MirageNet/Mirage/issues/1079)) ([61e8d6b](https://github.com/MirageNet/Mirage/commit/61e8d6baa9635aa4fe10738bc71f6f5e0e080081))
+
 ## [123.1.2](https://github.com/MirageNet/Mirage/compare/v123.1.1...v123.1.2) (2022-05-20)
 
 
