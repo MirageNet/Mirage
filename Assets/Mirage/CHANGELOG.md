@@ -1,3 +1,10 @@
+## [123.1.4](https://github.com/MirageNet/Mirage/compare/v123.1.3...v123.1.4) (2022-05-25)
+
+
+### Bug Fixes
+
+* avoid using NanoSockets on Mac OS (codesigning issues) ([c9c17ab](https://github.com/MirageNet/Mirage/commit/c9c17abb94e0caf36e69a7f8f2a500257cfd6ca1))
+
 ## [123.1.3](https://github.com/MirageNet/Mirage/compare/v123.1.2...v123.1.3) (2022-05-24)
 
 
