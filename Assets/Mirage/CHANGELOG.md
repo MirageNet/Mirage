@@ -1,3 +1,10 @@
+## [123.1.5](https://github.com/MirageNet/Mirage/compare/v123.1.4...v123.1.5) (2022-05-25)
+
+
+### Bug Fixes
+
+* adding sequence point to hookException ([47ec337](https://github.com/MirageNet/Mirage/commit/47ec33710b69831ac9e0c69898040ebcc2dd3bc1))
+
 ## [123.1.4](https://github.com/MirageNet/Mirage/compare/v123.1.3...v123.1.4) (2022-05-25)
 
 
