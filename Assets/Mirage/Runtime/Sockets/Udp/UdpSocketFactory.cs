@@ -49,19 +49,33 @@ namespace Mirage.Sockets.Udp
         {
             if (!useNanoSocket) return;
 
-			// NanoSocket is only available on Windows, Mac and Linux
-			// However on newer versions of Mac it causes the standalone builds
-			// to be unable to load the NanoSocket native library. So we just use
-			// C# Managed sockets instead.
-			
-			// Are we a Unity Editor instance or standalone instance?
+            // NanoSocket is only available on Windows, Mac and Linux
+            // However on newer versions of Mac it causes the standalone builds
+            // to be unable to load the NanoSocket native library. So we just use
+            // C# Managed sockets instead.
+
+            // Are we a Unity Editor instance or standalone instance?
+            // As per comment above, "Standalone" here is referring to Win64/Mac/Linux64
 #if UNITY_STANDALONE || UNITY_EDITOR
-			try
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+            Debug.LogWarning("NanoSocket support on MacOS is tempermental due to codesigning issues.\nTo ensure functionality, C# sockets will be used instead. This message is harmless (don't panic!).");
+            SocketLib = SocketLib.Managed;
+            return;
+#endif
+            // Attempt initialization of NanoSockets native library. If this fails, go back to native.
+            InitializeNanoSockets();
+#else
+            Debug.LogWarning("NanoSocket does not support this platform (non-desktop platform detected). Switching to C# Managed sockets.");
+            SocketLib = SocketLib.Managed;
+#endif
+        }
+
+        // Initializes the NanoSockets native library. If it fails, it resorts to C# Managed Sockets.
+        void InitializeNanoSockets()
+        {
+            try
             {
-                if (initCount == 0)
-                {
-                    UDP.Initialize();
-                }
+                if (initCount == 0) UDP.Initialize();
 
                 initCount++;
             }
@@ -69,12 +83,7 @@ namespace Mirage.Sockets.Udp
             {
                 Debug.LogWarning("NanoSocket DLL not found or failed to load. Switching to C# Managed Sockets.");
                 SocketLib = SocketLib.Managed;
-                return;
             }
-#else
-            Debug.LogWarning("NanoSocket does not support this platform, switching to C# Managed sockets.");
-            SocketLib = SocketLib.Managed;
-#endif
         }
 
         void OnDestroy()
