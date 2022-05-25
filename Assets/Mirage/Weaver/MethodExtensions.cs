@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -64,6 +65,13 @@ namespace Mirage.Weaver
         public static SequencePoint GetSequencePoint(this MethodDefinition method, Instruction instruction)
         {
             SequencePoint sequencePoint = method.DebugInformation.GetSequencePoint(instruction);
+            return sequencePoint;
+        }
+
+        public static SequencePoint GetFirstSequencePoint(this MethodDefinition method)
+        {
+            Instruction firstInstruction = method.Body.Instructions.First();
+            SequencePoint sequencePoint = method.DebugInformation.GetSequencePoint(firstInstruction);
             return sequencePoint;
         }
     }

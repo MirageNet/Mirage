@@ -123,7 +123,7 @@ namespace Mirage.Weaver.SyncVars
             }
 
             // else throw saying args were wrong
-            throw new HookMethodException($"Wrong type for Parameter in hook for '{syncVar.Name}', hook name '{hookFunctionName}'.", syncVar);
+            throw new HookMethodException($"Wrong type for Parameter in hook for '{syncVar.Name}', hook name '{hookFunctionName}'.", syncVar, methods.First());
         }
 
         private static SyncVarHook FindEvent1Arg(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType)

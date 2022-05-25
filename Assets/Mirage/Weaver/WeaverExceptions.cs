@@ -52,6 +52,7 @@ namespace Mirage.Weaver
     internal class SyncVarException : WeaverException
     {
         public SyncVarException(string message, MemberReference memberReference) : base(message, memberReference, null) { }
+        public SyncVarException(string message, MemberReference memberReference, SequencePoint sequencePoint) : base(message, memberReference, sequencePoint) { }
     }
 
     internal class RpcException : WeaverException
@@ -66,6 +67,7 @@ namespace Mirage.Weaver.SyncVars
     internal class HookMethodException : SyncVarException
     {
         public HookMethodException(string message, MemberReference memberReference) : base(message, memberReference) { }
+        public HookMethodException(string message, MemberReference memberReference, MethodDefinition method) : base(message, memberReference, method.GetFirstSequencePoint()) { }
     }
 }
 
