@@ -165,7 +165,7 @@ namespace Mirage.Sockets.Udp
         {
             if (IsWebgl)
             {
-                throw new NotSupportedException("Udp Socket can not be created in Webgl builds, Use WebSocket instead");
+                throw new NotSupportedException("The WebGL platform does not support UDP Sockets. Please use WebSockets instead.");
             }
         }
 
