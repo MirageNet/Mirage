@@ -58,7 +58,7 @@ namespace Mirage
         }
 
         IEndPoint IConnection.EndPoint => new PipeEndPoint();
-
+        void IConnection.FlushBatch() { }
 
         public ConnectionState State { get; private set; } = ConnectionState.Connected;
 
