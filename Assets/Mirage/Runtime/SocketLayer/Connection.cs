@@ -40,6 +40,14 @@ namespace Mirage.SocketLayer
         void SendUnreliable(byte[] packet);
         void SendUnreliable(byte[] packet, int offset, int length);
         void SendUnreliable(ArraySegment<byte> packet);
+
+        /// <summary>
+        /// Forces the connection to send any batched message immediately to the socket
+        /// <para>
+        /// Note: this will only send the packet to the socket. Some sockets may not send on main thread so might not send immediately
+        /// </para>
+        /// </summary>
+        void FlushBatch();
     }
 
     /// <summary>
@@ -430,6 +438,11 @@ namespace Mirage.SocketLayer
             {
                 peer.RemoveConnection(this);
             }
+        }
+
+        void IConnection.FlushBatch()
+        {
+            this.ackSystem.Update();
         }
 
         /// <summary>
