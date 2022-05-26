@@ -1,3 +1,15 @@
+# [123.2.0](https://github.com/MirageNet/Mirage/compare/v123.1.5...v123.2.0) (2022-05-26)
+
+
+### Bug Fixes
+
+* adding missing interface method to PipePeerConnection ([90e5179](https://github.com/MirageNet/Mirage/commit/90e5179fca4834e4eedaf9ed2785f8ec712155b8))
+
+
+### Features
+
+* **SocketLayer:** adding FlushBatch to Connection ([476156a](https://github.com/MirageNet/Mirage/commit/476156a16f3143ee89e70bfef74294b836b6ffbe))
+
 ## [123.1.5](https://github.com/MirageNet/Mirage/compare/v123.1.4...v123.1.5) (2022-05-25)
 
 
