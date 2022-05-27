@@ -12,7 +12,7 @@
 
 ## What is Mirage?
 
-Mirage is a rolling-release **high level** API for the Unity Game Engine that provides a **powerful, yet easy to use** networking API. Be it a online MMO, co-op adventure game or a first person shooter, Mirage improves your networked projects' **probability of success** significantly. With its modular structure, Mirage lets you unleash maximum performance out of your networking. 
+Mirage is a rolling-release **high level** API for the Unity Game Engine that provides a **powerful, yet easy to use** networking API. Be it a online MMO, co-op adventure game or a first person shooter, Mirage improves your networked projects' **probability of success** significantly. With its modular structure and "use only what you need" approach, Mirage lets you unleash maximum performance out of your networking. 
 
 Networked objects in the client are mirror images of the objects in the server, and the API provides all the tools necessary to keep them in sync and pass messages between them.
 
@@ -50,7 +50,7 @@ Mirage has some notable differences from its distant sister, Mirror. The table b
 
 | Mirage                                              | Mirror                                 |
 | --------------------------------------------------- | -------------------------------------- |
-| Installs via Unity Package Manager                  | Installs from Asset Store              |
+| Installs via OpenUPM UPM repository                 | Installs from the Unity Asset Store    |
 | Errors are thrown as exceptions                     | Errors are logged                      |
 | `[ServerRpc]`                                       | `[Command]`                            |
 | `[ClientRpc(target = RpcTarget.Owner)]`             | `[TargetRpc]`                          |
@@ -60,15 +60,15 @@ Mirage has some notable differences from its distant sister, Mirror. The table b
 | Methods use PascalCase (C# guidelines)              | No consistency                         |
 | `NetworkTime` available in `NetworkBehaviour`       | `NetworkTime` is global static         |
 | Send any data as messages                           | Messages must implement NetworkMessage |
-| Supports Unity 2020 LTS or later                    | Supports Unity 2019 LTS or later       |
+| Supports Unity 2020.3 LTS or later                  | Supports Unity 2020.3 LTS or later     |
 | Offers simple Socket API to implement new protocols | Each protocol requires a new transport |
 
 **Some notable features that Mirage has:**
 
-* [Fast play mode support](https://blogs.unity3d.com/2019/11/05/enter-play-mode-faster-in-unity-2019-3/)
-* Clients can connect to multiple servers - for example, be connected to a chat server while connected to a game server
-* Components can be added in child objects
 * Modular API: You only use the components you need
+* Network components can be added in child objects
+* Clients can connect to multiple servers - for example, be connected to a chat server while connected to a game server
+* [Fast play mode support](https://blogs.unity3d.com/2019/11/05/enter-play-mode-faster-in-unity-2019-3/)
 * Error handling
 * [Version defines](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html#define-symbols)
 * Server Rpcs can [return values](https://miragenet.github.io/Mirage/Articles/Guides/RemoteCalls/ServerRpc.html)
@@ -78,28 +78,28 @@ Peeking under the hood, Mirage is built upon fundamental pillars:
 
 * Mirage avoids singletons and static state in general
 * Mirage follows the [SOLID principles](https://en.wikipedia.org/wiki/SOLID)
-* Mirage has high [![Test Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=coverage)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
-* Mirage has low [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
+* Mirage has high [![Test Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=coverage)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage) and low [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MirageNet_Mirage&metric=sqale_index)](https://sonarcloud.io/dashboard?id=MirageNet_Mirage)
 
-## Development environment
+## Development environment setup
 
 If you want to contribute to Mirage, follow these steps:
 
 ### Linux and Mac
 
-1) Install the git client
-2) Clone this repo
+1) Ensure the git client is installed. On Linux, you can install it via your Package Manager. MacOS should have it included with the Xcode command-line tools, available from Apple.
+2) Clone the Mirage repository:
     ```sh
     cd /path/to/somewhere/on/your/disk
     mkdir MirageNetworking
     git clone https://github.com/MirageNet/Mirage.git MirageNetworking
     ```
-3) Open the newly cloned repo in Unity 2020 LTS or later.
+3) Open the newly cloned repo in Unity 2020.3 LTS or later.
 
 ### Windows
 
-1) Install [git](https://git-scm.com/download/win) or use your favorite git client (Fork, SourceTree, etc)
-2) As administrator, clone this repo with symbolic links support using Git Bash:
+1) Install the [git Windows Client](https://git-scm.com/download/win) or use your favorite git client (Fork, SourceTree, etc). 
+    Note that cloning the repository using a GUI tool should be fairly straight forward, we'll omit this for a command line example.
+3) As administrator, clone this repo with symbolic links support using Git Bash:
     ```sh 
     cd C:\UnityProjects\DontReallyUseThisExamplePath
     mkdir MirageNetworking
@@ -107,22 +107,23 @@ If you want to contribute to Mirage, follow these steps:
     ```
     It you don't want to use administrator, [add symlink support](https://www.joshkel.com/2018/01/18/symlinks-in-windows/) to your account.
     If you don't enable symlinks, you will be able to work on Mirage but Unity will not see the examples.
-3) Open in Unity 2020 LTS or later.
+3) Open in Unity 2020.3 LTS or later and have fun!
 
 ## Transport and Sockets
 
 Mirage supports multiple ways of transporting data:
-- Native UDP socket (default on Windows, Mac and Linux) with fallback to C# UDP Sockets (default on other platforms)
-- Steam ([Facepunch Steamworks](https://github.com/MirageNet/SteamyFaceNG))
-- WebSocket for WebGL clients ([SimpleWebSocket](https://github.com/James-Frowen/SimpleWebSocket))
+- Native UDP socket (default on Windows and Linux) with fallback to C# UDP Sockets (default on MacOS and other platforms)
+- Steam (via [Facepunch Steamworks](https://github.com/MirageNet/SteamyFaceNG))
+- WebSocket for WebGL clients (via [SimpleWebSocket](https://github.com/James-Frowen/SimpleWebSocket))
 
 ## Contributing
 
-1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :smiley:
+1. See the Development Environment Setup above.
+2. Fork this Mirage repository.
+3. Using your new fork, create your feature branch: `git checkout -b my-new-feature`
+5. Then commit your changes: `git commit -am 'Add some feature'`
+6. Push to the branch: `git push origin my-new-feature`
+7. Submit a pull request and let the team review your work. :smiley:
 
 The team will review it ASAP and give it the stamp of approval, ask for changes or decline it with a detailed explaination. 
 
