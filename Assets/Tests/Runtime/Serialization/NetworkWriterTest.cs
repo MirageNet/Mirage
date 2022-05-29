@@ -5,6 +5,13 @@ using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
+#if UNITY_2021_OR_NEWER
+// The following resolves a CS0104 error because apparently there's the same class
+// in System.Collections.Generic with the same name, and Unity complains about it.
+// First sighted on MacOS with Unity 2021.3.3f1. May affect all 2021 versions...?
+using CollectionExtensions = Mirage.Serialization.CollectionExtensions;
+#endif
+
 
 namespace Mirage.Tests.Runtime.Serialization
 {
