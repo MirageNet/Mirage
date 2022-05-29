@@ -1,3 +1,11 @@
+## [123.2.1](https://github.com/MirageNet/Mirage/compare/v123.2.0...v123.2.1) (2022-05-29)
+
+
+### Bug Fixes
+
+* fix the fix that fixed the CS0104 error about CollectionExtensions ([9657bdb](https://github.com/MirageNet/Mirage/commit/9657bdb07188839fe70223af2d288a179a03a00a))
+* network writer test CollectionExtensions causing CS0104 in 2021.3 ([1ed750a](https://github.com/MirageNet/Mirage/commit/1ed750a7c5c49b91ab56d6348474084e6ca2f811))
+
 # [123.2.0](https://github.com/MirageNet/Mirage/compare/v123.1.5...v123.2.0) (2022-05-26)
 
 
