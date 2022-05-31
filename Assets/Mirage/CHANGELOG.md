@@ -1,3 +1,10 @@
+## [123.2.2](https://github.com/MirageNet/Mirage/compare/v123.2.1...v123.2.2) (2022-05-31)
+
+
+### Bug Fixes
+
+* incorrect unity 2021 compile define ([6d9c566](https://github.com/MirageNet/Mirage/commit/6d9c566ceea1c4a268d14d2e0dff329d4f7eae47))
+
 ## [123.2.1](https://github.com/MirageNet/Mirage/compare/v123.2.0...v123.2.1) (2022-05-29)
 
 
