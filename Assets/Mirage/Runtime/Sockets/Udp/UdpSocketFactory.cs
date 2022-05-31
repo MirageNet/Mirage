@@ -1,9 +1,16 @@
+// nanosockets breaks on some platforms (like iOS)
+// so only include it for standalone and editor
+// but not for mac because of code signing issue
+#if (UNITY_STANDALONE || UNITY_EDITOR) && !(UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX)
+#define NANO_SOCKET_ALLOWED
+#endif
+
+using Mirage.SocketLayer;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using Mirage.SocketLayer;
 using UnityEngine;
-#if UNITY_STANDALONE || UNITY_EDITOR
+#if NANO_SOCKET_ALLOWED
 using NanoSockets;
 #endif
 
@@ -54,22 +61,23 @@ namespace Mirage.Sockets.Udp
             // to be unable to load the NanoSocket native library. So we just use
             // C# Managed sockets instead.
 
-            // Are we a Unity Editor instance or standalone instance?
-            // As per comment above, "Standalone" here is referring to Win64/Mac/Linux64
-#if UNITY_STANDALONE || UNITY_EDITOR
+            // give different warning for OSX
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
             Debug.LogWarning("NanoSocket support on MacOS is tempermental due to codesigning issues.\nTo ensure functionality, C# sockets will be used instead. This message is harmless (don't panic!).");
             SocketLib = SocketLib.Managed;
             return;
-#endif
+
+            // "Standalone" here is referring to Win64 or Linux64, but not mac, because that should be covered by case above
+#elif NANO_SOCKET_ALLOWED
             // Attempt initialization of NanoSockets native library. If this fails, go back to native.
             InitializeNanoSockets();
 #else
             Debug.LogWarning("NanoSocket does not support this platform (non-desktop platform detected). Switching to C# Managed sockets.");
-            SocketLib = SocketLib.Managed;
+            this.SocketLib = SocketLib.Managed;
 #endif
         }
 
+#if NANO_SOCKET_ALLOWED
         // Initializes the NanoSockets native library. If it fails, it resorts to C# Managed Sockets.
         void InitializeNanoSockets()
         {
@@ -85,12 +93,13 @@ namespace Mirage.Sockets.Udp
                 SocketLib = SocketLib.Managed;
             }
         }
+#endif
 
         void OnDestroy()
         {
             if (!useNanoSocket) return;
 
-#if UNITY_STANDALONE || UNITY_EDITOR
+#if NANO_SOCKET_ALLOWED
             initCount--;
 
             if (initCount == 0)
@@ -104,7 +113,7 @@ namespace Mirage.Sockets.Udp
         {
             ThrowIfNotSupported();
 
-#if UNITY_STANDALONE || UNITY_EDITOR
+#if NANO_SOCKET_ALLOWED
             if (useNanoSocket) return new NanoSocket(this);
 #endif
 
@@ -115,7 +124,7 @@ namespace Mirage.Sockets.Udp
         {
             ThrowIfNotSupported();
 
-#if UNITY_STANDALONE || UNITY_EDITOR
+#if NANO_SOCKET_ALLOWED
             if (useNanoSocket) return new NanoSocket(this);
 #endif
 
@@ -124,7 +133,7 @@ namespace Mirage.Sockets.Udp
 
         public override IEndPoint GetBindEndPoint()
         {
-#if UNITY_STANDALONE || UNITY_EDITOR
+#if NANO_SOCKET_ALLOWED
             if (useNanoSocket) return new NanoEndPoint("::0", Port);
 #endif
 
@@ -138,7 +147,7 @@ namespace Mirage.Sockets.Udp
 
             ushort portIn = port ?? Port;
 
-#if UNITY_STANDALONE || UNITY_EDITOR
+#if NANO_SOCKET_ALLOWED
             if (useNanoSocket) return new NanoEndPoint(addressString, portIn);
 #endif
 
