@@ -5,10 +5,11 @@ using Mirage.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
-#if UNITY_2021
 // The following resolves a CS0104 error because apparently there's the same class
 // in System.Collections.Generic with the same name, and Unity complains about it.
-// First sighted on MacOS with Unity 2021.3.3f1. May affect all 2021 versions...?
+// First sighted on 2021.3.3f1. May affect all 2021 versions...? Also thanks to
+// Hertzole on Discord for pointing out "UNITY_2021" might not exist in 2022.
+#if UNITY_2021_1_OR_NEWER
 using CollectionExtensions = Mirage.Serialization.CollectionExtensions;
 #endif
 
