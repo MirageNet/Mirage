@@ -1,3 +1,10 @@
+## [123.2.3](https://github.com/MirageNet/Mirage/compare/v123.2.2...v123.2.3) (2022-05-31)
+
+
+### Bug Fixes
+
+* fixing define in UdpSocketFactory ([a402953](https://github.com/MirageNet/Mirage/commit/a402953c8a4ae6246ce972387d7e4dabeaa2305f))
+
 ## [123.2.2](https://github.com/MirageNet/Mirage/compare/v123.2.1...v123.2.2) (2022-05-31)
 
 
