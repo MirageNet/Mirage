@@ -6,7 +6,28 @@
 
 There are a number of events relating to network behaviours that can occur over the course of a normal multiplayer game. These include events such as the host starting up, a player joining, or a player leaving. Each of these possible events has an associated callback that you can implement in your own code to take action when the event occurs.
 
-When you create a script which inherits from `NetworkBehaviour`, you can write your own implementation of what should happen when these events occur. To do this, you override the virtual methods on the `NetworkBehaviour` class with your own implementation of what should happen when the given event occurs.
+To use an event you must add a function as a listener, this function will then be called when the event occurs. Some events, like `OnStartServer`, will call the listener immediately if the event was previously called. This allows you to add the listeners at any point without worrying about missing the Invoke.
+
+```cs
+void Awake()
+{
+    Identity.OnStartServer.AddListener(MyStartServer);
+    Identity.OnStartClient.AddListener(MyStartClient);
+    Identity.OnStartLocalPlayer.AddListener(MyStartLocalPlayer);
+}
+void MyStartServer() 
+{
+    // ...
+}
+void MyStartClient() 
+{
+    // ...
+}
+void MyStartLocalPlayer() 
+{
+    // ...
+}
+```
 
 This is a full list of virtual methods (callbacks) that you can implement on `NetworkBehaviour`, and where they are called
 
