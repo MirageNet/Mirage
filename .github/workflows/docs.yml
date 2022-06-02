@@ -40,6 +40,10 @@ jobs:
       - name: Fix Csproj
         run: sed -i 's/<ReferenceOutputAssembly>false<\/ReferenceOutputAssembly>/<ReferenceOutputAssembly>true<\/ReferenceOutputAssembly>/g' *.csproj
 
+      # need to update so that docfx setup finds files correctly
+      - name: apt update
+        run: apt update
+        
       - name: Install docfx
         uses: MirageNet/setup-docfx@v1
 
