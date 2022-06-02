@@ -40,6 +40,9 @@ namespace Mirage
 
         public bool DisconnectOnException = true;
 
+        [Tooltip("If true will set Application.runInBackground")]
+        public bool RunInBackground = true;
+
         Peer peer;
 
         [Tooltip("Authentication component attached to this object")]
@@ -131,6 +134,9 @@ namespace Mirage
             peer.OnDisconnected += Peer_OnDisconnected;
 
             IConnection connection = peer.Connect(endPoint);
+
+            if (RunInBackground)
+                Application.runInBackground = RunInBackground;
 
             // setup all the handlers
             Player = new NetworkPlayer(connection);

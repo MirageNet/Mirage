@@ -42,6 +42,9 @@ namespace Mirage
 
         public bool DisconnectOnException = true;
 
+        [Tooltip("If true will set Application.runInBackground")]
+        public bool RunInBackground = true;
+
         [Tooltip("If disabled the server will not create a Network Peer to listen. This can be used to run server single player mode")]
         public bool Listening = true;
 
@@ -230,6 +233,9 @@ namespace Mirage
                 peer.Bind(SocketFactory.GetBindEndPoint());
 
                 if (logger.LogEnabled()) logger.Log($"Server started, listening for connections. Using socket {socket.GetType()}");
+
+                if (RunInBackground)
+                    Application.runInBackground = RunInBackground;
             }
             else
             {
