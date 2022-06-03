@@ -36,7 +36,7 @@ namespace Mirage
         /// The maximum number of concurrent network connections to support. Excluding the host player.
         /// <para>This field is only used if the <see cref="PeerConfig"/> property is null</para>
         /// </summary>
-        [Tooltip("Maximum number of concurrent connections. Excluding the host player.")]
+        [Tooltip("Maximum number of concurrent connections. Excluding the host player.\nNOTE: this field is not used if PeerConfig is set via code.")]
         [Min(1)]
         public int MaxConnections = 4;
 
