@@ -1,3 +1,11 @@
+## [123.2.4](https://github.com/MirageNet/Mirage/compare/v123.2.3...v123.2.4) (2022-06-03)
+
+
+### Bug Fixes
+
+* enable runInBackground so that connections dont timeout ([cb1b869](https://github.com/MirageNet/Mirage/commit/cb1b86925d7c6adf64168c21c82314726671916c))
+* updating tool tip for MaxConnections ([938f34c](https://github.com/MirageNet/Mirage/commit/938f34c36ceb8b67f0fbb66cbe7f45f3d3ebada5))
+
 ## [123.2.3](https://github.com/MirageNet/Mirage/compare/v123.2.2...v123.2.3) (2022-05-31)
 
 
