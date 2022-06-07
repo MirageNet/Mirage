@@ -5,6 +5,8 @@ using Mono.Collections.Generic;
 
 namespace Mirage.Weaver
 {
+    // original code under MIT Copyright (c) 2021 Unity Technologies
+    // https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/472d51b34520e8fb6f0aa43fd56d162c3029e0b0/com.unity.netcode.gameobjects/Editor/CodeGen/PostProcessorReflectionImporter.cs
     internal class PostProcessorReflectionImporter : DefaultReflectionImporter
     {
         private const string SystemPrivateCoreLib = "System.Private.CoreLib";
