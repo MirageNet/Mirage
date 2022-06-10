@@ -8,14 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2020.3.17f1-base-0.15.0
+    container: unityci/editor:ubuntu-2021.3.4f1-base-1.0.1
 
     steps:
       - name: Activate unity
         # exit code is 1 for manual activation
         continue-on-error: true
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_2020_3_17 }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
         run: |          
           echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
           unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit
@@ -28,17 +28,18 @@ jobs:
         uses: actions/cache@v3
         with:
           path: Library
-          key: Library-Library-2020.3.17-2
+          key: Library-Library-2021.3.4
 
       - name: Generate Solution
         run: unity-editor -nographics -logFile /dev/stdout -customBuildName Mirage -projectPath . -executeMethod UnityEditor.SyncVS.SyncSolution -quit
 
-      # unity 2020.3 outputs <ReferenceOutputAssembly>false</ReferenceOutputAssembly> on linux
-      # this breaks references to other csproj for docfx and sonar.
-      # This step is a work around for this so docfx runs in correctly
-      # replacing false with true in ReferenceOutputAssembly
-      - name: Fix Csproj
-        run: sed -i 's/<ReferenceOutputAssembly>false<\/ReferenceOutputAssembly>/<ReferenceOutputAssembly>true<\/ReferenceOutputAssembly>/g' *.csproj
+# Removing this step to see if 2021.3 fixes it
+#       # unity 2020.3 outputs <ReferenceOutputAssembly>false</ReferenceOutputAssembly> on linux
+#       # this breaks references to other csproj for docfx and sonar.
+#       # This step is a work around for this so docfx runs in correctly
+#       # replacing false with true in ReferenceOutputAssembly
+#       - name: Fix Csproj
+#         run: sed -i 's/<ReferenceOutputAssembly>false<\/ReferenceOutputAssembly>/<ReferenceOutputAssembly>true<\/ReferenceOutputAssembly>/g' *.csproj
 
       # need to update so that docfx setup finds files correctly
       - name: apt update
