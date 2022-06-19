@@ -10,6 +10,7 @@ namespace Mirage
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
 
+        readonly object instance;
         readonly bool disconnectOnException;
         readonly IObjectLocator objectLocator;
 
@@ -22,17 +23,18 @@ namespace Mirage
 
         internal readonly Dictionary<int, NetworkMessageDelegate> messageHandlers = new Dictionary<int, NetworkMessageDelegate>();
 
-        public MessageHandler(IObjectLocator objectLocator, bool disconnectOnException)
+        public MessageHandler(object instance, IObjectLocator objectLocator, bool disconnectOnException)
         {
+            this.instance = instance;
             this.disconnectOnException = disconnectOnException;
             this.objectLocator = objectLocator;
         }
 
-        private static NetworkMessageDelegate MessageWrapper<T>(MessageDelegateWithPlayer<T> handler)
+        private static NetworkMessageDelegate MessageWrapper<T>(object instance, MessageDelegateWithPlayer<T> handler)
         {
             void AdapterFunction(INetworkPlayer player, NetworkReader reader)
             {
-                T message = NetworkDiagnostics.ReadWithDiagnostics<T>(reader);
+                T message = NetworkDiagnostics.ReadWithDiagnostics<T>(instance, reader);
 
                 handler.Invoke(player, message);
             }
@@ -52,7 +54,7 @@ namespace Mirage
             {
                 logger.Log($"RegisterHandler replacing {msgType}");
             }
-            messageHandlers[msgType] = MessageWrapper(handler);
+            messageHandlers[msgType] = MessageWrapper(instance, handler);
         }
 
         /// <summary>

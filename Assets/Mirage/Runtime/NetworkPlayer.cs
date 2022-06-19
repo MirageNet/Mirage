@@ -22,6 +22,7 @@ namespace Mirage
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkPlayer));
 
         private readonly HashSet<NetworkIdentity> visList = new HashSet<NetworkIdentity>();
+        public readonly object instance;
 
         /// <summary>
         /// Transport level connection
@@ -132,8 +133,9 @@ namespace Mirage
         /// Creates a new NetworkConnection with the specified address and connectionId
         /// </summary>
         /// <param name="networkConnectionId"></param>
-        public NetworkPlayer(IConnection connection)
+        public NetworkPlayer(object instance, IConnection connection)
         {
+            this.instance = instance;
             this.connection = connection ?? throw new ArgumentNullException(nameof(connection));
         }
 
@@ -154,7 +156,7 @@ namespace Mirage
                 MessagePacker.Pack(message, writer);
 
                 var segment = writer.ToArraySegment();
-                NetworkDiagnostics.OnSend(message, segment.Count, 1);
+                NetworkDiagnostics.OnSend(instance, message, segment.Count, 1);
                 Send(segment, channelId);
             }
         }
@@ -195,7 +197,7 @@ namespace Mirage
                 MessagePacker.Pack(message, writer);
 
                 var segment = writer.ToArraySegment();
-                NetworkDiagnostics.OnSend(message, segment.Count, 1);
+                NetworkDiagnostics.OnSend(instance, message, segment.Count, 1);
                 connection.SendNotify(segment, token);
             }
         }

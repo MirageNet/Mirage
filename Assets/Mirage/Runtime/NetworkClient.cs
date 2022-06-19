@@ -120,7 +120,7 @@ namespace Mirage
 
             ISocket socket = SocketFactory.CreateClientSocket();
             int maxPacketSize = SocketFactory.MaxPacketSize;
-            MessageHandler = new MessageHandler(World, DisconnectOnException);
+            MessageHandler = new MessageHandler(this, World, DisconnectOnException);
             var dataHandler = new DataHandler(MessageHandler);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
@@ -139,7 +139,7 @@ namespace Mirage
                 Application.runInBackground = RunInBackground;
 
             // setup all the handlers
-            Player = new NetworkPlayer(connection);
+            Player = new NetworkPlayer(this, connection);
             dataHandler.SetConnection(connection, Player);
 
             RegisterMessageHandlers();
@@ -201,13 +201,13 @@ namespace Mirage
             World = server.World;
 
             // create local connection objects and connect them
-            MessageHandler = new MessageHandler(World, DisconnectOnException);
+            MessageHandler = new MessageHandler(this, World, DisconnectOnException);
             var dataHandler = new DataHandler(MessageHandler);
             (IConnection clientConn, IConnection serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler, OnHostDisconnected, null);
 
             // set up client before connecting to server, server could invoke handlers
             IsLocalClient = true;
-            Player = new NetworkPlayer(clientConn);
+            Player = new NetworkPlayer(this, clientConn);
             dataHandler.SetConnection(clientConn, Player);
             RegisterHostHandlers();
             InitializeAuthEvents();

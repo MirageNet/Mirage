@@ -198,7 +198,7 @@ namespace Mirage
             SyncVarSender = new SyncVarSender();
 
             LocalClient = localClient;
-            MessageHandler = new MessageHandler(World, DisconnectOnException);
+            MessageHandler = new MessageHandler(this, World, DisconnectOnException);
             MessageHandler.RegisterHandler<NetworkPingMessage>(World.Time.OnServerPing);
 
             var dataHandler = new DataHandler(MessageHandler, connections);
@@ -301,7 +301,7 @@ namespace Mirage
 
         private void Peer_OnConnected(IConnection conn)
         {
-            var player = new NetworkPlayer(conn);
+            var player = new NetworkPlayer(this, conn);
 
             if (logger.LogEnabled()) logger.Log($"Server accepted client: {player}");
 
@@ -399,7 +399,7 @@ namespace Mirage
                 throw new InvalidOperationException("Local client connection already exists");
             }
 
-            var player = new NetworkPlayer(connection);
+            var player = new NetworkPlayer(this, connection);
             LocalPlayer = player;
             LocalClient = client;
 
@@ -450,7 +450,7 @@ namespace Mirage
                 }
                 enumerator.Dispose();
 
-                NetworkDiagnostics.OnSend(msg, segment.Count, count);
+                NetworkDiagnostics.OnSend(this, msg, segment.Count, count);
             }
         }
 
@@ -477,7 +477,8 @@ namespace Mirage
                     count++;
                 }
 
-                NetworkDiagnostics.OnSend(msg, segment.Count, count);
+                if (count > 0)
+                    NetworkDiagnostics.OnSend(((NetworkPlayer)players.First()).instance, msg, segment.Count, count);
             }
         }
 
@@ -504,7 +505,8 @@ namespace Mirage
                     players[i].Send(segment, channelId);
                 }
 
-                NetworkDiagnostics.OnSend(msg, segment.Count, count);
+                if (count > 0)
+                    NetworkDiagnostics.OnSend(((NetworkPlayer)players.First()).instance, msg, segment.Count, count);
             }
         }
 
