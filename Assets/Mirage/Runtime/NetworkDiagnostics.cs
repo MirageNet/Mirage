@@ -17,6 +17,10 @@ namespace Mirage
         public readonly struct MessageInfo
         {
             /// <summary>
+            /// Instance of <see cref="NetworkClient"/> or <see cref="NetworkServer"/> which sent/received the message
+            /// </summary>
+            public readonly object instance;
+            /// <summary>
             /// The message being sent
             /// </summary>
             public readonly object message;
@@ -30,8 +34,9 @@ namespace Mirage
             /// </summary>
             public readonly int count;
 
-            public MessageInfo(object message, int bytes, int count)
+            public MessageInfo(object instance, object message, int bytes, int count)
             {
+                this.instance = instance;
                 this.message = message;
                 this.bytes = bytes;
                 this.count = count;
@@ -45,11 +50,11 @@ namespace Mirage
         /// </summary>
         public static event Action<MessageInfo> OutMessageEvent;
 
-        internal static void OnSend<T>(T message, int bytes, int count)
+        internal static void OnSend<T>(object instance, T message, int bytes, int count)
         {
             if (count > 0 && OutMessageEvent != null)
             {
-                var outMessage = new MessageInfo(message, bytes, count);
+                var outMessage = new MessageInfo(instance, message, bytes, count);
                 OutMessageEvent.Invoke(outMessage);
             }
         }
@@ -63,11 +68,11 @@ namespace Mirage
         /// </summary>
         public static event Action<MessageInfo> InMessageEvent;
 
-        internal static void OnReceive<T>(T message, int bytes)
+        internal static void OnReceive<T>(object instance, T message, int bytes)
         {
             if (InMessageEvent != null)
             {
-                var inMessage = new MessageInfo(message, bytes, 1);
+                var inMessage = new MessageInfo(instance, message, bytes, 1);
                 InMessageEvent.Invoke(inMessage);
             }
         }
@@ -80,7 +85,7 @@ namespace Mirage
         /// <typeparam name="T"></typeparam>
         /// <param name="reader"></param>
         /// <returns></returns>
-        internal static T ReadWithDiagnostics<T>(NetworkReader reader)
+        internal static T ReadWithDiagnostics<T>(object instance, NetworkReader reader)
         {
             var message = default(T);
 
@@ -94,7 +99,7 @@ namespace Mirage
             {
                 int endPos = reader.BitPosition;
                 int byteLength = (endPos - startPos) / 8;
-                NetworkDiagnostics.OnReceive(message, byteLength);
+                NetworkDiagnostics.OnReceive(instance, message, byteLength);
             }
 
             return message;
