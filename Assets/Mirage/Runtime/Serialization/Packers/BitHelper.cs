@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Mirage.Serialization
@@ -38,9 +39,26 @@ namespace Mirage.Serialization
         /// <param name="max"></param>
         /// <param name="precision">lowest precision required, bit count will round up so real precision might be higher</param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BitCount(float max, float precision)
         {
-            return Mathf.FloorToInt(Mathf.Log(2 * max / precision, 2)) + 1;
+            return BitCount(max, precision, true);
+        }
+
+        /// <summary>
+        /// Gets the number of bits need for <paramref name="precision"/> in range <paramref name="max"/>
+        /// <para>If signed then range is negative max to positive max, If unsigned then 0 to max</para>
+        /// <para>
+        /// WARNING: these methods are not fast, dont use in hotpath
+        /// </para>
+        /// </summary>
+        /// <param name="max"></param>
+        /// <param name="precision">lowest precision required, bit count will round up so real precision might be higher</param>
+        /// <returns></returns>
+        public static int BitCount(float max, float precision, bool signed)
+        {
+            float multiplier = signed ? 2 : 1;
+            return Mathf.FloorToInt(Mathf.Log(multiplier * max / precision, 2)) + 1;
         }
 
         /// <summary>

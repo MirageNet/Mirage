@@ -44,16 +44,18 @@ namespace Mirage.Serialization
         readonly float positiveMax;
         readonly float negativeMax;
 
-        /// <param name="max"></param>
         /// <param name="lowestPrecision">lowest precision, actual precision will be caculated from number of bits used</param>
-        public FloatPacker(float max, float lowestPrecision) : this(max, BitHelper.BitCount(max, lowestPrecision)) { }
+        public FloatPacker(float max, float lowestPrecision) : this(max, lowestPrecision, true) { }
 
-        /// <summary>
-        /// 
-        /// </summary>
+        public FloatPacker(float max, int bitCount) : this(max, bitCount, true) { }
+
         /// <param name="max"></param>
         /// <param name="lowestPrecision">lowest precision, actual precision will be caculated from number of bits used</param>
-        public FloatPacker(float max, int bitCount)
+        /// <param name="signed">if negative values will be allowed or not</param>
+        public FloatPacker(float max, float lowestPrecision, bool signed) : this(max, BitHelper.BitCount(max, lowestPrecision, signed), signed) { }
+
+        /// <param name="signed">if negative values will be allowed or not</param>
+        public FloatPacker(float max, int bitCount, bool signed)
         {
             this.bitCount = bitCount;
             // not sure what max bit count should be,
@@ -62,14 +64,27 @@ namespace Mirage.Serialization
             if (bitCount < 1) throw new ArgumentException("Bit count is too low, bit count should be between 1 and 30", nameof(bitCount));
             if (bitCount > 30) throw new ArgumentException("Bit count is too high, bit count should be between 1 and 30", nameof(bitCount));
 
-            midPoint = (1u << (bitCount - 1)) - 1u;
+            mask = (1u << bitCount) - 1u;
+
+            if (signed)
+            {
+                midPoint = (1u << (bitCount - 1)) - 1u;
+                toNegative = (int)(mask + 1u);
+
+                positiveMax = max;
+                negativeMax = -max;
+            }
+            else // unsigned
+            {
+                midPoint = (1u << (bitCount)) - 1u;
+                toNegative = 0;
+
+                positiveMax = max;
+                negativeMax = 0;
+            }
+
             multiplier_pack = midPoint / max;
             multiplier_unpack = 1 / multiplier_pack;
-            mask = (1u << bitCount) - 1u;
-            toNegative = (int)(mask + 1u);
-
-            positiveMax = max;
-            negativeMax = -max;
         }
 
 

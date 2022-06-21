@@ -4,28 +4,38 @@ using Random = UnityEngine.Random;
 
 namespace Mirage.Tests.Runtime.Serialization.Packers
 {
-    [TestFixture(100, 0.1f)]
-    [TestFixture(500, 0.02f)]
-    [TestFixture(2000, 0.05f)]
-    [TestFixture(1.5f, 0.01f)]
-    [TestFixture(100_000, 30)]
+    [TestFixture(100, 0.1f, true)]
+    [TestFixture(500, 0.02f, true)]
+    [TestFixture(2000, 0.05f, true)]
+    [TestFixture(1.5f, 0.01f, true)]
+    [TestFixture(100_000, 30, true)]
+
+    [TestFixture(100, 0.1f, false)]
+    [TestFixture(500, 0.02f, false)]
+    [TestFixture(2000, 0.05f, false)]
+    [TestFixture(1.5f, 0.01f, false)]
+    [TestFixture(100_000, 30, false)]
     public class FloatPackerTests : PackerTestBase
     {
         readonly FloatPacker packer;
         readonly float max;
+        readonly float min;
         readonly float precsion;
+        readonly bool signed;
 
-        public FloatPackerTests(float max, float precsion)
+        public FloatPackerTests(float max, float precsion, bool signed)
         {
             this.max = max;
+            min = signed ? -max : 0;
             this.precsion = precsion;
-            packer = new FloatPacker(max, precsion);
+            this.signed = signed;
+            packer = new FloatPacker(max, precsion, signed);
         }
 
 
         float GetRandomFloat()
         {
-            return Random.Range(-max, max);
+            return Random.Range(min, max);
         }
 
 
@@ -58,7 +68,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             uint packed = packer.Pack(start);
             float unpacked = packer.Unpack(packed);
 
-            Assert.That(unpacked, Is.EqualTo(-max).Within(precsion));
+            Assert.That(unpacked, Is.EqualTo(min).Within(precsion));
         }
 
         [Test]
@@ -100,7 +110,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             packer.Pack(writer, start);
             float unpacked = packer.Unpack(GetReader());
 
-            Assert.That(unpacked, Is.EqualTo(-max).Within(precsion));
+            Assert.That(unpacked, Is.EqualTo(min).Within(precsion));
         }
 
 
