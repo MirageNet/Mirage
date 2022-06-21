@@ -1,3 +1,10 @@
+# [123.3.0](https://github.com/MirageNet/Mirage/compare/v123.2.4...v123.3.0) (2022-06-21)
+
+
+### Features
+
+* adding option for unsigned floats in floatpacker ([dda61e1](https://github.com/MirageNet/Mirage/commit/dda61e17f3f22be2589b98a551bd06d09fc5aba3))
+
 ## [123.2.4](https://github.com/MirageNet/Mirage/compare/v123.2.3...v123.2.4) (2022-06-03)
 
 
