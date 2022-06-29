@@ -30,7 +30,7 @@ namespace Mirage
             /// </summary>
             public readonly int count;
 
-            internal MessageInfo(object message, int bytes, int count)
+            public MessageInfo(object message, int bytes, int count)
             {
                 this.message = message;
                 this.bytes = bytes;
