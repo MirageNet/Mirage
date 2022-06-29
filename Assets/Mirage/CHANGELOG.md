@@ -1,3 +1,10 @@
+## [123.3.1](https://github.com/MirageNet/Mirage/compare/v123.3.0...v123.3.1) (2022-06-29)
+
+
+### Bug Fixes
+
+* making MessageInfo public instead of internal ([e6a4413](https://github.com/MirageNet/Mirage/commit/e6a4413a99d08600a9595926ee9ce10791974567))
+
 # [123.3.0](https://github.com/MirageNet/Mirage/compare/v123.2.4...v123.3.0) (2022-06-21)
 
 
