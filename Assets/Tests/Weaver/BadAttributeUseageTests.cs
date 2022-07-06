@@ -2,9 +2,9 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Weaver
 {
-    public class BadAttributeUseageTests : TestsBuildFromTestName
+    public class BadAttributeUseageTests : WeaverTestBase
     {
-        [Test]
+        [Test, BatchSafe]
         public void MonoBehaviourValid()
         {
             IsSuccess();

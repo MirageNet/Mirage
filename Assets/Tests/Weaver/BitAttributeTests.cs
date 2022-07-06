@@ -2,9 +2,9 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Weaver
 {
-    public class BitAttributeTests : TestsBuildFromTestName
+    public class BitAttributeTests : WeaverTestBase
     {
-        [Test]
+        [Test, BatchSafe]
         public void BitCount()
         {
             IsSuccess();
@@ -56,7 +56,7 @@ namespace Mirage.Tests.Weaver
                 "System.Int32 BitAttributeTests.BitCountInvalid.MyBehaviour::value13");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ZigZag()
         {
             IsSuccess();
@@ -77,7 +77,7 @@ namespace Mirage.Tests.Weaver
                 "BitAttributeTests.ZigZagInvalid.MyShortEnum BitAttributeTests.ZigZagInvalid.MyBehaviour::value3");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void BitCountFromRange()
         {
             IsSuccess();
@@ -113,7 +113,7 @@ namespace Mirage.Tests.Weaver
                "System.Int64 BitAttributeTests.BitCountFromRangeInvalid.MyBehaviour::value8");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void FloatPack()
         {
             IsSuccess();
@@ -150,7 +150,7 @@ namespace Mirage.Tests.Weaver
                 "System.Single BitAttributeTests.FloatPackInvalid.MyBehaviour::value9");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void Vector3Pack()
         {
             IsSuccess();
@@ -202,7 +202,7 @@ namespace Mirage.Tests.Weaver
 #endif
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void Vector2Pack()
         {
             IsSuccess();
@@ -242,7 +242,7 @@ namespace Mirage.Tests.Weaver
 #endif
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void QuaternionPack()
         {
             IsSuccess();
@@ -264,7 +264,7 @@ namespace Mirage.Tests.Weaver
                "UnityEngine.Quaternion BitAttributeTests.QuaternionPackInvalid.MyBehaviour::value4");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void VarInt()
         {
             IsSuccess();
@@ -308,7 +308,7 @@ namespace Mirage.Tests.Weaver
                 "System.Int32 BitAttributeTests.VarIntInvalid.MyBehaviour::value13");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void VarIntBlocks()
         {
             IsSuccess();

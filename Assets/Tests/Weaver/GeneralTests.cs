@@ -2,15 +2,15 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Weaver
 {
-    public class GeneralTests : TestsBuildFromTestName
+    public class GeneralTests : WeaverTestBase
     {
-        [Test]
+        [Test, BatchSafe]
         public void RecursionCount()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void TestingScriptableObjectArraySerialization()
         {
             IsSuccess();
