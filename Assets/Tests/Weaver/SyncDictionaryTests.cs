@@ -3,57 +3,57 @@ using NUnit.Framework;
 namespace Mirage.Tests.Weaver
 {
     // Some tests for SyncObjects are in SyncListTests and apply to SyncDictionary too
-    public class SyncDictionaryTests : TestsBuildFromTestName
+    public class SyncDictionaryTests : WeaverTestBase
     {
-        [Test]
+        [Test, BatchSafe]
         public void SyncDictionary()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncDictionaryGenericAbstractInheritance()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncDictionaryGenericInheritance()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncDictionaryInheritance()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncDictionaryStructKey()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncDictionaryStructItem()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncDictionaryErrorForGenericStructKey()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncDictionaryErrorForGenericStructItem()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncDictionaryErrorWhenUsingGenericInNetworkBehaviour()
         {
             IsSuccess();

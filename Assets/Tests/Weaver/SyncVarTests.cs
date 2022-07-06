@@ -2,27 +2,27 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Weaver
 {
-    public class SyncVarTests : TestsBuildFromTestName
+    public class SyncVarTests : WeaverTestBase
     {
-        [Test]
+        [Test, BatchSafe]
         public void SyncVarsValid()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncVarsValidInitialOnly()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncVarArraySegment()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncVarsDerivedNetworkBehaviour()
         {
             IsSuccess();
@@ -35,13 +35,13 @@ namespace Mirage.Tests.Weaver
                 "System.Int32 SyncVarTests.SyncVarsStatic.SyncVarsStatic::invalidVar");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncVarsGenericField()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncVarsGenericParam()
         {
             IsSuccess();

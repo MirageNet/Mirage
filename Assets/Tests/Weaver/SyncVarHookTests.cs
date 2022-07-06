@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Weaver
 {
-    public class SyncVarHookTests : TestsBuildFromTestName
+    public class SyncVarHookTests : WeaverTestBase
     {
         private string TypeName()
         {
@@ -13,43 +13,43 @@ namespace Mirage.Tests.Weaver
         }
 
 
-        [Test]
+        [Test, BatchSafe]
         public void FindsPrivateHook()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void FindsPublicHook()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void FindsStaticHook()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void FindsHookWithNetworkIdentity()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void FindsHookWithGameObject()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void FindsHookWithOtherOverloadsInOrder()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void FindsHookWithOtherOverloadsInReverseOrder()
         {
             IsSuccess();
@@ -83,7 +83,7 @@ namespace Mirage.Tests.Weaver
                 $"System.Int32 {TypeName()}::health");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void FindsHookEvent()
         {
             IsSuccess();
@@ -110,7 +110,7 @@ namespace Mirage.Tests.Weaver
                 $"System.Action`2<System.Int32,System.Single> {TypeName()}::OnChangeHealth");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncVarHookServer()
         {
             IsSuccess();
@@ -123,25 +123,25 @@ namespace Mirage.Tests.Weaver
                 $"System.Int32 {TypeName()}::health");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void AutomaticHookMethod1()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void AutomaticHookMethod2()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void AutomaticHookEvent1()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void AutomaticHookEvent2()
         {
             IsSuccess();
@@ -161,37 +161,37 @@ namespace Mirage.Tests.Weaver
                 $"System.Int32 {TypeName()}::health");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ExplicitEvent1Found()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ExplicitEvent2Found()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ExplicitMethod1Found()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ExplicitMethod2Found()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ExplicitMethod1FoundWithOverLoad()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ExplicitMethod2FoundWithOverLoad()
         {
             IsSuccess();

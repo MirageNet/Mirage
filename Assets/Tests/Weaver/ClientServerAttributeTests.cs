@@ -7,9 +7,9 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Weaver
 {
-    public class ClientServerAttributeTests : TestsBuildFromTestName
+    public class ClientServerAttributeTests : WeaverTestBase
     {
-        [Test]
+        [Test, BatchSafe]
         public void NetworkBehaviourServer()
         {
             IsSuccess();
@@ -26,7 +26,7 @@ namespace Mirage.Tests.Weaver
                 "System.Void ClientServerAttributeTests.NetworkBehaviourServer.NetworkBehaviourServerOnAwake::Awake()");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void NetworkBehaviourServerOnAwakeWithParameters()
         {
             IsSuccess();
@@ -36,7 +36,7 @@ namespace Mirage.Tests.Weaver
 
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void NetworkBehaviourClient()
         {
             IsSuccess();
@@ -52,7 +52,7 @@ namespace Mirage.Tests.Weaver
                 "System.Void ClientServerAttributeTests.NetworkBehaviourClient.NetworkBehaviourClientOnAwake::Awake()");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void NetworkBehaviourClientOnAwakeWithParameters()
         {
             IsSuccess();
@@ -61,7 +61,7 @@ namespace Mirage.Tests.Weaver
                 "ClientServerAttributeTests.NetworkBehaviourClient.NetworkBehaviourClientOnAwakeWithParameters", "Awake");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void NetworkBehaviourHasAuthority()
         {
             IsSuccess();
@@ -77,7 +77,7 @@ namespace Mirage.Tests.Weaver
                 "System.Void ClientServerAttributeTests.NetworkBehaviourHasAuthority.NetworkBehaviourHasAuthorityOnAwake::Awake()");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void NetworkBehaviourHasAuthorityOnAwakeWithParameters()
         {
             IsSuccess();
@@ -86,7 +86,7 @@ namespace Mirage.Tests.Weaver
                 "ClientServerAttributeTests.NetworkBehaviourHasAuthority.NetworkBehaviourHasAuthorityOnAwakeWithParameters", "Awake");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void NetworkBehaviourLocalPlayer()
         {
             IsSuccess();
@@ -102,7 +102,7 @@ namespace Mirage.Tests.Weaver
                 "System.Void ClientServerAttributeTests.NetworkBehaviourLocalPlayer.NetworkBehaviourLocalPlayerOnAwake::Awake()");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void NetworkBehaviourLocalPlayerOnAwakeWithParameters()
         {
             IsSuccess();
@@ -118,14 +118,14 @@ namespace Mirage.Tests.Weaver
         /// <param name="methodName"></param>
         private void CheckAddedCode(Expression<Func<NetworkBehaviour, bool>> pred, string className, string methodName)
         {
-            var type = assembly.MainModule.GetType(className);
+            var type = testResult.assembly.MainModule.GetType(className);
             var method = type.Methods.First(m => m.Name == methodName);
             var body = method.Body;
 
             var top = body.Instructions[0];
             Assert.That(top.OpCode, Is.EqualTo(OpCodes.Ldarg_0));
 
-            var methodRef = assembly.MainModule.ImportReference(pred);
+            var methodRef = testResult.assembly.MainModule.ImportReference(pred);
 
             var call = body.Instructions[1];
 

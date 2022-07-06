@@ -2,9 +2,9 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Weaver
 {
-    public class ServerRpcTests : TestsBuildFromTestName
+    public class ServerRpcTests : WeaverTestBase
     {
-        [Test]
+        [Test, BatchSafe]
         public void ServerRpcValid()
         {
             IsSuccess();
@@ -16,61 +16,61 @@ namespace Mirage.Tests.Weaver
             HasError("CmdCantBeStatic must not be static", "System.Void ServerRpcTests.ServerRpcCantBeStatic.ServerRpcCantBeStatic::CmdCantBeStatic()");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ServerRpcThatIgnoresAuthority()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ServerRpcWithArguments()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ServerRpcThatIgnoresAuthorityWithSenderConnection()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ServerRpcWithSenderConnectionAndOtherArgs()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ServerRpcWithSenderConnectionAndOtherArgsWrongOrder()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void VirtualServerRpc()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void OverrideVirtualServerRpc()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void OverrideVirtualCallBaseServerRpc()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void OverrideVirtualCallsBaseServerRpcWithMultipleBaseClasses()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void OverrideVirtualCallsBaseServerRpcWithOverride()
         {
             IsSuccess();
@@ -88,7 +88,7 @@ namespace Mirage.Tests.Weaver
             HasError("Abstract Rpcs are currently not supported, use virtual method instead", "System.Void ServerRpcTests.OverrideAbstractServerRpc.BaseBehaviour::CmdDoSomething()");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ServerRpcWithReturn()
         {
             IsSuccess();

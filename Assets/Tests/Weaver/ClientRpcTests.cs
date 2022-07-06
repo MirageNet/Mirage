@@ -2,15 +2,15 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Weaver
 {
-    public class ClientRpcTests : TestsBuildFromTestName
+    public class ClientRpcTests : WeaverTestBase
     {
-        [Test]
+        [Test, BatchSafe]
         public void ClientRpcValid()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ClientRpcOverload()
         {
             IsSuccess();
@@ -23,13 +23,13 @@ namespace Mirage.Tests.Weaver
                 "System.Void ClientRpcTests.ClientRpcCantBeStatic.ClientRpcCantBeStatic::RpcCantBeStatic()");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void VirtualClientRpc()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void OverrideVirtualClientRpc()
         {
             IsSuccess();
@@ -49,7 +49,7 @@ namespace Mirage.Tests.Weaver
                 "System.Void ClientRpcTests.OverrideAbstractClientRpc.BaseBehaviour::RpcDoSomething()");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ClientRpcThatExcludesOwner()
         {
             IsSuccess();
@@ -67,31 +67,31 @@ namespace Mirage.Tests.Weaver
             HasError("ClientRpc with RpcTarget.Owner cannot have excludeOwner set as true", "System.Void ClientRpcTests.ClientRpcOwnerCantExcludeOwner.ClientRpcOwnerCantExcludeOwner::ClientRpcMethod()");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CallToRpcBase()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CallToNonRpcBase()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CallToNonRpcOverLoad()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CallToNonRpcOverLoadReverse()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void RpcAndOverLoad()
         {
             IsSuccess();

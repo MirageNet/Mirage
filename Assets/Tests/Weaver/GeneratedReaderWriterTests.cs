@@ -2,39 +2,33 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Weaver
 {
-    public class GeneratedReaderWriterTests : TestsBuildFromTestName
+    public class GeneratedReaderWriterTests : WeaverTestBase
     {
-        [SetUp]
-        public override void TestSetup()
-        {
-            base.TestSetup();
-        }
-
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForStructs()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreateForExplicitNetworkMessage()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForClass()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForClassInherited()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForClassWithValidConstructor()
         {
             IsSuccess();
@@ -47,31 +41,31 @@ namespace Mirage.Tests.Weaver
                 "GeneratedReaderWriter.GivesErrorForClassWithNoValidConstructor.SomeOtherData");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForInheritedFromScriptableObject()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForStructFromDifferentAssemblies()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForClassFromDifferentAssemblies()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForClassFromDifferentAssembliesWithValidConstructor()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CanUseCustomReadWriteForTypesFromDifferentAssemblies()
         {
             IsSuccess();
@@ -112,7 +106,7 @@ namespace Mirage.Tests.Weaver
                 "GeneratedReaderWriter.GivesErrorWhenUsingTypeInheritedFromMonoBehaviour.MyBehaviour");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void ExcludesNonSerializedFields()
         {
             // we test this by having a not allowed type in the class, but mark it with NonSerialized
@@ -126,7 +120,7 @@ namespace Mirage.Tests.Weaver
                 "GeneratedReaderWriter.GivesErrorWhenUsingInterface.IData");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CanUseCustomReadWriteForInterfaces()
         {
             IsSuccess();
@@ -138,37 +132,37 @@ namespace Mirage.Tests.Weaver
             HasError("Cannot generate write function for abstract class DataBase. Use a supported type or provide a custom write function", "GeneratedReaderWriter.GivesErrorWhenUsingAbstractClass.DataBase");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CanUseCustomReadWriteForAbstractClass()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CanUseCustomReadWriteForAbstractClassUsedInMessage()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForEnums()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForArraySegment()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForStructArraySegment()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void GivesErrorForJaggedArray()
         {
             IsSuccess();
@@ -193,13 +187,13 @@ namespace Mirage.Tests.Weaver
             HasError("Cannot generate write function for component type MonoBehaviour. Use a supported type or provide a custom write function", "UnityEngine.MonoBehaviour");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForList()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForStructList()
         {
             IsSuccess();
@@ -211,7 +205,7 @@ namespace Mirage.Tests.Weaver
             HasError("Cannot generate write function for component type MonoBehaviour. Use a supported type or provide a custom write function", "UnityEngine.MonoBehaviour");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void CreatesForNullable()
         {
             IsSuccess();

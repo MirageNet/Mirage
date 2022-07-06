@@ -2,51 +2,51 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Weaver
 {
-    public class SyncListTests : TestsBuildFromTestName
+    public class SyncListTests : WeaverTestBase
     {
-        [Test]
+        [Test, BatchSafe]
         public void SyncList()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncListByteValid()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncListGenericAbstractInheritance()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncListGenericInheritance()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncListGenericInheritanceWithMultipleGeneric()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncListInheritance()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncListNestedStruct()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncListNestedInAbstractClass()
         {
             IsSuccess();
@@ -62,7 +62,7 @@ namespace Mirage.Tests.Weaver
                 "UnityEngine.Object");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncListNestedInStruct()
         {
             IsSuccess();
@@ -78,13 +78,13 @@ namespace Mirage.Tests.Weaver
                 "UnityEngine.Object");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncListStruct()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncListErrorForGenericStruct()
         {
             IsSuccess();
@@ -99,7 +99,7 @@ namespace Mirage.Tests.Weaver
                 "SyncListTests.SyncListErrorForInterface.MyInterface");
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncListErrorWhenUsingGenericListInNetworkBehaviour()
         {
             IsSuccess();

@@ -3,33 +3,33 @@ using NUnit.Framework;
 namespace Mirage.Tests.Weaver
 {
     // Some tests for SyncObjects are in SyncListTests and apply to SyncDictionary too
-    public class SyncSetTests : TestsBuildFromTestName
+    public class SyncSetTests : WeaverTestBase
     {
-        [Test]
+        [Test, BatchSafe]
         public void SyncSetByteValid()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncSetGenericAbstractInheritance()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncSetGenericInheritance()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncSetInheritance()
         {
             IsSuccess();
         }
 
-        [Test]
+        [Test, BatchSafe]
         public void SyncSetStruct()
         {
             IsSuccess();
