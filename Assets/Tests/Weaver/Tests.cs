@@ -93,11 +93,12 @@ namespace Mirage.Tests.Weaver
         protected void BuildAndWeaveTestAssembly(string className, string testName)
         {
             weaverLog.Diagnostics.Clear();
-            assembler = new Assembler();
 
             string testSourceDirectory = className + "~";
-            assembler.OutputFile = Path.Combine(testSourceDirectory, testName + ".dll");
-            assembler.AddSourceFiles(new string[] { Path.Combine(testSourceDirectory, testName + ".cs") });
+            string outputFile = Path.Combine(testSourceDirectory, testName + ".dll");
+            string[] sourceFiles = new string[] { Path.Combine(testSourceDirectory, testName + ".cs") };
+
+            assembler = new Assembler(outputFile, sourceFiles);
             assembly = assembler.Build(weaverLog);
 
             Assert.That(assembler.CompilerErrors, Is.False);
