@@ -36,7 +36,7 @@ namespace Mirage.Tests.Weaver
         {
             string testSourceDirectory = className + "~";
 
-            string outputFile = Path.Combine(testSourceDirectory, testName + ".dll");
+            string outputFile = testName + ".dll";
             string[] sourceFiles = new string[] { Path.Combine(testSourceDirectory, testName + ".cs") };
 
             return buildAndWeave(outputFile, sourceFiles);
@@ -46,7 +46,7 @@ namespace Mirage.Tests.Weaver
         {
             string testSourceDirectory = className + "~";
 
-            string outputFile = Path.Combine(testSourceDirectory, className + ".dll");
+            string outputFile = className + ".dll";
             string[] sourceFiles = testNames.Select(x => Path.Combine(testSourceDirectory, x + ".cs")).ToArray();
 
             return buildAndWeave(outputFile, sourceFiles);
@@ -77,7 +77,7 @@ namespace Mirage.Tests.Weaver
             string[] methodNames = batchMethods.Select(x => x.Name).ToArray();
             if (methodNames.Length == 0)
                 return;
-            Debug.Log($"Batching {methodNames.Length}/{testMethodCount} tests for {GetClassName(fullName)}");
+            Debug.Log($"Batching {methodNames.Length} out of {testMethodCount} tests for {GetClassName(fullName)}");
 
             string className = TestContext.CurrentContext.Test.ClassName.Split('.').Last();
             batchResult = BuildAndWeaveBatch(className, methodNames);

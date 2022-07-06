@@ -9,21 +9,31 @@ namespace Mirage.Tests.Weaver
     /// </summary>
     public class WeaverTestLocator : ScriptableObject
     {
-        static string _outputDirectory;
-        public static string OutputDirectory
+        static string _sourceDirectory;
+        public static string SourceDirectory
         {
             get
             {
-                if (string.IsNullOrEmpty(_outputDirectory))
+                if (string.IsNullOrEmpty(_sourceDirectory))
                 {
                     ScriptableObject assemblerObj = CreateInstance<WeaverTestLocator>();
 
                     var monoScript = MonoScript.FromScriptableObject(assemblerObj);
                     string myPath = AssetDatabase.GetAssetPath(monoScript);
-                    _outputDirectory = Path.GetDirectoryName(myPath);
+                    _sourceDirectory = Path.GetDirectoryName(myPath);
                 }
-                return _outputDirectory;
+                return _sourceDirectory;
             }
+        }
+
+        public static string GetOutputDirectory()
+        {
+            string directory = Path.Combine(WeaverTestLocator.SourceDirectory, "temp~");
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            return directory;
         }
     }
 }

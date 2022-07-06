@@ -1,8 +1,8 @@
 using Mirage;
 
-namespace ServerRpcTests.ServerRpcWithSenderConnectionAndOtherArgs
+namespace ServerRpcTests.ServerRpcWithSenderConnectionAndOtherArgsWrongOrder
 {
-    class ServerRpcWithSenderConnectionAndOtherArgs : NetworkBehaviour
+    class ServerRpcWithSenderConnectionAndOtherArgsWrongOrder : NetworkBehaviour
     {
         [ServerRpc(requireAuthority = false)]
         void CmdFunction(int someNumber, INetworkPlayer connection, NetworkIdentity someTarget)
