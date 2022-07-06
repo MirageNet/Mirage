@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using Mono.Cecil;
@@ -12,9 +13,17 @@ namespace Mirage.Weaver
 
         public override ILPostProcessor GetInstance() => this;
 
+        static void Log(string msg)
+        {
+            Console.WriteLine($"[MirageILPostProcessor] {msg}");
+        }
+
         public override ILPostProcessResult Process(ICompiledAssembly compiledAssembly)
         {
-            if (!WillProcess(compiledAssembly))
+            bool willProcess = WillProcess(compiledAssembly);
+            string logText = willProcess ? "Processing" : "Skipping";
+            Log($"{logText} {compiledAssembly.Name}");
+            if (!willProcess)
                 return null;
 
             var logger = new WeaverLogger();
@@ -35,6 +44,8 @@ namespace Mirage.Weaver
 
             assemblyDefinition?.Write(pe, writerParameters);
 
+            logText = assemblyDefinition != null ? "Success" : "Failed";
+            Log($"{logText} {compiledAssembly.Name}");
             return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), logger.Diagnostics);
         }
 
