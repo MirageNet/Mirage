@@ -64,17 +64,26 @@ namespace Mirage.Tests.Weaver
         public Assembler(string outputFile, string[] sourceFiles)
         {
             OutputFile = outputFile;
-            ProjectPathFile = Path.Combine(WeaverTestLocator.OutputDirectory, OutputFile);
+            string dir = WeaverTestLocator.GetOutputDirectory();
+            ProjectPathFile = Path.Combine(dir, OutputFile);
 
             foreach (var src in sourceFiles)
             {
-                this.sourceFiles.Add(Path.Combine(WeaverTestLocator.OutputDirectory, src));
+                this.sourceFiles.Add(Path.Combine(WeaverTestLocator.SourceDirectory, src));
             }
         }
 
         private static void Log(string msg)
         {
             Console.WriteLine($"[WeaverTest] {msg}");
+        }
+        static void LogWarning(string msg)
+        {
+            Console.WriteLine($"[WeaverTest] Warning: {msg}");
+
+            // do debug log too if we are not running in batch mode
+            if (!Application.isBatchMode)
+                Debug.LogWarning(msg);
         }
 
         /// <summary>
@@ -107,7 +116,8 @@ namespace Mirage.Tests.Weaver
 
             while (builder.status != AssemblyBuilderStatus.Finished)
             {
-                System.Threading.Thread.Sleep(10);
+                Log($"Build status {builder.status} {OutputFile}");
+                System.Threading.Thread.Sleep(100);
             }
 
             return builtAssembly;
@@ -117,19 +127,28 @@ namespace Mirage.Tests.Weaver
         {
             Log($"buildFinished for {OutputFile}");
 
-#if !UNITY_2020_2_OR_NEWER
-                CompilerMessages.AddRange(compilerMessages);
-                foreach (CompilerMessage cm in compilerMessages)
+            // in unity2020, ILPP runs automatically. but in unity2021 it does not
+#if !UNITY_2020_2_OR_NEWER || UNITY_2021_3_OR_NEWER
+            CompilerMessages.AddRange(compilerMessages);
+            foreach (CompilerMessage m in compilerMessages)
+            {
+                if (m.type == CompilerMessageType.Error)
                 {
-                    if (cm.type == CompilerMessageType.Error)
-                    {
-                        Debug.LogErrorFormat("{0}:{1} -- {2}", cm.file, cm.line, cm.message);
-                        CompilerErrors = true;
-                    }
+                    // first error
+                    if (!CompilerErrors)
+                        LogWarning($"Batch failed!!!");
+
+                    CompilerErrors = true;
+                    LogWarning($"{m.file}:{m.line} -- {m.message}");
                 }
+            }
+
+            // we can't run weaver if there are compile errors
+            if (CompilerErrors)
+                return;
 #endif
 
-            // assembly builder does not call ILPostProcessor (WTF Unity?),  so we must invoke it ourselves.
+            // call weaver on result
             var compiledAssembly = new CompiledAssembly(assemblyPath, builder);
 
             Log($"Starting weaver on {OutputFile}");
