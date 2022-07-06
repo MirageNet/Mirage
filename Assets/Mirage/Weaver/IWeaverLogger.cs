@@ -3,6 +3,7 @@ using Mono.Cecil.Cil;
 
 namespace Mirage.Weaver
 {
+    // todo rename this to IWeaverErrors because it isn't really a logger
     public interface IWeaverLogger
     {
         void Error(string message);
