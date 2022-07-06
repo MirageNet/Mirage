@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -49,28 +50,122 @@ namespace Mirage.Tests.Weaver
 
     public class Assembler
     {
-        public string OutputFile { get; set; }
-        public string ProjectPathFile => Path.Combine(WeaverTestLocator.OutputDirectory, OutputFile);
-        public List<CompilerMessage> CompilerMessages { get; private set; }
+        public string OutputFile { get; }
+        public string ProjectPathFile { get; }
+
+        public List<CompilerMessage> CompilerMessages { get; } = new List<CompilerMessage>();
         public bool CompilerErrors { get; private set; }
 
         private readonly HashSet<string> sourceFiles = new HashSet<string>();
+        private AssemblyDefinition builtAssembly = null;
+        private IWeaverLogger logger;
+        private AssemblyBuilder builder;
 
-        public Assembler()
+        public Assembler(string outputFile, string[] sourceFiles)
         {
-            CompilerMessages = new List<CompilerMessage>();
-        }
+            OutputFile = outputFile;
+            ProjectPathFile = Path.Combine(WeaverTestLocator.OutputDirectory, OutputFile);
 
-        // Add a range of source files to compile
-        public void AddSourceFiles(string[] sourceFiles)
-        {
             foreach (var src in sourceFiles)
             {
                 this.sourceFiles.Add(Path.Combine(WeaverTestLocator.OutputDirectory, src));
             }
         }
 
-        // Delete output dll / pdb / mdb
+        private static void Log(string msg)
+        {
+            Console.WriteLine($"[WeaverTest] {msg}");
+        }
+
+        /// <summary>
+        /// Builds and Weaves an Assembly with references to unity engine and other asmdefs.
+        /// <para>
+        ///     NOTE: Does not write the weaved assemble to disk
+        /// </para>
+        /// </summary>
+        public AssemblyDefinition Build(IWeaverLogger logger)
+        {
+            Log($"Assembler.Build for {OutputFile}");
+
+            this.logger = logger;
+            // This will compile scripts with the same references as files in the asset folder.
+            // This means that the dll will get references to all asmdef just as if it was the default "Assembly-CSharp.dll"
+            builder = new AssemblyBuilder(ProjectPathFile, sourceFiles.ToArray())
+            {
+                referencesOptions = ReferencesOptions.UseEngineModules,
+            };
+
+            builder.buildFinished += buildFinished;
+
+            var started = builder.Build();
+            // Start build of assembly
+            if (!started)
+            {
+                Debug.LogErrorFormat("Failed to start build of assembly {0}", builder.assemblyPath);
+                return builtAssembly;
+            }
+
+            while (builder.status != AssemblyBuilderStatus.Finished)
+            {
+                System.Threading.Thread.Sleep(10);
+            }
+
+            return builtAssembly;
+        }
+
+        private void buildFinished(string assemblyPath, CompilerMessage[] compilerMessages)
+        {
+            Log($"buildFinished for {OutputFile}");
+
+#if !UNITY_2020_2_OR_NEWER
+                CompilerMessages.AddRange(compilerMessages);
+                foreach (CompilerMessage cm in compilerMessages)
+                {
+                    if (cm.type == CompilerMessageType.Error)
+                    {
+                        Debug.LogErrorFormat("{0}:{1} -- {2}", cm.file, cm.line, cm.message);
+                        CompilerErrors = true;
+                    }
+                }
+#endif
+
+            // assembly builder does not call ILPostProcessor (WTF Unity?),  so we must invoke it ourselves.
+            var compiledAssembly = new CompiledAssembly(assemblyPath, builder);
+
+            Log($"Starting weaver on {OutputFile}");
+            var weaver = new Mirage.Weaver.Weaver(logger);
+            builtAssembly = weaver.Weave(compiledAssembly);
+            Log($"Finished weaver on {OutputFile}");
+
+            // NOTE: we need to write to check for ArgumentException from writing
+            TryWriteAssembly(builtAssembly);
+        }
+
+        private void TryWriteAssembly(AssemblyDefinition assembly)
+        {
+            // fine to be given null here, means that weaver didn't finish 
+            if (assembly == null)
+                return;
+
+            try
+            {
+                var file = $"./temp/WeaverTests/{assembly.Name}.dll";
+                var dir = Path.GetDirectoryName(file);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
+                assembly.Write(file);
+            }
+            catch (Exception e)
+            {
+                Log($"Exception on {OutputFile}. {e}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Delete output dll / pdb / mdb
+        /// </summary>
         public void DeleteOutput()
         {
             // "x.dll" shortest possible dll name
@@ -98,72 +193,5 @@ namespace Mirage.Tests.Weaver
             catch { /* Do Nothing */ }
         }
 
-        /// <summary>
-        /// Builds and Weaves an Assembly with references to unity engine and other asmdefs.
-        /// <para>
-        ///     NOTE: Does not write the weaved assemble to disk
-        /// </para>
-        /// </summary>
-        public AssemblyDefinition Build(IWeaverLogger logger)
-        {
-            AssemblyDefinition assembly = null;
-
-            // This will compile scripts with the same references as files in the asset folder.
-            // This means that the dll will get references to all asmdef just as if it was the default "Assembly-CSharp.dll"
-            var assemblyBuilder = new AssemblyBuilder(ProjectPathFile, sourceFiles.ToArray())
-            {
-                referencesOptions = ReferencesOptions.UseEngineModules
-            };
-
-            assemblyBuilder.buildFinished += delegate (string assemblyPath, CompilerMessage[] compilerMessages)
-            {
-#if !UNITY_2020_2_OR_NEWER
-                CompilerMessages.AddRange(compilerMessages);
-                foreach (CompilerMessage cm in compilerMessages)
-                {
-                    if (cm.type == CompilerMessageType.Error)
-                    {
-                        Debug.LogErrorFormat("{0}:{1} -- {2}", cm.file, cm.line, cm.message);
-                        CompilerErrors = true;
-                    }
-                }
-#endif
-
-                // assembly builder does not call ILPostProcessor (WTF Unity?),  so we must invoke it ourselves.
-                var compiledAssembly = new CompiledAssembly(assemblyPath, assemblyBuilder);
-
-                var weaver = new Mirage.Weaver.Weaver(logger);
-
-                assembly = weaver.Weave(compiledAssembly);
-
-                // NOTE: we need to write to check for ArgumentException from writing
-                if (assembly != null)
-                    WriteAssembly(assembly);
-            };
-
-            // Start build of assembly
-            if (!assemblyBuilder.Build())
-            {
-                Debug.LogErrorFormat("Failed to start build of assembly {0}", assemblyBuilder.assemblyPath);
-                return assembly;
-            }
-
-            while (assemblyBuilder.status != AssemblyBuilderStatus.Finished)
-            {
-                System.Threading.Thread.Sleep(10);
-            }
-
-            return assembly;
-        }
-
-        private static void WriteAssembly(AssemblyDefinition assembly)
-        {
-            var file = $"./temp/WeaverTests/{assembly.Name}.dll";
-            var dir = Path.GetDirectoryName(file);
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            assembly.Write(file);
-        }
     }
 }
