@@ -32,6 +32,10 @@ namespace Mirage.Weaver
         {
             Console.WriteLine($"Weaver[{td.Name}]{message}");
         }
+        static void Log(string msg)
+        {
+            Console.WriteLine($"[Weaver] {msg}");
+        }
 
         public Weaver(IWeaverLogger logger)
         {
@@ -40,6 +44,7 @@ namespace Mirage.Weaver
 
         public AssemblyDefinition Weave(ICompiledAssembly compiledAssembly)
         {
+            Log($"Starting weaver on {compiledAssembly.Name}");
             try
             {
                 timer = new WeaverDiagnosticsTimer() { writeToFile = true };
@@ -102,6 +107,7 @@ namespace Mirage.Weaver
             }
             finally
             {
+                Log($"Finished weaver on {compiledAssembly.Name}");
                 // end in finally incase it return early
                 timer?.End();
             }
