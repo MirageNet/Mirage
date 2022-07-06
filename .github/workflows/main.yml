@@ -10,8 +10,8 @@ on:
       - '*.md'
 
 jobs:
-  Tests:
-    name: Test
+  Tests2020:
+    name: Test 2020
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
@@ -56,6 +56,57 @@ jobs:
         uses: MirageNet/nunit-reporter@v1.0.11
         if: always()
         with:
+          reportTitle: Test Report 2020
+          path: "Tests/*.xml"
+          access-token: ${{ secrets.GITHUB_TOKEN }}
+  
+  Tests2021:
+    name: Test 2021
+    runs-on: ubuntu-latest
+    # available list of containers here:
+    # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
+    container: unityci/editor:ubuntu-2021.3.5f1-base-1.0.1
+
+    steps:
+      - name: Activate unity
+        # exit code is 1 for manual activation
+        continue-on-error: true
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_2021_3_4 }}
+        run: |          
+          echo "$UNITY_LICENSE" | tr -d '\r' > UnityLicenseFile.ulf
+          unity-editor -nographics -logFile /dev/stdout -manualLicenseFile UnityLicenseFile.ulf -quit 
+      
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Cache Library
+        id: cache-library
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-2021.3.5
+
+      - name: Run editor Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform editmode -testResults Tests/editmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
+        timeout-minutes: 20
+        
+      - name: Run play Tests
+        run: unity-editor -nographics -logFile /dev/stdout -runTests -testPlatform playmode -testResults Tests/playmode-results.xml -enableCodeCoverage -coverageResultsPath Tests -debugCodeOptimization 
+        timeout-minutes: 20
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Test results
+          path: Tests
+
+      - name: Publish test results
+        uses: MirageNet/nunit-reporter@v1.0.11
+        if: always()
+        with:
+          reportTitle: Test Report 2021
           path: "Tests/*.xml"
           access-token: ${{ secrets.GITHUB_TOKEN }}
   
@@ -92,7 +143,7 @@ jobs:
 
   Publish:
     # only run once both tests and il2cpp have passed
-    needs: [Tests, BuildIL2CPP]
+    needs: [Tests2020, Tests2021, BuildIL2CPP]
     # only run on master
     if: github.ref == 'refs/heads/master'
     name: Publish
@@ -119,7 +170,8 @@ jobs:
 
   SonarScan:
     # needs coverage from test CI
-    needs: [Tests]
+    # only need 2020 test because that is the container that this action uses 
+    needs: [Tests2020] 
     name: SonarScan
     runs-on: ubuntu-latest
     # available list of containers here:
