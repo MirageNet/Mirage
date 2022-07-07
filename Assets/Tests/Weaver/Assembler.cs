@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Mirage.Weaver;
 using Mono.Cecil;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
@@ -93,7 +94,7 @@ namespace Mirage.Tests.Weaver
         ///     NOTE: Does not write the weaved assemble to disk
         /// </para>
         /// </summary>
-        public AssemblyDefinition Build(IWeaverLogger logger)
+        public async Task<AssemblyDefinition> BuildAsync(IWeaverLogger logger)
         {
             Log($"Assembler.Build for {OutputFile}");
 
@@ -117,8 +118,7 @@ namespace Mirage.Tests.Weaver
 
             while (builder.status != AssemblyBuilderStatus.Finished)
             {
-                Log($"Build status {builder.status} {OutputFile}");
-                System.Threading.Thread.Sleep(100);
+                await Task.Yield();
             }
 
             return builtAssembly;
