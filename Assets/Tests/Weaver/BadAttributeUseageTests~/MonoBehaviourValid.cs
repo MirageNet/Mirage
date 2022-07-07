@@ -1,4 +1,5 @@
 using UnityEngine;
+using Mirage;
 
 namespace BadAttributeUseageTests.MonoBehaviourValid
 {
@@ -6,4 +7,7 @@ namespace BadAttributeUseageTests.MonoBehaviourValid
     {
         int monkeys = 12;
     }
+
+    // we must reference mirage so  that weaver will run
+    class GoodBehaviour: NetworkBehaviour {}
 }
