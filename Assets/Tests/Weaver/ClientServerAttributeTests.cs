@@ -9,7 +9,7 @@ namespace Mirage.Tests.Weaver
 {
     public class ClientServerAttributeTests : WeaverTestBase
     {
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourServer()
         {
             IsSuccess();
@@ -26,7 +26,7 @@ namespace Mirage.Tests.Weaver
                 "System.Void ClientServerAttributeTests.NetworkBehaviourServer.NetworkBehaviourServerOnAwake::Awake()");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourServerOnAwakeWithParameters()
         {
             IsSuccess();
@@ -36,7 +36,7 @@ namespace Mirage.Tests.Weaver
 
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourClient()
         {
             IsSuccess();
@@ -52,7 +52,7 @@ namespace Mirage.Tests.Weaver
                 "System.Void ClientServerAttributeTests.NetworkBehaviourClient.NetworkBehaviourClientOnAwake::Awake()");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourClientOnAwakeWithParameters()
         {
             IsSuccess();
@@ -61,7 +61,7 @@ namespace Mirage.Tests.Weaver
                 "ClientServerAttributeTests.NetworkBehaviourClient.NetworkBehaviourClientOnAwakeWithParameters", "Awake");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourHasAuthority()
         {
             IsSuccess();
@@ -77,7 +77,7 @@ namespace Mirage.Tests.Weaver
                 "System.Void ClientServerAttributeTests.NetworkBehaviourHasAuthority.NetworkBehaviourHasAuthorityOnAwake::Awake()");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourHasAuthorityOnAwakeWithParameters()
         {
             IsSuccess();
@@ -86,7 +86,7 @@ namespace Mirage.Tests.Weaver
                 "ClientServerAttributeTests.NetworkBehaviourHasAuthority.NetworkBehaviourHasAuthorityOnAwakeWithParameters", "Awake");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourLocalPlayer()
         {
             IsSuccess();
@@ -102,7 +102,7 @@ namespace Mirage.Tests.Weaver
                 "System.Void ClientServerAttributeTests.NetworkBehaviourLocalPlayer.NetworkBehaviourLocalPlayerOnAwake::Awake()");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourLocalPlayerOnAwakeWithParameters()
         {
             IsSuccess();

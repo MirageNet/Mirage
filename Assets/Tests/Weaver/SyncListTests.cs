@@ -4,49 +4,49 @@ namespace Mirage.Tests.Weaver
 {
     public class SyncListTests : WeaverTestBase
     {
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncList()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncListByteValid()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncListGenericAbstractInheritance()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncListGenericInheritance()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncListGenericInheritanceWithMultipleGeneric()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncListInheritance()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncListNestedStruct()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncListNestedInAbstractClass()
         {
             IsSuccess();
@@ -62,7 +62,7 @@ namespace Mirage.Tests.Weaver
                 "UnityEngine.Object");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncListNestedInStruct()
         {
             IsSuccess();
@@ -78,13 +78,13 @@ namespace Mirage.Tests.Weaver
                 "UnityEngine.Object");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncListStruct()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncListErrorForGenericStruct()
         {
             IsSuccess();
@@ -99,7 +99,7 @@ namespace Mirage.Tests.Weaver
                 "SyncListTests.SyncListErrorForInterface.MyInterface");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncListErrorWhenUsingGenericListInNetworkBehaviour()
         {
             IsSuccess();

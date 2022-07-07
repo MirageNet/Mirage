@@ -4,25 +4,25 @@ namespace Mirage.Tests.Weaver
 {
     public class SyncVarTests : WeaverTestBase
     {
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncVarsValid()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncVarsValidInitialOnly()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncVarArraySegment()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncVarsDerivedNetworkBehaviour()
         {
             IsSuccess();
@@ -35,13 +35,13 @@ namespace Mirage.Tests.Weaver
                 "System.Int32 SyncVarTests.SyncVarsStatic.SyncVarsStatic::invalidVar");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncVarsGenericField()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void SyncVarsGenericParam()
         {
             IsSuccess();

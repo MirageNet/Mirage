@@ -4,31 +4,31 @@ namespace Mirage.Tests.Weaver
 {
     public class NetworkBehaviourTests : WeaverTestBase
     {
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourValid()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourAbstractBaseValid()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourGeneric()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourGenericInherit()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourCmdGenericArgument()
         {
             IsSuccess();
@@ -55,7 +55,7 @@ namespace Mirage.Tests.Weaver
                 "System.Int32 NetworkBehaviourTests.NetworkBehaviourCmdVoidReturn.NetworkBehaviourCmdVoidReturn::CmdCantHaveNonVoidReturn()");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourClientRpcGenericArgument()
         {
             IsSuccess();
@@ -123,7 +123,7 @@ namespace Mirage.Tests.Weaver
                 "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcParamComponent.NetworkBehaviourClientRpcParamComponent::RpcCantHaveParamComponent(NetworkBehaviourTests.NetworkBehaviourClientRpcParamComponent.NetworkBehaviourClientRpcParamComponent/ComponentClass)");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourClientRpcParamNetworkConnection()
         {
             IsSuccess();
@@ -135,7 +135,7 @@ namespace Mirage.Tests.Weaver
             HasError("ClientRpcCantHaveParamOptional has invalid parameter monkeyCon, Cannot pass NetworkConnections", "System.Void NetworkBehaviourTests.NetworkBehaviourClientRpcParamNetworkConnectionNotFirst.NetworkBehaviourClientRpcParamNetworkConnectionNotFirst::ClientRpcCantHaveParamOptional(System.Int32,Mirage.INetworkPlayer)");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourClientRpcDuplicateName()
         {
             IsSuccess();
@@ -181,19 +181,19 @@ namespace Mirage.Tests.Weaver
                 "System.Void NetworkBehaviourTests.NetworkBehaviourCmdParamComponent.NetworkBehaviourCmdParamComponent::CmdCantHaveParamComponent(NetworkBehaviourTests.NetworkBehaviourCmdParamComponent.NetworkBehaviourCmdParamComponent/ComponentClass)");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourCmdParamGameObject()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourCmdDuplicateName()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void NetworkBehaviourChild()
         {
             IsSuccess();
