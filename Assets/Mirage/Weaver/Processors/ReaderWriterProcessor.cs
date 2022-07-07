@@ -450,22 +450,10 @@ namespace Mirage.Weaver
         }
         private void RegisterWriter(MethodDefinition method)
         {
-            if (method.HasGenericParameters)
-                Console.WriteLine($"[RegisterWriter] HAS GENERIC: {method.FullName}");
-
-
-
             TypeReference dataType = method.Parameters[1].ParameterType;
-            try
-            {
-                TypeReference resolvedType = module.ImportReference(dataType);
-                MethodReference resolvedMethod = module.ImportReference(method);
-                writers.Register(resolvedType, resolvedMethod);
-            }
-            catch (NullReferenceException e)
-            {
-                Console.WriteLine($"[RegisterWriter] Null ref with: {dataType.FullName} and {method.FullName} {e}");
-            }
+            TypeReference resolvedType = module.ImportReference(dataType);
+            MethodReference resolvedMethod = module.ImportReference(method);
+            writers.Register(resolvedType, resolvedMethod);
         }
 
 
