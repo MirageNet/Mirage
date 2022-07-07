@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
+    container: unityci/editor:ubuntu-2020.3.30f1-base-1.0.1
 
     steps:
       - name: Activate unity
@@ -115,7 +115,8 @@ jobs:
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2020.1.17f1-linux-il2cpp-0.17.0
+    container: unityci/editor:ubuntu-2020.3.30f1-linux-il2cpp-1.0.1
+    
     steps:
       - name: Activate unity
         # exit code is 1 for manual activation
@@ -176,7 +177,7 @@ jobs:
     runs-on: ubuntu-latest
     # available list of containers here:
     # https://hub.docker.com/r/unityci/editor/tags?page=1&ordering=last_updated&name=ubuntu-2020.1.17f1-base
-    container: unityci/editor:ubuntu-2020.1.17f1-base-0.10.0
+    container: unityci/editor:ubuntu-2020.3.30f1-base-1.0.1
     env:
       DOTNET_ROOT: '/opt/unity/Editor/Data/NetCore/Sdk-2.2.107'
     steps:
