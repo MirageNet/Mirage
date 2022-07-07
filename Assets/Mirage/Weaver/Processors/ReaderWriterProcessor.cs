@@ -369,7 +369,7 @@ namespace Mirage.Weaver
         private static bool IsExtension(MethodInfo method) => Attribute.IsDefined(method, typeof(ExtensionAttribute));
         private static bool IsExtension(MethodDefinition method) => method.HasCustomAttribute<ExtensionAttribute>();
         private static bool NotGeneric(MethodInfo method) => !method.IsGenericMethod;
-        private static bool NotGeneric(MethodDefinition method) => !method.IsGenericInstance;
+        private static bool NotGeneric(MethodDefinition method) => !method.IsGenericInstance && !method.HasGenericParameters;
 
         /// <returns>true if method does not have <see cref="WeaverIgnoreAttribute"/></returns>
         private static bool NotIgnored(MethodInfo method) => !Attribute.IsDefined(method, typeof(WeaverIgnoreAttribute));
