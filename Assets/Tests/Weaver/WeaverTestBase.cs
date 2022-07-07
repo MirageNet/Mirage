@@ -158,6 +158,8 @@ namespace Mirage.Tests.Weaver
             }
             else
             {
+                currentTestIsBatch = false;
+
                 // not part of batch, build by itself
                 var task = BuildAndWeave(className, TestContext.CurrentContext.Test.Name);
                 while (!task.IsCompleted)
