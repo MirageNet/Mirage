@@ -98,6 +98,9 @@ namespace Mirage.Tests.Weaver
         {
             Log($"Assembler.Build for {OutputFile}");
 
+            if (UnityEditor.EditorApplication.isCompiling)
+                Debug.LogWarning("Assembler.Build Already compiling, AssemblyBuilder build may fail");
+
             this.logger = logger;
             // This will compile scripts with the same references as files in the asset folder.
             // This means that the dll will get references to all asmdef just as if it was the default "Assembly-CSharp.dll"
@@ -108,6 +111,7 @@ namespace Mirage.Tests.Weaver
 
             builder.buildFinished += buildFinished;
 
+
             bool started = builder.Build();
             // Start build of assembly
             if (!started)
@@ -115,6 +119,7 @@ namespace Mirage.Tests.Weaver
                 Debug.LogErrorFormat("Failed to start build of assembly {0}", builder.assemblyPath);
                 return builtAssembly;
             }
+
 
             while (builder.status != AssemblyBuilderStatus.Finished)
             {
