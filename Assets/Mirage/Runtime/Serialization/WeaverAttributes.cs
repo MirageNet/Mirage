@@ -9,6 +9,7 @@ namespace Mirage.Serialization.Internal.Codegen
     /// </para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
+    [System.Obsolete("broken in unity2021")]
     public sealed class WeaverReaderGeneratedAttribute : Attribute { }
 
     /// <summary>
@@ -18,6 +19,7 @@ namespace Mirage.Serialization.Internal.Codegen
     /// </para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
+    [System.Obsolete("broken in unity2021")]
     public sealed class WeaverWriterGeneratedAttribute : Attribute { }
 }
 namespace Mirage.Serialization
