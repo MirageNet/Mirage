@@ -16,6 +16,8 @@ namespace Mirage.Tests.Runtime.Host
         {
             bundle = AssetBundle.LoadFromFile("Assets/Tests/Runtime/TestScene/testscene");
 
+            // disable so awake isn't called till setup finished
+            networkManagerGo.SetActive(false);
             spawner = networkManagerGo.AddComponent<CharacterSpawner>();
 
             spawner.Client = client;
@@ -29,6 +31,7 @@ namespace Mirage.Tests.Runtime.Host
             spawner.PlayerPrefab = identity;
 
             spawner.AutoSpawn = false;
+            networkManagerGo.SetActive(true);
         }
 
         public override void ExtraTearDown()
