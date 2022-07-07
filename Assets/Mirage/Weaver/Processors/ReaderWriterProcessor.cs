@@ -38,29 +38,63 @@ namespace Mirage.Weaver
         {
             messages.Clear();
 
-            LoadBuiltinExtensions();
+            bool processed = FindAllExtensionMethods();
+
             LoadBuiltinMessages();
 
+            // store how many writers are found, we need to check if currentModule adds any
             int writeCount = writers.Count;
             int readCount = readers.Count;
+            ProcessModule();
 
-            ProcessAssemblyClasses();
-
-            return writers.Count != writeCount || readers.Count != readCount;
+            // we need to check if any methods are created from FindAllExtensionMethods or ProcessModule
+            return processed || writers.Count != writeCount || readers.Count != readCount;
         }
 
-        #region Load Mirage built in readers and writers
-        private void LoadBuiltinExtensions()
+        /// <summary>
+        /// Gets all extension methods in current assembly and all references
+        /// </summary>
+        private bool FindAllExtensionMethods()
         {
-            // find all extension methods
-            IEnumerable<Type> types = MirageModule.GetTypes();
-
-            foreach (Type type in types)
+            var assemblies = new List<AssemblyDefinition>();
+            // load all references
+            foreach (AssemblyNameReference reference in module.AssemblyReferences)
             {
-                extensionHelper.RegisterExtensionMethodsInType(type);
+                AssemblyDefinition assembly = module.AssemblyResolver.Resolve(reference);
+                assemblies.Add(assembly);
+            }
+
+            // store how many writers are found, we need to check if currentModule adds any
+            int writeCount = writers.Count;
+            int readCount = readers.Count;
+            FindExtensionMethodsInAssembly(module.Assembly);
+            // have any been added?
+            bool processed = writers.Count != writeCount || readers.Count != readCount;
+
+            // process all references
+            foreach (AssemblyDefinition assembly in assemblies)
+            {
+                FindExtensionMethodsInAssembly(assembly);
+            }
+
+            return processed;
+        }
+
+        private void FindExtensionMethodsInAssembly(AssemblyDefinition assembly)
+        {
+            foreach (ModuleDefinition module in assembly.Modules)
+            {
+                foreach (TypeDefinition type in module.Types)
+                {
+                    TypeDefinition resolved = type.Resolve();
+                    extensionHelper.RegisterExtensionMethodsInType(resolved);
+                }
             }
         }
 
+        /// <summary>
+        /// Find NetworkMessage in Mirage.dll and ensure that they have serailize functions
+        /// </summary>
         private void LoadBuiltinMessages()
         {
             IEnumerable<Type> types = MirageModule.GetTypes().Where(t => t.GetCustomAttribute<NetworkMessageAttribute>() != null);
@@ -72,43 +106,23 @@ namespace Mirage.Weaver
                 messages.Add(typeReference);
             }
         }
-        #endregion
 
-        #region Assembly defined reader/writer
-        void ProcessAssemblyClasses()
+        void ProcessModule()
         {
+            // create copy incase we modify types
             var types = new List<TypeDefinition>(module.Types);
 
-            // find all extension methods first, then find message.
-            // we need to do this incase message is defined before the extension class
-            LoadModuleExtensions(types);
-            LoadModuleMessages(types);
+            // find NetworkMessages
+            foreach (TypeDefinition klass in types)
+                CheckForNetworkMessage(klass);
 
             // Generate readers and writers
             // find all the Send<> and Register<> calls and generate
             // readers and writers for them.
-            CodePass.ForEachInstruction(module, (md, instr, sequencePoint) => GenerateReadersWriters(instr, sequencePoint));
+            CodePass.ForEachInstruction(module, GenerateReadersWriters);
         }
 
-        private void LoadModuleMessages(List<TypeDefinition> types)
-        {
-            foreach (TypeDefinition klass in types)
-            {
-                ProcessClass(klass);
-            }
-        }
-
-        private void LoadModuleExtensions(List<TypeDefinition> types)
-        {
-            foreach (TypeDefinition klass in types)
-            {
-                // extension methods only live in static classes
-                // static classes are represented as sealed and abstract
-                extensionHelper.RegisterExtensionMethodsInType(klass);
-            }
-        }
-
-        private void ProcessClass(TypeDefinition klass)
+        private void CheckForNetworkMessage(TypeDefinition klass)
         {
             if (klass.HasCustomAttribute<NetworkMessageAttribute>())
             {
@@ -119,11 +133,11 @@ namespace Mirage.Weaver
 
             foreach (TypeDefinition nestedClass in klass.NestedTypes)
             {
-                ProcessClass(nestedClass);
+                CheckForNetworkMessage(nestedClass);
             }
         }
 
-        private Instruction GenerateReadersWriters(Instruction instruction, SequencePoint sequencePoint)
+        private Instruction GenerateReadersWriters(MethodDefinition _, Instruction instruction, SequencePoint sequencePoint)
         {
             if (instruction.OpCode == OpCodes.Ldsfld)
             {
@@ -289,8 +303,6 @@ namespace Mirage.Weaver
                 worker.Append(worker.Create(OpCodes.Call, genericMethodCall));
             }
         }
-
-        #endregion
     }
 
     /// <summary>
@@ -438,8 +450,22 @@ namespace Mirage.Weaver
         }
         private void RegisterWriter(MethodDefinition method)
         {
+            if (method.HasGenericParameters)
+                Console.WriteLine($"[RegisterWriter] HAS GENERIC: {method.FullName}");
+
+
+
             TypeReference dataType = method.Parameters[1].ParameterType;
-            writers.Register(module.ImportReference(dataType), module.ImportReference(method));
+            try
+            {
+                TypeReference resolvedType = module.ImportReference(dataType);
+                MethodReference resolvedMethod = module.ImportReference(method);
+                writers.Register(resolvedType, resolvedMethod);
+            }
+            catch (NullReferenceException e)
+            {
+                Console.WriteLine($"[RegisterWriter] Null ref with: {dataType.FullName} and {method.FullName} {e}");
+            }
         }
 
 

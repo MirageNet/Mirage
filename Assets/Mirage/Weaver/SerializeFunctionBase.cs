@@ -22,6 +22,7 @@ namespace Mirage.Weaver
         /// <summary>
         /// Name for const that will tell other asmdef's that type has already generated function
         /// </summary>
+        [System.Obsolete("broken in unity2021", true)]
         protected abstract Type GeneratedAttribute { get; }
 
         protected SerializeFunctionBase(ModuleDefinition module, IWeaverLogger logger)
@@ -46,12 +47,13 @@ namespace Mirage.Weaver
             funcs[imported] = methodReference;
 
             // mark type as generated,
-            MarkAsGenerated(dataType);
+            //MarkAsGenerated(dataType); <---  broken in unity2021
         }
 
         /// <summary>
         /// Marks type as having write/read function if it is in the current module
         /// </summary>
+        [System.Obsolete("broken in unity2021", true)]
         private void MarkAsGenerated(TypeReference typeReference)
         {
             MarkAsGenerated(typeReference.Resolve());
@@ -60,6 +62,7 @@ namespace Mirage.Weaver
         /// <summary>
         /// Marks type as having write/read function if it is in the current module
         /// </summary>
+        [System.Obsolete("broken in unity2021", true)]
         private void MarkAsGenerated(TypeDefinition typeDefinition)
         {
             // if in this module, then mark as generated
@@ -77,6 +80,7 @@ namespace Mirage.Weaver
         /// Check if type has a write/read function generated in another module
         /// <para>returns false if type is a member of current module</para>
         /// </summary>
+        [System.Obsolete("broken in unity2021", true)]
         private bool HasGeneratedFunctionInAnotherModule(TypeReference typeReference)
         {
             TypeDefinition def = typeReference.Resolve();
@@ -139,11 +143,11 @@ namespace Mirage.Weaver
             }
             else
             {
-                // before generating new function, check if one was generated for type in its own module
-                if (HasGeneratedFunctionInAnotherModule(typeReference))
-                {
-                    return CreateGenericFunction(typeReference);
-                }
+                //// before generating new function, check if one was generated for type in its own module
+                //if (HasGeneratedFunctionInAnotherModule(typeReference)) < ---broken in unity2021
+                //{
+                //    return CreateGenericFunction(typeReference);
+                //}
 
                 return GenerateFunction(module.ImportReference(typeReference));
             }
@@ -243,7 +247,7 @@ namespace Mirage.Weaver
 
             // generate writer for class/struct 
             MethodReference generated = GenerateClassOrStructFunction(typeReference);
-            MarkAsGenerated(typeDefinition);
+            //MarkAsGenerated(typeDefinition); < ---broken in unity2021
 
             return generated;
         }
