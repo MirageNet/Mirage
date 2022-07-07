@@ -1,14 +1,17 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Mirage.Logging;
 using Mirage.Weaver;
 using Mono.Cecil;
 using NUnit.Framework;
 using Unity.CompilationPipeline.Common.Diagnostics;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Weaver
 {
@@ -30,35 +33,37 @@ namespace Mirage.Tests.Weaver
         protected IReadOnlyList<DiagnosticMessage> Diagnostics => testResult.weaverLog.Diagnostics;
 
         private bool currentTestIsBatch;
+        private Task batchTask;
         private HashSet<string> batchedTests = new HashSet<string>();
 
-        private static Result BuildAndWeave(string className, string testName)
+        private static Task<Result> BuildAndWeave(string className, string testName)
         {
-            var testSourceDirectory = className + "~";
+            string testSourceDirectory = className + "~";
 
-            var outputFile = testName + ".dll";
-            var sourceFiles = new string[] { Path.Combine(testSourceDirectory, testName + ".cs") };
+            string outputFile = testName + ".dll";
+            string[] sourceFiles = new string[] { Path.Combine(testSourceDirectory, testName + ".cs") };
 
             return buildAndWeave(outputFile, sourceFiles);
         }
 
-        private static Result BuildAndWeaveBatch(string className, string[] testNames)
+        private static Task<Result> BuildAndWeaveBatch(string className, string[] testNames)
         {
-            var testSourceDirectory = className + "~";
+            string testSourceDirectory = className + "~";
 
-            var outputFile = className + ".dll";
-            var sourceFiles = testNames.Select(x => Path.Combine(testSourceDirectory, x + ".cs")).ToArray();
+            string outputFile = className + ".dll";
+            string[] sourceFiles = testNames.Select(x => Path.Combine(testSourceDirectory, x + ".cs")).ToArray();
 
             return buildAndWeave(outputFile, sourceFiles);
         }
 
-        private static Result buildAndWeave(string outputFile, string[] sourceFiles)
+        private static async Task<Result> buildAndWeave(string outputFile, string[] sourceFiles)
         {
             var weaverLog = new WeaverLogger();
             var assembler = new Assembler(outputFile, sourceFiles);
-            var assembly = assembler.Build(weaverLog);
+            AssemblyDefinition assembly = await assembler.BuildAsync(weaverLog);
             return new Result(weaverLog, assembly, assembler);
         }
+
 
         [OneTimeSetUp]
         public virtual void OneTimeSetUp()
@@ -80,7 +85,13 @@ namespace Mirage.Tests.Weaver
             Debug.Log($"Batching {methodNames.Length} out of {testMethodCount} tests for {GetClassName(fullName)}");
 
             var className = TestContext.CurrentContext.Test.ClassName.Split('.').Last();
-            batchResult = BuildAndWeaveBatch(className, methodNames);
+            var buildTask = BuildAndWeaveBatch(className, methodNames);
+            batchTask = waitForResults(buildTask, methodNames);
+        }
+
+        private async Task waitForResults(Task<Result> buildTask, string[] methodNames)
+        {
+            batchResult = await buildTask;
 
             // if there are no compile errors, then add tests to batchedTests
             // else, add none and run seperatly so that we know which one failed
@@ -113,13 +124,24 @@ namespace Mirage.Tests.Weaver
             batchResult.assembler?.DeleteOutput();
         }
 
-        [SetUp]
-        public virtual void SetUp()
+        [UnitySetUp]
+        public IEnumerator SetUp()
         {
-            var className = GetClassName(TestContext.CurrentContext.Test.ClassName);
-            var testName = TestContext.CurrentContext.Test.Name;
+            Debug.Log($"UnitySetUp");
+            if (batchTask != null)
+            {
+                // wait for batch to finish first
+                while (!batchTask.IsCompleted)
+                {
+                    yield return null;
+                }
+            }
+
+            string className = GetClassName(TestContext.CurrentContext.Test.ClassName);
+            string testName = TestContext.CurrentContext.Test.Name;
 
             currentTestIsBatch = batchedTests.Contains(testName);
+
             if (currentTestIsBatch)
             {
                 // dont need to build, just sete the results
@@ -127,10 +149,14 @@ namespace Mirage.Tests.Weaver
             }
             else
             {
-                testResult = BuildAndWeave(className, TestContext.CurrentContext.Test.Name);
+                Task<Result> task = BuildAndWeave(className, TestContext.CurrentContext.Test.Name);
+                while (!task.IsCompleted)
+                {
+                    yield return null;
+                }
+                testResult = task.Result;
+                testResult.AssertNoCompileErrors();
             }
-
-            testResult.AssertNoCompileErrors();
         }
 
         [TearDown]
