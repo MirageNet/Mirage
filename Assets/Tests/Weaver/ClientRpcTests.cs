@@ -4,13 +4,13 @@ namespace Mirage.Tests.Weaver
 {
     public class ClientRpcTests : WeaverTestBase
     {
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void ClientRpcValid()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void ClientRpcOverload()
         {
             IsSuccess();
@@ -23,13 +23,13 @@ namespace Mirage.Tests.Weaver
                 "System.Void ClientRpcTests.ClientRpcCantBeStatic.ClientRpcCantBeStatic::RpcCantBeStatic()");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void VirtualClientRpc()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void OverrideVirtualClientRpc()
         {
             IsSuccess();
@@ -49,7 +49,7 @@ namespace Mirage.Tests.Weaver
                 "System.Void ClientRpcTests.OverrideAbstractClientRpc.BaseBehaviour::RpcDoSomething()");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void ClientRpcThatExcludesOwner()
         {
             IsSuccess();
@@ -67,31 +67,31 @@ namespace Mirage.Tests.Weaver
             HasError("ClientRpc with RpcTarget.Owner cannot have excludeOwner set as true", "System.Void ClientRpcTests.ClientRpcOwnerCantExcludeOwner.ClientRpcOwnerCantExcludeOwner::ClientRpcMethod()");
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void CallToRpcBase()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void CallToNonRpcBase()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void CallToNonRpcOverLoad()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void CallToNonRpcOverLoadReverse()
         {
             IsSuccess();
         }
 
-        [Test, BatchSafe]
+        [Test, BatchSafe(BatchType.Success)]
         public void RpcAndOverLoad()
         {
             IsSuccess();

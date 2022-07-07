@@ -21,20 +21,46 @@ namespace Mirage.Tests.Weaver
     /// Add this to test that can be batched and run together
     /// <para>Most of the time this will be only success test</para>
     /// </summary>
-    public class BatchSafeAttribute : Attribute { }
+    public class BatchSafeAttribute : Attribute
+    {
+        /// <summary>
+        /// If test should success without weaver errors
+        /// <para>if false then test should check to see if errors are correct</para>
+        /// </summary>
+        public BatchType Type { get; }
+
+        public BatchSafeAttribute(BatchType type)
+        {
+            Type = type;
+        }
+    }
+
+    public enum BatchType
+    {
+        /// <summary>
+        /// Tests that should pass weaver without errors
+        /// </summary>
+        Success = 0,
+        /// <summary>
+        /// Tests that should fail weaver with errors. Tests should then check those errors
+        /// </summary>
+        Fail = 1,
+    }
 
     [TestFixture]
     public abstract class WeaverTestBase
     {
         public static readonly ILogger logger = LogFactory.GetLogger<WeaverTestBase>(LogType.Exception);
 
+        protected Result batchSuccessResult { get; private set; }
+        protected Result batchFailResult { get; private set; }
+
         protected Result testResult { get; private set; }
-        protected Result batchResult { get; private set; }
-        protected IReadOnlyList<DiagnosticMessage> Diagnostics => testResult.weaverLog.Diagnostics;
 
         bool currentTestIsBatch;
+        protected IReadOnlyList<DiagnosticMessage> Diagnostics => testResult.weaverLog.Diagnostics;
+
         Task batchTask;
-        HashSet<string> batchedTests = new HashSet<string>();
 
         private static Task<Result> BuildAndWeave(string className, string testName)
         {
@@ -68,48 +94,27 @@ namespace Mirage.Tests.Weaver
         [OneTimeSetUp]
         public virtual void OneTimeSetUp()
         {
+            batchTask = batchAsync();
+        }
+
+        private async Task batchAsync()
+        {
             string fullName = TestContext.CurrentContext.Test.ClassName;
-            var type = Type.GetType(fullName);
-            // check we found the right type
-            Debug.Assert(type.FullName == fullName);
-            Debug.Assert(type.IsSubclassOf(typeof(WeaverTestBase)));
-
-            // tests must be public, so default flags are ok
-            IEnumerable<MethodInfo> testMethods = type.GetMethods().Where(IsTest);
-            int testMethodCount = testMethods.Count();
-            IEnumerable<MethodInfo> batchMethods = testMethods.Where(IsBatchSafe);
-
-            string[] methodNames = batchMethods.Select(x => x.Name).ToArray();
-            if (methodNames.Length == 0)
-                return;
-            Debug.Log($"Batching {methodNames.Length} out of {testMethodCount} tests for {GetClassName(fullName)}");
-
-            string className = TestContext.CurrentContext.Test.ClassName.Split('.').Last();
-            Task<Result> buildTask = BuildAndWeaveBatch(className, methodNames);
-            batchTask = waitForResults(buildTask, methodNames);
-        }
-        async Task waitForResults(Task<Result> buildTask, string[] methodNames)
-        {
-            batchResult = await buildTask;
-
-            // if there are no compile errors, then add tests to batchedTests
-            // else, add none and run seperatly so that we know which one failed
-            if (!batchResult.assembler.CompilerErrors)
-            {
-                batchedTests.UnionWith(methodNames);
-            }
+            batchSuccessResult = await TestBatcher.RunBatch(fullName, IsBatchSafeSuccess);
+            batchFailResult = await TestBatcher.RunBatch(fullName, IsBatchSafeFail);
         }
 
-        /// <summary>Checks if method has Test</summary>
-        bool IsTest(MethodInfo method)
+        /// <summary>Checks if method has Test and BatchSafe attritubes and is success test</summary>
+        bool IsBatchSafeSuccess(MethodInfo method)
         {
-            return method.GetCustomAttribute<TestAttribute>() != null;
+            BatchSafeAttribute attr = method.GetCustomAttribute<BatchSafeAttribute>();
+            return attr != null && attr.Type == BatchType.Success;
         }
-
-        /// <summary>Checks if method has Test and BatchSafe attritubes</summary>
-        bool IsBatchSafe(MethodInfo method)
+        /// <summary>Checks if method has Test and BatchSafe attritubes and is fail test</summary>
+        bool IsBatchSafeFail(MethodInfo method)
         {
-            return method.GetCustomAttribute<BatchSafeAttribute>() != null;
+            BatchSafeAttribute attr = method.GetCustomAttribute<BatchSafeAttribute>();
+            return attr != null && attr.Type == BatchType.Fail;
         }
         static string GetClassName(string fullname)
         {
@@ -119,13 +124,13 @@ namespace Mirage.Tests.Weaver
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
-            batchResult.assembler?.DeleteOutput();
+            batchSuccessResult.assembler?.DeleteOutput();
+            batchFailResult.assembler?.DeleteOutput();
         }
 
         [UnitySetUp]
         public IEnumerator SetUp()
         {
-            Debug.Log($"UnitySetUp");
             if (batchTask != null)
             {
                 // wait for batch to finish first
@@ -138,15 +143,20 @@ namespace Mirage.Tests.Weaver
             string className = GetClassName(TestContext.CurrentContext.Test.ClassName);
             string testName = TestContext.CurrentContext.Test.Name;
 
-            currentTestIsBatch = batchedTests.Contains(testName);
 
-            if (currentTestIsBatch)
+            if (batchSuccessResult.ContainsMethod(testName))
             {
-                // dont need to build, just sete the results
-                testResult = batchResult;
+                currentTestIsBatch = true;
+                testResult = batchSuccessResult;
+            }
+            else if (batchFailResult.ContainsMethod(testName))
+            {
+                currentTestIsBatch = true;
+                testResult = batchFailResult;
             }
             else
             {
+                // not part of batch, build by itself
                 Task<Result> task = BuildAndWeave(className, TestContext.CurrentContext.Test.Name);
                 while (!task.IsCompleted)
                 {
@@ -222,17 +232,68 @@ namespace Mirage.Tests.Weaver
                 );
         }
 
+        static class TestBatcher
+        {
+            public static async Task<Result> RunBatch(string classFullName, Func<MethodInfo, bool> batchDeligate)
+            {
+                var type = Type.GetType(classFullName);
+                // check we found the right type
+                Debug.Assert(type.FullName == classFullName);
+                Debug.Assert(type.IsSubclassOf(typeof(WeaverTestBase)));
+
+                // tests must be public, so default flags are ok
+                IEnumerable<MethodInfo> testMethods = type.GetMethods().Where(IsTest);
+                int testMethodCount = testMethods.Count();
+                IEnumerable<MethodInfo> methods = testMethods.Where(batchDeligate);
+
+                Debug.Log($"Batching tests {methods.Count()} out of {testMethodCount} tests for {WeaverTestBase.GetClassName(classFullName)}");
+
+                string[] names = methods.Select(x => x.Name).ToArray();
+                if (names.Length == 0)
+                    return default;
+
+                string className = GetClassName(classFullName);
+                Result result = await BuildAndWeaveBatch(className, names);
+
+                // if there are no compile errors, then add tests to batchedTests
+                // else, add none and run seperatly so that we know which one failed
+                if (!result.assembler.CompilerErrors)
+                {
+                    result.methods = new HashSet<string>(names);
+                }
+
+                return result;
+            }
+
+
+            /// <summary>Checks if method has Test</summary>
+            static bool IsTest(MethodInfo method)
+            {
+                return method.GetCustomAttribute<TestAttribute>() != null;
+            }
+        }
+
         protected struct Result
         {
             public readonly WeaverLogger weaverLog;
             public readonly AssemblyDefinition assembly;
             public readonly Assembler assembler;
+            public HashSet<string> methods;
 
             public Result(WeaverLogger weaverLog, AssemblyDefinition assembly, Assembler assembler)
             {
                 this.weaverLog = weaverLog;
                 this.assembly = assembly;
                 this.assembler = assembler;
+                methods = null;
+            }
+
+            public bool ContainsMethod(string name)
+            {
+                if (methods == null)
+                    return false;
+
+                return methods.Contains(name);
             }
 
             /// <summary>
