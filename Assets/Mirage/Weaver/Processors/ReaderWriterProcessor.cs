@@ -1,6 +1,6 @@
-// finds all readers and writers and register them
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -14,6 +14,12 @@ namespace Mirage.Weaver
 {
     public class ReaderWriterProcessor
     {
+        [Conditional("WEAVER_DEBUG_LOGS")]
+        internal static void Log(string msg)
+        {
+            Console.Write($"[Weaver.ReaderWriterProcessor] {msg}\n");
+        }
+
         private readonly HashSet<TypeReference> messages = new HashSet<TypeReference>(new TypeReferenceComparer());
 
         private readonly ModuleDefinition module;
@@ -82,6 +88,7 @@ namespace Mirage.Weaver
 
         private void FindExtensionMethodsInAssembly(AssemblyDefinition assembly)
         {
+            Log($"Looking for extension methods in {assembly.FullName}");
             foreach (var module in assembly.Modules)
             {
                 foreach (var type in module.Types)
@@ -445,24 +452,28 @@ namespace Mirage.Weaver
 
         private void RegisterWriter(MethodInfo method)
         {
+            ReaderWriterProcessor.Log($"Found writer extension methods: {method.Name}");
+
             var dataType = method.GetParameters()[1].ParameterType;
             writers.Register(module.ImportReference(dataType), module.ImportReference(method));
         }
         private void RegisterWriter(MethodDefinition method)
         {
+            ReaderWriterProcessor.Log($"Found writer extension methods: {method.Name}");
+
             var dataType = method.Parameters[1].ParameterType;
-            var resolvedType = module.ImportReference(dataType);
-            var resolvedMethod = module.ImportReference(method);
-            writers.Register(resolvedType, resolvedMethod);
+            writers.Register(module.ImportReference(dataType), module.ImportReference(method));
         }
 
 
         private void RegisterReader(MethodInfo method)
         {
+            ReaderWriterProcessor.Log($"Found reader extension methods: {method.Name}");
             readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
         }
         private void RegisterReader(MethodDefinition method)
         {
+            ReaderWriterProcessor.Log($"Found reader extension methods: {method.Name}");
             readers.Register(module.ImportReference(method.ReturnType), module.ImportReference(method));
         }
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -8,6 +9,12 @@ namespace Mirage.Weaver
 {
     public abstract class SerializeFunctionBase
     {
+        [Conditional("WEAVER_DEBUG_LOGS")]
+        private static void Log(string msg)
+        {
+            Console.Write($"[Weaver.SerializeFunction] {msg}\n");
+        }
+
         protected readonly Dictionary<TypeReference, MethodReference> funcs = new Dictionary<TypeReference, MethodReference>(new TypeReferenceComparer());
         private readonly IWeaverLogger logger;
         protected readonly ModuleDefinition module;
@@ -41,6 +48,9 @@ namespace Mirage.Weaver
                     $"  new:{methodReference.FullName}",
                     methodReference.Resolve());
             }
+
+            Log($"Register {FunctionTypeLog} for {dataType.FullName}, method:{methodReference.FullName}");
+
 
             // we need to import type when we Initialize Writers so import here in case it is used anywhere else
             var imported = module.ImportReference(dataType);
@@ -149,6 +159,7 @@ namespace Mirage.Weaver
                 //    return CreateGenericFunction(typeReference);
                 //}
 
+                Log($"Trying to generate {FunctionTypeLog} for {typeReference.FullName}");
                 return GenerateFunction(module.ImportReference(typeReference));
             }
         }
