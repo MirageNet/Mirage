@@ -57,7 +57,6 @@ namespace Mirage.Weaver
 
 
                 ModuleDefinition module = CurrentAssembly.MainModule;
-                CheckIfAlreadyProcessed(module);
                 readers = new Readers(module, logger);
                 writers = new Writers(module, logger);
                 propertySiteProcessor = new PropertySiteProcessor();
@@ -105,6 +104,8 @@ namespace Mirage.Weaver
             catch (Exception e)
             {
                 logger.Error("Exception :" + e);
+                // write line too because the error about doesn't show stacktrace
+                Console.WriteLine("[WeaverException] :" + e);
                 return null;
             }
             finally
@@ -112,15 +113,6 @@ namespace Mirage.Weaver
                 Log($"Finished weaver on {compiledAssembly.Name}");
                 // end in finally incase it return early
                 timer?.End();
-            }
-        }
-
-        private void CheckIfAlreadyProcessed(ModuleDefinition module)
-        {
-            TypeDefinition generatedType = module.GetType("Mirage", "GeneratedNetworkCode");
-            if (generatedType != null)
-            {
-                Log($"WARNING: GeneratedNetworkCode found before starting weaver. Weaver might be running twice on this assembly {module.Name}");
             }
         }
 
