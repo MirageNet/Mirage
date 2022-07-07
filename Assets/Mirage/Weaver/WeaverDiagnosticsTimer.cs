@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using ConditionalAttribute = System.Diagnostics.ConditionalAttribute;
 using Stopwatch = System.Diagnostics.Stopwatch;
@@ -20,6 +20,18 @@ namespace Mirage.Weaver
             writer = null;
         }
 
+        static bool _checkDirectory = false;
+        static void CheckDirectory()
+        {
+            if (_checkDirectory)
+                return;
+            _checkDirectory = true;
+            if (!Directory.Exists("./Logs/WeaverLogs"))
+            {
+                Directory.CreateDirectory("./Logs/WeaverLogs");
+            }
+        }
+
         [Conditional("WEAVER_DEBUG_TIMER")]
         public void Start(string name)
         {
@@ -27,7 +39,8 @@ namespace Mirage.Weaver
 
             if (writeToFile)
             {
-                string path = $"./Build/WeaverLogs/Timer_{name}.log";
+                CheckDirectory();
+                string path = $"./Logs/WeaverLogs/Timer_{name}.log";
                 try
                 {
                     writer = new StreamWriter(path)
