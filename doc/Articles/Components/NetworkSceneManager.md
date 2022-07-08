@@ -13,9 +13,9 @@ The Network Scene Manager component controls the Unity Scenes running over the n
 -   **Server Changed Scene**  
     Event that fires after the server changes scenes.
 
-The Network Scene Maanger allows the user to change network scenes during runtime. There are three types of scene changes broadly supported by Mirage: Normal, Additive Load, and Additive Unload.
+The Network Scene Manager allows the user to change network scenes during runtime. There are three types of scene changes broadly supported by Mirage: Normal, Additive Load, and Additive Unload.
 
-Normal: In a Normal scene change all currently loaded assets are unspawned and unloaded. The new scene is loaded and set active. Then all of the scene or instance netwrok objects can be spawned. Under this operation the client waits for the server to finish before spawning starts to prevent any race conditions.
+Normal: In a Normal scene change all currently loaded assets are unspawned and unloaded. The new scene is loaded and set active. Then all of the scene or instance network objects can be spawned. Under this operation the client waits for the server to finish before spawning starts to prevent any race conditions.
 
 Additive Load: The specified scene will be loaded on the Server and Client in addition to the currently active network scene.
 
@@ -29,12 +29,12 @@ Once a NetworkClient connects and passes authentication the NetworkServer will s
 
 ## How do I change scenes
 
-If the scene change involves network objects then it is strongly reccomended to make any scene changes via the NetworkSceneManager. Doing so via Unity's SceneManager directly may function but give undesired results with network objects.
+If the scene change involves network objects then it is strongly recommend to make any scene changes via the NetworkSceneManager. Doing so via Unity's SceneManager directly may function but give undesired results with network objects.
 
 To do a network scene change you initiate the process via the server NetworkSceneManager via:
 
 ```cs
-sceneManager.ChangeServerScene("Assets/Mirror/Tests/Runtime/testScene.unity");
+sceneManager.ChangeServerScene("Assets/GameScene.unity");
 ```
 
 Note: You dont have to provide the full scene path when initiating a scene change. But the 'NetworkSceneName' will be saved as the full path.
