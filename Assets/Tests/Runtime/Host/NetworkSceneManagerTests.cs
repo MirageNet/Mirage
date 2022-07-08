@@ -15,6 +15,7 @@ using UnityEditor.SceneManagement;
 
 namespace Mirage.Tests.Runtime.Host
 {
+    [Category("LoadsScene")]
     public class NetworkSceneManagerTests : HostSetup<MockComponent>
     {
         private UnityAction<Scene, SceneOperation> sceneEventFunction;
@@ -66,7 +67,7 @@ namespace Mirage.Tests.Runtime.Host
             ClientMessageHandler.RegisterHandler<SceneNotReadyMessage>(msg => invokeNotReadyMessage = true);
             sceneManager.OnServerStartedSceneChange.AddListener(func1);
 
-            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
+            sceneManager.ServerLoadSceneNormal(TestScene.Path);
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ActiveScenePath != null);
 
@@ -150,7 +151,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ChangeSceneAdditiveLoadTest() => UniTask.ToCoroutine(async () =>
         {
-            sceneManager.ServerLoadSceneAdditively("Assets/Tests/Runtime/Scenes/testScene.unity", new[] { client.Player });
+            sceneManager.ServerLoadSceneAdditively(TestScene.Path, new[] { client.Player });
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ActiveScenePath != null);
 
@@ -184,7 +185,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ServerCheckScenesPlayerIsInTest()
         {
-            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
+            sceneManager.ServerLoadSceneNormal(TestScene.Path);
 
             var scenes = sceneManager.ScenesPlayerIsIn(server.LocalPlayer);
 
@@ -204,7 +205,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ServerUnloadSceneCheckServerNotNullTest()
         {
-            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
+            sceneManager.ServerLoadSceneNormal(TestScene.Path);
 
             sceneManager.Server = null;
 
@@ -220,7 +221,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ServerUnloadSceneAdditivelySceneNotNullTest()
         {
-            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
+            sceneManager.ServerLoadSceneNormal(TestScene.Path);
 
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
@@ -235,7 +236,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ServerUnloadSceneAdditivelyPlayersNotNullTest()
         {
-            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
+            sceneManager.ServerLoadSceneNormal(TestScene.Path);
 
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
@@ -251,7 +252,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             var _invokedOnServerStartedSceneChange = false;
 
-            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
+            sceneManager.ServerLoadSceneNormal(TestScene.Path);
 
 #if UNITY_EDITOR
             await EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Tests/Performance/Runtime/10K/Scenes/Scene.unity", new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
@@ -273,7 +274,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                sceneManager.ServerLoadSceneAdditively("Assets/Tests/Runtime/Scenes/testScene.unity", null);
+                sceneManager.ServerLoadSceneAdditively(TestScene.Path, null);
             });
 
             var message = new ArgumentNullException("players", "No player's were added to send for information").Message;
@@ -311,7 +312,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator OnServerDisconnectPlayerTest() => UniTask.ToCoroutine(async () =>
         {
-            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
+            sceneManager.ServerLoadSceneNormal(TestScene.Path);
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ServerSceneData.Count > 0);
 
@@ -324,7 +325,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator IsPlayerInSceneTest() => UniTask.ToCoroutine(async () =>
         {
-            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
+            sceneManager.ServerLoadSceneNormal(TestScene.Path);
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ServerSceneData.Count > 0);
 
