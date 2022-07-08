@@ -8,14 +8,11 @@ namespace Mirage.Tests.Runtime.Host
 {
     public class CharacterSpawnerTest : HostSetup<MockComponent>
     {
-        private AssetBundle bundle;
         private GameObject player;
         private CharacterSpawner spawner;
 
         public override void ExtraSetup()
         {
-            bundle = AssetBundle.LoadFromFile("Assets/Tests/Runtime/TestScene/testscene");
-
             // disable so awake isn't called till setup finished
             networkManagerGo.SetActive(false);
             spawner = networkManagerGo.AddComponent<CharacterSpawner>();
@@ -36,7 +33,6 @@ namespace Mirage.Tests.Runtime.Host
 
         public override void ExtraTearDown()
         {
-            bundle.Unload(true);
             Object.Destroy(player);
         }
 
@@ -46,7 +42,7 @@ namespace Mirage.Tests.Runtime.Host
             var invokeAddPlayerMessage = false;
             ServerMessageHandler.RegisterHandler<AddCharacterMessage>(msg => invokeAddPlayerMessage = true);
 
-            sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
+            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
             // wait for messages to be processed
             await UniTask.Yield();
 

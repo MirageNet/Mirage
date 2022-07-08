@@ -5,7 +5,6 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -18,20 +17,12 @@ namespace Mirage.Tests.Runtime.Host
 {
     public class NetworkSceneManagerTests : HostSetup<MockComponent>
     {
-        private AssetBundle bundle;
         private UnityAction<Scene, SceneOperation> sceneEventFunction;
 
         public override void ExtraSetup()
         {
-            bundle = AssetBundle.LoadFromFile("Assets/Tests/Runtime/TestScene/testscene");
-
             sceneEventFunction = Substitute.For<UnityAction<Scene, SceneOperation>>();
             sceneManager.OnServerFinishedSceneChange.AddListener(sceneEventFunction);
-        }
-
-        public override void ExtraTearDown()
-        {
-            bundle.Unload(true);
         }
 
         [Test]
@@ -75,7 +66,7 @@ namespace Mirage.Tests.Runtime.Host
             ClientMessageHandler.RegisterHandler<SceneNotReadyMessage>(msg => invokeNotReadyMessage = true);
             sceneManager.OnServerStartedSceneChange.AddListener(func1);
 
-            sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
+            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ActiveScenePath != null);
 
@@ -159,7 +150,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ChangeSceneAdditiveLoadTest() => UniTask.ToCoroutine(async () =>
         {
-            sceneManager.ServerLoadSceneAdditively("Assets/Mirror/Tests/Runtime/testScene.unity", new[] { client.Player });
+            sceneManager.ServerLoadSceneAdditively("Assets/Tests/Runtime/Scenes/testScene.unity", new[] { client.Player });
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ActiveScenePath != null);
 
@@ -193,7 +184,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ServerCheckScenesPlayerIsInTest()
         {
-            sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
+            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
 
             var scenes = sceneManager.ScenesPlayerIsIn(server.LocalPlayer);
 
@@ -213,7 +204,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ServerUnloadSceneCheckServerNotNullTest()
         {
-            sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
+            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
 
             sceneManager.Server = null;
 
@@ -229,7 +220,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ServerUnloadSceneAdditivelySceneNotNullTest()
         {
-            sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
+            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
 
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
@@ -244,7 +235,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void ServerUnloadSceneAdditivelyPlayersNotNullTest()
         {
-            sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
+            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
 
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
@@ -260,7 +251,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             var _invokedOnServerStartedSceneChange = false;
 
-            sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
+            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
 
 #if UNITY_EDITOR
             await EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Tests/Performance/Runtime/10K/Scenes/Scene.unity", new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive });
@@ -282,7 +273,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
-                sceneManager.ServerLoadSceneAdditively("Assets/Mirror/Tests/Runtime/testScene.unity", null);
+                sceneManager.ServerLoadSceneAdditively("Assets/Tests/Runtime/Scenes/testScene.unity", null);
             });
 
             var message = new ArgumentNullException("players", "No player's were added to send for information").Message;
@@ -320,7 +311,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator OnServerDisconnectPlayerTest() => UniTask.ToCoroutine(async () =>
         {
-            sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
+            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ServerSceneData.Count > 0);
 
@@ -333,7 +324,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator IsPlayerInSceneTest() => UniTask.ToCoroutine(async () =>
         {
-            sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
+            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
 
             await AsyncUtil.WaitUntilWithTimeout(() => sceneManager.ServerSceneData.Count > 0);
 
