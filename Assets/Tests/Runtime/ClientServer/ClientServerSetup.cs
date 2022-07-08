@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirage.SocketLayer;
@@ -11,7 +10,7 @@ using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
-    public class ClientServerSetup<T> where T : NetworkBehaviour
+    public class ClientServerSetup<T> : TestBase where T : NetworkBehaviour
     {
         protected GameObject serverGo;
         protected NetworkServer server;
@@ -47,8 +46,6 @@ namespace Mirage.Tests.Runtime.ClientServer
         protected virtual bool AutoConnectClient => true;
         protected virtual Config ServerConfig => null;
         protected virtual Config ClientConfig => null;
-
-        protected List<GameObject> toDestroy = new List<GameObject>();
 
         [UnitySetUp]
         public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
@@ -136,7 +133,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         public virtual void ExtraTearDown() { }
 
         [UnityTearDown]
-        public IEnumerator ShutdownHost() => UniTask.ToCoroutine(async () =>
+        public IEnumerator UnityTearDown() => UniTask.ToCoroutine(async () =>
         {
             // check active, it might have been stopped by tests
             if (client.Active) client.Disconnect();
@@ -151,51 +148,9 @@ namespace Mirage.Tests.Runtime.ClientServer
             Object.DestroyImmediate(serverPlayerGO);
             Object.DestroyImmediate(clientPlayerGO);
 
-            foreach (var obj in toDestroy)
-            {
-                if (obj != null)
-                {
-                    Object.DestroyImmediate(obj);
-                }
-            }
+            TearDownTestObjects();
 
             ExtraTearDown();
         });
-
-
-        /// <summary>
-        /// Instantiate object that will be destroyed in teardown
-        /// </summary>
-        /// <param name="prefab"></param>
-        /// <returns></returns>
-        protected GameObject InstantiateForTest(GameObject prefab)
-        {
-            var obj = Object.Instantiate(prefab);
-            toDestroy.Add(obj);
-            return obj;
-        }
-        /// <summary>
-        /// Instantiate object that will be destroyed in teardown
-        /// </summary>
-        /// <typeparam name="TObj"></typeparam>
-        /// <param name="prefab"></param>
-        /// <returns></returns>
-        protected TObj InstantiateForTest<TObj>(TObj prefab) where TObj : Component
-        {
-            var obj = Object.Instantiate(prefab);
-            toDestroy.Add(obj.gameObject);
-            return obj;
-        }
-
-        /// <summary>
-        /// Creates a new NetworkIdentity that can be used by tests, then destroyed in teardown 
-        /// </summary>
-        /// <returns></returns>
-        protected NetworkIdentity CreateNetworkIdentity()
-        {
-            playerPrefab = new GameObject("A NetworkIdentity", typeof(NetworkIdentity));
-            toDestroy.Add(playerPrefab);
-            return playerPrefab.GetComponent<NetworkIdentity>();
-        }
     }
 }

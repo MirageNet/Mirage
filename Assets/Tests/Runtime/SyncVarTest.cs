@@ -18,7 +18,7 @@ namespace Mirage.Tests.Runtime.Serialization
         public NetworkIdentity target;
     }
 
-    public class SyncVarTest
+    public class SyncVarTest : TestBase
     {
         private readonly NetworkWriter ownerWriter = new NetworkWriter(1300);
         private readonly NetworkWriter observersWriter = new NetworkWriter(1300);
@@ -30,16 +30,15 @@ namespace Mirage.Tests.Runtime.Serialization
             ownerWriter.Reset();
             observersWriter.Reset();
             reader.Dispose();
+
+            TearDownTestObjects();
         }
 
 
         [Test]
         public void TestSettingStruct()
         {
-
-            var gameObject = new GameObject("player", typeof(NetworkIdentity), typeof(MockPlayer));
-
-            var player = gameObject.GetComponent<MockPlayer>();
+            var player = CreateBehaviour<MockPlayer>();
 
             // synchronize immediatelly
             player.syncInterval = 0f;
@@ -65,10 +64,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void TestSyncIntervalAndClearDirtyComponents()
         {
-
-            var gameObject = new GameObject("player", typeof(NetworkIdentity), typeof(MockPlayer));
-
-            var player = gameObject.GetComponent<MockPlayer>();
+            var player = CreateBehaviour<MockPlayer>();
             player._lastSyncTime = Time.time;
             // synchronize immediately
             player.syncInterval = 1f;
@@ -94,9 +90,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void TestSyncIntervalAndClearAllComponents()
         {
-            var gameObject = new GameObject("Player", typeof(NetworkIdentity), typeof(MockPlayer));
-
-            var player = gameObject.GetComponent<MockPlayer>();
+            var player = CreateBehaviour<MockPlayer>();
             player._lastSyncTime = Time.time;
             // synchronize immediately
             player.syncInterval = 1f;
@@ -123,9 +117,7 @@ namespace Mirage.Tests.Runtime.Serialization
         public void TestSynchronizingObjects()
         {
             // set up a "server" object
-            var gameObject1 = new GameObject("player", typeof(NetworkIdentity), typeof(MockPlayer));
-            var identity1 = gameObject1.GetComponent<NetworkIdentity>();
-            var player1 = gameObject1.GetComponent<MockPlayer>();
+            var player1 = CreateBehaviour<MockPlayer>();
             var myGuild = new MockPlayer.Guild
             {
                 name = "Back street boys"
@@ -133,16 +125,14 @@ namespace Mirage.Tests.Runtime.Serialization
             player1.guild = myGuild;
 
             // serialize all the data as we would for the network
-            identity1.OnSerializeAll(true, ownerWriter, observersWriter);
+            player1.Identity.OnSerializeAll(true, ownerWriter, observersWriter);
 
             // set up a "client" object
-            var gameObject2 = new GameObject();
-            var identity2 = gameObject2.AddComponent<NetworkIdentity>();
-            var player2 = gameObject2.AddComponent<MockPlayer>();
+            var player2 = CreateBehaviour<MockPlayer>();
 
             // apply all the data from the server object
             reader.Reset(ownerWriter.ToArray());
-            identity2.OnDeserializeAll(reader, true);
+            player2.Identity.OnDeserializeAll(reader, true);
 
             // check that the syncvars got updated
             Assert.That(player2.guild.name, Is.EqualTo("Back street boys"), "Data should be synchronized");
@@ -152,9 +142,8 @@ namespace Mirage.Tests.Runtime.Serialization
         [Description("Syncvars are converted to properties behind the scenes, this tests makes sure you can set and get them")]
         public void CanSetAndGetNetworkIdentitySyncvar()
         {
-            var gameObject = new GameObject("player", typeof(NetworkIdentity), typeof(MockPlayer));
-            var other = new GameObject("other", typeof(NetworkIdentity));
-            var player = gameObject.GetComponent<MockPlayer>();
+            var player = CreateBehaviour<MockPlayer>();
+            var other = CreateNetworkIdentity();
 
             player.target = other.GetComponent<NetworkIdentity>();
 

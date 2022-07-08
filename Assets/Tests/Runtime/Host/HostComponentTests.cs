@@ -12,67 +12,67 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ServerRpc() => UniTask.ToCoroutine(async () =>
         {
-            component.Send2Args(1, "hello");
+            playerComponent.Send2Args(1, "hello");
 
-            await AsyncUtil.WaitUntilWithTimeout(() => component.cmdArg1 != 0);
+            await AsyncUtil.WaitUntilWithTimeout(() => playerComponent.cmdArg1 != 0);
 
-            Assert.That(component.cmdArg1, Is.EqualTo(1));
-            Assert.That(component.cmdArg2, Is.EqualTo("hello"));
+            Assert.That(playerComponent.cmdArg1, Is.EqualTo(1));
+            Assert.That(playerComponent.cmdArg2, Is.EqualTo("hello"));
         });
 
         [UnityTest]
         public IEnumerator ServerRpcWithSender() => UniTask.ToCoroutine(async () =>
         {
-            component.SendWithSender(1);
+            playerComponent.SendWithSender(1);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => component.cmdArg1 != 0);
+            await AsyncUtil.WaitUntilWithTimeout(() => playerComponent.cmdArg1 != 0);
 
-            Assert.That(component.cmdArg1, Is.EqualTo(1));
-            Assert.That(component.cmdSender, Is.EqualTo(server.LocalPlayer), "Server Rpc call on host will have localplayer (server version) as sender");
+            Assert.That(playerComponent.cmdArg1, Is.EqualTo(1));
+            Assert.That(playerComponent.cmdSender, Is.EqualTo(server.LocalPlayer), "Server Rpc call on host will have localplayer (server version) as sender");
         });
 
         [UnityTest]
         public IEnumerator ServerRpcWithNetworkIdentity() => UniTask.ToCoroutine(async () =>
         {
-            component.CmdNetworkIdentity(identity);
+            playerComponent.CmdNetworkIdentity(playerIdentity);
 
-            await AsyncUtil.WaitUntilWithTimeout(() => component.cmdNi != null);
+            await AsyncUtil.WaitUntilWithTimeout(() => playerComponent.cmdNi != null);
 
-            Assert.That(component.cmdNi, Is.SameAs(identity));
+            Assert.That(playerComponent.cmdNi, Is.SameAs(playerIdentity));
         });
 
         [UnityTest]
         public IEnumerator ClientRpc() => UniTask.ToCoroutine(async () =>
         {
-            component.RpcTest(1, "hello");
+            playerComponent.RpcTest(1, "hello");
             // process spawn message from server
-            await AsyncUtil.WaitUntilWithTimeout(() => component.rpcArg1 != 0);
+            await AsyncUtil.WaitUntilWithTimeout(() => playerComponent.rpcArg1 != 0);
 
-            Assert.That(component.rpcArg1, Is.EqualTo(1));
-            Assert.That(component.rpcArg2, Is.EqualTo("hello"));
+            Assert.That(playerComponent.rpcArg1, Is.EqualTo(1));
+            Assert.That(playerComponent.rpcArg2, Is.EqualTo("hello"));
         });
 
         [UnityTest]
         public IEnumerator ClientConnRpc() => UniTask.ToCoroutine(async () =>
         {
-            component.ClientConnRpcTest(manager.Server.LocalPlayer, 1, "hello");
+            playerComponent.ClientConnRpcTest(manager.Server.LocalPlayer, 1, "hello");
             // process spawn message from server
-            await AsyncUtil.WaitUntilWithTimeout(() => component.targetRpcArg1 != 0);
+            await AsyncUtil.WaitUntilWithTimeout(() => playerComponent.targetRpcArg1 != 0);
 
-            Assert.That(component.targetRpcPlayer, Is.EqualTo(manager.Client.Player));
-            Assert.That(component.targetRpcArg1, Is.EqualTo(1));
-            Assert.That(component.targetRpcArg2, Is.EqualTo("hello"));
+            Assert.That(playerComponent.targetRpcPlayer, Is.EqualTo(manager.Client.Player));
+            Assert.That(playerComponent.targetRpcArg1, Is.EqualTo(1));
+            Assert.That(playerComponent.targetRpcArg2, Is.EqualTo("hello"));
         });
 
         [UnityTest]
         public IEnumerator ClientOwnerRpc() => UniTask.ToCoroutine(async () =>
         {
-            component.RpcOwnerTest(1, "hello");
+            playerComponent.RpcOwnerTest(1, "hello");
             // process spawn message from server
-            await AsyncUtil.WaitUntilWithTimeout(() => component.rpcOwnerArg1 != 0);
+            await AsyncUtil.WaitUntilWithTimeout(() => playerComponent.rpcOwnerArg1 != 0);
 
-            Assert.That(component.rpcOwnerArg1, Is.EqualTo(1));
-            Assert.That(component.rpcOwnerArg2, Is.EqualTo("hello"));
+            Assert.That(playerComponent.rpcOwnerArg1, Is.EqualTo(1));
+            Assert.That(playerComponent.rpcOwnerArg2, Is.EqualTo("hello"));
         });
 
         [Test]

@@ -1,6 +1,4 @@
 using NUnit.Framework;
-using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
@@ -9,27 +7,18 @@ namespace Mirage.Tests.Runtime.ClientServer
     {
         protected override bool AutoConnectClient => false;
 
-        private GameObject gameObject;
         private NetworkManagerHud networkManagerHud;
         public override void ExtraSetup()
         {
-            gameObject = new GameObject("NetworkManagerHud", typeof(NetworkManagerHud));
-            networkManagerHud = gameObject.GetComponent<NetworkManagerHud>();
+            networkManagerHud = CreateMonoBehaviour<NetworkManagerHud>();
             networkManagerHud.NetworkManager = clientGo.AddComponent<NetworkManager>();
             networkManagerHud.NetworkManager.Client = client;
-            networkManagerHud.OfflineGO = new GameObject();
-            networkManagerHud.OnlineGO = new GameObject();
+            networkManagerHud.OfflineGO = CreateGameObject();
+            networkManagerHud.OnlineGO = CreateGameObject();
 
             //Initial state in the prefab
             networkManagerHud.OfflineGO.SetActive(true);
             networkManagerHud.OnlineGO.SetActive(false);
-        }
-
-        public override void ExtraTearDown()
-        {
-            Object.DestroyImmediate(networkManagerHud.OfflineGO);
-            Object.DestroyImmediate(networkManagerHud.OnlineGO);
-            Object.DestroyImmediate(gameObject);
         }
 
         [Test]

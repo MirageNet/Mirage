@@ -55,7 +55,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator SpawnWithTarget() => UniTask.ToCoroutine(async () =>
         {
             // create an object, set the target and spawn it
-            var newObject = UnityEngine.Object.Instantiate(playerPrefab);
+            UnityEngine.GameObject newObject = InstantiateForTest(playerPrefab);
             var newBehavior = newObject.GetComponent<SampleBehaviorWithNB>();
             newBehavior.target = serverComponent;
             serverObjectManager.Spawn(newObject);

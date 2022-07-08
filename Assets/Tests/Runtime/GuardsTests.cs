@@ -1,6 +1,5 @@
 using Mirage.Tests.Runtime.ClientServer;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Mirage.Tests.Runtime
 {
@@ -144,25 +143,19 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void GuardHasAuthorityError()
         {
-            var obj = new GameObject("randomObject", typeof(NetworkIdentity), typeof(ExampleGuards));
-            var guardedComponent = obj.GetComponent<ExampleGuards>();
+            ExampleGuards guardedComponent = CreateBehaviour<ExampleGuards>();
             Assert.Throws<MethodInvocationException>(() =>
-           {
-               guardedComponent.CallAuthorityFunction();
-           });
-
-            Object.Destroy(obj);
+            {
+                guardedComponent.CallAuthorityFunction();
+            });
         }
 
         [Test]
         public void GuardHasAuthorityNoError()
         {
-            var obj = new GameObject("randomObject", typeof(NetworkIdentity), typeof(ExampleGuards));
-            var guardedComponent = obj.GetComponent<ExampleGuards>();
+            ExampleGuards guardedComponent = CreateBehaviour<ExampleGuards>();
             guardedComponent.CallAuthorityNoErrorFunction();
             Assert.That(guardedComponent.hasAuthorityNoErrorCalled, Is.False);
-
-            Object.Destroy(obj);
         }
 
         [Test]
@@ -182,28 +175,22 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void GuardLocalPlayer()
         {
-            var obj = new GameObject("randomObject", typeof(NetworkIdentity), typeof(ExampleGuards));
-            var guardedComponent = obj.GetComponent<ExampleGuards>();
+            ExampleGuards guardedComponent = CreateBehaviour<ExampleGuards>();
 
             Assert.Throws<MethodInvocationException>(() =>
             {
                 guardedComponent.CallLocalPlayer();
 
             });
-
-            Object.Destroy(obj);
         }
 
         [Test]
         public void GuardLocalPlayerNoError()
         {
-            var obj = new GameObject("randomObject", typeof(NetworkIdentity), typeof(ExampleGuards));
-            var guardedComponent = obj.GetComponent<ExampleGuards>();
+            ExampleGuards guardedComponent = CreateBehaviour<ExampleGuards>();
 
             guardedComponent.CallLocalPlayerNoError();
             Assert.That(guardedComponent.localPlayerNoErrorCalled, Is.False);
-
-            Object.Destroy(obj);
         }
     }
 }

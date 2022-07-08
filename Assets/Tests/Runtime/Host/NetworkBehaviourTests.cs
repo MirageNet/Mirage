@@ -12,39 +12,36 @@ namespace Mirage.Tests.Runtime.Host
 
     public class NetworkBehaviourTests : HostSetup<SampleBehavior>
     {
-        #region Component flags
         [Test]
         public void IsServerOnly()
         {
-            Assert.That(component.IsServerOnly, Is.False);
+            Assert.That(playerComponent.IsServerOnly, Is.False);
         }
 
         [Test]
         public void IsServer()
         {
-            Assert.That(component.IsServer, Is.True);
+            Assert.That(playerComponent.IsServer, Is.True);
         }
 
         [Test]
         public void IsClient()
         {
-            Assert.That(component.IsClient, Is.True);
+            Assert.That(playerComponent.IsClient, Is.True);
         }
 
         [Test]
         public void IsClientOnly()
         {
-            Assert.That(component.IsClientOnly, Is.False);
+            Assert.That(playerComponent.IsClientOnly, Is.False);
         }
 
         [Test]
         public void PlayerHasAuthorityByDefault()
         {
             // no authority by default
-            Assert.That(component.HasAuthority, Is.True);
+            Assert.That(playerComponent.HasAuthority, Is.True);
         }
-
-        #endregion
 
         private class OnStartServerTestComponent : NetworkBehaviour
         {
@@ -63,7 +60,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void OnStartServer()
         {
-            var gameObject = new GameObject();
+            GameObject gameObject = CreateGameObject();
             var netIdentity = gameObject.AddComponent<NetworkIdentity>();
             var comp = gameObject.AddComponent<OnStartServerTestComponent>();
             netIdentity.OnStartServer.AddListener(comp.OnStartServer);
@@ -72,56 +69,46 @@ namespace Mirage.Tests.Runtime.Host
             serverObjectManager.Spawn(gameObject);
 
             Assert.That(comp.called, Is.True);
-
-            Object.Destroy(gameObject);
         }
-
 
         [Test]
         public void SpawnedObjectNoAuthority()
         {
-            var gameObject2 = new GameObject();
-            gameObject2.AddComponent<NetworkIdentity>();
-            var behaviour2 = gameObject2.AddComponent<SampleBehavior>();
-
-            serverObjectManager.Spawn(gameObject2);
+            SampleBehavior behaviour = CreateBehaviour<SampleBehavior>();
+            serverObjectManager.Spawn(behaviour.gameObject);
 
             client.Update();
 
             // no authority by default
-            Assert.That(behaviour2.HasAuthority, Is.False);
+            Assert.That(behaviour.HasAuthority, Is.False);
         }
 
         [Test]
         public void HasIdentitysNetId()
         {
-            identity.NetId = 42;
-            Assert.That(component.NetId, Is.EqualTo(42));
+            playerIdentity.NetId = 42;
+            Assert.That(playerComponent.NetId, Is.EqualTo(42));
         }
 
         [Test]
         public void HasIdentitysOwner()
         {
-            (_, identity.Owner) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
-            Assert.That(component.Owner, Is.EqualTo(identity.Owner));
+            (_, playerIdentity.Owner) = PipedConnections(ClientMessageHandler, ServerMessageHandler);
+            Assert.That(playerComponent.Owner, Is.EqualTo(playerIdentity.Owner));
         }
 
         [Test]
         public void ComponentIndex()
         {
-            var extraObject = new GameObject();
+            NetworkIdentity extraObject = CreateNetworkIdentity();
 
-            extraObject.AddComponent<NetworkIdentity>();
-
-            var behaviour1 = extraObject.AddComponent<SampleBehavior>();
-            var behaviour2 = extraObject.AddComponent<SampleBehavior>();
+            var behaviour1 = extraObject.gameObject.AddComponent<SampleBehavior>();
+            var behaviour2 = extraObject.gameObject.AddComponent<SampleBehavior>();
 
             // original one is first networkbehaviour, so index is 0
             Assert.That(behaviour1.ComponentIndex, Is.EqualTo(0));
             // extra one is second networkbehaviour, so index is 1
             Assert.That(behaviour2.ComponentIndex, Is.EqualTo(1));
-
-            Object.Destroy(extraObject);
         }
     }
 

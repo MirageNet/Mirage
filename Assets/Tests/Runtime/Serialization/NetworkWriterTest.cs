@@ -17,7 +17,7 @@ using CollectionExtensions = Mirage.Serialization.CollectionExtensions;
 namespace Mirage.Tests.Runtime.Serialization
 {
     [TestFixture]
-    public class NetworkWriterTest
+    public class NetworkWriterTest : TestBase
     {
         private readonly NetworkWriter writer = new NetworkWriter(1300);
         private readonly MirageNetworkReader reader = new MirageNetworkReader();
@@ -33,6 +33,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             reader.Dispose();
             writer.Reset();
+            TearDownTestObjects();
         }
 
 
@@ -1006,29 +1007,20 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void WriteNetworkBehaviorNotNull()
         {
-            var go = new GameObject("TestWriteNetworkBehaviorNotNull", typeof(NetworkIdentity), typeof(MockComponent));
-            var mock = go.GetComponent<MockComponent>();
+            MockComponent mock = CreateBehaviour<MockComponent>();
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
             // returns found id
             reader.ObjectLocator.TryGetIdentity(1, out var _).Returns(x => { x[1] = mock.Identity; return true; });
 
-            // try/fianlly so go is always destroyed
-            try
-            {
-                writer.WriteNetworkBehaviour(mock);
+            writer.WriteNetworkBehaviour(mock);
 
-                reader.Reset(writer.ToArraySegment());
-                var behaviour = reader.ReadNetworkBehaviour<MockComponent>();
+            reader.Reset(writer.ToArraySegment());
+            var behaviour = reader.ReadNetworkBehaviour<MockComponent>();
 
-                Assert.That(behaviour == mock);
-                Assert.That(writer.ByteLength, Is.EqualTo(reader.BytePosition));
-            }
-            finally
-            {
-                GameObject.Destroy(go);
-            }
+            Assert.That(behaviour == mock);
+            Assert.That(writer.ByteLength, Is.EqualTo(reader.BytePosition));
         }
 
         // make weaver generate writers for MockComponent[]
@@ -1040,61 +1032,43 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void WriteNetworkBehaviorArray()
         {
-            var go = new GameObject("TestWriteNetworkBehaviorNotNull", typeof(NetworkIdentity), typeof(MockComponent));
-            var mock = go.GetComponent<MockComponent>();
+            MockComponent mock = CreateBehaviour<MockComponent>();
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
             // returns found id
             reader.ObjectLocator.TryGetIdentity(1, out var _).Returns(x => { x[1] = mock.Identity; return true; });
 
-            // try/fianlly so go is always destroyed
-            try
-            {
-                var mockArray = new MockComponent[] { mock };
-                writer.Write(mockArray);
+            var mockArray = new MockComponent[] { mock };
+            writer.Write(mockArray);
 
-                reader.Reset(writer.ToArraySegment());
-                var readArray = reader.Read<MockComponent[]>();
+            reader.Reset(writer.ToArraySegment());
+            var readArray = reader.Read<MockComponent[]>();
 
-                Assert.That(mockArray.Length == mockArray.Length);
-                Assert.That(mockArray[0] == mockArray[0]);
-                Assert.That(writer.ByteLength, Is.EqualTo(reader.BytePosition));
-            }
-            finally
-            {
-                GameObject.Destroy(go);
-            }
+            Assert.That(mockArray.Length == mockArray.Length);
+            Assert.That(mockArray[0] == mockArray[0]);
+            Assert.That(writer.ByteLength, Is.EqualTo(reader.BytePosition));
         }
 
         [Test]
         public void WriteNetworkBehaviorDestroyed()
         {
             // setup
-            var go = new GameObject("TestWriteNetworkBehaviorNotNull", typeof(NetworkIdentity), typeof(MockComponent));
-            var mock = go.GetComponent<MockComponent>();
+            MockComponent mock = CreateBehaviour<MockComponent>();
             // init lazy props
             _ = mock.Identity.NetworkBehaviours;
             mock.Identity.NetId = 1;
             // return not found
             reader.ObjectLocator.TryGetIdentity(1, out var _).Returns(x => { x[1] = null; return false; });
 
-            // try/fianlly so go is always destroyed
-            try
-            {
-                writer.WriteNetworkBehaviour(mock);
+            writer.WriteNetworkBehaviour(mock);
 
-                reader.Reset(writer.ToArraySegment());
-                var behaviour = reader.ReadNetworkBehaviour<MockComponent>();
+            reader.Reset(writer.ToArraySegment());
+            var behaviour = reader.ReadNetworkBehaviour<MockComponent>();
 
-                Assert.That(behaviour, Is.Null);
-                // make sure read same as written (including compIndex for non-0 netid
-                Assert.That(writer.ByteLength, Is.EqualTo(reader.BytePosition));
-            }
-            finally
-            {
-                GameObject.Destroy(go);
-            }
+            Assert.That(behaviour, Is.Null);
+            // make sure read same as written (including compIndex for non-0 netid
+            Assert.That(writer.ByteLength, Is.EqualTo(reader.BytePosition));
         }
 
         [Test]
