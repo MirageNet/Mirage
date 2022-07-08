@@ -89,6 +89,10 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             // create and register a prefab
             playerPrefab = new GameObject("player (unspawned)", typeof(NetworkIdentity), typeof(T));
+            // DontDestroyOnLoad so that "prefab" wont be destroyed by scene loading
+            // also means that NetworkScenePostProcess will skip this unspawned object
+            Object.DontDestroyOnLoad(playerPrefab);
+
             var identity = playerPrefab.GetComponent<NetworkIdentity>();
             identity.PrefabHash = Guid.NewGuid().GetHashCode();
             clientObjectManager.RegisterPrefab(identity);
