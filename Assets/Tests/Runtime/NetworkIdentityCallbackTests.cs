@@ -24,7 +24,6 @@ namespace Mirage.Tests.Runtime
         private INetworkPlayer player1;
         private INetworkPlayer player2;
 
-        [SetUp]
         public override void ExtraSetup()
         {
             gameObject = CreateGameObject();
