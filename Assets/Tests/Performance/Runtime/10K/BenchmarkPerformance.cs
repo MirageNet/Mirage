@@ -20,7 +20,7 @@ namespace Mirage.Tests.Performance.Runtime
         const int Warmup = 50;
         const int MeasureCount = 120;
 
-        private NetworkManager benchmarker;
+        private NetworkManager networkManager;
 
         [UnitySetUp]
         public IEnumerator SetUp() => UniTask.ToCoroutine(async () =>
@@ -34,9 +34,12 @@ namespace Mirage.Tests.Performance.Runtime
             SceneManager.SetActiveScene(scene);
 
             // load host
-            benchmarker = Object.FindObjectOfType<NetworkManager>();
+            networkManager = Object.FindObjectOfType<NetworkManager>();
 
-            benchmarker.Server.StartServer(benchmarker.Client);
+            // wait frame for Start to be called
+            await UniTask.DelayFrame(1);
+
+            networkManager.Server.StartServer(networkManager.Client);
 
         });
 
@@ -44,14 +47,16 @@ namespace Mirage.Tests.Performance.Runtime
         public IEnumerator TearDown()
         {
             // shutdown
-            benchmarker.Server.Stop();
+            if (networkManager != null)
+                networkManager.Server.Stop();
             yield return null;
 
             // unload scene
             Scene scene = SceneManager.GetSceneByPath(ScenePath);
             yield return SceneManager.UnloadSceneAsync(scene);
 
-            Object.Destroy(benchmarker.gameObject);
+            if (networkManager != null)
+                Object.Destroy(networkManager.gameObject);
         }
 
         static void EnableHealth(bool value)
