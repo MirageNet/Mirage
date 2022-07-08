@@ -5,6 +5,7 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Host
 {
+    [Category("LoadsScene")]
     public class CharacterSpawnerTest : HostSetup<MockComponent>
     {
         CharacterSpawner spawner;
@@ -33,7 +34,7 @@ namespace Mirage.Tests.Runtime.Host
             bool invokeAddPlayerMessage = false;
             ServerMessageHandler.RegisterHandler<AddCharacterMessage>(msg => invokeAddPlayerMessage = true);
 
-            sceneManager.ServerLoadSceneNormal("Assets/Tests/Runtime/Scenes/testScene.unity");
+            sceneManager.ServerLoadSceneNormal(TestScene.Path);
             // wait for messages to be processed
             await UniTask.Yield();
 
