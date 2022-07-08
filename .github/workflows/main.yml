@@ -49,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: Test results
+          name: Test results 2020
           path: Tests
 
       - name: Publish test results
@@ -99,7 +99,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: Test results
+          name: Test results 2021
           path: Tests
 
       - name: Publish test results
