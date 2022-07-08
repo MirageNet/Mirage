@@ -38,12 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 11
+  serializedVersion: 12
   m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -118,6 +118,8 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
@@ -197,6 +199,7 @@ Light:
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
 --- !u!4 &964724104
@@ -222,7 +225,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1193428351}
-  - component: {fileID: 1193428349}
   - component: {fileID: 1193428348}
   - component: {fileID: 1193428352}
   - component: {fileID: 1193428353}
@@ -246,7 +248,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5f5ec068f5604c32b160bc49ee97b75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EnablePeerMetrics: 0
+  MetricsSize: 10
   MaxConnections: 500
+  DisconnectOnException: 1
+  RunInBackground: 1
   Listening: 1
   SocketFactory: {fileID: 1193428350}
   authenticator: {fileID: 0}
@@ -275,33 +281,6 @@ MonoBehaviour:
     _event:
       m_PersistentCalls:
         m_Calls: []
---- !u!114 &1193428349
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1193428347}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30967dfd80dbb6c46a270a64ebecb951, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Client: {fileID: 0}
-  Server: {fileID: 1193428348}
-  DontDestroy: 1
-  _clientChangeScene:
-    m_PersistentCalls:
-      m_Calls: []
-  _clientSceneChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  _serverChangeScene:
-    m_PersistentCalls:
-      m_Calls: []
-  _serverSceneChanged:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &1193428350
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -314,8 +293,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9f46b2d67d7a054d8c13075473bd4a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  address: localhost
-  port: 7777
+  Address: localhost
+  Port: 7777
+  SocketLib: 0
+  BufferSize: 262144
 --- !u!4 &1193428351
 Transform:
   m_ObjectHideFlags: 0
@@ -343,7 +324,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Client: {fileID: 0}
-  NetworkSceneManager: {fileID: 1193428349}
+  NetworkSceneManager: {fileID: 0}
   spawnPrefabs: []
 --- !u!114 &1193428353
 MonoBehaviour:
@@ -358,7 +339,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Server: {fileID: 1193428348}
-  NetworkSceneManager: {fileID: 1193428349}
+  NetworkSceneManager: {fileID: 0}
 --- !u!1 &1615514841
 GameObject:
   m_ObjectHideFlags: 0
