@@ -1,7 +1,6 @@
 using System;
 using Mirage.Serialization;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Mirage.Tests.Runtime
 {
@@ -46,12 +45,13 @@ namespace Mirage.Tests.Runtime
         }
     }
     [TestFixture]
-    public class SyncVarVirtualTest
+    public class SyncVarVirtualTest : TestBase
     {
         private SyncVarHookTester serverTester;
-        private NetworkIdentity netIdServer;
+        private NetworkIdentity serverIdentity;
+
         private SyncVarHookTester clientTester;
-        private NetworkIdentity netIdClient;
+        private NetworkIdentity clientIdentity;
 
         readonly NetworkWriter ownerWriter = new NetworkWriter(1300);
         readonly NetworkWriter observersWriter = new NetworkWriter(1300);
@@ -60,15 +60,10 @@ namespace Mirage.Tests.Runtime
         [SetUp]
         public void Setup()
         {
-            // create server and client objects and sync inital values
-
-            var gameObject1 = new GameObject();
-            netIdServer = gameObject1.AddComponent<NetworkIdentity>();
-            serverTester = gameObject1.AddComponent<SyncVarHookTester>();
-
-            var gameObject2 = new GameObject();
-            netIdClient = gameObject2.AddComponent<NetworkIdentity>();
-            clientTester = gameObject2.AddComponent<SyncVarHookTester>();
+            serverTester = CreateBehaviour<SyncVarHookTester>();
+            serverIdentity = serverTester.Identity;
+            clientTester = CreateBehaviour<SyncVarHookTester>();
+            clientIdentity = clientTester.Identity;
 
             serverTester.value1 = 1;
             serverTester.value2 = 2;
@@ -76,29 +71,30 @@ namespace Mirage.Tests.Runtime
             SyncValuesWithClient();
         }
 
-        private void SyncValuesWithClient()
-        {
-            ownerWriter.Reset();
-            observersWriter.Reset();
-
-            netIdServer.OnSerializeAll(true, ownerWriter, observersWriter);
-
-            // apply all the data from the server object
-
-            reader.Reset(ownerWriter.ToArraySegment());
-            netIdClient.OnDeserializeAll(reader, true);
-        }
-
         [TearDown]
         public void TearDown()
         {
-            UnityEngine.Object.DestroyImmediate(serverTester.gameObject);
-            UnityEngine.Object.DestroyImmediate(clientTester.gameObject);
+            TearDownTestObjects();
 
             ownerWriter.Reset();
             observersWriter.Reset();
             reader.Dispose();
         }
+
+        private void SyncValuesWithClient()
+        {
+            ownerWriter.Reset();
+            observersWriter.Reset();
+
+            serverIdentity.OnSerializeAll(true, ownerWriter, observersWriter);
+
+            // apply all the data from the server object
+
+            reader.Reset(ownerWriter.ToArraySegment());
+            clientIdentity.OnDeserializeAll(reader, true);
+        }
+
+
         [Test]
         public void AbstractMethodOnChangeWorkWithHooks()
         {

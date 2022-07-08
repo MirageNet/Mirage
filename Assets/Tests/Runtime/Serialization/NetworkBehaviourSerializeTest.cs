@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Mirage.Collections;
 using Mirage.Serialization;
 using NUnit.Framework;
@@ -128,27 +127,14 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
     }
     #endregion
 
-    public class NetworkBehaviourSerializeTest
+    public class NetworkBehaviourSerializeTest : TestBase
     {
-        readonly List<GameObject> createdObjects = new List<GameObject>();
         [TearDown]
         public void TearDown()
         {
-            // Clean up all created objects
-            foreach (GameObject item in createdObjects)
-            {
-                Object.DestroyImmediate(item);
-            }
-            createdObjects.Clear();
+            TearDownTestObjects();
         }
 
-        T CreateBehaviour<T>() where T : NetworkBehaviour
-        {
-            var go1 = new GameObject();
-            go1.AddComponent<NetworkIdentity>();
-            createdObjects.Add(go1);
-            return go1.AddComponent<T>();
-        }
         static void SyncNetworkBehaviour(NetworkBehaviour source, NetworkBehaviour target, bool initialState)
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())

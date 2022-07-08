@@ -11,9 +11,7 @@ namespace Mirage.Tests.Runtime.Components
         [Test]
         public void PingDisplayTextLabelNullReferencesUpdateTest()
         {
-            var gameObject = new GameObject("pingDisplay", typeof(NetworkPingDisplay));
-
-            NetworkPingDisplay pingDisplay = gameObject.GetComponent<NetworkPingDisplay>();
+            NetworkPingDisplay pingDisplay = CreateMonoBehaviour<NetworkPingDisplay>();
             pingDisplay.Client = client;
 
             Assert.Throws<NullReferenceException>(() =>
@@ -23,14 +21,13 @@ namespace Mirage.Tests.Runtime.Components
         }
 
         [Test]
-
         public void PingDisplayTextChangedValue()
         {
-            var gameObject = new GameObject("pingDisplay", typeof(NetworkPingDisplay), typeof(Text));
+            GameObject gameObject = CreateGameObject();
 
-            NetworkPingDisplay pingDisplay = gameObject.GetComponent<NetworkPingDisplay>();
+            NetworkPingDisplay pingDisplay = gameObject.AddComponent<NetworkPingDisplay>();
             pingDisplay.Client = client;
-            pingDisplay.NetworkPingLabelText = gameObject.GetComponent<Text>();
+            pingDisplay.NetworkPingLabelText = gameObject.AddComponent<Text>();
 
             Text oldValue = pingDisplay.NetworkPingLabelText;
 

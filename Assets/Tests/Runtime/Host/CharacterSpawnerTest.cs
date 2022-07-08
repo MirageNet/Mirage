@@ -1,14 +1,12 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Host
 {
     public class CharacterSpawnerTest : HostSetup<MockComponent>
     {
-        GameObject player;
         CharacterSpawner spawner;
 
         public override void ExtraSetup()
@@ -23,17 +21,10 @@ namespace Mirage.Tests.Runtime.Host
             spawner.ClientObjectManager = clientObjectManager;
             spawner.ServerObjectManager = serverObjectManager;
 
-            player = new GameObject();
-            NetworkIdentity identity = player.AddComponent<NetworkIdentity>();
-            spawner.PlayerPrefab = identity;
+            spawner.PlayerPrefab = CreateNetworkIdentity();
 
             spawner.AutoSpawn = false;
             networkManagerGo.SetActive(true);
-        }
-
-        public override void ExtraTearDown()
-        {
-            Object.Destroy(player);
         }
 
         [UnityTest]

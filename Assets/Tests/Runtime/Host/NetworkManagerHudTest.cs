@@ -1,35 +1,25 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.TestTools;
-using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.Host
 {
     [TestFixture]
-    public class NetworkManagerHudTestSetup : HostSetup<MockComponent>
+    public abstract class NetworkManagerHudTestSetup : HostSetup<MockComponent>
     {
-        GameObject gameObject;
         protected NetworkManagerHud networkManagerHud;
+
         public override void ExtraSetup()
         {
-            gameObject = new GameObject("NetworkManagerHud", typeof(NetworkManagerHud));
-            networkManagerHud = gameObject.GetComponent<NetworkManagerHud>();
+            networkManagerHud = CreateMonoBehaviour<NetworkManagerHud>();
             networkManagerHud.NetworkManager = manager;
-            networkManagerHud.OfflineGO = new GameObject();
-            networkManagerHud.OnlineGO = new GameObject();
+            networkManagerHud.OfflineGO = CreateGameObject();
+            networkManagerHud.OnlineGO = CreateGameObject();
 
             //Initial state in the prefab
             networkManagerHud.OfflineGO.SetActive(true);
             networkManagerHud.OnlineGO.SetActive(false);
-        }
-
-        public override void ExtraTearDown()
-        {
-            Object.DestroyImmediate(networkManagerHud.OfflineGO);
-            Object.DestroyImmediate(networkManagerHud.OnlineGO);
-            Object.DestroyImmediate(gameObject);
         }
     }
 

@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 
 namespace Mirage.Tests.Runtime.Host
 {
-    public class HostSetup<T> where T : NetworkBehaviour
+    public class HostSetup<T> : TestBase where T : NetworkBehaviour
     {
         protected GameObject networkManagerGo;
         protected NetworkManager manager;
@@ -18,8 +18,8 @@ namespace Mirage.Tests.Runtime.Host
         protected ClientObjectManager clientObjectManager;
 
         protected GameObject playerGO;
-        protected NetworkIdentity identity;
-        protected T component;
+        protected NetworkIdentity playerIdentity;
+        protected T playerComponent;
 
         protected MessageHandler ClientMessageHandler => client.MessageHandler;
         protected MessageHandler ServerMessageHandler => server.MessageHandler;
@@ -67,8 +67,8 @@ namespace Mirage.Tests.Runtime.Host
                 await StartHost();
 
                 playerGO = new GameObject("playerGO", typeof(Rigidbody));
-                identity = playerGO.AddComponent<NetworkIdentity>();
-                component = playerGO.AddComponent<T>();
+                playerIdentity = playerGO.AddComponent<NetworkIdentity>();
+                playerComponent = playerGO.AddComponent<T>();
 
                 serverObjectManager.AddCharacter(server.LocalPlayer, playerGO);
 
@@ -96,7 +96,7 @@ namespace Mirage.Tests.Runtime.Host
         public virtual void ExtraTearDown() { }
 
         [UnityTearDown]
-        public IEnumerator ShutdownHost() => UniTask.ToCoroutine(async () =>
+        public IEnumerator UnityTearDown() => UniTask.ToCoroutine(async () =>
         {
             Object.Destroy(playerGO);
 
@@ -105,6 +105,8 @@ namespace Mirage.Tests.Runtime.Host
 
             await UniTask.Delay(1);
             Object.Destroy(networkManagerGo);
+
+            TearDownTestObjects();
 
             ExtraTearDown();
         });

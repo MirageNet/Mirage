@@ -26,7 +26,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void SetAllClientsNotReadyTest()
         {
-            readyComp = identity.gameObject.AddComponent<ObjectReady>();
+            readyComp = playerIdentity.gameObject.AddComponent<ObjectReady>();
             lobby.ObjectReadyList.Add(readyComp);
             readyComp.IsReady = true;
 
@@ -38,13 +38,13 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator SendToReadyTest() => UniTask.ToCoroutine(async () =>
         {
-            readyComp = identity.gameObject.AddComponent<ObjectReady>();
+            readyComp = playerIdentity.gameObject.AddComponent<ObjectReady>();
             lobby.ObjectReadyList.Add(readyComp);
             readyComp.IsReady = true;
 
             bool invokeWovenTestMessage = false;
             ClientMessageHandler.RegisterHandler<SceneMessage>(msg => invokeWovenTestMessage = true);
-            lobby.SendToReady(identity, new SceneMessage(), true, Channel.Reliable);
+            lobby.SendToReady(playerIdentity, new SceneMessage(), true, Channel.Reliable);
 
             await AsyncUtil.WaitUntilWithTimeout(() => invokeWovenTestMessage);
         });
@@ -52,7 +52,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void IsReadyStateTest()
         {
-            readyComp = identity.gameObject.AddComponent<ObjectReady>();
+            readyComp = playerIdentity.gameObject.AddComponent<ObjectReady>();
 
             Assert.That(readyComp.IsReady, Is.False);
         }
@@ -60,7 +60,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void SetClientReadyTest()
         {
-            readyComp = identity.gameObject.AddComponent<ObjectReady>();
+            readyComp = playerIdentity.gameObject.AddComponent<ObjectReady>();
 
             readyComp.SetClientReady();
 
@@ -70,7 +70,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void SetClientNotReadyTest()
         {
-            readyComp = identity.gameObject.AddComponent<ObjectReady>();
+            readyComp = playerIdentity.gameObject.AddComponent<ObjectReady>();
 
             readyComp.SetClientNotReady();
 
@@ -80,9 +80,8 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ClientReadyTest() => UniTask.ToCoroutine(async () =>
         {
-            readyPlayer = new GameObject();
-            readyPlayer.AddComponent<NetworkIdentity>();
-            readyComp = readyPlayer.AddComponent<ObjectReady>();
+            NetworkIdentity readyPlayer = CreateNetworkIdentity();
+            readyComp = readyPlayer.gameObject.AddComponent<ObjectReady>();
 
             serverObjectManager.Spawn(readyPlayer, server.LocalPlayer);
             readyComp.Ready();

@@ -5,7 +5,6 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Guid = System.Guid;
-using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.ClientServer
 {
@@ -102,8 +101,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             spawnDelegateTestCalled = 0;
             int hash = Guid.NewGuid().GetHashCode();
-            var gameObject = new GameObject();
-            NetworkIdentity identity = gameObject.AddComponent<NetworkIdentity>();
+
+            NetworkIdentity identity = CreateNetworkIdentity();
             identity.PrefabHash = hash;
             identity.NetId = (uint)Random.Range(0, int.MaxValue);
 
@@ -121,8 +120,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             spawnDelegateTestCalled = 0;
             int hash = Guid.NewGuid().GetHashCode();
-            var gameObject = new GameObject();
-            NetworkIdentity identity = gameObject.AddComponent<NetworkIdentity>();
+            NetworkIdentity identity = CreateNetworkIdentity();
             identity.PrefabHash = hash;
             identity.NetId = (uint)Random.Range(0, int.MaxValue);
 
@@ -149,7 +147,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             NetworkIdentity prefab = clientObjectManager.GetPrefab(msg.prefabHash.Value);
             if (!(prefab is null))
             {
-                return Object.Instantiate(prefab);
+                return InstantiateForTest(prefab);
             }
             return null;
         }

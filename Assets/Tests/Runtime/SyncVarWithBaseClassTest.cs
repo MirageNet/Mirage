@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Mirage.Tests.Runtime.SyncVarWithBaseClass
 {
@@ -23,13 +22,18 @@ namespace Mirage.Tests.Runtime.SyncVarWithBaseClass
         [SyncVar] public int i9;
     }
 
-    public class SyncVarWithBaseClassTest
+    public class SyncVarWithBaseClassTest : TestBase
     {
+        [TearDown]
+        public void TearDown()
+        {
+            TearDownTestObjects();
+        }
+
         [Test]
         public void SetsCorrectDirtyBit()
         {
-            var go = new GameObject("SetsCorrectDirtyBit", typeof(NetworkIdentity), typeof(C));
-            C behaviour = go.GetComponent<C>();
+            C behaviour = CreateBehaviour<C>();
             Assert.That(behaviour.SyncVarDirtyBits, Is.Zero, "Should start at zero");
 
             ulong expected = 0ul;
@@ -37,7 +41,6 @@ namespace Mirage.Tests.Runtime.SyncVarWithBaseClass
             behaviour.i0 = 1;
             SetDirtyBit(ref expected, 0);
             Assert.That(behaviour.SyncVarDirtyBits, Is.EqualTo(expected));
-
 
             behaviour.i3 = 1;
             SetDirtyBit(ref expected, 3);

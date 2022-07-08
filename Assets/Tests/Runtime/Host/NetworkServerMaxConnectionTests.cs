@@ -1,7 +1,6 @@
-﻿using Mirage.SocketLayer;
+using Mirage.SocketLayer;
 using NUnit.Framework;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.Host
 {
@@ -16,7 +15,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void DisconnectsConnectionsOverMax()
         {
-            var secondGO = new GameObject();
+            GameObject secondGO = CreateGameObject();
             NetworkClient secondClient = secondGO.AddComponent<NetworkClient>();
             TestSocketFactory socketFactory = networkManagerGo.GetComponent<TestSocketFactory>();
 
@@ -37,8 +36,6 @@ namespace Mirage.Tests.Runtime.Host
             Assert.That(server.Players, Has.Count.EqualTo(1));
             // also check if client was disconnected (this will confirm it was rejected
             Assert.That(disconnectedCalled, Is.EqualTo(1));
-
-            Object.Destroy(secondGO);
         }
     }
 }

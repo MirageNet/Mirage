@@ -50,13 +50,13 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator BothSyncVarsAreSetIntially()
         {
-            var prefab = new GameObject("BothSyncVarsAreSet", typeof(NetworkIdentity), typeof(SyncVarInitialOnly));
+            SyncVarInitialOnly prefab = CreateBehaviour<SyncVarInitialOnly>();
             NetworkIdentity identity = prefab.GetComponent<NetworkIdentity>();
             identity.PrefabHash = Guid.NewGuid().GetHashCode();
 
             clientObjectManager.RegisterPrefab(identity);
 
-            var clone = GameObject.Instantiate(prefab);
+            GameObject clone = InstantiateForTest(prefab.gameObject);
             SyncVarInitialOnly behaviour = clone.GetComponent<SyncVarInitialOnly>();
             behaviour.weaponIndex = 3;
             behaviour.health = 20;

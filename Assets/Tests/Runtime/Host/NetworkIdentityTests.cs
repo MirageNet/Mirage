@@ -7,29 +7,19 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.TestTools;
 using InvalidOperationException = System.InvalidOperationException;
-using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.Host
 {
     public class NetworkIdentityTests : HostSetup<MockComponent>
     {
-        #region SetUp
-
         GameObject gameObject;
         NetworkIdentity testIdentity;
 
         public override void ExtraSetup()
         {
-            gameObject = new GameObject();
-            testIdentity = gameObject.AddComponent<NetworkIdentity>();
+            testIdentity = CreateNetworkIdentity();
+            gameObject = testIdentity.gameObject;
         }
-
-        public override void ExtraTearDown()
-        {
-            Object.Destroy(gameObject);
-        }
-
-        #endregion
 
         [Test]
         public void AssignClientAuthorityNoServer()
@@ -182,13 +172,13 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void IdentityClientValueSet()
         {
-            Assert.That(identity.Client, Is.Not.Null);
+            Assert.That(playerIdentity.Client, Is.Not.Null);
         }
 
         [Test]
         public void IdentityServerValueSet()
         {
-            Assert.That(identity.Server, Is.Not.Null);
+            Assert.That(playerIdentity.Server, Is.Not.Null);
         }
 
         [UnityTest]
@@ -216,24 +206,14 @@ namespace Mirage.Tests.Runtime.Host
 
     public class NetworkIdentityStartedTests : HostSetup<MockComponent>
     {
-        #region SetUp
-
-        GameObject gameObject;
         NetworkIdentity testIdentity;
 
         public override void ExtraSetup()
         {
-            gameObject = new GameObject();
-            testIdentity = gameObject.AddComponent<NetworkIdentity>();
-            server.Started.AddListener(() => serverObjectManager.Spawn(gameObject));
+            testIdentity = CreateNetworkIdentity();
+            server.Started.AddListener(() => serverObjectManager.Spawn(testIdentity));
         }
 
-        public override void ExtraTearDown()
-        {
-            Object.Destroy(gameObject);
-        }
-
-        #endregion
 
         [UnityTest]
         public IEnumerator ClientNotNullAfterSpawnInStarted() => UniTask.ToCoroutine(async () =>

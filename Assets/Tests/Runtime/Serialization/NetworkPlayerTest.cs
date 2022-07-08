@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Mirage.Tests.Runtime
 {
-    public class NetworkPlayerTestBase
+    public class NetworkPlayerTestBase : TestBase
     {
         protected NetworkPlayer player;
         protected SocketLayer.IConnection connection;
@@ -17,6 +17,12 @@ namespace Mirage.Tests.Runtime
             connection = Substitute.For<SocketLayer.IConnection>();
             player = new NetworkPlayer(connection);
         }
+
+        [TearDown]
+        public void TearDown()
+        {
+            TearDownTestObjects();
+        }
     }
 
     public class NetworkPlayerCharactorTest : NetworkPlayerTestBase
@@ -24,7 +30,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void EventCalledWhenIdentityChanged()
         {
-            NetworkIdentity character = new GameObject("EventCalledWhenIdentityChanged").AddComponent<NetworkIdentity>();
+            NetworkIdentity character = CreateNetworkIdentity();
 
             Action<NetworkIdentity> action = Substitute.For<Action<NetworkIdentity>>();
             player.OnIdentityChanged += action;
@@ -40,7 +46,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void EventNotCalledWhenIdentityIsSame()
         {
-            NetworkIdentity character = new GameObject("EventNotCalledWhenIdentityIsSame").AddComponent<NetworkIdentity>();
+            NetworkIdentity character = CreateNetworkIdentity();
 
             Action<NetworkIdentity> action = Substitute.For<Action<NetworkIdentity>>();
             player.OnIdentityChanged += action;
@@ -62,14 +68,12 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void HasCharacterReturnsTrueIfIdentityIsSet()
         {
-            NetworkIdentity character = new GameObject("HasCharacterReturnsTrueIfIdentityIsSet").AddComponent<NetworkIdentity>();
+            NetworkIdentity character = CreateNetworkIdentity();
 
             player.Identity = character;
 
             Debug.Assert(player.Identity != null, "player did not have identity, this test is invalid");
             Assert.That(player.HasCharacter, Is.True);
-
-            GameObject.Destroy(character.gameObject);
         }
     }
 

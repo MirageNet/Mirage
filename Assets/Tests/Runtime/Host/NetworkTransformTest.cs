@@ -9,61 +9,61 @@ namespace Mirage.Experimental.Tests.Host
         [Test]
         public void InitexcludeOwnerUpdateTest()
         {
-            Assert.That(component.excludeOwnerUpdate, Is.True);
+            Assert.That(playerComponent.excludeOwnerUpdate, Is.True);
         }
 
         [Test]
         public void InitsyncPositionTest()
         {
-            Assert.That(component.syncPosition, Is.True);
+            Assert.That(playerComponent.syncPosition, Is.True);
         }
 
         [Test]
         public void InitsyncRotationTest()
         {
-            Assert.That(component.syncRotation, Is.True);
+            Assert.That(playerComponent.syncRotation, Is.True);
         }
 
         [Test]
         public void InitsyncScaleTest()
         {
-            Assert.That(component.syncScale, Is.True);
+            Assert.That(playerComponent.syncScale, Is.True);
         }
 
         [Test]
         public void InitinterpolatePositionTest()
         {
-            Assert.That(component.interpolatePosition, Is.True);
+            Assert.That(playerComponent.interpolatePosition, Is.True);
         }
 
         [Test]
         public void InitinterpolateRotationTest()
         {
-            Assert.That(component.interpolateRotation, Is.True);
+            Assert.That(playerComponent.interpolateRotation, Is.True);
         }
 
         [Test]
         public void InitinterpolateScaleTest()
         {
-            Assert.That(component.interpolateScale, Is.True);
+            Assert.That(playerComponent.interpolateScale, Is.True);
         }
 
         [Test]
         public void InitlocalPositionSensitivityTest()
         {
-            Assert.That(component.localPositionSensitivity, Is.InRange(0.001f, 0.199f));
+            Assert.That(playerComponent.localPositionSensitivity, Is.InRange(0.001f, 0.199f));
         }
 
         [Test]
         public void InitlocalRotationSensitivityTest()
         {
-            Assert.That(component.localRotationSensitivity, Is.InRange(0.001f, 0.199f));
+            Assert.That(playerComponent.localRotationSensitivity, Is.InRange(0.001f, 0.199f));
         }
 
         [Test]
         public void InitlocalScaleSensitivityTest()
         {
-            Assert.That(component.localScaleSensitivity, Is.InRange(0.001f, 0.199f));
+            Assert.That(playerComponent.localScaleSensitivity, Is.InRange(0.001f, 0.199f));
         }
     }
 }

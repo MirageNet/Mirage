@@ -135,7 +135,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             base.ExtraSetup();
 
-            serverIdentity2 = GameObject.Instantiate(playerPrefab).GetComponent<NetworkIdentity>();
+            serverIdentity2 = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
             serverObjectManager.Spawn(serverIdentity2);
 
             await UniTask.DelayFrame(2);

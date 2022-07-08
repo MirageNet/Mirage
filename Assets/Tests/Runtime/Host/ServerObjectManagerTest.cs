@@ -4,7 +4,6 @@ using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.Host
 {
@@ -18,24 +17,20 @@ namespace Mirage.Tests.Runtime.Host
 
             INetworkPlayer player = Substitute.For<INetworkPlayer>();
 
-            NetworkIdentity identity = new GameObject().AddComponent<NetworkIdentity>();
+            NetworkIdentity identity = CreateNetworkIdentity();
 
             serverObjectManager.HideToPlayer(identity, player);
 
             player.Received().Send(Arg.Is<ObjectHideMessage>(msg => msg.netId == identity.NetId));
-
-            // destroy GO after shutdown, otherwise isServer is true in OnDestroy and it tries to call
-            // GameObject.Destroy (but we need DestroyImmediate in Editor)
-            Object.Destroy(identity.gameObject);
         }
 
         [Test]
         public void ValidateSceneObject()
         {
-            identity.SetSceneId(42);
-            Assert.That(serverObjectManager.ValidateSceneObject(identity), Is.True);
-            identity.SetSceneId(0);
-            Assert.That(serverObjectManager.ValidateSceneObject(identity), Is.False);
+            playerIdentity.SetSceneId(42);
+            Assert.That(serverObjectManager.ValidateSceneObject(playerIdentity), Is.True);
+            playerIdentity.SetSceneId(0);
+            Assert.That(serverObjectManager.ValidateSceneObject(playerIdentity), Is.False);
         }
 
         [Test]
@@ -43,9 +38,9 @@ namespace Mirage.Tests.Runtime.Host
         {
             // shouldn't be valid for certain hide flags
             playerGO.hideFlags = HideFlags.NotEditable;
-            Assert.That(serverObjectManager.ValidateSceneObject(identity), Is.False);
+            Assert.That(serverObjectManager.ValidateSceneObject(playerIdentity), Is.False);
             playerGO.hideFlags = HideFlags.HideAndDontSave;
-            Assert.That(serverObjectManager.ValidateSceneObject(identity), Is.False);
+            Assert.That(serverObjectManager.ValidateSceneObject(playerIdentity), Is.False);
         }
 
         [Test]
@@ -55,13 +50,13 @@ namespace Mirage.Tests.Runtime.Host
             serverObjectManager.Destroy(playerGO, false);
 
             // it should have been marked for reset now
-            Assert.That(identity.NetId, Is.Zero);
+            Assert.That(playerIdentity.NetId, Is.Zero);
         }
 
         [UnityTest]
         public IEnumerator DestroyAllSpawnedOnStopTest() => UniTask.ToCoroutine(async () =>
         {
-            var spawnTestObj = new GameObject("testObj", typeof(NetworkIdentity));
+            NetworkIdentity spawnTestObj = CreateNetworkIdentity();
             serverObjectManager.Spawn(spawnTestObj);
 
             // need to grab reference to world before Stop, becuase stop will clear reference
