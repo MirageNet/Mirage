@@ -49,9 +49,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         protected virtual Config ClientConfig => null;
 
         [UnitySetUp]
-        public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
+        public IEnumerator UnitySetUp() => UniTask.ToCoroutine(async () =>
         {
-            Console.WriteLine($"[MirageTest] class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
+            Console.WriteLine($"[MirageTest] UnitySetUp class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
 
             serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(NetworkServer));
             clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(ClientObjectManager), typeof(NetworkClient));
