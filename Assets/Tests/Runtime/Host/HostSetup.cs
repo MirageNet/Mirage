@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using Mirage.SocketLayer;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Object = UnityEngine.Object;
 
 namespace Mirage.Tests.Runtime.Host
 {
@@ -31,8 +33,10 @@ namespace Mirage.Tests.Runtime.Host
         public virtual void ExtraSetup() { }
 
         [UnitySetUp]
-        public IEnumerator SetupHost() => UniTask.ToCoroutine(async () =>
+        public IEnumerator UnitySetUp() => UniTask.ToCoroutine(async () =>
         {
+            Console.WriteLine($"[MirageTest] UnitySetUp class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
+
             networkManagerGo = new GameObject();
             // set gameobject name to test name (helps with debugging)
             networkManagerGo.name = TestContext.CurrentContext.Test.MethodName;
@@ -109,6 +113,8 @@ namespace Mirage.Tests.Runtime.Host
             TearDownTestObjects();
 
             ExtraTearDown();
+
+            Console.WriteLine($"[MirageTest] UnityTearDown class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
         });
 
         public void DoUpdate(int updateCount = 1)

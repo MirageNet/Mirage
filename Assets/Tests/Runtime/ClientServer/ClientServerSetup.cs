@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mirage.SocketLayer;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -50,6 +51,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnitySetUp]
         public IEnumerator Setup() => UniTask.ToCoroutine(async () =>
         {
+            Console.WriteLine($"[MirageTest] class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
+
             serverGo = new GameObject("server", typeof(NetworkSceneManager), typeof(ServerObjectManager), typeof(NetworkServer));
             clientGo = new GameObject("client", typeof(NetworkSceneManager), typeof(ClientObjectManager), typeof(NetworkClient));
             socketFactory = serverGo.AddComponent<TestSocketFactory>();
@@ -151,6 +154,8 @@ namespace Mirage.Tests.Runtime.ClientServer
             TearDownTestObjects();
 
             ExtraTearDown();
+
+            Console.WriteLine($"[MirageTest] UnityTearDown class:{TestContext.CurrentContext.Test.ClassName} method:{TestContext.CurrentContext.Test.MethodName}");
         });
     }
 }
