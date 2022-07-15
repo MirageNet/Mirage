@@ -24,8 +24,8 @@ namespace Mirage
         public NetworkSceneManager NetworkSceneManager;
 
         // spawn handlers. internal for testing purposes. do not use directly.
-        internal readonly Dictionary<int, SpawnHandlerDelegate> spawnHandlers = new Dictionary<int, SpawnHandlerDelegate>();
-        internal readonly Dictionary<int, UnSpawnDelegate> unspawnHandlers = new Dictionary<int, UnSpawnDelegate>();
+        internal readonly Dictionary<int, SpawnHandlerDelegate> _spawnHandlers = new Dictionary<int, SpawnHandlerDelegate>();
+        internal readonly Dictionary<int, UnSpawnDelegate> _unspawnHandlers = new Dictionary<int, UnSpawnDelegate>();
 
         /// <summary>
         /// List of prefabs that will be registered with the spawning system.
@@ -38,7 +38,7 @@ namespace Mirage
         /// This is a dictionary of the prefabs that are registered on the client with ClientScene.RegisterPrefab().
         /// <para>The key to the dictionary is the prefab asset Id.</para>
         /// </summary>
-        internal readonly Dictionary<int, NetworkIdentity> prefabs = new Dictionary<int, NetworkIdentity>();
+        internal readonly Dictionary<int, NetworkIdentity> _prefabs = new Dictionary<int, NetworkIdentity>();
 
         /// <summary>
         /// This is dictionary of the disabled NetworkIdentity objects in the scene that could be spawned by messages from the server.
@@ -46,8 +46,8 @@ namespace Mirage
         /// </summary>
         public readonly Dictionary<ulong, NetworkIdentity> spawnableObjects = new Dictionary<ulong, NetworkIdentity>();
 
-        internal ServerObjectManager ServerObjectManager;
-        private SyncVarReceiver syncVarReceiver;
+        internal ServerObjectManager _serverObjectManager;
+        private SyncVarReceiver _syncVarReceiver;
 
         public void Start()
         {
@@ -61,25 +61,19 @@ namespace Mirage
             }
         }
 
-        private void LateUpdate()
-        {
-            // use late update because that will be called after all received message for this frame
-
-        }
-
 #if UNITY_EDITOR
-        private readonly Dictionary<int, NetworkIdentity> validateCache = new Dictionary<int, NetworkIdentity>();
+        private readonly Dictionary<int, NetworkIdentity> _validateCache = new Dictionary<int, NetworkIdentity>();
 
         private void OnValidate()
         {
-            validateCache.Clear();
+            _validateCache.Clear();
             foreach (var prefab in spawnPrefabs)
             {
                 if (prefab == null)
                     continue;
 
                 var hash = prefab.PrefabHash;
-                if (validateCache.TryGetValue(hash, out var existing))
+                if (_validateCache.TryGetValue(hash, out var existing))
                 {
                     if (prefab == existing)
                         continue;
@@ -90,14 +84,14 @@ namespace Mirage
                     logger.LogError($"2 prefabs had the same hash:'{hash}', A:'{prefab.name}' B:'{existing.name}'. Path A:{pathA} Path B:{pathB}");
                 }
 
-                validateCache[hash] = prefab;
+                _validateCache[hash] = prefab;
             }
         }
 #endif
 
         private void OnClientConnected(INetworkPlayer player)
         {
-            syncVarReceiver = new SyncVarReceiver(Client, Client.World);
+            _syncVarReceiver = new SyncVarReceiver(Client, Client.World);
             RegisterSpawnPrefabs();
 
             // prepare objects right away so objects in first scene can be spawned
@@ -118,7 +112,7 @@ namespace Mirage
         {
             ClearSpawners();
             DestroyAllClientObjects();
-            syncVarReceiver = null;
+            _syncVarReceiver = null;
         }
 
         private void OnFinishedSceneChange(Scene scene, SceneOperation sceneOperation)
@@ -211,7 +205,7 @@ namespace Mirage
             if (prefabHash == 0)
                 return null;
 
-            if (prefabs.TryGetValue(prefabHash, out var identity))
+            if (_prefabs.TryGetValue(prefabHash, out var identity))
             {
                 return identity;
             }
@@ -231,7 +225,7 @@ namespace Mirage
             identity.PrefabHash = newPrefabHash;
 
             if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' as asset:{identity.PrefabHash:X}");
-            prefabs[identity.PrefabHash] = identity;
+            _prefabs[identity.PrefabHash] = identity;
         }
 
         /// <summary>
@@ -244,7 +238,7 @@ namespace Mirage
         public void RegisterPrefab(NetworkIdentity identity)
         {
             if (logger.LogEnabled()) logger.Log($"Registering prefab '{identity.name}' as asset:{identity.PrefabHash:X}");
-            prefabs[identity.PrefabHash] = identity;
+            _prefabs[identity.PrefabHash] = identity;
         }
 
         /// <summary>
@@ -267,8 +261,8 @@ namespace Mirage
 
             if (logger.LogEnabled()) logger.Log("Registering custom prefab '" + identity.name + "' as asset:" + prefabHash + " " + spawnHandler.Method.Name + "/" + unspawnHandler.Method.Name);
 
-            spawnHandlers[prefabHash] = spawnHandler;
-            unspawnHandlers[prefabHash] = unspawnHandler;
+            _spawnHandlers[prefabHash] = spawnHandler;
+            _unspawnHandlers[prefabHash] = unspawnHandler;
         }
 
         /// <summary>
@@ -279,8 +273,8 @@ namespace Mirage
         {
             var prefabHash = identity.PrefabHash;
 
-            spawnHandlers.Remove(prefabHash);
-            unspawnHandlers.Remove(prefabHash);
+            _spawnHandlers.Remove(prefabHash);
+            _unspawnHandlers.Remove(prefabHash);
         }
 
         #endregion
@@ -303,8 +297,8 @@ namespace Mirage
                 logger.Log($"RegisterSpawnHandler PrefabHash:'{prefabHash}' Spawn:{spawnName} UnSpawn:{unspawnName}");
             }
 
-            spawnHandlers[prefabHash] = spawnHandler;
-            unspawnHandlers[prefabHash] = unspawnHandler;
+            _spawnHandlers[prefabHash] = spawnHandler;
+            _unspawnHandlers[prefabHash] = unspawnHandler;
         }
 
         /// <summary>
@@ -313,8 +307,8 @@ namespace Mirage
         /// <param name="prefabHash">The prefabHash for the handler to be removed for.</param>
         public void UnregisterSpawnHandler(int prefabHash)
         {
-            spawnHandlers.Remove(prefabHash);
-            unspawnHandlers.Remove(prefabHash);
+            _spawnHandlers.Remove(prefabHash);
+            _unspawnHandlers.Remove(prefabHash);
         }
 
         /// <summary>
@@ -322,9 +316,9 @@ namespace Mirage
         /// </summary>
         public void ClearSpawners()
         {
-            prefabs.Clear();
-            spawnHandlers.Clear();
-            unspawnHandlers.Clear();
+            _prefabs.Clear();
+            _spawnHandlers.Clear();
+            _unspawnHandlers.Clear();
         }
 
         #endregion
@@ -340,7 +334,7 @@ namespace Mirage
 
             identity.StopClient();
 
-            if (unspawnHandlers.TryGetValue(identity.PrefabHash, out var handler) && handler != null)
+            if (_unspawnHandlers.TryGetValue(identity.PrefabHash, out var handler) && handler != null)
             {
                 handler(identity);
             }
@@ -450,7 +444,7 @@ namespace Mirage
 
         private NetworkIdentity SpawnPrefab(SpawnMessage msg)
         {
-            if (spawnHandlers.TryGetValue(msg.prefabHash.Value, out var handler) && handler != null)
+            if (_spawnHandlers.TryGetValue(msg.prefabHash.Value, out var handler) && handler != null)
             {
                 var obj = handler(msg);
                 if (obj == null)
@@ -623,9 +617,9 @@ namespace Mirage
         private void OnServerRpcReply(INetworkPlayer player, ServerRpcReply reply)
         {
             // find the callback that was waiting for this and invoke it.
-            if (callbacks.TryGetValue(reply.replyId, out var action))
+            if (_callbacks.TryGetValue(reply.replyId, out var action))
             {
-                callbacks.Remove(replyId);
+                _callbacks.Remove(_replyId);
                 using (var reader = NetworkReaderPool.GetReader(reply.payload, Client.World))
                 {
                     action.Invoke(reader);
@@ -637,8 +631,8 @@ namespace Mirage
             }
         }
 
-        private readonly Dictionary<int, Action<NetworkReader>> callbacks = new Dictionary<int, Action<NetworkReader>>();
-        private int replyId;
+        private readonly Dictionary<int, Action<NetworkReader>> _callbacks = new Dictionary<int, Action<NetworkReader>>();
+        private int _replyId;
 
         /// <summary>
         /// Creates a task that waits for a reply from the server
@@ -647,7 +641,7 @@ namespace Mirage
         /// <returns>the task that will be completed when the result is in, and the id to use in the request</returns>
         internal (UniTask<T> task, int replyId) CreateReplyTask<T>()
         {
-            var newReplyId = replyId++;
+            var newReplyId = _replyId++;
             var completionSource = AutoResetUniTaskCompletionSource<T>.Create();
             void Callback(NetworkReader reader)
             {
@@ -655,7 +649,7 @@ namespace Mirage
                 completionSource.TrySetResult(result);
             }
 
-            callbacks.Add(newReplyId, Callback);
+            _callbacks.Add(newReplyId, Callback);
             return (completionSource.Task, newReplyId);
         }
     }

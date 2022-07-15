@@ -136,7 +136,7 @@ namespace Mirage
         {
             if (TryGetComponent(out ClientObjectManager ClientObjectManager))
             {
-                ClientObjectManager.ServerObjectManager = this;
+                ClientObjectManager._serverObjectManager = this;
             }
         }
 

@@ -67,8 +67,8 @@ namespace Mirage.Tests.Runtime.Host
 
             clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(clientObjectManager.spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(clientObjectManager.unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
 
             Object.Destroy(prefabObject);
         }
@@ -82,13 +82,13 @@ namespace Mirage.Tests.Runtime.Host
 
             clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(clientObjectManager.spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(clientObjectManager.unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
 
             clientObjectManager.UnregisterPrefab(identity);
 
-            Assert.That(!clientObjectManager.spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(!clientObjectManager.unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(!clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(!clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
 
             Object.Destroy(prefabObject);
         }
@@ -102,13 +102,13 @@ namespace Mirage.Tests.Runtime.Host
 
             clientObjectManager.RegisterPrefab(identity, TestSpawnDelegate, TestUnspawnDelegate);
 
-            Assert.That(clientObjectManager.spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(clientObjectManager.unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
 
             clientObjectManager.UnregisterSpawnHandler(identity.PrefabHash);
 
-            Assert.That(!clientObjectManager.spawnHandlers.ContainsKey(identity.PrefabHash));
-            Assert.That(!clientObjectManager.unspawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(!clientObjectManager._spawnHandlers.ContainsKey(identity.PrefabHash));
+            Assert.That(!clientObjectManager._unspawnHandlers.ContainsKey(identity.PrefabHash));
 
             Object.Destroy(prefabObject);
         }
@@ -144,7 +144,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             var testGuid = Guid.NewGuid().GetHashCode();
 
-            if (clientObjectManager.prefabs.ContainsKey(testGuid))
+            if (clientObjectManager._prefabs.ContainsKey(testGuid))
             {
                 testGuid = NewUniqueHash();
             }
