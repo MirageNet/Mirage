@@ -33,6 +33,25 @@ namespace Mirage
         /// </summary>
         public bool AutoSpawn = true;
 
+        public int startPositionIndex;
+
+        /// <summary>
+        /// List of transforms where players can be spawned
+        /// </summary>
+        public List<Transform> startPositions = new List<Transform>();
+
+        /// <summary>
+        /// Enumeration of methods of where to spawn player objects in multiplayer games.
+        /// </summary>
+        public enum PlayerSpawnMethod { Random, RoundRobin }
+
+        /// <summary>
+        /// The current method of spawning players used by the CharacterSpawner.
+        /// </summary>
+        [Tooltip("Round Robin or Random order of Start Position selection")]
+        public PlayerSpawnMethod playerSpawnMethod;
+
+
         // Start is called before the first frame update
         public virtual void Awake()
         {
@@ -175,23 +194,5 @@ namespace Mirage
                 return startPosition;
             }
         }
-
-        public int startPositionIndex;
-
-        /// <summary>
-        /// List of transforms where players can be spawned
-        /// </summary>
-        public List<Transform> startPositions = new List<Transform>();
-
-        /// <summary>
-        /// Enumeration of methods of where to spawn player objects in multiplayer games.
-        /// </summary>
-        public enum PlayerSpawnMethod { Random, RoundRobin }
-
-        /// <summary>
-        /// The current method of spawning players used by the CharacterSpawner.
-        /// </summary>
-        [Tooltip("Round Robin or Random order of Start Position selection")]
-        public PlayerSpawnMethod playerSpawnMethod;
     }
 }
