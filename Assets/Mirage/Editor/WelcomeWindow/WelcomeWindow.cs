@@ -437,7 +437,7 @@ namespace Mirage
                 else if (installRequest.Status == StatusCode.Failure)
                 {
                     logger.LogError($"Package install was unsuccessful. \n Error Code: {installRequest.Error.errorCode}\n Error Message: {installRequest.Error.message}");
-                    
+
                 }
 
                 EditorApplication.update -= InstallPackageProgress;
@@ -526,10 +526,10 @@ namespace Mirage
             {
                 //set the button and name of the package
                 var moduleButton = new Button(() => ModuleButtonClicked(module.displayName))
-                    {
-                        style = { height = new Length(20, LengthUnit.Pixel), position = Position.Relative, left = 40},
-                        text = module.installed ? "Uninstall" : "Install"
-                    };
+                {
+                    style = { height = new Length(20, LengthUnit.Pixel), position = Position.Relative, left = 40 },
+                    text = module.installed ? "Uninstall" : "Install"
+                };
 
                 var containerElement = new VisualElement
                 {

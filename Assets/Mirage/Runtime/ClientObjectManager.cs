@@ -302,7 +302,7 @@ namespace Mirage
                 var unspawnName = unspawnHandler?.Method.Name ?? "<NULL>";
                 logger.Log($"RegisterSpawnHandler PrefabHash:'{prefabHash}' Spawn:{spawnName} UnSpawn:{unspawnName}");
             }
-            
+
             spawnHandlers[prefabHash] = spawnHandler;
             unspawnHandlers[prefabHash] = unspawnHandler;
         }
