@@ -23,7 +23,7 @@ namespace Mirage.Tests.Performance
             identity.Owner = Substitute.For<INetworkPlayer>();
             identity.observers.Add(identity.Owner);
             health = new Health[healthCount];
-            for (int i = 0; i < healthCount; i++)
+            for (var i = 0; i < healthCount; i++)
             {
                 health[i] = gameObject.AddComponent<Health>();
                 health[i].syncMode = SyncMode.Owner;
@@ -48,9 +48,9 @@ namespace Mirage.Tests.Performance
 
         private void RunServerUpdateIsDirty()
         {
-            for (int j = 0; j < 1000; j++)
+            for (var j = 0; j < 1000; j++)
             {
-                for (int i = 0; i < healthCount; i++)
+                for (var i = 0; i < healthCount; i++)
                 {
                     health[i].SetDirtyBit(1UL);
                 }
@@ -70,7 +70,7 @@ namespace Mirage.Tests.Performance
 
         private void RunServerUpdateNotDirty()
         {
-            for (int j = 0; j < 1000; j++)
+            for (var j = 0; j < 1000; j++)
             {
                 identity.UpdateVars();
             }

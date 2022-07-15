@@ -27,7 +27,7 @@ namespace Mirage.Logging
 
         public static ILogger GetLogger(string loggerName, LogType defaultLogLevel = LogType.Warning)
         {
-            if (loggers.TryGetValue(loggerName, out ILogger logger))
+            if (loggers.TryGetValue(loggerName, out var logger))
             {
                 return logger;
             }
@@ -55,7 +55,7 @@ namespace Mirage.Logging
         {
             defaultLogHandler = logHandler;
 
-            foreach (ILogger logger in loggers.Values)
+            foreach (var logger in loggers.Values)
             {
                 logger.logHandler = logHandler;
             }

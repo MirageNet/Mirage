@@ -14,7 +14,7 @@ namespace Mirage.Weaver.Serialization
         public static int GetBitCount(ulong range, int max = 32)
         {
             // make sure to cast max to long so incase range is bigger than int value
-            int bitCount = (int)Math.Floor(Math.Log(range, 2)) + 1;
+            var bitCount = (int)Math.Floor(Math.Log(range, 2)) + 1;
             if (bitCount < 0 || bitCount > max)
                 throw new OverflowException($"Bit Count could not be calcualted, range:{range}, bitCount:{bitCount}");
 
@@ -32,7 +32,7 @@ namespace Mirage.Weaver.Serialization
             if (type.Resolve().IsEnum)
             {
                 // use underlying enum type for max size
-                TypeReference enumType = type.Resolve().GetEnumUnderlyingType();
+                var enumType = type.Resolve().GetEnumUnderlyingType();
                 return GetTypeMax(enumType, attributeName);
             }
 
@@ -58,7 +58,7 @@ namespace Mirage.Weaver.Serialization
             if (type.Resolve().IsEnum)
             {
                 // use underlying enum type for max size
-                TypeReference enumType = type.Resolve().GetEnumUnderlyingType();
+                var enumType = type.Resolve().GetEnumUnderlyingType();
                 return GetTypeMin(enumType, attributeName);
             }
 
@@ -78,7 +78,7 @@ namespace Mirage.Weaver.Serialization
             if (type.Resolve().IsEnum)
             {
                 // use underlying enum type for max size
-                TypeReference enumType = type.Resolve().GetEnumUnderlyingType();
+                var enumType = type.Resolve().GetEnumUnderlyingType();
                 return GetTypeMaxSize(enumType, attributeName);
             }
 
@@ -101,7 +101,7 @@ namespace Mirage.Weaver.Serialization
             if (type.Resolve().IsEnum)
             {
                 // use underlying enum type for cast
-                TypeReference enumType = type.Resolve().GetEnumUnderlyingType();
+                var enumType = type.Resolve().GetEnumUnderlyingType();
                 return GetConvertType(enumType);
             }
 

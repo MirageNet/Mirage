@@ -88,7 +88,7 @@ namespace Mirage.SocketLayer
         /// <returns>0, 1, 2, ..., (2^n)-1, 0, 1, 2, ...</returns>
         public ulong Next()
         {
-            ulong current = sequence;
+            var current = sequence;
             sequence = NextAfter(sequence);
             return current;
         }

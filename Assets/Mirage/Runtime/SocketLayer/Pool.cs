@@ -37,7 +37,7 @@ namespace Mirage.SocketLayer
                 Array.Resize(ref pool, maxPoolSize);
             }
 
-            for (int i = created; i < startPoolSize; i++)
+            for (var i = created; i < startPoolSize; i++)
             {
                 Put(CreateNewBuffer());
             }
@@ -62,7 +62,7 @@ namespace Mirage.SocketLayer
             this.logger = logger;
 
             pool = new T[maxPoolSize];
-            for (int i = 0; i < startPoolSize; i++)
+            for (var i = 0; i < startPoolSize; i++)
             {
                 Put(CreateNewBuffer());
             }
@@ -86,7 +86,7 @@ namespace Mirage.SocketLayer
                 // todo is it a security risk to not clear buffer?
 
                 // take then decrement
-                T item = pool[next];
+                var item = pool[next];
                 pool[next] = null;
                 next--;
                 return item;
@@ -125,7 +125,7 @@ namespace Mirage.SocketLayer
             {
                 if (pool.created >= pool.maxPoolSize && pool.logger.Enabled(LogType.Warning))
                 {
-                    float now = GetTime();
+                    var now = GetTime();
 
                     // if has been enough time since last log, then log again 
                     if (now > nextLogTime)

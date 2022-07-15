@@ -12,7 +12,7 @@ namespace Mirage.Examples.InterestManagement
 
         public void Spawn()
         {
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
                 SpawnPrefab();
         }
 
@@ -24,7 +24,7 @@ namespace Mirage.Examples.InterestManagement
                 (Random.value - 0.5f) * bounds.size.z + bounds.center.z
             );
 
-            NetworkIdentity newLoot = GameObject.Instantiate(prefab, position, Quaternion.identity, transform);
+            var newLoot = GameObject.Instantiate(prefab, position, Quaternion.identity, transform);
 
             serverObjectManager.Spawn(newLoot);
         }

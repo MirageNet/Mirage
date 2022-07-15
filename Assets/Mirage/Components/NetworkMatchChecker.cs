@@ -33,7 +33,7 @@ namespace Mirage
                 if (currentMatch == value) return;
 
                 // cache previous match so observers in that match can be rebuilt
-                Guid previousMatch = currentMatch;
+                var previousMatch = currentMatch;
 
                 // Set this to the new match this object just entered ...
                 currentMatch = value;
@@ -89,7 +89,7 @@ namespace Mirage
 
         private void RebuildMatchObservers(Guid specificMatch)
         {
-            foreach (NetworkIdentity networkIdentity in matchPlayers[specificMatch])
+            foreach (var networkIdentity in matchPlayers[specificMatch])
                 if (networkIdentity != null)
                     networkIdentity.RebuildObservers(false);
         }
@@ -108,7 +108,7 @@ namespace Mirage
             if (MatchId == Guid.Empty)
                 return false;
 
-            NetworkMatchChecker networkMatchChecker = player.Identity.GetComponent<NetworkMatchChecker>();
+            var networkMatchChecker = player.Identity.GetComponent<NetworkMatchChecker>();
 
             if (networkMatchChecker == null)
                 return false;
@@ -126,7 +126,7 @@ namespace Mirage
         {
             if (currentMatch == Guid.Empty) return;
 
-            foreach (NetworkIdentity networkIdentity in matchPlayers[currentMatch])
+            foreach (var networkIdentity in matchPlayers[currentMatch])
                 if (networkIdentity != null && networkIdentity.Owner != null)
                     observers.Add(networkIdentity.Owner);
         }

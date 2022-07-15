@@ -19,7 +19,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             var playerReplacement = new GameObject("replacement", typeof(NetworkIdentity));
             toDestroy.Add(playerReplacement);
-            NetworkIdentity replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
+            var replacementIdentity = playerReplacement.GetComponent<NetworkIdentity>();
             replacementIdentity.PrefabHash = Guid.NewGuid().GetHashCode();
             clientObjectManager.RegisterPrefab(replacementIdentity);
 
@@ -33,7 +33,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             server.Stop();
 
-            InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
+            var ex = Assert.Throws<InvalidOperationException>(() =>
             {
                 serverObjectManager.Spawn(new GameObject().AddComponent<NetworkIdentity>(), serverPlayer);
             });
@@ -45,7 +45,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ThrowsIfSpawnCalledOwnerHasNoNetworkIdentity()
         {
-            InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
+            var ex = Assert.Throws<InvalidOperationException>(() =>
             {
                 serverObjectManager.Spawn(new GameObject(), new GameObject());
             });
@@ -67,7 +67,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             var badOwner = new GameObject();
             badOwner.AddComponent<NetworkIdentity>();
 
-            InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
+            var ex = Assert.Throws<InvalidOperationException>(() =>
             {
                 serverObjectManager.Spawn(new GameObject(), badOwner);
             });
@@ -79,7 +79,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ShowForPlayerTest() => UniTask.ToCoroutine(async () =>
         {
-            bool invoked = false;
+            var invoked = false;
 
             ClientMessageHandler.RegisterHandler<SpawnMessage>(msg => invoked = true);
 
@@ -96,7 +96,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void SpawnSceneObject()
         {
-            NetworkIdentity sceneObject = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
+            var sceneObject = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
             sceneObject.SetSceneId(42);
 
             Debug.Assert(!sceneObject.IsSpawned, "Identity should be unspawned for this test");
@@ -107,7 +107,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void DoesNotSpawnNonSceneObject()
         {
-            NetworkIdentity sceneObject = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
+            var sceneObject = InstantiateForTest(playerPrefab).GetComponent<NetworkIdentity>();
             sceneObject.SetSceneId(0);
 
             Debug.Assert(!sceneObject.IsSpawned, "Identity should be unspawned for this test");
@@ -118,7 +118,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void SpawnEvent()
         {
-            Action<NetworkIdentity> mockHandler = Substitute.For<Action<NetworkIdentity>>();
+            var mockHandler = Substitute.For<Action<NetworkIdentity>>();
             server.World.onSpawn += mockHandler;
             var newObj = GameObject.Instantiate(playerPrefab);
             serverObjectManager.Spawn(newObj);
@@ -130,7 +130,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ClientSpawnEvent() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkIdentity> mockHandler = Substitute.For<Action<NetworkIdentity>>();
+            var mockHandler = Substitute.For<Action<NetworkIdentity>>();
             client.World.onSpawn += mockHandler;
             var newObj = GameObject.Instantiate(playerPrefab);
             serverObjectManager.Spawn(newObj);
@@ -144,7 +144,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ClientUnSpawnEvent() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkIdentity> mockHandler = Substitute.For<Action<NetworkIdentity>>();
+            var mockHandler = Substitute.For<Action<NetworkIdentity>>();
             client.World.onUnspawn += mockHandler;
             var newObj = GameObject.Instantiate(playerPrefab);
             serverObjectManager.Spawn(newObj);
@@ -157,7 +157,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void UnSpawnEvent()
         {
-            Action<NetworkIdentity> mockHandler = Substitute.For<Action<NetworkIdentity>>();
+            var mockHandler = Substitute.For<Action<NetworkIdentity>>();
             server.World.onUnspawn += mockHandler;
             var newObj = GameObject.Instantiate(playerPrefab);
             serverObjectManager.Spawn(newObj);
@@ -168,7 +168,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ReplacePlayerBaseTest()
         {
-            NetworkIdentity replacement = CreatePlayerReplacement();
+            var replacement = CreatePlayerReplacement();
 
             serverObjectManager.ReplaceCharacter(serverPlayer, replacement);
 
@@ -178,7 +178,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ReplacePlayerDontKeepAuthTest()
         {
-            NetworkIdentity replacement = CreatePlayerReplacement();
+            var replacement = CreatePlayerReplacement();
 
             serverObjectManager.ReplaceCharacter(serverPlayer, replacement, true);
 
@@ -188,8 +188,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ReplacePlayerPrefabHashTest()
         {
-            NetworkIdentity replacement = CreatePlayerReplacement();
-            int hash = replacement.PrefabHash;
+            var replacement = CreatePlayerReplacement();
+            var hash = replacement.PrefabHash;
 
             serverObjectManager.ReplaceCharacter(serverPlayer, replacement, hash);
 
@@ -199,8 +199,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void AddPlayerForConnectionPrefabHashTest()
         {
-            NetworkIdentity replacement = CreatePlayerReplacement();
-            int hash = replacement.PrefabHash;
+            var replacement = CreatePlayerReplacement();
+            var hash = replacement.PrefabHash;
 
             serverPlayer.Identity = null;
 
@@ -268,7 +268,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void DestroyCharacterThrowsIfNoCharacter()
         {
-            INetworkPlayer player = Substitute.For<INetworkPlayer>();
+            var player = Substitute.For<INetworkPlayer>();
 
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -279,7 +279,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void RemoveCharacterThrowsIfNoCharacter()
         {
-            INetworkPlayer player = Substitute.For<INetworkPlayer>();
+            var player = Substitute.For<INetworkPlayer>();
 
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -290,7 +290,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ThrowsIfSpawnedCalledWithoutANetworkIdentity()
         {
-            InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
+            var ex = Assert.Throws<InvalidOperationException>(() =>
             {
                 serverObjectManager.Spawn(new GameObject(), clientPlayer);
             });
@@ -302,7 +302,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void AddCharacterNoIdentityExceptionTest()
         {
-            InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
+            var ex = Assert.Throws<InvalidOperationException>(() =>
             {
                 serverObjectManager.AddCharacter(serverPlayer, new GameObject());
             });
@@ -313,7 +313,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ReplacePlayerNoIdentityExceptionTest()
         {
-            InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() =>
+            var ex = Assert.Throws<InvalidOperationException>(() =>
             {
                 serverObjectManager.ReplaceCharacter(serverPlayer, new GameObject(), true);
             });
@@ -327,7 +327,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             await AsyncUtil.WaitUntilWithTimeout(() => !server.Active);
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            var exception = Assert.Throws<InvalidOperationException>(() =>
             {
                 serverObjectManager.SpawnObjects();
             });

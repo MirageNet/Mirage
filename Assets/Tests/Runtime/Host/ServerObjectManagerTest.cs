@@ -16,9 +16,9 @@ namespace Mirage.Tests.Runtime.Host
         {
             // add connection
 
-            INetworkPlayer player = Substitute.For<INetworkPlayer>();
+            var player = Substitute.For<INetworkPlayer>();
 
-            NetworkIdentity identity = new GameObject().AddComponent<NetworkIdentity>();
+            var identity = new GameObject().AddComponent<NetworkIdentity>();
 
             serverObjectManager.HideToPlayer(identity, player);
 
@@ -65,7 +65,7 @@ namespace Mirage.Tests.Runtime.Host
             serverObjectManager.Spawn(spawnTestObj);
 
             // need to grab reference to world before Stop, becuase stop will clear reference
-            NetworkWorld world = server.World;
+            var world = server.World;
 
             //1 is the player. should be 2 at this point
             Assert.That(world.SpawnedIdentities.Count, Is.GreaterThan(1));

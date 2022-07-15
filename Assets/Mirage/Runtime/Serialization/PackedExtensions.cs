@@ -12,7 +12,7 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WritePackedInt32(this NetworkWriter writer, int i)
         {
-            uint zigzagged = ZigZag.Encode(i);
+            var zigzagged = ZigZag.Encode(i);
             writer.WritePackedUInt32(zigzagged);
         }
 
@@ -26,7 +26,7 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WritePackedInt64(this NetworkWriter writer, long i)
         {
-            ulong zigzagged = ZigZag.Encode(i);
+            var zigzagged = ZigZag.Encode(i);
             writer.WritePackedUInt64(zigzagged);
         }
 
@@ -79,7 +79,7 @@ namespace Mirage.Serialization
 
         public static int ReadPackedInt32(this NetworkReader reader)
         {
-            uint data = reader.ReadPackedUInt32();
+            var data = reader.ReadPackedUInt32();
             return ZigZag.Decode(data);
         }
 
@@ -88,61 +88,61 @@ namespace Mirage.Serialization
 
         public static long ReadPackedInt64(this NetworkReader reader)
         {
-            ulong data = reader.ReadPackedUInt64();
+            var data = reader.ReadPackedUInt64();
             return ZigZag.Decode(data);
         }
 
         public static ulong ReadPackedUInt64(this NetworkReader reader)
         {
-            byte a0 = reader.ReadByte();
+            var a0 = reader.ReadByte();
             if (a0 < 241)
             {
                 return a0;
             }
 
-            byte a1 = reader.ReadByte();
+            var a1 = reader.ReadByte();
             if (a0 >= 241 && a0 <= 248)
             {
                 return 240 + ((a0 - (ulong)241) << 8) + a1;
             }
 
-            byte a2 = reader.ReadByte();
+            var a2 = reader.ReadByte();
             if (a0 == 249)
             {
                 return 2288 + ((ulong)a1 << 8) + a2;
             }
 
-            byte a3 = reader.ReadByte();
+            var a3 = reader.ReadByte();
             if (a0 == 250)
             {
                 return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16);
             }
 
-            byte a4 = reader.ReadByte();
+            var a4 = reader.ReadByte();
             if (a0 == 251)
             {
                 return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16) + (((ulong)a4) << 24);
             }
 
-            byte a5 = reader.ReadByte();
+            var a5 = reader.ReadByte();
             if (a0 == 252)
             {
                 return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16) + (((ulong)a4) << 24) + (((ulong)a5) << 32);
             }
 
-            byte a6 = reader.ReadByte();
+            var a6 = reader.ReadByte();
             if (a0 == 253)
             {
                 return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16) + (((ulong)a4) << 24) + (((ulong)a5) << 32) + (((ulong)a6) << 40);
             }
 
-            byte a7 = reader.ReadByte();
+            var a7 = reader.ReadByte();
             if (a0 == 254)
             {
                 return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16) + (((ulong)a4) << 24) + (((ulong)a5) << 32) + (((ulong)a6) << 40) + (((ulong)a7) << 48);
             }
 
-            byte a8 = reader.ReadByte();
+            var a8 = reader.ReadByte();
             if (a0 == 255)
             {
                 return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16) + (((ulong)a4) << 24) + (((ulong)a5) << 32) + (((ulong)a6) << 40) + (((ulong)a7) << 48) + (((ulong)a8) << 56);

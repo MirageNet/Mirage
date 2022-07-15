@@ -39,9 +39,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Repeat(1000)]
         public void UnpacksCorrectUlongValue()
         {
-            ulong start = GetRandonUlongBias();
+            var start = GetRandonUlongBias();
             VarIntBlocksPacker.Pack(writer, start, blockSize);
-            ulong unpacked = VarIntBlocksPacker.Unpack(GetReader(), blockSize);
+            var unpacked = VarIntBlocksPacker.Unpack(GetReader(), blockSize);
 
             Assert.That(unpacked, Is.EqualTo(start));
         }
@@ -50,9 +50,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Repeat(1000)]
         public void UnpacksCorrectUintValue()
         {
-            uint start = GetRandonUintBias();
+            var start = GetRandonUintBias();
             VarIntBlocksPacker.Pack(writer, start, blockSize);
-            ulong unpacked = VarIntBlocksPacker.Unpack(GetReader(), blockSize);
+            var unpacked = VarIntBlocksPacker.Unpack(GetReader(), blockSize);
 
             Assert.That(unpacked, Is.EqualTo(start));
         }
@@ -61,9 +61,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Repeat(1000)]
         public void UnpacksCorrectUshortValue()
         {
-            ushort start = GetRandonUshortBias();
+            var start = GetRandonUshortBias();
             VarIntBlocksPacker.Pack(writer, start, blockSize);
-            ulong unpacked = VarIntBlocksPacker.Unpack(GetReader(), blockSize);
+            var unpacked = VarIntBlocksPacker.Unpack(GetReader(), blockSize);
 
             Assert.That(unpacked, Is.EqualTo(start));
         }
@@ -71,22 +71,22 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void WritesNplus1BitsPerBlock()
         {
-            uint zero = 0u;
+            var zero = 0u;
             VarIntBlocksPacker.Pack(writer, zero, blockSize);
             Assert.That(writer.BitPosition, Is.EqualTo(blockSize + 1));
 
-            ulong unpacked = VarIntBlocksPacker.Unpack(GetReader(), blockSize);
+            var unpacked = VarIntBlocksPacker.Unpack(GetReader(), blockSize);
             Assert.That(unpacked, Is.EqualTo(zero));
         }
 
         [Test]
         public void WritesNplus1BitsPerBlock_bigger()
         {
-            uint aboveBlockSize = (1u << blockSize) + 1u;
+            var aboveBlockSize = (1u << blockSize) + 1u;
             VarIntBlocksPacker.Pack(writer, aboveBlockSize, blockSize);
             Assert.That(writer.BitPosition, Is.EqualTo(2 * (blockSize + 1)));
 
-            ulong unpacked = VarIntBlocksPacker.Unpack(GetReader(), blockSize);
+            var unpacked = VarIntBlocksPacker.Unpack(GetReader(), blockSize);
             Assert.That(unpacked, Is.EqualTo(aboveBlockSize));
         }
     }

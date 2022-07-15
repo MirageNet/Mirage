@@ -39,7 +39,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public IEnumerator HookMethodCalled()
         {
             const int num = 32;
-            Action<int, int> hook = Substitute.For<Action<int, int>>();
+            var hook = Substitute.For<Action<int, int>>();
             clientComponent.hookCalled += hook;
             serverComponent.value = num;
 
@@ -63,7 +63,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public IEnumerator HookMethodCalled()
         {
             const int num = 32;
-            Action<MyClass, MyClass> hook = Substitute.For<Action<MyClass, MyClass>>();
+            var hook = Substitute.For<Action<MyClass, MyClass>>();
             clientComponent.hookCalled += hook;
             serverComponent.value = new MyClass { Value = num };
 

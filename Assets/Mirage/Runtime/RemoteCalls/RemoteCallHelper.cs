@@ -28,7 +28,7 @@ namespace Mirage.RemoteCalls
 
             if (logger.LogEnabled())
             {
-                string requireAuthorityMessage = invokerType == RpcInvokeType.ServerRpc ? $" RequireAuthority:{cmdRequireAuthority}" : "";
+                var requireAuthorityMessage = invokerType == RpcInvokeType.ServerRpc ? $" RequireAuthority:{cmdRequireAuthority}" : "";
                 logger.Log($"RegisterDelegate invokerType: {invokerType} method: {func.Method.Name}{requireAuthorityMessage}");
             }
         }
@@ -38,9 +38,9 @@ namespace Mirage.RemoteCalls
             async UniTaskVoid Wrapper(NetworkBehaviour obj, NetworkReader reader, INetworkPlayer senderPlayer, int replyId)
             {
                 /// invoke the serverRpc and send a reply message
-                T result = await func(obj, reader, senderPlayer, replyId);
+                var result = await func(obj, reader, senderPlayer, replyId);
 
-                using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+                using (var writer = NetworkWriterPool.GetWriter())
                 {
                     writer.Write(result);
                     var serverRpcReply = new ServerRpcReply

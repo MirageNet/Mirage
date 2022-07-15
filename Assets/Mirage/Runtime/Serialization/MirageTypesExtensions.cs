@@ -34,7 +34,7 @@ namespace Mirage.Serialization
                 writer.WriteNetworkIdentity(null);
                 return;
             }
-            NetworkIdentity identity = value.GetComponent<NetworkIdentity>();
+            var identity = value.GetComponent<NetworkIdentity>();
             if (identity == null)
                 throw new InvalidOperationException($"Cannot send GameObject without a NetworkIdentity {value.name}");
             writer.WriteNetworkIdentity(identity);
@@ -54,9 +54,9 @@ namespace Mirage.Serialization
 
         public static NetworkIdentity ReadNetworkIdentity(this NetworkReader reader)
         {
-            MirageNetworkReader mirageReader = reader.ToMirageReader();
+            var mirageReader = reader.ToMirageReader();
 
-            uint netId = reader.ReadPackedUInt32();
+            var netId = reader.ReadPackedUInt32();
             if (netId == 0)
                 return null;
 
@@ -72,25 +72,25 @@ namespace Mirage.Serialization
             }
 
             // if not found return c# null
-            return objectLocator.TryGetIdentity(netId, out NetworkIdentity identity)
+            return objectLocator.TryGetIdentity(netId, out var identity)
                 ? identity
                 : null;
         }
 
         public static NetworkBehaviour ReadNetworkBehaviour(this NetworkReader reader)
         {
-            MirageNetworkReader mirageReader = reader.ToMirageReader();
+            var mirageReader = reader.ToMirageReader();
 
             // we can't use ReadNetworkIdentity here, because we need to know if netid was 0 or not
             // if it is not 0 we need to read component index even if NI is null, or it'll fail to deserilize next part
-            uint netId = reader.ReadPackedUInt32();
+            var netId = reader.ReadPackedUInt32();
             if (netId == 0)
                 return null;
 
             // always read index if netid is not 0
-            byte componentIndex = reader.ReadByte();
+            var componentIndex = reader.ReadByte();
 
-            NetworkIdentity identity = FindNetworkIdentity(mirageReader.ObjectLocator, netId);
+            var identity = FindNetworkIdentity(mirageReader.ObjectLocator, netId);
             if (identity is null)
                 return null;
 
@@ -104,7 +104,7 @@ namespace Mirage.Serialization
 
         public static GameObject ReadGameObject(this NetworkReader reader)
         {
-            NetworkIdentity identity = reader.ReadNetworkIdentity();
+            var identity = reader.ReadNetworkIdentity();
             if (identity == null)
             {
                 return null;

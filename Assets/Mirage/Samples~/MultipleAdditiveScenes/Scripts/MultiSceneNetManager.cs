@@ -48,7 +48,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
 
             ServerObjectManager.NetworkSceneManager.ServerLoadSceneAdditively(gameScene, Server.Players);
 
-            PlayerScore playerScore = player.Identity.GetComponent<PlayerScore>();
+            var playerScore = player.Identity.GetComponent<PlayerScore>();
             playerScore.playerNumber = playerId;
             playerScore.scoreIndex = playerId / subScenes.Count;
             playerScore.matchIndex = playerId % subScenes.Count;
@@ -67,7 +67,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
 
         private IEnumerator LoadSubScenes()
         {
-            for (int index = 0; index < instances; index++)
+            for (var index = 0; index < instances; index++)
             {
                 yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(gameScene, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive, localPhysicsMode = LocalPhysicsMode.Physics3D });
                 subScenes.Add(UnityEngine.SceneManagement.SceneManager.GetSceneAt(index + 1));
@@ -91,7 +91,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
 
         private IEnumerator UnloadClientSubScenes()
         {
-            for (int index = 0; index < UnityEngine.SceneManagement.SceneManager.sceneCount; index++)
+            for (var index = 0; index < UnityEngine.SceneManagement.SceneManager.sceneCount; index++)
             {
                 if (UnityEngine.SceneManagement.SceneManager.GetSceneAt(index) != UnityEngine.SceneManagement.SceneManager.GetActiveScene())
                     yield return UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(UnityEngine.SceneManagement.SceneManager.GetSceneAt(index));
@@ -100,7 +100,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
 
         private IEnumerator UnloadSubScenes()
         {
-            for (int index = 0; index < subScenes.Count; index++)
+            for (var index = 0; index < subScenes.Count; index++)
                 yield return UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(subScenes[index]);
 
             subScenes.Clear();

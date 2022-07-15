@@ -12,21 +12,21 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void ThrowsIfStartIsLessThanMax()
         {
-            ArgumentException exception = Assert.Throws<ArgumentException>(() => new Pool<TestBuffer>(TestBuffer.Create, 0, 10, 5));
+            var exception = Assert.Throws<ArgumentException>(() => new Pool<TestBuffer>(TestBuffer.Create, 0, 10, 5));
             Assert.That(exception, Has.Message.EqualTo(new ArgumentException("Start size must be less than max size", "startPoolSize").Message));
         }
 
         [Test]
         public void ThrowsIfCreateIsNull()
         {
-            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() => new Pool<TestBuffer>(null, 0, 10, 100));
+            var exception = Assert.Throws<ArgumentNullException>(() => new Pool<TestBuffer>(null, 0, 10, 100));
             Assert.That(exception, Has.Message.EqualTo(new ArgumentNullException("createNew").Message));
         }
 
         [Test]
         public void CallsCreateStartCountTimesWithCorrectArgs()
         {
-            Pool<TestBuffer>.CreateNewItem create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
+            var create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
 
             const int startCount = 5;
             const int bufferSize = 100;
@@ -38,14 +38,14 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void TakeDoesntCreateTillEmpty()
         {
-            Pool<TestBuffer>.CreateNewItem create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
+            var create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
             create.Invoke(default, default).Returns((args) => TestBuffer.Create((int)args[0], (Pool<TestBuffer>)args[0]));
 
             const int startCount = 5;
             const int bufferSize = 100;
             var pool = new Pool<TestBuffer>(create, bufferSize, startCount, 100);
 
-            for (int i = 0; i < startCount; i++)
+            for (var i = 0; i < startCount; i++)
             {
                 _ = pool.Take();
             }
@@ -53,7 +53,7 @@ namespace Mirage.SocketLayer.Tests
             create.ClearReceivedCalls();
 
             const int extraCreates = 2;
-            for (int i = 0; i < extraCreates; i++)
+            for (var i = 0; i < extraCreates; i++)
             {
                 _ = pool.Take();
             }
@@ -63,7 +63,7 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void CanTakeMoreAfterPuttingSomeBackWithoutCreatingNew()
         {
-            Pool<TestBuffer>.CreateNewItem create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
+            var create = Substitute.For<Pool<TestBuffer>.CreateNewItem>();
             create.Invoke(default, default).Returns((args) => TestBuffer.Create((int)args[0], (Pool<TestBuffer>)args[1]));
 
             const int startCount = 5;
@@ -74,20 +74,20 @@ namespace Mirage.SocketLayer.Tests
 
             var temp = new List<TestBuffer>();
             var temp2 = new List<TestBuffer>();
-            for (int i = 0; i < takeCount; i++)
+            for (var i = 0; i < takeCount; i++)
             {
                 temp.Add(pool.Take());
             }
 
             create.ClearReceivedCalls();
 
-            for (int i = 0; i < takeCount; i++)
+            for (var i = 0; i < takeCount; i++)
             {
                 pool.Put(temp[i]);
             }
 
 
-            for (int i = 0; i < takeCount; i++)
+            for (var i = 0; i < takeCount; i++)
             {
                 temp2.Add(pool.Take());
             }
@@ -109,7 +109,7 @@ namespace Mirage.SocketLayer.Tests
 
             var temp = new List<TestBuffer>();
 
-            for (int i = 0; i < takeCount; i++)
+            for (var i = 0; i < takeCount; i++)
             {
                 temp.Add(pool.Take());
             }
@@ -123,12 +123,12 @@ namespace Mirage.SocketLayer.Tests
         {
             const int maxCount = 5;
             const int bufferSize = 100;
-            ILogger logger = Substitute.For<ILogger>();
+            var logger = Substitute.For<ILogger>();
             logger.IsLogTypeAllowed(LogType.Warning).Returns(true);
             var pool = new Pool<TestBuffer>(TestBuffer.Create, bufferSize, 0, maxCount, logger);
 
             var temp = new List<TestBuffer>();
-            for (int i = 0; i < maxCount; i++)
+            for (var i = 0; i < maxCount; i++)
             {
                 temp.Add(pool.Take());
             }
@@ -143,12 +143,12 @@ namespace Mirage.SocketLayer.Tests
         {
             const int maxCount = 5;
             const int bufferSize = 100;
-            ILogger logger = Substitute.For<ILogger>();
+            var logger = Substitute.For<ILogger>();
             logger.IsLogTypeAllowed(LogType.Warning).Returns(true);
             var pool = new Pool<TestBuffer>(TestBuffer.Create, bufferSize, 0, maxCount, logger);
 
             var temp = new List<TestBuffer>();
-            for (int i = 0; i < maxCount; i++)
+            for (var i = 0; i < maxCount; i++)
             {
                 temp.Add(pool.Take());
             }

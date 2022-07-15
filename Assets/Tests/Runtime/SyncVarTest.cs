@@ -39,7 +39,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var gameObject = new GameObject("player", typeof(NetworkIdentity), typeof(MockPlayer));
 
-            MockPlayer player = gameObject.GetComponent<MockPlayer>();
+            var player = gameObject.GetComponent<MockPlayer>();
 
             // synchronize immediatelly
             player.syncInterval = 0f;
@@ -68,7 +68,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
             var gameObject = new GameObject("player", typeof(NetworkIdentity), typeof(MockPlayer));
 
-            MockPlayer player = gameObject.GetComponent<MockPlayer>();
+            var player = gameObject.GetComponent<MockPlayer>();
             player.lastSyncTime = Time.time;
             // synchronize immediately
             player.syncInterval = 1f;
@@ -96,7 +96,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             var gameObject = new GameObject("Player", typeof(NetworkIdentity), typeof(MockPlayer));
 
-            MockPlayer player = gameObject.GetComponent<MockPlayer>();
+            var player = gameObject.GetComponent<MockPlayer>();
             player.lastSyncTime = Time.time;
             // synchronize immediately
             player.syncInterval = 1f;
@@ -124,8 +124,8 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             // set up a "server" object
             var gameObject1 = new GameObject("player", typeof(NetworkIdentity), typeof(MockPlayer));
-            NetworkIdentity identity1 = gameObject1.GetComponent<NetworkIdentity>();
-            MockPlayer player1 = gameObject1.GetComponent<MockPlayer>();
+            var identity1 = gameObject1.GetComponent<NetworkIdentity>();
+            var player1 = gameObject1.GetComponent<MockPlayer>();
             var myGuild = new MockPlayer.Guild
             {
                 name = "Back street boys"
@@ -137,8 +137,8 @@ namespace Mirage.Tests.Runtime.Serialization
 
             // set up a "client" object
             var gameObject2 = new GameObject();
-            NetworkIdentity identity2 = gameObject2.AddComponent<NetworkIdentity>();
-            MockPlayer player2 = gameObject2.AddComponent<MockPlayer>();
+            var identity2 = gameObject2.AddComponent<NetworkIdentity>();
+            var player2 = gameObject2.AddComponent<MockPlayer>();
 
             // apply all the data from the server object
             reader.Reset(ownerWriter.ToArray());
@@ -154,7 +154,7 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             var gameObject = new GameObject("player", typeof(NetworkIdentity), typeof(MockPlayer));
             var other = new GameObject("other", typeof(NetworkIdentity));
-            MockPlayer player = gameObject.GetComponent<MockPlayer>();
+            var player = gameObject.GetComponent<MockPlayer>();
 
             player.target = other.GetComponent<NetworkIdentity>();
 

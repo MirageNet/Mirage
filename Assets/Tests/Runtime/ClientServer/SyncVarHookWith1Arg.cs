@@ -69,7 +69,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             const int value = 50;
 
-            Action<int> sub = Substitute.For<Action<int>>();
+            var sub = Substitute.For<Action<int>>();
             clientComponent.onChangedCalled += sub;
             serverComponent.lastSyncTime = 0; // make sure syncs quick
             serverComponent.var = value;
@@ -87,7 +87,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             const int value = 50;
 
-            Action<int> sub = Substitute.For<Action<int>>();
+            var sub = Substitute.For<Action<int>>();
             clientComponent.OnChange += sub;
             serverComponent.lastSyncTime = 0; // make sure syncs quick
             serverComponent.var = value;
@@ -105,7 +105,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             const int value = 50;
 
-            Action<int> sub = Substitute.For<Action<int>>();
+            var sub = Substitute.For<Action<int>>();
             clientComponent.onChangedCalled += sub;
             serverComponent.lastSyncTime = 0; // make sure syncs quick
             serverComponent.var = value;
@@ -123,7 +123,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             const int value = 50;
 
-            Action<int> sub = Substitute.For<Action<int>>();
+            var sub = Substitute.For<Action<int>>();
             clientComponent.onChangedCalled += sub;
             serverComponent.lastSyncTime = 0; // make sure syncs quick
             serverComponent.var = value;

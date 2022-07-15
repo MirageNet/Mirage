@@ -48,7 +48,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.Write(data);
             var reader = new NetworkReader();
             reader.Reset(writer.ToArraySegment());
-            MyType copy = reader.Read<MyType>();
+            var copy = reader.Read<MyType>();
 
             Assert.That(copy, Is.EqualTo(data));
 

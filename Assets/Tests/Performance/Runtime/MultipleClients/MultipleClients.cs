@@ -41,7 +41,7 @@ namespace Mirage.Tests.Performance.Runtime
 #else
             throw new System.NotSupportedException("Test not supported in player");
 #endif
-            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            var scene = SceneManager.GetSceneByPath(ScenePath);
             SceneManager.SetActiveScene(scene);
 
 #if UNITY_EDITOR
@@ -69,11 +69,11 @@ namespace Mirage.Tests.Performance.Runtime
             Debug.Assert(socketFactory != null, "Could not find socket factory for test");
 
             // connect from a bunch of clients
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
                 await StartClient(i, socketFactory);
 
             // spawn a bunch of monsters
-            for (int i = 0; i < MonsterCount; i++)
+            for (var i = 0; i < MonsterCount; i++)
                 SpawnMonster(i);
 
             while (Object.FindObjectsOfType<MonsterBehavior>().Count() < MonsterCount * (ClientCount + 1))
@@ -83,8 +83,8 @@ namespace Mirage.Tests.Performance.Runtime
         private IEnumerator StartClient(int i, SocketFactory socketFactory)
         {
             var clientGo = new GameObject($"Client {i}", typeof(NetworkClient), typeof(ClientObjectManager));
-            NetworkClient client = clientGo.GetComponent<NetworkClient>();
-            ClientObjectManager objectManager = clientGo.GetComponent<ClientObjectManager>();
+            var client = clientGo.GetComponent<NetworkClient>();
+            var objectManager = clientGo.GetComponent<ClientObjectManager>();
             objectManager.Client = client;
             objectManager.Start();
             client.SocketFactory = socketFactory;
@@ -97,7 +97,7 @@ namespace Mirage.Tests.Performance.Runtime
 
         private void SpawnMonster(int i)
         {
-            NetworkIdentity monster = Object.Instantiate(MonsterPrefab);
+            var monster = Object.Instantiate(MonsterPrefab);
 
             monster.GetComponent<MonsterBehavior>().MonsterId = i;
             monster.gameObject.name = $"Monster {i}";
@@ -112,7 +112,7 @@ namespace Mirage.Tests.Performance.Runtime
             yield return null;
 
             // unload scene
-            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            var scene = SceneManager.GetSceneByPath(ScenePath);
             yield return SceneManager.UnloadSceneAsync(scene);
         }
 

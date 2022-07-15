@@ -42,7 +42,7 @@ namespace Mirage.Tests
             spawner.ClientObjectManager = clientObjectManager;
 
             playerPrefab = new GameObject();
-            NetworkIdentity playerId = playerPrefab.AddComponent<NetworkIdentity>();
+            var playerId = playerPrefab.AddComponent<NetworkIdentity>();
 
             spawner.PlayerPrefab = playerId;
 

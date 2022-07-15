@@ -20,7 +20,7 @@ namespace Mirage.Weaver
             var logger = new WeaverLogger();
             var weaver = new Weaver(logger);
 
-            AssemblyDefinition assemblyDefinition = weaver.Weave(compiledAssembly);
+            var assemblyDefinition = weaver.Weave(compiledAssembly);
 
             // write
             var pe = new MemoryStream();

@@ -32,10 +32,10 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         private static void UnloadAdditiveScenes()
         {
-            Scene active = SceneManager.GetActiveScene();
-            for (int i = 0; i < SceneManager.sceneCount; i++)
+            var active = SceneManager.GetActiveScene();
+            for (var i = 0; i < SceneManager.sceneCount; i++)
             {
-                Scene scene = SceneManager.GetSceneAt(i);
+                var scene = SceneManager.GetSceneAt(i);
                 if (active == scene) { continue; }
                 SceneManager.UnloadSceneAsync(scene);
             }
@@ -53,7 +53,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void FinishLoadSceneTest()
         {
-            UnityAction<Scene, SceneOperation> func2 = Substitute.For<UnityAction<Scene, SceneOperation>>();
+            var func2 = Substitute.For<UnityAction<Scene, SceneOperation>>();
             clientSceneManager.OnClientFinishedSceneChange.AddListener(func2);
             clientSceneManager.CompleteLoadingScene(default, SceneOperation.Normal);
 
@@ -76,8 +76,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ClientSceneMessageInvokeTest() => UniTask.ToCoroutine(async () =>
         {
-            int startInvoked = 0;
-            int endInvoked = 0;
+            var startInvoked = 0;
+            var endInvoked = 0;
 
             clientSceneManager.OnClientStartedSceneChange.AddListener((_, __) => startInvoked++);
             clientSceneManager.OnClientFinishedSceneChange.AddListener((_, __) => endInvoked++);
@@ -103,14 +103,14 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ClientSceneMessageThrowsIfInvalidSceneOperation()
         {
-            int startInvoked = 0;
-            int endInvoked = 0;
+            var startInvoked = 0;
+            var endInvoked = 0;
 
             clientSceneManager.OnClientStartedSceneChange.AddListener((_, __) => startInvoked++);
             clientSceneManager.OnClientFinishedSceneChange.AddListener((_, __) => endInvoked++);
 
             var invalidOperation = (SceneOperation)10;
-            InvalidEnumArgumentException exception = Assert.Throws<InvalidEnumArgumentException>(() =>
+            var exception = Assert.Throws<InvalidEnumArgumentException>(() =>
             {
                 clientSceneManager.ClientStartSceneMessage(null, new SceneMessage
                 {
@@ -119,7 +119,7 @@ namespace Mirage.Tests.Runtime.ClientServer
                 });
             });
 
-            string message = new InvalidEnumArgumentException("sceneOperation", 10, typeof(SceneOperation)).Message;
+            var message = new InvalidEnumArgumentException("sceneOperation", 10, typeof(SceneOperation)).Message;
             Assert.That(exception, Has.Message.EqualTo(message));
         }
 
@@ -132,7 +132,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ServerChangeSceneTest()
         {
-            UnityAction<string, SceneOperation> func1 = Substitute.For<UnityAction<string, SceneOperation>>();
+            var func1 = Substitute.For<UnityAction<string, SceneOperation>>();
             serverSceneManager.OnServerStartedSceneChange.AddListener(func1);
             serverSceneManager.OnServerStartedSceneChange.Invoke("test", SceneOperation.Normal);
             func1.Received(1).Invoke(Arg.Any<string>(), Arg.Any<SceneOperation>());
@@ -141,7 +141,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void ServerSceneChangedTest()
         {
-            UnityAction<Scene, SceneOperation> func1 = Substitute.For<UnityAction<Scene, SceneOperation>>();
+            var func1 = Substitute.For<UnityAction<Scene, SceneOperation>>();
             serverSceneManager.OnServerFinishedSceneChange.AddListener(func1);
             serverSceneManager.OnServerFinishedSceneChange.Invoke(default, SceneOperation.Normal);
             func1.Received(1).Invoke(Arg.Any<Scene>(), Arg.Any<SceneOperation>());
@@ -152,12 +152,12 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             clientSceneManager.ClientPendingAdditiveSceneLoadingList.Add(null);
 
-            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() =>
+            var exception = Assert.Throws<ArgumentNullException>(() =>
             {
                 clientSceneManager.OnClientSceneLoadFinished(default, SceneOperation.Normal);
             });
 
-            string message = new ArgumentNullException("ClientPendingAdditiveSceneLoadingList[0]", "Some how a null scene path has been entered.").Message;
+            var message = new ArgumentNullException("ClientPendingAdditiveSceneLoadingList[0]", "Some how a null scene path has been entered.").Message;
             Assert.That(exception, Has.Message.EqualTo(message));
         }
 

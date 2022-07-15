@@ -42,7 +42,7 @@ namespace Mirage.Weaver
             }
 
             // we need to import type when we Initialize Writers so import here in case it is used anywhere else
-            TypeReference imported = module.ImportReference(dataType);
+            var imported = module.ImportReference(dataType);
             funcs[imported] = methodReference;
 
             // mark type as generated,
@@ -79,7 +79,7 @@ namespace Mirage.Weaver
         /// </summary>
         private bool HasGeneratedFunctionInAnotherModule(TypeReference typeReference)
         {
-            TypeDefinition def = typeReference.Resolve();
+            var def = typeReference.Resolve();
             // if type is in this module, then we want to generate new function
             if (def.Module == module)
                 return false;
@@ -133,7 +133,7 @@ namespace Mirage.Weaver
 
             // check if there is already a known function for type
             // this will find extention methods within this module
-            if (funcs.TryGetValue(typeReference, out MethodReference foundFunc))
+            if (funcs.TryGetValue(typeReference, out var foundFunc))
             {
                 return foundFunc;
             }
@@ -167,7 +167,7 @@ namespace Mirage.Weaver
                 {
                     throw new SerializeFunctionException($"{typeReference.Name} is an unsupported type. Multidimensional arrays are not supported", typeReference);
                 }
-                TypeReference elementType = typeReference.GetElementType();
+                var elementType = typeReference.GetElementType();
                 return GenerateCollectionFunction(typeReference, elementType, ArrayExpression);
             }
 
@@ -175,28 +175,28 @@ namespace Mirage.Weaver
             if (typeReference.Is(typeof(Nullable<>)))
             {
                 var genericInstance = (GenericInstanceType)typeReference;
-                TypeReference elementType = genericInstance.GenericArguments[0];
+                var elementType = genericInstance.GenericArguments[0];
 
                 return GenerateCollectionFunction(typeReference, elementType, NullableExpression);
             }
             if (typeReference.Is(typeof(ArraySegment<>)))
             {
                 var genericInstance = (GenericInstanceType)typeReference;
-                TypeReference elementType = genericInstance.GenericArguments[0];
+                var elementType = genericInstance.GenericArguments[0];
 
                 return GenerateCollectionFunction(typeReference, elementType, SegmentExpression);
             }
             if (typeReference.Is(typeof(List<>)))
             {
                 var genericInstance = (GenericInstanceType)typeReference;
-                TypeReference elementType = genericInstance.GenericArguments[0];
+                var elementType = genericInstance.GenericArguments[0];
 
                 return GenerateCollectionFunction(typeReference, elementType, ListExpression);
             }
 
 
             // check for invalid types
-            TypeDefinition typeDefinition = typeReference.Resolve();
+            var typeDefinition = typeReference.Resolve();
             if (typeDefinition == null)
             {
                 throw ThrowCantGenerate(typeReference);
@@ -242,7 +242,7 @@ namespace Mirage.Weaver
             }
 
             // generate writer for class/struct 
-            MethodReference generated = GenerateClassOrStructFunction(typeReference);
+            var generated = GenerateClassOrStructFunction(typeReference);
             MarkAsGenerated(typeDefinition);
 
             return generated;
@@ -250,7 +250,7 @@ namespace Mirage.Weaver
 
         private SerializeFunctionException ThrowCantGenerate(TypeReference typeReference, string typeDescription = null)
         {
-            string reasonStr = string.IsNullOrEmpty(typeDescription) ? string.Empty : $"{typeDescription} ";
+            var reasonStr = string.IsNullOrEmpty(typeDescription) ? string.Empty : $"{typeDescription} ";
             return new SerializeFunctionException($"Cannot generate {FunctionTypeLog} for {reasonStr}{typeReference.Name}. Use a supported type or provide a custom {FunctionTypeLog}", typeReference);
         }
 
@@ -262,7 +262,7 @@ namespace Mirage.Weaver
         /// <returns></returns>
         private GenericInstanceMethod CreateGenericFunction(TypeReference argument)
         {
-            MethodReference method = GetGenericFunction();
+            var method = GetGenericFunction();
 
             var generic = new GenericInstanceMethod(method);
             generic.GenericArguments.Add(argument);

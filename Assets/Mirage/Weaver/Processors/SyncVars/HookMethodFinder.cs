@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using Mono.Cecil;
-using Mono.Collections.Generic;
 
 namespace Mirage.Weaver.SyncVars
 {
@@ -29,19 +28,19 @@ namespace Mirage.Weaver.SyncVars
         /// <exception cref="HookMethodException">Throws if users sets hook in attribute but method could not be found</exception>
         public static SyncVarHook GetHookMethod(FieldDefinition syncVar, TypeReference originalType)
         {
-            CustomAttribute syncVarAttr = syncVar.GetCustomAttribute<SyncVarAttribute>();
+            var syncVarAttr = syncVar.GetCustomAttribute<SyncVarAttribute>();
 
             if (syncVarAttr == null)
                 throw new InvalidOperationException("FoundSyncVar did not have a SyncVarAttribute");
 
-            string hookFunctionName = syncVarAttr.GetField<string>(nameof(SyncVarAttribute.hook), null);
+            var hookFunctionName = syncVarAttr.GetField<string>(nameof(SyncVarAttribute.hook), null);
 
             if (string.IsNullOrEmpty(hookFunctionName))
                 return null;
 
-            SyncHookType hookType = syncVarAttr.GetField<SyncHookType>(nameof(SyncVarAttribute.hookType), SyncHookType.Automatic);
+            var hookType = syncVarAttr.GetField<SyncHookType>(nameof(SyncVarAttribute.hookType), SyncHookType.Automatic);
 
-            SyncVarHook hook = FindHookMethod(syncVar, hookFunctionName, hookType, originalType);
+            var hook = FindHookMethod(syncVar, hookFunctionName, hookType, originalType);
             if (hook != null)
                 return hook;
             else
@@ -106,15 +105,15 @@ namespace Mirage.Weaver.SyncVars
 
         private static SyncVarHook ValidateMethod(FieldDefinition syncVar, string hookFunctionName, TypeReference originalType, int argCount)
         {
-            MethodDefinition[] methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
-            MethodDefinition[] methodsWithParams = methods.Where(m => m.Parameters.Count == argCount).ToArray();
+            var methods = syncVar.DeclaringType.GetMethods(hookFunctionName);
+            var methodsWithParams = methods.Where(m => m.Parameters.Count == argCount).ToArray();
             if (methodsWithParams.Length == 0)
             {
                 return null;
             }
 
             // return method if matching args are found
-            foreach (MethodDefinition method in methodsWithParams)
+            foreach (var method in methodsWithParams)
             {
                 if (MatchesParameters(method, originalType, argCount))
                 {
@@ -139,11 +138,11 @@ namespace Mirage.Weaver.SyncVars
         private static SyncVarHook ValidateEvent(FieldDefinition syncVar, TypeReference originalType, string hookFunctionName, int argCount)
         {
             // we can't have 2 events/fields with same name, so using `First` is ok here
-            EventDefinition @event = syncVar.DeclaringType.Events.FirstOrDefault(x => x.Name == hookFunctionName);
+            var @event = syncVar.DeclaringType.Events.FirstOrDefault(x => x.Name == hookFunctionName);
             if (@event == null)
                 return null;
 
-            TypeReference eventType = @event.EventType;
+            var eventType = @event.EventType;
             if (!eventType.FullName.Contains("System.Action"))
             {
                 ThrowWrongHookType(syncVar, @event, eventType);
@@ -155,7 +154,7 @@ namespace Mirage.Weaver.SyncVars
             }
 
             var genericEvent = (GenericInstanceType)eventType;
-            Collection<TypeReference> args = genericEvent.GenericArguments;
+            var args = genericEvent.GenericArguments;
             if (args.Count != argCount)
             {
                 // ok to not have matching count
@@ -183,8 +182,8 @@ namespace Mirage.Weaver.SyncVars
         private static bool MatchesParameters(GenericInstanceType genericEvent, TypeReference originalType, int count)
         {
             // matches event Action<T, T> eventName;
-            Collection<TypeReference> args = genericEvent.GenericArguments;
-            for (int i = 0; i < count; i++)
+            var args = genericEvent.GenericArguments;
+            for (var i = 0; i < count; i++)
             {
                 if (args[i].FullName != originalType.FullName)
                     return false;
@@ -195,8 +194,8 @@ namespace Mirage.Weaver.SyncVars
         private static bool MatchesParameters(MethodDefinition method, TypeReference originalType, int count)
         {
             // matches void onValueChange(T oldValue, T newValue)
-            Collection<ParameterDefinition> parameters = method.Parameters;
-            for (int i = 0; i < count; i++)
+            var parameters = method.Parameters;
+            for (var i = 0; i < count; i++)
             {
                 if (parameters[i].ParameterType.FullName != originalType.FullName)
                     return false;

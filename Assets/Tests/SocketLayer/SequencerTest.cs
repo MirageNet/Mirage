@@ -16,7 +16,7 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void ThrowsErrorIfBitsisOver63([Range(64, 70)] int bits)
         {
-            ArgumentOutOfRangeException exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            var exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 var sequencer = new Sequencer(bits);
             });
@@ -27,7 +27,7 @@ namespace Mirage.SocketLayer.Tests
         [Test]
         public void ThrowsErrorIfBitsisOver0([Range(-10, 0)] int bits)
         {
-            ArgumentOutOfRangeException exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            var exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 var sequencer = new Sequencer(bits);
             });

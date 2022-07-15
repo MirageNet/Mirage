@@ -76,7 +76,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public IEnumerator CanCallServerRpc()
         {
             const int num = 32;
-            Action<int> sub = Substitute.For<Action<int>>();
+            var sub = Substitute.For<Action<int>>();
             clientComponent.structParam += sub;
             serverComponent.MyRpc(new MyStruct<int> { value = num });
 
@@ -90,7 +90,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public IEnumerator CanCallServerRpcWithHolder()
         {
             const int num = 32;
-            Action<int> sub = Substitute.For<Action<int>>();
+            var sub = Substitute.For<Action<int>>();
             clientComponent.holderParam += sub;
             serverComponent.MyRpcHolder(new MyHolder
             {
@@ -121,7 +121,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public IEnumerator CanSyncVarWithHook()
         {
             const int num = 32;
-            Action<int, int> sub = Substitute.For<Action<int, int>>();
+            var sub = Substitute.For<Action<int, int>>();
             clientComponent.onSyncHook += sub;
             serverComponent.varWithHook = new MyStruct<int> { value = num };
 
@@ -135,7 +135,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public IEnumerator CanSyncVarWithEvent()
         {
             const int num = 32;
-            Action<MyStruct<int>, MyStruct<int>> sub = Substitute.For<Action<MyStruct<int>, MyStruct<int>>>();
+            var sub = Substitute.For<Action<MyStruct<int>, MyStruct<int>>>();
             clientComponent.syncEvent += sub;
             serverComponent.varWithEvent = new MyStruct<int> { value = num };
 

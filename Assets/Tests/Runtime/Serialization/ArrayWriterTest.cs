@@ -11,9 +11,9 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             byte[] array = null;
 
-            byte[] data = MessagePacker.Pack(array);
+            var data = MessagePacker.Pack(array);
 
-            byte[] unpacked = MessagePacker.Unpack<byte[]>(data);
+            var unpacked = MessagePacker.Unpack<byte[]>(data);
 
             Assert.IsNull(unpacked);
         }
@@ -21,11 +21,11 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void TestEmptyByteArray()
         {
-            byte[] array = new byte[] { };
+            var array = new byte[] { };
 
-            byte[] data = MessagePacker.Pack(array);
+            var data = MessagePacker.Pack(array);
 
-            byte[] unpacked = MessagePacker.Unpack<byte[]>(data);
+            var unpacked = MessagePacker.Unpack<byte[]>(data);
 
             Assert.IsNotNull(unpacked);
             Assert.IsEmpty(unpacked);
@@ -35,11 +35,11 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void TestDataByteArray()
         {
-            byte[] array = new byte[] { 3, 4, 5 };
+            var array = new byte[] { 3, 4, 5 };
 
-            byte[] data = MessagePacker.Pack(array);
+            var data = MessagePacker.Pack(array);
 
-            byte[] unpacked = MessagePacker.Unpack<byte[]>(data);
+            var unpacked = MessagePacker.Unpack<byte[]>(data);
 
             Assert.IsNotNull(unpacked);
             Assert.IsNotEmpty(unpacked);
@@ -51,9 +51,9 @@ namespace Mirage.Tests.Runtime.Serialization
         {
             int[] array = null;
 
-            byte[] data = MessagePacker.Pack(array);
+            var data = MessagePacker.Pack(array);
 
-            int[] unpacked = MessagePacker.Unpack<int[]>(data);
+            var unpacked = MessagePacker.Unpack<int[]>(data);
 
             Assert.That(unpacked, Is.Null);
         }
@@ -61,11 +61,11 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void TestEmptyIntArray()
         {
-            int[] array = new int[] { };
+            var array = new int[] { };
 
-            byte[] data = MessagePacker.Pack(array);
+            var data = MessagePacker.Pack(array);
 
-            int[] unpacked = MessagePacker.Unpack<int[]>(data);
+            var unpacked = MessagePacker.Unpack<int[]>(data);
 
             Assert.That(unpacked, Is.EquivalentTo(new int[] { }));
         }
@@ -73,11 +73,11 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void TestDataIntArray()
         {
-            int[] array = new[] { 3, 4, 5 };
+            var array = new[] { 3, 4, 5 };
 
-            byte[] data = MessagePacker.Pack(array);
+            var data = MessagePacker.Pack(array);
 
-            int[] unpacked = MessagePacker.Unpack<int[]>(data);
+            var unpacked = MessagePacker.Unpack<int[]>(data);
 
             Assert.That(unpacked, Is.EquivalentTo(new[] { 3, 4, 5 }));
         }

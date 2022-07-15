@@ -35,14 +35,14 @@ namespace Mirage.Tests.Runtime.Serialization
             serverComponent.value1 = Value1;
             serverComponent.value2 = Value2;
 
-            int hook1Called = 0;
+            var hook1Called = 0;
             clientComponent.HookCalled1 += (v1, v2) =>
             {
                 hook1Called++;
                 Assert.That(v1, Is.EqualTo(Value1));
                 Assert.That(v2, Is.EqualTo(Value2));
             };
-            int hook2Called = 0;
+            var hook2Called = 0;
             clientComponent.HookCalled2 += (v1, v2) =>
             {
                 hook2Called++;
@@ -73,14 +73,14 @@ namespace Mirage.Tests.Runtime.Serialization
             serverComponent.value1 = ValueNew1;
             serverComponent.value2 = ValueNew2;
 
-            int hookCalled1 = 0;
+            var hookCalled1 = 0;
             clientComponent.HookCalled1 += (v1, v2) =>
             {
                 hookCalled1++;
                 Assert.That(v1, Is.EqualTo(ValueNew1));
                 Assert.That(v2, Is.EqualTo(ValueOld2), "Should be old value because hook is called after v1 is set, but before v2 is read");
             };
-            int hookCalled2 = 0;
+            var hookCalled2 = 0;
             clientComponent.HookCalled2 += (v1, v2) =>
             {
                 hookCalled2++;
@@ -97,11 +97,11 @@ namespace Mirage.Tests.Runtime.Serialization
 
         private void SendSyncvars(bool initial)
         {
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            using (var writer = NetworkWriterPool.GetWriter())
             {
                 serverComponent.SerializeSyncVars(writer, initial);
 
-                using (PooledNetworkReader reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), clientComponent.World))
+                using (var reader = NetworkReaderPool.GetReader(writer.ToArraySegment(), clientComponent.World))
                 {
                     clientComponent.DeserializeSyncVars(reader, initial);
                 }

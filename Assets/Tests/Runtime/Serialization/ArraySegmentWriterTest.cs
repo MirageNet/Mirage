@@ -18,9 +18,9 @@ namespace Mirage.Tests.Runtime.Serialization
             {
                 var array = new ArraySegment<byte>(new byte[0]);
 
-                byte[] data = MessagePacker.Pack(array);
+                var data = MessagePacker.Pack(array);
 
-                ArraySegment<byte> unpacked = MessagePacker.Unpack<ArraySegment<byte>>(data);
+                var unpacked = MessagePacker.Unpack<ArraySegment<byte>>(data);
 
                 Assert.IsNotNull(unpacked.Array);
                 Assert.That(unpacked.Count, Is.EqualTo(0));
@@ -31,9 +31,9 @@ namespace Mirage.Tests.Runtime.Serialization
             {
                 ArraySegment<byte> array = default;
 
-                byte[] data = MessagePacker.Pack(array);
+                var data = MessagePacker.Pack(array);
 
-                ArraySegment<byte> unpacked = MessagePacker.Unpack<ArraySegment<byte>>(data);
+                var unpacked = MessagePacker.Unpack<ArraySegment<byte>>(data);
 
                 Assert.IsNull(unpacked.Array);
                 Assert.That(unpacked.Offset, Is.EqualTo(0));
@@ -46,9 +46,9 @@ namespace Mirage.Tests.Runtime.Serialization
                 byte[] sourcedata = { 0, 1, 2, 3, 4, 5, 6 };
                 var array = new ArraySegment<byte>(sourcedata, 3, 2);
 
-                byte[] data = MessagePacker.Pack(array);
+                var data = MessagePacker.Pack(array);
 
-                ArraySegment<byte> unpacked = MessagePacker.Unpack<ArraySegment<byte>>(data);
+                var unpacked = MessagePacker.Unpack<ArraySegment<byte>>(data);
 
                 Assert.IsNotNull(unpacked.Array);
                 Assert.That(unpacked.Count, Is.EqualTo(2));
@@ -63,9 +63,9 @@ namespace Mirage.Tests.Runtime.Serialization
             {
                 var array = new ArraySegment<int>(new int[0]);
 
-                byte[] data = MessagePacker.Pack(array);
+                var data = MessagePacker.Pack(array);
 
-                ArraySegment<int> unpacked = MessagePacker.Unpack<ArraySegment<int>>(data);
+                var unpacked = MessagePacker.Unpack<ArraySegment<int>>(data);
 
                 Assert.IsNotNull(unpacked.Array);
                 Assert.That(unpacked.Count, Is.EqualTo(0));
@@ -76,9 +76,9 @@ namespace Mirage.Tests.Runtime.Serialization
             {
                 ArraySegment<int> array = default;
 
-                byte[] data = MessagePacker.Pack(array);
+                var data = MessagePacker.Pack(array);
 
-                ArraySegment<int> unpacked = MessagePacker.Unpack<ArraySegment<int>>(data);
+                var unpacked = MessagePacker.Unpack<ArraySegment<int>>(data);
 
                 Assert.IsNull(unpacked.Array);
                 Assert.That(unpacked.Offset, Is.EqualTo(0));
@@ -92,9 +92,9 @@ namespace Mirage.Tests.Runtime.Serialization
 
                 var array = new ArraySegment<int>(sourcedata, 3, 2);
 
-                byte[] data = MessagePacker.Pack(array);
+                var data = MessagePacker.Pack(array);
 
-                ArraySegment<int> unpacked = MessagePacker.Unpack<ArraySegment<int>>(data);
+                var unpacked = MessagePacker.Unpack<ArraySegment<int>>(data);
 
                 Assert.IsNotNull(unpacked.Array);
                 Assert.That(unpacked.Count, Is.EqualTo(2));

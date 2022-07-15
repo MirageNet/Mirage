@@ -42,7 +42,7 @@ namespace Mirage.Tests.Runtime.Host
             lobby.ObjectReadyList.Add(readyComp);
             readyComp.IsReady = true;
 
-            bool invokeWovenTestMessage = false;
+            var invokeWovenTestMessage = false;
             ClientMessageHandler.RegisterHandler<SceneMessage>(msg => invokeWovenTestMessage = true);
             lobby.SendToReady(identity, new SceneMessage(), true, Channel.Reliable);
 

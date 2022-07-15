@@ -52,7 +52,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void ByteIsSentForByteEnum()
         {
-            MyByte byteEnum = MyByte.B;
+            var byteEnum = MyByte.B;
 
             writer.Write(byteEnum);
 
@@ -63,7 +63,7 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void ShortIsSentForShortEnum()
         {
-            MyShort shortEnum = MyShort.G;
+            var shortEnum = MyShort.G;
 
             writer.Write(shortEnum);
 
@@ -74,8 +74,8 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void CustomWriterIsUsedForEnum()
         {
-            MyCustom customEnum = MyCustom.O;
-            MyCustom clientMsg = SerializeAndDeserializeMessage(customEnum);
+            var customEnum = MyCustom.O;
+            var clientMsg = SerializeAndDeserializeMessage(customEnum);
 
             // custom writer should write N if it sees O
             Assert.That(clientMsg, Is.EqualTo(MyCustom.N));

@@ -29,13 +29,13 @@ namespace Mirage.Weaver
         {
             if (expression.Body is MethodCallExpression outermostExpression)
             {
-                MethodInfo methodInfo = outermostExpression.Method;
+                var methodInfo = outermostExpression.Method;
                 return module.ImportReference(methodInfo);
             }
 
             if (expression.Body is NewExpression newExpression)
             {
-                ConstructorInfo methodInfo = newExpression.Constructor;
+                var methodInfo = newExpression.Constructor;
                 // constructor is null when creating an ArraySegment<object>
                 methodInfo = methodInfo ?? newExpression.Type.GetConstructors()[0];
                 return module.ImportReference(methodInfo);
@@ -53,7 +53,7 @@ namespace Mirage.Weaver
 
         public static TypeDefinition GeneratedClass(this ModuleDefinition module)
         {
-            TypeDefinition type = module.GetType("Mirage", "GeneratedNetworkCode");
+            var type = module.GetType("Mirage", "GeneratedNetworkCode");
 
             if (type != null)
                 return type;

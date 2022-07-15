@@ -19,7 +19,7 @@ namespace Mirage.Weaver.Serialization
 
         public override void AppendWriteField(ModuleDefinition module, ILProcessor worker, ParameterDefinition writerParameter, ParameterDefinition typeParameter, FieldReference fieldReference)
         {
-            MethodReference writeWithBlockSize = module.ImportReference(() => VarIntBlocksPacker.Pack(default, default, default));
+            var writeWithBlockSize = module.ImportReference(() => VarIntBlocksPacker.Pack(default, default, default));
 
             worker.Append(LoadParamOrArg0(worker, writerParameter));
             worker.Append(LoadParamOrArg0(worker, typeParameter));
@@ -31,7 +31,7 @@ namespace Mirage.Weaver.Serialization
 
         public override void AppendWriteParameter(ModuleDefinition module, ILProcessor worker, VariableDefinition writer, ParameterDefinition valueParameter)
         {
-            MethodReference writeWithBlockSize = module.ImportReference(() => VarIntBlocksPacker.Pack(default, default, default));
+            var writeWithBlockSize = module.ImportReference(() => VarIntBlocksPacker.Pack(default, default, default));
 
             worker.Append(worker.Create(OpCodes.Ldloc, writer));
             worker.Append(worker.Create(OpCodes.Ldarg, valueParameter));
@@ -42,7 +42,7 @@ namespace Mirage.Weaver.Serialization
 
         public override void AppendRead(ModuleDefinition module, ILProcessor worker, ParameterDefinition readerParameter, TypeReference fieldType)
         {
-            MethodReference writeWithBlockSize = module.ImportReference(() => VarIntBlocksPacker.Unpack(default, default));
+            var writeWithBlockSize = module.ImportReference(() => VarIntBlocksPacker.Unpack(default, default));
 
             worker.Append(worker.Create(OpCodes.Ldarg, readerParameter));
             worker.Append(worker.Create(OpCodes.Ldc_I4, blockSize));

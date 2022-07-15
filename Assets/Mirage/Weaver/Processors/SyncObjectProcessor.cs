@@ -28,14 +28,14 @@ namespace Mirage.Weaver
         /// <returns></returns>
         public void ProcessSyncObjects(TypeDefinition td)
         {
-            foreach (FieldDefinition fd in td.Fields)
+            foreach (var fd in td.Fields)
             {
                 if (fd.FieldType.IsGenericParameter || fd.ContainsGenericParameter) // Just ignore all generic objects.
                 {
                     continue;
                 }
 
-                TypeDefinition tf = fd.FieldType.Resolve();
+                var tf = fd.FieldType.Resolve();
                 if (tf == null)
                 {
                     continue;
@@ -67,7 +67,7 @@ namespace Mirage.Weaver
         {
             if (tr is GenericInstanceType genericInstance)
             {
-                foreach (TypeReference argument in genericInstance.GenericArguments)
+                foreach (var argument in genericInstance.GenericArguments)
                 {
                     if (!argument.IsGenericParameter)
                     {
@@ -89,7 +89,7 @@ namespace Mirage.Weaver
 
             netBehaviourSubclass.AddToConstructor(logger, (worker) =>
             {
-                foreach (FieldDefinition fd in syncObjects)
+                foreach (var fd in syncObjects)
                 {
                     GenerateSyncObjectRegistration(worker, fd);
                 }
@@ -126,7 +126,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldfld, fd));
 
-            MethodReference initSyncObjectRef = worker.Body.Method.Module.ImportReference<NetworkBehaviour>(nb => nb.InitSyncObject(default));
+            var initSyncObjectRef = worker.Body.Method.Module.ImportReference<NetworkBehaviour>(nb => nb.InitSyncObject(default));
             worker.Append(worker.Create(OpCodes.Call, initSyncObjectRef));
         }
     }

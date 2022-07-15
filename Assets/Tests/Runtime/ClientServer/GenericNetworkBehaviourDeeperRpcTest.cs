@@ -128,7 +128,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNetworkIdentity() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+            var callback = Substitute.For<Action<NetworkIdentity>>();
             clientComponent.onSendNetworkIdentityCalled += callback;
 
             serverComponent.SendNetworkIdentity(serverIdentity);
@@ -139,7 +139,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNetworkBehavior() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+            var callback = Substitute.For<Action<NetworkBehaviour>>();
             clientComponent.onSendNetworkBehaviourCalled += callback;
 
             serverComponent.SendNetworkBehaviour(serverComponent);
@@ -150,7 +150,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNetworkBehaviorChild() => UniTask.ToCoroutine(async () =>
         {
-            Action<GenericBehaviourWithRpcDeeperImplement> callback = Substitute.For<Action<GenericBehaviourWithRpcDeeperImplement>>();
+            var callback = Substitute.For<Action<GenericBehaviourWithRpcDeeperImplement>>();
             clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
             serverComponent.SendNetworkBehaviourDerived(serverComponent);
@@ -161,7 +161,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendGameObject() => UniTask.ToCoroutine(async () =>
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             clientComponent.onSendGameObjectCalled += callback;
 
             serverComponent.SendGameObject(serverPlayerGO);
@@ -172,7 +172,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void SendInvalidGO()
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             clientComponent.onSendGameObjectCalled += callback;
 
             // this object does not have a NI, so this should error out
@@ -185,7 +185,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNullNetworkIdentity() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+            var callback = Substitute.For<Action<NetworkIdentity>>();
             clientComponent.onSendNetworkIdentityCalled += callback;
 
             serverComponent.SendNetworkIdentity(null);
@@ -196,7 +196,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNullNetworkBehavior() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+            var callback = Substitute.For<Action<NetworkBehaviour>>();
             clientComponent.onSendNetworkBehaviourCalled += callback;
 
             serverComponent.SendNetworkBehaviour(null);
@@ -207,7 +207,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNullNetworkBehaviorChild() => UniTask.ToCoroutine(async () =>
         {
-            Action<GenericBehaviourWithRpcDeeperImplement> callback = Substitute.For<Action<GenericBehaviourWithRpcDeeperImplement>>();
+            var callback = Substitute.For<Action<GenericBehaviourWithRpcDeeperImplement>>();
             clientComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
             serverComponent.SendNetworkBehaviourDerived(null);
@@ -218,7 +218,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNullGameObject() => UniTask.ToCoroutine(async () =>
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             clientComponent.onSendGameObjectCalled += callback;
 
             serverComponent.SendGameObject(null);
@@ -229,7 +229,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNetworkIdentityToServer() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+            var callback = Substitute.For<Action<NetworkIdentity>>();
             serverComponent.onSendNetworkIdentityCalled += callback;
 
             clientComponent.SendNetworkIdentityToServer(clientIdentity);
@@ -240,7 +240,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNetworkBehaviorToServer() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+            var callback = Substitute.For<Action<NetworkBehaviour>>();
             serverComponent.onSendNetworkBehaviourCalled += callback;
 
             clientComponent.SendNetworkBehaviourToServer(clientComponent);
@@ -251,7 +251,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendNetworkBehaviorChildToServer() => UniTask.ToCoroutine(async () =>
         {
-            Action<GenericBehaviourWithRpcDeeperImplement> callback = Substitute.For<Action<GenericBehaviourWithRpcDeeperImplement>>();
+            var callback = Substitute.For<Action<GenericBehaviourWithRpcDeeperImplement>>();
             serverComponent.onSendNetworkBehaviourDerivedCalled += callback;
 
             clientComponent.SendNetworkBehaviourDerivedToServer(clientComponent);
@@ -262,7 +262,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendGameObjectToServer() => UniTask.ToCoroutine(async () =>
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             serverComponent.onSendGameObjectCalled += callback;
 
             clientComponent.SendGameObjectToServer(clientPlayerGO);
@@ -273,7 +273,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void SendInvalidGOToServer()
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             serverComponent.onSendGameObjectCalled += callback;
 
             // this object does not have a NI, so this should error out
@@ -286,7 +286,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendDeeperNetworkIdentity() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+            var callback = Substitute.For<Action<NetworkIdentity>>();
             clientComponent.onSendDeeperNetworkIdentityCalled += callback;
 
             serverComponent.SendDeeperNetworkIdentity(serverIdentity);
@@ -297,7 +297,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendDeeperNetworkBehavior() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+            var callback = Substitute.For<Action<NetworkBehaviour>>();
             clientComponent.onSendDeeperNetworkBehaviourCalled += callback;
 
             serverComponent.SendDeeperNetworkBehaviour(serverComponent);
@@ -308,7 +308,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendDeeperNetworkBehaviorChild() => UniTask.ToCoroutine(async () =>
         {
-            Action<GenericBehaviourWithRpcDeeperImplement> callback = Substitute.For<Action<GenericBehaviourWithRpcDeeperImplement>>();
+            var callback = Substitute.For<Action<GenericBehaviourWithRpcDeeperImplement>>();
             clientComponent.onSendDeeperNetworkBehaviourDerivedCalled += callback;
 
             serverComponent.SendDeeperNetworkBehaviourDerived(serverComponent);
@@ -319,7 +319,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendDeeperGameObject() => UniTask.ToCoroutine(async () =>
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             clientComponent.onSendDeeperGameObjectCalled += callback;
 
             serverComponent.SendDeeperGameObject(serverPlayerGO);
@@ -330,7 +330,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void SendDeeperInvalidGO()
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             clientComponent.onSendDeeperGameObjectCalled += callback;
 
             // this object does not have a NI, so this should error out
@@ -343,7 +343,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendDeeperNullNetworkIdentity() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+            var callback = Substitute.For<Action<NetworkIdentity>>();
             clientComponent.onSendDeeperNetworkIdentityCalled += callback;
 
             serverComponent.SendDeeperNetworkIdentity(null);
@@ -354,7 +354,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendDeeperNullNetworkBehavior() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+            var callback = Substitute.For<Action<NetworkBehaviour>>();
             clientComponent.onSendDeeperNetworkBehaviourCalled += callback;
 
             serverComponent.SendDeeperNetworkBehaviour(null);
@@ -365,7 +365,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendDeeperNullNetworkBehaviorChild() => UniTask.ToCoroutine(async () =>
         {
-            Action<GenericBehaviourWithRpcDeeperImplement> callback = Substitute.For<Action<GenericBehaviourWithRpcDeeperImplement>>();
+            var callback = Substitute.For<Action<GenericBehaviourWithRpcDeeperImplement>>();
             clientComponent.onSendDeeperNetworkBehaviourDerivedCalled += callback;
 
             serverComponent.SendDeeperNetworkBehaviourDerived(null);
@@ -376,7 +376,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendDeeperNullGameObject() => UniTask.ToCoroutine(async () =>
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             clientComponent.onSendDeeperGameObjectCalled += callback;
 
             serverComponent.SendDeeperGameObject(null);
@@ -387,7 +387,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendDeeperNetworkIdentityToServer() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkIdentity> callback = Substitute.For<Action<NetworkIdentity>>();
+            var callback = Substitute.For<Action<NetworkIdentity>>();
             serverComponent.onSendDeeperNetworkIdentityCalled += callback;
 
             clientComponent.SendDeeperNetworkIdentityToServer(clientIdentity);
@@ -398,7 +398,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendDeeperNetworkBehaviorToServer() => UniTask.ToCoroutine(async () =>
         {
-            Action<NetworkBehaviour> callback = Substitute.For<Action<NetworkBehaviour>>();
+            var callback = Substitute.For<Action<NetworkBehaviour>>();
             serverComponent.onSendDeeperNetworkBehaviourCalled += callback;
 
             clientComponent.SendDeeperNetworkBehaviourToServer(clientComponent);
@@ -409,7 +409,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendDeeperNetworkBehaviorChildToServer() => UniTask.ToCoroutine(async () =>
         {
-            Action<GenericBehaviourWithRpcDeeperImplement> callback = Substitute.For<Action<GenericBehaviourWithRpcDeeperImplement>>();
+            var callback = Substitute.For<Action<GenericBehaviourWithRpcDeeperImplement>>();
             serverComponent.onSendDeeperNetworkBehaviourDerivedCalled += callback;
 
             clientComponent.SendDeeperNetworkBehaviourDerivedToServer(clientComponent);
@@ -420,7 +420,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator SendDeeperGameObjectToServer() => UniTask.ToCoroutine(async () =>
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             serverComponent.onSendDeeperGameObjectCalled += callback;
 
             clientComponent.SendDeeperGameObjectToServer(clientPlayerGO);
@@ -431,7 +431,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void SendDeeperInvalidGOToServer()
         {
-            Action<GameObject> callback = Substitute.For<Action<GameObject>>();
+            var callback = Substitute.For<Action<GameObject>>();
             serverComponent.onSendDeeperGameObjectCalled += callback;
 
             // this object does not have a NI, so this should error out

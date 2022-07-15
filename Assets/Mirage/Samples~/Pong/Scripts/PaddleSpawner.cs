@@ -25,8 +25,8 @@ namespace Mirage.Examples.Pong
         public override void OnServerAddPlayer(INetworkPlayer player)
         {
             // add player at correct spawn position
-            Transform start = Server.NumberOfPlayers == 0 ? leftRacketSpawn : rightRacketSpawn;
-            NetworkIdentity character = Instantiate(PlayerPrefab, start.position, start.rotation);
+            var start = Server.NumberOfPlayers == 0 ? leftRacketSpawn : rightRacketSpawn;
+            var character = Instantiate(PlayerPrefab, start.position, start.rotation);
             ServerObjectManager.AddCharacter(player, character.gameObject);
 
             // spawn ball if two players

@@ -27,7 +27,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         protected byte[] createRandomData(int id)
         {
             // random size messages
-            byte[] buffer = new byte[rand.Next(2, 12)];
+            var buffer = new byte[rand.Next(2, 12)];
             // fill array with random
             rand.NextBytes(buffer);
 
@@ -41,12 +41,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         /// </summary>
         protected static void AssertAreSameFromOffsets(byte[] expected, int expectedOffset, byte[] actual, int actualOffset, int length)
         {
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 if (expected[i + expectedOffset] != actual[i + actualOffset])
                 {
-                    byte e = expected[i + expectedOffset];
-                    byte a = actual[i + actualOffset];
+                    var e = expected[i + expectedOffset];
+                    var a = actual[i + actualOffset];
                     Assert.Fail($"Arrays are not the same\n  expected {e}\n  actual {a}");
                 }
             }
@@ -74,7 +74,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
         public void SendRaw(byte[] packet, int length)
         {
-            byte[] clone = new byte[length];
+            var clone = new byte[length];
             Buffer.BlockCopy(packet, 0, clone, 0, length);
             packets.Add(clone);
         }

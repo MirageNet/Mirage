@@ -17,7 +17,7 @@ namespace Mirage.Tests.Weaver
         [SetUp]
         public virtual void TestSetup()
         {
-            string className = TestContext.CurrentContext.Test.ClassName.Split('.').Last();
+            var className = TestContext.CurrentContext.Test.ClassName.Split('.').Last();
 
             BuildAndWeaveTestAssembly(className, TestContext.CurrentContext.Test.Name);
         }
@@ -34,14 +34,14 @@ namespace Mirage.Tests.Weaver
         [AssertionMethod]
         protected void NoErrors()
         {
-            DiagnosticMessage[] errors = weaverLog.Diagnostics.Where(x => x.DiagnosticType == DiagnosticType.Error).ToArray();
+            var errors = weaverLog.Diagnostics.Where(x => x.DiagnosticType == DiagnosticType.Error).ToArray();
             Assert.That(errors, Is.Empty, $"Failed because there are Error messages: \n  {string.Join("\n  ", errors.Select(d => d.MessageData))}\n");
         }
 
         [AssertionMethod]
         protected void HasErrorCount(int count)
         {
-            string[] errorMessages = weaverLog.Diagnostics
+            var errorMessages = weaverLog.Diagnostics
                 .Where(d => d.DiagnosticType == DiagnosticType.Error)
                 .Select(d => d.MessageData).ToArray();
 
@@ -51,8 +51,8 @@ namespace Mirage.Tests.Weaver
         [AssertionMethod]
         protected void HasError(string messsage, string atType)
         {
-            string fullMessage = $"{messsage} (at {atType})";
-            string[] errorMessages = weaverLog.Diagnostics
+            var fullMessage = $"{messsage} (at {atType})";
+            var errorMessages = weaverLog.Diagnostics
                 .Where(d => d.DiagnosticType == DiagnosticType.Error)
                 .Select(d => d.MessageData).ToArray();
 
@@ -66,8 +66,8 @@ namespace Mirage.Tests.Weaver
         [AssertionMethod]
         protected void HasWarning(string messsage, string atType)
         {
-            string fullMessage = $"{messsage} (at {atType})";
-            string[] warningMessages = weaverLog.Diagnostics
+            var fullMessage = $"{messsage} (at {atType})";
+            var warningMessages = weaverLog.Diagnostics
                 .Where(d => d.DiagnosticType == DiagnosticType.Warning)
                 .Select(d => d.MessageData).ToArray();
 
@@ -95,13 +95,13 @@ namespace Mirage.Tests.Weaver
             weaverLog.Diagnostics.Clear();
             assembler = new Assembler();
 
-            string testSourceDirectory = className + "~";
+            var testSourceDirectory = className + "~";
             assembler.OutputFile = Path.Combine(testSourceDirectory, testName + ".dll");
             assembler.AddSourceFiles(new string[] { Path.Combine(testSourceDirectory, testName + ".cs") });
             assembly = assembler.Build(weaverLog);
 
             Assert.That(assembler.CompilerErrors, Is.False);
-            foreach (DiagnosticMessage error in weaverLog.Diagnostics)
+            foreach (var error in weaverLog.Diagnostics)
             {
                 // ensure all errors have a location
                 Assert.That(error.MessageData, Does.Match(@"\(at .*\)$"));

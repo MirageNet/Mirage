@@ -82,8 +82,8 @@ namespace Mirage.Weaver
         {
             if (!WasProcessed(td))
             {
-                MethodDefinition versionMethod = td.AddMethod(ProcessedFunctionName, MethodAttributes.Private);
-                ILProcessor worker = versionMethod.Body.GetILProcessor();
+                var versionMethod = td.AddMethod(ProcessedFunctionName, MethodAttributes.Private);
+                var worker = versionMethod.Body.GetILProcessor();
                 worker.Append(worker.Create(OpCodes.Ret));
             }
         }
@@ -106,8 +106,8 @@ namespace Mirage.Weaver
             rpcCounter.Set(count);
 
             // override virtual method so returns total
-            MethodDefinition method = netBehaviourSubclass.AddMethod(nameof(NetworkBehaviour.GetRpcCount), MethodAttributes.Virtual | MethodAttributes.Family, typeof(int));
-            ILProcessor worker = method.Body.GetILProcessor();
+            var method = netBehaviourSubclass.AddMethod(nameof(NetworkBehaviour.GetRpcCount), MethodAttributes.Virtual | MethodAttributes.Family, typeof(int));
+            var worker = method.Body.GetILProcessor();
             // write count of base+current so that `GetInBase` call will return total
             worker.Emit(OpCodes.Ldc_I4, rpcCounter.GetInBase() + count);
             worker.Emit(OpCodes.Ret);
@@ -120,12 +120,12 @@ namespace Mirage.Weaver
 
             var rpcs = new List<RpcMethod>();
 
-            int index = rpcCounter.GetInBase();
-            foreach (MethodDefinition md in methods)
+            var index = rpcCounter.GetInBase();
+            foreach (var md in methods)
             {
                 try
                 {
-                    RpcMethod rpc = CheckAndProcessRpc(md, index);
+                    var rpc = CheckAndProcessRpc(md, index);
                     if (rpc != null)
                     {
                         // increment only if rpc was count
@@ -144,13 +144,13 @@ namespace Mirage.Weaver
 
         private RpcMethod CheckAndProcessRpc(MethodDefinition md, int index)
         {
-            if (md.TryGetCustomAttribute<ServerRpcAttribute>(out CustomAttribute serverAttribute))
+            if (md.TryGetCustomAttribute<ServerRpcAttribute>(out var serverAttribute))
             {
                 if (md.HasCustomAttribute<ClientRpcAttribute>()) throw new RpcException("Method should not have both ServerRpc and ClientRpc", md);
 
                 return serverRpcProcessor.ProcessRpc(md, serverAttribute, index);
             }
-            else if (md.TryGetCustomAttribute<ClientRpcAttribute>(out CustomAttribute clientAttribute))
+            else if (md.TryGetCustomAttribute<ClientRpcAttribute>(out var clientAttribute))
             {
                 return clientRpcProcessor.ProcessRpc(md, clientAttribute, index);
             }

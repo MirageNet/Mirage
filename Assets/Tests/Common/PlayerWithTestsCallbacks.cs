@@ -38,8 +38,8 @@ namespace Mirage.Tests.PlayerTests
         {
             try
             {
-                string xml = testResults.ToXml(true).OuterXml;
-                string savePath = Path.Combine(Application.persistentDataPath, "PlayerWithTests-results.xml");
+                var xml = testResults.ToXml(true).OuterXml;
+                var savePath = Path.Combine(Application.persistentDataPath, "PlayerWithTests-results.xml");
                 Debug.Log($"Saving results to {savePath}");
                 File.WriteAllText(savePath, xml);
             }

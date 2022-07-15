@@ -32,7 +32,7 @@ namespace Mirage.Weaver
 
         public bool ProcessTypes(IReadOnlyList<FoundType> foundTypes)
         {
-            foreach (FoundType foundType in foundTypes)
+            foreach (var foundType in foundTypes)
             {
                 ProcessType(foundType);
             }
@@ -42,14 +42,14 @@ namespace Mirage.Weaver
 
         private void ProcessType(FoundType foundType)
         {
-            foreach (MethodDefinition md in foundType.TypeDefinition.Methods)
+            foreach (var md in foundType.TypeDefinition.Methods)
             {
                 ProcessMethod(md, foundType);
             }
 
             if (!foundType.IsNetworkBehaviour)
             {
-                foreach (FieldDefinition fd in foundType.TypeDefinition.Fields)
+                foreach (var fd in foundType.TypeDefinition.Fields)
                 {
                     ProcessFields(fd, foundType);
                 }
@@ -104,7 +104,7 @@ namespace Mirage.Weaver
 
         private void CheckAttribute<TAttribute>(MethodDefinition md, FoundType foundType)
         {
-            CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
+            var attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
                 return;
 
@@ -116,7 +116,7 @@ namespace Mirage.Weaver
 
         private void InjectGuard<TAttribute>(MethodDefinition md, FoundType foundType, MethodReference predicate, string format)
         {
-            CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
+            var attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
                 return;
 
@@ -141,16 +141,16 @@ namespace Mirage.Weaver
             // dont need to set modified for errors, so we set it here when we start doing ILProcessing
             modified = true;
 
-            bool throwError = attribute.GetField("error", true);
-            ILProcessor worker = md.Body.GetILProcessor();
-            Instruction top = md.Body.Instructions[0];
+            var throwError = attribute.GetField("error", true);
+            var worker = md.Body.GetILProcessor();
+            var top = md.Body.Instructions[0];
 
             worker.InsertBefore(top, worker.Create(OpCodes.Ldarg_0));
             worker.InsertBefore(top, worker.Create(OpCodes.Call, predicate));
             worker.InsertBefore(top, worker.Create(OpCodes.Brtrue, top));
             if (throwError)
             {
-                string message = string.Format(format, md.Name);
+                var message = string.Format(format, md.Name);
                 worker.InsertBefore(top, worker.Create(OpCodes.Ldstr, message));
                 worker.InsertBefore(top, worker.Create(OpCodes.Newobj, () => new MethodInvocationException("")));
                 worker.InsertBefore(top, worker.Create(OpCodes.Throw));
@@ -163,15 +163,15 @@ namespace Mirage.Weaver
         // this is required to early-out from a function with "ref" or "out" parameters
         private static void InjectGuardParameters(MethodDefinition md, ILProcessor worker, Instruction top)
         {
-            int offset = md.Resolve().IsStatic ? 0 : 1;
-            for (int index = 0; index < md.Parameters.Count; index++)
+            var offset = md.Resolve().IsStatic ? 0 : 1;
+            for (var index = 0; index < md.Parameters.Count; index++)
             {
-                ParameterDefinition param = md.Parameters[index];
+                var param = md.Parameters[index];
                 if (param.IsOut)
                 {
-                    TypeReference elementType = param.ParameterType.GetElementType();
+                    var elementType = param.ParameterType.GetElementType();
 
-                    VariableDefinition elementLocal = md.AddLocal(elementType);
+                    var elementLocal = md.AddLocal(elementType);
 
                     worker.InsertBefore(top, worker.Create(OpCodes.Ldarg, index + offset));
                     worker.InsertBefore(top, worker.Create(OpCodes.Ldloca, elementLocal));
@@ -187,7 +187,7 @@ namespace Mirage.Weaver
         {
             if (!md.ReturnType.Is(typeof(void)))
             {
-                VariableDefinition returnLocal = md.AddLocal(md.ReturnType);
+                var returnLocal = md.AddLocal(md.ReturnType);
                 worker.InsertBefore(top, worker.Create(OpCodes.Ldloca, returnLocal));
                 worker.InsertBefore(top, worker.Create(OpCodes.Initobj, md.ReturnType));
                 worker.InsertBefore(top, worker.Create(OpCodes.Ldloc, returnLocal));

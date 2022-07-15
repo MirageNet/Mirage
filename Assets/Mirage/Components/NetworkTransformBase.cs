@@ -94,8 +94,8 @@ namespace Mirage
         //    -> elapsed based on send interval hoping that it roughly matches
         private static float EstimateMovementSpeed(DataPoint from, DataPoint to, Transform transform, float sendInterval)
         {
-            Vector3 delta = to.LocalPosition - (from != null ? from.LocalPosition : transform.localPosition);
-            float elapsed = from != null ? to.TimeStamp - from.TimeStamp : sendInterval;
+            var delta = to.LocalPosition - (from != null ? from.LocalPosition : transform.localPosition);
+            var elapsed = from != null ? to.TimeStamp - from.TimeStamp : sendInterval;
             // avoid NaN
             return elapsed > 0 ? delta.magnitude / elapsed : 0;
         }
@@ -166,8 +166,8 @@ namespace Mirage
             //
             else
             {
-                float oldDistance = Vector3.Distance(start.LocalPosition, goal.LocalPosition);
-                float newDistance = Vector3.Distance(goal.LocalPosition, temp.LocalPosition);
+                var oldDistance = Vector3.Distance(start.LocalPosition, goal.LocalPosition);
+                var newDistance = Vector3.Distance(goal.LocalPosition, temp.LocalPosition);
 
                 start = goal;
 
@@ -203,7 +203,7 @@ namespace Mirage
                 return;
 
             // deserialize payload
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(payload, Server.World))
+            using (var networkReader = NetworkReaderPool.GetReader(payload, Server.World))
                 DeserializeFromReader(networkReader);
 
             // server-only mode does no interpolation to save computations,
@@ -220,11 +220,11 @@ namespace Mirage
         {
             if (start != null)
             {
-                float difference = goal.TimeStamp - start.TimeStamp;
+                var difference = goal.TimeStamp - start.TimeStamp;
 
                 // the moment we get 'goal', 'start' is supposed to
                 // start, so elapsed time is based on:
-                float elapsed = Time.time - goal.TimeStamp;
+                var elapsed = Time.time - goal.TimeStamp;
                 // avoid NaN
                 return difference > 0 ? elapsed / difference : 0;
             }
@@ -244,7 +244,7 @@ namespace Mirage
                 // Option 2: always += speed
                 // -> speed is 0 if we just started after idle, so always use max
                 //    for best results
-                float speed = Mathf.Max(start.MovementSpeed, goal.MovementSpeed);
+                var speed = Mathf.Max(start.MovementSpeed, goal.MovementSpeed);
                 return Vector3.MoveTowards(currentPosition, goal.LocalPosition, speed * Time.deltaTime);
             }
             return currentPosition;
@@ -254,7 +254,7 @@ namespace Mirage
         {
             if (start != null)
             {
-                float t = CurrentInterpolationFactor(start, goal);
+                var t = CurrentInterpolationFactor(start, goal);
                 return Quaternion.Slerp(start.LocalRotation, goal.LocalRotation, t);
             }
             return defaultRotation;
@@ -264,7 +264,7 @@ namespace Mirage
         {
             if (start != null)
             {
-                float t = CurrentInterpolationFactor(start, goal);
+                var t = CurrentInterpolationFactor(start, goal);
                 return Vector3.Lerp(start.LocalScale, goal.LocalScale, t);
             }
             return currentScale;
@@ -278,10 +278,10 @@ namespace Mirage
         private bool NeedsTeleport()
         {
             // calculate time between the two data points
-            float startTime = start != null ? start.TimeStamp : Time.time - syncInterval;
-            float goalTime = goal != null ? goal.TimeStamp : Time.time;
-            float difference = goalTime - startTime;
-            float timeSinceGoalReceived = Time.time - goalTime;
+            var startTime = start != null ? start.TimeStamp : Time.time - syncInterval;
+            var goalTime = goal != null ? goal.TimeStamp : Time.time;
+            var difference = goalTime - startTime;
+            var timeSinceGoalReceived = Time.time - goalTime;
             return timeSinceGoalReceived > difference * 5;
         }
 
@@ -290,15 +290,15 @@ namespace Mirage
         {
             // moved or rotated or scaled?
             // local position/rotation/scale for VR support
-            bool moved = Vector3.Distance(lastPosition, TargetComponent.localPosition) > LocalPositionSensitivity;
-            bool scaled = Vector3.Distance(lastScale, TargetComponent.localScale) > LocalScaleSensitivity;
-            bool rotated = Quaternion.Angle(lastRotation, TargetComponent.localRotation) > LocalRotationSensitivity;
+            var moved = Vector3.Distance(lastPosition, TargetComponent.localPosition) > LocalPositionSensitivity;
+            var scaled = Vector3.Distance(lastScale, TargetComponent.localScale) > LocalScaleSensitivity;
+            var rotated = Quaternion.Angle(lastRotation, TargetComponent.localRotation) > LocalRotationSensitivity;
 
             // save last for next frame to compare
             // (only if change was detected. otherwise slow moving objects might
             //  never sync because of C#'s float comparison tolerance. see also:
             //  https://github.com/vis2k/Mirror/pull/428)
-            bool change = moved || rotated || scaled;
+            var change = moved || rotated || scaled;
             if (change)
             {
                 // local position/rotation for VR support
@@ -351,7 +351,7 @@ namespace Mirage
                 {
                     // serialize
                     // local position/rotation for VR support
-                    using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+                    using (var writer = NetworkWriterPool.GetWriter())
                     {
                         SerializeIntoWriter(writer, TargetComponent.localPosition, TargetComponent.localRotation, TargetComponent.localScale);
 
@@ -391,7 +391,7 @@ namespace Mirage
         {
             // use a little offset because transform.localPosition might be in
             // the ground in many cases
-            Vector3 offset = Vector3.up * 0.01f;
+            var offset = Vector3.up * 0.01f;
 
             // draw position
             Gizmos.color = color;

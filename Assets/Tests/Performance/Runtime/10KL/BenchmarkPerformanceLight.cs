@@ -29,7 +29,7 @@ namespace Mirage.Tests.Performance.Runtime
             throw new System.NotSupportedException("Test not supported in player");
 #endif
 
-            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            var scene = SceneManager.GetSceneByPath(ScenePath);
             SceneManager.SetActiveScene(scene);
 
             // load host
@@ -47,7 +47,7 @@ namespace Mirage.Tests.Performance.Runtime
             yield return null;
 
             // unload scene
-            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            var scene = SceneManager.GetSceneByPath(ScenePath);
             yield return SceneManager.UnloadSceneAsync(scene);
 
             GameObject.Destroy(benchmarker.gameObject);

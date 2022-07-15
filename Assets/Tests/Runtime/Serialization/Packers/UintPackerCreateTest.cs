@@ -42,7 +42,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ThrowsIfSmallBitIsZero()
         {
-            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            var exception = Assert.Throws<ArgumentException>(() =>
             {
                 _ = VarIntPacker.FromBitCount(0, 10);
             });
@@ -52,7 +52,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ThrowsIfMediumLessThanSmall()
         {
-            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            var exception = Assert.Throws<ArgumentException>(() =>
             {
                 _ = VarIntPacker.FromBitCount(6, 5);
             });
@@ -62,7 +62,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ThrowsIfLargeLessThanMedium()
         {
-            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            var exception = Assert.Throws<ArgumentException>(() =>
             {
                 _ = VarIntPacker.FromBitCount(4, 10, 8);
             });
@@ -72,7 +72,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ThrowsIfLargeIsOver64()
         {
-            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            var exception = Assert.Throws<ArgumentException>(() =>
             {
                 _ = VarIntPacker.FromBitCount(5, 10, 65);
             });
@@ -82,7 +82,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ThrowsIfMediumIsOver62()
         {
-            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            var exception = Assert.Throws<ArgumentException>(() =>
             {
                 _ = VarIntPacker.FromBitCount(5, 63);
             });
@@ -94,15 +94,15 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         public void ThrowsWhenValueIsOverLargeValue()
         {
             var packer = VarIntPacker.FromBitCount(1, 2, 3, true);
-            ArgumentOutOfRangeException exception1 = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            var exception1 = Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 packer.PackUlong(writer, 20);
             });
-            ArgumentOutOfRangeException exception2 = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            var exception2 = Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 packer.PackUint(writer, 20);
             });
-            ArgumentOutOfRangeException exception3 = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            var exception3 = Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 packer.PackUlong(writer, 20);
             });
@@ -118,7 +118,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [TestCase(50_000ul, 10)]
         public void WritesMaxIfOverLargeValue(ulong inValue, int largeBits)
         {
-            ulong max = BitMask.Mask(largeBits);
+            var max = BitMask.Mask(largeBits);
             var packer = VarIntPacker.FromBitCount(1, 2, largeBits, false);
             Assert.DoesNotThrow(() =>
             {
@@ -126,10 +126,10 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
                 packer.PackUint(writer, (uint)inValue);
                 packer.PackUlong(writer, (ushort)inValue);
             });
-            NetworkReader reader = GetReader();
-            ulong unpack1 = packer.UnpackUlong(reader);
-            uint unpack2 = packer.UnpackUint(reader);
-            ushort unpack3 = packer.UnpackUshort(reader);
+            var reader = GetReader();
+            var unpack1 = packer.UnpackUlong(reader);
+            var unpack2 = packer.UnpackUint(reader);
+            var unpack3 = packer.UnpackUshort(reader);
 
             Assert.That(unpack1, Is.EqualTo(max));
             Assert.That(unpack2, Is.EqualTo(max));

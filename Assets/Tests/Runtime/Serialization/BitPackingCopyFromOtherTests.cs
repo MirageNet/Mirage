@@ -75,11 +75,11 @@ namespace Mirage.Tests.Runtime.Serialization
         [Repeat(100)]
         public void CopyFromOtherWriterUnAlignedBig()
         {
-            ulong value1 = (ulong)UnityEngine.Random.Range(0, 20000);
-            ulong value2 = (ulong)UnityEngine.Random.Range(0, 20000);
-            ulong value3 = (ulong)UnityEngine.Random.Range(0, 20000);
-            ulong value4 = (ulong)UnityEngine.Random.Range(0, 20000);
-            ulong value5 = (ulong)UnityEngine.Random.Range(0, 20000);
+            var value1 = (ulong)UnityEngine.Random.Range(0, 20000);
+            var value2 = (ulong)UnityEngine.Random.Range(0, 20000);
+            var value3 = (ulong)UnityEngine.Random.Range(0, 20000);
+            var value4 = (ulong)UnityEngine.Random.Range(0, 20000);
+            var value5 = (ulong)UnityEngine.Random.Range(0, 20000);
             otherWriter.Write(value1, 46);
             otherWriter.Write(value2, 47);
             otherWriter.Write(value3, 48);
@@ -109,17 +109,17 @@ namespace Mirage.Tests.Runtime.Serialization
         [Repeat(100)]
         public void CopyFromOtherWriterUnAlignedBigOtherUnaligned()
         {
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 otherWriter.Write(12, 20);
             }
 
 
-            ulong value1 = (ulong)UnityEngine.Random.Range(0, 20000);
-            ulong value2 = (ulong)UnityEngine.Random.Range(0, 20000);
-            ulong value3 = (ulong)UnityEngine.Random.Range(0, 20000);
-            ulong value4 = (ulong)UnityEngine.Random.Range(0, 20000);
-            ulong value5 = (ulong)UnityEngine.Random.Range(0, 20000);
+            var value1 = (ulong)UnityEngine.Random.Range(0, 20000);
+            var value2 = (ulong)UnityEngine.Random.Range(0, 20000);
+            var value3 = (ulong)UnityEngine.Random.Range(0, 20000);
+            var value4 = (ulong)UnityEngine.Random.Range(0, 20000);
+            var value5 = (ulong)UnityEngine.Random.Range(0, 20000);
             otherWriter.Write(value1, 46);
             otherWriter.Write(value2, 47);
             otherWriter.Write(value3, 48);

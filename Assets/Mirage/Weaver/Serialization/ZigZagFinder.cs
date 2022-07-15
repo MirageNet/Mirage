@@ -7,7 +7,7 @@ namespace Mirage.Weaver.Serialization
     {
         public static void CheckZigZag(ICustomAttributeProvider attributeProvider, TypeReference fieldType, ref ValueSerializer valueSerializer)
         {
-            bool hasAttribute = attributeProvider.HasCustomAttribute<ZigZagEncodeAttribute>();
+            var hasAttribute = attributeProvider.HasCustomAttribute<ZigZagEncodeAttribute>();
             if (!hasAttribute)
                 return;
 
@@ -37,7 +37,7 @@ namespace Mirage.Weaver.Serialization
             if (type.Resolve().IsEnum)
             {
                 // check underlying field is signed
-                TypeReference enumType = type.Resolve().GetEnumUnderlyingType();
+                var enumType = type.Resolve().GetEnumUnderlyingType();
                 ThrowIfUnsignedType(enumType);
             }
         }

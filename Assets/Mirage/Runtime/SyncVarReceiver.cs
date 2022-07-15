@@ -43,9 +43,9 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnUpdateVarsMessage " + msg.netId);
 
-            if (objectLocator.TryGetIdentity(msg.netId, out NetworkIdentity localObject))
+            if (objectLocator.TryGetIdentity(msg.netId, out var localObject))
             {
-                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(msg.payload, objectLocator))
+                using (var networkReader = NetworkReaderPool.GetReader(msg.payload, objectLocator))
                     localObject.OnDeserializeAll(networkReader, false);
             }
             else

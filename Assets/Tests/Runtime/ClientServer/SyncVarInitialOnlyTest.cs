@@ -51,25 +51,25 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator BothSyncVarsAreSetIntially()
         {
             var prefab = new GameObject("BothSyncVarsAreSet", typeof(NetworkIdentity), typeof(SyncVarInitialOnly));
-            NetworkIdentity identity = prefab.GetComponent<NetworkIdentity>();
+            var identity = prefab.GetComponent<NetworkIdentity>();
             identity.PrefabHash = Guid.NewGuid().GetHashCode();
 
             clientObjectManager.RegisterPrefab(identity);
 
             var clone = GameObject.Instantiate(prefab);
-            SyncVarInitialOnly behaviour = clone.GetComponent<SyncVarInitialOnly>();
+            var behaviour = clone.GetComponent<SyncVarInitialOnly>();
             behaviour.weaponIndex = 3;
             behaviour.health = 20;
             behaviour.otherValue = 5.2f;
 
             serverObjectManager.Spawn(clone);
-            uint netId = behaviour.NetId;
+            var netId = behaviour.NetId;
 
             yield return null;
             yield return null;
 
-            client.World.TryGetIdentity(netId, out NetworkIdentity clientClient);
-            SyncVarInitialOnly clientBehaviour = clientClient.GetComponent<SyncVarInitialOnly>();
+            client.World.TryGetIdentity(netId, out var clientClient);
+            var clientBehaviour = clientClient.GetComponent<SyncVarInitialOnly>();
 
             Assert.That(clientBehaviour.weaponIndex, Is.EqualTo(3));
             Assert.That(clientBehaviour.health, Is.EqualTo(20));

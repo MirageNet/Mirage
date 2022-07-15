@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using Mirage.Logging;
 using UnityEditor;
@@ -25,13 +24,13 @@ namespace Mirage
             //    for some reason
             // => OfTypeAll so disabled objects are included too
             // => Unity 2019 returns prefabs here too, so filter them out.
-            IEnumerable<NetworkIdentity> identities = Resources.FindObjectsOfTypeAll<NetworkIdentity>()
+            var identities = Resources.FindObjectsOfTypeAll<NetworkIdentity>()
                 .Where(identity => identity.gameObject.hideFlags != HideFlags.NotEditable &&
                                    identity.gameObject.hideFlags != HideFlags.HideAndDontSave &&
                                    identity.gameObject.scene.name != "DontDestroyOnLoad" &&
                                    !PrefabUtility.IsPartOfPrefabAsset(identity.gameObject));
 
-            foreach (NetworkIdentity identity in identities)
+            foreach (var identity in identities)
             {
                 // if we had a [ConflictComponent] attribute that would be better than this check.
                 // also there is no context about which scene this is in.
@@ -68,11 +67,11 @@ namespace Mirage
             NetworkIdentityIdGenerator.SetSceneHash(identity);
 
             // safety check for prefabs with more than one NetworkIdentity
-            GameObject prefabGO = PrefabUtility.GetCorrespondingObjectFromSource(identity.gameObject);
+            var prefabGO = PrefabUtility.GetCorrespondingObjectFromSource(identity.gameObject);
 
             if (prefabGO)
             {
-                GameObject prefabRootGO = prefabGO.transform.root.gameObject;
+                var prefabRootGO = prefabGO.transform.root.gameObject;
                 if (prefabRootGO != null && prefabRootGO.GetComponentsInChildren<NetworkIdentity>().Length > 1)
                 {
                     logger.LogFormat(LogType.Warning, "Prefab '{0}' has several NetworkIdentity components attached to itself or its children, this is not supported.", prefabRootGO.name);

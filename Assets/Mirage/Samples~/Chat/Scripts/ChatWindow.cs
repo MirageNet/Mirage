@@ -31,7 +31,7 @@ namespace Mirage.Examples.Chat
 
         private void OnPlayerMessage(Player player, string message)
         {
-            string prettyMessage = player.IsLocalPlayer ?
+            var prettyMessage = player.IsLocalPlayer ?
                 $"<color=red>{player.playerName}: </color> {message}" :
                 $"<color=blue>{player.playerName}: </color> {message}";
             AppendMessage(prettyMessage);
@@ -45,7 +45,7 @@ namespace Mirage.Examples.Chat
                 return;
 
             // get our player
-            Player player = Client.Player.Identity.GetComponent<Player>();
+            var player = Client.Player.Identity.GetComponent<Player>();
 
             // send a message
             player.CmdSend(ChatMessage.text.Trim());

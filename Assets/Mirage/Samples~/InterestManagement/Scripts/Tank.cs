@@ -40,12 +40,12 @@ namespace Mirage.Examples.InterestManagement
             nameText.color = Color.green;
 
             // rotate
-            float horizontal = Input.GetAxis("Horizontal");
+            var horizontal = Input.GetAxis("Horizontal");
             transform.Rotate(0, horizontal * rotationSpeed * Time.deltaTime, 0);
 
             // move
-            float vertical = Input.GetAxis("Vertical");
-            Vector3 forward = transform.TransformDirection(Vector3.forward);
+            var vertical = Input.GetAxis("Vertical");
+            var forward = transform.TransformDirection(Vector3.forward);
             agent.velocity = forward * Mathf.Max(vertical, 0) * agent.speed;
             animator.SetBool("Moving", agent.velocity != Vector3.zero);
 

@@ -45,31 +45,31 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void PacketShouldBeNotify()
         {
-            int offset = 0;
-            byte packetType = ByteUtils.ReadByte(packet, ref offset);
+            var offset = 0;
+            var packetType = ByteUtils.ReadByte(packet, ref offset);
             Assert.That((PacketType)packetType, Is.EqualTo(PacketType.Notify));
         }
 
         [Test]
         public void SentSequenceShouldBe1()
         {
-            int offset = 1;
-            ushort sequance = ByteUtils.ReadUShort(packet, ref offset);
+            var offset = 1;
+            var sequance = ByteUtils.ReadUShort(packet, ref offset);
             Assert.That(sequance, Is.EqualTo(0));
         }
 
         [Test]
         public void LatestReceivedShouldBeMax()
         {
-            int offset = 3;
-            ushort received = ByteUtils.ReadUShort(packet, ref offset);
+            var offset = 3;
+            var received = ByteUtils.ReadUShort(packet, ref offset);
             Assert.That(received, Is.EqualTo(maxSequence));
         }
         [Test]
         public void ReceivedMaskShouldBe0()
         {
-            int offset = 5;
-            ushort mask = ByteUtils.ReadUShort(packet, ref offset);
+            var offset = 5;
+            var mask = ByteUtils.ReadUShort(packet, ref offset);
             Assert.That(mask, Is.EqualTo(0));
         }
 

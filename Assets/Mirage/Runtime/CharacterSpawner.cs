@@ -138,8 +138,8 @@ namespace Mirage
         /// <param name="player">Connection from client.</param>
         public virtual void OnServerAddPlayer(INetworkPlayer player)
         {
-            Transform startPos = GetStartPosition();
-            NetworkIdentity character = startPos != null
+            var startPos = GetStartPosition();
+            var character = startPos != null
                 ? Instantiate(PlayerPrefab, startPos.position, startPos.rotation)
                 : Instantiate(PlayerPrefab);
 
@@ -170,7 +170,7 @@ namespace Mirage
             }
             else
             {
-                Transform startPosition = startPositions[startPositionIndex];
+                var startPosition = startPositions[startPositionIndex];
                 startPositionIndex = (startPositionIndex + 1) % startPositions.Count;
                 return startPosition;
             }

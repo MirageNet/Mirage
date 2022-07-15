@@ -45,7 +45,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ClearEventOnSyncAll()
         {
-            Action callback = Substitute.For<Action>();
+            var callback = Substitute.For<Action>();
             clientSyncDictionary.OnClear += callback;
             SerializeHelper.SerializeAllTo(serverSyncDictionary, clientSyncDictionary);
             callback.Received().Invoke();
@@ -54,7 +54,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void InsertEventOnSyncAll()
         {
-            Action<int, string> callback = Substitute.For<Action<int, string>>();
+            var callback = Substitute.For<Action<int, string>>();
             clientSyncDictionary.OnInsert += callback;
             SerializeHelper.SerializeAllTo(serverSyncDictionary, clientSyncDictionary);
 
@@ -66,7 +66,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ChangeEventOnSyncAll()
         {
-            Action callback = Substitute.For<Action>();
+            var callback = Substitute.For<Action>();
             clientSyncDictionary.OnChange += callback;
             SerializeHelper.SerializeAllTo(serverSyncDictionary, clientSyncDictionary);
             callback.Received().Invoke();
@@ -168,7 +168,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void AddClientCallbackTest()
         {
-            Action<int, string> callback = Substitute.For<Action<int, string>>();
+            var callback = Substitute.For<Action<int, string>>();
             clientSyncDictionary.OnInsert += callback;
             serverSyncDictionary.Add(3, "yay");
             SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
@@ -178,7 +178,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void AddServerCallbackTest()
         {
-            Action<int, string> callback = Substitute.For<Action<int, string>>();
+            var callback = Substitute.For<Action<int, string>>();
             serverSyncDictionary.OnInsert += callback;
             serverSyncDictionary.Add(3, "yay");
             SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
@@ -188,7 +188,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void RemoveClientCallbackTest()
         {
-            Action<int, string> callback = Substitute.For<Action<int, string>>();
+            var callback = Substitute.For<Action<int, string>>();
             clientSyncDictionary.OnRemove += callback;
             serverSyncDictionary.Remove(1);
             SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
@@ -198,7 +198,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ClearClientCallbackTest()
         {
-            Action callback = Substitute.For<Action>();
+            var callback = Substitute.For<Action>();
             clientSyncDictionary.OnClear += callback;
             serverSyncDictionary.Clear();
             SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
@@ -208,7 +208,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void ChangeClientCallbackTest()
         {
-            Action callback = Substitute.For<Action>();
+            var callback = Substitute.For<Action>();
             clientSyncDictionary.OnChange += callback;
             serverSyncDictionary.Add(3, "1");
             serverSyncDictionary.Add(4, "1");
@@ -219,7 +219,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void SetClientCallbackTest()
         {
-            Action<int, string, string> callback = Substitute.For<Action<int, string, string>>();
+            var callback = Substitute.For<Action<int, string, string>>();
             clientSyncDictionary.OnSet += callback;
             serverSyncDictionary[0] = "yay";
             SerializeHelper.SerializeDeltaTo(serverSyncDictionary, clientSyncDictionary);
@@ -323,7 +323,7 @@ namespace Mirage.Tests.Runtime
             clientSyncDictionary.Reset();
 
             // make old client the host
-            SyncDictionaryIntString hostList = clientSyncDictionary;
+            var hostList = clientSyncDictionary;
             var clientList2 = new SyncDictionaryIntString();
 
             Assert.That(hostList.IsReadOnly, Is.False);

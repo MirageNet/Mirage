@@ -25,7 +25,7 @@ namespace Mirage.Tests.Runtime.Host
             spawner.ServerObjectManager = serverObjectManager;
 
             player = new GameObject();
-            NetworkIdentity identity = player.AddComponent<NetworkIdentity>();
+            var identity = player.AddComponent<NetworkIdentity>();
             spawner.PlayerPrefab = identity;
 
             spawner.AutoSpawn = false;
@@ -40,7 +40,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator DontAutoSpawnTest() => UniTask.ToCoroutine(async () =>
         {
-            bool invokeAddPlayerMessage = false;
+            var invokeAddPlayerMessage = false;
             ServerMessageHandler.RegisterHandler<AddCharacterMessage>(msg => invokeAddPlayerMessage = true);
 
             sceneManager.ServerLoadSceneNormal("Assets/Mirror/Tests/Runtime/testScene.unity");
@@ -54,7 +54,7 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator ManualSpawnTest() => UniTask.ToCoroutine(async () =>
         {
-            bool invokeAddPlayerMessage = false;
+            var invokeAddPlayerMessage = false;
             ServerMessageHandler.RegisterHandler<AddCharacterMessage>(msg => invokeAddPlayerMessage = true);
 
             spawner.RequestServerSpawnPlayer();

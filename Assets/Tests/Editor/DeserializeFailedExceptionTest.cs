@@ -8,7 +8,7 @@ namespace Mirage.Tests
         [Test]
         public void InvalidMessageWithTextTest()
         {
-            DeserializeFailedException ex = Assert.Throws<DeserializeFailedException>(() =>
+            var ex = Assert.Throws<DeserializeFailedException>(() =>
             {
                 throw new DeserializeFailedException("Test Message");
             });

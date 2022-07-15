@@ -18,7 +18,7 @@ namespace Mirage.Tests.Runtime.Serialization
             // should throw an exception
             byte[] bytes = { 0x00, 0x01 };
 
-            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(bytes, null))
+            using (var reader = NetworkReaderPool.GetReader(bytes, null))
             {
                 Assert.Throws<EndOfStreamException>(() =>
                 {
@@ -30,9 +30,9 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void GettingReaderSetObjectLocator_WithBytes()
         {
-            IObjectLocator locator = Substitute.For<IObjectLocator>();
+            var locator = Substitute.For<IObjectLocator>();
             byte[] bytes = { 0x00, 0x01 };
-            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(bytes, locator))
+            using (var reader = NetworkReaderPool.GetReader(bytes, locator))
             {
                 Assert.That(reader.ObjectLocator, Is.EqualTo(locator));
             }
@@ -41,10 +41,10 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void GettingReaderSetObjectLocator_WithSegment()
         {
-            IObjectLocator locator = Substitute.For<IObjectLocator>();
+            var locator = Substitute.For<IObjectLocator>();
             byte[] bytes = { 0x00, 0x01 };
             var segment = new ArraySegment<byte>(bytes);
-            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(segment, locator))
+            using (var reader = NetworkReaderPool.GetReader(segment, locator))
             {
                 Assert.That(reader.ObjectLocator, Is.EqualTo(locator));
             }
@@ -53,9 +53,9 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void GettingReaderSetObjectLocator_WithBytesAndLength()
         {
-            IObjectLocator locator = Substitute.For<IObjectLocator>();
+            var locator = Substitute.For<IObjectLocator>();
             byte[] bytes = { 0x00, 0x01 };
-            using (PooledNetworkReader reader = NetworkReaderPool.GetReader(bytes, 0, 2, locator))
+            using (var reader = NetworkReaderPool.GetReader(bytes, 0, 2, locator))
             {
                 Assert.That(reader.ObjectLocator, Is.EqualTo(locator));
             }
@@ -65,7 +65,7 @@ namespace Mirage.Tests.Runtime.Serialization
         public void ThrowsIfNotMirageReader()
         {
             var reader = new NetworkReader();
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            var exception = Assert.Throws<InvalidOperationException>(() =>
             {
                 _ = reader.ToMirageReader();
             });

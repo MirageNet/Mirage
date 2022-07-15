@@ -17,21 +17,21 @@ namespace Mirage.HeadlessBenchmark
             if (!hasArrived)
             {
                 hasArrived = true;
-                float randX = Random.Range(-15.0f, 15.0f);
-                float randY = Random.Range(-15.0f, 15.0f);
+                var randX = Random.Range(-15.0f, 15.0f);
+                var randY = Random.Range(-15.0f, 15.0f);
                 StartCoroutine(MoveToPoint(new Vector3(randX, randY, 0)));
             }
         }
 
         private IEnumerator MoveToPoint(Vector3 targetPos)
         {
-            float timer = 0.0f;
-            Vector3 startPos = transform.position;
+            var timer = 0.0f;
+            var startPos = transform.position;
 
             while (timer < movementDuration)
             {
                 timer += Time.deltaTime;
-                float t = timer / movementDuration;
+                var t = timer / movementDuration;
                 t = t * t * t * (t * (6f * t - 15f) + 10f);
                 transform.position = Vector3.Lerp(startPos, targetPos, t);
 

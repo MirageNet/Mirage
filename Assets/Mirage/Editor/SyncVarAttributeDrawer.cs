@@ -10,8 +10,8 @@ namespace Mirage
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            Vector2 syncVarIndicatorRect = EditorStyles.miniLabel.CalcSize(syncVarIndicatorContent);
-            float valueWidth = position.width - syncVarIndicatorRect.x;
+            var syncVarIndicatorRect = EditorStyles.miniLabel.CalcSize(syncVarIndicatorContent);
+            var valueWidth = position.width - syncVarIndicatorRect.x;
 
             var valueRect = new Rect(position.x, position.y, valueWidth, position.height);
             var labelRect = new Rect(position.x + valueWidth, position.y, syncVarIndicatorRect.x, position.height);

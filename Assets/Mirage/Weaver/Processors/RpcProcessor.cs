@@ -79,8 +79,8 @@ namespace Mirage.Weaver
         protected ValueSerializer[] GetValueSerializers(MethodDefinition method)
         {
             var serializers = new ValueSerializer[method.Parameters.Count];
-            bool error = false;
-            for (int i = 0; i < method.Parameters.Count; i++)
+            var error = false;
+            for (var i = 0; i < method.Parameters.Count; i++)
             {
                 if (IsNetworkPlayer(method.Parameters[i].ParameterType))
                     continue;
@@ -120,14 +120,14 @@ namespace Mirage.Weaver
 
             // NetworkConnection is not sent via the NetworkWriter so skip it here
             // skip first for NetworkConnection in TargetRpc
-            bool skipFirst = ClientRpcWithTarget(method, callType);
+            var skipFirst = ClientRpcWithTarget(method, callType);
 
-            int startingArg = skipFirst ? 1 : 0;
-            for (int i = startingArg; i < method.Parameters.Count; i++)
+            var startingArg = skipFirst ? 1 : 0;
+            for (var i = startingArg; i < method.Parameters.Count; i++)
             {
                 // try/catch for each arg so that it will give error for each
-                ParameterDefinition param = method.Parameters[i];
-                ValueSerializer serializer = paramSerializers[i];
+                var param = method.Parameters[i];
+                var serializer = paramSerializers[i];
                 WriteArgument(worker, writer, param, serializer);
             }
         }
@@ -155,11 +155,11 @@ namespace Mirage.Weaver
             CallCmdDoSomething(reader.ReadPackedInt32(), reader.ReadNetworkIdentity())
              */
 
-            int startingArg = skipFirst ? 1 : 0;
-            for (int i = startingArg; i < method.Parameters.Count; i++)
+            var startingArg = skipFirst ? 1 : 0;
+            for (var i = startingArg; i < method.Parameters.Count; i++)
             {
-                ParameterDefinition param = method.Parameters[i];
-                ValueSerializer serializer = paramSerializers[i];
+                var param = method.Parameters[i];
+                var serializer = paramSerializers[i];
                 ReadArgument(worker, readerParameter, senderParameter, param, serializer);
             }
         }
@@ -216,9 +216,9 @@ namespace Mirage.Weaver
         /// <exception cref="RpcException">Throws when parameter are invalid</exception>
         protected void ValidateParameters(MethodReference method, RemoteCallType callType)
         {
-            for (int i = 0; i < method.Parameters.Count; i++)
+            for (var i = 0; i < method.Parameters.Count; i++)
             {
-                ParameterDefinition param = method.Parameters[i];
+                var param = method.Parameters[i];
                 ValidateParameter(method, param, callType, i == 0);
             }
         }
@@ -229,14 +229,14 @@ namespace Mirage.Weaver
         /// <exception cref="RpcException">Throws when parameter are invalid</exception>
         protected void ValidateReturnType(MethodDefinition md, RemoteCallType callType)
         {
-            TypeReference returnType = md.ReturnType;
+            var returnType = md.ReturnType;
             if (returnType.Is(typeof(void)))
                 return;
 
             // only ServerRpc allow UniTask
             if (callType == RemoteCallType.ServerRpc)
             {
-                Type unitaskType = typeof(UniTask<int>).GetGenericTypeDefinition();
+                var unitaskType = typeof(UniTask<int>).GetGenericTypeDefinition();
                 if (returnType.Is(unitaskType))
                     return;
             }
@@ -307,11 +307,11 @@ namespace Mirage.Weaver
         //  this returns the newly created method with all the user provided code
         public MethodDefinition SubstituteMethod(MethodDefinition method)
         {
-            string newName = UserCodeMethodName(method);
-            MethodDefinition generatedMethod = method.DeclaringType.AddMethod(newName, method.Attributes, method.ReturnType);
+            var newName = UserCodeMethodName(method);
+            var generatedMethod = method.DeclaringType.AddMethod(newName, method.Attributes, method.ReturnType);
 
             // add parameters
-            foreach (ParameterDefinition pd in method.Parameters)
+            foreach (var pd in method.Parameters)
             {
                 _ = generatedMethod.AddParam(pd.ParameterType, pd.Name);
             }
@@ -320,11 +320,11 @@ namespace Mirage.Weaver
             (generatedMethod.Body, method.Body) = (method.Body, generatedMethod.Body);
 
             // Move over all the debugging information
-            foreach (SequencePoint sequencePoint in method.DebugInformation.SequencePoints)
+            foreach (var sequencePoint in method.DebugInformation.SequencePoints)
                 generatedMethod.DebugInformation.SequencePoints.Add(sequencePoint);
             method.DebugInformation.SequencePoints.Clear();
 
-            foreach (CustomDebugInformation customInfo in method.CustomDebugInformations)
+            foreach (var customInfo in method.CustomDebugInformations)
                 generatedMethod.CustomDebugInformations.Add(customInfo);
             method.CustomDebugInformations.Clear();
 
@@ -342,12 +342,12 @@ namespace Mirage.Weaver
         /// <param name="generatedMethod"></param>
         private void FixRemoteCallToBaseMethod(TypeDefinition type, MethodDefinition method, MethodDefinition generatedMethod)
         {
-            string userCodeName = generatedMethod.Name;
-            string rpcName = method.Name;
+            var userCodeName = generatedMethod.Name;
+            var rpcName = method.Name;
 
-            foreach (Instruction instruction in generatedMethod.Body.Instructions)
+            foreach (var instruction in generatedMethod.Body.Instructions)
             {
-                if (!IsCallToMethod(instruction, out MethodDefinition calledMethod))
+                if (!IsCallToMethod(instruction, out var calledMethod))
                     continue;
 
                 // does method have same name? (NOTE: could be overload or non RPC at this point)
@@ -358,10 +358,10 @@ namespace Mirage.Weaver
                 if (!calledMethod.HasCustomAttribute(AttributeType))
                     continue;
 
-                string targetName = UserCodeMethodName(calledMethod);
+                var targetName = UserCodeMethodName(calledMethod);
                 // check this type and base types for methods
                 // if the calledMethod is an rpc, then it will have a UserCode_ method generated for it
-                MethodReference userCodeReplacement = type.GetMethodInBaseType(targetName);
+                var userCodeReplacement = type.GetMethodInBaseType(targetName);
 
                 if (userCodeReplacement == null)
                 {

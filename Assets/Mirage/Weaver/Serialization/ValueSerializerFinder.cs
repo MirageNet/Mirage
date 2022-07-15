@@ -19,8 +19,8 @@ namespace Mirage.Weaver.Serialization
         public static ValueSerializer GetSerializer(ModuleDefinition module, FieldReference field, TypeReference fieldType, Writers writers, Readers readers)
         {
             // note: we have to `Resolve()` DeclaringType first, because imported referencev `Module` will be equal.
-            TypeDefinition holder = field.DeclaringType.Resolve();
-            string name = field.Name;
+            var holder = field.DeclaringType.Resolve();
+            var name = field.Name;
 
             // if field is in this module use its type for Packer field,
             // else use the generated class
@@ -37,7 +37,7 @@ namespace Mirage.Weaver.Serialization
         /// <exception cref="SerializeFunctionException">Throws when can not generate read or write function</exception>
         public static ValueSerializer GetSerializer(MethodDefinition method, ParameterDefinition param, Writers writers, Readers readers)
         {
-            string name = $"{method.Name}_{param.Name}";
+            var name = $"{method.Name}_{param.Name}";
             return GetSerializer(method.DeclaringType.Module, method.DeclaringType, param, param.ParameterType, name, writers, readers);
         }
 
@@ -130,8 +130,8 @@ namespace Mirage.Weaver.Serialization
         private static ValueSerializer FindSerializeFunctions(Writers writers, Readers readers, TypeReference fieldType)
         {
             // writers or readers might be null here, this is allowed because user of ValueSerializer might only be doing writing, or only doing reading
-            MethodReference writeFunction = writers?.GetFunction_Thorws(fieldType);
-            MethodReference readFunction = readers?.GetFunction_Thorws(fieldType);
+            var writeFunction = writers?.GetFunction_Thorws(fieldType);
+            var readFunction = readers?.GetFunction_Thorws(fieldType);
             return new FunctionSerializer(writeFunction, readFunction);
         }
     }

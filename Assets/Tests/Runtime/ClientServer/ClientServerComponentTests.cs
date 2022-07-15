@@ -101,9 +101,9 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator OnSpawnSpawnHandlerTest() => UniTask.ToCoroutine(async () =>
         {
             spawnDelegateTestCalled = 0;
-            int hash = Guid.NewGuid().GetHashCode();
+            var hash = Guid.NewGuid().GetHashCode();
             var gameObject = new GameObject();
-            NetworkIdentity identity = gameObject.AddComponent<NetworkIdentity>();
+            var identity = gameObject.AddComponent<NetworkIdentity>();
             identity.PrefabHash = hash;
             identity.NetId = (uint)Random.Range(0, int.MaxValue);
 
@@ -120,13 +120,13 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator OnDestroySpawnHandlerTest() => UniTask.ToCoroutine(async () =>
         {
             spawnDelegateTestCalled = 0;
-            int hash = Guid.NewGuid().GetHashCode();
+            var hash = Guid.NewGuid().GetHashCode();
             var gameObject = new GameObject();
-            NetworkIdentity identity = gameObject.AddComponent<NetworkIdentity>();
+            var identity = gameObject.AddComponent<NetworkIdentity>();
             identity.PrefabHash = hash;
             identity.NetId = (uint)Random.Range(0, int.MaxValue);
 
-            UnSpawnDelegate unspawnDelegate = Substitute.For<UnSpawnDelegate>();
+            var unspawnDelegate = Substitute.For<UnSpawnDelegate>();
 
             clientObjectManager.RegisterSpawnHandler(hash, SpawnDelegateTest, unspawnDelegate);
             clientObjectManager.RegisterPrefab(identity, hash);
@@ -147,7 +147,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         {
             spawnDelegateTestCalled++;
 
-            NetworkIdentity prefab = clientObjectManager.GetPrefab(msg.prefabHash.Value);
+            var prefab = clientObjectManager.GetPrefab(msg.prefabHash.Value);
             if (!(prefab is null))
             {
                 return Object.Instantiate(prefab);
@@ -158,7 +158,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [UnityTest]
         public IEnumerator ClientDisconnectTest() => UniTask.ToCoroutine(async () =>
         {
-            int playerCount = server.Players.Count;
+            var playerCount = server.Players.Count;
             client.Disconnect();
 
             await AsyncUtil.WaitUntilWithTimeout(() => client.connectState == ConnectState.Disconnected);

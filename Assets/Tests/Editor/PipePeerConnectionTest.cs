@@ -53,11 +53,11 @@ namespace Mirage.Tests
         [SetUp]
         public void Setup()
         {
-            IDataHandler handler1 = Substitute.For<IDataHandler>();
-            IDataHandler handler2 = Substitute.For<IDataHandler>();
+            var handler1 = Substitute.For<IDataHandler>();
+            var handler2 = Substitute.For<IDataHandler>();
             disconnect1 = Substitute.For<Action>();
             disconnect2 = Substitute.For<Action>();
-            (IConnection connection1, IConnection connection2) = PipePeerConnection.Create(handler1, handler2, disconnect1, disconnect2);
+            (var connection1, var connection2) = PipePeerConnection.Create(handler1, handler2, disconnect1, disconnect2);
 
             conn1 = new ConnectionHandler(handler1, connection1);
             conn2 = new ConnectionHandler(handler2, connection2);
@@ -183,10 +183,10 @@ namespace Mirage.Tests
         [Test]
         public void NotifyTokenShouldInvokeHandlerImmediately()
         {
-            INotifyToken token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+            var token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
             Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
 
-            int invoked = 0;
+            var invoked = 0;
             token.Delivered += () => invoked++;
             Assert.That(invoked, Is.EqualTo(1), "Delivered should be invoked 1 time Immediately when handler");
         }
@@ -194,14 +194,14 @@ namespace Mirage.Tests
         [Test]
         public void NotifyTokenShouldNotSavePreviousHandler()
         {
-            INotifyToken token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+            var token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
             Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
 
-            int invoked1 = 0;
+            var invoked1 = 0;
             token.Delivered += () => invoked1++;
             Assert.That(invoked1, Is.EqualTo(1), "Delivered should be invoked 1 time Immediately when handler");
 
-            int invoked2 = 0;
+            var invoked2 = 0;
             token.Delivered += () => invoked2++;
             Assert.That(invoked1, Is.EqualTo(1), "invoked1 handler should not be called a second time");
             Assert.That(invoked2, Is.EqualTo(1));
@@ -210,10 +210,10 @@ namespace Mirage.Tests
         [Test]
         public void NotifyTokenRemoveDeliveredHandlerDoesNothing()
         {
-            INotifyToken token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+            var token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
             Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
 
-            int invoked1 = 0;
+            var invoked1 = 0;
             token.Delivered -= () => invoked1++;
             Assert.That(invoked1, Is.EqualTo(0), "Does nothing");
         }
@@ -221,10 +221,10 @@ namespace Mirage.Tests
         [Test]
         public void NotifyTokenAddLostHandlerDoesNothing()
         {
-            INotifyToken token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+            var token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
             Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
 
-            int invoked1 = 0;
+            var invoked1 = 0;
             token.Lost += () => invoked1++;
             Assert.That(invoked1, Is.EqualTo(0), "Does nothing");
         }
@@ -232,10 +232,10 @@ namespace Mirage.Tests
         [Test]
         public void NotifyTokenRemoveLostHandlerDoesNothing()
         {
-            INotifyToken token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
+            var token = conn1.SendNotify(new byte[] { 1, 2, 3, 4 });
             Assert.That(token, Is.TypeOf<PipePeerConnection.PipeNotifyToken>());
 
-            int invoked1 = 0;
+            var invoked1 = 0;
             token.Lost -= () => invoked1++;
             Assert.That(invoked1, Is.EqualTo(0), "Does nothing");
         }
@@ -243,7 +243,7 @@ namespace Mirage.Tests
         [Test]
         public void NotifyCallbackShouldBeInvokedImmediately()
         {
-            INotifyCallBack callbacks = Substitute.For<INotifyCallBack>();
+            var callbacks = Substitute.For<INotifyCallBack>();
             conn1.SendNotify(new byte[] { 1, 2, 3, 4 }, callbacks);
 
             callbacks.Received(1).OnDelivered();

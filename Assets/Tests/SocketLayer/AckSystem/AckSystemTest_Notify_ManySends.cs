@@ -25,7 +25,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
             // create and send n messages
             instance.messages = new List<byte[]>();
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 instance.messages.Add(createRandomData(i + 1));
                 instance.ackSystem.SendNotify(instance.messages[i]);
@@ -42,10 +42,10 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void PacketsShouldBeNotify()
         {
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 0;
-                byte packetType = ByteUtils.ReadByte(instance.packet(i), ref offset);
+                var offset = 0;
+                var packetType = ByteUtils.ReadByte(instance.packet(i), ref offset);
                 Assert.That((PacketType)packetType, Is.EqualTo(PacketType.Notify));
             }
         }
@@ -53,10 +53,10 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void PacketSequenceShouldIncrement()
         {
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 1;
-                ushort sequance = ByteUtils.ReadUShort(instance.packet(i), ref offset);
+                var offset = 1;
+                var sequance = ByteUtils.ReadUShort(instance.packet(i), ref offset);
                 Assert.That(sequance, Is.EqualTo(i), "sequnce should start at 1 and increment for each message");
             }
         }
@@ -64,20 +64,20 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void PacketReceivedShouldBeMax()
         {
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 3;
-                ushort received = ByteUtils.ReadUShort(instance.packet(i), ref offset);
+                var offset = 3;
+                var received = ByteUtils.ReadUShort(instance.packet(i), ref offset);
                 Assert.That(received, Is.EqualTo(maxSequence), $"Received should stay max, index:{i}");
             }
         }
         [Test]
         public void PacketMaskShouldBe0()
         {
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 5;
-                ushort mask = ByteUtils.ReadUShort(instance.packet(i), ref offset);
+                var offset = 5;
+                var mask = ByteUtils.ReadUShort(instance.packet(i), ref offset);
                 Assert.That(mask, Is.EqualTo(0), "Received should stay 0");
             }
         }
@@ -85,7 +85,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void PacketShouldContainMessage()
         {
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 AssertAreSameFromOffsets(instance.message(i), 0, instance.packet(i), AckSystem.NOTIFY_HEADER_SIZE, instance.message(i).Length);
             }

@@ -66,8 +66,8 @@ namespace Mirage.Examples.Basic
         public void OnStartClient()
         {
             // Calculate position in the layout panel
-            int x = 100 + ((playerNo % 4) * 150);
-            int y = -170 - ((playerNo / 4) * 80);
+            var x = 100 + ((playerNo % 4) * 150);
+            var y = -170 - ((playerNo / 4) * 80);
             rectTransform.anchoredPosition = new Vector2(x, y);
 
             // Apply SyncVar values

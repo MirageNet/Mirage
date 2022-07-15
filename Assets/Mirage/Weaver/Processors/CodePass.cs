@@ -31,7 +31,7 @@ namespace Mirage.Weaver
         {
             var types = new List<TypeDefinition>(module.Types);
 
-            foreach (TypeDefinition td in types)
+            foreach (var td in types)
             {
                 if (td.IsClass)
                 {
@@ -45,12 +45,12 @@ namespace Mirage.Weaver
 
         private static void InstructionPass(TypeDefinition td, Predicate<MethodDefinition> selector, InstructionProcessor processor)
         {
-            foreach (MethodDefinition md in td.Methods)
+            foreach (var md in td.Methods)
             {
                 InstructionPass(md, selector, processor);
             }
 
-            foreach (TypeDefinition nested in td.NestedTypes)
+            foreach (var nested in td.NestedTypes)
             {
                 InstructionPass(nested, selector, processor);
             }
@@ -66,10 +66,10 @@ namespace Mirage.Weaver
 
             if (md.Body.CodeSize > 0 && selector(md))
             {
-                Collection<SequencePoint> sequencePoints = md.DebugInformation.SequencePoints;
+                var sequencePoints = md.DebugInformation.SequencePoints;
 
-                int sequencePointIndex = 0;
-                Instruction instr = md.Body.Instructions[0];
+                var sequencePointIndex = 0;
+                var instr = md.Body.Instructions[0];
 
                 while (instr != null)
                 {
@@ -91,12 +91,12 @@ namespace Mirage.Weaver
                 return (null, 0);
             }
 
-            SequencePoint sequencePoint = sequencePoints[index];
+            var sequencePoint = sequencePoints[index];
 
             if (index + 1 >= sequencePoints.Count)
                 return (sequencePoint, index);
 
-            SequencePoint next = sequencePoints[index + 1];
+            var next = sequencePoints[index + 1];
 
             if (next.Offset > instr.Offset)
                 return (sequencePoint, index);

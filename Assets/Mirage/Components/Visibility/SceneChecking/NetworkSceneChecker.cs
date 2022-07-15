@@ -77,7 +77,7 @@ namespace Mirage
 
         private void RebuildSceneObservers()
         {
-            foreach (NetworkIdentity networkIdentity in sceneCheckerObjects[currentScene])
+            foreach (var networkIdentity in sceneCheckerObjects[currentScene])
                 if (networkIdentity != null)
                     networkIdentity.RebuildObservers(false);
         }
@@ -109,7 +109,7 @@ namespace Mirage
                 return;
 
             // Add everything in the hashset for this object's current scene
-            foreach (NetworkIdentity networkIdentity in sceneCheckerObjects[currentScene])
+            foreach (var networkIdentity in sceneCheckerObjects[currentScene])
                 if (networkIdentity != null && networkIdentity.Owner != null)
                     observers.Add(networkIdentity.Owner);
         }

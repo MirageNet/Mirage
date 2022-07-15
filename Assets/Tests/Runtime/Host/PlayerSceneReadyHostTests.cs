@@ -16,7 +16,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void SetClientReadyAndNotReadyTest()
         {
-            INetworkPlayer player = Substitute.For<INetworkPlayer>();
+            var player = Substitute.For<INetworkPlayer>();
             // set ready to true, then check if methods sets it back to falase
             player.SceneIsReady = true;
 
@@ -29,17 +29,17 @@ namespace Mirage.Tests.Runtime.Host
         {
             var players = new List<INetworkPlayer>();
             // add first ready client
-            INetworkPlayer first = Substitute.For<INetworkPlayer>();
+            var first = Substitute.For<INetworkPlayer>();
             first.SceneIsReady = true;
             players.Add(first);
 
             // add second ready client
-            INetworkPlayer second = Substitute.For<INetworkPlayer>();
+            var second = Substitute.For<INetworkPlayer>();
             second.SceneIsReady = true;
             players.Add(second);
 
             // add second ready client
-            INetworkPlayer thrid = Substitute.For<INetworkPlayer>();
+            var thrid = Substitute.For<INetworkPlayer>();
             thrid.SceneIsReady = true;
 
             // set all not ready
@@ -53,12 +53,12 @@ namespace Mirage.Tests.Runtime.Host
         public void SetAllClientsNotReady_UsesServerPlayersByDefault()
         {
             // add first ready client
-            INetworkPlayer first = Substitute.For<INetworkPlayer>();
+            var first = Substitute.For<INetworkPlayer>();
             first.SceneIsReady = true;
             server.AddTestPlayer(first);
 
             // add second ready client
-            INetworkPlayer second = Substitute.For<INetworkPlayer>();
+            var second = Substitute.For<INetworkPlayer>();
             second.SceneIsReady = true;
             server.AddTestPlayer(second);
 

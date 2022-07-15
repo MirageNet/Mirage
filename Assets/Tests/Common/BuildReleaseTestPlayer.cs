@@ -19,15 +19,15 @@ namespace Mirage.Tests.PlayerTests.BuildScripts
         // [MenuItem("Build/Build performance tests", priority = 1005)]
         public static void BuildPerformanceTestsUsingRunner()
         {
-            BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
+            var target = EditorUserBuildSettings.activeBuildTarget;
             // use Temp folder so unity cleans it up on close
-            string targetFolder = "./Temp/TestPlayerBuild";
-            string exePath = $"{targetFolder}/mirage.exe";
+            var targetFolder = "./Temp/TestPlayerBuild";
+            var exePath = $"{targetFolder}/mirage.exe";
 
             // deleta any old build
             CleanUpBuildFolder(targetFolder);
 
-            TestRunnerApi runner = ScriptableObject.CreateInstance<TestRunnerApi>();
+            var runner = ScriptableObject.CreateInstance<TestRunnerApi>();
             MakeRestsReleaseMode.ApplyReleaseMode = true;
             // Create ExecutionSettings is the same as the settings created by the testrunner gui builds
 
@@ -73,8 +73,8 @@ namespace Mirage.Tests.PlayerTests.BuildScripts
         {
             // reflection because that is the only way to create buildOnly only with TestRunnerApi
             var assembly = Assembly.Load("UnityEditor.TestRunner");
-            string typeName = "UnityEditor.TestTools.TestRunner.PlayerLauncherTestRunSettings";
-            object runSettings = assembly.CreateInstance(typeName);
+            var typeName = "UnityEditor.TestTools.TestRunner.PlayerLauncherTestRunSettings";
+            var runSettings = assembly.CreateInstance(typeName);
             runSettings.GetType().GetProperty("buildOnly").SetValue(runSettings, true);
             runSettings.GetType().GetProperty("buildOnlyLocationPath").SetValue(runSettings, targetPath);
 
@@ -96,7 +96,7 @@ namespace Mirage.Tests.PlayerTests.BuildScripts
             {
                 Debug.Log("Appling MakeRestsReleaseMode");
 
-                BuildOptions options = playerOptions.options;
+                var options = playerOptions.options;
                 // Do not launch the player after the build completes.
                 options &= ~BuildOptions.AutoRunPlayer;
                 options |= BuildOptions.ShowBuiltPlayer;

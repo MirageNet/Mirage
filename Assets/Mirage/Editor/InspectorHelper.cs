@@ -20,8 +20,8 @@ namespace Mirage
             const BindingFlags privateFields = BindingFlags.NonPublic | BindingFlags.Instance;
 
             // get public fields (includes fields from base type)
-            FieldInfo[] allPublicFields = type.GetFields(publicFields);
-            foreach (FieldInfo field in allPublicFields)
+            var allPublicFields = type.GetFields(publicFields);
+            foreach (var field in allPublicFields)
             {
                 yield return field;
             }
@@ -29,8 +29,8 @@ namespace Mirage
             // get private fields in current type, then move to base type
             while (type != null)
             {
-                FieldInfo[] allPrivateFields = type.GetFields(privateFields);
-                foreach (FieldInfo field in allPrivateFields)
+                var allPrivateFields = type.GetFields(privateFields);
+                foreach (var field in allPrivateFields)
                 {
                     yield return field;
                 }
@@ -47,12 +47,12 @@ namespace Mirage
 
         public static bool IsSyncVar(this FieldInfo field)
         {
-            object[] fieldMarkers = field.GetCustomAttributes(typeof(SyncVarAttribute), true);
+            var fieldMarkers = field.GetCustomAttributes(typeof(SyncVarAttribute), true);
             return fieldMarkers.Length > 0;
         }
         public static bool IsSerializeField(this FieldInfo field)
         {
-            object[] fieldMarkers = field.GetCustomAttributes(typeof(SerializeField), true);
+            var fieldMarkers = field.GetCustomAttributes(typeof(SerializeField), true);
             return fieldMarkers.Length > 0;
         }
         public static bool IsVisibleField(this FieldInfo field)
@@ -66,7 +66,7 @@ namespace Mirage
         }
         public static bool HasShowInInspector(this FieldInfo field)
         {
-            object[] fieldMarkers = field.GetCustomAttributes(typeof(ShowInInspectorAttribute), true);
+            var fieldMarkers = field.GetCustomAttributes(typeof(ShowInInspectorAttribute), true);
             return fieldMarkers.Length > 0;
         }
         public static bool IsVisibleSyncObject(this FieldInfo field)

@@ -23,7 +23,7 @@ namespace Mirage.SocketLayer
             // default to mirage version
             if (string.IsNullOrEmpty(key))
             {
-                string version = typeof(ConnectKeyValidator).Assembly.GetName().Version.Major.ToString();
+                var version = typeof(ConnectKeyValidator).Assembly.GetName().Version.Major.ToString();
                 key = $"Mirage V{version}";
             }
 
@@ -35,9 +35,9 @@ namespace Mirage.SocketLayer
 
         public bool Validate(byte[] buffer)
         {
-            for (int i = 0; i < KeyLength; i++)
+            for (var i = 0; i < KeyLength; i++)
             {
-                byte keyByte = buffer[i + OFFSET];
+                var keyByte = buffer[i + OFFSET];
                 if (keyByte != key[i])
                     return false;
             }
@@ -47,7 +47,7 @@ namespace Mirage.SocketLayer
 
         public void CopyTo(byte[] buffer)
         {
-            for (int i = 0; i < KeyLength; i++)
+            for (var i = 0; i < KeyLength; i++)
             {
                 buffer[i + OFFSET] = key[i];
             }

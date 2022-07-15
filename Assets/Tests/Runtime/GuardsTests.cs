@@ -145,7 +145,7 @@ namespace Mirage.Tests.Runtime
         public void GuardHasAuthorityError()
         {
             var obj = new GameObject("randomObject", typeof(NetworkIdentity), typeof(ExampleGuards));
-            ExampleGuards guardedComponent = obj.GetComponent<ExampleGuards>();
+            var guardedComponent = obj.GetComponent<ExampleGuards>();
             Assert.Throws<MethodInvocationException>(() =>
            {
                guardedComponent.CallAuthorityFunction();
@@ -158,7 +158,7 @@ namespace Mirage.Tests.Runtime
         public void GuardHasAuthorityNoError()
         {
             var obj = new GameObject("randomObject", typeof(NetworkIdentity), typeof(ExampleGuards));
-            ExampleGuards guardedComponent = obj.GetComponent<ExampleGuards>();
+            var guardedComponent = obj.GetComponent<ExampleGuards>();
             guardedComponent.CallAuthorityNoErrorFunction();
             Assert.That(guardedComponent.hasAuthorityNoErrorCalled, Is.False);
 
@@ -183,7 +183,7 @@ namespace Mirage.Tests.Runtime
         public void GuardLocalPlayer()
         {
             var obj = new GameObject("randomObject", typeof(NetworkIdentity), typeof(ExampleGuards));
-            ExampleGuards guardedComponent = obj.GetComponent<ExampleGuards>();
+            var guardedComponent = obj.GetComponent<ExampleGuards>();
 
             Assert.Throws<MethodInvocationException>(() =>
             {
@@ -198,7 +198,7 @@ namespace Mirage.Tests.Runtime
         public void GuardLocalPlayerNoError()
         {
             var obj = new GameObject("randomObject", typeof(NetworkIdentity), typeof(ExampleGuards));
-            ExampleGuards guardedComponent = obj.GetComponent<ExampleGuards>();
+            var guardedComponent = obj.GetComponent<ExampleGuards>();
 
             guardedComponent.CallLocalPlayerNoError();
             Assert.That(guardedComponent.localPlayerNoErrorCalled, Is.False);

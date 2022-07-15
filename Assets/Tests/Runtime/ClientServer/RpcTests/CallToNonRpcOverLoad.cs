@@ -42,9 +42,9 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         public IEnumerator CanCallServerRpc()
         {
             const int num = 32;
-            Action<int> clientSub = Substitute.For<Action<int>>();
-            Action<int> serverSub = Substitute.For<Action<int>>();
-            Action<int> overloadSub = Substitute.For<Action<int>>();
+            var clientSub = Substitute.For<Action<int>>();
+            var serverSub = Substitute.For<Action<int>>();
+            var overloadSub = Substitute.For<Action<int>>();
             serverComponent.clientRpcCalled += clientSub;
             serverComponent.serverRpcCalled += serverSub;
             serverComponent.overloadCalled += overloadSub;
@@ -62,9 +62,9 @@ namespace Mirage.Tests.Runtime.ClientServer.RpcTests
         public IEnumerator CanCallClientRpc()
         {
             const int num = 32;
-            Action<int> clientSub = Substitute.For<Action<int>>();
-            Action<int> serverSub = Substitute.For<Action<int>>();
-            Action<int> overloadSub = Substitute.For<Action<int>>();
+            var clientSub = Substitute.For<Action<int>>();
+            var serverSub = Substitute.For<Action<int>>();
+            var overloadSub = Substitute.For<Action<int>>();
             clientComponent.clientRpcCalled += clientSub;
             clientComponent.serverRpcCalled += serverSub;
             clientComponent.overloadCalled += overloadSub;

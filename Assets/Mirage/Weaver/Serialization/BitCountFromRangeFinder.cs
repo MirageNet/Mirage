@@ -7,10 +7,10 @@ namespace Mirage.Weaver.Serialization
     {
         public static ValueSerializer GetSerializer(ICustomAttributeProvider attributeProvider, TypeReference fieldType)
         {
-            CustomAttribute attribute = attributeProvider.GetCustomAttribute<BitCountFromRangeAttribute>();
+            var attribute = attributeProvider.GetCustomAttribute<BitCountFromRangeAttribute>();
 
-            int min = (int)attribute.ConstructorArguments[0].Value;
-            int max = (int)attribute.ConstructorArguments[1].Value;
+            var min = (int)attribute.ConstructorArguments[0].Value;
+            var max = (int)attribute.ConstructorArguments[1].Value;
 
             if (min >= max)
                 throw new BitCountFromRangeException("Max must be greater than min");
@@ -24,7 +24,7 @@ namespace Mirage.Weaver.Serialization
             if (max > maxAllowedMax)
                 throw new BitCountFromRangeException($"Max must be greater than types max value, max:{max}, max allowed:{maxAllowedMax}, type:{fieldType.Name}");
 
-            int bitCount = BitPackHelper.GetBitCount(checked((long)max - min));
+            var bitCount = BitPackHelper.GetBitCount(checked((long)max - min));
 
             int? minResult;
             if (min == 0) minResult = null;

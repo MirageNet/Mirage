@@ -44,7 +44,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public IEnumerator CanCallServerRpc()
         {
             const int num = 32;
-            Action<int, INetworkPlayer> sub = Substitute.For<Action<int, INetworkPlayer>>();
+            var sub = Substitute.For<Action<int, INetworkPlayer>>();
             serverComponent.serverCalled += sub;
             clientComponent.MyRpc2(num, default);
 
@@ -58,7 +58,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public IEnumerator CanCallClientRpc()
         {
             const int num = 32;
-            Action<int> sub = Substitute.For<Action<int>>();
+            var sub = Substitute.For<Action<int>>();
             clientComponent.clientCalled += sub;
             serverComponent.MyRpc(num);
 
@@ -81,7 +81,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public IEnumerator CanCallServerRpc()
         {
             const int num = 32;
-            Action<MyClass, INetworkPlayer> sub = Substitute.For<Action<MyClass, INetworkPlayer>>();
+            var sub = Substitute.For<Action<MyClass, INetworkPlayer>>();
             serverComponent.serverCalled += sub;
             clientComponent.MyRpc2(new MyClass { Value = num }, default);
 
@@ -95,7 +95,7 @@ namespace Mirage.Tests.Runtime.ClientServer.Generics
         public IEnumerator CanCallClientRpc()
         {
             const int num = 32;
-            Action<MyClass> sub = Substitute.For<Action<MyClass>>();
+            var sub = Substitute.For<Action<MyClass>>();
             clientComponent.clientCalled += sub;
             serverComponent.MyRpc(new MyClass { Value = num });
 

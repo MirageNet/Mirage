@@ -15,10 +15,10 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         public void SetUp()
         {
             var config = new Config();
-            int mtu = MAX_PACKET_SIZE;
-            int bigSize = (int)(mtu * 1.5f);
+            var mtu = MAX_PACKET_SIZE;
+            var bigSize = (int)(mtu * 1.5f);
 
-            byte[] message = CreateBigData(1, bigSize);
+            var message = CreateBigData(1, bigSize);
 
             instance = new AckTestInstance();
             instance.connection = new SubIRawConnection();
@@ -35,7 +35,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
         private byte[] CreateBigData(int id, int size)
         {
-            byte[] buffer = new byte[size];
+            var buffer = new byte[size];
             rand.NextBytes(buffer);
             buffer[0] = (byte)id;
 
@@ -51,10 +51,10 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void MessageShouldBeReliableFragment()
         {
-            foreach (byte[] packet in instance.connection.packets)
+            foreach (var packet in instance.connection.packets)
             {
-                int offset = 0;
-                byte packetType = ByteUtils.ReadByte(packet, ref offset);
+                var offset = 0;
+                var packetType = ByteUtils.ReadByte(packet, ref offset);
                 Assert.That((PacketType)packetType, Is.EqualTo(PacketType.ReliableFragment));
             }
         }
@@ -62,10 +62,10 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void EachPacketHasDifferentAckSequence()
         {
-            for (int i = 0; i < instance.connection.packets.Count; i++)
+            for (var i = 0; i < instance.connection.packets.Count; i++)
             {
-                int offset = 1;
-                ushort sequance = ByteUtils.ReadUShort(instance.packet(i), ref offset);
+                var offset = 1;
+                var sequance = ByteUtils.ReadUShort(instance.packet(i), ref offset);
                 Assert.That(sequance, Is.EqualTo(i));
             }
         }
@@ -73,10 +73,10 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void EachPacketHasDifferentReliableOrder()
         {
-            for (int i = 0; i < instance.connection.packets.Count; i++)
+            for (var i = 0; i < instance.connection.packets.Count; i++)
             {
-                int offset = 1 + 2 + 2 + 8;
-                ushort reliableOrder = ByteUtils.ReadUShort(instance.packet(i), ref offset);
+                var offset = 1 + 2 + 2 + 8;
+                var reliableOrder = ByteUtils.ReadUShort(instance.packet(i), ref offset);
 
                 Assert.That(reliableOrder, Is.EqualTo(i));
             }
@@ -85,9 +85,9 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void EachPacketHasDifferentFragmentIndex()
         {
-            for (int i = 0; i < instance.connection.packets.Count; i++)
+            for (var i = 0; i < instance.connection.packets.Count; i++)
             {
-                int offset = 1 + 2 + 2 + 8 + 2;
+                var offset = 1 + 2 + 2 + 8 + 2;
                 ushort fragmentIndex = ByteUtils.ReadByte(instance.packet(i), ref offset);
                 Assert.That(fragmentIndex, Is.EqualTo(1 - i), "Should be reverse Index, first packet should have 1 and second should have 0");
             }

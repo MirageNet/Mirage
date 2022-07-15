@@ -153,8 +153,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator SpawnWithValue() => UniTask.ToCoroutine(async () =>
         {
             // create an object, set the target and spawn it
-            UnityEngine.GameObject newObject = UnityEngine.Object.Instantiate(playerPrefab);
-            GenericBehaviourWithSyncVarImplement newBehavior = newObject.GetComponent<GenericBehaviourWithSyncVarImplement>();
+            var newObject = UnityEngine.Object.Instantiate(playerPrefab);
+            var newBehavior = newObject.GetComponent<GenericBehaviourWithSyncVarImplement>();
             newBehavior.baseValue = 2;
             newBehavior.childValue = 22;
             newBehavior.target = serverComponent;
@@ -164,12 +164,12 @@ namespace Mirage.Tests.Runtime.ClientServer
             serverObjectManager.Spawn(newObject);
 
             // wait until the client spawns it
-            uint newObjectId = newBehavior.NetId;
+            var newObjectId = newBehavior.NetId;
 
-            NetworkIdentity newClientObject = await AsyncUtil.WaitUntilSpawn(client.World, newObjectId);
+            var newClientObject = await AsyncUtil.WaitUntilSpawn(client.World, newObjectId);
             // check if the target was set correctly in the client
 
-            GenericBehaviourWithSyncVarImplement newClientBehavior = newClientObject.GetComponent<GenericBehaviourWithSyncVarImplement>();
+            var newClientBehavior = newClientObject.GetComponent<GenericBehaviourWithSyncVarImplement>();
             Assert.AreEqual(newClientBehavior.baseValue, 2);
             Assert.AreEqual(newClientBehavior.childValue, 22);
             Assert.That(newClientBehavior.target, Is.SameAs(clientComponent));

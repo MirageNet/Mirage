@@ -33,7 +33,7 @@ namespace Mirage.Serialization
         /// <returns></returns>
         public static PooledNetworkReader GetReader(ArraySegment<byte> packet, IObjectLocator objectLocator)
         {
-            PooledNetworkReader reader = pool.Take();
+            var reader = pool.Take();
             reader.ObjectLocator = objectLocator;
             reader.Reset(packet.Array, packet.Offset, packet.Count);
             return reader;
@@ -46,7 +46,7 @@ namespace Mirage.Serialization
         /// <returns></returns>
         public static PooledNetworkReader GetReader(byte[] array, IObjectLocator objectLocator)
         {
-            PooledNetworkReader reader = pool.Take();
+            var reader = pool.Take();
             reader.ObjectLocator = objectLocator;
             reader.Reset(array, 0, array.Length);
             return reader;
@@ -59,7 +59,7 @@ namespace Mirage.Serialization
         /// <returns></returns>
         public static PooledNetworkReader GetReader(byte[] array, int offset, int length, IObjectLocator objectLocator)
         {
-            PooledNetworkReader reader = pool.Take();
+            var reader = pool.Take();
             reader.ObjectLocator = objectLocator;
             reader.Reset(array, offset, length);
             return reader;

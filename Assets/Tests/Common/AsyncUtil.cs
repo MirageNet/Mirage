@@ -25,7 +25,7 @@ namespace Mirage.Tests
         // so we do this boilerplate to run our async methods
         public static IEnumerator RunAsync(Func<Task> block)
         {
-            Task task = block();
+            var task = block();
 
             while (!task.IsCompleted) { yield return null; }
             if (task.IsFaulted) { throw task.Exception; }

@@ -29,7 +29,7 @@ namespace Mirage.Serialization
 
             // write string with same method as NetworkReader
             // convert to byte[]
-            int size = encoding.GetBytes(value, 0, value.Length, stringBuffer, 0);
+            var size = encoding.GetBytes(value, 0, value.Length, stringBuffer, 0);
 
             // check if within max size
             if (size >= MaxStringLength)
@@ -48,12 +48,12 @@ namespace Mirage.Serialization
         public static string ReadString(this NetworkReader reader)
         {
             // read number of bytes
-            ushort size = reader.ReadUInt16();
+            var size = reader.ReadUInt16();
 
             if (size == 0)
                 return null;
 
-            int realSize = size - 1;
+            var realSize = size - 1;
 
             // make sure it's within limits to avoid allocation attacks etc.
             if (realSize >= MaxStringLength)
@@ -61,7 +61,7 @@ namespace Mirage.Serialization
                 throw new EndOfStreamException($"ReadString too long: {realSize}. Limit is: {MaxStringLength}");
             }
 
-            ArraySegment<byte> data = reader.ReadBytesSegment(realSize);
+            var data = reader.ReadBytesSegment(realSize);
 
             // convert directly from buffer to string via encoding
             return encoding.GetString(data.Array, data.Offset, data.Count);

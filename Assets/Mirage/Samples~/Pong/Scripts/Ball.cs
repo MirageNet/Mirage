@@ -46,7 +46,7 @@ namespace Mirage.Examples.Pong
             if (col.transform.GetComponent<Player>())
             {
                 // Calculate y direction via hit Factor
-                float y = HitFactor(transform.position,
+                var y = HitFactor(transform.position,
                                     col.transform.position,
                                     col.collider.bounds.size.y);
 
@@ -54,7 +54,7 @@ namespace Mirage.Examples.Pong
                 float x = col.relativeVelocity.x > 0 ? 1 : -1;
 
                 // Calculate direction, make length=1 via .normalized
-                Vector2 dir = new Vector2(x, y).normalized;
+                var dir = new Vector2(x, y).normalized;
 
                 // Set Velocity with dir * speed
                 rigidbody2d.velocity = dir * speed;

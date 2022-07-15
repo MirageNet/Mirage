@@ -11,29 +11,29 @@ namespace Mirage
 
         public override bool OnCheckObserver(INetworkPlayer player)
         {
-            NetworkIdentity character = player.Identity;
+            var character = player.Identity;
             if (character == null)
             {
                 if (logger.LogEnabled()) logger.Log($"SceneChecker: {player} had no character");
                 return false;
             }
 
-            Scene playerScene = character.gameObject.scene;
+            var playerScene = character.gameObject.scene;
             if (!playerScene.IsValid())
             {
                 if (logger.WarnEnabled()) logger.LogWarning($"SceneChecker: Could not find scene for {player}");
                 return false;
             }
 
-            Scene thisScene = gameObject.scene;
-            bool visible = playerScene == thisScene;
+            var thisScene = gameObject.scene;
+            var visible = playerScene == thisScene;
             if (logger.LogEnabled()) logger.Log($"SceneChecker: {player} can see '{this}': {visible}");
             return visible;
         }
 
         public override void OnRebuildObservers(HashSet<INetworkPlayer> observers, bool initialize)
         {
-            foreach (INetworkPlayer player in Server.Players)
+            foreach (var player in Server.Players)
             {
                 if (OnCheckObserver(player))
                 {
@@ -48,7 +48,7 @@ namespace Mirage
         /// <param name="scene"></param>
         public void MoveToScene(Scene scene)
         {
-            INetworkPlayer owner = Identity.Owner;
+            var owner = Identity.Owner;
 
             // remove player from other clients
             removeObservers(Identity);
@@ -67,8 +67,8 @@ namespace Mirage
 
         private void removeObservers(NetworkIdentity identity)
         {
-            HashSet<INetworkPlayer> observers = identity.observers;
-            foreach (INetworkPlayer observer in observers)
+            var observers = identity.observers;
+            foreach (var observer in observers)
             {
                 observer.RemoveFromVisList(identity);
             }

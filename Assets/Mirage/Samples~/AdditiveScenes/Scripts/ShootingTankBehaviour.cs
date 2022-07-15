@@ -33,12 +33,12 @@ namespace Mirage.Examples.Additive
         private void ShootNearestPlayer()
         {
             GameObject target = null;
-            float distance = 100f;
+            var distance = 100f;
 
-            foreach (INetworkPlayer networkConnection in Identity.observers)
+            foreach (var networkConnection in Identity.observers)
             {
-                GameObject tempTarget = networkConnection.Identity.gameObject;
-                float tempDistance = Vector3.Distance(tempTarget.transform.position, transform.position);
+                var tempTarget = networkConnection.Identity.gameObject;
+                var tempDistance = Vector3.Distance(tempTarget.transform.position, transform.position);
 
                 if (target == null || distance > tempDistance)
                 {

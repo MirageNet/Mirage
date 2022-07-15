@@ -23,7 +23,7 @@ namespace Mirage.Tests.CodeGenerators
 
         private static void Create(CreateFromTemplate fromTemplate, float max, string ArgAttribute2, float value, float within, int bitcount)
         {
-            string name = $"_{max}_{bitcount}";
+            var name = $"_{max}_{bitcount}";
             fromTemplate.Replace("%%NAME%%", name);
             fromTemplate.Replace("%%PACKER_ATTRIBUTE%%", $"{max}, {ArgAttribute2}");
             fromTemplate.Replace("%%VALUE%%", $"{value}f");

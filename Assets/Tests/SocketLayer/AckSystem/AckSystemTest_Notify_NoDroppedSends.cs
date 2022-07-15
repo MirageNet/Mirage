@@ -38,7 +38,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             // create and send n messages
             instance1.messages = new List<byte[]>();
             instance2.messages = new List<byte[]>();
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 instance1.messages.Add(createRandomData(i + 1));
                 instance2.messages.Add(createRandomData(i + 1));
@@ -48,13 +48,13 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 // send to conn1
                 instance1.ackSystem.SendNotify(instance1.messages[i]);
                 // give to instance2 from conn1
-                ArraySegment<byte> segment2 = instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i], instance1.connection.packets[i].Length);
+                var segment2 = instance2.ackSystem.ReceiveNotify(instance1.connection.packets[i], instance1.connection.packets[i].Length);
                 received2.Add(segment2);
 
                 // send to conn2
                 instance2.ackSystem.SendNotify(instance2.messages[i]);
                 // give to instance1 from conn2
-                ArraySegment<byte> segment1 = instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i], instance2.connection.packets[i].Length);
+                var segment1 = instance1.ackSystem.ReceiveNotify(instance2.connection.packets[i], instance2.connection.packets[i].Length);
                 received1.Add(segment1);
             }
 
@@ -71,17 +71,17 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void AllPacketsShouldBeNotify()
         {
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 0;
-                byte packetType = ByteUtils.ReadByte(instance1.packet(i), ref offset);
+                var offset = 0;
+                var packetType = ByteUtils.ReadByte(instance1.packet(i), ref offset);
                 Assert.That((PacketType)packetType, Is.EqualTo(PacketType.Notify));
             }
 
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 0;
-                byte packetType = ByteUtils.ReadByte(instance2.packet(i), ref offset);
+                var offset = 0;
+                var packetType = ByteUtils.ReadByte(instance2.packet(i), ref offset);
                 Assert.That((PacketType)packetType, Is.EqualTo(PacketType.Notify));
             }
         }
@@ -89,17 +89,17 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void SequenceShouldIncrementPerSystem()
         {
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 1;
-                ushort sequance = ByteUtils.ReadUShort(instance1.packet(i), ref offset);
+                var offset = 1;
+                var sequance = ByteUtils.ReadUShort(instance1.packet(i), ref offset);
                 Assert.That(sequance, Is.EqualTo(i), "sequnce should start at 1 and increment for each message");
             }
 
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 1;
-                ushort sequance = ByteUtils.ReadUShort(instance2.packet(i), ref offset);
+                var offset = 1;
+                var sequance = ByteUtils.ReadUShort(instance2.packet(i), ref offset);
                 Assert.That(sequance, Is.EqualTo(i), "sequnce should start at 1 and increment for each message");
             }
         }
@@ -107,26 +107,26 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void ReceivedShouldBeEqualToLatest()
         {
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 3;
-                ushort received = ByteUtils.ReadUShort(instance1.packet(i), ref offset);
-                int expected = i - 1;
+                var offset = 3;
+                var received = ByteUtils.ReadUShort(instance1.packet(i), ref offset);
+                var expected = i - 1;
                 if (expected == -1) expected = maxSequence;
                 Assert.That(received, Is.EqualTo(expected), "Received should start at 0 and increment each time");
             }
 
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 3;
-                ushort received = ByteUtils.ReadUShort(instance2.packet(i), ref offset);
+                var offset = 3;
+                var received = ByteUtils.ReadUShort(instance2.packet(i), ref offset);
                 Assert.That(received, Is.EqualTo(i), "Received should start at 1 (received first message before sending) and increment each time");
             }
         }
         [Test]
         public void MaskShouldBePreviousSequences()
         {
-            uint[] expectedMask = new uint[6] {
+            var expectedMask = new uint[6] {
                 0b0,
                 0b1,
                 0b11,
@@ -134,28 +134,28 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 0b1111,
                 0b1_1111,
             };
-            uint[] mask = new uint[5];
+            var mask = new uint[5];
 
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 5;
+                var offset = 5;
                 mask[i] = ByteUtils.ReadUInt(instance1.packet(i), ref offset);
             }
             // do 2nd loop so we can log all values to debug
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 Assert.That(mask[i], Is.EqualTo(expectedMask[i]), $"Received should contain previous receives\n  instance 1, index{i}\n{string.Join(",", mask.Select(x => x.ToString()))}");
             }
 
 
             // start at 1
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 5;
+                var offset = 5;
                 mask[i] = ByteUtils.ReadUInt(instance2.packet(i), ref offset);
             }
             // do 2nd loop so we can log all values to debug
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 Assert.That(mask[i], Is.EqualTo(expectedMask[i + 1]), $"Received should contain previous receives\n  instance 2, index{i}\n{string.Join(",", mask.Select(x => x.ToString()))}");
             }
@@ -164,12 +164,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void PacketShouldContainMessage()
         {
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 AssertAreSameFromOffsets(instance1.message(i), 0, instance1.packet(i), AckSystem.NOTIFY_HEADER_SIZE, instance1.message(i).Length);
             }
 
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 AssertAreSameFromOffsets(instance2.message(i), 0, instance2.packet(i), AckSystem.NOTIFY_HEADER_SIZE, instance2.message(i).Length);
             }
@@ -178,12 +178,12 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void AllSegmentsShouldHaveBeenReturned()
         {
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 AssertAreSameFromOffsets(instance1.message(i), 0, instance1.message(i).Length, received2[i]);
             }
 
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 AssertAreSameFromOffsets(instance2.message(i), 0, instance2.message(i).Length, received1[i]);
             }

@@ -12,7 +12,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void BindShoudlCallSocketBind()
         {
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute();
             peer.Bind(endPoint);
 
             socket.Received(1).Bind(Arg.Is(endPoint));
@@ -21,11 +21,11 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void CloseSendsDisconnectMessageToAllConnections()
         {
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute();
             peer.Bind(endPoint);
 
             var endPoints = new IEndPoint[maxConnections];
-            for (int i = 0; i < maxConnections; i++)
+            for (var i = 0; i < maxConnections; i++)
             {
                 endPoints[i] = TestEndPoint.CreateSubstitute();
 
@@ -33,20 +33,20 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 peer.UpdateTest();
             }
 
-            for (int i = 0; i < maxConnections; i++)
+            for (var i = 0; i < maxConnections; i++)
             {
                 socket.ClearReceivedCalls();
             }
 
             peer.Close();
 
-            byte[] disconnectCommand = new byte[3]
+            var disconnectCommand = new byte[3]
             {
                 (byte)PacketType.Command,
                 (byte)Commands.Disconnect,
                 (byte)DisconnectReason.RequestedByRemotePeer,
             };
-            for (int i = 0; i < maxConnections; i++)
+            for (var i = 0; i < maxConnections; i++)
             {
                 socket.Received(1).Send(
                     Arg.Is(endPoints[i]),
@@ -61,10 +61,10 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             peer.Bind(TestEndPoint.CreateSubstitute());
 
-            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            var connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
-            IEndPoint endPoint = TestEndPoint.CreateSubstitute();
+            var endPoint = TestEndPoint.CreateSubstitute();
             socket.SetupReceiveCall(connectRequest, endPoint);
             peer.UpdateTest();
 
@@ -82,12 +82,12 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             peer.Bind(TestEndPoint.CreateSubstitute());
 
-            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            var connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
 
             var endPoints = new IEndPoint[maxConnections];
-            for (int i = 0; i < maxConnections; i++)
+            for (var i = 0; i < maxConnections; i++)
             {
                 endPoints[i] = TestEndPoint.CreateSubstitute();
 
@@ -98,7 +98,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
             // server sends accept and invokes event locally
             connectAction.ReceivedWithAnyArgs(maxConnections).Invoke(default);
-            for (int i = 0; i < maxConnections; i++)
+            for (var i = 0; i < maxConnections; i++)
             {
                 socket.Received(1).Send(endPoints[i], Arg.Is<byte[]>(x =>
                     x.Length >= 2 &&
@@ -113,10 +113,10 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             peer.Bind(TestEndPoint.CreateSubstitute());
 
-            Action<IConnection> connectAction = Substitute.For<Action<IConnection>>();
+            var connectAction = Substitute.For<Action<IConnection>>();
             peer.OnConnected += connectAction;
 
-            for (int i = 0; i < maxConnections; i++)
+            for (var i = 0; i < maxConnections; i++)
             {
                 socket.SetupReceiveCall(connectRequest);
                 peer.UpdateTest();
@@ -126,7 +126,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             socket.ClearReceivedCalls();
             connectAction.ClearReceivedCalls();
 
-            IEndPoint overMaxEndpoint = TestEndPoint.CreateSubstitute();
+            var overMaxEndpoint = TestEndPoint.CreateSubstitute();
             socket.SetupReceiveCall(connectRequest, overMaxEndpoint);
 
 

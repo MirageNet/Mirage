@@ -61,13 +61,13 @@ namespace Mirage.Tests.Runtime.Serialization
             });
 
             reader.Reset(writer.ToArraySegment());
-            ChildMessage received = reader.Read<ChildMessage>();
+            var received = reader.Read<ChildMessage>();
 
             Assert.AreEqual(3, received.parentValue);
             Assert.AreEqual(4, received.childValue);
 
-            int writeLength = writer.ByteLength;
-            int readLength = reader.BytePosition;
+            var writeLength = writer.ByteLength;
+            var readLength = reader.BytePosition;
             Assert.That(writeLength == readLength, $"OnSerializeAll and OnDeserializeAll calls write the same amount of data\n    writeLength={writeLength}\n    readLength={readLength}");
         }
 
@@ -86,14 +86,14 @@ namespace Mirage.Tests.Runtime.Serialization
 
             reader.Reset(writer.ToArraySegment());
 
-            ResponseMessage received = reader.Read<ResponseMessage>();
+            var received = reader.Read<ResponseMessage>();
 
             Assert.AreEqual(state, received.state);
             Assert.AreEqual(message, received.message);
             Assert.AreEqual(responseId, received.responseId);
 
-            int writeLength = writer.ByteLength;
-            int readLength = reader.BytePosition;
+            var writeLength = writer.ByteLength;
+            var readLength = reader.BytePosition;
             Assert.That(writeLength == readLength, $"OnSerializeAll and OnDeserializeAll calls write the same amount of data\n    writeLength={writeLength}\n    readLength={readLength}");
         }
 
@@ -112,14 +112,14 @@ namespace Mirage.Tests.Runtime.Serialization
 
             reader.Reset(writer.ToArraySegment());
 
-            ResponseMessageReverse received = reader.Read<ResponseMessageReverse>();
+            var received = reader.Read<ResponseMessageReverse>();
 
             Assert.AreEqual(state, received.state);
             Assert.AreEqual(message, received.message);
             Assert.AreEqual(responseId, received.responseId);
 
-            int writeLength = writer.ByteLength;
-            int readLength = reader.BytePosition;
+            var writeLength = writer.ByteLength;
+            var readLength = reader.BytePosition;
             Assert.That(writeLength == readLength, $"OnSerializeAll and OnDeserializeAll calls write the same amount of data\n    writeLength={writeLength}\n    readLength={readLength}");
         }
     }

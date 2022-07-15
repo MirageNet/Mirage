@@ -27,7 +27,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
             if (other.gameObject.CompareTag("Player"))
             {
                 // get direction from which player is contacting object
-                Vector3 direction = other.contacts[0].normal;
+                var direction = other.contacts[0].normal;
 
                 // zero the y and normalize so we don't shove this through the floor or launch this over the wall
                 direction.y = 0;

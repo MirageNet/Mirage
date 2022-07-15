@@ -41,16 +41,16 @@ namespace Mirage.Weaver.Serialization
             if (settings.large.HasValue && settings.large.Value <= 0)
                 throw new VarIntException("Large value should be greater than 0");
 
-            int smallBits = BitPackHelper.GetBitCount(settings.small, 64);
-            int mediumBits = BitPackHelper.GetBitCount(settings.medium, 64);
-            int? largeBits = settings.large.HasValue ? BitPackHelper.GetBitCount(settings.large.Value, 64) : default(int?);
+            var smallBits = BitPackHelper.GetBitCount(settings.small, 64);
+            var mediumBits = BitPackHelper.GetBitCount(settings.medium, 64);
+            var largeBits = settings.large.HasValue ? BitPackHelper.GetBitCount(settings.large.Value, 64) : default(int?);
 
             if (smallBits >= mediumBits)
                 throw new VarIntException("The small bit count should be less than medium bit count");
             if (largeBits.HasValue && mediumBits >= largeBits.Value)
                 throw new VarIntException("The medium bit count should be less than large bit count");
 
-            int maxBits = BitPackHelper.GetTypeMaxSize(fieldType, "VarInt");
+            var maxBits = BitPackHelper.GetTypeMaxSize(fieldType, "VarInt");
 
             if (smallBits > maxBits)
                 throw new VarIntException($"Small bit count can not be above target type size, bitCount:{smallBits}, max size:{maxBits}, type:{fieldType.Name}");
@@ -89,7 +89,7 @@ namespace Mirage.Weaver.Serialization
             if (fieldType.Resolve().IsEnum)
             {
                 // use underlying enum type for max size
-                TypeReference enumType = fieldType.Resolve().GetEnumUnderlyingType();
+                var enumType = fieldType.Resolve().GetEnumUnderlyingType();
                 return GetPackMethod(enumType);
             }
 
@@ -124,7 +124,7 @@ namespace Mirage.Weaver.Serialization
             if (fieldType.Resolve().IsEnum)
             {
                 // use underlying enum type for max size
-                TypeReference enumType = fieldType.Resolve().GetEnumUnderlyingType();
+                var enumType = fieldType.Resolve().GetEnumUnderlyingType();
                 return GetUnpackMethod(enumType);
             }
 
@@ -133,7 +133,7 @@ namespace Mirage.Weaver.Serialization
 
         protected override FieldDefinition CreatePackerField(ModuleDefinition module, string fieldName, TypeDefinition holder, VarIntSettings settings)
         {
-            FieldDefinition packerField = AddPackerField<VarIntPacker>(holder, fieldName);
+            var packerField = AddPackerField<VarIntPacker>(holder, fieldName);
 
             holder.AddToStaticConstructor((worker) =>
             {

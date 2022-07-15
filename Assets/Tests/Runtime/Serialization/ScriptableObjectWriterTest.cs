@@ -19,13 +19,13 @@ namespace Mirage.Tests.Runtime.Serialization
         [Test]
         public void TestWriteScriptableObject()
         {
-            MyScriptableObject scriptableObject = ScriptableObject.CreateInstance<MyScriptableObject>();
+            var scriptableObject = ScriptableObject.CreateInstance<MyScriptableObject>();
 
             scriptableObject.someData = 10;
 
-            byte[] data = MessagePacker.Pack(scriptableObject);
+            var data = MessagePacker.Pack(scriptableObject);
 
-            MyScriptableObject unpacked = MessagePacker.Unpack<MyScriptableObject>(data);
+            var unpacked = MessagePacker.Unpack<MyScriptableObject>(data);
 
             Assert.That(unpacked, Is.Not.Null);
             Assert.That(unpacked.someData, Is.EqualTo(10));

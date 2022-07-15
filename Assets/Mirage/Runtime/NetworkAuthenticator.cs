@@ -93,13 +93,13 @@ namespace Mirage
         {
             UnityEditor.Undo.RecordObject(this, "Assigned NetworkClient authenticator");
             // automatically assign NetworkClient field if we add this to NetworkClient
-            NetworkClient client = GetComponent<NetworkClient>();
+            var client = GetComponent<NetworkClient>();
             if (client != null && client.authenticator == null)
             {
                 client.authenticator = this;
             }
 
-            NetworkServer server = GetComponent<NetworkServer>();
+            var server = GetComponent<NetworkServer>();
             if (server != null && server.authenticator == null)
             {
                 server.authenticator = this;

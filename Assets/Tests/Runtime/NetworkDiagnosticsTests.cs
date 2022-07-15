@@ -11,7 +11,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void TestOnSendEvent()
         {
-            Action<NetworkDiagnostics.MessageInfo> outMessageCallback = Substitute.For<Action<NetworkDiagnostics.MessageInfo>>();
+            var outMessageCallback = Substitute.For<Action<NetworkDiagnostics.MessageInfo>>();
             NetworkDiagnostics.OutMessageEvent += outMessageCallback;
 
             var message = new TestMessage();
@@ -25,7 +25,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void TestOnSendZeroCountEvent()
         {
-            Action<NetworkDiagnostics.MessageInfo> outMessageCallback = Substitute.For<Action<NetworkDiagnostics.MessageInfo>>();
+            var outMessageCallback = Substitute.For<Action<NetworkDiagnostics.MessageInfo>>();
             NetworkDiagnostics.OutMessageEvent += outMessageCallback;
 
             var message = new TestMessage();
@@ -38,7 +38,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void TestOnReceiveEvent()
         {
-            Action<NetworkDiagnostics.MessageInfo> outMessageCallback = Substitute.For<Action<NetworkDiagnostics.MessageInfo>>();
+            var outMessageCallback = Substitute.For<Action<NetworkDiagnostics.MessageInfo>>();
             NetworkDiagnostics.InMessageEvent += outMessageCallback;
 
             var message = new TestMessage();

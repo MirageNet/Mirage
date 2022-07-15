@@ -24,9 +24,9 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void EventCalledWhenIdentityChanged()
         {
-            NetworkIdentity character = new GameObject("EventCalledWhenIdentityChanged").AddComponent<NetworkIdentity>();
+            var character = new GameObject("EventCalledWhenIdentityChanged").AddComponent<NetworkIdentity>();
 
-            Action<NetworkIdentity> action = Substitute.For<Action<NetworkIdentity>>();
+            var action = Substitute.For<Action<NetworkIdentity>>();
             player.OnIdentityChanged += action;
             player.Identity = character;
 
@@ -40,9 +40,9 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void EventNotCalledWhenIdentityIsSame()
         {
-            NetworkIdentity character = new GameObject("EventNotCalledWhenIdentityIsSame").AddComponent<NetworkIdentity>();
+            var character = new GameObject("EventNotCalledWhenIdentityIsSame").AddComponent<NetworkIdentity>();
 
-            Action<NetworkIdentity> action = Substitute.For<Action<NetworkIdentity>>();
+            var action = Substitute.For<Action<NetworkIdentity>>();
             player.OnIdentityChanged += action;
             player.Identity = character;
             action.ClearReceivedCalls();
@@ -62,7 +62,7 @@ namespace Mirage.Tests.Runtime
         [Test]
         public void HasCharacterReturnsTrueIfIdentityIsSet()
         {
-            NetworkIdentity character = new GameObject("HasCharacterReturnsTrueIfIdentityIsSet").AddComponent<NetworkIdentity>();
+            var character = new GameObject("HasCharacterReturnsTrueIfIdentityIsSet").AddComponent<NetworkIdentity>();
 
             player.Identity = character;
 
@@ -80,7 +80,7 @@ namespace Mirage.Tests.Runtime
         [TestCase(Channel.Unreliable)]
         public void SendCallsSendOnConnection(int channel)
         {
-            byte[] message = new byte[] { 0, 1, 2 };
+            var message = new byte[] { 0, 1, 2 };
             player.Send(new ArraySegment<byte>(message), channel);
             if (channel == Channel.Reliable)
             {

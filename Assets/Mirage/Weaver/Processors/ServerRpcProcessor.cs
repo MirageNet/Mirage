@@ -49,9 +49,9 @@ namespace Mirage.Weaver
         /// </remarks>
         private MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute serverRpcAttr, int rpcIndex, ValueSerializer[] paramSerializers)
         {
-            MethodDefinition cmd = SubstituteMethod(md);
+            var cmd = SubstituteMethod(md);
 
-            ILProcessor worker = md.Body.GetILProcessor();
+            var worker = md.Body.GetILProcessor();
 
             // if (IsServer)
             // {
@@ -61,19 +61,19 @@ namespace Mirage.Weaver
             CallBody(worker, cmd);
 
             // NetworkWriter writer = NetworkWriterPool.GetWriter()
-            VariableDefinition writer = md.AddLocal<PooledNetworkWriter>();
+            var writer = md.AddLocal<PooledNetworkWriter>();
             worker.Append(worker.Create(OpCodes.Call, md.Module.ImportReference(() => NetworkWriterPool.GetWriter())));
             worker.Append(worker.Create(OpCodes.Stloc, writer));
 
             // write all the arguments that the user passed to the Cmd call
             WriteArguments(worker, md, writer, paramSerializers, RemoteCallType.ServerRpc);
 
-            string cmdName = md.FullName;
+            var cmdName = md.FullName;
 
-            int channel = serverRpcAttr.GetField(nameof(ServerRpcAttribute.channel), 0);
-            bool requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
+            var channel = serverRpcAttr.GetField(nameof(ServerRpcAttribute.channel), 0);
+            var requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
 
-            MethodReference sendMethod = GetSendMethod(md, worker);
+            var sendMethod = GetSendMethod(md, worker);
 
             // ServerRpcSender.Send(this, 12345, writer, channel, requireAuthority)
             worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -93,7 +93,7 @@ namespace Mirage.Weaver
         public void IsServer(ILProcessor worker, Action body)
         {
             // if (IsServer) {
-            Instruction endif = worker.Create(OpCodes.Nop);
+            var endif = worker.Create(OpCodes.Nop);
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Call, (NetworkBehaviour nb) => nb.IsServer));
             worker.Append(worker.Create(OpCodes.Brfalse, endif));
@@ -118,14 +118,14 @@ namespace Mirage.Weaver
         {
             if (md.ReturnType.Is(typeof(void)))
             {
-                MethodReference sendMethod = md.Module.ImportReference(() => ServerRpcSender.Send(default, default, default, default, default));
+                var sendMethod = md.Module.ImportReference(() => ServerRpcSender.Send(default, default, default, default, default));
                 return sendMethod;
             }
             else
             {
                 // call ServerRpcSender.SendWithReturn<T> and return the result
-                MethodInfo sendMethod = typeof(ServerRpcSender).GetMethods(BindingFlags.Public | BindingFlags.Static).First(m => m.Name == nameof(ServerRpcSender.SendWithReturn));
-                MethodReference sendRef = md.Module.ImportReference(sendMethod);
+                var sendMethod = typeof(ServerRpcSender).GetMethods(BindingFlags.Public | BindingFlags.Static).First(m => m.Name == nameof(ServerRpcSender.SendWithReturn));
+                var sendRef = md.Module.ImportReference(sendMethod);
 
                 var returnType = md.ReturnType as GenericInstanceType;
 
@@ -158,18 +158,18 @@ namespace Mirage.Weaver
         /// </remarks>
         private MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, ValueSerializer[] paramSerializers)
         {
-            string newName = SkeletonMethodName(method);
-            MethodDefinition cmd = method.DeclaringType.AddMethod(newName,
+            var newName = SkeletonMethodName(method);
+            var cmd = method.DeclaringType.AddMethod(newName,
                 MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Static,
                 userCodeFunc.ReturnType);
 
             _ = cmd.AddParam<NetworkBehaviour>("behaviour");
-            ParameterDefinition readerParameter = cmd.AddParam<NetworkReader>("reader");
-            ParameterDefinition senderParameter = cmd.AddParam<INetworkPlayer>("senderConnection");
+            var readerParameter = cmd.AddParam<NetworkReader>("reader");
+            var senderParameter = cmd.AddParam<INetworkPlayer>("senderConnection");
             _ = cmd.AddParam<int>("replyId");
 
 
-            ILProcessor worker = cmd.Body.GetILProcessor();
+            var worker = cmd.Body.GetILProcessor();
 
             // load `behaviour.`
             worker.Append(worker.Create(OpCodes.Ldarg_0));
@@ -192,13 +192,13 @@ namespace Mirage.Weaver
             ValidateReturnType(md, RemoteCallType.ServerRpc);
 
             // default vaue true for requireAuthority, or someone could force call these on server
-            bool requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
+            var requireAuthority = serverRpcAttr.GetField(nameof(ServerRpcAttribute.requireAuthority), true);
 
-            ValueSerializer[] paramSerializers = GetValueSerializers(md);
+            var paramSerializers = GetValueSerializers(md);
 
-            MethodDefinition userCodeFunc = GenerateStub(md, serverRpcAttr, rpcIndex, paramSerializers);
+            var userCodeFunc = GenerateStub(md, serverRpcAttr, rpcIndex, paramSerializers);
 
-            MethodDefinition skeletonFunc = GenerateSkeleton(md, userCodeFunc, paramSerializers);
+            var skeletonFunc = GenerateSkeleton(md, userCodeFunc, paramSerializers);
             return new ServerRpcMethod
             {
                 Index = rpcIndex,
@@ -214,7 +214,7 @@ namespace Mirage.Weaver
             worker.Append(worker.Create(OpCodes.Ldarg_0));
 
             // load each param of rpc
-            foreach (ParameterDefinition param in rpc.Parameters)
+            foreach (var param in rpc.Parameters)
             {
                 // if param is network player, use Server's Local player instead
                 //   in host mode this will be the Server's copy of the the player,

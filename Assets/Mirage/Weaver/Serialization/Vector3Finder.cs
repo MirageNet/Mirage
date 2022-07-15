@@ -26,7 +26,7 @@ namespace Mirage.Weaver.Serialization
             }
 
             var settings = new Vector3PackSettings();
-            for (int i = 0; i < 3; i++)
+            for (var i = 0; i < 3; i++)
             {
                 settings.max[i] = (float)attribute.ConstructorArguments[i].Value;
                 if (settings.max[i] <= 0)
@@ -37,7 +37,7 @@ namespace Mirage.Weaver.Serialization
 
             if (attribute.ConstructorArguments.Count == 4)
             {
-                CustomAttributeArgument arg = attribute.ConstructorArguments[3];
+                var arg = attribute.ConstructorArguments[3];
                 if (arg.Type.Is<float>())
                 {
                     Precisionfrom1(ref settings, arg);
@@ -49,9 +49,9 @@ namespace Mirage.Weaver.Serialization
             }
             else
             {
-                CustomAttributeArgument xArg = attribute.ConstructorArguments[3];
-                CustomAttributeArgument yArg = attribute.ConstructorArguments[4];
-                CustomAttributeArgument zArg = attribute.ConstructorArguments[5];
+                var xArg = attribute.ConstructorArguments[3];
+                var yArg = attribute.ConstructorArguments[4];
+                var zArg = attribute.ConstructorArguments[5];
                 if (xArg.Type.Is<float>())
                 {
                     PrecisionFrom3(ref settings, xArg, yArg, zArg);
@@ -68,7 +68,7 @@ namespace Mirage.Weaver.Serialization
         private static void Precisionfrom1(ref Vector3PackSettings settings, CustomAttributeArgument arg)
         {
             // check vs all 3 axis
-            float precision = (float)arg.Value;
+            var precision = (float)arg.Value;
             ValidatePrecision(settings.max.x, precision, (s) => new Vector3PackException(s));
             ValidatePrecision(settings.max.y, precision, (s) => new Vector3PackException(s));
             ValidatePrecision(settings.max.z, precision, (s) => new Vector3PackException(s));
@@ -77,7 +77,7 @@ namespace Mirage.Weaver.Serialization
         private static void BitCountfrom1(ref Vector3PackSettings settings, CustomAttributeArgument arg)
         {
             // check vs all 3 axis
-            int bitCount = (int)arg.Value;
+            var bitCount = (int)arg.Value;
             ValidateBitCount(bitCount, (s) => new Vector3PackException(s));
             settings.bitCount = new Vector3Int(bitCount, bitCount, bitCount);
         }
@@ -119,7 +119,7 @@ namespace Mirage.Weaver.Serialization
 
         protected override FieldDefinition CreatePackerField(ModuleDefinition module, string fieldName, TypeDefinition holder, Vector3PackSettings settings)
         {
-            FieldDefinition packerField = AddPackerField<Vector3Packer>(holder, fieldName);
+            var packerField = AddPackerField<Vector3Packer>(holder, fieldName);
 
             holder.AddToStaticConstructor((worker) =>
             {

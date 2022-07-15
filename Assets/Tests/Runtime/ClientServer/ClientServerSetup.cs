@@ -89,7 +89,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             // create and register a prefab
             playerPrefab = new GameObject("player (unspawned)", typeof(NetworkIdentity), typeof(T));
-            NetworkIdentity identity = playerPrefab.GetComponent<NetworkIdentity>();
+            var identity = playerPrefab.GetComponent<NetworkIdentity>();
             identity.PrefabHash = Guid.NewGuid().GetHashCode();
             clientObjectManager.RegisterPrefab(identity);
 
@@ -151,7 +151,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             Object.DestroyImmediate(serverPlayerGO);
             Object.DestroyImmediate(clientPlayerGO);
 
-            foreach (GameObject obj in toDestroy)
+            foreach (var obj in toDestroy)
             {
                 if (obj != null)
                 {
@@ -170,7 +170,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         /// <returns></returns>
         protected GameObject InstantiateForTest(GameObject prefab)
         {
-            GameObject obj = Object.Instantiate(prefab);
+            var obj = Object.Instantiate(prefab);
             toDestroy.Add(obj);
             return obj;
         }
@@ -182,7 +182,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         /// <returns></returns>
         protected TObj InstantiateForTest<TObj>(TObj prefab) where TObj : Component
         {
-            TObj obj = Object.Instantiate(prefab);
+            var obj = Object.Instantiate(prefab);
             toDestroy.Add(obj.gameObject);
             return obj;
         }

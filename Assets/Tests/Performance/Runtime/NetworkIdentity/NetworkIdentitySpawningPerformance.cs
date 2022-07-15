@@ -32,7 +32,7 @@ namespace Mirage.Tests.Performance
         public void TearDown()
         {
             UnityEngine.Object.DestroyImmediate(prefab);
-            foreach (GameObject item in spawned)
+            foreach (var item in spawned)
                 UnityEngine.Object.DestroyImmediate(item);
 
             spawned.Clear();
@@ -46,7 +46,7 @@ namespace Mirage.Tests.Performance
             Measure.Method(() =>
             {
                 // spawn 100 objects
-                for (int i = 0; i < 100; i++)
+                for (var i = 0; i < 100; i++)
                 {
                     _ = Spawn();
                 }

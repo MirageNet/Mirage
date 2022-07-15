@@ -38,7 +38,7 @@ namespace Mirage.Tests.Runtime.ClientServer
             const int CValue = 0;
             int oldValue = default;
             int newValue = default;
-            int called = 0;
+            var called = 0;
 
             serverComponent.OnHealthChanged += (a, b) =>
             {
@@ -64,7 +64,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator SyncVarHookMethodIsCalledOnServer()
         {
             const int SValue = 10;
-            int oldValue = serverComponent.health;
+            var oldValue = serverComponent.health;
             int newValue = default;
 
             serverComponent.health = SValue;

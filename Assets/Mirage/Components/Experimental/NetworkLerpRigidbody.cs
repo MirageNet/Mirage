@@ -62,7 +62,7 @@ namespace Mirage.Experimental
 
         private void SendToServer()
         {
-            float now = Time.time;
+            var now = Time.time;
             if (now > nextSyncTime)
             {
                 nextSyncTime = now + syncInterval;

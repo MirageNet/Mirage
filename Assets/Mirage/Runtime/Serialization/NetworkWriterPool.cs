@@ -46,7 +46,7 @@ namespace Mirage.Serialization
         public static PooledNetworkWriter GetWriter()
         {
             if (pool == null) throw new InvalidOperationException("Configure must be called before ");
-            PooledNetworkWriter writer = pool.Take();
+            var writer = pool.Take();
             writer.Reset();
             return writer;
         }

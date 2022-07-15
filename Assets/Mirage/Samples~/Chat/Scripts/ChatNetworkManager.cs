@@ -36,7 +36,7 @@ namespace Mirage.Examples.Chat
         private void OnCreatePlayer(INetworkPlayer player, CreateCharacterMessage createCharacterMessage)
         {
             // create a gameobject using the name supplied by client
-            GameObject playergo = Instantiate(playerPrefab).gameObject;
+            var playergo = Instantiate(playerPrefab).gameObject;
             playergo.GetComponent<Player>().playerName = createCharacterMessage.name;
 
             // set it as the player

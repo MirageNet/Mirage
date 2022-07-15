@@ -17,12 +17,12 @@ namespace Mirage.Tests.Runtime.Host
         public void DisconnectsConnectionsOverMax()
         {
             var secondGO = new GameObject();
-            NetworkClient secondClient = secondGO.AddComponent<NetworkClient>();
-            TestSocketFactory socketFactory = networkManagerGo.GetComponent<TestSocketFactory>();
+            var secondClient = secondGO.AddComponent<NetworkClient>();
+            var socketFactory = networkManagerGo.GetComponent<TestSocketFactory>();
 
             secondClient.SocketFactory = socketFactory;
 
-            int disconnectedCalled = 0;
+            var disconnectedCalled = 0;
             secondClient.Disconnected.AddListener(reason =>
             {
                 disconnectedCalled++;

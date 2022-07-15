@@ -56,13 +56,13 @@ namespace Mirage.Examples.Notify
             };
 
             // add values from last know received
-            for (int i = lastReceivedCount; i < someValues.Count; i++)
+            for (var i = lastReceivedCount; i < someValues.Count; i++)
             {
                 message.newValues.Add(someValues[i]);
             }
 
             // get callback from pool and set count
-            MyNotifyCallbacks callbacks = GetCallbacks();
+            var callbacks = GetCallbacks();
             callbacks.valueCount = someValues.Count;
 
             // send message and callbacks
@@ -77,7 +77,7 @@ namespace Mirage.Examples.Notify
         /// <param name="callBacks"></param>
         public void SendNotify(Changes message, INotifyCallBack callBacks)
         {
-            using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+            using (var writer = NetworkWriterPool.GetWriter())
             {
                 MessagePacker.Pack(message, writer);
 
@@ -158,14 +158,14 @@ namespace Mirage.Examples.Notify
             // if server find values belonging to player
 
             // work out how many new values there are
-            List<float> newValues = message.newValues;
-            int newCount = message.valueCount;
+            var newValues = message.newValues;
+            var newCount = message.valueCount;
 
-            int numberOfNewValues = newCount - lastReceivedCount;
-            int offset = newValues.Count - numberOfNewValues;
+            var numberOfNewValues = newCount - lastReceivedCount;
+            var offset = newValues.Count - numberOfNewValues;
 
             // add new values to list
-            for (int i = offset; i < newValues.Count; i++)
+            for (var i = offset; i < newValues.Count; i++)
             {
                 someValues.Add(newValues[i]);
             }

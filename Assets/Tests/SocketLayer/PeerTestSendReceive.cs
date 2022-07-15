@@ -45,7 +45,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             server.peer.OnConnected += serverConnect;
 
             server.peer.Bind(TestEndPoint.CreateSubstitute());
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 clients[i] = new PeerInstanceWithSocket(config);
                 clientConnections.Add(clients[i].peer.Connect(server.endPoint));
@@ -57,7 +57,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         private void UpdateAll()
         {
             server.peer.UpdateTest();
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 clients[i].peer.UpdateTest();
             }
@@ -69,9 +69,9 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             UpdateAll();
 
             // check each client got packet once
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
-                IDataHandler handler = clients[i].dataHandler;
+                var handler = clients[i].dataHandler;
 
                 //handler.Received(1).ReceiveMessage(clientConnections[i], Arg.Is<ArraySegment<byte>>(x => x.SequenceEqual(message)));
                 handler.Received(1).ReceiveMessage(clientConnections[i], Arg.Is<ArraySegment<byte>>(x => DebugSequenceEqual(message, x)));
@@ -83,9 +83,9 @@ namespace Mirage.SocketLayer.Tests.PeerTests
             UpdateAll();
             UpdateAll();
 
-            IDataHandler handler = server.dataHandler;
+            var handler = server.dataHandler;
             // check each client sent packet once
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 //handler.Received(1).ReceiveMessage(serverConnections[i], Arg.Is<ArraySegment<byte>>(x => x.SequenceEqual(message)));
                 handler.Received(1).ReceiveMessage(serverConnections[i], Arg.Is<ArraySegment<byte>>(x => DebugSequenceEqual(message, x)));
@@ -95,10 +95,10 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void SeverUnreliableSend()
         {
-            byte[] message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
+            var message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
 
             // send 1 message to each client
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 serverConnections[i].SendUnreliable(message);
             }
@@ -110,10 +110,10 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ClientUnreliableSend()
         {
-            byte[] message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
+            var message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
 
             // send 1 message from each client
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 clientConnections[i].SendUnreliable(message);
             }
@@ -124,10 +124,10 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ServerNotifySend()
         {
-            byte[] message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
+            var message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
 
             // send 1 message to each client
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 serverConnections[i].SendNotify(message);
             }
@@ -138,10 +138,10 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ClientNotifySend()
         {
-            byte[] message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
+            var message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
 
             // send 1 message from each client
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 clientConnections[i].SendNotify(message);
             }
@@ -152,14 +152,14 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [UnityTest]
         public IEnumerator ServerNotifySendMarkedAsReceived()
         {
-            byte[] message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
+            var message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
 
             var received = new Action[ClientCount];
             var lost = new Action[ClientCount];
             // send 1 message to each client
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
-                INotifyToken token = serverConnections[i].SendNotify(message);
+                var token = serverConnections[i].SendNotify(message);
 
                 received[i] = Substitute.For<Action>();
                 lost[i] = Substitute.For<Action>();
@@ -167,14 +167,14 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 token.Lost += lost[i];
             }
 
-            float end = UnityEngine.Time.time + NotifyWaitTime;
+            var end = UnityEngine.Time.time + NotifyWaitTime;
             while (end > UnityEngine.Time.time)
             {
                 UpdateAll();
                 yield return null;
             }
 
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 received[i].Received(1).Invoke();
                 lost[i].DidNotReceive().Invoke();
@@ -184,14 +184,14 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [UnityTest]
         public IEnumerator ClientNotifySendMarkedAsReceived()
         {
-            byte[] message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
+            var message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
 
             var received = new Action[ClientCount];
             var lost = new Action[ClientCount];
             // send 1 message from each client
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
-                INotifyToken token = clientConnections[i].SendNotify(message);
+                var token = clientConnections[i].SendNotify(message);
 
                 received[i] = Substitute.For<Action>();
                 lost[i] = Substitute.For<Action>();
@@ -199,14 +199,14 @@ namespace Mirage.SocketLayer.Tests.PeerTests
                 token.Lost += lost[i];
             }
 
-            float end = UnityEngine.Time.time + NotifyWaitTime;
+            var end = UnityEngine.Time.time + NotifyWaitTime;
             while (end > UnityEngine.Time.time)
             {
                 UpdateAll();
                 yield return null;
             }
 
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 received[i].Received(1).Invoke();
                 lost[i].DidNotReceive().Invoke();
@@ -216,24 +216,24 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [UnityTest]
         public IEnumerator ServerNotifySendCallbacksMarkedAsReceived()
         {
-            byte[] message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
+            var message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
 
             var callBacks = new INotifyCallBack[ClientCount];
             // send 1 message to each client
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 callBacks[i] = Substitute.For<INotifyCallBack>();
                 serverConnections[i].SendNotify(message, callBacks[i]);
             }
 
-            float end = UnityEngine.Time.time + NotifyWaitTime;
+            var end = UnityEngine.Time.time + NotifyWaitTime;
             while (end > UnityEngine.Time.time)
             {
                 UpdateAll();
                 yield return null;
             }
 
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 callBacks[i].Received(1).OnDelivered();
                 callBacks[i].DidNotReceive().OnLost();
@@ -243,24 +243,24 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [UnityTest]
         public IEnumerator ClientNotifySendCallbacksMarkedAsReceived()
         {
-            byte[] message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
+            var message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
 
             var callBacks = new INotifyCallBack[ClientCount];
             // send 1 message from each client
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 callBacks[i] = Substitute.For<INotifyCallBack>();
                 clientConnections[i].SendNotify(message, callBacks[i]);
             }
 
-            float end = UnityEngine.Time.time + NotifyWaitTime;
+            var end = UnityEngine.Time.time + NotifyWaitTime;
             while (end > UnityEngine.Time.time)
             {
                 UpdateAll();
                 yield return null;
             }
 
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 callBacks[i].Received(1).OnDelivered();
                 callBacks[i].DidNotReceive().OnLost();
@@ -270,10 +270,10 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ServerReliableSend()
         {
-            byte[] message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
+            var message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
 
             // send 1 message to each client
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 serverConnections[i].SendReliable(message);
             }
@@ -284,10 +284,10 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void ClientReliableSend()
         {
-            byte[] message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
+            var message = Enumerable.Range(10, 20).Select(x => (byte)x).ToArray();
 
             // send 1 message from each client
-            for (int i = 0; i < ClientCount; i++)
+            for (var i = 0; i < ClientCount; i++)
             {
                 clientConnections[i].SendReliable(message);
             }
@@ -303,13 +303,13 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [TestCase(0.2f, 1)]
         public void FragmentedSend(float maxMultiplier, int expectedFragments)
         {
-            int size = (int)(maxFragmentMessageSize * maxMultiplier);
-            byte[] message = Enumerable.Range(10, size).Select(x => (byte)x).ToArray();
+            var size = (int)(maxFragmentMessageSize * maxMultiplier);
+            var message = Enumerable.Range(10, size).Select(x => (byte)x).ToArray();
 
-            int sentCount = server.socket.Sent.Count;
+            var sentCount = server.socket.Sent.Count;
 
             serverConnections[0].SendReliable(message);
-            IDataHandler handler = clients[0].dataHandler;
+            var handler = clients[0].dataHandler;
 
             // change in sent
             Assert.That(server.socket.Sent.Count - sentCount, Is.EqualTo(expectedFragments));
@@ -322,7 +322,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         [Test]
         public void FragmentedSendThrowsIfTooBig()
         {
-            byte[] message = Enumerable.Range(10, maxFragmentMessageSize + 1).Select(x => (byte)x).ToArray();
+            var message = Enumerable.Range(10, maxFragmentMessageSize + 1).Select(x => (byte)x).ToArray();
 
             Assert.Throws<ArgumentException>(() =>
             {
@@ -331,7 +331,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
 
             UpdateAll();
 
-            IDataHandler handler = clients[0].dataHandler;
+            var handler = clients[0].dataHandler;
             handler.DidNotReceive().ReceiveMessage(Arg.Any<IConnection>(), Arg.Any<ArraySegment<byte>>());
         }
 
@@ -341,7 +341,7 @@ namespace Mirage.SocketLayer.Tests.PeerTests
         {
             if (inMsg.Length != outMsg.Count) { return false; }
 
-            for (int i = 0; i < inMsg.Length; i++)
+            for (var i = 0; i < inMsg.Length; i++)
             {
                 if (inMsg[i] != outMsg.Array[outMsg.Offset + i]) { return false; }
             }

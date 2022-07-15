@@ -98,7 +98,7 @@ namespace Mirage.Tests.Runtime.Host
         [Test]
         public void SpawnWithPrefabHash()
         {
-            int hash = Guid.NewGuid().GetHashCode();
+            var hash = Guid.NewGuid().GetHashCode();
             serverObjectManager.Spawn(gameObject, hash, server.LocalPlayer);
             Assert.That(testIdentity.PrefabHash, Is.EqualTo(hash));
         }
@@ -170,7 +170,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             serverObjectManager.Spawn(gameObject);
 
-            UnityAction mockHandler = Substitute.For<UnityAction>();
+            var mockHandler = Substitute.For<UnityAction>();
             testIdentity.OnStopServer.AddListener(mockHandler);
 
             serverObjectManager.Destroy(gameObject, false);
@@ -194,9 +194,9 @@ namespace Mirage.Tests.Runtime.Host
         [UnityTest]
         public IEnumerator DestroyOwnedObjectsTest() => UniTask.ToCoroutine(async () =>
         {
-            NetworkIdentity testObj1 = new GameObject().AddComponent<NetworkIdentity>();
-            NetworkIdentity testObj2 = new GameObject().AddComponent<NetworkIdentity>();
-            NetworkIdentity testObj3 = new GameObject().AddComponent<NetworkIdentity>();
+            var testObj1 = new GameObject().AddComponent<NetworkIdentity>();
+            var testObj2 = new GameObject().AddComponent<NetworkIdentity>();
+            var testObj3 = new GameObject().AddComponent<NetworkIdentity>();
 
             // only destroys spawned objects, so spawn them here
             serverObjectManager.Spawn(testObj1);

@@ -80,7 +80,7 @@ namespace Mirage
                 return;
 
             // 'transform.' calls GetComponent, only do it once
-            Vector3 position = transform.position;
+            var position = transform.position;
 
             // brute force distance check
             // -> only player connections can be observers, so it's enough if we
@@ -89,7 +89,7 @@ namespace Mirage
             //    magnitude faster. if we have 10k monsters and run a sphere
             //    cast 10k times, we will see a noticeable lag even with physics
             //    layers. but checking to every connection is fast.
-            foreach (INetworkPlayer player in Server.Players)
+            foreach (var player in Server.Players)
             {
                 // check distance
                 if (player != null && player.HasCharacter && Vector3.Distance(player.Identity.transform.position, position) < VisibilityRange)

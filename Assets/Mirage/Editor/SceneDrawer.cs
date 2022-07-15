@@ -13,7 +13,7 @@ namespace Mirage
         {
             if (property.propertyType == SerializedPropertyType.String)
             {
-                SceneAsset sceneObject = AssetDatabase.LoadAssetAtPath<SceneAsset>(property.stringValue);
+                var sceneObject = AssetDatabase.LoadAssetAtPath<SceneAsset>(property.stringValue);
 
                 if (sceneObject == null && !string.IsNullOrEmpty(property.stringValue))
                 {
@@ -36,9 +36,9 @@ namespace Mirage
 
         protected SceneAsset GetBuildSettingsSceneObject(string sceneName)
         {
-            foreach (EditorBuildSettingsScene buildScene in EditorBuildSettings.scenes)
+            foreach (var buildScene in EditorBuildSettings.scenes)
             {
-                SceneAsset sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(buildScene.path);
+                var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(buildScene.path);
                 if (sceneAsset.name == sceneName)
                 {
                     return sceneAsset;

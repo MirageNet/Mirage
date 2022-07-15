@@ -45,7 +45,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ThrowsIfBitCountIsLessThan1([Range(-10, 0)] int bitCount, [Values(true, false)] bool signed)
         {
-            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            var exception = Assert.Throws<ArgumentException>(() =>
             {
                 _ = new FloatPacker(10, bitCount, signed);
             });
@@ -57,7 +57,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ThrowsIfBitCountIsGreaterThan30([Range(31, 40)] int bitCount, [Values(true, false)] bool signed)
         {
-            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            var exception = Assert.Throws<ArgumentException>(() =>
             {
                 _ = new FloatPacker(10, bitCount, signed);
             });
@@ -69,7 +69,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         [Test]
         public void ThrowsIfMaxIsZero([Values(true, false)] bool signed)
         {
-            ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            var exception = Assert.Throws<ArgumentException>(() =>
             {
                 _ = new FloatPacker(0, 1, signed);
             });

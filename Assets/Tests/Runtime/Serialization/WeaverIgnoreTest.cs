@@ -23,7 +23,7 @@ namespace Mirage.Tests.Runtime.Serialization
             writer.Write(data);
             var reader = new NetworkReader();
             reader.Reset(writer.ToArraySegment());
-            MyCustomType copy = reader.Read<MyCustomType>();
+            var copy = reader.Read<MyCustomType>();
 
             // should have copied both fields,
             // if it uses custom extension methods it will only write first

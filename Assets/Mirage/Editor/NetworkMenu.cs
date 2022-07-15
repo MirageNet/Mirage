@@ -42,31 +42,31 @@ namespace Mirage
             };
             var go = new GameObject("NetworkManager", components);
 
-            T socketFactory = go.GetComponent<T>();
-            NetworkSceneManager nsm = go.GetComponent<NetworkSceneManager>();
+            var socketFactory = go.GetComponent<T>();
+            var nsm = go.GetComponent<NetworkSceneManager>();
 
-            NetworkClient networkClient = go.GetComponent<NetworkClient>();
+            var networkClient = go.GetComponent<NetworkClient>();
             networkClient.SocketFactory = socketFactory;
 
-            NetworkServer networkServer = go.GetComponent<NetworkServer>();
+            var networkServer = go.GetComponent<NetworkServer>();
             networkServer.SocketFactory = socketFactory;
 
-            ServerObjectManager serverObjectManager = go.GetComponent<ServerObjectManager>();
+            var serverObjectManager = go.GetComponent<ServerObjectManager>();
             serverObjectManager.Server = networkServer;
             serverObjectManager.NetworkSceneManager = nsm;
 
-            ClientObjectManager clientObjectManager = go.GetComponent<ClientObjectManager>();
+            var clientObjectManager = go.GetComponent<ClientObjectManager>();
             clientObjectManager.Client = networkClient;
             clientObjectManager.NetworkSceneManager = nsm;
 
-            NetworkManager networkManager = go.GetComponent<NetworkManager>();
+            var networkManager = go.GetComponent<NetworkManager>();
             networkManager.Client = networkClient;
             networkManager.Server = networkServer;
             networkManager.ServerObjectManager = serverObjectManager;
             networkManager.ClientObjectManager = clientObjectManager;
             networkManager.NetworkSceneManager = nsm;
 
-            CharacterSpawner playerSpawner = go.GetComponent<CharacterSpawner>();
+            var playerSpawner = go.GetComponent<CharacterSpawner>();
             playerSpawner.Client = networkClient;
             playerSpawner.Server = networkServer;
             playerSpawner.SceneManager = nsm;

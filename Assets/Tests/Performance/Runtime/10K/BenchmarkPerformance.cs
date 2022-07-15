@@ -30,7 +30,7 @@ namespace Mirage.Tests.Performance.Runtime
 #else
             throw new System.NotSupportedException("Test not supported in player");
 #endif
-            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            var scene = SceneManager.GetSceneByPath(ScenePath);
             SceneManager.SetActiveScene(scene);
 
             // load host
@@ -48,7 +48,7 @@ namespace Mirage.Tests.Performance.Runtime
             yield return null;
 
             // unload scene
-            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            var scene = SceneManager.GetSceneByPath(ScenePath);
             yield return SceneManager.UnloadSceneAsync(scene);
 
             Object.Destroy(benchmarker.gameObject);
@@ -56,8 +56,8 @@ namespace Mirage.Tests.Performance.Runtime
 
         private static void EnableHealth(bool value)
         {
-            Health[] all = Object.FindObjectsOfType<Health>();
-            foreach (Health health in all)
+            var all = Object.FindObjectsOfType<Health>();
+            foreach (var health in all)
             {
                 health.enabled = value;
             }

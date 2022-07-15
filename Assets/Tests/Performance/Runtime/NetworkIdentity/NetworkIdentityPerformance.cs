@@ -52,7 +52,7 @@ namespace Mirage.Tests.Performance
 
         private void RunServerUpdateIsDirty()
         {
-            for (int j = 0; j < 1000; j++)
+            for (var j = 0; j < 1000; j++)
             {
                 health.SetDirtyBit(1UL);
                 identity.UpdateVars();
@@ -71,7 +71,7 @@ namespace Mirage.Tests.Performance
 
         private void RunServerUpdateNotDirty()
         {
-            for (int j = 0; j < 1000; j++)
+            for (var j = 0; j < 1000; j++)
             {
                 identity.UpdateVars();
             }

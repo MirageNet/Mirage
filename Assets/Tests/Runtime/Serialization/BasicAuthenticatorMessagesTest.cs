@@ -35,7 +35,7 @@ namespace Mirage.Tests.Runtime.Serialization
             // try deserialize
             var reader = new NetworkReader();
             reader.Reset(writer.ToArraySegment());
-            AuthRequestMessage fresh = reader.Read<AuthRequestMessage>();
+            var fresh = reader.Read<AuthRequestMessage>();
             Assert.That(fresh.serverCode, Is.EqualTo("abc"));
             reader.Dispose();
         }
@@ -59,7 +59,7 @@ namespace Mirage.Tests.Runtime.Serialization
             // try deserialize
             var reader = new NetworkReader();
             reader.Reset(writer.ToArraySegment());
-            AuthResponseMessage fresh = reader.Read<AuthResponseMessage>();
+            var fresh = reader.Read<AuthResponseMessage>();
             Assert.That(fresh.success, Is.EqualTo(true));
             Assert.That(fresh.message, Is.EqualTo("abc"));
             reader.Dispose();

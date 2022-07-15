@@ -223,8 +223,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         public IEnumerator SpawnWithValue() => UniTask.ToCoroutine(async () =>
         {
             // create an object, set the target and spawn it
-            UnityEngine.GameObject newObject = UnityEngine.Object.Instantiate(playerPrefab);
-            GenericBehaviourWithSyncVarDeeperImplement newBehavior = newObject.GetComponent<GenericBehaviourWithSyncVarDeeperImplement>();
+            var newObject = UnityEngine.Object.Instantiate(playerPrefab);
+            var newBehavior = newObject.GetComponent<GenericBehaviourWithSyncVarDeeperImplement>();
             newBehavior.baseValue = 2;
             newBehavior.middleValue = 22;
             newBehavior.implementValue = 222;
@@ -237,11 +237,11 @@ namespace Mirage.Tests.Runtime.ClientServer
             serverObjectManager.Spawn(newObject);
 
             // wait until the client spawns it
-            uint newObjectId = newBehavior.NetId;
-            NetworkIdentity newClientObject = await AsyncUtil.WaitUntilSpawn(client.World, newObjectId);
+            var newObjectId = newBehavior.NetId;
+            var newClientObject = await AsyncUtil.WaitUntilSpawn(client.World, newObjectId);
 
             // check if the target was set correctly in the client
-            GenericBehaviourWithSyncVarDeeperImplement newClientBehavior = newClientObject.GetComponent<GenericBehaviourWithSyncVarDeeperImplement>();
+            var newClientBehavior = newClientObject.GetComponent<GenericBehaviourWithSyncVarDeeperImplement>();
             Assert.AreEqual(newClientBehavior.baseValue, 2);
             Assert.AreEqual(newClientBehavior.middleValue, 22);
             Assert.AreEqual(newClientBehavior.implementValue, 222);

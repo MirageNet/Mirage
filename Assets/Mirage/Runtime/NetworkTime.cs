@@ -86,19 +86,19 @@ namespace Mirage
         // and update time offset
         internal void OnClientPong(NetworkPongMessage msg)
         {
-            double now = LocalTime();
+            var now = LocalTime();
 
             // how long did this message take to come back
-            double newRtt = now - msg.clientTime;
+            var newRtt = now - msg.clientTime;
             _rtt.Add(newRtt);
 
             // the difference in time between the client and the server
             // but subtract half of the rtt to compensate for latency
             // half of rtt is the best approximation we have
-            double newOffset = now - newRtt * 0.5f - msg.serverTime;
+            var newOffset = now - newRtt * 0.5f - msg.serverTime;
 
-            double newOffsetMin = now - newRtt - msg.serverTime;
-            double newOffsetMax = now - msg.serverTime;
+            var newOffsetMin = now - newRtt - msg.serverTime;
+            var newOffsetMax = now - msg.serverTime;
             offsetMin = Math.Max(offsetMin, newOffsetMin);
             offsetMax = Math.Min(offsetMax, newOffsetMax);
 

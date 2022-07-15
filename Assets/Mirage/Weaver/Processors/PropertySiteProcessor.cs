@@ -27,7 +27,7 @@ namespace Mirage.Weaver
         private void ProcessInstructionSetterField(Instruction i, FieldReference opField)
         {
             // does it set a field that we replaced?
-            if (Setters.TryGetValue(opField, out MethodDefinition replacement))
+            if (Setters.TryGetValue(opField, out var replacement))
             {
                 if (opField.DeclaringType.IsGenericInstance || opField.DeclaringType.HasGenericParameters) // We're calling to a generic class
                 {
@@ -49,7 +49,7 @@ namespace Mirage.Weaver
         private void ProcessInstructionGetterField(Instruction i, FieldReference opField)
         {
             // does it set a field that we replaced?
-            if (Getters.TryGetValue(opField, out MethodDefinition replacement))
+            if (Getters.TryGetValue(opField, out var replacement))
             {
                 if (opField.DeclaringType.IsGenericInstance || opField.DeclaringType.HasGenericParameters) // We're calling to a generic class
                 {
@@ -112,24 +112,24 @@ namespace Mirage.Weaver
         private Instruction ProcessInstructionLoadAddress(MethodDefinition md, Instruction instr, FieldReference opField)
         {
             // does it set a field that we replaced?
-            if (Setters.TryGetValue(opField, out MethodDefinition replacement))
+            if (Setters.TryGetValue(opField, out var replacement))
             {
                 // we have a replacement for this property
                 // is the next instruction a initobj?
-                Instruction nextInstr = instr.Next;
+                var nextInstr = instr.Next;
 
                 if (nextInstr.OpCode == OpCodes.Initobj)
                 {
                     // we need to replace this code with:
                     //     var tmp = new MyStruct();
                     //     this.set_Networkxxxx(tmp);
-                    ILProcessor worker = md.Body.GetILProcessor();
-                    VariableDefinition tmpVariable = md.AddLocal(opField.FieldType);
+                    var worker = md.Body.GetILProcessor();
+                    var tmpVariable = md.AddLocal(opField.FieldType);
 
                     worker.InsertBefore(instr, worker.Create(OpCodes.Ldloca, tmpVariable));
                     worker.InsertBefore(instr, worker.Create(OpCodes.Initobj, opField.FieldType));
                     worker.InsertBefore(instr, worker.Create(OpCodes.Ldloc, tmpVariable));
-                    Instruction newInstr = worker.Create(OpCodes.Call, replacement);
+                    var newInstr = worker.Create(OpCodes.Call, replacement);
                     worker.InsertBefore(instr, newInstr);
 
                     worker.Remove(instr);

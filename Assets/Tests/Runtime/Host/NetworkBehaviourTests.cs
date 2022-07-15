@@ -64,8 +64,8 @@ namespace Mirage.Tests.Runtime.Host
         public void OnStartServer()
         {
             var gameObject = new GameObject();
-            NetworkIdentity netIdentity = gameObject.AddComponent<NetworkIdentity>();
-            OnStartServerTestComponent comp = gameObject.AddComponent<OnStartServerTestComponent>();
+            var netIdentity = gameObject.AddComponent<NetworkIdentity>();
+            var comp = gameObject.AddComponent<OnStartServerTestComponent>();
             netIdentity.OnStartServer.AddListener(comp.OnStartServer);
 
             Assert.That(comp.called, Is.False);
@@ -82,7 +82,7 @@ namespace Mirage.Tests.Runtime.Host
         {
             var gameObject2 = new GameObject();
             gameObject2.AddComponent<NetworkIdentity>();
-            SampleBehavior behaviour2 = gameObject2.AddComponent<SampleBehavior>();
+            var behaviour2 = gameObject2.AddComponent<SampleBehavior>();
 
             serverObjectManager.Spawn(gameObject2);
 
@@ -113,8 +113,8 @@ namespace Mirage.Tests.Runtime.Host
 
             extraObject.AddComponent<NetworkIdentity>();
 
-            SampleBehavior behaviour1 = extraObject.AddComponent<SampleBehavior>();
-            SampleBehavior behaviour2 = extraObject.AddComponent<SampleBehavior>();
+            var behaviour1 = extraObject.AddComponent<SampleBehavior>();
+            var behaviour2 = extraObject.AddComponent<SampleBehavior>();
 
             // original one is first networkbehaviour, so index is 0
             Assert.That(behaviour1.ComponentIndex, Is.EqualTo(0));
@@ -132,9 +132,9 @@ namespace Mirage.Tests.Runtime.Host
         public void HookGuard()
         {
             // set hook guard for some bits
-            for (int i = 0; i < 10; ++i)
+            for (var i = 0; i < 10; ++i)
             {
-                ulong bit = 1ul << i;
+                var bit = 1ul << i;
 
                 // should be false by default
                 Assert.That(GetSyncVarHookGuard(bit), Is.False);

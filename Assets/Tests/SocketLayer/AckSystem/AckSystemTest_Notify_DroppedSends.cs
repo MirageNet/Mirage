@@ -49,7 +49,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             // create and send n messages
             instance1.messages = new List<byte[]>();
             instance2.messages = new List<byte[]>();
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 instance1.messages.Add(createRandomData(i + 1));
                 instance2.messages.Add(createRandomData(i + 1));
@@ -83,11 +83,11 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void ReceivedShouldBeEqualToLatest()
         {
-            ushort nextReceive = maxSequence;
-            for (int i = 0; i < messageCount; i++)
+            var nextReceive = maxSequence;
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 3;
-                ushort received = ByteUtils.ReadUShort(instance1.packet(i), ref offset);
+                var offset = 3;
+                var received = ByteUtils.ReadUShort(instance1.packet(i), ref offset);
                 Assert.That(received, Is.EqualTo(nextReceive), "Received should start at max and increment each time");
 
                 // do at end becuase 1 is sending first
@@ -96,14 +96,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             }
 
             nextReceive = maxSequence;
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 // do at start becuase 2 is sending second
                 if (received2[i])
                     nextReceive = (ushort)(i);
 
-                int offset = 3;
-                ushort received = ByteUtils.ReadUShort(instance2.packet(i), ref offset);
+                var offset = 3;
+                var received = ByteUtils.ReadUShort(instance2.packet(i), ref offset);
                 Assert.That(received, Is.EqualTo(nextReceive), "Received should start at 1 (received first message before sending) and increment each time");
             }
         }
@@ -111,42 +111,42 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Test]
         public void MaskShouldBePreviousSequences()
         {
-            uint[] expectedMask1 = new uint[5] {
+            var expectedMask1 = new uint[5] {
                 0b0,    // no received
                 0b1,    // i=0 received
                 0b1,    // still just i=0
                 0b1,    // still just i=0
                 0b1001, // received i=3
             };
-            uint[] expectedMask2 = new uint[5] {
+            var expectedMask2 = new uint[5] {
                 0b0,    // i=0 not received
                 0b1,    // i=1 received
                 0b11,   // i=2 received
                 0b11,   // still just i=2
                 0b1101, // received i=4
             };
-            uint[] mask = new uint[5];
+            var mask = new uint[5];
 
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 5;
+                var offset = 5;
                 mask[i] = ByteUtils.ReadUInt(instance1.packet(i), ref offset);
             }
             // do 2nd loop so we can log all values to debug
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 Assert.That(mask[i], Is.EqualTo(expectedMask1[i]), $"Received should contain previous receives\n  instance 1, index{i}\n{string.Join(",", mask.Select(x => x.ToString()))}");
             }
 
 
             // start at 1
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                int offset = 5;
+                var offset = 5;
                 mask[i] = ByteUtils.ReadUInt(instance2.packet(i), ref offset);
             }
             // do 2nd loop so we can log all values to debug
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 Assert.That(mask[i], Is.EqualTo(expectedMask2[i]), $"Received should contain previous receives\n  instance 2, index{i}\n{string.Join(",", mask.Select(x => x.ToString()))}");
             }

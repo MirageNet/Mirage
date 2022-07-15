@@ -114,16 +114,16 @@ namespace Mirage
 
             World = new NetworkWorld();
 
-            IEndPoint endPoint = SocketFactory.GetConnectEndPoint(address, port);
+            var endPoint = SocketFactory.GetConnectEndPoint(address, port);
             if (logger.LogEnabled()) logger.Log($"Client connecting to endpoint: {endPoint}");
 
-            ISocket socket = SocketFactory.CreateClientSocket();
-            int maxPacketSize = SocketFactory.MaxPacketSize;
+            var socket = SocketFactory.CreateClientSocket();
+            var maxPacketSize = SocketFactory.MaxPacketSize;
             MessageHandler = new MessageHandler(World, DisconnectOnException);
             var dataHandler = new DataHandler(MessageHandler);
             Metrics = EnablePeerMetrics ? new Metrics(MetricsSize) : null;
 
-            Config config = PeerConfig ?? new Config();
+            var config = PeerConfig ?? new Config();
 
             NetworkWriterPool.Configure(maxPacketSize);
 
@@ -132,7 +132,7 @@ namespace Mirage
             peer.OnConnectionFailed += Peer_OnConnectionFailed;
             peer.OnDisconnected += Peer_OnDisconnected;
 
-            IConnection connection = peer.Connect(endPoint);
+            var connection = peer.Connect(endPoint);
 
             if (RunInBackground)
                 Application.runInBackground = RunInBackground;
@@ -202,7 +202,7 @@ namespace Mirage
             // create local connection objects and connect them
             MessageHandler = new MessageHandler(World, DisconnectOnException);
             var dataHandler = new DataHandler(MessageHandler);
-            (IConnection clientConn, IConnection serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler, OnHostDisconnected, null);
+            (var clientConn, var serverConn) = PipePeerConnection.Create(dataHandler, serverDataHandler, OnHostDisconnected, null);
 
             // set up client before connecting to server, server could invoke handlers
             IsLocalClient = true;

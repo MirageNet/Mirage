@@ -102,7 +102,7 @@ namespace Mirage.SocketLayer
             active = true;
             socket.Connect(endPoint);
 
-            Connection connection = CreateNewConnection(endPoint);
+            var connection = CreateNewConnection(endPoint);
             connection.State = ConnectionState.Connecting;
 
             // update now to send connectRequest command
@@ -121,7 +121,7 @@ namespace Mirage.SocketLayer
             Application.quitting -= Application_quitting;
 
             // send disconnect messages
-            foreach (Connection conn in connections.Values)
+            foreach (var conn in connections.Values)
             {
                 conn.Disconnect(DisconnectReason.RequestedByLocalPeer);
             }
@@ -156,7 +156,7 @@ namespace Mirage.SocketLayer
 
         internal void SendUnreliable(Connection connection, byte[] packet, int offset, int length)
         {
-            using (ByteBuffer buffer = bufferPool.Take())
+            using (var buffer = bufferPool.Take())
             {
                 Buffer.BlockCopy(packet, offset, buffer.array, 1, length);
                 // set header
@@ -168,9 +168,9 @@ namespace Mirage.SocketLayer
 
         internal void SendCommandUnconnected(IEndPoint endPoint, Commands command, byte? extra = null)
         {
-            using (ByteBuffer buffer = bufferPool.Take())
+            using (var buffer = bufferPool.Take())
             {
-                int length = CreateCommandPacket(buffer, command, extra);
+                var length = CreateCommandPacket(buffer, command, extra);
 
                 socket.Send(endPoint, buffer.array, length);
                 metrics?.OnSendUnconnected(length);
@@ -183,9 +183,9 @@ namespace Mirage.SocketLayer
 
         internal void SendConnectRequest(Connection connection)
         {
-            using (ByteBuffer buffer = bufferPool.Take())
+            using (var buffer = bufferPool.Take())
             {
-                int length = CreateCommandPacket(buffer, Commands.ConnectRequest, null);
+                var length = CreateCommandPacket(buffer, Commands.ConnectRequest, null);
                 connectKeyValidator.CopyTo(buffer.array);
                 Send(connection, buffer.array, length + connectKeyValidator.KeyLength);
             }
@@ -193,9 +193,9 @@ namespace Mirage.SocketLayer
 
         internal void SendCommand(Connection connection, Commands command, byte? extra = null)
         {
-            using (ByteBuffer buffer = bufferPool.Take())
+            using (var buffer = bufferPool.Take())
             {
-                int length = CreateCommandPacket(buffer, command, extra);
+                var length = CreateCommandPacket(buffer, command, extra);
                 Send(connection, buffer.array, length);
             }
         }
@@ -225,7 +225,7 @@ namespace Mirage.SocketLayer
 
         internal void SendKeepAlive(Connection connection)
         {
-            using (ByteBuffer buffer = bufferPool.Take())
+            using (var buffer = bufferPool.Take())
             {
                 buffer.array[0] = (byte)PacketType.KeepAlive;
                 Send(connection, buffer.array, 1);
@@ -251,11 +251,11 @@ namespace Mirage.SocketLayer
 
         private void ReceiveLoop()
         {
-            using (ByteBuffer buffer = bufferPool.Take())
+            using (var buffer = bufferPool.Take())
             {
                 while (socket.Poll())
                 {
-                    int length = socket.Receive(buffer.array, out IEndPoint receiveEndPoint);
+                    var length = socket.Receive(buffer.array, out var receiveEndPoint);
 
                     // this should never happen. buffer size is only MTU, if socket returns higher length then it has a bug.
                     if (length > maxPacketSize)
@@ -263,7 +263,7 @@ namespace Mirage.SocketLayer
 
                     var packet = new Packet(buffer, length);
 
-                    if (connections.TryGetValue(receiveEndPoint, out Connection connection))
+                    if (connections.TryGetValue(receiveEndPoint, out var connection))
                     {
                         metrics?.OnReceive(length);
                         HandleMessage(connection, packet);
@@ -400,7 +400,7 @@ namespace Mirage.SocketLayer
         private bool Validate(Packet packet)
         {
             // key could be anything, so any message over 2 could be key.
-            int minLength = 2;
+            var minLength = 2;
             if (packet.length < minLength)
                 return false;
 
@@ -421,7 +421,7 @@ namespace Mirage.SocketLayer
         {
             if (logger.Enabled(LogType.Log)) logger.Log($"Accepting new connection from:{endPoint}");
 
-            Connection connection = CreateNewConnection(endPoint);
+            var connection = CreateNewConnection(endPoint);
 
             HandleConnectionRequest(connection);
         }
@@ -430,7 +430,7 @@ namespace Mirage.SocketLayer
         {
             // create copy of endpoint for this connection
             // this is so that we can re-use the endpoint (reduces alloc) for receive and not worry about changing internal data needed for each connection
-            IEndPoint endPoint = _newEndPoint?.CreateCopy();
+            var endPoint = _newEndPoint?.CreateCopy();
 
             var connection = new Connection(this, endPoint, dataHandler, config, maxPacketSize, time, bufferPool, logger, metrics);
             connection.SetReceiveTime();
@@ -508,7 +508,7 @@ namespace Mirage.SocketLayer
             if (sendToOther)
             {
                 // if reason is ByLocal, then change it to ByRemote for sending
-                byte byteReason = (byte)(reason == DisconnectReason.RequestedByLocalPeer
+                var byteReason = (byte)(reason == DisconnectReason.RequestedByLocalPeer
                     ? DisconnectReason.RequestedByRemotePeer
                     : reason);
                 SendCommand(connection, Commands.Disconnect, byteReason);
@@ -545,7 +545,7 @@ namespace Mirage.SocketLayer
 
         private void UpdateConnections()
         {
-            foreach (Connection connection in connections.Values)
+            foreach (var connection in connections.Values)
             {
                 connection.Update();
 
@@ -562,9 +562,9 @@ namespace Mirage.SocketLayer
             if (connectionsToRemove.Count == 0)
                 return;
 
-            foreach (Connection connection in connectionsToRemove)
+            foreach (var connection in connectionsToRemove)
             {
-                bool removed = connections.Remove(connection.EndPoint);
+                var removed = connections.Remove(connection.EndPoint);
                 connection.State = ConnectionState.Destroyed;
 
                 // value should be removed from dictionary

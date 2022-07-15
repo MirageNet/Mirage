@@ -23,7 +23,7 @@ namespace Mirage.Tests.CodeGenerators
 
         private static void Create(CreateFromTemplate fromTemplate, int bitCount, Quaternion value, float within)
         {
-            string name = $"_{bitCount}_{(int)(value.eulerAngles.x)}";
+            var name = $"_{bitCount}_{(int)(value.eulerAngles.x)}";
             fromTemplate.Replace("%%NAME%%", name);
             fromTemplate.Replace("%%PACKER_ATTRIBUTE%%", $"{bitCount}");
             fromTemplate.Replace("%%VALUE%%", $"new Quaternion({value.x}f, {value.y}f, {value.z}f, {value.w}f)");

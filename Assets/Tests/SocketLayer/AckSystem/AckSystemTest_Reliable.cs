@@ -39,17 +39,17 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             /// <param name="dropChance"></param>
             public (List<byte[]>, List<byte[]>) Update(float dropChance, float skipChance)
             {
-                List<byte[]> r2 = Update(ref processed1, ToSend1, connection1, ackSystem2, dropChance, skipChance);
-                List<byte[]> r1 = Update(ref processed2, ToSend2, connection2, ackSystem1, dropChance, skipChance);
+                var r2 = Update(ref processed1, ToSend1, connection1, ackSystem2, dropChance, skipChance);
+                var r1 = Update(ref processed2, ToSend2, connection2, ackSystem1, dropChance, skipChance);
                 return (r1, r2);
             }
 
             private static List<byte[]> Update(ref int processed, List<byte[]> ToSend, SubIRawConnection connection, AckSystem ackSystem, float dropChance, float skipChance)
             {
-                int count1 = connection.packets.Count;
-                for (int i = processed; i < count1; i++)
+                var count1 = connection.packets.Count;
+                for (var i = processed; i < count1; i++)
                 {
-                    byte[] packet = connection.packets[i];
+                    var packet = connection.packets[i];
                     if (UnityEngine.Random.value > dropChance)
                     {
                         ToSend.Add(packet);
@@ -58,7 +58,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 processed = count1;
 
                 var newPackets = new List<byte[]>();
-                for (int i = 0; i < ToSend.Count; i++)
+                for (var i = 0; i < ToSend.Count; i++)
                 {
                     if (UnityEngine.Random.value < skipChance) { continue; }
                     newPackets.AddRange(Receive(ackSystem, ToSend[i]));
@@ -89,7 +89,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                         break;
                 }
 
-                while (ackSystem.NextReliablePacket(out AckSystem.ReliableReceived received))
+                while (ackSystem.NextReliablePacket(out var received))
                 {
                     HandleAllMessageInPacket(messages, received);
                 }
@@ -98,15 +98,15 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
 
             private static void HandleAllMessageInPacket(List<byte[]> messages, AckSystem.ReliableReceived received)
             {
-                byte[] array = received.buffer.array;
-                int packetLength = received.length;
-                int offset = 0;
+                var array = received.buffer.array;
+                var packetLength = received.length;
+                var offset = 0;
                 while (offset < packetLength)
                 {
-                    ushort length = ByteUtils.ReadUShort(array, ref offset);
+                    var length = ByteUtils.ReadUShort(array, ref offset);
                     var message = new ArraySegment<byte>(array, offset, length);
 
-                    byte[] outBuffer = new byte[length];
+                    var outBuffer = new byte[length];
                     Buffer.BlockCopy(array, offset, outBuffer, 0, length);
                     offset += length;
                     messages.Add(outBuffer);
@@ -185,22 +185,22 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             Assert.That(receives1, Has.Count.EqualTo(instance2Sends ? messageCount + 1 : 0));
 
             // check all message reached other side
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                byte[] message = receives2[i];
+                var message = receives2[i];
 
-                byte[] expected = instance1.message(i);
+                var expected = instance1.message(i);
                 AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
             }
 
 
             if (instance2Sends)
             {
-                for (int i = 0; i < messageCount; i++)
+                for (var i = 0; i < messageCount; i++)
                 {
-                    byte[] message = receives1[i];
+                    var message = receives1[i];
 
-                    byte[] expected = instance2.message(i);
+                    var expected = instance2.message(i);
                     AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
                 }
             }
@@ -209,7 +209,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         private void SendManyMessages(bool instance2Sends, int messageCount, float dropChance, float skipChance)
         {
             // send all messages
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 instance1.messages.Add(createRandomData(i + 1));
                 instance2.messages.Add(createRandomData(i + 1));
@@ -254,7 +254,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             time.Now += tick;
             instance1.ackSystem.Update();
             instance2.ackSystem.Update();
-            (List<byte[]>, List<byte[]>) newMessages = badSocket.Update(dropChance, skipChance);
+            var newMessages = badSocket.Update(dropChance, skipChance);
             receives1.AddRange(newMessages.Item1);
             receives2.AddRange(newMessages.Item2);
         }
@@ -264,13 +264,13 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         [Explicit("Explicit Test: this test takes about 50 seconds to run")]
         public IEnumerator AllMessagesShouldHaveBeenReceivedInOrderFrames()
         {
-            bool instance2Sends = false;
-            int messageCount = 3000;
-            float dropChance = 0.2f;
-            float skipChance = 0.4f;
+            var instance2Sends = false;
+            var messageCount = 3000;
+            var dropChance = 0.2f;
+            var skipChance = 0.4f;
 
             // send all messages
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
                 instance1.messages.Add(createRandomData(i + 1));
                 instance2.messages.Add(createRandomData(i + 1));
@@ -315,22 +315,22 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             Assert.That(receives1, Has.Count.EqualTo(instance2Sends ? messageCount + 1 : 0));
 
             // check all message reached other side
-            for (int i = 0; i < messageCount; i++)
+            for (var i = 0; i < messageCount; i++)
             {
-                byte[] message = receives2[i];
+                var message = receives2[i];
 
-                byte[] expected = instance1.message(i);
+                var expected = instance1.message(i);
                 AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
             }
 
 
             if (instance2Sends)
             {
-                for (int i = 0; i < messageCount; i++)
+                for (var i = 0; i < messageCount; i++)
                 {
-                    byte[] message = receives1[i];
+                    var message = receives1[i];
 
-                    byte[] expected = instance2.message(i);
+                    var expected = instance2.message(i);
                     AssertAreSameFromOffsets(expected, 0, message, 0, expected.Length);
                 }
             }
