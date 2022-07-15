@@ -23,7 +23,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         public void OnHealthChanged(int oldValue, int newValue)
         {
-            if(!IsServer) return;
+            if (!IsServer) return;
 
             called++;
         }

@@ -10,7 +10,8 @@ namespace Mirage.Tests.Runtime.ClientServer
         public Colors myColor = DefaultValue;
     }
 
-    public enum Colors {
+    public enum Colors
+    {
         Blue,
         Green,
         Red,
