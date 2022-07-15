@@ -1,3 +1,5 @@
+# IMPORTANT: See bottom of file for re-include files
+
 # Created by weaver tests
 Assets/Tests/Weaver/**/CompilationLog.txt
 
@@ -550,3 +552,9 @@ FodyWeavers.xsd
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/unity,visualstudiocode,visualstudio,osx,windows
+
+
+
+# any folder ending with ~
+# used for Samples~ and weaver tests
+!Assets/**/*~
