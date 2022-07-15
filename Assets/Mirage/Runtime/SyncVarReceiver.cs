@@ -11,11 +11,11 @@ namespace Mirage
     {
         private static readonly ILogger logger = LogFactory.GetLogger(typeof(SyncVarReceiver));
 
-        private readonly IObjectLocator objectLocator;
+        private readonly IObjectLocator _objectLocator;
 
         public SyncVarReceiver(NetworkClient client, IObjectLocator objectLocator)
         {
-            this.objectLocator = objectLocator;
+            _objectLocator = objectLocator;
             if (client.IsConnected)
             {
                 AddHandlers(client);
@@ -43,9 +43,9 @@ namespace Mirage
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnUpdateVarsMessage " + msg.netId);
 
-            if (objectLocator.TryGetIdentity(msg.netId, out var localObject))
+            if (_objectLocator.TryGetIdentity(msg.netId, out var localObject))
             {
-                using (var networkReader = NetworkReaderPool.GetReader(msg.payload, objectLocator))
+                using (var networkReader = NetworkReaderPool.GetReader(msg.payload, _objectLocator))
                     localObject.OnDeserializeAll(networkReader, false);
             }
             else

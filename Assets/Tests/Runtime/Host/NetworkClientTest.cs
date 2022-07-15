@@ -25,18 +25,18 @@ namespace Mirage.Tests.Runtime.Host
         {
             client.Disconnect();
 
-            await AsyncUtil.WaitUntilWithTimeout(() => client.connectState == ConnectState.Disconnected);
+            await AsyncUtil.WaitUntilWithTimeout(() => client._connectState == ConnectState.Disconnected);
             await AsyncUtil.WaitUntilWithTimeout(() => !client.Active);
         });
 
         [Test]
         public void ConnectionClearHandlersTest()
         {
-            Assert.That(ClientMessageHandler.messageHandlers.Count > 0);
+            Assert.That(ClientMessageHandler._messageHandlers.Count > 0);
 
             ClientMessageHandler.ClearHandlers();
 
-            Assert.That(ClientMessageHandler.messageHandlers.Count == 0);
+            Assert.That(ClientMessageHandler._messageHandlers.Count == 0);
         }
 
         [Test]

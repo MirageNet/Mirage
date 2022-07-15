@@ -42,7 +42,8 @@ namespace Mirage
 
         [Tooltip("If true will set Application.runInBackground")]
         public bool RunInBackground = true;
-        private Peer peer;
+
+        private Peer _peer;
 
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
@@ -78,18 +79,18 @@ namespace Mirage
         /// </summary>
         public INetworkPlayer Player { get; internal set; }
 
-        internal ConnectState connectState = ConnectState.Disconnected;
+        internal ConnectState _connectState = ConnectState.Disconnected;
 
         /// <summary>
         /// active is true while a client is connecting/connected
         /// (= while the network is active)
         /// </summary>
-        public bool Active => connectState == ConnectState.Connecting || connectState == ConnectState.Connected;
+        public bool Active => _connectState == ConnectState.Connecting || _connectState == ConnectState.Connected;
 
         /// <summary>
         /// This gives the current connection status of the client.
         /// </summary>
-        public bool IsConnected => connectState == ConnectState.Connected;
+        public bool IsConnected => _connectState == ConnectState.Connected;
 
         public NetworkWorld World { get; private set; }
         public MessageHandler MessageHandler { get; private set; }
@@ -110,7 +111,7 @@ namespace Mirage
             ThrowIfActive();
             ThrowIfSocketIsMissing();
 
-            connectState = ConnectState.Connecting;
+            _connectState = ConnectState.Connecting;
 
             World = new NetworkWorld();
 
@@ -127,12 +128,12 @@ namespace Mirage
 
             NetworkWriterPool.Configure(maxPacketSize);
 
-            peer = new Peer(socket, maxPacketSize, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
-            peer.OnConnected += Peer_OnConnected;
-            peer.OnConnectionFailed += Peer_OnConnectionFailed;
-            peer.OnDisconnected += Peer_OnDisconnected;
+            _peer = new Peer(socket, maxPacketSize, dataHandler, config, LogFactory.GetLogger<Peer>(), Metrics);
+            _peer.OnConnected += Peer_OnConnected;
+            _peer.OnConnectionFailed += Peer_OnConnectionFailed;
+            _peer.OnDisconnected += Peer_OnDisconnected;
 
-            var connection = peer.Connect(endPoint);
+            var connection = _peer.Connect(endPoint);
 
             if (RunInBackground)
                 Application.runInBackground = RunInBackground;
@@ -163,7 +164,7 @@ namespace Mirage
         private void Peer_OnConnected(IConnection conn)
         {
             World.Time.UpdateClient(this);
-            connectState = ConnectState.Connected;
+            _connectState = ConnectState.Connected;
             _connected.Invoke(Player);
         }
 
@@ -195,7 +196,7 @@ namespace Mirage
 
             logger.Log("Client Connect Host to Server");
             // start connecting for setup, then "Peer_OnConnected" below will change to connected
-            connectState = ConnectState.Connecting;
+            _connectState = ConnectState.Connecting;
 
             World = server.World;
 
@@ -292,13 +293,13 @@ namespace Mirage
         internal void Update()
         {
             // local connection?
-            if (!IsLocalClient && Active && connectState == ConnectState.Connected)
+            if (!IsLocalClient && Active && _connectState == ConnectState.Connected)
             {
                 // only update things while connected
                 World.Time.UpdateClient(this);
             }
-            peer?.UpdateReceive();
-            peer?.UpdateSent();
+            _peer?.UpdateReceive();
+            _peer?.UpdateSent();
         }
 
         internal void RegisterHostHandlers()
@@ -321,7 +322,7 @@ namespace Mirage
 
             IsLocalClient = false;
 
-            connectState = ConnectState.Disconnected;
+            _connectState = ConnectState.Disconnected;
 
             if (authenticator != null)
             {
@@ -339,38 +340,38 @@ namespace Mirage
             _authenticated.Reset();
             _disconnected.Reset();
 
-            if (peer != null)
+            if (_peer != null)
             {
                 //remove handlers first to stop loop
-                peer.OnConnected -= Peer_OnConnected;
-                peer.OnConnectionFailed -= Peer_OnConnectionFailed;
-                peer.OnDisconnected -= Peer_OnDisconnected;
-                peer.Close();
-                peer = null;
+                _peer.OnConnected -= Peer_OnConnected;
+                _peer.OnConnectionFailed -= Peer_OnConnectionFailed;
+                _peer.OnDisconnected -= Peer_OnDisconnected;
+                _peer.Close();
+                _peer = null;
             }
         }
 
         internal class DataHandler : IDataHandler
         {
-            private IConnection connection;
-            private INetworkPlayer player;
-            private readonly IMessageReceiver messageHandler;
+            private IConnection _connection;
+            private INetworkPlayer _player;
+            private readonly IMessageReceiver _messageHandler;
 
             public DataHandler(IMessageReceiver messageHandler)
             {
-                this.messageHandler = messageHandler;
+                _messageHandler = messageHandler;
             }
 
             public void SetConnection(IConnection connection, INetworkPlayer player)
             {
-                this.connection = connection;
-                this.player = player;
+                _connection = connection;
+                _player = player;
             }
 
             public void ReceiveMessage(IConnection connection, ArraySegment<byte> message)
             {
-                logger.Assert(this.connection == connection);
-                messageHandler.HandleMessage(player, message);
+                logger.Assert(_connection == connection);
+                _messageHandler.HandleMessage(_player, message);
             }
         }
     }

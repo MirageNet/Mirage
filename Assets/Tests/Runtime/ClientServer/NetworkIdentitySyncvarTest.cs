@@ -48,9 +48,9 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             var networkIdentitySyncvar = new NetworkIdentitySyncvar
             {
-                objectLocator = client.World,
-                netId = serverIdentity.NetId,
-                identity = null,
+                _objectLocator = client.World,
+                _netId = serverIdentity.NetId,
+                _identity = null,
             };
 
             Assert.That(networkIdentitySyncvar.Value, Is.SameAs(clientIdentity));

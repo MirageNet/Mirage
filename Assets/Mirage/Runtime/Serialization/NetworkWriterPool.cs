@@ -57,11 +57,11 @@ namespace Mirage.Serialization
     /// </summary>
     public sealed class PooledNetworkWriter : NetworkWriter, IDisposable
     {
-        private readonly Pool<PooledNetworkWriter> pool;
+        private readonly Pool<PooledNetworkWriter> _pool;
 
         private PooledNetworkWriter(int bufferSize, Pool<PooledNetworkWriter> pool) : base(bufferSize)
         {
-            this.pool = pool ?? throw new ArgumentNullException(nameof(pool));
+            _pool = pool ?? throw new ArgumentNullException(nameof(pool));
         }
 
         public static PooledNetworkWriter CreateNew(int bufferSize, Pool<PooledNetworkWriter> pool)
@@ -75,7 +75,7 @@ namespace Mirage.Serialization
         public void Release()
         {
             Reset();
-            pool.Put(this);
+            _pool.Put(this);
         }
 
         void IDisposable.Dispose() => Release();

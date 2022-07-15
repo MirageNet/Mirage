@@ -132,7 +132,7 @@ namespace Mirage.EditorScripts.Logging
             if (GUILayout.Button("Clear All levels"))
             {
                 settings.LogLevels.Clear();
-                LogFactory.loggers.Clear();
+                LogFactory._loggers.Clear();
                 guiChanged = true;
             }
         }

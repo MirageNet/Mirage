@@ -28,36 +28,36 @@ namespace Mirage.Serialization
 {
     public sealed class Vector2Packer
     {
-        private readonly FloatPacker xPacker;
-        private readonly FloatPacker yPacker;
+        private readonly FloatPacker _xPacker;
+        private readonly FloatPacker _yPacker;
 
         public Vector2Packer(float xMax, float yMax, int xBitCount, int yBitCount)
         {
-            xPacker = new FloatPacker(xMax, xBitCount);
-            yPacker = new FloatPacker(yMax, yBitCount);
+            _xPacker = new FloatPacker(xMax, xBitCount);
+            _yPacker = new FloatPacker(yMax, yBitCount);
         }
         public Vector2Packer(float xMax, float yMax, float xPrecision, float yPrecision)
         {
-            xPacker = new FloatPacker(xMax, xPrecision);
-            yPacker = new FloatPacker(yMax, yPrecision);
+            _xPacker = new FloatPacker(xMax, xPrecision);
+            _yPacker = new FloatPacker(yMax, yPrecision);
         }
         public Vector2Packer(Vector2 max, Vector2 precision)
         {
-            xPacker = new FloatPacker(max.x, precision.x);
-            yPacker = new FloatPacker(max.y, precision.y);
+            _xPacker = new FloatPacker(max.x, precision.x);
+            _yPacker = new FloatPacker(max.y, precision.y);
         }
 
         public void Pack(NetworkWriter writer, Vector2 value)
         {
-            xPacker.Pack(writer, value.x);
-            yPacker.Pack(writer, value.y);
+            _xPacker.Pack(writer, value.x);
+            _yPacker.Pack(writer, value.y);
         }
 
         public Vector2 Unpack(NetworkReader reader)
         {
             Vector2 value = default;
-            value.x = xPacker.Unpack(reader);
-            value.y = yPacker.Unpack(reader);
+            value.x = _xPacker.Unpack(reader);
+            value.y = _yPacker.Unpack(reader);
             return value;
         }
     }

@@ -69,7 +69,7 @@ namespace Mirage.Tests.Runtime.Serialization
             var gameObject = new GameObject("player", typeof(NetworkIdentity), typeof(MockPlayer));
 
             var player = gameObject.GetComponent<MockPlayer>();
-            player.lastSyncTime = Time.time;
+            player._lastSyncTime = Time.time;
             // synchronize immediately
             player.syncInterval = 1f;
 
@@ -85,7 +85,7 @@ namespace Mirage.Tests.Runtime.Serialization
             player.Identity.ClearDirtyComponentsDirtyBits();
 
             // set lastSyncTime far enough back to be ready for syncing
-            player.lastSyncTime = Time.time - player.syncInterval;
+            player._lastSyncTime = Time.time - player.syncInterval;
 
             // should be dirty now
             Assert.That(player.IsDirty(), Is.True, "Sync interval met, should be dirty");
@@ -97,7 +97,7 @@ namespace Mirage.Tests.Runtime.Serialization
             var gameObject = new GameObject("Player", typeof(NetworkIdentity), typeof(MockPlayer));
 
             var player = gameObject.GetComponent<MockPlayer>();
-            player.lastSyncTime = Time.time;
+            player._lastSyncTime = Time.time;
             // synchronize immediately
             player.syncInterval = 1f;
 
@@ -113,7 +113,7 @@ namespace Mirage.Tests.Runtime.Serialization
             player.Identity.ClearAllComponentsDirtyBits();
 
             // set lastSyncTime far enough back to be ready for syncing
-            player.lastSyncTime = Time.time - player.syncInterval;
+            player._lastSyncTime = Time.time - player.syncInterval;
 
             // should be dirty now
             Assert.That(player.IsDirty(), Is.False, "Sync interval met, should still not be dirty");

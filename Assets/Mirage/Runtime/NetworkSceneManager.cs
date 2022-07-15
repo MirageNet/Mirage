@@ -53,7 +53,7 @@ namespace Mirage
         /// <summary>
         /// Used by the client to load the full additive scene list that the server has upon connection
         /// </summary>
-        internal readonly List<string> ClientPendingAdditiveSceneLoadingList = new List<string>();
+        internal readonly List<string> _clientPendingAdditiveSceneLoadingList = new List<string>();
 
         /// <summary>
         ///     Information on any scene that is currently being loaded.
@@ -226,7 +226,7 @@ namespace Mirage
                 {
                     if (string.IsNullOrEmpty(message.AdditiveScenes[sceneIndex])) continue;
 
-                    ClientPendingAdditiveSceneLoadingList.Add(message.AdditiveScenes[sceneIndex]);
+                    _clientPendingAdditiveSceneLoadingList.Add(message.AdditiveScenes[sceneIndex]);
                 }
             }
 
@@ -261,14 +261,14 @@ namespace Mirage
         /// <param name="sceneOperation">Scene operation that was just  happen</param>
         internal void OnClientSceneLoadFinished(Scene scene, SceneOperation sceneOperation)
         {
-            if (ClientPendingAdditiveSceneLoadingList.Count > 0 && Client && !Client.IsLocalClient)
+            if (_clientPendingAdditiveSceneLoadingList.Count > 0 && Client && !Client.IsLocalClient)
             {
-                if (string.IsNullOrEmpty(ClientPendingAdditiveSceneLoadingList[0]))
+                if (string.IsNullOrEmpty(_clientPendingAdditiveSceneLoadingList[0]))
                     throw new ArgumentNullException("ClientPendingAdditiveSceneLoadingList[0]", "Some how a null scene path has been entered.");
 
-                LoadSceneAsync(ClientPendingAdditiveSceneLoadingList[0], new[] { Client.Player }, SceneOperation.LoadAdditive).Forget();
+                LoadSceneAsync(_clientPendingAdditiveSceneLoadingList[0], new[] { Client.Player }, SceneOperation.LoadAdditive).Forget();
 
-                ClientPendingAdditiveSceneLoadingList.RemoveAt(0);
+                _clientPendingAdditiveSceneLoadingList.RemoveAt(0);
 
                 return;
             }

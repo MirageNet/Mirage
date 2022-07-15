@@ -13,21 +13,21 @@ namespace Mirage
         /// The network client that spawned the parent object
         /// used to lookup the identity if it exists
         /// </summary>
-        internal IObjectLocator objectLocator;
-        internal uint netId;
+        internal IObjectLocator _objectLocator;
+        internal uint _netId;
 
-        internal NetworkIdentity identity;
+        internal NetworkIdentity _identity;
 
-        internal uint NetId => identity != null ? identity.NetId : netId;
+        internal uint NetId => _identity != null ? _identity.NetId : _netId;
 
         public NetworkIdentity Value
         {
             get
             {
-                if (identity != null)
-                    return identity;
+                if (_identity != null)
+                    return _identity;
 
-                if (objectLocator != null && objectLocator.TryGetIdentity(NetId, out var result))
+                if (_objectLocator != null && _objectLocator.TryGetIdentity(NetId, out var result))
                 {
                     return result;
                 }
@@ -38,8 +38,8 @@ namespace Mirage
             set
             {
                 if (value == null)
-                    netId = 0;
-                identity = value;
+                    _netId = 0;
+                _identity = value;
             }
         }
     }
@@ -63,9 +63,9 @@ namespace Mirage
 
             return new NetworkIdentitySyncvar
             {
-                objectLocator = mirageReader.ObjectLocator,
-                netId = netId,
-                identity = identity
+                _objectLocator = mirageReader.ObjectLocator,
+                _netId = netId,
+                _identity = identity
             };
         }
     }

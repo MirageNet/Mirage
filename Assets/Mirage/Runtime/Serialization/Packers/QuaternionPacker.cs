@@ -38,12 +38,12 @@ namespace Mirage.Serialization
         /// <summary>
         /// 1 / sqrt(2)
         /// </summary>
-        private const float MaxValue = 1f / 1.414214f;
+        private const float MAX_VALUE = 1f / 1.414214f;
 
         /// <summary>
         /// bit count per element writen
         /// </summary>
-        private readonly int bitCountPerElement;
+        private readonly int _bitCountPerElement;
 
         /// <summary>
         /// total bit count for Quaternion
@@ -51,32 +51,32 @@ namespace Mirage.Serialization
         /// count = 3 * perElement + 2;
         /// </para>
         /// </summary>
-        private readonly int totalBitCount;
-        private readonly uint readMask;
-        private readonly FloatPacker floatPacker;
+        private readonly int _totalBitCount;
+        private readonly uint _readMask;
+        private readonly FloatPacker _floatPacker;
 
         /// <param name="quaternionBitLength">10 per "smallest 3" is good enough for most people</param>
         public QuaternionPacker(int quaternionBitLength = 10)
         {
             // (this.BitLength - 1) because pack sign by itself
-            bitCountPerElement = quaternionBitLength;
-            totalBitCount = 2 + (quaternionBitLength * 3);
-            floatPacker = new FloatPacker(MaxValue, quaternionBitLength);
-            readMask = (uint)BitMask.Mask(bitCountPerElement);
+            _bitCountPerElement = quaternionBitLength;
+            _totalBitCount = 2 + (quaternionBitLength * 3);
+            _floatPacker = new FloatPacker(MAX_VALUE, quaternionBitLength);
+            _readMask = (uint)BitMask.Mask(_bitCountPerElement);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Pack(NetworkWriter writer, Quaternion _value)
+        public void Pack(NetworkWriter writer, Quaternion value)
         {
-            QuickNormalize(ref _value);
+            QuickNormalize(ref value);
 
-            FindLargestIndex(ref _value, out var index);
+            FindLargestIndex(ref value, out var index);
 
-            GetSmallerDimensions(index, ref _value, out var a, out var b, out var c);
+            GetSmallerDimensions(index, ref value, out var a, out var b, out var c);
 
             // largest needs to be positive to be calculated by reader 
             // if largest is negative flip sign of others because Q = -Q
-            if (_value[(int)index] < 0)
+            if (value[(int)index] < 0)
             {
                 a = -a;
                 b = -b;
@@ -86,11 +86,11 @@ namespace Mirage.Serialization
             // todo, should we be rounding down for abc? because if they are rounded up their sum may be greater than largest
 
             writer.Write(
-                 (ulong)index << bitCountPerElement * 3 |
-                 (ulong)floatPacker.PackNoClamp(a) << bitCountPerElement * 2 |
-                 (ulong)floatPacker.PackNoClamp(b) << bitCountPerElement |
-                 floatPacker.PackNoClamp(c),
-                 totalBitCount);
+                 ((ulong)index << (_bitCountPerElement * 3)) |
+                 ((ulong)_floatPacker.PackNoClamp(a) << (_bitCountPerElement * 2)) |
+                 ((ulong)_floatPacker.PackNoClamp(b) << _bitCountPerElement) |
+                 _floatPacker.PackNoClamp(c),
+                 _totalBitCount);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -194,13 +194,13 @@ namespace Mirage.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Quaternion Unpack(NetworkReader reader)
         {
-            var combine = reader.Read(totalBitCount);
+            var combine = reader.Read(_totalBitCount);
 
-            var index = (uint)(combine >> bitCountPerElement * 3);
+            var index = (uint)(combine >> (_bitCountPerElement * 3));
 
-            var a = floatPacker.Unpack((uint)(combine >> bitCountPerElement * 2) & readMask);
-            var b = floatPacker.Unpack((uint)(combine >> bitCountPerElement * 1) & readMask);
-            var c = floatPacker.Unpack((uint)combine & readMask);
+            var a = _floatPacker.Unpack((uint)(combine >> (_bitCountPerElement * 2)) & _readMask);
+            var b = _floatPacker.Unpack((uint)(combine >> (_bitCountPerElement * 1)) & _readMask);
+            var c = _floatPacker.Unpack((uint)combine & _readMask);
 
             var l2 = 1 - ((a * a) + (b * b) + (c * c));
             var largest = (float)Math.Sqrt(l2);

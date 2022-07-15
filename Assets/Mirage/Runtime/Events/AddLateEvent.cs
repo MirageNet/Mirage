@@ -110,14 +110,14 @@ namespace Mirage.Events
         [SerializeField] private TEvent _event = new TEvent();
         protected override UnityEventBase baseEvent => _event;
 
-        private T0 arg0;
+        private T0 _arg0;
 
         public void AddListener(UnityAction<T0> handler)
         {
             // invoke handler if event has been invoked atleast once
             if (hasInvoked)
             {
-                handler.Invoke(arg0);
+                handler.Invoke(_arg0);
             }
 
             // add handler to inner event so that it can be invoked again
@@ -133,7 +133,7 @@ namespace Mirage.Events
         {
             MarkInvoked();
 
-            this.arg0 = arg0;
+            _arg0 = arg0;
             _event.Invoke(arg0);
         }
     }
@@ -151,15 +151,15 @@ namespace Mirage.Events
         [SerializeField] private TEvent _event = new TEvent();
         protected override UnityEventBase baseEvent => _event;
 
-        private T0 arg0;
-        private T1 arg1;
+        private T0 _arg0;
+        private T1 _arg1;
 
         public void AddListener(UnityAction<T0, T1> handler)
         {
             // invoke handler if event has been invoked atleast once
             if (hasInvoked)
             {
-                handler.Invoke(arg0, arg1);
+                handler.Invoke(_arg0, _arg1);
             }
 
             // add handler to inner event so that it can be invoked again
@@ -175,8 +175,8 @@ namespace Mirage.Events
         {
             MarkInvoked();
 
-            this.arg0 = arg0;
-            this.arg1 = arg1;
+            _arg0 = arg0;
+            _arg1 = arg1;
             _event.Invoke(arg0, arg1);
         }
     }

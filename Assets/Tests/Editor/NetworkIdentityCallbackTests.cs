@@ -291,7 +291,7 @@ namespace Mirage.Tests
             Assert.That(identity.SceneId & 0xFFFF_FFFF_0000_0000ul, Is.Zero);
 
             // make sure that OnValidate added it to sceneIds dict
-            Assert.That(NetworkIdentityIdGenerator.sceneIds[(int)(identity.SceneId & 0x0000_0000_FFFF_FFFFul)], Is.Not.Null);
+            Assert.That(NetworkIdentityIdGenerator._sceneIds[(int)(identity.SceneId & 0x0000_0000_FFFF_FFFFul)], Is.Not.Null);
         }
 
         [Test]

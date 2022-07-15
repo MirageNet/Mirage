@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Mirage.Logging
 {
@@ -12,19 +13,20 @@ namespace Mirage.Logging
     public class LogSettings : MonoBehaviour
     {
         [Header("Log Settings Asset")]
-        [SerializeField] internal LogSettingsSO settings;
+        [FormerlySerializedAs("settings")]
+        [SerializeField] internal LogSettingsSO _settings;
 
 #if UNITY_EDITOR
         // called when component is added to GameObject
         private void Reset()
         {
-            if (settings != null) { return; }
+            if (_settings != null) { return; }
 
             var existingSettings = EditorLogSettingsLoader.FindLogSettings();
             if (existingSettings != null)
             {
                 Undo.RecordObject(this, "adding existing settings");
-                settings = existingSettings;
+                _settings = existingSettings;
             }
         }
 #endif
@@ -41,9 +43,9 @@ namespace Mirage.Logging
 
         private void RefreshDictionary()
         {
-            if (settings != null)
+            if (_settings != null)
             {
-                settings.LoadIntoLogFactory();
+                _settings.LoadIntoLogFactory();
             }
             else
             {

@@ -150,7 +150,7 @@ namespace Mirage.Tests.Runtime.ClientServer
         [Test]
         public void OnClientSceneLoadFinishedTest()
         {
-            clientSceneManager.ClientPendingAdditiveSceneLoadingList.Add(null);
+            clientSceneManager._clientPendingAdditiveSceneLoadingList.Add(null);
 
             var exception = Assert.Throws<ArgumentNullException>(() =>
             {
@@ -176,7 +176,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         private void CheckForPendingAdditiveSceneList(Scene scene, SceneOperation sceneOperation)
         {
-            if (clientSceneManager.ClientPendingAdditiveSceneLoadingList.Count == 0)
+            if (clientSceneManager._clientPendingAdditiveSceneLoadingList.Count == 0)
             {
                 noAdditiveScenesFound = true;
             }
@@ -196,7 +196,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
         private void CheckForAdditiveScene(string scenePath, SceneOperation sceneOperation)
         {
-            if (clientSceneManager.ClientPendingAdditiveSceneLoadingList.Contains("Assets/Mirror/Tests/Runtime/testScene.unity"))
+            if (clientSceneManager._clientPendingAdditiveSceneLoadingList.Contains("Assets/Mirror/Tests/Runtime/testScene.unity"))
             {
                 additiveSceneWasFound = true;
             }

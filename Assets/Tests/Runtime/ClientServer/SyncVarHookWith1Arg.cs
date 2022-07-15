@@ -71,7 +71,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             var sub = Substitute.For<Action<int>>();
             clientComponent.onChangedCalled += sub;
-            serverComponent.lastSyncTime = 0; // make sure syncs quick
+            serverComponent._lastSyncTime = 0; // make sure syncs quick
             serverComponent.var = value;
             yield return null;
             yield return null;
@@ -89,7 +89,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             var sub = Substitute.For<Action<int>>();
             clientComponent.OnChange += sub;
-            serverComponent.lastSyncTime = 0; // make sure syncs quick
+            serverComponent._lastSyncTime = 0; // make sure syncs quick
             serverComponent.var = value;
             yield return null;
             yield return null;
@@ -107,7 +107,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             var sub = Substitute.For<Action<int>>();
             clientComponent.onChangedCalled += sub;
-            serverComponent.lastSyncTime = 0; // make sure syncs quick
+            serverComponent._lastSyncTime = 0; // make sure syncs quick
             serverComponent.var = value;
             yield return null;
             yield return null;
@@ -125,7 +125,7 @@ namespace Mirage.Tests.Runtime.ClientServer
 
             var sub = Substitute.For<Action<int>>();
             clientComponent.onChangedCalled += sub;
-            serverComponent.lastSyncTime = 0; // make sure syncs quick
+            serverComponent._lastSyncTime = 0; // make sure syncs quick
             serverComponent.var = value;
             yield return null;
             yield return null;

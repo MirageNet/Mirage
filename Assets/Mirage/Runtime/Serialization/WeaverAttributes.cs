@@ -92,7 +92,7 @@ namespace Mirage.Serialization
         public Vector3PackAttribute(float xMax, float yMax, float zMax, float xPrecision, float yPrecision, float zPrecision) { }
         public Vector3PackAttribute(float xMax, float yMax, float zMax, float precision) { }
 
-        public Vector3PackAttribute(float xMax, float yMax, float zMax, int xBitCount, int yBitCount, int ZBitCount) { }
+        public Vector3PackAttribute(float xMax, float yMax, float zMax, int xBitCount, int yBitCount, int zBitCount) { }
         public Vector3PackAttribute(float xMax, float yMax, float zMax, int bitCount) { }
     }
 
@@ -164,6 +164,7 @@ namespace Mirage.Serialization
     /// </example>
     public static class FromBitCount
     {
+#pragma warning disable IDE1006 // Naming Styles
         public const ulong b1 = (1ul << 1) - 1;
         public const ulong b2 = (1ul << 2) - 1;
         public const ulong b3 = (1ul << 3) - 1;
@@ -228,5 +229,6 @@ namespace Mirage.Serialization
         public const ulong b62 = (1ul << 62) - 1;
         public const ulong b63 = (1ul << 63) - 1;
         public const ulong b64 = ulong.MaxValue;
+#pragma warning restore IDE1006 // Naming Styles
     }
 }

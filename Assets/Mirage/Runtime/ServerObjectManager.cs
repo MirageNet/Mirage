@@ -49,9 +49,9 @@ namespace Mirage
         public NetworkSceneManager NetworkSceneManager;
 
         public INetIdGenerator NetIdGenerator;
-        private uint nextNetworkId = 1;
+        private uint _nextNetworkId = 1;
 
-        private uint GetNextNetworkId() => NetIdGenerator?.GenerateNetId() ?? checked(nextNetworkId++);
+        private uint GetNextNetworkId() => NetIdGenerator?.GenerateNetId() ?? checked(_nextNetworkId++);
 
         public void Start()
         {
@@ -92,7 +92,7 @@ namespace Mirage
 
             Server.World.ClearSpawnedObjects();
             // reset so ids stay small in each session
-            nextNetworkId = 1;
+            _nextNetworkId = 1;
         }
 
         private void OnFinishedSceneChange(Scene scene, SceneOperation sceneOperation)
@@ -134,9 +134,9 @@ namespace Mirage
 
         private void StartedHost()
         {
-            if (TryGetComponent(out ClientObjectManager ClientObjectManager))
+            if (TryGetComponent(out ClientObjectManager clientObjectManager))
             {
-                ClientObjectManager._serverObjectManager = this;
+                clientObjectManager._serverObjectManager = this;
             }
         }
 

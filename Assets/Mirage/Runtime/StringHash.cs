@@ -16,7 +16,7 @@ namespace Mirage
             {
                 var hash = EmptyString;
                 foreach (var c in text)
-                    hash = hash * 31 + c;
+                    hash = (hash * 31) + c;
                 return hash;
             }
         }
