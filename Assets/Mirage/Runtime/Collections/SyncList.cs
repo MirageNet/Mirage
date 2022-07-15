@@ -331,16 +331,22 @@ namespace Mirage.Collections
         public int IndexOf(T item)
         {
             for (var i = 0; i < _objects.Count; ++i)
+            {
                 if (_comparer.Equals(item, _objects[i]))
                     return i;
+            }
+
             return -1;
         }
 
         public int FindIndex(Predicate<T> match)
         {
             for (var i = 0; i < _objects.Count; ++i)
+            {
                 if (match(_objects[i]))
                     return i;
+            }
+
             return -1;
         }
 
@@ -354,8 +360,11 @@ namespace Mirage.Collections
         {
             var results = new List<T>();
             for (var i = 0; i < _objects.Count; ++i)
+            {
                 if (match(_objects[i]))
                     results.Add(_objects[i]);
+            }
+
             return results;
         }
 
@@ -398,8 +407,10 @@ namespace Mirage.Collections
         {
             var toRemove = new List<T>();
             for (var i = 0; i < _objects.Count; ++i)
+            {
                 if (match(_objects[i]))
                     toRemove.Add(_objects[i]);
+            }
 
             foreach (var entry in toRemove)
             {

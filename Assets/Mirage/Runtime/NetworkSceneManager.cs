@@ -380,12 +380,16 @@ namespace Mirage
         private void ServerSceneUnLoading(Scene scene, IEnumerable<INetworkPlayer> players)
         {
             if (!scene.IsValid())
+            {
                 throw new ArgumentNullException(nameof(scene),
                     "[NetworkSceneManager] - ServerChangeScene: " + nameof(scene) + " cannot be null");
+            }
 
             if (players == null || !players.Any())
+            {
                 throw new ArgumentNullException(nameof(players),
                     "[NetworkSceneManager] - list of player's cannot be null or no players.");
+            }
 
             if (logger.LogEnabled()) logger.Log("[NetworkSceneManager] - ServerChangeScene " + scene.name);
 
@@ -580,8 +584,10 @@ namespace Mirage
             if (Server && Server.Active)
             {
                 if (logger.LogEnabled())
+                {
                     logger.Log("[NetworkSceneManager] - Host: " + sceneOperation + " operation for scene: " +
                                scene.path);
+                }
 
                 // call OnServerSceneChanged
                 OnServerFinishedSceneLoad(scene, sceneOperation);
@@ -602,8 +608,10 @@ namespace Mirage
             if (Client && Client.Active)
             {
                 if (logger.LogEnabled())
+                {
                     logger.Log("[NetworkSceneManager] - Client: " + sceneOperation + " operation for scene: " +
                                scene.path);
+                }
 
                 OnClientSceneLoadFinished(scene, sceneOperation);
             }
