@@ -66,10 +66,10 @@ namespace Mirage.Serialization
             // this works because value types cannot be derived
             // if it is a reference type (for example IMessageBase),
             // ask the message for the real type
-            Type mstType = default(T) == null && message != null ? message.GetType() : typeof(T);
+            Type type = default(T) == null && message != null ? message.GetType() : typeof(T);
 
-            int msgType = GetId(mstType);
-            writer.WriteUInt16((ushort)msgType);
+            int id = GetId(type);
+            writer.WriteUInt16((ushort)id);
 
             writer.Write(message);
         }
@@ -107,15 +107,27 @@ namespace Mirage.Serialization
         {
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(data, objectLocator))
             {
-                int msgType = GetId<T>();
-
-                int id = networkReader.ReadUInt16();
-                if (id != msgType)
-                    throw new FormatException("Invalid message,  could not unpack " + typeof(T).FullName);
+                ValidateId<T>(networkReader);
 
                 return networkReader.Read<T>();
             }
         }
+
+        /// <summary>
+        /// Check that id of type is the same as message header
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="networkReader"></param>
+        /// <exception cref="FormatException"></exception>
+        private static void ValidateId<T>(PooledNetworkReader networkReader)
+        {
+            int typeId = GetId<T>();
+
+            int id = networkReader.ReadUInt16();
+            if (id != typeId)
+                throw new FormatException("Invalid message,  could not unpack " + typeof(T).FullName);
+        }
+
         // unpack message after receiving
         // -> pass NetworkReader so it's less strange if we create it in here
         //    and pass it upwards.
