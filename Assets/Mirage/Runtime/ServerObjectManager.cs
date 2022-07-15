@@ -704,7 +704,9 @@ namespace Mirage
         {
             if (identity.gameObject.hideFlags == HideFlags.NotEditable ||
                 identity.gameObject.hideFlags == HideFlags.HideAndDontSave)
+            {
                 return false;
+            }
 
 #if UNITY_EDITOR
             if (UnityEditor.EditorUtility.IsPersistent(identity.gameObject))
