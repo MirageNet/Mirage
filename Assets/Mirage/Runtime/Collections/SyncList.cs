@@ -256,7 +256,6 @@ namespace Mirage.Collections
                 _objects.Add(newItem);
                 OnInsert?.Invoke(_objects.Count - 1, newItem);
             }
-
         }
 
         private void DeserializeClear(bool apply)

@@ -719,7 +719,6 @@ namespace Mirage
                     OnDeserialize(components[index], reader, initialState);
                 }
             }
-
         }
 
         internal void SetServerValues(NetworkServer networkServer, ServerObjectManager serverObjectManager)

@@ -66,6 +66,5 @@ namespace Mirage.Serialization
             // convert directly from buffer to string via encoding
             return encoding.GetString(data.Array, data.Offset, data.Count);
         }
-
     }
 }

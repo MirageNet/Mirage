@@ -4,5 +4,4 @@
     {
         public static readonly string Current = typeof(NetworkIdentity).Assembly.GetName().Version.ToString();
     }
-
 }
