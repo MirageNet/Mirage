@@ -37,19 +37,19 @@ namespace Mirage.SocketLayer
     /// </summary>
     public sealed class Peer : IPeer
     {
-        readonly ILogger logger;
-        readonly Metrics metrics;
-        readonly ISocket socket;
-        readonly IDataHandler dataHandler;
-        readonly Config config;
-        readonly int maxPacketSize;
-        readonly Time time;
+        private readonly ILogger logger;
+        private readonly Metrics metrics;
+        private readonly ISocket socket;
+        private readonly IDataHandler dataHandler;
+        private readonly Config config;
+        private readonly int maxPacketSize;
+        private readonly Time time;
+        private readonly ConnectKeyValidator connectKeyValidator;
+        private readonly Pool<ByteBuffer> bufferPool;
+        private readonly Dictionary<IEndPoint, Connection> connections = new Dictionary<IEndPoint, Connection>();
 
-        readonly ConnectKeyValidator connectKeyValidator;
-        readonly Pool<ByteBuffer> bufferPool;
-        readonly Dictionary<IEndPoint, Connection> connections = new Dictionary<IEndPoint, Connection>();
         // list so that remove can take place after foreach loops
-        readonly List<Connection> connectionsToRemove = new List<Connection>();
+        private readonly List<Connection> connectionsToRemove = new List<Connection>();
 
         public event Action<IConnection> OnConnected;
         public event Action<IConnection, DisconnectReason> OnDisconnected;
@@ -58,7 +58,7 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// is server listening on or connected to endpoint
         /// </summary>
-        bool active;
+        private bool active;
 
         public Peer(ISocket socket, int maxPacketSize, IDataHandler dataHandler, Config config = null, ILogger logger = null, Metrics metrics = null)
         {
@@ -466,8 +466,7 @@ namespace Mirage.SocketLayer
             SendCommandUnconnected(endPoint, Commands.ConnectionRejected, (byte)reason);
         }
 
-
-        void HandleConnectionAccepted(Connection connection)
+        private void HandleConnectionAccepted(Connection connection)
         {
             switch (connection.State)
             {
@@ -485,7 +484,8 @@ namespace Mirage.SocketLayer
                     break;
             }
         }
-        void HandleConnectionRejected(Connection connection, Packet packet)
+
+        private void HandleConnectionRejected(Connection connection, Packet packet)
         {
             switch (connection.State)
             {
@@ -537,13 +537,13 @@ namespace Mirage.SocketLayer
             connectionsToRemove.Add(connection);
         }
 
-        void HandleConnectionDisconnect(Connection connection, Packet packet)
+        private void HandleConnectionDisconnect(Connection connection, Packet packet)
         {
             var reason = (DisconnectReason)packet.buffer.array[2];
             connection.Disconnect(reason, false);
         }
 
-        void UpdateConnections()
+        private void UpdateConnections()
         {
             foreach (Connection connection in connections.Values)
             {
@@ -557,7 +557,7 @@ namespace Mirage.SocketLayer
             RemoveConnections();
         }
 
-        void RemoveConnections()
+        private void RemoveConnections()
         {
             if (connectionsToRemove.Count == 0)
                 return;

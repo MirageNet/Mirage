@@ -48,7 +48,7 @@ namespace Mirage.Tests.Runtime.Generated.ZigZagAttributeTests.long_10
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        const long value = 14;
+        private const long value = 14;
 
         [Test]
         public void SyncVarIsBitPacked()

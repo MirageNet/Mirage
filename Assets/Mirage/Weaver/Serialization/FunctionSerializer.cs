@@ -8,8 +8,8 @@ namespace Mirage.Weaver.Serialization
     {
         public override bool IsIntType => false;
 
-        readonly MethodReference writeFunction;
-        readonly MethodReference readFunction;
+        private readonly MethodReference writeFunction;
+        private readonly MethodReference readFunction;
 
         public FunctionSerializer(MethodReference writeFunction, MethodReference readFunction)
         {

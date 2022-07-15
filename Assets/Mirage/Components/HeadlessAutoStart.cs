@@ -16,7 +16,7 @@ namespace Mirage
         [Tooltip("Should the server auto-start when the game is started in a headless build?")]
         public bool startOnHeadless = true;
 
-        void Start()
+        private void Start()
         {
             // headless mode? then start the server
             // can't do this in Awake because Awake is for initialization.

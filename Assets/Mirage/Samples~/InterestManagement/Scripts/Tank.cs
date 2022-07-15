@@ -24,7 +24,7 @@ namespace Mirage.Examples.InterestManagement
             playerName = "PLAYER" + Random.Range(1, 99);
         }
 
-        void Update()
+        private void Update()
         {
             if (Camera.main)
             {

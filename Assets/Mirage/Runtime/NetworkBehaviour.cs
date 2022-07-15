@@ -26,7 +26,7 @@ namespace Mirage
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Guides/GameObjects/NetworkBehaviour.html")]
     public abstract class NetworkBehaviour : MonoBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviour));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviour));
 
         internal float lastSyncTime;
 
@@ -122,7 +122,8 @@ namespace Mirage
         public NetworkTime NetworkTime => World.Time;
 
         protected internal ulong SyncVarDirtyBits { get; private set; }
-        ulong syncVarHookGuard;
+
+        private ulong syncVarHookGuard;
 
         protected internal bool GetSyncVarHookGuard(ulong dirtyBit)
         {
@@ -145,7 +146,7 @@ namespace Mirage
         /// <summary>
         /// NetworkIdentity component caching for easier access
         /// </summary>
-        NetworkIdentity _identity;
+        private NetworkIdentity _identity;
 
 
         // TODO: remove this bit once Unity drops support for 2019 LTS
@@ -296,7 +297,7 @@ namespace Mirage
             }
         }
 
-        bool AnySyncObjectDirty()
+        private bool AnySyncObjectDirty()
         {
             // note: don't use Linq here. 1200 networked objects:
             //   Linq: 187KB GC/frame;, 2.66ms time

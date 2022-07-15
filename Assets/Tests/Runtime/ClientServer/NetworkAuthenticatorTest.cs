@@ -7,14 +7,12 @@ namespace Mirage.Tests.Runtime.ClientServer
     [TestFixture]
     public class NetworkAuthenticatorTest : ClientServerSetup<MockComponent>
     {
-        NetworkAuthenticator serverAuthenticator;
-        NetworkAuthenticator clientAuthenticator;
+        private NetworkAuthenticator serverAuthenticator;
+        private NetworkAuthenticator clientAuthenticator;
+        private Action<INetworkPlayer> serverMockMethod;
+        private Action<INetworkPlayer> clientMockMethod;
 
-        Action<INetworkPlayer> serverMockMethod;
-        Action<INetworkPlayer> clientMockMethod;
-
-
-        class NetworkAuthenticationImpl : NetworkAuthenticator
+        private class NetworkAuthenticationImpl : NetworkAuthenticator
         {
             public override void ClientAuthenticate(INetworkPlayer player) => ClientAccept(player);
             public override void ServerAuthenticate(INetworkPlayer player) => ServerAccept(player);

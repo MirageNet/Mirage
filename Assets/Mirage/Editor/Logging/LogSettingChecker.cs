@@ -9,8 +9,8 @@ namespace Mirage.EditorScripts.Logging
     /// </summary>
     public class LogSettingChecker
     {
-        readonly LogSettingsSO settings;
-        readonly HashSet<string> duplicateChecker = new HashSet<string>();
+        private readonly LogSettingsSO settings;
+        private readonly HashSet<string> duplicateChecker = new HashSet<string>();
 
         public LogSettingChecker(LogSettingsSO settings)
         {
@@ -24,7 +24,7 @@ namespace Mirage.EditorScripts.Logging
             AddNewFromFactory();
         }
 
-        void RemoveDuplicates()
+        private void RemoveDuplicates()
         {
             for (int i = 0; i < settings.LogLevels.Count; i++)
             {
@@ -38,7 +38,7 @@ namespace Mirage.EditorScripts.Logging
             }
         }
 
-        void AddNewFromFactory()
+        private void AddNewFromFactory()
         {
             // try add new types
             foreach (KeyValuePair<string, ILogger> logger in LogFactory.Loggers)

@@ -54,7 +54,8 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.short_6
             public int expectedBits;
             public override string ToString() => value.ToString();
         }
-        static TestCase[] cases = new TestCase[] 
+
+        private static TestCase[] cases = new TestCase[] 
         {
             new TestCase { value = (short)10, expectedBits = 7 },
             new TestCase { value = (short)100, expectedBits = 14 },

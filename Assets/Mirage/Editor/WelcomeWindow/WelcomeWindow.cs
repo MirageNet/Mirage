@@ -25,7 +25,7 @@ namespace Mirage
     [InitializeOnLoad]
     public class WelcomeWindow : EditorWindow
     {
-        static readonly ILogger logger = LogFactory.GetLogger<WelcomeWindow>();
+        private static readonly ILogger logger = LogFactory.GetLogger<WelcomeWindow>();
 
         private Button lastClickedTab;
 

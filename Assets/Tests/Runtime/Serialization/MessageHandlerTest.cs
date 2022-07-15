@@ -92,7 +92,7 @@ namespace Mirage.Tests.Runtime
             , LogType.Log, $"Unexpected message ID {id} received from {player}. May be due to no existing RegisterHandler for this message.");
         }
 
-        void ExpectLog(Action action, LogType type, string log)
+        private void ExpectLog(Action action, LogType type, string log)
         {
             ILogger logger = LogFactory.GetLogger(typeof(MessageHandler));
             ILogHandler existing = logger.logHandler;

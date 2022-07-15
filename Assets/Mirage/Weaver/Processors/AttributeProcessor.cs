@@ -10,16 +10,14 @@ namespace Mirage.Weaver
     /// Injects server/client active checks for [Server/Client] attributes
     /// </para>
     /// </summary>
-    class AttributeProcessor
+    internal class AttributeProcessor
     {
         private readonly IWeaverLogger logger;
-
-        readonly MethodReference IsServer;
-        readonly MethodReference IsClient;
-        readonly MethodReference HasAuthority;
-        readonly MethodReference IsLocalPlayer;
-
-        bool modified = false;
+        private readonly MethodReference IsServer;
+        private readonly MethodReference IsClient;
+        private readonly MethodReference HasAuthority;
+        private readonly MethodReference IsLocalPlayer;
+        private bool modified = false;
 
         public AttributeProcessor(ModuleDefinition module, IWeaverLogger logger)
         {
@@ -42,7 +40,7 @@ namespace Mirage.Weaver
             return modified;
         }
 
-        void ProcessType(FoundType foundType)
+        private void ProcessType(FoundType foundType)
         {
             foreach (MethodDefinition md in foundType.TypeDefinition.Methods)
             {
@@ -63,7 +61,7 @@ namespace Mirage.Weaver
         /// </summary>
         /// <param name="fd"></param>
         /// <param name="foundType"></param>
-        void ProcessFields(FieldDefinition fd, FoundType foundType)
+        private void ProcessFields(FieldDefinition fd, FoundType foundType)
         {
             if (fd.HasCustomAttribute<SyncVarAttribute>())
                 logger.Error($"SyncVar {fd.Name} must be inside a NetworkBehaviour. {foundType.TypeDefinition.Name} is not a NetworkBehaviour", fd);
@@ -75,7 +73,7 @@ namespace Mirage.Weaver
             }
         }
 
-        void ProcessMethod(MethodDefinition md, FoundType foundType)
+        private void ProcessMethod(MethodDefinition md, FoundType foundType)
         {
             if (IgnoreMethod(md))
                 return;
@@ -88,13 +86,13 @@ namespace Mirage.Weaver
         /// </summary>
         /// <param name="md"></param>
         /// <returns></returns>
-        static bool IgnoreMethod(MethodDefinition md)
+        private static bool IgnoreMethod(MethodDefinition md)
         {
             return md.Name == ".cctor" ||
                 md.Name == NetworkBehaviourProcessor.ProcessedFunctionName;
         }
 
-        void ProcessMethodAttributes(MethodDefinition md, FoundType foundType)
+        private void ProcessMethodAttributes(MethodDefinition md, FoundType foundType)
         {
             InjectGuard<ServerAttribute>(md, foundType, IsServer, "[Server] function '{0}' called when server not active");
             InjectGuard<ClientAttribute>(md, foundType, IsClient, "[Client] function '{0}' called when client not active");
@@ -104,7 +102,7 @@ namespace Mirage.Weaver
             CheckAttribute<ClientRpcAttribute>(md, foundType);
         }
 
-        void CheckAttribute<TAttribute>(MethodDefinition md, FoundType foundType)
+        private void CheckAttribute<TAttribute>(MethodDefinition md, FoundType foundType)
         {
             CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
@@ -116,7 +114,7 @@ namespace Mirage.Weaver
             }
         }
 
-        void InjectGuard<TAttribute>(MethodDefinition md, FoundType foundType, MethodReference predicate, string format)
+        private void InjectGuard<TAttribute>(MethodDefinition md, FoundType foundType, MethodReference predicate, string format)
         {
             CustomAttribute attribute = md.GetCustomAttribute<TAttribute>();
             if (attribute == null)
@@ -163,7 +161,7 @@ namespace Mirage.Weaver
         }
 
         // this is required to early-out from a function with "ref" or "out" parameters
-        static void InjectGuardParameters(MethodDefinition md, ILProcessor worker, Instruction top)
+        private static void InjectGuardParameters(MethodDefinition md, ILProcessor worker, Instruction top)
         {
             int offset = md.Resolve().IsStatic ? 0 : 1;
             for (int index = 0; index < md.Parameters.Count; index++)
@@ -185,7 +183,7 @@ namespace Mirage.Weaver
         }
 
         // this is required to early-out from a function with a return value.
-        static void InjectGuardReturnValue(MethodDefinition md, ILProcessor worker, Instruction top)
+        private static void InjectGuardReturnValue(MethodDefinition md, ILProcessor worker, Instruction top)
         {
             if (!md.ReturnType.Is(typeof(void)))
             {

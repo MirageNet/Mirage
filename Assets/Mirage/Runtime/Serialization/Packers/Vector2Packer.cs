@@ -28,8 +28,8 @@ namespace Mirage.Serialization
 {
     public sealed class Vector2Packer
     {
-        readonly FloatPacker xPacker;
-        readonly FloatPacker yPacker;
+        private readonly FloatPacker xPacker;
+        private readonly FloatPacker yPacker;
 
         public Vector2Packer(float xMax, float yMax, int xBitCount, int yBitCount)
         {

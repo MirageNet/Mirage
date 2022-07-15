@@ -15,9 +15,8 @@ namespace Mirage
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkMatchChecker.html")]
     public class NetworkMatchChecker : NetworkVisibility
     {
-        static readonly Dictionary<Guid, HashSet<NetworkIdentity>> matchPlayers = new Dictionary<Guid, HashSet<NetworkIdentity>>();
-
-        Guid currentMatch = Guid.Empty;
+        private static readonly Dictionary<Guid, HashSet<NetworkIdentity>> matchPlayers = new Dictionary<Guid, HashSet<NetworkIdentity>>();
+        private Guid currentMatch = Guid.Empty;
 
         [Header("Diagnostics")]
         [SyncVar]
@@ -88,7 +87,7 @@ namespace Mirage
             // identity.RebuildObservers is called right after this from NetworkServer.SpawnObject
         }
 
-        void RebuildMatchObservers(Guid specificMatch)
+        private void RebuildMatchObservers(Guid specificMatch)
         {
             foreach (NetworkIdentity networkIdentity in matchPlayers[specificMatch])
                 if (networkIdentity != null)

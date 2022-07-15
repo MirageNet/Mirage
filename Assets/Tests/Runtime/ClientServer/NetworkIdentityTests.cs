@@ -128,8 +128,8 @@ namespace Mirage.Tests.Runtime.ClientServer
 
     public class NetworkIdentityAuthorityTests : ClientServerSetup<MockComponent>
     {
-        NetworkIdentity serverIdentity2;
-        NetworkIdentity clientIdentity2;
+        private NetworkIdentity serverIdentity2;
+        private NetworkIdentity clientIdentity2;
 
         public override async UniTask LateSetup()
         {

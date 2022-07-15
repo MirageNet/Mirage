@@ -20,7 +20,7 @@ namespace Mirage
     [DisallowMultipleComponent]
     public class NetworkServer : MonoBehaviour, INetworkServer
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
 
         public bool EnablePeerMetrics;
         [Tooltip("Sequence size of buffer in bits.\n10 => array size 1024 => ~17 seconds at 60hz")]
@@ -50,14 +50,13 @@ namespace Mirage
 
         [Tooltip("Creates Socket for Peer to use")]
         public SocketFactory SocketFactory;
-
-        Peer peer;
+        private Peer peer;
 
         [Tooltip("Authentication component attached to this object")]
         public NetworkAuthenticator authenticator;
 
         [Header("Events")]
-        [SerializeField] AddLateEvent _started = new AddLateEvent();
+        [SerializeField] private AddLateEvent _started = new AddLateEvent();
         /// <summary>
         /// This is invoked when a server is started - including when a host is started.
         /// </summary>
@@ -67,37 +66,37 @@ namespace Mirage
         /// Event fires once a new Client has connect to the Server.
         /// </summary>
         [FormerlySerializedAs("Connected")]
-        [FoldoutEvent, SerializeField] NetworkPlayerEvent _connected = new NetworkPlayerEvent();
+        [FoldoutEvent, SerializeField] private NetworkPlayerEvent _connected = new NetworkPlayerEvent();
         public NetworkPlayerEvent Connected => _connected;
 
         /// <summary>
         /// Event fires once a new Client has passed Authentication to the Server.
         /// </summary>
         [FormerlySerializedAs("Authenticated")]
-        [FoldoutEvent, SerializeField] NetworkPlayerEvent _authenticated = new NetworkPlayerEvent();
+        [FoldoutEvent, SerializeField] private NetworkPlayerEvent _authenticated = new NetworkPlayerEvent();
         public NetworkPlayerEvent Authenticated => _authenticated;
 
         /// <summary>
         /// Event fires once a Client has Disconnected from the Server.
         /// </summary>
         [FormerlySerializedAs("Disconnected")]
-        [FoldoutEvent, SerializeField] NetworkPlayerEvent _disconnected = new NetworkPlayerEvent();
+        [FoldoutEvent, SerializeField] private NetworkPlayerEvent _disconnected = new NetworkPlayerEvent();
         public NetworkPlayerEvent Disconnected => _disconnected;
 
-        [SerializeField] AddLateEvent _stopped = new AddLateEvent();
+        [SerializeField] private AddLateEvent _stopped = new AddLateEvent();
         public IAddLateEvent Stopped => _stopped;
 
         /// <summary>
         /// This is invoked when a host is started.
         /// <para>StartHost has multiple signatures, but they all cause this hook to be called.</para>
         /// </summary>
-        [SerializeField] AddLateEvent _onStartHost = new AddLateEvent();
+        [SerializeField] private AddLateEvent _onStartHost = new AddLateEvent();
         public IAddLateEvent OnStartHost => _onStartHost;
 
         /// <summary>
         /// This is called when a host is stopped.
         /// </summary>
-        [SerializeField] AddLateEvent _onStopHost = new AddLateEvent();
+        [SerializeField] private AddLateEvent _onStopHost = new AddLateEvent();
         public IAddLateEvent OnStopHost => _onStopHost;
 
         /// <summary>
@@ -129,7 +128,7 @@ namespace Mirage
         /// </summary>
         public IReadOnlyCollection<INetworkPlayer> Players => connections.Values;
 
-        readonly Dictionary<IConnection, INetworkPlayer> connections = new Dictionary<IConnection, INetworkPlayer>();
+        private readonly Dictionary<IConnection, INetworkPlayer> connections = new Dictionary<IConnection, INetworkPlayer>();
 
         /// <summary>
         /// <para>Checks if the server has been started.</para>
@@ -263,12 +262,12 @@ namespace Mirage
             StartServer();
         }
 
-        void ThrowIfActive()
+        private void ThrowIfActive()
         {
             if (Active) throw new InvalidOperationException("Server is already active");
         }
 
-        void ThrowIfSocketIsMissing()
+        private void ThrowIfSocketIsMissing()
         {
             if (SocketFactory is null)
                 SocketFactory = GetComponent<SocketFactory>();
@@ -276,7 +275,7 @@ namespace Mirage
                 throw new InvalidOperationException($"{nameof(SocketFactory)} could not be found for {nameof(NetworkServer)}");
         }
 
-        void InitializeAuthEvents()
+        private void InitializeAuthEvents()
         {
             if (authenticator != null)
             {
@@ -509,7 +508,7 @@ namespace Mirage
         }
 
         //called once a client disconnects from the server
-        void OnDisconnected(INetworkPlayer player)
+        private void OnDisconnected(INetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log("Server disconnect client:" + player);
 
@@ -538,10 +537,10 @@ namespace Mirage
         /// <summary>
         /// This class will later be removed when we have a better implementation for IDataHandler
         /// </summary>
-        class DataHandler : IDataHandler
+        private class DataHandler : IDataHandler
         {
-            readonly IMessageReceiver messageHandler;
-            readonly Dictionary<IConnection, INetworkPlayer> players;
+            private readonly IMessageReceiver messageHandler;
+            private readonly Dictionary<IConnection, INetworkPlayer> players;
 
             public DataHandler(IMessageReceiver messageHandler, Dictionary<IConnection, INetworkPlayer> connections)
             {

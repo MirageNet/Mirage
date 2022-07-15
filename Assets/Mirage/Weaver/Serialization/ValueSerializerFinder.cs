@@ -123,11 +123,11 @@ namespace Mirage.Weaver.Serialization
             return valueSerializer;
         }
 
-        static bool HasIntAttribute(ValueSerializer valueSerializer) => valueSerializer != null && valueSerializer.IsIntType;
+        private static bool HasIntAttribute(ValueSerializer valueSerializer) => valueSerializer != null && valueSerializer.IsIntType;
 
 
         /// <exception cref="SerializeFunctionException">Throws when can not generate read or write function</exception>
-        static ValueSerializer FindSerializeFunctions(Writers writers, Readers readers, TypeReference fieldType)
+        private static ValueSerializer FindSerializeFunctions(Writers writers, Readers readers, TypeReference fieldType)
         {
             // writers or readers might be null here, this is allowed because user of ValueSerializer might only be doing writing, or only doing reading
             MethodReference writeFunction = writers?.GetFunction_Thorws(fieldType);

@@ -17,7 +17,7 @@ namespace Mirage
     [System.Obsolete("This checker is inefficient, use SimpleSceneChecker instead")]
     public class NetworkSceneChecker : NetworkVisibility
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkSceneChecker));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkSceneChecker));
 
         /// <summary>
         /// Flag to force this object to be hidden from all observers.
@@ -27,11 +27,10 @@ namespace Mirage
         public bool forceHidden;
 
         // Use Scene instead of string scene.name because when additively loading multiples of a subscene the name won't be unique
-        static readonly Dictionary<Scene, HashSet<NetworkIdentity>> sceneCheckerObjects = new Dictionary<Scene, HashSet<NetworkIdentity>>();
+        private static readonly Dictionary<Scene, HashSet<NetworkIdentity>> sceneCheckerObjects = new Dictionary<Scene, HashSet<NetworkIdentity>>();
+        private Scene currentScene;
 
-        Scene currentScene;
-
-        void Awake()
+        private void Awake()
         {
             Identity.OnStartServer.AddListener(OnStartServer);
         }
@@ -48,7 +47,7 @@ namespace Mirage
         }
 
         [Server(error = false)]
-        void Update()
+        private void Update()
         {
             if (currentScene == gameObject.scene)
                 return;
@@ -76,7 +75,7 @@ namespace Mirage
             RebuildSceneObservers();
         }
 
-        void RebuildSceneObservers()
+        private void RebuildSceneObservers()
         {
             foreach (NetworkIdentity networkIdentity in sceneCheckerObjects[currentScene])
                 if (networkIdentity != null)

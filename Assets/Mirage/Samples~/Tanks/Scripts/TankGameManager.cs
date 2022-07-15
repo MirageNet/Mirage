@@ -22,7 +22,7 @@ namespace Mirage.Examples.Tanks
         public List<Tank> players = new List<Tank>();
         public NetworkManager NetworkManager;
 
-        void Update()
+        private void Update()
         {
             if (NetworkManager.IsNetworkActive)
             {
@@ -51,7 +51,7 @@ namespace Mirage.Examples.Tanks
             }
         }
 
-        void ShowReadyMenu()
+        private void ShowReadyMenu()
         {
             if (NetworkManager.Client.Active)
             {
@@ -63,7 +63,7 @@ namespace Mirage.Examples.Tanks
             }
         }
 
-        void GameReadyCheck()
+        private void GameReadyCheck()
         {
             if (!IsGameReady)
             {
@@ -84,7 +84,7 @@ namespace Mirage.Examples.Tanks
             }
         }
 
-        void CheckPlayersNotInList()
+        private void CheckPlayersNotInList()
         {
             NetworkWorld world = NetworkManager.Server.Active ? NetworkManager.Server.World : NetworkManager.Client.World;
             foreach (NetworkIdentity identity in world.SpawnedIdentities)
@@ -98,7 +98,7 @@ namespace Mirage.Examples.Tanks
             }
         }
 
-        bool GetAllReadyState()
+        private bool GetAllReadyState()
         {
             if (!LocalPlayer || !LocalPlayer.isReady) return false;
 
@@ -113,7 +113,7 @@ namespace Mirage.Examples.Tanks
             return AllReady;
         }
 
-        void GameOverCheck()
+        private void GameOverCheck()
         {
             if (!IsGameReady)
                 return;
@@ -130,7 +130,7 @@ namespace Mirage.Examples.Tanks
             }
         }
 
-        int GetAlivePlayerCount()
+        private int GetAlivePlayerCount()
         {
             int alivePlayerCount = 0;
             foreach (Tank tank in players)
@@ -146,7 +146,7 @@ namespace Mirage.Examples.Tanks
             return alivePlayerCount;
         }
 
-        void FindLocalTank()
+        private void FindLocalTank()
         {
             INetworkPlayer player = NetworkManager.Client.Player;
 
@@ -157,7 +157,7 @@ namespace Mirage.Examples.Tanks
             LocalPlayer = player.Identity.GetComponent<Tank>();
         }
 
-        void UpdateStats()
+        private void UpdateStats()
         {
             HealthText.text = LocalPlayer.health.ToString();
             ScoreText.text = LocalPlayer.score.ToString();
@@ -169,7 +169,7 @@ namespace Mirage.Examples.Tanks
         }
 
         //All players are ready and game has started. Allow players to move.
-        void AllowTankMovement()
+        private void AllowTankMovement()
         {
             foreach (Tank tank in players)
             {
@@ -178,7 +178,7 @@ namespace Mirage.Examples.Tanks
         }
 
         //Game is over. Prevent movement
-        void DisallowTankMovement()
+        private void DisallowTankMovement()
         {
             foreach (Tank tank in players)
             {

@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Mirage.Tests.Runtime
 {
-    class TestObjectBehaviour : NetworkBehaviour
+    internal class TestObjectBehaviour : NetworkBehaviour
     {
         // note synclists must be a property of a NetworkBehavior so that
         // the weaver generates the reader and writer for the object

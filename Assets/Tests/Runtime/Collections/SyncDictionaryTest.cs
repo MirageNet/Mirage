@@ -13,8 +13,8 @@ namespace Mirage.Tests.Runtime
         {
         }
 
-        SyncDictionaryIntString serverSyncDictionary;
-        SyncDictionaryIntString clientSyncDictionary;
+        private SyncDictionaryIntString serverSyncDictionary;
+        private SyncDictionaryIntString clientSyncDictionary;
 
         [SetUp]
         public void SetUp()

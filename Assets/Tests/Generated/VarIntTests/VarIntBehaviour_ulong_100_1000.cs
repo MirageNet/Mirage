@@ -54,7 +54,8 @@ namespace Mirage.Tests.Runtime.Generated.VarIntTests.ulong_100_1000
             public int expectedBits;
             public override string ToString() => value.ToString();
         }
-        static TestCase[] cases = new TestCase[] 
+
+        private static TestCase[] cases = new TestCase[] 
         {
             new TestCase { value = 10UL, expectedBits = 8 },
             new TestCase { value = 100UL, expectedBits = 8 },

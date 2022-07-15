@@ -54,7 +54,8 @@ namespace Mirage.Tests.Runtime.Generated.VarIntBlocksTests.%%NAME%%
             public int expectedBits;
             public override string ToString() => value.ToString();
         }
-        static TestCase[] cases = new TestCase[] 
+
+        private static TestCase[] cases = new TestCase[] 
         {
             %%TEST_CASES%%
         };

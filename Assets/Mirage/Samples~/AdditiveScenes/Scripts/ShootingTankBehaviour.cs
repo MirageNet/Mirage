@@ -9,11 +9,10 @@ namespace Mirage.Examples.Additive
     {
         [SyncVar]
         public Quaternion rotation;
-
-        NetworkAnimator networkAnimator;
+        private NetworkAnimator networkAnimator;
 
         [Server(error = false)]
-        void Start()
+        private void Start()
         {
             networkAnimator = GetComponent<NetworkAnimator>();
         }
@@ -21,7 +20,7 @@ namespace Mirage.Examples.Additive
         [Range(0, 1)]
         public float turnSpeed = 0.1f;
 
-        void Update()
+        private void Update()
         {
             if (IsServer && Identity.observers.Count > 0)
                 ShootNearestPlayer();
@@ -31,7 +30,7 @@ namespace Mirage.Examples.Additive
         }
 
         [Server]
-        void ShootNearestPlayer()
+        private void ShootNearestPlayer()
         {
             GameObject target = null;
             float distance = 100f;

@@ -11,8 +11,8 @@ namespace Mirage.Tests.Runtime.Serialization.StructMessages
     [TestFixture]
     public class StructMessagesTests
     {
-        readonly NetworkWriter writer = new NetworkWriter(1300);
-        readonly NetworkReader reader = new NetworkReader();
+        private readonly NetworkWriter writer = new NetworkWriter(1300);
+        private readonly NetworkReader reader = new NetworkReader();
 
         [TearDown]
         public void TearDown()

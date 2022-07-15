@@ -14,7 +14,7 @@ namespace Mirage.Authenticators
     [AddComponentMenu("Network/Authenticators/BasicAuthenticator")]
     public class BasicAuthenticator : NetworkAuthenticator
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(BasicAuthenticator));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(BasicAuthenticator));
 
         /// <summary>
         /// Code given to clients so that they can connect to the server/host
@@ -38,13 +38,13 @@ namespace Mirage.Authenticators
         /// </summary>
 
         [NetworkMessage]
-        struct AuthRequestMessage
+        private struct AuthRequestMessage
         {
             public string serverCode;
         }
 
         [NetworkMessage]
-        struct AuthResponseMessage
+        private struct AuthResponseMessage
         {
             public bool success;
             public string message;
@@ -66,8 +66,7 @@ namespace Mirage.Authenticators
             // wait for AuthRequestMessage from client
         }
 
-
-        void OnAuthRequestMessage(INetworkPlayer player, AuthRequestMessage msg)
+        private void OnAuthRequestMessage(INetworkPlayer player, AuthRequestMessage msg)
         {
             if (logger.LogEnabled()) logger.LogFormat(LogType.Log, "Authentication Request: {0} {1}", msg.serverCode);
 
@@ -101,7 +100,7 @@ namespace Mirage.Authenticators
             }
         }
 
-        IEnumerator DelayedDisconnect(INetworkPlayer player, float waitTime)
+        private IEnumerator DelayedDisconnect(INetworkPlayer player, float waitTime)
         {
             yield return new WaitForSeconds(waitTime);
             player.Disconnect();
@@ -129,7 +128,7 @@ namespace Mirage.Authenticators
             });
         }
 
-        void OnAuthResponseMessage(INetworkPlayer player, AuthResponseMessage msg)
+        private void OnAuthResponseMessage(INetworkPlayer player, AuthResponseMessage msg)
         {
             if (msg.success)
             {

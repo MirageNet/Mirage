@@ -7,7 +7,7 @@ namespace Mirage.Weaver
 {
     public class SyncObjectProcessor
     {
-        readonly List<FieldDefinition> syncObjects = new List<FieldDefinition>();
+        private readonly List<FieldDefinition> syncObjects = new List<FieldDefinition>();
 
         private readonly Readers readers;
         private readonly Writers writers;
@@ -63,7 +63,7 @@ namespace Mirage.Weaver
         /// </summary>
         /// <param name="td">The synclist class</param>
         /// <param name="mirrorBaseType">the base SyncObject td inherits from</param>
-        void GenerateReadersAndWriters(TypeReference tr)
+        private void GenerateReadersAndWriters(TypeReference tr)
         {
             if (tr is GenericInstanceType genericInstance)
             {
@@ -83,7 +83,7 @@ namespace Mirage.Weaver
             }
         }
 
-        void RegisterSyncObjects(TypeDefinition netBehaviourSubclass)
+        private void RegisterSyncObjects(TypeDefinition netBehaviourSubclass)
         {
             Weaver.DebugLog(netBehaviourSubclass, "  GenerateConstants ");
 
@@ -120,7 +120,7 @@ namespace Mirage.Weaver
             // generates code like:
             this.InitSyncObject(m_sizes);
         */
-        static void GenerateSyncObjectRegistration(ILProcessor worker, FieldDefinition fd)
+        private static void GenerateSyncObjectRegistration(ILProcessor worker, FieldDefinition fd)
         {
             worker.Append(worker.Create(OpCodes.Ldarg_0));
             worker.Append(worker.Create(OpCodes.Ldarg_0));

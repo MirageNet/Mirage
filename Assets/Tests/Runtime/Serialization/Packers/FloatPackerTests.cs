@@ -17,11 +17,11 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
     [TestFixture(100_000, 30, false)]
     public class FloatPackerTests : PackerTestBase
     {
-        readonly FloatPacker packer;
-        readonly float max;
-        readonly float min;
-        readonly float precsion;
-        readonly bool signed;
+        private readonly FloatPacker packer;
+        private readonly float max;
+        private readonly float min;
+        private readonly float precsion;
+        private readonly bool signed;
 
         public FloatPackerTests(float max, float precsion, bool signed)
         {
@@ -32,8 +32,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             packer = new FloatPacker(max, precsion, signed);
         }
 
-
-        float GetRandomFloat()
+        private float GetRandomFloat()
         {
             return Random.Range(min, max);
         }

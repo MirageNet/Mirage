@@ -16,7 +16,7 @@ namespace Mirage.Logging
 
 #if UNITY_EDITOR
         // called when component is added to GameObject
-        void Reset()
+        private void Reset()
         {
             if (settings != null) { return; }
 
@@ -29,17 +29,17 @@ namespace Mirage.Logging
         }
 #endif
 
-        void Awake()
+        private void Awake()
         {
             RefreshDictionary();
         }
 
-        void OnValidate()
+        private void OnValidate()
         {
             RefreshDictionary();
         }
 
-        void RefreshDictionary()
+        private void RefreshDictionary()
         {
             if (settings != null)
             {

@@ -45,18 +45,19 @@ namespace Mirage.Collections
             OP_REMOVE
         }
 
-        struct Change
+        private struct Change
         {
             internal Operation operation;
             internal T item;
         }
 
-        readonly List<Change> changes = new List<Change>();
+        private readonly List<Change> changes = new List<Change>();
+
         // how many changes we need to ignore
         // this is needed because when we initialize the list,
         // we might later receive changes that have already been applied
         // so we need to skip them
-        int changesAhead;
+        private int changesAhead;
 
         public SyncSet(ISet<T> objects)
         {
@@ -77,9 +78,9 @@ namespace Mirage.Collections
         // this should be called after a successfull sync
         public void Flush() => changes.Clear();
 
-        void AddOperation(Operation op) => AddOperation(op, default);
+        private void AddOperation(Operation op) => AddOperation(op, default);
 
-        void AddOperation(Operation op, T item)
+        private void AddOperation(Operation op, T item)
         {
             if (IsReadOnly)
             {
@@ -309,7 +310,7 @@ namespace Mirage.Collections
             }
         }
 
-        void IntersectWithSet(ISet<T> otherSet)
+        private void IntersectWithSet(ISet<T> otherSet)
         {
             var elements = new List<T>(objects);
 

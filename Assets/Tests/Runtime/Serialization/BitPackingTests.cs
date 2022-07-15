@@ -173,8 +173,8 @@ namespace Mirage.Tests.Runtime.Serialization
 
     public static class ULongRandom
     {
-        static Random rand;
-        static byte[] bytes;
+        private static Random rand;
+        private static byte[] bytes;
 
         public static unsafe ulong Next()
         {

@@ -20,7 +20,7 @@ namespace Mirage.SocketLayer
         public event Action Delivered;
         public event Action Lost;
 
-        bool notified;
+        private bool notified;
 
 
         public void OnDelivered()

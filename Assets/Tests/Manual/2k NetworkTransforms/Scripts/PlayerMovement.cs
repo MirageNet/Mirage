@@ -6,7 +6,7 @@ namespace Mirage.Examples.OneK
     {
         public float speed = 5;
 
-        void Update()
+        private void Update()
         {
             if (!IsLocalPlayer) return;
 

@@ -13,8 +13,8 @@ namespace Mirage.DisplayMetrics
 
         public Rect offset = new Rect(10, 10, 400, 800);
         public Color background;
-        GUIStyle style;
-        Texture2D tex;
+        private GUIStyle style;
+        private Texture2D tex;
 
 
         private void Start()
@@ -51,7 +51,8 @@ namespace Mirage.DisplayMetrics
                 DrawAverage();
             }
         }
-        void DrawAverage()
+
+        private void DrawAverage()
         {
             double connectionCount = 0;
 

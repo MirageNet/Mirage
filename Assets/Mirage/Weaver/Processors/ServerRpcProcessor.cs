@@ -47,7 +47,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute serverRpcAttr, int rpcIndex, ValueSerializer[] paramSerializers)
+        private MethodDefinition GenerateStub(MethodDefinition md, CustomAttribute serverRpcAttr, int rpcIndex, ValueSerializer[] paramSerializers)
         {
             MethodDefinition cmd = SubstituteMethod(md);
 
@@ -114,7 +114,7 @@ namespace Mirage.Weaver
             });
         }
 
-        MethodReference GetSendMethod(MethodDefinition md, ILProcessor worker)
+        private MethodReference GetSendMethod(MethodDefinition md, ILProcessor worker)
         {
             if (md.ReturnType.Is(typeof(void)))
             {
@@ -156,7 +156,7 @@ namespace Mirage.Weaver
         /// }
         /// </code>
         /// </remarks>
-        MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, ValueSerializer[] paramSerializers)
+        private MethodDefinition GenerateSkeleton(MethodDefinition method, MethodDefinition userCodeFunc, ValueSerializer[] paramSerializers)
         {
             string newName = SkeletonMethodName(method);
             MethodDefinition cmd = method.DeclaringType.AddMethod(newName,

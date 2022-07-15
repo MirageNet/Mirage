@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
 {
     #region No OnSerialize/OnDeserialize override
-    abstract class AbstractBehaviour : NetworkBehaviour
+    internal abstract class AbstractBehaviour : NetworkBehaviour
     {
         public readonly SyncList<bool> syncListInAbstract = new SyncList<bool>();
 
@@ -16,7 +16,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         public int SyncFieldInAbstract;
     }
 
-    class BehaviourWithSyncVar : NetworkBehaviour
+    internal class BehaviourWithSyncVar : NetworkBehaviour
     {
         public readonly SyncList<bool> syncList = new SyncList<bool>();
 
@@ -24,12 +24,12 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         public int SyncField;
     }
 
-    class OverrideBehaviourFromSyncVar : AbstractBehaviour
+    internal class OverrideBehaviourFromSyncVar : AbstractBehaviour
     {
 
     }
 
-    class OverrideBehaviourWithSyncVarFromSyncVar : AbstractBehaviour
+    internal class OverrideBehaviourWithSyncVarFromSyncVar : AbstractBehaviour
     {
         public readonly SyncList<bool> syncListInOverride = new SyncList<bool>();
 
@@ -37,12 +37,12 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         public int SyncFieldInOverride;
     }
 
-
-    class MiddleClass : AbstractBehaviour
+    internal class MiddleClass : AbstractBehaviour
     {
         // class with no sync var
     }
-    class SubClass : MiddleClass
+
+    internal class SubClass : MiddleClass
     {
         // class with sync var
         // this is to make sure that override works correctly if base class doesnt have sync vars
@@ -50,14 +50,14 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         public Vector3 anotherSyncField;
     }
 
-
-    class MiddleClassWithSyncVar : AbstractBehaviour
+    internal class MiddleClassWithSyncVar : AbstractBehaviour
     {
         // class with sync var
         [SyncVar]
         public string syncFieldInMiddle;
     }
-    class SubClassFromSyncVar : MiddleClassWithSyncVar
+
+    internal class SubClassFromSyncVar : MiddleClassWithSyncVar
     {
         // class with sync var
         // this is to make sure that override works correctly if base class doesnt have sync vars
@@ -69,7 +69,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
     #region OnSerialize/OnDeserialize override
 
 
-    class BehaviourWithSyncVarWithOnSerialize : NetworkBehaviour
+    internal class BehaviourWithSyncVarWithOnSerialize : NetworkBehaviour
     {
         public readonly SyncList<bool> syncList = new SyncList<bool>();
 
@@ -90,7 +90,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         }
     }
 
-    class OverrideBehaviourFromSyncVarWithOnSerialize : AbstractBehaviour
+    internal class OverrideBehaviourFromSyncVarWithOnSerialize : AbstractBehaviour
     {
         public float customSerializeField;
 
@@ -106,7 +106,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
         }
     }
 
-    class OverrideBehaviourWithSyncVarFromSyncVarWithOnSerialize : AbstractBehaviour
+    internal class OverrideBehaviourWithSyncVarFromSyncVarWithOnSerialize : AbstractBehaviour
     {
         public readonly SyncList<bool> syncListInOverride = new SyncList<bool>();
 
@@ -130,7 +130,7 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
 
     public class NetworkBehaviourSerializeTest
     {
-        readonly List<GameObject> createdObjects = new List<GameObject>();
+        private readonly List<GameObject> createdObjects = new List<GameObject>();
         [TearDown]
         public void TearDown()
         {
@@ -142,14 +142,15 @@ namespace Mirage.Tests.Runtime.Serialization.NetworkBehaviourSerialize
             createdObjects.Clear();
         }
 
-        T CreateBehaviour<T>() where T : NetworkBehaviour
+        private T CreateBehaviour<T>() where T : NetworkBehaviour
         {
             var go1 = new GameObject();
             go1.AddComponent<NetworkIdentity>();
             createdObjects.Add(go1);
             return go1.AddComponent<T>();
         }
-        static void SyncNetworkBehaviour(NetworkBehaviour source, NetworkBehaviour target, bool initialState)
+
+        private static void SyncNetworkBehaviour(NetworkBehaviour source, NetworkBehaviour target, bool initialState)
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {

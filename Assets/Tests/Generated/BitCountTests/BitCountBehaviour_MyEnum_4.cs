@@ -56,7 +56,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests.MyEnum_4
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        const MyEnum value = (MyEnum)3;
+        private const MyEnum value = (MyEnum)3;
 
         [Test]
         public void SyncVarIsBitPacked()

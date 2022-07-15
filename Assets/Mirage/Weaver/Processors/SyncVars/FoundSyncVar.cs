@@ -101,13 +101,13 @@ namespace Mirage.Weaver.SyncVars
                 throw new HookMethodException("'invokeHookOnServer' is set to true but no hook was implemented. Please implement hook or set 'invokeHookOnServer' back to false or remove for default false.", FieldDefinition);
         }
 
-        static bool GetInitialOnly(FieldDefinition fieldDefinition)
+        private static bool GetInitialOnly(FieldDefinition fieldDefinition)
         {
             CustomAttribute attr = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
             return attr.GetField(nameof(SyncVarAttribute.initialOnly), false);
         }
 
-        static bool GetFireOnServer(FieldDefinition fieldDefinition)
+        private static bool GetFireOnServer(FieldDefinition fieldDefinition)
         {
             CustomAttribute attr = fieldDefinition.GetCustomAttribute<SyncVarAttribute>();
             return attr.GetField(nameof(SyncVarAttribute.invokeHookOnServer), false);

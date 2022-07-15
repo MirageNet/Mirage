@@ -13,7 +13,7 @@ namespace Mirage
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkProximityChecker.html")]
     public class NetworkProximityChecker : NetworkVisibility
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkProximityChecker));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkProximityChecker));
 
         /// <summary>
         /// The maximim range that objects will be visible at.
@@ -47,7 +47,7 @@ namespace Mirage
             });
         }
 
-        void RebuildObservers()
+        private void RebuildObservers()
         {
             Identity.RebuildObservers(false);
         }

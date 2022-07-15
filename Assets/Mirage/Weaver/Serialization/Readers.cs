@@ -55,7 +55,7 @@ namespace Mirage.Weaver
             return readMethod.definition;
         }
 
-        struct ReadMethod
+        private struct ReadMethod
         {
             public readonly MethodDefinition definition;
             public readonly ParameterDefinition readParameter;
@@ -150,7 +150,7 @@ namespace Mirage.Weaver
         }
 
         // Initialize the local variable with a new instance
-        void CreateNew(VariableDefinition variable, ILProcessor worker, TypeDefinition td)
+        private void CreateNew(VariableDefinition variable, ILProcessor worker, TypeDefinition td)
         {
             TypeReference type = variable.VariableType;
             if (type.IsValueType)
@@ -183,7 +183,7 @@ namespace Mirage.Weaver
             }
         }
 
-        void ReadAllFields(TypeReference type, ReadMethod readMethod)
+        private void ReadAllFields(TypeReference type, ReadMethod readMethod)
         {
             ILProcessor worker = readMethod.worker;
             // create copy here because we might add static packer field

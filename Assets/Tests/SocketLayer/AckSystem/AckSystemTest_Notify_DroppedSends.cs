@@ -10,20 +10,20 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     [Category("SocketLayer")]
     public class AckSystemTest_Notify_DroppedSends : AckSystemTestBase
     {
-        const int messageCount = 5;
+        private const int messageCount = 5;
         private ushort maxSequence;
-        AckTestInstance instance1;
-        AckTestInstance instance2;
+        private AckTestInstance instance1;
+        private AckTestInstance instance2;
 
         // what message get received each instance
-        bool[] received1 = new bool[messageCount] {
+        private bool[] received1 = new bool[messageCount] {
             true,
             false,
             false,
             true,
             true,
         };
-        bool[] received2 = new bool[messageCount] {
+        private bool[] received2 = new bool[messageCount] {
             false,
             true,
             true,

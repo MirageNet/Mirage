@@ -117,7 +117,7 @@ namespace Mirage.Tests.Weaver
         /// </summary>
         /// <param name="addedString"></param>
         /// <param name="methodName"></param>
-        void CheckAddedCode(Expression<Func<NetworkBehaviour, bool>> pred, string className, string methodName)
+        private void CheckAddedCode(Expression<Func<NetworkBehaviour, bool>> pred, string className, string methodName)
         {
             TypeDefinition type = assembly.MainModule.GetType(className);
             MethodDefinition method = type.Methods.First(m => m.Name == methodName);

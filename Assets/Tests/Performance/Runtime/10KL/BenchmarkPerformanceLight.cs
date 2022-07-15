@@ -16,7 +16,7 @@ namespace Mirage.Tests.Performance.Runtime
     [Category("Benchmark")]
     public class BenchmarkPerformanceLight
     {
-        const string ScenePath = "Assets/Tests/Performance/Runtime/10KL/Scenes/Scene.unity";
+        private const string ScenePath = "Assets/Tests/Performance/Runtime/10KL/Scenes/Scene.unity";
 
         private NetworkManager benchmarker;
 

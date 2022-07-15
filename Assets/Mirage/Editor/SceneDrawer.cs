@@ -7,7 +7,7 @@ namespace Mirage
     [CustomPropertyDrawer(typeof(SceneAttribute))]
     public class SceneDrawer : PropertyDrawer
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(SceneDrawer));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(SceneDrawer));
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

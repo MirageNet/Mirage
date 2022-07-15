@@ -11,8 +11,8 @@ namespace Mirage.Tests.Runtime
     {
         public class SyncSetString : SyncHashSet<string> { }
 
-        SyncSetString serverSyncSet;
-        SyncSetString clientSyncSet;
+        private SyncSetString serverSyncSet;
+        private SyncSetString clientSyncSet;
 
         [SetUp]
         public void SetUp()

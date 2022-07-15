@@ -13,7 +13,7 @@ namespace Mirage.Tests
         private NetworkWorld world;
         private Action<NetworkIdentity> spawnListener;
         private Action<NetworkIdentity> unspawnListener;
-        HashSet<uint> existingIds;
+        private HashSet<uint> existingIds;
 
         [SetUp]
         public void SetUp()
@@ -26,7 +26,7 @@ namespace Mirage.Tests
             existingIds = new HashSet<uint>();
         }
 
-        void AddValidIdentity(out uint id, out NetworkIdentity identity)
+        private void AddValidIdentity(out uint id, out NetworkIdentity identity)
         {
             id = getValidId();
 

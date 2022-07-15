@@ -9,7 +9,7 @@ namespace Mirage
 {
     public class NetworkScenePostProcess : MonoBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkScenePostProcess));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkScenePostProcess));
 
         [PostProcessScene]
         public static void OnPostProcessScene()
@@ -62,7 +62,7 @@ namespace Mirage
             }
         }
 
-        static void PrepareSceneObject(NetworkIdentity identity)
+        private static void PrepareSceneObject(NetworkIdentity identity)
         {
             // set scene hash
             NetworkIdentityIdGenerator.SetSceneHash(identity);

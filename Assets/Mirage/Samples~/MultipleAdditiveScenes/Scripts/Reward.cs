@@ -6,20 +6,20 @@ namespace Mirage.Examples.MultipleAdditiveScenes
     [RequireComponent(typeof(RandomColor))]
     public class Reward : NetworkBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(Reward));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(Reward));
 
         public bool available = true;
         public Spawner spawner;
         public RandomColor randomColor;
 
-        void OnValidate()
+        private void OnValidate()
         {
             if (randomColor == null)
                 randomColor = GetComponent<RandomColor>();
         }
 
         [Server(error = false)]
-        void OnTriggerEnter(Collider other)
+        private void OnTriggerEnter(Collider other)
         {
             if (other.gameObject.CompareTag("Player"))
             {

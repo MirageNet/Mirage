@@ -21,7 +21,7 @@ namespace Mirage
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkAnimator.html")]
     public class NetworkAnimator : NetworkBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkAnimator));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkAnimator));
 
         [Header("Authority")]
         [FormerlySerializedAs("clientAuthority")]
@@ -38,18 +38,18 @@ namespace Mirage
         public Animator Animator;
 
         // Note: not an object[] array because otherwise initialization is real annoying
-        int[] lastIntParameters;
-        float[] lastFloatParameters;
-        bool[] lastBoolParameters;
-        AnimatorControllerParameter[] parameters;
+        private int[] lastIntParameters;
+        private float[] lastFloatParameters;
+        private bool[] lastBoolParameters;
+        private AnimatorControllerParameter[] parameters;
 
         // multiple layers
-        int[] animationHash;
-        int[] transitionHash;
-        float[] layerWeight;
-        float nextSendTime;
+        private int[] animationHash;
+        private int[] transitionHash;
+        private float[] layerWeight;
+        private float nextSendTime;
 
-        bool SendMessagesAllowed
+        private bool SendMessagesAllowed
         {
             get
             {
@@ -71,7 +71,7 @@ namespace Mirage
             }
         }
 
-        void Awake()
+        private void Awake()
         {
             // store the animator parameters in a variable - the "Animator.parameters" getter allocates
             // a new parameter array every time it is accessed so we should avoid doing it in a loop
@@ -87,7 +87,7 @@ namespace Mirage
             layerWeight = new float[Animator.layerCount];
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             if (!SendMessagesAllowed)
                 return;
@@ -112,7 +112,7 @@ namespace Mirage
             }
         }
 
-        bool CheckAnimStateChanged(out int stateHash, out float normalizedTime, int layerId)
+        private bool CheckAnimStateChanged(out int stateHash, out float normalizedTime, int layerId)
         {
             bool change = false;
             stateHash = 0;
@@ -155,7 +155,7 @@ namespace Mirage
             return change;
         }
 
-        void CheckSendRate()
+        private void CheckSendRate()
         {
             float now = Time.time;
             if (SendMessagesAllowed && syncInterval >= 0 && now > nextSendTime)
@@ -170,7 +170,7 @@ namespace Mirage
             }
         }
 
-        void SendAnimationMessage(int stateHash, float normalizedTime, int layerId, float weight, ArraySegment<byte> parameters)
+        private void SendAnimationMessage(int stateHash, float normalizedTime, int layerId, float weight, ArraySegment<byte> parameters)
         {
             if (IsServer)
             {
@@ -182,7 +182,7 @@ namespace Mirage
             }
         }
 
-        void SendAnimationParametersMessage(ArraySegment<byte> parameters)
+        private void SendAnimationParametersMessage(ArraySegment<byte> parameters)
         {
             if (IsServer)
             {
@@ -194,7 +194,7 @@ namespace Mirage
             }
         }
 
-        void HandleAnimMsg(int stateHash, float normalizedTime, int layerId, float weight, NetworkReader reader)
+        private void HandleAnimMsg(int stateHash, float normalizedTime, int layerId, float weight, NetworkReader reader)
         {
             if (HasAuthority && ClientAuthority)
                 return;
@@ -212,7 +212,7 @@ namespace Mirage
             ReadParameters(reader);
         }
 
-        void HandleAnimParamsMsg(NetworkReader reader)
+        private void HandleAnimParamsMsg(NetworkReader reader)
         {
             if (HasAuthority && ClientAuthority)
                 return;
@@ -220,19 +220,19 @@ namespace Mirage
             ReadParameters(reader);
         }
 
-        void HandleAnimTriggerMsg(int hash)
+        private void HandleAnimTriggerMsg(int hash)
         {
             if (Animator.enabled)
                 Animator.SetTrigger(hash);
         }
 
-        void HandleAnimResetTriggerMsg(int hash)
+        private void HandleAnimResetTriggerMsg(int hash)
         {
             if (Animator.enabled)
                 Animator.ResetTrigger(hash);
         }
 
-        ulong NextDirtyBits()
+        private ulong NextDirtyBits()
         {
             ulong dirtyBits = 0;
             for (int i = 0; i < parameters.Length; i++)
@@ -275,7 +275,7 @@ namespace Mirage
             return dirtyBits;
         }
 
-        bool WriteParameters(NetworkWriter writer, bool forceAll = false)
+        private bool WriteParameters(NetworkWriter writer, bool forceAll = false)
         {
             ulong dirtyBits = forceAll ? (~0ul) : NextDirtyBits();
             writer.WritePackedUInt64(dirtyBits);
@@ -304,7 +304,7 @@ namespace Mirage
             return dirtyBits != 0;
         }
 
-        void ReadParameters(NetworkReader reader)
+        private void ReadParameters(NetworkReader reader)
         {
             // need to read values from NetworkReader even if animator is disabled
 
@@ -513,7 +513,7 @@ namespace Mirage
         #region server message handlers
 
         [ServerRpc]
-        void CmdOnAnimationServerMessage(int stateHash, float normalizedTime, int layerId, float weight, ArraySegment<byte> parameters)
+        private void CmdOnAnimationServerMessage(int stateHash, float normalizedTime, int layerId, float weight, ArraySegment<byte> parameters)
         {
             // Ignore messages from client if not in client authority mode
             if (!ClientAuthority)
@@ -530,7 +530,7 @@ namespace Mirage
         }
 
         [ServerRpc]
-        void CmdOnAnimationParametersServerMessage(ArraySegment<byte> parameters)
+        private void CmdOnAnimationParametersServerMessage(ArraySegment<byte> parameters)
         {
             // Ignore messages from client if not in client authority mode
             if (!ClientAuthority)
@@ -545,7 +545,7 @@ namespace Mirage
         }
 
         [ServerRpc]
-        void CmdOnAnimationTriggerServerMessage(int hash)
+        private void CmdOnAnimationTriggerServerMessage(int hash)
         {
             // Ignore messages from client if not in client authority mode
             if (!ClientAuthority)
@@ -563,7 +563,7 @@ namespace Mirage
         }
 
         [ServerRpc]
-        void CmdOnAnimationResetTriggerServerMessage(int hash)
+        private void CmdOnAnimationResetTriggerServerMessage(int hash)
         {
             // Ignore messages from client if not in client authority mode
             if (!ClientAuthority)
@@ -585,21 +585,21 @@ namespace Mirage
         #region client message handlers
 
         [ClientRpc]
-        void RpcOnAnimationClientMessage(int stateHash, float normalizedTime, int layerId, float weight, ArraySegment<byte> parameters)
+        private void RpcOnAnimationClientMessage(int stateHash, float normalizedTime, int layerId, float weight, ArraySegment<byte> parameters)
         {
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters, null))
                 HandleAnimMsg(stateHash, normalizedTime, layerId, weight, networkReader);
         }
 
         [ClientRpc]
-        void RpcOnAnimationParametersClientMessage(ArraySegment<byte> parameters)
+        private void RpcOnAnimationParametersClientMessage(ArraySegment<byte> parameters)
         {
             using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(parameters, null))
                 HandleAnimParamsMsg(networkReader);
         }
 
         [ClientRpc]
-        void RpcOnAnimationTriggerClientMessage(int hash)
+        private void RpcOnAnimationTriggerClientMessage(int hash)
         {
             // host/owner handles this before it is sent
             if (IsServer || (ClientAuthority && HasAuthority)) return;
@@ -608,7 +608,7 @@ namespace Mirage
         }
 
         [ClientRpc]
-        void RpcOnAnimationResetTriggerClientMessage(int hash)
+        private void RpcOnAnimationResetTriggerClientMessage(int hash)
         {
             // host/owner handles this before it is sent
             if (IsServer || (ClientAuthority && HasAuthority)) return;

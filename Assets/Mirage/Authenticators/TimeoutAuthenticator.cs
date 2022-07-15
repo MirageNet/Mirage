@@ -13,7 +13,7 @@ namespace Mirage.Authenticators
     [AddComponentMenu("Network/Authenticators/TimeoutAuthenticator")]
     public class TimeoutAuthenticator : NetworkAuthenticator
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(TimeoutAuthenticator));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(TimeoutAuthenticator));
 
         public NetworkAuthenticator Authenticator;
 
@@ -67,7 +67,7 @@ namespace Mirage.Authenticators
             Authenticator.ClientSetup(client);
         }
 
-        IEnumerator BeginAuthentication(INetworkPlayer player, Action<INetworkPlayer> reject)
+        private IEnumerator BeginAuthentication(INetworkPlayer player, Action<INetworkPlayer> reject)
         {
             if (logger.LogEnabled()) logger.Log($"Authentication countdown started {player} {Timeout}");
 

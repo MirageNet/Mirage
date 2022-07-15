@@ -14,13 +14,13 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
         /// <summary>
         /// Bytes given to ack system
         /// </summary>
-        byte[] message;
+        private byte[] message;
+
         /// <summary>
         /// Bytes out of ack system
         /// </summary>
-        byte[] packet;
-
-        ushort maxSequence;
+        private byte[] packet;
+        private ushort maxSequence;
 
         [SetUp]
         public void SetUp()

@@ -8,8 +8,8 @@ namespace Mirage.Weaver.Serialization
     {
         public override bool IsIntType => true;
 
-        readonly int blockSize;
-        readonly OpCode? typeConverter;
+        private readonly int blockSize;
+        private readonly OpCode? typeConverter;
 
         public BlockSizeSerializer(int blockSize, OpCode? typeConverter)
         {

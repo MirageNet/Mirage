@@ -8,8 +8,8 @@ namespace Mirage.Sockets.Udp
 {
     public class UdpSocket : ISocket
     {
-        Socket socket;
-        EndPointWrapper Endpoint;
+        private Socket socket;
+        private EndPointWrapper Endpoint;
 
         public void Bind(IEndPoint endPoint)
         {
@@ -20,7 +20,7 @@ namespace Mirage.Sockets.Udp
             socket.Bind(Endpoint.inner);
         }
 
-        static Socket CreateSocket(EndPoint endPoint)
+        private static Socket CreateSocket(EndPoint endPoint)
         {
             var ipEndPoint = (IPEndPoint)endPoint;
             var newSocket = new Socket(ipEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp)

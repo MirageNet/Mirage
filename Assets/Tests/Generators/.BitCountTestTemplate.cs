@@ -48,7 +48,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountAttributeTests.%%TYPE%%_%%BIT_C
 
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        const %%TYPE%% value = %%EXTRA_VALUE%%;
+        private const %%TYPE%% value = %%EXTRA_VALUE%%;
 
         [Test]
         public void SyncVarIsBitPacked()

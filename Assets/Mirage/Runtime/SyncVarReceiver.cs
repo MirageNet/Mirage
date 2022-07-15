@@ -9,7 +9,7 @@ namespace Mirage
     /// </summary>
     public class SyncVarReceiver
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(SyncVarReceiver));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(SyncVarReceiver));
 
         private readonly IObjectLocator objectLocator;
 
@@ -39,7 +39,7 @@ namespace Mirage
             }
         }
 
-        void OnUpdateVarsMessage(UpdateVarsMessage msg)
+        private void OnUpdateVarsMessage(UpdateVarsMessage msg)
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnUpdateVarsMessage " + msg.netId);
 

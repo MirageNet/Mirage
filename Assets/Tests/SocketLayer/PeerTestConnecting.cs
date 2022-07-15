@@ -10,9 +10,9 @@ namespace Mirage.SocketLayer.Tests.PeerTests
     [Category("SocketLayer"), Description("tests using multiple instances of peer to check they can connect to each other")]
     public class PeerTestConnecting
     {
-        const int ClientCount = 4;
-        PeerInstanceWithSocket server;
-        PeerInstanceWithSocket[] clients;
+        private const int ClientCount = 4;
+        private PeerInstanceWithSocket server;
+        private PeerInstanceWithSocket[] clients;
 
         [SetUp]
         public void SetUp()

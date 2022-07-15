@@ -18,9 +18,9 @@ namespace Mirage.Tests.Performance
     [Category("Benchmark")]
     public class NetworkIdentityPerformance
     {
-        GameObject gameObject;
-        NetworkIdentity identity;
-        Health health;
+        private GameObject gameObject;
+        private NetworkIdentity identity;
+        private Health health;
 
 
         [SetUp]
@@ -50,7 +50,7 @@ namespace Mirage.Tests.Performance
                 .Run();
         }
 
-        void RunServerUpdateIsDirty()
+        private void RunServerUpdateIsDirty()
         {
             for (int j = 0; j < 1000; j++)
             {
@@ -69,7 +69,7 @@ namespace Mirage.Tests.Performance
                 .Run();
         }
 
-        void RunServerUpdateNotDirty()
+        private void RunServerUpdateNotDirty()
         {
             for (int j = 0; j < 1000; j++)
             {

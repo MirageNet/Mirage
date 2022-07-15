@@ -32,8 +32,7 @@ namespace Mirage.Examples.Tanks
         public bool IsDead => health <= 0;
         public TextMesh nameText;
 
-
-        void Update()
+        private void Update()
         {
             if (Camera.main)
             {
@@ -73,7 +72,7 @@ namespace Mirage.Examples.Tanks
 
         // this is called on the server
         [ServerRpc]
-        void CmdFire()
+        private void CmdFire()
         {
             GameObject projectile = Instantiate(projectilePrefab, projectileMount.position, transform.rotation);
             projectile.GetComponent<Projectile>().source = gameObject;
@@ -83,7 +82,7 @@ namespace Mirage.Examples.Tanks
 
         // this is called on the tank that fired for all observers
         [ClientRpc]
-        void RpcOnFire()
+        private void RpcOnFire()
         {
             animator.SetTrigger("Shoot");
         }
@@ -97,7 +96,7 @@ namespace Mirage.Examples.Tanks
         }
 
         [ServerRpc]
-        void CmdReady(string playername)
+        private void CmdReady(string playername)
         {
             if (string.IsNullOrEmpty(playername))
             {

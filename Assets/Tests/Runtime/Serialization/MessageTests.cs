@@ -173,8 +173,9 @@ namespace Mirage.Tests.Runtime.Serialization
         }
 
         [NetworkMessage]
-        struct NestedMessageWithAttr { }
-        struct NestedMessageWithoutAttr { }
+        private struct NestedMessageWithAttr { }
+
+        private struct NestedMessageWithoutAttr { }
 
         [Test]
         public void CreatesWriterForUnusedMessageWithAttribute()

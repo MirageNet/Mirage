@@ -11,11 +11,12 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
 {
     public class QuaternionPackerTests : PackerTestBase
     {
-        static Quaternion GetRandomQuaternion()
+        private static Quaternion GetRandomQuaternion()
         {
             return Random.rotationUniform.normalized;
         }
-        static Quaternion GetRandomQuaternionNotNormalized()
+
+        private static Quaternion GetRandomQuaternionNotNormalized()
         {
             return new Quaternion(
                 Random.Range(-1, 1),
@@ -36,8 +37,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             Assert.That(unpack, Is.EqualTo(Quaternion.identity));
         }
 
-
-        static IEnumerable ReturnsCorrectIndexCases()
+        private static IEnumerable ReturnsCorrectIndexCases()
         {
             var values = new List<float>() { 0.1f, 0.2f, 0.3f, 0.4f };
             // abcd are index
@@ -78,8 +78,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
             return index;
         }
 
-
-        static IEnumerable CompressesAndDecompressesCases()
+        private static IEnumerable CompressesAndDecompressesCases()
         {
             for (int i = 8; i < 12; i++)
             {
@@ -191,7 +190,7 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
         /// <param name="inValue"></param>
         /// <param name="outValue"></param>
         /// <returns></returns>
-        static float getAssertSign(Quaternion inValue, Quaternion outValue)
+        private static float getAssertSign(Quaternion inValue, Quaternion outValue)
         {
             // keep same index for in/out because largest *might* have chagned if all elements are equal
             QuaternionPacker.FindLargestIndex(ref inValue, out uint index);

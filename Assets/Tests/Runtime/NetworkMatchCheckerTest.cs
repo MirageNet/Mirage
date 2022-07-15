@@ -57,14 +57,14 @@ namespace Mirage.Tests.Runtime
             matchPlayers = g;
         }
 
-        static Dictionary<Guid, HashSet<NetworkIdentity>> GetMatchPlayersDictionary()
+        private static Dictionary<Guid, HashSet<NetworkIdentity>> GetMatchPlayersDictionary()
         {
             Type type = typeof(NetworkMatchChecker);
             FieldInfo fieldInfo = type.GetField("matchPlayers", BindingFlags.Static | BindingFlags.NonPublic);
             return (Dictionary<Guid, HashSet<NetworkIdentity>>)fieldInfo.GetValue(null);
         }
 
-        static NetworkPlayer CreatePlayer(GameObject character)
+        private static NetworkPlayer CreatePlayer(GameObject character)
         {
             var player = new NetworkPlayer(Substitute.For<SocketLayer.IConnection>())
             {
@@ -87,7 +87,7 @@ namespace Mirage.Tests.Runtime
             matchPlayers = null;
         }
 
-        static void SetMatchId(NetworkMatchChecker target, Guid guid)
+        private static void SetMatchId(NetworkMatchChecker target, Guid guid)
         {
             // set using reflection so bypass property
             FieldInfo field = typeof(NetworkMatchChecker).GetField("currentMatch", BindingFlags.Instance | BindingFlags.NonPublic);

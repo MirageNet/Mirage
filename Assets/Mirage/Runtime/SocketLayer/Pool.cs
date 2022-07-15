@@ -10,19 +10,17 @@ namespace Mirage.SocketLayer
     /// </summary>
     public class Pool<T> where T : class
     {
-        const int PoolEmpty = -1;
-
-        int maxPoolSize;
-        readonly int bufferSize;
-        readonly ILogger logger;
+        private const int PoolEmpty = -1;
+        private int maxPoolSize;
+        private readonly int bufferSize;
+        private readonly ILogger logger;
         public delegate T CreateNewItem(int bufferSize, Pool<T> pool);
-        readonly CreateNewItem createNew;
 
-        T[] pool;
-        int next = -1;
-        int created = 0;
-
-        OverMaxLog overMaxLog = new OverMaxLog();
+        private readonly CreateNewItem createNew;
+        private T[] pool;
+        private int next = -1;
+        private int created = 0;
+        private OverMaxLog overMaxLog = new OverMaxLog();
 
         /// <summary>
         /// sets max pool size and then creates writers up to new start size
@@ -109,18 +107,18 @@ namespace Mirage.SocketLayer
             }
         }
 
-        struct OverMaxLog
+        private struct OverMaxLog
         {
             // 10 seconds log interval
-            const float LogInterval = 10;
+            private const float LogInterval = 10;
 
             private float GetTime()
             {
                 return Stopwatch.GetTimestamp() / (float)Stopwatch.Frequency;
             }
 
-            float nextLogTime;
-            int lastLogValue;
+            private float nextLogTime;
+            private int lastLogValue;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void CheckLimit(Pool<T> pool)

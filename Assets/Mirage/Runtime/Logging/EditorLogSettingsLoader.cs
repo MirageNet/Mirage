@@ -6,10 +6,10 @@ namespace Mirage.Logging
 #if UNITY_EDITOR
     public static class EditorLogSettingsLoader
     {
-        static LogSettingsSO cache;
+        private static LogSettingsSO cache;
 
         [InitializeOnLoadMethod]
-        static void Init()
+        private static void Init()
         {
             // load settings first time LogFactory is used in the editor
             LoadLogSettingsIntoDictionary();

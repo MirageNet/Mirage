@@ -6,7 +6,7 @@ namespace Mirage
 {
     public class LobbyReady : MonoBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkServer));
 
         public List<ObjectReady> ObjectReadyList = new List<ObjectReady>();
 

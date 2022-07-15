@@ -9,7 +9,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     [Category("SocketLayer")]
     public class AckSystemTest_Fragmentation_Send : AckSystemTestBase
     {
-        AckTestInstance instance;
+        private AckTestInstance instance;
 
         [SetUp]
         public void SetUp()
@@ -33,7 +33,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             Assert.That(instance.connection.packets, Does.Not.Contain(null));
         }
 
-        byte[] CreateBigData(int id, int size)
+        private byte[] CreateBigData(int id, int size)
         {
             byte[] buffer = new byte[size];
             rand.NextBytes(buffer);

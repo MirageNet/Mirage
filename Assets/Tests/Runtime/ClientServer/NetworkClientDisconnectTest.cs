@@ -9,7 +9,7 @@ namespace Mirage.Tests.Runtime.ClientServer.DisconnectTests
 {
     public class NetworkClientDisconnectTest : ClientServerSetup<MockComponent>
     {
-        readonly Config config = new Config()
+        private readonly Config config = new Config()
         {
             // lower timeout so tests doesn't wait too long
             TimeoutDuration = 2,

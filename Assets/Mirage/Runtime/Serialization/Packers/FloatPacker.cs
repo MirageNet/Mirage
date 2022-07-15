@@ -33,16 +33,16 @@ namespace Mirage.Serialization
     /// </summary>
     public sealed class FloatPacker
     {
-        readonly int bitCount;
-        readonly float multiplier_pack;
-        readonly float multiplier_unpack;
-        readonly uint mask;
-        readonly int toNegative;
+        private readonly int bitCount;
+        private readonly float multiplier_pack;
+        private readonly float multiplier_unpack;
+        private readonly uint mask;
+        private readonly int toNegative;
 
         /// <summary>max positive value, any uint value over this will be negative</summary>
-        readonly uint midPoint;
-        readonly float positiveMax;
-        readonly float negativeMax;
+        private readonly uint midPoint;
+        private readonly float positiveMax;
+        private readonly float negativeMax;
 
         /// <param name="lowestPrecision">lowest precision, actual precision will be caculated from number of bits used</param>
         public FloatPacker(float max, float lowestPrecision) : this(max, lowestPrecision, true) { }

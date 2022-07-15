@@ -15,11 +15,12 @@ namespace Mirage.Tests.Runtime.Serialization
         public Action<int, int> HookCalled1;
         public Action<int, int> HookCalled2;
 
-        void OnValue1Changed(int _, int newValue)
+        private void OnValue1Changed(int _, int newValue)
         {
             HookCalled1?.Invoke(value1, value2);
         }
-        void OnValue2Changed(int _, int newValue)
+
+        private void OnValue2Changed(int _, int newValue)
         {
             HookCalled2?.Invoke(value1, value2);
         }

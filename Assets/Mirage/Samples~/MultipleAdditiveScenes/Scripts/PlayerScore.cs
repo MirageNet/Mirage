@@ -18,7 +18,7 @@ namespace Mirage.Examples.MultipleAdditiveScenes
 
         public int clientMatchIndex = -1;
 
-        void OnGUI()
+        private void OnGUI()
         {
             if (!IsLocalPlayer && clientMatchIndex < 0)
                 clientMatchIndex = Client.Player.Identity.GetComponent<PlayerScore>().matchIndex;

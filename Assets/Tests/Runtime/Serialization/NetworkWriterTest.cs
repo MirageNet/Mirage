@@ -195,7 +195,7 @@ namespace Mirage.Tests.Runtime.Serialization
             EnsureThrows(r => r.ReadGuid());
         }
 
-        static readonly Vector2[] vector2s = {
+        private static readonly Vector2[] vector2s = {
             Vector2.right,
                 Vector2.up,
                 Vector2.zero,
@@ -213,7 +213,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(output, Is.EqualTo(vector));
         }
 
-        static readonly Vector3[] vector3s = {
+        private static readonly Vector3[] vector3s = {
                 Vector3.right,
                 Vector3.up,
                 Vector3.zero,
@@ -232,7 +232,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(output, Is.EqualTo(input));
         }
 
-        static readonly Vector4[] vector4s = {
+        private static readonly Vector4[] vector4s = {
                 Vector3.right,
                 Vector3.up,
                 Vector4.zero,
@@ -250,7 +250,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(output, Is.EqualTo(input));
         }
 
-        static readonly Vector2Int[] vector2Ints = {
+        private static readonly Vector2Int[] vector2Ints = {
                 Vector2Int.down,
                 Vector2Int.up,
                 Vector2Int.left,
@@ -269,7 +269,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(output, Is.EqualTo(input));
         }
 
-        static readonly Vector3Int[] vector3Ints = {
+        private static readonly Vector3Int[] vector3Ints = {
                 Vector3Int.down,
                 Vector3Int.up,
                 Vector3Int.left,
@@ -289,7 +289,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(output, Is.EqualTo(input));
         }
 
-        static readonly Color[] colors = {
+        private static readonly Color[] colors = {
                 Color.black,
                 Color.blue,
                 Color.cyan,
@@ -308,7 +308,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(output, Is.EqualTo(input));
         }
 
-        static readonly Color32[] color32s = {
+        private static readonly Color32[] color32s = {
                 Color.black,
                 Color.blue,
                 Color.cyan,
@@ -328,7 +328,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(output, Is.EqualTo(input));
         }
 
-        static readonly Rect[] rects = {
+        private static readonly Rect[] rects = {
                 Rect.zero,
                 new Rect(1004.1f,2.001f,4636,400f),
                 new Rect(-100.622f,-200f,300f,975.6f),
@@ -345,7 +345,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(output, Is.EqualTo(input));
         }
 
-        static readonly Plane[] planes = {
+        private static readonly Plane[] planes = {
                 new Plane(new Vector3(-0.24f,0.34f,0.2f), 120.2f),
                 new Plane(new Vector3(0.133f,0.34f,0.122f), -10.135f),
                 new Plane(new Vector3(0.133f,-0.0f,float.MaxValue), -13.3f),
@@ -365,7 +365,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(output.distance, Is.EqualTo(input.distance));
         }
 
-        static readonly Ray[] rays = {
+        private static readonly Ray[] rays = {
                 new Ray(Vector3.up,Vector3.down),
                 new Ray(new Vector3(0.1f,0.2f,0.3f), new Vector3(0.4f,0.5f,0.6f)),
                 new Ray(new Vector3(-0.3f,0.5f,0.999f), new Vector3(1f,100.1f,20f))
@@ -381,7 +381,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(output.origin, Is.EqualTo(input.origin));
         }
 
-        static readonly Matrix4x4[] matrix4X4s = {
+        private static readonly Matrix4x4[] matrix4X4s = {
                 Matrix4x4.identity,
                 Matrix4x4.zero,
                 Matrix4x4.Scale(Vector3.one * 0.12345f),
@@ -400,7 +400,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
         // These are all bytes which never show up in valid UTF8 encodings.
         // NetworkReader should gracefully handle maliciously crafted input.
-        static readonly byte[] invalidUTF8bytes = {
+        private static readonly byte[] invalidUTF8bytes = {
                 0xC0, 0xC1, 0xF5, 0xF6,
                 0xF7, 0xF8, 0xF9, 0xFA,
                 0xFB, 0xFC, 0xFD, 0xFE,
@@ -490,7 +490,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(u2, Is.EqualTo(u));
         }
 
-        static readonly string[] weirdUnicode = {
+        private static readonly string[] weirdUnicode = {
                 "𝔲𝔫𝔦𝔠𝔬𝔡𝔢 𝔱𝔢𝔰𝔱",
                 "𝖚𝖓𝖎𝖈𝖔𝖉𝖊 𝖙𝖊𝖘𝖙",
                 "𝐮𝐧𝐢𝐜𝐨𝐝𝐞 𝐭𝐞𝐬𝐭",
@@ -537,7 +537,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(str, Is.EqualTo(weird));
         }
 
-        static readonly uint[] uint32s =
+        private static readonly uint[] uint32s =
         {
             0,
             234,
@@ -564,7 +564,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(reader.ReadUInt32(), Is.EqualTo(value));
         }
 
-        static readonly long[] int32Fail =
+        private static readonly long[] int32Fail =
         {
             1099511627775,
             281474976710655,
@@ -582,7 +582,7 @@ namespace Mirage.Tests.Runtime.Serialization
             });
         }
 
-        static readonly int[] int32s =
+        private static readonly int[] int32s =
         {
             0,
             234,
@@ -627,7 +627,7 @@ namespace Mirage.Tests.Runtime.Serialization
             });
         }
 
-        static readonly ulong[] uint64s =
+        private static readonly ulong[] uint64s =
         {
             0,
             234,
@@ -658,7 +658,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(reader.ReadUInt64(), Is.EqualTo(data));
         }
 
-        static readonly long[] int64s =
+        private static readonly long[] int64s =
         {
             0,
             234,
@@ -711,7 +711,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(readGuid, Is.EqualTo(originalGuid));
         }
 
-        static readonly float[] weirdFloats =
+        private static readonly float[] weirdFloats =
         {
             0f,
             -0f,
@@ -740,7 +740,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(readFloat, Is.EqualTo(weird));
         }
 
-        static readonly double[] weirdDoubles =
+        private static readonly double[] weirdDoubles =
         {
             0d,
             -0d,
@@ -769,7 +769,7 @@ namespace Mirage.Tests.Runtime.Serialization
             Assert.That(readDouble, Is.EqualTo(weird));
         }
 
-        static readonly decimal[] weirdDecimals =
+        private static readonly decimal[] weirdDecimals =
         {
             decimal.Zero,
             -decimal.Zero,
@@ -1033,7 +1033,7 @@ namespace Mirage.Tests.Runtime.Serialization
 
         // make weaver generate writers for MockComponent[]
         [NetworkMessage]
-        struct _BehaviourArrayWriter
+        private struct _BehaviourArrayWriter
         {
             public MockComponent[] mockComponents;
         }

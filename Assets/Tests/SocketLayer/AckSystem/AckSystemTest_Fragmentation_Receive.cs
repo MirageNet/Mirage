@@ -35,7 +35,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             ackSystem = new AckSystem(connection, config, MAX_PACKET_SIZE, new Time(), bufferPool);
         }
 
-        byte[] CreateBigData(int id, int size)
+        private byte[] CreateBigData(int id, int size)
         {
             byte[] buffer = new byte[size];
             rand.NextBytes(buffer);

@@ -19,7 +19,7 @@ namespace Mirage.Tests.Performance
                 .Run();
         }
 
-        static void WPackedInt32()
+        private static void WPackedInt32()
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -40,7 +40,8 @@ namespace Mirage.Tests.Performance
                 .MeasurementCount(100)
                 .Run();
         }
-        static void WInt32()
+
+        private static void WInt32()
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {
@@ -62,7 +63,8 @@ namespace Mirage.Tests.Performance
                 .MeasurementCount(100)
                 .Run();
         }
-        static void WGenericInt32()
+
+        private static void WGenericInt32()
         {
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {

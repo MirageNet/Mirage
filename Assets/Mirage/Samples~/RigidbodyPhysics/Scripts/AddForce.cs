@@ -4,9 +4,9 @@ namespace Mirage.Examples.RigidbodyPhysics
 {
     public class AddForce : NetworkBehaviour
     {
-        [SerializeField] float force = 500f;
+        [SerializeField] private float force = 500f;
 
-        void Update()
+        private void Update()
         {
             if (IsServer && Input.GetKeyDown(KeyCode.Space))
             {

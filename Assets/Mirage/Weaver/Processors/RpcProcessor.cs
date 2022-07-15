@@ -43,7 +43,7 @@ namespace Mirage.Weaver
         /// <summary>
         /// Hash to name names unique
         /// </summary>
-        static int GetStableHash(MethodReference method)
+        private static int GetStableHash(MethodReference method)
         {
             return method.FullName.GetStableHashCode();
         }
@@ -132,7 +132,7 @@ namespace Mirage.Weaver
             }
         }
 
-        static bool ClientRpcWithTarget(MethodDefinition method, RemoteCallType callType)
+        private static bool ClientRpcWithTarget(MethodDefinition method, RemoteCallType callType)
         {
             return (callType == RemoteCallType.ClientRpc)
                 && HasNetworkPlayerParameter(method);
@@ -252,7 +252,7 @@ namespace Mirage.Weaver
         /// checks if a parameter is valid for rpc
         /// </summary>
         /// <exception cref="RpcException">Throws when parameter are invalid</exception>
-        void ValidateParameter(MethodReference method, ParameterDefinition param, RemoteCallType callType, bool firstParam)
+        private void ValidateParameter(MethodReference method, ParameterDefinition param, RemoteCallType callType, bool firstParam)
         {
             if (param.IsOut)
             {
@@ -340,7 +340,7 @@ namespace Mirage.Weaver
         /// </summary>
         /// <param name="type"></param>
         /// <param name="generatedMethod"></param>
-        void FixRemoteCallToBaseMethod(TypeDefinition type, MethodDefinition method, MethodDefinition generatedMethod)
+        private void FixRemoteCallToBaseMethod(TypeDefinition type, MethodDefinition method, MethodDefinition generatedMethod)
         {
             string userCodeName = generatedMethod.Name;
             string rpcName = method.Name;
@@ -379,7 +379,7 @@ namespace Mirage.Weaver
             }
         }
 
-        static bool IsCallToMethod(Instruction instruction, out MethodDefinition calledMethod)
+        private static bool IsCallToMethod(Instruction instruction, out MethodDefinition calledMethod)
         {
             if (instruction.OpCode == OpCodes.Call &&
                 instruction.Operand is MethodDefinition method)

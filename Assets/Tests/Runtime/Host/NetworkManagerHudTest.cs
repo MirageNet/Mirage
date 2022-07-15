@@ -10,7 +10,7 @@ namespace Mirage.Tests.Runtime.Host
     [TestFixture]
     public class NetworkManagerHudTestSetup : HostSetup<MockComponent>
     {
-        GameObject gameObject;
+        private GameObject gameObject;
         protected NetworkManagerHud networkManagerHud;
         public override void ExtraSetup()
         {

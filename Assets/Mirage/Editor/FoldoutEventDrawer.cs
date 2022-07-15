@@ -7,11 +7,13 @@ namespace Mirage
     [CustomPropertyDrawer(typeof(FoldoutEventAttribute))]
     public class FoldoutEventDrawer : PropertyDrawer
     {
-        UnityEventDrawer _unityEventDrawer;
-        UnityEventDrawer UnityEventDrawer => _unityEventDrawer ?? (_unityEventDrawer = new UnityEventDrawer());
+        private UnityEventDrawer _unityEventDrawer;
 
-        static GUIStyle Style => EditorStyles.label;
-        static float Margin => Style.margin.vertical;
+        private UnityEventDrawer UnityEventDrawer => _unityEventDrawer ?? (_unityEventDrawer = new UnityEventDrawer());
+
+        private static GUIStyle Style => EditorStyles.label;
+
+        private static float Margin => Style.margin.vertical;
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {

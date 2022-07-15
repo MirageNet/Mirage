@@ -102,12 +102,12 @@ namespace Mirage
     [HelpURL("https://miragenet.github.io/Mirage/Articles/Components/NetworkIdentity.html")]
     public sealed class NetworkIdentity : MonoBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();
+        private static readonly ILogger logger = LogFactory.GetLogger<NetworkIdentity>();
 
         public TransformSpawnSettings SpawnSettings = new TransformSpawnSettings(true, true, true);
 
         [NonSerialized]
-        NetworkBehaviour[] networkBehavioursCache;
+        private NetworkBehaviour[] networkBehavioursCache;
 
         /// <summary>
         /// Returns true if running as a client and this object was spawned by a server.
@@ -207,8 +207,7 @@ namespace Mirage
         [ReadOnlyInspector]
         [Tooltip("Reference to Client set after the object is spawned. Used when debugging to see which client this object belongs to.")]
         public ClientObjectManager ClientObjectManager;
-
-        INetworkPlayer _owner;
+        private INetworkPlayer _owner;
 
         /// <summary>
         /// The INetworkPlayer associated with this <see cref="NetworkIdentity">NetworkIdentity</see>. This property is only valid on server
@@ -293,7 +292,7 @@ namespace Mirage
             return components;
         }
 
-        NetworkVisibility _visibility;
+        private NetworkVisibility _visibility;
         public NetworkVisibility Visibility
         {
             get
@@ -352,17 +351,16 @@ namespace Mirage
 
 
         [Header("Events")]
-        [SerializeField] AddLateEvent _onStartServer = new AddLateEvent();
-        [SerializeField] AddLateEvent _onStartClient = new AddLateEvent();
-        [SerializeField] AddLateEvent _onStartLocalPlayer = new AddLateEvent();
-        [SerializeField] BoolAddLateEvent _onAuthorityChanged = new BoolAddLateEvent();
-        [SerializeField] NetworkPlayerAddLateEvent _onOwnerChanged = new NetworkPlayerAddLateEvent();
-        [SerializeField] AddLateEvent _onStopClient = new AddLateEvent();
-        [SerializeField] AddLateEvent _onStopServer = new AddLateEvent();
-
-        bool clientStarted;
-        bool localPlayerStarted;
-        bool hadAuthority;
+        [SerializeField] private AddLateEvent _onStartServer = new AddLateEvent();
+        [SerializeField] private AddLateEvent _onStartClient = new AddLateEvent();
+        [SerializeField] private AddLateEvent _onStartLocalPlayer = new AddLateEvent();
+        [SerializeField] private BoolAddLateEvent _onAuthorityChanged = new BoolAddLateEvent();
+        [SerializeField] private NetworkPlayerAddLateEvent _onOwnerChanged = new NetworkPlayerAddLateEvent();
+        [SerializeField] private AddLateEvent _onStopClient = new AddLateEvent();
+        [SerializeField] private AddLateEvent _onStopServer = new AddLateEvent();
+        private bool clientStarted;
+        private bool localPlayerStarted;
+        private bool hadAuthority;
 
         /// <summary>
         /// This is invoked for NetworkBehaviour objects when they become active on the server.
@@ -448,10 +446,10 @@ namespace Mirage
         /// <summary>
         /// hasSpawned should always be false before runtime
         /// </summary>
-        [SerializeField, HideInInspector] bool hasSpawned;
+        [SerializeField, HideInInspector] private bool hasSpawned;
         public bool SpawnedFromInstantiate { get; private set; }
 
-        void Awake()
+        private void Awake()
         {
             if (hasSpawned)
             {
@@ -465,7 +463,7 @@ namespace Mirage
             hasSpawned = true;
         }
 
-        void OnValidate()
+        private void OnValidate()
         {
             // OnValidate is not called when using Instantiate, so we can use
             // it to make sure that hasSpawned is false
@@ -480,7 +478,7 @@ namespace Mirage
         /// Unity will Destroy all networked objects on Scene Change, so we have to handle that here silently.
         /// That means we cannot have any warning or logging in this method.
         /// </summary>
-        void OnDestroy()
+        private void OnDestroy()
         {
             // Objects spawned from Instantiate are not allowed so are destroyed right away
             // we don't want to call NetworkServer.Destroy if this is the case
@@ -572,7 +570,7 @@ namespace Mirage
         }
 
         // random number that is unlikely to appear in a regular data stream
-        const byte Barrier = 171;
+        private const byte Barrier = 171;
 
         // paul: readstring bug prevention: https://issuetracker.unity3d.com/issues/unet-networkwriter-dot-write-causing-readstring-slash-readbytes-out-of-range-errors-in-clients
         // -> OnSerialize writes componentData, barrier, componentData, barrier,componentData,...
@@ -604,7 +602,7 @@ namespace Mirage
         ///     </description></item>
         /// </list>
         /// </remarks>
-        void OnSerialize(NetworkBehaviour comp, NetworkWriter writer, bool initialState)
+        private void OnSerialize(NetworkBehaviour comp, NetworkWriter writer, bool initialState)
         {
             comp.OnSerialize(writer, initialState);
             if (logger.LogEnabled()) logger.Log($"OnSerializeSafely written for '{comp.name}', Component '{comp.GetType()}', SceneId {SceneId:X}");
@@ -686,7 +684,7 @@ namespace Mirage
             return false;
         }
 
-        void OnDeserialize(NetworkBehaviour comp, NetworkReader reader, bool initialState)
+        private void OnDeserialize(NetworkBehaviour comp, NetworkReader reader, bool initialState)
         {
             comp.OnDeserialize(reader, initialState);
 
@@ -819,7 +817,7 @@ namespace Mirage
             }
         }
 
-        static readonly HashSet<INetworkPlayer> newObservers = new HashSet<INetworkPlayer>();
+        private static readonly HashSet<INetworkPlayer> newObservers = new HashSet<INetworkPlayer>();
 
         /// <summary>
         /// This causes the set of players that can see this object to be rebuild.
@@ -870,7 +868,7 @@ namespace Mirage
         }
 
         // remove all old .observers that aren't in newObservers anymore
-        bool RemoveOldObservers(bool changed)
+        private bool RemoveOldObservers(bool changed)
         {
             foreach (INetworkPlayer player in observers)
             {
@@ -889,7 +887,7 @@ namespace Mirage
         }
 
         // add all newObservers that aren't in .observers yet
-        bool AddNewObservers(bool initialize, bool changed)
+        private bool AddNewObservers(bool initialize, bool changed)
         {
             foreach (INetworkPlayer player in newObservers)
             {
@@ -1027,7 +1025,7 @@ namespace Mirage
             }
         }
 
-        void SendUpdateVarsMessage()
+        private void SendUpdateVarsMessage()
         {
             // one writer for owner, one for observers
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
@@ -1073,7 +1071,7 @@ namespace Mirage
             }
         }
 
-        static readonly List<INetworkPlayer> connectionsExcludeSelf = new List<INetworkPlayer>(100);
+        private static readonly List<INetworkPlayer> connectionsExcludeSelf = new List<INetworkPlayer>(100);
 
         /// <summary>
         /// Send a message to all the remote observers
@@ -1131,7 +1129,7 @@ namespace Mirage
             }
         }
 
-        void ResetSyncObjects()
+        private void ResetSyncObjects()
         {
             foreach (NetworkBehaviour comp in NetworkBehaviours)
             {

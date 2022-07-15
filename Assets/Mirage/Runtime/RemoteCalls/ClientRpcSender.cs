@@ -8,7 +8,7 @@ namespace Mirage.RemoteCalls
 {
     public static class ClientRpcSender
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientRpcSender));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientRpcSender));
 
         public static void Send(NetworkBehaviour behaviour, int index, NetworkWriter writer, int channelId, bool excludeOwner)
         {
@@ -34,7 +34,7 @@ namespace Mirage.RemoteCalls
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static RpcMessage CreateMessage(NetworkBehaviour behaviour, int index, NetworkWriter writer)
+        private static RpcMessage CreateMessage(NetworkBehaviour behaviour, int index, NetworkWriter writer)
         {
             RemoteCall rpc = behaviour.remoteCallCollection.Get(index);
 
@@ -50,7 +50,7 @@ namespace Mirage.RemoteCalls
             return message;
         }
 
-        static void Validate(NetworkBehaviour behaviour, RemoteCall rpc)
+        private static void Validate(NetworkBehaviour behaviour, RemoteCall rpc)
         {
             INetworkServer server = behaviour.Server;
             if (server == null || !server.Active)

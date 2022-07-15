@@ -5,8 +5,8 @@ namespace Mirage
     // https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
     public class ExponentialMovingAverage
     {
-        readonly float alpha;
-        bool initialized;
+        private readonly float alpha;
+        private bool initialized;
 
         public ExponentialMovingAverage(int n)
         {

@@ -69,7 +69,7 @@ namespace Mirage.Tests.PlayerTests.BuildScripts
             }
         }
 
-        static ITestRunSettings GetRunSettings(string targetPath)
+        private static ITestRunSettings GetRunSettings(string targetPath)
         {
             // reflection because that is the only way to create buildOnly only with TestRunnerApi
             var assembly = Assembly.Load("UnityEditor.TestRunner");

@@ -28,9 +28,9 @@ namespace Mirage.Serialization
 {
     public sealed class Vector3Packer
     {
-        readonly FloatPacker xPacker;
-        readonly FloatPacker yPacker;
-        readonly FloatPacker zPacker;
+        private readonly FloatPacker xPacker;
+        private readonly FloatPacker yPacker;
+        private readonly FloatPacker zPacker;
 
         public Vector3Packer(float xMax, float yMax, float zMax, int xBitCount, int yBitCount, int zBitCount)
         {

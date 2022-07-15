@@ -69,9 +69,8 @@ namespace Mirage.SocketLayer
     /// </summary>
     internal sealed class Connection : IConnection, IRawConnection
     {
-        readonly ILogger logger;
-
-        ConnectionState _state;
+        private readonly ILogger logger;
+        private ConnectionState _state;
         public ConnectionState State
         {
             get => _state;
@@ -171,7 +170,7 @@ namespace Mirage.SocketLayer
             keepAliveTracker.SetSendTime();
         }
 
-        void ThrowIfNotConnected()
+        private void ThrowIfNotConnected()
         {
             if (_state != ConnectionState.Connected)
                 throw new InvalidOperationException("Connection is not connected");
@@ -323,7 +322,7 @@ namespace Mirage.SocketLayer
             HandleQueuedMessages();
         }
 
-        void HandleQueuedMessages()
+        private void HandleQueuedMessages()
         {
             // gets messages in order
             while (ackSystem.NextReliablePacket(out AckSystem.ReliableReceived received))
@@ -413,7 +412,7 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// client connecting attempts
         /// </summary>
-        void UpdateConnecting()
+        private void UpdateConnecting()
         {
             if (connectingTracker.TimeAttempt())
             {
@@ -432,7 +431,7 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// Used to remove connection after it has been disconnected
         /// </summary>
-        void UpdateDisconnected()
+        private void UpdateDisconnected()
         {
             if (disconnectedTracker.TimeToRemove())
             {
@@ -448,7 +447,7 @@ namespace Mirage.SocketLayer
         /// <summary>
         /// Used to keep connection alive
         /// </summary>
-        void UpdateConnected()
+        private void UpdateConnected()
         {
             if (timeoutTracker.TimeToDisconnect())
             {
@@ -463,12 +462,12 @@ namespace Mirage.SocketLayer
             }
         }
 
-        class ConnectingTracker
+        private class ConnectingTracker
         {
             private readonly Config config;
             private readonly Time time;
-            float lastAttempt = float.MinValue;
-            int AttemptCount = 0;
+            private float lastAttempt = float.MinValue;
+            private int AttemptCount = 0;
 
             public ConnectingTracker(Config config, Time time)
             {
@@ -492,11 +491,12 @@ namespace Mirage.SocketLayer
                 lastAttempt = time.Now;
             }
         }
-        class TimeoutTracker
+
+        private class TimeoutTracker
         {
-            float lastRecvTime = float.MinValue;
-            readonly Config config;
-            readonly Time time;
+            private float lastRecvTime = float.MinValue;
+            private readonly Config config;
+            private readonly Time time;
 
             public TimeoutTracker(Config config, Time time)
             {
@@ -514,11 +514,12 @@ namespace Mirage.SocketLayer
                 lastRecvTime = time.Now;
             }
         }
-        class KeepAliveTracker
+
+        private class KeepAliveTracker
         {
-            float lastSendTime = float.MinValue;
-            readonly Config config;
-            readonly Time time;
+            private float lastSendTime = float.MinValue;
+            private readonly Config config;
+            private readonly Time time;
 
             public KeepAliveTracker(Config config, Time time)
             {
@@ -537,12 +538,13 @@ namespace Mirage.SocketLayer
                 lastSendTime = time.Now;
             }
         }
-        class DisconnectedTracker
+
+        private class DisconnectedTracker
         {
-            bool isDisonnected;
-            float disconnectTime;
-            readonly Config config;
-            readonly Time time;
+            private bool isDisonnected;
+            private float disconnectTime;
+            private readonly Config config;
+            private readonly Time time;
 
             public DisconnectedTracker(Config config, Time time)
             {

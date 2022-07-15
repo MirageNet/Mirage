@@ -31,7 +31,7 @@ namespace Mirage.Sockets.Udp
 
         public override int MaxPacketSize => UdpMTU.MaxPacketSize;
 
-        bool useNanoSocket => SocketLib == SocketLib.Native || (SocketLib == SocketLib.Automatic && IsDesktop);
+        private bool useNanoSocket => SocketLib == SocketLib.Native || (SocketLib == SocketLib.Automatic && IsDesktop);
 
         string IHasAddress.Address
         {
@@ -44,15 +44,15 @@ namespace Mirage.Sockets.Udp
             set => Port = checked((ushort)value);
         }
 
-        static int initCount;
+        private static int initCount;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        static void ClearCounter()
+        private static void ClearCounter()
         {
             initCount = 0;
         }
 
-        void Awake()
+        private void Awake()
         {
             if (!useNanoSocket) return;
 
@@ -79,7 +79,7 @@ namespace Mirage.Sockets.Udp
 
 #if NANO_SOCKET_ALLOWED
         // Initializes the NanoSockets native library. If it fails, it resorts to C# Managed Sockets.
-        void InitializeNanoSockets()
+        private void InitializeNanoSockets()
         {
             try
             {
@@ -95,7 +95,7 @@ namespace Mirage.Sockets.Udp
         }
 #endif
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (!useNanoSocket) return;
 
@@ -170,7 +170,7 @@ namespace Mirage.Sockets.Udp
             }
         }
 
-        void ThrowIfNotSupported()
+        private void ThrowIfNotSupported()
         {
             if (IsWebgl)
             {
@@ -227,12 +227,12 @@ namespace Mirage.Sockets.Udp
         /// <summary>
         /// IPv6 + UDP Header
         /// </summary>
-        const int HEADER_SIZE = 40 + 8;
+        private const int HEADER_SIZE = 40 + 8;
 
         /// <summary>
         /// MTU is expected to be atleast this number
         /// </summary>
-        const int MIN_MTU = 1280;
+        private const int MIN_MTU = 1280;
 
         /// <summary>
         /// Max size of array that will be sent to or can be received from <see cref="ISocket"/>

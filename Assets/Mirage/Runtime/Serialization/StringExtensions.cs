@@ -11,9 +11,8 @@ namespace Mirage.Serialization
         /// <para>Can be changed by user if they need to</para>
         /// </summary>
         public static int MaxStringLength = 1300;
-
-        static readonly UTF8Encoding encoding = new UTF8Encoding(false, true);
-        static readonly byte[] stringBuffer = new byte[MaxStringLength];
+        private static readonly UTF8Encoding encoding = new UTF8Encoding(false, true);
+        private static readonly byte[] stringBuffer = new byte[MaxStringLength];
 
         /// <param name="value">string or null</param>
         public static void WriteString(this NetworkWriter writer, string value)

@@ -48,7 +48,7 @@ namespace Mirage.Tests.Runtime.Generated.BitCountFromRangeAttributeTests.int_N21
     
     public class BitPackTest : ClientServerSetup<BitPackBehaviour>
     {
-        const int value = -2147483648;
+        private const int value = -2147483648;
 
         [Test]
         public void SyncVarIsBitPacked()

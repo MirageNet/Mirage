@@ -17,11 +17,10 @@ namespace Mirage.HeadlessBenchmark
         public GameObject PlayerPrefab;
         public string editorArgs;
         public SocketFactory socketFactory;
+        private string[] cachedArgs;
+        private string port;
 
-        string[] cachedArgs;
-        string port;
-
-        void Start()
+        private void Start()
         {
             cachedArgs = Application.isEditor ?
                 cachedArgs = editorArgs.Split(' ') :
@@ -59,7 +58,7 @@ namespace Mirage.HeadlessBenchmark
             }
         }
 
-        void HeadlessStart()
+        private void HeadlessStart()
         {
             //Try to find port
             port = GetArgValue("-port");
@@ -76,7 +75,7 @@ namespace Mirage.HeadlessBenchmark
             ParseForHelp();
         }
 
-        void OnServerStarted()
+        private void OnServerStarted()
         {
             StartCoroutine(DisplayFramesPerSecons());
 
@@ -88,14 +87,14 @@ namespace Mirage.HeadlessBenchmark
             }
         }
 
-        void SpawnMonsters(int i)
+        private void SpawnMonsters(int i)
         {
             GameObject monster = Instantiate(MonsterPrefab);
             monster.gameObject.name = $"Monster {i}";
             serverObjectManager.Spawn(monster.gameObject);
         }
 
-        void ParseForServerMode()
+        private void ParseForServerMode()
         {
             if (string.IsNullOrEmpty(GetArg("-server"))) return;
 
@@ -123,7 +122,7 @@ namespace Mirage.HeadlessBenchmark
             Console.WriteLine("Starting Server Only Mode");
         }
 
-        async UniTaskVoid StartClients()
+        private async UniTaskVoid StartClients()
         {
             string clientArg = GetArg("-client");
             if (!string.IsNullOrEmpty(clientArg))
@@ -156,7 +155,7 @@ namespace Mirage.HeadlessBenchmark
             }
         }
 
-        void StartClient(int i, string networkAddress)
+        private void StartClient(int i, string networkAddress)
         {
             GameObject clientGo = Instantiate(ClientPrefab);
             clientGo.name = $"Client {i}";
@@ -189,7 +188,7 @@ namespace Mirage.HeadlessBenchmark
             }
         }
 
-        void ParseForHelp()
+        private void ParseForHelp()
         {
             if (!string.IsNullOrEmpty(GetArg("-help")))
             {
@@ -207,7 +206,7 @@ namespace Mirage.HeadlessBenchmark
             }
         }
 
-        void ParseForSocket()
+        private void ParseForSocket()
         {
             string socket = GetArgValue("-socket");
             if (string.IsNullOrEmpty(socket) || socket.Equals("udp"))
@@ -226,7 +225,7 @@ namespace Mirage.HeadlessBenchmark
             }
         }
 
-        string GetArgValue(string name)
+        private string GetArgValue(string name)
         {
             for (int i = 0; i < cachedArgs.Length; i++)
             {
@@ -238,7 +237,7 @@ namespace Mirage.HeadlessBenchmark
             return null;
         }
 
-        string GetArg(string name)
+        private string GetArg(string name)
         {
             for (int i = 0; i < cachedArgs.Length; i++)
             {

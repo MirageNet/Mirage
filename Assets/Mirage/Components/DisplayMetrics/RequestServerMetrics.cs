@@ -16,9 +16,9 @@ namespace Mirage.DisplayMetrics
         /// <summary>
         /// Connections that are requesting metrics
         /// </summary>
-        HashSet<INetworkPlayer> connections;
+        private HashSet<INetworkPlayer> connections;
         private Metrics metrics;
-        uint lastSendTick;
+        private uint lastSendTick;
 
         private void Start()
         {
@@ -67,13 +67,13 @@ namespace Mirage.DisplayMetrics
         }
 
         [NetworkMessage]
-        struct RequestMetricsMessage
+        private struct RequestMetricsMessage
         {
 
         }
 
         [NetworkMessage]
-        struct SendMetricsMessage
+        private struct SendMetricsMessage
         {
             public uint start;
             public Metrics.Frame[] newFrames;

@@ -8,7 +8,7 @@ namespace Mirage.RemoteCalls
 {
     public class RemoteCallCollection
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(RemoteCallCollection));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(RemoteCallCollection));
 
         public RemoteCall[] remoteCalls;
 
@@ -128,7 +128,7 @@ namespace Mirage.RemoteCalls
                 && this.function == function;
         }
 
-        bool AreEqualIgnoringGeneric(Type declaringType, RpcDelegate function)
+        private bool AreEqualIgnoringGeneric(Type declaringType, RpcDelegate function)
         {
             // if this.type not generic, then not equal
             if (!DeclaringType.IsGenericType)

@@ -31,9 +31,9 @@ namespace Mirage.Serialization
     /// </summary>
     public sealed class VarFloatPacker
     {
-        readonly int blockSize;
-        readonly float precision;
-        readonly float inversePrecision;
+        private readonly int blockSize;
+        private readonly float precision;
+        private readonly float inversePrecision;
 
         public VarFloatPacker(float precision, int blockSize)
         {

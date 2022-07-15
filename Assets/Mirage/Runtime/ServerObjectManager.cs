@@ -41,7 +41,7 @@ namespace Mirage
     [DisallowMultipleComponent]
     public class ServerObjectManager : MonoBehaviour, IServerObjectManager
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(ServerObjectManager));
 
         [FormerlySerializedAs("server")]
         public NetworkServer Server;
@@ -49,9 +49,9 @@ namespace Mirage
         public NetworkSceneManager NetworkSceneManager;
 
         public INetIdGenerator NetIdGenerator;
+        private uint nextNetworkId = 1;
 
-        uint nextNetworkId = 1;
-        uint GetNextNetworkId() => NetIdGenerator?.GenerateNetId() ?? checked(nextNetworkId++);
+        private uint GetNextNetworkId() => NetIdGenerator?.GenerateNetId() ?? checked(nextNetworkId++);
 
         public void Start()
         {
@@ -75,13 +75,13 @@ namespace Mirage
             Server.MessageHandler.RegisterHandler<ServerRpcWithReplyMessage>(OnServerRpcWithReplyMessage);
         }
 
-        void OnServerStarted()
+        private void OnServerStarted()
         {
             RegisterMessageHandlers();
             SpawnOrActivate();
         }
 
-        void OnServerStopped()
+        private void OnServerStopped()
         {
             // todo dont send messages on server stop, only reset NI
             foreach (NetworkIdentity obj in Server.World.SpawnedIdentities.Reverse())
@@ -95,14 +95,14 @@ namespace Mirage
             nextNetworkId = 1;
         }
 
-        void OnFinishedSceneChange(Scene scene, SceneOperation sceneOperation)
+        private void OnFinishedSceneChange(Scene scene, SceneOperation sceneOperation)
         {
             Server.World.RemoveDestroyedObjects();
 
             SpawnOrActivate();
         }
 
-        void SpawnOrActivate()
+        private void SpawnOrActivate()
         {
             if (Server && Server.Active)
             {
@@ -119,7 +119,7 @@ namespace Mirage
         /// <summary>
         /// Loops spawned collection for NetworkIdentities that are not IsClient and calls StartClient().
         /// </summary>
-        void StartHostClientObjects()
+        private void StartHostClientObjects()
         {
             foreach (NetworkIdentity identity in Server.World.SpawnedIdentities)
             {
@@ -132,7 +132,7 @@ namespace Mirage
             }
         }
 
-        void StartedHost()
+        private void StartedHost()
         {
             if (TryGetComponent(out ClientObjectManager ClientObjectManager))
             {
@@ -235,7 +235,7 @@ namespace Mirage
                 previousCharacter.RemoveClientAuthority();
         }
 
-        void SpawnVisibleObjectForPlayer(INetworkPlayer player)
+        private void SpawnVisibleObjectForPlayer(INetworkPlayer player)
         {
             if (logger.LogEnabled()) logger.Log($"Checking Observers on {Server.World.SpawnedIdentities.Count} objects for player: {player}");
 
@@ -345,7 +345,7 @@ namespace Mirage
             Respawn(identity);
         }
 
-        void Respawn(NetworkIdentity identity)
+        private void Respawn(NetworkIdentity identity)
         {
             if (!identity.IsSpawned)
             {
@@ -426,16 +426,17 @@ namespace Mirage
         /// </summary>
         /// <param name="player"></param>
         /// <param name="msg"></param>
-        void OnServerRpcWithReplyMessage(INetworkPlayer player, ServerRpcWithReplyMessage msg)
+        private void OnServerRpcWithReplyMessage(INetworkPlayer player, ServerRpcWithReplyMessage msg)
         {
             OnServerRpc(player, msg.netId, msg.componentIndex, msg.functionIndex, msg.payload, msg.replyId);
         }
-        void OnServerRpcMessage(INetworkPlayer player, ServerRpcMessage msg)
+
+        private void OnServerRpcMessage(INetworkPlayer player, ServerRpcMessage msg)
         {
             OnServerRpc(player, msg.netId, msg.componentIndex, msg.functionIndex, msg.payload, default);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void OnServerRpc(INetworkPlayer player, uint netId, int componentIndex, int functionIndex, ArraySegment<byte> payload, int replyId)
+        private void OnServerRpc(INetworkPlayer player, uint netId, int componentIndex, int functionIndex, ArraySegment<byte> payload, int replyId)
         {
             if (!Server.World.TryGetIdentity(netId, out NetworkIdentity identity))
             {
@@ -601,7 +602,7 @@ namespace Mirage
             });
         }
 
-        static ArraySegment<byte> CreateSpawnMessagePayload(bool isOwner, NetworkIdentity identity, PooledNetworkWriter ownerWriter, PooledNetworkWriter observersWriter)
+        private static ArraySegment<byte> CreateSpawnMessagePayload(bool isOwner, NetworkIdentity identity, PooledNetworkWriter ownerWriter, PooledNetworkWriter observersWriter)
         {
             // Only call OnSerializeAllSafely if there are NetworkBehaviours
             if (identity.NetworkBehaviours.Length == 0)
@@ -627,7 +628,7 @@ namespace Mirage
         /// <para>This check does nothing in builds</para>
         /// </summary>
         /// <exception cref="InvalidOperationException">Throws in the editor if object is part of a prefab</exception>
-        static void ThrowIfPrefab(GameObject obj)
+        private static void ThrowIfPrefab(GameObject obj)
         {
 #if UNITY_EDITOR
             if (UnityEditor.PrefabUtility.IsPartOfPrefabAsset(obj))
@@ -670,7 +671,7 @@ namespace Mirage
             DestroyObject(identity, destroyServerObject);
         }
 
-        void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
+        private void DestroyObject(NetworkIdentity identity, bool destroyServerObject)
         {
             if (logger.LogEnabled()) logger.Log("DestroyObject instance:" + identity.NetId);
 

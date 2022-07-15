@@ -12,11 +12,10 @@ namespace Mirage.Sockets.Udp
     }
     public sealed class NanoSocket : ISocket, IDisposable
     {
-        Socket socket;
-        NanoEndPoint receiveEndPoint;
-        readonly int bufferSize;
-
-        bool needsDisposing;
+        private Socket socket;
+        private NanoEndPoint receiveEndPoint;
+        private readonly int bufferSize;
+        private bool needsDisposing;
 
         public NanoSocket(UdpSocketFactory factory)
         {
@@ -27,7 +26,7 @@ namespace Mirage.Sockets.Udp
             Dispose();
         }
 
-        void InitSocket()
+        private void InitSocket()
         {
             socket = UDP.Create(bufferSize, bufferSize);
             UDP.SetDontFragment(socket);

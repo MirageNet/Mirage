@@ -5,7 +5,7 @@ using Mono.Collections.Generic;
 
 namespace Mirage.Weaver.SyncVars
 {
-    class SyncVarHook
+    internal class SyncVarHook
     {
         public readonly MethodDefinition Method;
         public readonly EventDefinition Event;
@@ -48,7 +48,7 @@ namespace Mirage.Weaver.SyncVars
                 throw new HookMethodException($"Could not find hook for '{syncVar.Name}', hook name '{hookFunctionName}', hook type {hookType}. See SyncHookType for valid signatures", syncVar);
         }
 
-        static SyncVarHook FindHookMethod(FieldDefinition syncVar, string hookFunctionName, SyncHookType hookType, TypeReference originalType)
+        private static SyncVarHook FindHookMethod(FieldDefinition syncVar, string hookFunctionName, SyncHookType hookType, TypeReference originalType)
         {
             switch (hookType)
             {
@@ -78,7 +78,7 @@ namespace Mirage.Weaver.SyncVars
             return foundHook;
         }
 
-        static void CheckHook(FieldDefinition syncVar, string hookFunctionName, ref SyncVarHook foundHook, SyncVarHook newfound)
+        private static void CheckHook(FieldDefinition syncVar, string hookFunctionName, ref SyncVarHook foundHook, SyncVarHook newfound)
         {
             // dont need to check anything if new one is null (not found)
             if (newfound == null)
@@ -180,7 +180,7 @@ namespace Mirage.Weaver.SyncVars
             throw new HookMethodException($"Hook Event for '{syncVar.Name}' needs to be type 'System.Action<,>' but was '{eventType.FullName}' instead", @event);
         }
 
-        static bool MatchesParameters(GenericInstanceType genericEvent, TypeReference originalType, int count)
+        private static bool MatchesParameters(GenericInstanceType genericEvent, TypeReference originalType, int count)
         {
             // matches event Action<T, T> eventName;
             Collection<TypeReference> args = genericEvent.GenericArguments;
@@ -191,7 +191,8 @@ namespace Mirage.Weaver.SyncVars
             }
             return true;
         }
-        static bool MatchesParameters(MethodDefinition method, TypeReference originalType, int count)
+
+        private static bool MatchesParameters(MethodDefinition method, TypeReference originalType, int count)
         {
             // matches void onValueChange(T oldValue, T newValue)
             Collection<ParameterDefinition> parameters = method.Parameters;

@@ -9,23 +9,21 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
     [Category("SocketLayer")]
     public class AckSystemTest_Reliable : AckSystemTestBase
     {
-        class Time : ITime
+        private class Time : ITime
         {
             public float Now { get; set; }
         }
-        class BadSocket
+
+        private class BadSocket
         {
-            readonly AckSystem ackSystem1;
-            readonly AckSystem ackSystem2;
-
-            readonly SubIRawConnection connection1;
-            readonly SubIRawConnection connection2;
-
-            int processed1 = 0;
-            int processed2 = 0;
-
-            List<byte[]> ToSend1 = new List<byte[]>();
-            List<byte[]> ToSend2 = new List<byte[]>();
+            private readonly AckSystem ackSystem1;
+            private readonly AckSystem ackSystem2;
+            private readonly SubIRawConnection connection1;
+            private readonly SubIRawConnection connection2;
+            private int processed1 = 0;
+            private int processed2 = 0;
+            private List<byte[]> ToSend1 = new List<byte[]>();
+            private List<byte[]> ToSend2 = new List<byte[]>();
 
             public BadSocket(AckTestInstance instance1, AckTestInstance instance2)
             {
@@ -45,7 +43,8 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
                 List<byte[]> r1 = Update(ref processed2, ToSend2, connection2, ackSystem1, dropChance, skipChance);
                 return (r1, r2);
             }
-            static List<byte[]> Update(ref int processed, List<byte[]> ToSend, SubIRawConnection connection, AckSystem ackSystem, float dropChance, float skipChance)
+
+            private static List<byte[]> Update(ref int processed, List<byte[]> ToSend, SubIRawConnection connection, AckSystem ackSystem, float dropChance, float skipChance)
             {
                 int count1 = connection.packets.Count;
                 for (int i = processed; i < count1; i++)
@@ -118,16 +117,14 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             }
         }
 
-        const float tick = 0.02f;
-
-        float timeout;
-        BadSocket badSocket;
-        Time time;
-        AckTestInstance instance1;
-        AckTestInstance instance2;
-
-        List<byte[]> receives1;
-        List<byte[]> receives2;
+        private const float tick = 0.02f;
+        private float timeout;
+        private BadSocket badSocket;
+        private Time time;
+        private AckTestInstance instance1;
+        private AckTestInstance instance2;
+        private List<byte[]> receives1;
+        private List<byte[]> receives2;
 
         [SetUp]
         public void SetUp()
@@ -209,7 +206,7 @@ namespace Mirage.SocketLayer.Tests.AckSystemTests
             }
         }
 
-        void SendManyMessages(bool instance2Sends, int messageCount, float dropChance, float skipChance)
+        private void SendManyMessages(bool instance2Sends, int messageCount, float dropChance, float skipChance)
         {
             // send all messages
             for (int i = 0; i < messageCount; i++)

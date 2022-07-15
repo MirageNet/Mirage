@@ -35,17 +35,19 @@ namespace Mirage.Serialization
     /// </summary>
     public unsafe class NetworkReader : IDisposable
     {
-        byte[] managedBuffer;
-        GCHandle handle;
-        ulong* longPtr;
-        bool needsDisposing;
+        private byte[] managedBuffer;
+        private GCHandle handle;
+        private ulong* longPtr;
+        private bool needsDisposing;
 
         /// <summary>Current read position</summary>
-        int bitPosition;
+        private int bitPosition;
+
         /// <summary>Offset of given buffer</summary>
-        int bitOffset;
+        private int bitOffset;
+
         /// <summary>Length of given buffer</summary>
-        int bitLength;
+        private int bitLength;
 
         /// <summary>
         /// Size of buffer that is being read from
@@ -164,14 +166,15 @@ namespace Mirage.Serialization
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void CheckNewLength(int newPosition)
+        private void CheckNewLength(int newPosition)
         {
             if (newPosition > bitLength)
             {
                 ThrowPositionOverLength(newPosition);
             }
         }
-        void ThrowPositionOverLength(int newPosition)
+
+        private void ThrowPositionOverLength(int newPosition)
         {
             throw new EndOfStreamException($"Can not read over end of buffer, new position {newPosition}, length {bitLength} bits");
         }

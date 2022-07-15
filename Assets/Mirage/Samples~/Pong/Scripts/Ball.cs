@@ -7,7 +7,7 @@ namespace Mirage.Examples.Pong
         public float speed = 30;
         public Rigidbody2D rigidbody2d;
 
-        void Awake()
+        private void Awake()
         {
             Identity.OnStartServer.AddListener(OnStartServer);
         }
@@ -21,7 +21,7 @@ namespace Mirage.Examples.Pong
             rigidbody2d.velocity = Vector2.right * speed;
         }
 
-        float HitFactor(Vector2 ballPos, Vector2 racketPos, float racketHeight)
+        private float HitFactor(Vector2 ballPos, Vector2 racketPos, float racketHeight)
         {
             // ascii art:
             // ||  1 <- at the top of the racket
@@ -34,7 +34,7 @@ namespace Mirage.Examples.Pong
 
         // only call this on server
         [Server(error = false)]
-        void OnCollisionEnter2D(Collision2D col)
+        private void OnCollisionEnter2D(Collision2D col)
         {
             // Note: 'col' holds the collision information. If the
             // Ball collided with a racket, then:

@@ -38,18 +38,16 @@ namespace Mirage.Serialization
         /// <summary>
         /// Max buffer size = 0.5MB
         /// </summary>
-        const int MaxBufferSize = 524_288;
+        private const int MaxBufferSize = 524_288;
+        private byte[] managedBuffer;
+        private int bitCapacity;
 
-        byte[] managedBuffer;
-        int bitCapacity;
         /// <summary>Allow internal buffer to resize if capcity is reached</summary>
-        readonly bool allowResize;
-
-        GCHandle handle;
-        ulong* longPtr;
-        bool needsDisposing;
-
-        int bitPosition;
+        private readonly bool allowResize;
+        private GCHandle handle;
+        private ulong* longPtr;
+        private bool needsDisposing;
+        private int bitPosition;
 
         /// <summary>
         /// Size limit of buffer
@@ -106,8 +104,7 @@ namespace Mirage.Serialization
             FreeHandle();
         }
 
-
-        void ResizeBuffer(int minBitCapacity)
+        private void ResizeBuffer(int minBitCapacity)
         {
             // +7 to round up to next byte
             int minByteCapacity = (minBitCapacity + 7) / 8;
@@ -130,7 +127,8 @@ namespace Mirage.Serialization
 
             CreateHandle();
         }
-        void CreateHandle()
+
+        private void CreateHandle()
         {
             if (needsDisposing) FreeHandle();
 
@@ -138,11 +136,12 @@ namespace Mirage.Serialization
             longPtr = (ulong*)handle.AddrOfPinnedObject();
             needsDisposing = true;
         }
+
         /// <summary>
         /// Frees the handle for the buffer
         /// <para>In order for <see cref="PooledNetworkWriter"/> to work This class can not have <see cref="IDisposable"/>. Instead we call this method from finalize</para>
         /// </summary>
-        void FreeHandle()
+        private void FreeHandle()
         {
             if (!needsDisposing) return;
 
@@ -174,7 +173,7 @@ namespace Mirage.Serialization
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void CheckCapacity(int newLength)
+        private void CheckCapacity(int newLength)
         {
             if (newLength > bitCapacity)
             {
@@ -188,7 +187,8 @@ namespace Mirage.Serialization
                 }
             }
         }
-        void ThrowLengthOverCapacity(int newLength)
+
+        private void ThrowLengthOverCapacity(int newLength)
         {
             throw new InvalidOperationException($"Can not write over end of buffer, new length {newLength}, capacity {bitCapacity}");
         }

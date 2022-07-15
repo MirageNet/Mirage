@@ -54,7 +54,7 @@ namespace Mirage.Tests.Weaver
         public List<CompilerMessage> CompilerMessages { get; private set; }
         public bool CompilerErrors { get; private set; }
 
-        readonly HashSet<string> sourceFiles = new HashSet<string>();
+        private readonly HashSet<string> sourceFiles = new HashSet<string>();
 
         public Assembler()
         {

@@ -16,7 +16,7 @@ namespace Mirage
     [DisallowMultipleComponent]
     public class ClientObjectManager : MonoBehaviour, IClientObjectManager
     {
-        static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientObjectManager));
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(ClientObjectManager));
 
         [FormerlySerializedAs("client")]
         public NetworkClient Client;
@@ -47,8 +47,7 @@ namespace Mirage
         public readonly Dictionary<ulong, NetworkIdentity> spawnableObjects = new Dictionary<ulong, NetworkIdentity>();
 
         internal ServerObjectManager ServerObjectManager;
-
-        SyncVarReceiver syncVarReceiver;
+        private SyncVarReceiver syncVarReceiver;
 
         public void Start()
         {
@@ -62,15 +61,16 @@ namespace Mirage
             }
         }
 
-        void LateUpdate()
+        private void LateUpdate()
         {
             // use late update because that will be called after all received message for this frame
 
         }
 
 #if UNITY_EDITOR
-        readonly Dictionary<int, NetworkIdentity> validateCache = new Dictionary<int, NetworkIdentity>();
-        void OnValidate()
+        private readonly Dictionary<int, NetworkIdentity> validateCache = new Dictionary<int, NetworkIdentity>();
+
+        private void OnValidate()
         {
             validateCache.Clear();
             foreach (NetworkIdentity prefab in spawnPrefabs)
@@ -95,7 +95,7 @@ namespace Mirage
         }
 #endif
 
-        void OnClientConnected(INetworkPlayer player)
+        private void OnClientConnected(INetworkPlayer player)
         {
             syncVarReceiver = new SyncVarReceiver(Client, Client.World);
             RegisterSpawnPrefabs();
@@ -114,14 +114,14 @@ namespace Mirage
             }
         }
 
-        void OnClientDisconnected(ClientStoppedReason reason)
+        private void OnClientDisconnected(ClientStoppedReason reason)
         {
             ClearSpawners();
             DestroyAllClientObjects();
             syncVarReceiver = null;
         }
 
-        void OnFinishedSceneChange(Scene scene, SceneOperation sceneOperation)
+        private void OnFinishedSceneChange(Scene scene, SceneOperation sceneOperation)
         {
             Client.World.RemoveDestroyedObjects();
 
@@ -150,7 +150,7 @@ namespace Mirage
             Client.MessageHandler.RegisterHandler<RpcMessage>(OnRpcMessage);
         }
 
-        bool ConsiderForSpawning(NetworkIdentity identity)
+        private bool ConsiderForSpawning(NetworkIdentity identity)
         {
             // not spawned yet, not hidden, etc.?
             return !identity.IsSpawned &&
@@ -329,7 +329,7 @@ namespace Mirage
 
         #endregion
 
-        void UnSpawn(NetworkIdentity identity)
+        private void UnSpawn(NetworkIdentity identity)
         {
             logger.Assert(!Client.IsLocalClient, "UnSpawn should not be called in host mode");
             // it is useful to remove authority when destroying the object
@@ -385,7 +385,7 @@ namespace Mirage
             Client.World.ClearSpawnedObjects();
         }
 
-        void ApplySpawnPayload(NetworkIdentity identity, SpawnMessage msg)
+        private void ApplySpawnPayload(NetworkIdentity identity, SpawnMessage msg)
         {
             if (msg.prefabHash.HasValue)
                 identity.PrefabHash = msg.prefabHash.Value;
@@ -448,7 +448,7 @@ namespace Mirage
                 Client.World.AddIdentity(msg.netId, identity);
         }
 
-        NetworkIdentity SpawnPrefab(SpawnMessage msg)
+        private NetworkIdentity SpawnPrefab(SpawnMessage msg)
         {
             if (spawnHandlers.TryGetValue(msg.prefabHash.Value, out SpawnHandlerDelegate handler) && handler != null)
             {
@@ -497,7 +497,7 @@ namespace Mirage
             return spawned;
         }
 
-        NetworkIdentity SpawnSceneObject(ulong sceneId)
+        private NetworkIdentity SpawnSceneObject(ulong sceneId)
         {
             if (spawnableObjects.TryGetValue(sceneId, out NetworkIdentity identity))
             {
@@ -555,7 +555,7 @@ namespace Mirage
             DestroyObject(msg.netId);
         }
 
-        void DestroyObject(uint netId)
+        private void DestroyObject(uint netId)
         {
             if (logger.LogEnabled()) logger.Log("ClientScene.OnObjDestroy netId:" + netId);
 
@@ -609,7 +609,7 @@ namespace Mirage
             }
         }
 
-        void CheckForLocalPlayer(NetworkIdentity identity)
+        private void CheckForLocalPlayer(NetworkIdentity identity)
         {
             if (identity && identity == Client.Player?.Identity)
             {

@@ -5,22 +5,22 @@ using UnityEngine;
 namespace Mirage
 {
     [CustomPreview(typeof(GameObject))]
-    class NetworkInformationPreview : ObjectPreview
+    internal class NetworkInformationPreview : ObjectPreview
     {
-        struct NetworkIdentityInfo
+        private struct NetworkIdentityInfo
         {
             public GUIContent Name;
             public GUIContent Value;
         }
 
-        struct NetworkBehaviourInfo
+        private struct NetworkBehaviourInfo
         {
             // This is here just so we can check if it's enabled/disabled
             public NetworkBehaviour Behaviour;
             public GUIContent Name;
         }
 
-        class Styles
+        private class Styles
         {
             public GUIStyle LabelStyle = new GUIStyle(EditorStyles.label);
             public GUIStyle ComponentName = new GUIStyle(EditorStyles.boldLabel);
@@ -59,8 +59,8 @@ namespace Mirage
             }
         }
 
-        GUIContent title;
-        Styles styles = new Styles();
+        private GUIContent title;
+        private Styles styles = new Styles();
 
         public override GUIContent GetPreviewTitle()
         {
@@ -116,7 +116,7 @@ namespace Mirage
 
         }
 
-        float DrawNetworkIdentityInfo(NetworkIdentity identity, float initialX, float Y)
+        private float DrawNetworkIdentityInfo(NetworkIdentity identity, float initialX, float Y)
         {
             IEnumerable<NetworkIdentityInfo> infos = GetNetworkIdentityInfo(identity);
             // Get required label size for the names of the information values we're going to show
@@ -139,7 +139,7 @@ namespace Mirage
             return labelRect.y;
         }
 
-        float DrawNetworkBehaviors(NetworkIdentity identity, float initialX, float Y)
+        private float DrawNetworkBehaviors(NetworkIdentity identity, float initialX, float Y)
         {
             IEnumerable<NetworkBehaviourInfo> behavioursInfo = GetNetworkBehaviorInfo(identity);
 
@@ -170,7 +170,7 @@ namespace Mirage
             return Y;
         }
 
-        float DrawObservers(NetworkIdentity identity, float initialX, float Y)
+        private float DrawObservers(NetworkIdentity identity, float initialX, float Y)
         {
             if (identity.observers.Count > 0)
             {
@@ -192,7 +192,7 @@ namespace Mirage
             return Y;
         }
 
-        float DrawOwner(NetworkIdentity identity, float initialX, float Y)
+        private float DrawOwner(NetworkIdentity identity, float initialX, float Y)
         {
             if (identity.Owner != null)
             {
@@ -204,7 +204,7 @@ namespace Mirage
         }
 
         // Get the maximum size used by the value of information items
-        Vector2 GetMaxNameLabelSize(IEnumerable<NetworkIdentityInfo> infos)
+        private Vector2 GetMaxNameLabelSize(IEnumerable<NetworkIdentityInfo> infos)
         {
             Vector2 maxLabelSize = Vector2.zero;
             foreach (NetworkIdentityInfo info in infos)
@@ -222,7 +222,7 @@ namespace Mirage
             return maxLabelSize;
         }
 
-        Vector2 GetMaxBehaviourLabelSize(IEnumerable<NetworkBehaviourInfo> behavioursInfo)
+        private Vector2 GetMaxBehaviourLabelSize(IEnumerable<NetworkBehaviourInfo> behavioursInfo)
         {
             Vector2 maxLabelSize = Vector2.zero;
             foreach (NetworkBehaviourInfo behaviour in behavioursInfo)
@@ -240,7 +240,7 @@ namespace Mirage
             return maxLabelSize;
         }
 
-        IEnumerable<NetworkIdentityInfo> GetNetworkIdentityInfo(NetworkIdentity identity)
+        private IEnumerable<NetworkIdentityInfo> GetNetworkIdentityInfo(NetworkIdentity identity)
         {
             var infos = new List<NetworkIdentityInfo>
             {
@@ -266,7 +266,7 @@ namespace Mirage
             return infos;
         }
 
-        IEnumerable<NetworkBehaviourInfo> GetNetworkBehaviorInfo(NetworkIdentity identity)
+        private IEnumerable<NetworkBehaviourInfo> GetNetworkBehaviorInfo(NetworkIdentity identity)
         {
             var behaviourInfos = new List<NetworkBehaviourInfo>();
 
@@ -282,7 +282,7 @@ namespace Mirage
             return behaviourInfos;
         }
 
-        NetworkIdentityInfo GetAssetId(NetworkIdentity identity)
+        private NetworkIdentityInfo GetAssetId(NetworkIdentity identity)
         {
             int prefabHash = identity.PrefabHash;
 
@@ -293,7 +293,7 @@ namespace Mirage
             return GetString("Asset ID", value);
         }
 
-        static NetworkIdentityInfo GetString(string name, string value)
+        private static NetworkIdentityInfo GetString(string name, string value)
         {
             return new NetworkIdentityInfo
             {
@@ -302,7 +302,7 @@ namespace Mirage
             };
         }
 
-        static NetworkIdentityInfo GetBoolean(string name, bool value)
+        private static NetworkIdentityInfo GetBoolean(string name, bool value)
         {
             return new NetworkIdentityInfo
             {

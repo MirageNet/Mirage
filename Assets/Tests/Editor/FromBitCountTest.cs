@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Mirage.Tests
 {
     [Description("Test first few cases to ensure logic doesn't have typo")]
-    class FromBitCountTest
+    internal class FromBitCountTest
     {
         [Test]
         public void b1Is1()

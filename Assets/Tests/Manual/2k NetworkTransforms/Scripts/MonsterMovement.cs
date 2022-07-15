@@ -7,10 +7,9 @@ namespace Mirage.Examples.OneK
         public float speed = 1;
         public float movementProbability = 0.5f;
         public float movementDistance = 20;
-
-        bool moving;
-        Vector3 start;
-        Vector3 destination;
+        private bool moving;
+        private Vector3 start;
+        private Vector3 destination;
 
         public void OnStartServer()
         {
@@ -18,7 +17,7 @@ namespace Mirage.Examples.OneK
         }
 
         [Server(error = false)]
-        void Update()
+        private void Update()
         {
             if (moving)
             {

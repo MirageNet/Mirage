@@ -8,9 +8,9 @@ namespace Mirage.Tests.Runtime.Host
 {
     public class CharacterSpawnerTest : HostSetup<MockComponent>
     {
-        AssetBundle bundle;
-        GameObject player;
-        CharacterSpawner spawner;
+        private AssetBundle bundle;
+        private GameObject player;
+        private CharacterSpawner spawner;
 
         public override void ExtraSetup()
         {

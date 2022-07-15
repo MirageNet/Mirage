@@ -10,11 +10,9 @@ namespace Mirage.Weaver.NetworkBehaviours
     internal class DeserializeHelper
     {
         public const string MethodName = nameof(NetworkBehaviour.DeserializeSyncVars);
-
-        readonly ModuleDefinition module;
-        readonly FoundNetworkBehaviour behaviour;
-
-        ILProcessor worker;
+        private readonly ModuleDefinition module;
+        private readonly FoundNetworkBehaviour behaviour;
+        private ILProcessor worker;
 
         public MethodDefinition Method { get; private set; }
         public ParameterDefinition ReaderParameter { get; private set; }

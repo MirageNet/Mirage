@@ -15,15 +15,15 @@ namespace Mirage.Weaver
     /// <summary>
     /// processes SyncVars, Cmds, Rpcs, etc. of NetworkBehaviours
     /// </summary>
-    class NetworkBehaviourProcessor
+    internal class NetworkBehaviourProcessor
     {
-        readonly TypeDefinition netBehaviourSubclass;
+        private readonly TypeDefinition netBehaviourSubclass;
         private readonly IWeaverLogger logger;
-        readonly ServerRpcProcessor serverRpcProcessor;
-        readonly ClientRpcProcessor clientRpcProcessor;
-        readonly SyncVarProcessor syncVarProcessor;
-        readonly SyncObjectProcessor syncObjectProcessor;
-        readonly ConstFieldTracker rpcCounter;
+        private readonly ServerRpcProcessor serverRpcProcessor;
+        private readonly ClientRpcProcessor clientRpcProcessor;
+        private readonly SyncVarProcessor syncVarProcessor;
+        private readonly SyncObjectProcessor syncObjectProcessor;
+        private readonly ConstFieldTracker rpcCounter;
 
         public NetworkBehaviourProcessor(TypeDefinition td, Readers readers, Writers writers, PropertySiteProcessor propertySiteProcessor, IWeaverLogger logger)
         {
@@ -89,7 +89,7 @@ namespace Mirage.Weaver
         }
         #endregion
 
-        void RegisterRpcs(List<RpcMethod> rpcs)
+        private void RegisterRpcs(List<RpcMethod> rpcs)
         {
             SetRpcCount(rpcs.Count);
             Weaver.DebugLog(netBehaviourSubclass, "  GenerateConstants ");
@@ -113,7 +113,7 @@ namespace Mirage.Weaver
             worker.Emit(OpCodes.Ret);
         }
 
-        void ProcessRpcs()
+        private void ProcessRpcs()
         {
             // copy the list of methods because we will be adding methods in the loop
             var methods = new List<MethodDefinition>(netBehaviourSubclass.Methods);

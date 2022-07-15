@@ -5,9 +5,9 @@ namespace Mirage.Tests.Runtime.Serialization.Packers
 {
     public class UnsignedFloatPackerTests : PackerTestBase
     {
-        FloatPacker packer;
-        float max;
-        float precsion;
+        private FloatPacker packer;
+        private float max;
+        private float precsion;
 
         [SetUp]
         public void Setup()

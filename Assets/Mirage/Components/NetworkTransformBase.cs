@@ -29,7 +29,7 @@ namespace Mirage
 
         // Is this a client with authority over this transform?
         // This component could be on the player object or any object that has been assigned authority to this client.
-        bool IsClientWithAuthority => HasAuthority && ClientAuthority;
+        private bool IsClientWithAuthority => HasAuthority && ClientAuthority;
 
         // Sensitivity is added for VR where human players tend to have micro movements so this can quiet down
         // the network traffic.  Additionally, rigidbody drift should send less traffic, e.g very slow sliding / rolling.
@@ -45,9 +45,9 @@ namespace Mirage
         protected abstract Transform TargetComponent { get; }
 
         // server
-        Vector3 lastPosition;
-        Quaternion lastRotation;
-        Vector3 lastScale;
+        private Vector3 lastPosition;
+        private Quaternion lastRotation;
+        private Vector3 lastScale;
 
         // client
         public class DataPoint
@@ -59,12 +59,13 @@ namespace Mirage
             public Vector3 LocalScale;
             public float MovementSpeed;
         }
+
         // interpolation start and goal
-        DataPoint start;
-        DataPoint goal;
+        private DataPoint start;
+        private DataPoint goal;
 
         // local authority send time
-        float lastClientSendTime;
+        private float lastClientSendTime;
 
         // serialization is needed by OnSerialize and by manual sending from authority
         // public only for tests
@@ -91,7 +92,7 @@ namespace Mirage
         // => if this is the first time ever then we use our best guess:
         //    -> delta based on transform.localPosition
         //    -> elapsed based on send interval hoping that it roughly matches
-        static float EstimateMovementSpeed(DataPoint from, DataPoint to, Transform transform, float sendInterval)
+        private static float EstimateMovementSpeed(DataPoint from, DataPoint to, Transform transform, float sendInterval)
         {
             Vector3 delta = to.LocalPosition - (from != null ? from.LocalPosition : transform.localPosition);
             float elapsed = from != null ? to.TimeStamp - from.TimeStamp : sendInterval;
@@ -100,7 +101,7 @@ namespace Mirage
         }
 
         // serialization is needed by OnSerialize and by manual sending from authority
-        void DeserializeFromReader(NetworkReader reader)
+        private void DeserializeFromReader(NetworkReader reader)
         {
             // put it into a data point immediately
             var temp = new DataPoint
@@ -195,7 +196,7 @@ namespace Mirage
 
         // local authority client sends sync message to server for broadcasting
         [ServerRpc]
-        void CmdClientToServerSync(byte[] payload)
+        private void CmdClientToServerSync(byte[] payload)
         {
             // Ignore messages from client if not in client authority mode
             if (!ClientAuthority)
@@ -215,7 +216,7 @@ namespace Mirage
         }
 
         // where are we in the timeline between start and goal? [0,1]
-        static float CurrentInterpolationFactor(DataPoint start, DataPoint goal)
+        private static float CurrentInterpolationFactor(DataPoint start, DataPoint goal)
         {
             if (start != null)
             {
@@ -230,7 +231,7 @@ namespace Mirage
             return 0;
         }
 
-        static Vector3 InterpolatePosition(DataPoint start, DataPoint goal, Vector3 currentPosition)
+        private static Vector3 InterpolatePosition(DataPoint start, DataPoint goal, Vector3 currentPosition)
         {
             if (start != null)
             {
@@ -249,7 +250,7 @@ namespace Mirage
             return currentPosition;
         }
 
-        static Quaternion InterpolateRotation(DataPoint start, DataPoint goal, Quaternion defaultRotation)
+        private static Quaternion InterpolateRotation(DataPoint start, DataPoint goal, Quaternion defaultRotation)
         {
             if (start != null)
             {
@@ -259,7 +260,7 @@ namespace Mirage
             return defaultRotation;
         }
 
-        static Vector3 InterpolateScale(DataPoint start, DataPoint goal, Vector3 currentScale)
+        private static Vector3 InterpolateScale(DataPoint start, DataPoint goal, Vector3 currentScale)
         {
             if (start != null)
             {
@@ -274,7 +275,7 @@ namespace Mirage
         //    fence between us and the goal
         // -> checking time always works, this way we just teleport if we still
         //    didn't reach the goal after too much time has elapsed
-        bool NeedsTeleport()
+        private bool NeedsTeleport()
         {
             // calculate time between the two data points
             float startTime = start != null ? start.TimeStamp : Time.time - syncInterval;
@@ -285,7 +286,7 @@ namespace Mirage
         }
 
         // moved since last time we checked it?
-        bool HasEitherMovedRotatedScaled()
+        private bool HasEitherMovedRotatedScaled()
         {
             // moved or rotated or scaled?
             // local position/rotation/scale for VR support
@@ -309,7 +310,7 @@ namespace Mirage
         }
 
         // set position carefully depending on the target component
-        void ApplyPositionRotationScale(Vector3 position, Quaternion rotation, Vector3 scale)
+        private void ApplyPositionRotationScale(Vector3 position, Quaternion rotation, Vector3 scale)
         {
             // local position/rotation for VR support
             TargetComponent.localPosition = position;
@@ -317,7 +318,7 @@ namespace Mirage
             TargetComponent.localScale = scale;
         }
 
-        void Update()
+        private void Update()
         {
             // if server then always sync to others.
             if (IsServer)
@@ -332,14 +333,14 @@ namespace Mirage
             }
         }
 
-        void UpdateServer()
+        private void UpdateServer()
         {
             // just use OnSerialize via SetDirtyBit only sync when position
             // changed. set dirty bits 0 or 1
             SetDirtyBit(HasEitherMovedRotatedScaled() ? 1UL : 0UL);
         }
 
-        void UpdateClient()
+        private void UpdateClient()
         {
             // send to server if we have local authority (and aren't the server)
             // -> only if connectionToServer has been initialized yet too
@@ -386,7 +387,7 @@ namespace Mirage
             }
         }
 
-        static void DrawDataPointGizmo(DataPoint data, Color color)
+        private static void DrawDataPointGizmo(DataPoint data, Color color)
         {
             // use a little offset because transform.localPosition might be in
             // the ground in many cases
@@ -406,14 +407,14 @@ namespace Mirage
             Gizmos.DrawRay(data.LocalPosition + offset, data.LocalRotation * Vector3.up);
         }
 
-        static void DrawLineBetweenDataPoints(DataPoint data1, DataPoint data2, Color color)
+        private static void DrawLineBetweenDataPoints(DataPoint data1, DataPoint data2, Color color)
         {
             Gizmos.color = color;
             Gizmos.DrawLine(data1.LocalPosition, data2.LocalPosition);
         }
 
         // draw the data points for easier debugging
-        void OnDrawGizmos()
+        private void OnDrawGizmos()
         {
             // draw start and goal points
             if (start != null) DrawDataPointGizmo(start, Color.gray);
