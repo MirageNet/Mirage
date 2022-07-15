@@ -202,4 +202,24 @@ namespace Mirage.Serialization
                 throw new EndOfStreamException($"Can't read {lengthInBits} elements because it would read past the end of the stream.");
         }
     }
+    
+    
+            // todo needs tests and check for allocations
+        public static void WriteEnumerable<T>(this NetworkWriter writer, IEnumerable<T> enumerable)
+        {
+            writer.WritePackedUInt32((uint)enumerable.Count());
+            foreach (T item in enumerable)
+            {
+                writer.Write(item);
+            }
+        }
+
+        public static IEnumerable<T> ReadEnumerable<T>(this NetworkReader reader)
+        {
+            uint count = reader.ReadPackedUInt32();
+            for (int i = 0; i < count; i++)
+            {
+                yield return reader.Read<T>();
+            }
+        }
 }
